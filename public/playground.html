@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Playground — Recipe</title>
+  <title>Playground · kolm</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -235,7 +235,7 @@ const PRETTY_EVENT = {
   candidate: 'draft program',
   verified: 'tested',
   accepted: 'passed all examples',
-  rejected: 'rejected — quality too low',
+  rejected: 'rejected, quality too low',
   published: 'published to your registry',
   done: 'done',
   error: 'error',
@@ -292,7 +292,7 @@ $('run-stream').onclick = async () => {
         let data = null;
         try { data = JSON.parse(dataLine); } catch {}
         const pretty = PRETTY_EVENT[ev] || ev;
-        log(`· ${pretty}${ev === 'candidate' && data?.size_bytes ? ` (${data.size_bytes} B)` : ''}${ev === 'verified' && data?.quality_score ? ` — quality ${(data.quality_score * 100).toFixed(0)}%` : ''}`);
+        log(`· ${pretty}${ev === 'candidate' && data?.size_bytes ? ` (${data.size_bytes} B)` : ''}${ev === 'verified' && data?.quality_score ? `, quality ${(data.quality_score * 100).toFixed(0)}%` : ''}`);
         if (ev === 'done' && data?.accepted) paintResult(data);
         if (ev === 'done' && data && !data.accepted) {
           $('status').innerHTML = '<span class="pill bad">REJECTED</span> ' + (data.reason || '');

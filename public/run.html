@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>kolm — Run</title>
+  <title>Run · kolm</title>
   <meta name="description" content="A .kolm artifact is a portable, signed bundle. kolm run executes it locally; kolm serve --mcp exposes it to any frontier agent." />
   <link rel="stylesheet" href="/styles.css" />
   <style>
@@ -50,7 +50,7 @@
       <h1>Open the box. <span class="grad">Run anywhere.</span></h1>
       <p class="sub">
         A <code>.kolm</code> file is a sealed, signed zip. <code>kolm run</code> opens it on any laptop, server,
-        or edge box and executes deterministic recipes against your input — no frontier API call, no network,
+        or edge box and executes deterministic recipes against your input, no frontier API call, no network,
         no telemetry. Or expose every local artifact as an MCP tool with one command and let
         Claude, Codex, or Cursor pick the right one for each turn.
       </p>
@@ -83,7 +83,7 @@ $ kolm eval    support-triage.kolm   <span class="c"># re-run embedded eval suit
       <p class="lede">
         One command turns <code>~/.kolm/artifacts/</code> into a live MCP server. Claude Desktop, Cursor,
         Codex, and any other frontier agent that speaks Model Context Protocol auto-discover every
-        compiled skill — no per-tool integration code, ever.
+        compiled skill, no per-tool integration code, ever.
       </p>
       <div class="codebox">
 <span class="c"># stdio transport (what most MCP clients want)</span>
@@ -92,10 +92,10 @@ $ kolm serve --mcp
 ┌─ kolm MCP server ─────────────────────────────────────────
 │  artifacts: ~/.kolm/artifacts
 │  tools:     7
-│    • support-triage   — classify support tickets · k=412.7, signed
-│    • email-reply      — draft replies in user's voice · k=389.4, signed
-│    • pr-review        — spot bugs in React PRs · k=441.2, signed
-│    • code-style       — review Python style · k=355.9, signed
+│    • support-triage  , classify support tickets · k=412.7, signed
+│    • email-reply     , draft replies in user's voice · k=389.4, signed
+│    • pr-review       , spot bugs in React PRs · k=441.2, signed
+│    • code-style      , review Python style · k=355.9, signed
 │    …and 3 more
 │
 │  Add to your MCP client config:
@@ -131,7 +131,7 @@ $ curl http://127.0.0.1:8765/health
         </div>
         <div class="card">
           <h3>The contract</h3>
-          <p>Open the zip. Verify <code>signature.sig</code> against the canonical JSON of <code>manifest.json</code>. If valid, every other file is anchored — including the model pointer, the LoRA delta, every recipe, the corpus index, and the eval suite that produced the K-score. One signature, every byte covered.</p>
+          <p>Open the zip. Verify <code>signature.sig</code> against the canonical JSON of <code>manifest.json</code>. If valid, every other file is anchored, including the model pointer, the LoRA delta, every recipe, the corpus index, and the eval suite that produced the K-score. One signature, every byte covered.</p>
         </div>
       </div>
     </section>

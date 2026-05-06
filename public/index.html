@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>kolm. The AI compiler.</title>
-<meta name="description" content="Give kolm your data and a task. Get back a single file that runs anywhere, even offline. The model is yours.">
-<meta name="theme-color" content="#000000">
-<meta property="og:title" content="kolm. The AI compiler.">
-<meta property="og:description" content="Give kolm your data and a task. Get back a single file that runs anywhere, even offline. The model is yours.">
+<title>kolm. Compile your data into a model.</title>
+<meta name="description" content="kolm takes the data you have and the task you describe. It returns a signed artifact you can run anywhere, even offline. Yours.">
+<meta name="theme-color" content="#08090a">
+<meta property="og:title" content="kolm. Compile your data into a model.">
+<meta property="og:description" content="A signed model built from your data. Runs anywhere. Even offline. Yours.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai">
 <meta property="og:image" content="/aurora.svg">
@@ -17,27 +17,34 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#000;
-  --fg:#f5f5f7;
+  --bg:#08090a;
+  --bg-2:#0d0e10;
+  --surface:#101113;
+  --surface-2:#15161a;
+  --line:#1f1f23;
+  --line-strong:#2a2b30;
+  --fg:#fafafa;
+  --fg-2:#e7e7ea;
   --muted:#86868b;
-  --dim:#6e6e73;
-  --line:#1d1d1f;
-  --card:#0a0a0e;
+  --dim:#52525b;
+  --accent:#10b981;
+  --accent-2:#3ad6ff;
   --link:#7cb8ff;
 }
 html,body{background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 body{
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  font-size:17px;font-weight:400;line-height:1.47;letter-spacing:-0.011em;
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI Variable","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:16.5px;font-weight:400;line-height:1.5;letter-spacing:-0.011em;
+  font-feature-settings:"ss01","cv11","calt";
   overflow-x:hidden;
 }
 img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 ul,ol{list-style:none}
-code,pre{font-family:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace}
+code,pre,.mono{font-family:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code","Geist Mono",Menlo,Consolas,monospace;font-feature-settings:"ss02","calt"}
 
-/* aurora text effect: real image clipped through letters */
-.aurora-text{
+/* aurora text effect: real image clipped through letters. only on wordmark + hero h1 + closing h2 */
+.aurora{
   background-image:url('/aurora.svg');
   background-size:cover;
   background-position:center;
@@ -52,182 +59,281 @@ code,pre{font-family:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,mono
 nav.top{
   position:sticky;top:0;z-index:50;
   display:flex;align-items:center;justify-content:space-between;gap:32px;
-  padding:14px max(24px,env(safe-area-inset-left)) 14px max(24px,env(safe-area-inset-right));
-  background:rgba(0,0,0,0.72);
-  backdrop-filter:saturate(180%) blur(20px);
-  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  padding:14px max(28px,env(safe-area-inset-left)) 14px max(28px,env(safe-area-inset-right));
+  background:rgba(8,9,10,0.7);
+  backdrop-filter:saturate(180%) blur(24px);
+  -webkit-backdrop-filter:saturate(180%) blur(24px);
   border-bottom:1px solid var(--line);
   font-size:14px;
 }
-nav.top .brand{font-weight:600;letter-spacing:-0.025em;font-size:19px;color:var(--fg)}
+nav.top .brand{font-weight:600;letter-spacing:-0.025em;font-size:20px;line-height:1;display:inline-block}
 nav.top ul.links{display:flex;gap:28px}
-nav.top ul.links a{color:var(--muted);transition:color .15s}
+nav.top ul.links a{color:var(--muted);transition:color .15s;font-weight:500}
 nav.top ul.links a:hover{color:var(--fg)}
-nav.top .signin{color:var(--fg);display:inline-flex;align-items:center;gap:4px}
-nav.top .signin .ar{transition:transform .2s}
-nav.top .signin:hover .ar{transform:translateX(2px)}
-@media(max-width:720px){nav.top ul.links{display:none}}
+nav.top .signin{color:var(--fg);display:inline-flex;align-items:center;gap:4px;font-weight:500}
+nav.top .signin .ar{transition:transform .2s;color:var(--muted)}
+nav.top .signin:hover .ar{transform:translateX(2px);color:var(--fg)}
+@media(max-width:760px){nav.top ul.links{display:none}}
 
 /* shared section */
-section{padding:120px 24px;max-width:1200px;margin:0 auto}
-section h2{font-size:clamp(36px,5.5vw,72px);font-weight:600;letter-spacing:-0.032em;line-height:1.05;text-align:center}
-section .sub{font-size:clamp(18px,2vw,22px);color:var(--muted);text-align:center;max-width:680px;margin:24px auto 64px;letter-spacing:-0.011em;line-height:1.4}
+.section{padding:140px 28px;max-width:1240px;margin:0 auto}
+.section h2{font-size:clamp(40px,5.6vw,72px);font-weight:600;letter-spacing:-0.034em;line-height:1.04;text-align:center}
+.section .sub{font-size:clamp(18px,1.7vw,21px);color:var(--muted);text-align:center;max-width:680px;margin:24px auto 72px;letter-spacing:-0.011em;line-height:1.45}
 
 /* hero */
-.hero{padding:140px 24px 80px;text-align:center;max-width:1200px;margin:0 auto}
-.hero h1{
-  font-size:clamp(64px,11vw,144px);
-  font-weight:700;letter-spacing:-0.045em;line-height:1.0;
+.hero{padding:140px 28px 40px;max-width:1240px;margin:0 auto;text-align:center}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);
+  letter-spacing:0.18em;text-transform:uppercase;
+  padding:7px 14px;background:var(--surface);border:1px solid var(--line);border-radius:6px;
   margin-bottom:32px;
 }
+.hero .eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(16,185,129,0.6);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,0.5)}70%{box-shadow:0 0 0 10px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+.hero h1{
+  font-size:clamp(56px,9.5vw,128px);
+  font-weight:700;letter-spacing:-0.045em;line-height:0.96;
+  margin-bottom:32px;
+}
+.hero h1 .row{display:block}
 .hero .lede{
-  font-size:clamp(20px,2.4vw,28px);
+  font-size:clamp(20px,2.1vw,26px);
   color:var(--muted);
-  max-width:680px;margin:0 auto 48px;
+  max-width:680px;margin:0 auto 56px;
   line-height:1.4;letter-spacing:-0.014em;
 }
-.cta-row{display:flex;justify-content:center;align-items:center;gap:36px;flex-wrap:wrap;font-size:18px;font-weight:500}
-.cta{color:var(--link);display:inline-flex;align-items:center;gap:6px;padding:4px 0}
-.cta:hover{text-decoration:underline}
-.cta .ar{transition:transform .2s}
-.cta:hover .ar{transform:translateX(3px)}
-.cta-text{color:var(--muted)}
-.cta-text:hover{color:var(--fg)}
+.cta-stack{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 22px;border-radius:8px;
+  font-size:15.5px;font-weight:500;letter-spacing:-0.011em;
+  border:1px solid transparent;line-height:1;
+  transition:background .15s,border-color .15s,color .15s,transform .15s;
+  white-space:nowrap;
+}
+.btn .ar{transition:transform .2s}
+.btn:hover .ar{transform:translateX(3px)}
+.btn-primary{background:var(--fg);color:#000;border-color:var(--fg)}
+.btn-primary:hover{background:#fff}
+.btn-secondary{background:transparent;color:var(--fg);border-color:var(--line-strong)}
+.btn-secondary:hover{border-color:var(--fg);background:var(--surface)}
+.btn-text{color:var(--muted);padding:14px 8px}
+.btn-text:hover{color:var(--fg)}
 
-/* terminal */
-.terminal-wrap{max-width:980px;margin:24px auto 0;padding:0 24px}
-.terminal{
-  border:1px solid var(--line);
-  border-radius:14px;
-  background:linear-gradient(180deg,#0c0c14 0%,#06060a 100%);
+/* hero split panel */
+.hero-panel{
+  margin-top:88px;
+  display:grid;grid-template-columns:1.2fr 0.8fr;gap:0;
+  border:1px solid var(--line);border-radius:18px;
+  background:linear-gradient(180deg,var(--surface) 0%,var(--bg-2) 100%);
   overflow:hidden;
-  box-shadow:0 30px 80px -40px rgba(124,92,255,0.35);
+  box-shadow:0 40px 100px -50px rgba(124,92,255,0.25),0 0 0 1px rgba(255,255,255,0.02);
 }
-.terminal-bar{
-  display:flex;align-items:center;gap:6px;
-  padding:14px 16px;
-  border-bottom:1px solid var(--line);
+
+/* tabbed code window (left) */
+.code-pane{border-right:1px solid var(--line);background:var(--bg-2)}
+.code-tabs{display:flex;border-bottom:1px solid var(--line);padding:0 4px;background:var(--bg)}
+.code-tabs button{
+  appearance:none;background:transparent;border:0;color:var(--muted);
+  font:inherit;font-size:12.5px;font-family:ui-monospace,monospace;font-weight:500;
+  padding:14px 16px;cursor:pointer;letter-spacing:0.04em;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color .15s,border-color .15s;
 }
-.terminal-bar .dot{width:11px;height:11px;border-radius:50%;background:#3a3a3c}
-.terminal-bar .label{margin-left:auto;font-family:ui-monospace,monospace;font-size:12px;color:var(--dim)}
-.terminal-body{padding:24px 28px;font-family:ui-monospace,monospace;font-size:14.5px;line-height:1.75;color:#d2d2d7;overflow-x:auto}
-.terminal-body .pr{color:var(--dim)}
-.terminal-body .cmd{color:#fff}
-.terminal-body .out{color:#86868b}
-.terminal-body .ok{color:#7cffb6}
-.terminal-body .ks{color:#ffd166}
-.terminal-body .file{color:#7cb8ff}
+.code-tabs button:hover{color:var(--fg-2)}
+.code-tabs button.active{color:var(--fg);border-bottom-color:var(--fg)}
+.code-body{padding:24px 28px;font-family:ui-monospace,monospace;font-size:13.5px;line-height:1.75;color:var(--fg-2);min-height:380px;position:relative}
+.code-block{display:none}
+.code-block.active{display:block}
+.tok-pr{color:var(--dim)}
+.tok-cmd{color:var(--fg)}
+.tok-str{color:#a5d6a7}
+.tok-num{color:#ffd47a}
+.tok-out{color:var(--muted)}
+.tok-ok{color:var(--accent)}
+.tok-warn{color:#ffd47a}
+.tok-key{color:#c4a8ff}
+.tok-fn{color:#7cb8ff}
+.tok-c{color:var(--dim);font-style:italic}
+.cursor{display:inline-block;width:7px;height:14px;background:var(--fg);vertical-align:-2px;animation:blink 1s steps(1) infinite;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+
+/* artifact card (right). the signature visual */
+.artifact-pane{padding:32px;display:flex;flex-direction:column;justify-content:center;background:radial-gradient(120% 80% at 50% 0%,rgba(124,92,255,0.06) 0%,transparent 60%),var(--bg-2)}
+.artifact{
+  border:1px solid var(--line-strong);border-radius:14px;
+  background:linear-gradient(180deg,#13141a 0%,#0a0b0f 100%);
+  padding:28px 26px;position:relative;overflow:hidden;
+}
+.artifact::before{
+  content:"";position:absolute;inset:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,0.025) 1px,transparent 0);
+  background-size:14px 14px;
+  pointer-events:none;
+}
+.artifact .head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;position:relative}
+.artifact .head .brand{font-size:14px;font-weight:600;letter-spacing:-0.02em;line-height:1}
+.artifact .head .brand .sub{display:block;font-family:ui-monospace,monospace;font-size:10px;color:var(--dim);letter-spacing:0.16em;font-weight:400;margin-top:6px;text-transform:uppercase}
+.artifact .head .seal{
+  width:36px;height:36px;border-radius:50%;
+  border:1px solid var(--accent);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:600;
+  background:radial-gradient(circle,rgba(16,185,129,0.18) 0%,rgba(16,185,129,0) 70%);
+}
+.artifact .kscore{margin:8px 0 4px;position:relative}
+.artifact .kscore .num{font-family:ui-monospace,monospace;font-size:64px;font-weight:600;letter-spacing:-0.04em;line-height:1;color:var(--fg);background-image:url('/aurora.svg');background-size:cover;background-position:center;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.artifact .kscore .lbl{font-family:ui-monospace,monospace;font-size:10px;color:var(--dim);letter-spacing:0.18em;text-transform:uppercase;margin-top:6px}
+.artifact hr{border:0;border-top:1px dashed var(--line-strong);margin:22px 0;position:relative}
+.artifact dl{display:grid;grid-template-columns:auto 1fr;gap:10px 16px;font-family:ui-monospace,monospace;font-size:12px;line-height:1.5;position:relative}
+.artifact dt{color:var(--dim);text-transform:uppercase;letter-spacing:0.1em;font-size:10.5px;align-self:center}
+.artifact dd{color:var(--fg-2);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.artifact dd .tag{color:var(--accent)}
+.artifact .verified{
+  margin-top:22px;display:inline-flex;align-items:center;gap:6px;
+  padding:6px 10px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.28);
+  color:var(--accent);font-family:ui-monospace,monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;
+  border-radius:5px;position:relative;
+}
+.artifact .verified .check{font-size:11px}
+
+@media(max-width:980px){
+  .hero-panel{grid-template-columns:1fr}
+  .code-pane{border-right:0;border-bottom:1px solid var(--line)}
+}
+@media(max-width:640px){
+  .hero{padding-top:96px}
+  .code-body{min-height:auto}
+  .artifact .kscore .num{font-size:48px}
+}
 
 /* big text band */
-.bigtext{padding:160px 24px;text-align:center;max-width:1200px;margin:0 auto;border-top:1px solid var(--line)}
-.bigtext h2{
-  font-size:clamp(40px,7.5vw,108px);
-  font-weight:600;letter-spacing:-0.038em;line-height:1.04;
-}
+.bigtext{padding:160px 28px;text-align:center;max-width:1240px;margin:0 auto;border-top:1px solid var(--line)}
+.bigtext h2{font-size:clamp(40px,7vw,104px);font-weight:600;letter-spacing:-0.038em;line-height:1.04}
 .bigtext h2 .accent{color:var(--muted)}
 
-/* engines */
+/* engines grid */
 .engines{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.engine{padding:36px 28px;background:var(--bg);transition:background .25s}
-.engine:hover{background:#06060a}
-.engine .num{font-family:ui-monospace,monospace;font-size:12px;color:var(--dim);letter-spacing:0.1em;margin-bottom:18px}
-.engine h3{font-size:24px;font-weight:600;letter-spacing:-0.02em;margin-bottom:10px}
-.engine p{color:var(--muted);font-size:15px;line-height:1.55}
+.engine{padding:36px 28px 32px;background:var(--bg);transition:background .25s}
+.engine:hover{background:var(--bg-2)}
+.engine .num{display:inline-flex;align-items:center;gap:8px;font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);letter-spacing:0.14em;margin-bottom:22px}
+.engine .num span:first-child{display:inline-block;width:18px;height:18px;border:1px solid var(--line-strong);border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)}
+.engine h3{font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-bottom:8px;line-height:1.2}
+.engine p{color:var(--muted);font-size:15px;line-height:1.5}
 @media(max-width:980px){.engines{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.engines{grid-template-columns:1fr}}
 
 /* surfaces */
-.surfaces-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.surfaces-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .surface{
   border:1px solid var(--line);
-  border-radius:16px;
-  padding:40px 32px;
-  background:linear-gradient(180deg,#0c0c14 0%,#04040a 100%);
+  border-radius:14px;
+  padding:36px 30px 30px;
+  background:linear-gradient(180deg,var(--surface) 0%,var(--bg) 100%);
   display:flex;flex-direction:column;
+  transition:border-color .2s,transform .25s;
 }
-.surface .tag{font-family:ui-monospace,monospace;font-size:12px;color:var(--dim);letter-spacing:0.12em;margin-bottom:24px}
-.surface h3{font-size:30px;font-weight:600;letter-spacing:-0.025em;margin-bottom:10px;line-height:1.1}
-.surface p{color:var(--muted);font-size:16px;line-height:1.5;margin-bottom:24px;min-height:72px}
-.surface pre{
-  background:#000;border:1px solid var(--line);border-radius:8px;
-  padding:14px 16px;font-size:12.5px;color:#d2d2d7;
-  overflow-x:auto;white-space:pre;line-height:1.6;
+.surface:hover{border-color:var(--line-strong)}
+.surface .tag{font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);letter-spacing:0.16em;margin-bottom:20px;text-transform:uppercase}
+.surface h3{font-size:26px;font-weight:600;letter-spacing:-0.024em;margin-bottom:10px;line-height:1.15}
+.surface p{color:var(--muted);font-size:15.5px;line-height:1.5;margin-bottom:24px;min-height:64px}
+.surface .terminal-mini{
+  background:var(--bg-2);border:1px solid var(--line);border-radius:8px;
+  padding:14px 16px;font-size:12.5px;color:var(--fg-2);font-family:ui-monospace,monospace;
+  overflow-x:auto;white-space:pre;line-height:1.7;
 }
-.surface .link{color:var(--link);font-size:14px;display:inline-flex;align-items:center;gap:4px;margin-top:auto;padding-top:24px}
+.surface .link{color:var(--link);font-size:14px;display:inline-flex;align-items:center;gap:4px;margin-top:auto;padding-top:24px;font-weight:500}
 .surface .link:hover{text-decoration:underline}
 @media(max-width:900px){.surfaces-grid{grid-template-columns:1fr}}
 
-/* anatomy */
-.anatomy{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:8px}
-.anatomy-list li{padding:20px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:baseline}
-.anatomy-list li:first-child{border-top:0}
-.anatomy-list .file{font-family:ui-monospace,monospace;font-size:14.5px;color:#fff}
-.anatomy-list .desc{color:var(--muted);font-size:15.5px;line-height:1.5}
-.anatomy-visual{
-  aspect-ratio:1;border:1px solid var(--line);border-radius:18px;
-  position:relative;overflow:hidden;background:#000;
-}
-.artifact-svg{position:absolute;inset:0;width:100%;height:100%}
-@media(max-width:900px){.anatomy{grid-template-columns:1fr;gap:48px}}
-@media(max-width:560px){.anatomy-list li{grid-template-columns:1fr;gap:6px}}
-
 /* moat */
-.moat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:48px 64px;margin-top:8px}
-.moat-item h3{font-size:22px;font-weight:600;letter-spacing:-0.018em;margin-bottom:10px;line-height:1.2}
-.moat-item p{color:var(--muted);font-size:16px;line-height:1.55}
-@media(max-width:760px){.moat-grid{grid-template-columns:1fr;gap:32px}}
+.moat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.moat-cell{background:var(--bg);padding:36px 32px}
+.moat-cell h3{font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-bottom:10px;line-height:1.2}
+.moat-cell p{color:var(--muted);font-size:15.5px;line-height:1.55}
+.moat-cell .num{display:inline-block;font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);letter-spacing:0.14em;margin-bottom:18px}
+@media(max-width:760px){.moat-grid{grid-template-columns:1fr}}
+
+/* receipt strip */
+.receipt-band{padding:120px 28px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);max-width:none}
+.receipt-inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1.1fr 0.9fr;gap:64px;align-items:center}
+.receipt-inner h2{text-align:left;font-size:clamp(32px,4.5vw,56px)}
+.receipt-inner p{color:var(--muted);font-size:17px;line-height:1.55;margin-top:20px;max-width:520px}
+.receipt-inner .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.receipt-inner .tags span{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);padding:5px 10px;background:var(--surface);border:1px solid var(--line);border-radius:5px;letter-spacing:0.08em}
+.receipt-card{
+  font-family:ui-monospace,monospace;font-size:12.5px;
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:24px 26px;color:var(--fg-2);line-height:1.95;
+}
+.receipt-card .line{display:grid;grid-template-columns:140px 1fr;gap:16px}
+.receipt-card .k{color:var(--dim);text-transform:uppercase;font-size:10.5px;letter-spacing:0.12em;align-self:center}
+.receipt-card .v{color:var(--fg);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.receipt-card .ok{color:var(--accent)}
+.receipt-card .div{height:1px;background:var(--line);margin:10px -8px;grid-column:1/-1}
+@media(max-width:900px){.receipt-inner{grid-template-columns:1fr;gap:40px}.receipt-inner h2{text-align:center}.receipt-inner p{margin-left:auto;margin-right:auto;text-align:center}.receipt-inner .tags{justify-content:center}}
 
 /* tiers */
 .tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .tier{background:var(--bg);padding:36px 28px;display:flex;flex-direction:column}
-.tier .name{font-family:ui-monospace,monospace;font-size:12px;color:var(--dim);letter-spacing:0.12em;margin-bottom:18px}
+.tier .name{font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);letter-spacing:0.14em;margin-bottom:18px}
 .tier .price{font-size:42px;font-weight:600;letter-spacing:-0.028em;margin-bottom:6px;line-height:1}
-.tier .price small{font-size:16px;color:var(--dim);font-weight:400;margin-left:4px;letter-spacing:0}
-.tier .for{color:var(--muted);font-size:14px;margin-bottom:24px;line-height:1.4}
-.tier ul{font-size:14px;color:#d2d2d7;line-height:1.85;flex:1}
-.tier ul li{padding-left:18px;position:relative}
-.tier ul li::before{content:"";position:absolute;left:0;top:13px;width:8px;height:1px;background:var(--dim)}
-.tier .pick{margin-top:24px;font-size:14px;color:var(--link)}
+.tier .price small{font-size:15px;color:var(--dim);font-weight:400;margin-left:4px;letter-spacing:0}
+.tier .for{color:var(--muted);font-size:14px;margin-bottom:28px;line-height:1.4;min-height:36px}
+.tier ul{font-size:14px;color:var(--fg-2);line-height:1.95;flex:1}
+.tier ul li{padding-left:22px;position:relative}
+.tier ul li::before{content:"";position:absolute;left:0;top:11px;width:12px;height:1px;background:var(--dim)}
+.tier .pick{margin-top:24px;font-size:14px;color:var(--link);font-weight:500;display:inline-flex;align-items:center;gap:4px}
 .tier .pick:hover{text-decoration:underline}
+.tier.featured{background:linear-gradient(180deg,var(--surface) 0%,var(--bg) 100%);position:relative}
+.tier.featured::before{content:"RECOMMENDED";position:absolute;top:14px;right:14px;font-family:ui-monospace,monospace;font-size:9.5px;letter-spacing:0.18em;color:var(--accent);background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);padding:3px 7px;border-radius:4px}
 @media(max-width:980px){.tiers{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.tiers{grid-template-columns:1fr}}
 
-/* receipt strip */
-.receipt-band{padding:80px 24px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);max-width:none}
-.receipt-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center}
-.receipt-inner h2{text-align:left;font-size:clamp(32px,4.5vw,56px)}
-.receipt-inner p{color:var(--muted);font-size:17px;line-height:1.55;margin-top:20px;max-width:520px}
-.receipt-card{
-  font-family:ui-monospace,monospace;font-size:13px;
-  background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:24px;color:#d2d2d7;line-height:1.85;
-}
-.receipt-card .k{color:var(--muted)}
-.receipt-card .v{color:#fff}
-.receipt-card .ok{color:#7cffb6}
-@media(max-width:900px){.receipt-inner{grid-template-columns:1fr}.receipt-inner h2{text-align:center}.receipt-inner p{margin-left:auto;margin-right:auto;text-align:center}}
-
 /* closing */
-.closing{padding:180px 24px;text-align:center;border-top:1px solid var(--line);max-width:1200px;margin:0 auto}
-.closing h2{font-size:clamp(48px,9vw,128px);font-weight:700;letter-spacing:-0.04em;line-height:1.0;margin-bottom:40px}
-.closing .cta{font-size:22px}
+.closing{padding:200px 28px;text-align:center;border-top:1px solid var(--line);max-width:1240px;margin:0 auto}
+.closing h2{font-size:clamp(56px,10vw,144px);font-weight:700;letter-spacing:-0.045em;line-height:0.96;margin-bottom:48px}
+.closing .cta-stack{margin-top:0}
 
 /* footer */
 footer{
   border-top:1px solid var(--line);
-  padding:48px 24px 64px;
+  padding:64px 28px 80px;
   font-size:13px;color:var(--dim);
 }
-footer .inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:24px}
-footer .links{display:flex;gap:28px;flex-wrap:wrap}
-footer a:hover{color:var(--muted)}
-footer .legal{font-size:12px;line-height:1.6;max-width:480px}
+footer .inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:48px}
+footer h4{color:var(--fg);font-size:13px;font-weight:600;margin-bottom:16px;letter-spacing:-0.011em}
+footer .col a{display:block;color:var(--muted);padding:6px 0;font-size:13px;transition:color .15s}
+footer .col a:hover{color:var(--fg)}
+footer .legal{font-size:12px;line-height:1.7;color:var(--dim);margin-top:24px}
+footer .brand-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+footer .brand-row .mark{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--fg)}
+@media(max-width:760px){footer .inner{grid-template-columns:1fr 1fr;gap:32px}}
+@media(max-width:480px){footer .inner{grid-template-columns:1fr}}
+
+/* tab interaction (CSS-only via :checked + sibling) */
+.tab-radio{position:absolute;opacity:0;pointer-events:none}
+#tab-cli:checked ~ .code-tabs label[for="tab-cli"],
+#tab-node:checked ~ .code-tabs label[for="tab-node"],
+#tab-py:checked ~ .code-tabs label[for="tab-py"]{color:var(--fg);border-bottom-color:var(--fg)}
+#tab-cli:checked ~ .code-body .b-cli,
+#tab-node:checked ~ .code-body .b-node,
+#tab-py:checked ~ .code-body .b-py{display:block}
+.code-tabs label{
+  font:inherit;font-size:12.5px;font-family:ui-monospace,monospace;font-weight:500;
+  color:var(--muted);padding:14px 16px;cursor:pointer;letter-spacing:0.04em;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color .15s,border-color .15s;
+}
+.code-tabs label:hover{color:var(--fg-2)}
+.code-block{display:none}
 </style>
 </head>
 <body>
 
 <nav class="top">
-  <a class="brand" href="/">kolm</a>
+  <a class="brand aurora" href="/">kolm</a>
   <ul class="links">
     <li><a href="/compile">Compile</a></li>
     <li><a href="/run">Run</a></li>
@@ -241,194 +347,236 @@ footer .legal{font-size:12px;line-height:1.6;max-width:480px}
 <main>
 
 <section class="hero">
-  <h1 class="aurora-text">The AI compiler.</h1>
+  <div class="eyebrow"><span class="pulse"></span> compiler.alpha &middot; live on kolm.ai</div>
+  <h1>
+    <span class="row">Compile your data</span>
+    <span class="row aurora">into a model.</span>
+  </h1>
   <p class="lede">
-    Give kolm your data and a task. Get back a single file that runs anywhere, even offline. The model is yours.
+    kolm takes the data you have and the task you describe. It returns a signed artifact you run anywhere, even offline. Yours.
   </p>
-  <div class="cta-row">
-    <a class="cta" href="/signup">Compile your first model <span class="ar">&rsaquo;</span></a>
-    <a class="cta-text" href="/docs">Read the docs</a>
+  <div class="cta-stack">
+    <a class="btn btn-primary" href="/signup">Compile your first model <span class="ar">&rsaquo;</span></a>
+    <a class="btn btn-secondary" href="/docs">Read the docs <span class="ar">&rsaquo;</span></a>
+  </div>
+
+  <div class="hero-panel">
+    <div class="code-pane">
+      <input class="tab-radio" type="radio" name="codetab" id="tab-cli" checked>
+      <input class="tab-radio" type="radio" name="codetab" id="tab-node">
+      <input class="tab-radio" type="radio" name="codetab" id="tab-py">
+      <div class="code-tabs" role="tablist">
+        <label for="tab-cli">CLI</label>
+        <label for="tab-node">Node</label>
+        <label for="tab-py">Python</label>
+      </div>
+      <div class="code-body">
+        <div class="code-block b-cli"><span class="tok-pr">$</span> <span class="tok-cmd">npm i -g @kolmogorov/kolm</span>
+<span class="tok-pr">$</span> <span class="tok-cmd">kolm compile</span> <span class="tok-str">"answer my emails in my voice"</span> \
+<span class="tok-out">    </span><span class="tok-cmd">--corpus ./mail/</span> <span class="tok-cmd">--base qwen2.5-3b</span>
+
+<span class="tok-c"># recall      </span><span class="tok-num">1,284</span><span class="tok-out"> chunks indexed</span>
+<span class="tok-c"># distill    </span><span class="tok-num">412</span><span class="tok-out"> verified labels</span>
+<span class="tok-c"># decompose  </span><span class="tok-num">96</span><span class="tok-out"> deterministic patterns</span>
+<span class="tok-c"># package    </span><span class="tok-num">2.34 GB</span>
+<span class="tok-ok"># ok         signed</span>
+
+<span class="tok-pr">$</span> <span class="tok-cmd">kolm run</span> <span class="tok-fn">email-voice.kolm</span><span class="cursor"></span></div>
+
+        <div class="code-block b-node"><span class="tok-key">import</span> { kolm } <span class="tok-key">from</span> <span class="tok-str">"@kolmogorov/kolm"</span>;
+
+<span class="tok-key">const</span> <span class="tok-fn">artifact</span> = <span class="tok-key">await</span> kolm.<span class="tok-fn">compile</span>({
+  task: <span class="tok-str">"answer my emails in my voice"</span>,
+  corpus: <span class="tok-str">"./mail"</span>,
+  base: <span class="tok-str">"qwen2.5-3b"</span>,
+});
+
+<span class="tok-out">// </span><span class="tok-fn">artifact</span><span class="tok-out"> -> { id, k_score, signature, run() }</span>
+
+<span class="tok-key">const</span> reply = <span class="tok-key">await</span> artifact.<span class="tok-fn">run</span>(incomingEmail);
+console.<span class="tok-fn">log</span>(reply);<span class="cursor"></span></div>
+
+        <div class="code-block b-py"><span class="tok-key">from</span> kolm <span class="tok-key">import</span> compile
+
+artifact = compile(
+    task=<span class="tok-str">"answer my emails in my voice"</span>,
+    corpus=<span class="tok-str">"./mail"</span>,
+    base=<span class="tok-str">"qwen2.5-3b"</span>,
+)
+
+<span class="tok-c"># artifact.k_score == 0.93</span>
+<span class="tok-c"># artifact.signature.verified == True</span>
+
+reply = artifact.run(incoming_email)
+<span class="tok-fn">print</span>(reply)<span class="cursor"></span></div>
+      </div>
+    </div>
+
+    <div class="artifact-pane">
+      <div class="artifact" role="img" aria-label="Signed kolm artifact card">
+        <div class="head">
+          <div class="brand">
+            <span class="aurora">kolm</span>
+            <span class="sub">Signed Artifact</span>
+          </div>
+          <div class="seal" aria-hidden="true">k</div>
+        </div>
+        <div class="kscore">
+          <div class="num">0.93</div>
+          <div class="lbl">K-score</div>
+        </div>
+        <hr>
+        <dl>
+          <dt>Artifact</dt><dd>email-voice.kolm</dd>
+          <dt>Base</dt><dd>qwen2.5-3b-int4</dd>
+          <dt>Size</dt><dd>2.34 GB</dd>
+          <dt>Labels</dt><dd>412 <span class="tag">verified</span></dd>
+          <dt>Recipes</dt><dd>96 deterministic</dd>
+          <dt>Signed</dt><dd>2026-05-06 18:42 UTC</dd>
+          <dt>ed25519</dt><dd>a3f1&hellip;c4d7</dd>
+        </dl>
+        <div class="verified">
+          <span class="check">&#10003;</span> verified
+        </div>
+      </div>
+    </div>
   </div>
 </section>
-
-<div class="terminal-wrap">
-  <div class="terminal" aria-hidden="true">
-    <div class="terminal-bar">
-      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-      <span class="label">~ kolm</span>
-    </div>
-    <div class="terminal-body"><span class="pr">$ </span><span class="cmd">kolm compile "answer my emails in my voice"</span>
-<span class="out">  recall    1,284 chunks indexed</span>
-<span class="out">  distill   412 verified labels</span>
-<span class="out">  decompose 96 deterministic patterns</span>
-<span class="out">  package   2.34 GB</span>
-<span class="ok">  ok        signed</span>
-
-<span class="pr">$ </span><span class="cmd">ls *.kolm</span>
-<span class="file">email-voice.kolm</span>  <span class="out">2.34 GB</span>  <span class="ks">K-score 487</span>
-
-<span class="pr">$ </span><span class="cmd">kolm run email-voice.kolm</span>
-<span class="out">  loaded on device. ready.</span></div>
-  </div>
-</div>
 
 <section class="bigtext">
   <h2>
-    One command.<br>
-    Three lines of context.<br>
-    <span class="accent">A model that's yours.</span>
+    An AI you own.<br>
+    <span class="accent">In a single file.</span>
   </h2>
 </section>
 
-<section>
+<section class="section">
   <h2>Four engines. One command.</h2>
   <p class="sub">A compile is the choreography of recall, distill, decompose, and run. You see one line. We do the rest.</p>
   <div class="engines">
     <div class="engine">
-      <div class="num">01 RECALL</div>
+      <div class="num"><span>01</span> RECALL</div>
       <h3>Index your world.</h3>
       <p>Text, image, audio, PDF, video. Embedded once. Queried by every compile.</p>
     </div>
     <div class="engine">
-      <div class="num">02 DISTILL</div>
+      <div class="num"><span>02</span> DISTILL</div>
       <h3>Borrow the frontier.</h3>
       <p>A frontier model labels the task. Every output verified before it counts.</p>
     </div>
     <div class="engine">
-      <div class="num">03 DECOMPOSE</div>
+      <div class="num"><span>03</span> DECOMPOSE</div>
       <h3>Cache the patterns.</h3>
       <p>Deterministic outputs become a draft pack. Speculative decoding for free.</p>
     </div>
     <div class="engine">
-      <div class="num">04 RUN</div>
+      <div class="num"><span>04</span> RUN</div>
       <h3>Ship the artifact.</h3>
       <p>Model, LoRA, draft pack, index. Composed at every token. Offline.</p>
     </div>
   </div>
 </section>
 
-<section>
+<section class="section">
   <h2>Use it three ways.</h2>
   <p class="sub">Same compiler. Same artifact. Three doors in.</p>
   <div class="surfaces-grid">
     <div class="surface">
       <div class="tag">CLI</div>
       <h3>Terminal first.</h3>
-      <p>For developers. Pipe a folder. Pipe a database. Get back a .kolm.</p>
-<pre>$ npm i -g @kolmogorov/kolm
-$ kolm compile "spot bugs like me"
-&gt; bugs.kolm  ready</pre>
+      <p>Pipe a folder. Pipe a database. Get back a .kolm. For developers who live in the shell.</p>
+<div class="terminal-mini">$ npm i -g @kolmogorov/kolm
+$ kolm compile "spot bugs"
+&gt; bugs.kolm  ready</div>
       <a class="link" href="/docs">Install the CLI <span>&rsaquo;</span></a>
     </div>
     <div class="surface">
       <div class="tag">CLOUD</div>
       <h3>Browser. Drag. Click.</h3>
-      <p>For teams. Drop examples. Drop a corpus. Click compile. Download or call by HTTPS.</p>
-<pre>https://kolm.ai/compile
+      <p>Drop examples. Drop a corpus. Click compile. Download the artifact, or call it by HTTPS.</p>
+<div class="terminal-mini">https://kolm.ai/compile
 
-kolm.compile(task).run(input)</pre>
+kolm.compile(task)
+    .run(input)</div>
       <a class="link" href="/compile">Open the cloud <span>&rsaquo;</span></a>
     </div>
     <div class="surface">
       <div class="tag">APP</div>
       <h3>Pocket size.</h3>
-      <p>For everyone. Three Specialists out of the box. Compile a new one in a tap.</p>
-<pre>iOS · Android · PWA
+      <p>Three Specialists out of the box. Compile a new one in a tap. Frontier, on your phone.</p>
+<div class="terminal-mini">iOS · Android · PWA
 
-tap Compile.</pre>
+tap Compile.
+tap Run.</div>
       <a class="link" href="/mobile">See the app <span>&rsaquo;</span></a>
     </div>
   </div>
 </section>
 
-<section>
-  <h2>Inside a .kolm file.</h2>
-  <p class="sub">A signed zip. Sub three gigabytes. Boots on a phone.</p>
-  <div class="anatomy">
-    <ul class="anatomy-list">
-      <li><span class="file">model.gguf</span><span class="desc">Base model. INT4 quantized. Boots on a 2021 phone.</span></li>
-      <li><span class="file">lora.bin</span><span class="desc">Your task fine-tune. Trained on verified labels.</span></li>
-      <li><span class="file">recipes.json</span><span class="desc">Deterministic draft pack. Speculative decoding.</span></li>
-      <li><span class="file">index.sqlite-vec</span><span class="desc">Multimodal embeddings of your corpus.</span></li>
-      <li><span class="file">manifest.json</span><span class="desc">Stats, hashes, registry version.</span></li>
-      <li><span class="file">signature.sig</span><span class="desc">HMAC chain anchored to a public registry.</span></li>
-    </ul>
-    <div class="anatomy-visual">
-      <svg class="artifact-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <radialGradient id="ag1" cx="0.18" cy="0.22" r="0.55"><stop offset="0" stop-color="#ff5e9c" stop-opacity="0.7"/><stop offset="1" stop-color="#ff5e9c" stop-opacity="0"/></radialGradient>
-          <radialGradient id="ag2" cx="0.85" cy="0.32" r="0.55"><stop offset="0" stop-color="#3ad6ff" stop-opacity="0.6"/><stop offset="1" stop-color="#3ad6ff" stop-opacity="0"/></radialGradient>
-          <radialGradient id="ag3" cx="0.5" cy="0.85" r="0.5"><stop offset="0" stop-color="#7cffb6" stop-opacity="0.5"/><stop offset="1" stop-color="#7cffb6" stop-opacity="0"/></radialGradient>
-          <radialGradient id="ag4" cx="0.5" cy="0.5" r="0.4"><stop offset="0" stop-color="#7c5cff" stop-opacity="0.4"/><stop offset="1" stop-color="#7c5cff" stop-opacity="0"/></radialGradient>
-        </defs>
-        <rect width="400" height="400" fill="#04040a"/>
-        <rect width="400" height="400" fill="url(#ag1)"/>
-        <rect width="400" height="400" fill="url(#ag2)"/>
-        <rect width="400" height="400" fill="url(#ag3)"/>
-        <rect width="400" height="400" fill="url(#ag4)"/>
-        <g transform="translate(80,140)">
-          <rect width="240" height="120" rx="14" fill="#0a0a14" fill-opacity="0.78" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1"/>
-          <text x="20" y="38" font-family="ui-monospace, monospace" font-size="11" fill="#a1a1a6" letter-spacing="2">SIGNED ARTIFACT</text>
-          <text x="20" y="74" font-family="ui-monospace, monospace" font-size="20" fill="#fff">email-voice.kolm</text>
-          <text x="20" y="100" font-family="ui-monospace, monospace" font-size="12" fill="#6e6e73">2.34 GB &middot; K-score 487</text>
-        </g>
-      </svg>
-    </div>
-  </div>
-</section>
-
-<section>
+<section class="section">
   <h2>Frontier inside. Yours outside.</h2>
   <p class="sub">A new compute compact. Borrow the frontier to teach. Own the result.</p>
   <div class="moat-grid">
-    <div class="moat-item">
+    <div class="moat-cell">
+      <div class="num">FRONTIER &rarr; STUDENT</div>
       <h3>Frontier teaches. You ship.</h3>
       <p>Distill against any frontier model with your own key. The student fits in your pocket. The teacher stays at home.</p>
     </div>
-    <div class="moat-item">
-      <h3>Sub three gigabytes.</h3>
-      <p>Quantized base, sparse LoRA, deterministic draft pack. Loads on any phone shipped since 2021.</p>
+    <div class="moat-cell">
+      <div class="num">UNDER 3 GB</div>
+      <h3>Boots on a 2021 phone.</h3>
+      <p>Quantized base, sparse LoRA, deterministic draft pack. Loads in seconds on any modern device.</p>
     </div>
-    <div class="moat-item">
-      <h3>Signed end to end.</h3>
+    <div class="moat-cell">
+      <div class="num">SIGNED END TO END</div>
+      <h3>Receipts, not promises.</h3>
       <p>Every artifact carries an HMAC chain anchored to a public registry. Every output verifiable.</p>
     </div>
-    <div class="moat-item">
-      <h3>Open spec. Open registry.</h3>
-      <p>Recipe, Recall, and Receipts ship as RS-1 specs under MIT. The compiler is ours. The format is everyone's.</p>
+    <div class="moat-cell">
+      <div class="num">OPEN SPEC, OPEN REGISTRY</div>
+      <h3>The format is everyone's.</h3>
+      <p>Recipe, Recall, and Receipts ship as RS-1 specs under MIT. The compiler is ours. The format is yours.</p>
     </div>
   </div>
 </section>
 
-<section class="receipt-band" style="max-width:none;padding-left:0;padding-right:0">
-  <div class="receipt-inner" style="padding:0 24px">
+<section class="receipt-band">
+  <div class="receipt-inner" style="padding:0 28px">
     <div>
-      <h2>Receipts, not promises.</h2>
+      <h2>Every byte, accounted for.</h2>
       <p>Every compile and every run produces a signed receipt. Inputs hashed, model versions pinned, decisions recorded. Verifiable by anyone, anywhere.</p>
+      <div class="tags">
+        <span>RS-1-receipts</span>
+        <span>HMAC chain</span>
+        <span>ed25519</span>
+        <span>MIT</span>
+      </div>
     </div>
-    <div class="receipt-card">
-<span class="k">artifact</span>   <span class="v">email-voice.kolm</span>
-<span class="k">k_score</span>    <span class="v">487</span>
-<span class="k">size</span>       <span class="v">2.34 GB</span>
-<span class="k">base</span>       <span class="v">qwen2.5-3b-int4</span>
-<span class="k">labels</span>     <span class="v">412</span> <span class="k">verified</span>
-<span class="k">drafts</span>     <span class="v">96</span> <span class="k">deterministic</span>
-<span class="k">corpus</span>     <span class="v">1,284 chunks</span>
-<span class="k">signed_at</span>  <span class="v">2026-05-06T18:42:11Z</span>
-<span class="k">sig</span>        <span class="v">a3f1...c4d7</span>
-<span class="k">status</span>     <span class="ok">verified</span>
+    <div class="receipt-card" aria-hidden="true">
+      <div class="line"><span class="k">artifact</span><span class="v">email-voice.kolm</span></div>
+      <div class="line"><span class="k">k_score</span><span class="v">0.93</span></div>
+      <div class="line"><span class="k">size</span><span class="v">2.34 GB</span></div>
+      <div class="line"><span class="k">base</span><span class="v">qwen2.5-3b-int4</span></div>
+      <div class="div"></div>
+      <div class="line"><span class="k">labels</span><span class="v">412 verified</span></div>
+      <div class="line"><span class="k">drafts</span><span class="v">96 deterministic</span></div>
+      <div class="line"><span class="k">corpus</span><span class="v">1,284 chunks</span></div>
+      <div class="div"></div>
+      <div class="line"><span class="k">signed_at</span><span class="v">2026-05-06T18:42:11Z</span></div>
+      <div class="line"><span class="k">sig</span><span class="v">a3f1&hellip;c4d7</span></div>
+      <div class="line"><span class="k">status</span><span class="v ok">&#10003; verified</span></div>
     </div>
   </div>
 </section>
 
-<section>
-  <h2>One product. Three tiers.</h2>
-  <p class="sub">Pay for compute and storage. Run is always free.</p>
+<section class="section">
+  <h2>Pay for compute. Run is free.</h2>
+  <p class="sub">Frontier API costs are passed through with your own key. Storage and compile are ours.</p>
   <div class="tiers">
     <div class="tier">
       <div class="name">FREE</div>
       <div class="price">$0</div>
-      <div class="for">Your first compile.</div>
+      <div class="for">For your first compile.</div>
       <ul>
         <li>1 Specialist a month</li>
         <li>10k corpus rows</li>
@@ -437,19 +585,7 @@ tap Compile.</pre>
       </ul>
       <a class="pick" href="/signup">Start free <span>&rsaquo;</span></a>
     </div>
-    <div class="tier">
-      <div class="name">MOBILE</div>
-      <div class="price">$9<small>/mo</small></div>
-      <div class="for">Hermes-class on your phone.</div>
-      <ul>
-        <li>1 personal Specialist</li>
-        <li>100k corpus rows</li>
-        <li>1M managed vectors</li>
-        <li>Unlimited on-device</li>
-      </ul>
-      <a class="pick" href="/signup">Get Mobile <span>&rsaquo;</span></a>
-    </div>
-    <div class="tier">
+    <div class="tier featured">
       <div class="name">PRO</div>
       <div class="price">$49<small>/mo</small></div>
       <div class="for">For shippers.</div>
@@ -460,6 +596,18 @@ tap Compile.</pre>
         <li>All open bases incl. Hermes</li>
       </ul>
       <a class="pick" href="/signup">Get Pro <span>&rsaquo;</span></a>
+    </div>
+    <div class="tier">
+      <div class="name">MOBILE</div>
+      <div class="price">$9<small>/mo</small></div>
+      <div class="for">Frontier on your phone.</div>
+      <ul>
+        <li>1 personal Specialist</li>
+        <li>100k corpus rows</li>
+        <li>1M managed vectors</li>
+        <li>Unlimited on-device</li>
+      </ul>
+      <a class="pick" href="/signup">Get Mobile <span>&rsaquo;</span></a>
     </div>
     <div class="tier">
       <div class="name">ENTERPRISE</div>
@@ -477,24 +625,42 @@ tap Compile.</pre>
 </section>
 
 <section class="closing">
-  <h2 class="aurora-text">Compile your first model.</h2>
-  <a class="cta" href="/signup">Start free <span class="ar">&rsaquo;</span></a>
+  <h2><span class="aurora">Compile your first model.</span></h2>
+  <div class="cta-stack">
+    <a class="btn btn-primary" href="/signup">Start free <span class="ar">&rsaquo;</span></a>
+    <a class="btn btn-secondary" href="/docs">Read the docs <span class="ar">&rsaquo;</span></a>
+  </div>
 </section>
 
 </main>
 
 <footer>
   <div class="inner">
-    <div class="legal">
-      &copy; 2026 Kolmogorov. The AI compiler.<br>
-      Recipe (RS-1, MIT) &middot; Recall (RS-1-multimodal, MIT) &middot; Receipts (RS-1-receipts, MIT)
+    <div>
+      <div class="brand-row"><span class="mark aurora">kolm</span></div>
+      <p style="color:var(--muted);font-size:13.5px;line-height:1.55;max-width:280px">The AI compiler. A signed model built from your data. Yours.</p>
+      <p class="legal">&copy; 2026 Kolmogorov. Built in the open.</p>
     </div>
-    <div class="links">
-      <a href="/docs">Docs</a>
+    <div class="col">
+      <h4>Product</h4>
+      <a href="/compile">Compile</a>
+      <a href="/run">Run</a>
       <a href="/registry">Registry</a>
-      <a href="/pricing">Pricing</a>
+      <a href="/mobile">Mobile</a>
+    </div>
+    <div class="col">
+      <h4>Develop</h4>
+      <a href="/docs">Docs</a>
+      <a href="/playground">Playground</a>
+      <a href="/device">On-device</a>
       <a href="/status">Status</a>
-      <a href="/signup">Sign in</a>
+    </div>
+    <div class="col">
+      <h4>Open</h4>
+      <a href="/docs#rs-1">RS-1 spec</a>
+      <a href="/docs#recall">Recall spec</a>
+      <a href="/docs#receipts">Receipts</a>
+      <a href="/pricing">Pricing</a>
     </div>
   </div>
 </footer>

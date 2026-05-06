@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Recipe registry — Recipe</title>
+  <title>Registry · kolm</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -97,7 +97,7 @@ async function reload() {
   for (const c of body.concepts) for (const t of (c.tags || [])) tags.add(t);
   const cur = $('tag').value;
   $('tag').innerHTML = '<option value="">all tags</option>' + [...tags].sort().map(t => `<option value="${escAttr(t)}"${t===cur?' selected':''}>${esc(t)}</option>`).join('');
-  $('tbl').innerHTML = body.concepts.map(c => `<tr style="cursor:pointer" onclick="openConcept('${escAttr(c.id)}')"><td><strong>${esc(c.name)}</strong>${c.score!=null?` <span class="faint mono">· match ${c.score.toFixed(3)}</span>`:''}<div class="muted" style="font-size:12px">${esc(c.description||'')}</div></td><td>${(c.tags||[]).map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</td><td class="mono">${esc(c.versions)}</td><td class="mono faint">${esc((c.updated_at||'').slice(0,19).replace('T',' '))}</td></tr>`).join('') || '<tr><td colspan="4" class="faint">no recipes yet — <a href="/playground">build the first one</a></td></tr>';
+  $('tbl').innerHTML = body.concepts.map(c => `<tr style="cursor:pointer" onclick="openConcept('${escAttr(c.id)}')"><td><strong>${esc(c.name)}</strong>${c.score!=null?` <span class="faint mono">· match ${c.score.toFixed(3)}</span>`:''}<div class="muted" style="font-size:12px">${esc(c.description||'')}</div></td><td>${(c.tags||[]).map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</td><td class="mono">${esc(c.versions)}</td><td class="mono faint">${esc((c.updated_at||'').slice(0,19).replace('T',' '))}</td></tr>`).join('') || '<tr><td colspan="4" class="faint">no recipes yet, <a href="/playground">build the first one</a></td></tr>';
 }
 
 window.openConcept = async (id) => {
@@ -122,7 +122,7 @@ window.openConcept = async (id) => {
     <tr><td>recipe size</td><td class="mono">${esc(ev.size_bytes ?? '—')} B</td></tr>
     <tr><td>strategy</td><td class="mono">${esc(ev.strategy ?? '—')}</td></tr>
     <tr><td>source hash</td><td class="mono">${esc(ev.source_hash ?? '—')}</td></tr>
-    <tr><td>vector dim</td><td class="mono">${esc(c.vector_dim ?? '256')}-d (hidden — used for search)</td></tr>
+    <tr><td>vector dim</td><td class="mono">${esc(c.vector_dim ?? '256')}-d (hidden, used for search)</td></tr>
   `;
   $('d-source').textContent = head?.source || '';
   $('d-out').textContent = '—';

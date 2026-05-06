@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>kolm — Manual</title>
+  <title>Manual · kolm</title>
   <meta name="description" content="The full kolm manual. Architecture, K-score formula, .kolm spec, signature chain, recipe registry, RSD draft pack, MCP integration." />
   <link rel="stylesheet" href="/styles.css" />
   <style>
@@ -54,7 +54,7 @@
       <h1>How <span class="grad">kolm</span> actually works.</h1>
       <p class="sub">
         Architecture, formats, formulas, registries. Everything below is what makes the contract above
-        — <code>kolm compile &lt;task&gt;</code> in, signed local artifact out — actually true.
+       , <code>kolm compile &lt;task&gt;</code> in, signed local artifact out, actually true.
       </p>
     </section>
 
@@ -77,7 +77,7 @@
     <section class="block">
       <h2 id="arch" class="anchor">1 · Architecture.</h2>
       <p class="lede">
-        <code>kolm compile</code> is the orchestrator. Beneath it, four engines do the work — but the user only
+        <code>kolm compile</code> is the orchestrator. Beneath it, four engines do the work, but the user only
         ever sees the compiler.
       </p>
       <div class="codebox">
@@ -123,7 +123,7 @@
     <span class="c">"coverage":</span>       <span class="k">0.92</span>,    <span class="c">// share of inputs handled w/o LoRA fallback</span>
     <span class="c">"size_bytes":</span>     <span class="k">2348</span>,    <span class="c">// the actual signed zip on disk</span>
     <span class="c">"p50_latency_us":</span> <span class="k">1400</span>,    <span class="c">// median over the embedded eval set</span>
-    <span class="c">"cost_usd_per_call":</span> <span class="k">0</span>,      <span class="c">// after compile — frontier cost amortized</span>
+    <span class="c">"cost_usd_per_call":</span> <span class="k">0</span>,      <span class="c">// after compile, frontier cost amortized</span>
     <span class="c">"spec":</span>           <span class="o">"k-score-1"</span>
   }
 }</div>
@@ -177,7 +177,7 @@ index.sqlite-vec  <span class="c"># corpus index for offline recall</span></div>
       <h2 id="recipes" class="anchor">5 · Recipe registry (RS-1).</h2>
       <p class="lede">
         <span class="pill">MIT</span><span class="pill">RS-1</span>
-        Recipe is the calling convention — the deterministic-token subset of model behavior. Each recipe is a
+        Recipe is the calling convention, the deterministic-token subset of model behavior. Each recipe is a
         named, versioned, signed function over JSON: <code>{ id, name, version_id, input_schema, output_schema,
         source }</code>. <code>kolm compile</code> emits the artifact's recipe pack as a <code>recipes.json</code>
         slice of the global RS-1 registry; every successful compile auto-merges new draft patterns back upstream.
@@ -211,8 +211,8 @@ index.sqlite-vec  <span class="c"># corpus index for offline recall</span></div>
         <code>protocolVersion: "2024-11-05"</code>. Every <code>.kolm</code> in <code>~/.kolm/artifacts/</code>
         becomes one MCP tool. <code>tools/list</code> returns name + K-score-bearing description;
         <code>tools/call</code> dispatches via <code>artifact-runner.js</code>; the response carries a
-        <code>_kolm</code> block with the receipt and recipe ID. Frontier agents — Claude Desktop, Cursor,
-        Codex — wire it up with three lines of config.
+        <code>_kolm</code> block with the receipt and recipe ID. Frontier agents, Claude Desktop, Cursor,
+        Codex, wire it up with three lines of config.
       </p>
     </section>
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>kolm — Account</title>
+  <title>Account · kolm</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -148,7 +148,7 @@
       $('acct-empty').firstElementChild.textContent = 'Key invalid or expired. Paste another.';
     }
 
-    // Top recipes — derived from /v1/recipes + per-recipe stats
+    // Top recipes, derived from /v1/recipes + per-recipe stats
     try {
       const list = await api('/v1/recipes');
       const recipes = (list.recipes || []).slice(0, 5);
@@ -166,7 +166,7 @@
         tr.innerHTML = `<td><a href="/registry">${esc(r.name)}</a></td><td style="text-align:right;">${esc(fmt(s.invocations))}</td><td style="text-align:right;">${esc(fmt(s.cache_hits || 0))}</td><td style="text-align:right;">${esc(s.latency_us?.p50 ?? '—')}</td>`;
         tbody.appendChild(tr);
       });
-      if (!any) $('acct-top-empty').textContent = 'No recipe-calls yet — try the playground.';
+      if (!any) $('acct-top-empty').textContent = 'No recipe-calls yet, try the playground.';
     } catch (e) { $('acct-top-empty').textContent = 'Could not load recipe stats.'; }
   }
 

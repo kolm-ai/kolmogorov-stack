@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>kolm — Recall</title>
+  <title>Recall · kolm</title>
   <meta name="description" content="The multimodal recall substrate. Ingest text, code, images, audio, video, PDFs. Every compile is grounded in your data; every artifact ships its index." />
   <link rel="stylesheet" href="/styles.css" />
   <style>
@@ -49,7 +49,7 @@
       <h1>Every modality. <span class="grad">One index.</span> Every compile, grounded.</h1>
       <p class="sub">
         Recall is the multimodal vector substrate beneath the compiler. Drop a folder, get back a
-        per-tenant hybrid index — BM25 + vector + RRF + reranker — that every Distill call grounds itself in.
+        per-tenant hybrid index, BM25 + vector + RRF + reranker, that every Distill call grounds itself in.
         The same index ships <em>inside</em> the artifact as <code>index.sqlite-vec</code>, so the compiled model
         knows your specifics offline, forever.
       </p>
@@ -58,7 +58,7 @@
     <section class="block">
       <h2>Ingest anything.</h2>
       <div class="codebox">
-<span class="c"># ingest a folder — auto-detects modality per file</span>
+<span class="c"># ingest a folder, auto-detects modality per file</span>
 $ kolm recall ingest ./my-data --namespace work
 ✔ tokenized 312 files (147 text, 88 image, 41 audio, 26 pdf, 10 video)
 ✔ embedded 4,802 chunks
@@ -80,7 +80,7 @@ $ kolm compile <span class="o">"answer questions about our infra"</span> --data 
     <section class="block">
       <h2>Multimodal sidecars.</h2>
       <p class="lede">
-        Every non-text file gets a Markdown sidecar — a structured tokenization that turns pixels, frames,
+        Every non-text file gets a Markdown sidecar, a structured tokenization that turns pixels, frames,
         and waveforms into something both humans and models can read. The sidecar is what gets embedded;
         the original is what gets returned. Inspired by Tobi Lutke's
         <code>qmd</code> pattern, extended to image / audio / video / PDF.
@@ -120,14 +120,14 @@ $ kolm compile <span class="o">"answer questions about our infra"</span> --data 
     <section class="block">
       <h2>Three back-ends, one interface.</h2>
       <div class="codebox">
-<span class="c"># managed (default — Pinecone)</span>
+<span class="c"># managed (default, Pinecone)</span>
 KOLMOGOROV_INDEX_BACKEND=pinecone
 
 <span class="c"># self-host (Trieve docker)</span>
 KOLMOGOROV_INDEX_BACKEND=trieve
 KOLM_TRIEVE_URL=http://localhost:8090
 
-<span class="c"># on-device (sqlite-vec — what ships INSIDE every .kolm)</span>
+<span class="c"># on-device (sqlite-vec, what ships INSIDE every .kolm)</span>
 KOLMOGOROV_INDEX_BACKEND=sqlite-vec</div>
       <p class="lede">
         Same SDK, same CLI, same wire format. Pick the back-end at the boundary; the rest of the stack doesn't notice.

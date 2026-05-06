@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>kolm — Cloud</title>
+  <title>Cloud · kolm</title>
   <meta name="description" content="Kolmogorov Cloud hosts the compile pipeline, the verified-inference wrap, and the public registry. Bring your own API key. Pay for what compiles." />
   <link rel="stylesheet" href="/styles.css" />
   <style>
@@ -52,14 +52,14 @@
       <p class="sub">
         The cloud runs the four engines so your laptop doesn't have to. Same compile pipeline, same artifact
         format, same K-score, plus a verified-inference wrap that turns any Anthropic / OpenAI / Mistral key
-        into a self-checking call — k-sample, deterministically verify, accept the winner, return a receipt.
+        into a self-checking call, k-sample, deterministically verify, accept the winner, return a receipt.
       </p>
     </section>
 
     <section class="block">
       <h2>Verified inference, drop-in.</h2>
       <div class="codebox">
-<span class="c"># the SDK is a transparent Proxy — wrap any Anthropic-shaped client</span>
+<span class="c"># the SDK is a transparent Proxy, wrap any Anthropic-shaped client</span>
 import Anthropic from <span class="o">'@anthropic-ai/sdk'</span>;
 import { kolm } from <span class="o">'https://kolm.ai/sdk.js'</span>;
 
@@ -154,7 +154,7 @@ $ curl https://kolm.ai/v1/compile/job_abc/.kolm -o triage.kolm</div>
         </div>
       </div>
       <p class="sub" style="font-size:12px; color:#666; margin-top:8px;">
-        You always pay your own frontier API bill on top — we're the compiler, not the model host.
+        You always pay your own frontier API bill on top, we're the compiler, not the model host.
       </p>
     </section>
 

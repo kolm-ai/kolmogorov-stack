@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>kolm — Mobile (preview)</title>
-  <meta name="description" content="kolm.app is the consumer entry — three pre-compiled Specialists out of the box, plus a 'compile your own' button. iOS + Android + PWA." />
+  <title>Mobile (preview) · kolm</title>
+  <meta name="description" content="kolm.app is the consumer entry, three pre-compiled Specialists out of the box, plus a 'compile your own' button. iOS + Android + PWA." />
   <link rel="stylesheet" href="/styles.css" />
   <style>
     .codebox { background:#0a0a0a; border:1px solid #222; border-radius:10px;
@@ -48,7 +48,7 @@
   <main class="main">
     <section class="hero">
       <div class="eyebrow"><span class="dot"></span> kolm.app · the consumer surface (sprint 3)</div>
-      <h1>The biggest model on your phone — <span class="grad">honestly.</span></h1>
+      <h1>The biggest model on your phone, <span class="grad">honestly.</span></h1>
       <p class="sub">
         Not a quantized 70B. A <em>compiled</em> personal model that <em>behaves</em> like Hermes-class on the
         tasks you compiled it for, because it was distilled on those exact tasks, drafted by recipes that cover
@@ -92,7 +92,7 @@
       <p class="lede">
         The "Compile a new one" button drives the same cloud pipeline as the CLI, using your on-device corpus
         (photos, voice memos, screen captures) as the data source. The resulting <code>.kolm</code> downloads
-        back onto the phone and runs locally — no further API calls.
+        back onto the phone and runs locally, no further API calls.
       </p>
       <div class="codebox">
 <span class="c"># under the hood, the app does what you'd do at the CLI</span>
@@ -106,7 +106,7 @@
     <section class="block">
       <h2>The runtime.</h2>
       <div class="codebox">
-<span class="c"># in-browser stack — same on PWA, Android (NPU), iOS (Neural Engine)</span>
+<span class="c"># in-browser stack, same on PWA, Android (NPU), iOS (Neural Engine)</span>
 wllama.wasm                 <span class="c"># INT4 inference</span>
 sqlite-vec.wasm             <span class="c"># offline recall index</span>
 recipe-worker.js (sandbox)  <span class="c"># deterministic draft execution</span>

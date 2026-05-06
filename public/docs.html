@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>API &amp; SDKs — Recipe</title>
+  <title>API &amp; SDKs · kolm</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -27,9 +27,9 @@
     <div style="padding:0 10px;">
       <a href="#five-min" class="muted" style="display:block; padding:4px 0; font-size:12px;">5-minute integration</a>
       <a href="#auth" class="muted" style="display:block; padding:4px 0; font-size:12px;">Auth</a>
-      <a href="#show" class="muted" style="display:block; padding:4px 0; font-size:12px;">Show — synthesis</a>
-      <a href="#get" class="muted" style="display:block; padding:4px 0; font-size:12px;">Get — registry</a>
-      <a href="#run" class="muted" style="display:block; padding:4px 0; font-size:12px;">Run — runtime</a>
+      <a href="#show" class="muted" style="display:block; padding:4px 0; font-size:12px;">Show, synthesis</a>
+      <a href="#get" class="muted" style="display:block; padding:4px 0; font-size:12px;">Get, registry</a>
+      <a href="#run" class="muted" style="display:block; padding:4px 0; font-size:12px;">Run, runtime</a>
       <a href="#sdks" class="muted" style="display:block; padding:4px 0; font-size:12px;">SDKs</a>
       <a href="#errors" class="muted" style="display:block; padding:4px 0; font-size:12px;">Errors</a>
     </div>
@@ -71,7 +71,7 @@ curl -X POST https://kolmogorov-stack-production.up.railway.app/v1/run \
     <h3 id="auth">Auth</h3>
     <pre><code>Authorization: Bearer ks_…       # tenant key (mint via /v1/signup)
 X-API-Key: ks_…                  # alternative header
-Authorization: Bearer ks_admin_… # admin only — provisions tenants</code></pre>
+Authorization: Bearer ks_admin_… # admin only, provisions tenants</code></pre>
 
     <h4 class="mono" style="margin:18px 0 6px">POST /v1/signup <span class="pill">public</span></h4>
     <p class="muted">Mint a tenant + key for free. 10,000 calls/month included. No card.</p>
@@ -234,7 +234,7 @@ recipe = r.show(
 print(r.run(recipe['concept_id'], '404 on /dashboard'))   # 'bug'</code></pre>
 
     <h4 class="mono" style="margin:18px 0 6px">Go</h4>
-    <pre><code>// HTTP — no SDK needed
+    <pre><code>// HTTP, no SDK needed
 req, _ := http.NewRequest("POST",
   "https://kolmogorov-stack-production.up.railway.app/v1/run",
   bytes.NewBufferString(`{"concept_id":"cpt_…","input":"404 on /dashboard"}`))
