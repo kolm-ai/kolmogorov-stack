@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>kolm — Compile</title>
+  <meta name="description" content="kolm compile takes a task and your data and produces a portable, signed .kolm artifact that runs anywhere." />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .codebox { background:#0a0a0a; border:1px solid #222; border-radius:10px;
+      padding:14px 16px; font:12px ui-monospace,monospace; color:#bbb;
+      overflow-x:auto; margin:8px 0; }
+    .codebox .c { color:#7c5cff; }
+    .codebox .o { color:#22c55e; }
+    .stages { display:grid; gap:8px; margin:14px 0; }
+    .stage { display:flex; gap:14px; align-items:flex-start;
+      background:#0d0d0d; border:1px solid #222; border-radius:10px; padding:14px; }
+    .stage .num { font: 700 11px ui-monospace,monospace; color:#7c5cff; min-width:60px; }
+    .stage h3 { margin:0 0 4px; font-size:15px; }
+    .stage p { color:#999; font-size:13px; margin:0; line-height:1.5; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <h1><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></h1>
+    <div class="tag">v0.1 · compiler cache for intelligence</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/compile" class="active">Compile</a>
+      <a href="/run">Run</a>
+      <a href="/recall">Recall</a>
+      <a href="/cloud">Cloud</a>
+      <a href="/manual">Manual</a>
+      <a href="/account">Account</a>
+    </nav>
+    <div class="footnote">
+      <strong>Compile · Run · Recall.</strong><br/>
+      Compile frontier behavior once, run it locally forever.
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow"><span class="dot live"></span> kolm compile · the one user-facing primitive</div>
+      <h1>One command. <span class="grad">Four engines</span>. One signed artifact.</h1>
+      <p class="sub">
+        <code>kolm compile</code> takes anything you can describe — "answer my emails in my voice", "spot bugs in my React PRs",
+        "find every photo from a beach trip" — plus the data that defines what you mean, and emits a portable
+        <code>.kolm</code> file that does that thing, anywhere, signed end-to-end.
+      </p>
+    </section>
+
+    <section class="block">
+      <h2>The contract.</h2>
+      <div class="codebox">
+<span class="c"># task only</span>
+$ kolm compile "summarize this folder" --data ./notes
+
+<span class="c"># task + examples (one example per line, JSONL)</span>
+$ kolm compile "classify intent" --examples ./examples.jsonl
+
+<span class="c"># task + corpus + base model override</span>
+$ kolm compile "code review my Python style" \
+    --data ./projects \
+    --base-model qwen2.5-coder-7b-instruct-q4_0
+
+<span class="c"># output: a .kolm file in ~/.kolm/artifacts/</span>
+✔ ~/.kolm/artifacts/job_abc.kolm (2.3KB)</div>
+    </section>
+
+    <section class="block">
+      <h2>What runs underneath.</h2>
+      <div class="stages">
+        <div class="stage">
+          <div class="num">stage 1</div>
+          <div>
+            <h3>recall.start → recall.done</h3>
+            <p>If <code>--data</code> was given, qmd indexes the folder (BM25 + vector + RRF + reranker). Top-k chunks are pulled for the task and prepended to every Distill call so the artifact knows your specifics.</p>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="num">stage 2</div>
+          <div>
+            <h3>distill.start → distill.done</h3>
+            <p>Synthesize a verifier from your examples. K-sample a frontier model. Verify each candidate. Accept the winner. P(correct) ≥ 1 − (1 − p·v)<sup>k</sup>. Generator-Verifier asymmetry made shippable.</p>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="num">stage 3</div>
+          <div>
+            <h3>decompose.start → decompose.done</h3>
+            <p>The Recipe registry slice that covers this task's structured-token subset. Public registry compounds: every successful compile auto-merges new draft patterns.</p>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="num">stage 4</div>
+          <div>
+            <h3>package.start → package.done</h3>
+            <p>Single zip: <code>manifest.json · model.gguf pointer · recipes.json · lora.bin · index.sqlite-vec · evals.json · signature.sig</code>. K-score patched into the manifest. HMAC-SHA256 over canonical JSON, anchored to Kolmogorov's public registry.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>What you get back.</h2>
+      <div class="codebox">
+{
+  <span class="c">"job_id":</span> <span class="o">"job_abc"</span>,
+  <span class="c">"status":</span> <span class="o">"completed"</span>,
+  <span class="c">"artifact_url":</span> <span class="o">"/v1/compile/job_abc/.kolm"</span>,
+  <span class="c">"artifact_bytes":</span> <span class="o">2348</span>,
+  <span class="c">"k_score":</span> {
+    <span class="c">"composite":</span>      <span class="o">412.7</span>,
+    <span class="c">"accuracy":</span>       <span class="o">0.965</span>,
+    <span class="c">"coverage":</span>       <span class="o">0.92</span>,
+    <span class="c">"size_bytes":</span>     <span class="o">2348</span>,
+    <span class="c">"p50_latency_us":</span> <span class="o">1400</span>,
+    <span class="c">"cost_usd_per_call":</span> <span class="o">0</span>
+  },
+  <span class="c">"manifest":</span> { <span class="c">"spec":</span> <span class="o">"kolm-1"</span>, <span class="c">"recipes":</span> {<span class="c">"n":</span> <span class="o">26</span>}, ... },
+  <span class="c">"stages":</span> [...]
+}</div>
+    </section>
+
+    <footer>
+      <a href="/">← Home</a> · <a href="/run">Run →</a>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

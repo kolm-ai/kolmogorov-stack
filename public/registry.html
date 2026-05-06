@@ -79,8 +79,10 @@
 </div>
 <div id="toast" class="toast"></div>
 <script src="/app.js"></script>
+<script src="/escape.js"></script>
 <script>
 const $ = id => document.getElementById(id);
+const { esc, escAttr } = window.KSesc;
 let currentId = null;
 KS.showKeyBanner('main.main').catch(() => {});
 
@@ -94,33 +96,33 @@ async function reload() {
   const tags = new Set();
   for (const c of body.concepts) for (const t of (c.tags || [])) tags.add(t);
   const cur = $('tag').value;
-  $('tag').innerHTML = '<option value="">all tags</option>' + [...tags].sort().map(t => `<option value="${t}"${t===cur?' selected':''}>${t}</option>`).join('');
-  $('tbl').innerHTML = body.concepts.map(c => `<tr style="cursor:pointer" onclick="openConcept('${c.id}')"><td><strong>${c.name}</strong>${c.score!=null?` <span class="faint mono">· match ${c.score.toFixed(3)}</span>`:''}<div class="muted" style="font-size:12px">${c.description||''}</div></td><td>${(c.tags||[]).map(t=>`<span class="chip">${t}</span>`).join('')}</td><td class="mono">${c.versions}</td><td class="mono faint">${(c.updated_at||'').slice(0,19).replace('T',' ')}</td></tr>`).join('') || '<tr><td colspan="4" class="faint">no recipes yet — <a href="/playground">build the first one</a></td></tr>';
+  $('tag').innerHTML = '<option value="">all tags</option>' + [...tags].sort().map(t => `<option value="${escAttr(t)}"${t===cur?' selected':''}>${esc(t)}</option>`).join('');
+  $('tbl').innerHTML = body.concepts.map(c => `<tr style="cursor:pointer" onclick="openConcept('${escAttr(c.id)}')"><td><strong>${esc(c.name)}</strong>${c.score!=null?` <span class="faint mono">· match ${c.score.toFixed(3)}</span>`:''}<div class="muted" style="font-size:12px">${esc(c.description||'')}</div></td><td>${(c.tags||[]).map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</td><td class="mono">${esc(c.versions)}</td><td class="mono faint">${esc((c.updated_at||'').slice(0,19).replace('T',' '))}</td></tr>`).join('') || '<tr><td colspan="4" class="faint">no recipes yet — <a href="/playground">build the first one</a></td></tr>';
 }
 
 window.openConcept = async (id) => {
   currentId = id;
-  const c = await KS.api('/v1/concepts/' + id);
+  const c = await KS.api('/v1/concepts/' + encodeURIComponent(id));
   const head = c.versions.find(v => v.id === c.head_version) || c.versions[c.versions.length - 1];
   $('detail').style.display = '';
   $('d-name').textContent = c.name;
   const ev = head?.evaluation || {};
   // Friendly summary cards
   $('d-meta-summary').innerHTML = `
-    <div class="card"><div class="label">Quality</div><div class="stat">${ev.quality_score!=null?(ev.quality_score*100).toFixed(0)+'%':'—'}</div><div class="delta">${head?.semver || '—'}</div></div>
-    <div class="card"><div class="label">p50 latency</div><div class="stat">${ev.latency_p50_us ?? '—'}µs</div><div class="delta">${ev.size_bytes ?? '—'} B source</div></div>
-    <div class="card"><div class="label">Built by</div><div class="stat" style="font-size:18px;">${ev.strategy === 'claude' ? 'Claude' : ev.strategy === 'manual' ? 'manual' : 'pattern'}</div><div class="delta">${(c.tags||[]).slice(0,3).map(t=>`<span class="chip">${t}</span>`).join('') || ''}</div></div>
+    <div class="card"><div class="label">Quality</div><div class="stat">${ev.quality_score!=null?(ev.quality_score*100).toFixed(0)+'%':'—'}</div><div class="delta">${esc(head?.semver || '—')}</div></div>
+    <div class="card"><div class="label">p50 latency</div><div class="stat">${esc(ev.latency_p50_us ?? '—')}µs</div><div class="delta">${esc(ev.size_bytes ?? '—')} B source</div></div>
+    <div class="card"><div class="label">Built by</div><div class="stat" style="font-size:18px;">${ev.strategy === 'claude' ? 'Claude' : ev.strategy === 'manual' ? 'manual' : 'pattern'}</div><div class="delta">${(c.tags||[]).slice(0,3).map(t=>`<span class="chip">${esc(t)}</span>`).join('') || ''}</div></div>
   `;
   $('d-meta').innerHTML = `
-    <tr><td>id</td><td class="mono">${c.id}</td></tr>
-    <tr><td>visibility</td><td class="mono">${c.visibility}</td></tr>
-    <tr><td>head version</td><td class="mono">${head?.semver} · ${head?.id}</td></tr>
+    <tr><td>id</td><td class="mono">${esc(c.id)}</td></tr>
+    <tr><td>visibility</td><td class="mono">${esc(c.visibility)}</td></tr>
+    <tr><td>head version</td><td class="mono">${esc(head?.semver)} · ${esc(head?.id)}</td></tr>
     <tr><td>quality score</td><td>${ev.quality_score!=null?`<span class="pill good">${(ev.quality_score*100).toFixed(1)}%</span>`:'—'}</td></tr>
-    <tr><td>p50 latency</td><td class="mono">${ev.latency_p50_us ?? '—'}µs</td></tr>
-    <tr><td>recipe size</td><td class="mono">${ev.size_bytes ?? '—'} B</td></tr>
-    <tr><td>strategy</td><td class="mono">${ev.strategy ?? '—'}</td></tr>
-    <tr><td>source hash</td><td class="mono">${ev.source_hash ?? '—'}</td></tr>
-    <tr><td>vector dim</td><td class="mono">${(c.vector_dim ?? '256')}-d (hidden — used for search)</td></tr>
+    <tr><td>p50 latency</td><td class="mono">${esc(ev.latency_p50_us ?? '—')}µs</td></tr>
+    <tr><td>recipe size</td><td class="mono">${esc(ev.size_bytes ?? '—')} B</td></tr>
+    <tr><td>strategy</td><td class="mono">${esc(ev.strategy ?? '—')}</td></tr>
+    <tr><td>source hash</td><td class="mono">${esc(ev.source_hash ?? '—')}</td></tr>
+    <tr><td>vector dim</td><td class="mono">${esc(c.vector_dim ?? '256')}-d (hidden — used for search)</td></tr>
   `;
   $('d-source').textContent = head?.source || '';
   $('d-out').textContent = '—';

@@ -3,390 +3,333 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Recipe — engineering-grade AI infrastructure</title>
-  <meta name="description" content="Recipe is the deterministic compute primitive missing from the AI stack. Free, signed, microsecond execution turns ensembling, exhaustive verification, and corpus-scale labeling into the default — not a budget item. Wrap your client. Same code. Accuracy approaches 1. Latency approaches 0. Receipts on every run." />
-  <meta property="og:title" content="Recipe — engineering-grade AI infrastructure" />
-  <meta property="og:description" content="Free deterministic compute. Verified Inference that provably exceeds frontier SOTA. Cryptographic receipts. The missing infra primitive for serious AI." />
+  <title>kolm — the compiler cache for intelligence</title>
+  <meta name="description" content="kolm compiles frontier-model behavior into the smallest local artifact that passes the tests. Distill any model down to your task. Run it on any device. Sign every output." />
+  <meta property="og:title" content="kolm — the compiler cache for intelligence" />
+  <meta property="og:description" content="Compile frontier behavior once, run it locally forever. CLI · Cloud · App. Recipes · LoRA · Recall · Receipts." />
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="manifest" href="/manifest.json" />
+  <style>
+    .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+    .hero-cta { display:grid; gap:12px; max-width:740px; margin:24px 0; }
+    .hero-cta textarea { background:#0a0a0a; border:1px solid #2a2a2a; color:#fff;
+      padding:14px 16px; border-radius:10px; font:14px ui-monospace, monospace;
+      min-height:96px; resize:vertical; }
+    .hero-cta textarea:focus { outline:none; border-color:#7c5cff; }
+    .hero-cta .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .hero-cta button { background:#7c5cff; color:#fff; border:0; padding:10px 18px;
+      border-radius:8px; font-weight:600; cursor:pointer; font-size:14px; }
+    .hero-cta button:hover { background:#9170ff; }
+    .hero-cta button[disabled] { opacity:.5; cursor:wait; }
+    .hero-cta .hint { color:#888; font-size:12px; }
+    .demo-out { margin-top:14px; padding:14px 16px; border:1px solid #2a2a2a;
+      border-radius:10px; background:#0a0a0a; font:12px ui-monospace, monospace;
+      white-space:pre-wrap; min-height:24px; color:#bbb; }
+    .demo-out.live { border-color:#22c55e; }
+    .demo-out.live .ok { color:#22c55e; }
+    .kscore { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+      gap:10px; margin-top:10px; }
+    .kscore .axis { background:#0d0d0d; border:1px solid #222; border-radius:8px;
+      padding:10px 12px; }
+    .kscore .axis .label { font-size:10px; color:#888; text-transform:uppercase;
+      letter-spacing:.06em; }
+    .kscore .axis .val { font: 600 18px ui-monospace, monospace; color:#fff; margin-top:2px; }
+    .kscore .axis.composite { background:linear-gradient(135deg,#1a1233 0,#2a1a4a 100%);
+      border-color:#7c5cff; }
+    .kscore .axis.composite .val { color:#bfa9ff; }
+    .pill-strip { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 8px; }
+    .pill-strip .pill { font-size:11px; padding:3px 9px; border-radius:99px;
+      background:#1a1a1a; border:1px solid #2a2a2a; color:#aaa; }
+    .pill-strip .pill .dot { display:inline-block; width:6px; height:6px;
+      border-radius:50%; background:#22c55e; margin-right:6px; vertical-align:middle; }
+    .four-engines { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:14px; margin:20px 0; }
+    .engine { background:#0d0d0d; border:1px solid #222; border-radius:12px;
+      padding:18px; }
+    .engine .num { font: 700 11px ui-monospace,monospace; color:#7c5cff;
+      letter-spacing:.06em; }
+    .engine h3 { margin:6px 0; font-size:16px; }
+    .engine p { color:#999; font-size:13px; line-height:1.5; margin:0; }
+    .three-surfaces { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:14px; margin:20px 0; }
+    .surface { background:#0d0d0d; border:1px solid #222; border-radius:12px;
+      padding:18px; }
+    .surface h3 { margin:0 0 6px; }
+    .surface .price { color:#7c5cff; font: 600 14px ui-monospace,monospace; }
+    .surface ul { padding-left:18px; color:#aaa; font-size:13px; }
+    .codebox { background:#0a0a0a; border:1px solid #222; border-radius:10px;
+      padding:14px 16px; font:12px ui-monospace,monospace; color:#bbb;
+      overflow-x:auto; margin:8px 0; }
+    .codebox .c { color:#7c5cff; }
+    .codebox .o { color:#22c55e; }
+  </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <h1><span class="glyph"></span> Recipe<span class="sub">by Kolmogorov</span></h1>
-    <div class="tag">v0.4 · infra</div>
+    <h1><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></h1>
+    <div class="tag">v0.1 · compiler cache for intelligence</div>
     <nav>
       <a href="/" class="active">Home</a>
-      <a href="/device">On-device <span class="pill violet" style="font-size:9px;">live</span></a>
-      <a href="/how-it-works">How it works</a>
-      <a href="/verified">Verified Inference</a>
-      <a href="/economics">What it makes possible</a>
-      <a href="/docs">Install &amp; SDK</a>
-      <a href="/playground">Playground</a>
-      <a href="/registry">Registry</a>
-      <a href="/dashboard">Live runtime</a>
-      <a href="/spec">RS-1 spec</a>
-      <a href="/receipts">Receipts</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/specialists">Specialists <span class="pill violet" style="font-size:9px;">soon</span></a>
+      <a href="/compile">Compile</a>
+      <a href="/run">Run</a>
+      <a href="/recall">Recall</a>
+      <a href="/cloud">Cloud</a>
+      <a href="/manual">Manual</a>
       <a href="/account">Account</a>
-      <a href="/signup">Get a key</a>
     </nav>
     <div class="footnote">
-      <strong>Memory · Skills · Specialists.</strong><br/>
-      Recipe is the Skills layer of <a href="https://remlabs.ai" style="color:var(--ink-mute);">REM Labs</a>.
+      <strong>Compile · Run · Recall.</strong><br/>
+      Compile frontier behavior once, run it locally forever.
     </div>
   </aside>
 
   <main class="main">
 
-    <!-- HERO ------------------------------------------------------------ -->
     <section class="hero">
-      <div class="eyebrow"><span class="dot live"></span> AI infra · drop-in · open spec · production</div>
-      <h1>The compute layer that makes AI <span class="grad">engineering-grade</span>.</h1>
+      <div class="eyebrow"><span class="dot live"></span> kolm · the compiler cache for intelligence</div>
+      <h1>Compile frontier behavior <span class="grad">once</span>, run it locally <span class="grad">forever</span>.</h1>
       <p class="sub">
-        Recipe is the deterministic compute primitive missing from the AI stack.
-        <strong>Free</strong>, <strong>signed</strong>, <strong>microsecond</strong> execution &mdash; so the things you couldn't afford to do
-        (ensemble across a thousand classifiers, sample <em>k</em>=1024 candidates and verify, label a billion-row corpus,
-        ship sub-millisecond UX) become the default, not a budget item.
-        <br/><br/>
-        Wrap your AI client. Latency drops 17,000×.
-        Accuracy <em>provably exceeds</em> frontier SOTA on any verifiable task.
-        Every output ships with a cryptographic receipt that anyone can re-verify offline, forever.
+        <strong>kolm</strong> takes a task description, your data, and a frontier model API key —
+        and produces a portable, signed <span class="mono">.kolm</span> artifact that runs anywhere.
+        Phone. Laptop. Server. Edge. Frontier agents discover it via MCP and call it instead of
+        re-solving from scratch.
       </p>
 
-      <div class="actions">
-        <a class="btn accent lg" href="/device">Try it live on this device &rarr;</a>
-        <a class="btn ghost lg" href="/verified">Verified Inference</a>
-        <a class="btn ghost lg" href="/economics">What free compute unlocks</a>
-        <a class="btn ghost lg" href="/how-it-works">How it works</a>
+      <div class="pill-strip">
+        <span class="pill"><span class="dot"></span>SWE-bench Lite +15.33pp</span>
+        <span class="pill"><span class="dot"></span>HMAC-signed receipts</span>
+        <span class="pill"><span class="dot"></span>MCP-discoverable</span>
+        <span class="pill"><span class="dot"></span>Apache-2 spec</span>
       </div>
 
-      <div class="hero-meta">
-        <span><strong>import { recipe } from '/sdk.js'</strong></span>
-        <span>&middot;</span>
-        <span>Runs on your device, offline</span>
-        <span>&middot;</span>
-        <span>Drop-in for OpenAI &amp; Anthropic</span>
-        <span>&middot;</span>
-        <span>RS-1 MIT spec</span>
+      <div class="hero-cta">
+        <label class="hint" for="task">Try it — describe a task. We'll compile a real <span class="mono">.kolm</span> artifact and show you the K-score.</label>
+        <textarea id="task" spellcheck="false" placeholder='kolm compile "triage support tickets by priority and team"'>kolm compile "classify a string as a positive number, negative number, or zero"</textarea>
+        <div class="row">
+          <button id="compile-btn" type="button">kolm compile</button>
+          <span class="hint mono">(no signup, sandbox tenant, ~2 sec)</span>
+        </div>
+        <div id="demo-out" class="demo-out">awaiting task…</div>
       </div>
     </section>
 
-    <!-- THE FOUR THINGS — not just cheaper. ------------------------------ -->
-    <h2 class="h2" style="margin-top: 28px;">Four things this gives you that an LLM call can't.</h2>
-    <div class="row cols-2">
-      <div class="card glow">
-        <div class="label">1 · Latency budget you can build a UX on</div>
-        <h3 style="margin: 6px 0 8px;">35 microseconds, not 600 milliseconds.</h3>
-        <p>An LLM call destroys interactive UX: 600&nbsp;ms median, 2&nbsp;s p99, retries on flakes. A recipe call is <strong>17,000×</strong> faster than the median and <strong>50,000×</strong> faster than the tail. You can put a classifier inside a keystroke handler. You can validate every form field on every keypress. Whole product surfaces &mdash; live spam-flagging, real-time intent disambiguation, in-loop tool-call validation &mdash; flip from "impossible" to "obvious."</p>
+    <section class="block">
+      <h2>The four engines, beneath one verb.</h2>
+      <p class="sub">
+        Every <span class="mono">kolm compile</span> drives four engines that compose at every token: Recall grounds in your corpus;
+        Distill labels with verified inference; Decompose extracts deterministic patterns; Run packages and signs.
+        You only ever see the compiler.
+      </p>
+      <div class="four-engines">
+        <div class="engine">
+          <div class="num">01 — RECALL</div>
+          <h3>Multimodal substrate</h3>
+          <p>qmd-indexed BM25 + vector + RRF + reranker. Every modality (text, image, audio, video, PDF) auto-becomes searchable Markdown sidecars. Per-tenant namespaces.</p>
+        </div>
+        <div class="engine">
+          <div class="num">02 — DISTILL</div>
+          <h3>Verified Inference</h3>
+          <p>k-sample any frontier model, deterministically verify, accept the winner. Generator-Verifier asymmetry. P(correct) ≥ 1 − (1 − p·v)<sup>k</sup>.</p>
+        </div>
+        <div class="engine">
+          <div class="num">03 — DECOMPOSE</div>
+          <h3>Deterministic draft pack</h3>
+          <p>Recipe registry slice covering this task's structured-token subset. Public registry compounds: every compile shrinks the next.</p>
+        </div>
+        <div class="engine">
+          <div class="num">04 — RUN</div>
+          <h3>Signed artifact</h3>
+          <p>Single zip: manifest · model.gguf pointer · LoRA · recipes · sqlite-vec index · signature · evals. K-score visible. Inspectable. Portable.</p>
+        </div>
       </div>
-      <div class="card glow">
-        <div class="label">2 · Accuracy that provably exceeds SOTA</div>
-        <h3 style="margin: 6px 0 8px;">Verified Inference: 1 − (1 − p·v)<sup>k</sup>.</h3>
-        <p>Sample <em>k</em> candidates from any frontier model. Run each through a deterministic Recipe verifier (test cases, type checks, invariant checks). Pick the first that passes. <strong>For p=0.91, k=8: accuracy 99.9999%.</strong> This is the Generator-Verifier asymmetry from classical CS, finally usable at the LLM API surface because Recipe is a portable, deterministic, signed verifier. Same model. Bounded compute. Accuracy → 1.</p>
-      </div>
-      <div class="card glow">
-        <div class="label">3 · Reproducibility you can put on a court exhibit</div>
-        <h3 style="margin: 6px 0 8px;">Cryptographic receipts. RS-1 open spec.</h3>
-        <p>Every run returns an HMAC-SHA256 receipt over canonical JSON: <code>(source_hash, input_hash, output_hash, runtime_version, time)</code>. Verifiable offline. Forever. Without us. Stochastic models <em>cannot</em> sign their work &mdash; even at temperature 0, retries diverge at the token level. Recipes can. That's the difference between "vendor told me" and "auditor accepts it" &mdash; and it's exactly what the EU AI Act 2026 requires.</p>
-      </div>
-      <div class="card glow">
-        <div class="label">4 · Composability of programs, not prose</div>
-        <h3 style="margin: 6px 0 8px;">Recipes call recipes. Software engineering on AI behavior.</h3>
-        <p>An LLM output is a string. A recipe is a function. Functions compose; strings don't. You can search recipes by semantic similarity, dispatch by routing, chain them, version them, diff them, lint them, ship them through CI. The registry is npm for AI behavior &mdash; with the math guarantee that everything in it is verified, signed, and reproducible.</p>
-      </div>
-    </div>
+    </section>
 
-    <!-- THE BIG REFRAME — costs are downstream ------------------------ -->
-    <section class="card" style="margin-top: 28px;">
-      <div class="row cols-2">
-        <div>
-          <div class="label">The reframe</div>
-          <h2 style="margin: 6px 0 12px;">It's not 1000× cheaper. It's <span class="grad">1,000,000×</span> more compute for the same dollar.</h2>
-          <p>
-            That changes the menu. With LLM-priced inference, robust workflows are a line item.
-            With Recipe-priced inference, robust workflows are <em>free</em>.
-          </p>
-          <ul style="margin-top: 12px; line-height: 1.85;">
-            <li>You can <strong>ensemble 1,000 specialized recipes</strong> per request and majority-vote.</li>
-            <li>You can run <strong>k=1024 Verified Inference</strong> on a hard problem until accuracy is indistinguishable from 1.</li>
-            <li>You can <strong>label a 100M-row corpus</strong> for $0 and 7 minutes — was $30K and 4 days.</li>
-            <li>You can run <strong>50 adversarial verifier-recipes</strong> on every model output to catch hallucinations.</li>
-            <li>You can put <strong>every keystroke</strong> through a classifier without a thought about budget.</li>
+    <section class="block">
+      <h2>Three surfaces. One artifact.</h2>
+      <p class="sub">The same <span class="mono">.kolm</span> file you compile from your laptop runs on your phone and is callable by Claude / Cursor / Codex via MCP.</p>
+      <div class="three-surfaces">
+        <div class="surface">
+          <div class="price">$0 / $9 / $49 / custom</div>
+          <h3>CLI for developers</h3>
+          <ul>
+            <li><span class="mono">kolm compile "&lt;task&gt;"</span></li>
+            <li><span class="mono">kolm run support-triage.kolm</span></li>
+            <li><span class="mono">kolm serve --mcp</span></li>
+            <li><span class="mono">kolm publish</span> to the public gallery</li>
           </ul>
-          <p style="margin-top: 14px; color: var(--ink-mute); font-size: 14px;">
-            Cost reduction is the proof. Compute regimes that were previously economically impossible — that's the product.
-          </p>
         </div>
-        <div>
-<pre class="terminal"><code><span class="dim">// Before — k=4 verified inference, $0.04 per query</span>
-<span class="kw">await</span> ai.verified({ prompt, k: 4 });
-
-<span class="dim">// After — k=128, same query, same cost.</span>
-<span class="kw">await</span> ai.verified({ prompt, k: 128 });
-<span class="dim">//   accuracy ~ 1 − (1 − 0.91)^128</span>
-<span class="dim">//   ~ 1 − 4e-129</span>
-<span class="dim">//   in plain English: never wrong</span>
-
-<span class="dim">// Or — ensemble 1000 specialists, $0 total.</span>
-<span class="kw">await</span> ai.ensemble({
-  query: <span class="dim">"is this support ticket urgent?"</span>,
-  k: 1000,
-  vote: <span class="dim">"majority"</span>
-});</code></pre>
+        <div class="surface">
+          <div class="price">Sub-$10/mo</div>
+          <h3>App for consumers</h3>
+          <ul>
+            <li>Three Specialists pre-loaded</li>
+            <li>"Compile a new one" button</li>
+            <li>iOS · Android · PWA</li>
+            <li>Offline-first; on-device sqlite-vec</li>
+          </ul>
         </div>
-      </div>
-    </section>
-
-    <!-- INSTALL CODE -------------------------------------------------- -->
-    <section class="card" style="margin: 22px 0;">
-      <div class="row cols-2">
-        <div>
-          <div class="label">One line. Wrap and forget.</div>
-          <h3 style="margin: 6px 0 12px;">Same SDK surface. Smarter dispatch.</h3>
-          <p>
-            <code>recipe.wrap(client)</code> returns a proxy with the same API your code already uses.
-            We watch traffic, learn the call shapes, find the ones that don't need a 600&nbsp;ms model,
-            and quietly replace them. Hard tasks get <em>k</em>-shot Verified Inference. Open prompts pass through.
-            <strong>You don't browse a registry. You don't synthesize anything by hand.</strong> You ship.
-          </p>
-        </div>
-        <div>
-<pre class="terminal"><code><span class="dim">// Before</span>
-<span class="kw">import</span> Anthropic <span class="kw">from</span> <span class="dim">'@anthropic-ai/sdk'</span>;
-<span class="kw">const</span> ai = <span class="kw">new</span> Anthropic();
-
-<span class="dim">// After — import direct from us. No npm install.</span>
-<span class="kw">import</span> { recipe } <span class="kw">from</span>
-  <span class="dim">'https://kolmogorov-stack-production.up.railway.app/sdk.js'</span>;
-<span class="kw">const</span> ai = recipe.wrap(<span class="kw">new</span> Anthropic());
-
-<span class="dim">// Use it normally. We auto-route every call.</span>
-<span class="kw">const</span> r = <span class="kw">await</span> ai.messages.create({
-  model: <span class="dim">'claude-opus-4-7'</span>,
-  messages: [{ role: <span class="dim">'user'</span>, content: <span class="dim">'Is this spam? "FREE $$$"'</span> }]
-});
-
-<span class="dim">// Or call recipes directly — runs on this device, $0.</span>
-<span class="kw">await</span> recipe.load();
-<span class="kw">const</span> { output } = <span class="kw">await</span> recipe.run(<span class="dim">'is-spam'</span>, <span class="dim">'FREE $$$'</span>);</code></pre>
+        <div class="surface">
+          <div class="price">Pro / Enterprise</div>
+          <h3>Cloud for teams</h3>
+          <ul>
+            <li>Hosted compile pipeline</li>
+            <li>Drag examples · drop a folder · click compile</li>
+            <li>Shared registry · audit trails</li>
+            <li>Receipt anchoring for compliance</li>
+          </ul>
         </div>
       </div>
     </section>
 
-    <!-- THREE LANES --------------------------------------------------- -->
-    <h2 class="h2" style="margin-top: 28px;">Three lanes. We pick automatically.</h2>
-    <div class="row cols-3">
-      <div class="card">
-        <div class="label">Lane 1 · Deterministic</div>
-        <h3 style="margin: 6px 0 8px;">Small structured tasks</h3>
-        <p>"Is this spam?" "What language is this?" "Pick a label from N." Replaced by a tiny signed function. Runs in <strong>35&nbsp;µs</strong>, <strong>$0</strong>, same answer every time, on any hardware.</p>
-        <p style="margin-top: 10px; color: var(--ink-mute); font-size: 13px;">Provably ≥ accurate as the LLM that generated it on its training examples. Replays forever.</p>
-      </div>
-      <div class="card">
-        <div class="label">Lane 2 · Verified Inference</div>
-        <h3 style="margin: 6px 0 8px;">Hard but verifiable</h3>
-        <p>Code generation. Math. Structured extraction with checks. Frontier model proposes <em>k</em> candidates &mdash; Recipe verifies and picks. <strong>Mathematically exceeds single-shot SOTA.</strong></p>
-        <p style="margin-top: 10px; color: var(--ink-mute); font-size: 13px;">P(correct) ≥ 1 − (1 − p·v)<sup>k</sup>. For p=0.91, k=8: 99.9999%.</p>
-      </div>
-      <div class="card">
-        <div class="label">Lane 3 · Passthrough</div>
-        <h3 style="margin: 6px 0 8px;">Open-ended generation</h3>
-        <p>"Write a marketing email." "Draft a contract." "Summarize this PDF." We don't touch it. The frontier model is the right tool. Recipe is honest infra.</p>
-        <p style="margin-top: 10px; color: var(--ink-mute); font-size: 13px;">We never get in the way of work we'd do worse.</p>
-      </div>
-    </div>
-
-    <!-- WHAT IT REPLACES ---------------------------------------------- -->
-    <h2 class="h2" style="margin-top: 36px;">What this actually replaces</h2>
-    <div class="card">
-      <p style="margin-bottom: 14px;">The repeat AI calls in your product where the answer is small and structured: yes/no, pick a category, extract these tokens.</p>
-      <table class="table compare-full">
-        <thead>
-          <tr><th>Today you might be using…</th><th>Recipe replaces it when…</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>A Claude / GPT call to classify support tickets</td><td>You have ~10 examples and the answer is one of N labels.</td></tr>
-          <tr><td>A Cohere classify endpoint</td><td>Same — Recipe runs in 35&nbsp;µs and is fully self-hostable.</td></tr>
-          <tr><td>A regex you're scared to touch</td><td>You'd rather have a small program with tests than 80 chars of cryptic regex.</td></tr>
-          <tr><td>A DistilBERT fine-tune for spam / NSFW / language ID</td><td>You want it deployed on the edge with no GPU and no model weights.</td></tr>
-          <tr><td>A custom OpenAI fine-tune</td><td>Your task is small enough that a 400-byte JS function is enough.</td></tr>
-          <tr class="winner-col"><td>A long-running agent loop on a structured step</td><td>The step has a verifiable answer — Verified Inference picks the winner.</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- WHEN NOT TO USE ----------------------------------------------- -->
-    <h2 class="h2" style="margin-top: 36px;">When you should <em>not</em> use Recipe</h2>
-    <div class="card">
-      <p style="margin-bottom: 14px;">We're not the answer to every problem. Honest infra means honest scope.</p>
-      <ul style="line-height: 1.85; margin: 0 0 0 18px;">
-        <li><strong>Open-ended generation.</strong> "Write a marketing email" — use Claude / GPT directly. (We pass through.)</li>
-        <li><strong>Long-context reasoning.</strong> "Read this 80-page PDF and extract clauses" — long-context model wins.</li>
-        <li><strong>Multi-step agent loops.</strong> Browse, plan, act — Claude Code, OpenAI Assistants, real agents.</li>
-        <li><strong>Domain knowledge with no examples.</strong> "Is this molecule toxic?" with no labeled data — you need a real classifier.</li>
-        <li><strong>Recall over a corpus.</strong> "Find prior conversations with this customer" — that's Memory, not Skills.</li>
-        <li><strong>Tasks where the right answer changes with world state.</strong> "Is this stock a buy?" — fresh inference, not a fixed recipe.</li>
-      </ul>
-    </div>
-
-    <!-- VS FINE-TUNE -------------------------------------------------- -->
-    <h2 class="h2" style="margin-top: 36px;">vs. fine-tuning</h2>
-    <div class="card">
-      <table class="table compare-full">
-        <thead>
-          <tr><th>&nbsp;</th><th>OpenAI fine-tune</th><th>Recipe</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Time to first answer</td><td>2–6 hours</td><td>~3 seconds</td></tr>
-          <tr><td>Examples needed</td><td>500–5,000</td><td>4–8</td></tr>
-          <tr><td>Setup cost</td><td>$30–$200</td><td>$0–$0.10</td></tr>
-          <tr><td>Per-call cost (1M)</td><td>$3,000–$10,000</td><td>$0.20</td></tr>
-          <tr><td>Latency</td><td>100–600 ms</td><td>35 µs</td></tr>
-          <tr><td>Determinism</td><td>same prompt → same answer (with temp=0)</td><td>absolutely (it's a function)</td></tr>
-          <tr><td>Edit-ability</td><td>retrain</td><td>edit 5 lines of JS, re-test</td></tr>
-          <tr><td>Runs offline / on edge</td><td>no</td><td>yes</td></tr>
-          <tr><td>Auditor-grade provenance</td><td>no</td><td>signed receipts on every run</td></tr>
-          <tr class="winner-col"><td>Goes deep on fuzzy data</td><td>strong on subtle / fuzzy cases</td><td>only as good as a small program can be</td></tr>
-        </tbody>
-      </table>
-      <p style="margin-top: 14px; color: var(--ink-mute);">Fuzzy task → fine-tune. Small structured task → Recipe wins by 1–3 orders of magnitude on cost, latency, and shippability. Both lose to Verified Inference when the task has a checkable answer and a frontier model is available.</p>
-    </div>
-
-    <!-- VERIFIED INFERENCE TEASER ------------------------------------- -->
-    <section class="card glow" style="margin-top: 36px;">
-      <div class="row cols-2">
-        <div>
-          <div class="label">The breakthrough lane</div>
-          <h2 style="margin: 6px 0 10px;">Verified Inference &mdash; provably exceeds frontier SOTA.</h2>
-          <p>
-            For any task with verifiable structure (code, math, structured extraction),
-            sampling <em>k</em> candidates from a frontier model and accepting the first that passes a deterministic verifier
-            yields accuracy ≥ <strong>1 − (1 − p·v)<sup>k</sup></strong>.
-            Generator-Verifier asymmetry, classical CS, finally shipped at the LLM API surface
-            because Recipe is the portable, deterministic, signed verifier the field has been missing.
-          </p>
-          <p style="margin-top: 8px;">
-            <strong>Opus 4.7 on HumanEval:</strong> single-shot 91% &middot; k=4 → 99.99% &middot; k=8 → 99.9999%.
-            <em>Same model. Bounded compute. Accuracy approaches 1.</em>
-          </p>
-          <p style="margin-top: 14px;">
-            <a class="btn accent" href="/verified">See the math &amp; live demo &rarr;</a>
-          </p>
-        </div>
-        <div>
-<pre class="terminal"><code><span class="dim">// Verified Inference — same wrap, one method.</span>
-<span class="kw">const</span> r = <span class="kw">await</span> ai.verified({
-  prompt: <span class="dim">"Implement nth Fibonacci, n &gt;= 0"</span>,
-  signature: <span class="dim">"function fib(n: number): number"</span>,
-  test_cases: [
-    { input: 0, expected: 0 },
-    { input: 1, expected: 1 },
-    { input: 10, expected: 55 },
-  ],
-  k: 8
-});
-<span class="dim">// r.verified === true</span>
-<span class="dim">// r.chosen.source === "function (n) { ... }"</span>
-<span class="dim">// r.receipt   === { hmac: "…", verifier_hash: "…" }</span></code></pre>
-        </div>
-      </div>
-    </section>
-
-    <!-- HARDWARE UNLOCK — the trillion-param thesis ----------------- -->
-    <section class="card glow" style="margin-top: 36px;">
-      <div class="eyebrow"><span class="dot live"></span> The infrastructure thesis · why this rewires the internet</div>
-      <h2 style="margin: 8px 0 12px;">Frontier-grade behavior, <span class="grad">on every device that has ever existed</span>.</h2>
-      <p>
-        Roughly <strong>80% of structured AI calls</strong> &mdash; classify, route, extract, validate, score &mdash; are a trillion-parameter model
-        being asked to do what a 400-byte function could do in 35&nbsp;µs.
-        Recipe compiles those calls, once, against a verifier the frontier model itself helped build.
-        The output is a portable, signed, deterministic function.
-        Now the structured behavior of the largest models on earth runs on the smallest devices, forever, for free.
+    <section class="block">
+      <h2>Frontier agents call your skills automatically.</h2>
+      <p class="sub">
+        Run <span class="mono">kolm serve --mcp</span> once. Claude / Codex / Cursor / any MCP client now sees every compiled
+        <span class="mono">.kolm</span> in <span class="mono">~/.kolm/artifacts/</span> as a tool. They reach for compiled
+        skills before fresh inference — that's the cache.
       </p>
-      <p style="margin-top: 10px;">
-        <strong>The registry is the model.</strong> The registry is downloaded, not called.
-        The internet stops shipping AI's structured-task traffic the same way it stopped shipping every cacheable byte two decades ago &mdash;
-        and the moment you internalize that, the whole stack changes shape.
+      <div class="codebox">
+<span class="c"># install</span>
+$ npm i -g @kolmogorov/kolm
+
+<span class="c"># compile a skill</span>
+$ kolm compile "triage support tickets" --data ./tickets
+✔ ~/.kolm/artifacts/job_abc.kolm (2.3KB)
+K-score: composite 412.7 · accuracy 96.5% · coverage 92% · 1.4ms p50
+
+<span class="c"># expose to frontier agents</span>
+$ kolm serve --mcp
+<span class="o">┌─ kolm MCP server ────────────</span>
+<span class="o">│ artifacts: ~/.kolm/artifacts</span>
+<span class="o">│ tools:     1</span>
+<span class="o">│   • triage-tickets — k=412.7, signed</span>
+<span class="o">└──────────────────────────────</span>
+
+<span class="c"># Claude (or any MCP client) now sees it.
+# Next time it needs to triage tickets: it just calls the compiled skill.</span></div>
+    </section>
+
+    <section class="block">
+      <h2>K-score: smallest passing artifact wins.</h2>
+      <p class="sub">
+        Every <span class="mono">.kolm</span> ships with five visible axes — accuracy, coverage, latency, cost, size —
+        and a single composite score. Sort artifacts by composite. Compare versions. Watch the cache compound:
+        every compile makes the next compile cheaper because the public registry grows.
       </p>
-      <table class="table compare-full" style="margin-top: 14px;">
-        <thead>
-          <tr>
-            <th>Device</th>
-            <th>Today's structured-AI options</th>
-            <th>With Recipe registry installed locally</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>iPhone (4&nbsp;GB RAM)</strong></td>
-            <td>Network round-trip + paid API per call. ~600&nbsp;ms p50.</td>
-            <td>Full 100k-recipe registry fits in 100&nbsp;MB. ~80% of calls served on-device. 0&nbsp;ms network. $0.</td>
-          </tr>
-          <tr>
-            <td><strong>Browser tab</strong></td>
-            <td>Latency-bound; per-keystroke classification impossible.</td>
-            <td>10&nbsp;MB pinned recipes &rArr; live spam-flag, intent-detect, validate-on-keypress. WASM bundle &lt; 30&nbsp;KB.</td>
-          </tr>
-          <tr>
-            <td><strong>Raspberry Pi 5 (8&nbsp;GB)</strong></td>
-            <td>Cloud API or nothing &mdash; no GPU, no model weights.</td>
-            <td>Full registry on-prem. Serves a LAN as a behavioral coprocessor at &gt;100k req/s. No GPU. No drift.</td>
-          </tr>
-          <tr>
-            <td><strong>ESP32 MCU (320&nbsp;KB RAM)</strong></td>
-            <td>Impossible &mdash; the smallest LLM is 1000× too large.</td>
-            <td>Curated 100-recipe pack (~250&nbsp;KB) classifies sensor data with frontier-grade accuracy.</td>
-          </tr>
-          <tr>
-            <td><strong>Air-gapped / classified server</strong></td>
-            <td>No AI &mdash; outbound connectivity forbidden.</td>
-            <td>Full registry runs offline indefinitely. Receipts verify against onboard HMAC. Auditor-acceptable.</td>
-          </tr>
-          <tr class="winner-col">
-            <td><strong>Anywhere with 1&nbsp;MB of storage</strong></td>
-            <td>&nbsp;</td>
-            <td>Inherits the structured-task behavior of every frontier model that ever published a recipe to the registry.</td>
-          </tr>
-        </tbody>
-      </table>
-      <p style="margin-top: 14px;">
-        This is not "edge AI" in the LLM-quantization sense. We are not making the model smaller.
-        We are <em>decomposing the model's behavior</em> into deterministic primitives that no longer need the model.
-        It is the largest re-architecture of inference since the GPU.
-        <a href="/economics">See the math &rarr;</a>
+      <p class="sub" style="font-style:italic;color:#888;">
+        composite = (accuracy × coverage × 1000) / log₂(size_kb + 2). Bigger is better.
       </p>
     </section>
 
-    <!-- TRUST RAIL — quiet ------------------------------------------- -->
-    <h2 class="h2" style="margin-top: 36px;">Trust by construction, not by promise</h2>
-    <div class="row cols-3">
-      <div class="card">
-        <div class="label">Receipts on every run</div>
-        <p>HMAC-SHA256 over canonical JSON. Re-verifiable offline. <a href="/receipts">Try the verifier &rarr;</a></p>
-      </div>
-      <div class="card">
-        <div class="label">RS-1 open spec</div>
-        <p>MIT-licensed. Any runtime can implement it. No vendor lock-in. <a href="/spec">Read RS-1 &rarr;</a></p>
-      </div>
-      <div class="card">
-        <div class="label">Self-host or hosted</div>
-        <p>Single Node binary. Or run on our infra. <a href="/docs#self-host">Self-host docs &rarr;</a></p>
-      </div>
-    </div>
-
-    <!-- BOTTOM CTA ---------------------------------------------------- -->
-    <section class="bottom-cta" style="margin-top: 40px;">
-      <h2>Wrap your client. Stop budgeting AI calls. Start using compute.</h2>
-      <p>Five-minute install. The first deterministic call costs $0. Open spec. No lock-in.</p>
-      <div class="actions" style="margin-top: 14px;">
-        <a class="btn accent lg" href="/docs#install">Install &rarr;</a>
-        <a class="btn ghost lg" href="/economics">What free compute makes possible</a>
-        <a class="btn ghost lg" href="/signup">Get an API key</a>
-      </div>
+    <section class="block">
+      <h2>Get a key.</h2>
+      <p class="sub"><a href="/signup">Free signup</a> · <a href="/manual">Manual</a> · <a href="/cloud">Cloud</a> · <a href="https://github.com/kolmogorov-dev">GitHub</a></p>
     </section>
 
+    <footer>
+      Kolmogorov · the compiler cache for intelligence ·
+      Recipe (RS-1, MIT) · Recall (RS-1-multimodal, MIT) · Receipts (RS-1-receipts, MIT)
+    </footer>
   </main>
 </div>
+
+<script>
+  // Live compile demo. Hits the public sandbox tenant and streams progress.
+  const btn = document.getElementById('compile-btn');
+  const ta = document.getElementById('task');
+  const out = document.getElementById('demo-out');
+  let inflight = false;
+
+  function fmtK(k) {
+    if (!k) return '';
+    return `<div class="kscore">
+      <div class="axis composite"><div class="label">composite</div><div class="val">${k.composite}</div></div>
+      <div class="axis"><div class="label">accuracy</div><div class="val">${(k.accuracy*100).toFixed(1)}%</div></div>
+      <div class="axis"><div class="label">coverage</div><div class="val">${(k.coverage*100).toFixed(1)}%</div></div>
+      <div class="axis"><div class="label">size</div><div class="val">${(k.size_bytes/1024).toFixed(1)}KB</div></div>
+      <div class="axis"><div class="label">p50 lat</div><div class="val">${k.p50_latency_us}us</div></div>
+      <div class="axis"><div class="label">cost/call</div><div class="val">$${k.cost_usd_per_call}</div></div>
+    </div>`;
+  }
+
+  async function getDemoKey() {
+    // Reuse if cached
+    const cached = sessionStorage.getItem('kolm_demo_key');
+    if (cached) return cached;
+    const r = await fetch('/v1/anon/bootstrap', { method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_agent: 'kolm-homepage' }) });
+    if (!r.ok) throw new Error('could not get demo key (' + r.status + ')');
+    const j = await r.json();
+    sessionStorage.setItem('kolm_demo_key', j.anon_token);
+    return j.anon_token;
+  }
+
+  // Examples baked into the homepage demo so K-score lights up. Synthesizer
+  // pattern-mode infers simple structural mappings; the default placeholder
+  // task ("classify positive/negative/zero") matches a sign-classifier shape.
+  const DEMO_EXAMPLES = [
+    { input: 7,    output: 'positive' },
+    { input: 0,    output: 'zero' },
+    { input: -3,   output: 'negative' },
+    { input: 42,   output: 'positive' },
+    { input: -1.5, output: 'negative' },
+  ];
+
+  async function runCompile() {
+    if (inflight) return;
+    let task = ta.value.trim();
+    if (!task) { out.textContent = 'enter a task above first'; return; }
+    // strip a leading `kolm compile ` if the user pasted the full command
+    task = task.replace(/^kolm\s+compile\s+/i, '').replace(/^["']/, '').replace(/["']$/, '');
+
+    inflight = true; btn.disabled = true;
+    out.classList.remove('live');
+    out.textContent = '→ POST /v1/compile…';
+
+    try {
+      const key = await getDemoKey();
+      const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key };
+      const start = await fetch('/v1/compile', { method: 'POST', headers,
+        body: JSON.stringify({ task, examples: DEMO_EXAMPLES }) });
+      if (!start.ok) throw new Error('compile start failed (' + start.status + ')');
+      const { job_id } = await start.json();
+      out.textContent = `  job=${job_id} status=queued`;
+
+      let state = null;
+      for (let i = 0; i < 30; i++) {
+        await new Promise(r => setTimeout(r, 700));
+        const r = await fetch('/v1/compile/' + job_id, { headers });
+        state = await r.json();
+        out.textContent = `  job=${job_id} ${state.progress}% ${state.status}`;
+        if (state.status === 'completed' || state.status === 'failed') break;
+      }
+      if (state.status !== 'completed') throw new Error('compile did not complete: ' + (state.error || state.status));
+
+      out.classList.add('live');
+      out.innerHTML = `<span class="ok">✔ compiled in ${state.stages?.length || 8} stages</span>
+  job:        ${state.id}
+  task:       ${state.task}
+  artifact:   ${(state.artifact_bytes/1024).toFixed(1)}KB · signed
+  download:   <a href="${state.artifact_url}" style="color:#7c5cff;">${state.artifact_url}</a>
+
+  <strong>K-score</strong>${fmtK(state.k_score)}
+
+  <span style="color:#888;">Run it locally:    </span><span class="ok">kolm run ${state.id}.kolm '&lt;input&gt;'</span>
+  <span style="color:#888;">Expose via MCP:    </span><span class="ok">kolm serve --mcp</span>`;
+    } catch (e) {
+      out.classList.remove('live');
+      out.textContent = 'error: ' + (e.message || e);
+    } finally {
+      inflight = false; btn.disabled = false;
+    }
+  }
+
+  btn.addEventListener('click', runCompile);
+  ta.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCompile(); }
+  });
+</script>
 </body>
 </html>

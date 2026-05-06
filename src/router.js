@@ -2,6 +2,7 @@
 
 import express from 'express';
 import crypto from 'node:crypto';
+import rateLimit from 'express-rate-limit';
 import { synthesize, synthesizeStream } from './synthesis.js';
 import * as registry from './registry.js';
 import * as runtime from './runtime.js';
@@ -11,6 +12,40 @@ import { compileJs, verify } from './verifier.js';
 import { LIBRARY_VERSION, libraryDescription } from './library.js';
 import { all, findOne, insert, update, stats as storeStats } from './store.js';
 import { verifiedInference } from './verified.js';
+import { createJob, getJob, listJobs, runJob } from './compile.js';
+import * as recall from './recall.js';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
+// Per-IP rate limiters (S5, S10). Express trust-proxy must be set so the
+// limiter can read X-Forwarded-For — Railway's edge sets it.
+const signupLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,    // 24 hours
+  max: 10,                          // 10 signups per IP per day
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'too many signups from this IP — try again tomorrow' },
+  validate: { trustProxy: false },
+});
+
+const exportLimiter = rateLimit({
+  windowMs: 60 * 1000,              // 1 minute
+  max: 60,                          // 60 registry-exports per IP per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate-limited — registry export caps at 60/min/ip' },
+  validate: { trustProxy: false },
+});
+
+const verifiedLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,                          // 30 verified-inference calls per IP per minute (it's expensive)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate-limited — verified inference caps at 30/min/ip' },
+  validate: { trustProxy: false },
+});
 
 const PRICING = {
   synthesis_small: 0.10,   // < 1 KB generator
@@ -94,11 +129,12 @@ export function buildRouter() {
     next();
   });
 
+  // Public /health — no provider-key leakage. Authenticated callers can
+  // hit /v1/health for the full snapshot including backend availability.
   r.get('/health', (req, res) => res.json({
     status: 'ok',
     version: '0.2.0',
     library_version: LIBRARY_VERSION,
-    has_anthropic_key: !!process.env.ANTHROPIC_API_KEY,
     region: process.env.RAILWAY_REGION || process.env.REGION || 'local',
     uptime_s: Math.round(process.uptime()),
     stats: storeStats(),
@@ -142,7 +178,12 @@ export function buildRouter() {
   });
 
   // ---------- Public signup ----------
-  r.post('/v1/signup', (req, res) => {
+  // Rate-limited (S5): 10 signups per IP per 24h. INVITE_ONLY=true hard-disables
+  // public signup entirely (CLI bootstrap and admin issue still work).
+  r.post('/v1/signup', signupLimiter, (req, res) => {
+    if (process.env.INVITE_ONLY === 'true') {
+      return res.status(403).json({ error: 'public signup disabled — invite required' });
+    }
     const { email, name } = req.body || {};
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       return res.status(400).json({ error: 'valid email required' });
@@ -155,6 +196,35 @@ export function buildRouter() {
       api_key: t.api_key,
       message: 'Save this key. You can rotate it from /v1/account/rotate-key.',
     });
+  });
+
+  // ---------- Session cookie (S7) ----------
+  // POST a key here to set an httpOnly `kolm_session` cookie. Browsers can
+  // then call /v1/* without exposing the key to JavaScript. The legacy
+  // localStorage path still works, but new pages should call /v1/session/login
+  // and rely on the cookie.
+  r.post('/v1/session/login', (req, res) => {
+    const { api_key } = req.body || {};
+    if (!api_key || typeof api_key !== 'string') {
+      return res.status(400).json({ error: 'api_key required' });
+    }
+    const t = findOne('tenants', x => x.api_key === api_key && !x._deleted);
+    const adminKey = process.env.ADMIN_KEY || 'ks_admin_change_me';
+    if (!t && api_key !== adminKey) return res.status(401).json({ error: 'invalid api key' });
+    const isProd = process.env.NODE_ENV === 'production' || !!process.env.RAILWAY_ENVIRONMENT;
+    res.cookie('kolm_session', api_key, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'strict',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      path: '/',
+    });
+    res.json({ ok: true, tenant: t ? { id: t.id, name: t.name, plan: t.plan } : { admin: true } });
+  });
+
+  r.post('/v1/session/logout', (req, res) => {
+    res.clearCookie('kolm_session', { path: '/' });
+    res.json({ ok: true });
   });
 
   // ---------- Public registry browsing — no auth needed for visibility=public ----------
@@ -274,7 +344,7 @@ export function buildRouter() {
   // A device with this bundle can run every public recipe locally, offline,
   // forever, for free. Returns a portable JSON envelope of all public recipes
   // with their executable source. This is the on-device runtime payload.
-  r.get('/v1/registry/export', (_req, res) => {
+  r.get('/v1/registry/export', exportLimiter, (_req, res) => {
     const concepts = all('concepts').filter(c => c.visibility === 'public');
     const versions = all('versions');
     const recipes = [];
@@ -313,12 +383,125 @@ export function buildRouter() {
     });
   });
 
+  // The wrap surface — what `recipe.wrap(client).messages.create({...})` calls.
+  //
+  // Same generator-verifier asymmetry as /v1/verified-inference, but shaped
+  // around the user's existing messages.create payload. The user's request
+  // looks identical to a normal Anthropic call; we add `verified` and
+  // optional `corpus_namespace` keys, run k samples, score them against
+  // the test cases (or recipe-as-judge), and return the winner shaped as
+  // a messages.create response — so the wrap is a drop-in.
+  //
+  // If `corpus_namespace` is set, we ask the tenant's Recall index for the
+  // top-k chunks for the most-recent user message and prepend them as a
+  // system context block. This is the "ground every Distill call in the
+  // user's corpus" promise from the plan.
+  r.post('/v1/wrap/verified', verifiedLimiter, async (req, res) => {
+    try {
+      const { messages, system, model, max_tokens, temperature, verified, corpus_namespace } = req.body || {};
+      if (!Array.isArray(messages) || messages.length === 0) {
+        return res.status(400).json({ error: 'messages array required' });
+      }
+      if (!verified || typeof verified !== 'object') {
+        return res.status(400).json({ error: 'verified opts required: { k, test_cases } or { judge_recipe_id, expected }' });
+      }
+      if (!process.env.ANTHROPIC_API_KEY) {
+        return res.status(503).json({ error: 'wrap/verified requires ANTHROPIC_API_KEY on the server' });
+      }
+
+      const k = Math.min(verified.k || 4, 64);
+
+      // Pull the textual user prompt from the messages array (last user turn).
+      const lastUser = [...messages].reverse().find(m => m.role === 'user');
+      const userText = !lastUser ? '' : (typeof lastUser.content === 'string'
+        ? lastUser.content
+        : (lastUser.content || []).map(c => c.text || '').join('\n'));
+
+      // Optional Recall grounding — fetch top-k chunks and prepend.
+      let groundedSystem = system || '';
+      let recall_chunks = [];
+      if (corpus_namespace) {
+        try {
+          recall_chunks = await recall.query({ tenant: req.tenant, namespace: corpus_namespace, query: userText, k: 8 });
+        } catch (e) { /* graceful degrade */ }
+        if (recall_chunks.length) {
+          const ctx = recall_chunks.map((c, i) => `[${i + 1}] ${c.path || 'chunk'}\n${c.snippet || ''}`).join('\n\n');
+          groundedSystem = (groundedSystem ? groundedSystem + '\n\n' : '')
+            + '## Context from your corpus\n' + ctx
+            + '\n\nUse the above context where relevant. Cite by number.';
+        }
+      }
+
+      // Test-cases mode — the headline shape.
+      if (Array.isArray(verified.test_cases) && verified.test_cases.length) {
+        const result = await verifiedInference({
+          prompt: userText,
+          system: groundedSystem || undefined,
+          test_cases: verified.test_cases,
+          k,
+          model,
+          temperature,
+        });
+        // Shape it like messages.create — a single content block with the chosen source.
+        return res.json({
+          id: 'wrap_' + crypto.randomBytes(6).toString('hex'),
+          model: result.receipt.model,
+          role: 'assistant',
+          stop_reason: result.verified ? 'end_turn' : 'verifier_unsatisfied',
+          content: [{ type: 'text', text: result.chosen?.source || '' }],
+          // wrap-specific extras kept under `_kolm` so a naive consumer
+          // sees the standard shape and a curious one finds the receipt.
+          _kolm: {
+            verified: result.verified,
+            chosen: result.chosen,
+            candidates: result.candidates,
+            cost_usd: result.cost_usd,
+            elapsed_ms: result.elapsed_ms,
+            recall_chunks: recall_chunks.length,
+            receipt: result.receipt,
+          },
+        });
+      }
+
+      // Recipe-as-judge mode — accept candidates that the verifier recipe approves.
+      if (verified.judge_recipe_id || verified.judge_version_id) {
+        const out = await import('./verified.js').then(m => m.recipeAsJudge({
+          prompt: userText,
+          system: groundedSystem || undefined,
+          verifier_concept_id: verified.judge_recipe_id,
+          verifier_version_id: verified.judge_version_id,
+          expected: verified.expected,
+          k, model, temperature,
+          tenant: req.tenant,
+        }));
+        return res.json({
+          id: 'wrap_' + crypto.randomBytes(6).toString('hex'),
+          model: model || process.env.ANTHROPIC_MODEL || 'claude-opus-4-7',
+          role: 'assistant',
+          stop_reason: out.verified ? 'end_turn' : 'verifier_unsatisfied',
+          content: [{ type: 'text', text: out.chosen?.text || '' }],
+          _kolm: {
+            verified: out.verified,
+            candidates_passed: out.candidates_passed,
+            candidates_n: out.candidates_n,
+            recall_chunks: recall_chunks.length,
+            receipt: out.receipt,
+          },
+        });
+      }
+
+      return res.status(400).json({ error: 'verified must include test_cases OR judge_recipe_id/judge_version_id+expected' });
+    } catch (e) {
+      res.status(400).json({ error: String(e.message || e) });
+    }
+  });
+
   // Public verified-inference endpoint — Generator-Verifier asymmetry made shippable.
   // Sample k candidates from a frontier model, run each through a deterministic
   // Recipe verifier (test cases), pick the first that passes. Returns a receipt.
   // P(correct) >= 1 - (1 - p*v)^k. For p=0.91 v=1 k=8: 99.9999%.
   // Uses the server's ANTHROPIC_API_KEY — no tenant binding needed for the demo.
-  r.post('/v1/verified-inference', async (req, res) => {
+  r.post('/v1/verified-inference', verifiedLimiter, async (req, res) => {
     try {
       const { prompt, signature, test_cases, k = 8, model, temperature, system } = req.body || {};
       if (!Array.isArray(test_cases) || test_cases.length === 0) {
@@ -336,6 +519,160 @@ export function buildRouter() {
   });
 
   r.use(authMiddleware);
+
+  // Authenticated /v1/health — full snapshot including provider availability.
+  // Public /health (above the authMiddleware) returns the no-leak version.
+  r.get('/v1/health', (req, res) => res.json({
+    status: 'ok',
+    version: '0.2.0',
+    library_version: LIBRARY_VERSION,
+    has_anthropic_key: !!process.env.ANTHROPIC_API_KEY,
+    region: process.env.RAILWAY_REGION || process.env.REGION || 'local',
+    uptime_s: Math.round(process.uptime()),
+    stats: storeStats(),
+    tenant: req.tenant_record ? { id: req.tenant_record.id, plan: req.tenant_record.plan } : { admin: !!req.is_admin },
+  }));
+
+  // ---------- Compile (kolm) ----------
+  // POST /v1/compile          → start a compile job, returns { job_id }
+  // GET  /v1/compile/:id      → status snapshot
+  // GET  /v1/compile/:id/.kolm → download the artifact
+  // GET  /v1/compile           → list this tenant's jobs
+  r.post('/v1/compile', async (req, res) => {
+    const { task, examples = [], corpus_namespace, base_model } = req.body || {};
+    if (!task || typeof task !== 'string') return res.status(400).json({ error: 'task (string) required' });
+    if (task.length > 4000) return res.status(400).json({ error: 'task description too long (>4000 chars)' });
+    if (examples && (!Array.isArray(examples) || examples.length > 200)) {
+      return res.status(400).json({ error: 'examples must be an array with ≤200 entries' });
+    }
+    const job = createJob({ task, examples, corpus_namespace, base_model, tenant: req.tenant });
+    // Fire and forget. Sprint 1 stub Recall + Distill resolve fast (<1s).
+    setImmediate(() => runJob(job, {
+      synthesize,
+      publicRecipes: () => {
+        const concepts = all('concepts').filter(c => c.visibility === 'public');
+        const versions = all('versions');
+        const out = [];
+        for (const c of concepts) {
+          const vs = versions.filter(v => v.concept_id === c.id).sort((a, b) =>
+            new Date(b.created_at || 0) - new Date(a.created_at || 0));
+          if (!vs.length || !vs[0].source) continue;
+          out.push({
+            id: c.id, name: c.name,
+            source: vs[0].source,
+            source_hash: vs[0].evaluation?.source_hash || null,
+            version_id: vs[0].id,
+            tags: c.tags || [],
+            schema: c.schema || null,
+          });
+        }
+        return out;
+      },
+      examples,
+      recall: {
+        query: ({ namespace, query, k }) => recall.query({ tenant: req.tenant, namespace, query, k }),
+      },
+      outDir: process.env.KOLM_ARTIFACT_DIR,
+    }));
+    res.status(202).json({ job_id: job.id, status: job.status, poll: `/v1/compile/${job.id}` });
+  });
+
+  r.get('/v1/compile', (req, res) => {
+    res.json({ jobs: listJobs(req.tenant, 50) });
+  });
+
+  r.get('/v1/compile/:id', (req, res) => {
+    const j = getJob(req.params.id, req.is_admin ? null : req.tenant);
+    if (!j) return res.status(404).json({ error: 'job not found' });
+    const { artifact_path, ...safe } = j;  // never leak local path
+    res.json({ ...safe, artifact_url: j.status === 'completed' ? `/v1/compile/${j.id}/.kolm` : null });
+  });
+
+  r.get('/v1/compile/:id/.kolm', (req, res) => {
+    const j = getJob(req.params.id, req.is_admin ? null : req.tenant);
+    if (!j) return res.status(404).json({ error: 'job not found' });
+    if (j.status !== 'completed') return res.status(409).json({ error: 'artifact not ready', status: j.status, progress: j.progress });
+    if (!j.artifact_path || !fs.existsSync(j.artifact_path)) return res.status(410).json({ error: 'artifact expired or missing' });
+    res.set('Content-Type', 'application/zip');
+    res.set('Content-Disposition', `attachment; filename="${j.id}.kolm"`);
+    fs.createReadStream(j.artifact_path).pipe(res);
+  });
+
+  // ---------- Recall ----------
+  // Hybrid query against the tenant's qmd-indexed corpus. Returns top-k chunks.
+  // The compile orchestrator calls the same surface internally; this is the
+  // public route for à la carte usage and for the kolm CLI's `kolm recall`.
+  r.post('/v1/recall', async (req, res) => {
+    const { namespace, query, k } = req.body || {};
+    if (!query || typeof query !== 'string') return res.status(400).json({ error: 'query (string) required' });
+    if (k !== undefined && (typeof k !== 'number' || k < 1 || k > 100)) {
+      return res.status(400).json({ error: 'k must be a number between 1 and 100' });
+    }
+    try {
+      const chunks = await recall.query({ tenant: req.tenant, namespace, query, k: k || 12 });
+      res.json({ namespace: namespace || 'default', n: chunks.length, chunks });
+    } catch (e) {
+      res.status(500).json({ error: 'recall failed', detail: String(e.message || e) });
+    }
+  });
+
+  // Tokenize-and-ingest a path (or array of paths). The path must live on the
+  // server; for now we support self-host where the kolm cloud runs alongside
+  // a tenant's mounted corpus directory. For the SaaS path we'll add an
+  // upload endpoint in Sprint 2.
+  r.post('/v1/embed', async (req, res) => {
+    const { namespace, paths, force } = req.body || {};
+    if (!Array.isArray(paths) || paths.length === 0) {
+      return res.status(400).json({ error: 'paths (non-empty array) required' });
+    }
+    if (paths.length > 64) {
+      return res.status(400).json({ error: 'paths too long — max 64 per request' });
+    }
+    // Reject obvious traversal — every path must be absolute and exist.
+    for (const p of paths) {
+      if (typeof p !== 'string' || !path.isAbsolute(p)) {
+        return res.status(400).json({ error: 'paths must be absolute strings' });
+      }
+      if (!fs.existsSync(p)) {
+        return res.status(400).json({ error: 'path not found: ' + p });
+      }
+    }
+    try {
+      const result = await recall.ingest({ tenant: req.tenant, namespace, paths, force: !!force });
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ error: 'ingest failed', detail: String(e.message || e) });
+    }
+  });
+
+  // Health check for the recall substrate.
+  r.get('/v1/recall/status', async (req, res) => {
+    const namespace = req.query.namespace ? String(req.query.namespace) : null;
+    try {
+      const av = await recall.isAvailable();
+      const st = namespace ? await recall.status({ tenant: req.tenant, namespace }) : null;
+      res.json({ available: av, namespace: namespace || null, status: st });
+    } catch (e) {
+      res.status(500).json({ error: 'recall status failed', detail: String(e.message || e) });
+    }
+  });
+
+  // Single-source debug view. Confirms a sidecar exists and returns its
+  // frontmatter + first 4KB of body so a UI can preview what qmd indexed.
+  r.get('/v1/recall/sources/:id(*)', (req, res) => {
+    // The :id is a URL-encoded relative path inside the tenant corpus. We
+    // resolve it against KOLM_RECALL_ROOT and refuse anything outside.
+    const root = process.env.KOLM_RECALL_ROOT || os.tmpdir();
+    const id = decodeURIComponent(req.params.id || '');
+    const full = path.resolve(root, id);
+    if (!full.startsWith(path.resolve(root))) {
+      return res.status(400).json({ error: 'path escapes recall root' });
+    }
+    const sidecar = full.endsWith('.md') ? full : full + '.md';
+    if (!fs.existsSync(sidecar)) return res.status(404).json({ error: 'sidecar not found' });
+    const text = fs.readFileSync(sidecar, 'utf-8');
+    res.json({ id, sidecar, length: text.length, preview: text.slice(0, 4096) });
+  });
 
   // ---------- Account ----------
   r.get('/v1/account', (req, res) => {

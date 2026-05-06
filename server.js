@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import compression from 'compression';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,24 +16,66 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.disable('x-powered-by');
+
+// Security headers (S3, S4) — mounted BEFORE express.static so static
+// assets get HSTS, CSP, nosniff, etc. CSP allows 'unsafe-inline' for now
+// because every page still has inline <script> blocks; Sprint 1 moves
+// inline scripts to /js/<page>.js and tightens CSP. 'wasm-unsafe-eval' is
+// required by the on-device runtime (wllama, sqlite-vec).
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'blob:'],
+      fontSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'", 'https://api.anthropic.com'],
+      workerSrc: ["'self'", 'blob:'],
+      frameAncestors: ["'none'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,  // breaks inline images otherwise
+  crossOriginResourcePolicy: { policy: 'cross-origin' },  // /sdk.js is cross-origin by design
+  strictTransportSecurity: { maxAge: 31536000, includeSubDomains: true },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  frameguard: { action: 'deny' },
+  noSniff: true,
+}));
+
 // gzip everything except SSE streams (compression breaks event delivery).
 app.use(compression({ filter: (req, res) => res.getHeader('Content-Type') !== 'text/event-stream' && compression.filter(req, res) }));
+app.use(cookieParser());
 app.use(express.json({ limit: '4mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Static dashboard with strong caching for hashed assets, weak for HTML
+// Static dashboard with strong caching for hashed assets, weak for HTML.
+// /sdk.js gets a versioned alias (S6) — the unversioned URL stays for
+// back-compat but we encourage `/sdk-<sha>.js` for SRI-pinned imports.
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'public, max-age=60, must-revalidate');
-    else if (filePath.match(/\.(css|js|svg|png|jpg|webp)$/)) res.setHeader('Cache-Control', 'public, max-age=300');
+    else if (/sdk-[a-f0-9]{8,}\.js$/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    else if (filePath.match(/\.(css|js|svg|png|jpg|webp|wasm)$/)) res.setHeader('Cache-Control', 'public, max-age=300');
   },
 }));
 
 app.use('/', buildRouter());
 
 // SPA fallback for HTML routes — every public page maps to a static file under /public.
-for (const route of ['/dashboard', '/playground', '/docs', '/registry', '/signup', '/why', '/pricing', '/status', '/specialists', '/onboarding', '/account', '/optimize', '/audit', '/spec', '/receipts', '/how-it-works', '/verified', '/economics', '/device']) {
-  app.get(route, (_req, res) => res.sendFile(path.join(__dirname, 'public', route.slice(1) + '.html')));
+// /compile, /run, /recall, /cloud, /manual, /mobile are the v5 (`kolm`) surfaces.
+// Legacy v4 pages (/optimize, /audit, /why, /how-it-works, /economics, /spec,
+// /receipts, /verified, /specialists) stay reachable until Sprint 1's kill-list
+// pass — the static files still live in public/.
+for (const route of ['/dashboard', '/playground', '/docs', '/registry', '/signup', '/why', '/pricing', '/status', '/specialists', '/onboarding', '/account', '/optimize', '/audit', '/spec', '/receipts', '/how-it-works', '/verified', '/economics', '/device', '/compile', '/run', '/recall', '/cloud', '/manual', '/mobile']) {
+  app.get(route, (_req, res) => {
+    const file = path.join(__dirname, 'public', route.slice(1) + '.html');
+    if (fs.existsSync(file)) return res.sendFile(file);
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+  });
 }
 
 // 404 fallback for unknown HTML routes — branded page from /public/404.html if it exists.

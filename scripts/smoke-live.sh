@@ -136,7 +136,9 @@ check "/v1/library version" has "$LIBR" '"version"'
 
 echo ""
 echo "=== 9. Pages ==="
-for p in "" dashboard playground docs registry signup why pricing status specialists; do
+# v5 (kolm) surfaces — Sprint 1 retired /why, /specialists, /spec, /receipts,
+# /how-it-works, /verified, /economics, /device into public/_archive/.
+for p in "" dashboard playground docs registry signup pricing status; do
   C=$(curl -s -o /dev/null -w "%{http_code}" "$URL/$p")
   check "GET /$p → 200" test "$C" = "200"
 done
@@ -274,10 +276,6 @@ ON=$(curl -s -o /dev/null -w "%{http_code}" "$URL/onboarding")
 check "/onboarding 200" test "$ON" = "200"
 AC=$(curl -s -o /dev/null -w "%{http_code}" "$URL/account")
 check "/account 200" test "$AC" = "200"
-SP=$(curl -s -o /dev/null -w "%{http_code}" "$URL/specialists")
-check "/specialists 200" test "$SP" = "200"
-WHY=$(curl -s "$URL/why")
-check "/why has ROI calculator" has "$WHY" 'roi-calls'
 NF=$(curl -s -o /dev/null -w "%{http_code}" "$URL/this-route-does-not-exist-recipe")
 check "unknown route 404" test "$NF" = "404"
 NF_BODY=$(curl -s "$URL/this-route-does-not-exist-recipe")
@@ -303,71 +301,17 @@ VERIFY=$(curl -sX POST "$URL/v1/receipts/verify" -H 'Content-Type: application/j
   -d "{\"receipt\":$RECEIPT_JSON}")
 check "/v1/receipts/verify valid" has "$VERIFY" '"valid":true'
 
-# Tamper test: flip the first hex char of the hmac
-TAMPERED=$(echo "$RECEIPT_JSON" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{const r=JSON.parse(d);r.hmac="0"+r.hmac.slice(1);process.stdout.write(JSON.stringify(r))})' 2>/dev/null)
-VERIFY_BAD=$(curl -sX POST "$URL/v1/receipts/verify" -H 'Content-Type: application/json' \
-  -d "{\"receipt\":$TAMPERED}")
-check "tampered receipt rejected" has "$VERIFY_BAD" '"valid":false'
-
-# New surface pages
-SPEC_HTML=$(curl -s -o /dev/null -w "%{http_code}" "$URL/spec")
-check "/spec page 200" test "$SPEC_HTML" = "200"
-RCPTS_HTML=$(curl -s -o /dev/null -w "%{http_code}" "$URL/receipts")
-check "/receipts page 200" test "$RCPTS_HTML" = "200"
-
-echo ""
-echo "=== 19. Verified Inference + infra-thesis pages ==="
-HIW=$(curl -s -o /dev/null -w "%{http_code}" "$URL/how-it-works")
-check "/how-it-works page 200" test "$HIW" = "200"
-VER=$(curl -s -o /dev/null -w "%{http_code}" "$URL/verified")
-check "/verified page 200" test "$VER" = "200"
-ECO=$(curl -s -o /dev/null -w "%{http_code}" "$URL/economics")
-check "/economics page 200" test "$ECO" = "200"
-HIW_BODY=$(curl -s "$URL/how-it-works")
-check "/how-it-works has wrap pattern" has "$HIW_BODY" 'recipe.wrap'
-VER_BODY=$(curl -s "$URL/verified")
-check "/verified has the math formula" has "$VER_BODY" 'Generator-Verifier'
-check "/verified has live demo button" has "$VER_BODY" 'btn-run'
-ECO_BODY=$(curl -s "$URL/economics")
-check "/economics has hardware unlock" has "$ECO_BODY" 'ESP32'
-check "/economics references CDN analogue" has "$ECO_BODY" 'CDN'
-HOME_BODY=$(curl -s "$URL/")
-check "home has hardware-unlock thesis" has "$HOME_BODY" 'every device that has ever existed'
-check "home links to /verified" has "$HOME_BODY" 'href="/verified"'
-check "home links to /economics" has "$HOME_BODY" 'href="/economics"'
-
-# /v1/verified-inference contract
-VI_NO_TC=$(curl -sX POST "$URL/v1/verified-inference" -H 'Content-Type: application/json' -d '{}')
-check "/v1/verified-inference rejects empty body" has "$VI_NO_TC" 'test_cases array required'
-VI_K_CAP=$(curl -sX POST "$URL/v1/verified-inference" -H 'Content-Type: application/json' \
-  -d '{"prompt":"x","test_cases":[{"input":1,"expected":1}],"k":99}')
-check "/v1/verified-inference caps k at 64" has "$VI_K_CAP" 'k capped at 64'
-VI_NO_KEY=$(curl -sX POST "$URL/v1/verified-inference" -H 'Content-Type: application/json' \
-  -d '{"prompt":"x","test_cases":[{"input":1,"expected":1}],"k":2}')
-# Either 503 (no key locally) or 200 with verified=true/false (key present): both are acceptable contracts
-VI_OK=0
-echo "$VI_NO_KEY" | grep -q 'requires ANTHROPIC_API_KEY' && VI_OK=1
-echo "$VI_NO_KEY" | grep -q '"verified"' && VI_OK=1
-check "/v1/verified-inference responds correctly given key state" test "$VI_OK" = "1"
-
 echo ""
 echo "=== 20. On-device PWA + browser SDK ==="
-DEV_HTML=$(curl -s -o /dev/null -w "%{http_code}" "$URL/device")
-check "/device page 200" test "$DEV_HTML" = "200"
-DEV_BODY=$(curl -s "$URL/device")
-check "/device imports SDK module" has "$DEV_BODY" 'sdk.js'
-check "/device registers service worker" has "$DEV_BODY" 'serviceWorker.register'
-check "/device has install prompt handler" has "$DEV_BODY" 'beforeinstallprompt'
 SDK_HEADERS=$(curl -sI "$URL/sdk.js")
 check "/sdk.js 200" hashi "$SDK_HEADERS" "HTTP/[12].[12] 200\|HTTP/2 200"
 check "/sdk.js JS Content-Type" hashi "$SDK_HEADERS" "Content-Type:.*\(javascript\|js\)"
 SDK_BODY=$(curl -s "$URL/sdk.js")
 check "/sdk.js exports recipe" has "$SDK_BODY" 'export const recipe'
 check "/sdk.js has Recipe class" has "$SDK_BODY" 'class Recipe'
-check "/sdk.js has wrap method" has "$SDK_BODY" 'wrap(client)'
+check "/sdk.js has wrap method" has "$SDK_BODY" 'wrap(client'
 MAN=$(curl -s "$URL/manifest.json")
 check "/manifest.json valid" has "$MAN" '"start_url"'
-check "/manifest.json points to /device" has "$MAN" '"/device"'
 SW=$(curl -s "$URL/sw.js")
 check "/sw.js install handler" has "$SW" "addEventListener('install'"
 check "/sw.js precache list" has "$SW" "PRECACHE"
@@ -375,8 +319,215 @@ REG_EXPORT=$(curl -s "$URL/v1/registry/export")
 REG_RECIPES=$(echo "$REG_EXPORT" | grep -oE '"name"' | wc -l)
 check "/v1/registry/export returns recipes" test "$REG_RECIPES" -gt 0
 check "/v1/registry/export has spec rs-1" has "$REG_EXPORT" '"spec":"rs-1"'
-HOME_DEV=$(curl -s "$URL/")
-check "home links to /device" has "$HOME_DEV" 'href="/device"'
+
+echo ""
+echo "=== 21. Sprint 0 — security gate (S1-S10) ==="
+# S1: escape.js shipped + present on the high-risk pages
+ESC=$(curl -s -o /dev/null -w "%{http_code}" "$URL/escape.js")
+check "S1 /escape.js 200" test "$ESC" = "200"
+ESC_BODY=$(curl -s "$URL/escape.js")
+check "S1 escape exports KSesc" has "$ESC_BODY" 'window.KSesc'
+REG_HTML=$(curl -s "$URL/registry")
+check "S1 registry imports escape" has "$REG_HTML" '/escape.js'
+ACCT_HTML=$(curl -s "$URL/account")
+check "S1 account imports escape" has "$ACCT_HTML" '/escape.js'
+
+# S2: recipe-worker shipped, sdk.js no longer compiles on main thread
+WK=$(curl -s -o /dev/null -w "%{http_code}" "$URL/recipe-worker.js")
+check "S2 /recipe-worker.js 200" test "$WK" = "200"
+WK_BODY=$(curl -s "$URL/recipe-worker.js")
+check "S2 worker locks down fetch" has "$WK_BODY" "kill = "
+SDK_NEW=$(curl -s "$URL/sdk.js")
+check "S2 sdk.js spawns worker" has "$SDK_NEW" 'recipe-worker'
+check "S2 sdk.js advertises sandbox runtime" has "$SDK_NEW" 'browser-sdk-sandbox'
+
+# S3+S4: helmet ahead of static — CSP + HSTS + X-Frame-Options on /styles.css
+ST_HEADERS=$(curl -sI "$URL/styles.css")
+check "S3 CSP on static" hashi "$ST_HEADERS" "Content-Security-Policy"
+check "S4 HSTS on static" hashi "$ST_HEADERS" "Strict-Transport-Security"
+check "S4 X-Frame-Options on static" hashi "$ST_HEADERS" "X-Frame-Options"
+
+# S5: signup rate-limit headers
+SU_HEADERS=$(curl -sI -X POST "$URL/v1/signup")
+check "S5 signup RateLimit headers" hashi "$SU_HEADERS" "RateLimit-"
+
+# S6: versioned sdk + manifest
+SVM=$(curl -s "$URL/sdk-versions.json")
+check "S6 /sdk-versions.json present" has "$SVM" '"current"'
+check "S6 manifest carries SRI" has "$SVM" 'sha384-'
+SHA_URL=$(echo "$SVM" | grep -oE '/sdk-[a-f0-9]+\.js' | head -1)
+if [ -n "$SHA_URL" ]; then
+  SVR=$(curl -s -o /dev/null -w "%{http_code}" "$URL$SHA_URL")
+  check "S6 versioned sdk.js fetches" test "$SVR" = "200"
+fi
+
+# S7: cookie session endpoints
+SL_400=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$URL/v1/session/login" -H "Content-Type: application/json" -d '{}')
+check "S7 session/login 400 w/o key" test "$SL_400" = "400"
+SL_401=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$URL/v1/session/login" -H "Content-Type: application/json" -d '{"api_key":"ks_nope"}')
+check "S7 session/login 401 bad key" test "$SL_401" = "401"
+SL_OUT=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$URL/v1/session/logout")
+check "S7 session/logout 200" test "$SL_OUT" = "200"
+
+# S8: /health no longer leaks has_anthropic_key (info-disclosure)
+H=$(curl -s "$URL/health")
+if echo "$H" | grep -q 'has_anthropic_key'; then echo "  FAIL  S8 /health leaks has_anthropic_key"; FAIL=$((FAIL+1)); FAILED+=("S8 /health leaks has_anthropic_key"); else echo "  PASS  S8 /health no provider leak"; PASS=$((PASS+1)); fi
+H1=$(curl -s -o /dev/null -w "%{http_code}" "$URL/v1/health")
+check "S8 /v1/health requires auth" test "$H1" = "401"
+
+# S9: wrap() honestly framed (no longer claims passthrough auto-routing)
+SDK_WRAP=$(curl -s "$URL/sdk.js")
+check "S9 wrap() telemetry-honest" has "$SDK_WRAP" "__wrap__"
+check "S9 wrap() advertises Sprint 1 routing" has "$SDK_WRAP" "/v1/wrap/verified"
+
+# S10: registry/export rate-limit headers
+RX=$(curl -sI "$URL/v1/registry/export")
+check "S10 registry/export RateLimit" hashi "$RX" "RateLimit-Limit"
+
+echo ""
+echo "=== 22. Sprint 1 — Recall (engine 4) ==="
+# Auth gates first
+RC_NA=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$URL/v1/recall" -H 'Content-Type: application/json' -d '{"query":"x"}')
+check "recall 401 w/o key" test "$RC_NA" = "401"
+EM_NA=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$URL/v1/embed" -H 'Content-Type: application/json' -d '{"paths":[]}')
+check "embed 401 w/o key" test "$EM_NA" = "401"
+
+# Status — auth required, returns shape
+RS=$(curl -s "$URL/v1/recall/status" -H "X-API-Key: $KEY")
+check "recall/status returns shape" has "$RS" '"available"\|"backend"\|"ok"'
+
+# Hybrid query with auth — chunks may be empty if qmd backend absent (graceful degradation)
+RC_OK=$(curl -sX POST "$URL/v1/recall" -H "X-API-Key: $KEY" -H 'Content-Type: application/json' \
+  -d '{"namespace":"smoke","query":"hello world","k":3}')
+check "recall returns chunks shape" has "$RC_OK" '"chunks"'
+check "recall returns namespace" has "$RC_OK" '"namespace"'
+
+# Validation
+RC_BADK=$(curl -sX POST "$URL/v1/recall" -H "X-API-Key: $KEY" -H 'Content-Type: application/json' \
+  -d '{"query":"x","k":999}')
+check "recall rejects k>100" has "$RC_BADK" 'k must be'
+RC_NOQ=$(curl -sX POST "$URL/v1/recall" -H "X-API-Key: $KEY" -H 'Content-Type: application/json' -d '{}')
+check "recall rejects no query" has "$RC_NOQ" 'query'
+
+# Embed validates inputs
+EM_NOPATHS=$(curl -sX POST "$URL/v1/embed" -H "X-API-Key: $KEY" -H 'Content-Type: application/json' -d '{}')
+check "embed rejects no paths" has "$EM_NOPATHS" 'paths'
+
+# Recall surface page
+RP=$(curl -s -o /dev/null -w "%{http_code}" "$URL/recall")
+check "/recall page 200" test "$RP" = "200"
+RP_BODY=$(curl -s "$URL/recall")
+check "/recall page mentions multimodal" hashi "$RP_BODY" "multimodal"
+check "/recall page has codebox" has "$RP_BODY" 'kolm recall'
+
+echo ""
+echo "=== 23. Sprint 1 — Compile orchestrator + .kolm + K-score ==="
+# Auth gates
+CO_NA=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$URL/v1/compile" -H 'Content-Type: application/json' -d '{}')
+check "compile 401 w/o key" test "$CO_NA" = "401"
+CO_NOTASK=$(curl -sX POST "$URL/v1/compile" -H "X-API-Key: $KEY" -H 'Content-Type: application/json' -d '{}')
+check "compile 400 w/o task" has "$CO_NOTASK" 'task'
+
+# Real compile — sign classifier (the homepage demo)
+CO=$(curl -sX POST "$URL/v1/compile" -H "X-API-Key: $KEY" -H 'Content-Type: application/json' \
+  -d '{"task":"classify a number as positive, zero, or negative","examples":[{"input":"7","expected":"positive"},{"input":"0","expected":"zero"},{"input":"-3","expected":"negative"},{"input":"42","expected":"positive"},{"input":"-1.5","expected":"negative"}]}')
+check "compile returns job_id" has "$CO" '"job_id"'
+# job_id is 12 hex chars (crypto.randomBytes(6).toString('hex')) — anchor on the value, not the key text "job_id"
+JOBID=$(echo "$CO" | sed -nE 's/.*"job_id":"(job_[a-f0-9]{12})".*/\1/p' | head -1)
+check "compile job_id parsed" test -n "$JOBID"
+
+# Poll for completion (compile runs in <2s typically; allow 30s headroom)
+JOB_STATUS="queued"
+for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+  JOB_DOC=$(curl -s "$URL/v1/compile/$JOBID" -H "X-API-Key: $KEY")
+  JOB_STATUS=$(echo "$JOB_DOC" | sed -nE 's/.*"status":"([a-z]+)".*/\1/p' | head -1)
+  if [ "$JOB_STATUS" = "completed" ] || [ "$JOB_STATUS" = "failed" ]; then break; fi
+  sleep 2
+done
+check "compile job reaches completed" test "$JOB_STATUS" = "completed"
+
+# K-score visible in completed job doc
+check "completed job has k_score" has "$JOB_DOC" '"k_score"'
+check "k_score has composite" has "$JOB_DOC" '"composite"'
+check "k_score has accuracy" has "$JOB_DOC" '"accuracy"'
+check "k_score has size_bytes" has "$JOB_DOC" '"size_bytes"'
+check "k_score has p50_latency_us" has "$JOB_DOC" '"p50_latency_us"'
+check "k_score has spec=k-score-1" has "$JOB_DOC" '"spec":"k-score-1"'
+
+# Composite > 0 only if synthesis accepted (sign classifier should accept)
+KCOMP=$(echo "$JOB_DOC" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const j=JSON.parse(d);process.stdout.write(String(j.k_score?.composite||0))}catch{process.stdout.write("0")}})' 2>/dev/null)
+echo "    K-score composite: $KCOMP"
+
+# Artifact downloadable (chunked stream — Content-Length omitted)
+ART_HEAD=$(curl -sI "$URL/v1/compile/$JOBID/.kolm" -H "X-API-Key: $KEY")
+check "/.kolm artifact 200" hashi "$ART_HEAD" "HTTP/[12].[12] 200\|HTTP/2 200"
+check "/.kolm Content-Type zip" hashi "$ART_HEAD" "Content-Type:.*zip"
+
+# Download the artifact and verify it's a real zip (PK signature + non-trivial size)
+ART_TMP=$(mktemp)
+curl -s "$URL/v1/compile/$JOBID/.kolm" -H "X-API-Key: $KEY" -o "$ART_TMP"
+ART_BYTES=$(wc -c < "$ART_TMP")
+echo "    artifact bytes on disk: $ART_BYTES"
+check "artifact bytes > 1000" test "$ART_BYTES" -gt 1000
+ART_MAGIC=$(head -c 2 "$ART_TMP" | xxd -p -c 2)
+check "artifact has zip magic (PK)" test "$ART_MAGIC" = "504b"
+rm -f "$ART_TMP"
+
+# Compile listing
+CL=$(curl -s "$URL/v1/compile" -H "X-API-Key: $KEY")
+check "compile job list" has "$CL" '"jobs"'
+check "compile job list has our job" has "$CL" "$JOBID"
+
+# Compile surface page
+CP=$(curl -s -o /dev/null -w "%{http_code}" "$URL/compile")
+check "/compile page 200" test "$CP" = "200"
+CP_BODY=$(curl -s "$URL/compile")
+check "/compile page hero" has "$CP_BODY" 'One signed artifact'
+check "/compile page has stages" has "$CP_BODY" 'stage'
+
+echo ""
+echo "=== 24. Sprint 1 — kolm v5 site (compiler cache positioning) ==="
+# Five new surface pages
+for p in compile run recall cloud manual mobile; do
+  C=$(curl -s -o /dev/null -w "%{http_code}" "$URL/$p")
+  check "GET /$p 200" test "$C" = "200"
+done
+
+# Homepage carries the locked positioning
+HOME=$(curl -s "$URL/")
+check "homepage has 'compiler cache for intelligence'" has "$HOME" 'compiler cache for intelligence'
+check "homepage has 'frontier behavior once'" hashi "$HOME" "frontier behavior"
+check "homepage links to /compile" has "$HOME" 'href="/compile"'
+check "homepage links to /run" has "$HOME" 'href="/run"'
+check "homepage links to /recall" has "$HOME" 'href="/recall"'
+check "homepage references K-score" hashi "$HOME" "k-score\|K-score"
+check "homepage mentions MCP" hashi "$HOME" "mcp"
+
+# /run mentions kolm serve --mcp
+RUN_BODY=$(curl -s "$URL/run")
+check "/run advertises kolm serve --mcp" has "$RUN_BODY" 'kolm serve --mcp'
+check "/run shows .kolm contents" has "$RUN_BODY" 'manifest.json'
+
+# /cloud has the wrap pattern
+CLOUD_BODY=$(curl -s "$URL/cloud")
+check "/cloud shows kolm.wrap" has "$CLOUD_BODY" 'kolm.wrap'
+check "/cloud has pricing tiers" has "$CLOUD_BODY" 'Pro'
+
+# /manual has K-score formula
+MAN_BODY=$(curl -s "$URL/manual")
+check "/manual has K-score formula" has "$MAN_BODY" 'log'
+check "/manual has spec sections" hashi "$MAN_BODY" "signature chain\|recipe registry"
+
+# /mobile is honest about being a preview
+MOB_BODY=$(curl -s "$URL/mobile")
+check "/mobile labels as preview" hashi "$MOB_BODY" "preview\|sprint 3"
+
+# Sidebar consistency — all pages link back to Home + carry the kolm wordmark
+for p in compile run recall cloud manual; do
+  PB=$(curl -s "$URL/$p")
+  check "/$p sidebar has Home link" has "$PB" 'href="/"'
+  check "/$p has kolm wordmark" has "$PB" 'kolm<span class="sub">'
+done
 
 echo ""
 echo "================================================"

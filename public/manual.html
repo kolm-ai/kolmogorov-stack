@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>kolm — Manual</title>
+  <meta name="description" content="The full kolm manual. Architecture, K-score formula, .kolm spec, signature chain, recipe registry, RSD draft pack, MCP integration." />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .codebox { background:#0a0a0a; border:1px solid #222; border-radius:10px;
+      padding:14px 16px; font:12px ui-monospace,monospace; color:#bbb;
+      overflow-x:auto; margin:8px 0; }
+    .codebox .c { color:#7c5cff; }
+    .codebox .o { color:#22c55e; }
+    .codebox .k { color:#f59e0b; }
+    .toc { background:#0d0d0d; border:1px solid #222; border-radius:10px; padding:14px 18px; margin:8px 0 14px; }
+    .toc ul { list-style:none; margin:0; padding:0; columns:2; column-gap:24px; }
+    @media (max-width: 720px) { .toc ul { columns:1; } }
+    .toc li { padding:3px 0; font-size:13px; }
+    .toc li a { color:#aaa; text-decoration:none; }
+    .toc li a:hover { color:#7c5cff; }
+    .anchor { padding-top:8px; margin-top:-8px; }
+    .formula { background:#0a0a0a; border:1px solid #2a2050; border-radius:10px; padding:18px; text-align:center;
+      font:18px ui-monospace,monospace; color:#fff; margin:14px 0; }
+    .formula .num { color:#22c55e; }
+    .formula .den { color:#7c5cff; }
+    .pill { display:inline-block; background:#1a1a1a; border:1px solid #333; border-radius:99px;
+      padding:2px 10px; font: 600 11px ui-monospace,monospace; color:#aaa; margin-right:6px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <h1><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></h1>
+    <div class="tag">v0.1 · compiler cache for intelligence</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/compile">Compile</a>
+      <a href="/run">Run</a>
+      <a href="/recall">Recall</a>
+      <a href="/cloud">Cloud</a>
+      <a href="/manual" class="active">Manual</a>
+      <a href="/account">Account</a>
+    </nav>
+    <div class="footnote">
+      <strong>Compile · Run · Recall.</strong><br/>
+      Compile frontier behavior once, run it locally forever.
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow"><span class="dot live"></span> kolm manual · the spec</div>
+      <h1>How <span class="grad">kolm</span> actually works.</h1>
+      <p class="sub">
+        Architecture, formats, formulas, registries. Everything below is what makes the contract above
+        — <code>kolm compile &lt;task&gt;</code> in, signed local artifact out — actually true.
+      </p>
+    </section>
+
+    <section class="block">
+      <h2>Contents.</h2>
+      <div class="toc">
+        <ul>
+          <li><a href="#arch">1 · Architecture</a></li>
+          <li><a href="#kscore">2 · The K-score</a></li>
+          <li><a href="#kolm-spec">3 · The .kolm format</a></li>
+          <li><a href="#sig">4 · Signature chain</a></li>
+          <li><a href="#recipes">5 · Recipe registry (RS-1)</a></li>
+          <li><a href="#rsd">6 · Recipe Speculative Decoding</a></li>
+          <li><a href="#receipts">7 · Receipts (RS-1-receipts)</a></li>
+          <li><a href="#mcp">8 · MCP integration</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 id="arch" class="anchor">1 · Architecture.</h2>
+      <p class="lede">
+        <code>kolm compile</code> is the orchestrator. Beneath it, four engines do the work — but the user only
+        ever sees the compiler.
+      </p>
+      <div class="codebox">
+                  <span class="c">kolm compile &lt;task&gt;</span>
+                         │
+                         ▼
+        ┌─────────── Compile Orchestrator ───────────┐
+        │                                            │
+        ▼                ▼               ▼           ▼
+   ┌────────┐      ┌─────────┐     ┌─────────┐  ┌─────────┐
+   │ RECALL │      │ DISTILL │     │ DECOMP  │  │   RUN   │
+   │  (4)   │      │   (2)   │     │   (1)   │  │  (3+0)  │
+   └────────┘      └─────────┘     └─────────┘  └─────────┘
+       │               │                │            │
+       ▼               ▼                ▼            ▼
+   multimodal      k-sample        recipe       deploy +
+   embed +         frontier +      pack from    sign +
+   index           verify =        observed     bundle
+   user data       labels          patterns     artifact</div>
+      <p class="lede">
+        Recall feeds Distill (every k-sample is grounded in recalled chunks). Distill produces labels for the
+        LoRA half (the "make-the-model-yours" step) and observes deterministic patterns to seed the recipe pack
+        (the "make-the-model-fast" step). Decompose finalizes the recipe pack indexed by embedding-shape of
+        recalled context. Run loads model + LoRA + recipe pack + sqlite-vec index and the four work together
+        at every token. <strong>That composition is the product.</strong>
+      </p>
+    </section>
+
+    <section class="block">
+      <h2 id="kscore" class="anchor">2 · The K-score.</h2>
+      <p class="lede">
+        Named after Kolmogorov complexity. Every <code>.kolm</code> ships a single composite number that captures
+        what we mean by a <em>good</em> compile: high accuracy, broad coverage, small size. Bigger is better.
+      </p>
+      <div class="formula">
+        K = <span class="num">accuracy × coverage × 1000</span> / <span class="den">log₂(size_kb + 2)</span>
+      </div>
+      <div class="codebox">
+{
+  <span class="c">"k_score":</span> {
+    <span class="c">"composite":</span>      <span class="k">412.7</span>,
+    <span class="c">"accuracy":</span>       <span class="k">0.965</span>,   <span class="c">// pass-rate on embedded eval suite</span>
+    <span class="c">"coverage":</span>       <span class="k">0.92</span>,    <span class="c">// share of inputs handled w/o LoRA fallback</span>
+    <span class="c">"size_bytes":</span>     <span class="k">2348</span>,    <span class="c">// the actual signed zip on disk</span>
+    <span class="c">"p50_latency_us":</span> <span class="k">1400</span>,    <span class="c">// median over the embedded eval set</span>
+    <span class="c">"cost_usd_per_call":</span> <span class="k">0</span>,      <span class="c">// after compile — frontier cost amortized</span>
+    <span class="c">"spec":</span>           <span class="o">"k-score-1"</span>
+  }
+}</div>
+      <p class="lede">
+        The score makes a compiler-cache hit visible: every successful compile is a small, fast, accurate
+        artifact <em>that didn't exist before</em>. The K-score is the receipt that says exactly how small,
+        fast, and accurate.
+      </p>
+    </section>
+
+    <section class="block">
+      <h2 id="kolm-spec" class="anchor">3 · The .kolm format.</h2>
+      <p class="lede">
+        A <code>.kolm</code> is a zip with seven well-known entries. Open it with any zip tool; verify it
+        with <code>kolm inspect</code>. <code>spec: "kolm-1"</code> in the manifest pins the format version.
+      </p>
+      <div class="codebox">
+<span class="c"># mandatory</span>
+manifest.json     <span class="c"># task, base_model, runtime, k_score, evals stub, recipes stub, hashes</span>
+recipes.json      <span class="c"># the deterministic draft pack (RS-1)</span>
+signature.sig     <span class="c"># HMAC-SHA256 over canonical(manifest.json), KOLM_ARTIFACT_SECRET</span>
+evals.json        <span class="c"># {n, cases:[{id, input, expected}], spec:"evals-1"}</span>
+
+<span class="c"># optional, present once Sprint 3 lands</span>
+model.gguf        <span class="c"># base model bytes (or a URL pointer for cloud-runtime artifacts)</span>
+lora.bin          <span class="c"># task-specific LoRA delta</span>
+index.sqlite-vec  <span class="c"># corpus index for offline recall</span></div>
+    </section>
+
+    <section class="block">
+      <h2 id="sig" class="anchor">4 · Signature chain.</h2>
+      <p class="lede">
+        One signature, every byte covered. <code>signature.sig</code> is HMAC-SHA256 over the canonical JSON
+        of <code>manifest.json</code>. The manifest carries SHA-256 hashes of every other entry, so signing
+        the manifest signs the bundle.
+      </p>
+      <div class="codebox">
+{
+  <span class="c">"spec":</span>      <span class="o">"kolm-1"</span>,
+  <span class="c">"job_id":</span>    <span class="o">"job_abc"</span>,
+  <span class="c">"task":</span>      <span class="o">"classify support tickets"</span>,
+  <span class="c">"runtime":</span>   { <span class="c">"engine":</span> <span class="o">"recipe-only"</span>, <span class="c">"version":</span> <span class="o">"0.1.0"</span> },
+  <span class="c">"recipes":</span>   { <span class="c">"n":</span> <span class="k">26</span>, <span class="c">"sha256":</span> <span class="o">"..."</span> },
+  <span class="c">"evals":</span>     { <span class="c">"n":</span> <span class="k">12</span>, <span class="c">"sha256":</span> <span class="o">"..."</span> },
+  <span class="c">"k_score":</span>   { <span class="c">"composite":</span> <span class="k">412.7</span>, ... },
+  <span class="c">"created_at":</span> <span class="o">"2026-05-06T18:42:11Z"</span>
+}</div>
+    </section>
+
+    <section class="block">
+      <h2 id="recipes" class="anchor">5 · Recipe registry (RS-1).</h2>
+      <p class="lede">
+        <span class="pill">MIT</span><span class="pill">RS-1</span>
+        Recipe is the calling convention — the deterministic-token subset of model behavior. Each recipe is a
+        named, versioned, signed function over JSON: <code>{ id, name, version_id, input_schema, output_schema,
+        source }</code>. <code>kolm compile</code> emits the artifact's recipe pack as a <code>recipes.json</code>
+        slice of the global RS-1 registry; every successful compile auto-merges new draft patterns back upstream.
+      </p>
+    </section>
+
+    <section class="block">
+      <h2 id="rsd" class="anchor">6 · Recipe Speculative Decoding.</h2>
+      <p class="lede">
+        Standard speculative decoding uses a small model as the draft. RSD uses the registry. For any prefix
+        whose <em>shape</em> matches a registered draft, we emit the draft tokens directly and verify against
+        the target model in parallel. Coverage is the fraction of tokens where a draft existed; latency drops
+        with coverage. Sprint 2 ships the prototype with a <code>--decompose</code> flag on <code>kolm compile</code>.
+      </p>
+    </section>
+
+    <section class="block">
+      <h2 id="receipts" class="anchor">7 · Receipts (RS-1-receipts).</h2>
+      <p class="lede">
+        Every <code>kolm run</code> emits a structured <code>rs-1-run</code> receipt. Every
+        <code>/v1/wrap/verified</code> call emits a <code>rs-1-verified</code> receipt with k-sample count,
+        verifier pass/fail, winner index, and a signed reference to the artifact + recipe ID that handled the call.
+        Save it, ship it, audit it, chain it.
+      </p>
+    </section>
+
+    <section class="block">
+      <h2 id="mcp" class="anchor">8 · MCP integration.</h2>
+      <p class="lede">
+        <code>kolm serve --mcp</code> starts a stdio JSON-RPC server speaking
+        <code>protocolVersion: "2024-11-05"</code>. Every <code>.kolm</code> in <code>~/.kolm/artifacts/</code>
+        becomes one MCP tool. <code>tools/list</code> returns name + K-score-bearing description;
+        <code>tools/call</code> dispatches via <code>artifact-runner.js</code>; the response carries a
+        <code>_kolm</code> block with the receipt and recipe ID. Frontier agents — Claude Desktop, Cursor,
+        Codex — wire it up with three lines of config.
+      </p>
+    </section>
+
+    <footer>
+      <a href="/cloud">← Cloud</a> · <a href="/account">Account →</a>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

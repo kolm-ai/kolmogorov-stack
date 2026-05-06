@@ -131,6 +131,7 @@
 </div>
 <div id="toast" class="toast"></div>
 <script src="/app.js"></script>
+<script src="/escape.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 KS.showKeyBanner('main.main').catch(() => {});
@@ -206,7 +207,7 @@ async function refresh() {
 
     const recent = t.recent || [];
     const tb = $('tbl-inv');
-    tb.innerHTML = recent.slice(0, 25).map(i => `<tr><td class="mono faint">${i.ts.split('T')[1].slice(0,8)}</td><td class="mono">${nameOf(i.concept_id)}</td><td class="mono">${i.latency_us ?? '-'}</td><td>${i.cache_hit ? '<span class="pill accent">' + i.cache_hit + '</span>' : '<span class="faint">miss</span>'}</td></tr>`).join('') || '<tr><td colspan="4" class="faint">no calls yet — try the playground</td></tr>';
+    tb.innerHTML = recent.slice(0, 25).map(i => `<tr><td class="mono faint">${KSesc.esc(i.ts.split('T')[1].slice(0,8))}</td><td class="mono">${KSesc.esc(nameOf(i.concept_id))}</td><td class="mono">${KSesc.esc(i.latency_us ?? '-')}</td><td>${i.cache_hit ? '<span class="pill accent">' + KSesc.esc(i.cache_hit) + '</span>' : '<span class="faint">miss</span>'}</td></tr>`).join('') || '<tr><td colspan="4" class="faint">no calls yet — try the playground</td></tr>';
 
     const agg = new Map();
     for (const i of recent) {
@@ -220,12 +221,12 @@ async function refresh() {
     const top = [...agg.entries()].sort((a, b) => b[1].calls - a[1].calls).slice(0, 8);
     $('tbl-top').innerHTML = top.length === 0
       ? '<tr><td colspan="4" class="faint">no usage yet</td></tr>'
-      : top.map(([cid, a]) => `<tr><td class="mono">${nameOf(cid)}</td><td class="mono">${a.calls}</td><td class="mono">${a.latN ? Math.round(a.totLat / a.latN) : '—'}</td><td class="mono">${a.cacheHits}/${a.calls}</td></tr>`).join('');
+      : top.map(([cid, a]) => `<tr><td class="mono">${KSesc.esc(nameOf(cid))}</td><td class="mono">${KSesc.esc(a.calls)}</td><td class="mono">${a.latN ? Math.round(a.totLat / a.latN) : '—'}</td><td class="mono">${KSesc.esc(a.cacheHits)}/${KSesc.esc(a.calls)}</td></tr>`).join('');
 
     const errs = recent.filter(i => i.error).slice(0, 8);
     $('tbl-err').innerHTML = errs.length === 0
       ? '<tr><td colspan="3" class="faint">none — clean run</td></tr>'
-      : errs.map(i => `<tr><td class="mono faint">${i.ts.split('T')[1].slice(0,8)}</td><td class="mono">${nameOf(i.concept_id)}</td><td class="mono" style="color:#f87171;">${(i.error || '').slice(0, 60)}</td></tr>`).join('');
+      : errs.map(i => `<tr><td class="mono faint">${KSesc.esc(i.ts.split('T')[1].slice(0,8))}</td><td class="mono">${KSesc.esc(nameOf(i.concept_id))}</td><td class="mono" style="color:#f87171;">${KSesc.esc((i.error || '').slice(0, 60))}</td></tr>`).join('');
   } catch (e) { /* swallow */ }
 }
 

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>kolm — Cloud</title>
+  <meta name="description" content="Kolmogorov Cloud hosts the compile pipeline, the verified-inference wrap, and the public registry. Bring your own API key. Pay for what compiles." />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .codebox { background:#0a0a0a; border:1px solid #222; border-radius:10px;
+      padding:14px 16px; font:12px ui-monospace,monospace; color:#bbb;
+      overflow-x:auto; margin:8px 0; }
+    .codebox .c { color:#7c5cff; }
+    .codebox .o { color:#22c55e; }
+    .codebox .k { color:#f59e0b; }
+    .tiers { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin:14px 0; }
+    .tier { background:#0d0d0d; border:1px solid #222; border-radius:10px; padding:18px; display:flex; flex-direction:column; }
+    .tier.featured { border-color:#7c5cff; }
+    .tier h3 { margin:0; font-size:15px; color:#ddd; }
+    .tier .price { font: 700 22px ui-monospace,monospace; color:#fff; margin:8px 0 0; }
+    .tier .price small { color:#666; font-weight:400; font-size:12px; }
+    .tier ul { margin:14px 0 0; padding-left:18px; color:#999; font-size:13px; line-height:1.7; }
+    .tier .cta { margin-top:auto; padding-top:14px; }
+    .tier .cta a { display:inline-block; padding:7px 12px; border:1px solid #333; border-radius:6px; color:#ddd; text-decoration:none; font-size:12px; }
+    .tier.featured .cta a { background:#7c5cff; border-color:#7c5cff; color:#fff; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <h1><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></h1>
+    <div class="tag">v0.1 · compiler cache for intelligence</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/compile">Compile</a>
+      <a href="/run">Run</a>
+      <a href="/recall">Recall</a>
+      <a href="/cloud" class="active">Cloud</a>
+      <a href="/manual">Manual</a>
+      <a href="/account">Account</a>
+    </nav>
+    <div class="footnote">
+      <strong>Compile · Run · Recall.</strong><br/>
+      Compile frontier behavior once, run it locally forever.
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow"><span class="dot live"></span> kolmogorov cloud · the hosted compile + verified wrap</div>
+      <h1>Bring your own key. <span class="grad">Pay for what compiles.</span></h1>
+      <p class="sub">
+        The cloud runs the four engines so your laptop doesn't have to. Same compile pipeline, same artifact
+        format, same K-score, plus a verified-inference wrap that turns any Anthropic / OpenAI / Mistral key
+        into a self-checking call — k-sample, deterministically verify, accept the winner, return a receipt.
+      </p>
+    </section>
+
+    <section class="block">
+      <h2>Verified inference, drop-in.</h2>
+      <div class="codebox">
+<span class="c"># the SDK is a transparent Proxy — wrap any Anthropic-shaped client</span>
+import Anthropic from <span class="o">'@anthropic-ai/sdk'</span>;
+import { kolm } from <span class="o">'https://kolmogorov.dev/sdk.js'</span>;
+
+const raw      = new Anthropic({ apiKey: <span class="o">'sk-ant-...'</span> });
+const verified = kolm.wrap(raw, { verified: <span class="k">true</span>, k: <span class="k">3</span>, corpus_namespace: <span class="o">'work'</span> });
+
+<span class="c">// same shape as the official SDK; routed through /v1/wrap/verified</span>
+const r = await verified.messages.create({
+  model: <span class="o">'claude-opus-4-7'</span>,
+  max_tokens: <span class="k">1024</span>,
+  messages: [{ role: <span class="o">'user'</span>, content: <span class="o">'classify intent: ...'</span> }],
+});
+
+console.log(r.content);             <span class="c">// the winner</span>
+console.log(r._kolm.k_samples);     <span class="c">// 3</span>
+console.log(r._kolm.verifier_pass); <span class="c">// true</span>
+console.log(r._kolm.receipt);       <span class="c">// signed proof</span></div>
+    </section>
+
+    <section class="block">
+      <h2>Or just compile in the browser.</h2>
+      <p class="lede">
+        Drag a folder onto the Cloud dashboard, write a task in the textbox, click Compile.
+        The pipeline runs on our hardware and emits a downloadable <code>.kolm</code> with full K-score breakdown.
+        Your data is namespaced per tenant, your API key is yours, your model bill stays on your account.
+      </p>
+      <div class="codebox">
+<span class="c"># or via curl, if you live there</span>
+$ curl -X POST https://kolmogorov.dev/v1/compile \
+    -H <span class="o">"Authorization: Bearer $KOLM_KEY"</span> \
+    -H <span class="o">"Content-Type: application/json"</span> \
+    -d '{
+      <span class="c">"task"</span>: <span class="o">"classify support tickets"</span>,
+      <span class="c">"examples"</span>: [...],
+      <span class="c">"corpus_namespace"</span>: <span class="o">"work"</span>
+    }'
+{ <span class="c">"job_id":</span> <span class="o">"job_abc"</span>, <span class="c">"status":</span> <span class="o">"queued"</span> }
+
+$ curl https://kolmogorov.dev/v1/compile/job_abc/.kolm -o triage.kolm</div>
+    </section>
+
+    <section class="block">
+      <h2>Pricing.</h2>
+      <div class="tiers">
+        <div class="tier">
+          <h3>Free</h3>
+          <div class="price">$0 <small>/ mo</small></div>
+          <ul>
+            <li>1 Specialist / mo</li>
+            <li>10k corpus rows</li>
+            <li>4B-class open base only</li>
+            <li>100k vectors managed</li>
+            <li>unlimited <code>kolm run</code></li>
+          </ul>
+          <div class="cta"><a href="/account">Start →</a></div>
+        </div>
+        <div class="tier">
+          <h3>Mobile</h3>
+          <div class="price">$9 <small>/ mo</small></div>
+          <ul>
+            <li>1 personal Specialist / mo</li>
+            <li>100k corpus rows</li>
+            <li>1M vectors managed</li>
+            <li>kolm.app phone runtime</li>
+            <li>unlimited on-device</li>
+          </ul>
+          <div class="cta"><a href="/account">Start →</a></div>
+        </div>
+        <div class="tier featured">
+          <h3>Pro</h3>
+          <div class="price">$49 <small>/ mo</small></div>
+          <ul>
+            <li>unlimited Specialists</li>
+            <li>1M rows each</li>
+            <li>all open bases incl. Hermes-3</li>
+            <li>10M vectors managed</li>
+            <li>full CLI + Cloud + MCP</li>
+          </ul>
+          <div class="cta"><a href="/account">Start →</a></div>
+        </div>
+        <div class="tier">
+          <h3>Enterprise</h3>
+          <div class="price">custom</div>
+          <ul>
+            <li>private base models</li>
+            <li>on-prem training bridge</li>
+            <li>private Trieve cluster</li>
+            <li>dedicated GPU embedders</li>
+            <li>on-chain receipt anchoring</li>
+          </ul>
+          <div class="cta"><a href="mailto:dev@kolmogorov.dev">Contact →</a></div>
+        </div>
+      </div>
+      <p class="sub" style="font-size:12px; color:#666; margin-top:8px;">
+        You always pay your own frontier API bill on top — we're the compiler, not the model host.
+      </p>
+    </section>
+
+    <footer>
+      <a href="/recall">← Recall</a> · <a href="/manual">Manual →</a>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

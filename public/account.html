@@ -102,8 +102,10 @@
 </footer>
 
 <script src="/app.js"></script>
+<script src="/escape.js"></script>
 <script>
 (function () {
+  const { esc, escAttr } = window.KSesc;
   function getKey() { return localStorage.getItem('apiKey') || localStorage.getItem('recipeApiKey') || ''; }
   function setKey(k) { localStorage.setItem('apiKey', k); localStorage.setItem('recipeApiKey', k); }
   function clearKey() { localStorage.removeItem('apiKey'); localStorage.removeItem('recipeApiKey'); }
@@ -164,7 +166,7 @@
         if (!s || (s.invocations ?? 0) === 0) return;
         any = true;
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><a href="/registry">${r.name}</a></td><td style="text-align:right;">${fmt(s.invocations)}</td><td style="text-align:right;">${fmt(s.cache_hits || 0)}</td><td style="text-align:right;">${(s.latency_us?.p50 ?? '—')}</td>`;
+        tr.innerHTML = `<td><a href="/registry">${esc(r.name)}</a></td><td style="text-align:right;">${esc(fmt(s.invocations))}</td><td style="text-align:right;">${esc(fmt(s.cache_hits || 0))}</td><td style="text-align:right;">${esc(s.latency_us?.p50 ?? '—')}</td>`;
         tbody.appendChild(tr);
       });
       if (!any) $('acct-top-empty').textContent = 'No recipe-calls yet — try the playground.';

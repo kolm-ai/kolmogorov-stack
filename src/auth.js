@@ -126,7 +126,13 @@ export function authMiddleware(req, res, next) {
   const adminKey = process.env.ADMIN_KEY || 'ks_admin_change_me';
   const header = req.headers.authorization || '';
   const xApi = req.headers['x-api-key'] || '';
-  const key = header.replace(/^Bearer\s+/i, '').trim() || xApi || req.query.api_key;
+  // S7: prefer the httpOnly cookie. Header / query params still accepted
+  // for back-compat (CLI, server-to-server, existing localStorage callers).
+  // Cookie takes precedence so a logged-in browser session is consulted
+  // first; this means a future migration can flip the order without
+  // breaking existing integrations.
+  const cookieKey = (req.cookies && req.cookies.kolm_session) || '';
+  const key = cookieKey || header.replace(/^Bearer\s+/i, '').trim() || xApi || req.query.api_key;
 
   if (key === adminKey) {
     req.tenant = process.env.DEFAULT_TENANT || 'demo';

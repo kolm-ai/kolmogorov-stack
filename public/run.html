@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>kolm — Run</title>
+  <meta name="description" content="A .kolm artifact is a portable, signed bundle. kolm run executes it locally; kolm serve --mcp exposes it to any frontier agent." />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .codebox { background:#0a0a0a; border:1px solid #222; border-radius:10px;
+      padding:14px 16px; font:12px ui-monospace,monospace; color:#bbb;
+      overflow-x:auto; margin:8px 0; }
+    .codebox .c { color:#7c5cff; }
+    .codebox .o { color:#22c55e; }
+    .codebox .k { color:#f59e0b; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns:1fr; } }
+    .card { background:#0d0d0d; border:1px solid #222; border-radius:10px; padding:16px; }
+    .card h3 { margin:0 0 6px; font-size:14px; color:#ddd; }
+    .card p { margin:0; color:#999; font-size:13px; line-height:1.55; }
+    .card code { color:#7c5cff; }
+    .file-tree { font:12px ui-monospace,monospace; color:#aaa; line-height:1.7; }
+    .file-tree .f { color:#7c5cff; }
+    .file-tree .d { color:#666; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <h1><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></h1>
+    <div class="tag">v0.1 · compiler cache for intelligence</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/compile">Compile</a>
+      <a href="/run" class="active">Run</a>
+      <a href="/recall">Recall</a>
+      <a href="/cloud">Cloud</a>
+      <a href="/manual">Manual</a>
+      <a href="/account">Account</a>
+    </nav>
+    <div class="footnote">
+      <strong>Compile · Run · Recall.</strong><br/>
+      Compile frontier behavior once, run it locally forever.
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow"><span class="dot live"></span> kolm run · the local execution leg</div>
+      <h1>Open the box. <span class="grad">Run anywhere.</span></h1>
+      <p class="sub">
+        A <code>.kolm</code> file is a sealed, signed zip. <code>kolm run</code> opens it on any laptop, server,
+        or edge box and executes deterministic recipes against your input — no frontier API call, no network,
+        no telemetry. Or expose every local artifact as an MCP tool with one command and let
+        Claude, Codex, or Cursor pick the right one for each turn.
+      </p>
+    </section>
+
+    <section class="block">
+      <h2>Run a single artifact.</h2>
+      <div class="codebox">
+<span class="c"># execute against a string input</span>
+$ kolm run support-triage.kolm <span class="o">"my login is failing after the update"</span>
+{
+  <span class="c">"output":</span> <span class="o">"category=auth severity=high suggested_owner=identity-team"</span>,
+  <span class="c">"recipe_id":</span> <span class="o">"r_class_v3"</span>,
+  <span class="c">"latency_us":</span> <span class="k">1480</span>,
+  <span class="c">"k_score":</span> { <span class="c">"composite":</span> <span class="k">412.7</span>, ... },
+  <span class="c">"receipt":</span> { <span class="c">"spec":</span> <span class="o">"rs-1-run"</span>, <span class="c">"recipe_id":</span> <span class="o">"r_class_v3"</span>, ... }
+}
+
+<span class="c"># or pipe JSON</span>
+$ echo '{<span class="o">"text"</span>:<span class="o">"..."</span>}' | kolm run support-triage.kolm
+
+<span class="c"># inspect without running</span>
+$ kolm inspect support-triage.kolm
+$ kolm score   support-triage.kolm   <span class="c"># show K-score only</span>
+$ kolm eval    support-triage.kolm   <span class="c"># re-run embedded eval suite</span></div>
+    </section>
+
+    <section class="block">
+      <h2>Or expose every artifact as an MCP tool.</h2>
+      <p class="lede">
+        One command turns <code>~/.kolm/artifacts/</code> into a live MCP server. Claude Desktop, Cursor,
+        Codex, and any other frontier agent that speaks Model Context Protocol auto-discover every
+        compiled skill — no per-tool integration code, ever.
+      </p>
+      <div class="codebox">
+<span class="c"># stdio transport (what most MCP clients want)</span>
+$ kolm serve --mcp
+
+┌─ kolm MCP server ─────────────────────────────────────────
+│  artifacts: ~/.kolm/artifacts
+│  tools:     7
+│    • support-triage   — classify support tickets · k=412.7, signed
+│    • email-reply      — draft replies in user's voice · k=389.4, signed
+│    • pr-review        — spot bugs in React PRs · k=441.2, signed
+│    • code-style       — review Python style · k=355.9, signed
+│    …and 3 more
+│
+│  Add to your MCP client config:
+│    {
+│      "kolm": {
+│        "command": "kolm",
+│        "args": ["serve", "--mcp"]
+│      }
+│    }
+└────────────────────────────────────────────────────────────
+
+<span class="c"># or HTTP for network agents</span>
+$ kolm serve --mcp --http --port 8765
+$ curl http://127.0.0.1:8765/health
+{ <span class="c">"ok":</span> <span class="o">true</span>, <span class="c">"tools":</span> <span class="k">7</span> }</div>
+    </section>
+
+    <section class="block">
+      <h2>What's inside a .kolm.</h2>
+      <div class="grid2">
+        <div class="card">
+          <h3>The bundle</h3>
+          <div class="file-tree">
+            <span class="d">support-triage.kolm/</span><br/>
+            ├── <span class="f">manifest.json</span>     <span class="d">— task, K-score, hashes</span><br/>
+            ├── <span class="f">recipes.json</span>      <span class="d">— deterministic draft pack</span><br/>
+            ├── <span class="f">model.gguf</span>        <span class="d">— base model pointer</span><br/>
+            ├── <span class="f">lora.bin</span>          <span class="d">— task-specific delta</span><br/>
+            ├── <span class="f">index.sqlite-vec</span>  <span class="d">— corpus index</span><br/>
+            ├── <span class="f">evals.json</span>        <span class="d">— embedded eval suite</span><br/>
+            └── <span class="f">signature.sig</span>     <span class="d">— HMAC chain</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>The contract</h3>
+          <p>Open the zip. Verify <code>signature.sig</code> against the canonical JSON of <code>manifest.json</code>. If valid, every other file is anchored — including the model pointer, the LoRA delta, every recipe, the corpus index, and the eval suite that produced the K-score. One signature, every byte covered.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>The receipt.</h2>
+      <p class="lede">
+        Every <code>kolm run</code> emits a structured receipt: which artifact ran, which recipe inside fired,
+        the version pin, the timing, and the K-score the artifact was packaged with. Save it, ship it, audit it,
+        chain it to whatever upstream system you run.
+      </p>
+      <div class="codebox">
+{
+  <span class="c">"spec":</span>            <span class="o">"rs-1-run"</span>,
+  <span class="c">"artifact_job_id":</span> <span class="o">"job_abc"</span>,
+  <span class="c">"recipe_id":</span>       <span class="o">"r_class_v3"</span>,
+  <span class="c">"version_id":</span>      <span class="o">"v3.2.1"</span>,
+  <span class="c">"latency_us":</span>      <span class="k">1480</span>,
+  <span class="c">"ran_at":</span>          <span class="o">"2026-05-06T18:42:11Z"</span>
+}</div>
+    </section>
+
+    <footer>
+      <a href="/compile">← Compile</a> · <a href="/recall">Recall →</a>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

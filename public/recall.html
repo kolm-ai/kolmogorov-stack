@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>kolm — Recall</title>
+  <meta name="description" content="The multimodal recall substrate. Ingest text, code, images, audio, video, PDFs. Every compile is grounded in your data; every artifact ships its index." />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .codebox { background:#0a0a0a; border:1px solid #222; border-radius:10px;
+      padding:14px 16px; font:12px ui-monospace,monospace; color:#bbb;
+      overflow-x:auto; margin:8px 0; }
+    .codebox .c { color:#7c5cff; }
+    .codebox .o { color:#22c55e; }
+    .codebox .k { color:#f59e0b; }
+    .modgrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin:14px 0; }
+    .mod { background:#0d0d0d; border:1px solid #222; border-radius:10px; padding:12px 14px; }
+    .mod .ex { font: 700 11px ui-monospace,monospace; color:#7c5cff; }
+    .mod h4 { margin:6px 0 2px; font-size:13px; color:#ddd; }
+    .mod p  { margin:0; color:#888; font-size:12px; line-height:1.5; }
+    .pipeline { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:14px 0; }
+    .pipe-step { background:#0d0d0d; border:1px solid #222; border-radius:8px; padding:8px 12px; font:12px ui-monospace,monospace; color:#bbb; }
+    .pipe-arrow { color:#444; font:14px ui-monospace,monospace; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <h1><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></h1>
+    <div class="tag">v0.1 · compiler cache for intelligence</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/compile">Compile</a>
+      <a href="/run">Run</a>
+      <a href="/recall" class="active">Recall</a>
+      <a href="/cloud">Cloud</a>
+      <a href="/manual">Manual</a>
+      <a href="/account">Account</a>
+    </nav>
+    <div class="footnote">
+      <strong>Compile · Run · Recall.</strong><br/>
+      Compile frontier behavior once, run it locally forever.
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow"><span class="dot live"></span> kolm recall · the data moat</div>
+      <h1>Every modality. <span class="grad">One index.</span> Every compile, grounded.</h1>
+      <p class="sub">
+        Recall is the multimodal vector substrate beneath the compiler. Drop a folder, get back a
+        per-tenant hybrid index — BM25 + vector + RRF + reranker — that every Distill call grounds itself in.
+        The same index ships <em>inside</em> the artifact as <code>index.sqlite-vec</code>, so the compiled model
+        knows your specifics offline, forever.
+      </p>
+    </section>
+
+    <section class="block">
+      <h2>Ingest anything.</h2>
+      <div class="codebox">
+<span class="c"># ingest a folder — auto-detects modality per file</span>
+$ kolm recall ingest ./my-data --namespace work
+✔ tokenized 312 files (147 text, 88 image, 41 audio, 26 pdf, 10 video)
+✔ embedded 4,802 chunks
+✔ indexed in namespace <span class="o">"work"</span>
+
+<span class="c"># query the index directly</span>
+$ kolm recall query <span class="o">"the migration we ran last quarter"</span> --namespace work
+[{
+  <span class="c">"source":</span>   <span class="o">"./my-data/notes/2026-01-migration.md"</span>,
+  <span class="c">"chunk_id":</span> <span class="o">"c_4f2a"</span>,
+  <span class="c">"score":</span>    <span class="k">0.847</span>,
+  <span class="c">"text":</span>     <span class="o">"On Jan 14 we cut over to the new auth schema..."</span>
+}, ...]
+
+<span class="c"># compile a Specialist that grounds every call in this corpus</span>
+$ kolm compile <span class="o">"answer questions about our infra"</span> --data ./my-data</div>
+    </section>
+
+    <section class="block">
+      <h2>Multimodal sidecars.</h2>
+      <p class="lede">
+        Every non-text file gets a Markdown sidecar — a structured tokenization that turns pixels, frames,
+        and waveforms into something both humans and models can read. The sidecar is what gets embedded;
+        the original is what gets returned. Inspired by Tobi Lutke's
+        <code>qmd</code> pattern, extended to image / audio / video / PDF.
+      </p>
+      <div class="modgrid">
+        <div class="mod"><div class="ex">.txt .md .ts .py</div><h4>text + code</h4><p>chunked by structure, embedded with bge-m3.</p></div>
+        <div class="mod"><div class="ex">.png .jpg .heic</div><h4>image</h4><p>CLIP embed + caption sidecar via vision model.</p></div>
+        <div class="mod"><div class="ex">.mp3 .wav .m4a</div><h4>audio</h4><p>Whisper transcript + CLAP embed of timbre.</p></div>
+        <div class="mod"><div class="ex">.mp4 .mov</div><h4>video</h4><p>scene-detected → per-shot caption + ASR + CLIP.</p></div>
+        <div class="mod"><div class="ex">.pdf</div><h4>pdf</h4><p>unstructured layout parse + per-page sidecar.</p></div>
+        <div class="mod"><div class="ex">auto</div><h4>everything else</h4><p>magika sniffs, falls back to bytes-as-text.</p></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Hybrid retrieval, reranked.</h2>
+      <div class="pipeline">
+        <div class="pipe-step">query</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step">BM25 (top 50)</div>
+        <span class="pipe-arrow">+</span>
+        <div class="pipe-step">vector (top 50)</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step">RRF fusion</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step">cross-encoder rerank</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step">top-k</div>
+      </div>
+      <p class="lede">
+        Lexical recall catches names and IDs. Vector recall catches paraphrase. RRF fuses without tuning a weight.
+        A small cross-encoder reorders the top of the list. The whole pipeline is what grounds every Distill k-sample
+        and every <code>/v1/wrap/verified</code> call when a <code>corpus_namespace</code> is set.
+      </p>
+    </section>
+
+    <section class="block">
+      <h2>Three back-ends, one interface.</h2>
+      <div class="codebox">
+<span class="c"># managed (default — Pinecone)</span>
+KOLMOGOROV_INDEX_BACKEND=pinecone
+
+<span class="c"># self-host (Trieve docker)</span>
+KOLMOGOROV_INDEX_BACKEND=trieve
+KOLM_TRIEVE_URL=http://localhost:8090
+
+<span class="c"># on-device (sqlite-vec — what ships INSIDE every .kolm)</span>
+KOLMOGOROV_INDEX_BACKEND=sqlite-vec</div>
+      <p class="lede">
+        Same SDK, same CLI, same wire format. Pick the back-end at the boundary; the rest of the stack doesn't notice.
+        On-device is the default inside artifacts: every <code>.kolm</code> ships <code>index.sqlite-vec</code> so
+        recall keeps working when the network is gone.
+      </p>
+    </section>
+
+    <footer>
+      <a href="/run">← Run</a> · <a href="/cloud">Cloud →</a>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

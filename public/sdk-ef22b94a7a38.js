@@ -234,68 +234,24 @@ class Recipe {
 
   // The wrap pattern.
   //
-  // wrap(client, opts) returns a proxy over your existing AI SDK client.
+  // wrap(client, opts?) returns a proxy over your existing AI SDK client.
+  // For now (sandbox-mode) it's a transparent passthrough that records
+  // every call into `recipe.runs` so you can see what the wrap *would*
+  // route. Real auto-routing — Lane 1 deterministic recipes, Lane 2
+  // verified inference, Lane 3 raw passthrough — ships when /v1/wrap/verified
+  // lands in Sprint 1. The import you write today is the import you'll
+  // ship with — only behavior changes.
   //
-  // If you pass `{ verified: { k, test_cases } }` (or `{ verified: {
-  // judge_recipe_id, expected } }`), `client.messages.create({...})`
-  // is intercepted and routed to /v1/wrap/verified — the server samples
-  // k candidates, runs them through the verifier, and returns the winner
-  // shaped exactly like a messages.create response, with a `_kolm` block
-  // carrying the receipt and candidate stats.
-  //
-  // If you also pass `{ corpus_namespace: 'notes' }`, the server pulls
-  // the top-k chunks from your qmd index and prepends them to the
-  // system message — every k-sample is grounded in your corpus.
-  //
-  // Without `verified`, the wrap is a transparent telemetry passthrough:
-  // your call goes to the upstream provider unchanged and we just record
-  // the shape into `recipe.runs` for inspection.
+  // If you pass `{verified: {test_cases: [...]}}` we will route
+  // messages.create / chat.completions.create calls through
+  // /v1/wrap/verified as soon as the server endpoint is live. Today this
+  // option is recorded but not yet active — your call still goes to the
+  // upstream provider unchanged.
   wrap(client, opts = {}) {
     const self = this;
-    const shouldRoute = (prop) => prop === 'messages';
     return new Proxy(client, {
       get(target, prop) {
         const v = Reflect.get(target, prop);
-        // Intercept the messages namespace if verified opts are present.
-        if (shouldRoute(prop) && opts.verified && v && typeof v === 'object') {
-          return new Proxy(v, {
-            get(t2, p2) {
-              const inner = Reflect.get(t2, p2);
-              if (p2 === 'create' && typeof inner === 'function') {
-                return async function (payload) {
-                  self.runs.push({
-                    name: '__wrap__',
-                    method: 'messages.create',
-                    verified_opts: opts.verified,
-                    corpus_namespace: opts.corpus_namespace || null,
-                    at: Date.now(),
-                    routed: true,
-                  });
-                  const r = await fetch(self.base + '/v1/wrap/verified', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      ...(self.key ? { 'Authorization': 'Bearer ' + self.key } : {}),
-                    },
-                    body: JSON.stringify({
-                      messages: payload.messages,
-                      system: payload.system,
-                      model: payload.model,
-                      max_tokens: payload.max_tokens,
-                      temperature: payload.temperature,
-                      verified: opts.verified,
-                      corpus_namespace: opts.corpus_namespace || null,
-                    }),
-                  });
-                  const data = await r.json();
-                  if (!r.ok) throw Object.assign(new Error(data.error || 'wrap/verified failed'), { status: r.status, body: data });
-                  return data;
-                };
-              }
-              return inner;
-            },
-          });
-        }
         if (typeof v === 'function') {
           return function (...args) {
             self.runs.push({
@@ -303,7 +259,7 @@ class Recipe {
               method: typeof prop === 'symbol' ? prop.toString() : String(prop),
               verified_opts: opts.verified || null,
               at: Date.now(),
-              routed: false,
+              routed: false, // becomes true in Sprint 1 once /v1/wrap/verified is live
             });
             return v.apply(target, args);
           };

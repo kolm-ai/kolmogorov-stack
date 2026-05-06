@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>kolm — Mobile (preview)</title>
+  <meta name="description" content="kolm.app is the consumer entry — three pre-compiled Specialists out of the box, plus a 'compile your own' button. iOS + Android + PWA." />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .codebox { background:#0a0a0a; border:1px solid #222; border-radius:10px;
+      padding:14px 16px; font:12px ui-monospace,monospace; color:#bbb;
+      overflow-x:auto; margin:8px 0; }
+    .codebox .c { color:#7c5cff; }
+    .codebox .o { color:#22c55e; }
+    .specs { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin:14px 0; }
+    .spec { background:#0d0d0d; border:1px solid #222; border-radius:10px; padding:18px; }
+    .spec .k { font: 700 11px ui-monospace,monospace; color:#22c55e; }
+    .spec h3 { margin:6px 0 4px; font-size:14px; color:#ddd; }
+    .spec p  { margin:0; color:#888; font-size:13px; line-height:1.55; }
+    .preview { background:linear-gradient(180deg, #0d0d0d 0%, #0a0a0a 100%);
+      border:1px solid #2a2050; border-radius:14px; padding:28px; text-align:center; margin:14px 0; }
+    .preview .badge { display:inline-block; background:#7c5cff; color:#fff; font: 700 10px ui-monospace,monospace;
+      padding:3px 10px; border-radius:99px; letter-spacing:1px; margin-bottom:10px; }
+    .preview h3 { margin:0; font-size:18px; color:#fff; }
+    .preview p { color:#999; margin:8px 0 0; font-size:13px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <h1><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></h1>
+    <div class="tag">v0.1 · compiler cache for intelligence</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/compile">Compile</a>
+      <a href="/run">Run</a>
+      <a href="/recall">Recall</a>
+      <a href="/cloud">Cloud</a>
+      <a href="/manual">Manual</a>
+      <a href="/account">Account</a>
+    </nav>
+    <div class="footnote">
+      <strong>Compile · Run · Recall.</strong><br/>
+      Compile frontier behavior once, run it locally forever.
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow"><span class="dot"></span> kolm.app · the consumer surface (sprint 3)</div>
+      <h1>The biggest model on your phone — <span class="grad">honestly.</span></h1>
+      <p class="sub">
+        Not a quantized 70B. A <em>compiled</em> personal model that <em>behaves</em> like Hermes-class on the
+        tasks you compiled it for, because it was distilled on those exact tasks, drafted by recipes that cover
+        its structured outputs, and grounded in your own corpus. 3B base + LoRA + recipe pack + sqlite-vec, all
+        running offline.
+      </p>
+    </section>
+
+    <section class="block">
+      <div class="preview">
+        <div class="badge">SPRINT 3 PREVIEW</div>
+        <h3>kolm.app is in build.</h3>
+        <p>The CLI ships first; the cloud ships second; the boxed mobile app is the consumer endpoint.<br/>
+        Below is what it will look like when it lands.</p>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Three Specialists out of the box.</h2>
+      <div class="specs">
+        <div class="spec">
+          <div class="k">k=389.4 · 2.1GB · signed</div>
+          <h3>Personal Assistant</h3>
+          <p>Schedule, recall, summarize, draft. Grounded in your photos, voice memos, calendar, and inbox via on-device sqlite-vec.</p>
+        </div>
+        <div class="spec">
+          <div class="k">k=412.7 · 2.0GB · signed</div>
+          <h3>Email Reply</h3>
+          <p>Drafts replies in your voice. Distilled from your sent folder. Never auto-sends. Receipts visible on every draft.</p>
+        </div>
+        <div class="spec">
+          <div class="k">k=355.9 · 1.9GB · signed</div>
+          <h3>Daily Recap</h3>
+          <p>One paragraph at end of day, grounded in everything captured. Optional voice readout. Stays on device.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Or compile your own from your phone.</h2>
+      <p class="lede">
+        The "Compile a new one" button drives the same cloud pipeline as the CLI, using your on-device corpus
+        (photos, voice memos, screen captures) as the data source. The resulting <code>.kolm</code> downloads
+        back onto the phone and runs locally — no further API calls.
+      </p>
+      <div class="codebox">
+<span class="c"># under the hood, the app does what you'd do at the CLI</span>
+1. capture phone-side  → embed locally via wllama.wasm + sqlite-vec.wasm
+2. user types a task   → POST /v1/compile (cloud)
+3. cloud runs the four engines + signs
+4. phone downloads .kolm → loads model + LoRA + recipes + index
+5. all subsequent calls run on-device</div>
+    </section>
+
+    <section class="block">
+      <h2>The runtime.</h2>
+      <div class="codebox">
+<span class="c"># in-browser stack — same on PWA, Android (NPU), iOS (Neural Engine)</span>
+wllama.wasm                 <span class="c"># INT4 inference</span>
+sqlite-vec.wasm             <span class="c"># offline recall index</span>
+recipe-worker.js (sandbox)  <span class="c"># deterministic draft execution</span>
+service-worker.js           <span class="c"># offline-first artifact cache</span>
+
+<span class="c"># Sprint 4 adds executorch bindings</span>
+<span class="c"># for hardware-accelerated NPU paths.</span></div>
+    </section>
+
+    <footer>
+      <a href="/cloud">← Cloud</a> · <a href="/manual">Manual →</a>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

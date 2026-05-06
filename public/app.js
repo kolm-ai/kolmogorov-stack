@@ -67,7 +67,8 @@ window.KS = (() => {
     banner.id = 'ks-key-banner';
     banner.className = 'card';
     banner.style.cssText = 'margin-bottom:18px;padding:10px 14px;display:flex;align-items:center;gap:12px;font-size:12.5px;';
-    banner.innerHTML = `<span class="pill good">DEMO KEY</span><span class="mono faint" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${k}">${k}</span><a href="/signup" style="color:var(--accent);text-decoration:none;">Get your own →</a>`;
+    const _esc = (window.KSesc && window.KSesc.esc) || (s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
+    banner.innerHTML = `<span class="pill good">DEMO KEY</span><span class="mono faint" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${_esc(k)}">${_esc(k)}</span><a href="/signup" style="color:var(--accent);text-decoration:none;">Get your own →</a>`;
     root.insertBefore(banner, root.firstChild);
   }
 
