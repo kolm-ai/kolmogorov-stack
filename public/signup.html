@@ -3,33 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Get a key — Recipe</title>
+  <title>kolm — Get a key</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <h1><span class="glyph"></span> Recipe<span class="sub">by Kolmogorov</span></h1>
-    <div class="tag">SIGN UP</div>
+    <h1><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></h1>
+    <div class="tag">v0.1 · compiler cache for intelligence</div>
     <nav>
       <a href="/">Home</a>
-      <a href="/device">On-device <span class="pill violet" style="font-size:9px;">live</span></a>
-      <a href="/playground">Playground</a>
-      <a href="/registry">Recipes</a>
-      <a href="/dashboard">Live runtime</a>
-      <a href="/why">Why this exists</a>
-      <a href="/docs">API &amp; SDKs</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/specialists">Specialists <span class="pill violet" style="font-size:9px;">soon</span></a>
-      <a href="/signup" class="active">Get a key</a>
+      <a href="/compile">Compile</a>
+      <a href="/run">Run</a>
+      <a href="/recall">Recall</a>
+      <a href="/cloud">Cloud</a>
+      <a href="/manual">Manual</a>
+      <a href="/account">Account</a>
     </nav>
     <div class="footnote">
-      Free tier: 10,000 recipe-calls / month. No card. Self-serve.
+      <strong>Free tier.</strong><br/>
+      1 Specialist / mo. 10k corpus rows. No card. Self-serve.
     </div>
   </aside>
   <main class="main">
-    <h2>Get a key</h2>
-    <p class="lead">10,000 recipe-calls a month, free. No credit card. The key is shown once and stored locally so the playground and dashboard can use it automatically.</p>
+    <section class="hero">
+      <div class="eyebrow"><span class="dot live"></span> kolm · sign up</div>
+      <h1>Get a <span class="grad">key</span>.</h1>
+      <p class="sub">Free tier: 1 Specialist per month, 10k corpus rows, unlimited <code>kolm run</code>. No credit card. The key is shown once and stored locally so the CLI and the cloud dashboard pick it up automatically.</p>
+    </section>
 
     <div class="card glow" style="max-width: 540px;">
       <div class="toolbar">
@@ -53,8 +54,8 @@
       <pre><code id="curl-snippet"></code></pre>
 
       <div class="toolbar" style="margin-top:14px;">
-        <a class="btn accent" href="/playground">Open playground &rarr;</a>
-        <a class="btn ghost" href="/dashboard">Live runtime</a>
+        <a class="btn accent" href="/compile">Compile a Specialist &rarr;</a>
+        <a class="btn ghost" href="/account">Account</a>
         <button class="btn ghost" id="copy-key">Copy key</button>
       </div>
     </div>

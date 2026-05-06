@@ -61,7 +61,7 @@
       <div class="codebox">
 <span class="c"># the SDK is a transparent Proxy — wrap any Anthropic-shaped client</span>
 import Anthropic from <span class="o">'@anthropic-ai/sdk'</span>;
-import { kolm } from <span class="o">'https://kolmogorov.dev/sdk.js'</span>;
+import { kolm } from <span class="o">'https://kolm.ai/sdk.js'</span>;
 
 const raw      = new Anthropic({ apiKey: <span class="o">'sk-ant-...'</span> });
 const verified = kolm.wrap(raw, { verified: <span class="k">true</span>, k: <span class="k">3</span>, corpus_namespace: <span class="o">'work'</span> });
@@ -88,7 +88,7 @@ console.log(r._kolm.receipt);       <span class="c">// signed proof</span></div>
       </p>
       <div class="codebox">
 <span class="c"># or via curl, if you live there</span>
-$ curl -X POST https://kolmogorov.dev/v1/compile \
+$ curl -X POST https://kolm.ai/v1/compile \
     -H <span class="o">"Authorization: Bearer $KOLM_KEY"</span> \
     -H <span class="o">"Content-Type: application/json"</span> \
     -d '{
@@ -98,7 +98,7 @@ $ curl -X POST https://kolmogorov.dev/v1/compile \
     }'
 { <span class="c">"job_id":</span> <span class="o">"job_abc"</span>, <span class="c">"status":</span> <span class="o">"queued"</span> }
 
-$ curl https://kolmogorov.dev/v1/compile/job_abc/.kolm -o triage.kolm</div>
+$ curl https://kolm.ai/v1/compile/job_abc/.kolm -o triage.kolm</div>
     </section>
 
     <section class="block">
@@ -150,7 +150,7 @@ $ curl https://kolmogorov.dev/v1/compile/job_abc/.kolm -o triage.kolm</div>
             <li>dedicated GPU embedders</li>
             <li>on-chain receipt anchoring</li>
           </ul>
-          <div class="cta"><a href="mailto:dev@kolmogorov.dev">Contact →</a></div>
+          <div class="cta"><a href="mailto:dev@kolm.ai">Contact →</a></div>
         </div>
       </div>
       <p class="sub" style="font-size:12px; color:#666; margin-top:8px;">

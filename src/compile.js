@@ -108,10 +108,12 @@ export async function runJob(job, ctx) {
     let synthesis_result = null;
     try {
       // Pattern-mode synthesis — no API key required.
-      const positives = (ctx.examples || []).filter(e => e.kind !== 'negative');
-      const negatives = (ctx.examples || []).filter(e => e.kind === 'negative');
+      // Normalize {input, output} into the synthesizer's {input, expected} shape.
+      const norm = (e) => ({ ...e, expected: e.expected ?? e.output });
+      const positives = (ctx.examples || []).filter(e => e.kind !== 'negative').map(norm);
+      const negatives = (ctx.examples || []).filter(e => e.kind === 'negative').map(norm);
       synthesis_result = await ctx.synthesize({
-        positives: positives.length ? positives : [{ input: job.task, output: job.task }],
+        positives: positives.length ? positives : [{ input: job.task, expected: job.task }],
         negatives,
         priors: {},
       });

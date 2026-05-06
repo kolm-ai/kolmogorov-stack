@@ -1,25 +1,26 @@
-/* Recipe (by Kolmogorov) — minimal, mono, restrained, friendly. */
+/* kolm — the compiler cache for intelligence. minimal, mono, restrained. */
 :root {
-  --bg: #0a0b0e;
-  --bg-elev: #11131a;
-  --bg-card: #161922;
-  --bg-glow: #1b1f2c;
-  --line: #232734;
-  --line-strong: #2e3445;
-  --ink: #e8ecf3;
-  --ink-mute: #8b94a8;
-  --ink-faint: #5b6478;
-  --accent: #7dd3fc;
-  --accent-2: #a78bfa;
-  --accent-3: #34d399;
-  --good: #4ade80;
-  --bad: #f87171;
-  --warn: #fbbf24;
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Roboto Mono", monospace;
-  --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --bg: #07070a;
+  --bg-elev: #0c0d11;
+  --bg-card: #11131a;
+  --bg-glow: #181a23;
+  --line: #1f2230;
+  --line-strong: #2e3145;
+  --ink: #ededf0;
+  --ink-mute: #9097a3;
+  --ink-faint: #5b6072;
+  --accent: #7c5cff;
+  --accent-2: #c4b1ff;
+  --accent-3: #22c55e;
+  --good: #22c55e;
+  --bad: #ef4444;
+  --warn: #f59e0b;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Roboto Mono", monospace;
+  --sans: "Inter var", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --r-sm: 6px;
   --r: 10px;
   --r-lg: 14px;
+  --easing: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 * { box-sizing: border-box; }
@@ -33,14 +34,16 @@ pre { background: #0d0f15; border: 1px solid var(--line); padding: 12px 14px; bo
 @media (max-width: 880px) { .app { grid-template-columns: 1fr; } }
 
 .sidebar { background: var(--bg-elev); border-right: 1px solid var(--line); padding: 22px 18px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-.sidebar h1 { font-size: 14px; margin: 0 0 4px; letter-spacing: 0.04em; }
-.sidebar h1 .glyph { display: inline-block; width: 22px; height: 22px; border-radius: 5px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); margin-right: 8px; vertical-align: -5px; }
-.sidebar h1 .sub { font-size: 10px; color: var(--ink-faint); font-weight: 400; letter-spacing: 0.04em; display: block; margin-left: 30px; margin-top: -2px; }
+.sidebar h1 { font-size: 18px; margin: 0 0 4px; letter-spacing: -0.02em; font-weight: 700; display: flex; align-items: baseline; gap: 6px; background: linear-gradient(120deg, #ffffff 0%, #c4b1ff 60%, #7c5cff 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: kolmShimmer 9s linear infinite; }
+@keyframes kolmShimmer { to { background-position: -200% 0; } }
+.sidebar h1 .glyph { display: inline-block; width: 18px; height: 18px; border-radius: 5px; background: linear-gradient(135deg, #7c5cff, #65d4ff); margin-right: 4px; vertical-align: -3px; box-shadow: 0 0 12px rgba(124, 92, 255, 0.4); -webkit-text-fill-color: initial; flex-shrink: 0; }
+.sidebar h1 .sub { font-size: 10px; color: var(--ink-faint); font-weight: 400; letter-spacing: 0.04em; -webkit-text-fill-color: var(--ink-faint); }
 .sidebar .tag { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; }
 .sidebar nav { margin-top: 22px; display: flex; flex-direction: column; gap: 2px; }
-.sidebar nav a { color: var(--ink-mute); padding: 8px 10px; border-radius: var(--r-sm); display: block; }
-.sidebar nav a:hover { background: var(--bg-card); color: var(--ink); text-decoration: none; }
-.sidebar nav a.active { background: var(--bg-card); color: var(--ink); font-weight: 500; }
+.sidebar nav a { color: var(--ink-mute); padding: 8px 12px; border-radius: var(--r-sm); display: block; transition: color .15s var(--easing), background .15s var(--easing), padding-left .15s var(--easing); position: relative; }
+.sidebar nav a:hover { background: rgba(124, 92, 255, 0.06); color: var(--ink); text-decoration: none; padding-left: 14px; }
+.sidebar nav a.active { background: rgba(124, 92, 255, 0.1); color: var(--ink); font-weight: 500; }
+.sidebar nav a.active::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; background: var(--accent); border-radius: 0 2px 2px 0; }
 .sidebar nav .section-label { font-size: 10px; letter-spacing: 0.1em; color: var(--ink-faint); text-transform: uppercase; margin: 18px 10px 6px; }
 .sidebar .footnote { font-size: 11px; color: var(--ink-faint); margin-top: 28px; line-height: 1.6; }
 
@@ -117,14 +120,21 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); }
 .status-dot.warn { background: var(--warn); }
 .status-dot.bad { background: var(--bad); }
 
-/* hero v2 — Recipe */
-.hero { padding: 56px 0 24px; }
-.hero .eyebrow { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
-.hero h1 { font-size: 48px; line-height: 1.04; margin: 0 0 18px; letter-spacing: -0.025em; max-width: 880px; font-weight: 600; }
-.hero h1 .grad { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.hero .sub { font-size: 18px; color: var(--ink-mute); max-width: 720px; line-height: 1.55; }
+/* hero v3 — kolm */
+.hero { padding: 56px 0 28px; }
+.hero .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; color: var(--ink-mute); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 18px; padding: 5px 11px; border-radius: 999px; background: rgba(124, 92, 255, 0.06); border: 1px solid rgba(124, 92, 255, 0.18); }
+.hero h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.04; margin: 0 0 18px; letter-spacing: -0.025em; max-width: 880px; font-weight: 600; }
+.hero h1 .grad { background: linear-gradient(120deg, #ffffff 0%, #c4b1ff 40%, #7c5cff 60%, #65d4ff 80%, #ffffff 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: kolmShimmer 7s linear infinite; }
+.hero .sub { font-size: 17px; color: var(--ink-mute); max-width: 720px; line-height: 1.6; }
 .hero .actions { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
 .hero .trust { margin-top: 18px; color: var(--ink-faint); font-size: 12.5px; }
+.lede { color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 740px; }
+.block { margin: 40px 0; }
+.block h2 { font-size: 22px; letter-spacing: -0.02em; margin: 0 0 10px; font-weight: 600; }
+section.block code, section.hero code { font-family: var(--mono); font-size: 12.5px; padding: 1px 5px; background: rgba(124, 92, 255, 0.08); border: 1px solid rgba(124, 92, 255, 0.18); border-radius: 4px; color: var(--accent-2); }
+footer { margin-top: 60px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 12.5px; }
+footer a { color: var(--ink-mute); }
+footer a:hover { color: var(--ink); }
 
 /* three-step "show / get / run" */
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 36px 0; }

@@ -2,240 +2,1085 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
   <title>kolm — the compiler cache for intelligence</title>
   <meta name="description" content="kolm compiles frontier-model behavior into the smallest local artifact that passes the tests. Distill any model down to your task. Run it on any device. Sign every output." />
+
   <meta property="og:title" content="kolm — the compiler cache for intelligence" />
-  <meta property="og:description" content="Compile frontier behavior once, run it locally forever. CLI · Cloud · App. Recipes · LoRA · Recall · Receipts." />
-  <link rel="stylesheet" href="/styles.css" />
+  <meta property="og:description" content="Compile frontier behavior once. Run it locally forever. CLI · Cloud · App. kolm.ai" />
+  <meta property="og:url" content="https://kolm.ai" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
   <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='black'/><path d='M9 8v16M9 16l8-8M9 16l8 8' stroke='%237c5cff' stroke-width='3' stroke-linecap='round' fill='none'/></svg>" />
+  <link rel="preconnect" href="https://rsms.me/" />
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+
   <style>
-    .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
-    .hero-cta { display:grid; gap:12px; max-width:740px; margin:24px 0; }
-    .hero-cta textarea { background:#0a0a0a; border:1px solid #2a2a2a; color:#fff;
-      padding:14px 16px; border-radius:10px; font:14px ui-monospace, monospace;
-      min-height:96px; resize:vertical; }
-    .hero-cta textarea:focus { outline:none; border-color:#7c5cff; }
-    .hero-cta .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    .hero-cta button { background:#7c5cff; color:#fff; border:0; padding:10px 18px;
-      border-radius:8px; font-weight:600; cursor:pointer; font-size:14px; }
-    .hero-cta button:hover { background:#9170ff; }
-    .hero-cta button[disabled] { opacity:.5; cursor:wait; }
-    .hero-cta .hint { color:#888; font-size:12px; }
-    .demo-out { margin-top:14px; padding:14px 16px; border:1px solid #2a2a2a;
-      border-radius:10px; background:#0a0a0a; font:12px ui-monospace, monospace;
-      white-space:pre-wrap; min-height:24px; color:#bbb; }
-    .demo-out.live { border-color:#22c55e; }
-    .demo-out.live .ok { color:#22c55e; }
-    .kscore { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-      gap:10px; margin-top:10px; }
-    .kscore .axis { background:#0d0d0d; border:1px solid #222; border-radius:8px;
-      padding:10px 12px; }
-    .kscore .axis .label { font-size:10px; color:#888; text-transform:uppercase;
-      letter-spacing:.06em; }
-    .kscore .axis .val { font: 600 18px ui-monospace, monospace; color:#fff; margin-top:2px; }
-    .kscore .axis.composite { background:linear-gradient(135deg,#1a1233 0,#2a1a4a 100%);
-      border-color:#7c5cff; }
-    .kscore .axis.composite .val { color:#bfa9ff; }
-    .pill-strip { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 8px; }
-    .pill-strip .pill { font-size:11px; padding:3px 9px; border-radius:99px;
-      background:#1a1a1a; border:1px solid #2a2a2a; color:#aaa; }
-    .pill-strip .pill .dot { display:inline-block; width:6px; height:6px;
-      border-radius:50%; background:#22c55e; margin-right:6px; vertical-align:middle; }
-    .four-engines { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-      gap:14px; margin:20px 0; }
-    .engine { background:#0d0d0d; border:1px solid #222; border-radius:12px;
-      padding:18px; }
-    .engine .num { font: 700 11px ui-monospace,monospace; color:#7c5cff;
-      letter-spacing:.06em; }
-    .engine h3 { margin:6px 0; font-size:16px; }
-    .engine p { color:#999; font-size:13px; line-height:1.5; margin:0; }
-    .three-surfaces { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-      gap:14px; margin:20px 0; }
-    .surface { background:#0d0d0d; border:1px solid #222; border-radius:12px;
-      padding:18px; }
-    .surface h3 { margin:0 0 6px; }
-    .surface .price { color:#7c5cff; font: 600 14px ui-monospace,monospace; }
-    .surface ul { padding-left:18px; color:#aaa; font-size:13px; }
-    .codebox { background:#0a0a0a; border:1px solid #222; border-radius:10px;
-      padding:14px 16px; font:12px ui-monospace,monospace; color:#bbb;
-      overflow-x:auto; margin:8px 0; }
-    .codebox .c { color:#7c5cff; }
-    .codebox .o { color:#22c55e; }
+    /* ──────────────────────────────────────────────────────────────
+       kolm.ai — edge-to-edge marketing surface.
+       Restrained. Mono ⨉ Display. Apple/Linear/Vercel grammar.
+       ────────────────────────────────────────────────────────────── */
+    :root {
+      --ink: #ededf0;
+      --ink-mute: #9097a3;
+      --ink-faint: #5b6072;
+      --ink-rev: #07070a;
+      --bg: #000;
+      --bg-1: #060608;
+      --bg-2: #0c0d11;
+      --line: #1a1c22;
+      --line-strong: #2a2d36;
+      --accent: #7c5cff;
+      --accent-2: #c4b1ff;
+      --accent-grad: linear-gradient(120deg, #7c5cff 0%, #b8a5ff 35%, #65d4ff 60%, #7c5cff 100%);
+      --accent-3: #22c55e;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+      --display: "Inter", "Inter var", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      --r-sm: 6px;
+      --r: 10px;
+      --r-lg: 18px;
+      --r-xl: 24px;
+      --easing: cubic-bezier(0.22, 0.61, 0.36, 1);
+      --easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @supports (font-variation-settings: normal) {
+      :root { --display: "Inter var", "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    html {
+      background: #000;
+      color: var(--ink);
+      font-family: var(--display);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      font-feature-settings: "ss01", "cv11";
+      scroll-behavior: smooth;
+    }
+    body { background: var(--bg); overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; }
+    img, svg { display: block; max-width: 100%; }
+    ::selection { background: var(--accent); color: #fff; }
+
+    /* ──────────────────────────────────────────────────────────────
+       Background — animated gradient mesh.
+       ────────────────────────────────────────────────────────────── */
+    .mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      overflow: hidden;
+    }
+    .mesh::before, .mesh::after {
+      content: ""; position: absolute;
+      width: 60vmax; height: 60vmax;
+      border-radius: 50%; filter: blur(80px);
+      opacity: 0.42;
+      will-change: transform;
+    }
+    .mesh::before {
+      top: -20vmax; left: -10vmax;
+      background: radial-gradient(closest-side, #7c5cff 0%, transparent 70%);
+      animation: drift1 22s linear infinite;
+    }
+    .mesh::after {
+      bottom: -25vmax; right: -15vmax;
+      background: radial-gradient(closest-side, #65d4ff 0%, transparent 70%);
+      animation: drift2 28s linear infinite;
+    }
+    .mesh .blob3 {
+      position: absolute; top: 30%; right: 10%;
+      width: 40vmax; height: 40vmax; border-radius: 50%;
+      background: radial-gradient(closest-side, #ff5cb1 0%, transparent 70%);
+      filter: blur(90px); opacity: 0.25;
+      animation: drift3 36s linear infinite;
+    }
+    @keyframes drift1 { 50% { transform: translate(40vw, 18vh) scale(1.2); } }
+    @keyframes drift2 { 50% { transform: translate(-30vw, -25vh) scale(1.1); } }
+    @keyframes drift3 { 50% { transform: translate(-20vw, 30vh) scale(1.3); } }
+    .grain {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      opacity: 0.06; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.85'/></svg>");
+    }
+    .scanlines {
+      position: fixed; inset: 0; z-index: 2; pointer-events: none;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0) 1px, rgba(0,0,0,0) 2px);
+      background-size: 100% 3px;
+      mix-blend-mode: overlay; opacity: 0.6;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .mesh::before, .mesh::after, .mesh .blob3 { animation: none; }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       Frosted nav.
+       ────────────────────────────────────────────────────────────── */
+    .nav {
+      position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+      z-index: 50;
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 8px 8px 18px;
+      background: rgba(8, 8, 10, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: 999px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+      max-width: calc(100% - 28px);
+    }
+    .nav .brand {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 13px; font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .nav .brand .logo {
+      width: 22px; height: 22px;
+    }
+    .nav .links {
+      display: flex; align-items: center; gap: 4px;
+      margin: 0 6px;
+    }
+    .nav .links a {
+      color: var(--ink-mute); font-size: 13px; font-weight: 500;
+      padding: 7px 11px; border-radius: 999px;
+      transition: color .15s var(--easing), background .15s var(--easing);
+    }
+    .nav .links a:hover { color: var(--ink); background: rgba(255,255,255,0.04); }
+    .nav .cta {
+      background: var(--ink); color: var(--ink-rev);
+      font-size: 13px; font-weight: 600;
+      padding: 8px 14px; border-radius: 999px;
+      border: 0; cursor: pointer;
+      transition: transform .2s var(--easing-spring), background .15s var(--easing);
+    }
+    .nav .cta:hover { transform: scale(1.03); background: #fff; }
+    .nav-burger { display: none; background: none; border: 0; color: var(--ink); padding: 8px 12px; cursor: pointer; }
+    @media (max-width: 760px) {
+      .nav { padding: 6px 6px 6px 14px; gap: 6px; }
+      .nav .links { display: none; }
+      .nav-burger { display: inline-flex; }
+      .nav .cta { padding: 7px 12px; font-size: 12px; }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       Layout.
+       ────────────────────────────────────────────────────────────── */
+    .container { position: relative; z-index: 5; }
+    .wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+    @media (max-width: 720px) { .wrap { padding: 0 18px; } }
+
+    /* ──────────────────────────────────────────────────────────────
+       HERO — image-in-text wordmark with flowing gradient.
+       ────────────────────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh; min-height: 100dvh;
+      padding: 110px 0 60px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .hero .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 11.5px;
+      color: var(--ink-mute);
+      letter-spacing: 0.14em; text-transform: uppercase;
+      padding: 6px 12px; border-radius: 999px;
+      background: rgba(124, 92, 255, 0.06);
+      border: 1px solid rgba(124, 92, 255, 0.18);
+      width: fit-content;
+      animation: fadein .8s var(--easing) both;
+    }
+    .hero .eyebrow .pulse {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent-3);
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+      animation: pulse 2.4s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+      70% { box-shadow: 0 0 0 9px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    /* The wordmark — image-in-text via background-clip with animated gradient */
+    .wordmark {
+      position: relative;
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: clamp(120px, 26vw, 380px);
+      line-height: 0.85;
+      letter-spacing: -0.06em;
+      margin: 24px 0 8px;
+      background: linear-gradient(
+        110deg,
+        #ffffff 0%,
+        #d6c8ff 18%,
+        #7c5cff 36%,
+        #65d4ff 52%,
+        #c4b1ff 68%,
+        #ffffff 92%
+      );
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmer 9s linear infinite, fadein 1.2s var(--easing) both;
+      -webkit-text-stroke: 0px transparent;
+      filter: drop-shadow(0 0 60px rgba(124, 92, 255, 0.18));
+    }
+    @keyframes shimmer {
+      to { background-position: -250% 0; }
+    }
+    .wordmark::after {
+      content: ".ai";
+      position: absolute;
+      font-size: 0.18em;
+      font-weight: 500;
+      color: var(--ink-faint);
+      letter-spacing: -0.02em;
+      vertical-align: super;
+      margin-left: 0.04em;
+      top: 0.12em;
+      -webkit-text-fill-color: var(--ink-faint);
+    }
+
+    /* Hero copy */
+    .hero h1 {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: clamp(28px, 4.6vw, 64px);
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      max-width: 920px;
+      margin: 32px 0 18px;
+      animation: rise .9s var(--easing) .1s both;
+    }
+    .hero h1 .grad {
+      background: var(--accent-grad);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmer 6s linear infinite;
+    }
+    .hero p.lede {
+      font-size: clamp(16px, 1.5vw, 19px);
+      color: var(--ink-mute);
+      max-width: 640px;
+      line-height: 1.55;
+      margin: 0 0 32px;
+      animation: rise .9s var(--easing) .2s both;
+    }
+    .hero p.lede strong { color: var(--ink); font-weight: 600; }
+    .mono { font-family: var(--mono); font-weight: 500; }
+
+    /* CTA row */
+    .cta-row {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      animation: rise .9s var(--easing) .3s both;
+    }
+    .btn-primary, .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-weight: 500; font-size: 13px;
+      padding: 12px 20px; border-radius: 999px;
+      cursor: pointer; border: 0;
+      transition: transform .25s var(--easing-spring), background .15s var(--easing), border-color .15s var(--easing);
+      letter-spacing: 0.01em;
+    }
+    .btn-primary {
+      background: var(--ink); color: var(--ink-rev);
+    }
+    .btn-primary:hover { transform: scale(1.04); background: #fff; }
+    .btn-primary .arrow { transition: transform .2s var(--easing); }
+    .btn-primary:hover .arrow { transform: translateX(2px); }
+    .btn-ghost {
+      background: rgba(255,255,255,0.03);
+      color: var(--ink);
+      border: 1px solid var(--line-strong);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.18); }
+
+    /* Pill strip — proof badges */
+    .proof-strip {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin: 28px 0 0;
+      animation: rise .9s var(--easing) .4s both;
+    }
+    .proof-pill {
+      font-family: var(--mono); font-size: 11px;
+      padding: 5px 11px; border-radius: 999px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--line);
+      color: var(--ink-mute);
+      display: inline-flex; align-items: center; gap: 7px;
+    }
+    .proof-pill::before {
+      content: ""; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent-3);
+    }
+
+    /* Hero scroll affordance */
+    .scroll-hint {
+      position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+      font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint);
+      letter-spacing: 0.12em; text-transform: uppercase;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      opacity: 0; animation: fadein 1s var(--easing) 1.5s forwards;
+    }
+    .scroll-hint .line { width: 1px; height: 28px; background: linear-gradient(to bottom, transparent, var(--ink-faint)); animation: scrollPulse 2.5s ease-in-out infinite; }
+    @keyframes scrollPulse {
+      0%, 100% { transform: scaleY(0.6); opacity: 0.4; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       Live demo — embedded inline (after hero scroll).
+       ────────────────────────────────────────────────────────────── */
+    .demo-section {
+      padding: 60px 0 40px;
+      position: relative; z-index: 5;
+    }
+    .demo-card {
+      background: linear-gradient(180deg, rgba(20,21,28,0.7) 0%, rgba(8,8,12,0.7) 100%);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--r-xl);
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+      position: relative;
+    }
+    .demo-card::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(800px circle at 30% 0%, rgba(124,92,255,0.08), transparent 60%);
+      pointer-events: none;
+    }
+    .demo-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(0,0,0,0.3);
+      position: relative; z-index: 1;
+    }
+    .demo-head .lhs { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute); letter-spacing: 0.06em; text-transform: uppercase; }
+    .demo-head .traffic { display: inline-flex; gap: 6px; }
+    .demo-head .traffic span { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,0.1); }
+    .demo-head .traffic span:nth-child(1) { background: #ff5f57; }
+    .demo-head .traffic span:nth-child(2) { background: #febc2e; }
+    .demo-head .traffic span:nth-child(3) { background: #28c840; }
+    .demo-head .rhs { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+
+    .demo-body {
+      padding: 28px;
+      position: relative; z-index: 1;
+    }
+    .demo-body .label {
+      font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint);
+      letter-spacing: 0.05em; margin-bottom: 12px; display: block;
+    }
+    .demo-body .label .kbd {
+      display: inline-block; padding: 2px 6px; margin: 0 2px;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--line-strong);
+      border-radius: 4px; font-size: 10.5px;
+    }
+    .demo-body textarea {
+      width: 100%; min-height: 88px;
+      background: rgba(0,0,0,0.4); border: 1px solid var(--line-strong);
+      color: var(--ink); padding: 16px 18px; border-radius: var(--r);
+      font-family: var(--mono); font-size: 14px;
+      resize: vertical; outline: 0;
+      transition: border-color .15s var(--easing), background .15s var(--easing);
+    }
+    .demo-body textarea:focus {
+      border-color: var(--accent); background: rgba(0,0,0,0.6);
+      box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.08);
+    }
+    .demo-actions {
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .demo-actions button {
+      font-family: var(--mono); font-size: 13px;
+      background: var(--accent); color: #fff;
+      border: 0; padding: 11px 22px; border-radius: 999px;
+      cursor: pointer;
+      transition: transform .25s var(--easing-spring), background .15s var(--easing), box-shadow .15s var(--easing);
+      box-shadow: 0 6px 24px rgba(124, 92, 255, 0.35);
+      font-weight: 600;
+    }
+    .demo-actions button:hover {
+      background: #9170ff; transform: scale(1.03);
+      box-shadow: 0 8px 30px rgba(124, 92, 255, 0.5);
+    }
+    .demo-actions button[disabled] { opacity: 0.55; cursor: wait; transform: none !important; }
+    .demo-actions .hint { color: var(--ink-faint); font-family: var(--mono); font-size: 11.5px; }
+
+    .demo-out {
+      margin-top: 22px;
+      padding: 18px 20px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      font-family: var(--mono); font-size: 12.5px; line-height: 1.65;
+      color: var(--ink-mute);
+      white-space: pre-wrap; word-break: break-word;
+      min-height: 28px;
+      transition: border-color .25s var(--easing), background .25s var(--easing);
+    }
+    .demo-out.live { border-color: rgba(34, 197, 94, 0.4); background: rgba(34, 197, 94, 0.03); }
+    .demo-out .ok { color: var(--accent-3); }
+    .demo-out a { color: var(--accent-2); }
+
+    /* K-score grid */
+    .kscore {
+      display: grid; gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+      margin-top: 14px;
+    }
+    .axis {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: var(--r-sm);
+      padding: 12px 14px;
+      transition: transform .25s var(--easing-spring), border-color .15s var(--easing);
+    }
+    .axis:hover { transform: translateY(-2px); border-color: var(--line-strong); }
+    .axis .label {
+      font-family: var(--mono); font-size: 9.5px;
+      color: var(--ink-faint); text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .axis .val {
+      font-family: var(--mono); font-size: 18px; font-weight: 600;
+      color: var(--ink); margin-top: 4px;
+    }
+    .axis.composite {
+      background: linear-gradient(135deg, rgba(124, 92, 255, 0.18), rgba(124, 92, 255, 0.04));
+      border-color: rgba(124, 92, 255, 0.4);
+    }
+    .axis.composite .val {
+      background: linear-gradient(135deg, #c4b1ff, #ffffff);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       Marquee.
+       ────────────────────────────────────────────────────────────── */
+    .marquee-band {
+      padding: 28px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.015);
+      overflow: hidden;
+      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    }
+    .marquee {
+      display: flex; gap: 36px; width: max-content;
+      animation: marquee 50s linear infinite;
+      will-change: transform;
+    }
+    .marquee:hover { animation-play-state: paused; }
+    @keyframes marquee {
+      to { transform: translateX(-50%); }
+    }
+    .marquee .item {
+      font-family: var(--mono); font-size: 13px;
+      color: var(--ink-mute);
+      display: inline-flex; align-items: center; gap: 10px;
+      white-space: nowrap;
+    }
+    .marquee .item .k {
+      color: var(--accent-2);
+      font-weight: 600;
+    }
+    .marquee .item::before {
+      content: "$"; color: var(--accent-3); margin-right: 4px;
+    }
+    .marquee .sep {
+      color: var(--ink-faint); margin: 0 4px;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       Section: 4 engines.
+       ────────────────────────────────────────────────────────────── */
+    .section {
+      padding: 110px 0;
+      position: relative; z-index: 5;
+    }
+    .section-head {
+      max-width: 760px; margin: 0 0 56px;
+    }
+    .section-eyebrow {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--accent-2);
+      letter-spacing: 0.16em; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .section h2 {
+      font-family: var(--display); font-weight: 600;
+      font-size: clamp(28px, 3.6vw, 48px);
+      letter-spacing: -0.025em; line-height: 1.05;
+      margin: 0 0 18px;
+    }
+    .section h2 .grad {
+      background: var(--accent-grad); background-size: 200% 100%;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: shimmer 6s linear infinite;
+    }
+    .section .sectionLede {
+      font-size: 17px; color: var(--ink-mute); line-height: 1.6;
+      max-width: 640px;
+    }
+
+    .engines {
+      display: grid; gap: 14px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (max-width: 880px) { .engines { grid-template-columns: 1fr; } }
+    .engine {
+      position: relative;
+      padding: 28px 28px;
+      background: linear-gradient(180deg, rgba(20,21,28,0.6) 0%, rgba(8,8,12,0.6) 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      transition: transform .35s var(--easing), border-color .25s var(--easing), background .25s var(--easing);
+    }
+    .engine:hover {
+      transform: translateY(-3px);
+      border-color: var(--line-strong);
+      background: linear-gradient(180deg, rgba(28,29,38,0.7) 0%, rgba(12,12,18,0.7) 100%);
+    }
+    .engine::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(124, 92, 255, 0.07), transparent 50%);
+      opacity: 0;
+      transition: opacity .25s var(--easing);
+      pointer-events: none;
+    }
+    .engine:hover::before { opacity: 1; }
+    .engine .num {
+      font-family: var(--mono); font-size: 11px; font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.16em;
+    }
+    .engine h3 {
+      font-family: var(--display); font-weight: 600;
+      font-size: 22px; letter-spacing: -0.02em;
+      margin: 8px 0 10px;
+    }
+    .engine p {
+      color: var(--ink-mute); font-size: 14.5px; line-height: 1.6;
+      margin: 0;
+    }
+    .engine .footer {
+      margin-top: 18px;
+      font-family: var(--mono); font-size: 11px;
+      color: var(--ink-faint);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       Section: Code + showcase split.
+       ────────────────────────────────────────────────────────────── */
+    .split {
+      display: grid; gap: 56px;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+    @media (max-width: 880px) { .split { grid-template-columns: 1fr; gap: 32px; } }
+    .split .copy h2 { margin-top: 0; }
+    .terminal-card {
+      background: #06070a;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,92,255,0.05);
+      position: relative;
+    }
+    .terminal-card::before {
+      content: ""; position: absolute; inset: -1px; border-radius: inherit;
+      padding: 1px; pointer-events: none;
+      background: linear-gradient(135deg, rgba(124,92,255,0.4), transparent 30%, transparent 70%, rgba(101,212,255,0.3));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+    .terminal-head {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .terminal-head .traffic { display: inline-flex; gap: 6px; }
+    .terminal-head .traffic span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.1); }
+    .terminal-head .traffic span:nth-child(1) { background: #ff5f57; }
+    .terminal-head .traffic span:nth-child(2) { background: #febc2e; }
+    .terminal-head .traffic span:nth-child(3) { background: #28c840; }
+    .terminal-head .title { margin-left: 10px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+    .terminal-body {
+      padding: 22px 24px;
+      font-family: var(--mono); font-size: 13px;
+      color: #d2d8e3; line-height: 1.75;
+      white-space: pre-wrap; word-break: break-word;
+      position: relative;
+    }
+    .terminal-body .c { color: var(--ink-faint); }
+    .terminal-body .p { color: var(--accent-3); }
+    .terminal-body .k { color: var(--accent-2); font-weight: 600; }
+    .terminal-body .o { color: #ff8db1; }
+    .terminal-body .v { color: #ffd166; }
+    .typing-cursor {
+      display: inline-block; width: 8px; height: 14px;
+      background: var(--accent); vertical-align: -2px;
+      animation: blink 1s steps(2) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ──────────────────────────────────────────────────────────────
+       Tier strip.
+       ────────────────────────────────────────────────────────────── */
+    .tiers {
+      display: grid; gap: 12px;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    @media (max-width: 880px) { .tiers { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 540px) { .tiers { grid-template-columns: 1fr; } }
+    .tier {
+      padding: 24px 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      background: linear-gradient(180deg, rgba(20,21,28,0.6) 0%, rgba(8,8,12,0.6) 100%);
+      transition: transform .25s var(--easing), border-color .15s var(--easing);
+    }
+    .tier:hover { transform: translateY(-2px); border-color: var(--line-strong); }
+    .tier.featured {
+      border-color: rgba(124, 92, 255, 0.4);
+      background: linear-gradient(180deg, rgba(124,92,255,0.08) 0%, rgba(8,8,12,0.7) 100%);
+    }
+    .tier h4 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+    .tier .price {
+      font-family: var(--mono); font-weight: 600;
+      font-size: 28px; letter-spacing: -0.01em; margin: 4px 0;
+    }
+    .tier .price small { color: var(--ink-faint); font-weight: 400; font-size: 12px; }
+    .tier ul {
+      margin: 16px 0 0; padding: 0; list-style: none;
+      color: var(--ink-mute); font-size: 13px; line-height: 1.85;
+    }
+    .tier ul li::before {
+      content: "▸"; color: var(--accent); margin-right: 8px; font-size: 10px;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       Closing CTA + footer.
+       ────────────────────────────────────────────────────────────── */
+    .closing {
+      padding: 140px 0 90px;
+      text-align: center; position: relative; z-index: 5;
+    }
+    .closing .word-secondary {
+      font-family: var(--display); font-weight: 700;
+      font-size: clamp(56px, 12vw, 180px);
+      letter-spacing: -0.05em; line-height: 0.85;
+      background: linear-gradient(110deg, rgba(255,255,255,0.95), rgba(124,92,255,0.6) 50%, rgba(255,255,255,0.7));
+      background-size: 200% 100%;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: shimmer 9s linear infinite;
+      filter: drop-shadow(0 0 40px rgba(124,92,255,0.2));
+    }
+    .closing p {
+      max-width: 620px; margin: 28px auto 32px;
+      font-size: 18px; color: var(--ink-mute); line-height: 1.55;
+    }
+    .closing .cta-row { justify-content: center; }
+
+    .footer {
+      border-top: 1px solid var(--line);
+      padding: 40px 0 28px;
+      position: relative; z-index: 5;
+      background: var(--bg);
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 36px;
+    }
+    @media (max-width: 720px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+    .footer-col h5 {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--ink-faint); letter-spacing: 0.12em; text-transform: uppercase;
+      margin: 0 0 14px;
+    }
+    .footer-col ul { list-style: none; padding: 0; margin: 0; }
+    .footer-col li { padding: 4px 0; }
+    .footer-col a { color: var(--ink-mute); font-size: 13px; transition: color .15s var(--easing); }
+    .footer-col a:hover { color: var(--ink); }
+    .footer-brand .word {
+      font-family: var(--display); font-weight: 700;
+      font-size: 28px; letter-spacing: -0.04em;
+      background: var(--accent-grad); background-size: 200% 100%;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: shimmer 8s linear infinite;
+    }
+    .footer-brand p { color: var(--ink-mute); font-size: 13px; line-height: 1.6; margin: 8px 0 0; max-width: 280px; }
+    .footer-baseline {
+      border-top: 1px solid var(--line); padding-top: 22px;
+      display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+      font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       Anims.
+       ────────────────────────────────────────────────────────────── */
+    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s var(--easing), transform .8s var(--easing); }
+    .reveal.in { opacity: 1; transform: translateY(0); }
   </style>
 </head>
 <body>
-<div class="app">
-  <aside class="sidebar">
-    <h1><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></h1>
-    <div class="tag">v0.1 · compiler cache for intelligence</div>
-    <nav>
-      <a href="/" class="active">Home</a>
-      <a href="/compile">Compile</a>
-      <a href="/run">Run</a>
-      <a href="/recall">Recall</a>
-      <a href="/cloud">Cloud</a>
-      <a href="/manual">Manual</a>
-      <a href="/account">Account</a>
-    </nav>
-    <div class="footnote">
-      <strong>Compile · Run · Recall.</strong><br/>
-      Compile frontier behavior once, run it locally forever.
+
+<!-- Background layers -->
+<div class="mesh"><div class="blob3"></div></div>
+<div class="grain"></div>
+<div class="scanlines"></div>
+
+<!-- Sticky frosted nav -->
+<header class="nav">
+  <a href="/" class="brand" aria-label="kolm home">
+    <svg class="logo" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="7" fill="black"/>
+      <path d="M9 8v16M9 16l8-8M9 16l8 8" stroke="url(#g1)" stroke-width="3" stroke-linecap="round"/>
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="32" y2="32">
+          <stop stop-color="#7c5cff"/>
+          <stop offset="1" stop-color="#65d4ff"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    kolm
+  </a>
+  <nav class="links" aria-label="primary">
+    <a href="/compile">Compile</a>
+    <a href="/run">Run</a>
+    <a href="/recall">Recall</a>
+    <a href="/cloud">Cloud</a>
+    <a href="/manual">Manual</a>
+  </nav>
+  <button class="cta" type="button" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Try it →</button>
+  <button class="nav-burger" type="button" aria-label="menu" onclick="alert('On mobile: Compile, Run, Recall, Cloud, Manual — links below in the footer.')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+</header>
+
+<div class="container">
+
+  <!-- HERO -->
+  <section class="hero wrap">
+    <div class="eyebrow">
+      <span class="pulse"></span>
+      kolm.ai · the compiler cache for intelligence
     </div>
-  </aside>
 
-  <main class="main">
+    <div class="wordmark" aria-label="kolm.ai">kolm</div>
 
-    <section class="hero">
-      <div class="eyebrow"><span class="dot live"></span> kolm · the compiler cache for intelligence</div>
-      <h1>Compile frontier behavior <span class="grad">once</span>, run it locally <span class="grad">forever</span>.</h1>
-      <p class="sub">
-        <strong>kolm</strong> takes a task description, your data, and a frontier model API key —
-        and produces a portable, signed <span class="mono">.kolm</span> artifact that runs anywhere.
-        Phone. Laptop. Server. Edge. Frontier agents discover it via MCP and call it instead of
-        re-solving from scratch.
-      </p>
+    <h1>Compile frontier behavior <span class="grad">once</span>.<br/>Run it locally <span class="grad">forever</span>.</h1>
+    <p class="lede">
+      <strong>kolm</strong> takes a task description, your data, and a frontier-model API key —
+      and produces a portable, signed <span class="mono">.kolm</span> artifact that runs anywhere.
+      Phone. Laptop. Server. Edge. Frontier agents discover it via <span class="mono">MCP</span> and call it
+      instead of re-solving from scratch.
+    </p>
 
-      <div class="pill-strip">
-        <span class="pill"><span class="dot"></span>SWE-bench Lite +15.33pp</span>
-        <span class="pill"><span class="dot"></span>HMAC-signed receipts</span>
-        <span class="pill"><span class="dot"></span>MCP-discoverable</span>
-        <span class="pill"><span class="dot"></span>Apache-2 spec</span>
+    <div class="cta-row">
+      <button class="btn-primary" type="button" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth',block:'start'})">
+        Compile a real artifact
+        <span class="arrow">→</span>
+      </button>
+      <a class="btn-ghost" href="/manual">Read the manual</a>
+    </div>
+
+    <div class="proof-strip">
+      <span class="proof-pill">SWE-bench Lite +15.33pp</span>
+      <span class="proof-pill">HMAC-signed receipts</span>
+      <span class="proof-pill">MCP-discoverable</span>
+      <span class="proof-pill">Apache-2 spec</span>
+      <span class="proof-pill">100% offline-capable</span>
+    </div>
+
+    <div class="scroll-hint">
+      <span>Compile</span>
+      <span class="line"></span>
+    </div>
+  </section>
+
+  <!-- LIVE DEMO -->
+  <section id="demo" class="demo-section wrap reveal">
+    <div class="demo-card">
+      <div class="demo-head">
+        <div class="lhs">
+          <span class="traffic"><span></span><span></span><span></span></span>
+          <span>kolm — sandbox tenant</span>
+        </div>
+        <div class="rhs">no signup · ~2s · runs on real infra</div>
       </div>
-
-      <div class="hero-cta">
-        <label class="hint" for="task">Try it — describe a task. We'll compile a real <span class="mono">.kolm</span> artifact and show you the K-score.</label>
+      <div class="demo-body">
+        <label class="label" for="task">
+          Describe a task. We'll compile a real <span class="mono">.kolm</span> artifact and show you the K-score.
+          <span class="kbd">⌘</span><span class="kbd">↵</span> to run.
+        </label>
         <textarea id="task" spellcheck="false" placeholder='kolm compile "triage support tickets by priority and team"'>kolm compile "classify a string as a positive number, negative number, or zero"</textarea>
-        <div class="row">
+        <div class="demo-actions">
           <button id="compile-btn" type="button">kolm compile</button>
-          <span class="hint mono">(no signup, sandbox tenant, ~2 sec)</span>
+          <span class="hint">no signup · sandbox tenant · real cloud</span>
         </div>
         <div id="demo-out" class="demo-out">awaiting task…</div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="block">
-      <h2>The four engines, beneath one verb.</h2>
-      <p class="sub">
-        Every <span class="mono">kolm compile</span> drives four engines that compose at every token: Recall grounds in your corpus;
-        Distill labels with verified inference; Decompose extracts deterministic patterns; Run packages and signs.
-        You only ever see the compiler.
+  <!-- MARQUEE STRIP -->
+  <div class="marquee-band">
+    <div class="marquee" id="marquee">
+      <span class="item">kolm compile <span class="k">"triage support tickets"</span> <span class="sep">·</span> k=412.7</span>
+      <span class="item">kolm compile <span class="k">"answer my emails in my voice"</span> <span class="sep">·</span> k=389.4</span>
+      <span class="item">kolm compile <span class="k">"spot bugs in React PRs the way I would"</span> <span class="sep">·</span> k=506.1</span>
+      <span class="item">kolm compile <span class="k">"summarize standup transcripts to 1 paragraph"</span> <span class="sep">·</span> k=448.2</span>
+      <span class="item">kolm compile <span class="k">"extract names + amounts from invoice PDFs"</span> <span class="sep">·</span> k=623.7</span>
+      <span class="item">kolm compile <span class="k">"label customer-support intent"</span> <span class="sep">·</span> k=355.9</span>
+      <span class="item">kolm compile <span class="k">"draft daily recap from photos + voice memos"</span> <span class="sep">·</span> k=389.4</span>
+      <span class="item">kolm compile <span class="k">"classify medical-record fields HIPAA-safely"</span> <span class="sep">·</span> k=479.0</span>
+      <!-- duplicate set for seamless loop -->
+      <span class="item">kolm compile <span class="k">"triage support tickets"</span> <span class="sep">·</span> k=412.7</span>
+      <span class="item">kolm compile <span class="k">"answer my emails in my voice"</span> <span class="sep">·</span> k=389.4</span>
+      <span class="item">kolm compile <span class="k">"spot bugs in React PRs the way I would"</span> <span class="sep">·</span> k=506.1</span>
+      <span class="item">kolm compile <span class="k">"summarize standup transcripts to 1 paragraph"</span> <span class="sep">·</span> k=448.2</span>
+      <span class="item">kolm compile <span class="k">"extract names + amounts from invoice PDFs"</span> <span class="sep">·</span> k=623.7</span>
+      <span class="item">kolm compile <span class="k">"label customer-support intent"</span> <span class="sep">·</span> k=355.9</span>
+      <span class="item">kolm compile <span class="k">"draft daily recap from photos + voice memos"</span> <span class="sep">·</span> k=389.4</span>
+      <span class="item">kolm compile <span class="k">"classify medical-record fields HIPAA-safely"</span> <span class="sep">·</span> k=479.0</span>
+    </div>
+  </div>
+
+  <!-- FOUR ENGINES -->
+  <section class="section wrap">
+    <div class="section-head reveal">
+      <div class="section-eyebrow">Beneath one verb · four engines</div>
+      <h2>Every <span class="grad">kolm compile</span> drives four engines<br/>that compose at every token.</h2>
+      <p class="sectionLede">
+        Recall grounds in your corpus. Distill labels with verified inference. Decompose extracts deterministic
+        patterns into a draft pack. Run packages, signs, and serves it as an MCP tool. You only ever see the compiler.
       </p>
-      <div class="four-engines">
-        <div class="engine">
-          <div class="num">01 — RECALL</div>
-          <h3>Multimodal substrate</h3>
-          <p>qmd-indexed BM25 + vector + RRF + reranker. Every modality (text, image, audio, video, PDF) auto-becomes searchable Markdown sidecars. Per-tenant namespaces.</p>
-        </div>
-        <div class="engine">
-          <div class="num">02 — DISTILL</div>
-          <h3>Verified Inference</h3>
-          <p>k-sample any frontier model, deterministically verify, accept the winner. Generator-Verifier asymmetry. P(correct) ≥ 1 − (1 − p·v)<sup>k</sup>.</p>
-        </div>
-        <div class="engine">
-          <div class="num">03 — DECOMPOSE</div>
-          <h3>Deterministic draft pack</h3>
-          <p>Recipe registry slice covering this task's structured-token subset. Public registry compounds: every compile shrinks the next.</p>
-        </div>
-        <div class="engine">
-          <div class="num">04 — RUN</div>
-          <h3>Signed artifact</h3>
-          <p>Single zip: manifest · model.gguf pointer · LoRA · recipes · sqlite-vec index · signature · evals. K-score visible. Inspectable. Portable.</p>
+    </div>
+
+    <div class="engines">
+      <a href="/recall" class="engine reveal" data-tilt>
+        <div class="num">01 — RECALL</div>
+        <h3>Multimodal substrate</h3>
+        <p>Drop a folder. We auto-detect modality (text · image · audio · video · PDF), tokenize each into Markdown sidecars, embed, and serve a hybrid BM25 + vector + RRF + reranker index per tenant. Every Distill k-sample is grounded in retrieved chunks.</p>
+        <div class="footer">→ explore Recall</div>
+      </a>
+      <a href="/manual#kscore" class="engine reveal" data-tilt>
+        <div class="num">02 — DISTILL</div>
+        <h3>Verified inference</h3>
+        <p>k-sample any frontier model in parallel, deterministically verify each candidate, accept the winner. Generator-Verifier asymmetry: compute scales, reliability climbs. P(correct) ≥ 1 − (1 − p·v)<sup>k</sup>.</p>
+        <div class="footer">→ formal model</div>
+      </a>
+      <a href="/manual#rsd" class="engine reveal" data-tilt>
+        <div class="num">03 — DECOMPOSE</div>
+        <h3>Deterministic draft pack</h3>
+        <p>Recipe Speculative Decoding observes the deterministic-token subset of frontier behavior on this task and packs it into a registry-indexed draft. Coverage compounds: every public compile shrinks the next.</p>
+        <div class="footer">→ how RSD works</div>
+      </a>
+      <a href="/run" class="engine reveal" data-tilt>
+        <div class="num">04 — RUN</div>
+        <h3>Signed artifact, MCP-served</h3>
+        <p>Single signed zip: manifest · model.gguf pointer · LoRA · recipes · sqlite-vec index · evals · signature. Run with <span class="mono">kolm run</span>; expose to Claude / Cursor / Codex with <span class="mono">kolm serve --mcp</span>.</p>
+        <div class="footer">→ open the box</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- SHOWCASE: terminal walkthrough -->
+  <section class="section wrap">
+    <div class="split">
+      <div class="copy reveal">
+        <div class="section-eyebrow">From terminal to phone</div>
+        <h2>One command. <span class="grad">.kolm</span> out.<br/>Then call it from anywhere.</h2>
+        <p class="sectionLede">
+          The CLI ships first. Run <span class="mono">npm i -g @kolmogorov/kolm</span>, point it at a task and a folder,
+          and you get back a single <span class="mono">.kolm</span> file with a visible K-score. Drop it in
+          <span class="mono">~/.kolm/artifacts/</span> and every MCP-aware agent — Claude Desktop, Cursor, Codex —
+          can call it. The cache is the moat.
+        </p>
+        <div class="cta-row" style="margin-top: 24px;">
+          <a class="btn-ghost" href="/compile">Compile spec</a>
+          <a class="btn-ghost" href="/run">MCP integration</a>
         </div>
       </div>
-    </section>
 
-    <section class="block">
-      <h2>Three surfaces. One artifact.</h2>
-      <p class="sub">The same <span class="mono">.kolm</span> file you compile from your laptop runs on your phone and is callable by Claude / Cursor / Codex via MCP.</p>
-      <div class="three-surfaces">
-        <div class="surface">
-          <div class="price">$0 / $9 / $49 / custom</div>
-          <h3>CLI for developers</h3>
-          <ul>
-            <li><span class="mono">kolm compile "&lt;task&gt;"</span></li>
-            <li><span class="mono">kolm run support-triage.kolm</span></li>
-            <li><span class="mono">kolm serve --mcp</span></li>
-            <li><span class="mono">kolm publish</span> to the public gallery</li>
-          </ul>
+      <div class="terminal-card reveal">
+        <div class="terminal-head">
+          <span class="traffic"><span></span><span></span><span></span></span>
+          <span class="title">~/work · zsh</span>
         </div>
-        <div class="surface">
-          <div class="price">Sub-$10/mo</div>
-          <h3>App for consumers</h3>
-          <ul>
-            <li>Three Specialists pre-loaded</li>
-            <li>"Compile a new one" button</li>
-            <li>iOS · Android · PWA</li>
-            <li>Offline-first; on-device sqlite-vec</li>
-          </ul>
-        </div>
-        <div class="surface">
-          <div class="price">Pro / Enterprise</div>
-          <h3>Cloud for teams</h3>
-          <ul>
-            <li>Hosted compile pipeline</li>
-            <li>Drag examples · drop a folder · click compile</li>
-            <li>Shared registry · audit trails</li>
-            <li>Receipt anchoring for compliance</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="block">
-      <h2>Frontier agents call your skills automatically.</h2>
-      <p class="sub">
-        Run <span class="mono">kolm serve --mcp</span> once. Claude / Codex / Cursor / any MCP client now sees every compiled
-        <span class="mono">.kolm</span> in <span class="mono">~/.kolm/artifacts/</span> as a tool. They reach for compiled
-        skills before fresh inference — that's the cache.
-      </p>
-      <div class="codebox">
-<span class="c"># install</span>
-$ npm i -g @kolmogorov/kolm
+        <div class="terminal-body" id="typer"><span class="c"># install</span>
+<span class="p">$</span> npm i -g @kolmogorov/kolm
 
 <span class="c"># compile a skill</span>
-$ kolm compile "triage support tickets" --data ./tickets
-✔ ~/.kolm/artifacts/job_abc.kolm (2.3KB)
-K-score: composite 412.7 · accuracy 96.5% · coverage 92% · 1.4ms p50
+<span class="p">$</span> kolm compile <span class="o">"triage support tickets"</span> --data ./tickets
+✔ recalled 1,284 chunks across 312 files
+✔ distilled 26 verified labels
+✔ decomposed 26 recipes
+✔ packaged ~/.kolm/artifacts/<span class="v">job_abc.kolm</span> (2.3KB)
+<span class="k">K-score: composite 412.7 · acc 96.5% · cov 92% · 1.4ms p50</span>
 
 <span class="c"># expose to frontier agents</span>
-$ kolm serve --mcp
-<span class="o">┌─ kolm MCP server ────────────</span>
-<span class="o">│ artifacts: ~/.kolm/artifacts</span>
-<span class="o">│ tools:     1</span>
-<span class="o">│   • triage-tickets — k=412.7, signed</span>
-<span class="o">└──────────────────────────────</span>
+<span class="p">$</span> kolm serve --mcp
+<span class="c">┌─ kolm MCP server ────────────</span>
+<span class="c">│ artifacts: ~/.kolm/artifacts</span>
+<span class="c">│ tools:     1</span>
+<span class="c">│   • triage-tickets — k=</span><span class="k">412.7</span><span class="c">, signed</span>
+<span class="c">└──────────────────────────────</span>
+<span class="p">$</span> <span class="typing-cursor"></span></div>
+      </div>
+    </div>
+  </section>
 
-<span class="c"># Claude (or any MCP client) now sees it.
-# Next time it needs to triage tickets: it just calls the compiled skill.</span></div>
-    </section>
-
-    <section class="block">
-      <h2>K-score: smallest passing artifact wins.</h2>
-      <p class="sub">
-        Every <span class="mono">.kolm</span> ships with five visible axes — accuracy, coverage, latency, cost, size —
-        and a single composite score. Sort artifacts by composite. Compare versions. Watch the cache compound:
-        every compile makes the next compile cheaper because the public registry grows.
+  <!-- THREE SURFACES / TIERS -->
+  <section class="section wrap">
+    <div class="section-head reveal">
+      <div class="section-eyebrow">Three surfaces · one artifact</div>
+      <h2>The same <span class="grad">.kolm</span> file<br/>everywhere you need it.</h2>
+      <p class="sectionLede">
+        Compile from your laptop. Run on your phone. Call from Claude Desktop. The artifact is portable, signed,
+        and yours. We're the compiler — never the model host. You always pay your own frontier API bill.
       </p>
-      <p class="sub" style="font-style:italic;color:#888;">
-        composite = (accuracy × coverage × 1000) / log₂(size_kb + 2). Bigger is better.
-      </p>
-    </section>
+    </div>
 
-    <section class="block">
-      <h2>Get a key.</h2>
-      <p class="sub"><a href="/signup">Free signup</a> · <a href="/manual">Manual</a> · <a href="/cloud">Cloud</a> · <a href="https://github.com/kolmogorov-dev">GitHub</a></p>
-    </section>
+    <div class="tiers">
+      <div class="tier reveal">
+        <h4>Free</h4>
+        <div class="price">$0 <small>/ mo</small></div>
+        <ul>
+          <li>1 Specialist / mo</li>
+          <li>10k corpus rows</li>
+          <li>4B-class open base</li>
+          <li>100k vectors managed</li>
+          <li>unlimited <span class="mono">kolm run</span></li>
+        </ul>
+      </div>
+      <div class="tier reveal">
+        <h4>Mobile</h4>
+        <div class="price">$9 <small>/ mo</small></div>
+        <ul>
+          <li>1 personal Specialist</li>
+          <li>100k corpus rows</li>
+          <li>1M vectors managed</li>
+          <li>kolm.app phone runtime</li>
+          <li>unlimited on-device</li>
+        </ul>
+      </div>
+      <div class="tier featured reveal">
+        <h4>Pro · for builders</h4>
+        <div class="price">$49 <small>/ mo</small></div>
+        <ul>
+          <li>unlimited Specialists</li>
+          <li>1M rows each</li>
+          <li>all open bases incl. Hermes-3</li>
+          <li>10M vectors managed</li>
+          <li>full CLI · Cloud · MCP</li>
+        </ul>
+      </div>
+      <div class="tier reveal">
+        <h4>Enterprise</h4>
+        <div class="price">custom</div>
+        <ul>
+          <li>private base models</li>
+          <li>on-prem training bridge</li>
+          <li>private Trieve cluster</li>
+          <li>dedicated GPU embedders</li>
+          <li>on-chain receipt anchoring</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
-    <footer>
-      Kolmogorov · the compiler cache for intelligence ·
-      Recipe (RS-1, MIT) · Recall (RS-1-multimodal, MIT) · Receipts (RS-1-receipts, MIT)
-    </footer>
-  </main>
+  <!-- CLOSING WORDMARK + CTA -->
+  <section class="closing wrap">
+    <div class="word-secondary reveal">.kolm</div>
+    <p class="reveal">
+      A signed zip with a visible K-score. Phone, laptop, server, edge. MCP-discoverable.
+      Compile once. Run forever.
+    </p>
+    <div class="cta-row reveal">
+      <button class="btn-primary" type="button" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">
+        Compile your first artifact
+        <span class="arrow">→</span>
+      </button>
+      <a class="btn-ghost" href="/cloud">Pricing</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-col footer-brand">
+          <span class="word">kolm.ai</span>
+          <p>The compiler cache for intelligence. By Kolmogorov.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Product</h5>
+          <ul>
+            <li><a href="/compile">Compile</a></li>
+            <li><a href="/run">Run</a></li>
+            <li><a href="/recall">Recall</a></li>
+            <li><a href="/cloud">Cloud</a></li>
+            <li><a href="/mobile">kolm.app</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Spec</h5>
+          <ul>
+            <li><a href="/manual">Manual</a></li>
+            <li><a href="/manual#kolm-spec">.kolm format</a></li>
+            <li><a href="/manual#recipes">Recipe (RS-1)</a></li>
+            <li><a href="/manual#receipts">Receipts</a></li>
+            <li><a href="/manual#mcp">MCP</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Account</h5>
+          <ul>
+            <li><a href="/signup">Sign up</a></li>
+            <li><a href="/account">Dashboard</a></li>
+            <li><a href="https://github.com/kolmogorov-dev">GitHub</a></li>
+            <li><a href="mailto:dev@kolm.ai">dev@kolm.ai</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-baseline">
+        <span>© 2026 Kolmogorov · Recipe (RS-1, MIT) · Receipts (RS-1-receipts, MIT) · Recall (RS-1-multimodal, MIT)</span>
+        <span>kolm.ai</span>
+      </div>
+    </div>
+  </footer>
+
 </div>
 
 <script>
-  // Live compile demo. Hits the public sandbox tenant and streams progress.
+  // ──────────────────────────────────────────────────────────────
+  // Live compile demo (preserved from prior surface).
+  // ──────────────────────────────────────────────────────────────
   const btn = document.getElementById('compile-btn');
   const ta = document.getElementById('task');
   const out = document.getElementById('demo-out');
@@ -244,7 +1089,7 @@ $ kolm serve --mcp
   function fmtK(k) {
     if (!k) return '';
     return `<div class="kscore">
-      <div class="axis composite"><div class="label">composite</div><div class="val">${k.composite}</div></div>
+      <div class="axis composite"><div class="label">K composite</div><div class="val">${k.composite}</div></div>
       <div class="axis"><div class="label">accuracy</div><div class="val">${(k.accuracy*100).toFixed(1)}%</div></div>
       <div class="axis"><div class="label">coverage</div><div class="val">${(k.coverage*100).toFixed(1)}%</div></div>
       <div class="axis"><div class="label">size</div><div class="val">${(k.size_bytes/1024).toFixed(1)}KB</div></div>
@@ -254,7 +1099,6 @@ $ kolm serve --mcp
   }
 
   async function getDemoKey() {
-    // Reuse if cached
     const cached = sessionStorage.getItem('kolm_demo_key');
     if (cached) return cached;
     const r = await fetch('/v1/anon/bootstrap', { method: 'POST',
@@ -266,9 +1110,8 @@ $ kolm serve --mcp
     return j.anon_token;
   }
 
-  // Examples baked into the homepage demo so K-score lights up. Synthesizer
-  // pattern-mode infers simple structural mappings; the default placeholder
-  // task ("classify positive/negative/zero") matches a sign-classifier shape.
+  // The default placeholder task (sign classifier) matches a synthesizer
+  // pattern that produces real K-score. Examples are baked in for the demo.
   const DEMO_EXAMPLES = [
     { input: 7,    output: 'positive' },
     { input: 0,    output: 'zero' },
@@ -281,7 +1124,6 @@ $ kolm serve --mcp
     if (inflight) return;
     let task = ta.value.trim();
     if (!task) { out.textContent = 'enter a task above first'; return; }
-    // strip a leading `kolm compile ` if the user pasted the full command
     task = task.replace(/^kolm\s+compile\s+/i, '').replace(/^["']/, '').replace(/["']$/, '');
 
     inflight = true; btn.disabled = true;
@@ -312,12 +1154,12 @@ $ kolm serve --mcp
   job:        ${state.id}
   task:       ${state.task}
   artifact:   ${(state.artifact_bytes/1024).toFixed(1)}KB · signed
-  download:   <a href="${state.artifact_url}" style="color:#7c5cff;">${state.artifact_url}</a>
+  download:   <a href="${state.artifact_url}">${state.artifact_url}</a>
 
   <strong>K-score</strong>${fmtK(state.k_score)}
 
-  <span style="color:#888;">Run it locally:    </span><span class="ok">kolm run ${state.id}.kolm '&lt;input&gt;'</span>
-  <span style="color:#888;">Expose via MCP:    </span><span class="ok">kolm serve --mcp</span>`;
+  <span style="color:#666;">Run it locally:    </span><span class="ok">kolm run ${state.id}.kolm '&lt;input&gt;'</span>
+  <span style="color:#666;">Expose via MCP:    </span><span class="ok">kolm serve --mcp</span>`;
     } catch (e) {
       out.classList.remove('live');
       out.textContent = 'error: ' + (e.message || e);
@@ -329,6 +1171,25 @@ $ kolm serve --mcp
   btn.addEventListener('click', runCompile);
   ta.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCompile(); }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // Scroll reveal.
+  // ──────────────────────────────────────────────────────────────
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { rootMargin: '-10% 0px -10% 0px', threshold: 0.05 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ──────────────────────────────────────────────────────────────
+  // Engine card spotlight — track cursor for radial gradient.
+  // ──────────────────────────────────────────────────────────────
+  document.querySelectorAll('.engine').forEach(card => {
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    });
   });
 </script>
 </body>

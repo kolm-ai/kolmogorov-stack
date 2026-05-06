@@ -33,7 +33,7 @@ window.KS = (() => {
     const r = await fetch('/v1/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: `anon-${seed.slice(0,8)}@playground.kolmogorov.dev`, name: `playground-${seed.slice(0,6)}` }),
+      body: JSON.stringify({ email: `anon-${seed.slice(0,8)}@playground.kolm.ai`, name: `playground-${seed.slice(0,6)}` }),
     }).then(r => r.ok ? r.json() : Promise.reject(r));
     setApiKey(r.api_key);
     return r.api_key;
