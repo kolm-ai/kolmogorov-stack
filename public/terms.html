@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Terms · kolm</title>
+<meta name="description" content="kolm terms of service. Plain-language terms for compiling, running, and reselling .kolm artifacts.">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://kolm.ai/terms">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #0a0a0a; --bg-elev: #0f0f12; --bg-card: #13141a;
+    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+    --ink: #ededed; --ink-mute: #9a9da8; --ink-faint: #5a5c66;
+    --accent: #7c8cff; --accent-soft: rgba(124,140,255,0.10); --accent-strong: #93a1ff;
+    --good: #7ce3b6;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.65; letter-spacing: -0.011em; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 32px; }
+  .wrap.wide { max-width: 1180px; }
+  @media (max-width: 720px) { .wrap, .wrap.wide { padding: 0 20px; } }
+
+  header.site { position: sticky; top: 0; z-index: 60; background: rgba(10,10,10,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+  header.site .left { display: flex; align-items: center; gap: 36px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
+  header.site .brand svg { height: 18px; width: 18px; color: var(--ink); }
+  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: -0.04em; }
+  header.site nav { display: flex; gap: 22px; }
+  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+  header.site nav a:hover, header.site nav a.active { color: var(--ink); }
+  header.site .right { display: flex; align-items: center; gap: 14px; }
+  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+  header.site .right .ghost:hover { color: var(--ink); }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta:hover { background: #fff; }
+  @media (max-width: 720px) { header.site nav { display: none; } }
+
+  section.hero { padding: 72px 0 28px; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
+  h1 { margin: 18px 0 14px; font-size: clamp(32px, 4.4vw, 50px); line-height: 1.05; font-weight: 500; letter-spacing: -0.028em; color: var(--ink); }
+  h1 .tone { color: var(--accent); }
+  p.lede { margin: 0; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+  .stamp { display: inline-block; margin-top: 18px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0.04em; }
+
+  section.body { padding: 28px 0 88px; }
+  .doc h2 { margin: 44px 0 12px; font-size: 22px; font-weight: 540; letter-spacing: -0.018em; color: var(--ink); }
+  .doc h2:first-child { margin-top: 0; }
+  .doc h2 .num { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.12em; margin-right: 12px; font-weight: 500; }
+  .doc h3 { margin: 24px 0 8px; font-size: 16px; font-weight: 540; letter-spacing: -0.012em; color: var(--ink); }
+  .doc p { margin: 0 0 14px; color: var(--ink-mute); font-size: 15px; }
+  .doc p strong, .doc li strong { color: var(--ink); font-weight: 540; }
+  .doc ul { margin: 0 0 14px; padding-left: 20px; color: var(--ink-mute); font-size: 15px; }
+  .doc li { margin-bottom: 6px; }
+  .doc code { font-family: var(--mono); font-size: 13.5px; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+  .doc a.inline { color: var(--accent); border-bottom: 1px solid var(--accent-soft); }
+  .doc a.inline:hover { color: var(--accent-strong); border-bottom-color: var(--accent); }
+
+  .callout { background: var(--bg-elev); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 6px; padding: 18px 22px; margin: 18px 0 22px; }
+  .callout p { margin: 0; color: var(--ink); font-size: 14.5px; }
+  .callout p strong { color: var(--accent); }
+
+  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); }
+  footer.site .grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 36px; margin-bottom: 36px; }
+  @media (max-width: 720px) { footer.site .grid { grid-template-columns: 1fr 1fr; } }
+  footer.site .brandcol .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); margin-bottom: 14px; }
+  footer.site .brandcol .brand svg { height: 16px; width: 16px; }
+  footer.site .brandcol .brand span { font-weight: 540; font-size: 15px; letter-spacing: -0.04em; }
+  footer.site .brandcol p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; max-width: 32ch; }
+  footer.site h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
+  footer.site ul { list-style: none; margin: 0; padding: 0; }
+  footer.site li { margin-bottom: 8px; }
+  footer.site li a { color: var(--ink-mute); font-size: 13.5px; }
+  footer.site li a:hover { color: var(--ink); }
+  footer.site .legal { padding-top: 22px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-faint); flex-wrap: wrap; gap: 12px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap wide row">
+    <div class="left">
+      <a href="/" class="brand" aria-label="kolm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M 6.5 4 L 6.5 20 M 6.5 13.4 L 14.6 4.6 M 9.4 10.6 L 17.5 19.4"/></svg>
+        <span>kolm</span>
+      </a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">Sign in</a>
+      <a href="/signup" class="cta">Get kolm</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="pill"><span class="dot"></span>terms · v0.1</span>
+    <h1>The deal<span class="tone">.</span><br>In plain language.</h1>
+    <p class="lede">Terms of service for the kolm CLI, the kolm cloud, and every <code>.kolm</code> artifact you compile through us. Read once. Apply forever.</p>
+    <span class="stamp">last updated · 2026-05-07 · governed by Delaware, USA</span>
+  </div>
+</section>
+
+<section class="body">
+  <div class="wrap">
+    <div class="doc">
+
+      <div class="callout">
+        <p><strong>The short version.</strong> Your data is yours. Your artifacts are yours. Your frontier API key is yours. We provide a service that compiles those into a sub-3GB file. We can disable accounts that abuse the service. Disputes are arbitrated. See sections below for the long form.</p>
+      </div>
+
+      <h2><span class="num">01</span>Who and what</h2>
+      <p>"<strong>kolm</strong>", "<strong>we</strong>", and "<strong>us</strong>" mean Kolmogorov, Inc., a Delaware corporation. "<strong>You</strong>" means the human or organization with an account at kolm.ai. The "<strong>Service</strong>" means the CLI, the cloud compile pipeline, the public registry, the SDK at <code>/sdk.js</code>, and any documentation at kolm.ai.</p>
+
+      <h2><span class="num">02</span>Your account</h2>
+      <p>You agree to provide a valid email and to keep your kolm API key secret. You are responsible for activity under your account. Tell us within 24 hours if a key is compromised: <a class="inline" href="mailto:security@kolm.ai">security@kolm.ai</a>.</p>
+
+      <h2><span class="num">03</span>Your data</h2>
+      <p>Your <strong>training data</strong> (examples, evals), your <strong>inference inputs</strong>, and your <strong>frontier API key</strong> remain yours. You grant us a non-exclusive, worldwide, royalty-free license to use them <em>only</em> for the purpose of running the compile job you requested. We do not retain them after the job completes.</p>
+      <p>The <strong>recipe contributions</strong> automatically extracted during compile (deterministic draft tokens) are licensed to the public registry under MIT, unless you compile with <code>--no-contribute</code>.</p>
+
+      <h2><span class="num">04</span>Your artifacts</h2>
+      <p>Every <code>.kolm</code> file you compile is owned by you. You can copy it, run it, ship it inside your product, or sell it. You can delete it at will. We claim no ownership over your artifacts.</p>
+      <p>Artifacts include third-party model weights subject to their own licenses (Llama, Qwen, Mistral, etc.). Your obligations under those licenses pass through. We list applicable licenses in <code>manifest.json</code> inside every artifact.</p>
+
+      <h2><span class="num">05</span>Frontier model bills</h2>
+      <p>The compile pipeline calls the frontier model <em>you</em> bring. You pay for those calls directly to the frontier provider. We do not mark up, rebill, or front the frontier API spend.</p>
+
+      <h2><span class="num">06</span>Acceptable use</h2>
+      <p>You may not use the Service to:</p>
+      <ul>
+        <li>Build artifacts that knowingly produce CSAM, NCII, voice-cloning fraud, election interference content, or weapons-of-mass-destruction uplift.</li>
+        <li>Reverse-engineer, scrape, or rate-limit-evade the cloud compile pipeline.</li>
+        <li>Attempt to extract another tenant's data through the public registry, the recipe pack, or any side channel.</li>
+        <li>Resell raw access to the cloud compile pipeline. (Reselling artifacts compiled with it is fine.)</li>
+      </ul>
+      <p>We may disable accounts that violate these. We will tell you when we do, with reason.</p>
+
+      <h2><span class="num">07</span>Pricing and billing</h2>
+      <p>Pricing on <a class="inline" href="/pricing">/pricing</a> is the current price. We will email at least 30 days before any price increase to a tier you are on. Prepaid Pro and Enterprise terms govern what you have already paid for.</p>
+      <p>You can cancel any tier any time via <code>kolm account cancel</code> or <a class="inline" href="mailto:hello@kolm.ai">hello@kolm.ai</a>. Billing stops at the end of the paid period; the account remains read-only until you delete it.</p>
+
+      <h2><span class="num">08</span>Service level</h2>
+      <p>The current tier-level uptime targets and credits are documented at <a class="inline" href="/status">/status</a>. The free tier is offered as-is with no SLA. Pro tier targets 99.9% monthly. Enterprise contracts override.</p>
+
+      <h2><span class="num">09</span>Warranty disclaimer</h2>
+      <p>The Service is provided "as is". We do not warrant that the model, the LoRA, the recipe pack, or the recall index will produce any particular accuracy, latency, or coverage on your task. The K-score is a measurement, not a guarantee.</p>
+
+      <h2><span class="num">10</span>Liability</h2>
+      <p>To the maximum extent permitted by law, our aggregate liability is capped at the greater of <strong>USD 100</strong> or <strong>fees you paid us in the 12 months preceding the claim</strong>. We are not liable for lost profits, lost data you did not back up, or consequential damages.</p>
+
+      <h2><span class="num">11</span>Indemnity</h2>
+      <p>You will indemnify us for third-party claims arising from your training data, your artifacts, or your downstream use of either. We will indemnify you for third-party claims that the Service itself infringes a US patent or copyright, subject to the cap in section 10.</p>
+
+      <h2><span class="num">12</span>Disputes</h2>
+      <p>Disputes will be resolved by binding arbitration in San Francisco under JAMS streamlined rules, in English, governed by Delaware law, except either side may bring a small-claims action and either side may seek injunctive relief in court for IP infringement.</p>
+
+      <h2><span class="num">13</span>Changes</h2>
+      <p>We will email every active account at least 14 days before any material change to these terms. Past versions are archived at <a class="inline" href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/public/terms.html">github.com/sneaky-hippo/kolmogorov-stack</a>.</p>
+
+      <h2><span class="num">14</span>Contact</h2>
+      <p>Legal: <a class="inline" href="mailto:legal@kolm.ai">legal@kolm.ai</a>. General: <a class="inline" href="mailto:hello@kolm.ai">hello@kolm.ai</a>. Security: <a class="inline" href="mailto:security@kolm.ai">security@kolm.ai</a>.</p>
+
+    </div>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap wide">
+    <div class="grid">
+      <div class="brandcol">
+        <a href="/" class="brand" aria-label="kolm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M 6.5 4 L 6.5 20 M 6.5 13.4 L 14.6 4.6 M 9.4 10.6 L 17.5 19.4"/></svg>
+          <span>kolm</span>
+        </a>
+        <p>The compiler cache for intelligence. RS-1 · RS-1-multimodal · RS-1-receipts. Open spec, MIT-licensed.</p>
+      </div>
+      <div>
+        <h5>Product</h5>
+        <ul>
+          <li><a href="/compile">Compile</a></li>
+          <li><a href="/serve">Serve</a></li>
+          <li><a href="/anatomy">.kolm anatomy</a></li>
+          <li><a href="/k-score">K-score</a></li>
+          <li><a href="/atlas">Public atlas</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Develop</h5>
+        <ul>
+          <li><a href="/docs">Docs</a></li>
+          <li><a href="/manual">Manual</a></li>
+          <li><a href="/sdk.js">SDK</a></li>
+          <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Trust</h5>
+        <ul>
+          <li><a href="/security">Security</a></li>
+          <li><a href="/status">Status</a></li>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+          <li><a href="mailto:hello@kolm.ai">hello@kolm.ai</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      <span>kolmogorov · 2026</span>
+      <span>compile once · run anywhere</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

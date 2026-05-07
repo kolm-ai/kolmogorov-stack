@@ -4,223 +4,504 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pricing · kolm</title>
-<meta name="description" content="kolm pricing. Free tier, $9 mobile, $49 pro, custom enterprise. Bring your own model API key. Unlimited compiles on Pro.">
-<meta name="theme-color" content="#050610">
+<meta name="description" content="kolm pricing. Free tier, $9 Mobile, $49 Pro, custom Enterprise. Bring your own model API key. Local runtime always free.">
+<meta name="theme-color" content="#0a0a0a">
 <meta name="color-scheme" content="dark">
+<meta property="og:title" content="Pricing · kolm">
+<meta property="og:description" content="Four tiers. Pay for the cache. The frontier bill stays yours.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/pricing">
+<meta property="og:image" content="/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/pricing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" as="image" href="/aurora.svg">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#050610;--bg-2:#0b0e15;--bg-3:#0e1320;
-  --surface:#0d1224;--surface-2:#11172a;
-  --line:#1c2738;--line-2:#28324a;--line-3:#2a3144;
-  --fg:#f6f8fb;--fg-2:#dde1ee;--fg-3:#8893ad;
-  --muted:#7d7898;--dim:#6a7385;
-  --violet:#aa9cff;--violet-2:#d4c8ff;--cyan:#65d4ff;--emerald:#5be8b6;
-  --maxw:1180px;--pad-x:max(28px,env(safe-area-inset-left));
-}
-html,body{background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;letter-spacing:-0.011em;font-feature-settings:"ss01","ss03","cv11","calt";font-optical-sizing:auto;overflow-x:hidden;position:relative}
-h1,h2,h3,h4{font-family:inherit;font-feature-settings:"ss01","ss03","cv11","calt"}
-a{color:inherit;text-decoration:none}
-ul,ol{list-style:none}
-code,pre,.mono,kbd{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace}
-::selection{background:rgba(170, 156, 255,0.32);color:var(--fg)}
+  :root {
+    --bg: #0a0a0a; --bg-elev: #0f0f12; --bg-card: #13141a;
+    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+    --ink: #ededed; --ink-mute: #9a9da8; --ink-faint: #5a5c66;
+    --accent: #7c8cff; --accent-soft: rgba(124,140,255,0.10); --accent-strong: #93a1ff;
+    --good: #7ce3b6;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink); font-family: var(--sans);
+    font-size: 16px; line-height: 1.55; letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility; font-synthesis: none;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 720px) { .wrap { padding: 0 20px; } }
 
-.bg-stage{position:fixed;inset:0;z-index:-2;background:var(--bg);overflow:hidden;pointer-events:none}
-.bg-stage::before{content:"";position:absolute;inset:-10%;background-image:url('/aurora.svg');background-size:cover;background-position:center;background-repeat:no-repeat;opacity:0.30;filter:blur(36px)}
-.bg-stage::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(5, 6, 10,0) 0%,rgba(5, 6, 10,0.6) 45%,rgba(5, 6, 10,0.94) 100%)}
-.aurora{background-image:url('/aurora.svg');background-size:200% 200%;background-position:center;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+  header.site {
+    position: sticky; top: 0; z-index: 60;
+    background: rgba(10,10,10,0.78);
+    backdrop-filter: saturate(160%) blur(14px);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+  header.site .left { display: flex; align-items: center; gap: 36px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
+  header.site .brand svg { height: 18px; width: 18px; color: var(--ink); }
+  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: -0.04em; }
+  header.site nav { display: flex; gap: 22px; }
+  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+  header.site nav a:hover, header.site nav a.active { color: var(--ink); }
+  header.site .right { display: flex; align-items: center; gap: 14px; }
+  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+  header.site .right .ghost:hover { color: var(--ink); }
+  header.site .right .cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--bg); background: var(--ink); border-radius: 6px;
+    padding: 7px 14px; font-size: 13px; font-weight: 540; letter-spacing: -0.01em;
+    transition: background 120ms;
+  }
+  header.site .right .cta:hover { background: #fff; }
+  @media (max-width: 720px) { header.site nav { display: none; } }
 
-nav.top{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:32px;padding:14px var(--pad-x);background:rgba(5, 6, 10,0.55);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);border-bottom:1px solid var(--line);font-size:14px}
-nav.top .brand{font-weight:600;letter-spacing:-0.025em;font-size:21px;line-height:1}
-nav.top ul.links{display:flex;gap:28px}
-nav.top ul.links a{color:var(--fg-3);transition:color .15s;font-weight:500}
-nav.top ul.links a:hover,nav.top ul.links a.active{color:var(--fg)}
-nav.top .signin{color:var(--fg);font-weight:500}
-nav.top .signin .ar{color:var(--fg-3);transition:transform .2s;margin-left:4px}
-nav.top .signin:hover .ar{transform:translateX(2px);color:var(--fg)}
-@media(max-width:880px){nav.top ul.links{display:none}}
+  section.hero { position: relative; padding: 88px 0 56px; overflow: hidden; }
+  section.hero::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 900px 480px at 22% 12%, rgba(124,140,255,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 400px at 88% 90%, rgba(124,140,255,0.04), transparent 60%);
+    pointer-events: none;
+  }
+  section.hero .wrap { position: relative; }
 
-main{max-width:var(--maxw);margin:0 auto;padding:64px var(--pad-x) 96px}
-.head{text-align:center;margin-bottom:48px}
-.eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11.5px;color:var(--fg-3);letter-spacing:0.16em;text-transform:uppercase;padding:6px 13px;border-radius:6px;background:linear-gradient(180deg,rgba(170, 156, 255,0.10),rgba(170, 156, 255,0.04));border:1px solid rgba(170, 156, 255,0.22);margin-bottom:22px}
-.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--violet);box-shadow:0 0 0 3px rgba(170, 156, 255,0.18)}
-h1{font-size:clamp(38px,5vw,60px);font-weight:600;letter-spacing:-0.032em;line-height:1.04;margin-bottom:14px}
-.lede{color:var(--fg-3);font-size:17px;line-height:1.55;max-width:580px;margin:0 auto}
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-mute);
+    border: 1px solid var(--line-strong); border-radius: 999px;
+    padding: 5px 12px; background: var(--bg-elev);
+  }
+  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
 
-.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:42px}
-@media(max-width:980px){.tiers{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:560px){.tiers{grid-template-columns:1fr}}
-.tier{background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:26px;display:flex;flex-direction:column;transition:border-color .15s,transform .15s,box-shadow .15s}
-.tier:hover{border-color:var(--line-3)}
-.tier.featured{border-color:rgba(170, 156, 255,0.5);background:linear-gradient(180deg,rgba(170, 156, 255,0.06),rgba(22,19,42,0.85));box-shadow:0 0 0 1px rgba(170, 156, 255,0.15),0 20px 60px -20px rgba(170, 156, 255,0.35)}
-.tier .name{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--fg-3);margin-bottom:10px}
-.tier.featured .name{color:var(--violet-2)}
-.tier .price{font-size:38px;font-weight:600;letter-spacing:-0.025em;line-height:1;margin-bottom:6px}
-.tier .price small{color:var(--fg-3);font-size:14px;font-weight:400;letter-spacing:0;margin-left:4px}
-.tier .for{color:var(--fg-3);font-size:13.5px;margin-bottom:18px;min-height:36px}
-.tier ul.feats{margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:9px}
-.tier ul.feats li{padding-left:22px;position:relative;font-size:13.5px;color:var(--fg-2);line-height:1.5}
-.tier ul.feats li::before{content:"";position:absolute;left:0;top:6px;width:14px;height:14px;border-radius:50%;background:rgba(170, 156, 255,0.08);border:1px solid rgba(170, 156, 255,0.3);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none'><path d='M3 6.5L5 8.5L9 4' stroke='%23aa9cff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:center}
-.tier .pick{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:8px;font-size:13.5px;font-weight:500;border:1px solid var(--line-3);color:var(--fg);transition:background .15s,border-color .15s,box-shadow .15s}
-.tier .pick:hover{border-color:var(--fg);background:rgba(255,255,255,0.04)}
-.tier.featured .pick{background:linear-gradient(180deg,#fff 0%,#e3deff 100%);color:#050610;border-color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,0.10),0 8px 28px -8px rgba(170, 156, 255,0.45)}
-.tier.featured .pick:hover{box-shadow:0 0 0 1px rgba(255,255,255,0.18),0 12px 32px -6px rgba(170, 156, 255,0.55)}
+  h1.hero-h1 {
+    margin: 24px 0 22px;
+    font-size: clamp(36px, 5.4vw, 64px);
+    line-height: 1.05; font-weight: 500; letter-spacing: -0.028em;
+    color: var(--ink); max-width: 18ch;
+  }
+  h1.hero-h1 .tone { color: var(--accent); }
+  p.lede {
+    margin: 0; font-size: clamp(15.5px, 1.3vw, 18px);
+    line-height: 1.55; color: var(--ink-mute);
+    max-width: 60ch; letter-spacing: -0.005em;
+  }
+  p.lede b { color: var(--ink); font-weight: 540; }
 
-.byok{margin-top:64px;padding:28px;background:var(--bg-2);border:1px solid var(--line);border-radius:16px;display:grid;grid-template-columns:1.4fr 1fr;gap:32px;align-items:center}
-@media(max-width:760px){.byok{grid-template-columns:1fr}}
-.byok h3{font-size:20px;font-weight:600;letter-spacing:-0.018em;margin-bottom:8px}
-.byok p{color:var(--fg-3);font-size:14.5px;line-height:1.6}
-.byok .right{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;background:var(--bg-3);border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:var(--fg-2);line-height:1.7}
-.byok .right .c{color:var(--violet-2)}
-.byok .right .o{color:var(--emerald)}
+  section { padding: 72px 0; position: relative; }
+  section + section { border-top: 1px solid var(--line); }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px;
+  }
+  .eyebrow .num { color: var(--accent); }
+  h2 {
+    margin: 0 0 18px;
+    font-size: clamp(26px, 3.2vw, 38px);
+    line-height: 1.1; font-weight: 540; letter-spacing: -0.022em;
+    color: var(--ink); max-width: 24ch;
+  }
+  h2 .tone { color: var(--accent); }
+  p.sec-lede {
+    margin: 0 0 40px; font-size: 16.5px;
+    line-height: 1.55; color: var(--ink-mute); max-width: 60ch;
+  }
 
-.faq{margin-top:64px}
-.faq h2{font-size:24px;font-weight:600;letter-spacing:-0.022em;margin-bottom:22px}
-.faq .q{padding:18px 0;border-bottom:1px solid var(--line)}
-.faq .q:last-child{border-bottom:0}
-.faq .q h4{font-size:15.5px;font-weight:500;letter-spacing:-0.011em;margin-bottom:6px}
-.faq .q p{color:var(--fg-3);font-size:14px;line-height:1.6}
+  .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 1080px) { .tiers { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .tiers { grid-template-columns: 1fr; } }
+  .tier {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 10px; padding: 28px;
+    display: flex; flex-direction: column;
+  }
+  .tier.featured {
+    background: linear-gradient(180deg, rgba(124,140,255,0.06), var(--bg-elev));
+    border-color: rgba(124,140,255,0.22);
+    box-shadow: 0 30px 60px -30px rgba(124,140,255,0.18);
+  }
+  .tier .tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .tier.featured .tag { color: var(--accent); }
+  .tier .name {
+    margin: 6px 0 4px;
+    font-size: 22px; font-weight: 540; letter-spacing: -0.018em; color: var(--ink);
+  }
+  .tier .pitch {
+    font-size: 13.5px; color: var(--ink-mute); line-height: 1.5;
+    min-height: 42px;
+  }
+  .tier .num {
+    margin: 18px 0 4px;
+    font-size: 36px; font-weight: 540; letter-spacing: -0.028em; color: var(--ink);
+  }
+  .tier .num .per { font-size: 13px; font-weight: 400; color: var(--ink-mute); margin-left: 4px; letter-spacing: 0; }
+  .tier .frontier { font-size: 12px; color: var(--ink-faint); margin-bottom: 22px; }
+  .tier ul { list-style: none; margin: 0 0 22px; padding: 0; flex: 1; }
+  .tier li {
+    padding: 8px 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-mute);
+    border-bottom: 1px solid var(--line);
+  }
+  .tier li:last-child { border-bottom: none; }
+  .tier li b { color: var(--ink); font-weight: 540; }
+  .tier a.cta {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 11px 16px; border-radius: 6px;
+    font-size: 13.5px; font-weight: 540; letter-spacing: -0.005em;
+    border: 1px solid var(--line-strong);
+    color: var(--ink); transition: border-color 120ms, color 120ms, background 120ms;
+  }
+  .tier a.cta:hover { border-color: var(--accent); color: var(--accent); }
+  .tier.featured a.cta { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .tier.featured a.cta:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
 
-footer{border-top:1px solid var(--line);background:rgba(14,12,28,0.4);padding:48px var(--pad-x) 40px;margin-top:80px}
-footer .inner{max-width:var(--maxw);margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px}
-@media(max-width:760px){footer .inner{grid-template-columns:1fr 1fr;gap:28px}}
-footer .mark{font-size:18px;font-weight:600;letter-spacing:-0.025em;margin-bottom:10px;display:inline-block}
-footer .legal{color:var(--dim);font-size:12px;margin-top:14px}
-footer h4{color:var(--fg-2);font-size:12.5px;font-weight:600;letter-spacing:-0.011em;margin-bottom:12px}
-footer .col a{display:block;color:var(--fg-3);font-size:13px;padding:5px 0;transition:color .15s}
-footer .col a:hover{color:var(--fg)}
+  .matrix {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .matrix table { width: 100%; border-collapse: collapse; }
+  .matrix th, .matrix td {
+    padding: 14px 18px; text-align: left;
+    border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .matrix th {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-faint); font-weight: 500;
+    background: rgba(0,0,0,0.20);
+  }
+  .matrix th.feat { width: 38%; color: var(--ink-faint); }
+  .matrix th.col-pro { color: var(--accent); }
+  .matrix td.feat { color: var(--ink); font-weight: 500; }
+  .matrix td { color: var(--ink-mute); text-align: center; }
+  .matrix td.feat { text-align: left; }
+  .matrix td .y { color: var(--good); }
+  .matrix td .n { color: var(--ink-faint); }
+  .matrix tr:last-child td { border-bottom: none; }
+  .matrix tr.section td {
+    background: rgba(0,0,0,0.18);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-faint); font-weight: 500;
+    text-align: left;
+  }
+  @media (max-width: 720px) {
+    .matrix th, .matrix td { padding: 10px 10px; font-size: 12px; }
+    .matrix th.feat { width: 50%; }
+  }
+
+  .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 800px) { .faq { grid-template-columns: 1fr; } }
+  .faq-card {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 8px; padding: 24px;
+  }
+  .faq-card h4 {
+    margin: 0 0 10px; font-size: 15px; font-weight: 540;
+    letter-spacing: -0.012em; color: var(--ink); line-height: 1.35;
+  }
+  .faq-card p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--ink-mute); }
+  .faq-card p code {
+    font-family: var(--mono); font-size: 0.92em; color: var(--ink);
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 4px; padding: 1px 6px;
+  }
+
+  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); }
+  footer.site .grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 36px; margin-bottom: 36px; }
+  @media (max-width: 720px) { footer.site .grid { grid-template-columns: 1fr 1fr; } }
+  footer.site .brandcol .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); margin-bottom: 14px; }
+  footer.site .brandcol .brand svg { height: 16px; width: 16px; }
+  footer.site .brandcol .brand span { font-weight: 540; font-size: 15px; letter-spacing: -0.04em; }
+  footer.site .brandcol p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; max-width: 32ch; }
+  footer.site h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
+  footer.site ul { list-style: none; margin: 0; padding: 0; }
+  footer.site li { margin-bottom: 8px; }
+  footer.site li a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+  footer.site li a:hover { color: var(--ink); }
+  footer.site .legal {
+    padding-top: 22px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-faint);
+    flex-wrap: wrap; gap: 12px;
+  }
 </style>
 </head>
 <body>
 
-<div class="bg-stage" aria-hidden="true"></div>
-
-<nav class="top">
-  <a class="brand aurora" href="/">kolm</a>
-  <ul class="links">
-    <li><a href="/compile">Compile</a></li>
-    <li><a href="/run">Run</a></li>
-    <li><a href="/registry">Registry</a></li>
-    <li><a href="/docs">Docs</a></li>
-    <li><a class="active" href="/pricing">Pricing</a></li>
-  </ul>
-  <a class="signin" href="/signup">Sign in <span class="ar">&rsaquo;</span></a>
-</nav>
-
-<main>
-  <section class="head">
-    <span class="eyebrow"><span class="dot"></span> Pricing</span>
-    <h1>One product. Three tiers. <span class="aurora">BYO key.</span></h1>
-    <p class="lede">You always pay your own model API bill on top. We are the compiler.</p>
-  </section>
-
-  <div class="tiers">
-    <div class="tier">
-      <div class="name">FREE</div>
-      <div class="price">$0</div>
-      <div class="for">Try kolm. Compile one specialist a month.</div>
-      <ul class="feats">
-        <li>1 specialist / month</li>
-        <li>4B-class open base</li>
-        <li>10k corpus rows</li>
-        <li>100k recall vectors</li>
-        <li>Public registry access</li>
-      </ul>
-      <a class="pick" href="/signup">Start free <span class="ar">&rsaquo;</span></a>
-    </div>
-
-    <div class="tier">
-      <div class="name">MOBILE</div>
-      <div class="price">$9<small>/mo</small></div>
-      <div class="for">Hermes-class on your phone. Your data stays local.</div>
-      <ul class="feats">
-        <li>1 personal specialist / month</li>
-        <li>100k corpus rows</li>
-        <li>1M recall vectors</li>
-        <li>iOS &amp; Android runtime</li>
-        <li>Unlimited local runs</li>
-      </ul>
-      <a class="pick" href="/signup?plan=mobile">Get Mobile <span class="ar">&rsaquo;</span></a>
-    </div>
-
-    <div class="tier featured">
-      <div class="name">PRO</div>
-      <div class="price">$49<small>/mo</small></div>
-      <div class="for">Shippers and teams. Unlimited compiles.</div>
-      <ul class="feats">
-        <li>Unlimited specialists</li>
-        <li>1M corpus rows each</li>
-        <li>10M recall vectors</li>
-        <li>Hermes-3 fine-tuning</li>
-        <li>Private registry</li>
-        <li>CLI &amp; SDK access</li>
-      </ul>
-      <a class="pick" href="/signup?plan=pro">Get Pro <span class="ar">&rsaquo;</span></a>
-    </div>
-
-    <div class="tier">
-      <div class="name">ENTERPRISE</div>
-      <div class="price">Custom</div>
-      <div class="for">Regulated industry. On-prem. SLA.</div>
-      <ul class="feats">
-        <li>Private base models</li>
-        <li>On-prem training bridge</li>
-        <li>Air-gapped runtimes</li>
-        <li>BAA / DPA available</li>
-        <li>SOC 2 Type I in-flight</li>
-      </ul>
-      <a class="pick" href="mailto:hi@kolm.ai">Talk to us <span class="ar">&rsaquo;</span></a>
-    </div>
-  </div>
-
-  <section class="byok">
-    <div>
-      <h3>BYO key, always.</h3>
-      <p>The frontier model is the teacher during compile. The student is what runs on your device. We never see your model bill, your prompts, or your data &mdash; you set the key once, and our endpoints stream straight to you.</p>
+<header class="site">
+  <div class="wrap row">
+    <div class="left">
+      <a href="/" class="brand" aria-label="kolm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+          <path d="M 6.5 4 L 6.5 20 M 6.5 13.4 L 14.6 4.6 M 9.4 10.6 L 17.5 19.4"/>
+        </svg>
+        <span>kolm</span>
+      </a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing" class="active">Pricing</a>
+      </nav>
     </div>
     <div class="right">
-      <span class="c">$ kolm config set anthropic.key sk-ant-…</span><br>
-      <span class="c">$ kolm compile "answer my emails"</span><br>
-      <span class="o">  k-score: 0.94 &middot; size: 18.3 KB</span><br>
-      <span class="o">  signed: HMAC chained &middot; ready</span>
+      <a href="/signin" class="ghost">Sign in</a>
+      <a href="/signup" class="cta">Get kolm</a>
     </div>
-  </section>
+  </div>
+</header>
 
-  <section class="faq">
-    <h2>Common questions</h2>
-    <div class="q">
-      <h4>Do I pay for model tokens through kolm?</h4>
-      <p>No. Compile uses your Anthropic / OpenAI / Together / Moonshot key directly. Your model bill goes to them; your kolm bill is just the compile + recall + registry hosting.</p>
-    </div>
-    <div class="q">
-      <h4>Can I cancel any time?</h4>
-      <p>Yes. Stripe portal, one click, no retention prompts. All your <code style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--violet-2)">.kolm</code> artifacts remain yours and keep running on every device they're already installed on, even after cancellation.</p>
-    </div>
-    <div class="q">
-      <h4>Where does the data live?</h4>
-      <p>Recall vectors are encrypted at rest in our managed index by default. Free / Mobile / Pro tiers can opt in to on-device-only via a self-hosted sqlite-vec backend. Enterprise can run the full stack on-prem.</p>
-    </div>
-    <div class="q">
-      <h4>What's a "compile"?</h4>
-      <p>One <code style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--violet-2)">kolm compile</code> turns a task description plus optional examples and corpus into one signed <code style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--violet-2)">.kolm</code> artifact. Re-compiling the same task with new data does not count against your monthly limit until the K-score crosses the publish threshold.</p>
-    </div>
-  </section>
-</main>
+<section class="hero">
+  <div class="wrap">
+    <span class="pill"><span class="dot"></span>BYO frontier key · local runtime always free</span>
+    <h1 class="hero-h1">You pay for the cache.<br><span class="tone">The frontier bill stays yours.</span></h1>
+    <p class="lede"><b>kolm</b> never resells tokens. You bring the model API key you already have. We compile against it; you keep the artifact. Run it anywhere, forever, at zero marginal cost.</p>
+  </div>
+</section>
 
-<footer>
-  <div class="inner">
-    <div>
-      <span class="mark aurora">kolm</span>
-      <p style="color:var(--fg-3);font-size:13.5px;line-height:1.55;max-width:280px">The AI compiler. Type a task. Compile a small signed specialist. Run it on every device offline.</p>
-      <p class="legal">&copy; 2026 Kolmogorov. <a href="/security" style="color:var(--fg-3)">Security</a></p>
+<section>
+  <div class="wrap">
+    <div class="tiers">
+      <div class="tier">
+        <div class="tag">Developer</div>
+        <div class="name">Free.</div>
+        <div class="pitch">For solo builders, researchers, and the public atlas.</div>
+        <div class="num">$0<span class="per">forever</span></div>
+        <div class="frontier">+ your frontier model bill</div>
+        <ul>
+          <li><b>1</b> private artifact at a time</li>
+          <li>Public atlas pulls unlimited</li>
+          <li>BYO model API key</li>
+          <li>Local MCP server</li>
+          <li>HMAC-chained receipts</li>
+          <li>Community support</li>
+        </ul>
+        <a href="/signup" class="cta">Get kolm</a>
+      </div>
+
+      <div class="tier">
+        <div class="tag">Mobile</div>
+        <div class="name">Personal.</div>
+        <div class="pitch">For people building one AI feature into one app.</div>
+        <div class="num">$9<span class="per">/ month</span></div>
+        <div class="frontier">+ your frontier model bill</div>
+        <ul>
+          <li><b>3</b> private artifacts</li>
+          <li>iOS · Android SDK</li>
+          <li>1M-vector recall</li>
+          <li>On-device runtime</li>
+          <li>Priority compile queue</li>
+          <li>Email support</li>
+        </ul>
+        <a href="/signup?plan=mobile" class="cta">Start Mobile</a>
+      </div>
+
+      <div class="tier featured">
+        <div class="tag">Pro</div>
+        <div class="name">Team.</div>
+        <div class="pitch">For product teams shipping AI features at scale.</div>
+        <div class="num">$49<span class="per">/ month</span></div>
+        <div class="frontier">+ your frontier model bill</div>
+        <ul>
+          <li><b>Unlimited</b> private artifacts</li>
+          <li>Cloud compile pipeline</li>
+          <li>Nightly drift recompile</li>
+          <li>10M-vector recall</li>
+          <li>Priority registry indexing</li>
+          <li>CI/CD integrations</li>
+          <li>Slack support</li>
+        </ul>
+        <a href="/signup?plan=pro" class="cta">Start Pro →</a>
+      </div>
+
+      <div class="tier">
+        <div class="tag">Enterprise</div>
+        <div class="name">VPC.</div>
+        <div class="pitch">For regulated buyers who can't put data anywhere else.</div>
+        <div class="num">Custom</div>
+        <div class="frontier">on-prem or hosted</div>
+        <ul>
+          <li>Air-gapped registry mirror</li>
+          <li>On-prem compile bridge</li>
+          <li>SAML · SCIM · audit log</li>
+          <li>BAA · DPA · DPIA paths</li>
+          <li>SOC 2 Type II evidence</li>
+          <li>On-chain receipt anchoring</li>
+          <li>Dedicated support · SLA</li>
+        </ul>
+        <a href="mailto:hello@kolm.ai?subject=Enterprise" class="cta">Contact sales</a>
+      </div>
     </div>
-    <div class="col"><h4>Product</h4><a href="/compile">Compile</a><a href="/run">Run</a><a href="/registry">Registry</a><a href="/pricing">Pricing</a></div>
-    <div class="col"><h4>Develop</h4><a href="/docs">Docs</a><a href="/docs#cli-compile">CLI</a><a href="/docs#sdk">SDKs</a><a href="/playground">Playground</a></div>
-    <div class="col"><h4>Open</h4><a href="/docs#rs-1">RS-1 spec</a><a href="/docs#manifest">Manifest</a><a href="/docs#receipts">Receipts</a><a href="/security">Security</a></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">·</span><span>Compare</span></div>
+    <h2>Every line, every tier.</h2>
+    <p class="sec-lede">No surprise fees. Local runtime is always free. The frontier bill is always yours.</p>
+
+    <div class="matrix" role="table" aria-label="Plan comparison">
+      <table>
+        <thead>
+          <tr>
+            <th class="feat">Feature</th>
+            <th>Developer</th>
+            <th>Mobile</th>
+            <th class="col-pro">Pro</th>
+            <th>Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="section"><td colspan="5">Compile</td></tr>
+          <tr><td class="feat">Private artifacts</td><td>1 at a time</td><td>3</td><td>Unlimited</td><td>Unlimited</td></tr>
+          <tr><td class="feat">Examples per compile</td><td>10k</td><td>100k</td><td>1M</td><td>Unlimited</td></tr>
+          <tr><td class="feat">Compile queue priority</td><td>Standard</td><td>Priority</td><td>Priority</td><td>Dedicated</td></tr>
+          <tr><td class="feat">Nightly drift recompile</td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+          <tr><td class="feat">BYO model API key</td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+
+          <tr class="section"><td colspan="5">Recall</td></tr>
+          <tr><td class="feat">Managed vector index</td><td>100k</td><td>1M</td><td>10M</td><td>Unlimited</td></tr>
+          <tr><td class="feat">On-device sqlite-vec</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+          <tr><td class="feat">Multimodal embed (text · image · audio · video · PDF)</td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+
+          <tr class="section"><td colspan="5">Run · serve</td></tr>
+          <tr><td class="feat">Local runtime</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+          <tr><td class="feat">MCP server</td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+          <tr><td class="feat">iOS · Android SDK</td><td><span class="n">·</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+          <tr><td class="feat">Public atlas listing</td><td>Optional</td><td>Optional</td><td>Optional</td><td>Private only</td></tr>
+
+          <tr class="section"><td colspan="5">Trust</td></tr>
+          <tr><td class="feat">HMAC-chained receipts</td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+          <tr><td class="feat">Air-gap compile mode</td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="y">✓</span></td></tr>
+          <tr><td class="feat">SAML · SCIM · audit log</td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="y">✓</span></td></tr>
+          <tr><td class="feat">BAA · DPA · DPIA</td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="y">✓</span></td></tr>
+          <tr><td class="feat">SOC 2 Type II evidence</td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="y">✓</span></td></tr>
+          <tr><td class="feat">On-chain receipt anchor</td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="n">·</span></td><td><span class="y">✓</span></td></tr>
+
+          <tr class="section"><td colspan="5">Support</td></tr>
+          <tr><td class="feat">Channel</td><td>Community</td><td>Email</td><td>Slack</td><td>Dedicated</td></tr>
+          <tr><td class="feat">Response time</td><td>Best effort</td><td>48h</td><td>24h</td><td>SLA</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">·</span><span>FAQ</span></div>
+    <h2>The questions buyers actually ask.</h2>
+    <p class="sec-lede">If yours isn't here, mail <a href="mailto:hello@kolm.ai" style="color:var(--accent)">hello@kolm.ai</a>.</p>
+
+    <div class="faq">
+      <div class="faq-card">
+        <h4>Who pays for the model API calls?</h4>
+        <p>You do. kolm uses your model API key during compile. We never resell tokens, never mark up frontier inference, never bill you for usage we didn't run on our infrastructure.</p>
+      </div>
+      <div class="faq-card">
+        <h4>What counts as a "compile"?</h4>
+        <p>One full pass: synthesize the verifier, k-sample the teacher, train the LoRA, build recipes, package, sign. <code>kolm rebuild</code> with the same inputs is byte-identical and free.</p>
+      </div>
+      <div class="faq-card">
+        <h4>What if K-score is below the gate?</h4>
+        <p>The artifact does not ship. You see the breakdown by component, can adjust seed examples or evals, and recompile. We don't charge for sub-gate compiles on Pro and Enterprise.</p>
+      </div>
+      <div class="faq-card">
+        <h4>How big is a typical .kolm file?</h4>
+        <p>20–500 MB. The base is a 1B–7B open-weight INT4 quant. The LoRA is 20–100 MB. The recall index scales with corpus size; we shard above 4 GB.</p>
+      </div>
+      <div class="faq-card">
+        <h4>Can I run it offline?</h4>
+        <p>Yes. The artifact is fully self-contained. <code>kolm serve --mcp file.kolm</code> requires no network at runtime. Compile is online; run is offline.</p>
+      </div>
+      <div class="faq-card">
+        <h4>Which frontier models can I use as the teacher?</h4>
+        <p>Anthropic, OpenAI, Google, Mistral, Together, Fireworks, AWS Bedrock, Azure OpenAI, your own gateway. Any HTTP completion endpoint that follows the OpenAI or Messages contract.</p>
+      </div>
+      <div class="faq-card">
+        <h4>Which open-weight bases can I compile against?</h4>
+        <p>Qwen 2.5, Qwen 3.x, Llama 3.x, Phi-3, Hermes 3, Gemma 2 — at INT4, sized 1B to 14B. Enterprise tier supports private base models you provision.</p>
+      </div>
+      <div class="faq-card">
+        <h4>Is there a free trial of Pro?</h4>
+        <p>Yes. The first 14 days of Pro are free; cancel any time. Artifacts you compiled during trial stay yours and remain runnable forever.</p>
+      </div>
+      <div class="faq-card">
+        <h4>Can I export everything if I leave?</h4>
+        <p>Yes. The artifact is a signed zip; you already own it. The recall index exports as Parquet. Receipts export as JSONL. Nothing is locked behind our cloud.</p>
+      </div>
+      <div class="faq-card">
+        <h4>Do you offer non-profit or academic pricing?</h4>
+        <p>Yes — Pro is free for verified non-profits and accredited academic researchers. Mail us with a .edu or .org address and we'll set it up.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="grid">
+      <div class="brandcol">
+        <a href="/" class="brand" aria-label="kolm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+            <path d="M 6.5 4 L 6.5 20 M 6.5 13.4 L 14.6 4.6 M 9.4 10.6 L 17.5 19.4"/>
+          </svg>
+          <span>kolm</span>
+        </a>
+        <p>The compiler cache for intelligence. RS-1 · RS-1-multimodal · RS-1-receipts. Open spec, MIT-licensed.</p>
+      </div>
+      <div>
+        <h5>Product</h5>
+        <ul>
+          <li><a href="/compile">Compile</a></li>
+          <li><a href="/serve">Serve</a></li>
+          <li><a href="/anatomy">.kolm anatomy</a></li>
+          <li><a href="/k-score">K-score</a></li>
+          <li><a href="/atlas">Public atlas</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Develop</h5>
+        <ul>
+          <li><a href="/docs">Docs</a></li>
+          <li><a href="/manual">Manual</a></li>
+          <li><a href="/sdk.js">SDK</a></li>
+          <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Trust</h5>
+        <ul>
+          <li><a href="/security">Security</a></li>
+          <li><a href="/status">Status</a></li>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+          <li><a href="mailto:hello@kolm.ai">hello@kolm.ai</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      <span>kolmogorov · 2026</span>
+      <span>compile once · run anywhere</span>
+    </div>
   </div>
 </footer>
 

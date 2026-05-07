@@ -140,7 +140,7 @@ export function buildRouter() {
     stats: storeStats(),
   }));
 
-  r.get('/pricing', (_req, res) => res.json({ currency: 'USD', units: PRICING }));
+  r.get('/v1/pricing', (_req, res) => res.json({ currency: 'USD', units: PRICING }));
 
   // ---------- Anonymous CLI auth (robots / agents) ----------
   // Bootstrap: returns an anon_token that the CLI stores locally. 30-day TTL.

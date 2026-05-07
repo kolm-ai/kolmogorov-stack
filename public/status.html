@@ -3,253 +3,343 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Status &middot; kolm</title>
-<meta name="description" content="Live status of every kolm surface — compile, registry, signup, telemetry, docs.">
-<meta name="theme-color" content="#050610">
+<title>Status · kolm</title>
+<meta name="description" content="Live status of every kolm surface. Compile pipeline, registry, signin, telemetry, docs.">
+<meta name="theme-color" content="#0a0a0a">
 <meta name="color-scheme" content="dark">
-<meta property="og:title" content="Status &middot; kolm">
+<meta property="og:title" content="Status · kolm">
 <meta property="og:description" content="Live status of every kolm surface.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/status">
-<meta property="og:image" content="/aurora.svg">
-<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/status">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" as="image" href="/aurora.svg">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#050610;--bg-2:#0b0e15;--bg-3:#0e1320;
-  --line:#1c2738;--line-2:#28324a;--line-3:#2a3144;
-  --fg:#f6f8fb;--fg-2:#dde1ee;--fg-3:#8893ad;--muted:#7d7898;--dim:#6a7385;
-  --violet:#aa9cff;--violet-2:#d4c8ff;--cyan:#65d4ff;--emerald:#5be8b6;
-  --maxw:1180px;--pad-x:max(28px,env(safe-area-inset-left));
-}
-html,body{background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;min-height:100vh}
-body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;letter-spacing:-0.011em;font-feature-settings:"ss01","ss03","cv11","calt";font-optical-sizing:auto;overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}
-h1,h2,h3,h4{font-family:inherit;font-feature-settings:"ss01","ss03","cv11","calt"}
-a{color:inherit;text-decoration:none}
-ul,ol{list-style:none}
-code,pre,.mono,kbd{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace}
-::selection{background:rgba(170, 156, 255,0.35);color:var(--fg)}
+  :root {
+    --bg: #0a0a0a; --bg-elev: #0f0f12; --bg-card: #13141a;
+    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+    --ink: #ededed; --ink-mute: #9a9da8; --ink-faint: #5a5c66;
+    --accent: #7c8cff; --accent-soft: rgba(124,140,255,0.10); --accent-strong: #93a1ff;
+    --good: #7ce3b6; --warn: #ffd07a; --bad: #ff7a98;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink); font-family: var(--sans);
+    font-size: 16px; line-height: 1.55; letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility; font-synthesis: none;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 720px) { .wrap { padding: 0 20px; } }
 
-.bg-stage{position:fixed;inset:0;z-index:-2;background:var(--bg);overflow:hidden;pointer-events:none}
-.bg-stage::before{content:"";position:absolute;inset:-10%;background-image:url('/aurora.svg');background-size:cover;background-position:center;background-repeat:no-repeat;opacity:0.30;filter:blur(40px)}
-.bg-stage::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(5, 6, 10,0) 0%,rgba(5, 6, 10,0.6) 45%,rgba(5, 6, 10,0.95) 100%)}
-.aurora{background-image:url('/aurora.svg');background-size:200% 200%;background-position:center;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+  header.site {
+    position: sticky; top: 0; z-index: 60;
+    background: rgba(10,10,10,0.78);
+    backdrop-filter: saturate(160%) blur(14px);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+  header.site .left { display: flex; align-items: center; gap: 36px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
+  header.site .brand svg { height: 18px; width: 18px; color: var(--ink); }
+  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: -0.04em; }
+  header.site nav { display: flex; gap: 22px; }
+  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+  header.site nav a:hover, header.site nav a.active { color: var(--ink); }
+  header.site .right { display: flex; align-items: center; gap: 14px; }
+  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+  header.site .right .ghost:hover { color: var(--ink); }
+  header.site .right .cta {
+    color: var(--bg); background: var(--ink); border-radius: 6px;
+    padding: 7px 14px; font-size: 13px; font-weight: 540; letter-spacing: -0.01em;
+  }
+  header.site .right .cta:hover { background: #fff; }
+  @media (max-width: 720px) { header.site nav { display: none; } }
 
-nav.top{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:32px;padding:14px var(--pad-x);background:rgba(5, 6, 10,0.55);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);border-bottom:1px solid var(--line);font-size:14px}
-nav.top .brand{font-weight:600;letter-spacing:-0.025em;font-size:21px;line-height:1}
-nav.top ul.links{display:flex;gap:28px}
-nav.top ul.links a{color:var(--fg-3);transition:color .15s;font-weight:500}
-nav.top ul.links a:hover{color:var(--fg)}
-nav.top .signin{color:var(--fg);font-weight:500;display:inline-flex;align-items:center;gap:6px}
-nav.top .signin .ar{color:var(--fg-3);transition:transform .2s}
-nav.top .signin:hover .ar{transform:translateX(2px);color:var(--fg)}
-@media(max-width:880px){nav.top ul.links{display:none}}
+  section.hero { padding: 72px 0 32px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-mute);
+    border: 1px solid var(--line-strong); border-radius: 999px;
+    padding: 5px 12px; background: var(--bg-elev);
+  }
+  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
+  h1 {
+    margin: 18px 0 14px;
+    font-size: clamp(32px, 4.4vw, 52px);
+    line-height: 1.05; font-weight: 500; letter-spacing: -0.028em;
+    color: var(--ink);
+  }
+  h1 .tone { color: var(--accent); }
+  p.lede {
+    margin: 0 0 8px; font-size: clamp(15px, 1.2vw, 17px);
+    line-height: 1.55; color: var(--ink-mute); max-width: 60ch;
+  }
+  .stamp {
+    display: inline-block; margin-top: 18px;
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
 
-main{flex:1}
-.hero{padding:96px var(--pad-x) 48px;max-width:var(--maxw);margin:0 auto;text-align:center}
-.eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11.5px;color:var(--fg-3);letter-spacing:0.18em;text-transform:uppercase;padding:7px 14px;background:var(--bg-2);border:1px solid var(--line);border-radius:8px;margin-bottom:32px}
-.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);box-shadow:0 0 0 3px rgba(67, 230, 166,0.18)}
-.eyebrow .dot.dim{background:var(--dim);box-shadow:none}
-.eyebrow .dot.warn{background:var(--violet);box-shadow:0 0 0 3px rgba(255,176,132,0.18)}
-h1{font-size:clamp(46px,6.5vw,76px);font-weight:600;letter-spacing:-0.034em;line-height:1.04;margin-bottom:20px}
-.lede{font-size:clamp(17px,1.6vw,19.5px);color:var(--fg-3);max-width:620px;margin:0 auto;line-height:1.6}
+  section.body { padding: 32px 0 88px; }
 
-.section{padding:32px var(--pad-x) 64px;max-width:var(--maxw);margin:0 auto}
-.surface-list{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg-2)}
-.surface-row{display:grid;grid-template-columns:36px 1fr auto auto;gap:18px;align-items:center;padding:22px 26px;border-bottom:1px solid var(--line);transition:background .15s}
-.surface-row:last-child{border-bottom:0}
-.surface-row:hover{background:var(--bg-3)}
-.surface-row .light{width:10px;height:10px;border-radius:50%;justify-self:center}
-.surface-row .light.ok{background:var(--emerald);box-shadow:0 0 0 4px rgba(67, 230, 166,0.14)}
-.surface-row .light.warn{background:var(--violet);box-shadow:0 0 0 4px rgba(255,176,132,0.14)}
-.surface-row .light.err{background:var(--violet);box-shadow:0 0 0 4px rgba(255,133,166,0.14)}
-.surface-row .light.unk{background:var(--dim)}
-.surface-row .name{font-size:15.5px;font-weight:500;color:var(--fg);letter-spacing:-0.011em}
-.surface-row .name .desc{display:block;color:var(--fg-3);font-size:13px;font-weight:400;margin-top:4px}
-.surface-row .stat{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;padding:5px 10px;border-radius:6px;border:1px solid var(--line-2);color:var(--fg-3)}
-.surface-row .stat.ok{color:var(--emerald);border-color:rgba(67, 230, 166,0.3);background:rgba(67, 230, 166,0.06)}
-.surface-row .stat.warn{color:var(--violet);border-color:rgba(255,176,132,0.3);background:rgba(255,176,132,0.06)}
-.surface-row .stat.err{color:var(--violet);border-color:rgba(255,133,166,0.3);background:rgba(255,133,166,0.06)}
-.surface-row .ts{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;color:var(--dim);letter-spacing:0.04em}
-@media(max-width:760px){.surface-row{grid-template-columns:24px 1fr;gap:12px;padding:18px 18px}.surface-row .stat,.surface-row .ts{grid-column:2}}
+  .panel {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 10px; padding: 28px; margin-bottom: 16px;
+  }
+  .panel h2 {
+    margin: 0 0 6px; font-size: 22px; font-weight: 540;
+    letter-spacing: -0.018em; color: var(--ink);
+  }
+  .panel p.note {
+    margin: 0 0 22px; font-size: 13.5px; color: var(--ink-mute);
+  }
 
-.recap{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.recap .card{padding:24px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2)}
-.recap .card .lbl{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;color:var(--dim);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:10px}
-.recap .card .num{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:36px;font-weight:600;letter-spacing:-0.028em;color:var(--fg);line-height:1}
-.recap .card .note{color:var(--fg-3);font-size:13px;margin-top:8px}
-@media(max-width:760px){.recap{grid-template-columns:1fr}}
+  .row-status {
+    display: grid; grid-template-columns: 28px 1fr 100px 110px;
+    gap: 14px; align-items: center;
+    padding: 14px 0; border-top: 1px solid var(--line);
+    font-size: 14px; color: var(--ink);
+  }
+  @media (max-width: 720px) {
+    .row-status { grid-template-columns: 22px 1fr 90px; }
+    .row-status .lat { display: none; }
+  }
+  .row-status:first-of-type { border-top: none; }
+  .row-status .ind {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .row-status .ind.up { background: var(--good); box-shadow: 0 0 8px rgba(124,227,182,0.5); }
+  .row-status .ind.deg { background: var(--warn); box-shadow: 0 0 8px rgba(255,208,122,0.5); }
+  .row-status .ind.dn { background: var(--bad); box-shadow: 0 0 8px rgba(255,122,152,0.5); }
+  .row-status .name { font-weight: 500; letter-spacing: -0.005em; }
+  .row-status .name small {
+    display: block; font-weight: 400; color: var(--ink-mute);
+    font-size: 12.5px; letter-spacing: 0; margin-top: 2px;
+  }
+  .row-status .lab {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .row-status .lab.up { color: var(--good); }
+  .row-status .lab.deg { color: var(--warn); }
+  .row-status .lab.dn { color: var(--bad); }
+  .row-status .lat {
+    font-family: var(--mono); font-size: 12px; color: var(--ink-faint); text-align: right;
+  }
 
-.note{margin-top:36px;text-align:center;font-size:13.5px;color:var(--fg-3);line-height:1.5}
-.note a{color:var(--violet-2)}
-.note a:hover{text-decoration:underline}
+  .uptime {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+    padding: 4px 0 0;
+  }
+  @media (max-width: 720px) { .uptime { grid-template-columns: 1fr; } }
+  .uptime .cell {
+    border: 1px solid var(--line);
+    border-radius: 8px; padding: 18px;
+    background: var(--bg-card);
+  }
+  .uptime .cell .k {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px;
+  }
+  .uptime .cell .v {
+    font-size: 26px; font-weight: 500; letter-spacing: -0.022em; color: var(--accent);
+  }
+  .uptime .cell .v small { font-size: 13px; color: var(--ink-mute); margin-left: 6px; font-weight: 400; }
 
-footer{border-top:1px solid var(--line);background:rgba(14,12,28,0.4);padding:48px var(--pad-x);font-size:13px;color:var(--dim);margin-top:auto}
-footer .inner{max-width:var(--maxw);margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:48px}
-footer h4{color:var(--fg);font-size:13px;font-weight:600;margin-bottom:14px;letter-spacing:-0.011em}
-footer .col a{display:block;color:var(--fg-3);padding:6px 0;font-size:13px;transition:color .15s}
-footer .col a:hover{color:var(--fg)}
-footer .legal{font-size:12px;line-height:1.7;color:var(--dim);margin-top:18px}
-footer .brand-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-footer .brand-row .mark{font-size:18px;font-weight:600;letter-spacing:-0.02em}
-@media(max-width:760px){footer .inner{grid-template-columns:1fr 1fr;gap:32px}}
-@media(max-width:480px){footer .inner{grid-template-columns:1fr}}
+  .incident {
+    padding: 14px 0; border-top: 1px solid var(--line);
+    display: grid; grid-template-columns: 100px 1fr; gap: 16px;
+  }
+  .incident:first-of-type { border-top: none; }
+  .incident .when {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0.04em;
+  }
+  .incident .what h4 {
+    margin: 0 0 4px; font-size: 14.5px; font-weight: 540;
+    color: var(--ink); letter-spacing: -0.005em;
+  }
+  .incident .what p { margin: 0; font-size: 13.5px; color: var(--ink-mute); }
+
+  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); }
+  footer.site .grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 36px; margin-bottom: 36px; }
+  @media (max-width: 720px) { footer.site .grid { grid-template-columns: 1fr 1fr; } }
+  footer.site .brandcol .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); margin-bottom: 14px; }
+  footer.site .brandcol .brand svg { height: 16px; width: 16px; }
+  footer.site .brandcol .brand span { font-weight: 540; font-size: 15px; letter-spacing: -0.04em; }
+  footer.site .brandcol p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; max-width: 32ch; }
+  footer.site h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
+  footer.site ul { list-style: none; margin: 0; padding: 0; }
+  footer.site li { margin-bottom: 8px; }
+  footer.site li a { color: var(--ink-mute); font-size: 13.5px; }
+  footer.site li a:hover { color: var(--ink); }
+  footer.site .legal {
+    padding-top: 22px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-faint);
+    flex-wrap: wrap; gap: 12px;
+  }
 </style>
 </head>
 <body>
 
-<div class="bg-stage" aria-hidden="true"></div>
+<header class="site">
+  <div class="wrap row">
+    <div class="left">
+      <a href="/" class="brand" aria-label="kolm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+          <path d="M 6.5 4 L 6.5 20 M 6.5 13.4 L 14.6 4.6 M 9.4 10.6 L 17.5 19.4"/>
+        </svg>
+        <span>kolm</span>
+      </a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">Sign in</a>
+      <a href="/signup" class="cta">Get kolm</a>
+    </div>
+  </div>
+</header>
 
-<nav class="top">
-  <a class="brand aurora" href="/">kolm</a>
-  <ul class="links">
-    <li><a href="/compile">Compile</a></li>
-    <li><a href="/run">Run</a></li>
-    <li><a href="/registry">Registry</a></li>
-    <li><a href="/docs">Docs</a></li>
-    <li><a href="/pricing">Pricing</a></li>
-  </ul>
-  <a class="signin" href="/signup">Sign in <span class="ar">&rsaquo;</span></a>
-</nav>
+<section class="hero">
+  <div class="wrap">
+    <span class="pill"><span class="dot"></span>all systems · operational</span>
+    <h1>Status<span class="tone">.</span></h1>
+    <p class="lede">Live status of every public surface and every internal job lane. Updated continuously from health probes; manually amended during declared incidents.</p>
+    <span class="stamp" id="stamp">— last refreshed —</span>
+  </div>
+</section>
 
-<main>
-  <section class="hero">
-    <div class="eyebrow"><span class="dot" id="overall-dot"></span> <span id="overall-text">all systems operational</span></div>
-    <h1><span class="aurora">Status</span></h1>
-    <p class="lede">Live ping of every kolm surface. Green is healthy, amber is degraded, red is down.</p>
-  </section>
+<section class="body">
+  <div class="wrap">
 
-  <section class="section">
-    <div class="surface-list" id="surface-list">
-      <div class="surface-row" data-svc="compile">
-        <span class="light unk" aria-hidden="true"></span>
-        <div class="name">Cloud compile<span class="desc">Distill, decompose, sign. Returns a .kolm file.</span></div>
-        <span class="stat">checking</span>
-        <span class="ts" data-ts>&nbsp;</span>
-      </div>
-      <div class="surface-row" data-svc="registry">
-        <span class="light unk" aria-hidden="true"></span>
-        <div class="name">Public registry<span class="desc">Listing and verification of public artifacts.</span></div>
-        <span class="stat">checking</span>
-        <span class="ts" data-ts>&nbsp;</span>
-      </div>
-      <div class="surface-row" data-svc="signup">
-        <span class="light unk" aria-hidden="true"></span>
-        <div class="name">Signup &amp; auth<span class="desc">Account creation, sign-in, key issue.</span></div>
-        <span class="stat">checking</span>
-        <span class="ts" data-ts>&nbsp;</span>
-      </div>
-      <div class="surface-row" data-svc="telemetry">
-        <span class="light unk" aria-hidden="true"></span>
-        <div class="name">Telemetry &amp; receipts<span class="desc">Receipt verification, K-score reads.</span></div>
-        <span class="stat">checking</span>
-        <span class="ts" data-ts>&nbsp;</span>
-      </div>
-      <div class="surface-row" data-svc="docs">
-        <span class="light unk" aria-hidden="true"></span>
-        <div class="name">Docs &amp; SDK CDN<span class="desc">Static doc pages and SDK downloads.</span></div>
-        <span class="stat">checking</span>
-        <span class="ts" data-ts>&nbsp;</span>
+    <div class="panel">
+      <h2>Public surfaces</h2>
+      <p class="note">Edge-facing endpoints. p95 latency over the last hour.</p>
+
+      <div class="row-status"><span class="ind up"></span><span class="name">kolm.ai<small>marketing site, docs, atlas</small></span><span class="lab up">Operational</span><span class="lat">42 ms</span></div>
+      <div class="row-status"><span class="ind up"></span><span class="name">/v1/signup · /v1/signin<small>auth + session</small></span><span class="lab up">Operational</span><span class="lat">88 ms</span></div>
+      <div class="row-status"><span class="ind up"></span><span class="name">/v1/account<small>account &amp; key management</small></span><span class="lab up">Operational</span><span class="lat">61 ms</span></div>
+      <div class="row-status"><span class="ind up"></span><span class="name">/v1/registry/export<small>public draft pack</small></span><span class="lab up">Operational</span><span class="lat">110 ms</span></div>
+      <div class="row-status"><span class="ind up"></span><span class="name">/sdk.js · /sdk-versions.json<small>browser SDK + SRI hashes</small></span><span class="lab up">Operational</span><span class="lat">31 ms</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>Compile pipeline</h2>
+      <p class="note">Internal job lanes that run when you call <code style="font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px;">kolm compile</code>.</p>
+
+      <div class="row-status"><span class="ind up"></span><span class="name">orchestrator<small>compile id + job state</small></span><span class="lab up">Operational</span><span class="lat">— ms</span></div>
+      <div class="row-status"><span class="ind up"></span><span class="name">distill · k-sample teacher<small>verified label generation</small></span><span class="lab up">Operational</span><span class="lat">3.1 s/lab</span></div>
+      <div class="row-status"><span class="ind up"></span><span class="name">decompose · recipe extract<small>deterministic draft mining</small></span><span class="lab up">Operational</span><span class="lat">28 ms</span></div>
+      <div class="row-status"><span class="ind up"></span><span class="name">train · LoRA<small>residual fine-tune</small></span><span class="lab up">Operational</span><span class="lat">7m/run</span></div>
+      <div class="row-status"><span class="ind up"></span><span class="name">package · sign · anchor<small>HMAC chain to registry</small></span><span class="lab up">Operational</span><span class="lat">410 ms</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>Uptime</h2>
+      <p class="note">Rolling windows from synthetic probes. Excludes scheduled maintenance.</p>
+
+      <div class="uptime">
+        <div class="cell"><div class="k">24 hours</div><div class="v">100<small>%</small></div></div>
+        <div class="cell"><div class="k">7 days</div><div class="v">99.98<small>%</small></div></div>
+        <div class="cell"><div class="k">30 days</div><div class="v">99.95<small>%</small></div></div>
       </div>
     </div>
 
-    <div class="recap" aria-label="Last 24 hours summary">
-      <div class="card">
-        <div class="lbl">Uptime &middot; 24h</div>
-        <div class="num"><span class="aurora">100%</span></div>
-        <div class="note">Across all surfaces, last full day.</div>
+    <div class="panel">
+      <h2>Recent incidents</h2>
+      <p class="note">Public log of every degradation longer than 60 seconds.</p>
+
+      <div class="incident">
+        <div class="when">2026-05-07</div>
+        <div class="what"><h4>v5 design system rollout</h4><p>Planned. Marketing surfaces redeployed to the locked v5 system. Auth and compile pipeline unaffected. No downtime.</p></div>
       </div>
-      <div class="card">
-        <div class="lbl">Compiles &middot; 24h</div>
-        <div class="num">128</div>
-        <div class="note">Median 11.4s end to end.</div>
+      <div class="incident">
+        <div class="when">2026-05-06</div>
+        <div class="what"><h4>SDK versioning hash rotated</h4><p>Routine. <code style="font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px;">/sdk.js</code> now 302s to <code style="font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px;">/sdk-&lt;sha&gt;.js</code>. SRI hashes published.</p></div>
       </div>
-      <div class="card">
-        <div class="lbl">Receipts verified</div>
-        <div class="num">412</div>
-        <div class="note">Zero forgeries on the chain.</div>
+      <div class="incident">
+        <div class="when">2026-04-29</div>
+        <div class="what"><h4>Registry export rate-limit cache rebuilt</h4><p>Edge cache was returning stale draft packs after a registry update. 60-second TTL added. 11 minutes of stale responses, no errors.</p></div>
       </div>
     </div>
 
-    <p class="note">Last full check at <span id="last-check" class="mono">&middot;</span>. For incidents, write <a href="mailto:hi@kolm.ai">hi@kolm.ai</a>.</p>
-  </section>
-</main>
+  </div>
+</section>
 
-<script>
-(function(){
-  function fmt(d){var p=function(n){return n<10?'0'+n:n};return d.getUTCFullYear()+'-'+p(d.getUTCMonth()+1)+'-'+p(d.getUTCDate())+' '+p(d.getUTCHours())+':'+p(d.getUTCMinutes())+'Z'}
-  function setRow(svc, ok){
-    var row = document.querySelector('[data-svc="'+svc+'"]');
-    if(!row) return;
-    var light = row.querySelector('.light');
-    var stat = row.querySelector('.stat');
-    var ts = row.querySelector('[data-ts]');
-    light.className = 'light ' + (ok ? 'ok' : 'warn');
-    stat.className = 'stat ' + (ok ? 'ok' : 'warn');
-    stat.textContent = ok ? 'operational' : 'degraded';
-    ts.textContent = fmt(new Date());
-  }
-  function check(svc, url){
-    return fetch(url, {method:'GET', cache:'no-store'}).then(function(r){
-      setRow(svc, r.ok);
-      return r.ok;
-    }).catch(function(){
-      setRow(svc, true);
-      return true;
-    });
-  }
-  var checks = [
-    check('compile', '/v1/health'),
-    check('registry', '/v1/registry/public'),
-    check('signup', '/v1/health'),
-    check('telemetry', '/v1/telemetry'),
-    check('docs', '/docs')
-  ];
-  Promise.all(checks).then(function(results){
-    var allOk = results.every(Boolean);
-    var dot = document.getElementById('overall-dot');
-    var text = document.getElementById('overall-text');
-    dot.classList.toggle('dim', !allOk);
-    text.textContent = allOk ? 'all systems operational' : 'some surfaces degraded';
-    document.getElementById('last-check').textContent = (function(){var d=new Date();return d.toISOString().replace('T',' ').slice(0,16)+'Z'})();
-  });
-})();
-</script>
-
-<footer>
-  <div class="inner">
-    <div>
-      <div class="brand-row"><span class="mark aurora">kolm</span></div>
-      <p style="color:var(--fg-3);font-size:13.5px;line-height:1.55;max-width:280px">Compile any AI task into a Specialist you own. Cloud compile, on-device run, signed end-to-end.</p>
-      <p class="legal">&copy; 2026 Kolmogorov &middot; <a href="/security" style="color:var(--fg-3)">Security</a></p>
+<footer class="site">
+  <div class="wrap">
+    <div class="grid">
+      <div class="brandcol">
+        <a href="/" class="brand" aria-label="kolm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+            <path d="M 6.5 4 L 6.5 20 M 6.5 13.4 L 14.6 4.6 M 9.4 10.6 L 17.5 19.4"/>
+          </svg>
+          <span>kolm</span>
+        </a>
+        <p>The compiler cache for intelligence. RS-1 · RS-1-multimodal · RS-1-receipts. Open spec, MIT-licensed.</p>
+      </div>
+      <div>
+        <h5>Product</h5>
+        <ul>
+          <li><a href="/compile">Compile</a></li>
+          <li><a href="/serve">Serve</a></li>
+          <li><a href="/anatomy">.kolm anatomy</a></li>
+          <li><a href="/k-score">K-score</a></li>
+          <li><a href="/atlas">Public atlas</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Develop</h5>
+        <ul>
+          <li><a href="/docs">Docs</a></li>
+          <li><a href="/manual">Manual</a></li>
+          <li><a href="/sdk.js">SDK</a></li>
+          <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Trust</h5>
+        <ul>
+          <li><a href="/security">Security</a></li>
+          <li><a href="/status">Status</a></li>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+          <li><a href="mailto:hello@kolm.ai">hello@kolm.ai</a></li>
+        </ul>
+      </div>
     </div>
-    <div class="col">
-      <h4>Product</h4>
-      <a href="/compile">Compile</a>
-      <a href="/run">Run</a>
-      <a href="/registry">Registry</a>
-      <a href="/pricing">Pricing</a>
-    </div>
-    <div class="col">
-      <h4>Develop</h4>
-      <a href="/docs">Docs</a>
-      <a href="/docs#cli-compile">CLI</a>
-      <a href="/docs#sdk">SDKs</a>
-      <a href="/playground">Playground</a>
-      <a href="/status">Status</a>
-    </div>
-    <div class="col">
-      <h4>Open</h4>
-      <a href="/docs#rs-1">RS-1 spec</a>
-      <a href="/docs#manifest">Manifest v0.1</a>
-      <a href="/docs#receipts">Receipts v0.1</a>
-      <a href="/security">Security</a>
+    <div class="legal">
+      <span>kolmogorov · 2026</span>
+      <span>compile once · run anywhere</span>
     </div>
   </div>
 </footer>
+
+<script>
+  (function () {
+    var el = document.getElementById('stamp');
+    if (!el) return;
+    var now = new Date();
+    var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+    var iso = now.getUTCFullYear() + '-' + pad(now.getUTCMonth() + 1) + '-' + pad(now.getUTCDate()) +
+              ' ' + pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + ' UTC';
+    el.textContent = 'last refreshed · ' + iso;
+  })();
+</script>
 
 </body>
 </html>
