@@ -307,6 +307,19 @@
     font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-faint);
     flex-wrap: wrap; gap: 12px;
   }
+
+  .plate{position:relative;margin:40px 0 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:#050507;isolation:isolate}
+  .plate .img{position:relative;aspect-ratio:16/9;background-position:center;background-size:cover;background-repeat:no-repeat}
+  .plate .img::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 50%,rgba(8,8,10,0.78) 100%),linear-gradient(90deg,rgba(8,8,10,0.55) 0%,transparent 30%,transparent 70%,rgba(8,8,10,0.55) 100%)}
+  .plate .img::before{content:"";position:absolute;left:12%;right:12%;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(124,140,255,0.5),transparent);pointer-events:none;z-index:2}
+  .plate .stamp{position:absolute;top:18px;left:20px;z-index:3;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:0.20em;text-transform:uppercase;color:var(--ink-mute);border:1px solid rgba(124,140,255,0.22);background:rgba(10,10,10,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 11px;border-radius:4px}
+  .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(124,140,255,0.85)}
+  .plate .cap{position:absolute;left:24px;right:24px;bottom:20px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+  .plate .cap .title{font-family:var(--sans);font-size:clamp(18px,2vw,24px);font-weight:540;letter-spacing:-0.018em;line-height:1.18;color:var(--ink);max-width:62%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
+  .plate .cap .title .tone{background:linear-gradient(170deg,#d4daff 0%,#93a1ff 50%,#7c8cff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .plate .cap .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);letter-spacing:0.06em;text-align:right;line-height:1.7}
+  .plate .cap .meta b{color:var(--ink);font-weight:520}
+  @media(max-width:720px){.plate .cap{left:14px;right:14px;bottom:12px;flex-direction:column;align-items:flex-start;gap:8px}.plate .cap .title{font-size:14px;max-width:100%}.plate .cap .meta{text-align:left;font-size:10px}.plate .stamp{top:12px;left:12px;font-size:9px;padding:4px 9px}}
 </style>
 </head>
 <body>
@@ -350,6 +363,15 @@
     <span class="pill"><span class="dot"></span>BYO frontier key · local runtime always free</span>
     <h1 class="hero-h1">You pay for the cache.<br><span class="tone">The frontier bill stays yours.</span></h1>
     <p class="lede"><b>kolm</b> never resells tokens. You bring the model API key you already have. We compile against it; you keep the artifact. Run it anywhere, forever, at zero marginal cost.</p>
+
+    <figure class="plate" role="img" aria-label="A signed kolm artifact at rest — your file, your bill, your run.">
+      <div class="img" style="background-image:url(/img/horizon-artifact.webp)"></div>
+      <span class="stamp"><span class="dot"></span>pricing · BYO key</span>
+      <div class="cap">
+        <div class="title">Cache once. <span class="tone">Run forever.</span></div>
+        <div class="meta">no token resale<br><b>artifact is yours</b></div>
+      </div>
+    </figure>
   </div>
 </section>
 
