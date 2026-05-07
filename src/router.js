@@ -60,13 +60,15 @@ const PRICING = {
 // (recipe_source, input) → output. Anyone can re-verify with /v1/receipts/verify.
 // This is the attestation layer that distinguishes Recipe from any LLM call.
 const RECEIPT_VERSION = 'rs-1';
-// Production refuses to start without a real secret. Dev fallback is only used
-// when NODE_ENV !== 'production' (local hacking, smoke tests).
+// Production logs a stern warning if the secret isn't set (and refuses to
+// issue or verify receipts), but still boots so static pages stay reachable.
+// Dev uses a known fallback for local hacking / smoke tests.
 const RECEIPT_SECRET = (() => {
   const s = process.env.RECIPE_RECEIPT_SECRET;
   if (s) return s;
   if (process.env.NODE_ENV === 'production') {
-    throw new Error('RECIPE_RECEIPT_SECRET must be set in production. Set it on Railway env.');
+    console.error('[router] WARNING: RECIPE_RECEIPT_SECRET not set — receipt endpoints will 503. Set it on Railway env.');
+    return null;
   }
   return 'ks_receipt_dev_secret_change_in_prod';
 })();
@@ -98,12 +100,14 @@ function buildReceipt({ source_hash, input, output, version_id, latency_us, cach
     cache_hit: !!cache_hit,
     latency_us: latency_us || 0,
   };
+  if (!RECEIPT_SECRET) return { ...payload, hmac: null, _error: 'receipt secret unavailable' };
   const canonical = canonicalJson(payload);
   const hmac = crypto.createHmac('sha256', RECEIPT_SECRET).update(canonical).digest('hex');
   return { ...payload, hmac };
 }
 
 function verifyReceipt(receipt) {
+  if (!RECEIPT_SECRET) return { valid: false, reason: 'receipt secret unavailable on this server' };
   if (!receipt || typeof receipt !== 'object') return { valid: false, reason: 'no receipt' };
   if (receipt.spec !== RECEIPT_VERSION) return { valid: false, reason: 'unknown spec ' + receipt.spec };
   const { hmac, ...payload } = receipt;
@@ -327,6 +331,7 @@ export function buildRouter() {
   // v0.1 receipt (kolm_version="0.1", chain[], signature). Also accepts
   // {artifact_hash, signature} drive-by shape used by lightweight callers.
   r.post('/v1/receipts/verify', (req, res) => {
+    if (!RECEIPT_SECRET) return res.status(503).json({ error: 'receipt secret not configured on this server' });
     const { receipt, input, output, artifact_hash: bodyArtifactHash, signature: bodySignature } = req.body || {};
     const reasons = [];
 

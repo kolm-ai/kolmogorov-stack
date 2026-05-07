@@ -31,7 +31,8 @@ const SIGN_SECRET = (() => {
   const s = process.env.RECIPE_RECEIPT_SECRET || process.env.KOLM_ARTIFACT_SECRET;
   if (s) return s;
   if (process.env.NODE_ENV === 'production') {
-    throw new Error('RECIPE_RECEIPT_SECRET (or KOLM_ARTIFACT_SECRET) must be set in production. Set it on Railway env.');
+    console.error('[artifact] WARNING: RECIPE_RECEIPT_SECRET not set — /v1/compile will 503. Set it on Railway env.');
+    return null;
   }
   return 'ks_receipt_dev_secret_change_in_prod';
 })();
@@ -295,6 +296,11 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
 // axis includes the K-score bytes themselves.
 export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, judge_id, tier }) {
+  if (!SIGN_SECRET) {
+    const e = new Error('cannot build .kolm: RECIPE_RECEIPT_SECRET not set on server');
+    e.statusCode = 503;
+    throw e;
+  }
   const dir = outDir || path.join(os.tmpdir(), 'kolm-artifacts');
   fs.mkdirSync(dir, { recursive: true });
 
@@ -354,6 +360,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
 }
 
 export function verifyManifestSignature(manifest_json, signature) {
+  if (!SIGN_SECRET) return { valid: false, reason: 'sign secret unavailable on server' };
   try {
     const sig = typeof signature === 'string' ? JSON.parse(signature) : signature;
     if (!sig || sig.spec !== ARTIFACT_SPEC || !sig.hmac) return { valid: false, reason: 'bad signature shape' };
