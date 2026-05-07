@@ -769,7 +769,7 @@
 
     <h1 class="hero-h1">AI that knows your users.<br><span class="tone">Without knowing your users.</span></h1>
 
-    <p class="lede">Cloud AI gets smart by sending your users' data away. <b>kolm inverts that.</b> <code>kolm compile</code> takes a task description, your seed examples, your evals, and the model API key you already pay for. It hands back a single signed <code>.kolm</code> file that runs <b>on your users' device</b>, learns from <b>the data already on their device</b>, and <b>never egresses.</b> Frontier models are the compiler. <code>.kolm</code> is the binary.</p>
+    <p class="lede">Cloud AI gets smart by sending your users' data away. <b>kolm inverts that.</b> Frontier models compile your task once, in your VPC. The signed <code>.kolm</code> ships to the user's device, learns from <b>the data already on their device</b>, and <b>never egresses.</b> Frontier models are the compiler. <code>.kolm</code> is the binary.</p>
 
     <div class="cta-row">
       <a href="/compile" class="btn-primary">Get kolm <code>·</code> <code>kolm compile</code></a>
@@ -821,11 +821,11 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">·</span><span>The inversion</span></div>
     <h2>The more private it is,<br>the more <span class="tone">personal it can be.</span></h2>
-    <p class="sec-lede">Cloud AI gets smart by sending your users' data away. kolm gets smart by leaving it there. The frontier teaches the artifact in your VPC; the artifact ships to the device; the data the user already trusts your app with stays where they trust it. Privacy and personalization stop being a tradeoff.</p>
+    <p class="sec-lede"><b>Privacy and personalization stop being a tradeoff.</b> Below: what every prompt, photo, voice note, and email sent to a cloud AI looks like on the wire vs. what a <code>.kolm</code> running on the device sends.</p>
 
     <div class="trust-split" aria-label="Cloud AI versus kolm-powered AI: data egress comparison">
       <div class="ts-col before">
-        <div class="ts-head"><span class="ts-tag">cloud AI</span><span class="ts-sub">what your users send to a third party</span></div>
+        <div class="ts-head"><span class="ts-tag">cloud AI</span><span class="ts-sub">user data on the wire, per request</span></div>
         <ul>
           <li><span class="x">×</span> every prompt, in clear text</li>
           <li><span class="x">×</span> every uploaded photo</li>
@@ -839,7 +839,7 @@
       </div>
       <div class="ts-arrow" aria-hidden="true">VS</div>
       <div class="ts-col after">
-        <div class="ts-head"><span class="ts-tag good">kolm-powered AI</span><span class="ts-sub">what your users send to a third party</span></div>
+        <div class="ts-head"><span class="ts-tag good">kolm-powered AI</span><span class="ts-sub">user data on the wire, per request</span></div>
         <div class="ts-empty">
           <div class="big">Nothing.</div>
           <p>The artifact runs on the device. The user's data is the recall index, on the device. Frontier intelligence was distilled into the artifact at compile time. <b>Runtime egress: zero.</b></p>
