@@ -40,6 +40,7 @@ Your product team wants AI features. Your legal and security teams do not want P
 ## Visual System
 
 - Base: near-black infrastructure shell.
+- Brand mark: bracketed K. The left bracket represents the compiler boundary and artifact package; the K stroke represents the compiled behavior crossing from cloud spec into device execution; the three short internal bars represent eval evidence, manifest, and receipt.
 - Brand energy: aurora ribbons, not decorative blobs.
 - Accent roles:
   - Cyan: compile and platform.
@@ -48,6 +49,14 @@ Your product team wants AI features. Your legal and security teams do not want P
   - Amber: risk and policy.
 - Type: SF Pro/system UI for product confidence; SF Mono for receipts, artifacts, scores, targets, and CLI.
 - Shape language: 8px radius, thin borders, dense information, no oversized cards inside cards.
+
+## Logo Assets
+
+- `/logo-mark.svg`: transparent bracketed K mark for headers and inline use.
+- `/logo-lockup.svg`: mark plus wordmark and "Verified AI Artifacts" descriptor.
+- `/favicon.svg`: app-icon version with dark rounded square and gradient edge.
+- `/og-card.svg`: social preview card with the new mark and positioning.
+- `/brand-logo-exploration.png`: generated exploration board used to choose the final direction.
 
 ## Generated Hero Image Prompt
 

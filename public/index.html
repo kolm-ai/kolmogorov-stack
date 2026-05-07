@@ -199,17 +199,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   font-weight:650;
 }
 .brand-mark{
-  width:30px;
-  height:30px;
-  border:1px solid rgba(89,216,255,.44);
-  border-radius:8px;
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:0;
   display:grid;
   place-items:center;
-  background:linear-gradient(145deg,rgba(89,216,255,.2),rgba(167,139,250,.16) 48%,rgba(67,230,166,.12));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 10px 26px rgba(0,0,0,.22);
+  background:transparent;
+  box-shadow:none;
 }
-.brand-mark svg{width:18px;height:18px}
-.brand-name{font-size:18px}
+.brand-mark img{width:100%;height:100%;object-fit:contain}
+.brand-name{font-size:18px;letter-spacing:.08em;font-weight:620;text-transform:lowercase}
 .nav-links{display:flex;align-items:center;gap:4px}
 .nav-links a,.top-actions a{
   min-height:44px;
@@ -916,11 +916,9 @@ footer a:hover{color:var(--ink)}
   <div class="topbar-inner">
     <a class="brand" href="/" aria-label="Kolm home">
       <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M6 4v16M18 5l-8 7 8 7M10 12h9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <img src="/logo-mark.svg" width="34" height="34" alt="">
       </span>
-      <span class="brand-name">Kolm</span>
+      <span class="brand-name">kolm</span>
     </a>
     <nav class="nav-links" aria-label="Primary navigation">
       <a href="#platform">Platform</a>
@@ -1421,11 +1419,9 @@ kolm install post-visit-guide</pre>
     <div>
       <a class="brand" href="/" aria-label="Kolm home">
         <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M6 4v16M18 5l-8 7 8 7M10 12h9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <img src="/logo-mark.svg" width="34" height="34" alt="">
         </span>
-        <span class="brand-name">Kolm</span>
+        <span class="brand-name">kolm</span>
       </a>
       <p>The verified AI artifact layer. Compile in the cloud. Personalize on device. Verify every artifact.</p>
       <p>&copy; 2026 Kolmogorov.</p>

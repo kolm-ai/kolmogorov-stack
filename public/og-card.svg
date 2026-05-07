@@ -5,37 +5,47 @@
       <stop offset=".5" stop-color="#0b111b"/>
       <stop offset="1" stop-color="#07090f"/>
     </linearGradient>
-    <linearGradient id="line" x1="110" y1="130" x2="1120" y2="512" gradientUnits="userSpaceOnUse">
+    <linearGradient id="ribbon" x1="40" y1="170" x2="1160" y2="520" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#43e6a6" stop-opacity="0"/>
-      <stop offset=".22" stop-color="#43e6a6"/>
+      <stop offset=".2" stop-color="#43e6a6"/>
       <stop offset=".52" stop-color="#59d8ff"/>
-      <stop offset=".78" stop-color="#a78bfa"/>
+      <stop offset=".8" stop-color="#a78bfa"/>
       <stop offset="1" stop-color="#ff7aa5" stop-opacity="0"/>
     </linearGradient>
+    <linearGradient id="kA" x1="116" y1="126" x2="178" y2="174" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#43e6a6"/>
+      <stop offset=".48" stop-color="#59d8ff"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="kB" x1="118" y1="184" x2="178" y2="232" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#59d8ff"/>
+      <stop offset=".48" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#43e6a6"/>
+    </linearGradient>
     <filter id="blur" x="-20%" y="-40%" width="140%" height="180%">
-      <feGaussianBlur stdDeviation="28"/>
+      <feGaussianBlur stdDeviation="32"/>
     </filter>
-    <pattern id="grid" width="54" height="54" patternUnits="userSpaceOnUse">
-      <path d="M54 0H0V54" fill="none" stroke="#d5e3ff" stroke-opacity=".08"/>
+    <pattern id="grid" width="56" height="56" patternUnits="userSpaceOnUse">
+      <path d="M56 0H0V56" fill="none" stroke="#d5e3ff" stroke-opacity=".075"/>
     </pattern>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <rect width="1200" height="630" fill="url(#grid)" opacity=".55"/>
-  <g filter="url(#blur)" opacity=".62">
-    <path d="M-30 355C152 206 324 206 518 318C744 448 898 420 1088 256C1172 184 1230 166 1280 170" fill="none" stroke="url(#line)" stroke-width="86" stroke-linecap="round"/>
+  <g filter="url(#blur)" opacity=".55">
+    <path d="M-60 382C130 212 330 224 536 338C760 462 914 420 1100 260C1184 188 1230 168 1280 170" fill="none" stroke="url(#ribbon)" stroke-width="88" stroke-linecap="round"/>
   </g>
-  <path d="M-40 338C150 194 330 204 520 314C744 444 900 414 1088 250C1176 174 1230 160 1280 168" fill="none" stroke="url(#line)" stroke-width="30" stroke-linecap="round" opacity=".9"/>
-  <g transform="translate(74 74)">
-    <rect width="70" height="70" rx="16" fill="#0b121d" stroke="#59d8ff" stroke-opacity=".72" stroke-width="2"/>
-    <path d="M24 18v34M49 19L31 35l18 16M31 35h20" fill="none" stroke="#8ef5d0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M-70 356C132 202 328 212 536 330C762 458 920 414 1100 254C1184 178 1232 160 1280 166" fill="none" stroke="url(#ribbon)" stroke-width="28" stroke-linecap="round" opacity=".82"/>
+  <g transform="translate(74 80)">
+    <path d="M70 0H28C10 0 0 10 0 28v130c0 18 10 28 28 28h42" fill="none" stroke="#f6f8fb" stroke-width="18" stroke-linecap="square" stroke-linejoin="round"/>
+    <path d="M90 93L166 17" fill="none" stroke="url(#kA)" stroke-width="20" stroke-linecap="square"/>
+    <path d="M90 93L166 169" fill="none" stroke="url(#kB)" stroke-width="20" stroke-linecap="square"/>
+    <path d="M44 63h34" stroke="#59d8ff" stroke-width="9" stroke-linecap="round"/>
+    <path d="M44 93h30" stroke="#43e6a6" stroke-width="9" stroke-linecap="round"/>
+    <path d="M44 123h34" stroke="#a78bfa" stroke-width="9" stroke-linecap="round"/>
   </g>
-  <text x="74" y="218" fill="#f6f8fb" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Arial,sans-serif" font-size="82" font-weight="700">Kolm</text>
-  <text x="74" y="304" fill="#f6f8fb" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Arial,sans-serif" font-size="62" font-weight="700">Verified AI artifacts</text>
-  <text x="74" y="376" fill="#d9e1ec" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Arial,sans-serif" font-size="32" font-weight="500">for regulated apps.</text>
-  <text x="76" y="484" fill="#9fb0c2" font-family="'SF Mono',Menlo,Consolas,monospace" font-size="22">compile in cloud  |  personalize on device  |  verify receipts</text>
-  <g transform="translate(830 372)">
-    <rect width="266" height="104" rx="8" fill="#0a1018" stroke="#d5e3ff" stroke-opacity=".18"/>
-    <text x="22" y="38" fill="#43e6a6" font-family="'SF Mono',Menlo,Consolas,monospace" font-size="16">health-guide.kolm</text>
-    <text x="22" y="70" fill="#a8b3c2" font-family="'SF Mono',Menlo,Consolas,monospace" font-size="14">signed | K=0.94 | local</text>
-  </g>
+  <text x="270" y="184" fill="#f6f8fb" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Arial,sans-serif" font-size="80" font-weight="560" letter-spacing="14">kolm</text>
+  <text x="276" y="232" fill="#59d8ff" font-family="'SF Mono',Menlo,Consolas,monospace" font-size="18" letter-spacing="8">VERIFIED AI ARTIFACTS</text>
+  <text x="76" y="402" fill="#f6f8fb" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Arial,sans-serif" font-size="56" font-weight="700">Private AI artifacts</text>
+  <text x="76" y="470" fill="#d9e1ec" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Arial,sans-serif" font-size="30" font-weight="500">Compile in cloud. Personalize on device. Verify receipts.</text>
+  <text x="78" y="552" fill="#9fb0c2" font-family="'SF Mono',Menlo,Consolas,monospace" font-size="18">Core ML | LiteRT | ONNX | private registries | signed manifests</text>
 </svg>
