@@ -16,19 +16,22 @@
 <meta property="og:description" content="Frontier models are the compiler. .kolm is the binary. A signed artifact that runs on-device with verified output. HIPAA · SOC 2 · EU AI Act path.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image" content="https://kolm.ai/img/brand-og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="kolm — frontier models are the compiler, .kolm is the binary">
+<meta property="og:image:alt" content="kolm — a signed .kolm artifact rendered as a matte-black slab engraved with periwinkle micro-glyphs. Frontier models are the compiler. .kolm is the binary.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="kolm — The AI Compiler">
-<meta name="twitter:description" content="Compile once. Run on-device. Verifiable. The build system for private AI.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="kolm — The AI Compiler. Compile once. Run locally.">
+<meta name="twitter:description" content="A signed .kolm artifact runs on-device, offline, with k-sample verified output. Frontier models are the compiler. The data never leaves the device.">
+<meta name="twitter:image" content="https://kolm.ai/img/brand-og.png">
 <link rel="canonical" href="https://kolm.ai/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/img/brand-mark.png">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" as="image" href="/img/hero-atmosphere.png" fetchpriority="high">
+<link rel="preload" as="image" href="/img/hero-artifact.png" fetchpriority="high">
+<link rel="preload" as="image" href="/img/compile-distill.png">
+<link rel="preload" as="image" href="/img/mcp-fanout.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -360,7 +363,7 @@
     .hero-built a:first-of-type { padding-left: 0; }
   }
 
-  /* artifact card — frontier centerpiece */
+  /* artifact card — frontier centerpiece, real product photography */
   .artifact {
     background:
       linear-gradient(180deg, rgba(124,140,255,0.025) 0%, transparent 22%),
@@ -368,7 +371,7 @@
     border: 1px solid var(--line-strong);
     border-radius: 14px;
     overflow: hidden;
-    max-width: 1020px;
+    max-width: 1080px;
     position: relative;
   }
   /* luminous top edge highlight */
@@ -376,6 +379,67 @@
     content: ""; position: absolute; left: 12%; right: 12%; top: 0; height: 1px;
     background: linear-gradient(90deg, transparent, rgba(124,140,255,0.45), transparent);
     pointer-events: none;
+  }
+  /* PHOTO FRAME — real render of the .kolm artifact */
+  .artifact .photo {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #050507 url(/img/hero-artifact.png) center/cover no-repeat;
+    border-bottom: 1px solid var(--line);
+  }
+  .artifact .photo::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      linear-gradient(180deg, transparent 60%, rgba(10,10,10,0.55) 100%),
+      radial-gradient(ellipse 70% 80% at 50% 50%, transparent 30%, rgba(10,10,10,0.45) 100%);
+  }
+  .artifact .photo .badge {
+    position: absolute; top: 22px; left: 24px;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.20em;
+    text-transform: uppercase; color: var(--ink-mute);
+    border: 1px solid rgba(124,140,255,0.22);
+    background: rgba(10,10,10,0.62);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    padding: 6px 12px; border-radius: 4px;
+    z-index: 1;
+  }
+  .artifact .photo .badge .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--good); box-shadow: 0 0 10px var(--good); }
+  .artifact .photo .filename {
+    position: absolute; bottom: 22px; left: 24px;
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    letter-spacing: -0.005em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    z-index: 1;
+  }
+  .artifact .photo .filename .ext { color: var(--accent); }
+  .artifact .photo .kfloat {
+    position: absolute; top: 22px; right: 24px;
+    display: flex; flex-direction: column; align-items: flex-end;
+    z-index: 1;
+  }
+  .artifact .photo .kfloat .lab {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.20em;
+    text-transform: uppercase; color: var(--ink-mute);
+    background: rgba(10,10,10,0.62);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    padding: 5px 10px; border-radius: 4px;
+    border: 1px solid rgba(124,140,255,0.18);
+  }
+  .artifact .photo .kfloat .num {
+    margin-top: 8px;
+    font-size: 64px; font-weight: 500; letter-spacing: -0.05em; line-height: 0.92;
+    background: linear-gradient(170deg, #d4daff 0%, #93a1ff 38%, #7c8cff 68%, #5e6fd6 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 50px rgba(124,140,255,0.45);
+    font-feature-settings: "tnum", "ss01";
+  }
+  @media (max-width: 720px) {
+    .artifact .photo .kfloat .num { font-size: 44px; }
+    .artifact .photo .badge { top: 14px; left: 14px; font-size: 9.5px; padding: 5px 10px; }
+    .artifact .photo .kfloat { top: 14px; right: 14px; }
+    .artifact .photo .filename { bottom: 14px; left: 14px; font-size: 12px; }
   }
   .artifact .head {
     display: flex; align-items: center; justify-content: space-between;
@@ -850,11 +914,11 @@
   .closing { padding: 180px 0 160px; position: relative; overflow: hidden; isolation: isolate; }
   .closing::before {
     content: ""; position: absolute; inset: 0;
-    background-image: url(/img/closing-atmosphere.png);
+    background-image: url(/img/horizon-artifact.png);
     background-size: cover;
-    background-position: center 64%;
+    background-position: center 58%;
     background-repeat: no-repeat;
-    opacity: 0.72;
+    opacity: 0.78;
     mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 82%, transparent 100%);
     -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 82%, transparent 100%);
     pointer-events: none;
@@ -1210,6 +1274,119 @@
   /* k-grid — refined hover on the hero artifact cells */
   .artifact .k-grid .cell { transition: background 180ms; }
   .artifact .k-grid .cell:hover { background: rgba(124,140,255,0.04); }
+
+  /* PHOTO PLATE — section-spanning product render with caption frame */
+  .plate {
+    position: relative;
+    margin-top: 56px;
+    border: 1px solid var(--line-strong);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #050507;
+    isolation: isolate;
+  }
+  .plate .img {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  .plate .img::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      linear-gradient(180deg, transparent 50%, rgba(8,8,10,0.78) 100%),
+      linear-gradient(90deg, rgba(8,8,10,0.55) 0%, transparent 30%, transparent 70%, rgba(8,8,10,0.55) 100%);
+  }
+  .plate .img::before {
+    content: ""; position: absolute; left: 12%; right: 12%; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(124,140,255,0.5), transparent);
+    pointer-events: none; z-index: 2;
+  }
+  .plate .stamp {
+    position: absolute; top: 22px; left: 24px;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.20em;
+    text-transform: uppercase; color: var(--ink-mute);
+    border: 1px solid rgba(124,140,255,0.22);
+    background: rgba(10,10,10,0.62);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    padding: 6px 12px; border-radius: 4px;
+    z-index: 3;
+  }
+  .plate .stamp .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px rgba(124,140,255,0.85); }
+  .plate .cap {
+    position: absolute; left: 30px; right: 30px; bottom: 26px;
+    z-index: 3;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+  }
+  .plate .cap .title {
+    font-family: var(--sans);
+    font-size: clamp(20px, 2.2vw, 28px);
+    font-weight: 540; letter-spacing: -0.018em; line-height: 1.18;
+    color: var(--ink);
+    max-width: 60%;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.55);
+  }
+  .plate .cap .title .tone {
+    background: linear-gradient(170deg, #d4daff 0%, #93a1ff 50%, #7c8cff 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .plate .cap .meta {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); letter-spacing: 0.06em;
+    text-align: right; line-height: 1.7;
+  }
+  .plate .cap .meta b { color: var(--ink); font-weight: 520; }
+  @media (max-width: 720px) {
+    .plate .cap { left: 16px; right: 16px; bottom: 14px; flex-direction: column; align-items: flex-start; gap: 10px; }
+    .plate .cap .title { font-size: 17px; max-width: 100%; }
+    .plate .cap .meta { text-align: left; font-size: 10.5px; }
+    .plate .stamp { top: 14px; left: 14px; font-size: 9.5px; padding: 5px 10px; }
+  }
+
+  /* portrait variant for the on-device phone shot */
+  .plate.portrait { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .plate.portrait .img {
+    aspect-ratio: auto;
+    min-height: 520px;
+  }
+  .plate.portrait .copy {
+    padding: 56px 48px;
+    display: flex; flex-direction: column; justify-content: center; gap: 18px;
+    background: linear-gradient(180deg, rgba(124,140,255,0.025) 0%, transparent 60%), var(--bg-card);
+    border-left: 1px solid var(--line);
+  }
+  .plate.portrait .copy .eyebrow { margin: 0 0 2px; }
+  .plate.portrait .copy h3 {
+    font-size: clamp(22px, 2.4vw, 32px);
+    font-weight: 540; letter-spacing: -0.02em; line-height: 1.16;
+    color: var(--ink); margin: 0;
+  }
+  .plate.portrait .copy h3 .tone {
+    background: linear-gradient(170deg, #d4daff 0%, #93a1ff 50%, #7c8cff 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .plate.portrait .copy p {
+    color: var(--ink-mute); font-size: 14.5px; line-height: 1.65; max-width: 44ch; margin: 0;
+  }
+  .plate.portrait .copy ul { list-style: none; padding: 0; margin: 4px 0 0; display: flex; flex-direction: column; gap: 6px; }
+  .plate.portrait .copy ul li {
+    font-family: var(--mono); font-size: 12px; color: var(--ink-mute); letter-spacing: 0.04em;
+    padding-left: 16px; position: relative;
+  }
+  .plate.portrait .copy ul li::before {
+    content: ""; position: absolute; left: 0; top: 8px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 8px rgba(124,140,255,0.8);
+  }
+  @media (max-width: 880px) {
+    .plate.portrait { grid-template-columns: 1fr; }
+    .plate.portrait .img { min-height: 380px; }
+    .plate.portrait .copy { padding: 32px 24px; border-left: none; border-top: 1px solid var(--line); }
+  }
 </style>
 </head>
 <body>
@@ -1219,10 +1396,16 @@
     <div class="left">
       <a href="/" class="brand" aria-label="kolm">
         <svg class="mark" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-          <g class="lyr lyr-1" opacity="0.42"><rect x="3.4" y="3.4" width="21.2" height="21.2" rx="5.4" stroke="#7c8cff" stroke-width="1.1"/></g>
-          <g class="lyr lyr-2" opacity="0.72"><rect x="5.4" y="5.4" width="17.2" height="17.2" rx="4.4" stroke="#7c8cff" stroke-width="1.2"/></g>
-          <g class="lyr lyr-3"><rect x="7.4" y="7.4" width="13.2" height="13.2" rx="3.4" fill="rgba(124,140,255,0.10)" stroke="#a8b3ff" stroke-width="1.3"/></g>
-          <path d="M 11 9.6 L 11 18.4 M 11 14.4 L 15.4 9.8 M 12.6 12.8 L 17 18.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" fill="none"/>
+          <defs>
+            <linearGradient id="kbar" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#a8b3ff"/>
+              <stop offset="50%" stop-color="#7c8cff"/>
+              <stop offset="100%" stop-color="#a8b3ff"/>
+            </linearGradient>
+          </defs>
+          <g class="lyr lyr-1"><rect x="9.5" y="7.4" width="9" height="1.6" rx="0.8" fill="url(#kbar)"/></g>
+          <g class="lyr lyr-2"><rect x="7" y="13" width="14" height="1.6" rx="0.8" fill="url(#kbar)"/></g>
+          <g class="lyr lyr-3"><rect x="4.5" y="18.6" width="19" height="1.6" rx="0.8" fill="url(#kbar)"/></g>
         </svg>
         <span>kolm</span>
       </a>
@@ -1269,14 +1452,11 @@
       <a href="/mobile">Consumer mobile</a>
     </div>
 
-    <div class="artifact">
-      <div class="head">
-        <div class="file">
-          <span class="chrome-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span class="icon">$</span>
-          <span>support-triage<span class="ext">.kolm</span></span>
-        </div>
-        <div class="ksum">K-score <span class="num">0.94</span></div>
+    <figure class="artifact" role="img" aria-label="A signed .kolm artifact: a matte-black slab engraved with a periwinkle micro-glyph grid, photographed on near-black, with K-score 0.94.">
+      <div class="photo">
+        <span class="badge"><span class="dot"></span>signed · verified</span>
+        <span class="filename">support-triage<span class="ext">.kolm</span></span>
+        <div class="kfloat"><span class="lab">K-score</span><span class="num">0.94</span></div>
       </div>
       <div class="k-grid">
         <div class="cell"><div class="lab">Size</div><div class="val">38<span class="u">MB</span></div></div>
@@ -1289,7 +1469,7 @@
         <div><span class="prompt">$</span> kolm serve --mcp <span class="arg">support-triage.kolm</span></div>
         <div class="clients">discovered by Claude · Codex · Cursor · Zed</div>
       </div>
-    </div>
+    </figure>
   </div>
 </section>
 
@@ -1363,6 +1543,15 @@
         <p>Verifier flags an input outside coverage. Frontier resolves it once. The next compile absorbs the gap and 03 becomes a 02.</p>
       </div>
     </div>
+
+    <figure class="plate" role="img" aria-label="Compile distillation: hundreds of fine periwinkle beams converge through a narrow aperture and funnel into a single glowing slab. Visualization of k-sample frontier output verified down to one signed artifact.">
+      <div class="img" style="background-image:url(/img/compile-distill.png)"></div>
+      <span class="stamp"><span class="dot"></span>kolm compile</span>
+      <div class="cap">
+        <div class="title">k-sample. Verify. <span class="tone">Distill into one signed file.</span></div>
+        <div class="meta"><b>k = 16</b> · frontier candidates<br>verifier pass · LoRA fit · pack signed</div>
+      </div>
+    </figure>
   </div>
 </section>
 
@@ -1633,6 +1822,20 @@ r = k.run(subject=subject, body=body)
     <h2>Teams that can't put their data <span class="tone">in someone else's cloud.</span></h2>
     <p class="sec-lede">The most useful AI is locked behind a privacy or cost wall. kolm keeps the model and the data on the side of the bar where the work happens.</p>
 
+    <figure class="plate portrait" aria-label="A matte-black phone in deep space, screen blank except for one small periwinkle dot — the visible signal that the .kolm artifact is running locally, offline, with the user's data inside.">
+      <div class="img" style="background-image:url(/img/run-on-device.png); background-position: center;"></div>
+      <div class="copy">
+        <div class="eyebrow"><span class="num">·</span><span>Compile once · run locally</span></div>
+        <h3>The dot is the only thing on the wire.<br><span class="tone">It never leaves the device.</span></h3>
+        <p>Inference, recall, and the personal LoRA all run inside the artifact, on the NPU your users already paid for. Cloud round-trip stops. The frontier bill stops. Audit risk stops.</p>
+        <ul>
+          <li>Apple Neural Engine · Snapdragon Hexagon · MediaTek APU</li>
+          <li>p50 80 ms · sub-10% battery / hr</li>
+          <li>Offline · airplane-mode safe · App Store review-clean</li>
+        </ul>
+      </div>
+    </figure>
+
     <div class="icp">
       <div class="icp-card">
         <div class="head">Consumer apps · iOS · Android · Web</div>
@@ -1687,6 +1890,15 @@ r = k.run(subject=subject, body=body)
     <div class="eyebrow"><span class="num">06</span><span>Serve · MCP-native</span></div>
     <h2>The agents you already use route to the cache automatically.</h2>
     <p class="sec-lede">Run <code style="font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px">kolm serve --mcp</code> and the artifact joins the local MCP bus. Claude, Codex, Cursor and Zed pick it up by name. Matching calls hit the cache instead of the frontier.</p>
+
+    <figure class="plate" role="img" aria-label="MCP fanout: a single luminous slab on the left projects four periwinkle beams to four geometric nodes — Claude, Codex, Cursor, and Zed — each one auto-discovering the artifact on the local bus.">
+      <div class="img" style="background-image:url(/img/mcp-fanout.png)"></div>
+      <span class="stamp"><span class="dot"></span>kolm serve --mcp</span>
+      <div class="cap">
+        <div class="title">One artifact. <span class="tone">Four agents discover it.</span></div>
+        <div class="meta"><b>Claude</b> · <b>Codex</b><br><b>Cursor</b> · <b>Zed</b></div>
+      </div>
+    </figure>
 
     <div class="compare">
       <div class="col before">
@@ -1793,6 +2005,15 @@ r = k.run(subject=subject, body=body)
         <p>Open spec (RS-1), open registry, open SDK. The first format with a K-score on the cover. The community we earn becomes the default credentialing system for on-device AI.</p>
       </div>
     </div>
+
+    <figure class="plate" role="img" aria-label="A horizontal chain of precise interlocking periwinkle hexagonal links glowing softly — visualization of the HMAC receipt chain that anchors every .kolm output back to the public Kolmogorov registry.">
+      <div class="img" style="background-image:url(/img/verification-chain.png)"></div>
+      <span class="stamp"><span class="dot"></span>HMAC receipts</span>
+      <div class="cap">
+        <div class="title">Every output links back to the <span class="tone">root of trust.</span></div>
+        <div class="meta">RS-1-receipts · MIT<br>anchored · reproducible · subpoena-clean</div>
+      </div>
+    </figure>
   </div>
 </section>
 
