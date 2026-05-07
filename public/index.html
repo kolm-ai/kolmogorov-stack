@@ -246,9 +246,35 @@
     font-size: 11px; letter-spacing: 0.06em; color: var(--ink-mute);
   }
 
+  /* VI band — neuro-optimized hero-trough fill (5-10% scroll) */
+  section.vi-band { padding: 64px 0 72px; position: relative; }
+  section.vi-band .wrap { max-width: 1100px; }
+  .vi-eyebrow { margin: 0 0 22px; }
+  .vi-figure { margin: 0; }
+  .vi-figure img {
+    display: block; width: 100%; height: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+  }
+  .vi-figure figcaption {
+    margin-top: 18px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+    color: var(--ink-mute); text-align: center; line-height: 1.6;
+  }
+  .vi-figure figcaption .vi-cap-num { color: var(--accent); font-weight: 540; }
+  .vi-figure figcaption .vi-cap-sep { color: var(--ink-faint); margin: 0 4px; }
+  .vi-figure figcaption .vi-cap-code {
+    font-family: var(--mono); font-size: 12px; color: var(--ink);
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 3px;
+    padding: 0 5px;
+  }
+  .vi-figure figcaption .vi-cap-zero { color: var(--accent); font-weight: 600; }
+
   /* SECTION FRAME */
   section { padding: 96px 0; position: relative; }
   section + section { border-top: 1px solid var(--line); }
+  section.vi-band + section { border-top: none; }
   .eyebrow {
     display: inline-flex; align-items: center; gap: 10px;
     font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
@@ -775,6 +801,22 @@
   </div>
 </section>
 
+<section class="vi-band" aria-label="The kolm compile pipeline: k samples distilled in your VPC become one verified artifact on the user's device">
+  <div class="wrap">
+    <div class="eyebrow vi-eyebrow"><span class="num">·</span><span>The compile pipeline</span></div>
+    <figure class="vi-figure">
+      <img src="/img/k-sample-verification.png" alt="Many parallel samples converging to a single verified output line, illustrating k-sample distillation" width="2176" height="1216" loading="lazy" decoding="async">
+      <figcaption>
+        <span class="vi-cap-num">k samples</span> distilled in your VPC
+        <span class="vi-cap-sep">·</span>
+        1 verified <code class="vi-cap-code">.kolm</code> shipped to the device
+        <span class="vi-cap-sep">·</span>
+        runtime egress = <span class="vi-cap-zero">0</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="num">·</span><span>The inversion</span></div>
@@ -1211,7 +1253,7 @@ curl -fsSL <span class="arg">kolm.ai/install.sh</span> | sh</div>
           <li>BAA · DPA · DPIA paths</li>
           <li>On-chain receipt anchoring</li>
         </ul>
-        <a href="mailto:hello@kolm.ai?subject=Enterprise" class="cta">Contact sales</a>
+        <a href="mailto:dev@kolm.ai?subject=Enterprise" class="cta">Contact sales</a>
       </div>
     </div>
   </div>
@@ -1280,7 +1322,7 @@ curl -fsSL <span class="arg">kolm.ai/install.sh</span> | sh</div>
           <li><a href="/status">Status</a></li>
           <li><a href="/privacy">Privacy</a></li>
           <li><a href="/terms">Terms</a></li>
-          <li><a href="mailto:hello@kolm.ai">hello@kolm.ai</a></li>
+          <li><a href="mailto:dev@kolm.ai">dev@kolm.ai</a></li>
         </ul>
       </div>
     </div>
