@@ -60,7 +60,16 @@ const PRICING = {
 // (recipe_source, input) → output. Anyone can re-verify with /v1/receipts/verify.
 // This is the attestation layer that distinguishes Recipe from any LLM call.
 const RECEIPT_VERSION = 'rs-1';
-const RECEIPT_SECRET = process.env.RECIPE_RECEIPT_SECRET || 'ks_receipt_dev_secret_change_in_prod';
+// Production refuses to start without a real secret. Dev fallback is only used
+// when NODE_ENV !== 'production' (local hacking, smoke tests).
+const RECEIPT_SECRET = (() => {
+  const s = process.env.RECIPE_RECEIPT_SECRET;
+  if (s) return s;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('RECIPE_RECEIPT_SECRET must be set in production. Set it on Railway env.');
+  }
+  return 'ks_receipt_dev_secret_change_in_prod';
+})();
 
 function sha256(s) {
   return crypto.createHash('sha256').update(typeof s === 'string' ? s : JSON.stringify(s)).digest('hex');
@@ -213,7 +222,7 @@ export function buildRouter() {
       return res.status(400).json({ error: 'api_key required' });
     }
     const t = findOne('tenants', x => x.api_key === api_key && !x._deleted);
-    const adminKey = process.env.ADMIN_KEY || 'ks_admin_change_me';
+    const adminKey = process.env.ADMIN_KEY || (process.env.NODE_ENV === 'production' ? null : 'ks_admin_change_me');
     if (!t && api_key !== adminKey) return res.status(401).json({ error: 'invalid api key' });
     const isProd = process.env.NODE_ENV === 'production' || !!process.env.RAILWAY_ENVIRONMENT;
     res.cookie('kolm_session', api_key, {
@@ -246,7 +255,7 @@ export function buildRouter() {
       return res.status(400).json({ error: 'api_key required' });
     }
     const t = findOne('tenants', x => x.api_key === api_key && !x._deleted);
-    const adminKey = process.env.ADMIN_KEY || 'ks_admin_change_me';
+    const adminKey = process.env.ADMIN_KEY || (process.env.NODE_ENV === 'production' ? null : 'ks_admin_change_me');
     if (!t && api_key !== adminKey) return res.status(401).json({ error: 'invalid api key' });
     const isProd = process.env.NODE_ENV === 'production' || !!process.env.RAILWAY_ENVIRONMENT;
     res.cookie('kolm_session', api_key, {

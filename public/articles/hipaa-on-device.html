@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HIPAA-Safe AI on a Laptop: PHI Never Leaves the Device · kolm</title>
+<meta name="description" content="Compile a clinical assistant where protected health information never leaves the user's device. A practical playbook for HIPAA-aligned AI without the BAA-shaped hole in your audit.">
+<meta name="keywords" content="HIPAA AI, on-device AI healthcare, PHI never leaves device, clinical AI assistant, HIPAA compliant LLM, edge AI healthcare, .kolm clinical, BAA AI vendor, kolm">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Kolmogorov">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="HIPAA-safe AI on a laptop: PHI never leaves the device">
+<meta property="og:description" content="Compile a clinical assistant where protected health information never leaves the user's device. The architecture, the audit story, and a working example.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/articles/hipaa-on-device">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HIPAA-safe AI on a laptop: PHI never leaves the device">
+<meta name="twitter:description" content="A practical playbook for HIPAA-aligned AI on the edge.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/articles/hipaa-on-device">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "HIPAA-safe AI on a laptop: compile a clinical assistant where PHI never leaves the device",
+  "description": "A practical playbook for HIPAA-aligned AI without a BAA-shaped hole in your audit.",
+  "author": { "@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai" },
+  "publisher": { "@type": "Organization", "name": "Kolmogorov", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+  "datePublished": "2026-05-07",
+  "dateModified": "2026-05-07",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/articles/hipaa-on-device" },
+  "image": "https://kolm.ai/og-card.svg",
+  "keywords": "HIPAA AI, on-device AI, clinical assistant, edge AI, PHI",
+  "articleSection": "Healthcare",
+  "wordCount": 2400
+}
+</script>
+<style>
+  :root {
+    --bg: #0a0a0a; --bg-elev: #0f0f12; --bg-card: #13141a;
+    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+    --ink: #ededed; --ink-mute: #9a9da8; --ink-faint: #5a5c66;
+    --accent: #7c8cff; --accent-soft: rgba(124,140,255,0.10); --accent-strong: #93a1ff;
+    --good: #7ce3b6; --bad: #ff7a98;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: -0.011em; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+  .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+  header.site { position: sticky; top: 0; z-index: 60; background: rgba(10,10,10,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+  header.site .left { display: flex; align-items: center; gap: 36px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
+  header.site .brand .mark { width: 22px; height: 22px; }
+  header.site .brand .lyr { transition: transform 280ms cubic-bezier(.2,.6,.2,1), opacity 280ms; }
+  header.site .brand:hover .lyr-1 { transform: translate(-1.4px,-1.4px); }
+  header.site .brand:hover .lyr-3 { transform: translate(1.4px,1.4px); }
+  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: -0.04em; }
+  header.site nav { display: flex; gap: 22px; }
+  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+  header.site nav a:hover { color: var(--ink); }
+  header.site .right { display: flex; align-items: center; gap: 14px; }
+  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+  header.site .right .ghost:hover { color: var(--ink); }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; box-shadow: 0 1px 0 rgba(255,255,255,0.55) inset, 0 4px 14px -4px rgba(0,0,0,0.45); transition: background 120ms, transform 120ms; }
+  header.site .right .cta:hover { background: #fff; transform: translateY(-1px); }
+  @media (max-width: 720px) { header.site nav { display: none; } }
+
+  section.hero { padding: 80px 0 36px; position: relative; overflow: hidden; }
+  section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 460px at 22% 12%, rgba(124,140,255,0.10), transparent 60%); }
+  section.hero .wrap { position: relative; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+  h1 { margin: 22px 0 18px; font-size: clamp(34px, 5.4vw, 54px); line-height: 1.05; font-weight: 500; letter-spacing: -0.028em; max-width: 22ch; }
+  h1 .tone { color: var(--accent); }
+  p.lede { margin: 0 0 0; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+  p.lede b { color: var(--ink); font-weight: 540; }
+  .meta { display: flex; gap: 18px; margin-top: 22px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); }
+  .meta b { color: var(--ink-mute); font-weight: 500; }
+
+  article { padding: 36px 0 96px; }
+  article h2 { margin: 56px 0 14px; font-size: clamp(24px, 2.6vw, 30px); line-height: 1.2; font-weight: 540; letter-spacing: -0.018em; color: var(--ink); }
+  article h2 .tone { color: var(--accent); }
+  article h3 { margin: 36px 0 10px; font-size: 18px; font-weight: 540; letter-spacing: -0.012em; color: var(--ink); }
+  article p { margin: 0 0 16px; font-size: 16.5px; line-height: 1.7; color: var(--ink-mute); }
+  article p b { color: var(--ink); font-weight: 540; }
+  article p code, article li code { font-family: var(--mono); font-size: 0.92em; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
+  article blockquote { margin: 28px 0; padding: 16px 22px; border-left: 2px solid var(--accent); background: var(--bg-elev); border-radius: 0 8px 8px 0; font-size: 17px; line-height: 1.6; color: var(--ink); }
+  article blockquote p { color: var(--ink); margin: 0; font-weight: 480; }
+  article ul { padding-left: 0; list-style: none; margin: 16px 0 24px; }
+  article ul li { padding: 8px 0 8px 22px; position: relative; font-size: 16px; line-height: 1.6; color: var(--ink-mute); }
+  article ul li::before { content: "·"; color: var(--accent); position: absolute; left: 6px; font-weight: 700; }
+  article ul li b { color: var(--ink); font-weight: 540; }
+  article pre { margin: 18px 0 24px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.75; color: var(--ink); box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
+  article pre .com { color: var(--ink-faint); }
+  article pre .arg { color: var(--accent); }
+  article pre .kw { color: #b0bbff; }
+
+  .figure { margin: 28px 0; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
+  .figure .cap { margin-top: 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); }
+  .figure .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .figure .grid { grid-template-columns: 1fr; } }
+  .figure .row { padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; background: rgba(0,0,0,0.18); display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute); }
+  .figure .row .v { color: var(--ink); }
+  .figure .row .v.acc { color: var(--accent); }
+  .figure .row .v.good { color: var(--good); }
+  .figure .row .v.bad { color: var(--bad); }
+
+  .signpost { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 36px 0 0; }
+  @media (max-width: 720px) { .signpost { grid-template-columns: 1fr; } }
+  .signpost a { display: flex; flex-direction: column; gap: 8px; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; transition: transform 220ms cubic-bezier(.2,.6,.2,1), border-color 220ms, box-shadow 220ms; box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 18px 40px -22px rgba(0,0,0,0.55); }
+  .signpost a:hover { transform: translateY(-2px); border-color: var(--line-strong); box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 24px 50px -22px rgba(0,0,0,0.65), 0 8px 22px -8px rgba(124,140,255,0.10); }
+  .signpost a .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
+  .signpost a .v { color: var(--ink); font-weight: 540; font-size: 16px; letter-spacing: -0.012em; }
+  .signpost a .v .arrow { color: var(--accent); margin-left: 6px; }
+  .signpost a p { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-mute); line-height: 1.5; }
+
+  .toc { margin: 28px 0 36px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; }
+  .toc h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; font-weight: 500; }
+  .toc ol { margin: 0; padding-left: 20px; }
+  .toc li { padding: 4px 0; font-size: 14px; color: var(--ink-mute); }
+  .toc li a { color: var(--ink-mute); }
+  .toc li a:hover { color: var(--accent); }
+
+  .compare-table { margin: 24px 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg-elev); box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
+  .compare-table table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .compare-table th { text-align: left; padding: 14px 16px; background: rgba(0,0,0,0.20); color: var(--ink); font-weight: 540; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+  .compare-table td { padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--ink-mute); }
+  .compare-table tr:last-child td { border-bottom: 0; }
+  .compare-table .acc { color: var(--accent); }
+  .compare-table .good { color: var(--good); }
+  .compare-table .bad { color: var(--bad); }
+
+  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-faint); }
+  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  footer.site a { color: var(--ink-faint); transition: color 120ms; }
+  footer.site a:hover { color: var(--ink-mute); }
+
+  body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 100; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); background-size: 180px 180px; opacity: 0.5; mix-blend-mode: overlay; }
+  @media (prefers-reduced-motion: reduce) { body::after { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand" aria-label="kolm">
+        <svg class="mark" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <g class="lyr lyr-1" opacity="0.42"><rect x="3.4" y="3.4" width="21.2" height="21.2" rx="5.4" stroke="#7c8cff" stroke-width="1.1"/></g>
+          <g class="lyr lyr-2" opacity="0.72"><rect x="5.4" y="5.4" width="17.2" height="17.2" rx="4.4" stroke="#7c8cff" stroke-width="1.2"/></g>
+          <g class="lyr lyr-3"><rect x="7.4" y="7.4" width="13.2" height="13.2" rx="3.4" fill="rgba(124,140,255,0.10)" stroke="#a8b3ff" stroke-width="1.3"/></g>
+          <path d="M 11 9.6 L 11 18.4 M 11 14.4 L 15.4 9.8 M 12.6 12.8 L 17 18.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" fill="none"/>
+        </svg>
+        <span>kolm</span>
+      </a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">Sign in</a>
+      <a href="/signup" class="cta">Get kolm</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="pill"><span class="dot"></span>Healthcare · 2026-05-07 · 12 min read</span>
+    <h1>HIPAA-safe AI on a laptop, <span class="tone">where PHI never leaves the device.</span></h1>
+    <p class="lede"><b>Every BAA you sign with a frontier model vendor is a ticking compliance bomb.</b> Even when the legal language is clean, the data-flow story isn't: the prompt with PHI traverses your edge, the vendor's edge, the vendor's logging stack, and any sub-processor in their chain. The cleanest fix is also the simplest: don't send the PHI in the first place. Compile the model once, run it on the user's laptop forever.</p>
+    <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;HIPAA · clinical · on-device</span></div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="toc">
+      <h5>Contents</h5>
+      <ol>
+        <li><a href="#problem">The shape of the HIPAA problem with frontier model APIs</a></li>
+        <li><a href="#inversion">The inversion: compile in a clean room, run on the device</a></li>
+        <li><a href="#pipeline">A clinical compile pipeline, end to end</a></li>
+        <li><a href="#audit">The audit story: what the OCR investigator actually wants</a></li>
+        <li><a href="#worked">Worked example: a chart-summary assistant</a></li>
+        <li><a href="#runtime">What runs on the device, and what doesn't</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ol>
+    </div>
+
+    <h2 id="problem">The shape of the HIPAA problem with frontier model APIs.</h2>
+    <p>HIPAA does not say "you cannot use AI." It says <b>you must control the disclosure of protected health information</b>. Disclosure to a vendor is permissible only via a Business Associate Agreement that pushes obligations down the chain to that vendor. In theory this is workable: sign BAAs with OpenAI, Anthropic, AWS Bedrock, and the like, and you have legal cover.</p>
+    <p>In practice, three failures of the model keep showing up in our customer conversations.</p>
+    <ul>
+      <li><b>Sub-processor drift.</b> A frontier vendor's sub-processor list shifts every quarter. Each addition is a covered entity's compliance event. Most clinical teams discover the change weeks later, after a periodic review.</li>
+      <li><b>Logging blind spots.</b> Even with "do not retain" flags, frontier vendors retain inputs for safety-classification and abuse-detection windows of 30-90 days. The retention is BAA-permitted; it is not BAA-erased. A 30-day window is a 30-day disclosure event.</li>
+      <li><b>Latency/cost cliff for offline use.</b> Many clinical workflows need to work in an exam room with intermittent connectivity. Vendor APIs require a network round trip. The "offline mode" path is usually a smaller model that does not pass quality bars.</li>
+    </ul>
+    <p>The cleanest fix is <b>not to send the PHI at all</b>. If the model lives on the user's device, there is no disclosure event. There is no third-party retention. There is no sub-processor surface. The BAA you would have signed with a vendor becomes unnecessary because the vendor is not in the pipe.</p>
+
+    <h2 id="inversion">The inversion: compile in a clean room, run on the device.</h2>
+    <p>Frontier-class behavior on PHI without sending PHI to a frontier vendor sounds contradictory until you separate <em>training time</em> from <em>inference time</em>.</p>
+    <p>At training (compile) time, the only data that touches a frontier API is <b>de-identified or synthetic seed data</b> the team has already cleared for outbound use. The compiler never sees the live patient corpus. It sees the task description, the de-identified examples, the verifier you wrote, and the budget. From these, it produces a portable artifact tuned to the task.</p>
+    <p>At inference (run) time, the artifact runs on the user's device — a clinician's laptop, a tablet at the bedside, an admin's workstation. The patient corpus lives in a local sqlite-vec index inside the artifact. The user's queries hit the local index, get retrieved chunks, run through the local LoRA-adapted base model, and produce an answer. <b>No outbound traffic carries PHI. None. The artifact's manifest declares zero egress; the runtime enforces it.</b></p>
+
+    <blockquote>
+      <p>The vendor never sees a real chart, real medication, or real patient name. The user's device sees all of it. The chain of custody for PHI is the user's device, full stop.</p>
+    </blockquote>
+
+    <h2 id="pipeline">A clinical compile pipeline, end to end.</h2>
+    <p>Concrete steps. Numbers from a real customer pipeline (anonymized).</p>
+
+    <h3>Step 1 — De-identify a small seed set.</h3>
+    <p>Take 50-200 representative chart entries. Run them through a HIPAA Safe Harbor de-identifier (the 18 identifiers go; structural information stays). The compiler's seed corpus is now de-identified. <b>This is the only data that ever touches a frontier vendor.</b></p>
+
+    <h3>Step 2 — Write the verifier.</h3>
+    <p>For each task — "summarize the chart in 50 words", "extract medications and dosages", "flag billing-code mismatches" — write 5-10 ideal output examples and a 30-line scoring function. The compiler synthesizes the rest. The verifier is reviewable, version-controlled, and content-hashed.</p>
+
+    <h3>Step 3 — Compile.</h3>
+    <p>Run <code>kolm compile</code> with the de-identified seed set, your verifier, and a frontier API key. The compiler k-samples the frontier model on each example, scores the candidates with the verifier, picks the winners, and trains a LoRA adapter on top of a 3B-7B clinical-friendly base (BioMedLM, Llama-Med, or a Qwen-2.5 base). 8-25 minutes, depending on corpus size.</p>
+
+    <h3>Step 4 — Sign the artifact.</h3>
+    <p>The compiler emits a <code>.kolm</code> artifact: the base model + LoRA + recipe pack + verifier + held-out tests + manifest + HMAC signature. The K-score is on the cover; below 0.70, the artifact does not ship.</p>
+
+    <h3>Step 5 — Ship to the device.</h3>
+    <p>The artifact is a single file. Distribute it via your MDM, your IT package manager, or a signed download. The user opens it with <code>kolm run artifact.kolm</code> or via the Kolm desktop runtime. First run, the artifact attaches to a local on-device patient corpus (which the user — or your ops team — has already loaded into a local sqlite-vec via <code>kolm recall ingest</code>). All subsequent inference is local.</p>
+
+    <h3>Step 6 — Recompile when the verifier or seed set changes.</h3>
+    <p>Drift is recompile-driven. New tasks, new edge cases, new de-identified examples — they go into the next compile. The compiler caches what it can. <b>The frontier vendor never sees a new piece of PHI</b>; it only ever sees de-identified seeds and synthetic verifier challenges.</p>
+
+    <div class="figure">
+      <div class="grid">
+        <div class="row"><span>vendor PHI exposure</span><span class="v good">0 records</span></div>
+        <div class="row"><span>local PHI scope</span><span class="v">user's device only</span></div>
+        <div class="row"><span>inference egress</span><span class="v acc">0 bytes</span></div>
+        <div class="row"><span>compile data</span><span class="v">de-identified seeds</span></div>
+        <div class="row"><span>signature</span><span class="v acc">HMAC-SHA256 chain</span></div>
+        <div class="row"><span>K-score gate</span><span class="v acc">≥ 0.70</span></div>
+      </div>
+      <div class="cap">Properties of a compiled clinical artifact, as enforced by manifest + runtime</div>
+    </div>
+
+    <h2 id="audit">The audit story: what the OCR investigator actually wants.</h2>
+    <p>If your covered entity is investigated by HHS Office for Civil Rights, the conversation will not be about the model's accuracy. It will be about <b>the chain of custody of PHI, every disclosure, every safeguard, every access log</b>. A clinician using a frontier API has a conversation that goes: "we send the chart text to the vendor, here is the BAA, here is the encryption-in-transit attestation, here is the data-retention contract addendum." Each step is a defensible — but expanded — surface area.</p>
+    <p>A clinician using a compiled <code>.kolm</code> has a much shorter conversation. <b>"PHI never left the device. Here is the artifact's manifest declaring zero outbound egress. Here is the compile-time receipt chain proving the model was trained on de-identified data. Here is the K-score and the held-out test set. Here is the device-level audit log."</b> Six sentences. Every one of them is verifiable.</p>
+
+    <div class="compare-table">
+      <table>
+        <tr><th>property</th><th>frontier API + BAA</th><th>compiled <code>.kolm</code></th></tr>
+        <tr><td>PHI leaves device</td><td class="bad">yes (every call)</td><td class="good">never</td></tr>
+        <tr><td>BAA required</td><td class="bad">vendor + sub-processors</td><td class="good">none</td></tr>
+        <tr><td>retention exposure</td><td class="bad">30-90 day vendor window</td><td class="good">device-controlled</td></tr>
+        <tr><td>offline mode</td><td class="bad">degraded or unavailable</td><td class="good">primary mode</td></tr>
+        <tr><td>cost per call</td><td class="bad">~$0.005-0.05</td><td class="good">$0.00</td></tr>
+        <tr><td>vendor lock-in</td><td class="bad">high</td><td class="good">artifact is portable</td></tr>
+        <tr><td>compile-time seed PHI</td><td>—</td><td class="acc">de-identified only</td></tr>
+        <tr><td>auditable artifact</td><td class="bad">no</td><td class="good">HMAC-chained manifest</td></tr>
+      </table>
+    </div>
+
+    <h2 id="worked">Worked example: a chart-summary assistant.</h2>
+    <p>An ambulatory clinic compiles "chart-summary in 50 words, hedge-aware, medications-listed". The team writes 12 ideal summaries against 12 de-identified charts. The verifier (auto-synthesized then hand-tightened) checks length, medication-name matching against a reference list, and absence of unsupported claims.</p>
+    <pre>kolm compile <span class="arg">"summarize chart in 50 words, hedge-aware"</span> \
+  --examples <span class="arg">./deidentified-charts/</span> \
+  --verifier <span class="arg">./summary-verifier.js</span> \
+  --base <span class="arg">qwen2.5-7b</span> \
+  --teacher <span class="arg">claude-opus-4-7</span> \
+  --k <span class="arg">8</span> \
+  --out <span class="arg">chart-summary.kolm</span>
+
+<span class="com"># 14 minutes later, the artifact lands.</span>
+<span class="com"># K-score: 0.82, size: 2.1 GB, base: qwen2.5-7b-int4, teacher: claude-opus-4-7</span>
+
+<span class="com"># Distribute via MDM. On the clinician's laptop:</span>
+kolm run <span class="arg">chart-summary.kolm</span> --recall <span class="arg">./local-charts/</span></pre>
+
+    <p>The clinician's local <code>local-charts/</code> directory is the patient corpus. <code>kolm recall ingest</code> embeds and indexes it into a sqlite-vec inside the artifact's data dir. From that point on, the assistant answers questions like "summarize Mr. Jones's last visit" by retrieving from the local index, running the LoRA-adapted base, and emitting a 50-word summary — entirely on-device. Audit trail is the local <code>~/.kolm/log/audit.jsonl</code>, signed and append-only.</p>
+
+    <h2 id="runtime">What runs on the device, and what doesn't.</h2>
+    <p><b>On the device:</b> the base model (1.5-4 GB INT4 weights), the LoRA (10-100 MB), the recall index (sqlite-vec, sized by corpus), the recipe pack (5-20 MB), the verifier (small JS), and the audit log. Inference uses llama.cpp + sqlite-vec — both open-source, both portable across macOS, Linux, Windows, iOS, Android.</p>
+    <p><b>Not on the device:</b> the frontier API key (it lived in the compile-time clean room and never reaches the device), the original training data (it stays on the compile environment's storage), and any vendor sub-processor relationship (there is no vendor in the runtime pipeline).</p>
+
+    <h2 id="faq">FAQ.</h2>
+    <h3>Is this the same as &quot;running an open-source model locally&quot;?</h3>
+    <p>No. Off-the-shelf open-source models are not tuned to your task and will produce unreliable clinical output. The compile step is what closes the gap: a 7B-class base behaves like a frontier model on your task because the frontier model was its teacher during distillation.</p>
+
+    <h3>What about HHS&apos;s emerging AI rule?</h3>
+    <p>HHS&apos;s 2026 Health AI rule (and equivalent state acts) emphasize transparency, auditability, and minimum-disclosure. A compiled <code>.kolm</code> directly satisfies the minimum-disclosure standard (zero PHI egress) and provides the auditable receipt chain that transparency requires. We track regulatory developments at <a href="/healthcare" style="color:var(--accent)">/healthcare</a>.</p>
+
+    <h3>What if my clinical team needs a model bigger than the device can run?</h3>
+    <p>This is the core insight: a 70B model on the patient&apos;s phone is a fantasy, but a 7B compiled artifact whose behavior on <em>your specific clinical tasks</em> matches a 70B is achievable, because the 70B was its teacher. <a href="/articles/ai-compiler" style="color:var(--accent)">Read the compile primer →</a></p>
+
+    <h3>What about prompt-injection attacks against the device-local model?</h3>
+    <p>Prompt-injection still exists, the same way SQL injection still exists in any software product that takes user input. The compile-time verifier catches a meaningful fraction (it gates outputs by structure, length, and reference-vocabulary match). For higher-assurance deployments, the recipe pack is restricted to approved prefix-shapes; out-of-distribution prompts trigger a fallback to a more conservative branch.</p>
+
+    <h3>Can I get a BAA from Kolmogorov?</h3>
+    <p>Enterprise customers do, but the surface is much smaller: only the compile-time orchestrator handles your de-identified seeds. The runtime artifact has no relationship to Kolmogorov at all once it ships to the device. We are happy to walk you through the security architecture during procurement.</p>
+
+    <div class="signpost">
+      <a href="/articles/ai-compiler">
+        <span class="lab">read</span>
+        <span class="v">How an AI compiler works <span class="arrow">→</span></span>
+        <p>The four-stage pipeline behind every <code>.kolm</code>.</p>
+      </a>
+      <a href="/articles/k-sample-verified-inference">
+        <span class="lab">read</span>
+        <span class="v">Verified inference <span class="arrow">→</span></span>
+        <p>Cryptographic receipts for every label.</p>
+      </a>
+      <a href="/healthcare">
+        <span class="lab">vertical</span>
+        <span class="v">Healthcare <span class="arrow">→</span></span>
+        <p>The full regulatory and architectural picture.</p>
+      </a>
+      <a href="/compile">
+        <span class="lab">act</span>
+        <span class="v">Run <code>kolm compile</code> <span class="arrow">→</span></span>
+        <p>Compile a clinical assistant in fifteen minutes.</p>
+      </a>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap-wide row">
+    <span>&copy; 2026 Kolmogorov · the AI compiler · MIT spec</span>
+    <span><a href="/manifesto">Manifesto</a> · <a href="/security">Security</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

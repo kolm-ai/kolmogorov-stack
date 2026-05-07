@@ -27,7 +27,14 @@ const ARTIFACT_SPEC = 'kolm-1';
 // hmac mismatch" failures even though both sides are byte-identical canonical
 // JSON. The legacy KOLM_ARTIFACT_SECRET env name is still honoured for
 // back-compat, but the default must match router.js's default.
-const SIGN_SECRET = process.env.RECIPE_RECEIPT_SECRET || process.env.KOLM_ARTIFACT_SECRET || 'ks_receipt_dev_secret_change_in_prod';
+const SIGN_SECRET = (() => {
+  const s = process.env.RECIPE_RECEIPT_SECRET || process.env.KOLM_ARTIFACT_SECRET;
+  if (s) return s;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('RECIPE_RECEIPT_SECRET (or KOLM_ARTIFACT_SECRET) must be set in production. Set it on Railway env.');
+  }
+  return 'ks_receipt_dev_secret_change_in_prod';
+})();
 
 function sha256(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex');

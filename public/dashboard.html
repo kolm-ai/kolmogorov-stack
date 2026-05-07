@@ -241,7 +241,7 @@
   <div class="acct">
     <div>
       <h3>API key</h3>
-      <p>Use <code id="api-key-mask">sl_live_…</code> as your <code>X-API-Key</code> header, or paste it into <code>kolm login</code>. Treat it like a password.</p>
+      <p>Use <code id="api-key-mask">ks_…</code> as your <code>X-API-Key</code> header, or paste it into <code>kolm login</code>. Treat it like a password.</p>
     </div>
     <div class="actions">
       <button class="btn btn-ghost btn-sm" id="show-key" type="button">Show key</button>
@@ -273,7 +273,7 @@
     if (s < 86400) return Math.floor(s/3600) + 'h ago';
     return Math.floor(s/86400) + 'd ago';
   }
-  function maskKey(k){ if (!k) return 'sl_live_…'; if (k.length < 12) return k; return k.slice(0,8) + '…' + k.slice(-4); }
+  function maskKey(k){ if (!k) return 'ks_…'; if (k.length < 12) return k; return k.slice(0,8) + '…' + k.slice(-4); }
   function statusLabel(s){ return ({queued:'queued', running:'compiling', completed:'ready', error:'error'})[s] || s; }
 
   // --- account + greeting ---

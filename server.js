@@ -103,6 +103,15 @@ for (const route of ['/', '/dashboard', '/playground', '/docs', '/registry', '/a
   });
 }
 
+// Extensionless article URLs: /articles/<slug> → public/articles/<slug>.html
+app.get('/articles/:slug', (req, res, next) => {
+  const slug = req.params.slug;
+  if (!/^[a-z0-9-]+$/.test(slug)) return next();
+  const file = path.join(__dirname, 'public', 'articles', slug + '.html');
+  if (fs.existsSync(file)) return res.sendFile(file);
+  next();
+});
+
 // 404 fallback for unknown HTML routes — branded page from /public/404.html if it exists.
 const _404Path = path.join(__dirname, 'public', '404.html');
 app.use((req, res, next) => {

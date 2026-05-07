@@ -126,7 +126,7 @@ export function authMiddleware(req, res, next) {
   // Non-API paths bypass auth entirely (page routes, static, 404 fallback handle them)
   if (!p.startsWith('/v1/')) return next();
   if (PUBLIC_API(p)) return next();
-  const adminKey = process.env.ADMIN_KEY || 'ks_admin_change_me';
+  const adminKey = process.env.ADMIN_KEY || (process.env.NODE_ENV === 'production' ? null : 'ks_admin_change_me');
   const header = req.headers.authorization || '';
   const xApi = req.headers['x-api-key'] || '';
   // S7: prefer the httpOnly cookie. Header / query params still accepted
