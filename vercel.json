@@ -8,10 +8,8 @@
     { "source": "/run", "destination": "/run.html" },
     { "source": "/recall", "destination": "/recall.html" },
     { "source": "/cloud", "destination": "/cloud.html" },
-    { "source": "/manual", "destination": "/manual.html" },
     { "source": "/account", "destination": "/account.html" },
     { "source": "/signup", "destination": "/signup.html" },
-    { "source": "/mobile", "destination": "/mobile.html" },
     { "source": "/pricing", "destination": "/pricing.html" },
     { "source": "/status", "destination": "/status.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
@@ -37,16 +35,10 @@
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/why", "destination": "/why.html" },
     { "source": "/api", "destination": "/api.html" },
-    { "source": "/failure-modes", "destination": "/failure-modes.html" },
     { "source": "/how-it-works", "destination": "/how-it-works.html" },
-    { "source": "/troubleshooting", "destination": "/troubleshooting.html" },
-    { "source": "/launch", "destination": "/launch.html" },
-    { "source": "/motion", "destination": "/motion.html" },
     { "source": "/roi", "destination": "/roi.html" },
-    { "source": "/architecture", "destination": "/architecture.html" },
     { "source": "/trust", "destination": "/trust.html" },
     { "source": "/integrations", "destination": "/integrations.html" },
-    { "source": "/glossary", "destination": "/glossary.html" },
     { "source": "/press", "destination": "/press.html" },
     { "source": "/benchmarks", "destination": "/benchmarks.html" },
     { "source": "/compare", "destination": "/compare.html" },
@@ -69,6 +61,19 @@
     { "source": "/brand", "destination": "/brand.html" },
     { "source": "/use-cases", "destination": "/use-cases/index.html" },
     { "source": "/use-cases/(.*)", "destination": "/use-cases/$1.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.vercel-insights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://kolm.ai https://kolmogorov-stack-production.up.railway.app https://*.vercel-insights.com https://api.stripe.com; frame-src https://js.stripe.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+      ]
+    }
   ],
   "functions": {
     "api/index.js": {

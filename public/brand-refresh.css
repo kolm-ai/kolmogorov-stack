@@ -200,6 +200,69 @@ footer .brand-row .mark::before {
   nav.top .nav-links {
     display: none !important;
   }
+  /* Below 460px the GitHub-star pill + sign-in + CTA crowd; drop GH and sign-in
+   * down to icon-only / hidden so the CTA always reaches a tappable size. */
+  .site-header .site-actions .gh-star,
+  .site-header .site-actions a[href="/signin"],
+  header.site .right .ghost {
+    display: none !important;
+  }
+  .site-header .site-actions,
+  header.site .right { gap: 8px !important; }
+}
+
+/* Inline <code> in body copy: keep readable, mono, with subtle background.
+ * On phones, force break-anywhere so multi-flag commands don't trail off-screen. */
+p code,
+.lede code,
+li code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
+  font-size: 0.86em !important;
+  background: rgba(255,255,255,0.04) !important;
+  color: #9db6ff !important;
+  padding: 1px 5px !important;
+  border-radius: 4px !important;
+  letter-spacing: 0 !important;
+  border: none !important;
+  white-space: nowrap !important;
+}
+@media (max-width: 720px) {
+  p code, .lede code, li code {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    font-size: 0.82em !important;
+    padding: 1px 4px !important;
+  }
+}
+
+/* Inline <code> inside hero h1 must not blow up the layout on mobile.
+ * The fluid clamp() can hit 36-52px and a wide mono glyph then breaks
+ * the line. Constrain to 0.85em and allow break-word to avoid overflow. */
+h1 code,
+.hero h1 code,
+.hero-h1 code {
+  font-size: 0.78em !important;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
+  letter-spacing: -0.01em !important;
+  padding: 2px 8px !important;
+  background: rgba(76,125,255,0.10) !important;
+  border-radius: 6px !important;
+  color: #9db6ff !important;
+  font-weight: 500 !important;
+  vertical-align: 2px !important;
+  word-break: keep-all !important;
+  white-space: nowrap !important;
+}
+@media (max-width: 720px) {
+  h1, .hero h1, .hero-h1 {
+    font-size: clamp(28px, 8vw, 40px) !important;
+    line-height: 1.08 !important;
+  }
+  h1 code, .hero h1 code, .hero-h1 code {
+    font-size: 0.72em !important;
+    padding: 1px 6px !important;
+  }
 }
 header.site nav a,
 .site-header .site-nav a,

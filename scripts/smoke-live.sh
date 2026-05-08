@@ -274,8 +274,6 @@ check "claim with bogus token → 400" test "$BAD_CLAIM" = "400"
 
 echo ""
 echo "=== 16. Phase G polish (HTML + branded errors) ==="
-ON=$(curl -s -o /dev/null -w "%{http_code}" "$URL/onboarding")
-check "/onboarding 200" test "$ON" = "200"
 AC=$(curl -s -o /dev/null -w "%{http_code}" "$URL/account")
 check "/account 200" test "$AC" = "200"
 NF=$(curl -s -o /dev/null -w "%{http_code}" "$URL/this-route-does-not-exist-recipe")
@@ -490,7 +488,7 @@ check "/compile page has stages" hashi "$CP_BODY" 'stage\|distill\|recipe'
 echo ""
 echo "=== 24. Sprint 1 — kolm v5 site (compiler cache positioning) ==="
 # Five new surface pages
-for p in compile run recall cloud manual mobile; do
+for p in compile run recall cloud; do
   C=$(curl -s -o /dev/null -w "%{http_code}" "$URL/$p")
   check "GET /$p 200" test "$C" = "200"
 done
@@ -516,17 +514,8 @@ CLOUD_BODY=$(curl -s "$URL/cloud")
 check "/cloud shows kolm.wrap" has "$CLOUD_BODY" 'kolm.wrap'
 check "/cloud has pricing tiers" has "$CLOUD_BODY" 'Pro'
 
-# /manual has K-score formula
-MAN_BODY=$(curl -s "$URL/manual")
-check "/manual has K-score formula" has "$MAN_BODY" 'log'
-check "/manual has spec sections" hashi "$MAN_BODY" "signature chain\|recipe registry"
-
-# /mobile is the on-device preview surface
-MOB_BODY=$(curl -s "$URL/mobile")
-check "/mobile reachable" test "$(echo -n "$MOB_BODY" | wc -c)" -gt 100
-
 # Header consistency — every page links back to Home + carries the kolm wordmark
-for p in compile run recall cloud manual serve anatomy k-score; do
+for p in compile run recall cloud serve anatomy k-score; do
   PB=$(curl -s "$URL/$p")
   check "/$p header has Home link" has "$PB" 'href="/"'
   check "/$p has kolm wordmark" hashi "$PB" 'class="brand"\|class="sub"'
@@ -536,9 +525,6 @@ done
 echo ""
 echo "[v5.4] launch-prep surface"
 
-A=$(curl -s -o /dev/null -w "%{http_code}" "$URL/architecture");        check "/architecture is 200" eq "$A" 200
-B=$(curl -s -o /dev/null -w "%{http_code}" "$URL/launch");              check "/launch is 200" eq "$B" 200
-C=$(curl -s -o /dev/null -w "%{http_code}" "$URL/troubleshooting");     check "/troubleshooting is 200" eq "$C" 200
 D=$(curl -s -o /dev/null -w "%{http_code}" "$URL/cookbook");            check "/cookbook is 200" eq "$D" 200
 E=$(curl -s -o /dev/null -w "%{http_code}" "$URL/legal");               check "/legal is 200" eq "$E" 200
 F=$(curl -s -o /dev/null -w "%{http_code}" "$URL/edge");                check "/edge is 200" eq "$F" 200
@@ -549,24 +535,6 @@ for v in healthcare finance legal edge; do
   check "/cookbook/$v alias is 200" eq "$CC" 200
 done
 
-# Architecture page mentions all four engines
-ARCH=$(curl -s "$URL/architecture")
-check "/architecture lists Recall"   has "$ARCH" "Recall"
-check "/architecture lists Distill"  has "$ARCH" "Distill"
-check "/architecture lists Decompose" has "$ARCH" "Decompose"
-check "/architecture lists Run"      has "$ARCH" "Run"
-check "/architecture mentions K-score gate" has "$ARCH" "K-score"
-
-# Launch page is honest
-LAUNCH=$(curl -s "$URL/launch")
-check "/launch K-score guarantee"    has "$LAUNCH" "K-score"
-check "/launch honesty bar"          has "$LAUNCH" "not"
-
-# Troubleshooting covers k-score-under-floor + verify-offline
-TS=$(curl -s "$URL/troubleshooting")
-check "/troubleshooting covers k-score floor" has "$TS" "k-score"
-check "/troubleshooting covers verify"        has "$TS" "verify"
-
 # Pricing has Teams tier
 PRICE=$(curl -s "$URL/pricing")
 check "/pricing has Teams tier"      has "$PRICE" "Teams"
@@ -574,9 +542,6 @@ check "/pricing has \$149 price"     has "$PRICE" "149"
 
 # Sitemap has new pages dated 2026-05-08
 SITEMAP=$(curl -s "$URL/sitemap.xml")
-check "sitemap has /architecture" has "$SITEMAP" "/architecture"
-check "sitemap has /launch"       has "$SITEMAP" "/launch"
-check "sitemap has /troubleshooting" has "$SITEMAP" "/troubleshooting"
 check "sitemap has /cookbook"     has "$SITEMAP" "/cookbook"
 check "sitemap has /legal"        has "$SITEMAP" "/legal"
 check "sitemap has /edge"         has "$SITEMAP" "/edge"
@@ -585,8 +550,6 @@ check "sitemap dated 2026-05-08"  has "$SITEMAP" "2026-05-08"
 # Homepage footer has 5 columns including new cookbook column
 HOME=$(curl -s "$URL/")
 check "homepage footer cookbook col" has "$HOME" "all recipes"
-check "homepage footer launch link"  has "$HOME" '/launch'
-check "homepage footer architecture link" has "$HOME" '/architecture'
 
 # Changelog has v5.4 entry
 CHANGELOG=$(curl -s "$URL/changelog")
@@ -594,7 +557,7 @@ check "/changelog v5.4 entry" has "$CHANGELOG" "v5.4"
 
 echo ""
 echo "=== 27. v5.7 — comparators, why-now, threat model, RSS, packages ==="
-for p in vs-ollama vs-rag vs-fine-tune why-now threat-model trust integrations glossary press; do
+for p in vs-ollama vs-rag vs-fine-tune why-now threat-model trust integrations press; do
   C=$(curl -s -o /dev/null -w "%{http_code}" "$URL/$p")
   check "GET /$p → 200" test "$C" = "200"
 done
@@ -636,7 +599,6 @@ check "sitemap has /why-now"           has "$SM2" '/why-now'
 check "sitemap has /threat-model"      has "$SM2" '/threat-model'
 check "sitemap has /trust"             has "$SM2" '/trust'
 check "sitemap has /integrations"      has "$SM2" '/integrations'
-check "sitemap has /glossary"          has "$SM2" '/glossary'
 check "sitemap has /press"             has "$SM2" '/press'
 check "sitemap has rss.xml"            has "$SM2" 'articles/rss.xml'
 
@@ -651,22 +613,12 @@ check "homepage GitHub star button"    has "$H2" 'gh-star-count'
 check "homepage triple-pillar"         has "$H2" 'sovereignty\|verifiability\|portability'
 check "homepage registry counter"      has "$H2" 'registry/public/count'
 check "homepage compiler-positioning"  has "$H2" 'kolm compiles a task into a working AI you own'
-check "homepage motion link"           has "$H2" '/motion'
 check "homepage roi link"              has "$H2" '/roi'
 
 echo ""
-echo "=== 28. v5.8 — three-phase motion + ROI calculator ==="
-for p in motion roi; do
-  C=$(curl -s -o /dev/null -w "%{http_code}" "$URL/$p")
-  check "GET /$p → 200" test "$C" = "200"
-done
-
-MOT=$(curl -s "$URL/motion")
-check "/motion three phases"           has "$MOT" 'Phase 01'
-check "/motion phase 02 enterprise"    has "$MOT" 'Phase 02'
-check "/motion phase 03 OEM"           has "$MOT" 'Phase 03'
-check "/motion compiler positioning"   has "$MOT" 'compiler is to code'
-check "/motion fintech mention"        has "$MOT" 'fintech\|healthtech\|legal'
+echo "=== 28. v5.8 — ROI calculator ==="
+C=$(curl -s -o /dev/null -w "%{http_code}" "$URL/roi")
+check "GET /roi → 200" test "$C" = "200"
 
 ROI=$(curl -s "$URL/roi")
 check "/roi calculator inputs"         has "$ROI" 'i-calls'
@@ -674,14 +626,13 @@ check "/roi calculator results"        has "$ROI" 'r-cloud-tot'
 check "/roi presets"                   has "$ROI" 'data-preset'
 check "/roi teacher math"              has "$ROI" 'teacher'
 
-# Sitemap has motion + roi
+# Sitemap has roi
 SM3=$(curl -s "$URL/sitemap.xml")
-check "sitemap has /motion"            has "$SM3" '/motion'
 check "sitemap has /roi"               has "$SM3" '/roi'
 
 echo ""
 echo "=== 29. v6.5 — depth pages + self-serve enterprise ==="
-for p in api failure-modes how-it-works; do
+for p in api how-it-works; do
   C=$(curl -s -o /dev/null -w "%{http_code}" "$URL/$p")
   check "GET /$p -> 200" test "$C" = "200"
 done
@@ -691,11 +642,6 @@ check "/api lists /v1/compile"         has "$API_REF" '/v1/compile'
 check "/api lists /v1/account/change-plan" has "$API_REF" '/v1/account/change-plan'
 check "/api lists error codes"         has "$API_REF" '402\|429'
 check "/api SDK install lines"         has "$API_REF" '@kolmogorov/kolm'
-
-FM=$(curl -s "$URL/failure-modes")
-check "/failure-modes FM-001"          has "$FM" 'FM-001'
-check "/failure-modes FM-303"          has "$FM" 'FM-303'
-check "/failure-modes operator action" has "$FM" 'k_score'
 
 HOW=$(curl -s "$URL/how-it-works")
 check "/how-it-works 8 stages"         has "$HOW" 'gather\|spec\|synthesize\|k-sample'
