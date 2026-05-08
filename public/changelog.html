@@ -121,6 +121,26 @@
 
     <div class="release recent">
       <div class="rel-head">
+        <span class="ver">v5.5</span>
+        <span class="date">2026-05-08</span>
+        <span class="tag security">Hotfix - mobile pass</span>
+        <h2>Kill horizontal scroll on iPhone. Fix brand-dot duplication on canonical pages. Hide nav under 920px so the header stops overflowing.</h2>
+      </div>
+      <div class="rel-body">
+        <p>Real-device test on a 5G iPhone Safari surfaced six issues that desktop emulators didn't. Fixed all of them in <code>brand-refresh.css</code> with <code>!important</code> overrides that win over the page-level inline <code>&lt;style&gt;</code> blocks (brand-refresh loads after).</p>
+        <ul>
+          <li><b>Brand dot rendered twice</b> on canonical pages. Removed <code>.site-header</code> from the <code>::before</code> pseudo-dot selector — those pages already render an inline <code>&lt;span class="brand-dot"&gt;</code>.</li>
+          <li><b>Nav showing at 390px</b> when styles.css said <code>display:none</code> at <code>&lt;920px</code>. The brand-refresh layer was forcing <code>display:flex !important</code> across all widths. Wrapped the rule in <code>@media (min-width:921px)</code>.</li>
+          <li><b>"get a key" CTA wrapped to three lines</b>. Tightened to <code>padding:6px 12px</code> and <code>white-space:nowrap</code> below 720px.</li>
+          <li><b>Hero lede paragraph cut off mid-word</b>. The page was scrolling sideways. Added <code>html, body { max-width:100%; overflow-x:hidden }</code> as the defensive net plus <code>min-width:0</code> on every grid child that could push the viewport.</li>
+          <li><b>Terminal blocks horizontal-scrolling</b> on /serve, /compile, /k-score. Forced <code>overflow-wrap:anywhere; word-break:break-word; white-space:pre-wrap</code> on every <code>pre</code>, <code>.terminal</code>, <code>.codebox</code>, <code>code</code> at &lt;720px so they wrap instead of widening the page.</li>
+          <li><b>/k-score figure.plate cap overlapping the SVG diagram</b>. Below 480px, dropped <code>aspect-ratio:16/9</code> and made the cap <code>position:static</code> so it sits below the image as a normal block instead of absolute-overlapping it.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="release">
+      <div class="rel-head">
         <span class="ver">v5.4</span>
         <span class="date">2026-05-08</span>
         <span class="tag major">Major - launch ready</span>
