@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>K-score explainer recipe - kolm cookbook</title>
+<meta name="description" content="Compile a signed local model that takes a failed K-score report and explains exactly why the gate failed and what to fix. Saves 30 minutes per failed compile.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="K-score-explainer recipe">
+<meta property="og:description" content="Local K-score failure explainer. Signed, offline.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/cookbook/k-score-explainer">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/k-score-explainer">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand"><img src="/logo-mark.svg" class="brand-mark" alt=""><span>kolm</span></a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="crumbs"><a href="/cookbook">cookbook</a> &middot; meta &middot; k-score-explainer</div>
+    <span class="pill">Recipe &middot; meta</span>
+    <h1>K-score failed, <span class="tone">here's the fix.</span></h1>
+    <p class="lede">A local <code>.kolm</code> file that takes a failed compile's K-score report (T, C, L decomposition + per-pair failure log) and returns a ranked list of fixes: which gold pairs to remove, which verifier hooks to relax, which to add. Trained on 800 of our own historical failed compiles paired with the actual fix that made them pass.</p>
+
+    <div class="meta-row">
+      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-7b</span></div>
+      <div class="item"><span class="label">gold pairs</span><span class="value">800 (560 train / 240 eval)</span></div>
+      <div class="item"><span class="label">k-score floor</span><span class="value">0.82</span></div>
+      <div class="item"><span class="label">artifact size</span><span class="value">2.4 GB</span></div>
+      <div class="item"><span class="label">compile time</span><span class="value">~46 min</span></div>
+      <div class="item"><span class="label">spec source</span><span class="value">grounded diagnosis</span></div>
+    </div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="group">
+      <h2>What this recipe does</h2>
+      <p>A failed K-score is the kolm equivalent of a compile error in C. The diagnostic is verbose; the fix is usually one of about a dozen patterns ("three gold pairs in your set are mutually inconsistent," "your verifier is too strict for the schema you wrote," "your eval set is too small to hit the floor with statistical confidence"). This recipe knows those patterns and applies them.</p>
+      <p>The verifier rejects any fix that doesn't trace to the actual numbers in the report — so the recipe can't make up a "your eval set is too small" diagnosis when it isn't. Each suggested fix points to a concrete row in the failure log.</p>
+    </div>
+
+    <div class="group">
+      <h2>The spec</h2>
+      <pre class="code">{
+  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+  <span class="k">"schema"</span>: {
+    <span class="k">"required"</span>: [<span class="k">"diagnosis"</span>, <span class="k">"fixes"</span>, <span class="k">"expected_lift"</span>],
+    <span class="k">"properties"</span>: {
+      <span class="k">"diagnosis"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 500 },
+      <span class="k">"fixes"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {
+        <span class="k">"required"</span>: [<span class="k">"action"</span>, <span class="k">"target"</span>, <span class="k">"why"</span>],
+        <span class="k">"properties"</span>: {
+          <span class="k">"action"</span>: { <span class="k">"enum"</span>: [<span class="k">"remove_pair"</span>, <span class="k">"relabel_pair"</span>, <span class="k">"relax_verifier"</span>, <span class="k">"strengthen_verifier"</span>, <span class="k">"add_pairs"</span>, <span class="k">"lower_k_floor"</span>] },
+          <span class="k">"target"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+          <span class="k">"why"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> }
+        }
+      }, <span class="k">"maxItems"</span>: 6 },
+      <span class="k">"expected_lift"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> }
+    }
+  },
+  <span class="k">"verifier"</span>: {
+    <span class="k">"target_must_appear_in_failure_log"</span>: <span class="ok">true</span>,
+    <span class="k">"diagnosis_must_cite_T_C_or_L_value"</span>: <span class="ok">true</span>,
+    <span class="k">"expected_lift_calibrated_brier"</span>: 0.12
+  }
+}</pre>
+    </div>
+
+    <div class="group">
+      <h2>Gold pair (1 of 800 shown)</h2>
+
+      <div class="pair">
+        <div class="pair-h">input - failed K-score report</div>
+        <pre class="code">k_score=0.78 (floor=0.85)
+  T=0.74 (k-sample pass rate)  C=0.91 (recipe coverage)  L=0.96 (latency)
+failure_log:
+  pair[112] verifier_failed: span_must_byte_match_input  diff=2chars
+  pair[113] verifier_failed: span_must_byte_match_input  diff=4chars
+  pair[114] verifier_failed: span_must_byte_match_input  diff=1char
+  ... (24 of 30 failures are span byte-match with diff &lt; 5 chars)</pre>
+        <div class="pair-h">output</div>
+        <pre class="code">{
+  <span class="k">"diagnosis"</span>: <span class="k">"T=0.74 is dragging the K-score below 0.85; 24 of 30 failures are span byte-match misses with diff under 5 chars (whitespace/punctuation). The verifier is correctly strict but the gold corpus has noisy span boundaries."</span>,
+  <span class="k">"fixes"</span>: [
+    {<span class="k">"action"</span>: <span class="k">"relax_verifier"</span>, <span class="k">"target"</span>: <span class="k">"span_must_byte_match_input"</span>, <span class="k">"why"</span>: <span class="k">"switch to span_must_overlap_input(min_overlap=0.95) — keeps semantic constraint, tolerates whitespace drift"</span>},
+    {<span class="k">"action"</span>: <span class="k">"relabel_pair"</span>, <span class="k">"target"</span>: <span class="k">"pairs[112-135]"</span>, <span class="k">"why"</span>: <span class="k">"normalize gold spans to trim leading/trailing whitespace"</span>}
+  ],
+  <span class="k">"expected_lift"</span>: 0.09
+}</pre>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Compile</h2>
+      <pre class="code">kolm compile <span class="k">"K-score failure explainer with grounded fix recommendations"</span> \
+  --base qwen2.5-coder-7b \
+  --pairs ./failed-compile-pairs.jsonl \
+  --verifier target-grounded,T-C-L-cited \
+  --k-floor 0.82 \
+  --output k-score-explainer.kolm
+
+<span class="ok">ok</span> wrote <span class="k">k-score-explainer.kolm</span>
+   k_score=0.86  signature=hmac-sha256</pre>
+    </div>
+
+    <div class="group">
+      <h2>K-score gate</h2>
+      <div class="k-bar">
+        <span class="k-label">K-score</span>
+        <span class="k-value">0.86</span>
+        <span class="k-detail">held-out 240 failed compiles &middot; target-grounded 100% &middot; expected-lift Brier 0.094 (target 0.12) &middot; user-applied-fix-passed 71%</span>
+      </div>
+      <p>"User-applied-fix-passed 71%" means: when a real engineer ran the suggested fix, the next compile passed its K-floor 71% of the time. The other 29% needed a second iteration — but the second iteration was also explained by this recipe.</p>
+    </div>
+
+    <div class="group">
+      <h2>Run-time profile</h2>
+      <div class="lat-grid">
+        <div class="cell"><div class="h">M2 MacBook</div><div class="v">2.4<span class="u">s</span></div></div>
+        <div class="cell"><div class="h">RTX 5090</div><div class="v">560<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">Mac Studio</div><div class="v">1.4<span class="u">s</span></div></div>
+        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">3.4<span class="u">s</span></div></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Deploy</h2>
+      <pre class="code"><span class="c"># wired into kolm compile failure path:</span>
+on_compile_failed = (report) =&gt; {
+  const x = kolm.run(<span class="k">'k-score-explainer.kolm'</span>, report);
+  console.log(<span class="k">'\nDIAGNOSIS:\n  '</span> + x.diagnosis);
+  console.log(<span class="k">'\nFIXES (expected lift +'</span> + x.expected_lift.toFixed(2) + <span class="k">'):'</span>);
+  for (const f of x.fixes) console.log(<span class="k">'  - '</span> + f.action + <span class="k">' '</span> + f.target + <span class="k">'\n    '</span> + f.why);
+};</pre>
+    </div>
+
+    <div class="group">
+      <h2>Related recipes</h2>
+      <div class="related">
+        <a href="/cookbook/verifier-from-examples"><div class="h">Verifier from examples</div><div class="d">20 pairs → kolm verifier spec.</div></a>
+        <a href="/cookbook/recipe-from-observations"><div class="h">Recipe from observations</div><div class="d">Production traffic → recipe pairs.</div></a>
+        <a href="/cookbook/recall-namespace-tagger"><div class="h">Namespace tagger</div><div class="d">Auto-classify recall queries into namespaces.</div></a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap-wide row">
+    <span>kolm cookbook &middot; <a href="/cookbook">all recipes</a></span>
+    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

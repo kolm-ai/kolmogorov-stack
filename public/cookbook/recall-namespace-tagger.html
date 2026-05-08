@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Recall namespace tagger recipe - kolm cookbook</title>
+<meta name="description" content="Compile a signed local model that auto-routes a recall query into the right tenant namespace. Replaces hand-tuned classifiers across kolm's recall layer.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="Recall-namespace-tagger recipe">
+<meta property="og:description" content="Local recall query router. Signed, offline.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/cookbook/recall-namespace-tagger">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/recall-namespace-tagger">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand"><img src="/logo-mark.svg" class="brand-mark" alt=""><span>kolm</span></a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="crumbs"><a href="/cookbook">cookbook</a> &middot; meta &middot; recall-namespace-tagger</div>
+    <span class="pill">Recipe &middot; meta</span>
+    <h1>Queries in, <span class="tone">routed to the right namespace.</span></h1>
+    <p class="lede">A local <code>.kolm</code> file that takes a recall query and returns the namespace it belongs to plus a confidence. Trained on 4,000 of your tenant's past queries with their final destination namespace. Replaces the hand-tuned heuristic that picks which corpus_namespace to search in <code>kolm serve</code>.</p>
+
+    <div class="meta-row">
+      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
+      <div class="item"><span class="label">gold pairs</span><span class="value">4,000 (2.8k train / 1.2k eval)</span></div>
+      <div class="item"><span class="label">k-score floor</span><span class="value">0.85</span></div>
+      <div class="item"><span class="label">artifact size</span><span class="value">1.6 GB</span></div>
+      <div class="item"><span class="label">compile time</span><span class="value">~38 min</span></div>
+      <div class="item"><span class="label">spec source</span><span class="value">closed-vocab + low-confidence-fallback</span></div>
+    </div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="group">
+      <h2>What this recipe does</h2>
+      <p>Most recall systems have one of two failure modes: search every namespace (slow, expensive, leaks) or pick wrong (miss). This recipe is the third option: a tiny model that's right about which namespace to hit ~95% of the time, with a confidence score that defaults to "search them all" below 0.7. So the slow fallback is rare, the right answer is fast, and you never accidentally search a namespace your tenant shouldn't see.</p>
+      <p>The verifier locks the namespace output to the closed namespace list and rejects any prediction outside the tenant's authorized set — a cross-tenant leak is impossible by construction.</p>
+    </div>
+
+    <div class="group">
+      <h2>The spec</h2>
+      <pre class="code">{
+  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+  <span class="k">"schema"</span>: {
+    <span class="k">"required"</span>: [<span class="k">"namespace"</span>, <span class="k">"confidence"</span>, <span class="k">"fallback"</span>],
+    <span class="k">"properties"</span>: {
+      <span class="k">"namespace"</span>: { <span class="k">"$ref"</span>: <span class="k">"namespaces.json"</span> },
+      <span class="k">"confidence"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span>, <span class="k">"minimum"</span>: 0, <span class="k">"maximum"</span>: 1 },
+      <span class="k">"fallback"</span>: { <span class="k">"enum"</span>: [<span class="k">"narrow"</span>, <span class="k">"broad"</span>] }
+    }
+  },
+  <span class="k">"verifier"</span>: {
+    <span class="k">"namespace_must_be_in_tenant_authorized_list"</span>: <span class="ok">true</span>,
+    <span class="k">"low_confidence_fallback_must_be_broad"</span>: <span class="ok">true</span>,
+    <span class="k">"calibration_target_brier_score"</span>: 0.10
+  }
+}</pre>
+    </div>
+
+    <div class="group">
+      <h2>Gold pair (1 of 4,000 shown)</h2>
+
+      <div class="pair">
+        <div class="pair-h">input - query</div>
+        <pre class="code">"how do I rotate the API key for the staging instance?"</pre>
+        <div class="pair-h">output</div>
+        <pre class="code">{
+  <span class="k">"namespace"</span>: <span class="k">"runbooks"</span>,
+  <span class="k">"confidence"</span>: 0.94,
+  <span class="k">"fallback"</span>: <span class="k">"narrow"</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Compile</h2>
+      <pre class="code">kolm compile <span class="k">"recall query namespace router"</span> \
+  --base qwen2.5-coder-3b \
+  --pairs ./query-namespace-pairs.jsonl \
+  --namespaces ./namespaces.json \
+  --verifier closed-vocab,calibrated-brier=0.10 \
+  --k-floor 0.85 \
+  --output namespace-tagger.kolm
+
+<span class="ok">ok</span> wrote <span class="k">namespace-tagger.kolm</span>
+   k_score=0.91  signature=hmac-sha256</pre>
+    </div>
+
+    <div class="group">
+      <h2>K-score gate</h2>
+      <div class="k-bar">
+        <span class="k-label">K-score</span>
+        <span class="k-value">0.91</span>
+        <span class="k-detail">held-out 1,200 queries &middot; namespace-correct 95% &middot; Brier 0.087 (target 0.10) &middot; cross-tenant leak rate 0% (verifier blocks unauthorized)</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Run-time profile</h2>
+      <div class="lat-grid">
+        <div class="cell"><div class="h">M2 MacBook</div><div class="v">280<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">RTX 5090</div><div class="v">75<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">820<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">1.1<span class="u">s</span></div></div>
+      </div>
+      <p>The 75ms RTX number is the load-bearing one — this recipe sits in the recall hot path on <code>kolm serve</code>. Per-request latency budget for routing is 100ms; we land at 75ms in the steady state, with the slow fallback ("search all") triggered ~5% of the time.</p>
+    </div>
+
+    <div class="group">
+      <h2>Deploy</h2>
+      <pre class="code"><span class="c"># wired into kolm serve recall pipeline:</span>
+serve.before_recall = (query, tenant) =&gt; {
+  const r = kolm.run(<span class="k">'namespace-tagger.kolm'</span>, query);
+  if (r.confidence &gt; 0.7) return { namespace: r.namespace, mode: <span class="k">'narrow'</span> };
+  return { namespaces: tenant.authorized_namespaces, mode: <span class="k">'broad'</span> };
+};</pre>
+    </div>
+
+    <div class="group">
+      <h2>Related recipes</h2>
+      <div class="related">
+        <a href="/cookbook/verifier-from-examples"><div class="h">Verifier from examples</div><div class="d">20 pairs → kolm verifier spec.</div></a>
+        <a href="/cookbook/recipe-from-observations"><div class="h">Recipe from observations</div><div class="d">Production traffic → recipe pairs.</div></a>
+        <a href="/cookbook/k-score-explainer"><div class="h">K-score explainer</div><div class="d">Score → why it failed + fix.</div></a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap-wide row">
+    <span>kolm cookbook &middot; <a href="/cookbook">all recipes</a></span>
+    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

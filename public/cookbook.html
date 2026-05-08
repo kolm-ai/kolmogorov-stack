@@ -43,8 +43,8 @@
     <div class="wrap">
       <div class="hero-copy">
         <div class="eyebrow"><span class="pulse"></span>cookbook</div>
-        <h1>Recipes by vertical.</h1>
-        <p class="lede">Each cookbook is a concrete walkthrough: what to compile, the gold-example shape, the CLI commands, the K-score floor that's reasonable for the use case, and the run-time profile. Pick the closest one to your problem and adapt. If your vertical isn't listed, the pattern still applies; the underlying compiler doesn't care about the domain.</p>
+        <h1>30 recipes. <span class="tone">All compile.</span></h1>
+        <p class="lede">Six categories &mdash; verticals, coding, ops, product, personal, meta. Each is a concrete walkthrough: gold-example shape, verifier hooks, K-score floor, run-time profile. Pick the closest one and adapt. If yours isn't listed, the pattern still applies &mdash; the compiler doesn't care about the domain.</p>
         <div class="actions">
           <a href="/quickstart" class="btn primary">quickstart</a>
           <a href="/build-your-own" class="btn ghost">build your own</a>
@@ -344,7 +344,49 @@
 
   <section class="section">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">07</span>shape</div>
+      <div class="eyebrow"><span class="num">07</span>meta recipes</div>
+      <h2>Four recipes for the loop itself.</h2>
+      <p class="sec-lede">The recipes that build recipes. Synthesize a verifier spec from 20 pairs. Auto-route recall queries into the right namespace. Turn production traffic captured by <code>/v1/capture</code> into a deployable recipe. Diagnose failed K-scores and recommend the fix. Each one closes a gap in the compile-once-run-locally loop.</p>
+
+      <div class="vs-tbl">
+        <table>
+          <thead>
+            <tr><th style="width:22%">Recipe</th><th>What it does</th><th>K-score</th><th>Read</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Verifier from examples</b></td>
+              <td>20 pairs + 1-line task to a kolm verifier spec. Output passes <code>kolm spec --check</code> and dry-run compile.</td>
+              <td><code>0.86</code></td>
+              <td><a href="/cookbook/verifier-from-examples">/cookbook/verifier-from-examples &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>Recall namespace tagger</b></td>
+              <td>Recall query to namespace + confidence. Hot-path router for <code>kolm serve</code>. 75ms RTX, cross-tenant leak by construction blocked.</td>
+              <td><code>0.91</code></td>
+              <td><a href="/cookbook/recall-namespace-tagger">/cookbook/recall-namespace-tagger &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>Recipe from observations</b></td>
+              <td>Cluster of observations from <code>/v1/capture</code> to a complete kolm recipe. The capture-to-distill bridge.</td>
+              <td><code>0.84</code></td>
+              <td><a href="/cookbook/recipe-from-observations">/cookbook/recipe-from-observations &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>K-score explainer</b></td>
+              <td>Failed compile report to ranked fixes. Every target cites a row in the failure log; every diagnosis cites T/C/L.</td>
+              <td><code>0.86</code></td>
+              <td><a href="/cookbook/k-score-explainer">/cookbook/k-score-explainer &rarr;</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">08</span>shape</div>
       <h2>Every recipe follows the same five steps.</h2>
       <div class="kvtable">
         <table>
@@ -360,7 +402,7 @@
 
   <section class="section">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">08</span>your vertical</div>
+      <div class="eyebrow"><span class="num">09</span>your vertical</div>
       <h2>Don't see your shape?</h2>
       <p class="sec-lede">Build your own. <code>kolm new my-task --from {redactor|extractor|classifier|blank}</code> scaffolds a working spec; <code>kolm compile --spec spec.json</code> seals it offline. Or drop ten labeled examples + a frontier API key into the cloud <code>kolm compile</code> and the registry comes back with a finished <code>.kolm</code>. Stuck on the spec shape? Open a thread in GitHub Discussions.</p>
       <div class="actions" style="margin-top:14px">

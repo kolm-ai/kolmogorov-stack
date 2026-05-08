@@ -1040,6 +1040,48 @@ check "sitemap has /cookbook/embedded-sensor"       has "$VRT_SM" "/cookbook/emb
 check "sitemap has /cookbook/web3-screener"         has "$VRT_SM" "/cookbook/web3-address-screener"
 
 echo ""
+echo "=== 39. Workstream G — four meta cookbook recipes ==="
+# Four recipes for the loop itself: spec synthesis, namespace routing,
+# recipe synthesis from production traffic, and K-score failure diagnosis.
+# These are the recipes that build recipes.
+for r in verifier-from-examples recall-namespace-tagger recipe-from-observations k-score-explainer; do
+  RC=$(curl -s -o /dev/null -w "%{http_code}" "$URL/cookbook/$r")
+  check "/cookbook/$r is 200" eq "$RC" 200
+done
+
+VFE_R=$(curl -s "$URL/cookbook/verifier-from-examples")
+check "verifier-from-examples spec-check"           has "$VFE_R" "output_must_pass_kolm_spec_check"
+check "verifier-from-examples dry-run gate"         has "$VFE_R" "output_must_compile_dry_run"
+
+RNT_R=$(curl -s "$URL/cookbook/recall-namespace-tagger")
+check "recall-namespace authorized list"            has "$RNT_R" "namespace_must_be_in_tenant_authorized_list"
+check "recall-namespace low-conf fallback"          has "$RNT_R" "low_confidence_fallback_must_be_broad"
+
+RFO_R=$(curl -s "$URL/cookbook/recipe-from-observations")
+check "recipe-from-obs k-floor matches purity"      has "$RFO_R" "k_floor_must_match_cluster_purity"
+check "recipe-from-obs minimum pairs"               has "$RFO_R" "pairs_count_minimum"
+
+KSE_R=$(curl -s "$URL/cookbook/k-score-explainer")
+check "k-score-explainer target grounded"           has "$KSE_R" "target_must_appear_in_failure_log"
+check "k-score-explainer T/C/L cited"               has "$KSE_R" "diagnosis_must_cite_T_C_or_L_value"
+
+# Cookbook index now lists four meta recipes.
+COOK_IDX6=$(curl -s "$URL/cookbook")
+check "cookbook index links verifier-from-examples" has "$COOK_IDX6" "/cookbook/verifier-from-examples"
+check "cookbook index links namespace-tagger"       has "$COOK_IDX6" "/cookbook/recall-namespace-tagger"
+check "cookbook index links recipe-from-obs"        has "$COOK_IDX6" "/cookbook/recipe-from-observations"
+check "cookbook index links k-score-explainer"      has "$COOK_IDX6" "/cookbook/k-score-explainer"
+check "cookbook index has meta section"             has "$COOK_IDX6" "meta recipes"
+check "cookbook hero advertises 30 recipes"         has "$COOK_IDX6" "30 recipes"
+
+# Sitemap carries all four meta recipe URLs.
+META_SM=$(curl -s "$URL/sitemap.xml")
+check "sitemap has /cookbook/verifier-from-examples" has "$META_SM" "/cookbook/verifier-from-examples"
+check "sitemap has /cookbook/namespace-tagger"       has "$META_SM" "/cookbook/recall-namespace-tagger"
+check "sitemap has /cookbook/recipe-from-obs"        has "$META_SM" "/cookbook/recipe-from-observations"
+check "sitemap has /cookbook/k-score-explainer"      has "$META_SM" "/cookbook/k-score-explainer"
+
+echo ""
 echo "================================================"
 echo " RESULTS: $PASS pass, $FAIL fail"
 if [ $FAIL -gt 0 ]; then
