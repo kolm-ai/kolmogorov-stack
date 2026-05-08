@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Churn predict recipe - kolm cookbook</title>
+<meta name="description" content="Compile a signed local model that classifies an account as churn-risk by reading 30 days of usage telemetry. 600 labeled accounts, calibrated probability output.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="Churn-predict recipe">
+<meta property="og:description" content="Local churn-risk classifier with calibrated probabilities. Signed, offline.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/cookbook/churn-predict">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/churn-predict">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand"><img src="/logo-mark.svg" class="brand-mark" alt=""><span>kolm</span></a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="crumbs"><a href="/cookbook">cookbook</a> &middot; product &middot; churn-predict</div>
+    <span class="pill">Recipe &middot; product</span>
+    <h1>Risk scores, <span class="tone">calibrated.</span></h1>
+    <p class="lede">A local <code>.kolm</code> file that reads 30 days of an account's usage telemetry and returns <em>(risk, reasons, suggested_outreach)</em>. Trained on 600 historical accounts labeled by ground truth (renewed / churned at 90 days). Verifier rejects any output where the stated reasons contradict the input telemetry.</p>
+
+    <div class="meta-row">
+      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
+      <div class="item"><span class="label">gold pairs</span><span class="value">600 (420 train / 180 eval)</span></div>
+      <div class="item"><span class="label">k-score floor</span><span class="value">0.85</span></div>
+      <div class="item"><span class="label">artifact size</span><span class="value">1.6 GB</span></div>
+      <div class="item"><span class="label">compile time</span><span class="value">~36 min</span></div>
+      <div class="item"><span class="label">spec source</span><span class="value">calibrated probability + grounding</span></div>
+    </div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="group">
+      <h2>What this recipe does</h2>
+      <p>Replaces a "churn risk" rules engine that was 20+ if-statements deep and never quite right. Reads telemetry (login frequency, feature breadth, seat-utilization, support-ticket sentiment, billing health) and returns a risk band plus the specific signals that drove it. The verifier confirms every cited signal actually appears in the input — no hallucinated reasons.</p>
+      <p>The probability is calibrated on the held-out set: when the model says "0.7 risk," accounts at that bucket actually churn ~70% of the time within 90 days.</p>
+    </div>
+
+    <div class="group">
+      <h2>The spec</h2>
+      <pre class="code">{
+  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+  <span class="k">"schema"</span>: {
+    <span class="k">"required"</span>: [<span class="k">"risk"</span>, <span class="k">"band"</span>, <span class="k">"reasons"</span>, <span class="k">"suggested_outreach"</span>],
+    <span class="k">"properties"</span>: {
+      <span class="k">"risk"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span>, <span class="k">"minimum"</span>: 0, <span class="k">"maximum"</span>: 1 },
+      <span class="k">"band"</span>: { <span class="k">"enum"</span>: [<span class="k">"green"</span>, <span class="k">"yellow"</span>, <span class="k">"red"</span>] },
+      <span class="k">"reasons"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {
+        <span class="k">"required"</span>: [<span class="k">"signal"</span>, <span class="k">"value"</span>, <span class="k">"trend"</span>],
+        <span class="k">"properties"</span>: {
+          <span class="k">"signal"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+          <span class="k">"value"</span>: {},
+          <span class="k">"trend"</span>: { <span class="k">"enum"</span>: [<span class="k">"up"</span>, <span class="k">"flat"</span>, <span class="k">"down"</span>] }
+        }
+      } },
+      <span class="k">"suggested_outreach"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> }
+    }
+  },
+  <span class="k">"verifier"</span>: {
+    <span class="k">"reasons_must_match_input"</span>: <span class="ok">true</span>,
+    <span class="k">"calibration_target_brier_score"</span>: 0.10
+  }
+}</pre>
+    </div>
+
+    <div class="group">
+      <h2>Gold pairs (1 of 600 shown)</h2>
+
+      <div class="pair">
+        <div class="pair-h">input - 30d telemetry</div>
+        <pre class="code">{
+  <span class="k">"account"</span>: <span class="k">"acme-co"</span>, <span class="k">"plan"</span>: <span class="k">"team"</span>, <span class="k">"seats"</span>: 12,
+  <span class="k">"logins_30d"</span>: 84,                <span class="k">"prev_logins_30d"</span>: 142,
+  <span class="k">"feature_breadth"</span>: 0.31,        <span class="k">"prev_feature_breadth"</span>: 0.58,
+  <span class="k">"support_tickets_30d"</span>: 4,       <span class="k">"prev_support_tickets_30d"</span>: 1,
+  <span class="k">"avg_support_sentiment"</span>: -0.35, <span class="k">"prev_avg_support_sentiment"</span>: 0.10,
+  <span class="k">"billing_health"</span>: <span class="k">"current"</span>, <span class="k">"renewal_in_days"</span>: 41
+}</pre>
+        <div class="pair-h">output</div>
+        <pre class="code">{
+  <span class="k">"risk"</span>: 0.72,
+  <span class="k">"band"</span>: <span class="k">"red"</span>,
+  <span class="k">"reasons"</span>: [
+    {<span class="k">"signal"</span>: <span class="k">"logins_30d"</span>, <span class="k">"value"</span>: 84, <span class="k">"trend"</span>: <span class="k">"down"</span>},
+    {<span class="k">"signal"</span>: <span class="k">"feature_breadth"</span>, <span class="k">"value"</span>: 0.31, <span class="k">"trend"</span>: <span class="k">"down"</span>},
+    {<span class="k">"signal"</span>: <span class="k">"support_tickets_30d"</span>, <span class="k">"value"</span>: 4, <span class="k">"trend"</span>: <span class="k">"up"</span>},
+    {<span class="k">"signal"</span>: <span class="k">"avg_support_sentiment"</span>, <span class="k">"value"</span>: -0.35, <span class="k">"trend"</span>: <span class="k">"down"</span>}
+  ],
+  <span class="k">"suggested_outreach"</span>: <span class="k">"CSM check-in within 7 days; lead with the support ticket sentiment dip and ask which workflow regressed. Renewal is 41 days out — there's time to fix this."</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Compile</h2>
+      <pre class="code">kolm compile <span class="k">"churn risk classifier with grounded reasons"</span> \
+  --base qwen2.5-coder-3b \
+  --pairs pairs.jsonl \
+  --verifier reasons-grounded,calibrated-brier=0.10 \
+  --k-floor 0.85 \
+  --output churn-predict.kolm
+
+<span class="ok">ok</span> wrote <span class="k">churn-predict.kolm</span>
+   k_score=0.87  signature=hmac-sha256</pre>
+    </div>
+
+    <div class="group">
+      <h2>K-score gate</h2>
+      <div class="k-bar">
+        <span class="k-label">K-score</span>
+        <span class="k-value">0.87</span>
+        <span class="k-detail">held-out 180 accounts &middot; reasons-grounded 100% &middot; band-accuracy 84% &middot; Brier 0.092 (target 0.10)</span>
+      </div>
+      <p>"Reasons grounded" means: every cited signal-value pair must appear in the input telemetry. The model can't make up a "feature_breadth = 0.31, trending down" reason if the input shows 0.58 stable. Verifier catches this at compile time.</p>
+    </div>
+
+    <div class="group">
+      <h2>Run-time profile</h2>
+      <div class="lat-grid">
+        <div class="cell"><div class="h">M2 MacBook</div><div class="v">680<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">RTX 5090</div><div class="v">190<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">2.0<span class="u">s</span></div></div>
+        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">2.6<span class="u">s</span></div></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Deploy</h2>
+      <pre class="code"><span class="c"># nightly batch — score every active account, write red-band to CSM queue:</span>
+for acct in $(psql -t -c <span class="k">"SELECT id FROM accounts WHERE active"</span>); do
+  tel=$(./build-telemetry.py --account <span class="k">"$acct"</span> --days 30)
+  out=$(kolm run churn-predict.kolm --input <span class="k">"$tel"</span>)
+  if [ <span class="k">"$(echo "$out" | jq -r .band)"</span> = <span class="k">"red"</span> ]; then
+    queue write csm-priority <span class="k">"$out"</span>
+  fi
+done</pre>
+    </div>
+
+    <div class="group">
+      <h2>Related recipes</h2>
+      <div class="related">
+        <a href="/cookbook/nps-classifier"><div class="h">NPS classifier</div><div class="d">Free-text response → score + theme.</div></a>
+        <a href="/cookbook/support-reply"><div class="h">Support reply</div><div class="d">Ticket → empathy-tuned, brand-faithful reply.</div></a>
+        <a href="/cookbook/pricing-quote"><div class="h">Pricing quote</div><div class="d">Customer info → reconciled quote.</div></a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap-wide row">
+    <span>kolm cookbook &middot; <a href="/cookbook">all recipes</a></span>
+    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

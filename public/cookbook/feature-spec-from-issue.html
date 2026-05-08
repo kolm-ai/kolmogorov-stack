@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Feature spec from issue recipe - kolm cookbook</title>
+<meta name="description" content="Compile a signed local model that turns a GitHub issue into a 4-section feature spec: problem, scope, success criteria, open questions. 80 gold pairs, runs offline.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="Feature-spec recipe">
+<meta property="og:description" content="Local issue-to-PRD writer. Brand-voice tuned, signed, offline.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/cookbook/feature-spec-from-issue">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/feature-spec-from-issue">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand"><img src="/logo-mark.svg" class="brand-mark" alt=""><span>kolm</span></a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="crumbs"><a href="/cookbook">cookbook</a> &middot; product &middot; feature-spec-from-issue</div>
+    <span class="pill">Recipe &middot; product</span>
+    <h1>Issue in, <span class="tone">spec out.</span></h1>
+    <p class="lede">A local <code>.kolm</code> file that takes a GitHub / Linear / Jira issue and writes a 4-section feature spec: <em>problem, scope, success criteria, open questions</em>. Trained on 80 of your team's past specs, so the voice and granularity match what your reviewers expect.</p>
+
+    <div class="meta-row">
+      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-7b-instruct</span></div>
+      <div class="item"><span class="label">gold pairs</span><span class="value">80 (40 train / 40 eval)</span></div>
+      <div class="item"><span class="label">k-score floor</span><span class="value">0.80</span></div>
+      <div class="item"><span class="label">artifact size</span><span class="value">2.6 GB</span></div>
+      <div class="item"><span class="label">compile time</span><span class="value">~28 min</span></div>
+      <div class="item"><span class="label">spec source</span><span class="value">JSON Schema + style verifier</span></div>
+    </div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="group">
+      <h2>What this recipe does</h2>
+      <p>A PM gets a 3-paragraph issue. Before they can scope it, they spend 20 minutes restructuring it into a spec. Same template every time. This recipe does the restructure pass and stops there — it doesn't decide product strategy or set priorities, it just turns prose into the shape your team reviews.</p>
+      <p>The verifier enforces (a) all four sections present, (b) each "success criterion" is testable (must contain a measurable verb), (c) the brand-voice gate from the docstring recipe — your prevailing tone, not a generic LLM voice.</p>
+    </div>
+
+    <div class="group">
+      <h2>The spec</h2>
+      <pre class="code">{
+  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+  <span class="k">"schema"</span>: {
+    <span class="k">"required"</span>: [<span class="k">"problem"</span>, <span class="k">"scope"</span>, <span class="k">"success_criteria"</span>, <span class="k">"open_questions"</span>],
+    <span class="k">"properties"</span>: {
+      <span class="k">"problem"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 600 },
+      <span class="k">"scope"</span>: { <span class="k">"type"</span>: <span class="k">"object"</span>,
+        <span class="k">"required"</span>: [<span class="k">"in"</span>, <span class="k">"out"</span>],
+        <span class="k">"properties"</span>: {
+          <span class="k">"in"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} },
+          <span class="k">"out"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} }
+        }
+      },
+      <span class="k">"success_criteria"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>}, <span class="k">"minItems"</span>: 2 },
+      <span class="k">"open_questions"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} }
+    }
+  },
+  <span class="k">"verifier"</span>: {
+    <span class="k">"success_criterion_must_contain_verb"</span>: <span class="ok">true</span>,
+    <span class="k">"style_corpus"</span>: <span class="k">"prior-specs/"</span>,
+    <span class="k">"max_words_per_section"</span>: 200
+  }
+}</pre>
+    </div>
+
+    <div class="group">
+      <h2>Gold pairs (1 of 80 shown)</h2>
+
+      <div class="pair">
+        <div class="pair-h">input - github issue</div>
+        <pre class="code">title: feed loads slow for users with &gt;200 saved items
+body:
+Customers on the high-volume saved list (top 5%) report the feed taking
+4-7 seconds to render. Telemetry confirms: p95 feed-render at 3.8s for users
+above 200 saved items, vs 480ms for everyone else. We've seen it in support
+tickets twice this week. Likely the N+1 query in feed.py:118 — we know
+about it but never prioritized it. Should we?</pre>
+        <div class="pair-h">output</div>
+        <pre class="code">{
+  <span class="k">"problem"</span>: <span class="k">"Customers with &gt;200 saved items see p95 feed-render at 3.8s vs 480ms baseline. Affects ~5% of active users; surfaced in 2 support tickets this week. Source is the N+1 query at feed.py:118."</span>,
+  <span class="k">"scope"</span>: {
+    <span class="k">"in"</span>: [
+      <span class="k">"Eliminate the N+1 query at feed.py:118 (use prefetch_related)"</span>,
+      <span class="k">"Add p95-by-saved-count chart to the feed perf dashboard"</span>
+    ],
+    <span class="k">"out"</span>: [
+      <span class="k">"Pagination redesign (separate work)"</span>,
+      <span class="k">"Caching layer (consider after this fix lands)"</span>
+    ]
+  },
+  <span class="k">"success_criteria"</span>: [
+    <span class="k">"p95 feed-render reduces below 800ms for users with 200+ saved items"</span>,
+    <span class="k">"DB query count for the feed endpoint drops below 12 per render (currently scales with saved count)"</span>,
+    <span class="k">"Zero new feed-perf support tickets in the 14 days after release"</span>
+  ],
+  <span class="k">"open_questions"</span>: [
+    <span class="k">"Do we backfill prefetch hints into the existing serializer, or write a new one?"</span>,
+    <span class="k">"What's the rollout plan — flag-gated for high-volume users first?"</span>
+  ]
+}</pre>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Compile</h2>
+      <pre class="code">kolm compile <span class="k">"github issue to 4-section feature spec"</span> \
+  --base qwen2.5-7b-instruct \
+  --pairs pairs.jsonl \
+  --style-corpus prior-specs/ \
+  --verifier success-criterion-testable \
+  --k-floor 0.80 \
+  --output feature-spec.kolm
+
+<span class="ok">ok</span> wrote <span class="k">feature-spec.kolm</span>
+   k_score=0.84  signature=hmac-sha256</pre>
+    </div>
+
+    <div class="group">
+      <h2>K-score gate</h2>
+      <div class="k-bar">
+        <span class="k-label">K-score</span>
+        <span class="k-value">0.84</span>
+        <span class="k-detail">held-out 40 specs &middot; schema-pass 100% &middot; success-criteria-testable 96% &middot; PM-rated useful 86%</span>
+      </div>
+      <p>The "testable verb" check is the hardest gate — it kills outputs like "feed should be faster" (no measurable threshold) and forces "p95 feed-render reduces below 800ms" (concrete, observable, falsifiable).</p>
+    </div>
+
+    <div class="group">
+      <h2>Run-time profile</h2>
+      <div class="lat-grid">
+        <div class="cell"><div class="h">M2 MacBook</div><div class="v">2.2<span class="u">s</span></div></div>
+        <div class="cell"><div class="h">RTX 5090</div><div class="v">510<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">5.8<span class="u">s</span></div></div>
+        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">7.4<span class="u">s</span></div></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Deploy</h2>
+      <pre class="code"><span class="c"># github action — runs on every issue with label `needs-spec`:</span>
+on:
+  issues:
+    types: [labeled]
+jobs:
+  draft-spec:
+    if: github.event.label.name == <span class="k">'needs-spec'</span>
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          spec=$(kolm run feature-spec.kolm --input <span class="k">"$ISSUE_BODY"</span>)
+          gh issue comment $NUM --body <span class="k">"$spec"</span></pre>
+    </div>
+
+    <div class="group">
+      <h2>Related recipes</h2>
+      <div class="related">
+        <a href="/cookbook/support-reply"><div class="h">Support reply</div><div class="d">Ticket → empathy-tuned, brand-faithful reply.</div></a>
+        <a href="/cookbook/pricing-quote"><div class="h">Pricing quote</div><div class="d">Customer info → quote with a deterministic price-table verifier.</div></a>
+        <a href="/cookbook/refactor"><div class="h">Refactor</div><div class="d">Suggest structural changes with rationale.</div></a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap-wide row">
+    <span>kolm cookbook &middot; <a href="/cookbook">all recipes</a></span>
+    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

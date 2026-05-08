@@ -897,6 +897,53 @@ check "sitemap has /cookbook/on-call-page-classifier" has "$OPS_SM" "/cookbook/o
 check "sitemap has /cookbook/slack-thread-summarizer" has "$OPS_SM" "/cookbook/slack-thread-summarizer"
 
 echo ""
+echo "=== 36. Workstream G — five product cookbook recipes ==="
+# Five recipes for product/CX work. Each verifier does specific load-bearing
+# work the model alone can't be trusted with — price reconcile, KB grounding,
+# closed-vocab classification, calibrated probability.
+for r in feature-spec-from-issue pricing-quote support-reply churn-predict nps-classifier; do
+  RC=$(curl -s -o /dev/null -w "%{http_code}" "$URL/cookbook/$r")
+  check "/cookbook/$r is 200" eq "$RC" 200
+done
+
+FS_R=$(curl -s "$URL/cookbook/feature-spec-from-issue")
+check "feature-spec testable verb gate"             has "$FS_R" "success_criterion_must_contain_verb"
+check "feature-spec 4 sections"                     has "$FS_R" "open_questions"
+
+PQ_R=$(curl -s "$URL/cookbook/pricing-quote")
+check "pricing-quote reconciles to table"           has "$PQ_R" "reconcile_unit_price"
+check "pricing-quote has line-math gate"            has "$PQ_R" "reconcile_line_math"
+
+SR_R=$(curl -s "$URL/cookbook/support-reply")
+check "support-reply KB grounding gate"             has "$SR_R" "factual_claim_must_be_grounded"
+check "support-reply escalates on anger"            has "$SR_R" "escalate_on_anger"
+
+CP_R=$(curl -s "$URL/cookbook/churn-predict")
+check "churn-predict reasons grounded"              has "$CP_R" "reasons_must_match_input"
+check "churn-predict Brier calibration"             has "$CP_R" "calibration_target_brier_score"
+
+NP_R=$(curl -s "$URL/cookbook/nps-classifier")
+check "nps-classifier closed taxonomy"              has "$NP_R" "theme_must_be_in_taxonomy"
+check "nps-classifier quote must appear"            has "$NP_R" "quote_must_appear_in_input"
+
+# Cookbook index now lists five product recipes.
+COOK_IDX3=$(curl -s "$URL/cookbook")
+check "cookbook index links feature-spec"           has "$COOK_IDX3" "/cookbook/feature-spec-from-issue"
+check "cookbook index links pricing-quote"          has "$COOK_IDX3" "/cookbook/pricing-quote"
+check "cookbook index links support-reply"          has "$COOK_IDX3" "/cookbook/support-reply"
+check "cookbook index links churn-predict"          has "$COOK_IDX3" "/cookbook/churn-predict"
+check "cookbook index links nps-classifier"         has "$COOK_IDX3" "/cookbook/nps-classifier"
+check "cookbook index has product section"          has "$COOK_IDX3" "product recipes"
+
+# Sitemap carries all five product recipe URLs.
+PRD_SM=$(curl -s "$URL/sitemap.xml")
+check "sitemap has /cookbook/feature-spec-from-issue" has "$PRD_SM" "/cookbook/feature-spec-from-issue"
+check "sitemap has /cookbook/pricing-quote"           has "$PRD_SM" "/cookbook/pricing-quote"
+check "sitemap has /cookbook/support-reply"           has "$PRD_SM" "/cookbook/support-reply"
+check "sitemap has /cookbook/churn-predict"           has "$PRD_SM" "/cookbook/churn-predict"
+check "sitemap has /cookbook/nps-classifier"          has "$PRD_SM" "/cookbook/nps-classifier"
+
+echo ""
 echo "================================================"
 echo " RESULTS: $PASS pass, $FAIL fail"
 if [ $FAIL -gt 0 ]; then

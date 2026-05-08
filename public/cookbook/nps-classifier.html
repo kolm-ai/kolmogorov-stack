@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NPS classifier recipe - kolm cookbook</title>
+<meta name="description" content="Compile a signed local model that turns free-text NPS responses into score + theme + intent. 500 labeled responses, calibrated theme taxonomy, runs offline.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="NPS-classifier recipe">
+<meta property="og:description" content="Local NPS theme classifier with calibrated taxonomy. Signed, offline.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/cookbook/nps-classifier">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/nps-classifier">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand"><img src="/logo-mark.svg" class="brand-mark" alt=""><span>kolm</span></a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="crumbs"><a href="/cookbook">cookbook</a> &middot; product &middot; nps-classifier</div>
+    <span class="pill">Recipe &middot; product</span>
+    <h1>NPS responses, <span class="tone">tagged in your taxonomy.</span></h1>
+    <p class="lede">A local <code>.kolm</code> file that takes a free-text NPS response and returns <em>(promoter / passive / detractor, primary_theme, intent_to_churn, mention_competitor)</em>. Trained on 500 of your past responses tagged by your CX team. The verifier rejects any output whose theme isn't in the canonical taxonomy.</p>
+
+    <div class="meta-row">
+      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
+      <div class="item"><span class="label">gold pairs</span><span class="value">500 (350 train / 150 eval)</span></div>
+      <div class="item"><span class="label">k-score floor</span><span class="value">0.85</span></div>
+      <div class="item"><span class="label">artifact size</span><span class="value">1.6 GB</span></div>
+      <div class="item"><span class="label">compile time</span><span class="value">~32 min</span></div>
+      <div class="item"><span class="label">spec source</span><span class="value">closed-vocab classifier</span></div>
+    </div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="group">
+      <h2>What this recipe does</h2>
+      <p>NPS post-survey free-text is a goldmine that nobody reads. This recipe routes every response into your existing theme taxonomy (<code>themes.json</code>: pricing, performance, onboarding, integrations, support_quality, feature_gaps, mobile, billing). The verifier enforces that every output theme is one of the taxonomy entries — no novel themes invented at run time.</p>
+      <p>The <code>intent_to_churn</code> and <code>mention_competitor</code> fields catch the two signals you most want to alert on, separately from the score.</p>
+    </div>
+
+    <div class="group">
+      <h2>The spec</h2>
+      <pre class="code">{
+  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+  <span class="k">"schema"</span>: {
+    <span class="k">"required"</span>: [<span class="k">"score_band"</span>, <span class="k">"primary_theme"</span>, <span class="k">"intent_to_churn"</span>, <span class="k">"mention_competitor"</span>],
+    <span class="k">"properties"</span>: {
+      <span class="k">"score_band"</span>: { <span class="k">"enum"</span>: [<span class="k">"promoter"</span>, <span class="k">"passive"</span>, <span class="k">"detractor"</span>] },
+      <span class="k">"primary_theme"</span>: { <span class="k">"$ref"</span>: <span class="k">"themes.json"</span> },
+      <span class="k">"secondary_themes"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"$ref"</span>: <span class="k">"themes.json"</span>} },
+      <span class="k">"intent_to_churn"</span>: { <span class="k">"type"</span>: <span class="k">"boolean"</span> },
+      <span class="k">"mention_competitor"</span>: { <span class="k">"type"</span>: [<span class="k">"string"</span>, <span class="k">"null"</span>] },
+      <span class="k">"quote"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"description"</span>: <span class="k">"verbatim phrase to surface"</span> }
+    }
+  },
+  <span class="k">"verifier"</span>: {
+    <span class="k">"theme_must_be_in_taxonomy"</span>: <span class="ok">true</span>,
+    <span class="k">"quote_must_appear_in_input"</span>: <span class="ok">true</span>,
+    <span class="k">"competitor_list"</span>: <span class="k">"competitors.txt"</span>
+  }
+}</pre>
+    </div>
+
+    <div class="group">
+      <h2>Gold pairs (3 of 500 shown)</h2>
+
+      <div class="pair">
+        <div class="pair-h">input</div>
+        <pre class="code">score: 9
+text: love how fast the app loads now, big improvement over last quarter.
+mobile is still rough though.</pre>
+        <div class="pair-h">output</div>
+        <pre class="code">{
+  <span class="k">"score_band"</span>: <span class="k">"promoter"</span>,
+  <span class="k">"primary_theme"</span>: <span class="k">"performance"</span>,
+  <span class="k">"secondary_themes"</span>: [<span class="k">"mobile"</span>],
+  <span class="k">"intent_to_churn"</span>: <span class="ok">false</span>,
+  <span class="k">"mention_competitor"</span>: <span class="ok">null</span>,
+  <span class="k">"quote"</span>: <span class="k">"love how fast the app loads now"</span>
+}</pre>
+      </div>
+
+      <div class="pair">
+        <div class="pair-h">input</div>
+        <pre class="code">score: 3
+text: support takes 4 days to respond and we're already evaluating Pinwheel
+which has dedicated CSMs for our tier. Likely switching at renewal unless
+something changes.</pre>
+        <div class="pair-h">output</div>
+        <pre class="code">{
+  <span class="k">"score_band"</span>: <span class="k">"detractor"</span>,
+  <span class="k">"primary_theme"</span>: <span class="k">"support_quality"</span>,
+  <span class="k">"secondary_themes"</span>: [<span class="k">"pricing"</span>],
+  <span class="k">"intent_to_churn"</span>: <span class="ok">true</span>,
+  <span class="k">"mention_competitor"</span>: <span class="k">"Pinwheel"</span>,
+  <span class="k">"quote"</span>: <span class="k">"likely switching at renewal unless something changes"</span>
+}</pre>
+      </div>
+
+      <div class="pair">
+        <div class="pair-h">input</div>
+        <pre class="code">score: 7
+text: it works fine. nothing wrong, nothing amazing.</pre>
+        <div class="pair-h">output</div>
+        <pre class="code">{
+  <span class="k">"score_band"</span>: <span class="k">"passive"</span>,
+  <span class="k">"primary_theme"</span>: <span class="k">"feature_gaps"</span>,
+  <span class="k">"secondary_themes"</span>: [],
+  <span class="k">"intent_to_churn"</span>: <span class="ok">false</span>,
+  <span class="k">"mention_competitor"</span>: <span class="ok">null</span>,
+  <span class="k">"quote"</span>: <span class="k">"nothing wrong, nothing amazing"</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Compile</h2>
+      <pre class="code">kolm compile <span class="k">"NPS classifier with closed-vocab themes"</span> \
+  --base qwen2.5-coder-3b \
+  --pairs pairs.jsonl \
+  --taxonomy themes.json \
+  --competitors competitors.txt \
+  --verifier closed-vocab \
+  --k-floor 0.85 \
+  --output nps-classifier.kolm
+
+<span class="ok">ok</span> wrote <span class="k">nps-classifier.kolm</span>
+   k_score=0.90  signature=hmac-sha256</pre>
+    </div>
+
+    <div class="group">
+      <h2>K-score gate</h2>
+      <div class="k-bar">
+        <span class="k-label">K-score</span>
+        <span class="k-value">0.90</span>
+        <span class="k-detail">held-out 150 responses &middot; theme-in-taxonomy 100% &middot; primary-theme correct 88% &middot; intent-to-churn precision 94%</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Run-time profile</h2>
+      <div class="lat-grid">
+        <div class="cell"><div class="h">M2 MacBook</div><div class="v">580<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">RTX 5090</div><div class="v">160<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">1.7<span class="u">s</span></div></div>
+        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">2.2<span class="u">s</span></div></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Deploy</h2>
+      <pre class="code"><span class="c"># delighted webhook receiver — auto-tag every response, alert on churn intent:</span>
+on_response = (r) =&gt; {
+  const tag = kolm.run(<span class="k">'nps-classifier.kolm'</span>, r);
+  airtable.update(r.id, tag);
+  if (tag.intent_to_churn) slack.post(<span class="k">'#csm-alerts'</span>, tag);
+  if (tag.mention_competitor) slack.post(<span class="k">'#competitive-intel'</span>, tag);
+};</pre>
+    </div>
+
+    <div class="group">
+      <h2>Related recipes</h2>
+      <div class="related">
+        <a href="/cookbook/churn-predict"><div class="h">Churn predict</div><div class="d">Usage telemetry → risk classification.</div></a>
+        <a href="/cookbook/support-reply"><div class="h">Support reply</div><div class="d">Ticket → empathy-tuned, brand-faithful reply.</div></a>
+        <a href="/cookbook/feature-spec-from-issue"><div class="h">Feature spec</div><div class="d">GitHub issue → 4-section spec.</div></a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap-wide row">
+    <span>kolm cookbook &middot; <a href="/cookbook">all recipes</a></span>
+    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -200,7 +200,55 @@
 
   <section class="section">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">04</span>shape</div>
+      <div class="eyebrow"><span class="num">04</span>product recipes</div>
+      <h2>Five compileable patterns for product work.</h2>
+      <p class="sec-lede">Pricing-table reconcile. KB-grounded support drafts. Calibrated churn risk. Closed-vocab NPS classification. Spec drafting in your house style. The verifiers do work that the model alone won't — reconciling numbers to a price file, grounding factual claims to a KB, classifying into a fixed taxonomy.</p>
+
+      <div class="vs-tbl">
+        <table>
+          <thead>
+            <tr><th style="width:22%">Recipe</th><th>What it does</th><th>K-score</th><th>Read</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Feature spec</b></td>
+              <td>Issue body to 4-section spec (problem, scope, success criteria, open questions). Brand-voice tuned.</td>
+              <td><code>0.84</code></td>
+              <td><a href="/cookbook/feature-spec-from-issue">/cookbook/feature-spec-from-issue &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>Pricing quote</b></td>
+              <td>Customer profile to reconciled quote. Verifier rejects any line item whose price disagrees with the table.</td>
+              <td><code>0.94</code></td>
+              <td><a href="/cookbook/pricing-quote">/cookbook/pricing-quote &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>Support reply</b></td>
+              <td>Inbound ticket to brand-voice draft, KB-grounded. Every factual claim must trace to a real KB section.</td>
+              <td><code>0.85</code></td>
+              <td><a href="/cookbook/support-reply">/cookbook/support-reply &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>Churn predict</b></td>
+              <td>30 days of telemetry to (risk, reasons, suggested outreach). Brier-calibrated probability.</td>
+              <td><code>0.87</code></td>
+              <td><a href="/cookbook/churn-predict">/cookbook/churn-predict &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>NPS classifier</b></td>
+              <td>Free-text response to score band + theme + churn intent. Themes locked to your taxonomy.</td>
+              <td><code>0.90</code></td>
+              <td><a href="/cookbook/nps-classifier">/cookbook/nps-classifier &rarr;</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">05</span>shape</div>
       <h2>Every recipe follows the same five steps.</h2>
       <div class="kvtable">
         <table>
@@ -216,7 +264,7 @@
 
   <section class="section">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">05</span>your vertical</div>
+      <div class="eyebrow"><span class="num">06</span>your vertical</div>
       <h2>Don't see your shape?</h2>
       <p class="sec-lede">Build your own. <code>kolm new my-task --from {redactor|extractor|classifier|blank}</code> scaffolds a working spec; <code>kolm compile --spec spec.json</code> seals it offline. Or drop ten labeled examples + a frontier API key into the cloud <code>kolm compile</code> and the registry comes back with a finished <code>.kolm</code>. Stuck on the spec shape? Open a thread in GitHub Discussions.</p>
       <div class="actions" style="margin-top:14px">
