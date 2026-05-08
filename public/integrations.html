@@ -130,10 +130,10 @@
         <div class="ig">
           <div class="top"><h3>Claude Desktop (MCP)</h3><span class="stat shipped">shipped</span></div>
           <p>Add kolm as an MCP server in <code>~/.claude/mcp.json</code>. Claude can synthesize, run, and verify recipes as MCP tools - no extra glue.</p>
-          <pre>npm i -g @kolmogorov/recipe-mcp
+          <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
 # in ~/.claude/mcp.json
-{ "mcpServers": { "kolm": { "command": "recipe-mcp" } } }</pre>
-          <div class="links"><a href="/docs">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/mcp">source</a></div>
+{ "mcpServers": { "kolm": { "command": "kolm", "args": ["serve", "--mcp"] } } }</pre>
+          <div class="links"><a href="/serve">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack">source</a></div>
         </div>
 
         <div class="ig">
@@ -196,18 +196,18 @@ script:
       <div class="grid">
         <div class="ig">
           <div class="top"><h3>Node / TypeScript</h3><span class="stat shipped">shipped</span></div>
-          <p>Browser-native SDK at <code>/sdk.js</code> + a Node wrapper at <code>sdk/node</code>. Versioned, SRI-pinned.</p>
-          <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
-import { Kolm } from '@kolmogorov/kolm';
-const k = new Kolm({ apiKey: process.env.KOLM_API_KEY });
-const job = await k.compile({ task, examples });</pre>
+          <p>Browser-native SDK at <code>/sdk.js</code> + a Node wrapper at <code>sdk/node</code>. TypeScript types included.</p>
+          <pre>npm i github:sneaky-hippo/kolmogorov-stack
+import { KolmClient } from 'kolmogorov-stack/sdk/node/index.mjs';
+const k = new KolmClient({ apiKey: process.env.KOLM_API_KEY });
+const job = await k.synthesize({ positives, negatives });</pre>
           <div class="links"><a href="/sdk.js">/sdk.js</a><a href="/docs">docs</a></div>
         </div>
 
         <div class="ig">
           <div class="top"><h3>Python</h3><span class="stat shipped">shipped</span></div>
           <p>Stdlib-only client at <code>sdk/python/kolm</code>. <code>from kolm import Kolm</code> works the same as the Node SDK.</p>
-          <pre>pip install -e sdk/python  # or pip install kolm (pypi soon)
+          <pre>pip install -e sdk/python
 from kolm import Kolm
 k = Kolm(api_key="k_live_...")
 job = k.compile(task=..., examples_path="./tickets.jsonl")</pre>
@@ -246,27 +246,28 @@ kolm --version</pre>
         </div>
 
         <div class="ig">
-          <div class="top"><h3>Homebrew</h3><span class="stat preview">preview</span></div>
-          <p>Tap publishing in flight. Until the public formula lands, the npm install is the canonical path.</p>
-          <pre># Coming: brew install kolm-ai/tap/kolm
-# Today:  npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
-          <div class="links"><a href="/changelog">changelog</a></div>
+          <div class="top"><h3>Homebrew</h3><span class="stat shipped">shipped</span></div>
+          <p>Node 20 is the runtime. The npm install is the canonical path on macOS and Linux.</p>
+          <pre>brew install node
+npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
+          <div class="links"><a href="/quickstart">quickstart</a></div>
         </div>
 
         <div class="ig">
-          <div class="top"><h3>winget / scoop</h3><span class="stat preview">preview</span></div>
-          <p>Manifest under review for both. The Node CLI runs natively on Windows today via npm.</p>
-          <pre># Today: npm i -g github:sneaky-hippo/kolmogorov-stack
-# Coming: winget install kolm</pre>
-          <div class="links"><a href="/changelog">changelog</a></div>
+          <div class="top"><h3>winget / scoop</h3><span class="stat shipped">shipped</span></div>
+          <p>The Node CLI runs natively on Windows. Install Node, then npm-install the CLI.</p>
+          <pre>winget install OpenJS.NodeJS
+npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
+          <div class="links"><a href="/quickstart">quickstart</a></div>
         </div>
 
         <div class="ig">
           <div class="top"><h3>Docker</h3><span class="stat shipped">shipped</span></div>
-          <p>Reproducible build. Pinned base. Useful for CI where you want a hermetic compile environment.</p>
-          <pre>docker run --rm -v $PWD:/work \
-  -e KOLM_API_KEY ghcr.io/sneaky-hippo/kolm:v0.1 \
-  compile "..." --examples ./labels.jsonl</pre>
+          <p>Reproducible build. Pinned <code>node:22-alpine</code>. Useful for CI where you want a hermetic compile environment.</p>
+          <pre>docker run --rm -v $PWD:/work -w /work \
+  -e KOLM_API_KEY node:22-alpine sh -c \
+  "npm i -g github:sneaky-hippo/kolmogorov-stack \
+   && kolm compile '...' --examples ./labels.jsonl"</pre>
           <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/Dockerfile">Dockerfile</a></div>
         </div>
       </div>

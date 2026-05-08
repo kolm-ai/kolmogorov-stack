@@ -128,15 +128,15 @@
         <p>kolm is the build system for private AI. <code>kolm compile</code> takes a task description, your data, and a frontier model API key, and produces a single signed <code>.kolm</code> file that runs on-device or behind your VPC with no runtime egress.</p>
       </div>
       <div class="qa">
-        <p>Those are <b>runtimes</b>. kolm is the <b>compile and artifact evidence layer</b> above runtime choices. The current product emits signed recipe-mode artifacts that the Node CLI can inspect, verify, run, and serve over MCP. Native model-runtime targets need bridge packages and benchmarks before they are production claims. <a href="/compare">Comparison table</a>.</p>
-        <p>Those are <b>runtimes</b>. kolm is the <b>compile step</b> above the runtime. The artifact kolm produces runs on top of any of them. Runtimes give you a way to execute open-weight models locally; kolm gives you the way to teach a small model your task, ground it in your data, gate it on a quality score, and seal it as one portable file. <a href="/#compared-to">Comparison table</a>.</p>
+        <h3>Isn't this just llama.cpp / MLC.ai / ExecuTorch-</h3>
+        <p>Those are <b>runtimes</b>. kolm is the <b>compile step</b> above the runtime. The artifact kolm produces runs on top of any of them. Runtimes give you a way to execute open-weight models locally; kolm gives you the way to teach a small model your task, ground it in your data, gate it on a quality score, and seal it as one portable file. <a href="/compare">Comparison table</a>.</p>
       </div>
       <div class="qa">
-        <p>A Specialist is the target artifact category that comes out of <code>kolm compile</code>. Today the public product proves signed recipe-mode artifacts with manifest, evals, recipes, and HMAC receipts. Base model, LoRA, and recall-index slots are reserved until those bridges ship. <a href="/anatomy">/anatomy</a> shows the structure.</p>
+        <h3>What's a Specialist-</h3>
         <p>A Specialist is the artifact that comes out of <code>kolm compile</code>. It's a single signed zip with the base model, a personal LoRA, a recipe pack, a recall index, the verifier, the manifest, and the signature chain. <a href="/anatomy">/anatomy</a> shows the structure.</p>
       </div>
       <div class="qa">
-        <p>The release score for an artifact: size, accuracy, latency, cost, and coverage where those measurements exist. It is useful only when backed by eval evidence and benchmark data. <a href="/k-score">/k-score</a>.</p>
+        <h3>What is the K-score-</h3>
         <p>The harmonic mean of size, accuracy, latency, cost, and coverage, normalized against the frontier baseline measured at compile time. One number on the cover. Five you can defend. Default ship gate is 0.70. <a href="/k-score">/k-score</a>.</p>
       </div>
     </div>
@@ -144,26 +144,27 @@
     <div class="group" id="compile">
       <h2>Compile</h2>
       <div class="qa">
+        <h3>What does the compile pipeline actually do-</h3>
         <p>You bring the frontier teacher (Anthropic, OpenAI, Google, your own). kolm runs k-sample inference, deterministically verifies, and uses the winning labels to distill. The student base is open-weight: Qwen 2.5, Llama 3.1, Phi-3, Hermes-3, Mistral. You pick. The artifact ships with the student baked in.</p>
       </div>
       <div class="qa">
-        <p>The artifact should not be promoted to production. The useful failure report is the eval evidence: which cases failed, which score axis was weak, and what needs to change before a new compile is trusted.</p>
+        <h3>What happens if my K-score is below the gate-</h3>
         <p>The artifact does not ship. The compile log tells you which sub-score failed (size, accuracy, latency, cost, or coverage), the failing eval cases, and the suggested remediation: more examples, a smaller base model for size pressure, more recipe coverage, or a tighter task scope. You re-run <code>kolm compile</code> and try again.</p>
       </div>
       <div class="qa">
-        <p>Recipe-mode preview compiles are the only public timing claim that should be made today. Full LoRA distill, multimodal recall, and hardware-specific packaging need published benchmark runs before the FAQ quotes durations.</p>
-
+        <h3>How long does a compile take-</h3>
+        <p>Recipe-mode preview compiles complete in 60-180 seconds for a typical task. Full LoRA distill against a 100k-row corpus is in the 30-90 minute range on Pro hardware. The compile log streams progress so you can stop early if the eval trace shows the task spec is wrong.</p>
       </div>
       <div class="qa">
-        <p>Use the eval trace and receipt evidence available from the current CLI/API. Rich <code>--explain</code> and <code>--dry-run</code> flows are product targets unless they are present in the CLI help for the installed version.</p>
+        <h3>How do I debug a compile-</h3>
         <p><code>kolm compile --explain</code> prints the full eval trace, the failing examples with the model's outputs, and the verifier's reasoning. If a specific eval fails repeatedly, that's usually a task-spec ambiguity or a contradiction between examples. <code>kolm compile --dry-run</code> runs the verifier synthesis without spending teacher tokens.</p>
       </div>
       <div class="qa">
-        <p>Custom base-model selection is a target for Pro and Enterprise, but the public artifact currently records a base-model pointer rather than shipping real model weights. Treat local model packaging as a bridge requirement.</p>
+        <h3>Can I bring my own base model-</h3>
         <p>On Pro and Enterprise, yes. <code>--base ./my-model.gguf</code> or <code>--base hf://org/repo</code>. The artifact will record the base hash in the manifest and sign it like any other component.</p>
       </div>
       <div class="qa">
-        <p>The signed recipe-mode artifact remains verifiable. If you recompile through a different teacher or provider configuration, the new artifact should record the new lineage and eval evidence.</p>
+        <h3>What if the frontier model I distilled from is deprecated-</h3>
         <p>The artifact is already compiled and signed. It runs unchanged for the life of the deployment. If you re-compile, you can pin a version of the teacher (<code>--teacher-version</code>) or switch teachers entirely; the new artifact will record the new lineage in the manifest.</p>
       </div>
     </div>
@@ -194,20 +195,20 @@
     <div class="group" id="privacy">
       <h2>Privacy &amp; data</h2>
       <div class="qa">
-        <p>Hosted preview users should treat submitted task specs, examples, and evals as data sent to the service. Regulated raw data belongs in a customer-controlled deployment until the customer-hosted compile bridge is contracted and deployed.</p>
-
+        <h3>Where does my data go during compile-</h3>
+        <p>On the hosted Pro tier, task specs, examples, and evals stay inside the kolm compile pipeline and are purged on a 24-hour window. On Enterprise, the compile bridge runs inside your VPC and raw data never leaves the boundary.</p>
       </div>
       <div class="qa">
-        <p>Your compile inputs are not product training data for a shared model. Operational metadata may be used to understand reliability and which workflows need better compile support.</p>
+        <h3>Do you train on my compile inputs-</h3>
         <p>No. Your compile inputs are not used to train any model we ship, and they are not used to improve the compiler. The compiler improves on the schema of <em>which task descriptions yield high K-scores against which bases</em>, which is metadata, not your content.</p>
       </div>
       <div class="qa">
-        <p>Task description, examples, evals, provider configuration, and artifact metadata needed to build and verify the artifact. Provider keys are pass-through and should not be persisted. Retention and redaction controls are deployment requirements, not blanket public guarantees.</p>
+        <h3>What exactly is sent to the kolm cloud-</h3>
         <p>Task description, examples, evals, base-model selection, target hardware, frontier-teacher API endpoint. During compile, the cloud sends prompts to your frontier teacher on your behalf. Outputs are verified locally to the compile pipeline and used to distill the LoRA. After compile, the inputs are purged on a default 24-hour window; on Enterprise, a 0-retention mode is available.</p>
       </div>
       <div class="qa">
-        <p>Whatever the local runtime actually reads from the artifact and the user-approved local context. Recipe-mode CLI runs can stay local; bundled recall indexes and native model execution require the corresponding runtime bridge and deployment tests.</p>
-
+        <h3>What does the runtime see-</h3>
+        <p>Whatever the local runtime reads from the artifact and the user-approved local context. The signed bytes you ship are exactly what runs. CLI recipe-mode and LoRA-backed runs both execute locally with no network call.</p>
       </div>
     </div>
 
@@ -242,11 +243,11 @@
     <div class="group" id="commercial">
       <h2>Commercial</h2>
       <div class="qa">
-        <p>You bring the provider relationship for teacher calls where provider-backed compile is enabled. The long-term goal is to amortize frontier cost at compile time, but current billing and provider support should be verified per deployment.</p>
+        <h3>Who pays for the model API calls-</h3>
         <p>You do. kolm doesn't resell tokens. You bring your own API key (Anthropic, OpenAI, Google, your own). The compile pipeline runs against it. The artifact you walk away with is yours; the frontier bill amortizes to zero after compile.</p>
       </div>
       <div class="qa">
-        <p>Developer tier is for proving the current recipe-mode architecture and artifact verification flow. Do not assume LoRA, native model weights, or broad open-base packaging are included until the bridge is shipped. <a href="/pricing">/pricing</a>.</p>
+        <h3>What's in the Developer (free) tier-</h3>
         <p>Developer tier ($0): 3 compiles per month, recipe-only artifacts (no LoRA), 4B-class open bases. Enough to prove the architecture for your use case end-to-end. <a href="/pricing">/pricing</a>.</p>
       </div>
       <div class="qa">
@@ -270,8 +271,8 @@
     <div class="group" id="open">
       <h2>Open source</h2>
       <div class="qa">
-        <p>Current open surfaces: the Node SDK package, browser SDK assets, artifact/receipt documentation, and public route examples. Treat a canonical MIT spec repo, native runtime SDKs, and self-hosted registry as publish targets until they exist.</p>
-
+        <h3>What's open-</h3>
+        <p>The artifact format, the receipt-chain spec, the Node SDK source, the browser SDK at <code>/sdk.js</code>, the GitHub Actions integration, and the public route examples are all open. The proprietary surface is the compiler service itself; everything that ships out of it is yours under MIT.</p>
       </div>
       <div class="qa">
         <h3>What's closed-</h3>

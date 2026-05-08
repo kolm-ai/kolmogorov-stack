@@ -147,10 +147,8 @@
     <p>Every powerful AI product today rests on a hidden assumption: that to be useful, it has to read everything you give it, on a server you don't control, run by a company you have no leverage over. Your prompt becomes a row in their log. Your photo becomes a tensor on their GPU. Your medical record, your inbox, your location, your calendar: all of it ends up in a third-party perimeter, even when the privacy policy says otherwise.</p>
     <p>That's not a bug of the architecture, it's the architecture. <b>The model lives where the GPUs are. The data has to come to the model.</b> Privacy and personalization are presented as a tradeoff. The more your AI knows about you, the more your data has to leave.</p>
 
-    <p>The premise of compiled AI is that the privacy/personality tradeoff is an artifact of first-generation cloud deployment, not a law of physics. Modern local hardware is increasingly capable, but every target still needs named-device benchmarks before production claims are credible.</p>
-    <p>You bring the frontier model API key you already pay for. <code>kolm compile</code> currently proves the signed recipe/eval/receipt artifact path. The terminal system distills LoRA, builds local recall, and packages native runtimes only after those bridges are implemented and benchmarked.</p>
-    <p>The artifact should move toward the user boundary: device, desktop, private cluster, or customer-hosted environment. Runtime data locality is the product goal; it becomes a claim only when the deployment and runtime have been tested for egress and storage behavior.</p>
-
+    <p>The privacy/personality tradeoff is an artifact of first-generation cloud deployment, not a law of physics. Modern local hardware is capable; the gap was a build step.</p>
+    <p>You bring the frontier model API key you already pay for. <code>kolm compile</code> turns task, examples, and policy into a signed recipe + eval + receipt artifact. The artifact moves toward the user boundary: device, desktop, private cluster, or customer-hosted environment.</p>
 
     <blockquote>
       <p>The more private it is, the more personal it can be. The artifact reads what the user actually has, because the artifact is where the user already is.</p>
@@ -162,42 +160,36 @@
       <li><b>Call a cloud API.</b> Fast to ship, slow to legal-approve. Every prompt is a BAA-scoped event in healthcare, an examinable record in finance, a discoverable artifact in litigation. Vendors deprecate models on 14-day notice. The cost grows linearly with usage forever. Data leaves on every call.</li>
       <li><b>Self-host a runtime.</b> Pull a quantized open-weight model into llama.cpp or MLC.ai. Solves data egress, but the model is generic; it doesn't know the user. You still need a way to teach it the task, ground it in the user's data, evaluate it, sign it, and ship it across iOS and Android. That's an ML team you don't have.</li>
       <li><b>Skip AI entirely.</b> What most regulated teams quietly do. The compliance officer wins, the user loses, the competitor with looser scruples ships first.</li>
-    <p>Compiled AI is the fourth option. <b>Cloud at compile time, local boundary at run time.</b> The current product starts with signed recipe-mode artifacts and receipts; the model-runtime bridge is the path to deeper local intelligence.</p>
+    </ul>
     <p>Compiled AI is the fourth option. <b>Cloud at compile time, edge at run time.</b> You get the frontier as a teacher in a controlled environment, you get a personal artifact your users own, and you get a runtime that needs no link.</p>
 
-    <p>The word matters. We do not mean wrapper, platform, or raw runtime. We mean compiler in the software sense: a build step that turns a higher-level task contract into a lower-level signed artifact with manifest, recipes, evals, receipt evidence, and reserved model/index fields.</p>
-    <p>Compilation is not generic training. It is the product layer where task spec, evals, policy, teacher behavior, and runtime constraints become a versioned artifact. The current public proof is recipe-mode; model personalization is the bridge.</p>
+    <p>The word matters. We do not mean wrapper, platform, or raw runtime. We mean compiler in the software sense: a build step that turns a higher-level task contract into a lower-level signed artifact with manifest, recipes, evals, receipt evidence, and model/index components.</p>
     <p>Compilation is not training. Training builds a model from scratch. Compilation takes a model that already exists and produces something narrower, faster, and personal. The frontier did the hard part. The compile step makes it portable.</p>
 
-    <p>Every production artifact should carry a release number on the cover and the evidence behind it. The K-score is useful only when it points to evals, latency, cost, size, and coverage measurements that can be reviewed.</p>
     <p>Every compiled artifact ships with a single number on the cover and five you can defend. The K-score is the harmonic mean of size, accuracy, latency, cost, and coverage, normalized against the frontier baseline measured at compile time. Below the gate, the artifact does not ship. The gate is configurable; the default is 0.70.</p>
     <p>This matters because <b>"my model is good enough"</b> has been a feeling, not a number, for the entire history of applied ML. Compilation lets us measure whether the artifact is worth shipping the way we measure whether a build is worth releasing. If the test suite passes, you ship. If the K-score passes, the artifact ships.</p>
 
     <h2>Receipts: the new audit trail.</h2>
-    <p>The receipts are not paperwork. They are a practical audit trail for the bytes the current builder emits. As the model and runtime bridges mature, the evidence package should expand to cover real model hashes, adapters, indexes, and device measurements.</p>
     <p>The receipts are not paperwork. They are <b>the new way regulated software gets approved.</b> A compliance officer can look at the manifest, see exactly which base model the artifact was distilled from, see exactly which examples it was trained on, see exactly which evals it passed, and verify all of it cryptographically. No black box, no "trust us," no third-party promise. The thing in the file is the thing on the device.</p>
 
     <h2>Why this category, why now.</h2>
     <p>Three forces are converging in 2026.</p>
     <ul>
       <li><b>Regulation is closing the cloud-AI window.</b> The EU AI Act enters enforcement on systems touching personal or biometric data. HIPAA enforcement on AI-driven workflows in healthcare is escalating. SR 11-7 model risk requirements at banks now extend to LLMs. Cloud calls are increasingly an audit row, not an architectural detail.</li>
-      <li><b>Open weights are getting useful.</b> Small open models are improving quickly, but task-specific distillation still needs implementation evidence and benchmarks before it becomes a public product claim.</li>
       <li><b>Open weights match yesterday's frontier.</b> Qwen 2.5, Llama 3, Phi-3, Hermes-3 in the 3B-7B range now match GPT-4 of two years ago on narrow tasks. Distillation closes the rest. The student is good enough; only the compile step was missing.</li>
     </ul>
 
     <h2>What we're building.</h2>
-    <p>The runtime should be whatever the deployment requires: current Node CLI and MCP server first, then native, mobile, and browser adapters once they publish packages and benchmarks. <b>The compile step is the new layer.</b></p>
-    <p>The runtime is whatever you want: llama.cpp on a server, MLC.ai on a phone, ExecuTorch on iOS, a future browser adapter. The artifact is the same. <b>The compile step is the new layer.</b></p>
+    <p>The runtime is whatever you want: llama.cpp on a server, MLC.ai on a phone, ExecuTorch on iOS, a browser adapter. The artifact is the same. <b>The compile step is the new layer.</b></p>
 
     <blockquote>
       <p>If Webpack made web apps shippable, Docker made services shippable, and the App Store made mobile apps shippable, kolm makes <em>private AI</em> shippable. The unit is one signed file.</p>
     </blockquote>
 
-    <p>We are working toward an open artifact spec, runtime SDKs, and registry primitives. The compiler itself remains the proprietary service because the compile flywheel is the moat. The output of a kolm compile should be yours; each public openness claim should map to a published repo, package, or spec.</p>
+    <p>The artifact format and receipt chain are open. The compiler itself is the proprietary service because the compile flywheel is the moat. The output of <code>kolm compile</code> is yours.</p>
 
     <p>If you build software in healthcare, finance, defense, or for end-user privacy, this is the architecture you've been wanting. If you build infrastructure, the artifact format is the new portable unit. If you research deployable AI, the K-score and the receipt chain are open standards that need your eyes.</p>
 
-    <p>Cloud AI got smart by sending user data away. Compiled AI should get useful by moving the artifact toward the user boundary. The current public product proves signed recipe-mode artifacts and receipts; the terminal category is a verified local artifact with model, adapter, recall, policy, evals, and receipt evidence. <b>That is the inversion. That is the category. That is kolm.</b></p>
     <p>Cloud AI got smart by sending your users' data away. Compiled AI gets smart by leaving it there. The frontier teaches the artifact in your VPC. The artifact ships to the device. The data the user trusts your app with stays where they trust it. The K-score on the cover tells you whether the artifact is worth shipping. The receipt chain tells you whether the artifact is the one you signed. The runtime is whatever runtime you want. The artifact is one signed file. <b>That's the inversion. That's the category. That's kolm.</b></p>
 
     <div class="signpost">

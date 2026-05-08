@@ -277,14 +277,14 @@ kolm compile "classify support emails" \
 <span class="c"># run the embedded eval set offline</span>
 kolm bench support.kolm --runs 10 --out report.json
 
-<span class="c"># report.json conforms to spec kolm-benchmark-1</span>
+<span class="c"># report.json conforms to spec kolm-benchmark-1 (sample run, see /benchmarks for real fixture)</span>
 {
   "spec": "kolm-benchmark-1",
-  "artifact_sha256": "sha256:7e3b…",
-  "artifact_bytes": 4827,
+  "artifact_sha256": "sha256:c23273dc…b5cc67d2",
+  "artifact_bytes": 5815,
   "k_score": 612.34,
   "evals": { "n": 24, "passed": 24, "accuracy": 1.0 },
-  "latency_us": { "p50": 41, "p95": 73, "max": 118 },
+  "latency_us": { "p50": 311, "p95": 431, "max": 626 },
   <span class="ok">"privacy": { "runtime_egress_attempts": 0, "blocked": false }</span>,
   <span class="ok">"integrity": { "signature_valid": true, "receipt_chain_steps": 5 }</span>
 }</pre>
@@ -292,37 +292,27 @@ kolm bench support.kolm --runs 10 --out report.json
     </div>
 
     <div class="group">
-      <h2>Cross-host reproducibility</h2>
-      <p>The same artifact on different machines should produce the same <code>artifact_sha256</code>, the same <code>evals.accuracy</code>, the same <code>integrity.signature_valid</code>. Latency varies with hardware. K-score does not — it is signed into the manifest at compile time.</p>
+      <h2>A real run, pinned to a fixture</h2>
+      <p>The numbers below come from a fresh <code>npm i -g github:sneaky-hippo/kolmogorov-stack</code> on Windows 11 + Node v24, run against the 5,815-byte fixture at <code>test/fixtures/sample.kolm</code> in the public repo. Anyone can rerun the exact command and get a JSON report shaped by spec <code>kolm-benchmark-1</code>.</p>
+      <pre class="code"><code>$ kolm bench test/fixtures/sample.kolm --runs 100 --target kolm-public-v0.1.0 --device win11-node24</code></pre>
       <table class="tbl">
         <thead>
-          <tr><th>host</th><th>artifact_sha256</th><th>accuracy</th><th>p50_us</th><th>egress</th></tr>
+          <tr><th>field</th><th>value</th></tr>
         </thead>
         <tbody>
-          <tr>
-            <td class="row-h" data-l="host">M3 MacBook</td>
-            <td class="num" data-l="sha">7e3b…</td>
-            <td class="num" data-l="acc">100%</td>
-            <td class="num" data-l="p50">38</td>
-            <td class="win" data-l="egress">0</td>
-          </tr>
-          <tr>
-            <td class="row-h" data-l="host">Linux x86_64</td>
-            <td class="num" data-l="sha">7e3b…</td>
-            <td class="num" data-l="acc">100%</td>
-            <td class="num" data-l="p50">52</td>
-            <td class="win" data-l="egress">0</td>
-          </tr>
-          <tr>
-            <td class="row-h" data-l="host">Windows ARM64</td>
-            <td class="num" data-l="sha">7e3b…</td>
-            <td class="num" data-l="acc">100%</td>
-            <td class="num" data-l="p50">61</td>
-            <td class="win" data-l="egress">0</td>
-          </tr>
+          <tr><td class="row-h" data-l="field">spec</td><td class="num">kolm-benchmark-1</td></tr>
+          <tr><td class="row-h" data-l="field">artifact_sha256</td><td class="num">c23273dc…b5cc67d2</td></tr>
+          <tr><td class="row-h" data-l="field">artifact_bytes</td><td class="num">5,815</td></tr>
+          <tr><td class="row-h" data-l="field">runs</td><td class="num">100</td></tr>
+          <tr><td class="row-h" data-l="field">latency_us.min</td><td class="num">264</td></tr>
+          <tr><td class="row-h" data-l="field">latency_us.p50</td><td class="num">311</td></tr>
+          <tr><td class="row-h" data-l="field">latency_us.p95</td><td class="num">431</td></tr>
+          <tr><td class="row-h" data-l="field">latency_us.max</td><td class="num">626</td></tr>
+          <tr><td class="row-h" data-l="field">privacy.runtime_egress_attempts</td><td class="win">0</td></tr>
+          <tr><td class="row-h" data-l="field">errors</td><td class="win">0</td></tr>
         </tbody>
       </table>
-      <p class="footnote">Numbers above are illustrative for a small classification artifact. Real numbers come from the harness on your machine.</p>
+      <p class="footnote">Fixture and full report at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/docs/benchmark-results-v0.1.0.md">github.com/sneaky-hippo/kolmogorov-stack/docs/benchmark-results-v0.1.0.md</a>. Latency varies with hardware; <code>artifact_sha256</code>, <code>evals.accuracy</code>, and <code>integrity.signature_valid</code> do not.</p>
     </div>
 
     <div class="group">

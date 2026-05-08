@@ -12,11 +12,35 @@
   </author>
 
   <entry>
+    <id>https://kolm.ai/changelog#v6-3</id>
+    <title>v6.3 - Install path lit, bench numbers pinned</title>
+    <link href="https://kolm.ai/changelog#v6-3"/>
+    <updated>2026-05-08T00:00:00Z</updated>
+    <summary>The launch blocker from v6.2 is closed. github.com/sneaky-hippo/kolmogorov-stack is now public, MIT-licensed, with the runtime SDK, the RS-1 spec, the GitHub Action, 26 example sets, an offline test suite, and reproducible bench numbers from a known-good fixture. npm i -g github:sneaky-hippo/kolmogorov-stack resolves end-to-end on a fresh machine and produces a working kolm binary in under ten seconds. The repo is the curated public install surface, not the company codebase: strategy docs, internal benchmarks, the cloud server, and Stripe/Vercel/Railway plumbing all stayed private. Reproducible bench numbers at docs/benchmark-results-v0.1.0.md: n=100, p50=311us, p95=431us, egress_attempts=0. Six offline tests at test/smoke.test.js covering tamper detection (fatal) and soft-fail signature (non-fatal). CI matrix on Linux + macOS + Windows for Node 20 and 22.</summary>
+  </entry>
+
+  <entry>
+    <id>https://kolm.ai/changelog#v6-2</id>
+    <title>v6.2 - Villain named, why-now surfaced</title>
+    <link href="https://kolm.ai/changelog#v6-2"/>
+    <updated>2026-05-08T00:00:00Z</updated>
+    <summary>Three independent launch reviews landed within 24 hours. They confirmed v6.1's empathy-led hero and called out the next gap: the homepage names the product but not the villain. v6.2 sharpens the pain section to that frame: every requests.post("api.openai.com") in your code is a liability. The four-row table is now cost / privacy / reproducibility / continuity, each named with the explicit regulatory frame (HIPAA, SR 11-7, EU AI Act, GDPR). Added a "Why this is happening now" primary CTA pulling readers into /why-now where the three-forces argument lives. Survival pass on /quickstart (dropped v0 hedge), /docs (dropped v0 hedge in meta description), /compile (dropped Sprint 1 internal language), /trust (rephrased CSP-nonce roadmap line). GitHub repo 404 flagged as launch blocker - resolved same day in v6.3.</summary>
+  </entry>
+
+  <entry>
+    <id>https://kolm.ai/changelog#v6-1</id>
+    <title>v6.1 - Hero restored, empathy-led</title>
+    <link href="https://kolm.ai/changelog#v6-1"/>
+    <updated>2026-05-08T00:00:00Z</updated>
+    <summary>Brought back "Your own AI, in a single file." as the homepage hero. The v6.0 hero ("AI you can sign, audit, and run anywhere") tested too technical for non-regulated buyers - "sign" and "audit" are jargon that punish a first-time reader. The new lede answers the only question that matters: why a single file? Because it bundles the model, your examples, the evaluator, and a signed receipt for every output, packaged like a Docker image you can ship through your existing pipelines, version in git, and run on a laptop, a phone, or inside your VPC. Sign-and-audit framing demoted to the credibility band lower on the page where regulated readers expect it. Title, description, OG, and Twitter meta tags all updated to match.</summary>
+  </entry>
+
+  <entry>
     <id>https://kolm.ai/changelog#v6-0</id>
     <title>v6.0 - Regulated-buyer launch polish</title>
     <link href="https://kolm.ai/changelog#v6-0"/>
     <updated>2026-05-08T00:00:00Z</updated>
-    <summary>Hero rewritten for regulated buyers: "AI you can sign, audit, and run anywhere." Header and footer pinned to a single 1180px wrap so navigation stops drifting between tabs. New regulated-industries strip on the homepage with explicit doors into healthcare, finance, and government and defense. Defensive language stripped from 12 pages: "roadmap" hedges and "honest" framings replaced with the actual product behavior. Static asset cache TTL raised to 1 hour for CSS / JS and 1 day for images / fonts / wasm. SOC 2 Type I Q4 2026 unified across pricing, trust, healthcare, finance, faq.</summary>
+    <summary>Hero rewritten for regulated buyers: "AI you can sign, audit, and run anywhere." Header and footer pinned to a single 1180px wrap so navigation stops drifting between tabs. New regulated-industries strip on the homepage with explicit doors into healthcare, finance, and government and defense. Defensive language stripped from 12 pages: "roadmap" hedges and "honest" framings replaced with the actual product behavior. Static asset cache TTL raised to 1 hour for CSS/JS and 1 day for images/fonts/wasm. SOC 2 Type I Q4 2026 unified across pricing, trust, healthcare, finance, faq. Final fake-claim sweep: unpublished @kolmogorov/recipe-mcp, kolm-ai/tap homebrew, winget kolm, ghcr.io/sneaky-hippo/kolm Docker image, "pypi soon" speculation all retired in favor of the real GitHub-source install path. Manifesto and FAQ deduped of paired hedged+confident paragraphs.</summary>
   </entry>
 
   <entry>
