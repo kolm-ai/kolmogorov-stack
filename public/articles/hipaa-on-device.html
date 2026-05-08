@@ -21,7 +21,6 @@
 <meta name="twitter:description" content="A practical playbook for HIPAA-aligned AI on the edge.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/articles/hipaa-on-device">
-<link rel="preload" as="image" href="/img/kolm-run-device.svg" fetchpriority="high">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
@@ -195,9 +194,16 @@
     <h1>HIPAA-aligned AI on a laptop, <span class="tone">where PHI can stay local.</span></h1>
     <p class="lede"><b>Every BAA you sign with a frontier model vendor is a ticking compliance bomb.</b> Even when the legal language is clean, the data-flow story isn't: the prompt with PHI traverses your edge, the vendor's edge, the vendor's logging stack, and any sub-processor in their chain. The cleanest fix is also the simplest: don't send the PHI in the first place. Compile the model once, run it on the user's laptop forever.</p>
     <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;HIPAA - clinical - on-device</span></div>
-    <figure class="plate" role="img" aria-label="kolm artifact essay illustration">
-      <div class="img" style="background-image:url(/img/kolm-run-device.svg)"></div>
-      <span class="stamp"><span class="dot"></span>essay - on-device HIPAA</span>
+    <figure class="plate" role="img" aria-label="On-device runtime: a single .kolm runs across mac, pc, phone, and browser-WASM with PHI never leaving the device.">
+      <div class="img diag-bg">
+        <div class="diag diag-device">
+          <div class="tgt"><b>macOS</b><span>M-series &middot; Metal</span><i>120 tok/s</i></div>
+          <div class="tgt"><b>Windows</b><span>x64 / arm &middot; CUDA</span><i>200 tok/s</i></div>
+          <div class="tgt"><b>iOS / Android</b><span>arm64 &middot; NNAPI</span><i>40 tok/s</i></div>
+          <div class="tgt"><b>Browser WASM</b><span>wllama &middot; offline</span><i>22 tok/s</i></div>
+        </div>
+      </div>
+      <span class="stamp"><span class="dot"></span>essay &middot; on-device HIPAA</span>
       <div class="cap">
         <div class="title">Compliance, <span class="tone">offline.</span></div>
         <div class="meta">local PHI boundary target<br><b>receipts on every call</b></div>

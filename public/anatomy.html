@@ -15,7 +15,6 @@
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/anatomy">
-<link rel="preload" as="image" href="/img/kolm-artifact-system.svg" fetchpriority="high">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
 <style>
@@ -152,7 +151,18 @@
       Two compiles with the same inputs produce <b>byte-identical</b> artifacts.</p>
 
     <figure class="plate" role="img" aria-label="The .kolm artifact rendered as a single object: model, adapter, recipes, recall index, signature.">
-      <div class="img" style="background-image:url(/img/kolm-artifact-system.svg)"></div>
+      <div class="img diag-bg">
+        <div class="diag diag-tree">
+          <div><span class="root">support-bot.kolm</span><span class="desc">2.4 GB &middot; sha256:7f3a&hellip;</span></div>
+          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ model.gguf</span><span class="desc">2.1 GB &middot; phi-3-mini-q4</span></div>
+          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ lora.bin</span><span class="desc">142 MB &middot; rank 16</span></div>
+          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ recipes.json</span><span class="desc">38 KB &middot; 412 entries</span></div>
+          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ index.sqlite-vec</span><span class="desc">87 MB &middot; 384-dim</span></div>
+          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ verifier.json</span><span class="desc">12 KB &middot; rubric+gates</span></div>
+          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ manifest.json</span><span class="desc">4 KB &middot; rs-1</span></div>
+          <div><span class="seg">&nbsp;&nbsp;&nbsp;└─ signature.sig</span><span class="desc">256 B &middot; ed25519</span></div>
+        </div>
+      </div>
       <span class="stamp"><span class="dot"></span>.kolm · seven layers</span>
       <div class="cap">
         <div class="title">A file you can <span class="tone">hold.</span></div>

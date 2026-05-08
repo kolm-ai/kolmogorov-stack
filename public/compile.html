@@ -14,7 +14,6 @@
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/compile">
-<link rel="preload" as="image" href="/img/kolm-compile-distill.svg" fetchpriority="high">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
   :root {
@@ -396,11 +395,24 @@
     </div>
 
     <figure class="plate" role="img" aria-label="A frontier model is distilled into a small signed kolm artifact via the kolm compile pipeline.">
-      <div class="img" style="background-image:url(/img/kolm-compile-distill.svg)"></div>
-      <span class="stamp"><span class="dot"></span>kolm compile - pipeline</span>
+      <div class="img diag-bg">
+        <div class="diag diag-pipeline">
+          <div class="stage"><span class="n">01</span><b>Synthesize</b><span>verifier from spec</span></div>
+          <div class="stage"><span class="n">02</span><b>Recall</b><span>seed examples</span></div>
+          <div class="stage"><span class="n">03</span><b>k-Sample</b><span>frontier proxy</span></div>
+          <div class="stage"><span class="n">04</span><b>Verify</b><span>gate &amp; label</span></div>
+          <div class="stage"><span class="n">05</span><b>Train</b><span>LoRA on signal</span></div>
+          <div class="stage"><span class="n">06</span><b>Extract</b><span>recipes</span></div>
+          <div class="stage"><span class="n">07</span><b>Index</b><span>sqlite-vec</span></div>
+          <div class="stage"><span class="n">08</span><b>Assemble</b><span>seven layers</span></div>
+          <div class="stage"><span class="n">09</span><b>Sign</b><span>ed25519</span></div>
+          <div class="stage acc"><span class="n">10</span><b>.kolm</b><span>signed artifact</span></div>
+        </div>
+      </div>
+      <span class="stamp"><span class="dot"></span>kolm compile &middot; pipeline</span>
       <div class="cap">
         <div class="title">Frontier in. <span class="tone">.kolm out.</span></div>
-        <div class="meta">distill - decompose - package<br><b>one signed file</b> - runs anywhere</div>
+        <div class="meta">distill &middot; decompose &middot; package<br><b>one signed file</b> &middot; runs anywhere</div>
       </div>
     </figure>
   </div>

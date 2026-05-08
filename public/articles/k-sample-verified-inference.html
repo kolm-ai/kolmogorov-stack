@@ -21,7 +21,6 @@
 <meta name="twitter:description" content="The mechanism that labels every .kolm artifact, in plain English.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/articles/k-sample-verified-inference">
-<link rel="preload" as="image" href="/img/kolm-verification-chain.svg" fetchpriority="high">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
@@ -194,9 +193,16 @@
     <h1>K-sample verified inference, <span class="tone">a practical alternative to zk-ML.</span></h1>
     <p class="lede"><b>Zero-knowledge proofs of model inference are technically beautiful and economically dead.</b> A 13B-parameter model proof costs hours of GPU time per token. Verified inference takes a different route: sample the model k times, run the candidates through a deterministic verifier, ship the receipt. It is what every label inside a <code>.kolm</code> artifact passes through.</p>
     <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;verified inference - audit - receipts</span></div>
-    <figure class="plate" role="img" aria-label="kolm artifact essay illustration">
-      <div class="img" style="background-image:url(/img/kolm-verification-chain.svg)"></div>
-      <span class="stamp"><span class="dot"></span>essay - verified inference</span>
+    <figure class="plate" role="img" aria-label="The four-ring HMAC chain: input, samples, verifier, manifest.">
+      <div class="img diag-bg">
+        <div class="diag diag-chain">
+          <div class="ring"><span class="lbl">ring 01</span><span class="hash">sha256:7f3a9b&hellip;</span><span class="ok">input</span></div>
+          <div class="ring"><span class="lbl">ring 02</span><span class="hash">sha256:c1d4e2&hellip;</span><span class="ok">k=5 samples</span></div>
+          <div class="ring"><span class="lbl">ring 03</span><span class="hash">sha256:9a07f6&hellip;</span><span class="ok">verifier</span></div>
+          <div class="ring"><span class="lbl">ring 04</span><span class="hash">sha256:e482ba&hellip;</span><span class="ok">manifest</span></div>
+        </div>
+      </div>
+      <span class="stamp"><span class="dot"></span>essay &middot; verified inference</span>
       <div class="cap">
         <div class="title">k samples. <span class="tone">One verifier.</span></div>
         <div class="meta">parallel attempts<br><b>deterministic</b> picker</div>

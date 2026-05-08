@@ -15,7 +15,6 @@
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/k-score">
-<link rel="preload" as="image" href="/img/kolm-verification-chain.svg" fetchpriority="high">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
 <style>
@@ -159,12 +158,27 @@
       the artifact was distilled from. <b>1.0</b> means the artifact ties or beats
       frontier on every component. <b>0.0</b> means it doesn’t exist.</p>
 
-    <figure class="plate" role="img" aria-label="The verification chain: every byte of a .kolm hashed and signed end to end.">
-      <div class="img" style="background-image:url(/img/kolm-verification-chain.svg)"></div>
-      <span class="stamp"><span class="dot"></span>K-score · gate</span>
+    <figure class="plate" role="img" aria-label="K-score is a single number from a weighted formula across five components, gated at 0.70.">
+      <div class="img diag-bg">
+        <div class="diag diag-gauge">
+          <div class="formula">
+            K = <span class="w">0.40</span><span class="var">A</span> + <span class="w">0.15</span><span class="var">S</span> + <span class="w">0.15</span><span class="var">L</span> + <span class="w">0.15</span><span class="var">C</span> + <span class="w">0.15</span><span class="var">V</span>
+          </div>
+          <div class="bar" aria-label="K-score 0.84"><div class="fill" style="width:84%"></div></div>
+          <div class="legend">
+            <span><b>A</b> accuracy</span>
+            <span><b>S</b> size</span>
+            <span><b>L</b> latency</span>
+            <span><b>C</b> cost</span>
+            <span><b>V</b> coverage</span>
+            <span class="ok">gate &ge; 0.70</span>
+          </div>
+        </div>
+      </div>
+      <span class="stamp"><span class="dot"></span>K-score &middot; gate</span>
       <div class="cap">
         <div class="title">One number. <span class="tone">Anchored.</span></div>
-        <div class="meta">accuracy · size · latency<br>cost · coverage · <b>signed</b></div>
+        <div class="meta">accuracy &middot; size &middot; latency<br>cost &middot; coverage &middot; <b>signed</b></div>
       </div>
     </figure>
   </div>

@@ -15,7 +15,6 @@
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/serve">
-<link rel="preload" as="image" href="/img/kolm-mcp-fanout.svg" fetchpriority="high">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
 <style>
@@ -160,7 +159,15 @@ $ kolm serve --mcp <span class="key">support-triage.kolm</span>
   <span class="ok">●</span> receipts       : on (hmac, anchors empty)</pre>
 
     <figure class="plate" role="img" aria-label="A single .kolm artifact fans out to every MCP-aware client over a local socket.">
-      <div class="img" style="background-image:url(/img/kolm-mcp-fanout.svg)"></div>
+      <div class="img diag-bg">
+        <div class="diag diag-fanout">
+          <div class="node"><b>claude code</b><span>mcp · stdio</span></div>
+          <div class="node"><b>cursor</b><span>mcp · stdio</span></div>
+          <div class="center"><b>kolm serve --mcp</b><span>127.0.0.1:7327 &middot; sse</span></div>
+          <div class="node"><b>continue.dev</b><span>mcp · stdio</span></div>
+          <div class="node"><b>open mcp client</b><span>http · sse</span></div>
+        </div>
+      </div>
       <span class="stamp"><span class="dot"></span>kolm serve --mcp · fan-out</span>
       <div class="cap">
         <div class="title">One artifact. <span class="tone">Every agent.</span></div>
