@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>kolm vs OpenPipe - capture-then-fine-tune vs capture-then-compile</title>
+<meta name="description" content="OpenPipe captures your OpenAI traffic and fine-tunes a cheaper model behind a drop-in proxy. kolm captures the same traffic and compiles a signed, portable artifact you keep forever. Different deliverables.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="kolm vs OpenPipe">
+<meta property="og:description" content="Both capture your frontier API traffic. OpenPipe gives you a hosted endpoint. kolm gives you a signed artifact.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/vs-openpipe">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/vs-openpipe">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+    --accent: #4c7dff; --accent-strong: #9db6ff; --good: #7ef0d2; --bad: #ff6b91;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+  .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+
+  header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+  header.site .left { display: flex; align-items: center; gap: 36px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site nav { display: flex; gap: 22px; }
+  header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
+  header.site nav a:hover { color: var(--ink); }
+  header.site .right { display: flex; align-items: center; gap: 14px; }
+  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  @media (max-width: 720px) { header.site nav { display: none; } }
+
+  section.hero { padding: 88px 0 32px; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+  h1 { margin: 22px 0 16px; font-size: clamp(36px, 5vw, 52px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
+  h1 .tone { color: var(--accent); }
+  p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+
+  .one-line { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 14px; margin: 24px 0 0; align-items: stretch; }
+  @media (max-width: 720px) { .one-line { grid-template-columns: 1fr; } .one-line .arrow { display: none; } }
+  .one-line .col { padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
+  .one-line .col h3 { margin: 0 0 8px; font-size: 15px; font-weight: 540; color: var(--ink); }
+  .one-line .col p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
+  .one-line .arrow { display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: var(--mono); font-size: 22px; }
+
+  .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
+  .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; }
+  .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
+
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
+  table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
+  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 540; }
+  table.tbl td { color: var(--ink-mute); }
+  table.tbl td b { color: var(--ink); font-weight: 540; }
+  table.tbl td.row-h { color: var(--ink); font-weight: 540; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; width: 26%; }
+  table.tbl td .ok { color: var(--good); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+  table.tbl td .no { color: var(--bad); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+  table.tbl td .partial { color: var(--ink-faint); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+  @media (max-width: 720px) {
+    table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
+    table.tbl thead { display: none; }
+    table.tbl tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
+    table.tbl td { border: 0; padding: 4px 0; }
+    table.tbl td.row-h { font-size: 12px; margin-bottom: 6px; }
+    table.tbl td::before { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 2px; }
+    table.tbl td[data-l]::before { content: attr(data-l); }
+  }
+
+  pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 14px 0; white-space: pre; }
+  @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
+  pre.code .c { color: var(--ink-faint); }
+  pre.code .ok { color: var(--good); }
+  pre.code .k { color: var(--accent-strong); }
+
+  .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(76,125,255,0.04), rgba(76,125,255,0.01)); margin: 24px 0 0; }
+  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 540; color: var(--ink); }
+  .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
+  .verdict p:last-child { margin-bottom: 0; }
+  .verdict b { color: var(--ink); font-weight: 540; }
+
+  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  footer.site a { color: var(--ink-mute); }
+</style>
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand"><img src="/logo-mark.svg" class="brand-mark" alt=""><span>kolm</span></a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="pill">vs OpenPipe</span>
+    <h1>Both capture your traffic. <span class="tone">Only one gives you a file.</span></h1>
+    <p class="lede">OpenPipe is the strongest competitor in the same lane: capture your OpenAI calls, fine-tune a cheaper model, ship it behind a drop-in proxy. kolm captures the same traffic and produces something different - a signed, portable <code>.kolm</code> artifact that you keep, sign, audit, and run anywhere.</p>
+
+    <div class="one-line">
+      <div class="col">
+        <h3>OpenPipe</h3>
+        <p>A <b>fine-tune-as-a-service</b>. Captures OpenAI traffic, trains a smaller model, exposes it behind a hosted endpoint. The deliverable is a hosted model.</p>
+      </div>
+      <div class="arrow">vs</div>
+      <div class="col">
+        <h3>kolm</h3>
+        <p>A <b>compiler</b>. Captures the same traffic, distills a smaller model, wraps it with verifier + recall + recipes + receipts. The deliverable is a <code>.kolm</code> file you own.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="group">
+      <h2>The job each one does</h2>
+      <p>Both products start from the same insight: <b>every dollar you spend on a frontier API is a labelled training pair</b>. Capture those pairs, train a smaller model, route the cheap traffic locally. OpenPipe shipped this in 2023 and the loop works.</p>
+      <p>The difference is what comes out of the pipe. OpenPipe gives you a hosted endpoint - swap your <code>OPENAI_BASE_URL</code> and you're done; the model lives in their cloud. kolm gives you a 1-3 GB file. The file holds the model, a LoRA, a verifier that checks each output, a sqlite-vec recall index, recipe packs for fast paths, and an HMAC-signed manifest. You can run it on your own machine, your customer's machine, an air-gapped server, or a phone.</p>
+      <p>If you're optimizing for "make this OpenAI call cheaper next quarter," OpenPipe is excellent. If you're optimizing for "this model becomes our product, runs in our customer's environment, and survives our cloud being down," that's what compile-to-file is for.</p>
+    </div>
+
+    <div class="group">
+      <h2>Where OpenPipe wins</h2>
+      <p>Honest concession. <b>OpenPipe is a more polished hosted offering than kolm cloud is today.</b> They've been at this longer, the dashboard is mature, the auto-eval suite for fine-tunes is real, the Mistral / Llama / GPT-4o-mini fine-tune coverage is broad, and the pay-per-token economics are straightforward. If your team only cares about cost per inference and you're happy hosting in their cloud, OpenPipe is a good answer.</p>
+      <p>Where the model has to leave their cloud (offline, on-device, regulated, customer-owned), the hosted-only architecture stops working. That's where the <code>.kolm</code> file format earns its keep.</p>
+    </div>
+
+    <div class="group">
+      <h2>Side-by-side</h2>
+      <table class="tbl">
+        <thead>
+          <tr><th></th><th>OpenPipe</th><th>kolm</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-h">What it is</td>
+            <td data-l="OpenPipe">Capture + fine-tune-as-a-service</td>
+            <td data-l="kolm">Capture + compile to portable artifact</td>
+          </tr>
+          <tr>
+            <td class="row-h">Capture loop</td>
+            <td data-l="OpenPipe"><span class="ok">yes</span> - drop-in OpenAI proxy</td>
+            <td data-l="kolm"><span class="ok">yes</span> - drop-in proxy for OpenAI + Anthropic</td>
+          </tr>
+          <tr>
+            <td class="row-h">Output</td>
+            <td data-l="OpenPipe">Hosted endpoint URL</td>
+            <td data-l="kolm">Signed <code>.kolm</code> file (≤3 GB)</td>
+          </tr>
+          <tr>
+            <td class="row-h">Runs offline</td>
+            <td data-l="OpenPipe"><span class="no">no</span> - hosted only</td>
+            <td data-l="kolm"><span class="ok">yes</span> - laptop, phone, air-gap</td>
+          </tr>
+          <tr>
+            <td class="row-h">You own the weights</td>
+            <td data-l="OpenPipe"><span class="partial">export available</span> on higher tiers</td>
+            <td data-l="kolm"><span class="ok">yes</span> - the file is yours, period</td>
+          </tr>
+          <tr>
+            <td class="row-h">Quality gate</td>
+            <td data-l="OpenPipe">Auto-eval over capture set</td>
+            <td data-l="kolm"><span class="ok">K-score</span> on a held-out test set, gated at 0.70 default</td>
+          </tr>
+          <tr>
+            <td class="row-h">Receipts / signing</td>
+            <td data-l="OpenPipe"><span class="no">no</span></td>
+            <td data-l="kolm"><span class="ok">HMAC-SHA256 receipt chain</span> on every output</td>
+          </tr>
+          <tr>
+            <td class="row-h">Bundled recall (RAG)</td>
+            <td data-l="OpenPipe"><span class="no">no</span> - bring your own</td>
+            <td data-l="kolm"><span class="ok">yes</span> - sqlite-vec index ships in the file</td>
+          </tr>
+          <tr>
+            <td class="row-h">Recipe / draft cache</td>
+            <td data-l="OpenPipe"><span class="no">no</span></td>
+            <td data-l="kolm"><span class="ok">yes</span> - deterministic drafts for sub-100ms hot paths</td>
+          </tr>
+          <tr>
+            <td class="row-h">Pricing model</td>
+            <td data-l="OpenPipe">Per token through their cloud</td>
+            <td data-l="kolm">Flat per compile, then $0 marginal inference</td>
+          </tr>
+          <tr>
+            <td class="row-h">Lock-in</td>
+            <td data-l="OpenPipe">Endpoint stops if account stops</td>
+            <td data-l="kolm">File survives. Spec is RS-1 MIT. Verifier is open.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="group">
+      <h2>When to use OpenPipe</h2>
+      <p>Use OpenPipe when your model only ever needs to run inside a hosted endpoint and your goal is to cut the per-token bill on traffic you already send to OpenAI.</p>
+      <pre class="code"><span class="c"># swap base URL, capture, train, save 5-10x:</span>
+OPENAI_BASE_URL=<span class="k">https://api.openpipe.ai/v1</span>
+<span class="c"># after ~10k captures, fine-tune a smaller model</span>
+<span class="c"># OpenPipe routes future calls to the smaller model</span></pre>
+    </div>
+
+    <div class="group">
+      <h2>When to use kolm</h2>
+      <p>Use kolm when the model needs to leave the cloud - or you need a signed artifact you can hand to a customer, an auditor, or a regulator.</p>
+      <pre class="code"><span class="c"># 1. capture frontier traffic (same drop-in pattern)</span>
+ANTHROPIC_BASE_URL=<span class="k">https://kolm.ai/v1/capture/anthropic</span>
+
+<span class="c"># 2. compile after enough pairs accumulate</span>
+kolm compile <span class="k">"PHI redaction for clinical notes"</span> \
+  --namespace clinical-notes \
+  --base qwen2.5-7b
+
+<span class="ok">ok</span> wrote <span class="k">phi-redactor.kolm</span>  k_score=0.93 signature=hmac-sha256
+
+<span class="c"># 3. ship the file. it runs anywhere.</span>
+kolm run phi-redactor.kolm <span class="k">"patient John Smith, DOB 1985..."</span> --receipt</pre>
+    </div>
+
+    <div class="group">
+      <h2>Can I use both?</h2>
+      <p>Yes, and it's a reasonable composition. Capture through OpenPipe to get a fine-tuned hosted model for cloud traffic; capture through kolm to get a portable artifact for the cases where the model needs to be in the customer's environment. Same training pairs serve both deliverables. The traffic isn't exclusive - you can dual-write to both.</p>
+      <p>Or: if you've already adopted OpenPipe and just need a signed offline copy of the model for a regulated customer, point <code>kolm compile</code> at your OpenPipe-exported weights as the base and let kolm wrap them with the verifier + recall + receipt chain.</p>
+    </div>
+
+    <div class="verdict">
+      <h3>Verdict</h3>
+      <p><b>If your only constraint is cost</b> and the model can live in someone else's cloud, OpenPipe is the cleaner answer. Hosted, mature, easy.</p>
+      <p><b>If the model has to ship</b> - to a phone, an enterprise's VPC, an offline device, a regulated environment - the file format is the difference. <code>.kolm</code> is what you hand over. The hosted endpoint isn't.</p>
+      <p>Adjacent comparisons: <a href="/vs-fine-tune" style="color:var(--accent);">vs fine-tuning</a> &middot; <a href="/vs-predibase" style="color:var(--accent);">vs Predibase</a> &middot; <a href="/vs-langsmith" style="color:var(--accent);">vs LangSmith</a> &middot; <a href="/compare" style="color:var(--accent);">full comparison table</a></p>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap-wide row">
+    <span>kolm v0.1.0 - the AI compiler</span>
+    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
