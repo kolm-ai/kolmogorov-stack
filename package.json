@@ -15,6 +15,7 @@
     "demo": "node scripts/demo.js",
     "build:sdk": "node scripts/build-sdk-version.js",
     "assets:fal": "node scripts/fal_generate_aurora.mjs",
+    "lint:refs": "node scripts/audit-static-refs.cjs && node scripts/audit-href.cjs --strict",
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {

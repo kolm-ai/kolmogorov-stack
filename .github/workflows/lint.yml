@@ -1,0 +1,49 @@
+name: lint
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --omit=optional --omit=dev
+
+      - name: forbid innerHTML with template literal in public/
+        run: |
+          if grep -rn 'innerHTML[[:space:]]*=[[:space:]]*`' public/ 2>/dev/null; then
+            echo "::error::innerHTML with template literal found — XSS regression risk"
+            exit 1
+          fi
+
+      - name: forbid orphan rewrites in vercel.json
+        run: |
+          node -e '
+            const v = JSON.parse(require("fs").readFileSync("vercel.json","utf8"));
+            const fs = require("fs");
+            let bad = 0;
+            for (const r of v.rewrites || []) {
+              const m = (r.destination||"").match(/^\/([^?]+\.html)$/);
+              if (!m) continue;
+              if (m[1].includes("$1")) continue;
+              const p = "public/" + m[1];
+              if (!fs.existsSync(p)) { console.error("ORPHAN:", r.source, "->", r.destination); bad++; }
+            }
+            process.exit(bad ? 1 : 0);
+          '
+
+      - name: audit static refs (img/script/link)
+        run: node scripts/audit-static-refs.cjs
+
+      - name: audit internal href targets
+        run: node scripts/audit-href.cjs --strict
+
+      - name: npm audit
+        run: npm audit --omit=dev --audit-level=high

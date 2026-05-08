@@ -1,0 +1,30 @@
+name: smoke
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --omit=optional
+      - name: start server
+        run: |
+          PORT=8787 node server.js &
+          echo $! > .server.pid
+          for i in {1..30}; do
+            curl -fsS http://localhost:8787/health && break
+            sleep 1
+          done
+      - name: run smoke
+        run: URL=http://localhost:8787 bash scripts/smoke-live.sh
+      - name: stop server
+        if: always()
+        run: kill "$(cat .server.pid)" 2>/dev/null || true
