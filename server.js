@@ -28,11 +28,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", 'https://js.stripe.com', 'https://*.vercel-insights.com'],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:', 'blob:'],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
       fontSrc: ["'self'", 'data:'],
-      connectSrc: ["'self'", 'https://api.anthropic.com'],
+      connectSrc: ["'self'", 'https://api.anthropic.com', 'https://kolm.ai', 'https://kolmogorov-stack-production.up.railway.app', 'https://*.vercel-insights.com', 'https://api.stripe.com'],
+      frameSrc: ['https://js.stripe.com'],
       workerSrc: ["'self'", 'blob:'],
       frameAncestors: ["'none'"],
       objectSrc: ["'none'"],
@@ -40,9 +41,9 @@ app.use(helmet({
       formAction: ["'self'"],
     },
   },
-  crossOriginEmbedderPolicy: false,  // breaks inline images otherwise
-  crossOriginResourcePolicy: { policy: 'cross-origin' },  // /sdk.js is cross-origin by design
-  strictTransportSecurity: { maxAge: 31536000, includeSubDomains: true },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  strictTransportSecurity: { maxAge: 63072000, includeSubDomains: true, preload: true },
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   frameguard: { action: 'deny' },
   noSniff: true,
