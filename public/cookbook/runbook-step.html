@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Runbook-step recipe - kolm cookbook</title>
+<meta name="description" content="Compile a signed local model that suggests the next runbook step given a current incident state. Trained on your team's runbook library. 90 gold pairs, citation-required.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="Runbook step recipe">
+<meta property="og:description" content="Local next-runbook-step suggester. Cites the runbook section. Signed.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/cookbook/runbook-step">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/runbook-step">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand"><img src="/logo-mark.svg" class="brand-mark" alt=""><span>kolm</span></a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="crumbs"><a href="/cookbook">cookbook</a> &middot; ops &middot; runbook-step</div>
+    <span class="pill">Recipe &middot; ops</span>
+    <h1>"What's the <span class="tone">next step?"</span></h1>
+    <p class="lede">A local <code>.kolm</code> file that takes the current incident state (alert text, last 3 actions taken, current symptom) and returns the next runbook step plus a citation to the runbook section. Trained on your team's actual runbooks; the verifier rejects any suggestion that is not grounded in a real section of the corpus.</p>
+
+    <div class="meta-row">
+      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-7b-instruct</span></div>
+      <div class="item"><span class="label">gold pairs</span><span class="value">90 (45 train / 45 eval)</span></div>
+      <div class="item"><span class="label">k-score floor</span><span class="value">0.85</span></div>
+      <div class="item"><span class="label">artifact size</span><span class="value">2.6 GB</span></div>
+      <div class="item"><span class="label">compile time</span><span class="value">~30 min</span></div>
+      <div class="item"><span class="label">spec source</span><span class="value">citation verifier</span></div>
+    </div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="group">
+      <h2>What this recipe does</h2>
+      <p>Removes the "where in the runbook am I?" tax during a paging event. Paste the alert + what you've already tried; get back the next step plus a section citation that maps to a real runbook page. The verifier reads the runbook corpus at compile time and rejects any output whose citation does not resolve. No hallucinated runbook sections.</p>
+    </div>
+
+    <div class="group">
+      <h2>The spec</h2>
+      <pre class="code">{
+  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+  <span class="k">"schema"</span>: {
+    <span class="k">"required"</span>: [<span class="k">"action"</span>, <span class="k">"runbook_path"</span>, <span class="k">"section_anchor"</span>, <span class="k">"why"</span>],
+    <span class="k">"properties"</span>: {
+      <span class="k">"action"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 240 },
+      <span class="k">"runbook_path"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+      <span class="k">"section_anchor"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+      <span class="k">"why"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 200 },
+      <span class="k">"escalate"</span>: { <span class="k">"type"</span>: <span class="k">"boolean"</span> }
+    }
+  },
+  <span class="k">"verifier"</span>: {
+    <span class="k">"corpus"</span>: <span class="k">"runbooks/"</span>,
+    <span class="k">"citation_must_resolve"</span>: <span class="ok">true</span>,
+    <span class="k">"escalate_when_no_match"</span>: <span class="ok">true</span>
+  }
+}</pre>
+    </div>
+
+    <div class="group">
+      <h2>Gold pairs (1 of 90 shown)</h2>
+
+      <div class="pair">
+        <div class="pair-h">input</div>
+        <pre class="code">alert: kafka consumer-lag &gt; 30s on orders.fulfilled
+prev_actions:
+  - confirmed broker health (3/3 up)
+  - checked downstream service (orders-worker) — running
+  - tailed orders-worker logs — last commit was 15 min ago
+symptom_now: lag still climbing, currently 2m18s</pre>
+        <div class="pair-h">output</div>
+        <pre class="code">{
+  <span class="k">"action"</span>: <span class="k">"Restart orders-worker pods one-by-one with kubectl rollout restart deploy/orders-worker -n prod. Verify lag drops within 90 seconds."</span>,
+  <span class="k">"runbook_path"</span>: <span class="k">"runbooks/kafka/consumer-lag.md"</span>,
+  <span class="k">"section_anchor"</span>: <span class="k">"#stalled-consumer-no-recent-commits"</span>,
+  <span class="k">"why"</span>: <span class="k">"Broker is healthy and consumer is alive but committing no offsets — matches stalled-consumer pattern. Section says rolling restart is the cheapest first move."</span>,
+  <span class="k">"escalate"</span>: <span class="ok">false</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Compile</h2>
+      <pre class="code">kolm compile <span class="k">"suggest next runbook step with citation"</span> \
+  --base qwen2.5-7b-instruct \
+  --pairs pairs.jsonl \
+  --corpus runbooks/ \
+  --verifier citation-resolves \
+  --k-floor 0.85 \
+  --output runbook-step.kolm
+
+<span class="ok">ok</span> wrote <span class="k">runbook-step.kolm</span>
+   k_score=0.88  signature=hmac-sha256</pre>
+    </div>
+
+    <div class="group">
+      <h2>K-score gate</h2>
+      <div class="k-bar">
+        <span class="k-label">K-score</span>
+        <span class="k-value">0.88</span>
+        <span class="k-detail">held-out 45 pairs &middot; citation-resolves 100% &middot; oncall-rated correct 84% &middot; escalate-when-uncertain 96%</span>
+      </div>
+      <p>The escalate flag is the safety valve: when the model is below confidence threshold or no runbook section matches the symptom, it flips <code>escalate: true</code> and returns the on-call escalation chain instead of inventing a step. This is the only way to ship "next step" suggestions during real pages without making things worse.</p>
+    </div>
+
+    <div class="group">
+      <h2>Run-time profile</h2>
+      <div class="lat-grid">
+        <div class="cell"><div class="h">M2 MacBook</div><div class="v">2.1<span class="u">s</span></div></div>
+        <div class="cell"><div class="h">RTX 5090</div><div class="v">490<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">5.6<span class="u">s</span></div></div>
+        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">7.0<span class="u">s</span></div></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Deploy</h2>
+      <pre class="code"><span class="c"># pagerduty webhook handler:</span>
+on_alert() {
+  state=$(echo <span class="k">"$1"</span> | jq -c '{alert, prev_actions, symptom_now}')
+  step=$(kolm run runbook-step.kolm --input-stdin &lt;&lt;&lt; <span class="k">"$state"</span>)
+  if [ <span class="k">"$(echo "$step" | jq -r .escalate)"</span> = <span class="k">"true"</span> ]; then
+    pagerduty escalate
+  else
+    slack post <span class="k">"#oncall-$(date +%s)"</span> <span class="k">"$step"</span>
+  fi
+}</pre>
+    </div>
+
+    <div class="group">
+      <h2>Related recipes</h2>
+      <div class="related">
+        <a href="/cookbook/incident-summarizer"><div class="h">Incident summarizer</div><div class="d">Slack channel + timeline → 5-section postmortem.</div></a>
+        <a href="/cookbook/log-grep"><div class="h">Log grep</div><div class="d">Natural-language to log query.</div></a>
+        <a href="/cookbook/on-call-page-classifier"><div class="h">Page classifier</div><div class="d">Triage paging signal vs noise.</div></a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap-wide row">
+    <span>kolm cookbook &middot; <a href="/cookbook">all recipes</a></span>
+    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

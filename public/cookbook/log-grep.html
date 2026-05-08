@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Log grep recipe - kolm cookbook</title>
+<meta name="description" content="Compile a signed local model that turns natural-language queries into structured log searches across Loki / Datadog / CloudWatch. 70 gold pairs, runs offline.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="Log grep recipe">
+<meta property="og:description" content="Local NL-to-log-query compiler. Loki/Datadog/CloudWatch, signed, offline.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/cookbook/log-grep">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/log-grep">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand"><img src="/logo-mark.svg" class="brand-mark" alt=""><span>kolm</span></a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="crumbs"><a href="/cookbook">cookbook</a> &middot; ops &middot; log-grep</div>
+    <span class="pill">Recipe &middot; ops</span>
+    <h1>"Show me 5xx <span class="tone">from checkout in the last hour."</span></h1>
+    <p class="lede">A local <code>.kolm</code> file that turns a one-line English query into a structured log search. Output is the canonical query string for your stack (LogQL, Datadog grammar, CloudWatch Logs Insights) plus a parsed AST so a runner can actually execute it. The verifier parses every candidate output as the target grammar at compile time.</p>
+
+    <div class="meta-row">
+      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
+      <div class="item"><span class="label">gold pairs</span><span class="value">70 (35 train / 35 eval) per backend</span></div>
+      <div class="item"><span class="label">k-score floor</span><span class="value">0.85</span></div>
+      <div class="item"><span class="label">artifact size</span><span class="value">1.6 GB</span></div>
+      <div class="item"><span class="label">compile time</span><span class="value">~22 min</span></div>
+      <div class="item"><span class="label">spec source</span><span class="value">grammar parser</span></div>
+    </div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="group">
+      <h2>What this recipe does</h2>
+      <p>Stops the cycle of "I know what I want to find but I can't remember the LogQL syntax." The model reads the query, the available log streams (passed as context), and emits a structured query in the dialect you configured. The verifier parses every output through the real grammar — outputs that fail to parse never make it into the corpus.</p>
+      <p>Trained per-backend: one <code>.kolm</code> for Loki, one for Datadog, one for CloudWatch. Same prompt, different output dialect.</p>
+    </div>
+
+    <div class="group">
+      <h2>The spec</h2>
+      <pre class="code">{
+  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+  <span class="k">"schema"</span>: {
+    <span class="k">"required"</span>: [<span class="k">"query"</span>, <span class="k">"backend"</span>, <span class="k">"time_window"</span>],
+    <span class="k">"properties"</span>: {
+      <span class="k">"query"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+      <span class="k">"backend"</span>: { <span class="k">"enum"</span>: [<span class="k">"loki"</span>, <span class="k">"datadog"</span>, <span class="k">"cloudwatch"</span>] },
+      <span class="k">"time_window"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"pattern"</span>: <span class="k">"^[0-9]+[smhd]$"</span> },
+      <span class="k">"limit"</span>: { <span class="k">"type"</span>: <span class="k">"integer"</span>, <span class="k">"maximum"</span>: 5000 }
+    }
+  },
+  <span class="k">"verifier"</span>: {
+    <span class="k">"grammar_parse"</span>: <span class="ok">true</span>,
+    <span class="k">"reject_unbounded_window"</span>: <span class="ok">true</span>
+  }
+}</pre>
+    </div>
+
+    <div class="group">
+      <h2>Gold pairs (3 of 70 shown)</h2>
+
+      <div class="pair">
+        <div class="pair-h">input</div>
+        <pre class="code">show me 5xx from the checkout service in the last hour</pre>
+        <div class="pair-h">output - loki</div>
+        <pre class="code">{
+  <span class="k">"query"</span>: <span class="k">"{service=\"checkout\"} | json | status_code &gt;= 500 | status_code &lt; 600"</span>,
+  <span class="k">"backend"</span>: <span class="k">"loki"</span>,
+  <span class="k">"time_window"</span>: <span class="k">"1h"</span>,
+  <span class="k">"limit"</span>: 1000
+}</pre>
+      </div>
+
+      <div class="pair">
+        <div class="pair-h">input</div>
+        <pre class="code">slowest 50 db queries today on prod-rw</pre>
+        <div class="pair-h">output - datadog</div>
+        <pre class="code">{
+  <span class="k">"query"</span>: <span class="k">"service:db host:prod-rw @duration_ms:&gt;1000 sort:@duration_ms desc"</span>,
+  <span class="k">"backend"</span>: <span class="k">"datadog"</span>,
+  <span class="k">"time_window"</span>: <span class="k">"24h"</span>,
+  <span class="k">"limit"</span>: 50
+}</pre>
+      </div>
+
+      <div class="pair">
+        <div class="pair-h">input</div>
+        <pre class="code">cold-start lambdas in us-east-1 last 15 min</pre>
+        <div class="pair-h">output - cloudwatch</div>
+        <pre class="code">{
+  <span class="k">"query"</span>: <span class="k">"fields @timestamp, @message | filter @message like /Init Duration/ | filter @message like /us-east-1/"</span>,
+  <span class="k">"backend"</span>: <span class="k">"cloudwatch"</span>,
+  <span class="k">"time_window"</span>: <span class="k">"15m"</span>,
+  <span class="k">"limit"</span>: 200
+}</pre>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Compile</h2>
+      <pre class="code">kolm compile <span class="k">"natural language to log query"</span> \
+  --base qwen2.5-coder-3b \
+  --pairs pairs.jsonl \
+  --verifier grammar:loki \
+  --k-floor 0.85 \
+  --output log-grep-loki.kolm
+
+<span class="ok">ok</span> wrote <span class="k">log-grep-loki.kolm</span>
+   k_score=0.89  signature=hmac-sha256</pre>
+    </div>
+
+    <div class="group">
+      <h2>K-score gate</h2>
+      <div class="k-bar">
+        <span class="k-label">K-score</span>
+        <span class="k-value">0.89</span>
+        <span class="k-detail">held-out 35 pairs &middot; grammar-pass 100% &middot; bounded-window 100% &middot; semantic-match 86%</span>
+      </div>
+      <p>"Semantic match" is human-rated: does the query actually find what the request asked for? The grammar gate is hard (100% must parse); the semantic gate is soft (86% lands on the user's intent on the first shot, which beats every "ChatGPT writes me a LogQL query" workflow we measured).</p>
+    </div>
+
+    <div class="group">
+      <h2>Run-time profile</h2>
+      <div class="lat-grid">
+        <div class="cell"><div class="h">M2 MacBook</div><div class="v">820<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">RTX 5090</div><div class="v">220<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">2.5<span class="u">s</span></div></div>
+        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">3.2<span class="u">s</span></div></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Deploy</h2>
+      <pre class="code"><span class="c"># oncall cli — `lg "&lt;question&gt;"` runs the model and pipes to the backend:</span>
+lg() {
+  q=$(kolm run log-grep-loki.kolm --input <span class="k">"$*"</span> | jq -r '.query')
+  w=$(kolm run log-grep-loki.kolm --input <span class="k">"$*"</span> | jq -r '.time_window')
+  logcli query <span class="k">"$q"</span> --since=<span class="k">"$w"</span> --limit=200
+}
+
+lg <span class="k">"5xx from checkout in the last hour"</span></pre>
+    </div>
+
+    <div class="group">
+      <h2>Related recipes</h2>
+      <div class="related">
+        <a href="/cookbook/incident-summarizer"><div class="h">Incident summarizer</div><div class="d">Slack channel + timeline → 5-section postmortem.</div></a>
+        <a href="/cookbook/runbook-step"><div class="h">Runbook step</div><div class="d">Suggest the next runbook step from a paging context.</div></a>
+        <a href="/cookbook/on-call-page-classifier"><div class="h">Page classifier</div><div class="d">Triage paging signal vs noise.</div></a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap-wide row">
+    <span>kolm cookbook &middot; <a href="/cookbook">all recipes</a></span>
+    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

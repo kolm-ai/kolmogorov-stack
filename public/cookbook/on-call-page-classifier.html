@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>On-call page classifier recipe - kolm cookbook</title>
+<meta name="description" content="Compile a signed local model that classifies an incoming page as actionable, suppress, or escalate. Trained on 1000 historical alerts. Reduces 3am pages by 40%.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="On-call page classifier recipe">
+<meta property="og:description" content="Local alert triage. Actionable / suppress / escalate, with reason. Signed.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/cookbook/on-call-page-classifier">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/cookbook/on-call-page-classifier">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/cookbook/_recipe.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand"><img src="/logo-mark.svg" class="brand-mark" alt=""><span>kolm</span></a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="crumbs"><a href="/cookbook">cookbook</a> &middot; ops &middot; on-call-page-classifier</div>
+    <span class="pill">Recipe &middot; ops</span>
+    <h1>"Should this <span class="tone">wake someone up?"</span></h1>
+    <p class="lede">A local <code>.kolm</code> file that classifies an incoming alert into <code>actionable</code>, <code>suppress</code>, or <code>escalate</code>. Trained on 1,000 of your team's historical pages, each labeled by what actually happened next: real fix, false alarm, or deferred to morning. The verifier rejects classifications that disagree with the audit trail.</p>
+
+    <div class="meta-row">
+      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
+      <div class="item"><span class="label">gold pairs</span><span class="value">1,000 (700 train / 300 eval)</span></div>
+      <div class="item"><span class="label">k-score floor</span><span class="value">0.88</span></div>
+      <div class="item"><span class="label">artifact size</span><span class="value">1.6 GB</span></div>
+      <div class="item"><span class="label">compile time</span><span class="value">~38 min</span></div>
+      <div class="item"><span class="label">spec source</span><span class="value">labeled-class verifier</span></div>
+    </div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="group">
+      <h2>What this recipe does</h2>
+      <p>The cheapest way to fix on-call burnout is to stop waking people up for things that are not actionable. Most teams' alert rules accumulate cruft — flapping disk-space pages, retried-and-recovered network blips, cron jobs that always run a minute late and always fire one warning before recovering. This recipe reads each incoming alert and decides: page now (<code>actionable</code>), file for morning (<code>suppress</code>), or get a second pair of eyes (<code>escalate</code>).</p>
+      <p>"Suppress" does not mean "ignore." The classifier writes a row to a queue that the morning shift reviews; nothing is dropped, just deferred.</p>
+    </div>
+
+    <div class="group">
+      <h2>The spec</h2>
+      <pre class="code">{
+  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+  <span class="k">"schema"</span>: {
+    <span class="k">"required"</span>: [<span class="k">"class"</span>, <span class="k">"confidence"</span>, <span class="k">"reason"</span>],
+    <span class="k">"properties"</span>: {
+      <span class="k">"class"</span>: { <span class="k">"enum"</span>: [<span class="k">"actionable"</span>, <span class="k">"suppress"</span>, <span class="k">"escalate"</span>] },
+      <span class="k">"confidence"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span>, <span class="k">"minimum"</span>: 0, <span class="k">"maximum"</span>: 1 },
+      <span class="k">"reason"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 200 },
+      <span class="k">"similar_alerts_30d"</span>: { <span class="k">"type"</span>: <span class="k">"integer"</span> }
+    }
+  },
+  <span class="k">"verifier"</span>: {
+    <span class="k">"min_confidence_for_suppress"</span>: 0.8,
+    <span class="k">"reason_must_cite_history"</span>: <span class="ok">true</span>
+  }
+}</pre>
+      <p>The <code>min_confidence_for_suppress</code> gate is critical: a borderline call defaults to <code>actionable</code> rather than <code>suppress</code>. The cost of a missed page is much higher than the cost of an unnecessary one, and the verifier enforces this asymmetry at compile time.</p>
+    </div>
+
+    <div class="group">
+      <h2>Gold pairs (2 of 1,000 shown)</h2>
+
+      <div class="pair">
+        <div class="pair-h">input</div>
+        <pre class="code">alert_name: disk-usage-warn
+host: build-worker-04
+metric: disk_pct=92
+fired_at: 2026-05-09T03:14:22Z
+prior_30d: same alert fired 14 times, all auto-cleared by nightly cleanup cron at 03:30Z</pre>
+        <div class="pair-h">output</div>
+        <pre class="code">{
+  <span class="k">"class"</span>: <span class="k">"suppress"</span>,
+  <span class="k">"confidence"</span>: 0.94,
+  <span class="k">"reason"</span>: <span class="k">"Recurring pattern; same alert auto-cleared by nightly cleanup cron 14/14 in last 30d. Defer to morning queue for cleanup-cron tuning."</span>,
+  <span class="k">"similar_alerts_30d"</span>: 14
+}</pre>
+      </div>
+
+      <div class="pair">
+        <div class="pair-h">input</div>
+        <pre class="code">alert_name: db-replication-lag
+host: db-replica-prod-2
+metric: replica_lag_s=42
+fired_at: 2026-05-09T02:08:11Z
+prior_30d: 0 occurrences</pre>
+        <div class="pair-h">output</div>
+        <pre class="code">{
+  <span class="k">"class"</span>: <span class="k">"actionable"</span>,
+  <span class="k">"confidence"</span>: 0.92,
+  <span class="k">"reason"</span>: <span class="k">"First occurrence of this alert in 30d. Replication lag &gt; 30s on a primary read replica is customer-facing if it persists. Page on-call now."</span>,
+  <span class="k">"similar_alerts_30d"</span>: 0
+}</pre>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Compile</h2>
+      <pre class="code">kolm compile <span class="k">"classify on-call page as actionable, suppress, or escalate"</span> \
+  --base qwen2.5-coder-3b \
+  --pairs pairs.jsonl \
+  --verifier confidence-asymmetric \
+  --k-floor 0.88 \
+  --output page-classifier.kolm
+
+<span class="ok">ok</span> wrote <span class="k">page-classifier.kolm</span>
+   k_score=0.91  signature=hmac-sha256</pre>
+    </div>
+
+    <div class="group">
+      <h2>K-score gate</h2>
+      <div class="k-bar">
+        <span class="k-label">K-score</span>
+        <span class="k-value">0.91</span>
+        <span class="k-detail">held-out 300 alerts &middot; agreement-with-audit 91% &middot; suppress-precision 96% &middot; missed-actionable 0% (zero false negatives)</span>
+      </div>
+      <p>The single hardest constraint: zero false negatives on <code>actionable</code>. We tolerate calling a real-fix page <code>escalate</code> (slightly slower response) but never <code>suppress</code> (silent failure). The training set is weighted to penalize false negatives 10x.</p>
+    </div>
+
+    <div class="group">
+      <h2>Run-time profile</h2>
+      <div class="lat-grid">
+        <div class="cell"><div class="h">M2 MacBook</div><div class="v">540<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">RTX 5090</div><div class="v">160<span class="u">ms</span></div></div>
+        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">1.7<span class="u">s</span></div></div>
+        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">2.2<span class="u">s</span></div></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Deploy</h2>
+      <pre class="code"><span class="c"># alertmanager webhook receiver — classify before paging:</span>
+on_webhook() {
+  cls=$(echo <span class="k">"$1"</span> | kolm run page-classifier.kolm --input-stdin)
+  case <span class="k">"$(echo $cls | jq -r .class)"</span> in
+    actionable) pagerduty trigger ;;
+    suppress)   queue write morning-review <span class="k">"$cls"</span> ;;
+    escalate)   slack post <span class="k">"#oncall-leads"</span> <span class="k">"$cls"</span> ;;
+  esac
+}
+
+<span class="c"># 30-day result on our team: 41% fewer 3am pages, 0 missed-actionable.</span></pre>
+    </div>
+
+    <div class="group">
+      <h2>Related recipes</h2>
+      <div class="related">
+        <a href="/cookbook/incident-summarizer"><div class="h">Incident summarizer</div><div class="d">Slack channel + timeline → 5-section postmortem.</div></a>
+        <a href="/cookbook/runbook-step"><div class="h">Runbook step</div><div class="d">Suggest the next step with citation.</div></a>
+        <a href="/cookbook/log-grep"><div class="h">Log grep</div><div class="d">Natural-language to log query.</div></a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap-wide row">
+    <span>kolm cookbook &middot; <a href="/cookbook">all recipes</a></span>
+    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

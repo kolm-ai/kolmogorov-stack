@@ -851,6 +851,52 @@ check "sitemap has /cookbook/refactor"         has "$COOK_SM" "/cookbook/refacto
 check "sitemap has /cookbook/test-gen"         has "$COOK_SM" "/cookbook/test-gen"
 
 echo ""
+echo "=== 35. Workstream G — five ops cookbook recipes ==="
+# Five recipe pages for on-call work — each carries a verifier with teeth
+# (redactor, citation-resolver, asymmetric confidence, msg-id check).
+for r in incident-summarizer log-grep runbook-step on-call-page-classifier slack-thread-summarizer; do
+  RC=$(curl -s -o /dev/null -w "%{http_code}" "$URL/cookbook/$r")
+  check "/cookbook/$r is 200" eq "$RC" 200
+done
+
+INC_R=$(curl -s "$URL/cookbook/incident-summarizer")
+check "incident-summarizer redacts at compile time" has "$INC_R" "redact_before_train"
+check "incident-summarizer chronological gate"      has "$INC_R" "timeline_chronological"
+
+LG_R=$(curl -s "$URL/cookbook/log-grep")
+check "log-grep names backends"                     has "$LG_R" "loki"
+check "log-grep grammar parser verifier"            has "$LG_R" "grammar_parse"
+
+RB_R=$(curl -s "$URL/cookbook/runbook-step")
+check "runbook-step citation-must-resolve"          has "$RB_R" "citation_must_resolve"
+check "runbook-step has escalate flag"              has "$RB_R" "escalate"
+
+PC_R=$(curl -s "$URL/cookbook/on-call-page-classifier")
+check "page-classifier 3-class enum"                has "$PC_R" "actionable"
+check "page-classifier zero-false-negatives gate"   has "$PC_R" "false negatives"
+
+TS_R=$(curl -s "$URL/cookbook/slack-thread-summarizer")
+check "thread-summarizer msg-id resolves"           has "$TS_R" "msg_id_must_exist_in_input"
+check "thread-summarizer has 3-block output"        has "$TS_R" "open_questions"
+
+# Cookbook index now lists five ops recipes too.
+COOK_IDX2=$(curl -s "$URL/cookbook")
+check "cookbook index links incident-summarizer"    has "$COOK_IDX2" "/cookbook/incident-summarizer"
+check "cookbook index links log-grep"               has "$COOK_IDX2" "/cookbook/log-grep"
+check "cookbook index links runbook-step"           has "$COOK_IDX2" "/cookbook/runbook-step"
+check "cookbook index links page-classifier"        has "$COOK_IDX2" "/cookbook/on-call-page-classifier"
+check "cookbook index links thread-summarizer"      has "$COOK_IDX2" "/cookbook/slack-thread-summarizer"
+check "cookbook index has ops section"              has "$COOK_IDX2" "ops recipes"
+
+# Sitemap carries all five ops recipe URLs.
+OPS_SM=$(curl -s "$URL/sitemap.xml")
+check "sitemap has /cookbook/incident-summarizer"   has "$OPS_SM" "/cookbook/incident-summarizer"
+check "sitemap has /cookbook/log-grep"              has "$OPS_SM" "/cookbook/log-grep"
+check "sitemap has /cookbook/runbook-step"          has "$OPS_SM" "/cookbook/runbook-step"
+check "sitemap has /cookbook/on-call-page-classifier" has "$OPS_SM" "/cookbook/on-call-page-classifier"
+check "sitemap has /cookbook/slack-thread-summarizer" has "$OPS_SM" "/cookbook/slack-thread-summarizer"
+
+echo ""
 echo "================================================"
 echo " RESULTS: $PASS pass, $FAIL fail"
 if [ $FAIL -gt 0 ]; then

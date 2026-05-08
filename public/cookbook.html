@@ -152,7 +152,55 @@
 
   <section class="section">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">03</span>shape</div>
+      <div class="eyebrow"><span class="num">03</span>ops recipes</div>
+      <h2>Five compileable patterns for on-call work.</h2>
+      <p class="sec-lede">Same shape as the coding recipes; different gates. Each is one page: input shape, gold pairs, compile command, verifier, and the latency profile across an M2, a 5090, a phone, and a CPU server. The verifiers do specific work — redact secrets at compile time, enforce chronological timelines, require runbook citations to resolve, weight false-negatives 10x for paging.</p>
+
+      <div class="vs-tbl">
+        <table>
+          <thead>
+            <tr><th style="width:22%">Recipe</th><th>What it does</th><th>K-score</th><th>Read</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Incident summarizer</b></td>
+              <td>Slack channel + Datadog timeline to 5-section postmortem draft. Redacts secrets at compile time.</td>
+              <td><code>0.86</code></td>
+              <td><a href="/cookbook/incident-summarizer">/cookbook/incident-summarizer &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>Log grep</b></td>
+              <td>Natural-language query to LogQL / Datadog / CloudWatch. Grammar parsed at compile time.</td>
+              <td><code>0.89</code></td>
+              <td><a href="/cookbook/log-grep">/cookbook/log-grep &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>Runbook step</b></td>
+              <td>Suggest next runbook step with section citation. Citation must resolve to a real runbook page.</td>
+              <td><code>0.88</code></td>
+              <td><a href="/cookbook/runbook-step">/cookbook/runbook-step &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>Page classifier</b></td>
+              <td>Actionable / suppress / escalate, with reason. Zero false negatives on actionable.</td>
+              <td><code>0.91</code></td>
+              <td><a href="/cookbook/on-call-page-classifier">/cookbook/on-call-page-classifier &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><b>Thread summarizer</b></td>
+              <td>Long Slack thread to TL;DR + decisions + open questions. Every citation must resolve.</td>
+              <td><code>0.83</code></td>
+              <td><a href="/cookbook/slack-thread-summarizer">/cookbook/slack-thread-summarizer &rarr;</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">04</span>shape</div>
       <h2>Every recipe follows the same five steps.</h2>
       <div class="kvtable">
         <table>
@@ -168,7 +216,7 @@
 
   <section class="section">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">03</span>your vertical</div>
+      <div class="eyebrow"><span class="num">05</span>your vertical</div>
       <h2>Don't see your shape?</h2>
       <p class="sec-lede">Build your own. <code>kolm new my-task --from {redactor|extractor|classifier|blank}</code> scaffolds a working spec; <code>kolm compile --spec spec.json</code> seals it offline. Or drop ten labeled examples + a frontier API key into the cloud <code>kolm compile</code> and the registry comes back with a finished <code>.kolm</code>. Stuck on the spec shape? Open a thread in GitHub Discussions.</p>
       <div class="actions" style="margin-top:14px">
