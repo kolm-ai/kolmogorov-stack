@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>kolm - compile private AI into signed artifacts.</title>
-<meta name="description" content="kolm is the compiler cache for intelligence: compile regulated AI tasks, policy, examples, and context into signed .kolm artifacts with verifier evidence and local-boundary runtime targets.">
+<title>kolm - your own AI, in a single file.</title>
+<meta name="description" content="Tell kolm what you want it to do. It builds a small AI for that exact task and gives you one file that runs on your laptop, phone, or server. Your data never leaves your machine.">
 <meta name="keywords" content="AI compiler, on-device AI, private AI, local AI, .kolm artifact, artifact registry, k-score, signed receipts, HIPAA AI, EU AI Act AI, edge AI">
 <meta name="theme-color" content="#0b0d10">
 <meta name="color-scheme" content="dark">
@@ -12,8 +12,8 @@
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <meta property="og:site_name" content="kolm">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="kolm - compile private AI into signed artifacts">
-<meta property="og:description" content="The compiler cache for intelligence. Compile inside your boundary, ship signed artifacts, and keep verifier evidence with every run.">
+<meta property="og:title" content="kolm - your own AI, in a single file">
+<meta property="og:description" content="Tell kolm what you want it to do. It builds a small AI for that exact task and gives you one file that runs on your laptop, phone, or server. Your data never leaves your machine.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -22,13 +22,14 @@
 <meta property="og:image:alt" content="kolm brand image showing a signed private AI artifact and compiler-cache positioning.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="kolm - compile private AI into signed artifacts">
-<meta name="twitter:description" content="Compile regulated AI into signed artifacts with verifier evidence and local-boundary runtime targets.">
+<meta name="twitter:title" content="kolm - your own AI, in a single file">
+<meta name="twitter:description" content="Tell kolm what you want it to do. It builds a small AI for that exact task and gives you one file that runs anywhere. Your data never leaves your machine.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -97,19 +98,14 @@
 
 <header class="site-header">
   <div class="wrap">
-    <a href="/" class="brand"><img src="/logo-mark.svg" alt="" class="brand-mark">kolm</a>
+    <a href="/" class="brand"><span class="brand-dot" aria-hidden="true"></span>kolm</a>
     <nav class="site-nav" aria-label="Primary">
-      <a href="/compile">compile</a>
-      <a href="/run">run</a>
-      <a href="/recall">recall</a>
-      <a href="/serve">serve</a>
-      <a href="/anatomy">anatomy</a>
-      <a href="/k-score">k-score</a>
-      <a href="/benchmarks">benchmarks</a>
-      <a href="/compare">compare</a>
-      <a href="/pricing">pricing</a>
-      <a href="/docs">docs</a>
-      <a href="/articles">articles</a>
+      <a href="/compile">Compile</a>
+      <a href="/serve">Serve</a>
+      <a href="/anatomy">.kolm</a>
+      <a href="/k-score">K-score</a>
+      <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
       <a href="/signin">sign in</a>
@@ -123,9 +119,9 @@
 <section class="hero home-hero">
   <div class="wrap">
     <div class="hero-copy">
-      <div class="eyebrow"><span class="pulse"></span>Compiler cache for intelligence</div>
-      <h1>Compile private AI into signed artifacts.</h1>
-      <p class="lede">kolm turns a task, policy, examples, and approved context into a portable <code>.kolm</code> artifact. The artifact carries the verifier, receipt chain, and local-boundary runtime contract so regulated teams can ship AI without exposing runtime data.</p>
+      <div class="eyebrow"><span class="pulse"></span>The AI compiler</div>
+      <h1>Your own AI, in a single file.</h1>
+      <p class="lede">Tell kolm what you want it to do. Answer your emails in your voice. Spot bugs in your code the way you would. Sort every photo from a trip. It builds a small AI for exactly that task and gives you one file that runs on your laptop, phone, or server. Your data never leaves your machine.</p>
 
       <div class="actions">
         <div class="install" id="install">
@@ -181,7 +177,8 @@
         <div><span>Server</span><small>VPC boundary</small></div>
       </div>
       <pre class="lab-terminal"><span class="prompt">$</span> kolm compile "screen patient urgency" --examples labels.jsonl --receipt
-<span class="ok">ok</span> wrote patient-intake.kolm  <span class="dim">k_score=0.92 signature=hmac-sha256</span></pre>
+<span class="ok">ok</span> wrote patient-intake.kolm  <span class="dim">k_score=0.92 signature=hmac-sha256</span>
+<span class="prompt">$</span> kolm serve --mcp  <span class="dim"># expose the artifact as an MCP tool</span></pre>
     </div>
   </div>
 </section>
@@ -369,7 +366,50 @@
 
 <section class="section">
   <div class="wrap">
-    <div class="eyebrow"><span class="num">08</span>install</div>
+    <div class="eyebrow"><span class="num">08</span>against the alternatives</div>
+    <h2>Why a compiler, not a wrapper.</h2>
+    <p class="sec-lede">Most ways of shipping AI keep the cloud, the model, or the data outside your boundary. kolm collapses the three problems into one signed file you own. Here is what you trade vs each adjacent path.</p>
+
+    <div class="vs-tbl">
+      <table>
+        <thead>
+          <tr><th style="width:30%">Path</th><th>What you keep</th><th>What kolm changes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Cloud APIs</b><br><span class="dim">OpenAI, Anthropic, Bedrock</span></td>
+            <td>Per-call inference. Network dependency. Per-token billing forever. Data leaves your machine on every call. No portable artifact.</td>
+            <td>Pay the frontier teacher once at compile. Run inference locally at zero marginal cost. ~27&times; cheaper at 100k MAU. Data stays on the device. Output is signed.</td>
+          </tr>
+          <tr>
+            <td><b>Hosted fine-tune</b><br><span class="dim">Together, HF, Bedrock fine-tune</span></td>
+            <td>A model you cannot move. Vendor-hosted weights. No quality gate. No portability across iOS, Android, edge, server.</td>
+            <td>One signed file you own. K-score gate at build. Same artifact runs on phone, laptop, edge, VPC. No vendor lock.</td>
+          </tr>
+          <tr>
+            <td><b>On-prem inference</b><br><span class="dim">vLLM, Ollama, MLC, llama.cpp</span></td>
+            <td>A general-purpose runtime. You build the eval pipeline, the LoRA pipeline, the recall index, the K-score, the receipt chain.</td>
+            <td>Task-specific LoRA + recipe pack + multimodal recall + K-score + signed receipts, all in one artifact. Compiler does the assembly.</td>
+          </tr>
+          <tr>
+            <td><b>RAG / orchestration</b><br><span class="dim">LangChain, LlamaIndex</span></td>
+            <td>Cloud calls every request. Glue you maintain. The intelligence stays in someone else's API.</td>
+            <td>Compile the policy, the retrieval, and the model into one boundary-local artifact. Receipts span retrieval and inference. No glue at runtime.</td>
+          </tr>
+          <tr>
+            <td><b>DIY edge stack</b><br><span class="dim">CoreML, ExecuTorch, TFLite</span></td>
+            <td>Three runtimes to ship and three quantization paths to maintain. No verification layer. No registry.</td>
+            <td>One <code>.kolm</code> across iOS, Android, web, server. RS-1 spec is open. Verification + registry shipped.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">09</span>install</div>
     <h2>Start with the CLI.</h2>
     <p class="sec-lede">The SDK and runtime are MIT. The paid surface is managed compile, registry, policy, and enterprise controls. Keep run-time inside your boundary.</p>
 
@@ -402,6 +442,7 @@
         <a href="/run">run</a>
         <a href="/recall">recall</a>
         <a href="/serve">serve</a>
+        <a href="/launch">launch</a>
       </div>
       <div>
         <div class="col-h">proof</div>
@@ -409,11 +450,21 @@
         <a href="/compare">compare</a>
         <a href="/k-score">k-score</a>
         <a href="/anatomy">anatomy</a>
+        <a href="/architecture">architecture</a>
+      </div>
+      <div>
+        <div class="col-h">cookbook</div>
+        <a href="/cookbook">all recipes</a>
+        <a href="/healthcare">healthcare</a>
+        <a href="/finance">finance</a>
+        <a href="/legal">legal</a>
+        <a href="/edge">edge</a>
       </div>
       <div>
         <div class="col-h">docs</div>
         <a href="/quickstart">quickstart</a>
         <a href="/docs">spec</a>
+        <a href="/troubleshooting">troubleshooting</a>
         <a href="/security">security</a>
         <a href="/privacy">privacy</a>
       </div>
@@ -423,6 +474,7 @@
         <a href="/signin">sign in</a>
         <a href="/pricing">pricing</a>
         <a href="/articles">articles</a>
+        <a href="/changelog">changelog</a>
       </div>
     </div>
   </div>

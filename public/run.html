@@ -16,23 +16,20 @@
 <link rel="canonical" href="https://kolm.ai/run">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
 </head>
 <body>
 
 <header class="site-header">
   <div class="wrap">
-    <a href="/" class="brand"><img src="/logo-mark.svg" alt="" class="brand-mark">kolm</a>
+    <a href="/" class="brand"><span class="brand-dot" aria-hidden="true"></span>kolm</a>
     <nav class="site-nav" aria-label="Primary">
-      <a href="/compile">compile</a>
-      <a href="/run" class="active">run</a>
-      <a href="/recall">recall</a>
-      <a href="/serve">serve</a>
-      <a href="/anatomy">anatomy</a>
-      <a href="/k-score">k-score</a>
-      <a href="/benchmarks">benchmarks</a>
-      <a href="/compare">compare</a>
-      <a href="/pricing">pricing</a>
-      <a href="/docs">docs</a>
+      <a href="/compile">Compile</a>
+      <a href="/serve">Serve</a>
+      <a href="/anatomy">.kolm</a>
+      <a href="/k-score">K-score</a>
+      <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
       <a href="/signin">sign in</a>
@@ -104,6 +101,9 @@
 <span class="prompt">$</span> kolm login
 
 <span class="prompt">$</span> kolm inspect support-writer.kolm
+  manifest.json    12 KB   1a92c4…aa
+  recipes.json     7.2 MB  ab02f1…7e
+  receipt.json     312 B   <span class="ok">verified</span>
 <span class="prompt">$</span> kolm eval support-writer.kolm
 <span class="prompt">$</span> kolm run support-writer.kolm '{"input":"draft a reply"}'</pre>
 

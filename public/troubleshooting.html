@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Troubleshooting - kolm</title>
+<meta name="description" content="Common kolm errors and how to fix them: failed compile, K-score under floor, signature drift, base-model mismatch, quota and auth issues.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="kolm troubleshooting">
+<meta property="og:description" content="Concrete fix steps for the errors you will hit when compiling and running .kolm artifacts.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/troubleshooting">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/troubleshooting">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand"><span class="brand-dot" aria-hidden="true"></span>kolm</a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/compile">Compile</a>
+      <a href="/serve">Serve</a>
+      <a href="/anatomy">.kolm</a>
+      <a href="/k-score">K-score</a>
+      <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
+    </nav>
+    <div class="site-actions">
+      <a href="/signin">sign in</a>
+      <a href="/signup" class="cta">get a key</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span>troubleshooting</div>
+        <h1>When kolm refuses to ship.</h1>
+        <p class="lede">Most failures fall into one of nine categories. The compiler is strict on purpose: a signed artifact that misses its quality gate is worse than no artifact. Each row below names the symptom, the cause, and the exact fix. If your problem is not here, open an issue with the compile id.</p>
+        <div class="actions">
+          <a href="/docs#errors" class="btn primary">error reference</a>
+          <a href="/status" class="btn ghost">status</a>
+          <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" class="btn accent">open an issue</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">01</span>compile failed</div>
+      <h2>The job ran, but the K-score didn't pass.</h2>
+      <p class="sec-lede">The compiler refused to sign the artifact because at least one gate (accuracy, coverage, size, p50 latency) fell below the floor. Three causes account for almost every case.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>too few examples</td><td>The verifier could not synthesize a stable test trace. Add 6&ndash;12 more positive examples and 2&ndash;4 negatives. Re-run <code>kolm compile</code>.</td></tr>
+          <tr><td>examples disagree</td><td>Two examples imply opposite outputs for inputs that look similar. Run <code>kolm doctor &lt;job_id&gt;</code> to see which pair caused the contradiction. Resolve and re-submit.</td></tr>
+          <tr><td>output_spec too tight</td><td>Schema rejected most teacher samples. Loosen the schema or remove an unused required field. The compile log shows which path failed validation most often.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">02</span>k-score under floor</div>
+      <h2>Score is 0.62, you need 0.74.</h2>
+      <p class="sec-lede">Ship gate is composite. You can pass three sub-gates and still fail if one is under floor.</p>
+      <pre class="terminal">$ kolm score summary.kolm
+K-score          0.62  blocked
+  accuracy       0.84  ok      &gt;= 0.80
+  coverage       0.71  ok      &gt;= 0.65
+  size_bytes     0.93  ok      &gt;= 0.50
+  p50_latency_us 0.18  failed  &gt;= 0.40    &lt;-- fix this</pre>
+      <p class="sec-lede" style="margin-top:18px">Latency floor failed. Either pick a smaller base model with <code>--base qwen2.5-3b-instruct</code>, or reduce recipe-pack depth with <code>--recipe-pack-depth 32</code>. Re-run; the receipt chain regenerates from the new pack.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">03</span>signature drift</div>
+      <h2>The artifact verifies locally but not on the registry.</h2>
+      <p class="sec-lede">A receipt mismatched its registry anchor. Three sub-cases.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>RECIPE_RECEIPT_SECRET unset</td><td>Server is signing with the dev fallback. Set <code>RECIPE_RECEIPT_SECRET</code> on Railway, redeploy, recompile. The CLI returns <code>503 not_configured</code> until set.</td></tr>
+          <tr><td>local clock drift</td><td>Receipts include <code>issued_at</code>. If your machine is &gt;5min off NTP the registry rejects on submit. Sync system time and retry.</td></tr>
+          <tr><td>SDK version too old</td><td>Pre-v0.1.0 receipts had a different chain shape. <code>npm i -g github:sneaky-hippo/kolmogorov-stack@latest</code> and recompile. Old artifacts stay valid; only fresh submissions need the new chain.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">04</span>base-model mismatch</div>
+      <h2>"Manifest declares qwen2.5-7b but loader has qwen2.5-3b."</h2>
+      <p class="sec-lede">The artifact's <code>manifest.json/base_model</code> field does not match the local runtime. The .kolm doesn't ship weights; it ships a pointer plus a LoRA delta. The base must be present locally.</p>
+      <pre class="terminal">$ kolm doctor summary.kolm
+manifest.base_model:  qwen2.5-7b-instruct@hf:Qwen/Qwen2.5-7B-Instruct
+local cache:          qwen2.5-3b-instruct  (mismatch)
+fix:                  kolm pull qwen2.5-7b-instruct
+                      # or recompile with --base qwen2.5-3b-instruct</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">05</span>quota exhausted</div>
+      <h2>You hit the monthly compile cap.</h2>
+      <p class="sec-lede">Free is 1 compile/month, Pro is 25, Teams is 10/seat. The CLI returns <code>403 quota_exhausted</code> with a reset date.</p>
+      <pre class="terminal">$ kolm compile examples.jsonl
+error: quota_exhausted (resets 2026-06-01)
+plan:  pro
+used:  25 of 25</pre>
+      <p class="sec-lede" style="margin-top:18px">Upgrade at <a href="/pricing">/pricing</a>, or wait for the reset. Compiles do not roll over.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">06</span>auth fails locally</div>
+      <h2>"Invalid API key" from a key you just created.</h2>
+      <p class="sec-lede">Two causes account for ~95% of these.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>wrong base URL</td><td>CLI defaults to <code>https://kolm.ai</code>. If you previously set <code>kolm config base http://localhost:8787</code>, the new key from prod won't work locally. Run <code>kolm config base https://kolm.ai &amp;&amp; kolm login</code>.</td></tr>
+          <tr><td>shell ate the prefix</td><td>Keys start with <code>k_live_</code>. If you pasted into <code>.bashrc</code> with <code>export KOLM_KEY=k_live...</code> without quotes, the underscore-prefixed value can hit shell expansion on some setups. Quote it: <code>export KOLM_KEY="k_live_..."</code>.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">07</span>kolm serve refuses to start</div>
+      <h2>MCP server fails the bind step.</h2>
+      <p class="sec-lede">Three usual suspects.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>port already in use</td><td>Default 11455 conflicts with a stale instance. <code>kolm serve --mcp --http --port 11456</code>. Or kill the old: <code>lsof -i :11455 &amp;&amp; kill &lt;pid&gt;</code>.</td></tr>
+          <tr><td>artifact not in cache</td><td><code>kolm serve</code> reads from <code>~/.kolm/artifacts</code>. If you compiled on another machine, copy the .kolm in or pass <code>--artifact ./summary.kolm</code> directly.</td></tr>
+          <tr><td>signature invalid</td><td>If the file was modified after sign, serve refuses. <code>kolm verify summary.kolm</code> will tell you which member is dirty.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">08</span>verify offline</div>
+      <h2>You want to verify a .kolm with no network.</h2>
+      <p class="sec-lede">The signature chain is HMAC-SHA256 with the registry's public anchor cached locally. <code>kolm verify --offline</code> uses the cached anchor only; if the artifact references a registry version newer than your last <code>kolm pull anchors</code>, it returns <code>warn: anchor_stale</code> but still tells you whether the chain is internally consistent.</p>
+      <pre class="terminal">$ kolm verify --offline summary.kolm
+manifest          ok    sha256:1f2e&hellip;
+recipes.json      ok    sha256:7a4c&hellip;
+lora.bin          ok    sha256:9b11&hellip;
+index.sqlite-vec  ok    sha256:0d56&hellip;
+receipt chain     ok    chained-from registry@v2026-04-30
+anchor            warn  cached 9d ago, run `kolm pull anchors`</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">09</span>still stuck</div>
+      <h2>Open an issue with the compile id.</h2>
+      <p class="sec-lede">If your symptom is not above, paste the compile id from <code>kolm compile</code>'s output and the last 50 lines of <code>~/.kolm/log/compile.log</code> into a GitHub issue. We answer within one business day.</p>
+      <div class="actions" style="margin-top:14px">
+        <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues/new" class="btn primary">file an issue</a>
+        <a href="mailto:dev@kolm.ai?subject=kolm%20compile%20issue" class="btn ghost">email dev@kolm.ai</a>
+        <a href="/status" class="btn accent">status page</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta"><img src="/logo-mark.svg" alt="" style="width:18px;height:18px;margin-right:8px;vertical-align:-4px;">kolm troubleshooting / <a href="/docs">docs</a> / <a href="/status">status</a></div>
+    <div class="links">
+      <div>
+        <div class="col-h">product</div>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/recall">recall</a>
+        <a href="/serve">serve</a>
+      </div>
+      <div>
+        <div class="col-h">proof</div>
+        <a href="/benchmarks">benchmarks</a>
+        <a href="/compare">compare</a>
+        <a href="/security">security</a>
+        <a href="/privacy">privacy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

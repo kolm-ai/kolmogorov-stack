@@ -7,6 +7,13 @@
 <meta name="description" content="One command turns any .kolm artifact into a discoverable MCP server. Claude, Cursor, and any MCP-aware agent finds it automatically.">
 <meta name="theme-color" content="#050607">
 <meta name="color-scheme" content="dark">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="kolm serve --mcp — every .kolm becomes an MCP tool">
+<meta property="og:description" content="One command exposes ~/.kolm/artifacts/ over MCP. Claude, Cursor, and any MCP-aware agent picks them up automatically.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/serve">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/serve">
 <link rel="preload" as="image" href="/img/kolm-mcp-fanout.svg" fetchpriority="high">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -117,7 +124,6 @@
   <div class="wrap"><div class="row">
     <div class="left">
       <a class="brand" href="/" aria-label="kolm home">
-        <img src="/logo-mark.svg" alt="" class="brand-mark">
         <span>kolm</span>
       </a>
       <nav>
@@ -125,17 +131,13 @@
         <a href="/serve" class="active">Serve</a>
         <a href="/anatomy">.kolm</a>
         <a href="/k-score">K-score</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-
         <a href="/docs">Docs</a>
-        <a href="/articles">Articles</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
     <div class="right">
-      <a href="/signin" class="ghost">Sign in</a>
-      <a href="/signup" class="cta">Get kolm <span aria-hidden="true">›</span></a>
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">get a key</a>
     </div>
   </div></div>
 </header>
@@ -277,7 +279,7 @@ $ kolm serve --mcp <span class="key">support-triage.kolm</span>
   <span class="key">"hmac"</span>:           "<span class="ok">verified</span>"
 }</pre>
     <div class="cta-row">
-      <a href="/signup" class="btn-primary">Get kolm <span aria-hidden="true">›</span></a>
+      <a href="/signup" class="btn-primary">get a key</a>
       <a href="/anatomy" class="btn-link">See what’s inside .kolm <span aria-hidden="true">›</span></a>
     </div>
   </div>

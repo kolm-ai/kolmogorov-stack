@@ -3,14 +3,14 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "kolmogorov-recipe"
+name = "kolm"
 version = "0.1.0"
-description = "Recipe — show your AI agent how once, run forever. Synthesize deterministic JS classifiers from 4-8 examples; replace repeat LLM-as-judge calls."
+description = "kolm - the AI compiler. Compile any AI task into a signed .kolm file you own. Python client over the public HTTP API."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
-authors = [{ name = "REM Labs", email = "dev@remlabs.ai" }]
-keywords = ["llm", "classifier", "synthesis", "agents", "claude", "openai", "fine-tuning", "lora"]
+authors = [{ name = "Kolmogorov", email = "dev@kolm.ai" }]
+keywords = ["llm", "compiler", "lora", "agents", "claude", "openai", "fine-tuning", "edge", "offline"]
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
@@ -22,13 +22,13 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://kolmogorov-stack-production.up.railway.app"
-Repository = "https://github.com/remlabs-ai/kolmogorov-stack"
-Documentation = "https://kolmogorov-stack-production.up.railway.app/docs"
+Homepage = "https://kolm.ai"
+Repository = "https://github.com/sneaky-hippo/kolmogorov-stack"
+Documentation = "https://kolm.ai/docs"
 
 [project.scripts]
 recipe = "recipe.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["recipe*"]
+include = ["kolm*", "recipe*"]

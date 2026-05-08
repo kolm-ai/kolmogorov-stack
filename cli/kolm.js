@@ -91,11 +91,12 @@ function prompt(q) {
   return new Promise(r => rl.question(q, a => { rl.close(); r(a); }));
 }
 
-function usage() {
-  console.log(`kolm v${VERSION} - compile private AI behavior into the smallest signed artifact that passes the tests.
+const HELP = {
+  _root: `kolm v${VERSION} - compile private AI behavior into the smallest signed artifact that passes the tests.
 
 USAGE
   kolm <command> [args...]
+  kolm <command> --help            per-command help
 
 COMMANDS
   login                            authenticate to a kolm cloud
@@ -108,29 +109,121 @@ COMMANDS
   serve [--mcp] [--http] [--port]  expose ~/.kolm/artifacts/* as MCP tools
   publish <art.kolm>               push to public gallery (Sprint 4)
   config [base|api_key] [value]    inspect or set config
-  version                          print version
+  version                          print version (CLI + server contract)
 
-COMPILE OPTIONS
+ENVIRONMENT
+  KOLM_BASE        cloud endpoint (default: https://kolm.ai)
+  KOLM_API_KEY     bearer token (overrides ~/.kolm/config.json)
+  KOLM_DEBUG       set any non-empty to print stack traces on errors
+`,
+  login: `kolm login - paste your API key from the cloud dashboard.
+
+USAGE
+  kolm login
+
+The key is stored at ~/.kolm/config.json (mode 0600). Get a key at https://kolm.ai/signin.
+`,
+  compile: `kolm compile - cloud-compile a task into a .kolm artifact.
+
+USAGE
+  kolm compile "<task>" [opts]
+
+OPTIONS
   --data <dir>                 corpus dir to ground the compile in (Recall)
   --base-model <name>          base model (default: qwen2.5-coder-7b-instruct-q4_0)
   --examples <file.jsonl>      seed examples for the verifier
   --out <dir>                  where to drop the .kolm (default ~/.kolm/artifacts)
 
-BENCHMARK OPTIONS
+EXAMPLE
+  kolm compile "triage support tickets" --data ./tickets --examples ./labels.jsonl
+`,
+  run: `kolm run - execute a .kolm artifact locally.
+
+USAGE
+  kolm run <artifact.kolm> '<input-json>'
+
+The input is parsed as JSON when possible; otherwise passed as a bare string.
+`,
+  eval: `kolm eval - re-run a .kolm's embedded eval set and recompute K-score.
+
+USAGE
+  kolm eval <artifact.kolm>
+`,
+  benchmark: `kolm benchmark - reproducible artifact benchmark.
+
+USAGE
+  kolm benchmark <artifact.kolm> [opts]
+
+OPTIONS
   --runs <n>                   runs per embedded eval case (default: 1)
-  --input '<json-or-string>'    fallback input when the artifact has no evals
+  --input '<json|string>'      fallback input when the artifact has no evals
   --target <name>              target label for the report
   --device <name>              device label for the report
   --out <file>                 also write the JSON report to a file
+`,
+  score: `kolm score - print the K-score on an artifact's manifest.
 
-ENVIRONMENT
-  KOLM_BASE        cloud endpoint (default: https://kolm.ai)
-  KOLM_API_KEY     bearer token (overrides ~/.kolm/config.json)
-`);
+USAGE
+  kolm score <artifact.kolm>
+`,
+  inspect: `kolm inspect - dump manifest + recipes + signature.
+
+USAGE
+  kolm inspect <artifact.kolm>
+`,
+  serve: `kolm serve - expose ~/.kolm/artifacts/* as MCP tools so frontier agents call them.
+
+USAGE
+  kolm serve --mcp [--http] [--port <n>]
+
+NOTES
+  --mcp is required in Sprint 1; HTTP is the only optional transport.
+`,
+  publish: `kolm publish - push to the public gallery.
+
+USAGE
+  kolm publish <artifact.kolm>
+
+NOTE: The public gallery ships in Sprint 4. Until then, this exits with status 1.
+`,
+  config: `kolm config - inspect or set config keys.
+
+USAGE
+  kolm config                          print current config (key redacted)
+  kolm config <base|api_key>           print one value
+  kolm config <base|api_key> <value>   set one value
+`,
+  version: `kolm version - print CLI version and the server contract version.
+
+USAGE
+  kolm version
+`,
+};
+
+function usage(topic) {
+  console.log(HELP[topic] || HELP._root);
+}
+
+function maybeHelp(topic, args) {
+  if (args && (args.includes('--help') || args.includes('-h'))) {
+    usage(topic);
+    return true;
+  }
+  return false;
+}
+
+function firstRunBannerIfNeeded() {
+  if (fs.existsSync(CONFIG_PATH)) return;
+  if (process.env.KOLM_API_KEY) return;
+  console.log('welcome to kolm. no config yet at ~/.kolm/config.json.');
+  console.log('  get a key:  https://kolm.ai/signin');
+  console.log('  then run:   kolm login');
+  console.log('');
 }
 
 // ---------- commands ----------
-async function cmdLogin() {
+async function cmdLogin(args) {
+  if (maybeHelp('login', args)) return;
   const c = loadConfig();
   console.log('kolm login - paste your API key from the cloud dashboard.');
   console.log(`Cloud: ${c.base}`);
@@ -151,6 +244,8 @@ async function cmdLogin() {
 }
 
 async function cmdCompile(args) {
+  if (maybeHelp('compile', args)) return;
+  firstRunBannerIfNeeded();
   const c = loadConfig();
   if (!c.api_key) { console.error('not logged in. run: kolm login'); process.exit(1); }
 
@@ -256,6 +351,7 @@ function resolveArtifact(p) {
 }
 
 async function cmdRun(args) {
+  if (maybeHelp('run', args)) return;
   const ap = resolveArtifact(args[0]);
   if (!ap) { console.error('error: artifact not found:', args[0]); process.exit(1); }
   const inputRaw = args[1];
@@ -271,6 +367,7 @@ async function cmdRun(args) {
 }
 
 async function cmdEval(args) {
+  if (maybeHelp('eval', args)) return;
   const ap = resolveArtifact(args[0]);
   if (!ap) { console.error('error: artifact not found:', args[0]); process.exit(1); }
   await withRunner(async ({ evalArtifact }) => {
@@ -280,6 +377,7 @@ async function cmdEval(args) {
 }
 
 async function cmdBenchmark(args) {
+  if (maybeHelp('benchmark', args)) return;
   const ap = resolveArtifact(args[0]);
   if (!ap) { console.error('error: artifact not found:', args[0]); process.exit(1); }
 
@@ -307,6 +405,7 @@ async function cmdBenchmark(args) {
 }
 
 async function cmdScore(args) {
+  if (maybeHelp('score', args)) return;
   const ap = resolveArtifact(args[0]);
   if (!ap) { console.error('error: artifact not found:', args[0]); process.exit(1); }
   await withRunner(async ({ inspectArtifact }) => {
@@ -317,6 +416,7 @@ async function cmdScore(args) {
 }
 
 async function cmdInspect(args) {
+  if (maybeHelp('inspect', args)) return;
   const ap = resolveArtifact(args[0]);
   if (!ap) { console.error('error: artifact not found:', args[0]); process.exit(1); }
   await withRunner(async ({ inspectArtifact }) => {
@@ -326,6 +426,7 @@ async function cmdInspect(args) {
 }
 
 async function cmdServe(args) {
+  if (maybeHelp('serve', args)) return;
   const useMcp = args.includes('--mcp');
   const useHttp = args.includes('--http');
   const portIdx = args.indexOf('--port');
@@ -340,11 +441,15 @@ async function cmdServe(args) {
 }
 
 function cmdPublish(args) {
-  console.log('kolm publish: public gallery is not implemented yet. For now, share the .kolm file directly.');
-  console.log('artifact:', args[0] || '(specify path)');
+  if (maybeHelp('publish', args)) return;
+  console.error('kolm publish: the public gallery ships in Sprint 4.');
+  console.error('  artifact:  ' + (args[0] || '(specify path)'));
+  console.error('  meanwhile: share the .kolm file directly, or push to your own registry.');
+  process.exit(1);
 }
 
 function cmdConfig(args) {
+  if (maybeHelp('config', args)) return;
   const c = loadConfig();
   if (args.length === 0) {
     console.log(JSON.stringify({ base: c.base, api_key: c.api_key ? c.api_key.slice(0, 6) + '...(set)' : null }, null, 2));
@@ -364,12 +469,34 @@ function cmdConfig(args) {
   console.log('saved');
 }
 
+async function cmdVersion(args) {
+  if (maybeHelp('version', args)) return;
+  const c = loadConfig();
+  console.log('kolm cli   v' + VERSION);
+  console.log('spec       rs-1');
+  try {
+    const url = c.base.replace(/\/+$/, '') + '/health';
+    const res = await fetch(url, { headers: authHeaders(c) });
+    if (res.ok) {
+      const j = await res.json();
+      const v = j.version || '?';
+      const lib = j.library_version ? ' lib=' + j.library_version : '';
+      const region = j.region ? ' region=' + j.region : '';
+      console.log('kolm cloud v' + v + '  (' + c.base + lib + region + ')');
+    } else {
+      console.log('kolm cloud ?  (' + c.base + ', http ' + res.status + ')');
+    }
+  } catch (e) {
+    console.log('kolm cloud ?  (' + c.base + ', unreachable)');
+  }
+}
+
 // ---------- dispatch ----------
 async function main() {
   const [, , cmd, ...rest] = process.argv;
   try {
     switch (cmd) {
-      case 'login':    await cmdLogin(); break;
+      case 'login':    await cmdLogin(rest); break;
       case 'compile':  await cmdCompile(rest); break;
       case 'run':      await cmdRun(rest); break;
       case 'eval':     await cmdEval(rest); break;
@@ -381,11 +508,11 @@ async function main() {
       case 'config':   cmdConfig(rest); break;
       case 'version':
       case '--version':
-      case '-v':       console.log('kolm v' + VERSION); break;
+      case '-v':       await cmdVersion(rest); break;
       case 'help':
       case '--help':
       case '-h':
-      case undefined:  usage(); break;
+      case undefined:  usage(rest && rest[0]); break;
       default:         console.error('unknown command:', cmd); usage(); process.exit(1);
     }
   } catch (e) {

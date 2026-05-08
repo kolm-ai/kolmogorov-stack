@@ -61,6 +61,28 @@ app.get('/articles', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'articles', 'index.html'));
 });
 
+// Explicit /docs handler — serves the docs hub HTML before express.static
+// can 301-redirect /docs to /docs/ (directory listing) since public/docs/
+// exists as the spec-asset folder.
+app.get('/docs', (_req, res) => {
+  const f = path.join(__dirname, 'public', 'docs.html');
+  if (fs.existsSync(f)) return res.sendFile(f);
+  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+});
+
+// RFC 9116 security.txt — serve from .well-known and as a top-level
+// alias. express.static skips dot-directories on some hosts, so we serve
+// explicitly to guarantee both URLs resolve.
+const SECURITY_TXT = path.join(__dirname, 'public', '.well-known', 'security.txt');
+for (const url of ['/.well-known/security.txt', '/security.txt']) {
+  app.get(url, (_req, res) => {
+    if (!fs.existsSync(SECURITY_TXT)) return res.status(404).type('text/plain').send('not found');
+    res.type('text/plain; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.sendFile(SECURITY_TXT);
+  });
+}
+
 // Static dashboard with strong caching for hashed assets, weak for HTML.
 // /sdk.js gets a versioned alias (S6) — the unversioned URL stays for
 // back-compat but we encourage `/sdk-<sha>.js` for SRI-pinned imports.
@@ -103,7 +125,7 @@ const ROUTE_ALIASES = {
   '/signin': 'signup',
   '/atlas': 'registry',
 };
-for (const route of ['/', '/dashboard', '/playground', '/docs', '/registry', '/atlas', '/signup', '/signin', '/why', '/pricing', '/status', '/specialists', '/onboarding', '/account', '/optimize', '/audit', '/spec', '/receipts', '/how-it-works', '/verified', '/economics', '/device', '/compile', '/run', '/recall', '/cloud', '/manual', '/mobile', '/k-score', '/benchmarks', '/compare', '/serve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/defense', '/manifesto', '/faq', '/quickstart', '/changelog']) {
+for (const route of ['/', '/dashboard', '/playground', '/docs', '/registry', '/atlas', '/signup', '/signin', '/why', '/pricing', '/status', '/specialists', '/onboarding', '/account', '/optimize', '/audit', '/spec', '/receipts', '/how-it-works', '/verified', '/economics', '/device', '/compile', '/run', '/recall', '/cloud', '/manual', '/mobile', '/k-score', '/benchmarks', '/compare', '/serve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/legal', '/edge', '/cookbook', '/defense', '/manifesto', '/faq', '/quickstart', '/changelog', '/troubleshooting', '/launch', '/architecture']) {
   app.get(route, (_req, res) => {
     const name = route === '/' ? 'index' : (ROUTE_ALIASES[route] || route.slice(1));
     const file = path.join(__dirname, 'public', name + '.html');
@@ -121,6 +143,18 @@ app.get('/articles/:slug', (req, res, next) => {
   next();
 });
 
+// /cookbook/<vertical> aliases: /cookbook/healthcare → /healthcare etc.
+// We keep the canonical URL at the root (/healthcare, /finance, /legal, /edge)
+// and let /cookbook/<slug> serve the same file so either path works.
+const COOKBOOK_VERTICALS = new Set(['healthcare', 'finance', 'legal', 'edge']);
+app.get('/cookbook/:slug', (req, res, next) => {
+  const slug = req.params.slug;
+  if (!COOKBOOK_VERTICALS.has(slug)) return next();
+  const file = path.join(__dirname, 'public', slug + '.html');
+  if (fs.existsSync(file)) return res.sendFile(file);
+  next();
+});
+
 // 404 fallback for unknown HTML routes — branded page from /public/404.html if it exists.
 const _404Path = path.join(__dirname, 'public', '404.html');
 app.use((req, res, next) => {
@@ -131,14 +165,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// Generic 500 — catches any unhandled error in routes.
+// Generic 500 — catches any unhandled error in routes. Standardized shape:
+// `{ error, detail? }` where `detail` is omitted in production to avoid
+// leaking stack-tail strings or internal paths.
 app.use((err, req, res, _next) => {
   console.error('[500]', err);
   if (req.accepts('html')) {
     const _500Path = path.join(__dirname, 'public', '500.html');
     if (fs.existsSync(_500Path)) return res.status(500).sendFile(_500Path);
   }
-  res.status(500).json({ error: 'internal server error', message: String(err.message || err) });
+  const body = { error: 'internal server error' };
+  if (process.env.NODE_ENV !== 'production' || process.env.KOLM_DEBUG) {
+    body.detail = String(err.message || err);
+  }
+  res.status(500).json(body);
 });
 
 const PORT = parseInt(process.env.PORT || '8787');

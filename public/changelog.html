@@ -90,7 +90,6 @@
   <div class="wrap-wide row">
     <div class="left">
       <a href="/" class="brand" aria-label="kolm">
-        <img src="/logo-mark.svg" alt="" class="brand-mark">
         <span>kolm</span>
       </a>
       <nav>
@@ -98,24 +97,20 @@
         <a href="/serve">Serve</a>
         <a href="/anatomy">.kolm</a>
         <a href="/k-score">K-score</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-
         <a href="/docs">Docs</a>
-        <a href="/articles">Articles</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
     <div class="right">
-      <a href="/signin" class="ghost">Sign in</a>
-      <a href="/signup" class="cta">Get kolm</a>
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">get a key</a>
     </div>
   </div>
 </header>
 
 <section class="hero">
   <div class="wrap">
-    <span class="pill"><span class="dot"></span>Updated 2026-05-07 - ship cadence weekly</span>
+    <span class="pill"><span class="dot"></span>Updated 2026-05-08 - ship cadence weekly</span>
     <h1>What shipped, <span class="tone">when.</span></h1>
     <p class="lede">Public log of every release, spec change, fix, and benchmark posted by Kolmogorov. Subscribe to the Atom feed at <a href="/changelog.xml" style="color:var(--accent);">/changelog.xml</a> for one-line notifications when anything moves.</p>
   </div>
@@ -125,6 +120,51 @@
   <div class="wrap">
 
     <div class="release recent">
+      <div class="rel-head">
+        <span class="ver">v5.4</span>
+        <span class="date">2026-05-08</span>
+        <span class="tag major">Major - launch ready</span>
+        <h2>Mobile audit. Teams tier. Six new pages: troubleshooting, architecture, launch, cookbook, legal, edge. Python SDK. GitHub Action. Sitemap refresh.</h2>
+      </div>
+      <div class="rel-body">
+        <p>The launch-readiness sprint. Two weeks of polish and depth folded into one drop. Everything in the implementation queue, shipped together.</p>
+        <ul>
+          <li><b>Mobile audit pass</b>. <code>.vs-tbl</code> homepage comparison table now collapses to a card-stack at &lt;720px (was unstyled HTML, painful on phones). <code>.lab-panel</code> and install rows reflow at &lt;640px. Terminal blocks wrap with <code>overflow-wrap:anywhere</code>. Hero tightens to one-CTA-stack at &lt;480px. Footer regrids 5&rarr;3&rarr;2&rarr;1 at progressive breakpoints.</li>
+          <li><b>Teams pricing tier</b> at $149/mo. Five seats, +$29 per extra seat, ten compiles per seat per month, private team registry, SSO, audit log, 30M-vector recall, Slack 8h. Sits between Pro and Enterprise. Comparison table expanded to 6 columns with a Team-only block (Seats / Extra seat / Private registry / SSO / Audit log).</li>
+          <li><b>/troubleshooting</b> ships nine error recipes: compile-failed, k-score-under-floor, signature-drift, base-model-mismatch, quota-exhausted, auth-fail, kolm-serve-refuses, verify-offline, still-stuck. Symptom &rarr; cause &rarr; fix tables and example terminal output.</li>
+          <li><b>/architecture</b> explains the four engines (Recall, Distill, Decompose, Run), the compile flow as ASCII (verifier &rarr; recall index &rarr; distill k-sample &rarr; verify &rarr; LoRA &rarr; recipe pack &rarr; K-score gate &rarr; assemble &rarr; anchor), what the public registry stores (schemas, receipt anchors, pattern set &mdash; not your data), the K-score sub-gates, the determinism story, and the receipt JSON shape.</li>
+          <li><b>/launch</b> &mdash; Show-HN landing. Reproducible <code>kolm compile</code> &rarr; <code>kolm run</code> &rarr; <code>kolm verify</code> walkthrough with the +15.33pp SWE-bench Lite reproducer command. Honesty bar (not a quantized 70B, not an API wrapper, not new training, not magic).</li>
+          <li><b>/cookbook</b> hub plus two new vertical recipes: <a href="/legal">/legal</a> (redline-policy compile, redlined.docx run, no privilege claims) and <a href="/edge">/edge</a> (--target-ram 4G, three architectures from one .kolm, no real-time guarantees). Joins existing <a href="/healthcare">/healthcare</a>, <a href="/finance">/finance</a>, <a href="/defense">/defense</a>.</li>
+          <li><b>Python SDK</b> at <code>sdk/python/kolm/</code>. <code>from kolm import Kolm; Kolm().compile(task=&hellip;)</code>. Wraps HTTP API and shells out to the Node CLI for compile/run/verify. <code>KOLM_KEY</code> + <code>KOLM_BASE</code> env support, dataclasses for <code>CompileJob</code> and <code>RunResult</code>, <code>KolmError(status, body)</code>.</li>
+          <li><b>GitHub Action</b> at <code>.github/actions/kolm-compile/action.yml</code>. Composite action that installs the CLI, runs <code>kolm compile</code>, uploads the .kolm artifact, verifies the signature. Reusable workflow at <code>.github/workflows/kolm-compile-on-push.yml</code> fires on <code>examples/**.jsonl</code> changes.</li>
+          <li><b>Sitemap refresh</b>. 36 entries dated 2026-05-08, grouped by surface / proof / docs / cookbook / security / articles. Footer expanded to 5 columns to match.</li>
+          <li><b>Smoke battery 193/0</b>. Vercel + Railway deployed.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="release">
+      <div class="rel-head">
+        <span class="ver">v5.3</span>
+        <span class="date">2026-05-08</span>
+        <span class="tag major">Major - launch polish</span>
+        <h2>Hero rewritten in plain English. Header chrome unified across every page. /docs depth pass with manifest, receipt, errors, and FAQ. Trust scaffolding: SOC 2 status, /security.txt, competitive table.</h2>
+      </div>
+      <div class="rel-body">
+        <p>Final-pass polish on the v5 surface ahead of public launch. Hero copy, header metrics, docs, and trust posture all moved together so the product reads as one coherent system rather than nine pages glued together.</p>
+        <ul>
+          <li><b>Hero rewritten</b> to plain English with concrete examples ("Your own AI, in a single file. Tell kolm what you want it to do — answer your emails, spot bugs, sort photos…"). No more "signed artifacts you own" jargon.</li>
+          <li><b>Header chrome unified</b>: 52px height, 13.5px monospace brand, 12.5px sans nav, 12px CTA, identical metrics on <code>header.site</code>, <code>.site-header</code>, and <code>nav.top</code>. <code>brand-refresh.css</code> loaded on every page so the menu stops drifting between screens.</li>
+          <li><b>/docs deepened</b>: inline manifest example, a <code>receipt.json</code> chain block, an <code>errors</code> reference, an 8-question FAQ, expected stdout under every CLI example, and full curl request/response shapes for <code>/v1/compile</code>.</li>
+          <li><b>SOC 2 honesty</b>: pricing now says "Type I in progress (target Q4 2026, Type II Q2 2027)" instead of asserting an unearned readiness packet.</li>
+          <li><b>/security.txt</b> at <code>/.well-known/security.txt</code> and <code>/security.txt</code>, RFC 9116 conformant. <code>security@kolm.ai</code> is the canonical disclosure mailbox.</li>
+          <li><b>Competitive section</b> on the homepage. Five-row table: kolm vs cloud APIs, hosted fine-tune, on-prem inference, RAG/orchestration, DIY edge stacks. What you give up vs what kolm changes.</li>
+          <li><b>193/0 smoke</b> against the local server; deployed to Vercel + Railway.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="release">
       <div class="rel-head">
         <span class="ver">v5.2</span>
         <span class="date">2026-05-07</span>

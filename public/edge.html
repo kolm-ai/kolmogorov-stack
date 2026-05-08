@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Edge - kolm</title>
+<meta name="description" content="kolm for edge devices: industrial sensors, in-vehicle compute, retail kiosks. Compile a task into one signed file that runs on ARM, x86, or RISC-V with zero runtime network dependency.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="kolm for edge">
+<meta property="og:description" content="One signed artifact across industrial, automotive, and retail edge hardware. Zero network at run time.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/edge">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/edge">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand"><span class="brand-dot" aria-hidden="true"></span>kolm</a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/compile">Compile</a>
+      <a href="/serve">Serve</a>
+      <a href="/anatomy">.kolm</a>
+      <a href="/k-score">K-score</a>
+      <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
+    </nav>
+    <div class="site-actions">
+      <a href="/signin">sign in</a>
+      <a href="/signup" class="cta">get a key</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span>cookbook / edge</div>
+        <h1>One artifact for every edge box.</h1>
+        <p class="lede">Edge AI usually means three runtimes (CoreML, ExecuTorch, TFLite), three quantization passes, and a six-month integration before the first device ships. kolm collapses the stack: compile once on your gold examples, ship the same signed file to ARM, x86, or RISC-V hardware. Runtime is offline, deterministic, and verifiable. The .kolm doesn't care whether you're on a NVIDIA Jetson, a Raspberry Pi, or a fleet of Linux x86 kiosks.</p>
+        <div class="actions">
+          <a href="/cookbook" class="btn primary">all cookbooks</a>
+          <a href="mailto:dev@kolm.ai?subject=edge%20pilot" class="btn ghost">talk to us</a>
+          <a href="/anatomy" class="btn accent">.kolm anatomy</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">01</span>three edge recipes</div>
+      <h2>Where this shape wins.</h2>
+      <p class="sec-lede">Each is a single .kolm. Compile once, distribute via your existing OTA pipeline, run with zero network dependency.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>industrial fault triage</td><td>Take a vibration / thermal / current sensor stream, label the operator's recommended next action. Compile from 60&ndash;90 days of plant-floor sensor + maintenance logs.</td></tr>
+          <tr><td>retail kiosk routing</td><td>Take a customer voice prompt or text input, route to the right knowledge base or staff escalation. Compile from your existing call-center transcripts.</td></tr>
+          <tr><td>in-vehicle assistant</td><td>Take cabin voice, return navigation / climate / media intents bound to your HMI's API surface. Compile from logged dialogues + the OEM's intent schema.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">02</span>compile</div>
+      <h2>Compile for a target class.</h2>
+      <pre class="terminal">$ kolm compile fault-triage \
+    --base qwen2.5-3b-instruct \
+    --quantize int4 \
+    --target-ram 4G \
+    --recipe-pack-depth 64 \
+    --examples ./plant-logs.jsonl
+
+K-score        0.79  ok
+size_bytes     1.84 GB  (fits ARM Cortex-A78 4GB SKU)
+p50_latency    312us    (target: 800us on Jetson Orin Nano)</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">03</span>run</div>
+      <h2>Same .kolm, three architectures.</h2>
+      <pre class="terminal"># Jetson Orin Nano (ARM, CUDA)
+$ kolm run fault-triage.kolm --in /dev/sensors/vib0
+runtime: arm64-cuda, p50 287us, 0 network calls
+
+# Raspberry Pi 5 (ARM, CPU)
+$ kolm run fault-triage.kolm --in /dev/sensors/vib0
+runtime: arm64-cpu, p50 4.2ms, 0 network calls
+
+# Industrial x86 mini-PC (Intel N100)
+$ kolm run fault-triage.kolm --in /dev/sensors/vib0
+runtime: x86_64-cpu, p50 3.8ms, 0 network calls</pre>
+      <p class="sec-lede" style="margin-top:18px">No retargeting. No re-quantization. The compiler chose the right primitives at compile time; the runtime adapts to the host.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">04</span>provisioning</div>
+      <h2>Fits your existing OTA pipeline.</h2>
+      <p class="sec-lede">A .kolm is a regular zip with a sha256. Push it through whatever you already use &mdash; Mender, Balena, Azure IoT Hub, AWS IoT, your own apt repo. The runtime caches by hash and verifies the signature on every cold load.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>signed at compile</td><td>HMAC chain anchors to your team registry. A field device only loads artifacts whose anchor matches the deployment's expected anchor.</td></tr>
+          <tr><td>delta-friendly</td><td>Recipes and LoRA changes ship as a small delta against the base model pointer. No need to push 2GB on every policy update.</td></tr>
+          <tr><td>rollback in seconds</td><td>Old .kolm stays in the cache. <code>kolm pin v2026-04-12</code> reverts the active artifact instantly.</td></tr>
+          <tr><td>offline-first</td><td>The runtime never phones home. Receipts are local; you mirror them upstream on your own schedule.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">05</span>guarantees</div>
+      <h2>What we say. What we don't.</h2>
+      <div class="kvtable">
+        <table>
+          <tr><td>same artifact across architectures</td><td>Yes. The compiler emits target-class metadata; runtime picks the right path. No retargeting required.</td></tr>
+          <tr><td>deterministic at run time</td><td>Yes for recipe-mode tasks. LoRA-mode tasks include a deterministic seed in the manifest; same input + same artifact = same output.</td></tr>
+          <tr><td>tiny-target SKUs (&lt;1GB RAM)</td><td>Roadmap. Today's compiler targets 2GB RAM minimum. Sub-1GB targets need recipe-only mode, available on Pro tier with manual flag.</td></tr>
+          <tr><td>real-time guarantees</td><td>No. p50 latency is reported; p99 / hard real-time is your integrator's responsibility, not the artifact's.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta"><img src="/logo-mark.svg" alt="" style="width:18px;height:18px;margin-right:8px;vertical-align:-4px;">kolm cookbook / <a href="/cookbook">all recipes</a> / <a href="/anatomy">.kolm anatomy</a></div>
+    <div class="links">
+      <div>
+        <div class="col-h">verticals</div>
+        <a href="/healthcare">healthcare</a>
+        <a href="/finance">finance</a>
+        <a href="/legal">legal</a>
+        <a href="/edge">edge</a>
+      </div>
+      <div>
+        <div class="col-h">product</div>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/serve">serve</a>
+        <a href="/docs">docs</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Legal - kolm</title>
+<meta name="description" content="kolm for legal teams: contract redline, document review, and discovery summarization compiled into signed local artifacts. No client data ever leaves the firm boundary at run time.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="kolm for legal">
+<meta property="og:description" content="Compile contract redline and discovery review into signed artifacts. Run inside the firm boundary. Privilege intact.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/legal">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/legal">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand"><span class="brand-dot" aria-hidden="true"></span>kolm</a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/compile">Compile</a>
+      <a href="/serve">Serve</a>
+      <a href="/anatomy">.kolm</a>
+      <a href="/k-score">K-score</a>
+      <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
+    </nav>
+    <div class="site-actions">
+      <a href="/signin">sign in</a>
+      <a href="/signup" class="cta">get a key</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span>cookbook / legal</div>
+        <h1>Legal AI without the privilege risk.</h1>
+        <p class="lede">Most law firms have banned cloud LLMs on client matter. The usual line is "every prompt is potentially discoverable." kolm flips the architecture: you compile the firm's redline policy and document-review patterns into a single signed file, then the firm runs that file locally. No client document touches a third-party API at run time. Privilege intact, audit defensible, model behavior frozen.</p>
+        <div class="actions">
+          <a href="/cookbook" class="btn primary">all cookbooks</a>
+          <a href="mailto:dev@kolm.ai?subject=legal%20pilot" class="btn ghost">talk to us</a>
+          <a href="/security" class="btn accent">security posture</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">01</span>three legal recipes</div>
+      <h2>What you'd compile first.</h2>
+      <p class="sec-lede">Each recipe ships as a standalone <code>.kolm</code>. Compile once on the firm's gold examples, distribute to partners and associates via MDM. The artifact has no network requirement at run time.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>contract redline</td><td>Take a counterparty draft, return tracked-changes that match the firm's playbook on indemnity, IP assignment, MFN, term and termination. Compile from 80&ndash;200 historical redlines.</td></tr>
+          <tr><td>discovery summarization</td><td>Take a custodian's mailbox export, produce per-thread summaries with privilege/relevance/responsiveness flags. Compile from labelled training corpus reviewed by senior associates.</td></tr>
+          <tr><td>cite-checker</td><td>Take a memo or brief, surface every citation, flag anything that doesn't match a current Bluebook form or has been overruled. Compile from the firm's citation manual + a hold-out test set.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">02</span>compile</div>
+      <h2>Redline recipe in five commands.</h2>
+      <pre class="terminal">$ kolm init redline-policy
+$ kolm examples add ./examples/redlines/*.json   # 142 historical pairs
+$ kolm spec set ./schemas/markup.json            # JSON Schema for tracked-changes
+$ kolm compile --base qwen2.5-7b-instruct --recall ./playbook/
+                                                 # K-score 0.81 (ship floor 0.74)
+$ kolm sign --org="Firm LLP" redline-policy.kolm
+                                                 # signed sha256:7a4c1f2e&hellip; receipt anchored</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">03</span>run</div>
+      <h2>Inside the firm, offline, signed.</h2>
+      <pre class="terminal">$ kolm run redline-policy.kolm --in counterparty-draft.docx --out redlined.docx
+input          counterparty-draft.docx (12.4 KB)
+recall hits    7 (firm playbook v2026.02)
+output         redlined.docx (14.1 KB, 23 tracked changes)
+receipt        receipt-9b110d56.json (chain ok, anchor ok)
+runtime        14.2s on M3 Pro, 0 network calls</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">04</span>privilege</div>
+      <h2>Why the receipt matters at deposition.</h2>
+      <p class="sec-lede">A signed receipt is the firm's record that this artifact was the one that produced this output for this input on this date. It binds the model state, the recall sources, and the input/output hashes into a single chain. If opposing counsel asks how the AI was used, the firm produces the artifact and the receipt. Reproducibility is the audit defense.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>artifact hash</td><td>sha256 of the .kolm zip. Pinned in the firm's matter management system at deployment. Cannot drift.</td></tr>
+          <tr><td>recall provenance</td><td>Every recall hit is content-addressed. The receipt names which playbook section was retrieved.</td></tr>
+          <tr><td>input/output hashes</td><td>HMAC-chained. Tampering with output after the fact breaks the chain on verify.</td></tr>
+          <tr><td>retention policy</td><td>Receipts are local. Firm retention rules apply. No third-party archives to subpoena.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">05</span>posture</div>
+      <h2>What's done. What needs review.</h2>
+      <p class="sec-lede">Honesty bar. We don't claim privilege protection &mdash; that's the firm's call with the firm's GC. We claim that the architecture removes the runtime cloud egress that most cloud-AI bans cite as the disqualifier.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>runtime cloud egress</td><td>Removed by design. The .kolm runs locally on the firm's hardware.</td></tr>
+          <tr><td>compile-time data flow</td><td>Compile happens against your gold examples. Use de-identified or synthetic examples for the first pass; switch to real once policy is reviewed.</td></tr>
+          <tr><td>frontier teacher used at compile</td><td>Yes &mdash; the LoRA distillation step uses your model API key. The teacher only sees your training set, not your production matter.</td></tr>
+          <tr><td>privilege determination</td><td>The firm's GC decides. We provide architecture and receipts, not legal opinion.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta"><img src="/logo-mark.svg" alt="" style="width:18px;height:18px;margin-right:8px;vertical-align:-4px;">kolm cookbook / <a href="/cookbook">all recipes</a> / <a href="/security">security</a></div>
+    <div class="links">
+      <div>
+        <div class="col-h">verticals</div>
+        <a href="/healthcare">healthcare</a>
+        <a href="/finance">finance</a>
+        <a href="/legal">legal</a>
+        <a href="/edge">edge</a>
+      </div>
+      <div>
+        <div class="col-h">product</div>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/serve">serve</a>
+        <a href="/docs">docs</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

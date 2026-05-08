@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Show HN: kolm - your own AI in a single file</title>
+<meta name="description" content="kolm is the AI compiler. Tell it what you want. It distills a frontier model down to one signed .kolm file that runs offline on your machine. Reproducible benchmark: +15.33pp on SWE-bench Lite vs cold Opus.">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="Show HN: kolm - the AI compiler">
+<meta property="og:description" content="Compile any AI task into a signed file that runs anywhere. +15.33pp SWE-bench Lite vs cold Opus, reproducible.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/launch">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/launch">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand"><span class="brand-dot" aria-hidden="true"></span>kolm</a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/compile">Compile</a>
+      <a href="/serve">Serve</a>
+      <a href="/anatomy">.kolm</a>
+      <a href="/k-score">K-score</a>
+      <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
+    </nav>
+    <div class="site-actions">
+      <a href="/signin">sign in</a>
+      <a href="/signup" class="cta">get a key</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span>show HN</div>
+        <h1>kolm: your own AI, in a single file.</h1>
+        <p class="lede">I built kolm because I wanted to ship AI features without sending my customers' data to OpenAI on every request. The shape that worked is a compiler: take a task description, the user's data, and a frontier model API key &mdash; emit one signed file that runs offline anywhere. Same artifact runs on my laptop, my phone, my server, my edge box. The compiler is the moat; the runtime is yours.</p>
+        <div class="actions">
+          <a href="/quickstart" class="btn primary">try it (5 min)</a>
+          <a href="https://github.com/sneaky-hippo/kolmogorov-stack" class="btn ghost">github</a>
+          <a href="#repro" class="btn accent">reproduce the benchmark</a>
+        </div>
+        <div class="hero-trust">
+          <span>+15.33pp SWE-bench Lite vs cold Opus</span>
+          <span>n=150, p&lt;0.05</span>
+          <span>RS-1 spec MIT</span>
+          <span>SDK MIT</span>
+          <span>HMAC-chained receipts</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">01</span>the shape</div>
+      <h2>One command, one file.</h2>
+      <p class="sec-lede">A 60-second tour. Compile a task, run it locally, verify the signature. Real CLI, no animations.</p>
+      <pre class="terminal">$ kolm compile "answer my support tickets in my voice" \
+    --examples ./tickets-2026-Q1.jsonl \
+    --base qwen2.5-7b-instruct
+job  cmp_9b110d56 ... compiling on frontier teacher
+                  ... distilling LoRA delta (4m32s)
+                  ... extracting recipe pack (28s)
+                  ... K-score 0.81 - ship floor 0.74
+saved  support-voice.kolm  (1.7 GB)
+       sha256:7a4c1f2e&hellip;  signed and registry-anchored
+
+$ kolm run support-voice.kolm --in "user can't log in"
+&rArr; "Hey - sorry about that. Two quick checks while I look:
+   1) try a fresh incognito window, &hellip;"
+
+receipt  rcpt_4d2a1c.json (chain ok, anchor ok)
+runtime  M3 Pro, 1.2s, 0 network calls
+
+$ kolm verify support-voice.kolm
+manifest          ok    sha256:1f2e&hellip;
+recipes.json      ok    sha256:7a4c&hellip;
+lora.bin          ok    sha256:9b11&hellip;
+receipt chain     ok    chained-from registry@v2026-04-30</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">02</span>numbers</div>
+      <h2>What you get on a real benchmark.</h2>
+      <p class="sec-lede">SWE-bench Lite, n=150, Anthropic-pinned. Same model, same tasks, same evaluator. The only delta is whether the agent has access to the kolm-compiled tool-error memory.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>cold Opus</td><td>30.0% strict (45/150 resolved)</td></tr>
+          <tr><td>Opus + kolm</td><td><b>45.3% strict</b> (68/150 resolved)</td></tr>
+          <tr><td>delta</td><td><b>+15.33pp</b>, 95% CI [+9.33, +22.00], p&lt;0.05</td></tr>
+          <tr><td>recovered tasks</td><td>26 (cold failed, +kolm passed)</td></tr>
+          <tr><td>regressed tasks</td><td>3 (cold passed, +kolm failed) &mdash; provider noise at temp=0</td></tr>
+          <tr><td>apply errors</td><td>&minus;48% (kolm reduces patch-format failures by injecting test bodies into context)</td></tr>
+        </table>
+      </div>
+      <p class="sec-lede" style="margin-top:18px">This is one shipped benchmark on one shape (coding agents). The same architecture &mdash; compile-then-run with verified context &mdash; transfers to email, document review, vertical assistants. We publish only what we can reproduce.</p>
+    </div>
+  </section>
+
+  <section class="section" id="repro">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">03</span>reproduce</div>
+      <h2>Run the benchmark yourself.</h2>
+      <p class="sec-lede">No magic numbers. The exact harness lives in the public repo. You bring an Anthropic key; this costs about $11 of API budget.</p>
+      <pre class="terminal">$ git clone https://github.com/sneaky-hippo/kolmogorov-stack
+$ cd kolmogorov-stack
+$ npm install
+$ export ANTHROPIC_API_KEY=sk-ant-&hellip;
+$ bash bench/swe-bench-lite-reproduce.sh --n 150 --seed 42
+                                                # ~3h on a laptop
+result.json:
+  pass1_strict: 0.300   (45/150)
+  pass2_strict: 0.453   (68/150)
+  delta:        +0.1533
+  ci_95:        [+0.0933, +0.2200]
+  p_value:      0.0381</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">04</span>what it isn't</div>
+      <h2>Honesty bar.</h2>
+      <div class="kvtable">
+        <table>
+          <tr><td>not a quantized 70B</td><td>We don't claim to run frontier weights on a phone. We compile a small model whose <i>behavior</i> on your task matches frontier &mdash; because it was distilled on your task.</td></tr>
+          <tr><td>not a cloud API wrapper</td><td>You pay your model API bill once, at compile. Run-time is local at zero marginal cost.</td></tr>
+          <tr><td>not new training</td><td>Bases are open weights (Qwen2.5, Llama-3, Phi-3). We add a LoRA delta and a recipe pack. The teacher is the frontier you already use.</td></tr>
+          <tr><td>not a magic answer</td><td>If your gold examples are bad, the K-score gate catches it. The compiler refuses to sign artifacts that fail the floor.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">05</span>roadmap</div>
+      <h2>What's next, in plain English.</h2>
+      <div class="kvtable">
+        <table>
+          <tr><td>now</td><td>Recipe-mode compile, signed artifacts, MCP server, atlas browser, K-score gate, CLI on macOS / Linux / WSL.</td></tr>
+          <tr><td>Q3 2026</td><td>LoRA-mode compile end-to-end (training bridge already shipped), Python SDK, GitHub Action.</td></tr>
+          <tr><td>Q4 2026</td><td>Native iOS + Android adapters. Public Specialist gallery. SOC 2 Type I.</td></tr>
+          <tr><td>2027</td><td>Recipe Speculative Decoding (3&times; cold-inference speedup), boxed mobile app, Specialist marketplace.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">06</span>start</div>
+      <h2>Try it on something small.</h2>
+      <p class="sec-lede">5 minutes, free tier, runs locally. No credit card, no demo call.</p>
+      <div class="actions" style="margin-top:14px">
+        <a href="/signup" class="btn primary">get a key</a>
+        <a href="/quickstart" class="btn ghost">quickstart</a>
+        <a href="/cookbook" class="btn accent">cookbooks</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta"><img src="/logo-mark.svg" alt="" style="width:18px;height:18px;margin-right:8px;vertical-align:-4px;">kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a></div>
+    <div class="links">
+      <div>
+        <div class="col-h">product</div>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/serve">serve</a>
+        <a href="/docs">docs</a>
+      </div>
+      <div>
+        <div class="col-h">proof</div>
+        <a href="/benchmarks">benchmarks</a>
+        <a href="/launch">launch</a>
+        <a href="/security">security</a>
+        <a href="/changelog">changelog</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -11,6 +11,7 @@ check() {
 
 has() { local body="$1"; local needle="$2"; echo "$body" | grep -q -e "$needle"; }
 hashi() { local body="$1"; local needle="$2"; echo "$body" | grep -qi -e "$needle"; }
+eq() { [ "$1" = "$2" ]; }
 
 echo "=== 1. Public + auto-mint ==="
 H_HEALTH=$(curl -s "$URL/health")
@@ -247,7 +248,7 @@ echo "=== 17. Anonymous CLI auth (autonomous bootstrap) ==="
 ANON_BOOT=$(curl -sX POST "$URL/v1/anon/bootstrap" -H 'Content-Type: application/json' -d '{"hostname":"smoke","user_agent":"smoke-test/1.0"}')
 check "anon/bootstrap returns kao_ token" has "$ANON_BOOT" '"anon_token":"kao_'
 check "anon/bootstrap has 30d expiry" has "$ANON_BOOT" '"expires_at"'
-check "anon/bootstrap nudges to claim" has "$ANON_BOOT" 'recipe claim'
+check "anon/bootstrap nudges to claim" has "$ANON_BOOT" 'kolm claim'
 ANON_TOK=$(echo "$ANON_BOOT" | grep -oE 'kao_[a-f0-9]+' | head -1)
 
 ANON_LIST=$(curl -s "$URL/v1/concepts" -H "X-API-Key: $ANON_TOK")
@@ -529,6 +530,66 @@ for p in compile run recall cloud manual serve anatomy k-score; do
   check "/$p header has Home link" has "$PB" 'href="/"'
   check "/$p has kolm wordmark" hashi "$PB" 'class="brand"\|class="sub"'
 done
+
+# v5.4 launch-prep surface — six new pages, /cookbook routing, sitemap freshness, footer cookbook column
+echo ""
+echo "[v5.4] launch-prep surface"
+
+A=$(curl -s -o /dev/null -w "%{http_code}" "$URL/architecture");        check "/architecture is 200" eq "$A" 200
+B=$(curl -s -o /dev/null -w "%{http_code}" "$URL/launch");              check "/launch is 200" eq "$B" 200
+C=$(curl -s -o /dev/null -w "%{http_code}" "$URL/troubleshooting");     check "/troubleshooting is 200" eq "$C" 200
+D=$(curl -s -o /dev/null -w "%{http_code}" "$URL/cookbook");            check "/cookbook is 200" eq "$D" 200
+E=$(curl -s -o /dev/null -w "%{http_code}" "$URL/legal");               check "/legal is 200" eq "$E" 200
+F=$(curl -s -o /dev/null -w "%{http_code}" "$URL/edge");                check "/edge is 200" eq "$F" 200
+
+# /cookbook/<slug> aliases — same files served via cookbook namespace
+for v in healthcare finance legal edge; do
+  CC=$(curl -s -o /dev/null -w "%{http_code}" "$URL/cookbook/$v")
+  check "/cookbook/$v alias is 200" eq "$CC" 200
+done
+
+# Architecture page mentions all four engines
+ARCH=$(curl -s "$URL/architecture")
+check "/architecture lists Recall"   has "$ARCH" "Recall"
+check "/architecture lists Distill"  has "$ARCH" "Distill"
+check "/architecture lists Decompose" has "$ARCH" "Decompose"
+check "/architecture lists Run"      has "$ARCH" "Run"
+check "/architecture mentions K-score gate" has "$ARCH" "K-score"
+
+# Launch page is honest
+LAUNCH=$(curl -s "$URL/launch")
+check "/launch SWE-bench reproducer" has "$LAUNCH" "SWE-bench"
+check "/launch honesty bar"          has "$LAUNCH" "not"
+
+# Troubleshooting covers k-score-under-floor + verify-offline
+TS=$(curl -s "$URL/troubleshooting")
+check "/troubleshooting covers k-score floor" has "$TS" "k-score"
+check "/troubleshooting covers verify"        has "$TS" "verify"
+
+# Pricing has Teams tier
+PRICE=$(curl -s "$URL/pricing")
+check "/pricing has Teams tier"      has "$PRICE" "Teams"
+check "/pricing has \$149 price"     has "$PRICE" "149"
+
+# Sitemap has new pages dated 2026-05-08
+SITEMAP=$(curl -s "$URL/sitemap.xml")
+check "sitemap has /architecture" has "$SITEMAP" "/architecture"
+check "sitemap has /launch"       has "$SITEMAP" "/launch"
+check "sitemap has /troubleshooting" has "$SITEMAP" "/troubleshooting"
+check "sitemap has /cookbook"     has "$SITEMAP" "/cookbook"
+check "sitemap has /legal"        has "$SITEMAP" "/legal"
+check "sitemap has /edge"         has "$SITEMAP" "/edge"
+check "sitemap dated 2026-05-08"  has "$SITEMAP" "2026-05-08"
+
+# Homepage footer has 5 columns including new cookbook column
+HOME=$(curl -s "$URL/")
+check "homepage footer cookbook col" has "$HOME" "all recipes"
+check "homepage footer launch link"  has "$HOME" '/launch'
+check "homepage footer architecture link" has "$HOME" '/architecture'
+
+# Changelog has v5.4 entry
+CHANGELOG=$(curl -s "$URL/changelog")
+check "/changelog v5.4 entry" has "$CHANGELOG" "v5.4"
 
 echo ""
 echo "================================================"

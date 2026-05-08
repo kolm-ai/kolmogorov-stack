@@ -7,6 +7,13 @@
 <meta name="description" content="K-score is the gate that decides whether a .kolm artifact is allowed to ship. Five components, one number, no eval no ship.">
 <meta name="theme-color" content="#050607">
 <meta name="color-scheme" content="dark">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="K-score — one number that decides whether .kolm ships">
+<meta property="og:description" content="Accuracy, coverage, size, latency, and cost rolled into a composite gate. No eval, no ship.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/k-score">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/k-score">
 <link rel="preload" as="image" href="/img/kolm-verification-chain.svg" fetchpriority="high">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -114,7 +121,6 @@
   <div class="wrap"><div class="row">
     <div class="left">
       <a class="brand" href="/" aria-label="kolm home">
-        <img src="/logo-mark.svg" alt="" class="brand-mark">
         <span>kolm</span>
       </a>
       <nav>
@@ -122,17 +128,13 @@
         <a href="/serve">Serve</a>
         <a href="/anatomy">.kolm</a>
         <a href="/k-score" class="active">K-score</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-
         <a href="/docs">Docs</a>
-        <a href="/articles">Articles</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
     <div class="right">
-      <a href="/signin" class="ghost">Sign in</a>
-      <a href="/signup" class="cta">Get kolm <span aria-hidden="true">›</span></a>
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">get a key</a>
     </div>
   </div></div>
 </header>
@@ -222,7 +224,17 @@
         The threshold is part of the manifest, anchored to the receipt, immutable post-sign.</div>
     </div>
 
-    <pre><span class="com"># inspect any .kolm</span>
+    <pre><span class="com"># just the number — for CI gates, scripts, dashboards</span>
+$ kolm score <span class="key">support-triage.kolm</span>
+task: triage support email, output {label,severity}
+  composite: <span class="key">0.94</span>
+  accuracy:  97.4%
+  coverage:  92.0%
+  size:      38.0MB
+  p50_lat:   80000us
+  cost/call: $0.000</pre>
+
+    <pre><span class="com"># the full breakdown when the gate fails</span>
 $ kolm inspect <span class="key">support-triage.kolm</span>
   task            : "triage support email, output {label,severity}"
   base_model      : qwen2.5-coder-7b-instruct-q4_0

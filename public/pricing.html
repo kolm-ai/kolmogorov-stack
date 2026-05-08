@@ -138,12 +138,13 @@
     color: var(--accent); margin-left: 4px;
   }
 
-  .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  @media (max-width: 1080px) { .tiers { grid-template-columns: repeat(2, 1fr); } }
+  .tiers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  @media (max-width: 1280px) { .tiers { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 880px) { .tiers { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 540px) { .tiers { grid-template-columns: 1fr; } }
   .tier {
     background: var(--bg-elev); border: 1px solid var(--line);
-    border-radius: 10px; padding: 28px;
+    border-radius: 10px; padding: 22px;
     display: flex; flex-direction: column;
   }
   .tier.featured {
@@ -330,7 +331,6 @@
   <div class="wrap row">
     <div class="left">
       <a href="/" class="brand" aria-label="kolm">
-        <img src="/logo-mark.svg" alt="" class="brand-mark">
         <span>kolm</span>
       </a>
       <nav>
@@ -338,17 +338,13 @@
         <a href="/serve">Serve</a>
         <a href="/anatomy">.kolm</a>
         <a href="/k-score">K-score</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-
         <a href="/docs">Docs</a>
-        <a href="/articles">Articles</a>
         <a href="/pricing" class="active">Pricing</a>
       </nav>
     </div>
     <div class="right">
-      <a href="/signin" class="ghost">Sign in</a>
-      <a href="/signup" class="cta">Get kolm</a>
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">get a key</a>
     </div>
   </div>
 </header>
@@ -393,7 +389,7 @@
           <li>HMAC-chained receipts</li>
           <li>Community support</li>
         </ul>
-        <a href="/signup" class="cta">Get kolm</a>
+        <a href="/signup" class="cta">get a key</a>
       </div>
 
       <div class="tier">
@@ -435,6 +431,25 @@
       </div>
 
       <div class="tier">
+        <div class="tag">Teams</div>
+        <div class="name">Squad.</div>
+        <div class="pitch">For 5-seat teams sharing a private registry and shipping artifacts together.</div>
+        <div class="num"><span data-mo="$149" data-yr="$1,490">$149</span><span class="per" data-mo="/ month" data-yr="/ year - 2 mo free">/ month</span></div>
+        <div class="frontier">+ your frontier model bill</div>
+        <ul>
+          <li><b>10</b> compiles per seat per month</li>
+          <li><b>5</b> seats included, +$29 / extra seat</li>
+          <li>Private team registry namespace</li>
+          <li>Shared artifact cache + signed pulls</li>
+          <li>SSO via Google Workspace</li>
+          <li>Audit log of every compile and pull</li>
+          <li>30M-vector recall pool</li>
+          <li>Slack support - 8h SLA</li>
+        </ul>
+        <a href="/signup?plan=teams" class="cta">Start Teams &rarr;</a>
+      </div>
+
+      <div class="tier">
         <div class="tag">Enterprise</div>
         <div class="name">VPC.</div>
         <div class="pitch">For regulated buyers validating private networking, retention, and evidence needs.</div>
@@ -446,7 +461,7 @@
           <li>Private base model policy mapping</li>
           <li>SAML / SCIM / audit log roadmap</li>
           <li>BAA / DPA / DPIA review paths</li>
-          <li>SOC 2 readiness packet</li>
+          <li>SOC 2 Type I in progress (target Q4 2026, Type II Q2 2027)</li>
           <li>External anchoring roadmap</li>
           <li>Priority support by agreement</li>
         </ul>
@@ -494,7 +509,7 @@
               <tr><td>K-score gate - drift detection</td><td>built-in</td><td>build evals + dashboards</td></tr>
               <tr><td>One signed file across phones - laptops - server</td><td>Target contract</td><td>three runtimes to ship</td></tr>
               <tr><td>One signed file across phones - laptops - server</td><td>built-in</td><td>three runtimes to ship</td></tr>
-              <tr><td>Compliance posture (SOC 2 readiness, BAA path, DPIA)</td><td>Enterprise tier</td><td>your auditor's problem</td></tr>
+              <tr><td>Compliance posture (SOC 2 Type I in progress, BAA path, DPIA)</td><td>Enterprise tier</td><td>your auditor's problem</td></tr>
             </tbody>
           </table>
         <p style="margin-top:14px">Hours, not licenses, are what self-hosting costs you. The current product sells the signed artifact, receipt, and recipe-mode path; native model packaging is the bridge that must be validated before broader runtime claims.</p>
@@ -516,41 +531,49 @@
           <tr>
             <th class="feat">Feature</th>
             <th>Developer</th>
-            <th>Mobile</th>
+            <th>Starter</th>
             <th class="col-pro">Pro</th>
+            <th>Teams</th>
             <th>Enterprise</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="section"><td colspan="5">Compile</td></tr>
-          <tr><td class="feat">Private artifacts</td><td>1 at a time</td><td>3</td><td>Higher quota</td><td>Contracted quota</td></tr>
-          <tr><td class="feat">Examples per compile</td><td>10k</td><td>100k</td><td>1M</td><td>Contracted limit</td></tr>
-          <tr><td class="feat">Compile queue priority</td><td>Standard</td><td>Priority</td><td>Priority</td><td>Dedicated</td></tr>
-          <tr><td class="feat">Drift checks</td><td><span class="n">No</span></td><td><span class="n">No</span></td><td>Workflow-level</td><td>By agreement</td></tr>
-          <tr><td class="feat">BYO model API key</td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td></tr>
+          <tr class="section"><td colspan="6">Compile</td></tr>
+          <tr><td class="feat">Private artifacts</td><td>1 at a time</td><td>3</td><td>Higher quota</td><td>10 / seat</td><td>Contracted quota</td></tr>
+          <tr><td class="feat">Examples per compile</td><td>10k</td><td>100k</td><td>1M</td><td>1M</td><td>Contracted limit</td></tr>
+          <tr><td class="feat">Compile queue priority</td><td>Standard</td><td>Priority</td><td>Priority</td><td>Priority</td><td>Dedicated</td></tr>
+          <tr><td class="feat">Drift checks</td><td><span class="n">No</span></td><td><span class="n">No</span></td><td>Workflow-level</td><td>Workflow-level</td><td>By agreement</td></tr>
+          <tr><td class="feat">BYO model API key</td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td></tr>
 
-          <tr class="section"><td colspan="5">Recall</td></tr>
-          <tr><td class="feat">Managed vector index</td><td>100k</td><td>1M</td><td>10M</td><td>Contracted limit</td></tr>
-          <tr><td class="feat">Local recall index</td><td>Recipe metadata today</td><td>Roadmap</td><td>Roadmap</td><td>Design review</td></tr>
-          <tr><td class="feat">Multimodal embed</td><td>Roadmap</td><td>Roadmap</td><td>Roadmap</td><td>Design review</td></tr>
+          <tr class="section"><td colspan="6">Recall</td></tr>
+          <tr><td class="feat">Managed vector index</td><td>100k</td><td>1M</td><td>10M</td><td>30M</td><td>Contracted limit</td></tr>
+          <tr><td class="feat">Local recall index</td><td>Recipe metadata today</td><td>Roadmap</td><td>Roadmap</td><td>Roadmap</td><td>Design review</td></tr>
+          <tr><td class="feat">Multimodal embed</td><td>Roadmap</td><td>Roadmap</td><td>Roadmap</td><td>Roadmap</td><td>Design review</td></tr>
 
-          <tr class="section"><td colspan="5">Run - serve</td></tr>
-          <tr><td class="feat">Local CLI runtime</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
-          <tr><td class="feat">MCP server</td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td></tr>
-          <tr><td class="feat">Native adapter roadmap</td><td><span class="n">No</span></td><td>Planned</td><td>Planned</td><td>Design review</td></tr>
-          <tr><td class="feat">Public atlas listing</td><td>Optional</td><td>Optional</td><td>Optional</td><td>Private only</td></tr>
+          <tr class="section"><td colspan="6">Run - serve</td></tr>
+          <tr><td class="feat">Local CLI runtime</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+          <tr><td class="feat">MCP server</td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td></tr>
+          <tr><td class="feat">Native adapter roadmap</td><td><span class="n">No</span></td><td>Planned</td><td>Planned</td><td>Planned</td><td>Design review</td></tr>
+          <tr><td class="feat">Public atlas listing</td><td>Optional</td><td>Optional</td><td>Optional</td><td>Optional</td><td>Private only</td></tr>
 
-          <tr class="section"><td colspan="5">Trust</td></tr>
-          <tr><td class="feat">HMAC-chained receipts</td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td></tr>
-          <tr><td class="feat">Customer-hosted bridge review</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="y">Yes</span></td></tr>
-          <tr><td class="feat">SAML / SCIM / audit log roadmap</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="y">Yes</span></td></tr>
-          <tr><td class="feat">BAA / DPA / DPIA review</td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="n">No</span></td><td>By agreement</td></tr>
-          <tr><td class="feat">SOC 2 readiness packet</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="y">Yes</span></td></tr>
-          <tr><td class="feat">External anchor roadmap</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="y">Yes</span></td></tr>
+          <tr class="section"><td colspan="6">Team</td></tr>
+          <tr><td class="feat">Seats included</td><td>1</td><td>1</td><td>1</td><td>5</td><td>By agreement</td></tr>
+          <tr><td class="feat">Extra seat price</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td>+$29 / mo</td><td>By agreement</td></tr>
+          <tr><td class="feat">Private team registry</td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td></tr>
+          <tr><td class="feat">SSO (Google Workspace)</td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="y">Yes</span></td><td>SAML / SCIM</td></tr>
+          <tr><td class="feat">Audit log of compiles + pulls</td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td></tr>
 
-          <tr class="section"><td colspan="5">Support</td></tr>
-          <tr><td class="feat">Channel</td><td>Community</td><td>Email</td><td>Slack</td><td>Dedicated</td></tr>
-          <tr><td class="feat">Response time</td><td>Best effort</td><td>48h</td><td>24h</td><td>SLA</td></tr>
+          <tr class="section"><td colspan="6">Trust</td></tr>
+          <tr><td class="feat">HMAC-chained receipts</td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td></tr>
+          <tr><td class="feat">Customer-hosted bridge review</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="y">Yes</span></td></tr>
+          <tr><td class="feat">SAML / SCIM / audit log roadmap</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td>SSO today</td><td><span class="y">Yes</span></td></tr>
+          <tr><td class="feat">BAA / DPA / DPIA review</td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="n">No</span></td><td>By agreement</td></tr>
+          <tr><td class="feat">SOC 2 Type I (target Q4 2026)</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td>In progress</td></tr>
+          <tr><td class="feat">External anchor roadmap</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="y">Yes</span></td></tr>
+
+          <tr class="section"><td colspan="6">Support</td></tr>
+          <tr><td class="feat">Channel</td><td>Community</td><td>Email</td><td>Slack</td><td>Slack</td><td>Dedicated</td></tr>
+          <tr><td class="feat">Response time</td><td>Best effort</td><td>48h</td><td>24h</td><td>8h</td><td>SLA</td></tr>
         </tbody>
       </table>
     </div>

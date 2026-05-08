@@ -1,0 +1,29 @@
+name: compile .kolm on push
+on:
+  push:
+    paths:
+      - "examples/**.jsonl"
+      - "schemas/**.json"
+      - ".github/workflows/kolm-compile-on-push.yml"
+  workflow_dispatch:
+    inputs:
+      task:
+        description: Task description
+        required: true
+        default: "summarize a support ticket"
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: ./.github/actions/kolm-compile
+        with:
+          task: ${{ github.event.inputs.task || 'summarize a support ticket' }}
+          examples: examples/tickets.jsonl
+          base: qwen2.5-7b-instruct
+          api-key: ${{ secrets.KOLM_KEY }}
+          artifact-name: ${{ github.sha }}.kolm

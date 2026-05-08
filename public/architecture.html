@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Architecture - kolm</title>
+<meta name="description" content="How kolm works under the hood: the public registry, the K-score gate, the deterministic ZIP, the manifest and receipt schemas, and the four engines (Recall, Distill, Decompose, Run).">
+<meta name="theme-color" content="#050607">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="kolm architecture">
+<meta property="og:description" content="The compiler underneath the .kolm artifact. Registry, K-score, manifest, receipts, four engines.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/architecture">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/architecture">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand"><span class="brand-dot" aria-hidden="true"></span>kolm</a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/compile">Compile</a>
+      <a href="/serve">Serve</a>
+      <a href="/anatomy">.kolm</a>
+      <a href="/k-score">K-score</a>
+      <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
+    </nav>
+    <div class="site-actions">
+      <a href="/signin">sign in</a>
+      <a href="/signup" class="cta">get a key</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span>architecture</div>
+        <h1>How the compiler works.</h1>
+        <p class="lede">kolm is one product, four engines, and one signed artifact. The CLI is what you use; the engines are what the CLI orchestrates. This page is the honest picture: which subsystems are shipped, which are scaffolded, and how the pieces compose at compile and at run time. If you want the on-disk format, read <a href="/anatomy" style="color:var(--accent)">/anatomy</a>. If you want the spec, read <a href="/docs/rs-1.md" style="color:var(--accent)">/docs/rs-1.md</a>. This is the system view in between.</p>
+        <div class="actions">
+          <a href="/anatomy" class="btn primary">.kolm anatomy</a>
+          <a href="/docs/rs-1.md" class="btn ghost">RS-1 spec</a>
+          <a href="/k-score" class="btn accent">K-score gate</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">01</span>four engines</div>
+      <h2>The compiler is a composition.</h2>
+      <p class="sec-lede">Each engine does one thing. Together they turn a task description and a gold set into a signed file you can run anywhere.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td><b>Recall</b></td><td>Multimodal vector substrate. Embed text, image, audio, video, PDF; index by tenant; query at compile and at run. Today: text + JSON via sqlite-vec on-device. Roadmap: image, audio, PDF.</td></tr>
+          <tr><td><b>Distill</b></td><td>Verified inference at scale. K-sample a frontier teacher (Anthropic, OpenAI, your provider), deterministically verify each sample against the synthesized test, produce high-quality labels. Shipped.</td></tr>
+          <tr><td><b>Decompose</b> (RSD)</td><td>Recipe Speculative Decoding. Extract the deterministic-token subset of a model's behavior into a draft pack indexed by prefix-shape and embedding-shape. Used at run time for 2&ndash;3&times; wall-time speedup. Research-grade prototype today.</td></tr>
+          <tr><td><b>Run</b></td><td>Local execution. llama.cpp + sqlite-vec + the LoRA delta + the recipe pack, all four composed at every token. Receipts written for every output. Shipped on macOS / Linux / WSL; iOS + Android adapters Q4 2026.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">02</span>compile flow</div>
+      <h2>What happens when you run <code>kolm compile</code>.</h2>
+      <pre class="terminal">user
+ |
+ |  kolm compile "task" --examples ./gold.jsonl
+ v
+[1] verifier synthesis     - read examples, infer the test
+[2] Recall index build     - embed any --recall corpus into sqlite-vec
+[3] Distill (k-sample)     - frontier teacher generates k candidates per input
+[3a] verify                - deterministic test rejects bad candidates
+[3b] label set             - winners become training pairs
+[4] LoRA distill           - bridge to trainer (REM Labs / customer-hosted),
+                             return lora.bin
+[5] Decompose pattern obs  - mine deterministic patterns from accepted outputs
+[5a] recipe pack           - registry-anchored draft pack written to recipes.json
+[6] K-score gate           - composite of accuracy / coverage / size / latency
+                             must pass floor or compile fails
+[7] artifact assemble      - manifest.json + recipes.json + lora.bin +
+                             index.sqlite-vec + signature.sig zipped
+[8] receipt anchor         - HMAC-chain submitted to the public registry
+ |
+ v
+.kolm</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">03</span>registry</div>
+      <h2>What the public registry actually stores.</h2>
+      <p class="sec-lede">Not the artifact. Not your data. Not your weights. The registry stores three things: the schema versions, the receipt anchors, and the deterministic-pattern set that everyone benefits from. It is small, public, and append-only.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td><b>Schema versions</b></td><td>Hashes of <code>manifest-v0.1.json</code>, <code>receipt-v0.1.json</code>, and the RS-1 spec. The chain anchors here so any artifact can be verified against the exact schema it was compiled against.</td></tr>
+          <tr><td><b>Receipt anchors</b></td><td>Per-artifact HMAC tip. Submitted at compile time. Anchors prove the artifact existed at <em>this</em> hash on <em>this</em> date and was signed by a known tenant.</td></tr>
+          <tr><td><b>Pattern set</b></td><td>Deterministic-token patterns mined from accepted compiles &mdash; a draft pack indexed by prefix-shape and embedding-shape. This is the compounding moat: every public compile shrinks the marginal cost of every future compile.</td></tr>
+          <tr><td><b>What's NOT here</b></td><td>Your gold examples. Your LoRA weights. Your recall index. Your inputs at run time. Your outputs at run time. The registry only holds the public, hashable, non-revealing parts.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">04</span>K-score gate</div>
+      <h2>The compiler refuses to ship below floor.</h2>
+      <p class="sec-lede">K-score is a composite gate. Every artifact that ships passes all four sub-gates; an artifact that fails any one is rejected at compile, not at deploy. This is the difference between a build system and a "best-effort" inference wrapper.</p>
+      <pre class="terminal">K-score (composite)
+ |
+ +-- accuracy        sub-gate floor 0.80   measured on hold-out
+ +-- coverage        sub-gate floor 0.65   verifier hits / inputs
+ +-- size_bytes      sub-gate floor 0.50   target SKU class fit
+ +-- p50_latency_us  sub-gate floor 0.40   target hardware class fit
+
+ship  iff  every sub-gate &gt;= floor
+fail  if   any single sub-gate &lt; floor</pre>
+      <p class="sec-lede" style="margin-top:18px">Floors are not magic numbers; they are tier-specific defaults you can tighten or loosen via flags. <a href="/k-score" style="color:var(--accent)">/k-score</a> has the full breakdown.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">05</span>determinism</div>
+      <h2>Why the .kolm zip is byte-stable.</h2>
+      <p class="sec-lede">Two compiles of the same gold set, the same flags, and the same teacher state must produce the same .kolm sha256. We get this by canonicalizing every layer.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>JSON canonicalization</td><td>Manifests and receipts use sorted keys, no whitespace, UTC timestamps. Deterministic across operating systems.</td></tr>
+          <tr><td>ZIP canonicalization</td><td>Members in lexical order, mtime fixed at the registry epoch (<code>2026-01-01T00:00:00Z</code>), no extended attributes, deflate level 6.</td></tr>
+          <tr><td>LoRA canonicalization</td><td>Tensor order fixed by parameter name; bf16 with byte-stable dump. Trainer seed is part of the manifest.</td></tr>
+          <tr><td>Recipe pack</td><td>Pattern entries sorted by hash. Registry version pinned at compile.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">06</span>receipts</div>
+      <h2>What the receipt actually proves.</h2>
+      <p class="sec-lede">A receipt binds (artifact_hash, input_hash, output_hash, recall_hits, runtime_id, issued_at) into a single HMAC chain anchored to the registry. It is local by default; you mirror upstream when you want shared audit.</p>
+      <pre class="terminal">{
+  "rs": "1",
+  "kind": "receipt",
+  "artifact": "sha256:7a4c1f2e&hellip;",
+  "input":    "sha256:0d56b9&hellip;",
+  "output":   "sha256:9b110d&hellip;",
+  "recall":   ["sha256:e4a0f1&hellip;", "sha256:c712a3&hellip;"],
+  "runtime":  "kolm-cli@0.1.0/darwin-arm64",
+  "issued_at":"2026-05-08T14:02:11.413Z",
+  "chain":    "hmac-sha256:1f2e7a4c&hellip;"
+}</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">07</span>read more</div>
+      <h2>Drill in.</h2>
+      <div class="actions" style="margin-top:14px">
+        <a href="/anatomy" class="btn primary">.kolm anatomy</a>
+        <a href="/k-score" class="btn ghost">K-score</a>
+        <a href="/docs/rs-1.md" class="btn accent">RS-1 spec</a>
+        <a href="/docs/manifest-v0.1.json" class="btn accent">manifest schema</a>
+        <a href="/docs/receipt-v0.1.json" class="btn accent">receipt schema</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta"><img src="/logo-mark.svg" alt="" style="width:18px;height:18px;margin-right:8px;vertical-align:-4px;">kolm architecture / <a href="/anatomy">.kolm</a> / <a href="/k-score">K-score</a></div>
+    <div class="links">
+      <div>
+        <div class="col-h">deep</div>
+        <a href="/docs/rs-1.md">RS-1 spec</a>
+        <a href="/anatomy">.kolm anatomy</a>
+        <a href="/k-score">K-score</a>
+        <a href="/registry">atlas browser</a>
+      </div>
+      <div>
+        <div class="col-h">build</div>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/serve">serve</a>
+        <a href="/docs">docs</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

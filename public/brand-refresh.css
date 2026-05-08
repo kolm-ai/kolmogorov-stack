@@ -57,32 +57,152 @@ body {
   -webkit-text-fill-color: var(--fg) !important;
 }
 
+/* Unified header chrome — same height, brand size, and nav metrics
+ * across every header variant (header.site, .site-header, nav.top).
+ * Tightens the bar so it reads as product chrome, not marketing.
+ */
+header.site,
+.site-header,
 nav.top {
-  background: rgba(11,13,16,.88) !important;
-  border-bottom-color: var(--line) !important;
+  background: rgba(11,13,16,.86) !important;
+  border-bottom: 1px solid var(--line) !important;
+  backdrop-filter: saturate(150%) blur(14px) !important;
+  -webkit-backdrop-filter: saturate(150%) blur(14px) !important;
 }
 
-nav.top .brand {
+header.site .row,
+header.site > .wrap > .row,
+header.site .wrap,
+.site-header .wrap,
+nav.top {
+  height: 52px !important;
+  min-height: 52px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 24px !important;
+}
+
+header.site .left,
+header.site > .wrap > .row > .left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 26px !important;
+}
+
+header.site .brand,
+.site-header .brand,
+nav.top .brand,
+.brand {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 9px !important;
+  gap: 8px !important;
   background: none !important;
   color: var(--fg) !important;
   -webkit-text-fill-color: var(--fg) !important;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
-  font-size: 17px !important;
+  font-size: 13.5px !important;
   font-weight: 560 !important;
+  letter-spacing: 0 !important;
+}
+
+header.site .brand span,
+.site-header .brand span,
+nav.top .brand span {
+  font-size: 13.5px !important;
+  font-weight: 560 !important;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
+  letter-spacing: 0 !important;
+}
+
+/* Hide any leftover SVG brand mark on inline-style pages. Replaced by a CSS dot. */
+header.site .brand img,
+.site-header .brand img,
+nav.top .brand img,
+img.brand-mark,
+.brand .brand-mark,
+.sidebar h1 .glyph {
+  display: none !important;
 }
 
 nav.top .brand::before,
+header.site .brand::before,
+.site-header .brand::before,
 footer .brand-row .mark::before {
   content: "";
-  width: 24px;
-  height: 24px;
+  width: 7px;
+  height: 7px;
   display: inline-block;
-  background: url("/logo-mark.svg") center / contain no-repeat;
-  vertical-align: -6px;
-  margin-right: 8px;
+  background: #4c7dff;
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(76,125,255,0.7);
+  vertical-align: 2px;
+  margin-right: 9px;
+  animation: brand-pulse-shared 3.4s ease-in-out infinite;
+}
+@keyframes brand-pulse-shared {
+  0%, 100% { box-shadow: 0 0 12px rgba(76,125,255,0.7); opacity: 1; }
+  50%      { box-shadow: 0 0 16px rgba(76,125,255,0.95); opacity: 0.85; }
+}
+
+/* Tab spacing — same metrics on every header variant. */
+header.site nav,
+.site-header .site-nav,
+nav.top .site-nav,
+nav.top .nav-links {
+  display: flex !important;
+  align-items: center !important;
+  gap: 22px !important;
+}
+header.site nav a,
+.site-header .site-nav a,
+nav.top .site-nav a,
+nav.top .nav-links a {
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: var(--fg-3, #a8adb7) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif !important;
+  transition: color 120ms ease;
+}
+header.site nav a:hover,
+header.site nav a.active,
+.site-header .site-nav a:hover,
+.site-header .site-nav a.active,
+nav.top .site-nav a:hover,
+nav.top .site-nav a.active {
+  color: var(--fg, #ece7dc) !important;
+}
+
+/* Right-side actions — sign-in + CTA tighter and consistently sized. */
+header.site .right,
+.site-header .site-actions,
+.site-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+header.site .right .ghost,
+header.site .right a:not(.cta),
+.site-header .site-actions a:not(.cta),
+.site-actions a:not(.cta) {
+  font-size: 12.5px !important;
+  color: var(--fg-3, #a8adb7) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif !important;
+}
+header.site .right .ghost:hover,
+header.site .right a:not(.cta):hover,
+.site-header .site-actions a:not(.cta):hover,
+.site-actions a:not(.cta):hover {
+  color: var(--fg, #ece7dc) !important;
+}
+header.site .right .cta,
+.site-header .site-actions .cta,
+.site-actions .cta {
+  font-size: 12px !important;
+  font-weight: 540 !important;
+  padding: 6px 11px !important;
+  border-radius: 6px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif !important;
 }
 
 .btn-primary,
@@ -169,23 +289,14 @@ header.site .brand,
   letter-spacing: 0 !important;
 }
 
-.brand .brand-mark,
-.site-header .brand-mark,
-header.site .brand img,
-nav.top .brand::before,
-.sidebar h1 .glyph {
-  width: 22px !important;
-  height: 22px !important;
-  min-width: 22px !important;
-  flex: 0 0 22px !important;
-  object-fit: contain !important;
-}
-
-.site-footer .meta img,
+/* Footer brand mark stays as a small dot. */
 footer img.brand-mark,
+.site-footer .meta img {
+  display: none !important;
+}
 footer .brand-row .mark::before {
-  width: 16px !important;
-  height: 16px !important;
+  width: 6px !important;
+  height: 6px !important;
 }
 
 .btn,

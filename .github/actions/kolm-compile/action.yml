@@ -1,0 +1,83 @@
+name: kolm compile
+description: Compile a kolm task into a signed .kolm artifact and upload it as a workflow artifact.
+author: Kolmogorov
+
+inputs:
+  task:
+    description: One-line task description (e.g. "answer support tickets in my voice")
+    required: true
+  examples:
+    description: Path to a JSONL file of gold examples relative to the workspace root
+    required: true
+  base:
+    description: Base model pointer (default qwen2.5-7b-instruct)
+    required: false
+    default: qwen2.5-7b-instruct
+  api-key:
+    description: kolm API key (use $\{\{ secrets.KOLM_KEY \}\})
+    required: true
+  base-url:
+    description: kolm API base URL (default https://kolm.ai)
+    required: false
+    default: https://kolm.ai
+  artifact-name:
+    description: Name for the uploaded workflow artifact
+    required: false
+    default: compiled.kolm
+
+outputs:
+  artifact-path:
+    description: Absolute path of the saved .kolm
+    value: ${{ steps.compile.outputs.artifact_path }}
+  k-score:
+    description: Composite K-score reported by the compiler
+    value: ${{ steps.compile.outputs.k_score }}
+  job-id:
+    description: Compile job id (for log lookup)
+    value: ${{ steps.compile.outputs.job_id }}
+
+runs:
+  using: composite
+  steps:
+    - name: install kolm CLI
+      shell: bash
+      run: npm i -g github:sneaky-hippo/kolmogorov-stack
+
+    - name: configure
+      shell: bash
+      env:
+        KOLM_BASE: ${{ inputs.base-url }}
+        KOLM_KEY: ${{ inputs.api-key }}
+      run: |
+        kolm config base "$KOLM_BASE"
+        kolm whoami
+
+    - name: compile
+      id: compile
+      shell: bash
+      env:
+        KOLM_BASE: ${{ inputs.base-url }}
+        KOLM_KEY: ${{ inputs.api-key }}
+      run: |
+        out=$(kolm compile "${{ inputs.task }}" \
+              --examples "${{ inputs.examples }}" \
+              --base "${{ inputs.base }}" \
+              --json)
+        echo "$out"
+        path=$(echo "$out" | jq -r '.artifact_path')
+        score=$(echo "$out" | jq -r '.k_score')
+        job=$(echo "$out" | jq -r '.id')
+        echo "artifact_path=$path" >> "$GITHUB_OUTPUT"
+        echo "k_score=$score" >> "$GITHUB_OUTPUT"
+        echo "job_id=$job" >> "$GITHUB_OUTPUT"
+
+    - name: upload .kolm
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ steps.compile.outputs.artifact_path }}
+        if-no-files-found: error
+
+    - name: verify signature
+      shell: bash
+      run: kolm verify "${{ steps.compile.outputs.artifact_path }}"
