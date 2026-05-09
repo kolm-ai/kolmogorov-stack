@@ -933,3 +933,34 @@ footer.modern::before {
   .diag-spec .card { padding: 11px 12px; }
 }
 
+/* === site-wide green accent for definitional and status moments ===
+ * Single subtle pass: every page that ships .term/.qa/.toc patterns
+ * (glossary, troubleshooting, faq, why-now, press, articles) gets a
+ * consistent emerald accent in the same load-bearing places. This is
+ * the only place green is allowed outside .diag-* components. */
+.term h3 .alias,
+.qa h3 .tag,
+.tag.good,
+.status-ok,
+.dot-ok {
+  color: #7ef0d2 !important;
+}
+.toc a:hover {
+  color: #7ef0d2 !important;
+  border-color: rgba(126,240,210,0.32) !important;
+}
+.toc a:focus-visible {
+  outline: 2px solid rgba(126,240,210,0.55);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+/* Verified / receipt / signed badges across articles + use-cases */
+.badge.verified,
+.badge.signed,
+.badge-verified,
+.verified-pill {
+  color: #7ef0d2 !important;
+  border-color: rgba(126,240,210,0.32) !important;
+  background: rgba(126,240,210,0.06) !important;
+}
+
