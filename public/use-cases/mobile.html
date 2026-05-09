@@ -233,10 +233,10 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">04</span> &middot; integration</div>
     <h2>Five lines of <span class="tone">React Native.</span></h2>
-    <p class="sec-lede">Drop a <code>.kolm</code> in your bundle (or stream it on first launch via on-demand resources). Open it. Call it. The SDK handles model loading, NPU offload, receipt signing, recall.</p>
+    <p class="sec-lede">Drop a <code>.kolm</code> in your bundle (or stream it on first launch via on-demand resources). Open it. Call it. The SDK handles model loading, NPU offload, receipt signing, recall. <em style="color:var(--ink-mute,#b5bdb1)">(React Native module is in preview &mdash; ships with v7.0; the API below is the locked surface, today browser-WASM via WebView.)</em></p>
     <div class="term" style="max-width:880px">
       <div class="hd"><span class="dot"></span><span>App.tsx</span></div>
-      <pre><span class="cm">// 1. install: npm i @kolmogorov/react-native</span>
+      <pre><span class="cm">// 1. install: npm i github:sneaky-hippo/kolmogorov-stack  (RN module in preview, ships v7.0)</span>
 <span class="pmt">import</span> { Specialist } <span class="pmt">from</span> <span class="ok">"@kolmogorov/react-native"</span>;
 
 <span class="pmt">const</span> writer = <span class="pmt">await</span> Specialist.<span class="ok">load</span>(<span class="ok">"email-reply-1.0.0.kolm"</span>);
