@@ -1132,6 +1132,25 @@ WE_SM=$(curl -s "$URL/sitemap.xml")
 check "sitemap has /articles/rent-vs-buy-compute"  has "$WE_SM" "/articles/rent-vs-buy-compute"
 check "sitemap has /use-cases/capture-and-distill" has "$WE_SM" "/use-cases/capture-and-distill"
 
+echo "=== 41. Workstream J — launch-checklist + marketing posts ==="
+# Internal launch-readiness markdown. Ungated by sitemap (per plan), blocked
+# in robots.txt so search engines do not index the staging-mode prose.
+LC_RC=$(curl -s -o /dev/null -w "%{http_code}" "$URL/launch-checklist.md")
+check "/launch-checklist.md is 200"             eq "$LC_RC" 200
+LC=$(curl -s "$URL/launch-checklist.md")
+check "launch-checklist 30-box title"           has "$LC" "30-box"
+check "launch-checklist Show HN draft"          has "$LC" "Show HN: kolm"
+check "launch-checklist three tweets"           has "$LC" "Three tweets"
+check "launch-checklist three LinkedIn posts"   has "$LC" "Three LinkedIn posts"
+check "launch-checklist end-to-end dry-run"     has "$LC" "End-to-end dry-run"
+check "launch-checklist marketing cycle"        has "$LC" "Marketing cycle"
+check "launch-checklist founder-only items"     has "$LC" "Founder-only items"
+RB=$(curl -s "$URL/robots.txt")
+check "robots disallows /launch-checklist.md"   has "$RB" "/launch-checklist.md"
+# Not in sitemap (intentional).
+SM_LC=$(curl -s "$URL/sitemap.xml" | grep -c "launch-checklist" || true)
+check "sitemap does NOT list launch-checklist"  eq "$SM_LC" 0
+
 echo ""
 echo "================================================"
 echo " RESULTS: $PASS pass, $FAIL fail"
