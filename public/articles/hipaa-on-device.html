@@ -250,23 +250,23 @@
     <h2 id="pipeline">A clinical compile pipeline, end to end.</h2>
     <p>Concrete steps. Numbers from a real customer pipeline (anonymized).</p>
 
-    <h3>Step 1 - De-identify a small seed set.</h3>
+    <h3>Step 1: De-identify a small seed set.</h3>
     <p>Take representative chart entries. Run them through a HIPAA Safe Harbor de-identifier (the 18 identifiers go; structural information stays). The compiler's seed corpus should now be de-identified or synthetic. <b>This is the only data that should touch a frontier vendor during a compliant pilot.</b></p>
 
-    <h3>Step 2 - Write the verifier.</h3>
-    <p>For each task - "summarize the chart in 50 words", "extract medications and dosages", "flag billing-code mismatches" --write 5-10 ideal output examples and a 30-line scoring function. The compiler synthesizes the rest. The verifier is reviewable, version-controlled, and content-hashed.</p>
+    <h3>Step 2: Write the verifier.</h3>
+    <p>For each task (&ldquo;summarize the chart in 50 words&rdquo;, &ldquo;extract medications and dosages&rdquo;, &ldquo;flag billing-code mismatches&rdquo;), write 5&ndash;10 ideal output examples and a 30-line scoring function. The compiler synthesizes the rest. The verifier is reviewable, version-controlled, and content-hashed.</p>
 
-    <h3>Step 3 - Compile.</h3>
+    <h3>Step 3: Compile.</h3>
     <p>Run <code>kolm compile</code> with the de-identified seed set, your verifier, and a frontier API key. The compiler produces a signed artifact with the recipe pack, the LoRA delta distilled from teacher labels, the recall index, and the receipt chain. Each layer is hashed into the manifest before the K-score gate runs.</p>
 
-    <h3>Step 4 - Sign the artifact.</h3>
+    <h3>Step 4: Sign the artifact.</h3>
     <p>The compiler emits a <code>.kolm</code> artifact with a manifest, recipe pack, verifier metadata, held-out tests, and HMAC-bound receipt evidence. The K-score is on the cover; below the configured gate, the artifact should not ship.</p>
 
-    <h3>Step 5 - Ship to the device.</h3>
+    <h3>Step 5: Ship to the device.</h3>
     <p>The artifact is a single file. Distribute it through the deployment channel your security team approves. The user opens it with <code>kolm run artifact.kolm</code> or serves it over MCP. Any connection to local patient data must be explicitly granted and tested in the target environment.</p>
 
-    <h3>Step 6 - Recompile when the verifier or seed set changes.</h3>
-    <p>Drift is recompile-driven. New tasks, new edge cases, new de-identified examples - they go into the next compile. The compiler caches what it can. <b>The frontier vendor never sees a new piece of PHI</b>; it only ever sees de-identified seeds and synthetic verifier challenges.</p>
+    <h3>Step 6: Recompile when the verifier or seed set changes.</h3>
+    <p>Drift is recompile-driven. New tasks, new edge cases, new de-identified examples all go into the next compile. The compiler caches what it can. <b>The frontier vendor never sees a new piece of PHI</b>; it only ever sees de-identified seeds and synthetic verifier challenges.</p>
 
     <div class="figure">
       <div class="grid">
