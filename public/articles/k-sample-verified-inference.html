@@ -230,16 +230,16 @@
     <h2 id="problem">The auditability problem with frontier models.</h2>
     <p>You ask a frontier model a question. You get an answer. <b>You have no way to prove that answer came from the model you think it came from, on the prompt you think you sent, with the temperature you think you set.</b> The vendor logs say one thing; your application log says another; the user sees the answer. If the answer ends up in a regulated context - a clinical decision, a credit denial, a court filing - your downstream auditors will eventually ask one of three questions:</p>
     <ul>
-      <li><b>Which model produced this output-</b> (Was it the version under contract, or one that silently rolled forward last Tuesday-)</li>
-      <li><b>What was the exact prompt-</b> (Was it the system message your team approved, or one mutated by middleware-)</li>
-      <li><b>Was the output stable, or a one-shot accident-</b> (Did anyone re-roll the same prompt before deciding to act on the answer-)</li>
+      <li><b>Which model produced this output?</b> (Was it the version under contract, or one that silently rolled forward last Tuesday?)</li>
+      <li><b>What was the exact prompt?</b> (Was it the system message your team approved, or one mutated by middleware?)</li>
+      <li><b>Was the output stable, or a one-shot accident?</b> (Did anyone re-roll the same prompt before deciding to act on the answer?)</li>
     </ul>
     <p>Three questions, one missing object: a receipt. Software has been auditing itself with cryptographic logs since the 1980s. Frontier model output is the first widely deployed compute primitive that does not, by default, leave a trail.</p>
 
     <h2 id="zkml">Why zk-ML is not the answer (yet).</h2>
     <p>The cryptographer's reflex is to reach for zero-knowledge proofs. <b>Prove that some statement about a private witness - "this output came from this model on this prompt" --is true, without revealing the witness.</b> The math is elegant. The cost is brutal.</p>
     <p>State-of-the-art zk-ML systems as of late 2026 prove a forward pass over a 13B-parameter model in <b>4-12 hours of A100 time per inference</b>, with proof sizes in the hundreds of kilobytes. The economics close at "important compliance documents that are computed once and then live forever." They do not close at "every customer support ticket your application processes."</p>
-    <p>The right move is to back off the cryptographic ambition and ask: what auditability does the use case actually require- In our experience, it is almost always one of three things:</p>
+    <p>The right move is to back off the cryptographic ambition and ask: what auditability does the use case actually require? In our experience, it is almost always one of three things:</p>
     <ul>
       <li><b>Reproducibility.</b> An auditor wants to re-run the same prompt against the same model and see the same output, or close to it.</li>
       <li><b>Stability.</b> An auditor wants evidence that the chosen output was not a one-in-a-thousand outlier, but a stable response.</li>
