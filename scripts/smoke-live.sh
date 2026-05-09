@@ -1550,6 +1550,23 @@ check "/vs-langsmith title colon"           has "$(curl -s $URL/vs-langsmith)" '
 check "/vs-ollama title colon"              has "$(curl -s $URL/vs-ollama)" 'kolm vs Ollama: which one'
 check "/vs-openpipe title colon"            has "$(curl -s $URL/vs-openpipe)" 'kolm vs OpenPipe: capture'
 
+echo "=== 49k. canonical primary-nav across pages ==="
+NAV_QS=$(curl -s "$URL/quickstart")
+NAV_CMP=$(curl -s "$URL/compare")
+NAV_BCH=$(curl -s "$URL/benchmarks")
+check "/quickstart canonical nav compile"   has "$NAV_QS" 'href="/compile">Compile</a>'
+check "/quickstart canonical nav serve"     has "$NAV_QS" 'href="/serve">Serve</a>'
+check "/quickstart canonical nav .kolm"     has "$NAV_QS" 'href="/anatomy">.kolm</a>'
+check "/quickstart canonical nav K-score"   has "$NAV_QS" 'href="/k-score">K-score</a>'
+check "/quickstart canonical nav Docs"      has "$NAV_QS" 'href="/docs">Docs</a>'
+check "/quickstart canonical nav Pricing"   has "$NAV_QS" 'href="/pricing">Pricing</a>'
+check "/quickstart canonical-nav not lower" has "$NAV_QS" 'href="/serve">Serve</a>'
+check "/compare canonical nav serve"        has "$NAV_CMP" 'href="/serve">Serve</a>'
+check "/compare canonical-nav not lower"    has "$NAV_CMP" 'href="/k-score">K-score</a>'
+check "/compare canonical nav .kolm"        has "$NAV_CMP" 'href="/anatomy">.kolm</a>'
+check "/benchmarks canonical nav K-score"   has "$NAV_BCH" 'href="/k-score">K-score</a>'
+check "/benchmarks no self-link in nav"     hashno "$NAV_BCH" '/benchmarks" class="active">Benchmarks'
+
 echo "=== 49j. /api capture & distill section ==="
 API_PG=$(curl -s "$URL/api")
 check "/api capture-anthropic anchor"       has "$API_PG" 'id="capture-anthropic"'
