@@ -1,0 +1,54 @@
+{
+  "@context": "https://kolm.ai/well-known/ai-context.json",
+  "@type": "AiContext",
+  "version": "1.0",
+  "name": "kolm",
+  "tagline": "Your own AI, compiled to your task.",
+  "description": "kolm is the AI compiler. It turns a task specification into a single signed .kolm artifact: recipes + a small LoRA + a verifier + a vector index + tests, in one file you can run offline anywhere. Every inference emits a verifiable HMAC receipt.",
+  "company": "Kolmogorov, Inc.",
+  "binary": "kolm",
+  "fileFormat": ".kolm",
+  "specification": "RS-1",
+  "license": "MIT (code), CC-BY-4.0 (text)",
+  "primaryUrl": "https://kolm.ai",
+  "endpoints": {
+    "signup": "https://kolm.ai/v1/signup",
+    "signin": "https://kolm.ai/v1/signin",
+    "wrap": "https://kolm.ai/v1/wrap/verified",
+    "captureAnthropic": "https://kolm.ai/v1/capture/anthropic",
+    "captureOpenai": "https://kolm.ai/v1/capture/openai",
+    "labels": "https://kolm.ai/v1/labels/synthesize-corpus",
+    "distill": "https://kolm.ai/v1/specialists/auto-distill",
+    "recipes": "https://kolm.ai/v1/recipes",
+    "recall": "https://kolm.ai/v1/recall",
+    "oauth": ["https://kolm.ai/v1/oauth/google/start", "https://kolm.ai/v1/oauth/github/start"]
+  },
+  "concepts": {
+    "kolm-artifact": "Signed zip containing model.gguf, lora.bin, recipes.json, index.sqlite-vec, verifier.json, manifest.json, signature.sig.",
+    "k-score": "K = round(100 * (0.60*T + 0.25*C + 0.15*L), 1) where T is k-sample pass rate, C is recipe coverage, L is latency ratio.",
+    "four-ring-chain": "HMAC-SHA256 chain: pre-image -> derived -> execution -> seal. Optionally anchored to Sigstore Rekor.",
+    "rent-vs-buy": "Frontier-API spend captured as (input, verified-output) pairs is distilled into a task-specific local LoRA the customer keeps forever."
+  },
+  "honestProof": {
+    "headline": "SWE-bench Lite +15.33pp, n=150, seed=42, Opus-4.7, swebench 4.1.0 evaluator. 95% CI [+9.33, +22.00], p<0.05.",
+    "reproduce": "kolm bench --reproduce swebench-lite-n150",
+    "methodology": "https://kolm.ai/articles/how-we-benchmark"
+  },
+  "pricingTiers": [
+    {"name": "Free CLI", "price": 0, "currency": "USD", "billing": "one-time"},
+    {"name": "Mobile", "price": 9, "currency": "USD", "billing": "monthly"},
+    {"name": "Pro", "price": 49, "currency": "USD", "billing": "monthly"},
+    {"name": "Team", "price": 149, "currency": "USD", "billing": "monthly"},
+    {"name": "Business", "price": 1499, "currency": "USD", "billing": "monthly"},
+    {"name": "Enterprise", "price": 2999, "currency": "USD", "billing": "monthly"}
+  ],
+  "byokeyPolicy": "All tiers bring their own frontier-API key. kolm never resells tokens.",
+  "repository": "https://github.com/sneaky-hippo/kolmogorov-stack",
+  "package": "@kolmogorov/kolm",
+  "install": "npm i -g @kolmogorov/kolm",
+  "contact": {
+    "press": "press@kolm.ai",
+    "security": "https://kolm.ai/.well-known/security.txt",
+    "general": "https://kolm.ai/contact"
+  }
+}

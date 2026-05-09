@@ -23,25 +23,29 @@
 }
 
 body {
-  background: #0b0d10 !important;
+  background:
+    radial-gradient(ellipse 1200px 800px at 18% 8%, rgba(76,125,255,0.06), transparent 55%),
+    radial-gradient(ellipse 900px 600px at 88% 92%, rgba(76,125,255,0.04), transparent 60%),
+    linear-gradient(180deg, #0e1116 0%, #0b0d10 38%, #0a0c0f 100%) !important;
+  background-attachment: fixed !important;
   color: var(--fg) !important;
 }
 
 .bg-stage {
-  background: #0b0d10 !important;
+  background: transparent !important;
 }
 
 .bg-stage::before {
   background:
-    linear-gradient(90deg, rgba(76,125,255,.10), transparent 36%),
-    linear-gradient(180deg, rgba(236,231,220,.045), transparent 34%) !important;
+    linear-gradient(90deg, rgba(76,125,255,.08), transparent 38%),
+    linear-gradient(180deg, rgba(236,231,220,.035), transparent 30%) !important;
   opacity: 1 !important;
   filter: none !important;
 }
 
 .bg-stage::after {
   background:
-    linear-gradient(180deg, rgba(11,13,16,0) 0%, rgba(11,13,16,.72) 62%, rgba(11,13,16,.96) 100%) !important;
+    linear-gradient(180deg, rgba(11,13,16,0) 0%, rgba(11,13,16,.55) 70%, rgba(7,9,11,.8) 100%) !important;
   background-size: auto !important;
 }
 
@@ -156,8 +160,8 @@ img.brand-mark,
   display: none !important;
 }
 
-/* Wordmark-only brand: no dot, no icon. The word "kolm" is the mark.
-   Restraint over redundancy; one signal beats two. */
+/* Mark + wordmark lockup. The mark reads "k" + a periwinkle compiled-bit,
+   prepended via ::before so HTML-only edits aren't required. */
 nav.top .brand,
 header.site .brand,
 .site-header .brand,
@@ -174,6 +178,22 @@ header.site .brand span,
 nav.top .brand::before,
 header.site .brand::before,
 .site-header .brand::before,
+.brand::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 22px !important;
+  height: 22px !important;
+  flex: 0 0 22px !important;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='14' y='10' width='10' height='44' fill='%23ece7dc'/%3E%3Cpath d='M44 14 L52 14 L30 32 L22 32 Z' fill='%23ece7dc'/%3E%3Cpath d='M22 32 L30 32 L52 50 L44 50 Z' fill='%23ece7dc'/%3E%3Crect x='16' y='29' width='6' height='6' fill='%234c7dff'/%3E%3C/svg%3E") !important;
+  background-position: center !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  margin-right: 2px;
+  transition: transform 200ms ease;
+}
+nav.top .brand:hover::before,
+header.site .brand:hover::before,
+.brand:hover::before { transform: scale(1.04); }
 footer .brand-row .mark,
 footer .brand-row .mark::before {
   display: none !important;
