@@ -963,7 +963,9 @@ async function cmdBenchReproduce(args) {
     console.error('this image is published as part of the v7.0 launch. if you are seeing this');
     console.error('before the public launch, the image is not yet in the registry. interim:');
     console.error('  - watch https://github.com/kolmogorov/kolm-bench-reproducer/releases');
-    console.error('  - or build locally from source (clone kolm-bench-reproducer, docker build -t ' + cfg.image + ' .)');
+    console.error('  - or build locally from kolmogorov-stack/bench/:');
+    console.error('      git clone https://github.com/kolmogorov/kolmogorov-stack && cd kolmogorov-stack/bench');
+    console.error('      docker build -t ' + cfg.image + ' .');
     console.error('  - or run the n=5 smoke locally without docker: kolm bench --reproduce ' + suite + ' --dry-run');
     process.exitCode = 2; return;
   }
