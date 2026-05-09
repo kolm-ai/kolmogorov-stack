@@ -1,8 +1,14 @@
 (function () {
-  var header = document.querySelector('header.site-header');
+  // Two header conventions in the repo:
+  //   newer: <header class="site-header"> + .site-nav + .site-actions
+  //   older: <header class="site"> with .left>nav + .right
+  // nav.js handles both so every public page has a working mobile menu.
+  var header = document.querySelector('header.site-header, header.site');
   if (!header) return;
-  var nav = header.querySelector('.site-nav');
-  var actions = header.querySelector('.site-actions');
+
+  var isLegacy = header.classList.contains('site') && !header.classList.contains('site-header');
+  var nav = isLegacy ? header.querySelector('.left nav, nav') : header.querySelector('.site-nav');
+  var actions = isLegacy ? header.querySelector('.right') : header.querySelector('.site-actions');
   if (!nav || !actions) return;
   if (header.querySelector('.nav-toggle')) return;
 

@@ -244,9 +244,11 @@ footer .brand { font-size: 14px; }
 @media (max-width: 920px) {
   .site-nav { display: none; }
   .nav-toggle { display: inline-flex; }
-  .site-header { position: relative; }
-  .site-nav.is-open {
-    display: flex;
+  .site-header,
+  header.site { position: relative; }
+  .site-nav.is-open,
+  header.site nav.is-open {
+    display: flex !important;
     position: absolute;
     top: 100%;
     left: 0;
@@ -258,13 +260,15 @@ footer .brand { font-size: 14px; }
     gap: 0;
     z-index: 50;
   }
-  .site-nav.is-open a {
+  .site-nav.is-open a,
+  header.site nav.is-open a {
     font-size: 14px;
     padding: 12px 4px;
     border-bottom: 1px solid rgba(255,255,255,0.04);
     color: var(--ink, #faf2e1);
   }
-  .site-nav.is-open a:last-child { border-bottom: 0; }
+  .site-nav.is-open a:last-child,
+  header.site nav.is-open a:last-child { border-bottom: 0; }
 }
 body.nav-open { overflow: hidden; }
 
