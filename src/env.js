@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -33,7 +34,12 @@ export function runtimeReadiness() {
   const artifactDir = process.env.KOLM_ARTIFACT_DIR || '';
   const storeDriver = configuredStoreDriver();
   const dataDirOk = !productionLike || directoryWritable(dataDir);
-  const artifactDirOk = !productionLike || directoryWritable(artifactDir);
+  // Artifact dir falls back to os.tmpdir()/kolm-artifacts inside artifact.js; ensure that
+  // fallback path exists and is writable so /ready never blocks on a non-critical staging dir.
+  const artifactFallback = path.join(os.tmpdir(), 'kolm-artifacts');
+  const artifactDirOk = !productionLike ||
+    directoryWritable(artifactDir) ||
+    ensureWritableDir(artifactFallback);
   const sqliteDir = path.dirname(path.resolve(process.env.KOLM_DB_PATH || path.join(dataDir || '.', 'kolm.sqlite')));
   const sqliteAvailable = storeDriver !== 'sqlite' || nodeSqliteAvailable();
   const sqlitePathOk = storeDriver !== 'sqlite' || directoryWritable(sqliteDir);
@@ -124,6 +130,15 @@ function directoryWritable(dir) {
     if (!stat.isDirectory()) return false;
     fs.accessSync(dir, fs.constants.R_OK | fs.constants.W_OK);
     return true;
+  } catch {
+    return false;
+  }
+}
+
+function ensureWritableDir(dir) {
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    return directoryWritable(dir);
   } catch {
     return false;
   }
