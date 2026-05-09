@@ -24,6 +24,13 @@
   --cyan: #7ef0d2 !important;
   --emerald: #7ef0d2 !important;
   --amber: #d97706 !important;
+  /* --ink-* aliases keep nav/text colors identical on cookbook and app pages
+   * that don't define them locally. Without these, var(--ink-mute) fell
+   * back to a slightly warmer #a39e90 on those pages, producing a
+   * visible "menu colors change" jump between routes. */
+  --ink: #faf2e1 !important;
+  --ink-mute: #b5bdb1 !important;
+  --ink-faint: #737c73 !important;
 }
 
 body {
@@ -349,7 +356,7 @@ nav.top .nav-links a {
   font-size: 12.5px !important;
   font-weight: 500 !important;
   letter-spacing: 0 !important;
-  color: var(--ink-mute, #a39e90) !important;
+  color: var(--ink-mute, #b5bdb1) !important;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif !important;
   transition: color 120ms ease;
 }
@@ -359,7 +366,7 @@ header.site nav a.active,
 .site-header .site-nav a.active,
 nav.top .site-nav a:hover,
 nav.top .site-nav a.active {
-  color: var(--ink, #ece7dc) !important;
+  color: var(--ink, #faf2e1) !important;
 }
 
 /* Right-side actions — sign-in + CTA tighter and consistently sized. */
