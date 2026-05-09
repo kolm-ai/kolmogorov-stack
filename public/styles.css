@@ -781,6 +781,11 @@ p code, li code {
   line-height: 1.65;
   padding: 14px 16px 16px;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+  min-height: 188px;
+  max-height: 188px;
+  overflow: hidden;
 }
 .lab-terminal .prompt { color: var(--accent); }
 .lab-terminal .ok { color: var(--accent-cyan); }
@@ -874,6 +879,11 @@ p code, li code {
   .compile-core::after,
   .map-arrow {
     display: none;
+  }
+  .lab-terminal {
+    min-height: 220px;
+    max-height: 260px;
+    overflow-y: auto;
   }
 }
 @media (max-width: 1080px) {
