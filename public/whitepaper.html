@@ -146,7 +146,7 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">RS-1</span> · Whitepaper</div>
     <h1 class="cover-title">The <code style="font-family:var(--mono);font-size:0.78em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:0 12px">.kolm</code> <span class="tone">specification.</span></h1>
-    <p class="lede">Formal description of the artifact format, 8-stage compile pipeline, K-score gate, and HMAC-chained receipt protocol anchored to a public registry. Conforming implementations MAY use the name <b>kolm</b> and extension <b>.kolm</b>.</p>
+    <p class="lede">Formal description of the artifact format, 8-stage compile pipeline, K-score gate, and HMAC-chained receipt protocol anchored to a public registry. Conforming implementations MAY use <b>kolm</b> / <b>.kolm</b>.</p>
 
     <div class="meta-bar">
       <div class="cell"><div class="k">spec id</div><div class="v accent">RS-1</div></div>
@@ -233,7 +233,7 @@
 
 <section id="format">
   <h2><span class="num">§3</span> Artifact format</h2>
-  <p>A <code>.kolm</code> is a ZIP archive (PKZip 2.0 / DEFLATE) with a fixed inner layout. Stored entries <span class="kw">MUST</span> appear in the canonical order below with deterministic ZIP options (mtime <code>2020-01-01T00:00:00Z</code>, extra fields stripped, UTF-8 names, no Zip64 unless a layer exceeds 4 GiB).</p>
+  <p>A <code>.kolm</code> is a ZIP archive (PKZip 2.0 / DEFLATE) with fixed inner layout. Entries <span class="kw">MUST</span> appear in canonical order with deterministic options (mtime <code>2020-01-01T00:00:00Z</code>, no extra fields, UTF-8 names, no Zip64 unless a layer exceeds 4 GiB).</p>
 
   <table>
     <thead><tr><th>#</th><th>Path</th><th>Required</th><th>Purpose</th></tr></thead>
@@ -250,9 +250,7 @@
     </tbody>
   </table>
 
-  <div class="normative"><b>Layer ordering invariant.</b> The first 4 KiB of any conformant
-    <code>.kolm</code> <span class="kw">MUST</span> contain the local file header for
-    <code>manifest.json</code>. Runtimes MAY read only the first 4 KiB to detect format and version before streaming the rest.</div>
+  <div class="normative"><b>Layer ordering invariant.</b> The first 4 KiB <span class="kw">MUST</span> contain the local file header for <code>manifest.json</code>. Runtimes MAY read only the first 4 KiB to detect format/version before streaming.</div>
 </section>
 
 <section id="manifest">
@@ -306,64 +304,64 @@
   }
 }</pre>
 
-  <div class="normative"><b>Field stability.</b> Appendix A field names are
-    <span class="kw">REQUIRED</span> at their documented paths. Implementations <span class="kw">MAY</span> add extension fields under a top-level key prefixed <code>x_</code> (e.g. <code>x_acme_metadata</code>); such fields <span class="kw">MUST NOT</span> be assumed present by others.</div>
+  <div class="normative"><b>Field stability.</b> Appendix A names are
+    <span class="kw">REQUIRED</span> at documented paths. Extension fields <span class="kw">MAY</span> be added under a top-level <code>x_</code> prefix (e.g. <code>x_acme_metadata</code>); they <span class="kw">MUST NOT</span> be assumed present by others.</div>
 </section>
 
 <section id="pipeline">
   <h2><span class="num">§5</span> Compile pipeline</h2>
-  <p>Eight stages, executed in order. A conformant compiler <span class="kw">MAY</span> elide stages 4 (recall), 5 (k-sample), or 6 (fit) when inputs are absent. Stages 1, 2, 3, 7, 8 are <span class="kw">REQUIRED</span>.</p>
+  <p>Eight stages in order. Stages 4 (recall), 5 (k-sample), 6 (fit) <span class="kw">MAY</span> be elided when inputs are absent. Stages 1, 2, 3, 7, 8 are <span class="kw">REQUIRED</span>.</p>
 
   <h3>5.1 Stage 1: Gather</h3>
-  <p>Inputs: task description, optional examples (<code>jsonl</code>), optional corpus. Compiler MUST canonicalize to UTF-8, strip BOMs, and record SHA-256 of the canonicalized bundle as <code>task.input_hash</code>.</p>
+  <p>Inputs: task description, optional examples (<code>jsonl</code>), optional corpus. Compiler MUST canonicalize to UTF-8, strip BOMs, record SHA-256 as <code>task.input_hash</code>.</p>
 
   <h3>5.2 Stage 2: Spec</h3>
-  <p>Synthesize a structured task spec: input shape, output shape, desiderata, edge cases. Hashed to <code>task.intent_hash</code>; semantically equivalent task descriptions <span class="kw">SHOULD</span> produce the same intent hash up to documented normalization (whitespace, casing, punctuation).</p>
+  <p>Synthesize structured task spec: input shape, output shape, desiderata, edge cases. Hashed to <code>task.intent_hash</code>; semantically equivalent descriptions <span class="kw">SHOULD</span> produce the same hash up to documented normalization (whitespace, casing, punctuation).</p>
 
   <h3>5.3 Stage 3: Synthesize verifier</h3>
-  <p>Emit one or more verifiers (§7). At least one <span class="kw">MUST</span> be deterministic (schema, regex, or function); classifier-typed verifiers <span class="kw">MAY</span> only appear in composite mode where a deterministic verifier dominates.</p>
+  <p>Emit verifiers (§7). At least one <span class="kw">MUST</span> be deterministic (schema, regex, function); classifier verifiers <span class="kw">MAY</span> only appear in composite mode where a deterministic verifier dominates.</p>
 
   <h3>5.4 Stage 4: K-sample</h3>
-  <p>Query a frontier model <i>k</i> times per input (default <i>k</i>=5, range 1–32) and apply the synthesized verifier. First verifier-passing output becomes the label. If none pass within <i>k</i>, the example is recorded as <code>frontier.unverified</code> and excluded from training (see FM-001, §10.3).</p>
+  <p>Query frontier <i>k</i> times per input (default <i>k</i>=5, range 1–32) and apply the verifier. First passing output becomes the label. If none pass, the example is <code>frontier.unverified</code> and excluded from training (FM-001, §10.3).</p>
 
   <h3>5.5 Stage 5: Verify</h3>
-  <p>Independent verifier pass over accepted (input, output) pairs detects label drift. Failing pairs are dropped. Acceptance rate recorded in <code>provenance/k-sample.log</code>.</p>
+  <p>Independent verifier pass over accepted pairs detects label drift. Failing pairs dropped. Acceptance rate logged in <code>provenance/k-sample.log</code>.</p>
 
   <h3>5.6 Stage 6: Fit</h3>
-  <p>If at least one accepted pair exists, fit a LoRA adapter on the verified pairs against the base model. Default hyperparameters in §A.adapter. Implementations <span class="kw">MAY</span> use INT4 + bf16 mixed-precision when VRAM allows; full-precision CPU training is permitted but not <span class="kw">RECOMMENDED</span>.</p>
+  <p>Fit a LoRA adapter on verified pairs against the base. Defaults in §A.adapter. INT4 + bf16 mixed-precision <span class="kw">MAY</span> be used when VRAM allows; full-precision CPU is permitted but not <span class="kw">RECOMMENDED</span>.</p>
 
   <h3>5.7 Stage 7: Observe</h3>
-  <p>Run the fitted artifact against <code>tests.jsonl</code> and compute K-score (§6). Recipe candidates extracted from accepted outputs are proposed back to the registry; those passing gated synthesis enter future epochs.</p>
-  <p>If the K-score gate fails, the compiler <span class="kw">MUST NOT</span> emit a signed artifact and <span class="kw">SHOULD</span> emit a diagnostic bundle under <code>./build/</code>. See FM-001 in §10.3.</p>
+  <p>Run fitted artifact against <code>tests.jsonl</code>, compute K-score (§6). Recipe candidates from accepted outputs are proposed to the registry; those passing gated synthesis enter future epochs.</p>
+  <p>If the K-score gate fails, the compiler <span class="kw">MUST NOT</span> emit a signed artifact and <span class="kw">SHOULD</span> emit a diagnostic bundle under <code>./build/</code>. See FM-001 (§10.3).</p>
 
   <h3>5.8 Stage 8: Sign</h3>
-  <p>Compute layer hashes, build the manifest, compute the signature chain (§8), write the artifact, post the anchor record to the registry. After ack the signature is <i>anchored</i>; consumers verify offline against a cached epoch root.</p>
+  <p>Compute layer hashes, build manifest, compute signature chain (§8), write artifact, post anchor to registry. After ack the signature is <i>anchored</i>; consumers verify offline against a cached epoch root.</p>
 </section>
 
 <section id="kscore">
   <h2><span class="num">§6</span> K-score</h2>
-  <p>Composite quality metric reported by every compile. A single number in [0, 100] with three named subcomponents.</p>
+  <p>Composite quality metric. Single number in [0, 100], three subcomponents.</p>
 
   <h3>6.1 Definition</h3>
-  <p>Let <code>T</code> = task accuracy on the bundled eval suite (proportion of verifier-passing outputs). Let <code>C</code> = calibration score: 1 minus mean absolute deviation between stated confidence and observed accuracy on a 10-bucket reliability diagram. Let <code>L</code> = latency score: step function over p50 inference (<10 ms = 100, <50 ms = 95, <250 ms = 85, <1 s = 70, <5 s = 50, ≥5 s = 0). Then:</p>
+  <p><code>T</code> = task accuracy (proportion of verifier-passing outputs). <code>C</code> = calibration: 1 − mean absolute deviation between stated confidence and observed accuracy on a 10-bucket reliability diagram. <code>L</code> = latency score: step function over p50 (<10 ms = 100, <50 ms = 95, <250 ms = 85, <1 s = 70, <5 s = 50, ≥5 s = 0). Then:</p>
   <pre><span class="com">// composite K-score</span>
 K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
-  <p>Weights (0.60, 0.25, 0.15) are normative for K-score 1.0; they <span class="kw">MAY</span> be overridden by a task-specific profile (latency-critical, calibration-critical), with the profile name and weights in <code>manifest.k_score.profile</code>.</p>
+  <p>Weights (0.60, 0.25, 0.15) are normative for K-score 1.0; <span class="kw">MAY</span> be overridden by a task profile (latency-critical, calibration-critical) with name and weights in <code>manifest.k_score.profile</code>.</p>
 
   <h3>6.2 Gate semantics</h3>
   <table>
     <thead><tr><th>Gate</th><th>Condition</th><th>Behavior</th></tr></thead>
     <tbody>
-      <tr><td><span class="pill">passed</span></td><td>K ≥ floor and T ≥ 0.85</td><td>Artifact emitted normally.</td></tr>
-      <tr><td><span class="pill warn">warned</span></td><td>floor &gt; K ≥ floor − 5 or 0.85 &gt; T ≥ 0.75</td><td>Artifact emitted with a warning record. Operators are advised to inspect the eval suite.</td></tr>
+      <tr><td><span class="pill">passed</span></td><td>K ≥ floor and T ≥ 0.85</td><td>Artifact emitted.</td></tr>
+      <tr><td><span class="pill warn">warned</span></td><td>floor &gt; K ≥ floor − 5 or 0.85 &gt; T ≥ 0.75</td><td>Emitted with warning. Operators should inspect the eval suite.</td></tr>
       <tr><td><span class="pill bad">failed</span></td><td>K &lt; floor − 5 or T &lt; 0.75</td><td>Artifact <span class="kw">MUST NOT</span> be emitted. Compile exits non-zero. See FM-001.</td></tr>
     </tbody>
   </table>
 
   <h3>6.3 Recompute protocol</h3>
-  <p>Any party <span class="kw">MAY</span> recompute K-score:
+  <p>Any party <span class="kw">MAY</span> recompute:
     (1) load <code>tests.jsonl</code> and <code>verifiers.json</code>;
-    (2) run the artifact's inference path on each test input;
+    (2) run inference on each test input;
     (3) apply the verifier;
     (4) recompute T, C, L per §6.1.
     Divergence beyond ±0.5 K-points <span class="kw">SHOULD</span> be reported as tampering.</p>
@@ -384,12 +382,12 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
     </tbody>
   </table>
 
-  <p>Verifiers are referenced from <code>tests.jsonl</code> by ID; bodies stored in <code>verifiers.json</code>. Body is content-addressed; renaming invalidates the receipt chain.</p>
+  <p>Verifiers are referenced from <code>tests.jsonl</code> by ID; bodies in <code>verifiers.json</code>, content-addressed. Renaming invalidates the receipt chain.</p>
 </section>
 
 <section id="receipts">
   <h2><span class="num">§8</span> Receipt chain</h2>
-  <p>A receipt is an HMAC-SHA256 over a canonical statement of an inference event. Emitted at every <code>kolm run</code>, chained to the artifact's signature, which anchors to the public registry.</p>
+  <p>HMAC-SHA256 over a canonical statement of an inference event. Emitted at every <code>kolm run</code>, chained to the artifact signature, which anchors to the public registry.</p>
 
   <h3>8.1 Statement form</h3>
 <pre><span class="com">// canonical receipt statement (CSON, sorted keys)</span>
@@ -404,18 +402,18 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
 }</pre>
 
   <h3>8.2 Chain construction</h3>
-  <p>The receipt body is HMAC-SHA256'd under a per-artifact key derived from the artifact's signature and the operator's tenant secret. The MAC is appended to form the wire-format receipt.</p>
+  <p>Receipt body is HMAC-SHA256'd under a per-artifact key derived from the artifact signature and the operator tenant secret. MAC is appended for the wire-format receipt.</p>
 
-  <p><code>signature.sig</code> is itself an HMAC over the canonical concatenation of every manifest layer hash, under the registry epoch key. Anchor posts are inserted into a Merkle tree; the daily root is published at <code>registry.kolm.ai/epoch/&lt;date&gt;/root.json</code>.</p>
+  <p><code>signature.sig</code> is itself an HMAC over the canonical concatenation of every manifest layer hash, under the registry epoch key. Anchor posts go into a Merkle tree; daily root is published at <code>registry.kolm.ai/epoch/&lt;date&gt;/root.json</code>.</p>
 
   <h3>8.3 Offline verification</h3>
-  <p>To verify offline a verifier needs: (1) receipt body and MAC, (2) artifact's <code>signature.sig</code> and manifest, (3) registry epoch root for the anchor day. Given those, every chain link reconstructs without network.</p>
-  <div class="normative"><b>Tenant secret rotation.</b> Receipts signed under the old secret remain verifiable against the previous epoch snapshot. New receipts use the new secret. See FM-202.</div>
+  <p>Verifier needs: (1) receipt body + MAC, (2) artifact <code>signature.sig</code> + manifest, (3) registry epoch root for the anchor day. Every chain link reconstructs without network.</p>
+  <div class="normative"><b>Tenant secret rotation.</b> Old-secret receipts remain verifiable against the previous epoch snapshot. New receipts use the new secret. See FM-202.</div>
 </section>
 
 <section id="repro">
   <h2><span class="num">§9</span> Reproducibility</h2>
-  <p>RS-1 commits to <b>byte-identical reproducibility</b>: given the same <code>(task, examples, corpus, base_model, recipe_registry@epoch)</code>, two independent compiles <span class="kw">MUST</span> produce the identical zip — not just the same K-score.</p>
+  <p><b>Byte-identical reproducibility.</b> Given the same <code>(task, examples, corpus, base_model, recipe_registry@epoch)</code>, two independent compiles <span class="kw">MUST</span> produce the identical zip — not just the same K-score.</p>
 
   <p>Mechanism:</p>
   <ul>
@@ -425,7 +423,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
     <li>FP determinism: GPU via cuBLAS workspace limits + deterministic-cudnn; CPU via single-threaded BLAS for the final norm-and-clip pass.</li>
   </ul>
 
-  <p>A frontier model non-deterministic at temperature 0 (e.g. provider-side batching) is the only legitimate source of irreproducibility. The compiler caches first-compile k-sample winners under <code>provenance/k-sample.log</code>; replays use the cache when inputs match.</p>
+  <p>A frontier model non-deterministic at temperature 0 (e.g. provider-side batching) is the only legitimate source of irreproducibility. The compiler caches first-compile k-sample winners in <code>provenance/k-sample.log</code>; replays use the cache when inputs match.</p>
 </section>
 
 <section id="threat">
@@ -451,12 +449,12 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
   <table>
     <thead><tr><th>Code</th><th>Phase</th><th>Severity</th><th>Action</th></tr></thead>
     <tbody>
-      <tr><td><code>FM-001</code></td><td>compile</td><td><span class="pill bad">fail</span></td><td>K-score below floor; emit diagnostic bundle, exit 65.</td></tr>
-      <tr><td><code>FM-002</code></td><td>compile</td><td><span class="pill warn">degraded</span></td><td>Corpus partially unreadable; proceed, warn, list skipped files.</td></tr>
-      <tr><td><code>FM-003</code></td><td>compile</td><td><span class="pill warn">degraded</span></td><td>Frontier quota exceeded; fall back to cached k-sample winners; mark <code>recompile_recommended</code>.</td></tr>
-      <tr><td><code>FM-101</code></td><td>runtime</td><td><span class="pill bad">fail</span></td><td>Signature invalid; refuse to execute, exit 70.</td></tr>
+      <tr><td><code>FM-001</code></td><td>compile</td><td><span class="pill bad">fail</span></td><td>K-score below floor; diagnostic bundle, exit 65.</td></tr>
+      <tr><td><code>FM-002</code></td><td>compile</td><td><span class="pill warn">degraded</span></td><td>Corpus partially unreadable; proceed, warn, list skipped.</td></tr>
+      <tr><td><code>FM-003</code></td><td>compile</td><td><span class="pill warn">degraded</span></td><td>Frontier quota exceeded; fall back to cached winners; mark <code>recompile_recommended</code>.</td></tr>
+      <tr><td><code>FM-101</code></td><td>runtime</td><td><span class="pill bad">fail</span></td><td>Signature invalid; refuse, exit 70.</td></tr>
       <tr><td><code>FM-103</code></td><td>runtime</td><td><span class="pill bad">fail</span></td><td>OOM. Return <code>503</code>, suggest smaller quantization.</td></tr>
-      <tr><td><code>FM-201</code></td><td>registry</td><td><span class="pill warn">degraded</span></td><td>Registry unavailable; verify against last-cached epoch root.</td></tr>
+      <tr><td><code>FM-201</code></td><td>registry</td><td><span class="pill warn">degraded</span></td><td>Registry down; verify against last-cached epoch root.</td></tr>
       <tr><td><code>FM-301</code></td><td>auth</td><td><span class="pill bad">fail</span></td><td>Bearer invalid. Return <code>401</code>.</td></tr>
     </tbody>
   </table>
@@ -479,13 +477,13 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
   <ul>
     <li><span class="kw">MUST</span> verify <code>signature.sig</code> before executing any layer.</li>
     <li><span class="kw">MUST</span> emit a receipt per inference event (§8).</li>
-    <li><span class="kw">MUST</span> refuse to execute artifacts whose <code>rs</code> field is a higher major version than the runtime supports.</li>
-    <li><span class="kw">SHOULD</span> support offline operation. Receipt verification and inference both <span class="kw">MUST</span> work without network when the epoch root is locally cached.</li>
-    <li><span class="kw">MAY</span> implement recipe-driven speculative decoding (§7.5); doing so does not affect output correctness, only latency.</li>
+    <li><span class="kw">MUST</span> refuse artifacts whose <code>rs</code> major exceeds runtime support.</li>
+    <li><span class="kw">SHOULD</span> support offline operation. Receipt verification and inference <span class="kw">MUST</span> work without network when the epoch root is locally cached.</li>
+    <li><span class="kw">MAY</span> implement recipe-driven speculative decoding (§7.5); affects latency, not correctness.</li>
   </ul>
 
   <h3>11.3 Naming</h3>
-  <p>Implementations passing conformance <span class="kw">MAY</span> use the name <i>kolm</i>, extension <i>.kolm</i>, and MIME type <code>application/vnd.kolm.rs1+zip</code>. <i>kolm</i> and <i>Kolmogorov</i> are trademarks of Kolmogorov, Inc.; use permitted for conformant implementations and editorial reference. <i>RS-1</i>, <i>K-score</i>, <i>recipe pack</i> are public terms.</p>
+  <p>Conformant implementations <span class="kw">MAY</span> use the name <i>kolm</i>, extension <i>.kolm</i>, MIME <code>application/vnd.kolm.rs1+zip</code>. <i>kolm</i>/<i>Kolmogorov</i> are trademarks of Kolmogorov, Inc.; permitted for conformant implementations and editorial reference. <i>RS-1</i>, <i>K-score</i>, <i>recipe pack</i> are public terms.</p>
 </section>
 
 <section id="refs">
@@ -499,7 +497,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
     <li>[BGE-M3] Xiao, S. et al. <i>BGE M3-Embedding.</i> 2024.</li>
     <li>[SQLITE-VEC] Asg, A. <i>sqlite-vec: A vector search SQLite extension.</i> 2024.</li>
     <li>[JSON-SCHEMA-2020-12] <i>JSON Schema Draft 2020-12.</i> json-schema.org.</li>
-    <li>Reproducibility appendix and conformance test vectors live at <code>github.com/sneaky-hippo/kolmogorov-stack</code>.</li>
+    <li>Reproducibility appendix and conformance vectors at <code>github.com/sneaky-hippo/kolmogorov-stack</code>.</li>
   </ul>
 </section>
 
@@ -556,7 +554,7 @@ offset  size  field
 
   <p>Verification: compute <code>HMAC-SHA256(epoch_key, bytes[0..135])</code> and compare to <code>bytes[136..167]</code>. The epoch key is published at <code>registry.kolm.ai/epoch/&lt;anchor_date&gt;/key.json</code> and signed by the registry's long-term Ed25519 key.</p>
 
-  <div class="note"><b>End of specification.</b> Errata, change proposals, conformance test vectors at <code>github.com/sneaky-hippo/kolmogorov-stack</code>. Maintainers: <code>spec@kolm.ai</code>.</div>
+  <div class="note"><b>End of specification.</b> Errata and conformance vectors at <code>github.com/sneaky-hippo/kolmogorov-stack</code>. Maintainers: <code>spec@kolm.ai</code>.</div>
 </section>
 
 </article>
