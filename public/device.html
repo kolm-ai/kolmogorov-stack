@@ -199,6 +199,15 @@ let registry = null;
 let totalRuns = 0;
 let lastRunSig = '';
 
+// HTML escape — every untrusted string flowing into innerHTML must pass
+// through this. The registry is shared across tenants, so a hostile recipe
+// name/description would otherwise stored-XSS every visitor of /device.
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // ---- HMAC trust gate ----
 // We refuse to execute any recipe whose source hash we can't verify against
 // the recipe's declared signature. The local demo uses a pinned public trust root.
@@ -297,8 +306,8 @@ function renderEmpty(meta) {
     el.dataset.name = r.name;
     el.innerHTML = `
       <div>
-        <div class="name">${r.name}</div>
-        <div class="desc">${r.description || ''}</div>
+        <div class="name">${esc(r.name)}</div>
+        <div class="desc">${esc(r.description || '')}</div>
         <div class="out" style="margin-top:6px;color:var(--ink-faint);">(type to run)</div>
       </div>
       <div class="lat">&hellip;</div>
@@ -392,7 +401,7 @@ document.querySelectorAll('[data-demo]').forEach((b) => {
     sRecipes.textContent = 'failed';
     sSize.textContent = '…';
     sHash.textContent = String(e.message || e);
-    resultsEl.innerHTML = '<div class="dev-result errored" style="grid-template-columns:1fr;">Could not hydrate registry: ' + String(e.message || e) + '</div>';
+    resultsEl.innerHTML = '<div class="dev-result errored" style="grid-template-columns:1fr;">Could not hydrate registry: ' + esc(String(e.message || e)) + '</div>';
   }
 })();
 

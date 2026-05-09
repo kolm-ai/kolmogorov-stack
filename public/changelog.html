@@ -20,7 +20,7 @@
     --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
     --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
     --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #4c7dff; --accent-soft: rgba(76,125,255,0.10); --accent-strong: #9db6ff;
+    --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
     --good: #7ef0d2; --bad: #ff6b91;
     --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
@@ -59,14 +59,14 @@
 
   article { padding: 36px 0 80px; }
   .release { margin: 0 0 36px; padding: 26px 28px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; }
-  .release.recent { border-color: var(--line-strong); box-shadow: 0 0 0 1px rgba(76,125,255,0.10); }
+  .release.recent { border-color: var(--line-strong); box-shadow: 0 0 0 1px rgba(236,231,220, 0.10); }
   .rel-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px; margin: 0 0 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
   .rel-head .ver { font-family: var(--mono); font-size: 14px; font-weight: 540; color: var(--accent); letter-spacing: 0; }
   .rel-head .date { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0; }
   .rel-head .tag { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line); background: var(--bg-card); border-radius: 999px; padding: 3px 9px; }
-  .rel-head .tag.major { color: var(--accent); border-color: rgba(76,125,255,0.24); background: var(--accent-soft); }
+  .rel-head .tag.major { color: var(--accent); border-color: rgba(236,231,220, 0.24); background: var(--accent-soft); }
   .rel-head .tag.security { color: var(--bad); border-color: rgba(255,122,152,0.22); background: rgba(255,122,152,0.06); }
-  .rel-head .tag.spec { color: var(--good); border-color: rgba(76,125,255,0.22); background: rgba(76,125,255,0.06); }
+  .rel-head .tag.spec { color: var(--good); border-color: rgba(236,231,220, 0.22); background: rgba(236,231,220, 0.06); }
   .rel-head h2 { margin: 0; font-size: 18px; font-weight: 540; color: var(--ink); letter-spacing: 0; line-height: 1.4; flex: 1 1 100%; padding-top: 4px; }
   .rel-body p { margin: 0 0 12px; font-size: 14.5px; line-height: 1.65; color: var(--ink-mute); }
   .rel-body p:last-child { margin-bottom: 0; }
@@ -465,7 +465,7 @@
           <li><b>Pricing reset</b>: Developer $0 / Mobile $9 / Pro $49 / Enterprise custom.</li>
           <li><b>Trust chain page</b>: HMAC chain explained step by step, registry record, third-party verifier protocol.</li>
           <li><b>Manual</b>: full reference for the four engines (Distill, Decompose, Recall, Run).</li>
-          <li>Locked design system: <code>--bg #050607</code>, <code>--accent #4c7dff</code>, system fonts, square 6px CTAs.</li>
+          <li>Locked design system: <code>--bg #050607</code>, <code>--accent #faf2e1</code>, system fonts, square 6px CTAs.</li>
         </ul>
       </div>
     </div>

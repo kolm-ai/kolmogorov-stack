@@ -8,7 +8,7 @@ import { effectiveReceiptSecret, isProductionRuntime, runtimeReadiness } from '.
 import * as registry from './registry.js';
 import * as runtime from './runtime.js';
 import * as cache from './cache.js';
-import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, adminApiKey, findTenantByApiKey, findTenantByEmail } from './auth.js';
+import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq } from './auth.js';
 import { mountOAuth, oauthConfigured } from './oauth.js';
 import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured } from './email.js';
 import { compileJs, verify } from './verifier.js';
@@ -59,6 +59,44 @@ const verifiedLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate-limited — verified inference caps at 30/min/ip' },
+  validate: { trustProxy: false },
+});
+
+// Anonymous workspace bootstrap — bots can mint these without an email. Cap to
+// prevent disk-DoS-by-tenant-row.
+const anonLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'too many anon workspaces from this IP — try again tomorrow' },
+  validate: { trustProxy: false },
+});
+
+const waitlistLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate-limited — waitlist caps at 10/hr/ip' },
+  validate: { trustProxy: false },
+});
+
+const signinLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate-limited — sign-in caps at 30/5min/ip' },
+  validate: { trustProxy: false },
+});
+
+const publishLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate-limited — publish/verify caps at 20/min/ip' },
   validate: { trustProxy: false },
 });
 
@@ -231,7 +269,7 @@ export function buildRouter() {
   // ---------- Anonymous CLI auth (robots / agents) ----------
   // Bootstrap: returns an anon_token that the CLI stores locally. 30-day TTL.
   // No email, no signup. Designed for agents that need to start working in <1 second.
-  r.post('/v1/anon/bootstrap', (req, res) => {
+  r.post('/v1/anon/bootstrap', anonLimiter, (req, res) => {
     const { user_agent, hostname } = req.body || {};
     const t = provisionAnonTenant({ ttl_days: 30, quota: 1000 });
     res.json({
@@ -326,7 +364,7 @@ export function buildRouter() {
   // for the homepage contract. POST {api_key} returns the same shape and sets
   // the same kolm_session cookie. /v1/signout returns 204 to be friendly to
   // CLI tools that ignore body.
-  r.post('/v1/signin', (req, res) => {
+  r.post('/v1/signin', signinLimiter, (req, res) => {
     const { api_key, email, password } = req.body || {};
     // Email/password is reserved for the future; today only api_key works.
     if (!api_key || typeof api_key !== 'string') {
@@ -337,7 +375,7 @@ export function buildRouter() {
     }
     const t = findTenantByApiKey(api_key);
     const adminKey = adminApiKey();
-    const isAdmin = !!adminKey && api_key === adminKey;
+    const isAdmin = !!adminKey && constantTimeEq(api_key, adminKey);
     if (!t && !isAdmin) return res.status(401).json({ error: 'invalid api key' });
     const isProd = isProductionRuntime();
     res.cookie('kolm_session', api_key, {
@@ -364,14 +402,14 @@ export function buildRouter() {
   // then call /v1/* without exposing the key to JavaScript. The legacy
   // localStorage path still works, but new pages should call /v1/session/login
   // and rely on the cookie.
-  r.post('/v1/session/login', (req, res) => {
+  r.post('/v1/session/login', signinLimiter, (req, res) => {
     const { api_key } = req.body || {};
     if (!api_key || typeof api_key !== 'string') {
       return res.status(400).json({ error: 'api_key required' });
     }
     const t = findTenantByApiKey(api_key);
     const adminKey = adminApiKey();
-    const isAdmin = !!adminKey && api_key === adminKey;
+    const isAdmin = !!adminKey && constantTimeEq(api_key, adminKey);
     if (!t && !isAdmin) return res.status(401).json({ error: 'invalid api key' });
     const isProd = isProductionRuntime();
     res.cookie('kolm_session', api_key, {
@@ -955,10 +993,17 @@ export function buildRouter() {
     if (paths.length > 64) {
       return res.status(400).json({ error: 'paths too long — max 64 per request' });
     }
-    // Reject obvious traversal — every path must be absolute and exist.
+    // Constrain to per-tenant root under KOLM_RECALL_ROOT. Admins can ingest
+    // anywhere on the box; tenants only see their own slice.
+    const recallRoot = process.env.KOLM_RECALL_ROOT || os.tmpdir();
+    const tenantRoot = path.resolve(recallRoot, req.tenant || '_anon');
     for (const p of paths) {
       if (typeof p !== 'string' || !path.isAbsolute(p)) {
         return res.status(400).json({ error: 'paths must be absolute strings' });
+      }
+      const resolved = path.resolve(p);
+      if (!req.is_admin && !resolved.startsWith(tenantRoot + path.sep) && resolved !== tenantRoot) {
+        return res.status(403).json({ error: 'path outside tenant recall root', tenant_root: tenantRoot });
       }
       if (!fs.existsSync(p)) {
         return res.status(400).json({ error: 'path not found: ' + p });
@@ -988,11 +1033,14 @@ export function buildRouter() {
   // frontmatter + first 4KB of body so a UI can preview what qmd indexed.
   r.get('/v1/recall/sources/:id(*)', (req, res) => {
     // The :id is a URL-encoded relative path inside the tenant corpus. We
-    // resolve it against KOLM_RECALL_ROOT and refuse anything outside.
+    // resolve it against the per-tenant slice of KOLM_RECALL_ROOT — admins can
+    // see across tenants, tenants only see their own.
     const root = process.env.KOLM_RECALL_ROOT || os.tmpdir();
+    const tenantRoot = path.resolve(root, req.tenant || '_anon');
+    const lookupRoot = req.is_admin ? path.resolve(root) : tenantRoot;
     const id = decodeURIComponent(req.params.id || '');
-    const full = path.resolve(root, id);
-    if (!full.startsWith(path.resolve(root))) {
+    const full = path.resolve(lookupRoot, id);
+    if (!full.startsWith(lookupRoot)) {
       return res.status(400).json({ error: 'path escapes recall root' });
     }
     const sidecar = full.endsWith('.md') ? full : full + '.md';
@@ -1221,15 +1269,35 @@ export function buildRouter() {
 
   // Self-serve cancel / downgrade-to-free. Any paid tenant can drop to the
   // free tier without contacting anyone.
-  r.post('/v1/account/cancel', (req, res) => {
+  r.post('/v1/account/cancel', async (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot cancel' });
-    update('tenants', x => x.id === req.tenant_record.id, {
+    const t = req.tenant_record;
+    let stripe_cancelled = false;
+    if (t.stripe_subscription_id && process.env.STRIPE_SECRET_KEY) {
+      try {
+        const r = await fetch(`https://api.stripe.com/v1/subscriptions/${t.stripe_subscription_id}`, {
+          method: 'DELETE',
+          headers: { authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` },
+        });
+        stripe_cancelled = r.ok;
+      } catch (err) {
+        console.error('[cancel] stripe sub cancel failed', err && err.message);
+      }
+    }
+    update('tenants', x => x.id === t.id, {
       plan: 'free',
       quota: PLAN_CATALOG.free.quota,
       trial_ends_at: null,
       cancelled_at: new Date().toISOString(),
+      stripe_subscription_id: null,
+      pending_plan: null,
     });
-    res.json({ ok: true, plan: 'free', message: 'Subscription cancelled. Your tenant is now on the Developer (free) plan; existing artifacts and registry data are untouched.' });
+    res.json({
+      ok: true,
+      plan: 'free',
+      stripe_cancelled,
+      message: 'Subscription cancelled. Your tenant is now on the Developer (free) plan; existing artifacts and registry data are untouched.',
+    });
   });
 
   // Self-serve account delete. Soft-delete the tenant; receipts and artifacts
@@ -1393,7 +1461,7 @@ export function buildRouter() {
     res.json({ results, total: results.length, accepted: results.filter(r => r.accepted).length });
   });
 
-  r.post('/v1/verify', (req, res) => {
+  r.post('/v1/verify', publishLimiter, (req, res) => {
     const { source, positives = [], negatives = [] } = req.body || {};
     if (!source) return res.status(400).json({ error: 'source is required' });
     try {
@@ -1406,7 +1474,7 @@ export function buildRouter() {
   });
 
   // Publish an edited generator (no synthesis required)
-  r.post('/v1/publish', (req, res) => {
+  r.post('/v1/publish', publishLimiter, (req, res) => {
     const { source, name, description, tags = [], visibility = 'private', positives = [], negatives = [], output_spec } = req.body || {};
     if (!source || !name) return res.status(400).json({ error: 'source and name are required' });
     try {
@@ -1621,6 +1689,52 @@ export function buildRouter() {
     res.json({ tenants: all('tenants') });
   });
 
+  r.get('/v1/admin/diagnostics', async (req, res) => {
+    if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
+    const fs = await import('node:fs');
+    const dataDir = process.env.KOLM_DATA_DIR || '';
+    const artifactDir = process.env.KOLM_ARTIFACT_DIR || '';
+    const checkDir = (dir) => {
+      if (!dir) return { dir, ok: false, reason: 'unset' };
+      try {
+        const stat = fs.statSync(dir);
+        if (!stat.isDirectory()) return { dir, ok: false, reason: 'not_a_directory' };
+        try {
+          fs.accessSync(dir, fs.constants.R_OK | fs.constants.W_OK);
+          return { dir, ok: true, mode: stat.mode.toString(8), uid: stat.uid, gid: stat.gid };
+        } catch (e) {
+          return { dir, ok: false, reason: 'access_denied', code: e.code, mode: stat.mode.toString(8) };
+        }
+      } catch (e) {
+        return { dir, ok: false, reason: 'stat_failed', code: e.code, message: e.message };
+      }
+    };
+    let mkdirResult = null;
+    try {
+      fs.mkdirSync(dataDir, { recursive: true });
+      fs.mkdirSync(artifactDir, { recursive: true });
+      mkdirResult = { ok: true };
+    } catch (e) {
+      mkdirResult = { ok: false, code: e.code, message: e.message };
+    }
+    res.json({
+      env: {
+        NODE_ENV: process.env.NODE_ENV,
+        KOLM_DATA_DIR: process.env.KOLM_DATA_DIR,
+        KOLM_ARTIFACT_DIR: process.env.KOLM_ARTIFACT_DIR,
+        KOLM_STORE_DRIVER: process.env.KOLM_STORE_DRIVER,
+        KOLM_ALLOW_JSON_STORE: process.env.KOLM_ALLOW_JSON_STORE,
+        KOLM_ALLOW_JSON_STORE_strict_true: process.env.KOLM_ALLOW_JSON_STORE === 'true',
+        RECIPE_RECEIPT_SECRET_len: (process.env.RECIPE_RECEIPT_SECRET || '').length,
+        RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT,
+      },
+      cwd: process.cwd(),
+      data_dir: checkDir(dataDir),
+      artifact_dir: checkDir(artifactDir),
+      mkdir_result: mkdirResult,
+    });
+  });
+
   // ---------- Recipe aliases ----------
   // Forward-looking branding: "recipe" terminology mirrors "concept" endpoints.
   // Both names route to the same handlers — full backward compatibility preserved.
@@ -1756,7 +1870,7 @@ export function buildRouter() {
 
   // ---------- Specialists (Phase D — Day 60-120 in roadmap) ----------
   // Public waitlist endpoint — gathers email + task interest before the product launches.
-  r.post('/v1/specialists/waitlist', (req, res) => {
+  r.post('/v1/specialists/waitlist', waitlistLimiter, (req, res) => {
     const { email, task } = req.body || {};
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'valid email required' });
     if (!task || String(task).length < 3) return res.status(400).json({ error: 'task description required (3+ chars)' });

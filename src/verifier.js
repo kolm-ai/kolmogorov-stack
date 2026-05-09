@@ -10,7 +10,40 @@ import { subroutines } from './library.js';
 
 const DEFAULT_TIMEOUT_MS = 250;
 
+// Defence-in-depth: node:vm is not a hard security boundary (a hostile script
+// can reach `Function` via `this.constructor.constructor` and escape an empty
+// context). We block the canonical escape primitives via a string scan before
+// the source ever reaches the compiler. Synthesized recipes never need any of
+// these — they operate on the `lib` argument only.
+const DANGEROUS = [
+  /\bprocess\b/,
+  /\brequire\b/,
+  /\bmodule\b/,
+  /\bglobal(This)?\b/,
+  /\b__dirname\b/,
+  /\b__filename\b/,
+  /\bimport\s*\(/,
+  /\bFunction\s*\(/,
+  /\beval\s*\(/,
+  /\bconstructor\b/,
+  /\bprototype\b/,
+  /\bArrayBuffer\b/,
+  /\bSharedArrayBuffer\b/,
+  /\bAtomics\b/,
+];
+
+function assertSafeSource(source) {
+  if (typeof source !== 'string') throw new Error('source must be a string');
+  if (source.length > 64 * 1024) throw new Error('source too large (>64 KiB)');
+  for (const re of DANGEROUS) {
+    if (re.test(source)) {
+      throw new Error('source contains a forbidden identifier (' + re.source + ')');
+    }
+  }
+}
+
 export function compileJs(source) {
+  assertSafeSource(source);
   const wrapped = `(function(input, lib){ "use strict"; ${source}\n; return generate(input, lib); })`;
   const script = new vm.Script(wrapped, { filename: 'generator.js' });
   const ctx = vm.createContext({}, { name: 'gen-ctx' });

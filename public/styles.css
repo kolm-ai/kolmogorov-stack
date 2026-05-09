@@ -16,9 +16,9 @@
   --ink:          #ece7dc;
   --ink-mute:     #a8adb7;
   --ink-faint:    #707985;
-  --accent:       #4c7dff;
-  --accent-soft:  rgba(76,125,255,0.13);
-  --accent-strong:#9db6ff;
+  --accent:       #faf2e1;
+  --accent-soft:  rgba(236,231,220, 0.13);
+  --accent-strong:#c9c2b2;
   --accent-cyan:  #7ef0d2;
   --accent-amber: #d6a65a;
   --accent-violet:#8d96a8;
@@ -56,8 +56,8 @@ body {
 }
 body {
   background:
-    radial-gradient(ellipse 1200px 800px at 18% 8%, rgba(76,125,255,0.06), transparent 55%),
-    radial-gradient(ellipse 900px 600px at 88% 92%, rgba(76,125,255,0.04), transparent 60%),
+    radial-gradient(ellipse 1200px 800px at 18% 8%, rgba(236,231,220, 0.06), transparent 55%),
+    radial-gradient(ellipse 900px 600px at 88% 92%, rgba(236,231,220, 0.04), transparent 60%),
     linear-gradient(180deg, #0e1116 0%, #0b0d10 38%, #0a0c0f 100%);
   background-attachment: fixed;
 }
@@ -78,13 +78,13 @@ body::after {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 720px 440px at 12% 0%, rgba(76,125,255,0.08), transparent 70%),
+    radial-gradient(ellipse 720px 440px at 12% 0%, rgba(236,231,220, 0.08), transparent 70%),
     linear-gradient(180deg, rgba(11,13,16,0.35) 0%, transparent 18%, transparent 82%, rgba(7,9,11,0.65) 100%);
 }
 @media (prefers-reduced-motion: reduce) {
   .brand .brand-dot { animation: none; }
 }
-::selection { background: rgba(76,125,255,0.38); color: #fff; }
+::selection { background: rgba(236,231,220, 0.38); color: #fff; }
 
 a { color: var(--accent); text-decoration: none; transition: color 120ms ease; }
 a:hover { color: var(--accent-strong); }
@@ -237,7 +237,7 @@ footer .brand { font-size: 14px; }
 .hero .eyebrow .pulse {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 16px rgba(76,125,255,0.42);
+  box-shadow: 0 0 16px rgba(236,231,220, 0.42);
 }
 .hero h1 {
   font-size: clamp(52px, 8vw, 96px);
@@ -265,9 +265,9 @@ footer .brand { font-size: 14px; }
 .lede code,
 p code, li code {
   font-family: var(--mono); font-size: 0.92em;
-  color: var(--ink); background: rgba(76,125,255,0.10);
+  color: var(--ink); background: rgba(236,231,220, 0.10);
   padding: 1px 5px; border-radius: 3px;
-  border: 1px solid rgba(76,125,255,0.20);
+  border: 1px solid rgba(236,231,220, 0.20);
 }
 .hero .actions {
   display: flex; gap: 14px; flex-wrap: wrap;
@@ -312,7 +312,7 @@ p code, li code {
   z-index: -1;
   border: 1px solid rgba(236,231,220,0.13);
   background:
-    linear-gradient(135deg, rgba(76,125,255,0.12), transparent 34%),
+    linear-gradient(135deg, rgba(236,231,220, 0.12), transparent 34%),
     linear-gradient(315deg, rgba(126,240,210,0.08), transparent 33%),
     rgba(236,231,220,0.018);
   transform: translate3d(0,0,0);
@@ -333,7 +333,7 @@ p code, li code {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(120deg, transparent 0 52%, rgba(76,125,255,0.08) 52% 52.3%, transparent 52.3%),
+    linear-gradient(120deg, transparent 0 52%, rgba(236,231,220, 0.08) 52% 52.3%, transparent 52.3%),
     linear-gradient(90deg, transparent 0%, rgba(126,240,210,0.08) 58%, transparent 82%);
 }
 .proof-toolbar {
@@ -369,7 +369,7 @@ p code, li code {
   height: 7px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 14px rgba(76,125,255,0.40);
+  box-shadow: 0 0 14px rgba(236,231,220, 0.40);
 }
 .proof-workspace {
   display: grid;
@@ -404,7 +404,7 @@ p code, li code {
 }
 .artifact-plate {
   background:
-    linear-gradient(135deg, rgba(76,125,255,0.12), transparent 38%),
+    linear-gradient(135deg, rgba(236,231,220, 0.12), transparent 38%),
     rgba(236,231,220,0.048);
   min-height: 250px;
   display: grid;
@@ -480,10 +480,10 @@ p code, li code {
   color: var(--ink);
   font-family: var(--mono);
   font-size: 10.5px;
-  border: 1px solid rgba(76,125,255,0.26);
+  border: 1px solid rgba(236,231,220, 0.26);
   border-radius: var(--r-sm);
   padding: 7px 8px;
-  background: rgba(76,125,255,0.08);
+  background: rgba(236,231,220, 0.08);
   min-height: 42px;
 }
 .flow-card {
@@ -597,7 +597,7 @@ p code, li code {
 .home-hero::before {
   z-index: 0;
   background:
-    linear-gradient(90deg, rgba(76,125,255,0.12), transparent 28%),
+    linear-gradient(90deg, rgba(236,231,220, 0.12), transparent 28%),
     linear-gradient(180deg, rgba(236,231,220,0.05), transparent 26%);
 }
 .home-hero::after {
@@ -706,9 +706,9 @@ p code, li code {
   position: absolute;
   width: 94px;
   height: 94px;
-  border: 1px solid rgba(76,125,255,0.46);
+  border: 1px solid rgba(236,231,220, 0.46);
   background:
-    linear-gradient(90deg, transparent 49%, rgba(76,125,255,0.24) 49% 51%, transparent 51%),
+    linear-gradient(90deg, transparent 49%, rgba(236,231,220, 0.24) 49% 51%, transparent 51%),
     linear-gradient(180deg, transparent 49%, rgba(126,240,210,0.18) 49% 51%, transparent 51%);
 }
 .core-mark {
@@ -782,7 +782,9 @@ p code, li code {
   box-sizing: border-box;
   min-height: 188px;
   max-height: 188px;
+  height: 188px;
   overflow: hidden;
+  touch-action: pan-y;
 }
 .lab-terminal .prompt { color: var(--accent); }
 .lab-terminal .ok { color: var(--accent-cyan); }
@@ -878,18 +880,22 @@ p code, li code {
     display: none;
   }
   .lab-terminal {
-    min-height: 168px;
-    max-height: 196px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    min-height: 188px;
+    max-height: 188px;
+    height: 188px;
+    overflow: hidden;
+    touch-action: pan-y;
     font-size: 11px;
     padding: 12px 13px 13px;
   }
 }
 @media (max-width: 420px) {
   .lab-terminal {
-    min-height: 152px;
-    max-height: 176px;
+    min-height: 172px;
+    max-height: 172px;
+    height: 172px;
+    overflow: hidden;
+    touch-action: pan-y;
     font-size: 10.5px;
   }
 }
@@ -918,8 +924,8 @@ p code, li code {
 .btn.primary:hover { background: #f6f0e4; color: #0b0d10; }
 .btn.ghost { background: rgba(236,231,220,0.04); color: var(--ink); border-color: var(--line-strong); }
 .btn.ghost:hover { background: rgba(236,231,220,0.08); border-color: var(--line-stronger); }
-.btn.accent { background: var(--accent-soft); color: var(--accent-strong); border-color: rgba(76,125,255,0.38); }
-.btn.accent:hover { background: rgba(76,125,255,0.18); color: var(--ink); }
+.btn.accent { background: var(--accent-soft); color: var(--accent-strong); border-color: rgba(236,231,220, 0.38); }
+.btn.accent:hover { background: rgba(236,231,220, 0.18); color: var(--ink); }
 
 /* ============================================================
    Install tabs --bun-archetype. $ prompt, copy on click.
@@ -1067,7 +1073,7 @@ p code, li code {
   pointer-events: none;
   background:
     linear-gradient(180deg, transparent 0%, rgba(11,13,16,0.10) 48%, rgba(11,13,16,0.82) 100%),
-    linear-gradient(90deg, rgba(76,125,255,0.10), transparent 38%, rgba(126,240,210,0.08));
+    linear-gradient(90deg, rgba(236,231,220, 0.10), transparent 38%, rgba(126,240,210,0.08));
 }
 .media-frame picture,
 .media-frame img {
@@ -1263,8 +1269,8 @@ pre.terminal .num { color: var(--accent-amber); }
 }
 .card p { color: var(--ink-mute); font-size: 13.5px; line-height: 1.55; }
 .card.glow {
-  background: linear-gradient(180deg, rgba(76,125,255,0.052), var(--bg-card));
-  border-color: rgba(76,125,255,0.20);
+  background: linear-gradient(180deg, rgba(236,231,220, 0.052), var(--bg-card));
+  border-color: rgba(236,231,220, 0.20);
 }
 
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
@@ -1308,7 +1314,7 @@ textarea, select {
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(76,125,255,0.18);
+  box-shadow: 0 0 0 3px rgba(236,231,220, 0.18);
 }
 textarea { min-height: 110px; resize: vertical; }
 label.field {
@@ -1469,7 +1475,7 @@ label.field .lbl {
 }
 .sidebar nav a:hover { color: var(--ink); background: rgba(255,255,255,0.04); }
 .sidebar nav a.active {
-  color: var(--ink); background: rgba(76,125,255,0.10);
+  color: var(--ink); background: rgba(236,231,220, 0.10);
   position: relative;
 }
 .sidebar nav a.active::before {
@@ -1691,7 +1697,7 @@ textarea {
   height: 7px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 16px rgba(76,125,255,0.38);
+  box-shadow: 0 0 16px rgba(236,231,220, 0.38);
 }
 
 .metric-grid {
@@ -1778,7 +1784,7 @@ textarea {
   background: var(--ink-faint);
 }
 .job-dot.completed { background: var(--good); }
-.job-dot.running { background: var(--accent); box-shadow: 0 0 0 4px rgba(76,125,255,0.15); }
+.job-dot.running { background: var(--accent); box-shadow: 0 0 0 4px rgba(236,231,220, 0.15); }
 .job-dot.queued { background: var(--warn); }
 .job-dot.error { background: var(--bad); }
 .job-main {
@@ -1908,7 +1914,7 @@ textarea {
   font-family: var(--sans);
 }
 .auth-tabs button.active {
-  background: rgba(76,125,255,0.14);
+  background: rgba(236,231,220, 0.14);
   color: var(--ink);
 }
 .auth-msg {

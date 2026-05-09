@@ -21,7 +21,9 @@ set_var() {
     echo "skip  $name (not set)"
     return
   fi
-  railway variables --service "$SERVICE" --set "$name=$value" >/dev/null
+  # MSYS_NO_PATHCONV=1 prevents Git Bash for Windows from rewriting Unix paths
+  # like /app/data into C:/Program Files/Git/app/data when forwarding to railway.
+  MSYS_NO_PATHCONV=1 railway variable set "$name=$value" --service "$SERVICE" --skip-deploys >/dev/null
   echo "ok    $name"
 }
 

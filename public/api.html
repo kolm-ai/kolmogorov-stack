@@ -26,7 +26,7 @@
   .api-toc { position: sticky; top: 88px; align-self: start; border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px; background: var(--bg-2, #11151b); font-family: var(--mono); font-size: 12px; }
   .api-toc h4 { margin: 0 0 12px; font-size: 11px; text-transform: uppercase; color: var(--ink-faint, #737c73); letter-spacing: 0.05em; font-weight: 540; }
   .api-toc a { display: block; color: var(--ink-mute, #b5bdb1); text-decoration: none; padding: 4px 0; border-radius: 4px; }
-  .api-toc a:hover { color: var(--violet, #4c7dff); }
+  .api-toc a:hover { color: var(--violet, #faf2e1); }
   .api-toc .grp { margin-top: 14px; }
   .api-section { margin-bottom: 56px; }
   .api-section h2 { margin: 0 0 14px; font-size: 22px; font-weight: 540; letter-spacing: -0.005em; }
@@ -34,18 +34,18 @@
   .endpoint { border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); margin-bottom: 22px; overflow: hidden; }
   .endpoint .ep-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.18); }
   .endpoint .method { font-family: var(--mono); font-size: 11px; font-weight: 540; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .endpoint .method.get { background: rgba(76,125,255,0.12); color: #4c7dff; }
+  .endpoint .method.get { background: rgba(236,231,220, 0.12); color: #faf2e1; }
   .endpoint .method.post { background: rgba(126,240,210,0.12); color: #7ef0d2; }
   .endpoint .method.delete { background: rgba(255,107,145,0.12); color: #ff6b91; }
   .endpoint .path { font-family: var(--mono); font-size: 13.5px; color: var(--ink, #faf2e1); }
   .endpoint .auth-pill { margin-left: auto; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--line); color: var(--ink-faint, #737c73); }
-  .endpoint .auth-pill.bearer { color: #4c7dff; border-color: rgba(76,125,255,0.32); }
+  .endpoint .auth-pill.bearer { color: #faf2e1; border-color: rgba(236,231,220, 0.32); }
   .endpoint .auth-pill.public { color: #7ef0d2; border-color: rgba(126,240,210,0.28); }
   .endpoint .ep-body { padding: 18px 18px; }
   .endpoint .ep-body p { margin: 0 0 10px; font-size: 13.5px; color: var(--fg-2, #c9c2b2); line-height: 1.55; }
   .endpoint h5 { margin: 14px 0 6px; font-size: 11px; text-transform: uppercase; color: var(--ink-faint, #737c73); letter-spacing: 0.05em; font-weight: 540; font-family: var(--mono); }
   .endpoint pre { margin: 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0,0,0,0.32); font-family: var(--mono); font-size: 12px; color: var(--ink, #faf2e1); line-height: 1.65; overflow-x: auto; }
-  .endpoint pre.req { border-color: rgba(76,125,255,0.20); }
+  .endpoint pre.req { border-color: rgba(236,231,220, 0.20); }
   .endpoint pre.res { border-color: rgba(126,240,210,0.20); }
   .endpoint .errors { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-family: var(--mono); font-size: 12px; }
   .endpoint .errors .code { color: #ff6b91; }
@@ -164,16 +164,16 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
           <p class="lede">Every endpoint returns errors as JSON: <code>{ "error": "&lt;message&gt;", "code": "&lt;machine_code&gt;", "request_id": "..." }</code>. Status codes follow standard HTTP semantics.</p>
           <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-family:var(--mono);font-size:13px;color:var(--ink-mute,#b5bdb1);padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2,#11151b)">
             <code style="color:#7ef0d2">2xx</code><span>Success.</span>
-            <code style="color:#4c7dff">3xx</code><span>Redirect or not-modified.</span>
+            <code style="color:#faf2e1">3xx</code><span>Redirect or not-modified.</span>
             <code style="color:#ff6b91">400</code><span>Bad request: malformed body, missing fields, invalid types.</span>
             <code style="color:#ff6b91">401</code><span>Missing or invalid bearer / session.</span>
-            <code style="color:#ff6b91">402</code><span>Quota exhausted on current plan. <a href="/pricing" style="color:var(--violet,#4c7dff)">Upgrade</a> or wait for reset.</span>
+            <code style="color:#ff6b91">402</code><span>Quota exhausted on current plan. <a href="/pricing" style="color:var(--violet,#faf2e1)">Upgrade</a> or wait for reset.</span>
             <code style="color:#ff6b91">403</code><span>Authenticated but not authorized (wrong tenant, signup disabled).</span>
             <code style="color:#ff6b91">404</code><span>Not found.</span>
             <code style="color:#ff6b91">409</code><span>Conflict: duplicate id, signature mismatch, version skew.</span>
             <code style="color:#ff6b91">422</code><span>Semantically wrong: k-score below floor, verifier rejects.</span>
             <code style="color:#ff6b91">429</code><span>Rate-limited. <code>Retry-After</code> header indicates when.</span>
-            <code style="color:#ff6b91">500</code><span>Server error. Includes a <code>request_id</code> you can quote in <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" style="color:var(--violet,#4c7dff)">an issue</a>.</span>
+            <code style="color:#ff6b91">500</code><span>Server error. Includes a <code>request_id</code> you can quote in <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" style="color:var(--violet,#faf2e1)">an issue</a>.</span>
             <code style="color:#ff6b91">503</code><span>Upstream dependency unavailable (frontier API down, secret unset).</span>
           </div>
         </section>
@@ -701,15 +701,15 @@ count_only  bool     "1" | "true"</pre>
           <p class="lede">Thin wrappers around this HTTP surface. Add one to your project; the underlying API is the same.</p>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;font-family:var(--mono);font-size:12.5px">
             <div style="padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-2,#11151b)">
-              <div style="color:var(--violet,#4c7dff);text-transform:uppercase;font-size:10.5px;letter-spacing:0.05em;margin-bottom:6px">Node / TS</div>
+              <div style="color:var(--violet,#faf2e1);text-transform:uppercase;font-size:10.5px;letter-spacing:0.05em;margin-bottom:6px">Node / TS</div>
               <div style="color:var(--ink,#faf2e1)">npm i -g github:sneaky-hippo/kolmogorov-stack</div>
             </div>
             <div style="padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-2,#11151b)">
-              <div style="color:var(--violet,#4c7dff);text-transform:uppercase;font-size:10.5px;letter-spacing:0.05em;margin-bottom:6px">Python</div>
+              <div style="color:var(--violet,#faf2e1);text-transform:uppercase;font-size:10.5px;letter-spacing:0.05em;margin-bottom:6px">Python</div>
               <div style="color:var(--ink,#faf2e1)">pip install -e sdk/python</div>
             </div>
             <div style="padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-2,#11151b)">
-              <div style="color:var(--violet,#4c7dff);text-transform:uppercase;font-size:10.5px;letter-spacing:0.05em;margin-bottom:6px">Browser</div>
+              <div style="color:var(--violet,#faf2e1);text-transform:uppercase;font-size:10.5px;letter-spacing:0.05em;margin-bottom:6px">Browser</div>
               <div style="color:var(--ink,#faf2e1)">&lt;script src="/sdk.js"&gt;&lt;/script&gt;</div>
             </div>
           </div>

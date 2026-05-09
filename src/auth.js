@@ -36,6 +36,8 @@ function constantTimeEqual(a, b) {
   return crypto.timingSafeEqual(left, right);
 }
 
+export { constantTimeEqual };
+
 function tenantKeyMatches(tenant, key) {
   if (!tenant || !key) return false;
   if (tenant.api_key_hash && constantTimeEqual(tenant.api_key_hash, hashApiKey(key))) return true;

@@ -2,6 +2,7 @@
   "version": 2,
   "rewrites": [
     { "source": "/health", "destination": "https://kolmogorov-stack-production.up.railway.app/health" },
+    { "source": "/ready", "destination": "https://kolmogorov-stack-production.up.railway.app/ready" },
     { "source": "/v1/(.*)", "destination": "https://kolmogorov-stack-production.up.railway.app/v1/$1" },
     { "source": "/", "destination": "/index.html" },
     { "source": "/compile", "destination": "/compile.html" },
