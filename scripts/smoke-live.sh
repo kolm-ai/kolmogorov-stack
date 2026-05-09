@@ -735,6 +735,11 @@ B31_BENCH=$(curl -s "$URL/benchmarks")
 check "benchmarks page kolm-benchmark-1 intact"    has "$B31_BENCH" 'kolm-benchmark-1'
 check "benchmarks page disowns SWE-bench leaderboard" has "$B31_BENCH" 'does not appear on the SWE-bench'
 check "/benchmarks links to methodology"           has "$B31_BENCH" '/articles/how-we-benchmark'
+check "/benchmarks two-views K-score header"       has "$B31_BENCH" 'K-score, two views'
+check "/benchmarks bench composite labelled"       has "$B31_BENCH" 'k_score.composite &middot; bench harness'
+check "/benchmarks gate canonical labelled"        has "$B31_BENCH" 'k_score.gate &middot; canonical'
+check "/benchmarks gate formula 0.40"              has "$B31_BENCH" '<span class="var">0.40</span>·A'
+check "/benchmarks gate threshold 0.85"            has "$B31_BENCH" 'K &ge; 0.85'
 
 echo ""
 echo "=== 32. v7.0 — /build-your-own + spec-driven authoring + 4 fixtures ==="

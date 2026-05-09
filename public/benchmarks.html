@@ -256,14 +256,19 @@
     </div>
 
     <div class="group">
-      <h2>K-score, computed</h2>
-      <p>K-score is what the manifest reports: a single number that combines accuracy, eval coverage, and binary size. Bigger is better; bloat is penalized:</p>
+      <h2>K-score, two views</h2>
+      <p>The artifact ships two related numbers, each suited to its job. The bench harness emits an engineering composite that rewards small artifacts at high accuracy; the gate uses the canonical 5-component weighted sum from <a href="/k-score" style="color:var(--accent-strong)">/k-score</a>.</p>
       <div class="math">
-        <div class="lab">k_score.composite</div>
+        <div class="lab">k_score.composite &middot; bench harness</div>
         composite = (<span class="var">accuracy</span> · <span class="var">coverage</span> · 1000) / log<sub>2</sub>(<span class="var">size_kb</span> + 2)
       </div>
-      <p>A 5KB recipe at 100% accuracy and 100% coverage scores ~588. A 50MB checkpoint at the same accuracy scores ~62. The denominator is the discipline.</p>
-      <p><a href="/k-score" style="color:var(--accent-strong)">→ how K-score is computed, all five raw axes</a></p>
+      <p>A 5&nbsp;KB recipe at 100% accuracy and 100% coverage scores ~588. A 50&nbsp;MB checkpoint at the same accuracy scores ~62. The denominator is the bloat discipline; this is the column you see in the fixture table below.</p>
+      <div class="math">
+        <div class="lab">k_score.gate &middot; canonical, 0&ndash;1</div>
+        K = <span class="var">0.40</span>·A + <span class="var">0.15</span>·S + <span class="var">0.15</span>·L + <span class="var">0.15</span>·C + <span class="var">0.15</span>·V
+      </div>
+      <p>Where A = accuracy, S = size, L = latency, C = cost, V = coverage. Ship gate is <b>K &ge; 0.85</b> (0.95 for safety-critical, 0.70 for prototype relax). This is the manifest field <code>k_score.gate</code> and the number every comparison page reports.</p>
+      <p><a href="/k-score" style="color:var(--accent-strong)">&rarr; how the canonical K-score is computed, all five axes</a></p>
     </div>
 
     <div class="group">
