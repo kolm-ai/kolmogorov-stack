@@ -1487,7 +1487,7 @@ TIT_MAN=$(curl -s "$URL/manifesto")
 TIT_CMP=$(curl -s "$URL/compile")
 TIT_FIN=$(curl -s "$URL/finance")
 check "/security title middot"              has "$TIT_SEC" 'Security · kolm</title>'
-check "/pricing title middot"               has "$TIT_PRC" 'Pricing · kolm</title>'
+check "/pricing title brand suffix"          has "$TIT_PRC" 'kolm pricing'
 check "/faq title middot"                   has "$TIT_FAQ" 'FAQ · kolm</title>'
 check "/changelog title middot"             has "$TIT_CHL" 'Changelog · kolm</title>'
 check "/trust title middot"                 has "$TIT_TR" 'Trust · kolm</title>'

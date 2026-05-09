@@ -54,6 +54,17 @@ set_var GITHUB_OAUTH_CLIENT_SECRET "<YOURS>"
 
 set_var OAUTH_REDIRECT_BASE "https://kolm.ai"
 
+# --- Persistence -----------------------------------------------------------
+# Required for /ready to return ready in production. KOLM_DATA_DIR must point
+# at a writable path. Without a Railway volume mounted at /data this is
+# ephemeral (wiped on every restart); add the volume after first launch:
+#   railway volume add --mount-path /data --service kolmogorov-stack
+# then change these to /data and /data/artifacts.
+set_var KOLM_DATA_DIR        "/app/data"
+set_var KOLM_ARTIFACT_DIR    "/app/data/artifacts"
+set_var KOLM_STORE_DRIVER    "json"
+set_var KOLM_ALLOW_JSON_STORE "true"
+
 # --- Email (Resend) --------------------------------------------------------
 # 1. Sign up at https://resend.com (Google login works)
 # 2. Add the kolm.ai domain at https://resend.com/domains
