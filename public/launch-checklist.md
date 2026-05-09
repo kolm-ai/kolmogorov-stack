@@ -63,16 +63,15 @@
 
 ## Founder-only items
 
-The four checklist items below are **founder-blocking** and cannot be unblocked by the engineering loop:
+Stripe (live keys + webhook secret + payment links), Resend (domain + API key), and Railway storage env are already provisioned on Vercel — verified live by /v1/stripe/webhook returning 400 on missing signature (endpoint live, signing active) and /ready returning all-green. The two remaining founder items are OAuth credentials (Google + GitHub developer-console apps) and the REM Labs trainer bridge:
 
-| # | Item | Owner | Blocking |
-|---|---|---|---|
-| OAuth | Google + GitHub OAuth redirect URIs configured on respective developer consoles | Founder | `/signin` smoke (currently soft-fails) |
-| Resend | Resend.com domain verified, API key on Vercel env, `scripts/setup-prod.sh` run once | Founder | Email magic-link flow |
-| Stripe | Test-mode payment links + webhook secret per D1/D2 above | Founder | Workstream D |
-| REM Labs bridge | `/v1/specialists/auto-distill` calls REM Labs trainer with valid creds | Founder | E3-E5 close |
+| # | Item | Owner | Blocking | How to unblock |
+|---|---|---|---|---|
+| OAuth-1 | Google OAuth client ID + secret | Founder | `/v1/oauth/providers` returns `{google:false}` → buttons hidden on /signin | Console → Create OAuth client → set redirect to `https://kolm.ai/v1/oauth/google/callback` → set `GOOGLE_OAUTH_CLIENT_ID` + `GOOGLE_OAUTH_CLIENT_SECRET` on Vercel |
+| OAuth-2 | GitHub OAuth app | Founder | `/v1/oauth/providers` returns `{github:false}` → buttons hidden on /signin | github.com/settings/developers → New OAuth App → callback `https://kolm.ai/v1/oauth/github/callback` → set `GITHUB_OAUTH_CLIENT_ID` + `GITHUB_OAUTH_CLIENT_SECRET` on Vercel |
+| REM-bridge | REM Labs trainer URL + token for `/v1/specialists/auto-distill` to mint real `.kolm` artifacts (currently returns honest "not enough captures" stub) | Founder | E3-E5 close | Set `REM_LABS_BRIDGE_URL` + `REM_LABS_BRIDGE_TOKEN` on Vercel once REM Labs trainer endpoint is up |
 
-When all four are done, the box count above moves from 24/30 to 30/30.
+When all three are done, the box count moves to 30/30 and the OAuth row auto-renders on /signin (the UI is wired — it auto-shows the button as soon as `/v1/oauth/providers` returns true for that provider).
 
 ---
 
@@ -224,8 +223,9 @@ Tuesday 8am PT *or* Wed 8am PT (depending on PH performance). Title: **"Show HN:
 ## Box count
 
 - 27 / 30 boxes complete (engineering loop).
-- 3 / 30 boxes founder-blocked (Stripe payment links + STRIPE_WEBHOOK_SECRET on Vercel; OAuth + Resend env config; REM_LABS_BRIDGE_URL/_TOKEN; `kolmogorov/swebench-reproducer:1.0.0` Docker image publish).
+- 3 / 30 boxes founder-blocked: Google OAuth client, GitHub OAuth app, REM Labs trainer bridge.
+- Stripe + Resend + Railway storage already provisioned on Vercel. Verified live: `/v1/stripe/webhook` 400-on-missing-sig (signing active), `/ready` all-required-green.
 - Marketing materials drafted; founder owns posting.
 - End-to-end dry-run scheduled the day before launch.
 
-When founder unblocks the six items, the loop reruns the dry-run gauntlet and the launch ships.
+When founder configures the three OAuth + REM-bridge items, the loop reruns the dry-run gauntlet and the launch ships.
