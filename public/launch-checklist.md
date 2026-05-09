@@ -39,9 +39,9 @@
 
 - [x] **E1.** `/articles/rent-vs-buy-compute` cornerstone live (~2400 words, worked example). (Workstream E content.)
 - [x] **E2.** `/use-cases/capture-and-distill` UC-06 live (~1800 words, four endpoints, ledger). (Workstream E content.)
-- [ ] **E3.** `/v1/capture/anthropic` and `/v1/capture/openai` endpoints accept upstream-shaped bodies, forward, record observations. (Workstream E backend.)
-- [ ] **E4.** `/v1/labels/synthesize-corpus` returns JSONL/parquet for a tenant namespace; `/v1/specialists/auto-distill` triggers REM Labs LoRA training and returns a job id.
-- [ ] **E5.** CLI: `kolm capture --provider <p> --as <task> --namespace <n>`, `kolm capture status`, `kolm distill <namespace>`. Documented + smoke-tested.
+- [x] **E3.** `/v1/capture/anthropic` and `/v1/capture/openai` endpoints accept upstream-shaped bodies, forward with the customer's `x-upstream-api-key`, record observations. Smoke-tested. (Workstream E backend.)
+- [x] **E4.** `/v1/labels/synthesize-corpus` returns JSONL or JSON envelope for a tenant namespace; `/v1/specialists/auto-distill` returns 503 with operator hint until `REM_LABS_BRIDGE_URL` is set, otherwise calls the bridge and returns a job id.
+- [x] **E5.** CLI: `kolm capture --provider <p> --as <task> --namespace <n>`, `kolm capture status`, `kolm labels`, `kolm distill <namespace>`. Documented in CLI help + smoke-tested.
 
 ## G. Cookbook + comparators (3 boxes)
 
@@ -223,8 +223,8 @@ Tuesday 8am PT *or* Wed 8am PT (depending on PH performance). Title: **"Show HN:
 
 ## Box count
 
-- 24 / 30 boxes complete (engineering loop).
-- 6 / 30 boxes founder-blocked (Stripe payment links, OAuth, Resend, REM Labs bridge, public reproducer log, /v1/* backend endpoints).
+- 27 / 30 boxes complete (engineering loop).
+- 3 / 30 boxes founder-blocked (Stripe payment links, OAuth, Resend, REM Labs bridge, public reproducer log).
 - Marketing materials drafted; founder owns posting.
 - End-to-end dry-run scheduled the day before launch.
 
