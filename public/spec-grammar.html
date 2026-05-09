@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RS-1 grammar (BNF) · kolm</title>
+<meta name="description" content="The BNF grammar for the .kolm manifest and receipt. Drop it into your parser; ignore the prose.">
+<meta name="theme-color" content="#0b0d10">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="RS-1 grammar (BNF) · kolm">
+<meta property="og:description" content="A formal BNF grammar for the .kolm manifest and receipt.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/spec/grammar">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/spec/grammar">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="/escape.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "RS-1 grammar (BNF) — formal grammar for the .kolm manifest and receipt",
+  "description": "A formal BNF grammar that describes the manifest, recipes, and receipt JSON for the .kolm artifact format.",
+  "url": "https://kolm.ai/spec/grammar",
+  "author": {"@type": "Organization", "name": "Kolmogorov"},
+  "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+  "datePublished": "2026-05-09",
+  "license": "https://opensource.org/licenses/MIT"
+}
+</script>
+
+<style>
+  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220,0.10);--good:#7ef0d2;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:rgba(236,231,220,0.30)}
+
+  .wrap{max-width:880px;margin:0 auto;padding:0 32px;width:100%}
+  @media(max-width:720px){.wrap{padding:0 20px}}
+
+  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+  @media(max-width:720px){header.site .row{padding:0 20px}}
+  header.site .left{display:flex;align-items:center;gap:36px}
+  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+  header.site .brand span{font-weight:540;font-size:16px;letter-spacing:0}
+  header.site nav{display:flex;gap:22px}
+  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+  header.site .right{display:flex;align-items:center;gap:14px}
+  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+  header.site .right .ghost:hover{color:var(--ink)}
+  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:540}
+
+  main{padding:64px 0 96px;flex:1}
+  .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+  .eyebrow .num{color:var(--accent)}
+  h1{font-weight:540;letter-spacing:0;line-height:1.05;font-size:34px;margin:0 0 12px}
+  .lede{color:var(--ink-mute);font-size:16px;margin:0 0 32px;max-width:64ch;line-height:1.5}
+  h2{font-weight:540;letter-spacing:0;font-size:22px;margin:48px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+  h3{font-weight:540;letter-spacing:0;font-size:16px;margin:24px 0 8px;color:var(--ink)}
+  p{color:var(--ink-mute);margin:0 0 12px}
+  p strong{color:var(--ink);font-weight:540}
+  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.6}
+  pre .com{color:var(--ink-faint)}
+  pre .key{color:var(--good)}
+  pre .lit{color:#ffd479}
+  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+  ul li{margin:6px 0}
+
+  .copy-row{display:flex;justify-content:flex-end;margin-bottom:6px}
+  .copy{appearance:none;cursor:pointer;background:var(--bg-elev);border:1px solid var(--line-strong);color:var(--ink-mute);font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:4px;transition:color 120ms,border-color 120ms;letter-spacing:0}
+  .copy:hover{color:var(--ink);border-color:var(--ink-mute)}
+  .copy.ok{color:var(--good);border-color:rgba(126,240,210,0.30)}
+
+  .nav-trail{display:flex;gap:10px;font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-bottom:24px}
+  .nav-trail a{color:var(--ink-mute)}
+  .nav-trail a:hover{color:var(--ink)}
+
+  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+  footer a{color:var(--ink-mute)}
+  footer a:hover{color:var(--ink)}
+  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+  .footer-row a{color:inherit}
+</style>
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="row">
+    <div class="left">
+      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+      <nav>
+        <a href="/compile">Compile</a>
+        <a href="/serve">Serve</a>
+        <a href="/anatomy">.kolm</a>
+        <a href="/k-score">K-score</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="nav-trail"><a href="/spec">spec</a><span>/</span><span>grammar</span></div>
+    <div class="eyebrow"><span class="num">A1</span> RS-1 normative grammar</div>
+    <h1>RS-1 grammar (BNF)</h1>
+    <p class="lede">A formal grammar for the <code>.kolm</code> manifest, recipes, and receipt. If you write a parser to this, you can validate any RS-1 artifact without reading the prose.</p>
+
+    <p>Notation: extended BNF. <code>::=</code> means “is defined as”. <code>|</code> means alternatives. <code>?</code> means optional. <code>*</code> means zero-or-more. <code>+</code> means one-or-more. Quoted strings are literal. <code>WS</code> is implicit between tokens at JSON boundaries.</p>
+
+    <h2>Top-level archive</h2>
+    <div class="copy-row"><button class="copy" data-target="g-archive">copy</button></div>
+<pre id="g-archive"><span class="com">; A .kolm is a deterministic ZIP. Members appear in this order.</span>
+<span class="key">archive</span>          ::= <span class="key">manifest</span> <span class="key">recipes</span> <span class="key">evals</span> <span class="key">receipt</span> <span class="key">model_ptr</span> <span class="key">lora</span>? <span class="key">index</span>?
+<span class="key">manifest</span>         ::= <span class="lit">"manifest.json"</span> <span class="key">manifest_doc</span>
+<span class="key">recipes</span>          ::= <span class="lit">"recipes.json"</span> <span class="key">recipes_doc</span>
+<span class="key">evals</span>            ::= <span class="lit">"evals.jsonl"</span> <span class="key">jsonl_lines</span>
+<span class="key">receipt</span>          ::= <span class="lit">"receipt.json"</span> <span class="key">receipt_doc</span>
+<span class="key">model_ptr</span>        ::= <span class="lit">"model.ptr"</span> <span class="key">model_ptr_doc</span>
+<span class="key">lora</span>             ::= <span class="lit">"lora.bin"</span> <span class="key">bytes</span>
+<span class="key">index</span>            ::= <span class="lit">"index.sqlite-vec"</span> <span class="key">bytes</span>
+</pre>
+
+    <h2>manifest.json</h2>
+    <div class="copy-row"><button class="copy" data-target="g-manifest">copy</button></div>
+<pre id="g-manifest"><span class="key">manifest_doc</span>     ::= <span class="lit">"{"</span> <span class="key">m_spec</span> <span class="lit">","</span> <span class="key">m_schema</span> <span class="lit">","</span> <span class="key">m_task</span> <span class="lit">","</span> <span class="key">m_compiled</span> <span class="lit">","</span>
+                     <span class="key">m_base_model</span> <span class="lit">","</span> <span class="key">m_recipe_registry</span> <span class="lit">","</span>
+                     <span class="key">m_k_score</span> <span class="lit">","</span> <span class="key">m_compiler</span> <span class="lit">"}"</span>
+
+<span class="key">m_spec</span>           ::= <span class="lit">"\"spec\""</span> <span class="lit">":"</span> <span class="lit">"\"rs-1\""</span>
+<span class="key">m_schema</span>         ::= <span class="lit">"\"schema\""</span> <span class="lit">":"</span> <span class="lit">"\"manifest-v0.1\""</span>
+<span class="key">m_task</span>           ::= <span class="lit">"\"task\""</span> <span class="lit">":"</span> <span class="key">string</span>
+<span class="key">m_compiled</span>       ::= <span class="lit">"\"compiled_at\""</span> <span class="lit">":"</span> <span class="key">iso_8601_z</span>
+
+<span class="key">m_base_model</span>     ::= <span class="lit">"\"base_model\""</span> <span class="lit">":"</span> <span class="lit">"{"</span>
+                       <span class="lit">"\"name\""</span> <span class="lit">":"</span> <span class="key">string</span> <span class="lit">","</span>
+                       <span class="lit">"\"sha256\""</span> <span class="lit">":"</span> <span class="key">hex64</span>
+                     <span class="lit">"}"</span>
+
+<span class="key">m_recipe_registry</span> ::= <span class="lit">"\"recipe_registry\""</span> <span class="lit">":"</span> <span class="lit">"{"</span>
+                       <span class="lit">"\"version\""</span> <span class="lit">":"</span> <span class="key">date_or_tag</span> <span class="lit">","</span>
+                       <span class="lit">"\"url\""</span> <span class="lit">":"</span> <span class="key">https_url</span>
+                     <span class="lit">"}"</span>
+
+<span class="key">m_k_score</span>        ::= <span class="lit">"\"k_score\""</span> <span class="lit">":"</span> <span class="lit">"{"</span>
+                       <span class="lit">"\"spec\""</span> <span class="lit">":"</span> <span class="lit">"\"k-score-1\""</span> <span class="lit">","</span>
+                       <span class="lit">"\"composite\""</span> <span class="lit">":"</span> <span class="key">unit_float</span> <span class="lit">","</span>
+                       <span class="lit">"\"accuracy\""</span> <span class="lit">":"</span> <span class="key">unit_float</span> <span class="lit">","</span>
+                       <span class="lit">"\"coverage\""</span> <span class="lit">":"</span> <span class="key">unit_float</span> <span class="lit">","</span>
+                       <span class="lit">"\"size_bytes\""</span> <span class="lit">":"</span> <span class="key">u64</span> <span class="lit">","</span>
+                       <span class="lit">"\"p50_latency_us\""</span> <span class="lit">":"</span> <span class="key">u64</span> <span class="lit">","</span>
+                       <span class="lit">"\"cost_usd_per_call\""</span> <span class="lit">":"</span> <span class="key">non_neg_float</span>
+                     <span class="lit">"}"</span>
+
+<span class="key">m_compiler</span>       ::= <span class="lit">"\"compiler\""</span> <span class="lit">":"</span> <span class="lit">"{"</span>
+                       <span class="lit">"\"name\""</span> <span class="lit">":"</span> <span class="lit">"\"kolm\""</span> <span class="lit">","</span>
+                       <span class="lit">"\"version\""</span> <span class="lit">":"</span> <span class="key">semver</span>
+                     <span class="lit">"}"</span>
+</pre>
+
+    <h2>recipes.json</h2>
+    <div class="copy-row"><button class="copy" data-target="g-recipes">copy</button></div>
+<pre id="g-recipes"><span class="key">recipes_doc</span>      ::= <span class="lit">"{"</span> <span class="lit">"\"recipes\""</span> <span class="lit">":"</span> <span class="lit">"["</span> <span class="key">recipe_list</span> <span class="lit">"]"</span> <span class="lit">"}"</span>
+<span class="key">recipe_list</span>      ::= <span class="key">recipe</span> ( <span class="lit">","</span> <span class="key">recipe</span> )*  | <span class="com">; empty</span>
+<span class="key">recipe</span>           ::= <span class="lit">"{"</span>
+                       <span class="lit">"\"id\""</span> <span class="lit">":"</span> <span class="key">id_slug</span> <span class="lit">","</span>
+                       <span class="lit">"\"shape\""</span> <span class="lit">":"</span> <span class="key">string</span> <span class="lit">","</span>
+                       <span class="lit">"\"tokens\""</span> <span class="lit">":"</span> <span class="lit">"["</span> <span class="key">string_list</span> <span class="lit">"]"</span> <span class="lit">","</span>
+                       <span class="lit">"\"coverage\""</span> <span class="lit">":"</span> <span class="key">unit_float</span>
+                     <span class="lit">"}"</span>
+</pre>
+
+    <h2>receipt.json</h2>
+    <div class="copy-row"><button class="copy" data-target="g-receipt">copy</button></div>
+<pre id="g-receipt"><span class="key">receipt_doc</span>      ::= <span class="lit">"{"</span>
+                       <span class="lit">"\"spec\""</span> <span class="lit">":"</span> <span class="lit">"\"receipt-v0.1\""</span> <span class="lit">","</span>
+                       <span class="lit">"\"alg\""</span> <span class="lit">":"</span> <span class="lit">"\"HMAC-SHA256\""</span> <span class="lit">","</span>
+                       <span class="lit">"\"signed_at\""</span> <span class="lit">":"</span> <span class="key">iso_8601_z</span> <span class="lit">","</span>
+                       <span class="lit">"\"signer\""</span> <span class="lit">":"</span> <span class="key">signer_id</span> <span class="lit">","</span>
+                       <span class="lit">"\"chain\""</span> <span class="lit">":"</span> <span class="lit">"["</span> <span class="key">chain_link</span>+ <span class="lit">"]"</span> <span class="lit">","</span>
+                       <span class="lit">"\"registry_signature\""</span> <span class="lit">":"</span> <span class="key">b64</span> <span class="lit">","</span>
+                       <span class="lit">"\"signature\""</span> <span class="lit">":"</span> <span class="key">b64</span>
+                     <span class="lit">"}"</span>
+
+<span class="key">chain_link</span>       ::= <span class="lit">"{"</span>
+                       <span class="lit">"\"member\""</span> <span class="lit">":"</span> <span class="key">member_name</span> <span class="lit">","</span>
+                       <span class="lit">"\"sha256\""</span> <span class="lit">":"</span> <span class="key">hex64</span>
+                       ( <span class="lit">","</span> <span class="lit">"\"optional\""</span> <span class="lit">":"</span> <span class="key">bool</span> )?
+                     <span class="lit">"}"</span>
+
+<span class="key">member_name</span>      ::= <span class="lit">"\"manifest.json\""</span>
+                   | <span class="lit">"\"recipes.json\""</span>
+                   | <span class="lit">"\"evals.jsonl\""</span>
+                   | <span class="lit">"\"model.ptr\""</span>
+                   | <span class="lit">"\"lora.bin\""</span>
+                   | <span class="lit">"\"index.sqlite-vec\""</span>
+
+<span class="key">signer_id</span>        ::= <span class="key">string</span>      <span class="com">; e.g. "kolm-cloud@kolm.ai"</span>
+</pre>
+
+    <h2>model.ptr</h2>
+    <div class="copy-row"><button class="copy" data-target="g-modelptr">copy</button></div>
+<pre id="g-modelptr"><span class="key">model_ptr_doc</span>    ::= <span class="lit">"{"</span>
+                       <span class="lit">"\"kind\""</span> <span class="lit">":"</span> <span class="key">model_kind</span> <span class="lit">","</span>
+                       <span class="lit">"\"name\""</span> <span class="lit">":"</span> <span class="key">string</span> <span class="lit">","</span>
+                       <span class="lit">"\"sha256\""</span> <span class="lit">":"</span> <span class="key">hex64</span> <span class="lit">","</span>
+                       <span class="lit">"\"url\""</span> <span class="lit">":"</span> <span class="key">https_url</span>
+                     <span class="lit">"}"</span>
+
+<span class="key">model_kind</span>       ::= <span class="lit">"\"huggingface\""</span> | <span class="lit">"\"ollama\""</span> | <span class="lit">"\"local\""</span>
+</pre>
+
+    <h2>Lexical primitives</h2>
+    <div class="copy-row"><button class="copy" data-target="g-lex">copy</button></div>
+<pre id="g-lex"><span class="key">string</span>           ::= <span class="lit">"\""</span> <span class="key">json_string_chars</span> <span class="lit">"\""</span>
+<span class="key">hex64</span>            ::= <span class="lit">"\""</span> [<span class="lit">0-9a-f</span>]{<span class="lit">64</span>} <span class="lit">"\""</span>
+<span class="key">b64</span>              ::= <span class="lit">"\""</span> [<span class="lit">A-Za-z0-9+/=</span>]+ <span class="lit">"\""</span>
+<span class="key">u64</span>              ::= [<span class="lit">0</span>-<span class="lit">9</span>]+                       <span class="com">; 0..2^64-1</span>
+<span class="key">unit_float</span>       ::= <span class="lit">"0"</span> | <span class="lit">"1"</span> | <span class="lit">"0."</span> [<span class="lit">0-9</span>]+ | <span class="lit">"1.0"</span>     <span class="com">; 0.0..1.0 inclusive</span>
+<span class="key">non_neg_float</span>    ::= [<span class="lit">0-9</span>]+ ( <span class="lit">"."</span> [<span class="lit">0-9</span>]+ )?
+<span class="key">bool</span>             ::= <span class="lit">"true"</span> | <span class="lit">"false"</span>
+<span class="key">iso_8601_z</span>       ::= <span class="lit">"\""</span> [<span class="lit">0-9</span>]{<span class="lit">4</span>}<span class="lit">"-"</span>[<span class="lit">0-9</span>]{<span class="lit">2</span>}<span class="lit">"-"</span>[<span class="lit">0-9</span>]{<span class="lit">2</span>}
+                       <span class="lit">"T"</span>[<span class="lit">0-9</span>]{<span class="lit">2</span>}<span class="lit">":"</span>[<span class="lit">0-9</span>]{<span class="lit">2</span>}<span class="lit">":"</span>[<span class="lit">0-9</span>]{<span class="lit">2</span>}<span class="lit">"Z\""</span>
+<span class="key">date_or_tag</span>      ::= <span class="lit">"\""</span> [<span class="lit">0-9</span>]{<span class="lit">4</span>}<span class="lit">"-"</span>[<span class="lit">0-9</span>]{<span class="lit">2</span>}<span class="lit">"-"</span>[<span class="lit">0-9</span>]{<span class="lit">2</span>} <span class="lit">"\""</span>
+                   | <span class="key">tag_string</span>
+<span class="key">id_slug</span>          ::= <span class="lit">"\""</span> [<span class="lit">a-z0-9-</span>]+ <span class="lit">"\""</span>
+<span class="key">semver</span>           ::= <span class="lit">"\""</span> [<span class="lit">0-9</span>]+<span class="lit">"."</span>[<span class="lit">0-9</span>]+<span class="lit">"."</span>[<span class="lit">0-9</span>]+ ( <span class="lit">"-"</span> [<span class="lit">a-z0-9.-</span>]+ )? <span class="lit">"\""</span>
+<span class="key">https_url</span>        ::= <span class="lit">"\"https://"</span> [<span class="lit">^"</span>]+ <span class="lit">"\""</span>
+<span class="key">tag_string</span>       ::= <span class="lit">"\""</span> [<span class="lit">a-z0-9._-</span>]+ <span class="lit">"\""</span>
+<span class="key">jsonl_lines</span>      ::= ( <span class="key">json_object</span> <span class="lit">"\n"</span> )*
+<span class="key">json_object</span>      ::= <span class="com">; per RFC 8259</span>
+<span class="key">string_list</span>      ::= <span class="key">string</span> ( <span class="lit">","</span> <span class="key">string</span> )*  |
+<span class="key">json_string_chars</span> ::= <span class="com">; per RFC 8259, with sorted keys at parent scope</span>
+<span class="key">bytes</span>            ::= <span class="com">; opaque; SHA-256 must match the chain link</span>
+</pre>
+
+    <h2>Implementation notes</h2>
+    <ul>
+      <li><strong>Determinism.</strong> JSON keys MUST be emitted in lexicographic order. Whitespace MUST be a single space after <code>:</code> and <code>,</code> with no trailing whitespace, and a final <code>\n</code>. The grammar allows other whitespace; <em>compilers</em> MUST not emit it.</li>
+      <li><strong>ZIP framing.</strong> Members use STORE (no compression). Timestamps fixed at <code>1980-01-01T00:00:00Z</code>. External attributes zeroed.</li>
+      <li><strong>Unknown keys.</strong> Parsers SHOULD reject unknown keys at the top level of <code>manifest.json</code> and <code>receipt.json</code>. Inside <code>k_score</code> they MAY accept unknown keys for forward compatibility.</li>
+      <li><strong>Future versions.</strong> A breaking change bumps <code>spec</code> to <code>rs-2</code>. Non-breaking additions get new optional members and bump only the <code>schema</code> field.</li>
+    </ul>
+
+    <h2>Test fixtures</h2>
+    <p>Reference artifacts that conform to this grammar are published in the registry. Pull any one of them and run your parser against the bytes:</p>
+<pre><span class="com"># pick the top of the leaderboard</span>
+curl -s https://kolm.ai/v1/public/concepts | jq '.concepts[0].id'
+
+<span class="com"># download its .kolm</span>
+curl -sLO https://kolm.ai/v1/registry/&lt;id&gt;/artifact
+
+<span class="com"># verify against this grammar</span>
+kolm verify ./&lt;id&gt;.kolm --strict --grammar rs-1
+</pre>
+
+    <p style="margin-top:32px"><a href="/spec" style="color:var(--ink);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px;text-decoration-color:rgba(255,255,255,0.18)">← back to /spec</a></p>
+  </div>
+</main>
+
+<footer>
+  <div>&copy; 2026 Kolmogorov · the AI compiler · <a href="/docs/rs-1.md">RS-1 spec</a> · <a href="/docs">Docs</a> · <a href="/articles">Articles</a> · <a href="/security">Security</a></div>
+  <div class="footer-row">
+    <a href="/manifesto">Manifesto</a>
+    <a href="/trust">Trust</a>
+    <a href="/security">Security</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/changelog">Changelog</a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  document.querySelectorAll('button.copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var t = document.getElementById(btn.dataset.target);
+      if (!t) return;
+      var text = t.innerText;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){
+          var orig = btn.textContent;
+          btn.textContent = 'copied';
+          btn.classList.add('ok');
+          setTimeout(function(){ btn.textContent = orig; btn.classList.remove('ok'); }, 1400);
+        });
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
