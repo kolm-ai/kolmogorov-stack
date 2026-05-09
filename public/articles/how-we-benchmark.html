@@ -224,12 +224,16 @@
     <h2 id="reproducer">Reproducing on your own machine.</h2>
     <p>The full reproducer is one command. It will take ~90 minutes and ~$30 in Anthropic API credit at current Opus-4.7 prices. <b>You bring your own key.</b> We never see it; the harness writes it into the local environment of the spawned Docker containers and never out of process.</p>
 
-    <pre><span class="com"># install the CLI from npm</span>
-npx -y @kolmogorov/kolm@latest <span class="kw">bench</span> --reproduce <span class="arg">swebench-lite-n150</span> \
-  --seed <span class="arg">42</span> \
-  --n <span class="arg">150</span> \
-  --provider <span class="arg">anthropic</span> \
-  --model <span class="arg">claude-opus-4-7</span></pre>
+    <pre><span class="com"># install the CLI (one-liner, ~10s)</span>
+npm i -g github:sneaky-hippo/kolmogorov-stack
+
+<span class="com"># bring your own key, then run the reproducer</span>
+export ANTHROPIC_API_KEY=sk-ant-...
+kolm <span class="kw">bench</span> --reproduce <span class="arg">swebench-lite-n150</span> --seed <span class="arg">42</span> --n <span class="arg">150</span>
+
+<span class="com"># first time? sanity-check the wiring with the n=5 smoke (~3 min, ~$1)</span>
+kolm <span class="kw">bench</span> --reproduce <span class="arg">swebench-lite-n150</span> --seed <span class="arg">42</span> --n <span class="arg">5</span> --dry-run  <span class="com"># prints the plan</span>
+kolm <span class="kw">bench</span> --reproduce <span class="arg">swebench-lite-n150</span> --seed <span class="arg">42</span> --n <span class="arg">5</span></pre>
 
     <p>The CLI clones the SWE-bench repo at the pinned commit, pulls the official evaluator Docker image, runs both arms (cold and kolm), and writes a single JSON report to <code>~/.kolm/bench/swebench-lite-n150/report.json</code>. The report records the per-instance pass/fail for each arm, the wall time, the prompt + response token counts, the total dollar spend, and a sha256 of the evaluator's <code>_eval_*.log</code> outputs so you can diff our log against yours line-for-line.</p>
 

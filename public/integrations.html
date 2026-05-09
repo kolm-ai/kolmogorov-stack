@@ -197,8 +197,8 @@ script:
         <div class="ig">
           <div class="top"><h3>Node / TypeScript</h3><span class="stat shipped">shipped</span></div>
           <p>Browser-native SDK at <code>/sdk.js</code> + a Node wrapper at <code>sdk/node</code>. TypeScript types included.</p>
-          <pre>npm i @kolmogorov/kolm-sdk
-import { RecipeClient } from '@kolmogorov/kolm-sdk';
+          <pre>npm i github:sneaky-hippo/kolmogorov-stack
+import { RecipeClient } from 'kolmogorov-stack/sdk/node/index.mjs';
 const k = new RecipeClient({ apiKey: process.env.KOLM_API_KEY });
 const job = await k.synthesize({ positives, negatives });</pre>
           <div class="links"><a href="/sdk.js">/sdk.js</a><a href="/docs">docs</a></div>
