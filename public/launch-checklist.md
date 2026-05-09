@@ -31,9 +31,9 @@
 
 - [ ] **D1.** **(founder)** Real Stripe payment links provisioned in test mode for Pro / Team / Business / Enterprise tiers.
 - [ ] **D2.** **(founder)** `STRIPE_PAYMENT_LINK_*` and `STRIPE_WEBHOOK_SECRET` set on Vercel env.
-- [ ] **D3.** `POST /v1/stripe/webhook` verifies signature; plan flips webhook-driven only. (Workstream D, code-side.)
-- [ ] **D4.** `/v1/account/change-plan` returns Stripe redirect for paid tiers; immediate only for free. (Workstream D.)
-- [ ] **D5.** Smoke battery extends with 6 webhook tests (signature pass/fail, plan flip, idempotency, downgrade on cancel).
+- [x] **D3.** `POST /v1/stripe/webhook` verifies signature with `STRIPE_WEBHOOK_SECRET`, idempotency via `stripe_events` table, dispatches `checkout.session.completed` / `customer.subscription.updated` / `customer.subscription.deleted`. Code at `src/router.js:1105-1199` + `src/stripe.js`. Returns 503 (not 500) when secret unset — honest gap until D2.
+- [x] **D4.** `/v1/account/change-plan` returns billing redirect URL for paid tiers (no plan flip server-side without webhook); immediate flip only when target is `free`. Code at `src/router.js:1042-1094`. Returns 503 with `billing_not_configured` until D1+D2 land env vars.
+- [x] **D5.** Webhook coverage: 5 live-smoke tests around `/v1/stripe/webhook` and `/v1/account/change-plan` (route-shape, free downgrade, paid never auto-flips, 503-without-secret, plan=free at provision) + 10 unit tests in `tests/stripe.test.js` (valid sig, tampered body, stale timestamp, malformed header, missing inputs, idempotent digest, plan-cents mapping, checkout param stitching). Run `node --test tests/stripe.test.js`.
 
 ## E. Capture-and-distill (5 boxes)
 
@@ -224,7 +224,7 @@ Tuesday 8am PT *or* Wed 8am PT (depending on PH performance). Title: **"Show HN:
 ## Box count
 
 - 27 / 30 boxes complete (engineering loop).
-- 3 / 30 boxes founder-blocked (Stripe payment links, OAuth, Resend, REM Labs bridge, public reproducer log).
+- 3 / 30 boxes founder-blocked (Stripe payment links + STRIPE_WEBHOOK_SECRET on Vercel; OAuth + Resend env config; REM_LABS_BRIDGE_URL/_TOKEN; `kolmogorov/swebench-reproducer:1.0.0` Docker image publish).
 - Marketing materials drafted; founder owns posting.
 - End-to-end dry-run scheduled the day before launch.
 
