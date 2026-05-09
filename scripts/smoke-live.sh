@@ -1550,6 +1550,14 @@ check "/vs-langsmith title colon"           has "$(curl -s $URL/vs-langsmith)" '
 check "/vs-ollama title colon"              has "$(curl -s $URL/vs-ollama)" 'kolm vs Ollama: which one'
 check "/vs-openpipe title colon"            has "$(curl -s $URL/vs-openpipe)" 'kolm vs OpenPipe: capture'
 
+echo "=== 49l. JSON-LD parity on use-cases ==="
+for slug in agentic-coding ai-saas capture-and-distill embedded mobile web3-verifiable; do
+  PG=$(curl -s "$URL/use-cases/$slug")
+  check "/use-cases/$slug TechArticle ld+json"  has "$PG" 'application/ld+json'
+  check "/use-cases/$slug schema.org context"   has "$PG" 'schema.org'
+  check "/use-cases/$slug Kolmogorov org"        has "$PG" 'Kolmogorov'
+done
+
 echo "=== 49k. canonical primary-nav across pages ==="
 NAV_QS=$(curl -s "$URL/quickstart")
 NAV_CMP=$(curl -s "$URL/compare")
