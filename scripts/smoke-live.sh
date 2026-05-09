@@ -1488,6 +1488,12 @@ check "/pricing footer middot RS-1"        has "$PRICE2" 'RS-1 &middot; RS-1-mul
 check "/pricing no footer dash leak"       hashno "$PRICE2" 'RS-1 - RS-1-multimodal'
 
 echo ""
+echo "=== 49g. / homepage range typography ==="
+HOME=$(curl -s "$URL/")
+check "/ year-1 savings ndash range"       has "$HOME" '15&ndash;30&times;'
+check "/ no stale 15-30x ascii"            hashno "$HOME" '>15 - 30x<'
+
+echo ""
 echo "================================================"
 echo " RESULTS: $PASS pass, $FAIL fail"
 if [ $FAIL -gt 0 ]; then
