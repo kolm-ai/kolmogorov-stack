@@ -99,6 +99,46 @@
   footer ul a:hover{color:var(--ink)}
   footer .legal{padding-top:18px;border-top:1px solid var(--line);color:var(--ink-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 
+  /* k-score calculator — interactive widget, NEO LAB readout aesthetic.
+     Five sliders feed K = 0.40·A + 0.15·(S+L+C+V); status flips at 0.85. */
+  .kcalc{margin:36px 0 0;border:1px solid var(--line-strong);border-radius:12px;background:linear-gradient(180deg,#080a0c 0%,#050607 100%);overflow:hidden}
+  .kcalc-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 22px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-faint)}
+  .kcalc-head .ks-tag{display:inline-flex;align-items:center;gap:8px;color:var(--ink-mute)}
+  .kcalc-head .ks-tag::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(76,125,255,0.7)}
+  .kcalc-head .ks-hint{color:var(--ink-faint)}
+  .kcalc-body{display:grid;grid-template-columns:1.05fr 1fr;gap:0}
+  @media(max-width:780px){.kcalc-body{grid-template-columns:1fr}}
+  .kcalc-controls{padding:24px 22px;display:flex;flex-direction:column;gap:14px;border-right:1px solid var(--line)}
+  @media(max-width:780px){.kcalc-controls{border-right:0;border-bottom:1px solid var(--line)}}
+  .kcalc-row{display:grid;grid-template-columns:54px 1fr 60px;gap:12px;align-items:center}
+  .kcalc-row .ks-key{font-family:var(--mono);font-size:11px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute)}
+  .kcalc-row .ks-key b{color:var(--accent);font-weight:540;display:inline-block;width:14px}
+  .kcalc-row input[type="range"]{appearance:none;-webkit-appearance:none;width:100%;height:4px;background:linear-gradient(90deg,var(--accent) 0%,var(--accent) var(--at,90%),var(--line-strong) var(--at,90%),var(--line-strong) 100%);border-radius:3px;outline:0;cursor:pointer}
+  .kcalc-row input[type="range"]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#faf2e1;border:2px solid #050607;box-shadow:0 0 0 1px var(--accent),0 0 8px rgba(76,125,255,0.45);cursor:grab}
+  .kcalc-row input[type="range"]::-webkit-slider-thumb:active{cursor:grabbing}
+  .kcalc-row input[type="range"]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#faf2e1;border:2px solid #050607;box-shadow:0 0 0 1px var(--accent),0 0 8px rgba(76,125,255,0.45);cursor:grab}
+  .kcalc-row .ks-num{font-family:var(--mono);font-size:13px;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+  .kcalc-row .ks-num .w{color:var(--ink-faint);font-size:10.5px;display:block;letter-spacing: 0;line-height:1}
+
+  .kcalc-readout{padding:24px 22px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(ellipse 480px 220px at 50% 0%,rgba(76,125,255,0.08),transparent 60%)}
+  .kcalc-K{display:flex;align-items:baseline;gap:14px;justify-content:space-between}
+  .kcalc-K .ks-big{font-family:var(--mono);font-size:54px;font-weight:540;letter-spacing: 0;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+  .kcalc-K .ks-big.ks-fail{color:var(--bad)}
+  .kcalc-K .ks-status{font-family:var(--mono);font-size:11px;letter-spacing: 0;text-transform:uppercase;padding:5px 10px;border-radius:4px;border:1px solid var(--line-strong);color:var(--ink-mute);white-space:nowrap}
+  .kcalc-K .ks-status.ks-ship{color:var(--good);border-color:rgba(126,240,210,0.3);background:rgba(126,240,210,0.06)}
+  .kcalc-K .ks-status.ks-fail{color:var(--bad);border-color:rgba(255,107,145,0.3);background:rgba(255,107,145,0.06)}
+  .kcalc-bar{position:relative;height:10px;border-radius:6px;background:var(--line-strong);overflow:hidden}
+  .kcalc-bar .ks-fill{position:absolute;inset:0 auto 0 0;width:var(--w,0%);background:linear-gradient(90deg,#9db6ff 0%,var(--accent) 100%);transition:width 140ms ease-out}
+  .kcalc-bar.ks-fail .ks-fill{background:linear-gradient(90deg,#ff9ab1 0%,var(--bad) 100%)}
+  .kcalc-bar .ks-mark{position:absolute;top:-3px;bottom:-3px;left:85%;width:2px;background:rgba(250,242,225,0.45);box-shadow:0 0 6px rgba(250,242,225,0.4)}
+  .kcalc-bar .ks-mark::after{content:"0.85 gate";position:absolute;left:6px;top:-16px;font-family:var(--mono);font-size:9.5px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap}
+  .kcalc-formula{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing: 0;line-height:1.7;padding:12px 14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px}
+  .kcalc-formula .ks-term{color:var(--ink-mute)}
+  .kcalc-formula .ks-w{color:var(--accent)}
+  .kcalc-cmd{font-family:var(--mono);font-size:11px;color:var(--ink-faint);display:flex;align-items:center;gap:8px}
+  .kcalc-cmd code{color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:2px 8px;font-size:11px}
+  @media(prefers-reduced-motion: reduce){.kcalc-bar .ks-fill{transition:none}}
+
   .plate{position:relative;margin:48px 0 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:#050607;isolation:isolate}
   .plate .img{position:relative;aspect-ratio:16/9;background-position:center;background-size:cover;background-repeat:no-repeat}
   .plate .img::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 50%,rgba(8,8,10,0.78) 100%),linear-gradient(90deg,rgba(8,8,10,0.55) 0%,transparent 30%,transparent 70%,rgba(8,8,10,0.55) 100%)}
@@ -266,7 +306,105 @@ $ kolm inspect <span class="key">support-triage.kolm</span>
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">03</span> · Why one number</div>
+    <div class="eyebrow"><span class="num">03</span> · Try it</div>
+    <h2>Live formula. <span class="tone">Drag to ship.</span></h2>
+    <p class="lede">Move any slider. K recomputes from the same five terms a real artifact carries. Cross 0.85 and the gate flips green — that is what <code>kolm compile</code> is checking when it decides whether to write the file.</p>
+
+    <div class="kcalc" id="kcalc" aria-label="K-score calculator">
+      <div class="kcalc-head">
+        <span class="ks-tag">live calc &middot; k-score-1</span>
+        <span class="ks-hint">drag any slider &middot; values normalize against your frontier baseline</span>
+      </div>
+      <div class="kcalc-body">
+        <div class="kcalc-controls">
+          <div class="kcalc-row" data-key="A">
+            <span class="ks-key"><b>A</b> accuracy</span>
+            <input type="range" min="0" max="100" value="97" step="1" aria-label="accuracy normalized 0 to 1">
+            <span class="ks-num"><span class="ks-val">0.97</span><span class="w">w &middot; 0.40</span></span>
+          </div>
+          <div class="kcalc-row" data-key="S">
+            <span class="ks-key"><b>S</b> size</span>
+            <input type="range" min="0" max="100" value="95" step="1" aria-label="size inverse normalized 0 to 1">
+            <span class="ks-num"><span class="ks-val">0.95</span><span class="w">w &middot; 0.15</span></span>
+          </div>
+          <div class="kcalc-row" data-key="L">
+            <span class="ks-key"><b>L</b> latency</span>
+            <input type="range" min="0" max="100" value="94" step="1" aria-label="latency inverse normalized 0 to 1">
+            <span class="ks-num"><span class="ks-val">0.94</span><span class="w">w &middot; 0.15</span></span>
+          </div>
+          <div class="kcalc-row" data-key="C">
+            <span class="ks-key"><b>C</b> cost</span>
+            <input type="range" min="0" max="100" value="100" step="1" aria-label="cost inverse normalized 0 to 1">
+            <span class="ks-num"><span class="ks-val">1.00</span><span class="w">w &middot; 0.15</span></span>
+          </div>
+          <div class="kcalc-row" data-key="V">
+            <span class="ks-key"><b>V</b> coverage</span>
+            <input type="range" min="0" max="100" value="92" step="1" aria-label="coverage normalized 0 to 1">
+            <span class="ks-num"><span class="ks-val">0.92</span><span class="w">w &middot; 0.15</span></span>
+          </div>
+        </div>
+        <div class="kcalc-readout">
+          <div class="kcalc-K">
+            <span class="ks-big" id="kcalc-big">0.95</span>
+            <span class="ks-status ks-ship" id="kcalc-status">ships &middot; gate &ge; 0.85</span>
+          </div>
+          <div class="kcalc-bar" id="kcalc-bar" aria-hidden="true">
+            <span class="ks-fill" style="--w:95%"></span>
+            <span class="ks-mark"></span>
+          </div>
+          <div class="kcalc-formula">
+            K = <span class="ks-w">0.40</span><span class="ks-term">&middot;<span id="kcalc-A">0.97</span></span>
+            + <span class="ks-w">0.15</span><span class="ks-term">&middot;<span id="kcalc-S">0.95</span></span>
+            + <span class="ks-w">0.15</span><span class="ks-term">&middot;<span id="kcalc-L">0.94</span></span>
+            + <span class="ks-w">0.15</span><span class="ks-term">&middot;<span id="kcalc-C">1.00</span></span>
+            + <span class="ks-w">0.15</span><span class="ks-term">&middot;<span id="kcalc-V">0.92</span></span>
+          </div>
+          <div class="kcalc-cmd"><span>reproduce on your machine</span> <code>kolm score &lt;artifact.kolm&gt;</code></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    (() => {
+      const root = document.getElementById('kcalc');
+      if (!root) return;
+      const W = { A: 0.40, S: 0.15, L: 0.15, C: 0.15, V: 0.15 };
+      const big = document.getElementById('kcalc-big');
+      const bar = document.getElementById('kcalc-bar');
+      const fill = bar.querySelector('.ks-fill');
+      const status = document.getElementById('kcalc-status');
+      const rows = root.querySelectorAll('.kcalc-row');
+      const fmt2 = (n) => n.toFixed(2);
+      const compute = () => {
+        let K = 0;
+        rows.forEach((r) => {
+          const k = r.getAttribute('data-key');
+          const v = parseInt(r.querySelector('input[type="range"]').value, 10) / 100;
+          K += W[k] * v;
+          r.querySelector('input[type="range"]').style.setProperty('--at', (v * 100) + '%');
+          r.querySelector('.ks-val').textContent = fmt2(v);
+          const echo = document.getElementById('kcalc-' + k);
+          if (echo) echo.textContent = fmt2(v);
+        });
+        const ship = K >= 0.85;
+        big.textContent = fmt2(K);
+        big.classList.toggle('ks-fail', !ship);
+        bar.classList.toggle('ks-fail', !ship);
+        fill.style.setProperty('--w', Math.min(100, Math.max(0, K * 100)) + '%');
+        status.textContent = ship ? 'ships · gate ≥ 0.85' : 'fails closed · gate 0.85';
+        status.classList.toggle('ks-ship', ship);
+        status.classList.toggle('ks-fail', !ship);
+      };
+      rows.forEach((r) => r.querySelector('input[type="range"]').addEventListener('input', compute));
+      compute();
+    })();
+    </script>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">04</span> · Why one number</div>
     <h2>Because shipping is binary.</h2>
     <p class="lede">Every model card in the wild today is a tasteful menu of cherry-picked plots.
       You read down the page and never decide. <b>K is the decision.</b></p>

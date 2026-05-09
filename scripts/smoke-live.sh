@@ -1325,6 +1325,24 @@ check "/compile sign hmac canon"       has "$COMPILE" '<b>Sign</b><span>hmac-sha
 check "/compile no vestigial ed25519"  hashno "$COMPILE" '<b>Sign</b><span>ed25519</span>'
 
 echo ""
+echo "=== 47. K-score calculator widget on /k-score ==="
+check "/k-score kcalc element"           has "$KSCORE" 'id="kcalc"'
+check "/k-score kcalc head live tag"     has "$KSCORE" 'live calc &middot; k-score-1'
+check "/k-score kcalc has 5 rows"        has "$KSCORE" 'data-key="A"'
+check "/k-score kcalc row S"             has "$KSCORE" 'data-key="S"'
+check "/k-score kcalc row L"             has "$KSCORE" 'data-key="L"'
+check "/k-score kcalc row C"             has "$KSCORE" 'data-key="C"'
+check "/k-score kcalc row V"             has "$KSCORE" 'data-key="V"'
+check "/k-score kcalc gate readout"      has "$KSCORE" 'id="kcalc-big"'
+check "/k-score kcalc fill bar"          has "$KSCORE" 'id="kcalc-bar"'
+check "/k-score kcalc status pill"       has "$KSCORE" 'id="kcalc-status"'
+check "/k-score kcalc 0.85 mark css"     has "$KSCORE" '0.85 gate'
+check "/k-score kcalc reduced-motion"    has "$KSCORE" 'prefers-reduced-motion'
+check "/k-score kcalc compute JS"        has "$KSCORE" "getElementById('kcalc')"
+check "/k-score kcalc weights JS"        has "$KSCORE" 'A: 0.40, S: 0.15, L: 0.15, C: 0.15, V: 0.15'
+check "/k-score eyebrow 04 renumbered"   has "$KSCORE" '<span class="num">04</span> · Why one number'
+
+echo ""
 echo "================================================"
 echo " RESULTS: $PASS pass, $FAIL fail"
 if [ $FAIL -gt 0 ]; then
