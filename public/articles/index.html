@@ -154,8 +154,17 @@
 <section class="list">
   <div class="wrap">
 
+    <a class="article-card" href="/articles/rent-vs-buy-compute">
+      <div class="num"><span class="ix">01</span>12&nbsp;min</div>
+      <div class="body">
+        <h3>Rent vs. buy compute &mdash; turn your frontier API bill into a local LoRA.</h3>
+        <p>Every dollar you spend on Anthropic or OpenAI is a rental fee. Proxy through <code style="font-family:var(--mono)">kolm capture</code> and the same dollar pays for a verified dataset. At threshold, that dataset compiles into a signed local <code style="font-family:var(--mono)">.kolm</code> you keep forever. The math, the mechanism, the legal frame, and a worked example for a 50-engineer team.</p>
+      </div>
+      <span class="arrow">&rarr;</span>
+    </a>
+
     <a class="article-card" href="/articles/ai-compiler">
-      <div class="num"><span class="ix">01</span>11&nbsp;min</div>
+      <div class="num"><span class="ix">02</span>11&nbsp;min</div>
       <div class="body">
         <h3>How to compile GPT-5 into a 4GB local model that runs offline.</h3>
         <p>The missing build step between a frontier API and a local artifact. What the compiler does, why the unit economics flip, and how to compile your first <code style="font-family:var(--mono)">.kolm</code> in five minutes.</p>
@@ -164,7 +173,7 @@
     </a>
 
     <a class="article-card" href="/articles/k-sample-verified-inference">
-      <div class="num"><span class="ix">02</span>9&nbsp;min</div>
+      <div class="num"><span class="ix">03</span>9&nbsp;min</div>
       <div class="body">
         <h3>K-sample verified inference: a practical alternative to zk-ML.</h3>
         <p>Zero-knowledge proofs of inference are technically beautiful and economically dead. Verified inference takes a different route: sample <em>k</em> times, score deterministically, sign the receipt. The mechanism behind every label inside a <code style="font-family:var(--mono)">.kolm</code>.</p>
@@ -173,7 +182,7 @@
     </a>
 
     <a class="article-card" href="/articles/hipaa-on-device">
-      <div class="num"><span class="ix">03</span>12&nbsp;min</div>
+      <div class="num"><span class="ix">04</span>12&nbsp;min</div>
       <div class="body">
         <h3>HIPAA-aligned AI on a laptop: keep PHI local by design.</h3>
         <p>Every PHI-bearing frontier call expands the compliance surface. Compile from de-identified examples, run inside the approved boundary, and verify the evidence. A practical architecture playbook.</p>
@@ -182,7 +191,7 @@
     </a>
 
     <a class="article-card" href="/articles/kolm-file-format">
-      <div class="num"><span class="ix">04</span>10&nbsp;min</div>
+      <div class="num"><span class="ix">05</span>10&nbsp;min</div>
       <div class="body">
         <h3>The <code style="font-family:var(--mono)">.kolm</code> file format, component by component.</h3>
         <p>One signed zip with seven internal components and a manifest. Why everything is co-versioned, how the HMAC chain works, and what the file looks like on disk.</p>
@@ -191,7 +200,7 @@
     </a>
 
     <a class="article-card" href="/articles/speculative-decoding-recipes">
-      <div class="num"><span class="ix">05</span>10&nbsp;min</div>
+      <div class="num"><span class="ix">06</span>10&nbsp;min</div>
       <div class="body">
         <h3>Speculative decoding with deterministic drafts.</h3>
         <p>A draft model is the standard way. A recipe pack is faster, smaller, free at runtime, and verifiably correct on the patterns it covers. How RSD cuts the local inference bill to zero on structured tokens.</p>
@@ -200,7 +209,7 @@
     </a>
 
     <a class="article-card" href="/articles/why-we-built-kolm">
-      <div class="num"><span class="ix">06</span>9&nbsp;min</div>
+      <div class="num"><span class="ix">07</span>9&nbsp;min</div>
       <div class="body">
         <h3>Why we built kolm.</h3>
         <p>Every shipped AI feature today has the same shape: prompt, JSON, retry. Webpack happened to JavaScript, Docker happened to deployment, the App Store happened to mobile. Each one took an artisanal step and made it a build artifact. The same step had not happened for AI features. So we built it.</p>
@@ -209,7 +218,7 @@
     </a>
 
     <a class="article-card" href="/articles/distillation-vs-fine-tuning-vs-rag">
-      <div class="num"><span class="ix">07</span>11&nbsp;min</div>
+      <div class="num"><span class="ix">08</span>11&nbsp;min</div>
       <div class="body">
         <h3>Distillation vs fine-tuning vs RAG: pick the right one.</h3>
         <p>Three techniques, three jobs, three failure modes. A decision tree, a cost matrix, and a worked ticket-routing example. When RAG dies, when fine-tuning is a vendor trap, and where distillation actually wins.</p>
@@ -218,7 +227,7 @@
     </a>
 
     <a class="article-card" href="/articles/running-our-marketing-on-distilled-models">
-      <div class="num"><span class="ix">08</span>10&nbsp;min</div>
+      <div class="num"><span class="ix">09</span>10&nbsp;min</div>
       <div class="body">
         <h3>Running our marketing on distilled models.</h3>
         <p>Dogfood case study. Four Specialists, one $99/mo GPU sliver, $1,860 -> $339 monthly bill. K-scores per artifact, the two compiles that failed (one rolled back, one quietly retired), and the six commands that drive the whole pipeline.</p>
@@ -227,7 +236,7 @@
     </a>
 
     <a class="article-card" href="/articles/how-we-benchmark">
-      <div class="num"><span class="ix">09</span>8&nbsp;min</div>
+      <div class="num"><span class="ix">10</span>8&nbsp;min</div>
       <div class="body">
         <h3>How we benchmark, and how to disagree with us.</h3>
         <p>The methodology behind every percentage on this site. n=150 SWE-bench Lite, seed=42, swebench 4.1.0 evaluator. What the +10.67pp lift measures, what it does not, and the diagnosis flowchart for when your reproduce attempt lands somewhere different.</p>

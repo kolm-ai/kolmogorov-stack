@@ -98,13 +98,13 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">use cases</span> · the workflow shapes</div>
     <h1>Where compile-once, <span class="tone">run-locally</span> earns its keep.</h1>
-    <p class="lede">Eight workflow shapes where the math swings hardest: any task that&rsquo;s 80%+ deterministic, has data you can&rsquo;t leak, runs on a budget, and needs an audit trail. Pick a shape closest to yours and read what kolm changes about it.</p>
+    <p class="lede">Nine workflow shapes where the math swings hardest: any task that&rsquo;s 80%+ deterministic, has data you can&rsquo;t leak, runs on a budget, and needs an audit trail. Pick a shape closest to yours and read what kolm changes about it.</p>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <h2>The eight shapes <span class="tone">we shipped for.</span></h2>
+    <h2>The nine shapes <span class="tone">we shipped for.</span></h2>
     <p class="sec-lede">Each page links to a worked example, the verifier shape, the receipt format, and the eval set we used to gate the K-score. Industry pages (healthcare / finance / defense) cover regulated buyer concerns; use-case pages cover the engineering shape.</p>
 
     <div class="uc-grid">
@@ -136,6 +136,12 @@
         <div class="uc-tag">UC-05 · Web3</div>
         <h3>Verifiable on-chain AI.</h3>
         <p>HMAC-chained receipts anchor to Sigstore / Rekor, optionally Arweave / OP_RETURN. Outputs you can prove came from a specific artifact.</p>
+        <div class="uc-foot">read <span class="arr">&rarr;</span></div>
+      </a>
+      <a class="uc-card" href="/use-cases/capture-and-distill">
+        <div class="uc-tag">UC-06 · Capture</div>
+        <h3>Capture &amp; distill.</h3>
+        <p>Drop-in proxy for OpenAI / Anthropic. Captures verified <code>(input, output)</code> pairs. Compiles to a signed local LoRA at threshold. The frontier bill pays for the artifact.</p>
         <div class="uc-foot">read <span class="arr">&rarr;</span></div>
       </a>
       <a class="uc-card" href="/healthcare">

@@ -1081,6 +1081,57 @@ check "sitemap has /cookbook/namespace-tagger"       has "$META_SM" "/cookbook/r
 check "sitemap has /cookbook/recipe-from-obs"        has "$META_SM" "/cookbook/recipe-from-observations"
 check "sitemap has /cookbook/k-score-explainer"      has "$META_SM" "/cookbook/k-score-explainer"
 
+echo "=== 40. Workstream E — rent-vs-buy article + capture-and-distill use-case ==="
+# Workstream E content pieces. The two long-form pages that turn the rent-vs-buy
+# wedge into a customer-visible promise. The article is cornerstone-grade
+# (~2400 words). The use-case page is UC-06 and follows the agentic-coding shape.
+RVB_RC=$(curl -s -o /dev/null -w "%{http_code}" "$URL/articles/rent-vs-buy-compute")
+check "/articles/rent-vs-buy-compute is 200"    eq "$RVB_RC" 200
+CAD_RC=$(curl -s -o /dev/null -w "%{http_code}" "$URL/use-cases/capture-and-distill")
+check "/use-cases/capture-and-distill is 200"   eq "$CAD_RC" 200
+
+# Rent-vs-buy article body: hero copy, the four CLI commands, the legal frame,
+# the worked example, and the JSON-LD parity with the rest of the article corpus.
+RVB=$(curl -s "$URL/articles/rent-vs-buy-compute")
+check "rent-vs-buy hero rents-to-deposit"       has "$RVB" "rent to deposit"
+check "rent-vs-buy worked-example month-12"     has "$RVB" "Month 12"
+check "rent-vs-buy capture endpoint"            has "$RVB" "/v1/capture/anthropic"
+check "rent-vs-buy labels endpoint"             has "$RVB" "/v1/labels/synthesize-corpus"
+check "rent-vs-buy distill endpoint"            has "$RVB" "/v1/specialists/auto-distill"
+check "rent-vs-buy CLI surface"                 has "$RVB" "kolm capture status"
+check "rent-vs-buy 78pct opus quality"          has "$RVB" "78 percent\|seventy-eight\|78%"
+check "rent-vs-buy legal-frame heading"         has "$RVB" "who owns what"
+check "rent-vs-buy receipt explanation"         has "$RVB" "HMAC-SHA256 chain"
+check "rent-vs-buy JSON-LD TechArticle"         has "$RVB" "\"@type\": \"TechArticle\""
+check "rent-vs-buy canonical link"              has "$RVB" "kolm.ai/articles/rent-vs-buy-compute"
+check "rent-vs-buy links capture use-case"      has "$RVB" "/use-cases/capture-and-distill"
+
+# Capture-and-distill use-case body: UC-06 tag, four endpoints, ledger table,
+# privacy/legal section, and the closing CTA.
+CAD=$(curl -s "$URL/use-cases/capture-and-distill")
+check "capture-and-distill UC-06 tag"           has "$CAD" "UC-06"
+check "capture-and-distill hero LoRA frame"     has "$CAD" "trains a local LoRA"
+check "capture-and-distill threshold copy"      has "$CAD" "1,000"
+check "capture-and-distill k-score gate"        has "$CAD" "0.85"
+check "capture-and-distill four endpoints"      has "$CAD" "/v1/capture/&lt;provider&gt;"
+check "capture-and-distill labels endpoint"     has "$CAD" "/v1/labels/synthesize-corpus"
+check "capture-and-distill distill endpoint"    has "$CAD" "/v1/specialists/auto-distill"
+check "capture-and-distill 12-month ledger"     has "$CAD" "Month\|Frontier"
+check "capture-and-distill JSON-LD TechArticle" has "$CAD" "\"@type\":\"TechArticle\""
+check "capture-and-distill links rvb article"   has "$CAD" "/articles/rent-vs-buy-compute"
+
+# Indexes pick up the new entries.
+ART_IDX=$(curl -s "$URL/articles")
+check "/articles index lists rent-vs-buy"       has "$ART_IDX" "/articles/rent-vs-buy-compute"
+UC_IDX=$(curl -s "$URL/use-cases")
+check "/use-cases index lists capture+distill"  has "$UC_IDX" "/use-cases/capture-and-distill"
+check "/use-cases index says nine shapes"       has "$UC_IDX" "Nine workflow shapes\|nine shapes"
+
+# Sitemap entries for both new URLs.
+WE_SM=$(curl -s "$URL/sitemap.xml")
+check "sitemap has /articles/rent-vs-buy-compute"  has "$WE_SM" "/articles/rent-vs-buy-compute"
+check "sitemap has /use-cases/capture-and-distill" has "$WE_SM" "/use-cases/capture-and-distill"
+
 echo ""
 echo "================================================"
 echo " RESULTS: $PASS pass, $FAIL fail"
