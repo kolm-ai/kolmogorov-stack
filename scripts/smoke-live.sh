@@ -1287,6 +1287,24 @@ check "/articles/kolm-file-format manifest" has "$FF" 'data-name="manifest.json"
 check "/articles/kolm-file-format old tree retired" hashno "$FF" 'diag diag-tree'
 
 echo ""
+echo "=== 45. NEO LAB direction — homepage lab-strip telemetry ==="
+HOME=$(curl -s "$URL/")
+check "/ lab-strip section"            has "$HOME" '<section class="lab-strip"'
+check "/ lab-strip has live tag"       has "$HOME" 'live &middot; kolm lab'
+check "/ lab-strip harness panel"      has "$HOME" 'kolm bench <span class="arg">--reproduce swebench-lite-n150'
+check "/ lab-strip k-score gate panel" has "$HOME" 'k-score gate'
+check "/ lab-strip gauge mark 0.85"    has "$HOME" 'data-mark="0.85"'
+check "/ lab-strip registry panel"     has "$HOME" 'js-registry-count'
+check "/ lab-strip receipt-chain panel" has "$HOME" 'receipt chain'
+check "/ lab-strip play-state CSS"     has "$HOME" 'animation-play-state: paused'
+check "/ lab-strip armed gate"         has "$HOME" 'ls-armed'
+check "/ lab-strip IO observer JS"     has "$HOME" "getElementById('lab-strip')"
+check "/ lab-strip prefers-reduced"    has "$HOME" 'prefers-reduced-motion'
+check "/ registry-count dual class"    has "$HOME" 'id="registry-count" class="js-registry-count"'
+check "/ no fabricated +10pp claim"    hashno "$HOME" '\+10\.67pp'
+check "/ no fabricated +15pp claim"    hashno "$HOME" '\+15\.33pp'
+
+echo ""
 echo "================================================"
 echo " RESULTS: $PASS pass, $FAIL fail"
 if [ $FAIL -gt 0 ]; then
