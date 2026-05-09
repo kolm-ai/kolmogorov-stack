@@ -142,7 +142,7 @@
   <div class="wrap">
     <span class="pill">ROI calculator</span>
     <h1>The cloud-vs-kolm math,<br><span class="tone">teacher cost honest.</span></h1>
-    <p class="lede">Plug in your monthly call volume, token mix, and frontier price. <b>kolm is a one-time compile cost, not a per-call cost.</b> Year one absorbs the teacher bill once; year two and after, the same artifact runs at zero marginal token cost. The numbers below are unrounded and the formulas are the ones below the calculator.</p>
+    <p class="lede"><b>kolm is a one-time compile cost, not a per-call cost.</b> Year one absorbs the teacher bill; year two and after, the same artifact runs at zero marginal token cost. Numbers unrounded, formulas below the calculator.</p>
   </div>
 </section>
 
@@ -170,12 +170,12 @@
     <div class="calc">
       <div class="inputs">
         <h2>Inputs.</h2>
-        <p class="hint">Monthly call volume, average tokens per call, and your current frontier price. Defaults are the customer-support preset.</p>
+        <p class="hint">Defaults are the customer-support preset.</p>
 
         <div class="field">
           <label>Monthly calls</label>
           <input type="number" id="i-calls" value="1200000" min="0" step="10000">
-          <span class="helper"><b>1.2M</b> = 100K MAU - 12 calls/user/month.</span>
+          <span class="helper"><b>1.2M</b> = 100K MAU at 12 calls/user/mo.</span>
         </div>
 
         <div class="field">
@@ -184,7 +184,7 @@
             <input type="number" id="i-in" value="800" min="0" step="50">
             <input type="number" id="i-out" value="250" min="0" step="50">
           </div>
-          <span class="helper">Most LLM features sit at <b>500-3000 in</b>, <b>200-900 out</b>.</span>
+          <span class="helper">Typical: <b>500-3000 in</b>, <b>200-900 out</b>.</span>
         </div>
 
         <div class="field">
@@ -193,7 +193,7 @@
             <input type="number" id="i-pin" value="3.00" min="0" step="0.01">
             <input type="number" id="i-pout" value="15.00" min="0" step="0.01">
           </div>
-          <span class="helper">Default = Sonnet-class pricing. Set 5.00 / 25.00 for Opus-class.</span>
+          <span class="helper">Default = Sonnet-class. 5.00 / 25.00 for Opus-class.</span>
         </div>
 
         <div class="field">
@@ -203,31 +203,31 @@
             <option value="149">Teams - $149/mo</option>
             <option value="2999">Enterprise - $2,999/mo</option>
           </select>
-          <span class="helper">All tiers include unlimited local-runtime inference.</span>
+          <span class="helper">All tiers: unlimited local-runtime inference.</span>
         </div>
 
         <div class="field">
           <label>Compile cycles per year</label>
           <input type="number" id="i-cycles" value="12" min="1" max="365" step="1">
-          <span class="helper">Most teams recompile <b>monthly</b> (12) or <b>quarterly</b> (4).</span>
+          <span class="helper">Typical: <b>monthly</b> (12) or <b>quarterly</b> (4).</span>
         </div>
 
         <div class="field">
           <label>Teacher k-sample size at compile</label>
           <input type="number" id="i-k" value="8" min="1" max="64" step="1">
-          <span class="helper">k samples per training row. 8 is the default; 16 for the strictest verifier.</span>
+          <span class="helper">k per row. Default 8; 16 for strictest verifier.</span>
         </div>
 
         <div class="field">
           <label>Training rows per compile</label>
           <input type="number" id="i-rows" value="2000" min="100" max="100000" step="100">
-          <span class="helper">Most workflows top out <b>1.5K - 5K</b> verified-label rows.</span>
+          <span class="helper">Typical: <b>1.5K-5K</b> verified-label rows.</span>
         </div>
       </div>
 
       <div class="results">
         <h2>Output.</h2>
-        <p class="hint">All numbers are dollars per year. Kept dollars compound; year-two onward the teacher cost goes to near-zero unless you choose to recompile.</p>
+        <p class="hint">Dollars per year. Year-two onward the teacher cost drops to near-zero unless you recompile.</p>
 
         <div class="res-row cloud">
           <div class="l"><b>Cloud frontier</b> - per-call inference</div>
@@ -263,7 +263,7 @@
 
         <div class="delta">
           <div class="big" id="r-mult">-</div>
-          <div class="lab"><b>cheaper year one.</b> Year two onward the gap widens because the teacher bill drops to whatever recompile cycle you choose.</div>
+          <div class="lab"><b>cheaper year one.</b> Year two onward the gap widens with your recompile cycle.</div>
           <div class="small" id="r-savings">-</div>
         </div>
       </div>
@@ -271,9 +271,9 @@
 
     <div class="honest">
       <h3>What's in the math, what isn't.</h3>
-      <p><b>In:</b> per-call frontier cost (input + output token price), ~8% egress + variance buffer for the cloud lane, kolm plan cost, frontier teacher cost during the compile phase ((k - rows - in_tokens) priced at the same rate).</p>
-      <p><b>Out:</b> engineer time, GPU rental during fine-tune (Pro tier handles this on the bridge), recall index population (one-time, scales with corpus size, not call volume), and the cost of <em>not</em> compiling (cloud variance during incidents, prompt regressions in production, vendor-side rate-limit incidents).</p>
-      <p><b>The honest assumption:</b> tasks suited for kolm are tasks 80%+ deterministic on labeled examples. If your task is mostly free-form open-ended generation, the math swings; check <a href="/k-score" style="color:var(--accent)">/k-score</a> for the gating logic, or open a thread in <a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions" style="color:var(--accent)">GitHub Discussions</a> with your task shape before you trust this calculator.</p>
+      <p><b>In:</b> per-call frontier cost (input + output), ~8% egress + variance buffer, kolm plan, teacher cost ((k · rows · in_tokens) at same rate).</p>
+      <p><b>Out:</b> engineer time, GPU rental during fine-tune (Pro handles this on the bridge), one-time recall index population, and the cost of <em>not</em> compiling (cloud variance, prompt regressions, rate-limit incidents).</p>
+      <p><b>Assumption:</b> kolm fits tasks 80%+ deterministic on labeled examples. For free-form generation, see <a href="/k-score" style="color:var(--accent)">/k-score</a> or <a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions" style="color:var(--accent)">GitHub Discussions</a>.</p>
     </div>
 
   </div>
@@ -282,7 +282,7 @@
 <section class="next">
   <div class="wrap">
     <h2>Next move<br><span class="tone">if the math says yes.</span></h2>
-    <p class="lede">A 30-day signed pilot. One workflow. One <code style="font-family:var(--mono)">.kolm</code>. K-score gate. The artifact stays with you whether or not we expand; that's the contract.</p>
+    <p class="lede">30-day signed pilot. One workflow, one <code style="font-family:var(--mono)">.kolm</code>, K-score gate. The artifact stays with you whether we expand or not.</p>
     <div class="next-row">
       <a href="/signup?plan=enterprise">Start a pilot</a>
       <a href="/trust" class="muted">trust center</a>

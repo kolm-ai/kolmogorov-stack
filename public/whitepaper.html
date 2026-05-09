@@ -146,9 +146,7 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">RS-1</span> · Whitepaper</div>
     <h1 class="cover-title">The <code style="font-family:var(--mono);font-size:0.78em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:0 12px">.kolm</code> <span class="tone">specification.</span></h1>
-    <p class="lede">A formal description of the artifact format, the 8-stage compile pipeline, the K-score
-      gate, and the HMAC-chained receipt protocol that anchors every byte to a public registry.
-      Implementations that conform to this document MAY use the name <b>kolm</b> and the file extension <b>.kolm</b>.</p>
+    <p class="lede">Formal description of the artifact format, 8-stage compile pipeline, K-score gate, and HMAC-chained receipt protocol anchored to a public registry. Conforming implementations MAY use the name <b>kolm</b> and extension <b>.kolm</b>.</p>
 
     <div class="meta-bar">
       <div class="cell"><div class="k">spec id</div><div class="v accent">RS-1</div></div>
@@ -187,40 +185,23 @@
 
 <section id="abstract">
   <h2><span class="num">§0</span> Abstract</h2>
-  <p>This document specifies <b>RS-1</b>, the wire format and protocol for <code>.kolm</code>
-    artifacts. A <code>.kolm</code> is a single-file, deterministic, signed bundle that
-    encodes a base model, a personal LoRA adapter, a recipe pack of deterministic-token drafts,
-    a multimodal recall index, an evaluation suite, and a manifest with cryptographic anchors
-    to a public registry. The compiler that produces <code>.kolm</code> files is called
-    <b>kolm</b>; the compile pipeline has eight normative stages
-    (gather → spec → synthesize → k-sample → verify → fit → observe → sign).</p>
-  <p>RS-1 is designed to satisfy three goals simultaneously: <b>portability</b> (the same
-    artifact runs on commodity CPUs, consumer GPUs, and mobile NPUs without a network),
-    <b>verifiability</b> (any third party can byte-for-byte reproduce an artifact from its
-    inputs, and any consumer of an artifact's output can verify the output's lineage offline),
-    and <b>compositionality</b> (artifacts may import other artifacts, with the receipt chain
-    surviving composition).</p>
+  <p>This document specifies <b>RS-1</b>, the wire format and protocol for <code>.kolm</code> artifacts. A <code>.kolm</code> is a single-file, deterministic, signed bundle: base model, personal LoRA adapter, recipe pack of deterministic-token drafts, multimodal recall index, eval suite, manifest with cryptographic anchors to a public registry. The compiler is <b>kolm</b>; the pipeline has eight normative stages (gather → spec → synthesize → k-sample → verify → fit → observe → sign).</p>
+  <p>RS-1 satisfies three goals: <b>portability</b> (runs on commodity CPUs, consumer GPUs, mobile NPUs, no network),
+    <b>verifiability</b> (third parties byte-reproduce from inputs; consumers verify output lineage offline),
+    <b>compositionality</b> (artifacts import other artifacts; receipt chain survives).</p>
 </section>
 
 <section id="intro">
   <h2><span class="num">§1</span> Introduction</h2>
-  <p>The current AI deployment stack forces three undesirable choices:
-    (a) call a closed remote model and accept opacity, latency, and per-token cost;
-    (b) self-host an open-weight model and accept poor task-specific quality;
-    (c) fine-tune an open-weight model and accept fragile, undocumented, unverifiable artifacts.</p>
-  <p>RS-1 is a fourth option: <b>compile</b> a task into a portable artifact. The compiler
-    distills a frontier model's behavior on the task into an open-weight base model + personal
-    adapter + draft pack, signs every layer, and emits a single file. The artifact is owned by
-    the operator, runs offline, and proves its own provenance.</p>
-  <p>This document is the normative spec. Implementations MAY add capabilities, but MUST NOT
-    rename existing fields, change layer ordering inside the zip, or break receipt verification
-    against the public registry at <code>registry.kolm.ai</code>.</p>
+  <p>Current AI deployment forces three choices:
+    (a) closed remote model — opacity, latency, per-token cost;
+    (b) self-host open-weight — poor task-specific quality;
+    (c) fine-tune open-weight — fragile, undocumented, unverifiable.</p>
+  <p>RS-1 is a fourth option: <b>compile</b> a task into a portable artifact. The compiler distills frontier behavior into an open-weight base + adapter + draft pack, signs every layer, emits a single file. Owned by the operator, runs offline, proves its own provenance.</p>
+  <p>Implementations MAY add capabilities, but MUST NOT rename fields, change zip layer ordering, or break receipt verification against <code>registry.kolm.ai</code>.</p>
   <div class="normative">
-    <b>Status of this memo.</b> RS-1 is a public specification published under MIT (code) and
-    CC-BY-4.0 (text). Errata, additions, and the test suite live at
-    <code>github.com/sneaky-hippo/kolmogorov-stack</code>. Specification changes follow
-    semantic versioning; backward-incompatible changes increment the major version
-    (RS-1 → RS-2) and require a registry epoch transition.
+    <b>Status of this memo.</b> RS-1 published under MIT (code) and CC-BY-4.0 (text). Errata, additions, test suite at
+    <code>github.com/sneaky-hippo/kolmogorov-stack</code>. Spec follows SemVer; backward-incompatible changes increment major (RS-1 → RS-2) and require a registry epoch transition.
   </div>
 </section>
 
@@ -236,15 +217,15 @@
     <thead><tr><th style="width:200px">Term</th><th>Definition</th></tr></thead>
     <tbody>
       <tr><td><b>artifact</b></td><td>A <code>.kolm</code> file conforming to §3.</td></tr>
-      <tr><td><b>base model</b></td><td>An open-weight LLM whose weights are referenced by SHA-256 hash and quantization profile in the manifest. The student.</td></tr>
-      <tr><td><b>frontier model</b></td><td>A closed or remote LLM used during distillation as a label source. The teacher.</td></tr>
-      <tr><td><b>recipe</b></td><td>A deterministic-token draft pattern indexed by prefix-shape and embedding-shape, drawn from a public registry.</td></tr>
-      <tr><td><b>recall</b></td><td>A multimodal vector index over the operator's corpus, packaged inside the artifact.</td></tr>
-      <tr><td><b>k-sample</b></td><td>The protocol of querying a frontier model <i>k</i> times for the same input and selecting the verifier-passing winner (§5.4).</td></tr>
-      <tr><td><b>verifier</b></td><td>A deterministic checker that decides whether a candidate output is accepted (§7).</td></tr>
-      <tr><td><b>K-score</b></td><td>A composite quality metric in [0, 100] computed against the artifact's bundled eval suite (§6).</td></tr>
-      <tr><td><b>receipt</b></td><td>An HMAC-SHA256 over a canonical statement of (input, output, artifact, timestamp) that anchors the inference event to the registry (§8).</td></tr>
-      <tr><td><b>registry</b></td><td>The public service at <code>registry.kolm.ai</code> that serves recipe packs, anchors receipts, and tracks specification epochs.</td></tr>
+      <tr><td><b>base model</b></td><td>Open-weight LLM referenced by SHA-256 + quantization profile. The student.</td></tr>
+      <tr><td><b>frontier model</b></td><td>Closed or remote LLM used as label source during distillation. The teacher.</td></tr>
+      <tr><td><b>recipe</b></td><td>Deterministic-token draft pattern indexed by prefix-shape and embedding-shape, from a public registry.</td></tr>
+      <tr><td><b>recall</b></td><td>Multimodal vector index over the operator's corpus, packaged inside the artifact.</td></tr>
+      <tr><td><b>k-sample</b></td><td>Querying a frontier model <i>k</i> times on the same input and selecting the verifier-passing winner (§5.4).</td></tr>
+      <tr><td><b>verifier</b></td><td>Deterministic checker accepting/rejecting candidate outputs (§7).</td></tr>
+      <tr><td><b>K-score</b></td><td>Composite quality metric in [0, 100] over the bundled eval suite (§6).</td></tr>
+      <tr><td><b>receipt</b></td><td>HMAC-SHA256 over (input, output, artifact, timestamp) anchoring the event to the registry (§8).</td></tr>
+      <tr><td><b>registry</b></td><td>Public service at <code>registry.kolm.ai</code>: serves recipe packs, anchors receipts, tracks epochs.</td></tr>
       <tr><td><b>conformant runtime</b></td><td>A program that loads and executes a <code>.kolm</code> per §11.</td></tr>
     </tbody>
   </table>
@@ -252,36 +233,31 @@
 
 <section id="format">
   <h2><span class="num">§3</span> Artifact format</h2>
-  <p>A <code>.kolm</code> is a ZIP archive (PKZip 2.0 / DEFLATE) with a fixed inner layout.
-    Stored entries <span class="kw">MUST</span> appear in the canonical order below, written
-    with deterministic ZIP options (mtime fixed to <code>2020-01-01T00:00:00Z</code>, extra
-    fields stripped, UTF-8 names, no Zip64 unless any single layer exceeds 4 GiB).</p>
+  <p>A <code>.kolm</code> is a ZIP archive (PKZip 2.0 / DEFLATE) with a fixed inner layout. Stored entries <span class="kw">MUST</span> appear in the canonical order below with deterministic ZIP options (mtime <code>2020-01-01T00:00:00Z</code>, extra fields stripped, UTF-8 names, no Zip64 unless a layer exceeds 4 GiB).</p>
 
   <table>
     <thead><tr><th>#</th><th>Path</th><th>Required</th><th>Purpose</th></tr></thead>
     <tbody>
-      <tr><td>01</td><td><code>manifest.json</code></td><td>yes</td><td>The single source of truth for every other layer's hash, size, and role. Read first by every runtime.</td></tr>
-      <tr><td>02</td><td><code>signature.sig</code></td><td>yes</td><td>HMAC-SHA256 chain root. 256 bytes binary. See §8 and Appendix B.</td></tr>
-      <tr><td>03</td><td><code>model.gguf</code></td><td>yes</td><td>The base model in GGUF format [GGUF-v3]. Quantization profile <span class="kw">MUST</span> match <code>manifest.base_model.quantization</code>.</td></tr>
-      <tr><td>04</td><td><code>lora.bin</code></td><td>conditional</td><td>The personal adapter in GGUF-LoRA format. <span class="kw">REQUIRED</span> if any compile stage produced training labels (§5.6).</td></tr>
-      <tr><td>05</td><td><code>recipes.json</code></td><td>yes</td><td>The recipe pack: deterministic-token drafts indexed by prefix-shape and embedding-shape (§7.5).</td></tr>
-      <tr><td>06</td><td><code>index.sqlite-vec</code></td><td>conditional</td><td>The multimodal recall index. <span class="kw">REQUIRED</span> if a corpus was supplied; otherwise <span class="kw">MAY</span> be omitted.</td></tr>
-      <tr><td>07</td><td><code>tests.jsonl</code></td><td>yes</td><td>The evaluation suite the artifact passed at compile time. Used for K-score recompute (§6.3).</td></tr>
-      <tr><td>08</td><td><code>verifiers.json</code></td><td>yes</td><td>The verifier definitions referenced by <code>tests.jsonl</code> (§7).</td></tr>
-      <tr><td>09</td><td><code>provenance/</code></td><td>OPTIONAL</td><td>Audit material: prompts, k-sample logs, label-acceptance traces. Operators MAY strip this for privacy without breaking signature verification; the signature commits to a stripped-tree hash.</td></tr>
+      <tr><td>01</td><td><code>manifest.json</code></td><td>yes</td><td>Source of truth for every layer's hash, size, role. Read first by every runtime.</td></tr>
+      <tr><td>02</td><td><code>signature.sig</code></td><td>yes</td><td>HMAC-SHA256 chain root. 256-byte binary. See §8 and Appendix B.</td></tr>
+      <tr><td>03</td><td><code>model.gguf</code></td><td>yes</td><td>Base model in GGUF [GGUF-v3]. Quantization <span class="kw">MUST</span> match <code>manifest.base_model.quantization</code>.</td></tr>
+      <tr><td>04</td><td><code>lora.bin</code></td><td>conditional</td><td>Personal adapter (GGUF-LoRA). <span class="kw">REQUIRED</span> if any stage produced training labels (§5.6).</td></tr>
+      <tr><td>05</td><td><code>recipes.json</code></td><td>yes</td><td>Recipe pack: deterministic-token drafts by prefix-shape and embedding-shape (§7.5).</td></tr>
+      <tr><td>06</td><td><code>index.sqlite-vec</code></td><td>conditional</td><td>Multimodal recall index. <span class="kw">REQUIRED</span> if corpus supplied.</td></tr>
+      <tr><td>07</td><td><code>tests.jsonl</code></td><td>yes</td><td>Eval suite the artifact passed at compile. Used for K-score recompute (§6.3).</td></tr>
+      <tr><td>08</td><td><code>verifiers.json</code></td><td>yes</td><td>Verifier definitions referenced by <code>tests.jsonl</code> (§7).</td></tr>
+      <tr><td>09</td><td><code>provenance/</code></td><td>OPTIONAL</td><td>Audit material: prompts, k-sample logs, label-acceptance traces. Operators MAY strip without breaking signature verification; signature commits to a stripped-tree hash.</td></tr>
     </tbody>
   </table>
 
   <div class="normative"><b>Layer ordering invariant.</b> The first 4 KiB of any conformant
     <code>.kolm</code> <span class="kw">MUST</span> contain the local file header for
-    <code>manifest.json</code>. Runtimes MAY read only the first 4 KiB to detect format
-    and version, before deciding whether to stream the rest.</div>
+    <code>manifest.json</code>. Runtimes MAY read only the first 4 KiB to detect format and version before streaming the rest.</div>
 </section>
 
 <section id="manifest">
   <h2><span class="num">§4</span> Manifest schema</h2>
-  <p>The manifest is a UTF-8 JSON document with the following top-level shape. Full JSON Schema
-    is in Appendix A.</p>
+  <p>UTF-8 JSON document with this top-level shape. Full JSON Schema in Appendix A.</p>
 
 <pre><span class="com">// manifest.json - RS-1 1.0.0</span>
 {
@@ -330,91 +306,49 @@
   }
 }</pre>
 
-  <div class="normative"><b>Field stability.</b> Field names listed in Appendix A are
-    <span class="kw">REQUIRED</span> and <span class="kw">MUST</span> appear under their
-    documented paths. Implementations <span class="kw">MAY</span> add extension fields under
-    a top-level key prefixed with <code>x_</code> (e.g. <code>x_acme_metadata</code>); such
-    fields <span class="kw">MUST NOT</span> be assumed present by other implementations.</div>
+  <div class="normative"><b>Field stability.</b> Appendix A field names are
+    <span class="kw">REQUIRED</span> at their documented paths. Implementations <span class="kw">MAY</span> add extension fields under a top-level key prefixed <code>x_</code> (e.g. <code>x_acme_metadata</code>); such fields <span class="kw">MUST NOT</span> be assumed present by others.</div>
 </section>
 
 <section id="pipeline">
   <h2><span class="num">§5</span> Compile pipeline</h2>
-  <p>The compile process has eight stages. Stages <span class="kw">MUST</span> execute in the
-    order below; a conformant compiler <span class="kw">MAY</span> elide stages 4 (recall),
-    5 (k-sample), or 6 (fit) when their inputs are absent, but stages 1, 2, 3, 7, and 8 are
-    <span class="kw">REQUIRED</span>.</p>
+  <p>Eight stages, executed in order. A conformant compiler <span class="kw">MAY</span> elide stages 4 (recall), 5 (k-sample), or 6 (fit) when inputs are absent. Stages 1, 2, 3, 7, 8 are <span class="kw">REQUIRED</span>.</p>
 
   <h3>5.1 Stage 1: Gather</h3>
-  <p>Inputs: a task description, optional examples (<code>jsonl</code>), optional corpus
-    (any directory). The compiler MUST canonicalize examples to UTF-8, strip BOMs, and
-    record the SHA-256 of the canonicalized input bundle as <code>task.input_hash</code>.</p>
+  <p>Inputs: task description, optional examples (<code>jsonl</code>), optional corpus. Compiler MUST canonicalize to UTF-8, strip BOMs, and record SHA-256 of the canonicalized bundle as <code>task.input_hash</code>.</p>
 
   <h3>5.2 Stage 2: Spec</h3>
-  <p>The compiler synthesizes a structured task specification: input shape, output shape,
-    desiderata, edge cases. The spec is hashed to <code>task.intent_hash</code>; two compiles
-    with semantically equivalent task descriptions <span class="kw">SHOULD</span> produce the
-    same intent hash up to documented normalization rules (whitespace, casing, punctuation).</p>
+  <p>Synthesize a structured task spec: input shape, output shape, desiderata, edge cases. Hashed to <code>task.intent_hash</code>; semantically equivalent task descriptions <span class="kw">SHOULD</span> produce the same intent hash up to documented normalization (whitespace, casing, punctuation).</p>
 
   <h3>5.3 Stage 3: Synthesize verifier</h3>
-  <p>From the spec the compiler emits one or more verifiers (§7). At least one verifier
-    <span class="kw">MUST</span> be of a deterministic type (schema, regex, or function);
-    classifier-typed verifiers <span class="kw">MAY</span> only be used in composite mode
-    where a deterministic verifier dominates.</p>
+  <p>Emit one or more verifiers (§7). At least one <span class="kw">MUST</span> be deterministic (schema, regex, or function); classifier-typed verifiers <span class="kw">MAY</span> only appear in composite mode where a deterministic verifier dominates.</p>
 
   <h3>5.4 Stage 4: K-sample</h3>
-  <p>For each example or generated input, the compiler queries a frontier model <i>k</i> times
-    (default <i>k</i>=5, range 1–32) and applies the synthesized verifier to each output. The
-    first verifier-passing output is selected as the label. If no output passes within <i>k</i>
-    attempts, the example is recorded as <code>frontier.unverified</code> and excluded from
-    training (FM-001 budget tracking applies; see §10.3).</p>
+  <p>Query a frontier model <i>k</i> times per input (default <i>k</i>=5, range 1–32) and apply the synthesized verifier. First verifier-passing output becomes the label. If none pass within <i>k</i>, the example is recorded as <code>frontier.unverified</code> and excluded from training (see FM-001, §10.3).</p>
 
   <h3>5.5 Stage 5: Verify</h3>
-  <p>An independent verifier pass is run over all accepted (input, output) pairs to detect
-    label drift. Pairs that fail re-verification are dropped. The acceptance rate
-    is recorded in <code>provenance/k-sample.log</code>.</p>
+  <p>Independent verifier pass over accepted (input, output) pairs detects label drift. Failing pairs are dropped. Acceptance rate recorded in <code>provenance/k-sample.log</code>.</p>
 
   <h3>5.6 Stage 6: Fit</h3>
-  <p>If at least one accepted pair exists, the compiler fits a LoRA adapter on the verified
-    pairs against the chosen base model. Default hyperparameters are listed in §A.adapter.
-    Implementations <span class="kw">MAY</span> use INT4 + bf16 mixed-precision training when
-    the host has sufficient VRAM; otherwise full-precision training on CPU is permitted but
-    not <span class="kw">RECOMMENDED</span>.</p>
+  <p>If at least one accepted pair exists, fit a LoRA adapter on the verified pairs against the base model. Default hyperparameters in §A.adapter. Implementations <span class="kw">MAY</span> use INT4 + bf16 mixed-precision when VRAM allows; full-precision CPU training is permitted but not <span class="kw">RECOMMENDED</span>.</p>
 
   <h3>5.7 Stage 7: Observe</h3>
-  <p>The compiler runs the fitted artifact against the bundled eval suite (<code>tests.jsonl</code>)
-    and computes the K-score (§6). Recipe candidates extracted from accepted outputs are
-    proposed back to the registry; recipes that pass the registry's gated synthesis become
-    part of future epochs.</p>
-  <p>If the K-score gate fails, the compiler <span class="kw">MUST NOT</span> emit a signed
-    artifact. It <span class="kw">SHOULD</span> emit a diagnostic bundle under
-    <code>./build/</code> for the operator to inspect. See FM-001 in §10.3.</p>
+  <p>Run the fitted artifact against <code>tests.jsonl</code> and compute K-score (§6). Recipe candidates extracted from accepted outputs are proposed back to the registry; those passing gated synthesis enter future epochs.</p>
+  <p>If the K-score gate fails, the compiler <span class="kw">MUST NOT</span> emit a signed artifact and <span class="kw">SHOULD</span> emit a diagnostic bundle under <code>./build/</code>. See FM-001 in §10.3.</p>
 
   <h3>5.8 Stage 8: Sign</h3>
-  <p>The compiler computes layer hashes, builds the manifest, computes the signature chain
-    (§8), writes the artifact, and posts the anchor record to the registry. After registry
-    acknowledgment the artifact's signature is considered <i>anchored</i>; consumers may
-    verify the anchor at any later time, including offline against a previously cached
-    epoch root.</p>
+  <p>Compute layer hashes, build the manifest, compute the signature chain (§8), write the artifact, post the anchor record to the registry. After ack the signature is <i>anchored</i>; consumers verify offline against a cached epoch root.</p>
 </section>
 
 <section id="kscore">
   <h2><span class="num">§6</span> K-score</h2>
-  <p>K-score is the composite quality metric reported by every compile. It is a single number
-    in [0, 100] and three named subcomponents.</p>
+  <p>Composite quality metric reported by every compile. A single number in [0, 100] with three named subcomponents.</p>
 
   <h3>6.1 Definition</h3>
-  <p>Let <code>T</code> be the task accuracy on the bundled eval suite (proportion of
-    verifier-passing outputs). Let <code>C</code> be the calibration score: 1 minus the
-    mean absolute deviation between the artifact's stated confidence and its observed
-    accuracy on a 10-bucket reliability diagram. Let <code>L</code> be the latency score:
-    a step function over p50 inference time (<10 ms = 100, <50 ms = 95, <250 ms = 85,
-    <1 s = 70, <5 s = 50, ≥5 s = 0). Then:</p>
+  <p>Let <code>T</code> = task accuracy on the bundled eval suite (proportion of verifier-passing outputs). Let <code>C</code> = calibration score: 1 minus mean absolute deviation between stated confidence and observed accuracy on a 10-bucket reliability diagram. Let <code>L</code> = latency score: step function over p50 inference (<10 ms = 100, <50 ms = 95, <250 ms = 85, <1 s = 70, <5 s = 50, ≥5 s = 0). Then:</p>
   <pre><span class="com">// composite K-score</span>
 K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
-  <p>The weights (0.60, 0.25, 0.15) are normative for K-score 1.0; they
-    <span class="kw">MAY</span> be overridden by a task-specific profile (e.g. for latency-critical
-    or calibration-critical workloads), in which case the profile name and weights
-    <span class="kw">MUST</span> appear in <code>manifest.k_score.profile</code>.</p>
+  <p>Weights (0.60, 0.25, 0.15) are normative for K-score 1.0; they <span class="kw">MAY</span> be overridden by a task-specific profile (latency-critical, calibration-critical), with the profile name and weights in <code>manifest.k_score.profile</code>.</p>
 
   <h3>6.2 Gate semantics</h3>
   <table>
@@ -427,41 +361,35 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
   </table>
 
   <h3>6.3 Recompute protocol</h3>
-  <p>Any party with the artifact <span class="kw">MAY</span> recompute the K-score by:
-    (1) loading <code>tests.jsonl</code> and <code>verifiers.json</code>;
-    (2) running the artifact's inference path on each test input;
-    (3) applying the verifier;
-    (4) recomputing T, C, L per §6.1.
-    A divergence of more than ±0.5 K-points between recomputed and stated values
-    <span class="kw">SHOULD</span> be reported as a tampering signal.</p>
+  <p>Any party <span class="kw">MAY</span> recompute K-score:
+    (1) load <code>tests.jsonl</code> and <code>verifiers.json</code>;
+    (2) run the artifact's inference path on each test input;
+    (3) apply the verifier;
+    (4) recompute T, C, L per §6.1.
+    Divergence beyond ±0.5 K-points <span class="kw">SHOULD</span> be reported as tampering.</p>
 </section>
 
 <section id="verifiers">
   <h2><span class="num">§7</span> Verifier types</h2>
-  <p>A verifier is a deterministic decision procedure on (input, candidate_output) → boolean.
-    Five verifier types are normative.</p>
+  <p>A verifier is a deterministic decision procedure (input, candidate_output) → boolean. Five normative types:</p>
 
   <table>
     <thead><tr><th>Type</th><th>Form</th><th>Deterministic?</th><th>Use</th></tr></thead>
     <tbody>
       <tr><td><b>schema</b></td><td>JSON Schema 2020-12 over output</td><td>yes</td><td>Structured outputs (extraction, function-calls).</td></tr>
-      <tr><td><b>regex</b></td><td>RE2 regular expression over output</td><td>yes</td><td>Format constraints (dates, IDs, classification labels).</td></tr>
-      <tr><td><b>function</b></td><td>Pure JavaScript / Python evaluator referenced by SHA-256</td><td>yes</td><td>Computable predicates (parser, math, code-runs-and-returns).</td></tr>
-      <tr><td><b>classifier</b></td><td>Bundled small model (≤200 MB) with a calibrated threshold</td><td>no, but stable</td><td>Subjective tasks (style, tone, harmlessness). <span class="kw">MUST</span> be paired with a deterministic gate inside a composite.</td></tr>
-      <tr><td><b>composite</b></td><td>Boolean combination over the above</td><td>follows leaves</td><td>Real tasks. AND/OR with a documented short-circuit order.</td></tr>
+      <tr><td><b>regex</b></td><td>RE2 regex over output</td><td>yes</td><td>Format constraints (dates, IDs, labels).</td></tr>
+      <tr><td><b>function</b></td><td>Pure JS/Python evaluator by SHA-256</td><td>yes</td><td>Computable predicates (parser, math, code-runs).</td></tr>
+      <tr><td><b>classifier</b></td><td>Bundled small model (≤200 MB), calibrated threshold</td><td>no, but stable</td><td>Subjective tasks (style, tone, harmlessness). <span class="kw">MUST</span> pair with a deterministic gate in a composite.</td></tr>
+      <tr><td><b>composite</b></td><td>Boolean combination of the above</td><td>follows leaves</td><td>Real tasks. AND/OR, documented short-circuit order.</td></tr>
     </tbody>
   </table>
 
-  <p>Verifiers are referenced from <code>tests.jsonl</code> by ID and their full body is stored
-    in <code>verifiers.json</code>. The body is content-addressed; renaming a verifier
-    invalidates the receipt chain.</p>
+  <p>Verifiers are referenced from <code>tests.jsonl</code> by ID; bodies stored in <code>verifiers.json</code>. Body is content-addressed; renaming invalidates the receipt chain.</p>
 </section>
 
 <section id="receipts">
   <h2><span class="num">§8</span> Receipt chain</h2>
-  <p>A receipt is an HMAC-SHA256 over a canonical statement of an inference event. Receipts
-    are emitted at every <code>kolm run</code> invocation and chain to an artifact's signature,
-    which itself anchors to the public registry.</p>
+  <p>A receipt is an HMAC-SHA256 over a canonical statement of an inference event. Emitted at every <code>kolm run</code>, chained to the artifact's signature, which anchors to the public registry.</p>
 
   <h3>8.1 Statement form</h3>
 <pre><span class="com">// canonical receipt statement (CSON, sorted keys)</span>
@@ -476,53 +404,37 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
 }</pre>
 
   <h3>8.2 Chain construction</h3>
-  <p>The receipt body is HMAC-SHA256'd under a per-artifact key derived from the artifact's
-    signature and the operator's tenant secret. The resulting MAC is appended to the
-    receipt body to form the wire-format receipt.</p>
+  <p>The receipt body is HMAC-SHA256'd under a per-artifact key derived from the artifact's signature and the operator's tenant secret. The MAC is appended to form the wire-format receipt.</p>
 
-  <p>An artifact's <code>signature.sig</code> is itself an HMAC over the canonical concatenation
-    of every layer hash listed in the manifest, computed under the registry epoch key. Anchor
-    posts to the registry are inserted into a Merkle tree; the registry publishes the daily
-    root at <code>registry.kolm.ai/epoch/&lt;date&gt;/root.json</code>.</p>
+  <p><code>signature.sig</code> is itself an HMAC over the canonical concatenation of every manifest layer hash, under the registry epoch key. Anchor posts are inserted into a Merkle tree; the daily root is published at <code>registry.kolm.ai/epoch/&lt;date&gt;/root.json</code>.</p>
 
   <h3>8.3 Offline verification</h3>
-  <p>To verify a receipt offline a verifier needs: (1) the receipt body and its MAC,
-    (2) the artifact's <code>signature.sig</code> and manifest, (3) the registry epoch
-    root for the day the artifact was anchored. Given those three inputs the verifier
-    can reconstruct every link in the chain without any network access.</p>
-  <div class="normative"><b>Tenant secret rotation.</b> If a tenant rotates its secret,
-    all receipts signed under the old secret remain verifiable against the previous epoch
-    snapshot. New receipts are signed under the new secret. See FM-202.</div>
+  <p>To verify offline a verifier needs: (1) receipt body and MAC, (2) artifact's <code>signature.sig</code> and manifest, (3) registry epoch root for the anchor day. Given those, every chain link reconstructs without network.</p>
+  <div class="normative"><b>Tenant secret rotation.</b> Receipts signed under the old secret remain verifiable against the previous epoch snapshot. New receipts use the new secret. See FM-202.</div>
 </section>
 
 <section id="repro">
   <h2><span class="num">§9</span> Reproducibility</h2>
-  <p>RS-1 commits to <b>byte-identical reproducibility</b>: given the same
-    <code>(task, examples, corpus, base_model, recipe_registry@epoch)</code>, two
-    independent compiles <span class="kw">MUST</span> produce the same artifact bytes:
-    not merely an artifact with the same K-score, but the identical zip.</p>
+  <p>RS-1 commits to <b>byte-identical reproducibility</b>: given the same <code>(task, examples, corpus, base_model, recipe_registry@epoch)</code>, two independent compiles <span class="kw">MUST</span> produce the identical zip — not just the same K-score.</p>
 
   <p>Mechanism:</p>
   <ul>
-    <li>K-sample selection ties broken by lexicographic comparison of canonical output strings, not wall-clock arrival.</li>
-    <li>LoRA training uses fixed seeds derived from <code>task.intent_hash</code>; data shuffling is a deterministic permutation of <code>(intent_hash, example_index)</code>.</li>
-    <li>ZIP entries written with fixed mtime, no extra fields, and stable per-file order (§3).</li>
-    <li>Floating-point determinism on GPU is achieved via cuBLAS workspace limits and the deterministic-cudnn flag; on CPU via single-threaded BLAS for the final norm-and-clip pass.</li>
+    <li>K-sample ties broken by lexicographic comparison of canonical outputs, not wall-clock.</li>
+    <li>LoRA training uses fixed seeds from <code>task.intent_hash</code>; data shuffle is a deterministic permutation of <code>(intent_hash, example_index)</code>.</li>
+    <li>ZIP entries: fixed mtime, no extra fields, stable per-file order (§3).</li>
+    <li>FP determinism: GPU via cuBLAS workspace limits + deterministic-cudnn; CPU via single-threaded BLAS for the final norm-and-clip pass.</li>
   </ul>
 
-  <p>A frontier model that is non-deterministic at temperature 0 (e.g. due to provider-side
-    batching) is the only legitimate source of irreproducibility. The compiler caches the
-    first compile's k-sample winners under <code>provenance/k-sample.log</code>; replays
-    use the cached winners when present and the same inputs are given.</p>
+  <p>A frontier model non-deterministic at temperature 0 (e.g. provider-side batching) is the only legitimate source of irreproducibility. The compiler caches first-compile k-sample winners under <code>provenance/k-sample.log</code>; replays use the cache when inputs match.</p>
 </section>
 
 <section id="threat">
   <h2><span class="num">§10</span> Threat model & failure modes</h2>
   <h3>10.1 In scope</h3>
   <ul>
-    <li>Tampered artifacts (modified weights, swapped LoRA, edited eval suite).</li>
-    <li>Forged receipts (claiming an output came from a given artifact when it did not).</li>
-    <li>Registry-side recipe corruption (a malicious draft pattern that biases inference).</li>
+    <li>Tampered artifacts (modified weights, swapped LoRA, edited evals).</li>
+    <li>Forged receipts (claiming an output came from a given artifact).</li>
+    <li>Registry-side recipe corruption (malicious draft biases inference).</li>
     <li>Frontier-model failure during compile (rate limit, content policy, downtime).</li>
     <li>Runtime failure on the consumer device (missing CPU instructions, OOM).</li>
   </ul>
@@ -530,13 +442,12 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
   <h3>10.2 Out of scope</h3>
   <ul>
     <li>Side-channel attacks on the operator's machine.</li>
-    <li>Plaintext exfiltration before compile begins (the operator owns their inputs and is responsible for transport).</li>
-    <li>Inverting an artifact to reconstruct training data. A compiled <code>.kolm</code> stores neither raw examples nor raw corpus; only embedded chunks and verifier-passing labels are committed.</li>
+    <li>Plaintext exfiltration before compile (operator owns inputs and transport).</li>
+    <li>Inverting an artifact to reconstruct training data. A <code>.kolm</code> stores neither raw examples nor raw corpus; only embedded chunks and verifier-passing labels.</li>
   </ul>
 
   <h3>10.3 Failure modes (FM)</h3>
-  <p>Twelve normative failure modes are defined. Each has an exit code, an HTTP status (when
-    surfaced via the API), and a recovery action. A representative slice:</p>
+  <p>Twelve normative failure modes, each with an exit code, HTTP status (when surfaced via API), and recovery action. Representative slice:</p>
   <table>
     <thead><tr><th>Code</th><th>Phase</th><th>Severity</th><th>Action</th></tr></thead>
     <tbody>
@@ -553,9 +464,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
 
 <section id="conform">
   <h2><span class="num">§11</span> Conformance</h2>
-  <p>An implementation is <b>conformant</b> if it satisfies the rules in this section. The
-    public test suite at <code>github.com/sneaky-hippo/kolmogorov-stack/tree/main/conformance</code>
-    is the operational definition; this section is the human-readable summary.</p>
+  <p>The operational definition is the public test suite at <code>github.com/sneaky-hippo/kolmogorov-stack/tree/main/conformance</code>. This section is the human-readable summary.</p>
 
   <h3>11.1 Compiler conformance</h3>
   <ul>
@@ -576,12 +485,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
   </ul>
 
   <h3>11.3 Naming</h3>
-  <p>Implementations that pass the conformance suite <span class="kw">MAY</span> use the
-    name <i>kolm</i>, the file extension <i>.kolm</i>, and the registered MIME type
-    <code>application/vnd.kolm.rs1+zip</code>. The names <i>kolm</i> and
-    <i>Kolmogorov</i> are trademarks of Kolmogorov, Inc. Use is permitted in the context of
-    conformant implementations and in editorial reference. The names
-    <i>RS-1</i>, <i>K-score</i>, and <i>recipe pack</i> are public terms.</p>
+  <p>Implementations passing conformance <span class="kw">MAY</span> use the name <i>kolm</i>, extension <i>.kolm</i>, and MIME type <code>application/vnd.kolm.rs1+zip</code>. <i>kolm</i> and <i>Kolmogorov</i> are trademarks of Kolmogorov, Inc.; use permitted for conformant implementations and editorial reference. <i>RS-1</i>, <i>K-score</i>, <i>recipe pack</i> are public terms.</p>
 </section>
 
 <section id="refs">
@@ -601,23 +505,22 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
 
 <section id="appendix-a">
   <h2><span class="num">§A</span> Appendix A: manifest JSON Schema</h2>
-  <p>The full JSON Schema for <code>manifest.json</code> is published at
-    <code>kolm.ai/schemas/manifest-1.0.0.json</code>. Required top-level keys are:</p>
+  <p>Full JSON Schema published at <code>kolm.ai/schemas/manifest-1.0.0.json</code>. Required top-level keys:</p>
   <table>
     <thead><tr><th>Key</th><th>Type</th><th>Constraint</th></tr></thead>
     <tbody>
       <tr><td><code>rs</code></td><td>string</td><td>SemVer; major <span class="kw">MUST</span> match runtime major.</td></tr>
       <tr><td><code>id</code></td><td>string</td><td>Pattern <code>kolm:[0-9a-f]{32}</code>.</td></tr>
       <tr><td><code>created_at</code></td><td>string</td><td>RFC 3339 UTC.</td></tr>
-      <tr><td><code>compiler</code></td><td>object</td><td>Required keys: <code>name</code>, <code>version</code>.</td></tr>
-      <tr><td><code>task</code></td><td>object</td><td>Required keys: <code>description</code>, <code>intent_hash</code>.</td></tr>
-      <tr><td><code>base_model</code></td><td>object</td><td>Required keys: <code>name</code>, <code>weights_sha256</code>, <code>quantization</code>.</td></tr>
+      <tr><td><code>compiler</code></td><td>object</td><td>Keys: <code>name</code>, <code>version</code>.</td></tr>
+      <tr><td><code>task</code></td><td>object</td><td>Keys: <code>description</code>, <code>intent_hash</code>.</td></tr>
+      <tr><td><code>base_model</code></td><td>object</td><td>Keys: <code>name</code>, <code>weights_sha256</code>, <code>quantization</code>.</td></tr>
       <tr><td><code>adapter</code></td><td>object</td><td>Required when stage 6 ran. Keys: <code>format</code>, <code>rank</code>, <code>alpha</code>, <code>epochs</code>, <code>weights_sha256</code>.</td></tr>
-      <tr><td><code>recipes</code></td><td>object</td><td>Required keys: <code>registry_epoch</code>, <code>pack_sha256</code>, <code>count</code>.</td></tr>
+      <tr><td><code>recipes</code></td><td>object</td><td>Keys: <code>registry_epoch</code>, <code>pack_sha256</code>, <code>count</code>.</td></tr>
       <tr><td><code>recall</code></td><td>object</td><td>Required when corpus supplied. Keys: <code>embedder</code>, <code>chunks</code>, <code>index_sha256</code>.</td></tr>
-      <tr><td><code>verifiers</code></td><td>array</td><td>Min length 1. Each entry: <code>id</code>, <code>type</code>, <code>sha256</code>.</td></tr>
-      <tr><td><code>k_score</code></td><td>object</td><td>Required keys: <code>composite</code>, <code>components</code>, <code>gate</code>, <code>floor</code>.</td></tr>
-      <tr><td><code>signature</code></td><td>object</td><td>Required keys: <code>alg</code>, <code>anchored_to</code>, <code>layer_hashes</code>.</td></tr>
+      <tr><td><code>verifiers</code></td><td>array</td><td>Min length 1. Entry keys: <code>id</code>, <code>type</code>, <code>sha256</code>.</td></tr>
+      <tr><td><code>k_score</code></td><td>object</td><td>Keys: <code>composite</code>, <code>components</code>, <code>gate</code>, <code>floor</code>.</td></tr>
+      <tr><td><code>signature</code></td><td>object</td><td>Keys: <code>alg</code>, <code>anchored_to</code>, <code>layer_hashes</code>.</td></tr>
     </tbody>
   </table>
 
@@ -637,7 +540,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
 
 <section id="appendix-b">
   <h2><span class="num">§B</span> Appendix B: signature wire format</h2>
-  <p>The <code>signature.sig</code> file is a 256-byte binary blob with the following layout:</p>
+  <p><code>signature.sig</code> is a 256-byte binary blob:</p>
 <pre><span class="com">// signature.sig - RS-1 1.0.0</span>
 offset  size  field
 0       4     magic                <span class="ok">"KOLM"</span>
@@ -651,14 +554,9 @@ offset  size  field
 168     88    reserved (zeros)
 256     EOF</pre>
 
-  <p>Verification: a runtime computes <code>HMAC-SHA256(epoch_key, bytes[0..135])</code> and
-    compares to <code>bytes[136..167]</code>. The epoch key is published at
-    <code>registry.kolm.ai/epoch/&lt;anchor_date&gt;/key.json</code> and signed by the
-    registry's long-term Ed25519 key.</p>
+  <p>Verification: compute <code>HMAC-SHA256(epoch_key, bytes[0..135])</code> and compare to <code>bytes[136..167]</code>. The epoch key is published at <code>registry.kolm.ai/epoch/&lt;anchor_date&gt;/key.json</code> and signed by the registry's long-term Ed25519 key.</p>
 
-  <div class="note"><b>End of specification.</b> Errata, change proposals, and the official
-    conformance test vectors live at <code>github.com/sneaky-hippo/kolmogorov-stack</code>.
-    The maintainers can be reached at <code>spec@kolm.ai</code>.</div>
+  <div class="note"><b>End of specification.</b> Errata, change proposals, conformance test vectors at <code>github.com/sneaky-hippo/kolmogorov-stack</code>. Maintainers: <code>spec@kolm.ai</code>.</div>
 </section>
 
 </article>

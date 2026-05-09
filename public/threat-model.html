@@ -123,7 +123,7 @@
   <div class="wrap">
     <span class="pill">threat model</span>
     <h1>What it defends. <span class="tone">What it doesn't.</span></h1>
-    <p class="lede">A signed artifact is only useful if the threat scope is honest. Below: the five attacks the receipt chain catches, and the four it doesn't. Plus the cryptographic primitives behind both.</p>
+    <p class="lede">A signed artifact is only useful if the threat scope is honest. The attacks the receipt chain catches, the ones it doesn't, and the primitives behind both.</p>
   </div>
 </section>
 
@@ -132,7 +132,7 @@
 
     <div class="group">
       <h2>Primitive: the receipt chain</h2>
-      <p>Every <code>.kolm</code> artifact emits a chain of HMAC-SHA256 hashes anchored on the manifest. At runtime, every output is signed against the chain. The verifier walks the chain backwards from the output to the manifest hash; any tampered link breaks verification.</p>
+      <p>Every <code>.kolm</code> artifact emits a chain of HMAC-SHA256 hashes anchored on the manifest. The verifier walks the chain backwards from output to manifest hash; any tampered link breaks verification.</p>
       <pre class="code"><span class="c">// at compile time</span>
 manifest_hash   = SHA256(manifest.json)
 model_hash      = SHA256(model.gguf)
@@ -159,37 +159,37 @@ verify(output, receipt, artifact) =&gt; <span class="ok">ok</span> | <span style
         <div class="card defends">
           <div class="tag">defends · t1</div>
           <h3>Artifact tampering</h3>
-          <p>Anyone modifies model.gguf, lora.bin, recipes.json, or recall.sqlite-vec inside a <code>.kolm</code> file. Receipt chain breaks; <code>kolm verify</code> fails immediately.</p>
+          <p>Modifying model.gguf, lora.bin, recipes.json, or recall.sqlite-vec inside a <code>.kolm</code> breaks the chain; <code>kolm verify</code> fails immediately.</p>
         </div>
 
         <div class="card defends">
           <div class="tag">defends · t2</div>
           <h3>Output substitution</h3>
-          <p>Adversary swaps a real model output for a forged one before the user sees it. The forged output's receipt does not chain to a valid artifact_root; verifier rejects.</p>
+          <p>Forged outputs don't chain to a valid artifact_root; verifier rejects.</p>
         </div>
 
         <div class="card defends">
           <div class="tag">defends · t3</div>
           <h3>Manifest forgery</h3>
-          <p>Attacker writes a fake manifest claiming to describe a different artifact. Manifest hash diverges from artifact_root; verification fails on first link.</p>
+          <p>A fake manifest's hash diverges from artifact_root; verification fails on the first link.</p>
         </div>
 
         <div class="card defends">
           <div class="tag">defends · t4</div>
           <h3>Recall index poisoning</h3>
-          <p>Adversary edits the bundled sqlite-vec index to add or remove documents. recall_hash diverges; chain breaks. (This is why we ship the index <em>inside</em> the artifact, not alongside it.)</p>
+          <p>Editing the bundled sqlite-vec index changes recall_hash; chain breaks. (Why we ship the index <em>inside</em> the artifact.)</p>
         </div>
 
         <div class="card defends">
           <div class="tag">defends · t5</div>
           <h3>Replay across artifacts</h3>
-          <p>Attacker copies a valid receipt from artifact A to claim it came from artifact B. Receipt embeds artifact_root; verification against B fails because A's root ≠ B's root.</p>
+          <p>A valid receipt from A copied to B fails: receipts embed artifact_root, A's root ≠ B's root.</p>
         </div>
 
         <div class="card defends">
           <div class="tag">defends · t6</div>
           <h3>Quality regression smuggling</h3>
-          <p>Adversary swaps the LoRA delta with a deliberately worse one (e.g. trojan-trained). K-score gate rejects at compile time; manifest records both the K-score and the held-out test set hash.</p>
+          <p>A trojan-trained LoRA fails the K-score gate at compile time; manifest records the K-score and held-out test set hash.</p>
         </div>
 
       </div>
@@ -202,25 +202,25 @@ verify(output, receipt, artifact) =&gt; <span class="ok">ok</span> | <span style
         <div class="card does-not">
           <div class="tag">out of scope · n1</div>
           <h3>Model-level adversarial prompts</h3>
-          <p>If your prompt is jailbroken, the artifact will sign whatever the model produced. Receipts prove <em>provenance</em>, not <em>safety</em>. Use guardrail layers separately.</p>
+          <p>A jailbroken prompt will be signed as-is. Receipts prove <em>provenance</em>, not <em>safety</em>. Use guardrail layers separately.</p>
         </div>
 
         <div class="card does-not">
           <div class="tag">out of scope · n2</div>
           <h3>Compromised compile environment</h3>
-          <p>If the machine running <code>kolm compile</code> is compromised, the attacker can produce a valid signed artifact with poisoned weights. Use a clean build environment; consider air-gapped compile for high-stakes use.</p>
+          <p>If the machine running <code>kolm compile</code> is compromised, the attacker can sign a valid artifact with poisoned weights. Use a clean build; consider air-gapped compile for high-stakes work.</p>
         </div>
 
         <div class="card does-not">
           <div class="tag">out of scope · n3</div>
           <h3>Side-channel timing inference</h3>
-          <p>An attacker observing inference timing on shared hardware may infer aspects of input or output. The receipt is a content integrity primitive, not a confidentiality primitive. Use trusted hardware (SEV, TDX) for adversarial multi-tenant.</p>
+          <p>Inference-timing attacks on shared hardware may infer input or output. Receipts are an integrity primitive, not confidentiality. Use trusted hardware (SEV, TDX) for adversarial multi-tenant.</p>
         </div>
 
         <div class="card does-not">
           <div class="tag">out of scope · n4</div>
           <h3>Human at the keyboard</h3>
-          <p>Receipts prove what the artifact said. They cannot prove that the human who saw the output then acted on it correctly. Audit trail ends at the model's output; downstream business logic is your responsibility.</p>
+          <p>Receipts prove what the artifact said, not that a human acted on it correctly. Audit trail ends at the model output; downstream business logic is yours.</p>
         </div>
 
       </div>
@@ -259,19 +259,19 @@ verify(output, receipt, artifact) =&gt; <span class="ok">ok</span> | <span style
 
     <div class="group">
       <h2>What an attacker would have to compromise</h2>
-      <p>To produce a forged artifact that verifies as legitimate kolm output, an attacker would need <b>simultaneously</b>: (a) the user's signing secret <em>or</em> the Kolmogorov registry's signing secret, (b) a SHA-256 second-preimage on the manifest, and (c) if registry-co-signed, a second compromise on the registry side. The cost of all three is the cost of breaking SHA-256, plus social engineering against two parties.</p>
-      <p>For artifacts anchored on-chain (enterprise), forgery additionally requires rewriting the anchored block, which requires the cost of attacking the underlying chain.</p>
+      <p>To forge a legitimate-verifying artifact, an attacker needs <b>simultaneously</b>: (a) the user's signing secret <em>or</em> the registry's, (b) a SHA-256 second-preimage on the manifest, (c) if co-signed, a second registry compromise.</p>
+      <p>On-chain anchored artifacts (enterprise) also require rewriting the anchored block at chain-attack cost.</p>
     </div>
 
     <div class="group">
       <h2>Reporting</h2>
-      <p>Found a way around any of T1–T6? Email <a href="mailto:security@kolm.ai" style="color:var(--accent);">security@kolm.ai</a> with reproduction steps. Bounty brackets are listed on <a href="/trust" style="color:var(--accent);">trust</a>. Coordinated disclosure window: 90 days standard, 14 days for actively exploited.</p>
+      <p>Found a way around any of T1–T6? Email <a href="mailto:security@kolm.ai" style="color:var(--accent);">security@kolm.ai</a> with repro steps. Bounty brackets on <a href="/trust" style="color:var(--accent);">trust</a>. Coordinated disclosure: 90 days standard, 14 days for actively exploited.</p>
     </div>
 
     <div class="verdict">
       <h3>Honest scope</h3>
-      <p>kolm is an <b>integrity</b> primitive, not a <b>safety</b> primitive. The receipt chain proves <em>what was said by which artifact</em>. It does not prove the model said something safe, true, or aligned with your policy.</p>
-      <p>Pair with: prompt-side guardrails, output filters, downstream business logic. The receipt chain is the substrate underneath those layers, not a replacement for them.</p>
+      <p>kolm is an <b>integrity</b> primitive, not a <b>safety</b> primitive. Receipts prove <em>what was said by which artifact</em>, not that the output is safe or policy-aligned.</p>
+      <p>Pair with prompt-side guardrails, output filters, and downstream business logic.</p>
       <p><a href="/trust" style="color:var(--accent);">trust center</a> · <a href="/security" style="color:var(--accent);">security policy</a> · <a href="/docs/rs-1.md" style="color:var(--accent);">RS-1 spec</a></p>
     </div>
 

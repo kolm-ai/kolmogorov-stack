@@ -44,7 +44,7 @@
 
   /* pain anchor */
   .pain-anchor { margin: 80px auto 0; padding: 36px 32px; max-width: 980px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg-2, #11151b); }
-  .pain-anchor .pain-hd { font-family: var(--mono); font-size: 11px; color: var(--violet, #4c7dff); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
+  .pain-anchor .pain-hd { font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
   .pain-anchor h2 { margin: 0 0 16px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.2; }
   .pain-anchor .pain-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 18px 0 0; }
   @media (max-width: 760px) { .pain-anchor .pain-grid { grid-template-columns: 1fr; } }
@@ -117,18 +117,18 @@
   @media (max-width: 540px) { .brand-anchor-inner { flex-direction: column; gap: 6px; padding: 12px 18px; } }
 
   /* hero rent-vs-buy thesis line */
-  .hero-thesis { margin: 18px 0 4px; font-size: 14.5px; color: var(--fg-2, #c9c2b2); line-height: 1.55; max-width: 60ch; padding: 12px 16px; border-left: 2px solid var(--violet, #4c7dff); background: rgba(76,125,255,0.03); border-radius: 0 6px 6px 0; }
+  .hero-thesis { margin: 18px 0 4px; font-size: 14.5px; color: var(--fg-2, #c9c2b2); line-height: 1.55; max-width: 60ch; padding: 12px 16px; border-left: 2px solid var(--ink-faint, #737c73); background: rgba(236,231,220,0.02); border-radius: 0 6px 6px 0; }
   .hero-thesis b { color: var(--ink, #faf2e1); font-weight: 540; }
 
   /* artifact-guarantee credibility band */
   .cred-band { margin: 36px auto 0; max-width: 1180px; padding: 0 32px; }
-  .cred-band a.cred-inner { display: grid; grid-template-columns: auto repeat(4, 1fr) auto; gap: 24px; align-items: center; padding: 18px 26px; border: 1px solid rgba(76,125,255,0.28); border-radius: 12px; background: linear-gradient(90deg, rgba(76,125,255,0.06), rgba(76,125,255,0.01) 70%); text-decoration: none; color: inherit; transition: border-color 160ms; }
-  .cred-band a.cred-inner:hover { border-color: rgba(76,125,255,0.55); }
-  .cred-band .cred-tag { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--violet, #4c7dff); border: 1px solid rgba(76,125,255,0.32); padding: 5px 10px; border-radius: 999px; white-space: nowrap; }
+  .cred-band a.cred-inner { display: grid; grid-template-columns: auto repeat(4, 1fr) auto; gap: 24px; align-items: center; padding: 18px 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); text-decoration: none; color: inherit; transition: border-color 160ms; }
+  .cred-band a.cred-inner:hover { border-color: var(--line-strong, rgba(236,231,220,0.22)); }
+  .cred-band .cred-tag { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint, #737c73); border: 1px solid var(--line); padding: 5px 10px; border-radius: 999px; white-space: nowrap; }
   .cred-band .cred-cell { font-family: var(--mono); font-size: 12px; color: var(--ink-mute, #b5bdb1); line-height: 1.45; }
   .cred-band .cred-cell .num { display: block; color: var(--ink, #faf2e1); font-size: 15px; font-weight: 540; margin-bottom: 2px; }
   .cred-band .cred-cell .lab { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint, #737c73); }
-  .cred-band .cred-arrow { font-family: var(--mono); font-size: 12px; color: var(--violet, #4c7dff); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+  .cred-band .cred-arrow { font-family: var(--mono); font-size: 12px; color: var(--ink-mute, #b5bdb1); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
   @media (max-width: 880px) {
     .cred-band a.cred-inner { grid-template-columns: 1fr 1fr; gap: 14px; padding: 16px 18px; }
     .cred-band .cred-tag { grid-column: 1 / -1; justify-self: start; }
@@ -148,7 +148,7 @@
   @media (max-width: 540px) { .vs-strip .vs-grid { grid-template-columns: 1fr; } }
   .vs-strip a.vs-card { display: block; padding: 20px 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); transition: border-color 160ms, transform 160ms; color: inherit; text-decoration: none; }
   .vs-strip a.vs-card:hover { border-color: rgba(76,125,255,0.45); transform: translateY(-2px); }
-  .vs-strip .vs-card .vs { font-family: var(--mono); font-size: 10.5px; color: var(--violet, #4c7dff); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .vs-strip .vs-card .vs { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
   .vs-strip .vs-card h3 { margin: 0 0 6px; font-size: 15px; font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.35; }
   .vs-strip .vs-card p { margin: 0; font-size: 12.5px; color: var(--ink-faint, #737c73); line-height: 1.5; }
 
@@ -210,7 +210,7 @@
   .fmt-cmp table { width: 100%; min-width: 720px; border-collapse: collapse; }
   .fmt-cmp th, .fmt-cmp td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--line); font-size: 13.5px; }
   .fmt-cmp th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint, #737c73); font-weight: 540; background: rgba(0,0,0,0.18); }
-  .fmt-cmp th.col-kolm { color: var(--violet, #4c7dff); }
+  .fmt-cmp th.col-kolm { color: var(--fg, #faf2e1); }
   .fmt-cmp td:first-child { color: var(--fg, #faf2e1); font-weight: 500; }
   .fmt-cmp td { color: var(--fg-2, #c9c2b2); }
   .fmt-cmp td.col-kolm { color: var(--fg, #faf2e1); }
@@ -224,16 +224,16 @@
   .dp-bar { margin: 56px auto 0; max-width: 1180px; padding: 0 32px; }
   .dp-bar .dp-inner { border: 1px solid var(--line); border-radius: 14px; background: var(--bg-2, #11151b); padding: 22px 28px; }
   .dp-bar .dp-row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-  .dp-bar .dp-tag { font-family: var(--mono); font-size: 10.5px; color: var(--violet, #4c7dff); text-transform: uppercase; letter-spacing: 0.06em; padding: 5px 10px; border: 1px solid rgba(76,125,255,0.32); border-radius: 999px; white-space: nowrap; }
+  .dp-bar .dp-tag { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.06em; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; white-space: nowrap; }
   .dp-bar .dp-copy { font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.55; flex: 1; min-width: 220px; }
   .dp-bar .dp-copy b { color: var(--ink, #faf2e1); font-weight: 540; }
-  .dp-bar .dp-link { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--violet, #4c7dff); white-space: nowrap; }
+  .dp-bar .dp-link { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-mute, #b5bdb1); white-space: nowrap; }
   .dp-bar .dp-link:hover { text-decoration: underline; }
   .dp-bar .dp-slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 18px; }
   @media (max-width: 880px) { .dp-bar .dp-slots { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 540px) { .dp-bar .dp-slots { grid-template-columns: 1fr; } }
   .dp-bar .dp-slot { padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0,0,0,0.18); }
-  .dp-bar .dp-slot .vert { font-family: var(--mono); font-size: 10px; color: var(--violet, #4c7dff); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+  .dp-bar .dp-slot .vert { font-family: var(--mono); font-size: 10px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
   .dp-bar .dp-slot .name { font-size: 13px; color: var(--ink, #faf2e1); font-weight: 540; line-height: 1.3; }
   .dp-bar .dp-slot .status { font-family: var(--mono); font-size: 10px; color: var(--ink-faint, #737c73); margin-top: 4px; text-transform: lowercase; }
   .dp-bar .dp-slot.reserved .status { color: #7ef0d2; }
@@ -249,7 +249,7 @@
      Every moving element clamps via IntersectionObserver: paused offscreen, runs only when .ls-armed is on the section. */
   .lab-strip { margin: 36px auto 0; max-width: 1180px; padding: 0 32px; }
   .lab-strip .ls-head { display: flex; align-items: center; gap: 14px; margin: 0 0 12px; padding: 0 4px; flex-wrap: wrap; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; }
-  .lab-strip .ls-tag { color: var(--violet, #4c7dff); border: 1px solid rgba(76,125,255,0.32); padding: 4px 10px; border-radius: 999px; }
+  .lab-strip .ls-tag { color: var(--ink-faint, #737c73); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
   .lab-strip .ls-status { color: var(--ink-faint, #737c73); display: inline-flex; align-items: center; gap: 8px; }
   .lab-strip .ls-status code { font-family: var(--mono); color: var(--ink-mute, #b5bdb1); }
   .lab-strip .ls-dot { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210,0.6); animation: ls-blink 1.6s ease-in-out infinite; animation-play-state: paused; }
@@ -258,12 +258,12 @@
   .lab-strip .ls-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
   @media (max-width: 980px) { .lab-strip .ls-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 540px) { .lab-strip .ls-grid { grid-template-columns: 1fr; } }
-  .lab-strip .ls-panel { display: flex; flex-direction: column; gap: 10px; min-height: 158px; padding: 16px 18px 18px; border: 1px solid rgba(76,125,255,0.18); border-radius: 12px; background: linear-gradient(180deg, rgba(76,125,255,0.05), rgba(76,125,255,0.01) 60%), var(--bg-2, #11151b); text-decoration: none; color: inherit; transition: border-color 160ms, transform 160ms; position: relative; overflow: hidden; }
-  .lab-strip .ls-panel:hover, .lab-strip .ls-panel:focus-visible { border-color: rgba(76,125,255,0.55); transform: translateY(-2px); outline: none; }
-  .lab-strip .ls-panel::after { content: ""; position: absolute; right: 8px; top: 8px; width: 8px; height: 8px; border-top: 1px solid rgba(76,125,255,0.4); border-right: 1px solid rgba(76,125,255,0.4); pointer-events: none; }
+  .lab-strip .ls-panel { display: flex; flex-direction: column; gap: 10px; min-height: 158px; padding: 16px 18px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); text-decoration: none; color: inherit; transition: border-color 160ms, transform 160ms; position: relative; overflow: hidden; }
+  .lab-strip .ls-panel:hover, .lab-strip .ls-panel:focus-visible { border-color: var(--line-strong, rgba(236,231,220,0.22)); transform: translateY(-2px); outline: none; }
+  .lab-strip .ls-panel::after { content: ""; position: absolute; right: 8px; top: 8px; width: 8px; height: 8px; border-top: 1px solid var(--line-strong, rgba(236,231,220,0.22)); border-right: 1px solid var(--line-strong, rgba(236,231,220,0.22)); pointer-events: none; }
   .lab-strip .ls-row-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 16px; }
   .lab-strip .ls-id { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint, #737c73); }
-  .lab-strip .ls-pulse { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--violet, #4c7dff); display: inline-flex; align-items: center; gap: 5px; }
+  .lab-strip .ls-pulse { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute, #b5bdb1); display: inline-flex; align-items: center; gap: 5px; }
   .lab-strip .ls-pulse > span { width: 5px; height: 5px; border-radius: 50%; background: var(--violet, #4c7dff); box-shadow: 0 0 6px rgba(76,125,255,0.7); animation: ls-blink 1.4s ease-in-out infinite; animation-play-state: paused; }
   .lab-strip .ls-ok { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: #7ef0d2; border: 1px solid rgba(126,240,210,0.28); padding: 2px 7px; border-radius: 4px; }
   .lab-strip .ls-value { display: flex; align-items: baseline; gap: 6px; line-height: 1; min-height: 30px; }
@@ -696,26 +696,6 @@
   </div>
 </section>
 
-<section class="triple">
-  <div class="triple-grid">
-    <div class="triple-cell">
-      <div class="lab">01 sovereignty</div>
-      <h3>Your data, your network, your model.</h3>
-      <p>Compile in your boundary. Run in your boundary. The frontier API is the teacher, not the runtime. Egress at run time is zero.</p>
-    </div>
-    <div class="triple-cell">
-      <div class="lab">02 verifiability</div>
-      <h3>Every output, signed end-to-end.</h3>
-      <p>HMAC-SHA256 receipt chain anchored on the manifest. <code>kolm verify</code> checks any output against any artifact, with no key needed for public registry-cosigned artifacts.</p>
-    </div>
-    <div class="triple-cell">
-      <div class="lab">03 portability</div>
-      <h3>One file. Any device.</h3>
-      <p>≤3 GB ZIP, INT4-quantized GGUF base + LoRA + recipe pack + sqlite-vec index + verifier + manifest + signature. Runs on phone, laptop, server, edge.</p>
-    </div>
-  </div>
-</section>
-
 <section class="reg-tele" aria-label="public registry telemetry">
   <div class="reg-tele-inner">
     <div class="reg-tele-cell">
@@ -868,40 +848,16 @@
 
 <section class="section">
   <div class="wrap">
-    <div class="eyebrow"><span class="num">04</span>primitives</div>
-    <h2>One artifact. Four jobs.</h2>
-    <p class="sec-lede">The product should feel like one command, not a stack of ML chores. The internal pieces stay visible enough for engineering, security, and legal to trust the build.</p>
+    <div class="eyebrow"><span class="num">04</span>anatomy</div>
+    <h2>One artifact. Every byte has a job.</h2>
+    <p class="sec-lede">Four verbs, six file roles, one signed binary. Engineering, security, and legal read the same artifact.</p>
 
-    <div class="pillars">
-      <div class="pillar">
-        <div class="verb">$ kolm compile</div>
-        <h3>Freeze the task.</h3>
-        <p>Capture the task, examples, base model, policy, and corpus namespace in a signed manifest.</p>
-      </div>
-      <div class="pillar">
-        <div class="verb">$ kolm compile --data</div>
-        <h3>Attach context.</h3>
-        <p>Package searchable context with the artifact so local runs can cite the approved source material.</p>
-      </div>
-      <div class="pillar">
-        <div class="verb">$ kolm eval</div>
-        <h3>Gate the release.</h3>
-        <p>Re-run embedded tests, recompute K-score, and reject artifacts that fall under the threshold.</p>
-      </div>
-      <div class="pillar">
-        <div class="verb">$ kolm run</div>
-        <h3>Execute locally.</h3>
-        <p>Run the artifact in the product boundary and emit a receipt that can be checked later.</p>
-      </div>
+    <div class="verb-strip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:18px 0 26px;font-family:var(--mono);font-size:13px">
+      <div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--bg-2,#11151b)"><span style="color:var(--ink-faint,#737c73);text-transform:uppercase;letter-spacing:0.06em;font-size:10px;display:block;margin-bottom:4px">compile</span><span style="color:var(--ink,#faf2e1)">freeze the task</span></div>
+      <div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--bg-2,#11151b)"><span style="color:var(--ink-faint,#737c73);text-transform:uppercase;letter-spacing:0.06em;font-size:10px;display:block;margin-bottom:4px">compile --data</span><span style="color:var(--ink,#faf2e1)">attach context</span></div>
+      <div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--bg-2,#11151b)"><span style="color:var(--ink-faint,#737c73);text-transform:uppercase;letter-spacing:0.06em;font-size:10px;display:block;margin-bottom:4px">eval</span><span style="color:var(--ink,#faf2e1)">gate the release</span></div>
+      <div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--bg-2,#11151b)"><span style="color:var(--ink-faint,#737c73);text-transform:uppercase;letter-spacing:0.06em;font-size:10px;display:block;margin-bottom:4px">run</span><span style="color:var(--ink,#faf2e1)">execute locally</span></div>
     </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">05</span>artifact</div>
-    <h2>Every byte has a job.</h2>
-    <p class="sec-lede">A <code>.kolm</code> is a portable trust object. The format keeps product, security, and compliance on the same page.</p>
 
     <div class="anatomy" aria-label="anatomy of a .kolm file">
       <span class="root">patient-intake.kolm</span>
@@ -917,7 +873,7 @@
 
 <section class="section">
   <div class="wrap">
-    <div class="eyebrow"><span class="num">06</span>proof</div>
+    <div class="eyebrow"><span class="num">05</span>proof</div>
     <h2>Receipts, not vibes.</h2>
     <p class="sec-lede">Every run can emit a receipt. Every release has a gate. Every claim needs a number attached to it.</p>
 
@@ -954,50 +910,7 @@
 
 <section class="section">
   <div class="wrap">
-    <div class="eyebrow"><span class="num">07</span>against the alternatives</div>
-    <h2>Why a compiler, not a wrapper.</h2>
-    <p class="sec-lede">Most ways of shipping AI keep the cloud, the model, or the data outside your boundary. kolm collapses the three problems into one signed file you own. Here is what you trade vs each adjacent path.</p>
-
-    <div class="vs-tbl">
-      <table>
-        <thead>
-          <tr><th style="width:30%">Path</th><th>What you keep</th><th>What kolm changes</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><b>Cloud APIs</b><br><span class="dim">OpenAI, Anthropic, Bedrock</span></td>
-            <td>Per-call inference. Network dependency. Per-token billing forever. Data leaves your machine on every call. No portable artifact.</td>
-            <td>Pay the frontier teacher once at compile. Run inference locally at zero marginal cost. ~27&times; cheaper at 100k MAU. Data stays on the device. Output is signed.</td>
-          </tr>
-          <tr>
-            <td><b>Hosted fine-tune</b><br><span class="dim">Together, HF, Bedrock fine-tune</span></td>
-            <td>A model you cannot move. Vendor-hosted weights. No quality gate. No portability across iOS, Android, edge, server.</td>
-            <td>One signed file you own. K-score gate at build. Same artifact runs on phone, laptop, edge, VPC. No vendor lock.</td>
-          </tr>
-          <tr>
-            <td><b>On-prem inference</b><br><span class="dim">vLLM, Ollama, MLC, llama.cpp</span></td>
-            <td>A general-purpose runtime. You build the eval pipeline, the LoRA pipeline, the recall index, the K-score, the receipt chain.</td>
-            <td>Task-specific LoRA + recipe pack + multimodal recall + K-score + signed receipts, all in one artifact. Compiler does the assembly.</td>
-          </tr>
-          <tr>
-            <td><b>RAG / orchestration</b><br><span class="dim">LangChain, LlamaIndex</span></td>
-            <td>Cloud calls every request. Glue you maintain. The intelligence stays in someone else's API.</td>
-            <td>Compile the policy, the retrieval, and the model into one boundary-local artifact. Receipts span retrieval and inference. No glue at runtime.</td>
-          </tr>
-          <tr>
-            <td><b>DIY edge stack</b><br><span class="dim">CoreML, ExecuTorch, TFLite</span></td>
-            <td>Three runtimes to ship and three quantization paths to maintain. No verification layer. No registry.</td>
-            <td>One <code>.kolm</code> across iOS, Android, web, server. RS-1 spec is open. Verification + registry shipped.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">08</span>install</div>
+    <div class="eyebrow"><span class="num">06</span>install</div>
     <h2>Start with the CLI.</h2>
     <p class="sec-lede">The SDK and runtime are MIT. The paid surface is managed compile, registry, policy, and enterprise controls. Keep run-time inside your boundary.</p>
 

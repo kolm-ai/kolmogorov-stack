@@ -77,7 +77,7 @@
     <div class="wrap">
       <div class="eyebrow"><span class="pulse"></span>How it works</div>
       <h1>Compile, end-to-end.</h1>
-      <p class="lede">The compiler is eight stages: gather, spec, synthesize, k-sample, verify, fit, observe, sign. The frontier model is the teacher. The artifact is the student. The receipt is the audit row. This page reads like a paper because it should - the only credible answer to "how does it work" is one that an engineer can implement.</p>
+      <p class="lede">Eight stages: gather, spec, synthesize, k-sample, verify, fit, observe, sign. Frontier as teacher, artifact as student, receipt as audit row. Reads like a paper because the only credible answer to "how does it work" is one an engineer can implement.</p>
     </div>
   </section>
 
@@ -146,22 +146,22 @@
         <div class="hiw-num">01</div>
         <div>
           <h2>Gather: collect the gold examples and the corpus.</h2>
-          <p class="summary">The compile starts with what you bring. 30&ndash;200 input/output pairs (the gold set) and the directory of related documents (the corpus). The compiler holds 20% of the gold out for the eval set and never peeks at it during synthesis or training.</p>
+          <p class="summary">30&ndash;200 input/output pairs (gold set) plus a directory of related documents (corpus). 20% of the gold is held out for eval and never seen during synthesis or training.</p>
 
           <h4>Inputs</h4>
           <ul>
             <li><code>examples.jsonl</code> - one input/output pair per line</li>
-            <li><code>./corpus/</code> - text, PDFs, images, audio, video. Mixed modalities are auto-detected (<code>magika</code>) and routed to the right embedder</li>
-            <li><code>policy.md</code> (optional) - refusal patterns, formatting constraints, regulatory language</li>
-            <li>frontier API key - Anthropic, OpenAI, Google, or your own. Used as the teacher.</li>
+            <li><code>./corpus/</code> - text, PDFs, images, audio, video. Auto-detected (<code>magika</code>), routed to the right embedder</li>
+            <li><code>policy.md</code> (optional) - refusals, formatting, regulatory language</li>
+            <li>frontier API key - Anthropic, OpenAI, Google, or your own; used as the teacher</li>
           </ul>
 
           <h4>What the compiler does</h4>
           <ul>
-            <li>parses, deduplicates, normalizes encoding</li>
-            <li>splits 80/20 train/eval with a deterministic seed (so re-compiles produce identical splits)</li>
-            <li>indexes the corpus into a tenant-scoped sqlite-vec namespace</li>
-            <li>writes the deterministic <code>data_hash</code> into the manifest - same inputs, same hash, every time</li>
+            <li>parses, dedupes, normalizes encoding</li>
+            <li>80/20 train/eval split, deterministic seed</li>
+            <li>indexes corpus into a tenant-scoped sqlite-vec namespace</li>
+            <li>writes deterministic <code>data_hash</code> into the manifest</li>
           </ul>
         </div>
       </div>
@@ -170,15 +170,15 @@
         <div class="hiw-num">02</div>
         <div>
           <h2>Spec: derive the verifier from the examples.</h2>
-          <p class="summary">A task is only compilable if there's a deterministic check on the output. The compiler synthesizes that check from your examples: a JSON schema, a regex, a custom function - or a learned classifier when the output is free-form. This is what makes the K-score quantitative instead of vibes.</p>
+          <p class="summary">A task is compilable only if there's a deterministic check on the output. The compiler synthesizes one from your examples: JSON schema, regex, custom function, or a learned classifier for free-form output. This is what makes the K-score quantitative.</p>
 
           <h4>Verifier types</h4>
           <ul>
             <li><b>schema</b> - JSON Schema synthesized from output shape (most common)</li>
-            <li><b>regex</b> - for structured strings (patient IDs, claim numbers, redactions)</li>
-            <li><b>function</b> - user-supplied <code>verify.js</code> or <code>verify.py</code> for arbitrary checks</li>
-            <li><b>classifier</b> - a small learned head (logistic regression on frontier embeddings) when outputs are free-form - trained on the gold set</li>
-            <li><b>composite</b> - AND/OR combinations of the above</li>
+            <li><b>regex</b> - for structured strings (IDs, claim numbers, redactions)</li>
+            <li><b>function</b> - user-supplied <code>verify.js</code> or <code>verify.py</code></li>
+            <li><b>classifier</b> - a small learned head (logistic regression on frontier embeddings) for free-form output, trained on gold</li>
+            <li><b>composite</b> - AND/OR combinations</li>
           </ul>
 
           <h4>Output</h4>
@@ -192,12 +192,12 @@ the K-score is the mean over the held-out eval set.</pre>
         <div class="hiw-num">03</div>
         <div>
           <h2>Synthesize: draft the recipe pack from the examples.</h2>
-          <p class="summary">Most tokens in a structured task are deterministic given the prefix: opening brackets, field names, fixed framings. The compiler observes those patterns across the gold set and emits a <em>recipe pack</em> - a deterministic draft table indexed by prefix shape and by the embedding of the recalled context. This is the speculative-decoding moat: at run time, the recipe pack drafts the boring tokens, the LoRA fills in the substantive ones.</p>
+          <p class="summary">Most tokens in structured tasks are deterministic given the prefix. The compiler emits a <em>recipe pack</em> indexed by prefix shape and recalled-context embedding. At run time, recipes draft boring tokens; the LoRA fills the substantive ones. The speculative-decoding moat.</p>
 
           <h4>What ships in the pack</h4>
           <ul>
-            <li><b>prefix-shape entries</b> - e.g., <code>{"triage":</code> always followed by one of <code>"urgent"|"routine"|"escalate"</code></li>
-            <li><b>embedding-shape entries</b> - e.g., when the recalled context resembles "ER intake form", the field order is fixed</li>
+            <li><b>prefix-shape entries</b> - e.g., <code>{"triage":</code> always followed by <code>"urgent"|"routine"|"escalate"</code></li>
+            <li><b>embedding-shape entries</b> - e.g., recalled context resembling "ER intake form" pins field order</li>
             <li><b>fallback</b> - if no recipe matches, the LoRA decodes from scratch (no quality cost)</li>
           </ul>
         </div>
@@ -207,13 +207,13 @@ the K-score is the mean over the held-out eval set.</pre>
         <div class="hiw-num">04</div>
         <div>
           <h2>k-sample: query the frontier as the teacher.</h2>
-          <p class="summary">For each training example, the compiler asks the frontier model <em>k</em> times (default <code>k=4</code>) for the answer. The verifier scores all <em>k</em> outputs. The winner advances; the losers are discarded. This is verified inference: the labels we use to train the LoRA are not "what the frontier said" - they are "what the frontier said that the verifier accepts."</p>
+          <p class="summary">For each training example, the compiler asks the frontier <em>k</em> times (default <code>k=4</code>). The verifier scores all <em>k</em>; the winner advances. Labels are "what the frontier said that the verifier accepts," not "what the frontier said."</p>
 
-          <h4>Why k-sampling instead of a single call</h4>
-          <p>Single frontier calls are unreliable on the long tail. <em>k</em>=4 with deterministic verification gets you to &ge;0.95 label correctness on most structured tasks. The cost is 4&times; the frontier API spend per training example - amortized to zero after compile, because every call against the artifact thereafter is local.</p>
+          <h4>Why k-sampling instead of one call</h4>
+          <p>Single frontier calls are unreliable on the long tail. <em>k</em>=4 with deterministic verification reaches &ge;0.95 label correctness on most structured tasks. Cost is 4&times; teacher spend per training example, amortized to zero after compile.</p>
 
           <h4>Recall injection</h4>
-          <p>If a corpus namespace was provided, every k-sample request is grounded in the top-k recalled chunks. The frontier never sees the whole corpus; it sees the <em>relevant</em> chunks per example, retrieved by embedding similarity.</p>
+          <p>If a corpus is provided, every k-sample request is grounded in top-k recalled chunks retrieved by embedding similarity.</p>
         </div>
       </div>
 
@@ -221,12 +221,12 @@ the K-score is the mean over the held-out eval set.</pre>
         <div class="hiw-num">05</div>
         <div>
           <h2>verify: the deterministic gate.</h2>
-          <p class="summary">Every k-sampled output is run through the verifier. The score determines acceptance. If no sample passes, the example is dropped from training (we'd rather train on less than train on a wrong label). The fraction of examples that produced a passing sample is the <em>label coverage</em>; it goes into the manifest.</p>
+          <p class="summary">Every k-sampled output runs through the verifier. If no sample passes, the example is dropped (better to train on less than on a wrong label). The fraction passing is the <em>label coverage</em>, recorded in the manifest.</p>
 
           <h4>Failure handling</h4>
           <ul>
             <li>if &lt;80% of examples produce passing samples, the compile pauses and asks for more or higher-quality gold</li>
-            <li>if the frontier consistently fails the verifier, you get a "the frontier cannot do this task at this gate" error - the compile fails fast, you re-spec the task</li>
+            <li>if the frontier consistently fails the verifier, you get a "frontier cannot do this task at this gate" error - compile fails fast, re-spec the task</li>
           </ul>
         </div>
       </div>
@@ -235,20 +235,20 @@ the K-score is the mean over the held-out eval set.</pre>
         <div class="hiw-num">06</div>
         <div>
           <h2>fit: train the LoRA.</h2>
-          <p class="summary">The verified label set is the training data for a LoRA delta over the chosen base model. Training runs server-side (or on a customer-hosted bridge) on a single H100 / 5090; typical compile takes 8&ndash;25 minutes for a 3B-class base.</p>
+          <p class="summary">Verified labels train a LoRA delta over the chosen base. Training runs server-side or on a customer-hosted bridge on a single H100 / 5090; 8&ndash;25 minutes for a 3B-class base.</p>
 
           <h4>Hyperparameters &amp; bases</h4>
           <table class="spec-table">
             <tbody>
-              <tr><th>bases</th><td>Qwen 2.5 / 3.x (1B, 3B, 7B, 14B), Llama-3 8B, Phi-3 3.8B, Hermes-3 8B, Gemma 2 9B. All open weights, all INT4-quantizable.</td></tr>
-              <tr><th>LoRA rank</th><td>16 default, 32 for high-coverage tasks. Adapter &le; 100MB at rank 16 on a 7B base.</td></tr>
-              <tr><th>quantization</th><td>INT4 GGUF for portability (CPU / phone), bf16 for GPU. Both produced in one compile.</td></tr>
-              <tr><th>training</th><td>3 to 5 epochs, bf16 mixed-precision, gradient checkpointing on a single H100 or 5090.</td></tr>
+              <tr><th>bases</th><td>Qwen 2.5 / 3.x (1B, 3B, 7B, 14B), Llama-3 8B, Phi-3 3.8B, Hermes-3 8B, Gemma 2 9B. All open, all INT4-quantizable.</td></tr>
+              <tr><th>LoRA rank</th><td>16 default, 32 for high-coverage. Adapter &le; 100MB at rank 16 on a 7B base.</td></tr>
+              <tr><th>quantization</th><td>INT4 GGUF (CPU/phone) and bf16 (GPU), both produced per compile.</td></tr>
+              <tr><th>training</th><td>3-5 epochs, bf16 mixed-precision, gradient checkpointing on H100 or 5090.</td></tr>
             </tbody>
           </table>
 
           <h4>What "Hermes-class on your task" actually means</h4>
-          <p>We don't claim 3B-with-LoRA matches a 70B raw on arbitrary inputs. We claim - and measure - that on the task you compiled (your eval set, your input distribution), the resulting artifact achieves &ge;K-score-floor accuracy. The eval set is held out from training; you can re-run it offline at any time.</p>
+          <p>Not 3B-with-LoRA matching 70B raw on arbitrary inputs. On the task you compiled (your eval set, your input distribution), the artifact achieves &ge;K-score-floor accuracy. The eval set is held out; you can re-run it offline anytime.</p>
         </div>
       </div>
 
@@ -256,10 +256,10 @@ the K-score is the mean over the held-out eval set.</pre>
         <div class="hiw-num">07</div>
         <div>
           <h2>observe: harden the recipe pack from the trained model.</h2>
-          <p class="summary">After the LoRA is trained, the compiler runs it across the eval set with verbose logging on. Tokens that the LoRA emits with &ge;99% confidence and that are predicted by the recipe pack are <em>confirmed</em>. Tokens predicted by the recipe pack but where the LoRA disagrees are <em>removed</em>. Tokens emitted with high confidence but not in the pack are <em>candidates</em> for inclusion in the next compile. The pack tightens with every compile.</p>
+          <p class="summary">After training, the compiler runs the LoRA across the eval set with verbose logging. Tokens emitted at &ge;99% confidence and predicted by the pack are <em>confirmed</em>; disagreements are <em>removed</em>; high-confidence tokens not in the pack are <em>candidates</em>.</p>
 
           <h4>This is the compounding loop</h4>
-          <p>Every public compile feeds candidate patterns to the public registry. Every registry growth shrinks the marginal observation budget for the next compile. Over time, the pack covers a higher fraction of every task's structured-token surface, which means smaller models can draft faster, which means cheaper compiles, which means more compiles. The flywheel is real.</p>
+          <p>Every public compile feeds candidates to the public registry; each growth shrinks the next observation budget; smaller models draft faster; compiles get cheaper.</p>
         </div>
       </div>
 
@@ -267,7 +267,7 @@ the K-score is the mean over the held-out eval set.</pre>
         <div class="hiw-num">08</div>
         <div>
           <h2>sign: bundle and seal.</h2>
-          <p class="summary">The compiler bundles model + LoRA + recipes + verifier + recall index + manifest into a single signed zip. The signature is HMAC-SHA256 over the canonical hash chain of every component. The receipt secret is held by the registry; the public key is published. Anyone can verify a receipt offline against the published key.</p>
+          <p class="summary">Bundles model + LoRA + recipes + verifier + recall index + manifest into a signed zip. Signature is HMAC-SHA256 over the canonical hash chain. Receipt secret is held by the registry; public key is published. Anyone can verify a receipt offline against the published key.</p>
 
           <h4>Manifest fields</h4>
           <pre class="out">{
@@ -292,10 +292,10 @@ the K-score is the mean over the held-out eval set.</pre>
 
           <h4>What it means at the receiving end</h4>
           <ul>
-            <li>any output the artifact produces ships with a per-call receipt over <code>(input_hash, output_hash, manifest_sha)</code></li>
-            <li>any auditor with the published public key can re-verify any receipt offline, without contacting kolm</li>
-            <li>artifact tampering invalidates the signature; the runtime refuses to load it</li>
-            <li>frontier-model drift over time has no effect - the artifact is sealed; output is reproducible</li>
+            <li>every output ships with a per-call receipt over <code>(input_hash, output_hash, manifest_sha)</code></li>
+            <li>any auditor with the public key can re-verify offline, without contacting kolm</li>
+            <li>tampering invalidates the signature; the runtime refuses to load</li>
+            <li>frontier drift has no effect - the artifact is sealed and reproducible</li>
           </ul>
         </div>
       </div>
@@ -307,12 +307,12 @@ the K-score is the mean over the held-out eval set.</pre>
     <div class="wrap">
       <div class="eyebrow"><span class="num">09</span>Properties</div>
       <h2>Why this shape produces what it does.</h2>
-      <p class="sec-lede">A compiled artifact is small (3B + 100MB LoRA + 10MB recipes &asymp; 2&ndash;3GB), portable (runs on phone, laptop, edge box), reproducible (sealed manifest), auditable (HMAC receipt per output), and offline-first (no run-time network). The trade-offs are explicit: it does not generalize beyond the compiled task, and the K-score is the contract on its accuracy.</p>
+      <p class="sec-lede">Small (3B + 100MB LoRA + 10MB recipes &asymp; 2&ndash;3GB), portable (phone, laptop, edge), reproducible (sealed manifest), auditable (HMAC per output), offline-first. Trade-off: no generalization beyond the compiled task; K-score is the accuracy contract.</p>
       <h4>What it is not</h4>
       <ul style="margin:0;padding-left:20px;font-size:13.5px;color:var(--ink-mute,#b5bdb1);line-height:1.7;max-width:70ch">
-        <li>not a quantized 70B running on a phone - it's a 3B-class artifact that <em>behaves</em> 70B-class on the compiled task</li>
-        <li>not memory or context-management - the corpus is grounding, not personality</li>
-        <li>not a frontier-model wrapper - the frontier is used at compile time only; runtime is local</li>
+        <li>not a quantized 70B on a phone - it's a 3B-class artifact that <em>behaves</em> 70B-class on the compiled task</li>
+        <li>not memory or context-management - corpus is grounding, not personality</li>
+        <li>not a frontier wrapper - frontier is compile-time only; runtime is local</li>
       </ul>
     </div>
   </section>
@@ -322,11 +322,11 @@ the K-score is the mean over the held-out eval set.</pre>
       <div class="eyebrow"><span class="num">10</span>Read more</div>
       <h2>The papers, specs, and code that ground this.</h2>
       <ul style="margin:0;padding-left:20px;font-size:14px;color:var(--ink,#faf2e1);line-height:1.9">
-        <li><a href="/anatomy" style="color:var(--violet,#4c7dff)">.kolm anatomy</a> - the artifact format byte-for-byte</li>
-        <li><a href="/k-score" style="color:var(--violet,#4c7dff)">K-score spec</a> - how the compile-time gate is computed</li>
-        <li><a href="/api" style="color:var(--violet,#4c7dff)">API reference</a> - every endpoint, request, response</li>
+        <li><a href="/anatomy" style="color:var(--violet,#4c7dff)">.kolm anatomy</a> - the artifact byte-for-byte</li>
+        <li><a href="/k-score" style="color:var(--violet,#4c7dff)">K-score spec</a> - the compile-time gate</li>
+        <li><a href="/api" style="color:var(--violet,#4c7dff)">API reference</a> - every endpoint</li>
         <li><a href="/benchmarks" style="color:var(--violet,#4c7dff)">Benchmark protocol</a> - reproducible methodology</li>
-        <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" style="color:var(--violet,#4c7dff)">GitHub</a> - the compiler source, MIT</li>
+        <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" style="color:var(--violet,#4c7dff)">GitHub</a> - compiler source, MIT</li>
       </ul>
     </div>
   </section>
