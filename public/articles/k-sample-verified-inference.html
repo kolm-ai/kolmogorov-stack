@@ -192,23 +192,7 @@
     <span class="pill"><span class="dot"></span>Engineering - 2026-05-07 - 9 min read</span>
     <h1>K-sample verified inference, <span class="tone">a practical alternative to zk-ML.</span></h1>
     <p class="lede"><b>Zero-knowledge proofs of model inference are technically beautiful and economically dead.</b> A 13B-parameter model proof costs hours of GPU time per token. Verified inference takes a different route: sample the model k times, run the candidates through a deterministic verifier, ship the receipt. It is what every label inside a <code>.kolm</code> artifact passes through.</p>
-    <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;verified inference - audit - receipts</span></div>
-    <figure class="plate" role="img" aria-label="The four-ring HMAC chain: input, samples, verifier, manifest.">
-      <div class="img diag-bg">
-        <div class="diag diag-chain">
-          <div class="ring"><span class="lbl">ring 01</span><span class="hash">sha256:7f3a9b&hellip;</span><span class="ok">input</span></div>
-          <div class="ring"><span class="lbl">ring 02</span><span class="hash">sha256:c1d4e2&hellip;</span><span class="ok">k=5 samples</span></div>
-          <div class="ring"><span class="lbl">ring 03</span><span class="hash">sha256:9a07f6&hellip;</span><span class="ok">verifier</span></div>
-          <div class="ring"><span class="lbl">ring 04</span><span class="hash">sha256:e482ba&hellip;</span><span class="ok">manifest</span></div>
-        </div>
-      </div>
-      <span class="stamp"><span class="dot"></span>essay &middot; verified inference</span>
-      <div class="cap">
-        <div class="title">k samples. <span class="tone">One verifier.</span></div>
-        <div class="meta">parallel attempts<br><b>deterministic</b> picker</div>
-      </div>
-    </figure>
-  </div>
+    <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;verified inference - audit - receipts</span></div>  </div>
 </section>
 
 <article>

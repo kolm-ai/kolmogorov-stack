@@ -192,24 +192,7 @@
     <span class="pill"><span class="dot"></span>Engineering - 2026-05-07 - 10 min read</span>
     <h1>Speculative decoding <span class="tone">with deterministic drafts.</span></h1>
     <p class="lede">A draft model is the standard way to do speculative decoding: pay a small model to predict tokens that the big model can verify in parallel. <b>A recipe pack is faster, smaller, free at runtime, and verifiably correct on the patterns it covers.</b> This is how to use one to cut your local LLM bill to zero on the predictable tokens, which is most of them.</p>
-    <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;speculative decoding - drafts - runtime</span></div>
-    <figure class="plate" role="img" aria-label="A recipe pack drafts predictable tokens; the LLM only verifies them.">
-      <div class="img diag-bg">
-        <div class="diag diag-pipeline">
-          <div class="stage"><span class="n">in</span><b>prompt</b><span>tokens t&#x2080;..t&#x2099;</span></div>
-          <div class="stage"><span class="n">01</span><b>recipe</b><span>O(1) lookup</span></div>
-          <div class="stage"><span class="n">02</span><b>draft</b><span>+8 tokens</span></div>
-          <div class="stage"><span class="n">03</span><b>llm verify</b><span>parallel</span></div>
-          <div class="stage acc"><span class="n">out</span><b>2.4&times;</b><span>throughput</span></div>
-        </div>
-      </div>
-      <span class="stamp"><span class="dot"></span>essay &middot; recipe drafts</span>
-      <div class="cap">
-        <div class="title">Determinism, <span class="tone">drafted.</span></div>
-        <div class="meta">tokenized prefixes<br><b>signed registry</b></div>
-      </div>
-    </figure>
-  </div>
+    <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;speculative decoding - drafts - runtime</span></div>  </div>
 </section>
 
 <article>

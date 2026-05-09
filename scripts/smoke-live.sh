@@ -1444,22 +1444,22 @@ check "/trust chain links to walker"        has "$TRUST" 'href="/anatomy#walker"
 check "/trust Walk the four rings link"     has "$TRUST" 'Walk the four rings interactively'
 
 echo ""
-echo "=== 49d. /security SVG architecture cleanup ==="
+echo "=== 49d. /security text architecture grid ==="
 SEC=$(curl -s "$URL/security")
-check "/security single svg opener"        test "$(echo "$SEC" | grep -c 'viewBox="0 0 980 460"')" -eq 1
-check "/security has </svg> close"         has "$SEC" '</svg>'
+check "/security has arch-grid"            has "$SEC" 'class="arch-grid"'
+check "/security no SVG architecture"      test "$(echo "$SEC" | grep -c 'viewBox="0 0 980 460"')" -eq 0
 check "/security no dup compile step 3"    test "$(echo "$SEC" | grep -c 'reserve model bridge')" -eq 0
-check "/security has step 1 verifier"      has "$SEC" '1 &middot; synthesize verifier'
-check "/security has step 2 k-sample"      has "$SEC" '2 &middot; k-sample teacher'
-check "/security has step 3 distill LoRA"  has "$SEC" '3 &middot; distill LoRA'
-check "/security has step 4 recipe pack"   has "$SEC" '4 &middot; build recipe pack'
-check "/security has step 5 package sign"  has "$SEC" '5 &middot; package &amp; sign'
+check "/security has step synthesize"      has "$SEC" 'synthesize verifier'
+check "/security has step k-sample"        has "$SEC" 'k-sample teacher'
+check "/security has step distill LoRA"    has "$SEC" 'distill LoRA'
+check "/security has step recipe pack"     has "$SEC" 'build recipe pack'
+check "/security has step package sign"    has "$SEC" 'package &amp; sign'
 check "/security no dup retention text"    hashno "$SEC" 'retention controlled by deployment'
 check "/security has post-compile delete"  has "$SEC" 'post-compile: inputs deleted'
 check "/security no dup model bridge text" hashno "$SEC" 'model/index bridge reserved'
-check "/security has recall index tests"   has "$SEC" '+ recall index + tests'
+check "/security has recall index tests"   has "$SEC" 'recipes + LoRA + verifier + index + tests'
 check "/security single recipe-mode MCP"   test "$(echo "$SEC" | grep -c 'recipe-mode &middot; MCP')" -eq 1
-check "/security single enterprise add-on" test "$(echo "$SEC" | grep -c 'enterprise add-on')" -eq 1
+check "/security has anchor extension row" has "$SEC" 'class="arch-anchor"'
 check "/security single arch-cap"          test "$(echo "$SEC" | grep -c '<p class="arch-cap">')" -eq 1
 check "/security eyebrow middot fix"       has "$SEC" 'Architecture &middot; data flow'
 check "/security no eyebrow dash"          hashno "$SEC" 'Architecture - data flow'
