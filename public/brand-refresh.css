@@ -257,8 +257,28 @@ header.site .brand .brand-dot,
   nav.top .nav-links {
     display: none !important;
   }
-  /* Below 460px the GitHub-star pill + sign-in + CTA crowd; drop GH and sign-in
-   * down to icon-only / hidden so the CTA always reaches a tappable size. */
+  /* Order-independent override: when the hamburger toggles `.is-open` the nav
+   * must beat `display:none !important` above. Doubling the class bumps
+   * specificity above the grouped display:none rule regardless of stylesheet
+   * load order, so the open menu renders even if styles.css is overridden. */
+  header.site nav.is-open.is-open,
+  .site-header .site-nav.is-open.is-open,
+  nav.top .site-nav.is-open.is-open,
+  nav.top .nav-links.is-open.is-open {
+    display: flex !important;
+    flex-direction: column !important;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-2, #11151b);
+    border-bottom: 1px solid var(--line, rgba(255,255,255,0.06));
+    padding: 12px 24px 16px;
+    gap: 0;
+    z-index: 50;
+  }
+  /* On narrow viewports the GitHub-star pill + sign-in + CTA crowd; drop GH and
+   * sign-in down to icon-only / hidden so the CTA always reaches a tappable size. */
   .site-header .site-actions .gh-star,
   .site-header .site-actions a[href="/signin"],
   header.site .right .gh-star,
