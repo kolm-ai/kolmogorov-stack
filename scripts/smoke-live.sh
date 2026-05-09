@@ -1168,7 +1168,7 @@ check "sitemap does NOT list launch-checklist"  eq "$SM_LC" 0
 echo "=== 42. Workstream E backend — capture proxy + labels + auto-distill ==="
 # These endpoints are the rent-vs-buy thesis made real: drop-in proxy for
 # OpenAI / Anthropic that records (input, output) pairs, then promote a
-# namespace to a local LoRA via the REM Labs bridge.
+# namespace to a local LoRA via the kolm trainer bridge.
 EKEY_RAW=$(curl -s -X POST "$URL/v1/signup" \
   -H 'Content-Type: application/json' \
   -d "{\"email\":\"e-backend-$(date +%s)-$RANDOM@example.com\"}")

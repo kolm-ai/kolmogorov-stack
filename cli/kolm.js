@@ -304,7 +304,7 @@ DEFAULTS
 EXAMPLE
   kolm labels --namespace tickets --out tickets-corpus.jsonl
 `,
-  distill: `kolm distill - auto-distill a captured namespace into a local LoRA via the REM Labs bridge.
+  distill: `kolm distill - auto-distill a captured namespace into a local LoRA via the kolm trainer bridge.
 
 USAGE
   kolm distill --namespace <n> [--base-model <name>] [--target <size>]
@@ -315,7 +315,7 @@ DEFAULTS
 
 EXIT CODES
   0  job started; the .kolm artifact is delivered to ~/.kolm/artifacts/ when done.
-  2  REM Labs bridge not configured on this kolm cloud (hosted-only feature).
+  2  trainer bridge not configured on this kolm cloud (hosted-only feature).
   3  not enough captured pairs yet (default threshold: 1000).
 
 If the bridge is unavailable, run \`kolm labels --namespace <n> --out corpus.jsonl\`
@@ -1161,8 +1161,8 @@ async function cmdLabels(args) {
 }
 
 // kolm distill --namespace <n> [--base-model <m>] [--target <size>]
-//   Triggers auto-distill via the REM Labs bridge. Returns 503 with a clear
-//   operator hint until the server has REM_LABS_BRIDGE_URL configured.
+//   Triggers auto-distill via the kolm trainer bridge. Returns 503 with a clear
+//   operator hint until the server has KOLM_TRAINER_BRIDGE_URL configured.
 async function cmdDistill(args) {
   if (maybeHelp('distill', args)) return;
   const c = loadConfig();

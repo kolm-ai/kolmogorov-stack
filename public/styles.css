@@ -201,8 +201,39 @@ footer .brand { font-size: 14px; }
 }
 .site-actions .cta:hover { color: #0b0d10; transform: translateY(-1px); filter: brightness(1.04); }
 
+/* Mobile hamburger toggle. Hidden on desktop; injected by /nav.js when
+ * a site-header is present, and shown ≤920px to replace the hidden nav. */
+.nav-toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+}
+.nav-toggle:hover { border-color: rgba(126,240,210,0.30); }
+.nav-toggle span {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  background: var(--ink, #faf2e1);
+  transition: transform 200ms, opacity 200ms;
+  position: absolute;
+  left: 11px;
+}
+.nav-toggle span:nth-child(1) { top: 13px; }
+.nav-toggle span:nth-child(2) { top: 18px; }
+.nav-toggle span:nth-child(3) { top: 23px; }
+.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+
 @media (max-width: 720px) {
-  .site-nav { display: none; }
   .site-header .wrap { gap: 12px; }
 }
 @media (max-width: 1080px) {
@@ -212,7 +243,30 @@ footer .brand { font-size: 14px; }
 }
 @media (max-width: 920px) {
   .site-nav { display: none; }
+  .nav-toggle { display: inline-flex; }
+  .site-header { position: relative; }
+  .site-nav.is-open {
+    display: flex;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-2, #11151b);
+    border-bottom: 1px solid var(--line);
+    flex-direction: column;
+    padding: 12px 24px 16px;
+    gap: 0;
+    z-index: 50;
+  }
+  .site-nav.is-open a {
+    font-size: 14px;
+    padding: 12px 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--ink, #faf2e1);
+  }
+  .site-nav.is-open a:last-child { border-bottom: 0; }
 }
+body.nav-open { overflow: hidden; }
 
 /* ============================================================
    Hero.

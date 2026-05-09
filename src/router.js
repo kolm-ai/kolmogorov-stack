@@ -1904,7 +1904,7 @@ export function buildRouter() {
       status: 'queued',
       est_minutes: 47,
       created_at: new Date().toISOString(),
-      pipeline: 'remlabs.ai LoRA — coming Day 60-120',
+      pipeline: 'kolm trainer bridge - hosted LoRA training, Wave 2',
     };
     insert('specialists', spec);
     res.status(202).json({ specialist_id: id, status: 'queued', est_minutes: 47, name, recipe_id, base_model, rank, pipeline: spec.pipeline });
@@ -2285,9 +2285,9 @@ export function buildRouter() {
   });
 
   // POST /v1/specialists/auto-distill — kicks off LoRA training on the
-  // namespace's captured corpus via the REM Labs training bridge.
+  // namespace's captured corpus via the kolm trainer bridge.
   // {namespace, base_model, target_size} → {job_id, status_url}. Stubbed
-  // until REM_LABS_BRIDGE_URL is configured; returns 503 with a clear
+  // until KOLM_TRAINER_BRIDGE_URL is configured; returns 503 with a clear
   // operator hint so the gap is visible (not silently no-op).
   r.post('/v1/specialists/auto-distill', authMiddleware, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
@@ -2306,22 +2306,23 @@ export function buildRouter() {
         message: `Capture ${1000 - obs.length} more pairs before distill is unlocked.`,
       });
     }
-    const bridge = process.env.REM_LABS_BRIDGE_URL;
+    const bridge = process.env.KOLM_TRAINER_BRIDGE_URL || process.env.REM_LABS_BRIDGE_URL;
     if (!bridge) {
       return res.status(503).json({
         ok: false,
         error: 'distill_bridge_not_configured',
-        message: 'REM_LABS_BRIDGE_URL is not set on this server. Auto-distill is a hosted-cloud feature; on-prem trainer ships in Wave 2.',
+        message: 'KOLM_TRAINER_BRIDGE_URL is not set on this server. Auto-distill is a hosted-cloud feature; on-prem trainer ships in Wave 2.',
         namespace,
         count: obs.length,
         next_steps: 'Email hello@kolm.ai to request access, or run `kolm labels --namespace <n> --out corpus.jsonl` and train locally.',
       });
     }
+    const bridgeToken = process.env.KOLM_TRAINER_BRIDGE_TOKEN || process.env.REM_LABS_BRIDGE_TOKEN || '';
     // Bridge configured — POST to it and return the job id.
     try {
       const jobRes = await fetch(bridge.replace(/\/+$/, '') + '/distill', {
         method: 'POST',
-        headers: { 'content-type': 'application/json', 'authorization': `Bearer ${process.env.REM_LABS_BRIDGE_TOKEN || ''}` },
+        headers: { 'content-type': 'application/json', 'authorization': `Bearer ${bridgeToken}` },
         body: JSON.stringify({
           tenant: req.tenant,
           namespace,

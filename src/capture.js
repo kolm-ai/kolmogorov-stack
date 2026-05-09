@@ -7,7 +7,7 @@
 // The captured corpus is queryable via `/v1/labels/synthesize-corpus` as
 // JSONL or parquet, then promoted to a recipe via the existing
 // `/v1/bridges/auto-synthesize` path or distilled to a local LoRA via
-// `/v1/specialists/auto-distill` (REM Labs bridge).
+// `/v1/specialists/auto-distill` (kolm trainer bridge).
 //
 // We never train on the customer's data without consent. The artifact
 // produced by distill ships to the customer; no copy is retained.

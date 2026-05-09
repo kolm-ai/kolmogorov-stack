@@ -1,7 +1,7 @@
 # kolmogorov-recipe
 
 > **Recipe.** Show how once. Run forever.
-> The Skills layer of [REM Labs](https://remlabs.ai).
+> The Skills layer of [Kolmogorov Stack](https://kolm.ai).
 
 A thin Python client for the Recipe HTTP API — replaces repeat LLM-as-judge calls with deterministic JS classifiers that run in microseconds, for free, and always return the same answer.
 

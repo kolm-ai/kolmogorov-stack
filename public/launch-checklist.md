@@ -40,7 +40,7 @@
 - [x] **E1.** `/articles/rent-vs-buy-compute` cornerstone live (~2400 words, worked example). (Workstream E content.)
 - [x] **E2.** `/use-cases/capture-and-distill` UC-06 live (~1800 words, four endpoints, ledger). (Workstream E content.)
 - [x] **E3.** `/v1/capture/anthropic` and `/v1/capture/openai` endpoints accept upstream-shaped bodies, forward with the customer's `x-upstream-api-key`, record observations. Smoke-tested. (Workstream E backend.)
-- [x] **E4.** `/v1/labels/synthesize-corpus` returns JSONL or JSON envelope for a tenant namespace; `/v1/specialists/auto-distill` returns 503 with operator hint until `REM_LABS_BRIDGE_URL` is set, otherwise calls the bridge and returns a job id.
+- [x] **E4.** `/v1/labels/synthesize-corpus` returns JSONL or JSON envelope for a tenant namespace; `/v1/specialists/auto-distill` returns 503 with operator hint until `KOLM_TRAINER_BRIDGE_URL` is set, otherwise calls the bridge and returns a job id.
 - [x] **E5.** CLI: `kolm capture --provider <p> --as <task> --namespace <n>`, `kolm capture status`, `kolm labels`, `kolm distill <namespace>`. Documented in CLI help + smoke-tested.
 
 ## G. Cookbook + comparators (3 boxes)
@@ -63,13 +63,13 @@
 
 ## Founder-only items
 
-Stripe (live keys + webhook secret + payment links), Resend (domain + API key), and Railway storage env are already provisioned on Vercel — verified live by /v1/stripe/webhook returning 400 on missing signature (endpoint live, signing active) and /ready returning all-green. The two remaining founder items are OAuth credentials (Google + GitHub developer-console apps) and the REM Labs trainer bridge:
+Stripe (live keys + webhook secret + payment links), Resend (domain + API key), and Railway storage env are already provisioned on Vercel — verified live by /v1/stripe/webhook returning 400 on missing signature (endpoint live, signing active) and /ready returning all-green. The two remaining founder items are OAuth credentials (Google + GitHub developer-console apps) and the kolm trainer bridge:
 
 | # | Item | Owner | Blocking | How to unblock |
 |---|---|---|---|---|
 | OAuth-1 | Google OAuth client ID + secret | Founder | `/v1/oauth/providers` returns `{google:false}` → buttons hidden on /signin | Console → Create OAuth client → set redirect to `https://kolm.ai/v1/oauth/google/callback` → set `GOOGLE_OAUTH_CLIENT_ID` + `GOOGLE_OAUTH_CLIENT_SECRET` on Vercel |
 | OAuth-2 | GitHub OAuth app | Founder | `/v1/oauth/providers` returns `{github:false}` → buttons hidden on /signin | github.com/settings/developers → New OAuth App → callback `https://kolm.ai/v1/oauth/github/callback` → set `GITHUB_OAUTH_CLIENT_ID` + `GITHUB_OAUTH_CLIENT_SECRET` on Vercel |
-| REM-bridge | REM Labs trainer URL + token for `/v1/specialists/auto-distill` to mint real `.kolm` artifacts (currently returns honest "not enough captures" stub) | Founder | E3-E5 close | Set `REM_LABS_BRIDGE_URL` + `REM_LABS_BRIDGE_TOKEN` on Vercel once REM Labs trainer endpoint is up |
+| Trainer-bridge | Kolm trainer URL + token for `/v1/specialists/auto-distill` to mint real `.kolm` artifacts (currently returns honest "not enough captures" stub) | Founder | E3-E5 close | Set `KOLM_TRAINER_BRIDGE_URL` + `KOLM_TRAINER_BRIDGE_TOKEN` on Vercel once the trainer endpoint is up |
 
 When all three are done, the box count moves to 30/30 and the OAuth row auto-renders on /signin (the UI is wired — it auto-shows the button as soon as `/v1/oauth/providers` returns true for that provider).
 
@@ -223,9 +223,9 @@ Tuesday 8am PT *or* Wed 8am PT (depending on PH performance). Title: **"Show HN:
 ## Box count
 
 - 27 / 30 boxes complete (engineering loop).
-- 3 / 30 boxes founder-blocked: Google OAuth client, GitHub OAuth app, REM Labs trainer bridge.
+- 3 / 30 boxes founder-blocked: Google OAuth client, GitHub OAuth app, kolm trainer bridge.
 - Stripe + Resend + Railway storage already provisioned on Vercel. Verified live: `/v1/stripe/webhook` 400-on-missing-sig (signing active), `/ready` all-required-green.
 - Marketing materials drafted; founder owns posting.
 - End-to-end dry-run scheduled the day before launch.
 
-When founder configures the three OAuth + REM-bridge items, the loop reruns the dry-run gauntlet and the launch ships.
+When founder configures the three OAuth + trainer-bridge items, the loop reruns the dry-run gauntlet and the launch ships.
