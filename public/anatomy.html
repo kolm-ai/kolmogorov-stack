@@ -150,25 +150,111 @@
       Every layer is reproducible from <code>(task, examples, base_model, recipe_registry@version)</code>.
       Two compiles with the same inputs produce <b>byte-identical</b> artifacts.</p>
 
-    <figure class="plate" role="img" aria-label="The .kolm artifact rendered as a single object: model, adapter, recipes, recall index, signature.">
-      <div class="img diag-bg">
-        <div class="diag diag-tree">
-          <div><span class="root">support-bot.kolm</span><span class="desc">2.4 GB &middot; sha256:7f3a&hellip;</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ model.gguf</span><span class="desc">2.1 GB &middot; phi-3-mini-q4</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ lora.bin</span><span class="desc">142 MB &middot; rank 16</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ recipes.json</span><span class="desc">38 KB &middot; 412 entries</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ index.sqlite-vec</span><span class="desc">87 MB &middot; 384-dim</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ verifier.json</span><span class="desc">12 KB &middot; rubric+gates</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ manifest.json</span><span class="desc">4 KB &middot; rs-1</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;└─ signature.sig</span><span class="desc">256 B &middot; ed25519</span></div>
+    <figure class="bytemap-frame" aria-label="Interactive byte-map of a 2.4 GB .kolm artifact split across seven layers." data-bytemap>
+      <div class="bytemap-head">
+        <div class="bytemap-title"><span class="dot"></span>support-bot.kolm <span class="hash">sha256:7f3a8e…0c91</span></div>
+        <div class="bytemap-total">2.4&nbsp;GB &middot; 7 layers &middot; <b>RS-1</b></div>
+      </div>
+      <div class="bytemap-grid">
+        <div class="bytemap-row" data-name="model.gguf" data-role="base model · phi-3-mini · INT4 quantized" data-hash="9f1a8c…b3" data-size="2.1 GB" style="--w:88.0%">
+          <span class="bytemap-bar" data-tier="model"></span>
+          <span class="bytemap-name">model.gguf</span>
+          <span class="bytemap-size">2.1&nbsp;GB</span>
+        </div>
+        <div class="bytemap-row" data-name="lora.bin" data-role="personal adapter · rank-16 · distilled from k-sample frontier verified inference" data-hash="4d22ef…c1" data-size="142 MB" style="--w:5.7%">
+          <span class="bytemap-bar" data-tier="adapter"></span>
+          <span class="bytemap-name">lora.bin</span>
+          <span class="bytemap-size">142&nbsp;MB</span>
+        </div>
+        <div class="bytemap-row" data-name="index.sqlite-vec" data-role="multimodal recall index · 384-dim embeddings · queryable offline" data-hash="8b73e9…02" data-size="87 MB" style="--w:3.6%">
+          <span class="bytemap-bar" data-tier="recall"></span>
+          <span class="bytemap-name">index.sqlite-vec</span>
+          <span class="bytemap-size">87&nbsp;MB</span>
+        </div>
+        <div class="bytemap-row" data-name="recipes.json" data-role="speculative-decoding recipe pack · 412 entries · prefix + embedding indexed" data-hash="ab02f1…7e" data-size="38 KB" style="--w:1.4%">
+          <span class="bytemap-bar" data-tier="recipes"></span>
+          <span class="bytemap-name">recipes.json</span>
+          <span class="bytemap-size">38&nbsp;KB</span>
+        </div>
+        <div class="bytemap-row" data-name="verifier.json" data-role="task verifier · rubric + gates · embedded in artifact" data-hash="ef44a3…c8" data-size="12 KB" style="--w:1.0%">
+          <span class="bytemap-bar" data-tier="verifier"></span>
+          <span class="bytemap-name">verifier.json</span>
+          <span class="bytemap-size">12&nbsp;KB</span>
+        </div>
+        <div class="bytemap-row" data-name="manifest.json" data-role="contract layer · spec=rs-1 · K-score, gate, base-hash, registry@v" data-hash="1a92c4…aa" data-size="4 KB" style="--w:0.7%">
+          <span class="bytemap-bar" data-tier="manifest"></span>
+          <span class="bytemap-name">manifest.json</span>
+          <span class="bytemap-size">4&nbsp;KB</span>
+        </div>
+        <div class="bytemap-row" data-name="signature.sig" data-role="HMAC-SHA256 chain over emitted layer hashes · tamper-evident" data-hash="" data-size="256 B" style="--w:0.5%">
+          <span class="bytemap-bar" data-tier="signature"></span>
+          <span class="bytemap-name">signature.sig</span>
+          <span class="bytemap-size">256&nbsp;B</span>
         </div>
       </div>
-      <span class="stamp"><span class="dot"></span>.kolm · seven layers</span>
-      <div class="cap">
-        <div class="title">A file you can <span class="tone">hold.</span></div>
-        <div class="meta">model · adapter · recipes<br>index · evals · <b>signature</b></div>
+      <div class="bytemap-readout" aria-live="polite">
+        <span class="bytemap-readout-name">model.gguf</span>
+        <span class="bytemap-readout-role">base model &middot; phi-3-mini &middot; INT4 quantized</span>
+        <span class="bytemap-readout-hash"><span class="dim">sha256</span> 9f1a8c…b3</span>
       </div>
     </figure>
+    <style>
+      .bytemap-frame{margin:48px 0 0;border:1px solid var(--line-strong);border-radius:14px;background:radial-gradient(ellipse 800px 320px at 22% -10%,rgba(76,125,255,0.10),transparent 60%),#070809;padding:28px 32px 26px;font-family:var(--mono);position:relative;overflow:hidden}
+      .bytemap-frame::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(76,125,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(76,125,255,0.04) 1px,transparent 1px);background-size:32px 32px;mask-image:radial-gradient(ellipse at center,#000 0%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 0%,transparent 75%);pointer-events:none}
+      .bytemap-frame > *{position:relative;z-index:1}
+      .bytemap-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:0 0 22px;flex-wrap:wrap}
+      .bytemap-title{display:inline-flex;align-items:center;gap:10px;font-size:13px;color:var(--ink);letter-spacing:0}
+      .bytemap-title .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px rgba(76,125,255,0.85)}
+      .bytemap-title .hash{color:var(--ink-faint);font-size:11.5px;margin-left:4px}
+      .bytemap-total{font-size:11.5px;color:var(--ink-mute);letter-spacing:0}
+      .bytemap-total b{color:var(--ink);font-weight:540}
+      .bytemap-grid{display:grid;gap:7px}
+      .bytemap-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:9px 12px;border:1px solid transparent;border-radius:6px;cursor:default;transition:background 140ms,border-color 140ms;position:relative}
+      .bytemap-row:hover,.bytemap-row.is-active{background:rgba(76,125,255,0.05);border-color:rgba(76,125,255,0.22)}
+      .bytemap-bar{position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);height:24px;border-radius:4px;pointer-events:none;background:linear-gradient(90deg,rgba(76,125,255,0.32) 0%,rgba(76,125,255,0.08) 100%);width:max(var(--w),3px);max-width:calc(100% - 24px);transition:opacity 140ms;opacity:.55}
+      .bytemap-row:hover .bytemap-bar,.bytemap-row.is-active .bytemap-bar{opacity:.95}
+      .bytemap-bar[data-tier="model"]{background:linear-gradient(90deg,#4c7dff 0%,rgba(76,125,255,0.18) 100%)}
+      .bytemap-bar[data-tier="adapter"]{background:linear-gradient(90deg,#9db6ff 0%,rgba(157,182,255,0.14) 100%)}
+      .bytemap-bar[data-tier="recall"]{background:linear-gradient(90deg,#7ef0d2 0%,rgba(126,240,210,0.10) 100%)}
+      .bytemap-bar[data-tier="recipes"]{background:linear-gradient(90deg,#faf2e1 0%,rgba(250,242,225,0.08) 100%)}
+      .bytemap-bar[data-tier="verifier"]{background:linear-gradient(90deg,#b5bdb1 0%,rgba(181,189,177,0.08) 100%)}
+      .bytemap-bar[data-tier="manifest"]{background:linear-gradient(90deg,#737c73 0%,rgba(115,124,115,0.10) 100%)}
+      .bytemap-bar[data-tier="signature"]{background:linear-gradient(90deg,#7ef0d2 0%,#4c7dff 100%);opacity:.85}
+      .bytemap-name{position:relative;z-index:1;color:var(--ink);font-size:12.5px;font-weight:540;letter-spacing:0;mix-blend-mode:normal;padding-left:6px}
+      .bytemap-size{position:relative;z-index:1;color:var(--ink-mute);font-size:11.5px;letter-spacing:0;text-align:right;font-variant-numeric:tabular-nums}
+      .bytemap-readout{margin:24px 0 0;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:rgba(8,9,8,0.72);display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;font-size:11.5px;letter-spacing:0;min-height:44px}
+      .bytemap-readout-name{color:var(--accent);font-weight:540;font-size:12px}
+      .bytemap-readout-role{color:var(--ink-mute);font-size:12px;line-height:1.5}
+      .bytemap-readout-hash{color:var(--ink-faint);font-size:11px;text-align:right;font-variant-numeric:tabular-nums}
+      .bytemap-readout-hash .dim{color:var(--ink-faint);opacity:.6;margin-right:6px}
+      @media (max-width:720px){.bytemap-frame{padding:20px 18px 18px}.bytemap-readout{grid-template-columns:1fr;gap:6px}.bytemap-readout-hash{text-align:left}}
+      @media (prefers-reduced-motion: reduce){.bytemap-row,.bytemap-bar{transition:none}}
+    </style>
+    <script>
+      (() => {
+        const frame = document.querySelector('[data-bytemap]');
+        if (!frame) return;
+        const rows = frame.querySelectorAll('.bytemap-row');
+        const out = frame.querySelector('.bytemap-readout');
+        const oName = out.querySelector('.bytemap-readout-name');
+        const oRole = out.querySelector('.bytemap-readout-role');
+        const oHash = out.querySelector('.bytemap-readout-hash');
+        const setActive = (row) => {
+          rows.forEach(r => r.classList.remove('is-active'));
+          row.classList.add('is-active');
+          oName.textContent = row.dataset.name + ' · ' + row.dataset.size;
+          oRole.textContent = row.dataset.role;
+          oHash.innerHTML = row.dataset.hash
+            ? '<span class="dim">sha256</span> ' + row.dataset.hash
+            : '<span class="dim">HMAC-chained</span>';
+        };
+        rows.forEach(r => {
+          r.addEventListener('mouseenter', () => setActive(r));
+          r.addEventListener('focus', () => setActive(r));
+          r.tabIndex = 0;
+        });
+      })();
+    </script>
   </div>
 </section>
 

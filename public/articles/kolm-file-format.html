@@ -186,25 +186,111 @@
     <h1>The <code style="font-family:var(--mono);font-size:0.92em">.kolm</code> file format, <span class="tone">as it exists today.</span></h1>
     <p class="lede">A <code>.kolm</code> is a signed zip that co-versions the task manifest, recipe pack, eval metadata, receipt, an optional KOLMPACK behaviour pack (in the <code>lora.bin</code> slot), and an optional KOLMIDX lookup index (in the <code>index.sqlite-vec</code> slot). <b>The current public artifact is recipe-mode.</b> The reference fixture and the redactor / extractor / classifier examples ship populated packs and indexes that recipes call from. Native LoRA weights and sqlite-vec retrieval reuse the same slot names with richer encodings in later tiers.</p>
     <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;.kolm spec / format / v0.1</span></div>
-    <figure class="plate" role="img" aria-label="The .kolm zip layout: seven slots, all reproducible from inputs.">
-      <div class="img diag-bg">
-        <div class="diag diag-tree">
-          <div><span class="root">artifact.kolm</span><span class="desc">RS-1 &middot; deterministic zip</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ manifest.json</span><span class="desc">task &middot; provenance</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ recipes.json</span><span class="desc">decomposed program</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ lora.bin</span><span class="desc">KOLMPACK / weights</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ index.sqlite-vec</span><span class="desc">KOLMIDX retrieval</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ verifier.json</span><span class="desc">rubric + gates</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;├─ evals.json</span><span class="desc">k-score + ablations</span></div>
-          <div><span class="seg">&nbsp;&nbsp;&nbsp;└─ signature.sig</span><span class="desc">ed25519 over zip</span></div>
+    <figure class="bytemap-frame" aria-label="Interactive layout of the .kolm zip: seven RS-1 slots with role and signature fingerprint." data-bytemap>
+      <div class="bytemap-head">
+        <div class="bytemap-title"><span class="dot"></span>artifact.kolm <span class="hash">RS-1 &middot; deterministic zip</span></div>
+        <div class="bytemap-total">7 slots &middot; recipe-mode &middot; <b>signed</b></div>
+      </div>
+      <div class="bytemap-grid">
+        <div class="bytemap-row" data-name="manifest.json" data-role="task &middot; base-model hash &middot; recipe-registry version &middot; K-score &middot; gate" data-hash="rs-1" data-size="task" style="--w:14%">
+          <span class="bytemap-bar" data-tier="manifest"></span>
+          <span class="bytemap-name">manifest.json</span>
+          <span class="bytemap-size">contract</span>
+        </div>
+        <div class="bytemap-row" data-name="recipes.json" data-role="decomposed program &middot; deterministic-token drafts &middot; prefix + embedding indexed" data-hash="rs-1" data-size="program" style="--w:24%">
+          <span class="bytemap-bar" data-tier="recipes"></span>
+          <span class="bytemap-name">recipes.json</span>
+          <span class="bytemap-size">program</span>
+        </div>
+        <div class="bytemap-row" data-name="lora.bin" data-role="KOLMPACK behaviour pack today &middot; LoRA weights in later tiers" data-hash="rs-1" data-size="pack" style="--w:60%">
+          <span class="bytemap-bar" data-tier="adapter"></span>
+          <span class="bytemap-name">lora.bin</span>
+          <span class="bytemap-size">pack / weights</span>
+        </div>
+        <div class="bytemap-row" data-name="index.sqlite-vec" data-role="KOLMIDX lookup index today &middot; sqlite-vec retrieval in richer tiers" data-hash="rs-1" data-size="index" style="--w:50%">
+          <span class="bytemap-bar" data-tier="recall"></span>
+          <span class="bytemap-name">index.sqlite-vec</span>
+          <span class="bytemap-size">retrieval</span>
+        </div>
+        <div class="bytemap-row" data-name="verifier.json" data-role="rubric + gates &middot; the K-score is computed against this surface" data-hash="rs-1" data-size="rubric" style="--w:18%">
+          <span class="bytemap-bar" data-tier="verifier"></span>
+          <span class="bytemap-name">verifier.json</span>
+          <span class="bytemap-size">rubric</span>
+        </div>
+        <div class="bytemap-row" data-name="evals.json" data-role="K-score components &middot; ablations &middot; latency / accuracy / coverage" data-hash="rs-1" data-size="evals" style="--w:22%">
+          <span class="bytemap-bar" data-tier="recipes"></span>
+          <span class="bytemap-name">evals.json</span>
+          <span class="bytemap-size">scoreboard</span>
+        </div>
+        <div class="bytemap-row" data-name="signature.sig" data-role="HMAC-SHA256 chain over emitted layer hashes &middot; tamper-evident &middot; ed25519 in extension tier" data-hash="rs-1" data-size="seal" style="--w:8%">
+          <span class="bytemap-bar" data-tier="signature"></span>
+          <span class="bytemap-name">signature.sig</span>
+          <span class="bytemap-size">seal</span>
         </div>
       </div>
-      <span class="stamp"><span class="dot"></span>essay &middot; file format</span>
-      <div class="cap">
-        <div class="title">Inside the <span class="tone">.kolm</span> artifact.</div>
-        <div class="meta">manifest &middot; recipes &middot; evals<br>pack &middot; index &middot; <b>receipt</b></div>
+      <div class="bytemap-readout" aria-live="polite">
+        <span class="bytemap-readout-name">manifest.json &middot; contract</span>
+        <span class="bytemap-readout-role">task &middot; base-model hash &middot; recipe-registry version &middot; K-score &middot; gate</span>
+        <span class="bytemap-readout-hash"><span class="dim">spec</span> rs-1</span>
       </div>
     </figure>
+    <style>
+      .bytemap-frame{margin:32px 0 0;border:1px solid rgba(255,255,255,0.12);border-radius:14px;background:radial-gradient(ellipse 800px 320px at 22% -10%,rgba(76,125,255,0.10),transparent 60%),#070809;padding:28px 32px 26px;font-family:var(--mono,ui-monospace,Menlo,Consolas,monospace);position:relative;overflow:hidden}
+      .bytemap-frame::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(76,125,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(76,125,255,0.04) 1px,transparent 1px);background-size:32px 32px;mask-image:radial-gradient(ellipse at center,#000 0%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 0%,transparent 75%);pointer-events:none}
+      .bytemap-frame > *{position:relative;z-index:1}
+      .bytemap-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:0 0 22px;flex-wrap:wrap}
+      .bytemap-title{display:inline-flex;align-items:center;gap:10px;font-size:13px;color:#faf2e1;letter-spacing:0}
+      .bytemap-title .dot{width:6px;height:6px;border-radius:50%;background:#4c7dff;box-shadow:0 0 12px rgba(76,125,255,0.85)}
+      .bytemap-title .hash{color:#737c73;font-size:11.5px;margin-left:4px}
+      .bytemap-total{font-size:11.5px;color:#b5bdb1;letter-spacing:0}
+      .bytemap-total b{color:#faf2e1;font-weight:540}
+      .bytemap-grid{display:grid;gap:7px}
+      .bytemap-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:9px 12px;border:1px solid transparent;border-radius:6px;cursor:default;transition:background 140ms,border-color 140ms;position:relative}
+      .bytemap-row:hover,.bytemap-row.is-active{background:rgba(76,125,255,0.05);border-color:rgba(76,125,255,0.22)}
+      .bytemap-bar{position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);height:24px;border-radius:4px;pointer-events:none;background:linear-gradient(90deg,rgba(76,125,255,0.32) 0%,rgba(76,125,255,0.08) 100%);width:max(var(--w),3px);max-width:calc(100% - 24px);transition:opacity 140ms;opacity:.55}
+      .bytemap-row:hover .bytemap-bar,.bytemap-row.is-active .bytemap-bar{opacity:.95}
+      .bytemap-bar[data-tier="model"]{background:linear-gradient(90deg,#4c7dff 0%,rgba(76,125,255,0.18) 100%)}
+      .bytemap-bar[data-tier="adapter"]{background:linear-gradient(90deg,#9db6ff 0%,rgba(157,182,255,0.14) 100%)}
+      .bytemap-bar[data-tier="recall"]{background:linear-gradient(90deg,#7ef0d2 0%,rgba(126,240,210,0.10) 100%)}
+      .bytemap-bar[data-tier="recipes"]{background:linear-gradient(90deg,#faf2e1 0%,rgba(250,242,225,0.08) 100%)}
+      .bytemap-bar[data-tier="verifier"]{background:linear-gradient(90deg,#b5bdb1 0%,rgba(181,189,177,0.08) 100%)}
+      .bytemap-bar[data-tier="manifest"]{background:linear-gradient(90deg,#737c73 0%,rgba(115,124,115,0.10) 100%)}
+      .bytemap-bar[data-tier="signature"]{background:linear-gradient(90deg,#7ef0d2 0%,#4c7dff 100%);opacity:.85}
+      .bytemap-name{position:relative;z-index:1;color:#faf2e1;font-size:12.5px;font-weight:540;letter-spacing:0;padding-left:6px}
+      .bytemap-size{position:relative;z-index:1;color:#b5bdb1;font-size:11.5px;letter-spacing:0;text-align:right;font-variant-numeric:tabular-nums}
+      .bytemap-readout{margin:24px 0 0;padding:14px 16px;border:1px solid rgba(255,255,255,0.06);border-radius:8px;background:rgba(8,9,8,0.72);display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;font-size:11.5px;letter-spacing:0;min-height:44px}
+      .bytemap-readout-name{color:#4c7dff;font-weight:540;font-size:12px}
+      .bytemap-readout-role{color:#b5bdb1;font-size:12px;line-height:1.5}
+      .bytemap-readout-hash{color:#737c73;font-size:11px;text-align:right;font-variant-numeric:tabular-nums}
+      .bytemap-readout-hash .dim{color:#737c73;opacity:.6;margin-right:6px}
+      @media (max-width:720px){.bytemap-frame{padding:20px 18px 18px}.bytemap-readout{grid-template-columns:1fr;gap:6px}.bytemap-readout-hash{text-align:left}}
+      @media (prefers-reduced-motion: reduce){.bytemap-row,.bytemap-bar{transition:none}}
+    </style>
+    <script>
+      (() => {
+        const frame = document.querySelector('[data-bytemap]');
+        if (!frame) return;
+        const rows = frame.querySelectorAll('.bytemap-row');
+        const out = frame.querySelector('.bytemap-readout');
+        const oName = out.querySelector('.bytemap-readout-name');
+        const oRole = out.querySelector('.bytemap-readout-role');
+        const oHash = out.querySelector('.bytemap-readout-hash');
+        const setActive = (row) => {
+          rows.forEach(r => r.classList.remove('is-active'));
+          row.classList.add('is-active');
+          oName.textContent = row.dataset.name + ' · ' + row.dataset.size;
+          oRole.textContent = row.dataset.role;
+          oHash.innerHTML = row.dataset.hash
+            ? '<span class="dim">spec</span> ' + row.dataset.hash
+            : '<span class="dim">HMAC-chained</span>';
+        };
+        rows.forEach(r => {
+          r.addEventListener('mouseenter', () => setActive(r));
+          r.addEventListener('focus', () => setActive(r));
+          r.tabIndex = 0;
+        });
+      })();
+    </script>
   </div>
 </section>
 

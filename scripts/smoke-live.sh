@@ -11,6 +11,7 @@ check() {
 
 has() { local body="$1"; local needle="$2"; echo "$body" | grep -q -e "$needle"; }
 hashi() { local body="$1"; local needle="$2"; echo "$body" | grep -qi -e "$needle"; }
+hashno() { local body="$1"; local needle="$2"; ! echo "$body" | grep -q -e "$needle"; }
 lacks() { local body="$1"; local needle="$2"; ! echo "$body" | grep -q -e "$needle"; }
 eq() { [ "$1" = "$2" ]; }
 
@@ -661,7 +662,7 @@ API_REF=$(curl -s "$URL/api")
 check "/api lists /v1/compile"         has "$API_REF" '/v1/compile'
 check "/api lists /v1/account/change-plan" has "$API_REF" '/v1/account/change-plan'
 check "/api lists error codes"         has "$API_REF" '402\|429'
-check "/api SDK install lines"         has "$API_REF" '@kolmogorov/kolm'
+check "/api SDK install lines"         has "$API_REF" 'github:sneaky-hippo/kolmogorov-stack'
 
 HOW=$(curl -s "$URL/how-it-works")
 check "/how-it-works 8 stages"         has "$HOW" 'gather\|spec\|synthesize\|k-sample'
@@ -1270,6 +1271,20 @@ if [ -f "$KOLM_CLI" ]; then
   check "bench --help mentions --reproduce"     has "$HELP" "reproduce"
   check "bench --help mentions Docker"          hashi "$HELP" "docker"
 fi
+
+echo ""
+echo "=== 44. Workstream C polish — interactive byte-map components ==="
+ANATOMY=$(curl -s "$URL/anatomy")
+check "/anatomy bytemap-frame"             has "$ANATOMY" 'bytemap-frame'
+check "/anatomy bytemap rows × 7"          has "$ANATOMY" 'data-name="model.gguf"'
+check "/anatomy bytemap row signature"     has "$ANATOMY" 'data-name="signature.sig"'
+check "/anatomy bytemap readout"           has "$ANATOMY" 'bytemap-readout'
+check "/anatomy bytemap js wired"          has "$ANATOMY" 'data-bytemap'
+check "/anatomy old diag-tree retired"     hashno "$ANATOMY" 'diag diag-tree'
+FF=$(curl -s "$URL/articles/kolm-file-format")
+check "/articles/kolm-file-format bytemap" has "$FF" 'bytemap-frame'
+check "/articles/kolm-file-format manifest" has "$FF" 'data-name="manifest.json"'
+check "/articles/kolm-file-format old tree retired" hashno "$FF" 'diag diag-tree'
 
 echo ""
 echo "================================================"
