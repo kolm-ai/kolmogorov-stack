@@ -1506,6 +1506,51 @@ check "/changelog v7.0 capture proxy"      has "$CHL" '/v1/capture/anthropic'
 check "/changelog v7.0 K-score formula"    has "$CHL" 'K = 0.40&middot;A + 0.15&middot;S + 0.15&middot;L + 0.15&middot;C + 0.15&middot;V'
 
 echo ""
+echo "=== 49i. site-wide title separator normalization ==="
+TIT_SEC=$(curl -s "$URL/security")
+TIT_PRC=$(curl -s "$URL/pricing")
+TIT_FAQ=$(curl -s "$URL/faq")
+TIT_CHL=$(curl -s "$URL/changelog")
+TIT_TR=$(curl -s "$URL/trust")
+TIT_HM=$(curl -s "$URL/")
+TIT_CB=$(curl -s "$URL/cookbook/pr-review")
+TIT_MAN=$(curl -s "$URL/manifesto")
+TIT_CMP=$(curl -s "$URL/compile")
+TIT_FIN=$(curl -s "$URL/finance")
+check "/security title middot"              has "$TIT_SEC" 'Security · kolm</title>'
+check "/pricing title middot"               has "$TIT_PRC" 'Pricing · kolm</title>'
+check "/faq title middot"                   has "$TIT_FAQ" 'FAQ · kolm</title>'
+check "/changelog title middot"             has "$TIT_CHL" 'Changelog · kolm</title>'
+check "/trust title middot"                 has "$TIT_TR" 'Trust · kolm</title>'
+check "/cookbook recipe title middot"       has "$TIT_CB" 'recipe · kolm cookbook</title>'
+check "/security no dash title leak"        hashno "$TIT_SEC" 'Security - kolm</title>'
+check "/pricing no dash title leak"         hashno "$TIT_PRC" 'Pricing - kolm</title>'
+check "/faq no dash title leak"             hashno "$TIT_FAQ" 'FAQ - kolm</title>'
+check "/changelog no dash title leak"       hashno "$TIT_CHL" 'Changelog - kolm</title>'
+check "/cookbook no dash recipe title leak" hashno "$TIT_CB" 'recipe - kolm cookbook'
+check "/faq pill middot"                    has "$TIT_FAQ" 'FAQ &middot; plain answers'
+check "/faq no pill dash leak"              hashno "$TIT_FAQ" 'FAQ - plain answers'
+check "/faq footer middot"                  has "$TIT_FAQ" 'kolmogorov &middot; 2026 &middot; faq'
+check "/faq no footer dash leak"            hashno "$TIT_FAQ" '>kolmogorov - 2026'
+check "/pricing pill middot"                has "$TIT_PRC" 'BYO frontier key &middot; local runtime'
+check "/pricing no pill dash leak"          hashno "$TIT_PRC" 'BYO frontier key - local runtime'
+check "/compile pill middot"                has "$TIT_CMP" 'kolm compile &middot; live'
+check "/compile no pill dash leak"          hashno "$TIT_CMP" 'kolm compile - live'
+check "/finance pill middot"                has "$TIT_FIN" 'Banks &middot; brokers &middot; asset managers'
+check "/security pill middot"               has "$TIT_SEC" 'RS-1-receipts &middot; MIT &middot; verifiable offline'
+check "/manifesto an audit row fix"         has "$TIT_MAN" 'an audit row'
+check "/manifesto no a-audit grammar bug"   hashno "$TIT_MAN" 'a audit row'
+check "/ og:title middot subtitle"          has "$TIT_HM" 'kolm &middot; your own AI, compiled to your task'
+check "/ no og:title dash leak"             hashno "$TIT_HM" 'kolm - your own AI, compiled to your task'
+check "/ title middot subtitle"             has "$TIT_HM" '<title>kolm &middot; your own AI'
+check "/ no title dash leak"                hashno "$TIT_HM" '<title>kolm - your own AI'
+check "/vs-hindsight title colon"           has "$(curl -s $URL/vs-hindsight)" 'kolm vs Hindsight: retrieval depth'
+check "/vs-mem0 title colon"                has "$(curl -s $URL/vs-mem0)" 'kolm vs Mem0: memory backend'
+check "/vs-langsmith title colon"           has "$(curl -s $URL/vs-langsmith)" 'kolm vs LangSmith: tracing'
+check "/vs-ollama title colon"              has "$(curl -s $URL/vs-ollama)" 'kolm vs Ollama: which one'
+check "/vs-openpipe title colon"            has "$(curl -s $URL/vs-openpipe)" 'kolm vs OpenPipe: capture'
+
+echo ""
 echo "================================================"
 echo " RESULTS: $PASS pass, $FAIL fail"
 if [ $FAIL -gt 0 ]; then
