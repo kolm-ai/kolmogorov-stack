@@ -87,6 +87,7 @@ nav.top {
 header.site .row,
 header.site > .wrap > .row,
 header.site .wrap,
+header.site .wrap-wide,
 .site-header .wrap,
 nav.top {
   height: 60px !important;
@@ -97,14 +98,22 @@ nav.top {
 }
 
 /* Pin the header AND footer's inner wrap to one canonical width across
- * every page. Without this, the per-page .wrap (760-1180px on article
- * vs landing pages) made the nav visibly shift left/right when switching
- * tabs, and the footer drifted in the same way. */
+ * every page. Covers every per-page header variant we ship:
+ *   <div class="wrap row">                    (compile, defense, ...)
+ *   <div class="wrap"><div class="row">       (anatomy, k-score, ...)
+ *   <div class="wrap-wide row">               (benchmarks, changelog, ...)
+ *   <div class="wrap wide row">               (privacy)
+ * Without this pin, the right-side actions visibly jumped between routes
+ * because per-page wrap widths drifted from 760px to 1180px. */
 header.site > .wrap,
 header.site > .wrap.row,
+header.site > .wrap-wide,
+header.site > .wrap-wide.row,
 .site-header > .wrap,
 footer.site > .wrap,
+footer.site > .wrap-wide,
 footer.site > .wrap.row,
+footer.site > .wrap-wide.row,
 .site-footer > .wrap {
   max-width: 1180px !important;
   width: 100% !important;
@@ -115,9 +124,13 @@ footer.site > .wrap.row,
 @media (max-width: 720px) {
   header.site > .wrap,
   header.site > .wrap.row,
+  header.site > .wrap-wide,
+  header.site > .wrap-wide.row,
   .site-header > .wrap,
   footer.site > .wrap,
+  footer.site > .wrap-wide,
   footer.site > .wrap.row,
+  footer.site > .wrap-wide.row,
   .site-footer > .wrap {
     padding: 0 20px !important;
   }

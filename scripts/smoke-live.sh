@@ -1239,50 +1239,64 @@ echo "=== 43. Workstream B — kolm bench --reproduce CLI scaffold ==="
 # in /articles/how-we-benchmark and /launch-checklist is that this verb ships
 # in the npm CLI; these tests prove it parses the right args and returns honest
 # exit codes when prerequisites are missing.
+#
+# Capture pattern: write to a temp file rather than shell var. CI captures via
+# $(...) had truncation/exit-code-loss issues across runners; file IO is
+# deterministic. Also: each block disables `set -e` while the CLI is invoked
+# because the CLI legitimately exits non-zero in 4 of these tests.
 KOLM_CLI="${KOLM_CLI:-cli/kolm.js}"
 if [ -f "$KOLM_CLI" ]; then
+  TMP43=$(mktemp -t kolm_smoke43.XXXXXX 2>/dev/null || echo "/tmp/kolm_smoke43.$$")
+
   # 1. --dry-run prints a plan JSON with the suite metadata. No docker pull,
   #    no network. This is the test the founder runs in CI on every release.
-  DRY=$(node "$KOLM_CLI" bench --reproduce swebench-lite-n150 --seed 42 --n 5 --dry-run 2>&1)
-  check "bench --reproduce dry-run JSON"        has "$DRY" '"suite": "swebench-lite-n150"'
-  check "bench --reproduce dry-run pinned image" has "$DRY" 'kolmogorov/swebench-reproducer:1.0.0'
-  check "bench --reproduce dry-run scaled est"  has "$DRY" '"estimated_minutes": 3'
-  check "bench --reproduce dry-run methodology" has "$DRY" 'how-we-benchmark'
+  set +e
+  node "$KOLM_CLI" bench --reproduce swebench-lite-n150 --seed 42 --n 5 --dry-run >"$TMP43" 2>&1
+  set -e
+  check "bench --reproduce dry-run JSON"        grep -q '"suite": "swebench-lite-n150"' "$TMP43"
+  check "bench --reproduce dry-run pinned image" grep -q 'kolmogorov/swebench-reproducer:1.0.0' "$TMP43"
+  check "bench --reproduce dry-run scaled est"  grep -q '"estimated_minutes": 3' "$TMP43"
+  check "bench --reproduce dry-run methodology" grep -q 'how-we-benchmark' "$TMP43"
 
   # 2. Unknown suite returns exit 1 with the available-suites list.
   set +e
-  UNK=$(node "$KOLM_CLI" bench --reproduce nope-not-a-suite 2>&1); UNK_RC=$?
+  node "$KOLM_CLI" bench --reproduce nope-not-a-suite >"$TMP43" 2>&1; UNK_RC=$?
   set -e
   check "bench --reproduce unknown suite exit 1" eq "$UNK_RC" 1
-  check "bench --reproduce unknown suite hint"  has "$UNK" "available suites"
+  check "bench --reproduce unknown suite hint"  grep -q "available suites" "$TMP43"
 
   # 3. Missing suite arg returns exit 1 and lists suites with their headlines.
   set +e
-  NOSUITE=$(node "$KOLM_CLI" bench --reproduce 2>&1); NOSUITE_RC=$?
+  node "$KOLM_CLI" bench --reproduce >"$TMP43" 2>&1; NOSUITE_RC=$?
   set -e
   check "bench --reproduce no-suite exit 1"     eq "$NOSUITE_RC" 1
-  check "bench --reproduce no-suite headline"   has "$NOSUITE" "+10.67pp"
+  check "bench --reproduce no-suite headline"   grep -qF "+10.67pp" "$TMP43"
 
   # 4. Bad --n (out of [1,300]) returns exit 1.
   set +e
-  BADN=$(node "$KOLM_CLI" bench --reproduce swebench-lite-n150 --n 999 --dry-run 2>&1); BADN_RC=$?
+  node "$KOLM_CLI" bench --reproduce swebench-lite-n150 --n 999 --dry-run >"$TMP43" 2>&1; BADN_RC=$?
   set -e
   check "bench --reproduce bad --n exit 1"      eq "$BADN_RC" 1
-  check "bench --reproduce bad --n msg"         has "$BADN" "must be an integer in"
+  check "bench --reproduce bad --n msg"         grep -q "must be an integer in" "$TMP43"
 
   # 5. Real run without ANTHROPIC_API_KEY returns exit 2 with operator hint.
   #    This is the same shape as /v1/specialists/auto-distill's 503 — the verb
-  #    works, the gate is operator-side.
+  #    works, the gate is operator-side. We unset via a subshell rather than
+  #    `env -u` because some CI runners ship a stripped coreutils.
   set +e
-  NOKEY=$(env -u ANTHROPIC_API_KEY node "$KOLM_CLI" bench --reproduce swebench-lite-n150 --n 5 2>&1); NOKEY_RC=$?
+  ( unset ANTHROPIC_API_KEY; node "$KOLM_CLI" bench --reproduce swebench-lite-n150 --n 5 >"$TMP43" 2>&1 ); NOKEY_RC=$?
   set -e
   check "bench --reproduce no-API-key exit 2"   eq "$NOKEY_RC" 2
-  check "bench --reproduce no-API-key hint"     has "$NOKEY" "ANTHROPIC_API_KEY not set"
+  check "bench --reproduce no-API-key hint"     grep -q "ANTHROPIC_API_KEY not set" "$TMP43"
 
   # 6. --help renders the new --reproduce mode docs.
-  HELP=$(node "$KOLM_CLI" bench --help 2>&1)
-  check "bench --help mentions --reproduce"     has "$HELP" "reproduce"
-  check "bench --help mentions Docker"          hashi "$HELP" "docker"
+  set +e
+  node "$KOLM_CLI" bench --help >"$TMP43" 2>&1
+  set -e
+  check "bench --help mentions --reproduce"     grep -q "reproduce" "$TMP43"
+  check "bench --help mentions Docker"          grep -qi "docker" "$TMP43"
+
+  rm -f "$TMP43"
 fi
 
 echo ""
