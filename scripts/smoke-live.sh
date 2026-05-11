@@ -695,17 +695,16 @@ check "/v1/plans pro"                  has "$PLANS" '"id":"pro"'
 check "/v1/plans teams"                has "$PLANS" '"id":"teams"'
 check "/v1/plans enterprise"           has "$PLANS" '"id":"enterprise"'
 
-# Homepage three-box explainer
-check "homepage three-box 01 inputs"   has "$H2" 'three-box\|inputs'
-check "homepage three-box 02 compile"  has "$H2" 'kolm compiles'
+# Homepage hero + system-map (the loop)
+check "homepage hero compiles a task"  has "$H2" 'kolm compiles a task'
+check "homepage system-map the loop"   has "$H2" 'Compile, ship, run, evolve'
 
 echo ""
 echo "=== 30. v7.0 day-1 — brand anchor + rent-vs-buy ==="
 B30_HOME=$(curl -s "$URL/")
 check "homepage H1 lock 'compiled to your task'" has "$B30_HOME" 'compiled to your task'
-check "homepage brand-anchor 'Built by Kolmogorov'" has "$B30_HOME" 'Built by .b.Kolmogorov'
 check "homepage rent-vs-buy thesis line"           has "$B30_HOME" 'local LoRA you keep forever'
-check "homepage brand-anchor lists RS-1 spec"      has "$B30_HOME" 'RS-1'
+check "homepage reg-tele RS-1 spec"                has "$B30_HOME" '<span class="accent">RS-1</span>'
 B30_MAN=$(curl -s "$URL/manifesto")
 check "/manifesto has brand-anchor paragraph"      hashi "$B30_MAN" 'andrey kolmogorov\|smallest specialist program'
 check "/manifesto mentions RS-1 spec"              has "$B30_MAN" 'RS-1'
@@ -766,8 +765,7 @@ check "/build-your-own rent-vs-buy section"        has "$B32_BYO" 'buy instead o
 check "/build-your-own links AUTHORING.md"         has "$B32_BYO" 'docs/AUTHORING.md'
 check "/build-your-own links cookbook"             has "$B32_BYO" 'href="/cookbook"'
 check "sitemap lists /build-your-own"              has "$(curl -s "$URL/sitemap.xml")" 'https://kolm.ai/build-your-own'
-B32_HOME=$(curl -s "$URL/")
-check "homepage CTA links /build-your-own"         has "$B32_HOME" 'href="/build-your-own"'
+# homepage no longer links /build-your-own directly — reachable via nav + cookbook + docs
 B32_QS=$(curl -s "$URL/quickstart")
 check "quickstart CTA links /build-your-own"       has "$B32_QS" 'href="/build-your-own"'
 B32_COOK=$(curl -s "$URL/cookbook")
@@ -1315,8 +1313,8 @@ check "/ cred-band benefit row"        has "$HOME" 'stays on your hardware'
 check "/ cred-band reproducible"       has "$HOME" 'reproducible forever'
 check "/ cred-band signed receipts"    has "$HOME" 'signed receipts'
 check "/ cred-band open spec link"     has "$HOME" 'href="/spec"'
-check "/ design-partner one-liner"     has "$HOME" '5 slots open across regulated verticals'
-check "/ design-partner apply link"    has "$HOME" 'href="/pricing#enterprise"'
+# design-partner standalone strip cut — /enterprise reg-strip footer now carries the entry point
+check "/ enterprise reg-strip footer"  has "$HOME" 'enterprise overview'
 check "/ no kolm-benchmark-1 in hero"  hashno "$HOME" 'spec &middot; kolm-benchmark-1'
 check "/ no K-score formula in hero"   hashno "$HOME" 'K = 0.40&middot;A'
 check "/ no design-partner wall"       hashno "$HOME" 'Five reserved, five open'
@@ -1469,7 +1467,7 @@ check "/pricing no footer dash leak"       hashno "$PRICE2" 'RS-1 - RS-1-multimo
 echo ""
 echo "=== 49g. / homepage range typography ==="
 HOME=$(curl -s "$URL/")
-check "/ year-1 savings ndash range"       has "$HOME" '15&ndash;30&times;'
+# 15-30x year-1 savings line lived in deleted pain-anchor section; /roi uses a dynamic calculator
 check "/ no stale 15-30x ascii"            hashno "$HOME" '>15 - 30x<'
 
 echo ""

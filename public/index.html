@@ -472,13 +472,6 @@
   </div>
 </section>
 
-<div class="brand-anchor" aria-label="brand">
-  <div class="brand-anchor-inner">
-    <span class="ba-tag">brand</span>
-    <span class="ba-text">Built by <b>Kolmogorov</b>. <code>kolm</code> is the binary &middot; <code>.kolm</code> is the file format &middot; <b>RS-1</b> is the spec, MIT-licensed</span>
-  </div>
-</div>
-
 <div class="cred-band">
   <a href="/spec" class="cred-inner" aria-label="kolm spec">
     <span class="cred-tag">RS-1 spec</span>
@@ -490,103 +483,75 @@
   </a>
 </div>
 
-<section class="dp-bar" aria-label="Design partner program">
-  <div class="dp-inner">
-    <div class="dp-row">
-      <span class="dp-tag">design partner</span>
-      <p class="dp-copy">5 slots open across regulated verticals. Free Pro tier + Slack with the engineers.</p>
-      <a href="/pricing#enterprise" class="dp-link">apply &rarr;</a>
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">01</span>the loop</div>
+    <h2>Compile, ship, run, evolve.</h2>
+    <p class="sec-lede">Four stages, one loop. Runs become training data; training improves the next compile. The artifact is the same file at every step.</p>
+
+    <div class="system-map" aria-label="kolm product loop">
+      <div class="map-column">
+        <span>01</span>
+        <h3><a href="/compile" style="color:inherit">Compile</a></h3>
+        <p>Examples + policy + recall corpus &rarr; release candidate. K-score gate at 0.85.</p>
+      </div>
+      <div class="map-arrow" aria-hidden="true"></div>
+      <div class="map-column artifact">
+        <span>02</span>
+        <h3><a href="/anatomy" style="color:inherit">.kolm</a></h3>
+        <p>Manifest, verifier, recall index, receipt chain, signature. One signed file.</p>
+      </div>
+      <div class="map-arrow" aria-hidden="true"></div>
+      <div class="map-column">
+        <span>03</span>
+        <h3><a href="/serve" style="color:inherit">Run</a></h3>
+        <p>Execute inside your boundary. Emit a signed receipt per call. Verify offline.</p>
+      </div>
+      <div class="map-arrow" aria-hidden="true"></div>
+      <div class="map-column">
+        <span>04</span>
+        <h3><a href="/evolve" style="color:inherit">Evolve</a></h3>
+        <p>Captured runs train a local LoRA. K-score gates promotion. Skeleton becomes a living model.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="fmt-cmp" aria-label="Format comparison">
-  <div class="fc-head">file formats &middot; what each one carries</div>
-  <h2><code style="font-family:var(--mono);background:var(--bg-2,#11151b);border:1px solid var(--line);border-radius:4px;padding:1px 7px;color:var(--fg,#faf2e1)">.kolm</code> is to AI what a Docker image is to a service.</h2>
-  <p class="lede">Other AI file formats carry weights. <b>.kolm carries the workflow</b>: the model, the adapter, the verifier, the eval suite, and a signed receipt of the gate that let it ship. The same task, packaged once, runs the same way on a laptop, a phone, or inside a VPC.</p>
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">02</span>compile</div>
+    <h2>Cache the expensive intelligence once.</h2>
+    <p class="sec-lede">Examples become tests. Private context becomes recall. Policy becomes a runtime guard. Approved behavior becomes the cache.</p>
 
-  <div class="tbl-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>What it contains</th>
-          <th>.gguf</th>
-          <th>.safetensors</th>
-          <th>.onnx</th>
-          <th class="col-kolm">.kolm</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>Quantized base weights</td><td><span class="y">yes</span></td><td><span class="y">yes</span></td><td><span class="partial">via tools</span></td><td class="col-kolm"><span class="y">yes</span></td></tr>
-        <tr><td>Personal LoRA adapter</td><td><span class="partial">separate file</span></td><td><span class="partial">separate file</span></td><td><span class="partial">separate file</span></td><td class="col-kolm"><span class="y">bundled</span></td></tr>
-        <tr><td>Deterministic-token recipe pack</td><td><span class="n">no</span></td><td><span class="n">no</span></td><td><span class="n">no</span></td><td class="col-kolm"><span class="y">yes</span></td></tr>
-        <tr><td>Multimodal recall index</td><td><span class="n">no</span></td><td><span class="n">no</span></td><td><span class="n">no</span></td><td class="col-kolm"><span class="y">yes</span></td></tr>
-        <tr><td>Eval suite the artifact passed</td><td><span class="n">no</span></td><td><span class="n">no</span></td><td><span class="n">no</span></td><td class="col-kolm"><span class="y">tests.jsonl</span></td></tr>
-        <tr><td>Verifier definitions</td><td><span class="n">no</span></td><td><span class="n">no</span></td><td><span class="n">no</span></td><td class="col-kolm"><span class="y">verifiers.json</span></td></tr>
-        <tr><td>K-score gate result</td><td><span class="n">no</span></td><td><span class="n">no</span></td><td><span class="n">no</span></td><td class="col-kolm"><span class="y">manifest</span></td></tr>
-        <tr><td>HMAC-chained signature</td><td><span class="n">no</span></td><td><span class="partial">hash only</span></td><td><span class="n">no</span></td><td class="col-kolm"><span class="y">RS-1</span></td></tr>
-        <tr><td>Receipt anchor to public registry</td><td><span class="n">no</span></td><td><span class="n">no</span></td><td><span class="n">no</span></td><td class="col-kolm"><span class="y">yes</span></td></tr>
-        <tr><td>Byte-identical reproducibility from inputs</td><td><span class="n">no</span></td><td><span class="n">no</span></td><td><span class="n">no</span></td><td class="col-kolm"><span class="y">required</span></td></tr>
-        <tr><td>Single-file deploy</td><td><span class="y">yes</span></td><td><span class="y">yes</span></td><td><span class="y">yes</span></td><td class="col-kolm"><span class="y">yes</span></td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="fc-foot">.gguf, .safetensors, .onnx are excellent weight formats. <a href="/anatomy" style="color:var(--violet,#faf2e1)">.kolm packages a workflow</a> &middot; <a href="/whitepaper" style="color:var(--violet,#faf2e1)">read the RS-1 spec</a></p>
-</section>
+    <div class="grid-2">
+      <div class="filetab">
+        <div class="filetab-head">
+          <span class="name">patient-intake.task</span>
+          <span class="muted">approved task contract</span>
+        </div>
+<pre class="code"><code><span class="tone">task</span>: classify incoming patient messages
+<span class="tone">labels</span>: urgent | billing | schedule | follow-up
+<span class="tone">examples</span>: ./labels.jsonl
+<span class="tone">corpus</span>: ./clinical-policy/
+<span class="tone">constraints</span>:
+  runtime_egress: 0
+  k_score_min: 0.90
+  receipt: required</code></pre>
+      </div>
 
-<section class="pain-anchor-section">
-  <div class="pain-anchor">
-    <div class="pain-hd">the problem</div>
-    <h2>Every <code style="font-family:var(--mono);background:rgba(255,107,145,0.08);padding:2px 8px;border-radius:4px;color:#ff6b91">requests.post(&quot;api.openai.com&quot;)</code> in your code is a liability.</h2>
-    <p style="margin:14px 0 24px;color:var(--ink-mute,#b5bdb1);font-size:16px;line-height:1.6;max-width:62ch">For cost. For privacy. For reproducibility. For compliance. For continuity. Frontier APIs are great teachers and terrible production dependencies. The 90%-deterministic part of your AI feature is paying frontier prices, leaving your network on every call, and breaking the moment the vendor ships a new model version.</p>
-    <div class="pain-grid">
-      <div class="pain-row">
-        <div class="lab">cost</div>
-        <div class="val"><b>$0.04 per call</b> for a job that's 90% deterministic. The same task compiled to a <code>.kolm</code> artifact runs at $0/token forever.</div>
-      </div>
-      <div class="pain-row">
-        <div class="lab">privacy</div>
-        <div class="val">PHI, PII, PCI, attorney-client - all of it leaves your network on every API call. <b>HIPAA, SR 11-7, EU AI Act, GDPR</b> all have something to say about that.</div>
-      </div>
-      <div class="pain-row">
-        <div class="lab">reproducibility</div>
-        <div class="val">Vendor ships a new model version, your prompts drift, your evals shift. <b>"The AI said so" is not a record.</b> No signed receipt. No reproducer.</div>
-      </div>
-      <div class="pain-row">
-        <div class="lab">continuity</div>
-        <div class="val">Your AI feature lives at someone else's URL. <b>Sunset = re-train.</b> Air-gap impossible. Audit only as far as the vendor lets you see.</div>
-      </div>
+<pre class="terminal"><span class="prompt">$</span> kolm compile "classify patient messages" \
+  --examples ./labels.jsonl \
+  --data ./clinical-policy \
+  --base-model qwen2.5-coder-7b-instruct-q4_0
+
+<span class="dim">ingest</span>   1,284 policy chunks indexed
+<span class="dim">verify</span>   412 examples accepted
+<span class="dim">package</span>  manifest, verifier, recall, policy
+<span class="dim">sign</span>     hmac-sha256 receipt chain
+
+<span class="ok">ok</span> wrote <span class="kw">patient-intake.kolm</span>
+<span class="ok">ok</span> K-score <span class="num">0.92</span> / release gate <span class="num">0.90</span></pre>
     </div>
-    <div style="margin-top:28px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">
-      <a href="/why-now" style="font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:0.05em;background:var(--ink,#faf2e1);color:var(--bg,#050607);border-radius:6px;padding:9px 18px">Why this is happening now &rarr;</a>
-      <a href="/roi" style="font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--violet,#faf2e1);border:1px solid var(--violet,#faf2e1);border-radius:6px;padding:9px 18px">Run the ROI math &rarr;</a>
-      <span style="font-family:var(--mono);font-size:12px;color:var(--ink-faint,#737c73)">tasks 80%+ deterministic see <b style="color:var(--ink,#faf2e1);font-weight:540">15&ndash;30&times;</b> year-1 savings</span>
-    </div>
-  </div>
-</section>
-
-<section class="icp-doors">
-  <div class="icp-head">who this is for</div>
-  <h2>Three doors. Same compiler.</h2>
-  <div class="icp-grid">
-    <a href="/quickstart" class="icp-card">
-      <div class="who">indie / SaaS</div>
-      <h3>Compile a feature, ship it offline.</h3>
-      <p>Your AI feature shouldn't be a $0.04/call surprise on the invoice. Compile once, run forever, $0/token from the laptop on day one.</p>
-      <span class="arrow">quickstart →</span>
-    </a>
-    <a href="/healthcare" class="icp-card">
-      <div class="who">regulated</div>
-      <h3>HIPAA, SOC 2, EU AI Act: built in.</h3>
-      <p>Healthcare, finance, legal, defense. Signed receipts, in-boundary compile, no vendor egress. The auditor verifies without your help.</p>
-      <span class="arrow">verticals →</span>
-    </a>
-    <a href="/edge" class="icp-card">
-      <div class="who">edge / private</div>
-      <h3>Air-gapped, on a phone, on a kiosk.</h3>
-      <p>One <code>.kolm</code> file runs on iOS, Android, x86 server, ARM edge box. Same artifact, same K-score, same receipt chain.</p>
-      <span class="arrow">edge runtime →</span>
-    </a>
   </div>
 </section>
 
@@ -643,239 +608,6 @@
       <span class="reg-tele-id"><span class="dot"></span>receipt</span>
       <span class="reg-tele-val">HMAC<span class="unit">SHA-256</span></span>
       <span class="reg-tele-meta">4-ring chain &middot; tamper-evident</span>
-    </div>
-  </div>
-</section>
-
-<section class="vs-strip" aria-label="kolm versus alternatives">
-  <div class="vs-head">how this is different</div>
-  <h2>kolm vs. the things you already use.</h2>
-  <div class="vs-grid">
-    <a href="/vs-ollama" class="vs-card">
-      <div class="vs">vs Ollama</div>
-      <h3>Ollama runs models. kolm compiles tasks.</h3>
-      <p>Ollama gives you Llama-on-disk. kolm gives you a task-specific artifact: base model + LoRA + recipes + recall index + verifier - signed.</p>
-    </a>
-    <a href="/vs-rag" class="vs-card">
-      <div class="vs">vs RAG</div>
-      <h3>RAG is a runtime. kolm is a release.</h3>
-      <p>RAG re-indexes at every query and stays online. kolm bakes the corpus and the verifier into the artifact, so the runtime is hermetic.</p>
-    </a>
-    <a href="/vs-fine-tune" class="vs-card">
-      <div class="vs">vs fine-tuning</div>
-      <h3>Fine-tuning gives you weights. kolm gives you a release.</h3>
-      <p>A LoRA without a verifier, recall, policy, and signature is not a release artifact - it's a checkpoint. kolm is the layer above.</p>
-    </a>
-    <a href="/roi" class="vs-card">
-      <div class="vs">vs frontier API</div>
-      <h3>Compile once. Run forever.</h3>
-      <p>$0.04/call &times; 90%-deterministic tasks compounds forever. <b>15&ndash;30&times; year-1 savings</b> on hot paths.</p>
-    </a>
-    <a href="/vs-openpipe" class="vs-card">
-      <div class="vs">vs OpenPipe</div>
-      <h3>Both capture. Only one gives you a file.</h3>
-      <p>OpenPipe captures and hosts a fine-tune. kolm captures and compiles a portable signed artifact. Same loop, different deliverable.</p>
-    </a>
-    <a href="/vs-predibase" class="vs-card">
-      <div class="vs">vs Predibase</div>
-      <h3>Same LoRA. Different deliverable.</h3>
-      <p>Predibase trains and serves LoRAs in their cloud. kolm wraps the same LoRA into a signed file with verifier + recall + receipts.</p>
-    </a>
-    <a href="/vs-langsmith" class="vs-card">
-      <div class="vs">vs LangSmith</div>
-      <h3>Same trace. Different exit.</h3>
-      <p>LangSmith captures traces for debug. kolm captures the same traces and compiles them into a smaller, signed model.</p>
-    </a>
-    <a href="/compare" class="vs-card">
-      <div class="vs">full table</div>
-      <h3>Compare against everyone, side by side.</h3>
-      <p>One page. Every alternative. Honest concessions where they win. Use this to decide.</p>
-    </a>
-  </div>
-</section>
-
-<section class="section section-tight">
-  <div class="wrap">
-    <div class="product-statement">
-      <div>
-        <div class="eyebrow"><span class="num">01</span>position</div>
-        <h2>The layer above device runtimes.</h2>
-      </div>
-      <p>Core ML, LiteRT, ONNX Runtime, and ExecuTorch execute models. kolm packages the task, policy, recall, verifier, and receipt chain so regulated teams can decide what is allowed to ship before it reaches a phone, browser, server, or edge box.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">02</span>the loop</div>
-    <h2>Compile, ship, run, evolve.</h2>
-    <p class="sec-lede">Four stages, one loop. Runs become training data; training improves the next compile. The artifact is the same file at every step &mdash; signed, portable, replayable.</p>
-
-    <div class="system-map" aria-label="kolm product loop">
-      <div class="map-column">
-        <span>01</span>
-        <h3><a href="/compile" style="color:inherit">Compile</a></h3>
-        <p>Examples + policy + recall corpus &rarr; release candidate. K-score gate at 0.85.</p>
-      </div>
-      <div class="map-arrow" aria-hidden="true"></div>
-      <div class="map-column artifact">
-        <span>02</span>
-        <h3><a href="/anatomy" style="color:inherit">.kolm</a></h3>
-        <p>Manifest, verifier, recall index, receipt chain, signature &mdash; one signed file.</p>
-      </div>
-      <div class="map-arrow" aria-hidden="true"></div>
-      <div class="map-column">
-        <span>03</span>
-        <h3><a href="/serve" style="color:inherit">Run</a></h3>
-        <p>Execute inside your boundary. Emit a signed receipt per call. Verify offline.</p>
-      </div>
-      <div class="map-arrow" aria-hidden="true"></div>
-      <div class="map-column">
-        <span>04</span>
-        <h3><a href="/evolve" style="color:inherit">Evolve</a></h3>
-        <p>Captured runs train a local LoRA. K-score gates promotion. Skeleton becomes a living model.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">03</span>compile</div>
-    <h2>Cache the expensive intelligence once.</h2>
-    <p class="sec-lede">The compiler turns a task into a releaseable unit: examples become tests, private context becomes recall, policy becomes a runtime guard, and the approved behavior becomes the cache.</p>
-
-    <div class="grid-2">
-      <div class="filetab">
-        <div class="filetab-head">
-          <span class="name">patient-intake.task</span>
-          <span class="muted">approved task contract</span>
-        </div>
-<pre class="code"><code><span class="tone">task</span>: classify incoming patient messages
-<span class="tone">labels</span>: urgent | billing | schedule | follow-up
-<span class="tone">examples</span>: ./labels.jsonl
-<span class="tone">corpus</span>: ./clinical-policy/
-<span class="tone">constraints</span>:
-  runtime_egress: 0
-  k_score_min: 0.90
-  receipt: required</code></pre>
-      </div>
-
-<pre class="terminal"><span class="prompt">$</span> kolm compile "classify patient messages" \
-  --examples ./labels.jsonl \
-  --data ./clinical-policy \
-  --base-model qwen2.5-coder-7b-instruct-q4_0
-
-<span class="dim">ingest</span>   1,284 policy chunks indexed
-<span class="dim">verify</span>   412 examples accepted
-<span class="dim">package</span>  manifest, verifier, recall, policy
-<span class="dim">sign</span>     hmac-sha256 receipt chain
-
-<span class="ok">ok</span> wrote <span class="kw">patient-intake.kolm</span>
-<span class="ok">ok</span> K-score <span class="num">0.92</span> / release gate <span class="num">0.90</span></pre>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">04</span>anatomy</div>
-    <h2>One artifact. Every byte has a job.</h2>
-    <p class="sec-lede">Four verbs, six file roles, one signed binary. Engineering, security, and legal read the same artifact.</p>
-
-    <div class="verb-strip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:18px 0 26px;font-family:var(--mono);font-size:13px">
-      <div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--bg-2,#11151b)"><span style="color:var(--ink-faint,#737c73);text-transform:uppercase;letter-spacing:0.06em;font-size:10px;display:block;margin-bottom:4px">compile</span><span style="color:var(--ink,#faf2e1)">freeze the task</span></div>
-      <div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--bg-2,#11151b)"><span style="color:var(--ink-faint,#737c73);text-transform:uppercase;letter-spacing:0.06em;font-size:10px;display:block;margin-bottom:4px">compile --data</span><span style="color:var(--ink,#faf2e1)">attach context</span></div>
-      <div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--bg-2,#11151b)"><span style="color:var(--ink-faint,#737c73);text-transform:uppercase;letter-spacing:0.06em;font-size:10px;display:block;margin-bottom:4px">eval</span><span style="color:var(--ink,#faf2e1)">gate the release</span></div>
-      <div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--bg-2,#11151b)"><span style="color:var(--ink-faint,#737c73);text-transform:uppercase;letter-spacing:0.06em;font-size:10px;display:block;margin-bottom:4px">run</span><span style="color:var(--ink,#faf2e1)">execute locally</span></div>
-    </div>
-
-    <div class="anatomy" aria-label="anatomy of a .kolm file">
-      <span class="root">patient-intake.kolm</span>
-      <div class="row"><span class="tree">|--</span><span class="name">manifest.json</span><span class="desc">artifact id, base model, hashes, runtime policy</span></div>
-      <div class="row"><span class="tree">|--</span><span class="name">recipe.json</span><span class="desc">task contract and deterministic behavior cache</span></div>
-      <div class="row"><span class="tree">|--</span><span class="name">recall.sqlite</span><span class="desc">approved context index for local retrieval</span></div>
-      <div class="row"><span class="tree">|--</span><span class="name">verifier.json</span><span class="desc">held-out tests and K-score release gate</span></div>
-      <div class="row"><span class="tree">|--</span><span class="name">receipts.log</span><span class="desc">prompt, output, verifier, and manifest hashes</span></div>
-      <div class="row"><span class="tree">`--</span><span class="name">signature.sig</span><span class="desc">HMAC chain bound in the artifact receipt</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">05</span>proof</div>
-    <h2>Receipts, not vibes.</h2>
-    <p class="sec-lede">Every run can emit a receipt. Every release has a gate. Every claim needs a number attached to it.</p>
-
-    <div class="grid-2">
-      <div class="kv">
-        <div class="row"><span class="k">accuracy_eval</span><span class="v">held-out examples attached</span></div>
-        <div class="row"><span class="k">coverage_report</span><span class="v">behavior cache coverage</span></div>
-        <div class="row"><span class="k">latency_budget</span><span class="v">target device benchmark</span></div>
-        <div class="row"><span class="k">network_policy</span><span class="v">reviewed per runtime target</span></div>
-        <div class="row"><span class="k">release_gate</span><span class="v">minimum score declared</span></div>
-        <div class="row"><span class="k">receipt</span><span class="v accent">signed before release</span></div>
-      </div>
-
-<pre class="terminal"><span class="prompt">$</span> kolm run patient-intake.kolm '{"message":"chest pain after new medication"}' --receipt
-{
-  "output": "urgent",
-  "citation": "clinical-policy.md#L44-L61",
-  "receipt": {
-    "manifest_hash": "sha256:a4b9c0...1d4",
-    "output_hash": "sha256:dd0a55...81f",
-    "verifier": "pass",
-    "signature": "hmac-sha256:71f0bb...8e9"
-  }
-}
-
-<span class="prompt">$</span> kolm verify --output urgent.json --artifact patient-intake.kolm
-<span class="ok">ok</span> manifest_hash matches <span class="dim">a4b9c0...1d4</span>
-<span class="ok">ok</span> verifier ran clean on held-out cases
-<span class="ok">ok</span> hmac-sha256 signature anchors to registry <span class="dim">k:0.92</span>
-<span class="ok">verified</span> 2026-05-08T17:14:22Z &middot; <span class="dim">no key required</span></pre>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">06</span>install</div>
-    <h2>Start with the CLI.</h2>
-    <p class="sec-lede">The SDK and runtime are MIT. The paid surface is managed compile, registry, policy, and enterprise controls. Keep run-time inside your boundary.</p>
-
-    <div class="install-row">
-      <div class="install">
-        <div class="install-tabs" role="tablist" aria-label="Install command">
-          <button class="install-tab active" data-cmd="npm i -g github:sneaky-hippo/kolmogorov-stack" role="tab">npm</button>
-          <button class="install-tab" data-cmd="git clone https://github.com/sneaky-hippo/kolmogorov-stack && cd kolmogorov-stack && npm install && npm link" role="tab">source</button>
-          <button class="install-tab" data-cmd="kolm config base https://kolm.ai && kolm login" role="tab">login</button>
-        </div>
-        <div class="install-cmd"><span class="prompt">$</span><span class="install-text">npm i -g github:sneaky-hippo/kolmogorov-stack</span><button class="copy" aria-label="copy install command">copy</button></div>
-      </div>
-      <a href="/signup" class="btn primary">Get API key &rarr;</a>
-      <a href="https://github.com/sneaky-hippo/kolmogorov-stack" class="btn ghost">github</a>
-    </div>
-
-<pre class="terminal" style="margin-top:18px"><span class="dim"># 60-second quickstart - install &rarr; compile &rarr; run</span>
-<span class="prompt">$</span> npm i -g github:sneaky-hippo/kolmogorov-stack            <span class="dim"># 1. install (~10s)</span>
-<span class="prompt">$</span> kolm compile "triage GitHub issues" --examples ./labels.jsonl  <span class="dim"># 2. compile (~3min via cloud)</span>
-<span class="prompt">$</span> kolm run triage.kolm '{"title":"login broken on safari"}'      <span class="dim"># 3. run (offline, &lt;200ms)</span></pre>
-  </div>
-</section>
-
-<section class="ent-cta" aria-label="enterprise self-serve">
-  <div class="ent-inner">
-    <div>
-      <div class="ent-tag">enterprise &middot; regulated &middot; air-gapped</div>
-      <h2>Self-serve, even at Enterprise.</h2>
-      <p>HIPAA, SOC 2 Type I (Q4 2026), EU AI Act. Customer-hosted compile bridge, private registry, signed receipts anchored to your CA. <b>$2,999/mo, provisioned the moment you submit the form.</b> No scoping call, no email approval - the BAA, DPA, and SOC 2 letter are linked directly from /trust.</p>
-    </div>
-    <div class="ent-actions">
-      <a href="/signup?plan=enterprise" class="ent-btn primary">Start Enterprise</a>
-      <a href="/trust" class="ent-btn ghost">Trust &amp; compliance</a>
     </div>
   </div>
 </section>
