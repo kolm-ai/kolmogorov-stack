@@ -24,9 +24,9 @@
     "oauth": ["https://kolm.ai/v1/oauth/google/start", "https://kolm.ai/v1/oauth/github/start"]
   },
   "concepts": {
-    "kolm-artifact": "Signed zip containing model.gguf, lora.bin, recipes.json, index.sqlite-vec, verifier.json, manifest.json, signature.sig.",
+    "kolm-artifact": "Signed zip with rs-1 slots: model.gguf, lora.bin, recipes.json, index.sqlite-vec, verifier.json, manifest.json, signature.sig. In v0.1 these slots ship recipe-tier contents (JSON base-model pointer, KOLMPACK behavior pack, KOLMIDX JSON lookup); native weights, GGUF-LoRA, and sqlite-vec databases are roadmap tiers.",
     "k-score": "K = round(100 * (0.60*T + 0.25*C + 0.15*L), 1) where T is k-sample pass rate, C is recipe coverage, L is latency ratio.",
-    "four-ring-chain": "HMAC-SHA256 chain: pre-image -> derived -> execution -> seal. Optionally anchored to Sigstore Rekor.",
+    "four-ring-chain": "HMAC-SHA256 chain: pre-image -> derived -> execution -> seal. Verifiable by the issuer or any holder of the shared tenant receipt secret. Ed25519 public-key receipts and Sigstore Rekor anchoring are roadmap.",
     "rent-vs-buy": "Frontier-API spend captured as (input, verified-output) pairs is distilled into a task-specific local LoRA the customer keeps forever."
   },
   "honestProof": {

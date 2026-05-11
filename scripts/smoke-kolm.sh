@@ -217,7 +217,7 @@ contains "dispatched" "/v1/compose returns dispatched array"
 # --- 14. Telemetry — real numbers ---
 hit GET "/v1/telemetry" 200 -H "Authorization: Bearer $KEY"
 contains "compiles_today" "/v1/telemetry has compiles_today"
-contains "receipts_verified" "/v1/telemetry has receipts_verified"
+contains "receipt_bearing_runs" "/v1/telemetry has receipt_bearing_runs"
 contains "k_score_median" "/v1/telemetry has k_score_median"
 
 # --- 15. /v1/embed (validation) ---

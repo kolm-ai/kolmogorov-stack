@@ -18,9 +18,14 @@ artifact. The compute you rent compounds into compute you own.
 ## What is a `.kolm` file?
 
 A signed zip with seven segments: model.gguf · lora.bin · recipes.json ·
-index.sqlite-vec · verifier.json · manifest.json · signature.sig. Sub-3GB.
-Specified by RS-1 (MIT-licensed). Verified by walking the four-ring receipt
-chain, optionally anchored to Sigstore Rekor.
+index.sqlite-vec · verifier.json · manifest.json · signature.sig.
+Specified by RS-1 (MIT-licensed). In v0.1 the slots hold: a JSON base-model
+pointer (model.gguf), an optional KOLMPACK behavior pack (lora.bin), and an
+optional KOLMIDX JSON lookup (index.sqlite-vec). Native quantized weights,
+GGUF-LoRA adapters, and sqlite-vec databases are roadmap tiers. Receipts are
+HMAC-SHA256; the issuer or holder of the shared tenant receipt secret can
+re-verify offline. Ed25519 public-key receipts and Sigstore Rekor anchoring
+are roadmap.
 
 ## Primary URLs
 

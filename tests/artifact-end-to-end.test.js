@@ -15,6 +15,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { loadArtifact, runArtifact, evalArtifact, inspectArtifact } from '../src/artifact-runner.js';
 import { benchmarkArtifact } from '../src/benchmark.js';
@@ -67,6 +68,23 @@ for (const a of ARTIFACTS) {
     assert.equal(r.passed, a.evals, `${a.name} must pass all evals (got ${r.passed}/${a.evals}; errors: ${JSON.stringify(r.errors)})`);
     assert.equal(r.accuracy, 1.0);
     assert.ok(r.p50_latency_us > 0);
+  });
+
+  test(`manifest k_score is stable across load: ${a.name}`, () => {
+    // KCI-044: the manifest k_score must be the value actually embedded in
+    // the on-disk artifact (no post-zip mutation). Loading the artifact must
+    // return the same k_score the manifest stores. size_bytes axis reflects
+    // the seal-time probe zip size (typically 64-100 bytes less than the
+    // final zip), and that is the value runtimes recompute against.
+    const bundle = loadArtifact(path.join(FIXTURES, a.file));
+    const k = bundle.manifest.k_score;
+    assert.ok(k && typeof k.composite === 'number', 'k_score present');
+    assert.ok(typeof k.size_bytes === 'number' && k.size_bytes > 0, 'size_bytes axis present');
+    // size_bytes must be the probe size; the final on-disk size is larger.
+    // (Spec semantics: K-score is recomputable from manifest alone.)
+    const onDiskSize = fs.statSync(path.join(FIXTURES, a.file)).size;
+    assert.ok(k.size_bytes <= onDiskSize, `k_score.size_bytes (${k.size_bytes}) must be <= on-disk size (${onDiskSize})`);
+    assert.ok(onDiskSize - k.size_bytes < 256, `delta between k_score.size_bytes and on-disk size must be <256 bytes (got ${onDiskSize - k.size_bytes})`);
   });
 
   test(`benchmark 0 egress + 100% pass: ${a.name}`, async () => {

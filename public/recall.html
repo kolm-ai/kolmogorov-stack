@@ -223,7 +223,7 @@ $ kolm query <span class="arg">"how do we rotate the prod KMS key?"</span> \
   <div class="wrap">
     <div class="eyebrow"><span class="num">03</span> - Three back-ends, one interface</div>
     <h2>Same SDK. <span class="tone">Same wire format.</span></h2>
-    <p class="lede">Pick the back-end at the boundary; the rest of the stack does not notice. On-device is the default inside artifacts: every <code>.kolm</code> ships <code>index.sqlite-vec</code> so recall keeps working when the network is gone.</p>
+    <p class="lede">Pick the back-end at the boundary; the rest of the stack does not notice. In v0.1, the on-device slot inside each <code>.kolm</code> is an optional <code>KOLMIDX</code> JSON lookup (filename <code>index.sqlite-vec</code>); a real on-device sqlite-vec index is a roadmap tier.</p>
 
     <div class="backends">
       <div class="be">

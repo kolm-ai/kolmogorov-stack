@@ -153,8 +153,9 @@ output_receipt  = HMAC-SHA256(secret, artifact_root ||
                               SHA256(prompt) || SHA256(output) ||
                               timestamp || run_nonce)
 
-<span class="c">// verification (anyone can run, no secret needed if signed by registry)</span>
-verify(output, receipt, artifact) =&gt; <span class="ok">ok</span> | <span style="color:var(--bad);">tampered</span></pre>
+<span class="c">// verification (v0.1: shared-secret HMAC — issuer or shared-secret holder)</span>
+<span class="c">// public-key (Ed25519) verifier is a roadmap tier</span>
+verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <span style="color:var(--bad);">tampered</span></pre>
     </div>
 
     <div class="group">

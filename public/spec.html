@@ -180,7 +180,7 @@
     <p>If you ship a runtime that implements an RFC before it lands, that is fine. Flag the artifact with <code>"spec": "rs-N-rcM"</code> so legacy runtimes refuse it cleanly.</p>
 
     <h2>Why a spec at all</h2>
-    <p>A signed binary that no one can independently verify is just trust theater. The <code>.kolm</code> format only earns its weight if a third party can re-derive the receipt chain, validate the manifest, and re-run the K-score from the same inputs and arrive at the same numbers. That is what RS-1 buys: <strong>reproducibility, not just provenance</strong>.</p>
+    <p>A signed binary you cannot reproduce is just trust theater. The <code>.kolm</code> format earns its weight when a holder of the inputs and the shared tenant receipt secret can re-derive the chain, validate the manifest, and re-run the K-score to the same numbers. That is what RS-1 buys today: <strong>reproducibility plus issuer-or-shared-secret verifiability</strong>. Independent public-key (Ed25519) verification across organizations is on the rs-2/rs-3 roadmap.</p>
     <p>Compare <code>.kolm</code> to other formats:</p>
     <table class="table">
       <thead><tr><th>Format</th><th>Spec</th><th>Reproducible</th><th>Signed</th></tr></thead>

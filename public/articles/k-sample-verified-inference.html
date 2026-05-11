@@ -262,7 +262,7 @@ function verified(client, prompt, k = 8, verifier) {
     <p>For structured tasks (extract a JSON object, return a function signature, classify into a label set), the verifier is exact: the candidate either matches the schema or it doesn't. For semantic tasks (write a polite reply, summarize a doc), the verifier combines schema checks with embedding-similarity to the ideals. Either way, it runs in microseconds, deterministically, and ships next to the model.</p>
 
     <blockquote>
-      <p>The verifier is what makes "AI output" auditable. Anyone who has the verifier can re-derive the score. Anyone who has the receipt can verify the chain. Nobody has to trust the model vendor.</p>
+      <p>The verifier is what makes "AI output" auditable. Anyone who has the verifier can re-derive the score. Anyone holding the shared tenant receipt secret can re-verify the HMAC chain. Independent public-key verification across organizations is a roadmap tier.</p>
     </blockquote>
 
     <h3>Worked example: a clinical-summary verifier.</h3>
@@ -334,7 +334,7 @@ function score(input, output) {
     <h2>What this buys you in production.</h2>
     <p><b>For compliance.</b> Every label that trained your LoRA is signed, timestamped, and chained. Every chain is recoverable. The auditor reads a number and verifies the chain; you do not have to argue policy with them.</p>
     <p><b>For training quality.</b> The verifier is a quality filter. Distilling against k=8 verified labels produces consistently better LoRAs than distilling against k=1 raw labels, because the bad samples don't pollute the training set. The compile-time gate in <a href="/k-score" style="color:var(--accent)">K-score</a> enforces this: an artifact whose embedded eval set fails to clear the floor never gets signed.</p>
-    <p><b>For the receipt-chain itself.</b> You can export the chain root and verify it offline against your retained evidence. The Enterprise tier publishes chain roots to Sigstore / Rekor for cross-organization diligence.</p>
+    <p><b>For the receipt-chain itself.</b> You can export the chain root and re-verify it offline using your retained tenant receipt secret. Publishing chain roots to Sigstore / Rekor for cross-organization diligence without sharing secrets is on the rs-2/rs-3 roadmap.</p>
 
     <h2 id="faq">FAQ.</h2>
     <h3>Why not just save the raw model output and call it a day?</h3>

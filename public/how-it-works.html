@@ -279,7 +279,7 @@ the K-score is the mean over the held-out eval set.</pre>
         <div class="hiw-num">08</div>
         <div>
           <h2>sign: bundle and seal.</h2>
-          <p class="summary">Bundles model + LoRA + recipes + verifier + recall index + manifest into a signed zip. Signature is HMAC-SHA256 over the canonical hash chain. Receipt secret is held by the registry; public key is published. Anyone can verify a receipt offline against the published key.</p>
+          <p class="summary">Bundles base-model pointer + behavior pack + recipes + verifier + lookup index + manifest into a signed zip. Signature is HMAC-SHA256 over the canonical hash chain. v0.1 receipts are HMAC-verifiable by the issuer or any holder of the shared tenant receipt secret; Ed25519 public-key receipts are a roadmap tier.</p>
 
           <h4>Manifest fields</h4>
           <pre class="out">{
@@ -305,7 +305,7 @@ the K-score is the mean over the held-out eval set.</pre>
           <h4>What it means at the receiving end</h4>
           <ul>
             <li>every output ships with a per-call receipt over <code>(input_hash, output_hash, manifest_sha)</code></li>
-            <li>any auditor with the public key can re-verify offline, without contacting kolm</li>
+            <li>any holder of the tenant receipt secret (you, your auditor under NDA, kolm support) can re-verify offline; Ed25519 public-key receipts are roadmap</li>
             <li>tampering invalidates the signature; the runtime refuses to load</li>
             <li>frontier drift has no effect - the artifact is sealed and reproducible</li>
           </ul>

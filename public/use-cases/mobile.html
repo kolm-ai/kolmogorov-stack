@@ -253,7 +253,7 @@
   context: incomingEmail,
 });
 <span class="cm">// reply.text · the draft</span>
-<span class="cm">// reply.receipt · HMAC-chained signature you can verify offline</span>
+<span class="cm">// reply.receipt · HMAC signature (v0.1: verify with shared tenant secret)</span>
 <span class="cm">// reply.sources · recall chunks that grounded the draft</span></pre>
     </div>
   </div>
@@ -287,7 +287,7 @@
 <section class="closing">
   <div class="wrap">
     <h2>Ship the AI experience <span class="tone">that survives airplane mode.</span></h2>
-    <p class="sec-lede" style="margin:0 auto 28px;text-align:center">A pre-compiled Specialist your users own, on a device they own, with receipts they can verify offline. The opposite of a thin client.</p>
+    <p class="sec-lede" style="margin:0 auto 28px;text-align:center">A pre-compiled Specialist your users own, on a device they own, with HMAC receipts you (and any auditor holding your tenant secret) can verify offline. The opposite of a thin client.</p>
     <div class="cta-row">
       <a href="/signup?plan=starter" class="btn-primary">Start Mobile &rarr;</a>
       <a href="/anatomy" class="btn-link">Inside a .kolm artifact <span aria-hidden="true">&rarr;</span></a>

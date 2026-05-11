@@ -247,6 +247,8 @@
   <h2><span class="num">§3</span> Artifact format</h2>
   <p>A <code>.kolm</code> is a ZIP archive (PKZip 2.0 / DEFLATE) with fixed inner layout. Entries <span class="kw">MUST</span> appear in canonical order with deterministic options (mtime <code>2020-01-01T00:00:00Z</code>, no extra fields, UTF-8 names, no Zip64 unless a layer exceeds 4 GiB).</p>
 
+  <div class="normative" style="border-color:#5a6f5a"><b>v0.1 implementation status.</b> Today, <code>model.gguf</code> contains a signed JSON pointer to the resolved base model (runtime "cloud"), <code>lora.bin</code> contains an optional <code>KOLMPACK</code> behavior pack, and <code>index.sqlite-vec</code> contains an optional <code>KOLMIDX</code> JSON lookup container. Native quantized weights, GGUF-LoRA adapters, and sqlite-vec recall databases are roadmap tiers (rs-2 model-adapter, rs-3 native-runtime). The table below describes the rs-1 format contract — runtimes <span class="kw">MUST</span> accept either contents.</div>
+
   <table>
     <thead><tr><th>#</th><th>Path</th><th>Required</th><th>Purpose</th></tr></thead>
     <tbody>

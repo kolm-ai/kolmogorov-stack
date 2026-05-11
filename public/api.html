@@ -621,12 +621,12 @@ count_only  bool     "1" | "true"</pre>
 
         <section class="api-section">
           <h2>Receipts</h2>
-          <p class="lede">Every <code>/v1/run</code> output ships with an HMAC-bound receipt. Anyone can re-verify offline. The verifier is part of the artifact; this endpoint is for convenience.</p>
+          <p class="lede">Every <code>/v1/run</code> output ships with an HMAC-bound receipt. In v0.1, the issuer or any holder of the shared tenant receipt secret can re-verify offline; Ed25519 public-key receipts are a roadmap tier. This endpoint is the server-side recompute for convenience.</p>
 
           <div class="endpoint" id="verify">
             <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/receipts/verify</span><span class="auth-pill public">public</span></div>
             <div class="ep-body">
-              <p>Verifies a receipt against the registry's published HMAC chain. Public - any auditor can call without a key.</p>
+              <p>Public endpoint that recomputes the receipt HMAC server-side using the service's receipt secret. Unauthenticated convenience verifier — not the same as independent public-key verification (Ed25519 receipts are roadmap).</p>
               <h5>Request</h5>
               <pre class="req">{ "receipt": { "kolm_version": "0.1", "artifact_hash": "...", "chain": [...], "signature": "..." } }</pre>
               <h5>Response</h5>

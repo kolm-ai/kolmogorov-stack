@@ -123,7 +123,11 @@ function canonicalJson(v) {
 //   coverage:          fraction of declared task surface handled [0..1]
 //   p50_latency_us:    median run-time per call
 //   cost_usd_per_call: marginal $ at run-time (0 for pure-recipe)
-//   size_bytes:        total .kolm zip on disk
+//   size_bytes:        seal-time probe zip size (the zip before the manifest
+//                      embeds the K-score itself); typically 64-100 bytes
+//                      less than the final on-disk size. Stored on the
+//                      manifest so K-score is deterministically recomputable
+//                      from artifact bytes alone.
 //
 // Each non-fractional axis (S, L, C) is normalized to [0..1] via a smooth
 // curve calibrated so that typical recipe-mode artifacts (~10KB, ~100us, $0)
@@ -413,20 +417,16 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     cost_usd_per_call: training_stats?.cost_usd_per_call ?? 0,
   });
 
-  // Pass 2 — repackage with the K-score in the manifest. Size delta is small
-  // (~80 bytes); we re-derive K-score on the final artifact below.
+  // Pass 2 — repackage with the K-score in the manifest. The K-score size
+  // axis reflects the probe zip size (Pass 1); the final zip is typically
+  // 64-100 bytes larger because the manifest now embeds the K-score JSON.
+  // We do NOT mutate the manifest after writing — the returned manifest is
+  // exactly what's inside the on-disk artifact, so a verifier recomputing
+  // K-score from the artifact bytes will reproduce manifest.k_score
+  // deterministically (size_bytes axis matches the embedded value).
   const finalPayload = buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id: _judgeId, eval_score, tier: _tier, pack, index });
   await packageArtifact({ job_id, payload: finalPayload, outPath });
   const stat = fs.statSync(outPath);
-
-  // Final K-score reflects the actual on-disk size.
-  finalPayload.manifest.k_score = computeKScore({
-    size_bytes: stat.size,
-    accuracy,
-    coverage,
-    p50_latency_us: training_stats?.latency_p50_us ?? 50,
-    cost_usd_per_call: training_stats?.cost_usd_per_call ?? 0,
-  });
 
   return {
     outPath,

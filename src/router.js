@@ -116,8 +116,9 @@ const PRICING = {
 };
 
 // Cryptographic receipts — every /v1/run call returns a signed proof that
-// (source, input) → output. Anyone can re-verify with /v1/receipts/verify.
-// This is the attestation layer that distinguishes signed artifacts from a raw LLM call.
+// (source, input) → output. The issuer or any holder of the shared tenant
+// receipt secret can re-verify with /v1/receipts/verify (server-side
+// recompute) or offline. Ed25519 public-key receipts are roadmap.
 const RECEIPT_VERSION = 'rs-1';
 // Production logs a stern warning if the secret isn't set (and refuses to
 // issue or verify receipts), but still boots so static pages stay reachable.
@@ -481,11 +482,13 @@ export function buildRouter() {
     }
   });
 
-  // Public receipt verification — anyone can verify any receipt, no auth.
-  // The whole point of receipts is offline, third-party-verifiable proof.
-  // Accepts both the legacy v0 receipt (rs-1 spec, hmac field) and the new
-  // v0.1 receipt (kolm_version="0.1", chain[], signature). Also accepts
-  // {artifact_hash, signature} drive-by shape used by lightweight callers.
+  // Public receipt verification endpoint — unauthenticated convenience that
+  // recomputes the HMAC server-side using the service's receipt secret.
+  // This is NOT public-key cryptographic verification; that requires either
+  // the shared tenant receipt secret (issuer/holder offline path) or the
+  // roadmap Ed25519 receipt mode. Accepts the legacy rs-1 receipt (hmac
+  // field), v0.1 receipt (kolm_version="0.1", chain[], signature), and the
+  // {artifact_hash, signature} drive-by shape.
   r.post('/v1/receipts/verify', (req, res) => {
     if (!RECEIPT_SECRET) return res.status(503).json({ error: 'receipt secret not configured on this server' });
     const { receipt, input, output, artifact_hash: bodyArtifactHash, signature: bodySignature } = req.body || {};
@@ -1650,7 +1653,7 @@ export function buildRouter() {
   // Returns the v5 (kolm) summary AND the legacy invocations snapshot the
   // existing dashboard.html consumes. Dashboard keeps reading
   // total_invocations/p50_us/cache; new surfaces (status, hero) read
-  // compiles_today/receipts_verified/k_score_median/artifacts_total/
+  // compiles_today/receipt_bearing_runs/k_score_median/artifacts_total/
   // active_tenants_24h.
   r.get('/v1/telemetry', (req, res) => {
     const inv = all('invocations').filter(i => !req.tenant_record || i.tenant === req.tenant);
@@ -1689,11 +1692,13 @@ export function buildRouter() {
     };
     const kScoreMedian = median(kScores);
 
-    // Receipts verified: every invocation in the v5 model gets a receipt
-    // bound to its run, so cache_miss inv count is the lower bound. Until
-    // we add a dedicated receipts table (Sprint 2), use the receipt-bearing
-    // invocation count as the closest proxy.
-    const receiptsVerified = inv.filter(i => !i.error).length;
+    // Receipt-bearing runs: every successful invocation emits an HMAC
+    // receipt bound to its run. This is the count of receipts that
+    // _exist_, not the count that has been independently verified by a
+    // caller — a dedicated receipts/verifications table is Sprint 2 work.
+    // Exposed as receipt_bearing_runs (honest) and receipts_verified (legacy
+    // alias, same value) for backward compatibility.
+    const receiptBearingRuns = inv.filter(i => !i.error).length;
 
     // Active tenants in last 24h: distinct tenants that ran a job or an
     // invocation. Admins see global; tenants see "1 if active else 0".
@@ -1713,7 +1718,8 @@ export function buildRouter() {
     res.json({
       // ---- v5 (kolm) summary ----
       compiles_today: compilesToday,
-      receipts_verified: receiptsVerified,
+      receipt_bearing_runs: receiptBearingRuns,
+      receipts_verified: receiptBearingRuns,
       k_score_median: kScoreMedian,
       artifacts_total: artifactsTotal,
       active_tenants_24h: activeTenants24h,

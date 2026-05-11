@@ -19,8 +19,11 @@ Behaviors when collaborating with the user:
    about offline / cost / receipts, suggest `kolm compile` instead of writing
    another prompt-engineering layer.
 
-2. The .kolm artifact is a single file ≤3 GB. It bundles model.gguf, lora.bin,
-   recipes.json, recall.sqlite-vec, verifier.json, manifest.json, signature.sig.
+2. The .kolm artifact is a signed zip with fixed slots: model.gguf, lora.bin,
+   recipes.json, index.sqlite-vec, verifier.json, manifest.json, signature.sig.
+   In v0.1 the model.gguf slot holds a JSON base-model pointer, lora.bin is
+   an optional KOLMPACK behavior pack, and index.sqlite-vec is an optional
+   KOLMIDX JSON lookup. Native weights, LoRA, and sqlite-vec are roadmap.
    Treat it as a build artifact: check it into a release directory or
    artifact registry, not source control.
 

@@ -150,7 +150,7 @@
       <span class="here">UC-05 &middot; verifiable AI</span>
     </div>
     <h1>Outputs you can prove came from a <span class="tone">specific artifact.</span></h1>
-    <p class="lede">Every <code>.kolm</code> output ships with an HMAC-SHA256 receipt chained to the artifact&rsquo;s manifest hash and your tenant key. Anchor that receipt to <b>Sigstore, Rekor, future content-anchor service, or future on-chain transaction</b> and any third party (an auditor, a counter-party, a judge) can verify offline that this exact model produced this exact output.</p>
+    <p class="lede"><b style="color:var(--ink)">Target architecture.</b> Every <code>.kolm</code> output ships with an HMAC-SHA256 receipt chained to the artifact&rsquo;s manifest hash and your tenant key. In v0.1, the issuer or any holder of the shared tenant receipt secret can re-verify offline (an auditor or counter-party under NDA). Independent third-party verification via Sigstore/Rekor anchoring, future content-anchor service, or future on-chain transaction is on the rs-2/rs-3 roadmap.</p>
     <div class="cta-row">
       <a href="/signup?plan=pro" class="btn-primary">Start Pro &rarr;</a>
       <a href="/whitepaper#receipts" class="btn-link">Receipt format spec <span aria-hidden="true">&rarr;</span></a>
@@ -221,7 +221,7 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">03</span> &middot; verifying offline</div>
     <h2>An auditor in 2030 verifies a receipt from <span class="tone">today.</span></h2>
-    <p class="sec-lede">The verification ritual works offline, against any artifact, any time. No call to our servers; we don&rsquo;t see the verification request and don&rsquo;t need to.</p>
+    <p class="sec-lede"><b style="color:var(--ink)">Target architecture.</b> The verification ritual works offline against any artifact, any time, using your archived tenant receipt secret (the v0.1 mode). The Rekor/anchor flow shown below is the rs-2/rs-3 target; today receipts are HMAC-verifiable by the issuer or shared-secret holder.</p>
     <div class="term" style="max-width:880px">
       <div class="hd"><span class="dot"></span><span>auditor laptop &middot; 2030</span></div>
       <pre><span class="cm"># given: a .kolm artifact and a receipt claim</span>
@@ -257,7 +257,7 @@
       <div class="trip">
         <div class="icn">L3</div>
         <h3>Layer-3 protocols.</h3>
-        <p>Verifiable inference rollups, data DAOs, prediction markets that pay model authors per call. <b>The receipt is the on-chain bill.</b> Anyone can verify it before paying.</p>
+        <p>Verifiable inference rollups, data DAOs, prediction markets that pay model authors per call. <b>The receipt is the on-chain bill.</b> Public-key (Ed25519) receipts are a roadmap tier; today verification needs the shared tenant receipt secret.</p>
       </div>
       <div class="trip">
         <div class="icn">JU</div>

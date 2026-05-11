@@ -151,6 +151,7 @@
     <p class="lede">A <code>.kolm</code> is a deterministic zip with a fixed schema (<code>RS-1</code>).
       Every layer is reproducible from <code>(task, examples, base_model, recipe_registry@version)</code>.
       Two compiles with the same inputs produce <b>byte-identical</b> artifacts.</p>
+    <p class="lede" style="margin-top:14px;color:var(--ink-faint);font-size:14px"><b style="color:var(--ink-mute)">v0.1 truth:</b> v0 ships recipe-tier artifacts. The zip member names below are the v0.1 layout; today <code>model.gguf</code> holds a signed pointer record, <code>lora.bin</code> holds an optional behavior pack (<code>KOLMPACK</code>), and <code>index.sqlite-vec</code> holds an optional JSON lookup (<code>KOLMIDX</code>). Native-weight, LoRA-adapter, and sqlite-vec tiers are on the rs-2/rs-3 roadmap.</p>
 
   </div>
 </section>
@@ -167,18 +168,18 @@
         <li>
           <span class="icon">01</span>
           <div class="body">
-            <h3>model.gguf</h3>
-            <p>The base model, INT4-quantized via <code>llama.cpp</code>. Pinned by hash to a known open-weight release. The student.</p>
+            <h3>model.gguf <span style="color:var(--ink-faint);font-weight:500;font-size:11px;font-family:var(--mono);text-transform:uppercase;margin-left:6px">v0.1 · pointer</span></h3>
+            <p>In v0.1 this slot holds a signed JSON pointer to the base-model release (<code>runtime: cloud</code>); native INT4 weight packaging is a roadmap tier.</p>
           </div>
-          <span class="size">2.1 GB</span>
+          <span class="size">target 2.1 GB</span>
         </li>
         <li>
           <span class="icon">02</span>
           <div class="body">
-            <h3>lora.bin</h3>
-            <p>The personal adapter. Distilled from k-sample frontier verified inference on <em>your</em> task. The 90% lift in 100 MB.</p>
+            <h3>lora.bin <span style="color:var(--ink-faint);font-weight:500;font-size:11px;font-family:var(--mono);text-transform:uppercase;margin-left:6px">v0.1 · KOLMPACK</span></h3>
+            <p>In v0.1 this slot holds an optional <code>KOLMPACK</code> behavior pack (deterministic categories/rules). Distilled LoRA adapters are a roadmap tier.</p>
           </div>
-          <span class="size">82 MB</span>
+          <span class="size">target 82 MB</span>
         </li>
         <li>
           <span class="icon">03</span>
@@ -191,10 +192,10 @@
         <li>
           <span class="icon">04</span>
           <div class="body">
-            <h3>index.sqlite-vec</h3>
-            <p>Multimodal embedding index over your corpus. Queryable offline. Grounds every inference in your own data.</p>
+            <h3>index.sqlite-vec <span style="color:var(--ink-faint);font-weight:500;font-size:11px;font-family:var(--mono);text-transform:uppercase;margin-left:6px">v0.1 · KOLMIDX</span></h3>
+            <p>In v0.1 this slot holds an optional <code>KOLMIDX</code> JSON lookup container. A real sqlite-vec multimodal index is a roadmap tier.</p>
           </div>
-          <span class="size">11 MB</span>
+          <span class="size">target 11 MB</span>
         </li>
         <li>
           <span class="icon">05</span>
