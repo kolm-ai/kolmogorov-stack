@@ -1634,4 +1634,183 @@ footer.modern::before {
     color: #0c0e10;
   }
 }
+
+/* =========================================================================
+ * v7.8.8 — readability sweep. Many pages hardcode cream text colors
+ * (rgba(236,231,220,*) / #faf2e1 / #ece7dc) that pre-date the theme system.
+ * In light mode these render as nearly invisible on the paper-white surface.
+ * Force-flip them all to high-contrast dark.
+ * ========================================================================= */
+[data-theme="light"] body,
+[data-theme="light"] main,
+[data-theme="light"] section,
+[data-theme="light"] article,
+[data-theme="light"] p,
+[data-theme="light"] li,
+[data-theme="light"] td,
+[data-theme="light"] dd,
+[data-theme="light"] span {
+  color: var(--fg, #0c0e10);
+}
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6,
+[data-theme="light"] b,
+[data-theme="light"] strong {
+  color: #0c0e10 !important;
+}
+
+/* Hero copy — single biggest readability bug. styles.css hardcoded
+ * rgba(236,231,220,0.78) on .home-hero .lede and 0.76 on .eyebrow.
+ * Override forcefully. */
+[data-theme="light"] .home-hero .eyebrow,
+[data-theme="light"] .hero .eyebrow {
+  color: #4b5158 !important;
+}
+[data-theme="light"] .home-hero .lede,
+[data-theme="light"] .home-hero p,
+[data-theme="light"] .hero .lede,
+[data-theme="light"] .hero p,
+[data-theme="light"] .lede,
+[data-theme="light"] .lead {
+  color: #1f2429 !important;
+}
+[data-theme="light"] .home-hero h1,
+[data-theme="light"] .hero h1 {
+  color: #0c0e10 !important;
+}
+[data-theme="light"] .home-hero .lede b,
+[data-theme="light"] .home-hero p b,
+[data-theme="light"] .hero .lede b,
+[data-theme="light"] .lede b,
+[data-theme="light"] .hero h1 .tone {
+  color: #0c0e10 !important;
+}
+
+/* media-frame figcaption — also hardcoded cream */
+[data-theme="light"] .media-frame figcaption,
+[data-theme="light"] figcaption {
+  color: #1f2429 !important;
+}
+
+/* Force-flip any inline style="color:#faf2e1" or similar by re-asserting
+ * via attribute selector. inline-style:color wins normally, but `!important`
+ * in a stylesheet beats non-important inline styles. */
+[data-theme="light"] [style*="color:#faf2e1"],
+[data-theme="light"] [style*="color: #faf2e1"],
+[data-theme="light"] [style*="color:#ece7dc"],
+[data-theme="light"] [style*="color: #ece7dc"],
+[data-theme="light"] [style*="color:rgba(236,231,220"],
+[data-theme="light"] [style*="color: rgba(236,231,220"] {
+  color: #0c0e10 !important;
+}
+
+/* Anti-incumbent eyebrow, gh-star, similar tag pills */
+[data-theme="light"] .anti-incumbent {
+  color: #4b5158 !important;
+  border-color: rgba(12,14,16,0.18) !important;
+  background: rgba(12,14,16,0.03) !important;
+}
+[data-theme="light"] .gh-star {
+  color: #4b5158 !important;
+  border-color: rgba(12,14,16,0.18) !important;
+}
+[data-theme="light"] .gh-star:hover {
+  color: #0c0e10 !important;
+  border-color: rgba(12,14,16,0.32) !important;
+}
+
+/* Card body text (icp-card, reg-card, vs-card, tb-cell, triple-cell) */
+[data-theme="light"] .icp-card p,
+[data-theme="light"] .reg-card p,
+[data-theme="light"] .vs-card p,
+[data-theme="light"] .triple-cell p,
+[data-theme="light"] .tb-cell p,
+[data-theme="light"] .tb-cell .desc,
+[data-theme="light"] .reg-strip .reg-sub {
+  color: #1f2429 !important;
+}
+[data-theme="light"] .icp-card h3,
+[data-theme="light"] .reg-card h3,
+[data-theme="light"] .vs-card h3,
+[data-theme="light"] .triple-cell h3,
+[data-theme="light"] .tb-cell h3 {
+  color: #0c0e10 !important;
+}
+[data-theme="light"] .icp-card .who,
+[data-theme="light"] .reg-card .vert,
+[data-theme="light"] .triple-cell .lab,
+[data-theme="light"] .icp-card .arrow {
+  color: #4b5158 !important;
+}
+[data-theme="light"] .reg-strip .reg-card .frames b,
+[data-theme="light"] .pain-anchor .pain-row .val,
+[data-theme="light"] .pain-anchor .pain-row .val b,
+[data-theme="light"] .pain-anchor h2 {
+  color: #0c0e10 !important;
+}
+
+/* Buttons that have inline style overrides on book-a-demo */
+[data-theme="light"] .btn.ghost,
+[data-theme="light"] .btn-ghost {
+  color: #0c0e10 !important;
+  border-color: rgba(12,14,16,0.22) !important;
+  background: transparent !important;
+}
+[data-theme="light"] .btn.ghost:hover,
+[data-theme="light"] .btn-ghost:hover {
+  background: rgba(12,14,16,0.04) !important;
+  border-color: rgba(12,14,16,0.40) !important;
+}
+
+/* Diagram/pipeline ink text inside dark frames — those frames already
+ * get inverted to white, so their inner text must flip too */
+[data-theme="light"] .diag-fanout .node b,
+[data-theme="light"] .diag-fanout .center b,
+[data-theme="light"] .diag-fanout .center span,
+[data-theme="light"] .diag-fanout .lab,
+[data-theme="light"] .diag-pipeline .stage,
+[data-theme="light"] .diag-pipeline .stage.acc,
+[data-theme="light"] .diag-ladder .step {
+  color: #0c0e10 !important;
+}
+
+/* Code blocks, inline code */
+[data-theme="light"] code,
+[data-theme="light"] pre code,
+[data-theme="light"] .lede code,
+[data-theme="light"] p code,
+[data-theme="light"] li code {
+  color: #0c0e10 !important;
+  background: rgba(12,14,16,0.05) !important;
+}
+[data-theme="light"] pre {
+  color: #0c0e10 !important;
+  background: #f4f5f7 !important;
+  border-color: rgba(12,14,16,0.10) !important;
+}
+
+/* Cookbook + article body */
+[data-theme="light"] .cookbook-grid .ck-card p,
+[data-theme="light"] .cookbook-grid .ck-card .desc,
+[data-theme="light"] article.prose p,
+[data-theme="light"] article.prose li {
+  color: #1f2429 !important;
+}
+
+/* Footer */
+[data-theme="light"] footer,
+[data-theme="light"] .site-footer,
+[data-theme="light"] footer a,
+[data-theme="light"] .site-footer a {
+  color: #1f2429 !important;
+}
+[data-theme="light"] footer a:hover,
+[data-theme="light"] .site-footer a:hover {
+  color: #0a8862 !important;
+}
+
 body.nav-open { overflow: hidden; }

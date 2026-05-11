@@ -79,7 +79,7 @@
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
-      <button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
       <a href="/signin">sign in</a>
       <a href="/signup" class="cta">Get API key &rarr;</a>
     </div>
@@ -176,7 +176,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
           <p class="lede">Every endpoint returns errors as JSON: <code>{ "error": "&lt;message&gt;", "code": "&lt;machine_code&gt;", "request_id": "..." }</code>. Status codes follow standard HTTP semantics.</p>
           <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-family:var(--mono);font-size:13px;color:var(--ink-mute,#b5bdb1);padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2,#11151b)">
             <code style="color:#7ef0d2">2xx</code><span>Success.</span>
-            <code style="color:#faf2e1">3xx</code><span>Redirect or not-modified.</span>
+            <code style="color:var(--ink,#faf2e1)">3xx</code><span>Redirect or not-modified.</span>
             <code style="color:#ff6b91">400</code><span>Bad request: malformed body, missing fields, invalid types.</span>
             <code style="color:#ff6b91">401</code><span>Missing or invalid bearer / session.</span>
             <code style="color:#ff6b91">402</code><span>Quota exhausted on current plan. <a href="/pricing" style="color:var(--violet,#faf2e1)">Upgrade</a> or wait for reset.</span>
