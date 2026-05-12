@@ -156,40 +156,40 @@ $ kolm query <span class="arg">"how do we rotate the prod KMS key?"</span> \
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">01</span> - Ingest anything</div>
+    <div class="eyebrow"><span class="num">01</span> - Ingest anything <span style="color:var(--ink-faint)">&middot; target architecture</span></div>
     <h2>Multimodal sidecars.</h2>
-    <p class="lede">Every non-text file gets a Markdown sidecar, a structured tokenization that turns pixels, frames, and waveforms into something both humans and models can read. The sidecar is what gets embedded; the original is what gets returned.</p>
+    <p class="lede"><b>Shipped in v0.1:</b> local <code>kolm rag</code> builds a deterministic pure-JS BM25 index over text/code, hosted <code>/v1/embed</code> bridges to qmd when configured. <b>Target architecture below</b> &middot; each non-text modality gets a Markdown sidecar so a unified retrieval layer can address pixels, frames, and waveforms; image captioning, transcript, and scene-detection adapters are roadmap.</p>
 
     <div class="modgrid">
       <div class="mod">
         <span class="ext">.txt .md .ts .py</span>
-        <h3>Text and code</h3>
-        <p>Chunked by structure, embedded with bge-m3. Symbols, comments, headings preserved.</p>
+        <h3>Text and code <span style="color:var(--good);font-size:11px">&middot; shipped</span></h3>
+        <p>Local BM25 today (deterministic, pure-JS). Vector embedding via bge-m3 is the target architecture; available through qmd bridge when configured server-side.</p>
       </div>
       <div class="mod">
         <span class="ext">.png .jpg .heic</span>
-        <h3>Images</h3>
-        <p>CLIP embed plus caption sidecar via vision model. Both vector and lexical recall.</p>
+        <h3>Images <span style="color:var(--ink-faint);font-size:11px">&middot; target architecture</span></h3>
+        <p>Target: CLIP embed plus caption sidecar via vision model. Today: placeholder sidecars (Anthropic caption available when configured); CLIP embed is roadmap.</p>
       </div>
       <div class="mod">
         <span class="ext">.mp3 .wav .m4a</span>
-        <h3>Audio</h3>
-        <p>Whisper transcript with CLAP timbre embed. Speakers and music both addressable.</p>
+        <h3>Audio <span style="color:var(--ink-faint);font-size:11px">&middot; target architecture</span></h3>
+        <p>Target: Whisper transcript with CLAP timbre embed so speakers and music are both addressable. Today: placeholder sidecars; transcript/CLAP adapters are roadmap.</p>
       </div>
       <div class="mod">
         <span class="ext">.mp4 .mov</span>
-        <h3>Video</h3>
-        <p>Scene-detected, then per-shot caption + ASR + CLIP. Jump straight to the right second.</p>
+        <h3>Video <span style="color:var(--ink-faint);font-size:11px">&middot; target architecture</span></h3>
+        <p>Target: scene-detected, then per-shot caption + ASR + CLIP. Today: placeholder sidecars; scene-detection and per-shot adapters are roadmap.</p>
       </div>
       <div class="mod">
         <span class="ext">.pdf</span>
-        <h3>PDF</h3>
-        <p>Layout parse via unstructured. Per-page sidecar; tables, figures, footnotes addressable.</p>
+        <h3>PDF <span style="color:var(--ink-faint);font-size:11px">&middot; target architecture</span></h3>
+        <p>Target: layout parse via unstructured, per-page sidecar with tables, figures, footnotes addressable. Today: placeholder sidecars; unstructured-style layout parse is roadmap.</p>
       </div>
       <div class="mod">
         <span class="ext">auto</span>
-        <h3>Everything else</h3>
-        <p>magika sniffs the bytes. Falls back to bytes-as-text for any file the kernel can read.</p>
+        <h3>Everything else <span style="color:var(--ink-faint);font-size:11px">&middot; target architecture</span></h3>
+        <p>Target: magika sniffs the bytes and falls back to bytes-as-text. Today: bytes-as-text fallback works; magika detection is roadmap.</p>
       </div>
     </div>
   </div>
@@ -197,9 +197,9 @@ $ kolm query <span class="arg">"how do we rotate the prod KMS key?"</span> \
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">02</span> - Hybrid retrieval</div>
+    <div class="eyebrow"><span class="num">02</span> - Hybrid retrieval <span style="color:var(--ink-faint)">&middot; target architecture</span></div>
     <h2>BM25 plus vector. <span class="tone">RRF, then rerank.</span></h2>
-    <p class="lede">Lexical recall catches names and IDs. Vector recall catches paraphrase. RRF fuses them without tuning a weight. A small cross-encoder reorders the top of the list. The whole pipeline is what grounds every Distill k-sample and every <code>kolm.wrap</code> call when a corpus namespace is set.</p>
+    <p class="lede"><b>Shipped today:</b> local pure-JS BM25 via <code>kolm rag</code>, plus a qmd bridge for hosted vector/hybrid when the server has qmd configured. <b>Target architecture below</b> &middot; the unified pipeline that fuses lexical + vector via RRF and reorders the top with a cross-encoder is the v0.2 roadmap. Today, <code>kolm.wrap</code> grounds against whichever backend the namespace actually points at.</p>
 
     <div class="pipeline">
       <span class="step">query</span>
@@ -221,28 +221,28 @@ $ kolm query <span class="arg">"how do we rotate the prod KMS key?"</span> \
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">03</span> - Three back-ends, one interface</div>
+    <div class="eyebrow"><span class="num">03</span> - Three back-ends, one interface <span style="color:var(--ink-faint)">&middot; target architecture</span></div>
     <h2>Same SDK. <span class="tone">Same wire format.</span></h2>
-    <p class="lede">Pick the back-end at the boundary; the rest of the stack does not notice. In v0.1, the on-device slot inside each <code>.kolm</code> is an optional <code>KOLMIDX</code> JSON lookup (filename <code>index.sqlite-vec</code>); a real on-device sqlite-vec index is a roadmap tier.</p>
+    <p class="lede">Pick the back-end at the boundary; the rest of the stack does not notice. In v0.1, the on-device slot inside each <code>.kolm</code> is an optional <code>KOLMIDX</code> JSON lookup (filename <code>index.sqlite-vec</code>); a real on-device sqlite-vec index is a roadmap tier. Pinecone and Trieve adapters below are target architecture &middot; today the hosted path is the qmd bridge when configured.</p>
 
     <div class="backends">
       <div class="be">
-        <div class="n">Managed</div>
+        <div class="n">Managed <span style="color:var(--ink-faint)">&middot; target</span></div>
         <h3>Pinecone</h3>
-        <p>Default for Cloud-compiled artifacts. Per-tenant namespaces, regional residency, no infra.</p>
+        <p>Target architecture for Cloud-compiled artifacts: per-tenant namespaces, regional residency, no infra. Adapter is roadmap.</p>
         <code>KOLMOGOROV_INDEX_BACKEND=pinecone</code>
       </div>
       <div class="be">
-        <div class="n">Self-host</div>
+        <div class="n">Self-host <span style="color:var(--ink-faint)">&middot; target</span></div>
         <h3>Trieve</h3>
-        <p>Single Docker image. BYO embedding service or use the bundled bge-m3. VPC-friendly.</p>
+        <p>Target architecture for self-hosted hybrid retrieval. Single Docker image. BYO embedding service or use the bundled bge-m3. Adapter is roadmap.</p>
         <code>KOLMOGOROV_INDEX_BACKEND=trieve
 KOLM_TRIEVE_URL=https://trieve.your-vpc.local</code>
       </div>
       <div class="be">
-        <div class="n">On-device</div>
+        <div class="n">On-device <span style="color:var(--ink-faint)">&middot; target</span></div>
         <h3>sqlite-vec</h3>
-        <p>What ships <em>inside</em> every <code>.kolm</code> at runtime. Single file. No network.</p>
+        <p>Target architecture for the slot <em>inside</em> every <code>.kolm</code> at runtime. Today the slot carries an optional <code>KOLMIDX</code> JSON lookup container; a populated sqlite-vec index is roadmap.</p>
         <code>KOLMOGOROV_INDEX_BACKEND=sqlite-vec</code>
       </div>
     </div>

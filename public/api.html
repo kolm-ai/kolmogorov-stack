@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>API reference · kolm</title>
-<meta name="description" content="kolm HTTP API reference. Every endpoint, request schema, response schema, error code, and authentication path. Plain HTTP. Bearer auth. JSON in, JSON out.">
+<meta name="description" content="kolm HTTP API reference. The core /v1 endpoints with request schemas, response schemas, error codes, and authentication paths. Plain HTTP. Bearer auth. JSON in, JSON out.">
 <meta name="theme-color" content="#0b0d10">
 <meta name="color-scheme" content="dark light">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm HTTP API reference">
-<meta property="og:description" content="Every kolm endpoint with request/response schemas. Plain HTTP, bearer auth, JSON.">
+<meta property="og:description" content="The core kolm /v1 endpoints with request/response schemas. Plain HTTP, bearer auth, JSON.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/api">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -90,8 +90,8 @@
   <section class="api-hero">
     <div class="wrap">
       <div class="eyebrow"><span class="pulse"></span>HTTP API reference</div>
-      <h1>Every endpoint. Every schema.</h1>
-      <p>Plain HTTP. Bearer auth on private endpoints. JSON in, JSON out. Versioned at <code>/v1</code>. The CLI and SDKs wrap this surface; you can hit it directly with <code>curl</code>.</p>
+      <h1>The core endpoints. Plain HTTP.</h1>
+      <p>Bearer auth on private endpoints. JSON in, JSON out. Versioned at <code>/v1</code>. The CLI and SDKs wrap this surface; you can hit it directly with <code>curl</code>. This page documents the buyer-facing core; the full route inventory (admin, preview, internal) is published with the OpenAPI manifest in <a href="/docs" style="color:var(--violet,#faf2e1)">/docs</a>.</p>
     </div>
   </section>
 
@@ -173,7 +173,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
 
         <section class="api-section" id="errors">
           <h2>HTTP error codes</h2>
-          <p class="lede">Every endpoint returns errors as JSON: <code>{ "error": "&lt;message&gt;", "code": "&lt;machine_code&gt;", "request_id": "..." }</code>. Status codes follow standard HTTP semantics.</p>
+          <p class="lede">Documented endpoints aim to return errors as JSON: <code>{ "error": "&lt;message&gt;", "code": "&lt;machine_code&gt;", "request_id": "..." }</code>. Some routes still return ad-hoc <code>{ "error" }</code> shapes; the generated route manifest is the source of truth.</p>
           <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-family:var(--mono);font-size:13px;color:var(--ink-mute,#b5bdb1);padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2,#11151b)">
             <code style="color:#7ef0d2">2xx</code><span>Success.</span>
             <code style="color:var(--ink,#faf2e1)">3xx</code><span>Redirect or not-modified.</span>

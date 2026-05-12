@@ -494,14 +494,17 @@
     size:   115.8 KB</pre>
       </div>
       <div class="rag-card out">
-        <div class="head">attach + use inside a recipe</div>
+        <div class="head">attach + use inside a recipe <span style="color:var(--ink-faint)">&middot; target architecture</span></div>
         <h3>lib.rag, injected.</h3>
-        <p>Attaching writes a sidecar (<code>&lt;art&gt;.kolm.rag.json</code>) next to the artifact. The artifact itself is not re-signed: the receipt stays byte-stable. The runner reads the sidecar at execution time and injects <code>lib.rag.query()</code> into the recipe sandbox.</p>
+        <p><b>Shipped today:</b> <code>kolm rag attach</code> writes a sidecar (<code>&lt;art&gt;.kolm.rag.json</code>) next to the artifact and the artifact itself is not re-signed, so the receipt stays byte-stable. <b>Target architecture:</b> the runner reads the sidecar at execution time and injects <code>lib.rag.query()</code> into the recipe sandbox. The runner integration is in progress &middot; for the current release, query the index directly via <code>kolm rag query</code>.</p>
         <pre><span class="com">$</span> kolm rag attach redactor.kolm <span class="arg">--index</span> internal-docs
 <span class="ok">ok</span> wrote redactor.kolm.rag.json
 
-<span class="com">// inside the recipe:</span>
-var hits = lib.rag.query(q, 5).matches;</pre>
+<span class="com">// target architecture inside the recipe:</span>
+var hits = lib.rag.query(q, 5).matches;
+
+<span class="com">// shipped today, equivalent CLI:</span>
+<span class="com">$</span> kolm rag query internal-docs <span class="arg">"&lt;question&gt;"</span> <span class="arg">--top-k</span> 5</pre>
       </div>
     </div>
 

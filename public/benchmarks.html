@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>kolm benchmarks · reproducible runs, public seeds, 95% CI</title>
-<meta name="description" content="kolm benchmarks: every .kolm artifact ships its own eval set. Offline-capable, network-egress monitored, K-score signed into the manifest.">
+<title>kolm benchmarks · reproducible runs, public seeds</title>
+<meta name="description" content="kolm benchmarks: every .kolm artifact ships its own eval set. Offline-capable, in-process network-egress monitor, K-score signed into the manifest.">
 <meta name="theme-color" content="#0b0d10">
 <meta name="color-scheme" content="dark light">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
 
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="kolm benchmarks · reproducible runs, public seeds, 95% CI">
-<meta property="og:description" content="Every .kolm carries its own evals. Offline-capable. Egress monitored. K-score in the manifest.">
+<meta property="og:title" content="kolm benchmarks · reproducible runs, public seeds">
+<meta property="og:description" content="Every .kolm carries its own evals. Offline-capable. In-process egress monitor. K-score in the manifest.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/benchmarks">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -293,7 +293,7 @@ kolm bench support.kolm --runs 10 --out report.json
   <span class="ok">"privacy": { "runtime_egress_attempts": 0, "blocked": false }</span>,
   <span class="ok">"integrity": { "signature_valid": true, "receipt_chain_steps": 5 }</span>
 }</pre>
-      <p class="footnote">The harness patches fetch, http, https, net, tls, and dns before any recipe runs. Any egress attempt is recorded and counted against the artifact. This is how you prove a binary is sovereign.</p>
+      <p class="footnote">The harness patches fetch, http, https, net, tls, and dns inside the Node process before any recipe runs. Any in-process egress attempt is recorded and counted against the artifact. This is an <b>in-process Node API egress monitor</b>, not an OS-level network sandbox; for hard isolation of untrusted artifacts, run kolm under a network namespace, seccomp, Firecracker, or equivalent.</p>
     </div>
 
     <div class="group">
