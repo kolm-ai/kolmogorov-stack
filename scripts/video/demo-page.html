@@ -1,0 +1,1411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>kolm demo</title>
+<style>
+  :root {
+    --bg-0: #07090c;
+    --bg-1: #0c1014;
+    --bg-2: #14181d;
+    --ink: #faf2e1;
+    --ink-soft: #ece1c4;
+    --ink-mute: #b5bdb1;
+    --ink-faint: #6c736c;
+    --line: rgba(250, 242, 225, 0.08);
+    --line-strong: rgba(250, 242, 225, 0.22);
+    --accent: #7ef0d2;
+    --accent-soft: rgba(126, 240, 210, 0.14);
+    --warm: #f6d36a;
+    --ok: #2cce8a;
+    --rose: #ef6f6c;
+    --mono: 'Consolas','Cascadia Mono','SF Mono',ui-monospace,monospace;
+    --sans: -apple-system, 'Inter','Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    width: 1920px; height: 1080px;
+    background: var(--bg-0);
+    color: var(--ink);
+    font-family: var(--sans);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Cinematic vignette + grain layers */
+  .vignette {
+    position: absolute; inset: 0; pointer-events: none; z-index: 100;
+    background:
+      radial-gradient(ellipse 85% 65% at 50% 50%, transparent 55%, rgba(0,0,0,0.5) 100%),
+      radial-gradient(ellipse 200% 100% at 50% 100%, rgba(126,240,210,0.025), transparent 60%);
+  }
+  .stars {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.6;
+  }
+  .stars .s {
+    position: absolute; width: 2px; height: 2px; border-radius: 50%;
+    background: rgba(250, 242, 225, 0.16);
+  }
+
+  .stage {
+    position: absolute; inset: 0;
+    transform-origin: 50% 50%;
+  }
+
+  /* Brand-tag (always on) */
+  .brand {
+    position: absolute; top: 44px; left: 72px;
+    font-family: var(--mono); font-size: 16px; letter-spacing: 0.04em;
+    color: var(--ink-mute);
+    z-index: 60;
+  }
+  .brand b { color: var(--ink); font-weight: 580; letter-spacing: 0.02em; }
+  .brand .dot { color: var(--accent); }
+  .brand .live {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ok); margin-right: 9px;
+    box-shadow: 0 0 8px rgba(44, 206, 138, 0.55);
+    vertical-align: middle;
+  }
+
+  /* Chapter progress dots (always on, top right) */
+  .progress {
+    position: absolute; top: 50px; right: 72px;
+    z-index: 60;
+    display: flex; align-items: center; gap: 9px;
+    font-family: var(--mono); font-size: 13px; color: var(--ink-faint);
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .progress .pdot {
+    width: 24px; height: 3px; background: rgba(250,242,225,0.10);
+    border-radius: 2px;
+    transition: background 200ms;
+  }
+  .progress .pdot.active { background: var(--accent); box-shadow: 0 0 8px rgba(126,240,210,0.4); }
+  .progress .pdot.done { background: rgba(126,240,210,0.45); }
+
+  /* Persistent .kolm artifact badge — appears after compile completes */
+  .artifact-badge {
+    position: absolute;
+    bottom: 50px; right: 72px;
+    z-index: 60;
+    display: flex; align-items: center; gap: 13px;
+    padding: 11px 19px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: rgba(250, 242, 225, 0.025);
+    backdrop-filter: blur(6px);
+    font-family: var(--mono); font-size: 14.5px; color: var(--ink-mute);
+    letter-spacing: 0.06em;
+    opacity: 0;
+  }
+  .artifact-badge .pulse {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px rgba(126, 240, 210, 0.8);
+  }
+  .artifact-badge b { color: var(--ink); font-weight: 540; letter-spacing: 0.04em; }
+
+  /* Scene wrapper */
+  .scene { position: absolute; inset: 0; opacity: 0; }
+
+  /* === TITLE CARDS === */
+  .chapter {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    text-align: center;
+  }
+  /* Tiny accent rule above the title — replaces "CHAPTER N" entirely */
+  .chapter .ch-rule {
+    width: 0; height: 2px; background: var(--accent);
+    margin: 0 auto 44px; border-radius: 999px;
+    box-shadow: 0 0 12px rgba(126,240,210,0.45);
+  }
+  .chapter .ch-h {
+    font-size: 176px; line-height: 1; letter-spacing: -0.052em;
+    font-weight: 600; color: var(--ink);
+    margin: 0 0 38px;
+    display: flex; gap: 30px; align-items: baseline; justify-content: center;
+  }
+  /* Mask reveal: word wraps clip its chars so they SLIDE UP from below */
+  .chapter .ch-h .word {
+    display: inline-block;
+    overflow: hidden;
+    padding: 0 0 18px;  /* room for descenders during the mask slide */
+  }
+  .chapter .ch-h .ch {
+    display: inline-block;
+    transform: translateY(112%);  /* start below the mask */
+    will-change: transform;
+  }
+  .chapter .ch-sub {
+    font-family: var(--mono); font-size: 22px; color: var(--ink-soft);
+    letter-spacing: 0.18em; text-transform: lowercase;
+    max-width: 1100px;
+    opacity: 0;
+  }
+  .chapter .ch-sub .acc { color: var(--accent); }
+  .chapter .ch-sub .sep { color: var(--ink-faint); margin: 0 14px; }
+
+  /* === SCENE 1: NL spec input === */
+  .spec-stage {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 1620px; height: 860px;
+    perspective: 1600px;
+  }
+  .browser {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
+    border: 1px solid var(--line-strong);
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow:
+      inset 0 1px 0 rgba(250, 242, 225, 0.06),
+      0 90px 160px rgba(0, 0, 0, 0.7),
+      0 0 80px rgba(126, 240, 210, 0.04);
+  }
+  .browser-chrome {
+    height: 60px; display: flex; align-items: center; gap: 12px;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .browser-chrome .tlight {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: rgba(250, 242, 225, 0.16);
+  }
+  .browser-chrome .url {
+    margin: 0 auto;
+    padding: 7px 22px; border: 1px solid var(--line); border-radius: 999px;
+    font-family: var(--mono); font-size: 16px; color: var(--ink-mute);
+    background: rgba(0,0,0,0.25);
+    min-width: 320px; text-align: center;
+  }
+  .browser-chrome .url b { color: var(--accent); font-weight: 540; }
+  .browser-chrome .url .live {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ok); margin-right: 10px; vertical-align: middle;
+    box-shadow: 0 0 6px var(--ok);
+  }
+
+  .spec-body {
+    padding: 78px 100px 68px;
+    height: calc(100% - 60px);
+    display: flex; flex-direction: column;
+    gap: 38px;
+  }
+  .spec-eyebrow {
+    font-family: var(--mono); font-size: 16px; color: var(--accent);
+    letter-spacing: 0.2em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .spec-eyebrow .led { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .spec-h1 {
+    font-size: 80px; line-height: 1.04; letter-spacing: -0.03em;
+    margin: 0; font-weight: 600;
+  }
+  .spec-h1 .em { color: var(--accent); }
+  .spec-sub {
+    font-size: 25px; line-height: 1.5; color: var(--ink-soft);
+    margin: -10px 0 0; max-width: 1200px;
+  }
+  .spec-input {
+    margin-top: 18px;
+    border: 1px solid var(--line-strong);
+    border-radius: 16px;
+    padding: 32px 38px;
+    background: rgba(0, 0, 0, 0.28);
+    display: flex; flex-direction: column; gap: 20px;
+    transition: border-color 0.4s;
+  }
+  .spec-input.focus { border-color: rgba(126, 240, 210, 0.55); box-shadow: 0 0 0 4px rgba(126, 240, 210, 0.06); }
+  .spec-input .label {
+    font-family: var(--mono); font-size: 14px; color: var(--ink-faint);
+    letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .spec-input .ttext {
+    font-size: 38px; line-height: 1.4; color: var(--ink);
+    letter-spacing: -0.005em;
+    min-height: 54px;
+    font-family: var(--sans);
+  }
+  .spec-input .typewriter-cursor {
+    display: inline-block; width: 14px; height: 38px;
+    background: var(--accent);
+    margin-left: 6px; transform: translateY(6px);
+  }
+  .spec-input .meta {
+    display: flex; gap: 28px; align-items: center;
+    font-family: var(--mono); font-size: 14.5px; color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    padding-top: 10px; border-top: 1px solid var(--line);
+  }
+  .spec-input .meta span b { color: var(--ink-soft); font-weight: 540; }
+  .spec-input .meta .sep { color: var(--line-strong); }
+  .spec-input .meta .cta {
+    margin-left: auto; padding: 7px 16px;
+    border: 1px solid var(--line-strong); border-radius: 7px;
+    color: var(--ink-mute); letter-spacing: 0.08em;
+  }
+  .spec-input .meta .cta b { color: var(--accent); }
+
+  /* === SCENE 2: compile process streaming === */
+  .compile-stage {
+    position: absolute;
+    left: 50%; top: 48%;  /* nudge up so callout sits cleanly below */
+    transform: translate(-50%, -50%);
+    width: 1660px; height: 760px;  /* shorter so stage-callout has its own zone */
+    display: grid; grid-template-columns: 1fr 520px;
+    gap: 38px;
+  }
+  .terminal {
+    background: var(--bg-1);
+    border: 1px solid var(--line-strong);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+      inset 0 1px 0 rgba(250, 242, 225, 0.06),
+      0 90px 160px rgba(0, 0, 0, 0.7);
+    display: flex; flex-direction: column;
+  }
+  .terminal .chrome {
+    height: 50px; display: flex; align-items: center; gap: 12px;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .terminal .chrome .tlight {
+    width: 13px; height: 13px; border-radius: 50%;
+    background: rgba(250, 242, 225, 0.16);
+  }
+  .terminal .chrome .title {
+    margin-left: 16px;
+    font-family: var(--mono); font-size: 15px; color: var(--ink-mute);
+    letter-spacing: 0.04em;
+  }
+  .terminal .chrome .title b { color: var(--ink); font-weight: 540; }
+  .terminal .body {
+    flex: 1;
+    padding: 34px 42px;
+    font-family: var(--mono); font-size: 21px; line-height: 1.95;
+    color: var(--ink-mute);
+    overflow: hidden;
+  }
+  .terminal .body .ln { white-space: pre; opacity: 0; }
+  .terminal .body .ln.prompt { color: var(--ink); }
+  .terminal .body .ln.prompt .p { color: var(--accent); }
+  .terminal .body .ln.prompt .q { color: var(--warm); }
+  .terminal .body .ln.info { color: var(--ink-soft); }
+  .terminal .body .ln.tick { color: var(--ink-mute); }
+  .terminal .body .ln.tick .ok { color: var(--ok); }
+  .terminal .body .ln.tick .arrow { color: var(--accent); }
+  .terminal .body .ln.tick .num { color: var(--ink); }
+  .terminal .body .ln.tick .h { color: var(--accent); }
+  .terminal .body .ln.tick .warm { color: var(--warm); }
+  .terminal .body .ln.tick .dim { color: var(--ink-faint); }
+  .terminal .body .ln.done {
+    color: var(--ok); font-weight: 540;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .terminal .body .ln.done b { color: var(--ink); font-weight: 540; }
+  .terminal .body .ln.done .h { color: var(--accent); }
+  .terminal .cursor {
+    display: inline-block; width: 10px; height: 23px;
+    background: var(--ink-soft); vertical-align: -3px;
+  }
+
+  /* Right rail: K-score + signing panel */
+  .compile-rail {
+    display: flex; flex-direction: column; gap: 24px;
+  }
+  .rail-card {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px 30px;
+    opacity: 0;
+  }
+  .rail-card .h {
+    font-family: var(--mono); font-size: 13.5px; color: var(--ink-faint);
+    letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .rail-card.k .num {
+    font-family: var(--mono); font-size: 88px; line-height: 1; color: var(--ink);
+    letter-spacing: -0.02em; font-weight: 540;
+    display: flex; align-items: baseline; gap: 14px;
+  }
+  .rail-card.k .num .acc { color: var(--accent); }
+  .rail-card.k .num .gate {
+    font-size: 17px; letter-spacing: 0.1em; color: var(--ok);
+    font-weight: 540;
+  }
+  .rail-card.k .bar {
+    margin-top: 22px;
+    height: 8px; border-radius: 999px; background: rgba(250, 242, 225, 0.06);
+    position: relative; overflow: hidden;
+  }
+  .rail-card.k .bar .fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0;
+    background: linear-gradient(90deg, var(--accent), var(--ok));
+    border-radius: 999px;
+  }
+  .rail-card.k .gate-mark {
+    position: absolute; top: -4px; bottom: -4px; width: 3px;
+    background: var(--warm);
+  }
+  .rail-card.k .legend {
+    font-family: var(--mono); font-size: 13px; color: var(--ink-faint);
+    margin-top: 12px; display: flex; justify-content: space-between;
+    letter-spacing: 0.08em;
+  }
+  .rail-card.sig .rows {
+    display: flex; flex-direction: column; gap: 13px;
+  }
+  .rail-card.sig .row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 16px;
+  }
+  .rail-card.sig .row .l { color: var(--ink-mute); letter-spacing: 0.04em; }
+  .rail-card.sig .row .v { color: var(--ink); letter-spacing: 0.02em; }
+  .rail-card.sig .row .v.ok { color: var(--ok); }
+  .rail-card.sig .row .v.acc { color: var(--accent); }
+  .rail-card.size {
+    background: linear-gradient(180deg, rgba(126,240,210,0.06), rgba(126,240,210,0.02));
+    border-color: rgba(126,240,210,0.3);
+  }
+  .rail-card.size .big {
+    font-family: var(--mono); font-size: 36px; color: var(--ink); letter-spacing: -0.01em;
+    font-weight: 540;
+  }
+  .rail-card.size .big b { color: var(--accent); font-weight: 580; }
+  .rail-card.size .sub {
+    font-family: var(--mono); font-size: 14.5px; color: var(--ink-mute);
+    letter-spacing: 0.04em; margin-top: 8px;
+  }
+
+  /* Stage callout overlay during compile — sits in its own zone below the compile-stage */
+  .stage-callout {
+    position: absolute; bottom: 56px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    display: flex; align-items: center; gap: 30px;
+    padding: 14px 30px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(11, 13, 16, 0.78);
+    backdrop-filter: blur(8px);
+    font-family: var(--mono); font-size: 16px; color: var(--ink-faint);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    opacity: 0;
+  }
+  .stage-callout .step { transition: color 200ms; }
+  .stage-callout .step.active { color: var(--accent); }
+  .stage-callout .step.done { color: var(--ink-soft); }
+  .stage-callout .sep { color: var(--ink-faint); opacity: 0.4; }
+
+  /* === SCENE 3 — "RUN ANYWHERE" ============================== */
+  /* The .kolm artifact splits across a constellation of devices.   */
+  /* Laptop · phone · server · edge — same file, four places, no   */
+  /* internet between them. This is the actual product magic.       */
+  .run-anywhere {
+    position: absolute; inset: 0;
+  }
+
+  /* Center origin: the .kolm chip the compile produced.  Lives at  */
+  /* exact center, soft glow, faint orbital ring around it.         */
+  .ra-source {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    z-index: 8;
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 28px;
+    border: 1.5px solid rgba(126,240,210,0.55);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(126,240,210,0.10), rgba(11,13,16,0.92));
+    box-shadow:
+      0 0 60px rgba(126,240,210,0.30),
+      0 30px 70px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.10);
+    opacity: 0;
+    font-family: var(--mono);
+    will-change: transform, opacity;
+  }
+  .ra-source .ra-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 18px rgba(126,240,210,0.85);
+  }
+  .ra-source .ra-name {
+    font-size: 30px; color: var(--ink); font-weight: 580; letter-spacing: 0.01em;
+  }
+  .ra-source .ra-name .accent { color: var(--accent); text-shadow: 0 0 16px rgba(126,240,210,0.4); }
+  .ra-source .ra-hash {
+    margin-left: 4px;
+    font-size: 16px; color: var(--ink-faint); letter-spacing: 0.10em;
+  }
+  /* Orbital ring around the source — slowly rotating */
+  .ra-orbit {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 360px; height: 360px;
+    border-radius: 50%;
+    border: 1px dashed rgba(126,240,210,0.18);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 7;
+  }
+
+  /* Connection beams: SVG below the source so they sit behind it */
+  .ra-beams {
+    position: absolute; inset: 0;
+    z-index: 6;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .ra-beam {
+    fill: none;
+    stroke: rgba(126,240,210,0.55);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 8;
+    stroke-dashoffset: 0;
+    filter: drop-shadow(0 0 6px rgba(126,240,210,0.35));
+    opacity: 0;
+  }
+
+  /* Device frames — four cards at quadrant positions */
+  .ra-device {
+    position: absolute;
+    width: 460px; height: 286px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
+    border: 1px solid var(--line-strong);
+    overflow: hidden;
+    box-shadow:
+      0 50px 110px rgba(0,0,0,0.62),
+      inset 0 1px 0 rgba(250,242,225,0.06);
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .ra-device .ra-head {
+    height: 36px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-faint); letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .ra-device .ra-head .ra-icn {
+    width: 12px; height: 12px; border-radius: 3px;
+    background: rgba(126,240,210,0.2);
+    border: 1px solid rgba(126,240,210,0.45);
+  }
+  .ra-device .ra-head .ra-pl {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--ok);
+  }
+  .ra-device .ra-head .ra-pl::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 6px var(--ok);
+  }
+  .ra-device .ra-screen {
+    padding: 20px 22px;
+    font-family: var(--mono); font-size: 14.5px; line-height: 1.65;
+    color: var(--ink-mute);
+    height: calc(100% - 36px);
+    overflow: hidden;
+  }
+  .ra-device .ra-line {
+    opacity: 0;
+    transform: translateY(6px);
+    will-change: transform, opacity;
+  }
+  .ra-device .ra-line .acc { color: var(--accent); }
+  .ra-device .ra-line .ok  { color: var(--ok); }
+  .ra-device .ra-line .ink { color: var(--ink); }
+  .ra-device .ra-line .dim { color: var(--ink-faint); }
+  .ra-device .ra-line .warm { color: var(--warm); }
+
+  /* Quadrant positions — top-left laptop, top-right phone, bot-left server, bot-right edge */
+  .ra-d-laptop { top: 130px; left: 130px; }
+  .ra-d-phone  { top: 130px; right: 130px; }
+  .ra-d-server { bottom: 200px; left: 130px; }
+  .ra-d-edge   { bottom: 200px; right: 130px; }
+
+  /* Phone gets a narrower aspect ratio */
+  .ra-d-phone { width: 320px; height: 286px; }
+  .ra-d-phone .ra-head { font-size: 10.5px; }
+  .ra-d-phone .ra-screen { font-size: 13.5px; padding: 18px 18px; }
+  .ra-d-phone .ra-chat {
+    display: flex; flex-direction: column; gap: 9px;
+  }
+  .ra-d-phone .ra-bubble {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 13px; line-height: 1.4;
+    opacity: 0;
+  }
+  .ra-d-phone .ra-bubble.user {
+    align-self: flex-end;
+    background: rgba(126,240,210,0.10);
+    border: 1px solid rgba(126,240,210,0.30);
+    color: var(--ink);
+    border-bottom-right-radius: 3px;
+  }
+  .ra-d-phone .ra-bubble.bot {
+    align-self: flex-start;
+    background: rgba(250,242,225,0.04);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    border-bottom-left-radius: 3px;
+  }
+
+  /* Closing caption — beneath the constellation */
+  .ra-caption {
+    position: absolute;
+    left: 50%; bottom: 88px;
+    transform: translateX(-50%);
+    z-index: 9;
+    display: flex; align-items: center; gap: 22px;
+    padding: 12px 28px;
+    border: 1px solid rgba(126,240,210,0.22);
+    border-radius: 999px;
+    background: rgba(11,13,16,0.78);
+    backdrop-filter: blur(8px);
+    font-family: var(--mono); font-size: 17px;
+    color: var(--ink-mute);
+    letter-spacing: 0.20em; text-transform: uppercase;
+    opacity: 0;
+  }
+  .ra-caption b { color: var(--accent); font-weight: 540; }
+  .ra-caption .sep { color: var(--ink-faint); opacity: 0.5; }
+
+  /* === SCENE 4: closing — bigger, more cinematic === */
+  .closing-stage {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    overflow: hidden;
+  }
+  /* Backdrop: huge faint .kolm watermark + soft accent glow at center  */
+  .closing-stage .cs-back {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .closing-stage .cs-back .cs-mark {
+    font-family: var(--mono); font-size: 480px; font-weight: 700;
+    color: rgba(126,240,210,0.04);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+  .closing-stage .cs-back .cs-mark .acc { color: rgba(126,240,210,0.06); }
+  .closing-stage .cs-back .cs-halo {
+    position: absolute;
+    width: 1000px; height: 1000px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(126,240,210,0.07) 0%, transparent 65%);
+    filter: blur(40px);
+    opacity: 0;
+  }
+  .closing-stage .cs-content { position: relative; z-index: 2; text-align: center; }
+  .closing-stage .cs-rule {
+    width: 0; height: 2px; background: var(--accent);
+    margin: 0 auto 38px;
+    border-radius: 999px;
+    box-shadow: 0 0 14px rgba(126,240,210,0.5);
+    opacity: 0;
+  }
+  .closing-stage .head {
+    font-size: 184px; letter-spacing: -0.052em; font-weight: 600;
+    line-height: 1; margin: 0 0 32px;
+    display: flex; gap: 34px; align-items: baseline; justify-content: center;
+  }
+  .closing-stage .head .word {
+    display: inline-block; overflow: hidden; position: relative;
+    padding: 0 0 14px;
+  }
+  .closing-stage .head .word .ch {
+    display: inline-block;
+  }
+  .closing-stage .head .accent { color: var(--accent); text-shadow: 0 4px 36px rgba(126,240,210,0.35); }
+  .closing-stage .sub {
+    font-family: var(--mono); font-size: 24px; color: var(--ink-soft);
+    letter-spacing: 0.16em; margin: 0 0 42px;
+    text-transform: lowercase;
+  }
+  .closing-stage .sub .sep { color: var(--ink-faint); margin: 0 10px; opacity: 0.6; }
+  .closing-stage .url {
+    font-family: var(--mono); font-size: 19px; color: var(--ink);
+    letter-spacing: 0.20em;
+    padding: 13px 26px;
+    border: 1px solid rgba(126,240,210,0.32);
+    border-radius: 999px;
+    background: rgba(126,240,210,0.04);
+    text-transform: lowercase;
+    display: inline-flex; align-items: center;
+  }
+  .closing-stage .url .live {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); margin-right: 13px;
+    box-shadow: 0 0 10px var(--accent);
+    vertical-align: middle;
+  }
+  .closing-stage .url b { color: var(--accent); font-weight: 580; letter-spacing: 0.10em; }
+
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="brand"><span class="live"></span><b>kolm</b> <span class="dot">·</span> your AI, compiled</div>
+
+<div class="progress" id="progress">
+  <span class="pdot" data-c="0"></span>
+  <span class="pdot" data-c="1"></span>
+  <span class="pdot" data-c="2"></span>
+</div>
+
+<div class="artifact-badge" id="badge">
+  <span class="pulse"></span>
+  <span><b>support-bot.kolm</b> · signed · sha256 7f3a…c81</span>
+</div>
+
+<!-- SCENE 1: NL spec input -->
+<div class="scene" id="s1">
+  <div class="spec-stage" id="s1-stage">
+    <div class="browser">
+      <div class="browser-chrome">
+        <span class="tlight" style="background:#ef6f6c"></span>
+        <span class="tlight" style="background:#f6d36a"></span>
+        <span class="tlight" style="background:#2cce8a"></span>
+        <span class="url"><span class="live"></span>kolm.ai/<b>compile</b></span>
+      </div>
+      <div class="spec-body">
+        <div class="spec-eyebrow"><span class="led"></span>step 1 of 1 · describe in plain english</div>
+        <h1 class="spec-h1">Tell us what your AI should do.<br><span class="em">We&rsquo;ll compile it into one file.</span></h1>
+        <p class="spec-sub">No prompts to maintain. No model to host. The compiler turns your description into a deterministic, signed <code style="font-family:var(--mono);color:var(--ink)">.kolm</code> artifact that runs anywhere &mdash; laptop, phone, edge, agent.</p>
+        <div class="spec-input" id="s1-input">
+          <span class="label">your task</span>
+          <div class="ttext"><span id="s1-typed"></span><span class="typewriter-cursor" id="s1-cur"></span></div>
+          <div class="meta">
+            <span><b>positives</b> auto-synthesized</span>
+            <span class="sep">·</span>
+            <span><b>K-score gate</b> &ge; 0.85</span>
+            <span class="sep">·</span>
+            <span><b>signs</b> with your local secret</span>
+            <span class="cta">press <b>&#9166;</b> to compile</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 2: compile process streaming -->
+<div class="scene" id="s2">
+  <div class="compile-stage" id="s2-stage">
+    <div class="terminal">
+      <div class="chrome">
+        <span class="tlight" style="background:#ef6f6c"></span>
+        <span class="tlight" style="background:#f6d36a"></span>
+        <span class="tlight" style="background:#2cce8a"></span>
+        <span class="title"><b>~/refund-bot</b> · zsh · local</span>
+      </div>
+      <div class="body" id="s2-body">
+        <div class="ln prompt" data-i="0"><span class="p">$</span> kolm compile <span class="q">"handle refund requests per our policy"</span></div>
+        <div class="ln info" data-i="1">  starting compile job <span style="color:var(--accent)">job_8f2c41</span> &middot; local &middot; zero egress</div>
+        <div class="ln tick" data-i="2">  positives <span class="num">24</span>   <span class="dim">from policy</span></div>
+        <div class="ln tick" data-i="3">  negatives <span class="num">18</span>   <span class="dim">adversarial</span></div>
+        <div class="ln tick" data-i="4">  pattern set <span class="num">3/3</span>   <span class="dim">deterministic</span> <span class="ok">&check;</span></div>
+        <div class="ln tick" data-i="5">  K-score <span class="h">0.917</span>   <span class="dim">gate 0.85</span> <span class="ok">&check;</span></div>
+        <div class="ln tick" data-i="6">  HMAC-SHA256   <span class="dim">rs-1 receipt</span> <span class="ok">&check;</span></div>
+        <div class="ln tick" data-i="7">  <span class="arrow">&rarr;</span> packing <span class="num">2.4 MB</span>   <span class="dim">.kolm artifact</span> <span class="ok">&check;</span></div>
+        <div class="ln done" data-i="8">&check; wrote <b>./support-bot.kolm</b> &middot; sha256 <span class="h">7f3a&hellip;c81</span> &middot; <span style="color:var(--ink-mute)">5.8 s</span></div>
+      </div>
+    </div>
+    <div class="compile-rail">
+      <div class="rail-card k" id="s2-k">
+        <div class="h">K-score gate</div>
+        <div class="num"><span class="acc" id="s2-knum">0.000</span><span class="gate" id="s2-kgate"></span></div>
+        <div class="bar">
+          <span class="gate-mark" style="left: 85%"></span>
+          <span class="fill" id="s2-kfill"></span>
+        </div>
+        <div class="legend"><span>0.00</span><span style="color:var(--warm)">gate 0.85</span><span>1.00</span></div>
+      </div>
+      <div class="rail-card sig" id="s2-sig">
+        <div class="h">artifact</div>
+        <div class="rows">
+          <div class="row"><span class="l">name</span><span class="v">support-bot.kolm</span></div>
+          <div class="row"><span class="l">size</span><span class="v" id="s2-size">&mdash;</span></div>
+          <div class="row"><span class="l">k-score</span><span class="v acc" id="s2-kshow">&mdash;</span></div>
+          <div class="row"><span class="l">receipt</span><span class="v ok" id="s2-sigv">&mdash;</span></div>
+          <div class="row"><span class="l">sha256</span><span class="v" id="s2-sha">&mdash;</span></div>
+        </div>
+      </div>
+      <div class="rail-card size" id="s2-runs">
+        <div class="h">runs locally</div>
+        <div class="big"><b id="s2-runs-big">&mdash;</b> ms · zero egress</div>
+        <div class="sub">no API keys · no cloud · same answer offline</div>
+      </div>
+    </div>
+  </div>
+  <div class="stage-callout" id="s2-stages">
+    <span class="step" data-st="1">1 synthesize</span>
+    <span class="sep">·</span>
+    <span class="step" data-st="2">2 distill</span>
+    <span class="sep">·</span>
+    <span class="step" data-st="3">3 score</span>
+    <span class="sep">·</span>
+    <span class="step" data-st="4">4 sign</span>
+  </div>
+</div>
+
+<!-- SCENE 3 — "RUN ANYWHERE": one file lights up four devices simultaneously.    -->
+<!-- The compile produced .kolm. That single file ships to laptop / phone / server -->
+<!-- / edge and each runs it offline. Lines from a glowing source-chip connect to  -->
+<!-- four device cards; each card shows the artifact doing real work on its plane. -->
+<div class="scene" id="s4">
+  <div class="run-anywhere" id="s4-stage">
+
+    <!-- Connection beams: SVG paths from source chip (center) to each device card.
+         Laptop  TL ends at (590, 416) — right-bottom corner of laptop card
+         Phone   TR ends at (1470, 416) — left-bottom corner of phone card
+         Server  BL ends at (590, 594) — right-top corner of server card
+         Edge    BR ends at (1330, 594) — left-top corner of edge card -->
+    <svg class="ra-beams" id="s4-beams" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+      <path class="ra-beam" data-i="0" d="M 960 540 L 590 416"></path>
+      <path class="ra-beam" data-i="1" d="M 960 540 L 1470 416"></path>
+      <path class="ra-beam" data-i="2" d="M 960 540 L 590 594"></path>
+      <path class="ra-beam" data-i="3" d="M 960 540 L 1330 594"></path>
+    </svg>
+
+    <!-- Orbital ring for visual interest -->
+    <div class="ra-orbit" id="s4-orbit"></div>
+
+    <!-- Center source chip — the .kolm artifact. Name + hash cycle through
+         example bot names in the last second to suggest the breadth of what
+         you can compile. -->
+    <div class="ra-source" id="s4-source">
+      <span class="ra-dot"></span>
+      <span class="ra-name" id="s4-name">support-bot<span class="accent">.kolm</span></span>
+      <span class="ra-hash" id="s4-hash">7f3a&hellip;c81</span>
+    </div>
+
+    <!-- Laptop (top-left): VS Code-like editor running the bot -->
+    <div class="ra-device ra-d-laptop" id="s4-d1">
+      <div class="ra-head">
+        <span class="ra-icn"></span><span>laptop &middot; macOS</span>
+        <span class="ra-pl">offline</span>
+      </div>
+      <div class="ra-screen">
+        <div class="ra-line" data-i="0"><span class="dim">$</span> <span class="acc">kolm run</span> support-bot.kolm</div>
+        <div class="ra-line" data-i="1"><span class="dim">&rarr;</span> ready &middot; <span class="ok">42ms</span> warm</div>
+        <div class="ra-line" data-i="2"><span class="ink">refund req #4193</span>: 7d window</div>
+        <div class="ra-line" data-i="3"><span class="acc">approved</span> &middot; <span class="dim">policy match</span></div>
+      </div>
+    </div>
+
+    <!-- Phone (top-right): chat UI showing the same bot answering offline -->
+    <div class="ra-device ra-d-phone" id="s4-d2">
+      <div class="ra-head">
+        <span class="ra-icn"></span><span>iphone</span>
+        <span class="ra-pl">airplane</span>
+      </div>
+      <div class="ra-screen">
+        <div class="ra-chat">
+          <div class="ra-bubble user" data-i="0">need a refund on order #882</div>
+          <div class="ra-bubble bot" data-i="1">checking policy&hellip;</div>
+          <div class="ra-bubble bot" data-i="2"><b style="color:var(--accent)">yes</b> &mdash; within 7 days, you&rsquo;re eligible.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Server (bottom-left): terminal logs of API requests served locally -->
+    <div class="ra-device ra-d-server" id="s4-d3">
+      <div class="ra-head">
+        <span class="ra-icn"></span><span>server &middot; us-east</span>
+        <span class="ra-pl">on-prem</span>
+      </div>
+      <div class="ra-screen">
+        <div class="ra-line" data-i="0"><span class="dim">POST</span> /v1/refund <span class="ok">200</span> <span class="dim">12ms</span></div>
+        <div class="ra-line" data-i="1"><span class="dim">POST</span> /v1/refund <span class="ok">200</span> <span class="dim">8ms</span></div>
+        <div class="ra-line" data-i="2"><span class="dim">POST</span> /v1/refund <span class="ok">200</span> <span class="dim">11ms</span></div>
+        <div class="ra-line" data-i="3"><span class="dim">egress</span> <span class="warm">0 bytes</span> &middot; <span class="ok">same answer</span></div>
+      </div>
+    </div>
+
+    <!-- Edge (bottom-right): on-device chip status -->
+    <div class="ra-device ra-d-edge" id="s4-d4">
+      <div class="ra-head">
+        <span class="ra-icn"></span><span>edge &middot; nvidia jetson</span>
+        <span class="ra-pl">isolated</span>
+      </div>
+      <div class="ra-screen">
+        <div class="ra-line" data-i="0"><span class="dim">device</span> <span class="ink">factory-gateway-04</span></div>
+        <div class="ra-line" data-i="1"><span class="dim">model</span> <span class="acc">support-bot.kolm</span></div>
+        <div class="ra-line" data-i="2"><span class="dim">cloud</span> <span class="warm">disconnected</span></div>
+        <div class="ra-line" data-i="3"><span class="dim">verdict</span> <span class="ok">same answer as cloud</span></div>
+      </div>
+    </div>
+
+    <!-- Closing caption -->
+    <div class="ra-caption" id="s4-caption">
+      <span><b>one file</b></span>
+      <span class="sep">&middot;</span>
+      <span><b>four places</b></span>
+      <span class="sep">&middot;</span>
+      <span><b>no internet</b></span>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 4: closing — wordmark + sub + URL with kolm watermark backdrop -->
+<div class="scene" id="s5">
+  <div class="closing-stage">
+    <!-- Backdrop: giant faint .kolm watermark + soft halo -->
+    <div class="cs-back">
+      <div class="cs-halo" id="s5-halo"></div>
+      <div class="cs-mark" id="s5-mark">.<span class="acc">kolm</span></div>
+    </div>
+    <div class="cs-content">
+      <div class="cs-rule" id="s5-rule"></div>
+      <div class="head" id="s5-head">
+        <span class="word" data-w="your"></span>
+        <span class="word" data-w="AI,"></span>
+        <span class="word accent" data-w="compiled."></span>
+      </div>
+      <div class="sub" id="s5-sub">describe it once <span class="sep">&middot;</span> compile <span class="sep">&middot;</span> yours forever</div>
+      <div class="url" id="s5-url"><span class="live"></span><b>kolm</b>.ai</div>
+    </div>
+  </div>
+</div>
+
+<div class="vignette"></div>
+
+<script>
+  // ====== Remotion-equivalent primitives ======
+  const FPS = 30;
+  const TOTAL = 21.0;
+
+  function spring(t, { mass = 1, stiffness = 100, damping = 12, from = 0, to = 1, delay = 0 } = {}) {
+    const tt = Math.max(0, t - delay);
+    if (tt === 0) return from;
+    const w0 = Math.sqrt(stiffness / mass);
+    const zeta = damping / (2 * Math.sqrt(stiffness * mass));
+    let v;
+    if (zeta < 1) {
+      const wd = w0 * Math.sqrt(1 - zeta * zeta);
+      v = 1 - Math.exp(-zeta * w0 * tt) * (Math.cos(wd * tt) + (zeta * w0 / wd) * Math.sin(wd * tt));
+    } else {
+      v = 1 - Math.exp(-w0 * tt) * (1 + w0 * tt);
+    }
+    return from + (to - from) * v;
+  }
+
+  function lerp(t, inR, outR, easing) {
+    if (t <= inR[0]) return outR[0];
+    if (t >= inR[inR.length - 1]) return outR[outR.length - 1];
+    for (let i = 0; i < inR.length - 1; i++) {
+      if (t >= inR[i] && t <= inR[i + 1]) {
+        let p = (t - inR[i]) / (inR[i + 1] - inR[i]);
+        if (easing) p = easing(p);
+        return outR[i] + p * (outR[i + 1] - outR[i]);
+      }
+    }
+    return outR[outR.length - 1];
+  }
+
+  const E = {
+    linear: t => t,
+    outCubic: t => 1 - Math.pow(1 - t, 3),
+    inOutCubic: t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2,
+    outBack: t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2); },
+    outQuint: t => 1 - Math.pow(1 - t, 5),
+  };
+
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+
+  // ====== Scene timeline (21s total) ======
+  // No chapter cards — 4 content scenes flow as one continuous narrative.
+  // Describe → compile → artifact reveal → closing.
+  const SCENES = [
+    { id: 's1', t0: 0.0,  t1: 6.0,  chapter: 0 },    // NL spec input (6.0s — typed task lands clean)
+    { id: 's2', t0: 6.0,  t1: 13.0, chapter: 1 },    // compile streaming (7.0s — 4 stages + K-score)
+    { id: 's4', t0: 13.0, t1: 18.0, chapter: 2 },    // artifact hero close (5.0s — single dramatic reveal)
+    { id: 's5', t0: 18.0, t1: 21.0, chapter: 2 },    // closing tag (3.0s)
+  ];
+
+  // Scene 1: user types the task in plain english — kept short so the typewriter cursor
+  // never wraps to a second line at 38px sans inside the 1344px-wide input.
+  const S1_TYPED = "Handle refund requests per our 7-day policy.";
+
+  // Compile terminal lines — each appears at a specific time within scene 2 (which starts at 7.5s globally).
+  // Total scene duration = 7.1s. Pace: groups of 2-3 lines per stage with visible pause between stages.
+  const S2_LINES = [
+    { i: 0, t: 0.15 },  // $ kolm compile "..."
+    { i: 1, t: 0.55 },  // starting job
+    { i: 2, t: 1.20 },  // [1/4 synthesize] positives 24
+    { i: 3, t: 1.75 },  // [1/4 synthesize] negatives 18
+    { i: 4, t: 2.70 },  // [2/4 distill] pattern set 3/3
+    { i: 5, t: 3.85 },  // [3/4 score] K-score 0.917
+    { i: 6, t: 4.95 },  // [4/4 sign] HMAC-SHA256
+    { i: 7, t: 5.75 },  // packing artifact 2.4 MB
+    { i: 8, t: 6.35 },  // ✓ wrote ./support-bot.kolm
+  ];
+
+  // Scene 4 cycle: at the end of "Run Anywhere", the central source chip
+  // cycles through example bot names to suggest the breadth of things you can
+  // compile. Spans coding, healthcare, finance, legal, ops, manufacturing,
+  // compliance, HR — and lands on "your-AI" as the empowerment moment.
+  const S4_CYCLE = [
+    { base: 'support-bot',         hash: '7f3a&hellip;c81' },
+    { base: 'claims-adjuster',     hash: '1a08&hellip;ef2' },
+    { base: 'contract-redline',    hash: '4c91&hellip;bd5' },
+    { base: 'chart-summary',       hash: '8e23&hellip;a47' },
+    { base: 'code-reviewer',       hash: '2f7b&hellip;91c' },
+    { base: 'defect-spotter',      hash: '7b32&hellip;605' },
+    { base: 'your-AI',             hash: '0000&hellip;001' },
+  ];
+
+  // Sub-stage callout activations (seconds into scene 2)
+  // 1=synthesize, 2=distill, 3=score, 4=sign
+  function activeStage(u) {
+    if (u < 1.05) return 0;
+    if (u < 2.55) return 1;       // synthesize
+    if (u < 3.70) return 2;       // distill
+    if (u < 4.80) return 3;       // score
+    if (u < 6.30) return 4;       // sign
+    return 5;                     // done
+  }
+
+  // Stars background — pre-bake positions
+  (function makeStars() {
+    const wrap = document.getElementById('stars');
+    let html = '';
+    for (let i = 0; i < 70; i++) {
+      const x = (i * 113.7) % 1920;
+      const y = (i * 71.3 + 19) % 1080;
+      const s = (i % 4 === 0) ? 3 : 2;
+      const op = 0.05 + ((i * 7) % 17) / 100;
+      html += `<span class="s" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;width:${s}px;height:${s}px;opacity:${op}"></span>`;
+    }
+    wrap.innerHTML = html;
+  })();
+
+  // Pre-split per-character spans on the closing tagline
+  (function splitWords() {
+    document.querySelectorAll('#s5-head .word').forEach(w => {
+      const txt = w.dataset.w || w.textContent;
+      let h = '';
+      for (let i = 0; i < txt.length; i++) {
+        h += `<span class="ch" data-i="${i}">${txt[i] === ' ' ? '&nbsp;' : txt[i]}</span>`;
+      }
+      w.innerHTML = h;
+    });
+  })();
+
+  const $ = (q) => document.querySelector(q);
+  const $all = (q) => document.querySelectorAll(q);
+
+  function showScene(idx) {
+    SCENES.forEach((s, i) => {
+      const el = document.getElementById(s.id);
+      if (el) el.style.opacity = (i === idx) ? 1 : 0;
+    });
+  }
+
+  function setStyle(el, m) { Object.assign(el.style, m); }
+
+  function updateProgress(chapter, t) {
+    $all('.pdot').forEach((d, i) => {
+      d.classList.remove('active', 'done');
+      if (i < chapter) d.classList.add('done');
+      else if (i === chapter) d.classList.add('active');
+    });
+  }
+
+  // ===== seek(t) — frame-deterministic state =====
+  function seek(t) {
+    t = clamp(t, 0, TOTAL);
+
+    let sIdx = 0;
+    for (let i = 0; i < SCENES.length; i++) {
+      if (t >= SCENES[i].t0 && t < SCENES[i].t1) { sIdx = i; break; }
+      if (i === SCENES.length - 1 && t >= SCENES[i].t0) sIdx = i;
+    }
+    showScene(sIdx);
+    const sc = SCENES[sIdx];
+    const u = t - sc.t0;
+    const sd = sc.t1 - sc.t0;
+
+    updateProgress(sc.chapter);
+
+    // Artifact badge: fades in once the compile completes (~12.5s globally)
+    const badge = $('#badge');
+    const badgeIn = clamp((t - 12.5) * 1.8, 0, 1);
+    const drift = Math.sin(t * 0.55) * 3;
+    setStyle(badge, {
+      opacity: badgeIn,
+      transform: `translateY(${drift.toFixed(2)}px)`,
+    });
+
+    // ============== SCENE 1: NL spec input ==============
+    if (sc.id === 's1') {
+      const stage = $('#s1-stage');
+      const arr = spring(u, { stiffness: 70, damping: 14 });
+      const sc1 = lerp(arr, [0, 1], [0.95, 1], E.outCubic);
+      const ty = lerp(arr, [0, 1], [30, 0], E.outCubic);
+      const op = lerp(u, [0, 0.5], [0, 1], E.outCubic);
+      setStyle(stage, { transform: `translate(-50%, calc(-50% + ${ty.toFixed(1)}px)) scale(${sc1.toFixed(3)})`, opacity: op });
+
+      const inputEl = $('#s1-input');
+      inputEl.classList.toggle('focus', u > 0.50);
+
+      const tStart = 0.75, tEnd = 3.20;
+      const frac = clamp((u - tStart) / (tEnd - tStart), 0, 1);
+      const len = Math.floor(E.outQuint(frac) * S1_TYPED.length);
+      $('#s1-typed').textContent = S1_TYPED.slice(0, len);
+      $('#s1-cur').style.opacity = (len >= S1_TYPED.length && u > 3.4) ? 0 : (Math.sin(u * 9) > 0 ? 1 : 0.2);
+
+      const cta = $('#s1-input .meta .cta');
+      if (cta) {
+        const ctaK = clamp((u - 3.20) * 2.5, 0, 1);
+        cta.style.opacity = 0.55 + ctaK * 0.45;
+      }
+
+      // Exit fade in the last 0.4s
+      const tail = sd - u;
+      if (tail < 0.4) {
+        const exit = 1 - (tail / 0.4);
+        setStyle(stage, {
+          transform: `translate(-50%, calc(-50% + ${ty.toFixed(1)}px)) scale(${(sc1 * (1 - exit * 0.04)).toFixed(3)})`,
+          opacity: op * (1 - exit * 0.85),
+        });
+      }
+    }
+
+    // ============== SCENE 2: compile streaming ==============
+    if (sc.id === 's2') {
+      const stage = $('#s2-stage');
+      const arr = spring(u, { stiffness: 65, damping: 14 });
+      const sc1 = lerp(arr, [0, 1], [0.96, 1], E.outCubic);
+      const op = clamp(u * 4, 0, 1);
+      setStyle(stage, { transform: `translate(-50%, -50%) scale(${sc1.toFixed(3)})`, opacity: op });
+
+      // Stream terminal lines
+      const body = $('#s2-body');
+      const lns = body.querySelectorAll('.ln');
+      lns.forEach((el) => {
+        const i = +el.dataset.i;
+        const lineCfg = S2_LINES[i];
+        if (!lineCfg) return;
+        const local = u - lineCfg.t;
+        if (local < 0) {
+          el.style.opacity = 0;
+          el.style.transform = 'translateY(8px)';
+          return;
+        }
+        const k = spring(local, { stiffness: 220, damping: 18 });
+        const lop = clamp(local * 6, 0, 1);
+        const ly = lerp(k, [0, 1], [8, 0], E.outBack);
+        el.style.opacity = lop;
+        el.style.transform = `translateY(${ly.toFixed(1)}px)`;
+      });
+
+      // Right rail card entrances (slower, with gaps so the eye can track)
+      const kCard = $('#s2-k');
+      const sigCard = $('#s2-sig');
+      const runsCard = $('#s2-runs');
+      function cardIn(el, when) {
+        const local = u - when;
+        if (local < 0) { el.style.opacity = 0; el.style.transform = 'translateY(16px)'; return; }
+        const k = spring(local, { stiffness: 130, damping: 15 });
+        el.style.opacity = clamp(local * 3, 0, 1);
+        el.style.transform = `translateY(${lerp(k, [0, 1], [16, 0], E.outBack).toFixed(1)}px)`;
+      }
+      cardIn(kCard, 0.50);
+      cardIn(sigCard, 1.40);
+      cardIn(runsCard, 2.80);
+
+      // K-score number ramp — aligned to scoring stage
+      const kStart = 3.85, kEnd = 4.65;
+      const kFrac = clamp((u - kStart) / (kEnd - kStart), 0, 1);
+      const kVal = lerp(kFrac, [0, 1], [0.000, 0.917], E.outQuint);
+      $('#s2-knum').textContent = kVal.toFixed(3);
+      $('#s2-kfill').style.width = `${(kVal * 100).toFixed(2)}%`;
+      $('#s2-kgate').textContent = (kVal >= 0.85) ? '· passed' : '';
+
+      // Sig card values populate as each stage completes
+      $('#s2-size').textContent = u > 5.85 ? '2.4 MB' : '—';
+      $('#s2-kshow').textContent = u > 4.30 ? '0.917' : '—';
+      $('#s2-sigv').textContent  = u > 5.10 ? 'signed · HMAC' : '—';
+      $('#s2-sha').textContent   = u > 6.10 ? '7f3a…c81' : '—';
+
+      // Runs card: latency tick — animates 0 → 42 after sign completes
+      const lStart = 6.45, lEnd = 7.00;
+      const lFrac = clamp((u - lStart) / (lEnd - lStart), 0, 1);
+      const lVal = Math.round(lerp(lFrac, [0, 1], [0, 42], E.outQuint));
+      $('#s2-runs-big').textContent = lVal > 0 ? lVal : '—';
+
+      // Stage callout — fades in at 0.9s, tracks active stage
+      const callout = $('#s2-stages');
+      const callIn = clamp((u - 0.90) * 3, 0, 1);
+      setStyle(callout, { opacity: callIn });
+      const active = activeStage(u);
+      callout.querySelectorAll('.step').forEach(el => {
+        const st = +el.dataset.st;
+        el.classList.remove('active', 'done');
+        if (st < active) el.classList.add('done');
+        else if (st === active) el.classList.add('active');
+      });
+
+      // Exit at end
+      const tail = sd - u;
+      if (tail < 0.4) {
+        const exit = 1 - (tail / 0.4);
+        setStyle(stage, { opacity: op * (1 - exit * 0.85) });
+      }
+    }
+
+    // ============== SCENE 3 — "RUN ANYWHERE" ==============
+    // The .kolm file ships out from the compile into a constellation of devices.
+    // Source chip pulses at center, beams draw outward to four device cards,
+    // each device's screen content streams in showing the file doing real work.
+    // Caption "one file · four places · no internet" lands as the punchline.
+    if (sc.id === 's4') {
+      // Source chip lands first (0.0-0.7s) with spring scale + opacity
+      const source = $('#s4-source');
+      const srK = spring(u, { stiffness: 110, damping: 13 });
+      const srScale = lerp(srK, [0, 1], [0.5, 1], E.outBack);
+      const srOp = clamp(u * 3.2, 0, 1);
+      // Soft breathing pulse after landing
+      const srBreath = (u > 0.9) ? 1 + Math.sin((u - 0.9) * 1.8) * 0.012 : 1;
+      setStyle(source, {
+        opacity: srOp,
+        transform: `translate(-50%, -50%) scale(${(srScale * srBreath).toFixed(3)})`,
+      });
+
+      // Orbital ring around source — fades in slowly + rotates continuously
+      const orbit = $('#s4-orbit');
+      if (orbit) {
+        const orK = clamp((u - 0.5) * 1.4, 0, 1);
+        const orRot = u * 18;
+        setStyle(orbit, {
+          opacity: orK * 0.55,
+          transform: `translate(-50%, -50%) rotate(${orRot.toFixed(1)}deg)`,
+        });
+      }
+
+      // Beams draw from center outward (staggered 0.7s+)
+      // Each beam uses stroke-dashoffset for line-draw effect
+      const beams = $all('#s4-beams .ra-beam');
+      beams.forEach((p, i) => {
+        const delay = 0.75 + i * 0.12;
+        const local = u - delay;
+        const k = clamp(local / 0.55, 0, 1);
+        const op = E.outCubic(k);
+        // Energize pulse along the beam (dashoffset cycles after fully drawn)
+        const flow = u * -60;
+        setStyle(p, {
+          opacity: op * 0.85,
+          strokeDashoffset: flow.toFixed(1),
+        });
+      });
+
+      // Device cards: fly in from offscreen at each corner (staggered 1.1-2.2s)
+      const devOffsets = [
+        { id: '#s4-d1', dx: -80,  dy: -50, delay: 1.15 },  // laptop TL
+        { id: '#s4-d2', dx:  80,  dy: -50, delay: 1.30 },  // phone  TR
+        { id: '#s4-d3', dx: -80,  dy:  50, delay: 1.45 },  // server BL
+        { id: '#s4-d4', dx:  80,  dy:  50, delay: 1.60 },  // edge   BR
+      ];
+      devOffsets.forEach(d => {
+        const el = $(d.id);
+        if (!el) return;
+        const local = u - d.delay;
+        const k = spring(Math.max(0, local), { stiffness: 90, damping: 14 });
+        const x = lerp(k, [0, 1], [d.dx, 0], E.outCubic);
+        const y = lerp(k, [0, 1], [d.dy, 0], E.outCubic);
+        const sc = lerp(k, [0, 1], [0.88, 1], E.outBack);
+        const op = clamp(local * 3, 0, 1);
+        setStyle(el, {
+          opacity: op,
+          transform: `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) scale(${sc.toFixed(3)})`,
+        });
+      });
+
+      // Stream the lines on the three terminal-style devices (laptop, server, edge)
+      [
+        { sel: '#s4-d1 .ra-line', start: 1.85 },
+        { sel: '#s4-d3 .ra-line', start: 2.10 },
+        { sel: '#s4-d4 .ra-line', start: 2.35 },
+      ].forEach(g => {
+        const lines = $all(g.sel);
+        lines.forEach((ln, i) => {
+          const delay = g.start + i * 0.18;
+          const local = u - delay;
+          if (local < 0) {
+            setStyle(ln, { opacity: 0, transform: 'translateY(6px)' });
+            return;
+          }
+          const k = spring(local, { stiffness: 200, damping: 18 });
+          const ly = lerp(k, [0, 1], [6, 0], E.outBack);
+          const op = clamp(local * 6, 0, 1);
+          setStyle(ln, { opacity: op, transform: `translateY(${ly.toFixed(1)}px)` });
+        });
+      });
+
+      // Phone chat bubbles — each appears in sequence
+      const bubbles = $all('#s4-d2 .ra-bubble');
+      bubbles.forEach((b, i) => {
+        const delay = 2.00 + i * 0.34;
+        const local = u - delay;
+        if (local < 0) { setStyle(b, { opacity: 0, transform: 'translateY(6px)' }); return; }
+        const k = spring(local, { stiffness: 180, damping: 17 });
+        const ly = lerp(k, [0, 1], [6, 0], E.outBack);
+        const op = clamp(local * 4, 0, 1);
+        setStyle(b, { opacity: op, transform: `translateY(${ly.toFixed(1)}px)` });
+      });
+
+      // Caption "one file · four places · no internet" — lands at 3.7s
+      const cap = $('#s4-caption');
+      const cK = clamp((u - 3.7) * 2.6, 0, 1);
+      const cY = lerp(cK, [0, 1], [14, 0], E.outBack);
+      setStyle(cap, {
+        opacity: cK,
+        transform: `translate(-50%, ${cY.toFixed(1)}px)`,
+      });
+
+      const cycleStart = 3.70;
+      const dwell = 0.120;
+      const nameEl = $('#s4-name');
+      const hashEl = $('#s4-hash');
+      if (nameEl && hashEl) {
+        if (u < cycleStart) {
+          if (nameEl.dataset.cur !== '0') {
+            nameEl.innerHTML = 'support-bot<span class="accent">.kolm</span>';
+            hashEl.innerHTML = '7f3a&hellip;c81';
+            nameEl.dataset.cur = '0';
+            nameEl.style.transform = '';
+          }
+        } else {
+          const rawIdx = Math.floor((u - cycleStart) / dwell);
+          const idx = clamp(rawIdx, 0, S4_CYCLE.length - 1);
+          if (String(idx) !== nameEl.dataset.cur) {
+            const entry = S4_CYCLE[idx];
+            nameEl.innerHTML = entry.base + '<span class="accent">.kolm</span>';
+            hashEl.innerHTML = entry.hash;
+            nameEl.dataset.cur = String(idx);
+          }
+          const local = (u - cycleStart) - idx * dwell;
+          const pulse = 0.85 + clamp(local / dwell, 0, 1) * 0.15;
+          if (nameEl.style.opacity !== String(pulse.toFixed(3))) {
+            nameEl.style.opacity = pulse.toFixed(3);
+          }
+          if (idx === S4_CYCLE.length - 1) {
+            const landed = clamp(local / 0.20, 0, 1);
+            const scl = 1 + E.outBack(landed) * 0.06;
+            nameEl.style.textShadow = '0 0 26px rgba(126,240,210,0.62)';
+            nameEl.style.transform = `scale(${scl.toFixed(3)})`;
+          } else {
+            nameEl.style.textShadow = '';
+            nameEl.style.transform = '';
+          }
+        }
+      }
+
+      // Exit fade in last 0.45s — gentle dim before s5 takes over
+      const tail = sd - u;
+      if (tail < 0.45) {
+        const exit = 1 - (tail / 0.45);
+        const dim = 1 - exit * 0.7;
+        setStyle($('#s4-stage'), { opacity: dim });
+      } else {
+        setStyle($('#s4-stage'), { opacity: 1 });
+      }
+    }
+
+    // ============== SCENE 5: closing — wordmark lands over .kolm watermark ==============
+    if (sc.id === 's5') {
+      // Backdrop: halo fades in first, watermark drifts in slowly behind
+      const halo = $('#s5-halo');
+      if (halo) {
+        const hK = clamp(u / 0.85, 0, 1);
+        setStyle(halo, { opacity: E.outCubic(hK) });
+      }
+      const mark = $('#s5-mark');
+      if (mark) {
+        const mK = clamp((u - 0.10) / 1.4, 0, 1);
+        const mScale = lerp(mK, [0, 1], [0.96, 1.0], E.outCubic);
+        setStyle(mark, { opacity: E.outCubic(mK), transform: `scale(${mScale.toFixed(3)})` });
+      }
+
+      // Accent rule grows out from center (0.0-0.7s)
+      const rule = $('#s5-rule');
+      if (rule) {
+        const ruleK = clamp(u / 0.65, 0, 1);
+        const ruleW = lerp(ruleK, [0, 1], [0, 88], E.outCubic);
+        setStyle(rule, { width: `${ruleW.toFixed(1)}px`, opacity: clamp(ruleK * 2, 0, 1) });
+      }
+
+      // Head: per-char rise with mask reveal
+      const chars = $all('#s5-head .ch');
+      const total = chars.length;
+      chars.forEach((c, i) => {
+        const delay = 0.20 + (i / total) * 0.55;
+        const k = spring(u - delay, { stiffness: 140, damping: 13 });
+        const op = clamp((u - delay) * 4, 0, 1);
+        const y = lerp(k, [0, 1], [56, 0], E.outBack);
+        setStyle(c, { transform: `translateY(${y.toFixed(1)}px)`, opacity: op, display: 'inline-block' });
+      });
+      const sub = $('#s5-sub');
+      const subK = clamp((u - 0.95) * 2.5, 0, 1);
+      setStyle(sub, { transform: `translateY(${(10 * (1 - subK)).toFixed(1)}px)`, opacity: subK });
+      const url = $('#s5-url');
+      const uK = clamp((u - 1.20) * 2.5, 0, 1);
+      setStyle(url, { transform: `translateY(${(10 * (1 - uK)).toFixed(1)}px)`, opacity: uK });
+    }
+  }
+
+  // Default state — start everything invisible
+  $all('#s2-body .ln').forEach(c => c.style.opacity = 0);
+  $all('.rail-card').forEach(c => c.style.opacity = 0);
+  // s4 — "RUN ANYWHERE" defaults
+  const s4Source = $('#s4-source'); if (s4Source) { s4Source.style.opacity = 0; s4Source.style.transform = 'translate(-50%, -50%) scale(0.5)'; }
+  const s4Orbit = $('#s4-orbit'); if (s4Orbit) s4Orbit.style.opacity = 0;
+  $all('#s4-beams .ra-beam').forEach(p => p.style.opacity = 0);
+  ['#s4-d1','#s4-d2','#s4-d3','#s4-d4'].forEach(id => { const el = $(id); if (el) { el.style.opacity = 0; el.style.transform = 'translate(0,0) scale(0.88)'; } });
+  $all('#s4 .ra-line').forEach(ln => { ln.style.opacity = 0; ln.style.transform = 'translateY(6px)'; });
+  $all('#s4 .ra-bubble').forEach(b => { b.style.opacity = 0; b.style.transform = 'translateY(6px)'; });
+  const s4Cap = $('#s4-caption'); if (s4Cap) s4Cap.style.opacity = 0;
+  $all('#s5-head .ch').forEach(c => c.style.opacity = 0);
+  $('#s5-sub').style.opacity = 0;
+  $('#s5-url').style.opacity = 0;
+  const s5Halo = $('#s5-halo'); if (s5Halo) s5Halo.style.opacity = 0;
+  const s5Mark = $('#s5-mark'); if (s5Mark) s5Mark.style.opacity = 0;
+  const s5Rule = $('#s5-rule'); if (s5Rule) { s5Rule.style.width = '0'; s5Rule.style.opacity = 0; }
+  $('#s2-stages').style.opacity = 0;
+
+  // Public API for Playwright
+  window.kolmSeek = seek;
+  window.kolmTotal = TOTAL;
+  seek(0);
+</script>
+
+</body>
+</html>

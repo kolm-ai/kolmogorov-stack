@@ -160,7 +160,7 @@
       <ul>
         <li><strong>Job metadata</strong>: today retained indefinitely; the 90-day aggregate-and-purge job is target architecture and not yet running.</li>
         <li><strong>Edge access logs</strong>: 30 days, then purged.</li>
-        <li><strong>Account records</strong>: kept while your account is open. Today <code>POST /v1/account/delete</code> performs a soft delete &mdash; the tenant row is marked <code>_deleted: true</code>, the session cookie clears, and the API key stops authorizing &mdash; but concepts, versions, observations, invocations, compile jobs, and artifact zips remain in storage. Full purge within 30 days is target architecture; for now, regulated deployments should use the customer-hosted bridge or contact us for an operator-run purge.</li>
+        <li><strong>Account records</strong>: kept while your account is open. Today <code>POST /v1/account/delete</code> performs a soft delete: the tenant row is marked <code>_deleted: true</code>, the session cookie clears, and the API key stops authorizing. Concepts, versions, observations, invocations, compile jobs, and artifact zips remain in storage. Full purge within 30 days is target architecture; for now, regulated deployments should use the customer-hosted bridge or contact us for an operator-run purge.</li>
         <li><strong>Recipe contributions</strong>: retained according to the registry configuration for that deployment. Public contribution should be opt-in and reviewed for sensitive workflows.</li>
       </ul>
 

@@ -388,7 +388,7 @@ export function buildRouter() {
     res.cookie('kolm_session', api_key, {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000,
       path: '/',
     });
@@ -422,8 +422,8 @@ export function buildRouter() {
     res.cookie('kolm_session', api_key, {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
       path: '/',
     });
     res.json({ ok: true, tenant: t ? { id: t.id, name: t.name, plan: t.plan } : { admin: true } });
@@ -1074,15 +1074,55 @@ export function buildRouter() {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
       const deps = {
-        // compile is "tell me how", not auto-do — the assistant returns the
-        // exact CLI / curl the user can run. Real compile flows through
-        // /v1/synthesize where positives/negatives can be curated.
-        synthesize: async ({ task }) => ({
-          guidance: 'open /compile with this task pre-filled, or POST /v1/synthesize',
-          curl: `curl -s -X POST ${process.env.PUBLIC_URL || 'https://kolm.ai'}/v1/synthesize \\\n  -H "authorization: Bearer $KOLM_KEY" \\\n  -H "content-type: application/json" \\\n  -d '{"name":"my-recipe","positives":[{"input":"x","expected":"y"}]}'`,
-          compile_link: '/compile?task=' + encodeURIComponent(String(task || '').slice(0, 200)),
-          task,
-        }),
+        // compile actually kicks off a real compile job (no LLM round-trip;
+        // the synthesizer is pattern-mode + deterministic). On serverless we
+        // await synchronously since the worker dies after res.end(); on
+        // long-running self-hosted nodes we fire-and-forget so the caller
+        // can poll.
+        compile: async ({ task }) => {
+          const job = createJob({ task, examples: [], tenant: req.tenant });
+          const ctx = {
+            synthesize,
+            publicRecipes: () => {
+              const concepts = all('concepts').filter(c => c.visibility === 'public');
+              const versions = all('versions');
+              const out = [];
+              for (const c of concepts) {
+                const vs = versions.filter(v => v.concept_id === c.id).sort((a, b) =>
+                  new Date(b.created_at || 0) - new Date(a.created_at || 0));
+                if (!vs.length || !vs[0].source) continue;
+                out.push({ id: c.id, name: c.name, source: vs[0].source, source_hash: vs[0].evaluation?.source_hash || null, version_id: vs[0].id, tags: c.tags || [], schema: c.schema || null });
+              }
+              return out;
+            },
+            examples: [],
+            recall: { query: ({ namespace, query, k }) => recall.query({ tenant: req.tenant, namespace, query, k }) },
+            outDir: process.env.KOLM_ARTIFACT_DIR,
+          };
+          const ON_SERVERLESS = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+          if (ON_SERVERLESS) {
+            try { await runJob(job, ctx); } catch {}
+            const fresh = getJob(job.id, req.tenant) || job;
+            return {
+              job_id: fresh.id,
+              status: fresh.status,
+              progress: fresh.progress || 0,
+              k_score: fresh.k_score || null,
+              artifact_url: fresh.status === 'completed' ? `/v1/compile/${fresh.id}/.kolm` : null,
+              poll: `/v1/compile/${fresh.id}`,
+              task,
+            };
+          }
+          setImmediate(() => runJob(job, ctx));
+          return {
+            job_id: job.id,
+            status: job.status,
+            progress: 0,
+            poll: `/v1/compile/${job.id}`,
+            artifact_url: null,
+            task,
+          };
+        },
         run: async ({ tenant, concept_id, input }) => {
           try {
             return await runtime.runConcept({ concept_id, input, tenant });
@@ -1115,10 +1155,31 @@ export function buildRouter() {
   r.get('/v1/account', (req, res) => {
     if (!req.tenant_record) return res.json({ admin: !!req.is_admin, tenant: req.tenant });
     const t = req.tenant_record;
+    // Resolve the raw key — tenants post-migration store only api_key_hash,
+    // so prefer the request-verified key (req.api_key set by authMiddleware).
+    const rawKey = req.api_key || t.api_key || null;
+    // Sliding session: refresh the kolm_session cookie on every authenticated
+    // /v1/account hit so an active user keeps a fresh 30-day expiry. Stale
+    // sessions still expire on schedule when the user goes quiet.
+    if (rawKey) {
+      try {
+        res.cookie('kolm_session', rawKey, {
+          httpOnly: true,
+          secure: isProductionRuntime(),
+          sameSite: 'lax',
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+          path: '/',
+        });
+      } catch (_) {}
+    }
+    // Expose api_key on /v1/account so cookie-authed clients (OAuth users)
+    // can mirror it to localStorage for legacy pages that gate on it.
+    // This is the user's own key and requires a valid session to obtain.
     res.json({
       id: t.id,
       name: t.name,
       email: t.email || null,
+      api_key: rawKey,
       plan: t.plan,
       quota: t.quota,
       used: t.used,
@@ -2030,16 +2091,114 @@ export function buildRouter() {
     res.json({ submission_id: sub.id, status: sub.status, message: 'submitted — public review on Day 120-180 schedule' });
   });
 
-  // Tenant audit log. Beta — opt-in via POST /v1/account/audit-log {enabled:true}.
-  // Until the durable per-tenant log lands in Wave 2, return 503 with a clear
-  // error so /audit-log.html shows the static disclosure card. Probe-safe:
-  // never returns 404 (which would 404 the whole `/v1/audit/log` path under a
-  // CDN-misconfigured deploy) — returns 503 with a structured body instead.
-  r.get('/v1/audit/log', (_req, res) => {
-    res.status(503).json({
-      error: 'audit_log_beta',
-      message: 'Per-tenant durable audit log ships in Wave 2 (Days 22-60). Opt in via POST /v1/account/audit-log {"enabled":true} once available.',
-      entries: [],
+  // Tenant audit log. Reconstructs entries on the fly from the source tables
+  // (`invocations`, `compile_jobs`, `observations`, `stripe_events`) so every
+  // tenant operation that touches their data is queryable. The "durable
+  // audit_events table" is still a target architecture (a single normalised
+  // write path with HMAC-chained signatures); this implementation gives the
+  // dashboard real entries from day one without that wiring.
+  //
+  // Probe-safe: when unauth'd, returns the same 200 envelope with entries=[]
+  // rather than 401/503 so frontend probes don't fall over.
+  r.get('/v1/audit/log', (req, res) => {
+    const tenant = req.tenant_record;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500);
+    const since = req.query.since ? Date.parse(req.query.since) : 0;
+    if (!tenant) {
+      return res.json({
+        entries: [],
+        total: 0,
+        note: 'sign in (Bearer <api_key>) to see your audit entries; this endpoint reconstructs from invocations, compile_jobs, observations, and stripe_events scoped to your tenant.',
+      });
+    }
+    const out = [];
+    // 1. Invocations (kolm run <artifact> via local runner or hosted /v1/run)
+    for (const i of all('invocations')) {
+      if (i.tenant !== tenant.id && i.tenant !== tenant.email) continue;
+      const t = Date.parse(i.ts || '');
+      if (since && Number.isFinite(t) && t < since) continue;
+      out.push({
+        op: i.error ? 'run.error' : 'run',
+        ts: i.ts,
+        ms: i.ms ?? null,
+        concept_id: i.concept_id || null,
+        cache: i.cache || null,
+        input_hash: i.input_hash || null,
+        output_hash: i.output_hash || null,
+        error: i.error || null,
+      });
+    }
+    // 2. Compile jobs (kolm compile, /v1/compile)
+    for (const j of all('compile_jobs')) {
+      if (j._deleted || j._bootstrap) continue;
+      if (j.tenant !== tenant.id && j.tenant !== tenant.email) continue;
+      const t = Date.parse(j.created_at || '');
+      if (since && Number.isFinite(t) && t < since) continue;
+      out.push({
+        op: 'compile.' + (j.status || 'started'),
+        ts: j.created_at,
+        job_id: j.id,
+        task: j.task || null,
+        base_model: j.base_model || null,
+        k_score: j.k_score ?? null,
+        artifact_url: j.artifact_url || null,
+        signature: j.signature || null,
+      });
+    }
+    // 3. Captures / observations (kolm capture proxy)
+    for (const o of all('observations')) {
+      if (o.tenant !== tenant.id && o.tenant !== tenant.email) continue;
+      const t = Date.parse(o.ts || '');
+      if (since && Number.isFinite(t) && t < since) continue;
+      out.push({
+        op: 'capture.' + (o.provider || o.model || 'inference'),
+        ts: o.ts,
+        namespace: o.namespace || 'default',
+        model: o.model || null,
+        template_hash: o.template_hash || null,
+        latency_ms: o.latency_ms ?? null,
+        discarded: !!o.discarded,
+      });
+    }
+    // 4. Stripe events scoped by tenant (plan changes, key actions logged with tenant)
+    for (const e of all('stripe_events')) {
+      if (e.tenant && e.tenant !== tenant.id && e.tenant !== tenant.email) continue;
+      if (!e.tenant && !req.is_admin) continue;
+      const t = Date.parse(e.received_at || '');
+      if (since && Number.isFinite(t) && t < since) continue;
+      out.push({
+        op: 'billing.' + String(e.type || 'event').replace(/[^a-z0-9_.]/gi, '_'),
+        ts: e.received_at,
+        event_id: e.id,
+        type: e.type || null,
+      });
+    }
+    out.sort((a, b) => String(b.ts || '').localeCompare(String(a.ts || '')));
+    const format = String(req.query.format || 'json').toLowerCase();
+    const entries = out.slice(0, limit);
+    if (format === 'jsonl') {
+      res.setHeader('content-type', 'application/x-ndjson');
+      return res.send(entries.map(e => JSON.stringify(e)).join('\n'));
+    }
+    if (format === 'csv') {
+      const cols = ['ts', 'op', 'concept_id', 'job_id', 'namespace', 'k_score', 'ms', 'latency_ms', 'cache', 'error'];
+      const rows = [cols.join(',')];
+      for (const e of entries) {
+        rows.push(cols.map(c => {
+          const v = e[c];
+          if (v == null) return '';
+          const s = String(v).replace(/"/g, '""');
+          return /[",\n]/.test(s) ? `"${s}"` : s;
+        }).join(','));
+      }
+      res.setHeader('content-type', 'text/csv');
+      return res.send(rows.join('\n'));
+    }
+    res.json({
+      entries,
+      total: out.length,
+      limit,
+      note: 'Reconstructed from invocations + compile_jobs + observations + stripe_events. The unified durable audit_events table with HMAC-chained signatures is target architecture; this endpoint is the bridge.',
     });
   });
 

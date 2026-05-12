@@ -2092,3 +2092,389 @@ a:focus-visible {
   white-space: nowrap !important;
   border: 0 !important;
 }
+
+/* ===========================================================
+   v7.9.5 LIGHT-THEME BLEED FIX
+   The homepage hero/value-prop/anatomy/footer sections set
+   their own dark gradients and rgba backgrounds inline in
+   index.html <style>. Light mode previously inherited none of
+   that, so panels stayed dark inside a white page. These rules
+   force light parity for every surface that hardcoded a dark
+   colour. Footer added because col-h + meta inherited cream.
+   =========================================================== */
+
+/* Hero demo panel + video chrome */
+[data-theme="light"] .hero-demo-panel,
+[data-theme="light"] .hero-video-panel,
+[data-theme="light"] .hero-video-panel-wide {
+  background: linear-gradient(180deg, #ffffff, #f4f5f7) !important;
+  border-color: rgba(12,14,16,0.10) !important;
+  box-shadow: 0 18px 60px rgba(12,14,16,0.08) !important;
+}
+[data-theme="light"] .hero-demo-head,
+[data-theme="light"] .hero-video-foot {
+  background: #f4f5f7 !important;
+  color: #4b5158 !important;
+  border-color: rgba(12,14,16,0.10) !important;
+}
+[data-theme="light"] .hero-video-foot .scenes span { color: #6b7280 !important; }
+[data-theme="light"] .hero-video-foot .scenes b { color: #0c0e10 !important; }
+[data-theme="light"] .hero-video-foot a { color: #0a8862 !important; }
+[data-theme="light"] .hero-video-wrap,
+[data-theme="light"] .hero-video-wrap video { background: #ffffff !important; }
+[data-theme="light"] .hero-video-wrap::after {
+  box-shadow: inset 0 0 0 1px rgba(12,14,16,0.06), inset 0 -80px 60px -40px rgba(244,245,247,0.55) !important;
+}
+[data-theme="light"] .hero-demo-head .live-pulse { color: #0a8862 !important; }
+[data-theme="light"] .hero-demo-head .live-pulse::before {
+  background: #0a8862 !important;
+  box-shadow: 0 0 8px rgba(10,136,98,0.45) !important;
+}
+
+/* Cred band cells under the hero */
+[data-theme="light"] .cred-band .cred-inner,
+[data-theme="light"] .cred-band .cred-cell {
+  background: #ffffff !important;
+  color: #0c0e10 !important;
+}
+[data-theme="light"] .cred-band .cred-cell .num { color: #0c0e10 !important; }
+[data-theme="light"] .cred-band .cred-cell .lab { color: #4b5158 !important; }
+[data-theme="light"] .cred-band .cred-arrow { color: #0a8862 !important; }
+
+/* Compile-anatomy 4-step cards */
+[data-theme="light"] .compile-anatomy .ca-step {
+  background: #ffffff !important;
+  border-color: rgba(12,14,16,0.10) !important;
+}
+[data-theme="light"] .compile-anatomy .ca-step:hover {
+  border-color: rgba(10,136,98,0.42) !important;
+}
+[data-theme="light"] .compile-anatomy .ca-eyebrow { color: #4b5158 !important; }
+[data-theme="light"] .compile-anatomy .ca-eyebrow .pulse {
+  background: #0a8862 !important;
+  box-shadow: 0 0 8px rgba(10,136,98,0.45) !important;
+}
+[data-theme="light"] .compile-anatomy .ca-num { color: #0a8862 !important; }
+[data-theme="light"] .compile-anatomy .ca-step h3 { color: #0c0e10 !important; }
+[data-theme="light"] .compile-anatomy .ca-step p { color: #4b5158 !important; }
+[data-theme="light"] .compile-anatomy .ca-sub { color: #4b5158 !important; }
+[data-theme="light"] .compile-anatomy .ca-sub b { color: #0c0e10 !important; }
+[data-theme="light"] .compile-anatomy .ca-sub code { color: #0a8862 !important; }
+[data-theme="light"] .compile-anatomy .ca-out {
+  background: #f4f5f7 !important;
+  border-color: rgba(12,14,16,0.10) !important;
+  color: #1f2429 !important;
+}
+[data-theme="light"] .compile-anatomy .ca-foot { color: #4b5158 !important; }
+[data-theme="light"] .compile-anatomy .ca-foot code {
+  color: #0a8862 !important;
+  background: rgba(10,136,98,0.06) !important;
+  border-color: rgba(10,136,98,0.20) !important;
+}
+[data-theme="light"] .compile-anatomy .ca-foot a {
+  color: #0a8862 !important;
+  border-bottom-color: rgba(10,136,98,0.40) !important;
+}
+
+/* Value-row cards + ROI calculator inputs/outputs */
+[data-theme="light"] .vr-card {
+  background: #ffffff !important;
+  border-color: rgba(12,14,16,0.10) !important;
+}
+[data-theme="light"] .vr-card .ic {
+  background: rgba(10,136,98,0.06) !important;
+  border-color: rgba(10,136,98,0.20) !important;
+}
+[data-theme="light"] .vr-card .ic svg { stroke: #0a8862 !important; }
+[data-theme="light"] .vr-card .ic svg circle { fill: #0a8862 !important; }
+[data-theme="light"] .vr-card h3 { color: #0c0e10 !important; }
+[data-theme="light"] .vr-card p { color: #4b5158 !important; }
+[data-theme="light"] .vr-card p b { color: #0c0e10 !important; }
+[data-theme="light"] .vr h2 { color: #0c0e10 !important; }
+[data-theme="light"] .vr .vr-sub { color: #4b5158 !important; }
+[data-theme="light"] .vr .vr-sub b { color: #0c0e10 !important; }
+[data-theme="light"] .vr-calc {
+  background: #ffffff !important;
+  border-color: rgba(10,136,98,0.42) !important;
+}
+[data-theme="light"] .vr-calc .ttl { color: #0c0e10 !important; }
+[data-theme="light"] .vr-calc .lbl { color: #4b5158 !important; }
+[data-theme="light"] .vr-calc .hint { color: #4b5158 !important; }
+[data-theme="light"] .vr-calc .vc-row label { color: #4b5158 !important; }
+[data-theme="light"] .vr-calc input,
+[data-theme="light"] .vr-calc select {
+  background: #f4f5f7 !important;
+  color: #0c0e10 !important;
+  border-color: rgba(12,14,16,0.20) !important;
+}
+[data-theme="light"] .vr-calc input:focus,
+[data-theme="light"] .vr-calc select:focus { border-color: #0a8862 !important; }
+[data-theme="light"] .vr-calc .big { color: #0a8862 !important; }
+[data-theme="light"] .vr-calc .big.warn { color: #a04d00 !important; }
+[data-theme="light"] .vr-calc .big-lab { color: #4b5158 !important; }
+[data-theme="light"] .vr-calc .big-lab b { color: #0c0e10 !important; }
+
+/* Proof terminal + recipe step demos (hardcoded #0b0d10 in styles.css) */
+[data-theme="light"] .proof-terminal {
+  background: #0c0e10 !important;
+  color: #ece1c4 !important;
+}
+[data-theme="light"] .proof-terminal .prompt,
+[data-theme="light"] .proof-terminal .ok { color: #7ef0d2 !important; }
+[data-theme="light"] .step .demo {
+  background: #0c0e10 !important;
+  color: #ece1c4 !important;
+}
+
+/* Regulated-industries cards (reg-card / reg-strip) */
+[data-theme="light"] .reg-strip .reg-card,
+[data-theme="light"] .uc-strip .uc-card {
+  background: #ffffff !important;
+  border-color: rgba(12,14,16,0.10) !important;
+}
+
+/* Trust strip + telemetry strip */
+[data-theme="light"] .trust-strip .ts-card,
+[data-theme="light"] .reg-tele .reg-tele-cell {
+  background: #ffffff !important;
+  border-color: rgba(12,14,16,0.10) !important;
+  color: #0c0e10 !important;
+}
+[data-theme="light"] .trust-strip .ts-lab,
+[data-theme="light"] .reg-tele .reg-tele-id { color: #4b5158 !important; }
+[data-theme="light"] .trust-strip .ts-val,
+[data-theme="light"] .reg-tele .reg-tele-val { color: #0c0e10 !important; }
+[data-theme="light"] .trust-strip .ts-sub,
+[data-theme="light"] .reg-tele .reg-tele-meta { color: #4b5158 !important; }
+
+/* Bottom CTA + sitewide footer (very bottom panel — flagged by founder) */
+[data-theme="light"] .bottom-cta {
+  background: #ffffff !important;
+  border-top-color: rgba(12,14,16,0.10) !important;
+}
+[data-theme="light"] .bottom-cta h2,
+[data-theme="light"] .bottom-cta h3 { color: #0c0e10 !important; }
+[data-theme="light"] .bottom-cta p { color: #4b5158 !important; }
+[data-theme="light"] .bottom-cta .btn.primary { color: #ffffff !important; }
+[data-theme="light"] .bottom-cta .btn.outline { color: #0c0e10 !important; border-color: rgba(12,14,16,0.18) !important; }
+/* Trust-line strip wrapper: dark grid gap shows through without override */
+[data-theme="light"] .trust-line .tl-wrap {
+  background: rgba(12,14,16,0.04) !important;
+  border-color: rgba(12,14,16,0.10) !important;
+}
+[data-theme="light"] .trust-line .tl-cell {
+  background: #ffffff !important;
+  color: #0c0e10 !important;
+}
+[data-theme="light"] .trust-line .tl-cell b { color: #0c0e10 !important; }
+[data-theme="light"] .trust-line .tl-cell span { color: #4b5158 !important; }
+[data-theme="light"] .site-footer {
+  background: #fafafa !important;
+  border-top-color: rgba(12,14,16,0.10) !important;
+  color: #4b5158 !important;
+}
+[data-theme="light"] .site-footer .meta,
+[data-theme="light"] .site-footer .meta a,
+[data-theme="light"] .site-footer .links a {
+  color: #4b5158 !important;
+}
+[data-theme="light"] .site-footer .meta a:hover,
+[data-theme="light"] .site-footer .links a:hover {
+  color: #0c0e10 !important;
+}
+[data-theme="light"] .site-footer .col-h { color: #1f2429 !important; }
+
+/* NL widget readability in light mode */
+[data-theme="light"] .nl-try form {
+  background: #ffffff !important;
+  border-color: rgba(12,14,16,0.10) !important;
+}
+[data-theme="light"] .nl-try input { color: #0c0e10 !important; }
+[data-theme="light"] .nl-try input::placeholder { color: #6b7280 !important; }
+[data-theme="light"] .nl-try .nl-go {
+  background: #0a8862 !important;
+  color: #ffffff !important;
+}
+[data-theme="light"] .nl-try .nl-go:hover { filter: brightness(1.05) !important; }
+[data-theme="light"] .nl-try .nl-head { color: #4b5158 !important; }
+[data-theme="light"] .nl-try .nl-head b { color: #0c0e10 !important; }
+[data-theme="light"] .nl-try .nl-dot {
+  background: #0a8862 !important;
+  box-shadow: 0 0 8px rgba(10,136,98,0.45) !important;
+}
+[data-theme="light"] .nl-try .nl-chips button {
+  background: #ffffff !important;
+  border-color: rgba(12,14,16,0.10) !important;
+  color: #4b5158 !important;
+}
+[data-theme="light"] .nl-try .nl-chips button:hover {
+  color: #0c0e10 !important;
+  border-color: rgba(10,136,98,0.42) !important;
+}
+[data-theme="light"] .nl-try #nl-out { color: #4b5158 !important; }
+[data-theme="light"] .nl-try #nl-out .nl-narration { color: #0c0e10 !important; }
+[data-theme="light"] .nl-try #nl-out .nl-cmd {
+  background: rgba(10,136,98,0.06) !important;
+  border-color: rgba(10,136,98,0.20) !important;
+  color: #0a8862 !important;
+}
+[data-theme="light"] .nl-try #nl-out .nl-link { color: #0a8862 !important; }
+[data-theme="light"] .nl-try #nl-out .nl-job {
+  background: #ffffff !important;
+  border-color: rgba(10,136,98,0.20) !important;
+}
+[data-theme="light"] .nl-try #nl-out .nl-job .nl-jhead { color: #4b5158 !important; }
+[data-theme="light"] .nl-try #nl-out .nl-job .nl-jmeta { color: #4b5158 !important; }
+[data-theme="light"] .nl-try #nl-out .nl-job .nl-jmeta b { color: #0c0e10 !important; }
+
+/* v7.9.5 video chrome buttons in light mode */
+[data-theme="light"] .hv-btn {
+  background: #ffffff !important;
+  border-color: rgba(12,14,16,0.10) !important;
+  color: #4b5158 !important;
+}
+[data-theme="light"] .hv-btn:hover {
+  background: #f4f5f7 !important;
+  border-color: rgba(10,136,98,0.42) !important;
+  color: #0c0e10 !important;
+}
+
+/* v7.9.5 consolidation — uc-card regulated sub-links + ROI calc-only layout */
+[data-theme="light"] .uc-card-reg .uc-sublink {
+  color: #0a8862 !important;
+  border-bottom-color: rgba(10,136,98,0.42) !important;
+}
+[data-theme="light"] .uc-card-reg .uc-sublink:hover {
+  border-bottom-color: #0a8862 !important;
+}
+[data-theme="light"] .vr-calc-only .vr-sub a {
+  color: #0a8862 !important;
+  border-bottom-color: rgba(10,136,98,0.32) !important;
+}
+
+/* ============================================================
+   v7.9.9 SOTA spacing pass. Section rhythm + mobile breathing.
+   ============================================================ */
+
+/* Section rhythm: anchor every top-level section to a consistent vertical
+   beat. Desktop = 88px between sections, mobile = 56px. */
+.compile-anatomy { margin-top: 88px !important; }
+.vr,
+.vr.vr-calc-only { margin-top: 64px !important; }
+.uc-strip { margin-top: 88px !important; }
+.trust-line { margin-top: 72px !important; padding: 40px 24px !important; }
+.bottom-cta { margin-top: 88px !important; }
+
+/* ROI calc-solo: tighter follow-on from heading. */
+.vr-calc-solo { margin-top: 32px !important; }
+
+/* Hero: more breathing on phones so the lede + CTAs + form don't crowd. */
+@media (max-width: 640px) {
+  .hero { padding: 64px 0 52px !important; }
+  .hero h1 { font-size: clamp(40px, 9vw, 52px) !important; line-height: 1.02 !important; }
+  .hero .lede { font-size: 17px !important; line-height: 1.55 !important; }
+  .hero .actions { gap: 10px !important; margin-top: 24px !important; }
+  .hero .actions .btn.lg { padding: 12px 18px !important; font-size: 14.5px !important; }
+}
+@media (max-width: 520px) {
+  .hero { padding: 56px 0 44px !important; }
+  .hero .actions { flex-direction: column !important; align-items: stretch !important; }
+  .hero .actions .btn { width: 100% !important; justify-content: center !important; text-align: center !important; }
+  .home-hero-stacked h1 { font-size: clamp(34px, 10vw, 42px) !important; }
+}
+
+/* Eyebrow line-height: caps + 11px label inheriting body 1.55 reads as
+   excessive padding. SOTA caps run tighter. */
+.hero .eyebrow,
+.compile-anatomy .ca-eyebrow,
+.vr .vr-eyebrow,
+.uc-strip .uc-head { line-height: 1.2 !important; }
+
+/* Section content rhythm: more space below the heading + sub on each
+   section so the cards/grid don't crowd. */
+.compile-anatomy .ca-head { margin-bottom: 48px !important; }
+.uc-strip .uc-sub { margin-bottom: 32px !important; }
+.vr .vr-sub { margin-bottom: 28px !important; }
+
+/* Compile-anatomy steps: more comfortable padding inside each card. */
+.compile-anatomy .ca-step { padding: 32px 26px 26px !important; gap: 12px !important; }
+.compile-anatomy .ca-step h3 { font-size: 24px !important; }
+
+/* UC cards: tighter inner gap on mobile but more padding on desktop. */
+@media (min-width: 981px) {
+  .uc-strip .uc-card { padding: 22px 22px 20px !important; }
+}
+
+/* Trust-line: collapse to 1 column on phones < 480px (currently 2-col
+   at 720px is still too cramped for narrow viewports). */
+@media (max-width: 480px) {
+  .trust-line .tl-wrap { grid-template-columns: 1fr !important; }
+  .trust-line .tl-cell { padding: 16px 18px !important; }
+}
+
+/* iOS zoom guard: hero-calc and vr-calc inputs hit 16px on phones (was
+   13px which triggered Safari zoom-on-focus). Keep desktop 13px for
+   numeric-input density. */
+@media (max-width: 520px) {
+  .vr-calc input,
+  .vr-calc select,
+  .hero-calc-row input { font-size: 16px !important; }
+}
+
+/* Body text rhythm fix: a couple of older pages set .lede at 19px but
+   line-height inherits from body (1.55). Lock to 1.5 for the larger
+   ledes so descenders don't overrun. */
+.hero .lede,
+.compile-anatomy .ca-sub { line-height: 1.5 !important; }
+
+/* Buttons: enforce squared corners + consistent padding-y. The .btn.lg
+   variant was uneven across pages (some 11px/18px, some 12px/22px). */
+.btn.lg { padding: 12px 20px !important; font-size: 14.5px !important; border-radius: 8px !important; }
+.btn { border-radius: 8px !important; }
+
+/* Section bottom buffer: ensure last section has room before footer. */
+main > section:last-of-type { margin-bottom: 56px !important; }
+@media (max-width: 640px) {
+  main > section:last-of-type { margin-bottom: 40px !important; }
+}
+
+/* ============================================================
+   v7.9.10 canonical header-to-content rhythm · uniform breathing
+   between the sticky header and the first content surface on
+   every page shell so navigating between routes does not change
+   the perceived gap below the chrome.
+   ============================================================ */
+
+/* Hero pages (pricing / use-cases / verticals / index). Explicit per-
+   breakpoint padding-top so the v7.9.9 mobile `padding` shorthand below
+   doesn't get inverted by selector specificity. */
+.hero { padding-top: 88px !important; }
+@media (max-width: 980px) { .hero { padding-top: 72px !important; } }
+@media (max-width: 640px) { .hero { padding-top: 64px !important; } }
+@media (max-width: 520px) { .hero { padding-top: 56px !important; } }
+
+/* App / settings shells (dashboard, account, captures, audit-log).
+   54px was too tight under the 60px header — bump to 72px desktop. */
+.page-main { padding-top: 72px !important; }
+@media (max-width: 640px) {
+  .page-main { padding-top: 48px !important; }
+}
+
+/* Auth shell (signup / signin). Centered card needs room to breathe. */
+.auth-main { padding-top: 80px !important; }
+@media (max-width: 640px) {
+  .auth-main { padding-top: 48px !important; }
+}
+
+/* Docs shell (left-rail layout). 48px was tight; raise for parity. */
+.docs-shell { padding-top: 64px !important; }
+@media (max-width: 920px) {
+  .docs-shell { padding-top: 40px !important; }
+}
+
+/* Generic fallback for any other top-level shell that lacks one of
+   the named classes — first <section> directly under <main> picks up
+   the same beat. */
+main > section:first-of-type:not(.hero):not(.compile-anatomy):not(.uc-strip):not(.vr):not(.trust-line):not(.bottom-cta) {
+  padding-top: 56px !important;
+}

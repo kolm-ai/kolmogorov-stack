@@ -314,6 +314,10 @@ export function authMiddleware(req, res, next) {
 
   req.tenant = t.name;
   req.tenant_record = t;
+  // Stash the verified raw key so handlers can use it (e.g. /v1/account
+  // mirroring api_key into a sliding-session cookie). Tenants store only
+  // api_key_hash post-migration, so without this the raw key is unrecoverable.
+  req.api_key = key;
   next();
 }
 

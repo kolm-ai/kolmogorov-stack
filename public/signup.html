@@ -213,33 +213,41 @@
       if (planParam && planParam !== 'free') qp += '&plan=' + encodeURIComponent(planParam);
       location.href = '/v1/oauth/' + provider + '/start' + qp;
     }
-    // Always wire the click handlers. If a provider isn't configured server-side,
-    // the /v1/oauth/<provider>/start endpoint returns 503 + oauth_not_configured;
-    // surface a friendly message rather than redirecting to a JSON error page.
+    // Check provider availability once, gate the click. No HEAD probe race —
+    // the /start endpoint sets state cookies, so HEAD-then-GET wrote them twice
+    // and could leak a stale state on rapid clicks. One source of truth.
+    var providerOk = { google: true, github: true };
     function tryOAuth(provider){
-      fetch('/v1/oauth/' + provider + '/start', { method: 'HEAD', redirect: 'manual' })
-        .then(function(r){
-          if (r.status === 503) {
-            show('err', provider + ' sign-in is being set up. Use email signup below.');
-          } else {
-            gotoOAuth(provider);
-          }
-        }).catch(function(){ gotoOAuth(provider); });
+      if (providerOk[provider] === false) {
+        show('err', provider + ' sign-in is being set up. Use email signup below.');
+        return;
+      }
+      gotoOAuth(provider);
     }
     $('oauth-google').addEventListener('click', function(){ tryOAuth('google'); });
     $('oauth-github').addEventListener('click', function(){ tryOAuth('github'); });
     fetch('/v1/oauth/providers').then(function(r){ return r.json(); }).then(function(p){
-      // If a provider IS configured we just leave the button enabled. If we get
-      // a clean providers map and BOTH are off, dim the buttons but keep them
-      // clickable so the friendly fallback message fires.
-      if (p && p.google === false) $('oauth-google').style.opacity = '0.55';
-      if (p && p.github === false) $('oauth-github').style.opacity = '0.55';
+      if (!p) return;
+      providerOk.google = p.google !== false;
+      providerOk.github = p.github !== false;
+      if (p.google === false) $('oauth-google').style.opacity = '0.55';
+      if (p.github === false) $('oauth-github').style.opacity = '0.55';
     }).catch(function(){});
 
     var err = (location.search.match(/[?&]oauth_error=([^&]+)/) || [])[1];
     if (err) {
       var pretty = decodeURIComponent(err).replace(/_/g, ' ');
-      show('err', 'Sign in failed: ' + pretty + '. Try again or use email.');
+      var hint = '';
+      if (/state_mismatch/.test(err)) {
+        hint = ' (your browser dropped the state cookie — try in a fresh window without strict tracking protection)';
+      } else if (/no_email_returned/.test(err)) {
+        hint = ' (the provider did not return a verified email — make sure your account has one)';
+      } else if (/token_exchange_failed/.test(err)) {
+        hint = ' (the provider rejected the code — usually means the consent step was cancelled or the redirect URI is not authorized in the provider console)';
+      } else if (/access_denied/.test(err)) {
+        hint = ' (you cancelled at the consent screen — pick a different account or use email)';
+      }
+      show('err', 'Sign in failed: ' + pretty + '.' + hint + ' Use email below if it keeps failing.');
     }
     var ok = (location.search.match(/[?&]oauth=(signup|signin)/) || [])[1];
     if (ok === 'signup') show('ok', 'Account created. Redirecting...');

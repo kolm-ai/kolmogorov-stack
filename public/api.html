@@ -173,7 +173,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
 
         <section class="api-section" id="errors">
           <h2>HTTP error codes</h2>
-          <p class="lede">Documented endpoints aim to return errors as JSON: <code>{ "error": "&lt;message&gt;", "code": "&lt;machine_code&gt;" }</code>. Some routes still return ad-hoc <code>{ "error" }</code> shapes; the generated route manifest is the source of truth. A <code>request_id</code> envelope field and matching response header are target architecture &mdash; no request-id middleware ships today, so do not key alerting on it yet.</p>
+          <p class="lede">Documented endpoints aim to return errors as JSON: <code>{ "error": "&lt;message&gt;", "code": "&lt;machine_code&gt;" }</code>. Some routes still return ad-hoc <code>{ "error" }</code> shapes; the generated route manifest is the source of truth. A <code>request_id</code> envelope field and matching response header are target architecture. No request-id middleware ships today, so do not key alerting on it yet.</p>
           <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-family:var(--mono);font-size:13px;color:var(--ink-mute,#b5bdb1);padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2,#11151b)">
             <code style="color:#7ef0d2">2xx</code><span>Success.</span>
             <code style="color:var(--ink,#faf2e1)">3xx</code><span>Redirect or not-modified.</span>

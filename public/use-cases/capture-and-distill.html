@@ -182,9 +182,9 @@
     <p class="sec-lede">Every other large recurring line in software (cloud hosting, observability, payments) either is fungible commodity or accrues real switching cost. <b>Frontier API spend accrues neither.</b> Cancel today and you have nothing but log entries. The fix is the inversion: capture the verified pairs your team is already buying, and turn them into a local artifact you own.</p>
     <div class="pain">
       <div class="pain-card">
-        <div class="lab">Threshold to compile</div>
-        <div class="big">1,000<span class="u">verified pairs</span></div>
-        <p>Default. Configurable per namespace. Below the threshold, the proxy keeps capturing and the LoRA stays uncompiled. <b>The compiler refuses to ship without a meaningful holdout.</b></p>
+        <div class="lab">Threshold to distill</div>
+        <div class="big">1,000<span class="u">pairs</span></div>
+        <p>Server-side default for <code>/v1/specialists/auto-distill</code>. Below the threshold, the route returns 400 with a <code>capture {N} more pairs</code> hint. Above it, the captured corpus is handed to the trainer bridge. <b>Per-namespace overrides are roadmap.</b></p>
       </div>
       <div class="pain-card">
         <div class="lab">K-score gate</div>
@@ -214,12 +214,12 @@
       <div class="trip">
         <div class="icn">LBL</div>
         <h3>GET /v1/labels/synthesize-corpus</h3>
-        <p>Returns captured pairs as JSONL or parquet, scoped by tenant + namespace + optional verifier-confidence floor. <b>You can take the corpus to any trainer.</b> You are not locked into ours.</p>
+        <p>Returns captured pairs as JSONL or JSON, scoped by tenant + namespace, with <code>limit</code> and <code>count_only</code> params. <b>You can take the corpus to any trainer.</b> You are not locked into ours.</p>
       </div>
       <div class="trip">
         <div class="icn">DST</div>
         <h3>POST /v1/specialists/auto-distill</h3>
-        <p>Takes <code>{namespace, base_model, target_size}</code>. Fires LoRA training when the namespace clears the threshold, runs the K-score gate on a held-out slice, ships back the signed <code>.kolm</code>. <b>One CLI call, one download.</b></p>
+        <p>Takes <code>{namespace, base_model, target_size}</code>. <b>Shipped today:</b> at 1,000 captures, the route hands the corpus to an external trainer bridge (<code>KOLM_TRAINER_BRIDGE_URL</code>); the bridge owns the LoRA fit, K-score, and signing. Returns 503 without the bridge. <b>Target architecture:</b> closed-loop in-app distill with K-score gate on held-out slice and signed-artifact return through <code>/v1/compile/:id/.kolm</code>.</p>
       </div>
     </div>
   </div>
@@ -244,17 +244,17 @@
 
 <span class="cm"># 3. inspect what has accumulated (run this whenever)</span>
 <span class="pmt">$</span> kolm capture status
-namespace=prod-tickets pairs=412 verified=326 (79%)
-namespace=prod-tickets ready_to_distill_at=1000  eta_days=4
+namespace=prod-tickets pairs=412
+namespace=prod-tickets ready_to_distill=false threshold=1000
 
-<span class="cm"># 4. at threshold, compile to a signed local artifact</span>
+<span class="cm"># 4. at threshold, kick the trainer bridge from the same CLI</span>
 <span class="pmt">$</span> kolm distill --namespace <span style="color:var(--accent)">prod-tickets</span> --base-model <span style="color:var(--accent)">phi-3-mini</span>
-<span class="ok">✓</span> trained LoRA on 1000 verified pairs (240 holdout)
-<span class="ok">✓</span> K-score 0.86, signature hmac-sha256
-<span class="ok">✓</span> artifact ~/.kolm/artifacts/prod-tickets.kolm
+<span class="ok">✓</span> POST /v1/specialists/auto-distill (1,000 pairs handed to bridge)
+<span class="dim">→ job_id=dst_b1f2e9 · the bridge owns LoRA fit + K-score + signing</span>
+<span class="dim">→ on bridge completion, artifact is returned via /v1/compile/:id/.kolm</span>
 
 <span class="pmt">$</span> kolm inspect <span style="color:var(--accent)">~/.kolm/artifacts/prod-tickets.kolm</span>
-<span class="ok">✓</span> manifest signed, receipt chain walks, corpus hash matches</pre>
+<span class="ok">✓</span> manifest signed (HMAC v0.1), artifact-level digest re-checked</pre>
     </div>
   </div>
 </section>
@@ -311,7 +311,7 @@ namespace=prod-tickets ready_to_distill_at=1000  eta_days=4
       <div class="hd"><span class="dot"></span><span>capture path &middot; what crosses what perimeter</span></div>
       <div class="body">
         <h3>The proxy is a passthrough.</h3>
-        <p class="note">No plaintext on disk; TLS terminates only long enough to capture, then re-establishes upstream. Captured pairs are stored in a row keyed by your tenant id. We do not retrain on captured data without an explicit per-namespace consent flag flipped on your account. For HIPAA / GDPR / ITAR, the proxy ships as a docker image you run in your environment.</p>
+        <p class="note">TLS terminates at the proxy long enough to capture the pair, then re-establishes upstream. Captured pairs land in tenant-scoped storage keyed by your tenant id (stored at rest; encrypted in transit). <b>We do not train a competing general model on captured data</b>; the LoRA produced by distill ships to you and we hold no copy. For HIPAA / GDPR / ITAR boundaries, the proxy ships as a docker image you run in your own environment so captures never leave your perimeter.</p>
       </div>
       <div class="steps">
         <div class="step"><div class="n">step 1</div><h4>your client</h4><p>Existing OpenAI / Anthropic SDK with one base-URL change. Customer API key in a header.</p></div>

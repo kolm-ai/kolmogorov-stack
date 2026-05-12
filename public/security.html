@@ -474,7 +474,7 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">04</span><span>Supply chain</span></div>
     <h2>What ran. <span class="tone">Where the bytes came from.</span></h2>
-    <p class="sec-lede">CLI, runtime, SDK, registry, Docker, npm, Homebrew. Target architecture: reproducible from source, attested at build, signed before publication. Shipped today: <code>security.txt</code> + PGP contact and pinned lockfiles in the repo; SLSA provenance, Sigstore signatures, and CycloneDX SBOM are wired in design but not yet emitted by a release workflow &mdash; mark these as roadmap until the first signed release ships.</p>
+    <p class="sec-lede">CLI, runtime, SDK, registry, Docker, npm, Homebrew. Target architecture: reproducible from source, attested at build, signed before publication. Shipped today: <code>security.txt</code> + PGP contact and pinned lockfiles in the repo; SLSA provenance, Sigstore signatures, and CycloneDX SBOM are wired in design but not yet emitted by a release workflow. Mark these as roadmap until the first signed release ships.</p>
 
     <div class="compl">
       <div class="compl-card">
@@ -485,7 +485,7 @@
       <div class="compl-card">
         <div class="head"><span class="nm">Sigstore</span><span class="st flight">target &middot; first signed release</span></div>
         <h4>Cosign signatures on every published artifact.</h4>
-        <p>Target: npm, Homebrew, Docker, release zips, registry deltas signed via keyless Sigstore; <code>cosign verify</code> hits Rekor without contacting kolm. No release workflow has emitted Cosign signatures yet &mdash; treat as roadmap.</p>
+        <p>Target: npm, Homebrew, Docker, release zips, registry deltas signed via keyless Sigstore; <code>cosign verify</code> hits Rekor without contacting kolm. No release workflow has emitted Cosign signatures yet. Treat as roadmap.</p>
       </div>
       <div class="compl-card">
         <div class="head"><span class="nm">SBOM</span><span class="st flight">CycloneDX 1.5 &middot; target</span></div>

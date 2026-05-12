@@ -129,9 +129,9 @@
 
 <section class="hero">
   <div class="wrap">
-    <span class="pill"><span class="dot"></span>Audit trail &middot; target architecture</span>
-    <h1>Every operation. <span class="tone">Receipted.</span></h1>
-    <p class="lede"><b>Target architecture:</b> every kolm action that touches your data leaves a per-tenant entry &mdash; captures, label exports, distill jobs, artifact signings &mdash; queryable in JSON or CSV, signed by the same HMAC chain that signs your <code>.kolm</code> artifacts. <b>Shipped today:</b> the <code>/v1/audit/log</code> endpoint is in beta and returns <code>503</code> until a tenant opts in, and the local artifact runner (<code>runArtifact</code>) supports an audit callback for on-device evidence. The durable hosted log + JSON/CSV/JSONL export is the next milestone.</p>
+    <span class="pill"><span class="dot"></span>Audit trail &middot; reconstructed live</span>
+    <h1>Every operation. <span class="tone">Reconstructable.</span></h1>
+    <p class="lede"><b>Shipped today:</b> <code>GET /v1/audit/log</code> returns per-tenant entries reconstructed live from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and <code>stripe_events</code>. Filter by <code>?since=&lt;iso&gt;</code>, page with <code>?limit=N</code>, export as <code>?format=jsonl</code> or <code>?format=csv</code>. <b>Target architecture:</b> a single durable <code>audit_events</code> table with HMAC-chained signatures so any tamper detection happens in <code>O(1)</code> instead of cross-table reconstruction.</p>
 
     <div id="signedout" class="panel">
       <h3>Sign in to view your log</h3>
@@ -148,8 +148,8 @@
       </div>
     </div>
 
-    <h2>What gets logged <span style="font-family:var(--mono);font-size:12px;color:var(--ink-faint);font-weight:400;text-transform:uppercase;letter-spacing:0.04em;">&middot; target schema</span></h2>
-    <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-faint)">Schema below is the target. The 503 beta envelope returns <code>entries: []</code> until the durable event table ships; until then, per-operation evidence lives in <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, <code>stripe_events</code>, and the local runner's audit callback.</p>
+    <h2>What gets logged <span style="font-family:var(--mono);font-size:12px;color:var(--ink-faint);font-weight:400;text-transform:uppercase;letter-spacing:0.04em;">&middot; live + target</span></h2>
+    <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-faint)">Reconstructed live from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and <code>stripe_events</code> scoped to your tenant. The durable <code>audit_events</code> table with single normalised schema and HMAC chain is target architecture.</p>
     <table class="tbl">
       <thead>
         <tr><th>Operation</th><th>Endpoint</th><th>Recorded fields</th></tr>
@@ -210,7 +210,7 @@
     </ul>
 
     <h2>Honest disclosure</h2>
-    <p>The <code>/v1/audit/log</code> endpoint is in beta and currently returns <code>503</code> with <code>entries: []</code> for all tenants. There is no <code>audit_events</code> table or shared <code>recordAudit</code> write path yet; per-operation evidence is reconstructible from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and the local runner's audit callback, but the durable per-tenant log + JSON/CSV/JSONL export is not implemented. Subscribe to <a href="/changelog" style="color:var(--good)">the changelog</a> for the ship date.</p>
+    <p>The <code>/v1/audit/log</code> endpoint reconstructs entries on the fly from the source tables listed above. JSON, JSONL, and CSV export work today. The unified durable <code>audit_events</code> write path is target architecture: one normalised row per operation, signed in an HMAC chain so tamper detection happens in <code>O(1)</code> rather than via cross-table reconstruction. Subscribe to <a href="/changelog" style="color:var(--good)">the changelog</a> for ship dates on the durable path.</p>
   </div>
 </section>
 
@@ -239,9 +239,14 @@
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
   function fmtTs(ts) { var d = new Date(ts); return Number.isFinite(d.getTime()) ? d.toISOString().replace('T', ' ').slice(0, 19) + 'Z' : '-'; }
-  var apiKey = key();
-  if (!apiKey) return;
-  fetch('/v1/audit/log?limit=20', { headers: { authorization: 'Bearer ' + apiKey } })
+  (window.KS && window.KS.hydrateSession ? window.KS.hydrateSession() : Promise.resolve('')).then(function () {
+    var apiKey = key();
+    if (!apiKey) return;
+    loadLog(apiKey);
+  });
+
+  function loadLog(apiKey) {
+  fetch('/v1/audit/log?limit=20', { headers: { authorization: 'Bearer ' + apiKey }, credentials: 'include' })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) {
       if (!j || !Array.isArray(j.entries)) return;
@@ -255,6 +260,7 @@
       }).join('');
     })
     .catch(function () {});
+  } // end loadLog()
 })();
 </script>
 <script src="/nav.js" defer></script>

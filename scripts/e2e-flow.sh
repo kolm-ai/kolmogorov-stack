@@ -97,14 +97,15 @@ DN=$(curl -s -X POST "$URL/v1/account/change-plan" -H "authorization: Bearer $KE
 DN_OK=$(printf '%s' "$DN" | grep -c '"plan":"free"\|"ok":true' || true)
 [ "$DN_OK" -gt 0 ] && step "8. change-plan down succeeds" 1 "" || step "8. change-plan down succeeds" 0 "$DN"
 
-# Step 9: audit-log returns the documented 503 stub for tenants not opted in.
+# Step 9: audit-log returns reconstructed feed (target arch is durable HMAC-chained table;
+# bridge endpoint reconstructs from invocations + compile_jobs + observations + stripe_events).
 AUD_CODE=$(curl -s -o /dev/null -w '%{http_code}' "$URL/v1/audit/log" -H "authorization: Bearer $KEY")
 AUD_BODY=$(curl -s "$URL/v1/audit/log" -H "authorization: Bearer $KEY")
-HAS_BETA=$(printf '%s' "$AUD_BODY" | grep -c 'audit_log_beta\|"entries":\[\]' || true)
-if [ "$AUD_CODE" = "503" ] && [ "$HAS_BETA" -gt 0 ]; then
-  step "9. audit-log stub returns 503" 1 ""
+HAS_SHAPE=$(printf '%s' "$AUD_BODY" | grep -c '"entries":\|"total":' || true)
+if [ "$AUD_CODE" = "200" ] && [ "$HAS_SHAPE" -gt 0 ]; then
+  step "9. audit-log returns bridge feed" 1 ""
 else
-  step "9. audit-log stub returns 503" 0 "code=$AUD_CODE body=$AUD_BODY"
+  step "9. audit-log returns bridge feed" 0 "code=$AUD_CODE body=$AUD_BODY"
 fi
 
 echo "----------------------------------------"

@@ -127,7 +127,7 @@
 
   <section class="metric-grid" style="margin-top:24px" aria-label="Workflow shortcuts">
     <a class="metric-card" href="/captures" style="display:block;text-decoration:none;color:inherit"><div class="label">Captures</div><div class="value" style="font-size:22px">Inbox &rarr;</div><p>Triage every upstream inference. Keep, discard, promote.</p></a>
-    <a class="metric-card" href="/audit-log" style="display:block;text-decoration:none;color:inherit"><div class="label">Audit log</div><div class="value" style="font-size:22px">Log &rarr;</div><p>Per-tenant operation trail. Signed, exportable, beta.</p></a>
+    <a class="metric-card" href="/audit-log" style="display:block;text-decoration:none;color:inherit"><div class="label">Audit log</div><div class="value" style="font-size:22px">Log &rarr;</div><p>Per-tenant operation trail. JSON / JSONL / CSV export.</p></a>
     <a class="metric-card" href="/playground" style="display:block;text-decoration:none;color:inherit"><div class="label">Playground</div><div class="value" style="font-size:22px">Spec &rarr;</div><p>Synthesize a recipe, run it, sign it.</p></a>
     <a class="metric-card" href="/leaderboard" style="display:block;text-decoration:none;color:inherit"><div class="label">Leaderboard</div><div class="value" style="font-size:22px">Stand &rarr;</div><p>Public K-score rankings across tasks.</p></a>
   </section>
@@ -195,12 +195,15 @@
   }
 
   async function loadAccount() {
-    if (!KS.apiKey()) {
-      location.href = '/signin';
-      return;
-    }
+    // Try /v1/account first — works via session cookie (OAuth flow) OR
+    // localStorage api key. If neither works the call 401s and we redirect.
     try {
       var account = await KS.api('/v1/account');
+      // Mirror the api_key to localStorage so legacy pages that gate on it
+      // can also see "signed-in" after an OAuth signup with cookie-only auth.
+      if (account.api_key && !KS.apiKey()) {
+        KS.setApiKey(account.api_key);
+      }
       var name = account.name || account.tenant || account.id || '';
       $('hd-greet').textContent = name ? 'Welcome, ' + name + '.' : 'Dashboard.';
       $('m-plan').textContent = account.plan || (account.admin ? 'admin' : 'free');
@@ -210,10 +213,18 @@
       } else {
         $('m-quota').textContent = 'Usage unavailable.';
       }
-      $('api-key-mask').textContent = maskKey(KS.apiKey());
-    } catch (_) {
-      KS.clearApiKey();
-      location.href = '/signin';
+      var displayKey = account.api_key || KS.apiKey();
+      $('api-key-mask').textContent = displayKey ? maskKey(displayKey) : '(session)';
+    } catch (e) {
+      // Only clear + redirect on actual auth failures, not network errors
+      if (e && e.status === 401) {
+        KS.clearApiKey();
+        location.href = '/signin?return=' + encodeURIComponent('/dashboard');
+      } else {
+        $('hd-greet').textContent = 'Dashboard.';
+        $('m-plan').textContent = '-';
+        $('m-quota').textContent = 'Could not reach server.';
+      }
     }
   }
 

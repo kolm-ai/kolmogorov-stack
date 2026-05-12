@@ -7,7 +7,8 @@
 //   status      - account snapshot (plan, quota, used)
 //   usage       - same as status but framed "how much have i used"
 //   list        - list compiled concepts / artifacts for this tenant
-//   compile     - kick off a compile from a free-text task description
+//   compile     - REAL compile — creates and runs a compile job. Returns the
+//                 job id + poll URL + artifact URL when complete.
 //   run         - run a previously-compiled concept by id or name
 //   tune        - explain how to start a local tune loop (airgap CLI verb)
 //   evolve      - alias for tune
@@ -150,20 +151,23 @@ export async function handleAssistant(req, _res, deps) {
           narration: 'Tell me what the recipe should do. Example: "compile a recipe that classifies support tickets by urgency".',
         };
       }
-      // Compile is multi-step (positives/negatives, K-score gate) so the
-      // assistant guides — it does not silently kick off a job. Returns the
-      // exact curl + a /compile link with the task pre-filled.
-      const out = await deps.synthesize({ task });
-      return {
-        ok: true,
-        intent,
-        narration: `Got it. Open the guided builder at /compile (pre-filled), or paste the curl below to compile from your terminal.`,
-        data: out,
-        next_steps: [
-          { label: 'open /compile', href: out.compile_link },
-          { label: 'show curl', prompt: 'help' },
-        ],
-      };
+      // Real compile — creates a compile job, runs it (sync on serverless,
+      // fire-and-forget on long-running nodes). Caller polls `data.poll`.
+      const out = await deps.compile({ task });
+      const done = out.status === 'completed';
+      const narration = done
+        ? `Compiled. job ${out.job_id} · K-score ${out.k_score ?? '—'}. Artifact ready at ${out.artifact_url}.`
+        : `Compile started. job ${out.job_id} · status: ${out.status}. Poll ${out.poll} for progress; the artifact link appears when it's done.`;
+      const steps = done
+        ? [
+            { label: 'download .kolm', href: out.artifact_url },
+            { label: 'view job',       href: '/dashboard#compile-' + out.job_id },
+          ]
+        : [
+            { label: 'view job',  href: out.poll },
+            { label: 'dashboard', href: '/dashboard' },
+          ];
+      return { ok: true, intent, narration, data: out, next_steps: steps };
     }
 
     case 'run': {

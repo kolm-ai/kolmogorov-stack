@@ -248,6 +248,133 @@
   .lab-terminal[data-anim="done"] .cursor { display: none; }
   @media (prefers-reduced-motion: reduce) { .lab-terminal .cursor { animation: none; opacity: 0; } }
 
+  /* hero cassette · tier-1 shot-and-cut product demo */
+  .cassette-frame { display: flex; flex-direction: column; gap: 10px; position: relative; }
+  .cassette-progress { position: relative; height: 2px; border-radius: 1px; background: rgba(236,231,220, 0.08); overflow: hidden; }
+  .cassette-progress-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, #7ef0d2, #c1f5e3); border-radius: 1px; transition: width 120ms linear; box-shadow: 0 0 8px rgba(126,240,210, 0.45); }
+  .cassette-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint, #737c73); padding: 0 2px; min-height: 14px; }
+  .cassette-meta .rec { display: inline-flex; align-items: center; gap: 6px; color: #ff6b91; font-weight: 540; }
+  .cassette-meta .rec::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #ff6b91; box-shadow: 0 0 8px rgba(255,107,145, 0.55); animation: ls-blink 1.4s ease-in-out infinite; }
+  .cassette-stage { transition: color 220ms ease-out; }
+  .cassette-stage.live { color: #7ef0d2; }
+  .cassette-dots { display: inline-flex; gap: 6px; align-items: center; }
+  .cassette-dots .cdot { width: 6px; height: 6px; border-radius: 50%; background: rgba(236,231,220, 0.18); transition: background 220ms ease-out, box-shadow 220ms ease-out; }
+  .cassette-dots .cdot.active { background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.55); }
+
+  /* scene crossfade · terminal contents fade between scenes */
+  .lab-terminal#hero-terminal { min-height: 220px; transition: opacity 280ms ease-out; }
+  .cassette-frame.swapping .lab-terminal#hero-terminal { opacity: 0.18; }
+
+  /* scene caption · the "voiceover" line of the shot-and-cut */
+  .cassette-caption { display: flex; align-items: flex-start; gap: 10px; min-height: 38px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0,0,0, 0.32); transition: opacity 240ms ease-out, transform 240ms ease-out; opacity: 1; transform: translateY(0); }
+  .cassette-frame.swapping .cassette-caption { opacity: 0; transform: translateY(4px); }
+  .cassette-caption .cap-num { font-family: var(--mono); font-size: 10px; color: #7ef0d2; letter-spacing: 0.06em; text-transform: uppercase; padding-top: 2px; min-width: 26px; }
+  .cassette-caption .cap-text { font-size: 13px; color: var(--ink-mute, #b5bdb1); line-height: 1.5; }
+  .cassette-caption .cap-text b { color: var(--ink, #faf2e1); font-weight: 540; }
+
+  /* hero demo strip · product video + live cost calc */
+  .hero-demo { margin: 36px auto 0; max-width: 1180px; padding: 0 32px; position: relative; z-index: 2; }
+  .hero-demo-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 22px; align-items: stretch; }
+  @media (max-width: 1080px) { .hero-demo-grid { grid-template-columns: 1fr; gap: 18px; } }
+  .hero-demo-panel { border: 1px solid var(--line-strong, rgba(236,231,220, 0.22)); background: linear-gradient(180deg, rgba(21,26,33, 0.96), rgba(11,13,16, 0.98)); box-shadow: 0 28px 80px rgba(0,0,0, 0.32); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+  .hero-demo-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 18px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint, #737c73); }
+  .hero-demo-head .live-pulse { display: inline-flex; align-items: center; gap: 7px; color: #7ef0d2; }
+  .hero-demo-head .live-pulse::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.55); animation: eyebrow-pulse 2.6s ease-in-out infinite; }
+  .hero-demo-body { padding: 18px 20px; flex: 1; min-height: 0; }
+
+  /* hero video · the actual product demo, autoplay muted loop */
+  .hero-video-panel { padding: 0; background: #050607; }
+  .hero-video-wrap { position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; background: #050607; }
+  .hero-video-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; background: #050607; }
+  .hero-video-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(255,255,255, 0.04), inset 0 -80px 60px -40px rgba(8,9,8, 0.55); }
+  .hero-video-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 18px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-mute, #b5bdb1); letter-spacing: 0.02em; }
+  .hero-video-foot .scenes { display: inline-flex; gap: 14px; flex-wrap: wrap; }
+  .hero-video-foot .scenes span { color: var(--ink-faint, #737c73); }
+  .hero-video-foot .scenes b { color: var(--fg, #faf2e1); font-weight: 540; margin-right: 4px; }
+  .hero-video-foot a { color: #7ef0d2; }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-video-wrap video { display: none; }
+    .hero-video-wrap { background-image: url('/video/kolm-hero-poster.jpg'); background-size: cover; background-position: center; }
+  }
+
+  /* v7.9.4 — wide video panel (full-bleed, video is the centerpiece) */
+  .hero-demo-wide { margin: 44px auto 0; max-width: 1320px; padding: 0 32px; transition: max-width 220ms cubic-bezier(.2,.7,.2,1); }
+  .hero-demo-wide.compact { max-width: 860px; }
+  .hero-video-panel-wide { width: 100%; }
+  .hero-video-panel-wide .hero-video-wrap { aspect-ratio: 16/9; }
+  .hero-video-panel-wide .hero-demo-head { padding: 16px 22px; font-size: 11.5px; }
+  .hero-video-panel-wide .hero-video-foot { padding: 13px 22px; font-size: 12px; }
+  .hero-video-panel-wide .hero-video-foot .scenes { gap: 22px; }
+  .hero-video-panel-wide .hero-video-foot .scenes span { font-size: 12px; }
+
+  /* v7.9.5 — video chrome buttons (play/pause, mute, size) */
+  .hero-video-actions { display: inline-flex; align-items: center; gap: 8px; }
+  .hv-btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border: 1px solid var(--line); border-radius: 999px; background: rgba(0,0,0,0.28); color: var(--ink-mute, #b5bdb1); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: border-color 140ms, color 140ms, background 140ms; }
+  .hv-btn:hover { border-color: rgba(126,240,210, 0.42); color: var(--ink, #faf2e1); background: rgba(0,0,0,0.42); }
+  .hv-btn .hv-ico { width: 9px; height: 9px; display: inline-block; position: relative; }
+  .hv-ico-play::before { content: ""; position: absolute; inset: 0; clip-path: polygon(0 0, 100% 50%, 0 100%); background: currentColor; }
+  .hv-ico-pause::before, .hv-ico-pause::after { content: ""; position: absolute; top: 0; bottom: 0; width: 3px; background: currentColor; }
+  .hv-ico-pause::before { left: 0; }
+  .hv-ico-pause::after { right: 0; }
+  .hv-ico-muted::before { content: ""; position: absolute; left: 0; top: 50%; width: 5px; height: 5px; transform: translateY(-50%); clip-path: polygon(0 30%, 60% 30%, 100% 0, 100% 100%, 60% 70%, 0 70%); background: currentColor; }
+  .hv-ico-muted::after { content: "/"; position: absolute; right: -3px; top: -3px; font-size: 11px; font-weight: 600; color: currentColor; line-height: 1; }
+  .hv-ico-sound::before { content: ""; position: absolute; left: 0; top: 50%; width: 5px; height: 5px; transform: translateY(-50%); clip-path: polygon(0 30%, 60% 30%, 100% 0, 100% 100%, 60% 70%, 0 70%); background: currentColor; }
+  .hv-ico-sound::after { content: ""; position: absolute; right: 0; top: 50%; width: 3px; height: 5px; transform: translateY(-50%); border-right: 1.5px solid currentColor; border-top: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; border-radius: 0 999px 999px 0; }
+  .hv-ico-shrink::before, .hv-ico-shrink::after { content: ""; position: absolute; width: 4px; height: 4px; border-style: solid; border-color: currentColor; }
+  .hv-ico-shrink::before { top: 0; left: 0; border-width: 1.5px 0 0 1.5px; }
+  .hv-ico-shrink::after { bottom: 0; right: 0; border-width: 0 1.5px 1.5px 0; }
+  .hv-ico-expand::before, .hv-ico-expand::after { content: ""; position: absolute; width: 4px; height: 4px; border-style: solid; border-color: currentColor; }
+  .hv-ico-expand::before { top: 0; right: 0; border-width: 1.5px 1.5px 0 0; }
+  .hv-ico-expand::after { bottom: 0; left: 0; border-width: 0 0 1.5px 1.5px; }
+  @media (max-width: 640px) {
+    .hero-video-actions { gap: 6px; }
+    .hv-btn .hv-lab { display: none; }
+    .hv-btn { padding: 5px 7px; }
+  }
+
+  /* v7.9.4 — calc moved below; same look but full-width container */
+  .hero-demo-calc { margin: 24px auto 0; max-width: 720px; padding: 0 32px; }
+  .hero-demo-calc .hero-demo-panel { width: 100%; }
+  .hero-demo-calc .hero-demo-body { padding: 22px 24px; }
+
+  /* v7.9.4 — "what compile means" 4-step anatomy section */
+  .compile-anatomy { max-width: 1320px; margin: 56px auto 0; padding: 0 32px; }
+  .compile-anatomy .ca-head { text-align: center; max-width: 880px; margin: 0 auto 36px; }
+  .compile-anatomy .ca-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint, #737c73); margin-bottom: 16px; }
+  .compile-anatomy .ca-eyebrow .pulse { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210,0.55); }
+  .compile-anatomy .ca-h { font-size: clamp(34px, 4.2vw, 54px); line-height: 1.05; letter-spacing: -0.028em; margin: 0 0 18px; font-weight: 600; }
+  .compile-anatomy .ca-sub { font-size: 18.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; max-width: 760px; margin-left: auto; margin-right: auto; }
+  .compile-anatomy .ca-sub b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .compile-anatomy .ca-sub code { font-family: var(--mono); color: #7ef0d2; }
+  .compile-anatomy .ca-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  @media (max-width: 1080px) { .compile-anatomy .ca-steps { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .compile-anatomy .ca-steps { grid-template-columns: 1fr; gap: 14px; } }
+  .compile-anatomy .ca-step { position: relative; padding: 28px 24px 24px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 14px; background: linear-gradient(180deg, rgba(21,26,33,0.5), rgba(11,13,16,0.5)); display: flex; flex-direction: column; gap: 10px; transition: border-color 160ms, transform 160ms; }
+  .compile-anatomy .ca-step:hover { border-color: rgba(126,240,210, 0.32); transform: translateY(-2px); }
+  .compile-anatomy .ca-num { font-family: var(--mono); font-size: 13px; letter-spacing: 0.14em; color: #7ef0d2; }
+  .compile-anatomy .ca-step h3 { font-size: 23px; line-height: 1.15; letter-spacing: -0.018em; margin: 0; font-weight: 580; color: var(--ink, #faf2e1); }
+  .compile-anatomy .ca-step p { font-size: 14.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; }
+  .compile-anatomy .ca-out { display: block; font-family: var(--mono); font-size: 12px; color: var(--ink-soft, #ece1c4); letter-spacing: 0.02em; margin-top: auto; padding: 9px 12px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 7px; background: rgba(0,0,0,0.28); }
+  .compile-anatomy .ca-foot { margin: 28px auto 0; text-align: center; font-size: 14.5px; color: var(--ink-mute, #b5bdb1); max-width: 820px; line-height: 1.55; }
+  .compile-anatomy .ca-foot code { font-family: var(--mono); color: #7ef0d2; padding: 1px 5px; background: rgba(126,240,210,0.05); border: 1px solid rgba(126,240,210,0.18); border-radius: 4px; font-size: 12.5px; }
+  .compile-anatomy .ca-foot a { color: #7ef0d2; border-bottom: 1px solid rgba(126,240,210, 0.35); margin-left: 8px; }
+  .compile-anatomy .ca-foot a:hover { color: #c1f5e3; }
+
+  /* compact cost calc · hero variant */
+  .hero-calc { display: flex; flex-direction: column; gap: 14px; height: 100%; }
+  .hero-calc-row { display: grid; grid-template-columns: 1fr; gap: 6px; }
+  .hero-calc-row.row2 { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hero-calc-row label { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint, #737c73); }
+  .hero-calc-row input { width: 100%; padding: 9px 12px; background: rgba(0,0,0, 0.32); border: 1px solid var(--line); color: var(--ink); border-radius: 7px; font-family: var(--mono); font-size: 13px; outline: none; transition: border-color 120ms; box-sizing: border-box; }
+  .hero-calc-row input:focus { border-color: #7ef0d2; }
+  .hero-calc-out { margin-top: auto; padding: 14px 16px; border: 1px solid #7ef0d2; border-radius: 10px; background: linear-gradient(180deg, rgba(126,240,210, 0.06), rgba(0,0,0, 0.18)); }
+  .hero-calc-big { font-family: var(--mono); font-size: clamp(28px, 3.8vw, 38px); font-weight: 600; color: #7ef0d2; line-height: 1; letter-spacing: -0.01em; }
+  .hero-calc-big .unit { font-size: 0.42em; color: var(--ink-mute, #b5bdb1); margin-left: 6px; font-weight: 400; }
+  .hero-calc-sub { font-size: 12.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.5; margin-top: 4px; }
+  .hero-calc-sub b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .hero-calc-foot { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint, #737c73); letter-spacing: 0; margin-top: 8px; }
+  .hero-calc-foot a { color: #7ef0d2; border-bottom: 1px solid rgba(126,240,210, 0.35); }
+
   /* hero overflow guard · keep terminal from bleeding on narrow widths */
   .lab-terminal { max-width: 100%; overflow-x: auto; white-space: pre; word-break: normal; }
   .artifact-lab { min-width: 0; overflow: hidden; }
@@ -316,6 +443,23 @@
   .uc-strip .uc-card h3 { font-size: 16px; line-height: 1.32; margin: 0; color: var(--fg); font-weight: 540; }
   .uc-strip .uc-card p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; }
   .uc-strip .uc-card .uc-tag { margin-top: auto; font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); letter-spacing: 0.04em; }
+
+  /* trust-strip - compact compliance & integrity row · honest claims only */
+  .trust-strip { margin: 36px auto 0; max-width: 1180px; padding: 24px 32px 0; border-top: 1px solid var(--line); }
+  .trust-strip .ts-head { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+  .trust-strip .ts-head::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.55); }
+  .trust-strip .ts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 980px) { .trust-strip .ts-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .trust-strip .ts-grid { grid-template-columns: 1fr; } }
+  .trust-strip .ts-card { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-2, #11151b); min-height: 96px; text-decoration: none; color: inherit; transition: border-color 160ms; }
+  .trust-strip a.ts-card:hover { border-color: rgba(126,240,210, 0.32); }
+  .trust-strip .ts-lab { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 8px; }
+  .trust-strip .ts-state { font-family: var(--mono); font-size: 9.5px; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .trust-strip .ts-state.live { color: #7ef0d2; border: 1px solid rgba(126,240,210, 0.32); }
+  .trust-strip .ts-state.wip { color: #ffce7d; border: 1px solid rgba(255,206,125, 0.34); }
+  .trust-strip .ts-state.ask { color: var(--ink-mute, #b5bdb1); border: 1px solid var(--line); }
+  .trust-strip .ts-val { font-size: 15.5px; font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.3; margin-top: 2px; }
+  .trust-strip .ts-sub { font-family: var(--mono); font-size: 11px; color: var(--ink-mute, #b5bdb1); margin-top: auto; line-height: 1.4; letter-spacing: 0.01em; }
 
   /* lab-strip - verifiable telemetry below hero, NEO LAB readout aesthetic.
      Every moving element clamps via IntersectionObserver: paused offscreen, runs only when .ls-armed is on the section. */
@@ -458,13 +602,12 @@
 
 <main>
 
-<section class="hero home-hero">
+<section class="hero home-hero home-hero-stacked">
   <div class="wrap">
     <div class="hero-copy">
       <div class="eyebrow"><span class="pulse"></span>Your data. Your model. Your hardware.</div>
       <h1>Your own AI,<br>compiled to your task.</h1>
-      <p class="lede"><b>Show kolm what you want it to do. Get back a small AI that does that task.</b> Runs on your laptop, your phone, or inside your network. No data leaves.</p>
-      <p class="hero-thesis">Each compile bakes in everything you&rsquo;ve learned. You keep the artifact, the receipts, and every improvement, forever.</p>
+      <p class="lede"><b>Describe what you want. Get back a small AI in one signed file.</b> Runs on your laptop, your phone, or inside your network. No data leaves.</p>
 
       <div class="actions">
         <a href="/quickstart" class="btn primary lg">Try kolm &rarr;</a>
@@ -472,283 +615,348 @@
       </div>
 
       <p class="hero-microcopy" style="margin-top:14px;font-size:12.5px;font-family:var(--mono);color:var(--ink-faint);letter-spacing:0;max-width:54ch;line-height:1.55">
-        ship a signed AI that runs on hardware <b style="color:var(--ink-mute);font-weight:540">you</b> control. no API. no per-token bill.
+        already paying OpenAI? <a href="/capture" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.35)">turn that bill into a local model &rarr;</a>
       </p>
-    </div>
 
-    <div class="artifact-lab" aria-label="kolm compile system diagram">
-      <div class="lab-head">
-        <div class="proof-title"><span>kolm compiler</span></div>
-        <div class="proof-status"><span></span>local-boundary artifact</div>
-      </div>
-      <div class="lab-grid">
-        <div class="lab-panel source">
-          <span class="panel-label">inputs</span>
-          <strong>task contract</strong>
-          <small>examples.jsonl</small>
-          <small>policy.md</small>
-          <small>approved corpus</small>
+      <div class="nl-try" aria-label="natural-language try-it">
+        <div class="nl-head">
+          <span class="nl-dot" aria-hidden="true"></span>
+          <span>Describe what your AI should do. <b>We&rsquo;ll compile it.</b></span>
         </div>
-        <div class="compile-core" aria-hidden="true">
-          <div class="core-ring"></div>
-          <svg class="core-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="4" y="6" width="4.5" height="20" rx="0.6" fill="#faf2e1"/>
-            <rect x="13" y="9" width="4.5" height="14" rx="0.6" fill="#faf2e1"/>
-            <rect x="22" y="12" width="4.5" height="8" rx="0.6" fill="#7ef0d2"/>
-          </svg>
-          <span>compile</span>
+        <form id="nl-form" autocomplete="off">
+          <input id="nl-input" type="text" placeholder='Try: "compile a recipe that classifies support tickets by urgency"' aria-label="natural-language prompt" maxlength="220">
+          <button type="submit" class="nl-go" aria-label="ask">compile &rarr;</button>
+        </form>
+        <div class="nl-chips" aria-label="example prompts">
+          <button type="button" data-prompt="compile a recipe that redacts PII from free text">redact PII</button>
+          <button type="button" data-prompt="compile a recipe that classifies support tickets by urgency">classify tickets</button>
+          <button type="button" data-prompt="show my builds">my builds</button>
         </div>
-        <div class="artifact-card-mini">
-          <span class="panel-label">artifact</span>
-          <strong>patient-intake.kolm</strong>
-          <div class="mini-row"><span>manifest</span><em>sha256</em></div>
-          <div class="mini-row"><span>verifier</span><em>pass</em></div>
-          <div class="mini-row"><span>receipt</span><em>hmac</em></div>
-        </div>
-      </div>
-      <div class="target-row" aria-label="runtime targets">
-        <div><span>iOS</span><small>Core ML target</small></div>
-        <div><span>Android</span><small>LiteRT target</small></div>
-        <div><span>Web</span><small>WASM/WebGPU gate</small></div>
-        <div><span>Server</span><small>VPC boundary</small></div>
-      </div>
-      <pre class="lab-terminal" id="hero-terminal" aria-label="kolm compile demo"><span id="hero-term-out"></span><span class="cursor" aria-hidden="true"></span></pre>
-    </div>
-  </div>
-</section>
-
-<div class="cred-band">
-  <a href="/spec" class="cred-inner cred-inner-3" aria-label="why teams pick kolm">
-    <span class="cred-cell"><span class="num">Compliance built in</span><span class="lab">your hardware, your audit log. HIPAA, GDPR, EU AI Act.</span></span>
-    <span class="cred-cell"><span class="num">Same answer, every time</span><span class="lab">versioned and signed. no drift, no surprises.</span></span>
-    <span class="cred-cell"><span class="num">Yours forever</span><span class="lab">one file you own. no per-token bill, no kill switch.</span></span>
-    <span class="cred-arrow">why teams pick kolm &rarr;</span>
-  </a>
-</div>
-
-<section class="vr" aria-label="value props and ROI calculator">
-  <div class="vr-eyebrow">why teams pick kolm</div>
-  <h2>Cheaper. Safer. Yours.</h2>
-  <p class="vr-sub">Drop your numbers into the calculator on the right and watch year-one math swing toward kolm.</p>
-
-  <div class="vr-grid">
-    <div class="vr-cards">
-      <div class="vr-card">
-        <span class="ic" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#7ef0d2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.4-8 9-4.6-.6-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
-        </span>
-        <div>
-          <h3>Compliance, built in.</h3>
-          <p>Data stays on your hardware. Every output is signed. <b>Your boundary is the compliant party.</b> Not a vendor cert you have to trust.</p>
-        </div>
-      </div>
-      <div class="vr-card">
-        <span class="ic" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#7ef0d2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M3 7h18"/><path d="M3 17h18"/><circle cx="6" cy="7" r="1.6" fill="#7ef0d2"/><circle cx="12" cy="12" r="1.6" fill="#7ef0d2"/><circle cx="18" cy="17" r="1.6" fill="#7ef0d2"/></svg>
-        </span>
-        <div>
-          <h3>Same answer, every time.</h3>
-          <p>Versioned releases. Frozen prompts. <b>Reproducible benchmarks.</b> Ship a model you can sign off on without reading prompt history.</p>
-        </div>
-      </div>
-      <div class="vr-card">
-        <span class="ic" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#7ef0d2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M4 10h16"/><path d="M9 14h6"/></svg>
-        </span>
-        <div>
-          <h3>Yours forever.</h3>
-          <p>One file you own. <b>No per-token bill.</b> No rate-limits, no price hikes, no kill switch. Runs on a laptop, a phone, or in your environment.</p>
-        </div>
-      </div>
-    </div>
-
-    <aside class="vr-calc" aria-label="cost calculator">
-      <div class="lbl">cost math &middot; live</div>
-      <div class="ttl">Cloud vs. kolm, year one.</div>
-      <p class="hint">Three knobs. The full math is on <a href="/roi" style="color:var(--accent);border-bottom:1px solid rgba(236,231,220,0.3)">/roi</a> with teacher and recompile costs.</p>
-
-      <div class="vc-row">
-        <label>Monthly calls</label>
-        <input type="number" id="vrc-calls" value="1200000" min="0" step="10000">
-      </div>
-      <div class="vc-row">
-        <label>Tokens per call (in / out)</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="number" id="vrc-tin" value="800" min="0" step="50"><input type="number" id="vrc-tout" value="250" min="0" step="50"></div>
-      </div>
-      <div class="vc-row">
-        <label>Frontier price ($ / 1M tokens, in / out)</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="number" id="vrc-pin" value="3.00" min="0" step="0.01"><input type="number" id="vrc-pout" value="15.00" min="0" step="0.01"></div>
-      </div>
-
-      <div class="out">
-        <div class="big" id="vrc-mult">&middot;</div>
-        <div class="big-lab"><b id="vrc-tag">cheaper year one</b> <span id="vrc-sub">vs. cloud-only deployment</span></div>
-        <div class="deep"><a href="/roi">open full calculator &rarr;</a></div>
-      </div>
-    </aside>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">01</span>the loop</div>
-    <h2>Compile, ship, run, evolve.</h2>
-    <p class="sec-lede">Build it. Bundle it. Run it anywhere. Make it better with every use.</p>
-
-    <div class="system-map" aria-label="how kolm works">
-      <div class="map-column">
-        <span>01</span>
-        <h3><a href="/compile" style="color:inherit">Compile</a></h3>
-        <p>Show kolm what good looks like. It builds a small AI that does that task.</p>
-      </div>
-      <div class="map-arrow" aria-hidden="true"></div>
-      <div class="map-column artifact">
-        <span>02</span>
-        <h3><a href="/anatomy" style="color:inherit">Bundle</a></h3>
-        <p>One signed file you can keep, share, or run anywhere. Tamper-evident.</p>
-      </div>
-      <div class="map-arrow" aria-hidden="true"></div>
-      <div class="map-column">
-        <span>03</span>
-        <h3><a href="/serve" style="color:inherit">Run</a></h3>
-        <p>On your laptop, your phone, or inside your network. No data leaves.</p>
-      </div>
-      <div class="map-arrow" aria-hidden="true"></div>
-      <div class="map-column">
-        <span>04</span>
-        <h3><a href="/evolve" style="color:inherit">Evolve</a></h3>
-        <p>Every run improves the next version. You keep every improvement.</p>
+        <output id="nl-out" aria-live="polite"></output>
       </div>
     </div>
   </div>
 </section>
 
-<section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">02</span>compile</div>
-    <h2>Cache the expensive intelligence once.</h2>
-    <p class="sec-lede">Examples become tests. Private context becomes recall. Policy becomes a runtime guard. Approved behavior becomes the cache.</p>
+<style>
+  .home-hero-stacked { min-height: auto; padding-bottom: 18px; border-bottom: 0; }
+  .home-hero-stacked .wrap { display: block; max-width: 1180px; }
+  .home-hero-stacked .hero-copy { max-width: 880px; }
+  .home-hero-stacked h1 { font-size: clamp(48px, 6.6vw, 84px); max-width: 13ch; }
+  @media (max-width: 720px) { .home-hero-stacked h1 { font-size: clamp(36px, 8vw, 48px); } }
 
-    <div class="grid-2">
-      <div class="filetab">
-        <div class="filetab-head">
-          <span class="name">patient-intake.task</span>
-          <span class="muted">approved task contract</span>
-        </div>
-<pre class="code"><code><span class="tone">task</span>: classify incoming patient messages
-<span class="tone">labels</span>: urgent | billing | schedule | follow-up
-<span class="tone">examples</span>: ./labels.jsonl
-<span class="tone">corpus</span>: ./clinical-policy/
-<span class="tone">constraints</span>:
-  runtime_egress: 0
-  k_score_min: 0.90
-  receipt: required</code></pre>
-      </div>
+  .nl-try { margin: 28px 0 0; max-width: 720px; }
+  .nl-try .nl-head { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+  .nl-try .nl-head b { color: var(--ink-mute, #b5bdb1); font-weight: 540; text-transform: none; letter-spacing: 0; }
+  .nl-try .nl-dot { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126, 240, 210, 0.6); display: inline-block; }
+  .nl-try form { display: flex; gap: 10px; align-items: stretch; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 11px; background: var(--bg-2, #11151b); padding: 7px; transition: border-color 160ms, box-shadow 160ms; }
+  .nl-try form:focus-within { border-color: rgba(126,240,210, 0.4); box-shadow: 0 0 0 3px rgba(126,240,210, 0.07); }
+  /* font-size: 16px is the iOS Safari threshold below which focusing an
+     input zooms the viewport unexpectedly — feels broken on mobile. Hold the
+     line at exactly 16px so the bot is usable on phones. */
+  .nl-try input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; padding: 11px 13px; color: var(--ink, #faf2e1); font-family: var(--sans, system-ui); font-size: 16px; letter-spacing: -0.005em; }
+  @media (max-width: 520px) {
+    .nl-try form { flex-direction: column; padding: 9px; }
+    .nl-try .nl-go { width: 100%; padding: 12px 20px; }
+    .nl-try input { padding: 12px 13px; }
+    .nl-try .nl-chips { gap: 8px; }
+    .nl-try .nl-chips button { padding: 7px 12px; font-size: 12.5px; }
+  }
+  .nl-try input::placeholder { color: var(--ink-faint, #737c73); }
+  .nl-try .nl-go { background: #7ef0d2; color: #0b0d10; border: 0; border-radius: 8px; padding: 10px 20px; font-family: var(--mono, ui-monospace); font-size: 13px; font-weight: 580; letter-spacing: 0.01em; cursor: pointer; transition: filter 120ms, transform 120ms; }
+  .nl-try .nl-go:hover { filter: brightness(1.07); transform: translateY(-1px); }
+  .nl-try .nl-chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 12px 0 0; }
+  .nl-try .nl-chips button { background: transparent; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 6px; padding: 5px 11px; font-family: var(--mono, ui-monospace); font-size: 11.5px; color: var(--ink-mute, #b5bdb1); cursor: pointer; letter-spacing: 0; transition: color 120ms, border-color 120ms; }
+  .nl-try .nl-chips button:hover { color: var(--ink, #faf2e1); border-color: rgba(126,240,210, 0.35); }
+  .nl-try #nl-out { display: block; margin: 16px 0 0; font-family: var(--mono, ui-monospace); font-size: 13px; line-height: 1.6; color: var(--ink-mute, #b5bdb1); white-space: pre-wrap; }
+  .nl-try #nl-out .nl-narration { color: var(--ink, #faf2e1); }
+  .nl-try #nl-out .nl-cmd { display: block; margin: 10px 0; padding: 11px 13px; background: rgba(126,240,210,0.05); border: 1px solid rgba(126,240,210,0.18); border-radius: 7px; color: #c1f5e3; }
+  .nl-try #nl-out .nl-link { color: #7ef0d2; }
+  .nl-try #nl-out .nl-link:hover { border-bottom: 1px solid rgba(126,240,210, 0.4); }
+  .nl-try #nl-out .nl-job { margin-top: 12px; padding: 12px 14px; border: 1px solid rgba(126,240,210, 0.2); border-radius: 8px; background: rgba(126,240,210, 0.03); }
+  .nl-try #nl-out .nl-job .nl-jhead { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--ink-mute, #b5bdb1); letter-spacing: 0.08em; text-transform: uppercase; }
+  .nl-try #nl-out .nl-job .nl-jhead .nl-spin { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid rgba(126,240,210, 0.35); border-top-color: #7ef0d2; animation: nl-spin 1s linear infinite; }
+  .nl-try #nl-out .nl-job .nl-jhead .nl-spin.done { animation: none; border: 0; background: #2cce8a; box-shadow: 0 0 8px rgba(44,206,138,0.55); }
+  @keyframes nl-spin { to { transform: rotate(360deg); } }
+  .nl-try #nl-out .nl-job .nl-bar { margin: 10px 0 8px; height: 4px; background: rgba(250,242,225,0.06); border-radius: 999px; overflow: hidden; }
+  .nl-try #nl-out .nl-job .nl-bar .nl-fill { height: 100%; background: linear-gradient(90deg, #7ef0d2, #2cce8a); width: 0%; transition: width 320ms ease-out; }
+  .nl-try #nl-out .nl-job .nl-jmeta { color: var(--ink-mute, #b5bdb1); font-size: 12px; }
+  .nl-try #nl-out .nl-job .nl-jmeta b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .nl-try #nl-out .nl-job .nl-dl { display: inline-block; margin-top: 10px; padding: 6px 14px; background: rgba(126,240,210, 0.12); border: 1px solid rgba(126,240,210, 0.4); border-radius: 7px; color: #c1f5e3; font-size: 12px; font-weight: 540; text-decoration: none; }
+  .nl-try #nl-out .nl-job .nl-dl:hover { background: rgba(126,240,210, 0.2); }
+  @media (max-width: 640px) { .nl-try .nl-go { padding: 10px 16px; } }
+</style>
+<script>
+(function () {
+  var form = document.getElementById('nl-form');
+  if (!form) return;
+  var input = document.getElementById('nl-input');
+  var out = document.getElementById('nl-out');
+  var pollTimer = null;
+  function key() {
+    try { return (window.KS && window.KS.apiKey && window.KS.apiKey()) || localStorage.getItem('kolm.api_key') || ''; }
+    catch (_) { return ''; }
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+  function fmtKB(n) { if (!n) return '—'; return n > 1024 * 1024 ? (n / 1024 / 1024).toFixed(2) + ' MB' : (n / 1024).toFixed(1) + ' KB'; }
+  function renderJobBox(j) {
+    var done = j.status === 'completed';
+    var failed = j.status === 'failed';
+    var progress = Math.max(0, Math.min(100, Math.round((j.progress || 0) * 100)));
+    var statusLabel = failed ? 'failed' : (done ? 'compiled' : (j.status || 'queued'));
+    var headHtml = '<div class="nl-jhead"><span class="nl-spin' + (done || failed ? ' done' : '') + '" aria-hidden="true"></span><span>compile job ' + esc(j.id || j.job_id || '') + ' &middot; ' + esc(statusLabel) + '</span></div>';
+    var barHtml = '<div class="nl-bar"><div class="nl-fill" style="width:' + (done ? 100 : progress) + '%"></div></div>';
+    var stage = (j.stages && j.stages.length) ? j.stages[j.stages.length - 1].name : (done ? 'done' : (j.status || 'starting'));
+    var k = j.k_score != null ? j.k_score : (j.manifest && j.manifest.k_score);
+    var bytes = j.artifact_bytes || (j.manifest && j.manifest.size_bytes);
+    var metaHtml = '<div class="nl-jmeta">stage: <b>' + esc(stage) + '</b>'
+      + (k != null ? '  &middot;  K-score <b>' + esc(Number(k).toFixed(3)) + '</b>' : '')
+      + (bytes ? '  &middot;  artifact <b>' + esc(fmtKB(bytes)) + '</b>' : '')
+      + '</div>';
+    var dlHtml = done && j.artifact_url ? '<a class="nl-dl" href="' + esc(j.artifact_url) + '" download>download .kolm artifact &rarr;</a>' : '';
+    if (failed) dlHtml = '<div class="nl-jmeta" style="color:#ef6f6c;margin-top:6px">' + esc(j.error || 'compile failed.') + '</div>';
+    return '<div class="nl-job">' + headHtml + barHtml + metaHtml + dlHtml + '</div>';
+  }
+  function pollJob(jobId, container) {
+    var apiKey = key();
+    if (pollTimer) clearTimeout(pollTimer);
+    function tick() {
+      fetch('/v1/compile/' + encodeURIComponent(jobId), { headers: { 'authorization': 'Bearer ' + apiKey } })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          container.innerHTML = renderJobBox(j);
+          if (j.status === 'completed' || j.status === 'failed') return;
+          pollTimer = setTimeout(tick, 900);
+        })
+        .catch(function () { pollTimer = setTimeout(tick, 1500); });
+    }
+    tick();
+  }
+  function ask(prompt) {
+    if (!prompt) return;
+    var apiKey = key();
+    if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+    out.innerHTML = '<span style="color:#737c73">routing&hellip;</span>';
+    if (!apiKey) {
+      var q = encodeURIComponent(prompt);
+      out.innerHTML = '<span class="nl-narration">No key yet, so I cannot compile against your tenant. Sign in and the same prompt lands as your first dashboard build.</span><a class="nl-link" style="display:inline-block;margin-top:10px" href="/signup?try=' + q + '">Get an API key &rarr;</a>';
+      return;
+    }
+    fetch('/v1/assistant', {
+      method: 'POST',
+      headers: { 'authorization': 'Bearer ' + apiKey, 'content-type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt })
+    })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (r) {
+        var j = r.j || {};
+        var html = '';
+        if (j.narration) html += '<span class="nl-narration">' + esc(j.narration) + '</span>';
+        if (j.data && j.data.command) html += '<code class="nl-cmd">' + esc(j.data.command) + '</code>';
+        // If the assistant kicked off a real compile job, render a polling progress box.
+        var jobId = j.data && j.data.job_id;
+        var jobHost = '';
+        if (jobId) {
+          jobHost = '<div id="nl-job-host"></div>';
+        }
+        if (Array.isArray(j.next_steps) && j.next_steps.length) {
+          html += '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">';
+          j.next_steps.forEach(function (s) {
+            if (s.href) html += '<a class="nl-link" href="' + esc(s.href) + '" style="border:1px solid rgba(126,240,210,0.25);border-radius:6px;padding:4px 10px;font-size:11.5px">' + esc(s.label || 'open') + '</a>';
+            else if (s.prompt) html += '<button type="button" class="nl-chip-next" data-prompt="' + esc(s.prompt) + '" style="border:1px solid rgba(126,240,210,0.25);background:transparent;color:#c1f5e3;border-radius:6px;padding:4px 10px;font-size:11.5px;cursor:pointer;font-family:inherit">' + esc(s.label || s.prompt) + '</button>';
+          });
+          html += '</div>';
+        }
+        if (!html) html = '<span style="color:#737c73">no response.</span>';
+        out.innerHTML = html + jobHost;
+        out.querySelectorAll('.nl-chip-next').forEach(function (b) {
+          b.addEventListener('click', function () { input.value = b.getAttribute('data-prompt'); ask(b.getAttribute('data-prompt')); });
+        });
+        if (jobId) {
+          var host = document.getElementById('nl-job-host');
+          if (host) {
+            host.innerHTML = renderJobBox(j.data);
+            // If not already complete, poll until done.
+            if (j.data.status !== 'completed' && j.data.status !== 'failed') pollJob(jobId, host);
+          }
+        }
+      })
+      .catch(function () { out.innerHTML = '<span style="color:#ef6f6c">network error. try again.</span>'; });
+  }
+  form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value.trim()); });
+  document.querySelectorAll('.nl-try .nl-chips button').forEach(function (b) {
+    b.addEventListener('click', function () { input.value = b.getAttribute('data-prompt'); ask(input.value); });
+  });
+})();
+</script>
 
-<pre class="terminal"><span class="prompt">$</span> kolm compile "classify patient messages" \
-  --examples ./labels.jsonl \
-  --data ./clinical-policy \
-  --base-model qwen2.5-coder-7b-instruct-q4_0
-
-<span class="dim">ingest</span>   1,284 policy chunks indexed
-<span class="dim">verify</span>   412 examples accepted
-<span class="dim">package</span>  manifest, verifier, recall, policy
-<span class="dim">sign</span>     hmac-sha256 receipt chain
-
-<span class="ok">ok</span> wrote <span class="kw">patient-intake.kolm</span>
-<span class="ok">ok</span> K-score <span class="num">0.92</span> / release gate <span class="num">0.90</span></pre>
+<section class="hero-demo hero-demo-wide" aria-label="live product demo">
+  <div class="hero-demo-panel hero-video-panel hero-video-panel-wide" id="hero-video-panel">
+    <div class="hero-demo-head">
+      <span>describe &middot; compile &middot; yours forever</span>
+      <span class="hero-video-actions">
+        <button type="button" class="hv-btn" id="hv-playpause" aria-label="play or pause demo" aria-pressed="true">
+          <span class="hv-ico hv-ico-pause" aria-hidden="true"></span>
+          <span class="hv-lab">pause</span>
+        </button>
+        <button type="button" class="hv-btn" id="hv-size" aria-label="toggle video size" aria-pressed="false">
+          <span class="hv-ico hv-ico-shrink" aria-hidden="true"></span>
+          <span class="hv-lab">smaller</span>
+        </button>
+      </span>
+    </div>
+    <div class="hero-video-wrap">
+      <video
+        id="hero-video"
+        autoplay muted loop playsinline preload="metadata"
+        poster="/video/kolm-hero-poster.jpg"
+        aria-label="kolm demo. Write what your AI should do in plain English. Press compile. Get back one file that runs offline, gives the same answer every time, and is yours forever.">
+        <source src="/video/kolm-hero.webm" type="video/webm">
+        <source src="/video/kolm-hero.mp4" type="video/mp4">
+        <noscript><img src="/video/kolm-hero-poster.jpg" alt="describe your AI in english, kolm compiles it into one file you own."></noscript>
+      </video>
+    </div>
+    <div class="hero-video-foot">
+      <span class="scenes" aria-hidden="true">
+        <span><b>01</b>describe</span>
+        <span><b>02</b>compile</span>
+        <span><b>03</b>yours</span>
+      </span>
+      <a href="/anatomy">anatomy of a .kolm &rarr;</a>
     </div>
   </div>
 </section>
+
+<section class="compile-anatomy" aria-label="what compile means">
+  <div class="ca-head">
+    <div class="ca-eyebrow"><span class="pulse"></span>what &ldquo;compile&rdquo; actually does</div>
+    <h2 class="ca-h">Four passes. One file. Yours forever.</h2>
+    <p class="ca-sub">Describe the task in plain English. The compiler runs four passes and hands you one <code>.kolm</code> file. Run it twice, you get the same answer twice. Always.</p>
+  </div>
+
+  <ol class="ca-steps">
+    <li class="ca-step">
+      <span class="ca-num">01</span>
+      <h3>Synthesize</h3>
+      <p>Generates the examples your task needs to handle. Right answers and tricky edge cases. Coverage you&rsquo;d never sit down and write yourself.</p>
+      <code class="ca-out">24 right answers &middot; 18 hard cases</code>
+    </li>
+    <li class="ca-step">
+      <span class="ca-num">02</span>
+      <h3>Distill</h3>
+      <p>Shrinks the task into a small, fast file. No prompts to maintain. No model server to keep running.</p>
+      <code class="ca-out">small &middot; fast &middot; same answer twice</code>
+    </li>
+    <li class="ca-step">
+      <span class="ca-num">03</span>
+      <h3>Score</h3>
+      <p>Checks the result on accuracy, size, speed, and cost. If it doesn&rsquo;t clear 85%, the compile fails. Nothing ships unless it&rsquo;s good enough.</p>
+      <code class="ca-out">score 0.917 &middot; minimum 0.85 &middot; passed</code>
+    </li>
+    <li class="ca-step">
+      <span class="ca-num">04</span>
+      <h3>Sign</h3>
+      <p>Signs the file so anyone you trust can verify it hasn&rsquo;t been tampered with. The file is yours. The audit trail is yours. No vendor in the middle.</p>
+      <code class="ca-out">sha256 7f3a&hellip;c81 &middot; signed</code>
+    </li>
+  </ol>
+
+  <p class="ca-foot">
+    The output is one <code>.kolm</code> file you own. Runs offline. Same answer every time. No per-call bill. No remote kill switch.
+    <a href="/anatomy">how it works under the hood &rarr;</a>
+  </p>
+</section>
+
+
+<section class="vr vr-calc-only" aria-label="ROI calculator">
+  <div class="vr-eyebrow">cost math &middot; live</div>
+  <h2>Cloud vs. kolm, year one.</h2>
+  <p class="vr-sub">Three inputs. Setup costs, recompiles, and training data live on <a href="/roi">/roi</a>.</p>
+
+  <aside class="vr-calc vr-calc-solo" aria-label="cost calculator">
+    <div class="vc-row">
+      <label>Monthly calls</label>
+      <input type="number" id="vrc-calls" value="1200000" min="0" step="10000">
+    </div>
+    <div class="vc-row">
+      <label>Tokens per call (in / out)</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="number" id="vrc-tin" value="800" min="0" step="50"><input type="number" id="vrc-tout" value="250" min="0" step="50"></div>
+    </div>
+    <div class="vc-row">
+      <label>Frontier price ($ / 1M tokens, in / out)</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="number" id="vrc-pin" value="3.00" min="0" step="0.01"><input type="number" id="vrc-pout" value="15.00" min="0" step="0.01"></div>
+    </div>
+
+    <div class="out">
+      <div class="big" id="vrc-mult">&middot;</div>
+      <div class="big-lab"><b id="vrc-tag">cheaper year one</b> <span id="vrc-sub">vs. cloud-only deployment</span></div>
+      <div class="deep"><a href="/roi">open full calculator &rarr;</a></div>
+    </div>
+  </aside>
+</section>
+<style>
+  .vr-calc-only { padding-bottom: 32px; }
+  .vr-calc-only .vr-eyebrow, .vr-calc-only h2, .vr-calc-only .vr-sub { text-align: center; }
+  .vr-calc-only .vr-sub { margin-left: auto; margin-right: auto; }
+  .vr-calc-only .vr-sub a { color: var(--accent); border-bottom: 1px solid rgba(126,240,210,0.32); }
+  .vr-calc-solo { max-width: 760px; margin: 24px auto 0; }
+</style>
 
 <section class="uc-strip" aria-label="what teams build with kolm">
   <div class="uc-head">what teams build</div>
   <h2>From coding agents to clinical intake.</h2>
-  <p class="uc-sub">Most kolm artifacts aren&rsquo;t about compliance. They&rsquo;re about owning the model that owns your workflow.</p>
+  <p class="uc-sub">Most teams pick kolm because they want to own the AI that runs their business. Not just to pass audits.</p>
   <div class="uc-grid">
     <a href="/cookbook" class="uc-card">
       <span class="uc-vert">coding</span>
       <h3>Agents that don&rsquo;t leak your codebase.</h3>
-      <p>Specialize a small model on your repo. Cursor, Claude Code, Continue point at it.</p>
-      <span class="uc-tag">cookbook &rarr;</span>
+      <p>Train a small model on your own code. Point Cursor, Claude Code, or Continue at it.</p>
+      <span class="uc-tag">recipes &rarr;</span>
     </a>
-    <a href="/use-cases" class="uc-card">
+    <a href="/capture" class="uc-card">
       <span class="uc-vert">ai startup</span>
-      <h3>Ship without the OpenAI bill.</h3>
-      <p>One signed artifact per feature. Same answer at 10 users and 10 million.</p>
-      <span class="uc-tag">use cases &rarr;</span>
+      <h3>Cut the OpenAI bill. Keep the model.</h3>
+      <p>Route your AI calls through kolm. Every paid call becomes training data. Once it&rsquo;s enough, kolm builds you a signed local model.</p>
+      <span class="uc-tag">how capture works &rarr;</span>
     </a>
-    <a href="/use-cases" class="uc-card">
-      <span class="uc-vert">support &amp; ops</span>
-      <h3>Customer answers your team would approve.</h3>
-      <p>Approved corpus, frozen prompt, signed reply. No hallucinated refunds.</p>
-      <span class="uc-tag">use cases &rarr;</span>
+    <a href="/enterprise" class="uc-card uc-card-reg">
+      <span class="uc-vert">regulated</span>
+      <h3>Health records, payment data, privileged work. All stay inside.</h3>
+      <p>Compile inside your network. Sign every output. <a href="/healthcare" class="uc-sublink">healthcare</a> &middot; <a href="/finance" class="uc-sublink">finance</a> &middot; <a href="/legal" class="uc-sublink">legal</a></p>
+      <span class="uc-tag">enterprise &rarr;</span>
     </a>
     <a href="/edge" class="uc-card">
       <span class="uc-vert">edge / on-device</span>
       <h3>Runs offline. Runs on the device.</h3>
-      <p>iOS, Android, kiosks, robots. No network round-trip, no telemetry.</p>
+      <p>Phones, tablets, kiosks, robots. No data leaves the device. No remote kill switch.</p>
       <span class="uc-tag">edge &rarr;</span>
     </a>
   </div>
 </section>
 
-<section class="reg-strip" aria-label="regulated industries">
-  <div class="reg-head">regulated industries</div>
-  <p class="reg-sub">If your data has a frame around it - PHI, PCI, attorney-client - the artifact stays inside that frame. Versioned, signed, named in your audit log.</p>
-  <div class="reg-grid">
-    <a href="/healthcare" class="reg-card">
-      <div class="vert">healthcare</div>
-      <h3>Patient data never reaches a vendor.</h3>
-      <p>Compile inside the BAA boundary. Sign every output. Run on the clinician&rsquo;s laptop, the hospital VPC, or the kiosk in the waiting room.</p>
-      <div class="frames"><b>HIPAA</b> &middot; <b>HITECH</b> &middot; BAA path</div>
-    </a>
-    <a href="/finance" class="reg-card">
-      <div class="vert">finance</div>
-      <h3>Model risk that an examiner can read.</h3>
-      <p>Versioned artifact, reproducible benchmark, frozen prompts, signed outputs. Replace prompt-engineered surfaces with releases your second line can sign off on.</p>
-      <div class="frames"><b>model risk</b> &middot; <b>per-trade audit</b> &middot; PCI-aligned</div>
-    </a>
-    <a href="/legal" class="reg-card">
-      <div class="vert">legal</div>
-      <h3>Privilege boundary, end to end.</h3>
-      <p>Discovery, redaction, brief drafts. Compile inside the firm. Signed receipts let opposing counsel verify what model produced what output without your help.</p>
-      <div class="frames"><b>attorney-client</b> &middot; <b>work product</b> &middot; audit-clean</div>
-    </a>
-    <a href="/defense" class="reg-card">
-      <div class="vert">defense / gov</div>
-      <h3>Airgap-strict, reproducible, signed.</h3>
-      <p>Run AI on hardware that never touches the internet. Compile with airgap on, no fetch, no telemetry. Receipt chain replays at any later date for review.</p>
-      <div class="frames"><b>airgap-strict</b> &middot; <b>reproducible</b> &middot; IG-replayable</div>
-    </a>
-  </div>
-  <div style="text-align:center;margin-top:28px"><a href="/enterprise" style="color:var(--ink-mute);font-family:var(--mono);font-size:13px;text-decoration:none;letter-spacing:0.02em">enterprise overview &middot; BAA / DPA template &middot; founders direct &rarr;</a></div>
-</section>
-
-<section class="reg-tele" aria-label="for engineers">
-  <div class="reg-tele-inner">
-    <div class="reg-tele-cell">
-      <span class="reg-tele-id"><span class="dot"></span>artifacts signed</span>
-      <span class="reg-tele-val"><span id="registry-count" class="js-registry-count">&middot;</span></span>
-      <span class="reg-tele-meta">public registry &middot; live</span>
-    </div>
-    <div class="reg-tele-cell">
-      <span class="reg-tele-id"><span class="dot"></span>open spec</span>
-      <span class="reg-tele-val"><a href="/spec" style="color:inherit;text-decoration:none">read</a><span class="unit">/spec</span></span>
-      <span class="reg-tele-meta">MIT-licensed</span>
-    </div>
-    <div class="reg-tele-cell">
-      <span class="reg-tele-id"><span class="dot"></span>runtime</span>
-      <span class="reg-tele-val">kolm/0.5<span class="unit">.x</span></span>
-      <span class="reg-tele-meta">npm &middot; brew &middot; winget</span>
-    </div>
-    <div class="reg-tele-cell">
-      <span class="reg-tele-id"><span class="dot"></span>receipt</span>
-      <span class="reg-tele-val">HMAC<span class="unit">SHA-256</span></span>
-      <span class="reg-tele-meta">tamper-evident chain</span>
-    </div>
+<section class="trust-line" aria-label="trust posture">
+  <div class="tl-wrap">
+    <a href="/security" class="tl-cell"><b>Security audit</b><span>SOC 2 Type I &middot; in progress Q4 2026</span></a>
+    <a href="/baa" class="tl-cell"><b>Healthcare ready</b><span>HIPAA agreement &middot; on request</span></a>
+    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" class="tl-cell"><b>Open source</b><span>code + docs on github &middot; MIT</span></a>
+    <a href="/spec" class="tl-cell"><b>Signed outputs</b><span>cryptographic receipts &middot; verifiable</span></a>
   </div>
 </section>
+<style>
+  .uc-card-reg .uc-sublink { color: var(--accent); border-bottom: 1px solid rgba(126,240,210,0.32); }
+  .uc-card-reg .uc-sublink:hover { border-bottom-color: var(--accent); }
+  .trust-line { padding: 32px 24px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .trust-line .tl-wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .trust-line .tl-cell { display: flex; flex-direction: column; gap: 4px; padding: 18px 22px; background: var(--bg-1, #0e1014); text-decoration: none; transition: background 140ms; }
+  .trust-line .tl-cell:hover { background: rgba(126,240,210,0.04); }
+  .trust-line .tl-cell b { font-family: var(--mono); font-size: 12px; font-weight: 580; color: var(--ink, #faf2e1); letter-spacing: 0.06em; text-transform: uppercase; }
+  .trust-line .tl-cell span { font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute, #b5bdb1); letter-spacing: 0.02em; }
+  [data-theme="light"] .trust-line .tl-cell { background: #ffffff !important; }
+  [data-theme="light"] .trust-line .tl-cell:hover { background: rgba(10,136,98,0.04) !important; }
+  [data-theme="light"] .trust-line .tl-cell b { color: #0c0e10 !important; }
+  [data-theme="light"] .trust-line .tl-cell span { color: #4b5158 !important; }
+  @media (max-width: 720px) { .trust-line .tl-wrap { grid-template-columns: 1fr 1fr; } }
+</style>
 
 <section class="bottom-cta" aria-label="get started" style="text-align:center;padding:54px 24px 80px;border-top:1px solid var(--line)">
   <p style="font-family:var(--mono);font-size:14px;color:var(--ink-mute);margin:0 0 18px">Ready to compile your first artifact?</p>
@@ -768,6 +976,7 @@
     <div class="links">
       <div>
         <div class="col-h">product</div>
+        <a href="/capture">capture</a>
         <a href="/compile">compile</a>
         <a href="/run">run</a>
         <a href="/recall">recall</a>
@@ -930,62 +1139,255 @@
     io.observe(strip);
   })();
 
-  // Hero terminal typewriter
+  // Hero cassette · tier-1 shot-and-cut 3-scene product demo (capture · distill · run)
   (() => {
+    const frame = document.getElementById('cassette-frame');
     const term = document.getElementById('hero-terminal');
     const out = document.getElementById('hero-term-out');
-    if (!term || !out) return;
+    const stageEl = document.getElementById('cassette-stage');
+    const dots = document.querySelectorAll('.cassette-dots .cdot');
+    const progFill = document.getElementById('cassette-progress-fill');
+    const capNum = document.getElementById('cap-num');
+    const capText = document.getElementById('cap-text');
+    if (!term || !out || !frame) return;
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const lines = [
-      { t: '<span class="prompt">$</span> ', d: 0 },
-      { t: 'kolm compile "screen patient urgency" --examples labels.jsonl --receipt', d: 18 },
-      { t: '\n', d: 320 },
-      { t: '<span class="dim">› synthesizing verifier from 412 examples ...</span>\n', d: 8 },
-      { t: '<span class="dim">› k=8 sample · verify · accept (Q=0.928) ...</span>\n', d: 8 },
-      { t: '<span class="dim">› specializing model · observing patterns · signing ...</span>\n', d: 8 },
-      { t: '<span class="ok">ok</span> wrote patient-intake.kolm  <span class="dim">k_score=0.92 signature=hmac-sha256</span>\n', d: 14 },
-      { t: '<span class="prompt">$</span> kolm serve --mcp  <span class="dim"># expose the artifact as an MCP tool</span>', d: 18 }
+
+    const scenes = [
+      {
+        label: '01 · capture',
+        capNum: '01',
+        capText: '<b>Drop-in proxy.</b> Point your existing OpenAI calls at kolm capture. Every successful pair is recorded.',
+        lines: [
+          '<span class="prompt">$</span> kolm capture --provider openai --namespace patient-intake',
+          '<span class="dim">› proxying api.openai.com → kolm capture (egress-bounded) ...</span>',
+          '<span class="dim">› observed: 1,247 calls past 24h · ready for distill at 1,000</span>',
+          '<span class="ok">ok</span> captured. corpus_namespace=patient-intake size=1247'
+        ],
+        holdMs: 1900
+      },
+      {
+        label: '02 · distill',
+        capNum: '02',
+        capText: '<b>Threshold &rarr; bridge.</b> At 1,000 pairs kolm hands the corpus to the trainer. K-score gate. HMAC-signed artifact.',
+        lines: [
+          '<span class="prompt">$</span> kolm compile patient-intake --examples 1247 --receipt',
+          '<span class="dim">› synthesizing verifier from 1,247 examples ...</span>',
+          '<span class="dim">› k=8 sample · verify · accept  (Q=0.928) ...</span>',
+          '<span class="dim">› specializing model · stamping K-score · signing ...</span>',
+          '<span class="ok">ok</span> wrote patient-intake.kolm  <span class="dim">k_score=0.92  hmac-sha256</span>'
+        ],
+        holdMs: 1900
+      },
+      {
+        label: '03 · run',
+        capNum: '03',
+        capText: '<b>Local hardware. No bill.</b> Run the artifact on your laptop, in your VPC, or on a phone. Same task, your boundary.',
+        lines: [
+          '<span class="prompt">$</span> kolm run patient-intake.kolm "ID 8842, abnormal labs Cr 2.1 K+ 5.6"',
+          '{',
+          '  "urgency": "<span class="ok">HIGH</span>",',
+          '  "rationale": "AKI risk pattern (Cr 2.1, K+ 5.6)",',
+          '  "_kolm": { "k_score": 0.92, "verified": true, "host": "on-device" }',
+          '}'
+        ],
+        holdMs: 2800
+      }
     ];
+
+    const charMs = 11;
+    const lineGapMs = 240;
+
+    function setStage(i) {
+      if (stageEl) {
+        stageEl.textContent = scenes[i].label;
+        stageEl.classList.add('live');
+      }
+      if (capNum) capNum.textContent = scenes[i].capNum;
+      if (capText) capText.innerHTML = scenes[i].capText;
+      dots.forEach((d, idx) => d.classList.toggle('active', idx === i));
+    }
+
+    function setProgress(pct) {
+      if (progFill) progFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    }
+
     if (reduce) {
-      out.innerHTML = lines.map(l => l.t).join('');
+      // static render: show distill scene fully (most representative)
+      setStage(1);
+      out.innerHTML = scenes[1].lines.join('\n');
       term.setAttribute('data-anim', 'done');
+      setProgress(100);
       return;
     }
+
     let buf = '';
-    function play(idx) {
-      if (idx >= lines.length) { term.setAttribute('data-anim', 'done'); return; }
-      const ln = lines[idx];
-      // type char-by-char while preserving HTML tags
+    let sceneStartTs = 0;
+    let sceneDurEst = 0;
+    let progressRaf = 0;
+
+    function tickProgress() {
+      const elapsed = performance.now() - sceneStartTs;
+      const pct = sceneDurEst > 0 ? (elapsed / sceneDurEst) * 100 : 0;
+      setProgress(pct);
+      if (pct < 100) progressRaf = requestAnimationFrame(tickProgress);
+    }
+
+    function typeLine(text, done) {
       const tokens = [];
       let i = 0;
-      while (i < ln.t.length) {
-        if (ln.t[i] === '<') {
-          const close = ln.t.indexOf('>', i);
-          tokens.push(ln.t.slice(i, close + 1));
+      while (i < text.length) {
+        if (text[i] === '<') {
+          const close = text.indexOf('>', i);
+          tokens.push(text.slice(i, close + 1));
           i = close + 1;
         } else {
-          tokens.push(ln.t[i]);
+          tokens.push(text[i]);
           i += 1;
         }
       }
       let k = 0;
       function step() {
-        if (k >= tokens.length) { setTimeout(() => play(idx + 1), 80); return; }
+        if (k >= tokens.length) { done(); return; }
         buf += tokens[k];
         out.innerHTML = buf;
         k += 1;
-        setTimeout(step, ln.d);
+        setTimeout(step, charMs);
       }
-      setTimeout(step, ln.d);
+      step();
     }
-    // wait for hero in view, then start
+
+    function estimateSceneMs(sc) {
+      const chars = sc.lines.reduce((n, l) => n + l.replace(/<[^>]+>/g, '').length, 0);
+      return chars * charMs + sc.lines.length * lineGapMs + sc.holdMs;
+    }
+
+    function playScene(idx) {
+      // crossfade out previous scene
+      frame.classList.add('swapping');
+      setTimeout(() => {
+        setStage(idx);
+        buf = '';
+        out.innerHTML = '';
+        frame.classList.remove('swapping');
+
+        // start progress bar tick
+        sceneStartTs = performance.now();
+        sceneDurEst = estimateSceneMs(scenes[idx]);
+        cancelAnimationFrame(progressRaf);
+        setProgress(0);
+        progressRaf = requestAnimationFrame(tickProgress);
+
+        const sc = scenes[idx];
+        let li = 0;
+        function nextLine() {
+          if (li >= sc.lines.length) {
+            setTimeout(() => {
+              setProgress(100);
+              const next = (idx + 1) % scenes.length;
+              const gap = next === 0 ? 900 : 320;
+              setTimeout(() => playScene(next), gap);
+            }, sc.holdMs);
+            return;
+          }
+          typeLine(sc.lines[li] + '\n', () => {
+            li += 1;
+            setTimeout(nextLine, lineGapMs);
+          });
+        }
+        nextLine();
+      }, 240);
+    }
+
     if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver((entries) => {
-        if (entries.some(e => e.isIntersecting)) { io.disconnect(); play(0); }
+        if (entries.some(e => e.isIntersecting)) {
+          io.disconnect();
+          // initial scene: skip crossfade, start immediately
+          frame.classList.remove('swapping');
+          setStage(0);
+          sceneStartTs = performance.now();
+          sceneDurEst = estimateSceneMs(scenes[0]);
+          setProgress(0);
+          progressRaf = requestAnimationFrame(tickProgress);
+          const sc = scenes[0];
+          let li = 0;
+          (function nextLine() {
+            if (li >= sc.lines.length) {
+              setTimeout(() => {
+                setProgress(100);
+                setTimeout(() => playScene(1), 320);
+              }, sc.holdMs);
+              return;
+            }
+            typeLine(sc.lines[li] + '\n', () => {
+              li += 1;
+              setTimeout(nextLine, lineGapMs);
+            });
+          })();
+        }
       }, { threshold: 0.2 });
       io.observe(term);
     } else {
-      play(0);
+      playScene(0);
+    }
+  })();
+
+  // v7.9.5 — hero video chrome (play/pause, mute, size)
+  (function(){
+    var v = document.getElementById('hero-video');
+    var panel = document.getElementById('hero-video-panel');
+    var wrap = panel && panel.closest('.hero-demo-wide');
+    if (!v) return;
+    function set(btn, pressed, lab, ico) {
+      if (!btn) return;
+      btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+      var labEl = btn.querySelector('.hv-lab'); if (labEl) labEl.textContent = lab;
+      var icoEl = btn.querySelector('.hv-ico');
+      if (icoEl) { icoEl.className = 'hv-ico ' + ico; }
+    }
+    var pp = document.getElementById('hv-playpause');
+    if (pp) {
+      pp.addEventListener('click', function(){
+        if (v.paused) { v.play(); set(pp, true, 'pause', 'hv-ico-pause'); }
+        else { v.pause(); set(pp, false, 'play', 'hv-ico-play'); }
+      });
+      v.addEventListener('pause', function(){ set(pp, false, 'play', 'hv-ico-play'); });
+      v.addEventListener('play',  function(){ set(pp, true, 'pause', 'hv-ico-pause'); });
+    }
+    // Size toggle. On desktop: shrink/expand the panel width.
+    // On mobile (<= 720px): the panel width toggle has no visible effect since
+    // the viewport is already narrower than 860px, so the button instead enters
+    // native Fullscreen on the <video> element. That gives mobile users a real
+    // "expand" affordance that actually does something.
+    var sz = document.getElementById('hv-size');
+    if (sz && wrap) {
+      sz.addEventListener('click', function(){
+        var isMobile = window.matchMedia('(max-width: 720px)').matches;
+        if (isMobile) {
+          var target = v;
+          var req = target.requestFullscreen
+                 || target.webkitEnterFullscreen   // iOS Safari video-only
+                 || target.webkitRequestFullscreen
+                 || target.mozRequestFullScreen
+                 || target.msRequestFullscreen;
+          if (req) {
+            try { req.call(target); }
+            catch (e) {
+              try { if (target.webkitEnterFullscreen) target.webkitEnterFullscreen(); } catch (_) {}
+            }
+          }
+          return;
+        }
+        var isCompact = wrap.classList.toggle('compact');
+        if (isCompact) set(sz, true,  'fullsize', 'hv-ico-expand');
+        else            set(sz, false, 'smaller',  'hv-ico-shrink');
+      });
+      // Update label on mobile to reflect what the button actually does.
+      if (window.matchMedia('(max-width: 720px)').matches) {
+        var lab = sz.querySelector('.hv-lab'); if (lab) lab.textContent = 'fullscreen';
+        var ico = sz.querySelector('.hv-ico'); if (ico) ico.className = 'hv-ico hv-ico-expand';
+        sz.setAttribute('aria-label', 'enter fullscreen');
+      }
     }
   })();
 

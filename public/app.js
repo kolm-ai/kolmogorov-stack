@@ -92,6 +92,28 @@ window.KS = (() => {
     return apiKey() || await autoMint();
   }
 
+  // hydrateSession: for cookie-authed users (OAuth flow), mirror the api_key
+  // from /v1/account into localStorage so legacy code paths that gate on
+  // localStorage immediately see the user as signed in. Returns the api_key
+  // string when authed (cookie or localStorage), '' otherwise. Safe to call
+  // multiple times; no-op when localStorage already has a key.
+  async function hydrateSession() {
+    if (apiKey()) return apiKey();
+    try {
+      const res = await fetch('/v1/account', {
+        credentials: 'include',
+        headers: { accept: 'application/json' },
+      });
+      if (!res.ok) return '';
+      const body = await res.json().catch(() => ({}));
+      if (body && body.api_key) {
+        setApiKey(body.api_key);
+        return body.api_key;
+      }
+    } catch (_) {}
+    return '';
+  }
+
   function fmtJSON(value) {
     return JSON.stringify(value, null, 2);
   }
@@ -152,6 +174,7 @@ window.KS = (() => {
     api,
     toast,
     ensureKey,
+    hydrateSession,
     apiKey,
     setApiKey,
     clearApiKey,

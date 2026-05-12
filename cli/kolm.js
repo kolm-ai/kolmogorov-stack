@@ -150,6 +150,7 @@ COMMANDS
   rag <sub>                        airgapped local lookup (index|query|attach|list)
   doctor                           sanity-check env (config, cloud, docker, project)
   logs [--limit n] [--artifact x]  tail local run history (~/.kolm/logs/runs.jsonl)
+  ask "<question>"                 natural-language gateway: status, builds, install, compile, upgrade
   config [base|api_key] [value]    inspect or set config
   version                          print version (CLI + server contract)
 
@@ -176,6 +177,25 @@ Continue) can auto-attach the project's .kolm artifacts via 'kolm serve --mcp'.
 
 SCHEMA
   https://kolm.ai/docs/kolm-yaml-v0.1.json
+`,
+  ask: `kolm ask - ask in plain English. Routes through the deterministic
+natural-language assistant (no LLM round-trip). Useful when you don't remember
+the exact verb-noun grammar.
+
+USAGE
+  kolm ask "<your question>"
+  kolm "<your question>"             (also works — auto-detected)
+
+EXAMPLES
+  kolm ask "what's my status"
+  kolm ask "show my builds"
+  kolm ask "compile a recipe that redacts secrets"
+  kolm ask "install claude-code"
+  kolm ask "how much have i used this month"
+  kolm ask "upgrade to pro"
+
+The server-side intent parser is deterministic and rule-based — never an LLM,
+never your data leaving — and returns a narration + concrete next steps.
 `,
   login: `kolm login - paste your API key from the cloud dashboard.
 
@@ -2106,6 +2126,81 @@ async function cmdVersion(args) {
   }
 }
 
+// ---------- natural-language ask ----------
+// `kolm ask "<question>"` routes a free-text prompt through /v1/assistant.
+// The server-side intent parser is deterministic and rule-based (no LLM
+// round-trip), and returns { ok, intent, narration, data?, next_steps? }.
+// We render the narration + next_steps so non-technical users get a useful
+// reply (or a guided path) without having to know any verb-noun grammar.
+async function cmdAsk(args) {
+  if (!args.length || args[0] === '--help' || args[0] === '-h') {
+    console.log(HELP.ask || `kolm ask - ask in natural language. Usage: kolm ask "<your question>"`);
+    return;
+  }
+  const c = loadConfig();
+  if (!c.api_key) {
+    console.error('not signed in. run: kolm login   (or paste your key from https://kolm.ai/dashboard)');
+    process.exit(1);
+  }
+  const prompt = args.join(' ').replace(/^["']|["']$/g, '');
+  try {
+    const r = await api(c, 'POST', '/v1/assistant', { prompt });
+    if (r.narration) {
+      console.log('');
+      console.log(r.narration);
+      console.log('');
+    }
+    if (r.data && r.data.command) {
+      console.log('  ' + r.data.command);
+      console.log('');
+    }
+    if (r.data && r.data.curl) {
+      console.log(r.data.curl);
+      console.log('');
+    }
+    if (Array.isArray(r.next_steps) && r.next_steps.length) {
+      console.log('try:');
+      for (const s of r.next_steps) {
+        const tail = s.prompt ? `kolm ask "${s.prompt}"` : (s.href ? c.base.replace(/\/$/, '') + s.href : '');
+        console.log('  ' + (s.label || '').padEnd(12) + tail);
+      }
+      console.log('');
+    }
+    if (Array.isArray(r.data && r.data.items) && r.data.items.length) {
+      for (const it of r.data.items.slice(0, 10)) {
+        console.log('  ' + (it.id || '').padEnd(24) + ' ' + (it.name || '').padEnd(28) + (it.k_score != null ? `K=${it.k_score}` : ''));
+      }
+      console.log('');
+    }
+    if (!r.ok && !r.narration) {
+      console.error('assistant: no reply');
+      process.exit(1);
+    }
+  } catch (e) {
+    if (e.status === 401) {
+      console.error('auth_required. run: kolm login');
+      process.exit(1);
+    }
+    throw e;
+  }
+}
+
+// Detect when the user typed a bare natural-language string instead of a
+// verb (e.g. `kolm "what's my status"` or `kolm refund the customer in 87421`).
+// We route through /v1/assistant the same way `kolm ask` does so non-technical
+// users get a useful reply without memorising the verb-noun grammar.
+function looksLikeNaturalLanguage(cmd, rest) {
+  if (!cmd) return false;
+  if (cmd.startsWith('-')) return false;
+  // multi-word first arg ("what's my status") OR mixed-case sentence-y
+  if (/\s/.test(cmd)) return true;
+  // single-word cmd that is clearly English: ends with ? or contains apostrophe
+  if (/[?']/.test(cmd)) return true;
+  // sentence-style: starts with a question word + more args
+  if (rest.length && /^(what|how|where|when|why|who|show|tell|give|make|build|let|please|i|my)$/i.test(cmd)) return true;
+  return false;
+}
+
 // ---------- dispatch ----------
 // If the user previously compiled an artifact via `kolm compile --spec` we
 // auto-saved a per-user `local_receipt_secret` to ~/.kolm/config.json so the
@@ -2148,6 +2243,7 @@ async function main() {
       case 'rag':      await cmdRag(rest); break;
       case 'doctor':   await cmdDoctor(rest); break;
       case 'logs':     await cmdLogs(rest); break;
+      case 'ask':      await cmdAsk(rest); break;
       case 'version':
       case '--version':
       case '-v':       await cmdVersion(rest); break;
@@ -2155,7 +2251,15 @@ async function main() {
       case '--help':
       case '-h':
       case undefined:  usage(rest && rest[0]); break;
-      default:         console.error('unknown command:', cmd); usage(); process.exit(1);
+      default:
+        if (looksLikeNaturalLanguage(cmd, rest)) {
+          await cmdAsk([cmd, ...rest]);
+        } else {
+          console.error('unknown command:', cmd);
+          console.error('try: kolm ask "' + [cmd, ...rest].join(' ') + '"   (natural-language fallback)');
+          usage();
+          process.exit(1);
+        }
     }
   } catch (e) {
     console.error('error:', e.message);

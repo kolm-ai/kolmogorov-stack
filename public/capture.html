@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>kolm capture &middot; turn your OpenAI bill into a local model</title>
+<meta name="description" content="Point your OpenAI / Anthropic calls at kolm capture. Every successful response becomes a training example. At threshold, kolm compiles them into a signed local artifact. The frontier API bill becomes a deposit account.">
+<meta name="keywords" content="OpenAI cost reduction, LoRA distillation, kolm capture, AI cost savings, local model, frontier API proxy, inference cost cutting">
+<meta name="theme-color" content="#0b0d10">
+<meta name="color-scheme" content="dark light">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="author" content="Kolmogorov">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="kolm capture &middot; the frontier API bill becomes a deposit account">
+<meta property="og:description" content="Proxy your existing OpenAI / Anthropic traffic. Every paid call becomes a training pair. At 1,000, kolm distills a signed local LoRA. Same task, your hardware, no bill.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/capture">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="kolm capture &middot; turn your OpenAI bill into a local model">
+<meta name="twitter:description" content="Drop-in proxy. Every paid call becomes a training pair. At threshold, kolm distills a signed local LoRA. Your data, your hardware, no bill.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/capture">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://kolm.ai/capture",
+      "url": "https://kolm.ai/capture",
+      "name": "kolm capture - turn your OpenAI bill into a local model",
+      "description": "Proxy your existing frontier-API traffic. Captures verified pairs. Compiles a signed local LoRA at threshold."
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "kolm capture",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS, Linux, Windows",
+      "url": "https://kolm.ai/capture",
+      "description": "A drop-in proxy for OpenAI / Anthropic that captures every paid (input, output) pair and distills a signed local model at threshold.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+  ]
+}
+</script>
+<style>
+  /* hero */
+  .cap-hero { padding: 88px 0 56px; position: relative; overflow: hidden; }
+  .cap-hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 1000px 480px at 22% 8%, rgba(126,240,210, 0.10), transparent 60%); pointer-events: none; }
+  .cap-hero .wrap { position: relative; max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+  .cap-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #7ef0d2; margin-bottom: 18px; display: inline-flex; align-items: center; gap: 8px; }
+  .cap-eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.55); }
+  .cap-hero h1 { margin: 0 0 18px; font-size: clamp(36px, 5.6vw, 64px); line-height: 1.04; font-weight: 500; max-width: 18ch; letter-spacing: -0.005em; color: var(--ink, #faf2e1); }
+  .cap-hero h1 .swap { color: #7ef0d2; }
+  .cap-hero p.lede { margin: 0 0 28px; font-size: clamp(16px, 1.3vw, 19px); line-height: 1.55; color: var(--ink-mute, #b5bdb1); max-width: 60ch; }
+  .cap-hero p.lede b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .cap-hero p.lede code { font-family: var(--mono); font-size: 0.9em; background: rgba(126,240,210, 0.08); border: 1px solid rgba(126,240,210, 0.20); border-radius: 4px; padding: 1px 6px; color: #c1f5e3; }
+  .cap-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .cap-actions .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-size: 14.5px; font-weight: 540; font-family: var(--sans); transition: transform 120ms, background 120ms, border-color 120ms; }
+  .cap-actions .btn.primary { background: #7ef0d2; color: #051a14; }
+  .cap-actions .btn.primary:hover { transform: translateY(-1px); background: #9af7df; }
+  .cap-actions .btn.ghost { border: 1px solid var(--line); color: var(--ink, #faf2e1); }
+  .cap-actions .btn.ghost:hover { border-color: rgba(236,231,220, 0.45); }
+  .cap-microcopy { margin-top: 14px; font-family: var(--mono); font-size: 12px; color: var(--ink-faint, #737c73); letter-spacing: 0; max-width: 54ch; line-height: 1.55; }
+  .cap-microcopy b { color: var(--ink-mute, #b5bdb1); font-weight: 540; }
+
+  /* 3-up flow strip */
+  .cap-flow { margin: 0 auto; max-width: 1180px; padding: 24px 32px 0; }
+  .cap-flow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 880px) { .cap-flow-grid { grid-template-columns: 1fr; } }
+  .cap-flow-cell { padding: 22px 24px 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); position: relative; }
+  .cap-flow-num { position: absolute; top: -10px; left: 18px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #051a14; background: #7ef0d2; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+  .cap-flow-cell h3 { margin: 0 0 8px; font-size: 16px; font-weight: 540; color: var(--ink, #faf2e1); line-height: 1.3; }
+  .cap-flow-cell p { margin: 0; font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; }
+  .cap-flow-cell code { font-family: var(--mono); font-size: 11.5px; color: #c1f5e3; background: rgba(126,240,210, 0.06); padding: 1px 5px; border-radius: 3px; }
+
+  /* live cost math */
+  .cap-math { margin: 64px auto 0; max-width: 1180px; padding: 0 32px; }
+  .cap-math-card { padding: 32px 36px; border: 1px solid #7ef0d2; border-radius: 16px; background: linear-gradient(180deg, rgba(126,240,210, 0.04), rgba(0,0,0,0.18) 60%); }
+  .cap-math-head { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #7ef0d2; margin-bottom: 6px; }
+  .cap-math h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; color: var(--ink, #faf2e1); }
+  .cap-math .lede { margin: 0 0 24px; font-size: 14px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; max-width: 60ch; }
+  .cap-math-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 26px; align-items: stretch; }
+  @media (max-width: 880px) { .cap-math-grid { grid-template-columns: 1fr; } }
+  .cap-math-knobs { display: grid; gap: 12px; }
+  .cap-math-row { display: grid; grid-template-columns: 1fr; gap: 6px; }
+  .cap-math-row label { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint, #737c73); }
+  .cap-math-row input { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.32); border: 1px solid var(--line); color: var(--ink); border-radius: 7px; font-family: var(--mono); font-size: 13.5px; outline: none; transition: border-color 120ms; }
+  .cap-math-row input:focus { border-color: #7ef0d2; }
+  .cap-math-row.row2 { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cap-math-out { padding: 22px 26px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.28); display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+  .cap-math-out .big { font-family: var(--mono); font-size: clamp(36px, 4.6vw, 52px); font-weight: 600; color: #7ef0d2; line-height: 1; letter-spacing: -0.01em; }
+  .cap-math-out .big .unit { font-size: 0.45em; color: var(--ink-mute, #b5bdb1); margin-left: 6px; font-weight: 400; }
+  .cap-math-out .sub { font-size: 13px; color: var(--ink-mute, #b5bdb1); line-height: 1.5; }
+  .cap-math-out .sub b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .cap-math-out .ann { margin-top: 8px; padding-top: 12px; border-top: 1px dashed var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); letter-spacing: 0; }
+  .cap-math-out .ann b { color: var(--ink-mute, #b5bdb1); font-weight: 540; }
+
+  /* 7-min steps */
+  .cap-steps { margin: 64px auto 0; max-width: 1180px; padding: 0 32px; }
+  .cap-steps h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; color: var(--ink, #faf2e1); }
+  .cap-steps .lede { margin: 0 0 26px; font-size: 14px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; max-width: 60ch; }
+  .cap-steps pre { background: #0a0c10; border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; font-family: var(--mono); font-size: 13px; color: var(--ink, #faf2e1); line-height: 1.65; overflow-x: auto; margin: 0 0 16px; }
+  .cap-steps pre .prompt { color: #7ef0d2; }
+  .cap-steps pre .dim { color: var(--ink-faint, #737c73); }
+  .cap-steps pre .ok { color: #7ef0d2; }
+  .cap-steps pre .comment { color: var(--ink-faint, #737c73); }
+  .cap-steps .step-grid { display: grid; grid-template-columns: 32px 1fr; gap: 14px; align-items: start; margin-bottom: 18px; }
+  .cap-steps .step-num { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 50%; font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute, #b5bdb1); margin-top: 2px; }
+  .cap-steps .step-body h3 { margin: 0 0 4px; font-size: 15.5px; font-weight: 540; color: var(--ink, #faf2e1); line-height: 1.3; }
+  .cap-steps .step-body p { margin: 0 0 12px; font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; max-width: 64ch; }
+
+  /* honest scope · what ships today vs target */
+  .cap-honesty { margin: 64px auto 0; max-width: 1180px; padding: 0 32px; }
+  .cap-honesty-head { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint, #737c73); margin-bottom: 12px; }
+  .cap-honesty h2 { margin: 0 0 22px; font-size: clamp(20px, 2.2vw, 24px); font-weight: 540; color: var(--ink, #faf2e1); }
+  .cap-honesty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 880px) { .cap-honesty-grid { grid-template-columns: 1fr; } }
+  .cap-honesty-cell { padding: 20px 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); }
+  .cap-honesty-cell .badge { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 12px; }
+  .cap-honesty-cell .badge.shipped { color: #051a14; background: #7ef0d2; font-weight: 600; }
+  .cap-honesty-cell .badge.target { color: var(--ink-faint, #737c73); background: transparent; border: 1px solid var(--line); }
+  .cap-honesty-cell ul { margin: 0; padding-left: 18px; }
+  .cap-honesty-cell li { font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.65; margin-bottom: 6px; }
+  .cap-honesty-cell li b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .cap-honesty-cell li code { font-family: var(--mono); font-size: 11.5px; color: #c1f5e3; background: rgba(126,240,210, 0.06); padding: 1px 5px; border-radius: 3px; }
+
+  /* CTA */
+  .cap-cta { margin: 80px auto 88px; max-width: 1180px; padding: 56px 36px; text-align: center; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(180deg, rgba(126,240,210, 0.05), transparent 60%); }
+  .cap-cta h2 { margin: 0 0 8px; font-size: clamp(24px, 2.8vw, 32px); font-weight: 540; color: var(--ink, #faf2e1); }
+  .cap-cta p { margin: 0 0 24px; font-size: 14.5px; color: var(--ink-mute, #b5bdb1); }
+  .cap-cta .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand"><span>kolm</span></a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/use-cases">Solutions</a>
+      <a href="/docs">Developers</a>
+      <a href="/pricing">Pricing</a>
+    </nav>
+    <div class="site-actions">
+      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+      <a href="/signin">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="cap-hero">
+  <div class="wrap">
+    <div class="cap-eyebrow">kolm capture &middot; rent-to-own AI</div>
+    <h1>Cut your frontier API bill. <span class="swap">Keep the model.</span></h1>
+    <p class="lede">
+      Point your <code>api.openai.com</code> calls at kolm capture. Every successful (input, output) pair gets recorded. At your threshold, kolm hands the corpus to the trainer and you get back a <b>signed local LoRA</b> that runs the same task on your hardware. <b>The frontier bill becomes a deposit account.</b>
+    </p>
+
+    <div class="cap-actions">
+      <a href="/signup" class="btn primary">Start capturing &rarr;</a>
+      <a href="/use-cases/capture-and-distill" class="btn ghost">How it works</a>
+    </div>
+
+    <p class="cap-microcopy">
+      One-line proxy change. Zero re-prompting. Zero retraining work today. <b>kolm captures pairs you've already paid for.</b>
+    </p>
+  </div>
+</section>
+
+<section class="cap-flow">
+  <div class="cap-flow-grid">
+    <div class="cap-flow-cell">
+      <span class="cap-flow-num">01 capture</span>
+      <h3>Drop-in proxy.</h3>
+      <p>Change your base URL from <code>api.openai.com</code> to <code>kolm.ai/v1/capture/openai</code>. Same model, same response, same key. <b>Every successful call is stored as a training pair.</b></p>
+    </div>
+    <div class="cap-flow-cell">
+      <span class="cap-flow-num">02 distill</span>
+      <h3>Threshold &rarr; corpus &rarr; bridge.</h3>
+      <p>When you hit 1,000+ pairs in a namespace, kolm hands the corpus to the trainer bridge. PEFT LoRA, K-score gate, HMAC-signed <code>.kolm</code> archive. <b>You own the artifact.</b></p>
+    </div>
+    <div class="cap-flow-cell">
+      <span class="cap-flow-num">03 run</span>
+      <h3>Local hardware. No bill.</h3>
+      <p>Run <code>kolm run patient-intake.kolm</code> on a laptop, a phone, or your VPC. The artifact runs the same task. Per-call cost: zero. Vendor lock-in: zero.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cap-math">
+  <div class="cap-math-card">
+    <div class="cap-math-head">live cost math</div>
+    <h2>What you'd save in year one.</h2>
+    <p class="lede">Drop in your volume. Frontier-API costs vs. kolm capture + Pro plan + teacher cycles. <a href="/roi" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210, 0.35)">Open full calculator &rarr;</a></p>
+
+    <div class="cap-math-grid">
+      <div class="cap-math-knobs">
+        <div class="cap-math-row">
+          <label>Monthly API calls</label>
+          <input type="number" id="cm-calls" value="1200000" min="0" step="10000">
+        </div>
+        <div class="cap-math-row row2">
+          <div>
+            <label>Tokens in / call</label>
+            <input type="number" id="cm-tin" value="800" min="0" step="50">
+          </div>
+          <div>
+            <label>Tokens out / call</label>
+            <input type="number" id="cm-tout" value="250" min="0" step="50">
+          </div>
+        </div>
+        <div class="cap-math-row row2">
+          <div>
+            <label>$/1M in</label>
+            <input type="number" id="cm-pin" value="3.00" min="0" step="0.01">
+          </div>
+          <div>
+            <label>$/1M out</label>
+            <input type="number" id="cm-pout" value="15.00" min="0" step="0.01">
+          </div>
+        </div>
+      </div>
+
+      <div class="cap-math-out">
+        <div class="big" id="cm-savings">$0<span class="unit">/yr</span></div>
+        <div class="sub"><b id="cm-mult">0x</b> cheaper vs cloud-only. <span id="cm-payback">Payback: &middot;</span>.</div>
+        <div class="ann">
+          <b>Cloud (cloud-only, year 1):</b> <span id="cm-cloud">&middot;</span><br>
+          <b>kolm (Pro + teacher cycles):</b> <span id="cm-kolm">&middot;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cap-steps">
+  <h2>From frontier bill to local LoRA, in seven minutes.</h2>
+  <p class="lede">Below is the literal flow. No training math, no eval rig.</p>
+
+  <div class="step-grid">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>Swap your base URL.</h3>
+      <p>One line in your SDK config. Everything else stays the same.</p>
+      <pre><span class="comment"># before</span>
+client = OpenAI(base_url="https://api.openai.com/v1")
+
+<span class="comment"># after &middot; same key, same model, same response</span>
+client = OpenAI(base_url="https://kolm.ai/v1/capture/openai")</pre>
+    </div>
+  </div>
+
+  <div class="step-grid">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>Watch your inbox fill up.</h3>
+      <p>Each successful call lands in <code>/captures</code> with the input, output, and a K-score floor estimate. Discard noise; keep the rest.</p>
+      <pre><span class="prompt">$</span> kolm logs --tail
+<span class="dim">› captured: patient-intake (1247 pairs / 7 days)</span>
+<span class="dim">› captured: support-triage (488 pairs / 7 days)</span>
+<span class="ok">ok</span> threshold reached: patient-intake ready for distill</pre>
+    </div>
+  </div>
+
+  <div class="step-grid">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Hand the corpus to the trainer.</h3>
+      <p>kolm packages the captured pairs and calls the trainer bridge. PEFT LoRA fit, K-score gate, HMAC-signed archive. The artifact lands back in your dashboard.</p>
+      <pre><span class="prompt">$</span> kolm compile patient-intake --examples 1247 --receipt
+<span class="dim">› synthesizing verifier from 1247 examples ...</span>
+<span class="dim">› k=8 sample &middot; verify &middot; accept (Q=0.928) ...</span>
+<span class="dim">› stamping K-score &middot; signing artifact ...</span>
+<span class="ok">ok</span> wrote patient-intake.kolm  k_score=0.92  hmac-sha256</pre>
+    </div>
+  </div>
+
+  <div class="step-grid">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h3>Run the artifact on your hardware.</h3>
+      <p>Locally, in your VPC, on a phone. Whatever fits. Per-call cost goes to zero. Compliance moves inside your boundary.</p>
+      <pre><span class="prompt">$</span> kolm run patient-intake.kolm "ID 8842, abnormal labs Cr 2.1 K+ 5.6"
+{
+  "urgency": "<span class="ok">HIGH</span>",
+  "rationale": "AKI risk pattern (Cr 2.1, K+ 5.6)",
+  "_kolm": { "k_score": 0.92, "verified": true, "host": "on-device" }
+}</pre>
+    </div>
+  </div>
+</section>
+
+<section class="cap-honesty">
+  <div class="cap-honesty-head">honest scope</div>
+  <h2>What ships today vs what's roadmap.</h2>
+  <div class="cap-honesty-grid">
+    <div class="cap-honesty-cell">
+      <span class="badge shipped">shipped today</span>
+      <ul>
+        <li><b>Capture proxy</b> for OpenAI and Anthropic. Auth, rate-limit, and namespace routing. <code>/v1/capture/openai</code>, <code>/v1/capture/anthropic</code>.</li>
+        <li><b>Inbox + triage.</b> <code>/captures</code> shows the (input, output) pairs; you can discard noise from the inbox view.</li>
+        <li><b>Bridge handoff at threshold.</b> POST <code>/v1/specialists/auto-distill</code> counts <code>corpus_namespace</code>, packages, and sends the corpus to your trainer bridge with a callback URL.</li>
+        <li><b>Artifact-level receipt.</b> Final <code>.kolm</code> archive is HMAC-signed and re-verifiable by the issuer or a shared-secret holder.</li>
+      </ul>
+    </div>
+    <div class="cap-honesty-cell">
+      <span class="badge target">target architecture</span>
+      <ul>
+        <li><b>In-app distill loop.</b> Today the bridge does the actual LoRA fit; closing the loop in-app is on the roadmap.</li>
+        <li><b>Triage-binding on distill.</b> Today discard only hides from inbox; binding triage to label-export and auto-distill is target arch.</li>
+        <li><b>Per-call HMAC chain</b> across requests, with optional Sigstore Rekor anchoring. Today it's per-artifact HMAC over the archive.</li>
+        <li><b>Server-owned distill status.</b> Today the bridge owns status; <code>/v1/specialists/auto-distill/:id/status</code> is target arch.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="cap-cta">
+  <h2>Stop renting. Start owning.</h2>
+  <p>Free tier captures up to 1,000 pairs/month. No card. No vendor lock.</p>
+  <div class="btn-row">
+    <a href="/signup" class="btn primary" style="padding:14px 24px;border-radius:8px;background:#7ef0d2;color:#051a14;font-weight:540;font-size:15px">Start capturing &rarr;</a>
+    <a href="/pricing" class="btn ghost" style="padding:14px 24px;border-radius:8px;border:1px solid var(--line);color:var(--ink);font-weight:540;font-size:15px">See pricing</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta">
+      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+<script>
+  // live cost math
+  (function(){
+    var $ = function(id){ return document.getElementById(id); };
+    function fmt(n){
+      if (!isFinite(n) || n <= 0) return '$0';
+      if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+      if (n >= 1e3) return '$' + Math.round(n/1e3) + 'K';
+      return '$' + Math.round(n).toLocaleString();
+    }
+    function recompute(){
+      var calls = +$('cm-calls').value || 0;
+      var tin   = +$('cm-tin').value || 0;
+      var tout  = +$('cm-tout').value || 0;
+      var pin   = +$('cm-pin').value || 0;
+      var pout  = +$('cm-pout').value || 0;
+      // cloud year-1
+      var callsYr = calls * 12;
+      var cloud = (callsYr * tin)/1e6 * pin + (callsYr * tout)/1e6 * pout;
+      cloud *= 1.08; // observability + retry overhead
+      // kolm year-1: Pro $49/mo + teacher cycles (8 samples, 2000 rows, 12 cycles default)
+      var kolmPlan = 49 * 12;
+      var teacherPerCycle = (8 * 2000 * tin)/1e6 * pin + (8 * 2000 * tout)/1e6 * pout;
+      var kolm = kolmPlan + (teacherPerCycle * 12);
+      var savings = cloud - kolm;
+      var mult = kolm > 0 ? cloud / kolm : 0;
+      var monthly = cloud / 12;
+      var paybackMonths = monthly > 0 ? Math.max(1, Math.ceil(kolm / monthly)) : 0;
+
+      $('cm-savings').innerHTML = (savings >= 0 ? fmt(savings) : '&minus;' + fmt(-savings)) + '<span class="unit">/yr saved</span>';
+      $('cm-mult').textContent = (mult >= 1 ? mult.toFixed(1) : (1/Math.max(mult,0.001)).toFixed(1)) + 'x';
+      $('cm-payback').textContent = paybackMonths > 0 ? 'Payback: ' + paybackMonths + ' month' + (paybackMonths>1?'s':'') : 'Payback: instant';
+      $('cm-cloud').textContent = fmt(cloud);
+      $('cm-kolm').textContent  = fmt(kolm);
+    }
+    ['cm-calls','cm-tin','cm-tout','cm-pin','cm-pout'].forEach(function(id){
+      var el = $(id); if (el) el.addEventListener('input', recompute);
+    });
+    recompute();
+  })();
+</script>
+
+</body>
+</html>

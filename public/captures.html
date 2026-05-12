@@ -252,8 +252,14 @@
     setTimeout(function () { t.classList.remove('on'); }, 2400);
   }
 
-  var apiKey = key();
-  if (!apiKey) return;
+  // Try cookie-auth hydration first (OAuth users have no localStorage key).
+  (window.KS && window.KS.hydrateSession ? window.KS.hydrateSession() : Promise.resolve('')).then(function () {
+    var apiKey = key();
+    if (!apiKey) return;
+    boot(apiKey);
+  });
+
+  function boot(apiKey) {
 
   var so = document.getElementById('signedout');
   if (so) so.style.display = 'none';
@@ -344,6 +350,7 @@
   });
 
   load();
+  } // end boot()
 })();
 </script>
 <script src="/nav.js" defer></script>

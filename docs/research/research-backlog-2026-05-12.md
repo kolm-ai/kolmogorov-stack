@@ -181,6 +181,23 @@ This backlog keeps the research loop alive. The goal is to convert broad "keep r
 | RB-139 | How should local RAG indexes protect sensitive paths and previews? | Evaluate absolute path storage, previews, permissions, redaction, and optional encrypted local storage. | Local RAG privacy policy and flags. |
 | RB-140 | Which public pages need recall claim downgrades? | Review recall, API, docs, whitepaper, security, vs-rag, vs-openpipe, vs-predibase, and vs-ollama pages. | Recall claim cleanup queue. |
 
+## P0/P1: Release Distribution Governance
+
+| ID | Question | Evidence Needed | Output |
+| --- | --- | --- | --- |
+| RB-167 | What is the canonical public CLI install path before v0.1.0? | Compare missing npm package, GitHub-source install, package dry-run contents, and docs tabs. | Preview install contract. |
+| RB-168 | Which npm packages should exist at launch? | Decide root CLI, Node SDK, MCP package, package scopes, names, files, license, and ownership. | npm package plan and publish checklist. |
+| RB-169 | How should root package contents be curated? | Snapshot `npm pack --dry-run`, denylist docs/research/test/fixtures/public bulk, and include license. | `.npmignore` or `files` policy. |
+| RB-170 | How should GitHub Action stay in CLI contract? | Smoke action against current CLI, remove missing commands, and decide JSON output shape. | Action contract test and updated action. |
+| RB-171 | What package-manager labels are true today? | Check npm, Homebrew tap, winget path, Scoop manifest, PyPI, Docker registry, and VS Code marketplace. | Evidence-backed integration status manifest. |
+| RB-172 | What is the Python package name strategy? | Resolve PyPI `kolm` collision, package scripts, current README, and CLI wrapper drift. | Python packaging decision. |
+| RB-173 | Which Python wrappers must be rewritten? | Test `compile`, `run`, `verify`, `wait`, auth env, and CLI fallback against root CLI. | Python SDK contract tests. |
+| RB-174 | What is the VS Code extension release path? | Update base URL/imports, package VSIX, add smoke tests, and decide marketplace publisher. | VS Code release checklist. |
+| RB-175 | Should Docker mean server image, CLI image, or example command? | Compare root Dockerfile, public Docker command, registry image availability, and signing needs. | Docker distribution contract. |
+| RB-176 | What release workflow emits SLSA, Sigstore, and SBOM evidence? | Add tag workflow with id-token, package publish, Cosign, CycloneDX, checksums, and verification jobs. | Signed-release workflow. |
+| RB-177 | How should docs render shipped/preview labels? | Build a release-evidence JSON manifest and drive public integration badges from checks. | Generated integration status labels. |
+| RB-178 | Which package-manager tests block launch? | Add npm view, pip/PyPI ownership, tap URL, winget/Scoop, action smoke, package dry-run, and VSIX checks. | Release CI gate. |
+
 ## P0/P1: Device Offline Browser Governance
 
 | ID | Question | Evidence Needed | Output |

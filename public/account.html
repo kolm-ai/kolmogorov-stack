@@ -237,14 +237,15 @@
   }
 
   async function loadAccount() {
-    var key = KS.apiKey();
-    if (!key) {
-      $('acct-empty').hidden = false;
-      $('acct-loaded').hidden = true;
-      return;
-    }
+    // Try the API call first — cookie auth (OAuth) works without localStorage.
+    // Only show the empty state if the call actually 401s.
     try {
       var account = await KS.api('/v1/account');
+      // Mirror api_key into localStorage so legacy code paths see it.
+      if (account.api_key && !KS.apiKey()) {
+        KS.setApiKey(account.api_key);
+      }
+      var key = account.api_key || KS.apiKey() || '';
       $('acct-empty').hidden = true;
       $('acct-loaded').hidden = false;
       $('acct-plan').textContent = account.plan || (account.admin ? 'admin' : 'free');
@@ -253,14 +254,20 @@
       $('acct-quota').textContent = 'of ' + fmt(account.quota) + ' per month';
       $('acct-remaining').textContent = fmt(account.remaining == null ? Math.max(0, Number(account.quota || 0) - Number(account.used || 0)) : account.remaining);
       $('acct-pct').textContent = pct(account.used, account.quota) + '% used';
-      $('acct-key').value = maskKey(key);
+      $('acct-key').value = key ? maskKey(key) : '(session — no key exposed)';
       renderBillingBanner(account);
       initSettings(account);
-    } catch (_) {
-      KS.clearApiKey();
-      $('acct-empty').hidden = false;
-      $('acct-loaded').hidden = true;
-      KS.toast('Key invalid or expired. Paste another key.', 3200);
+    } catch (e) {
+      if (e && e.status === 401) {
+        KS.clearApiKey();
+        $('acct-empty').hidden = false;
+        $('acct-loaded').hidden = true;
+        KS.toast('Sign in or paste an API key.', 3200);
+      } else {
+        $('acct-empty').hidden = false;
+        $('acct-loaded').hidden = true;
+        KS.toast('Could not reach the server. Try again.', 3200);
+      }
     }
   }
 

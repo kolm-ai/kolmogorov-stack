@@ -40,18 +40,23 @@
   var gh = actions.querySelector('#gh-star, .gh-star');
   if (gh && gh.parentNode) gh.parentNode.removeChild(gh);
 
-  // Auth-aware status pill. Reads kolm_api_key (and aliases) from localStorage
-  // and renders a tiny "signed in" indicator next to the actions so the user
-  // never feels like a navigation dropped them. Idempotent · re-runs replace
-  // the existing pill rather than stacking.
+  // Auth-aware status pill. Validates the session before showing anything ·
+  // localStorage alone is not trusted (stale keys from deleted tenants would
+  // falsely render "signed in"). Single source of truth = /v1/account 200
+  // with api_key in the payload. Cookie session OR x-api-key header
+  // authenticates the call; on 401 we wipe stale keys so the pill stays off.
   var KEY_NAMES = ['kolm_api_key', 'apiKey', 'recipeApiKey', 'ks_api_key'];
   function readKey() {
     try { for (var i = 0; i < KEY_NAMES.length; i++) { var v = localStorage.getItem(KEY_NAMES[i]); if (v) return v; } } catch (e) {}
     return '';
   }
+  function clearKeys() {
+    try { KEY_NAMES.forEach(function (n) { localStorage.removeItem(n); }); } catch (e) {}
+  }
   var existingPill = actions.querySelector('.kolm-auth-pill');
   if (existingPill && existingPill.parentNode) existingPill.parentNode.removeChild(existingPill);
-  if (readKey()) {
+  function renderPill() {
+    if (actions.querySelector('.kolm-auth-pill')) return;
     var pill = document.createElement('a');
     pill.href = '/dashboard';
     pill.className = 'kolm-auth-pill kolm-auth-pill--in';
@@ -59,6 +64,35 @@
     pill.innerHTML = '<span class="dot"></span><span class="lbl">signed in</span>';
     actions.insertBefore(pill, actions.firstChild);
   }
+  (function validateSession() {
+    var localKey = readKey();
+    var headers = { accept: 'application/json' };
+    if (localKey) headers['x-api-key'] = localKey;
+    try {
+      fetch('/v1/account', { credentials: 'include', headers: headers })
+        .then(function (r) {
+          if (r.status === 401 || r.status === 403) { clearKeys(); return null; }
+          return r.ok ? r.json() : null;
+        })
+        .then(function (j) {
+          // Canonical signed-in signal = presence of tenant `id` field.
+          // /v1/account returns `{admin, tenant}` (no id) for unauth /
+          // admin-token responses, and `{id, name, ..., api_key}` for
+          // an authenticated real tenant.
+          if (j && j.id) {
+            if (j.api_key) {
+              try { KEY_NAMES.forEach(function (n) { localStorage.setItem(n, j.api_key); }); } catch (e) {}
+            }
+            renderPill();
+          } else if (localKey) {
+            // 200 but no tenant id (admin token or anon response shape) ·
+            // the localStorage key did not authenticate as a real tenant.
+            clearKeys();
+          }
+        })
+        .catch(function () {});
+    } catch (e) {}
+  })();
 
   // Theme toggle is pre-baked. Wire the click handler.
   var tt = actions.querySelector('.theme-toggle');

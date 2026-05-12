@@ -1,0 +1,12 @@
+import { chromium } from 'playwright';
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 414, height: 896 } });
+const page = await ctx.newPage();
+await page.goto('https://kolm.ai/', { waitUntil: 'domcontentloaded' });
+await page.waitForTimeout(1500);
+await page.screenshot({ path: 'scripts/qa-prod-mobile-hero.png', fullPage: false });
+await page.evaluate(() => window.scrollTo(0, 1800));
+await page.waitForTimeout(400);
+await page.screenshot({ path: 'scripts/qa-prod-mobile-anatomy.png', fullPage: false });
+console.log('prod mobile captured');
+await browser.close();

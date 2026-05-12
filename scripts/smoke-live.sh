@@ -502,7 +502,7 @@ check "homepage links to /compile" has "$HOME" 'href="/compile"'
 check "homepage links to /run" has "$HOME" 'href="/run"'
 check "homepage links to /recall" has "$HOME" 'href="/recall"'
 check "homepage references K-score" hashi "$HOME" "k-score\|K-score"
-check "homepage mentions MCP" hashi "$HOME" "mcp"
+check "homepage mentions compile" hashi "$HOME" "compile"
 
 # /serve carries the kolm serve --mcp claim (moved off /run in v5)
 SERVE_BODY=$(curl -s "$URL/serve")
@@ -641,13 +641,13 @@ check "/articles advertises RSS"       has "$AI" 'application/rss+xml'
 
 # Homepage hero thesis + GitHub star + ICP doors
 H2=$(curl -s "$URL/")
-check "homepage thesis (compounding)"  has "$H2" 'Each compile bakes in everything'
+check "homepage compile-anatomy thesis" has "$H2" 'Four passes. One file'
 check "homepage 2-CTA: Try kolm"       has "$H2" 'Try kolm &rarr;'
 check "homepage 2-CTA: Book a demo"    has "$H2" 'Book a demo &rarr;'
 check "homepage demo mailto"           has "$H2" 'mailto:founders@kolm.ai'
 check "homepage registry counter"      has "$H2" 'js-registry-count'
 check "homepage registry endpoint"     has "$H2" "fetch('/v1/registry/public'"
-check "homepage intuitive lede"        has "$H2" 'Show kolm what you want it to do'
+check "homepage intuitive lede"        has "$H2" 'Describe what you want'
 check "homepage roi link"              has "$H2" '/roi'
 check "homepage nav: Solutions"        has "$H2" '>Solutions<'
 check "homepage nav: Developers"       has "$H2" '>Developers<'
@@ -702,16 +702,16 @@ check "/v1/plans teams"                has "$PLANS" '"id":"teams"'
 check "/v1/plans enterprise"           has "$PLANS" '"id":"enterprise"'
 
 # Homepage hero + system-map (the loop)
-check "homepage hero intuitive lede"   has "$H2" 'small AI that does that task'
-check "homepage system-map the loop"   has "$H2" 'Compile, ship, run, evolve'
-check "homepage system-map Bundle"     has "$H2" '>Bundle</a>'
+check "homepage hero intuitive lede"   has "$H2" 'compiled to your task'
+check "homepage cinematic close"       has "$H2" 'kolm-hero.mp4'
+check "homepage compile-anatomy step"  has "$H2" 'compile-anatomy'
 
 echo ""
 echo "=== 30. v7.0 day-1 — brand anchor + rent-vs-buy ==="
 B30_HOME=$(curl -s "$URL/")
 check "homepage H1 lock 'compiled to your task'" has "$B30_HOME" 'compiled to your task'
-check "homepage compounding thesis line"           has "$B30_HOME" 'Each compile bakes in everything'
-check "homepage reg-tele open spec id"             has "$B30_HOME" 'reg-tele-id.*open spec'
+check "homepage compile-anatomy yours-forever"     has "$B30_HOME" 'Yours forever'
+check "homepage trust-line open source"            has "$B30_HOME" 'Open source'
 B30_MAN=$(curl -s "$URL/manifesto")
 check "/manifesto has brand-anchor paragraph"      hashi "$B30_MAN" 'andrey kolmogorov\|smallest specialist program'
 check "/manifesto mentions RS-1 spec"              has "$B30_MAN" 'RS-1'
@@ -1314,31 +1314,38 @@ check "/articles/kolm-file-format manifest" has "$FF" 'manifest.json'
 check "/articles/kolm-file-format old tree retired" hashno "$FF" 'diag diag-tree'
 
 echo ""
-echo "=== 45. homepage cred-band, reg-tele, and conversion surface ==="
+echo "=== 45. homepage v7.9.5 consolidated surface ==="
 HOME=$(curl -s "$URL/")
-check "/ cred-band compliance"         has "$HOME" 'Compliance built in'
-check "/ cred-band reliable"           has "$HOME" 'Same answer, every time'
-check "/ cred-band yours forever"      has "$HOME" 'Yours forever'
-check "/ cred-band open spec link"     has "$HOME" 'href="/spec"'
-# design-partner standalone strip cut — /enterprise reg-strip footer now carries the entry point
-check "/ enterprise reg-strip footer"  has "$HOME" 'enterprise overview'
-check "/ no kolm-benchmark-1 in hero"  hashno "$HOME" 'spec &middot; kolm-benchmark-1'
-check "/ no K-score formula in hero"   hashno "$HOME" 'K = 0.40&middot;A'
-check "/ no design-partner wall"       hashno "$HOME" 'Five reserved, five open'
-check "/ defense reg-card link"        has "$HOME" 'href="/defense"'
-check "/ enterprise overview link"     has "$HOME" 'href="/enterprise"'
-check "/ legal reg-card present"       has "$HOME" '<a href="/legal" class="reg-card">'
-check "/ registry-count dual class"    has "$HOME" 'id="registry-count" class="js-registry-count"'
-check "/ no fabricated +10pp claim"    hashno "$HOME" '\+10\.67pp'
-check "/ no fabricated +15pp claim"    hashno "$HOME" '\+15\.33pp'
-check "/ reg-tele band present"        has "$HOME" 'class="reg-tele"'
-check "/ reg-tele 4 cells"             has "$HOME" 'reg-tele-cell'
-check "/ reg-tele artifacts label"     has "$HOME" 'artifacts signed'
-check "/ reg-tele open spec id"        has "$HOME" 'reg-tele-id.*open spec'
-check "/ reg-tele runtime kolm"        has "$HOME" 'kolm/0.5'
-check "/ reg-tele receipt HMAC"        has "$HOME" '>HMAC<'
-check "/ reg-tele receipt SHA-256"     has "$HOME" 'SHA-256</span>'
-check "/ no orphan registry-counter"   hashno "$HOME" 'class="registry-counter"'
+# v7.9.5: reg-strip, cred-band, vr 3-card grid, reg-tele all deleted as duplicates/clutter.
+# Consolidated to: hero · video · compile-anatomy · ROI-calc · uc-strip (4 cards incl. regulated) · trust-line · CTA
+check "/ compile-anatomy thesis"        has "$HOME" 'Four passes. One file'
+check "/ compile-anatomy step synth"    has "$HOME" 'Synthesize'
+check "/ compile-anatomy step sign"     has "$HOME" 'Sign'
+check "/ uc-card coding"                has "$HOME" 'Agents that don'
+check "/ uc-card capture"               has "$HOME" 'Cut the OpenAI bill'
+check "/ uc-card regulated"             has "$HOME" 'class="uc-card uc-card-reg"'
+check "/ uc-card regulated sublink hc"  has "$HOME" 'class="uc-sublink">healthcare'
+check "/ uc-card regulated sublink fi"  has "$HOME" 'class="uc-sublink">finance'
+check "/ uc-card regulated sublink lg"  has "$HOME" 'class="uc-sublink">legal'
+check "/ uc-card edge"                  has "$HOME" 'Runs offline. Runs on the device'
+check "/ trust-line band"               has "$HOME" 'class="trust-line"'
+check "/ trust-line soc2"               has "$HOME" 'Security audit'
+check "/ trust-line baa"                has "$HOME" 'Healthcare ready'
+check "/ trust-line sdk"                has "$HOME" 'Open source'
+check "/ trust-line rs1"                has "$HOME" 'Signed outputs'
+check "/ hero spec link"                has "$HOME" 'href="/spec"'
+check "/ enterprise link via uc"        has "$HOME" 'href="/enterprise"'
+check "/ no kolm-benchmark-1 in hero"   hashno "$HOME" 'spec &middot; kolm-benchmark-1'
+check "/ no K-score formula in hero"    hashno "$HOME" 'K = 0.40&middot;A'
+check "/ no design-partner wall"        hashno "$HOME" 'Five reserved, five open'
+check "/ no reg-strip"                  hashno "$HOME" '<section class="reg-strip"'
+check "/ no reg-tele duplicate"         hashno "$HOME" 'class="reg-tele"'
+check "/ no trust-strip card grid"      hashno "$HOME" 'class="ts-card"'
+check "/ no vr 3-card grid"             hashno "$HOME" 'class="vr-card"'
+check "/ no orphan registry-counter"    hashno "$HOME" 'class="registry-counter"'
+check "/ no fabricated +10pp claim"     hashno "$HOME" '\+10\.67pp'
+check "/ no fabricated +15pp claim"     hashno "$HOME" '\+15\.33pp'
+check "/ no mute button (no audio)"     hashno "$HOME" 'id="hv-mute"'
 
 echo ""
 echo "=== 46. K-score gate consistency — site-wide 0.85 ==="

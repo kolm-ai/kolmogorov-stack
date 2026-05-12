@@ -423,3 +423,32 @@ This register records primary sources used in the first knowledge-base pass. Sou
 | public-whitepaper-device-current | ../public/whitepaper.html | RS-1 portability/offline claims and v0.1 implementation-status caveat review. |
 | docs-product-device-current | ../docs/PRODUCT.md | Local runtime, no phone-home, and zero-egress positioning review. |
 | tests-site-device-current | ../tests/site.test.js | Static public claim checks, inline script parse behavior, module-script skip, and external script coverage review. |
+
+## Release Distribution Governance Refresh 2026-05-12
+
+| Ref | URL | Used For |
+| --- | --- | --- |
+| kolm-live-integrations-release-current | https://kolm.ai/integrations | Live integration/package-manager shipped labels, install snippets, Node/Python/Docker/GitHub Action claims. |
+| kolm-live-docs-release-current | https://kolm.ai/docs | Live CLI install tabs, missing npm package command, brew tab, source install, and CLI verb docs. |
+| kolm-live-security-release-current | https://kolm.ai/security | Live supply-chain, SLSA, Sigstore, SBOM, and signed-release wording review. |
+| npm-cli-package-current | https://registry.npmjs.org/ | `npm view @kolm/cli` registry availability check. |
+| npm-node-sdk-package-current | https://registry.npmjs.org/ | `npm view @kolmogorov/kolm-sdk` registry availability check. |
+| npm-root-package-current | https://registry.npmjs.org/ | `npm view kolmogorov-stack` registry availability check. |
+| pypi-kolm-current | https://pypi.org/pypi/kolm/json | PyPI package-name ownership and collision review. |
+| github-homebrew-tap-current | https://github.com/kolm/homebrew-kolm | Documented Homebrew tap existence check. |
+| github-winget-current | https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/k/Kolmogorov/kolm/0.1.0 | Windows package-manager manifest existence check. |
+| github-scoop-current | https://github.com/ScoopInstaller/Main/blob/master/bucket/kolm.json | Scoop manifest existence check. |
+| root-package-current | ../package.json | Root CLI bin, private flag, scripts, engine, and package metadata review. |
+| root-npm-pack-current | npm pack dry-run | Root package size, entry count, package contents, lockfile omission, and license-file absence review. |
+| node-sdk-package-current | ../sdk/node/package.json | Node SDK package metadata, files list, bin, and publication state review. |
+| python-sdk-package-current | ../sdk/python/pyproject.toml | Python package name, scripts, package discovery, and PyPI collision review. |
+| python-sdk-client-current | ../sdk/python/kolm/client.py | Python CLI wrapper contract, compile/run/verify behavior, and env behavior review. |
+| mcp-sdk-package-current | ../sdk/mcp/package.json | Legacy MCP package metadata, package status, and artifact-MCP separation review. |
+| vscode-package-current | ../sdk/vscode/package.json | VS Code extension package metadata, activation, commands, and release state review. |
+| vscode-extension-current | ../sdk/vscode/extension.js | VS Code API host, replacement import, command implementation, and syntax review. |
+| github-action-current | ../.github/actions/kolm-compile/action.yml | Composite action install/config/compile/upload/verify contract review. |
+| github-workflows-release-current | ../.github/workflows | Existing lint/smoke workflows and absence of publish, provenance, signing, and SBOM workflows. |
+| docker-release-current | ../Dockerfile | Server Dockerfile base image pin and release-image distinction review. |
+| brew-stub-current | ../scripts/brew/kolm.rb | Homebrew preview status, placeholder SHA, and formula test review. |
+| winget-stub-current | ../scripts/winget/kolm.yaml | Windows package-manager preview status, missing companion manifests, and package claims review. |
+| tests-release-current | ../tests | Absence of package-manager, action, package dry-run, and release-signing tests review. |

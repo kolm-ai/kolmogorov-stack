@@ -232,7 +232,7 @@ verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <sp
         <div class="card does-not">
           <div class="tag">out of scope · n5</div>
           <h3>Recipe sandbox escapes (v0.1)</h3>
-          <p>v0.1 executes JS recipes in <code>node:vm</code> with a frozen <code>lib</code> global. <code>node:vm</code> is <b>defence-in-depth, not a hard security boundary</b> &mdash; synthesized recipes are scanned for canonical escape primitives (<code>process</code>, <code>require</code>, <code>constructor</code>, <code>Function</code>, <code>eval</code>) and rejected on match. For untrusted third-party recipes, run kolm under a hardened isolation layer (isolated-vm, Wasmtime, Firecracker). Roadmap: switch the default sandbox to isolated-vm.</p>
+          <p>v0.1 executes JS recipes in <code>node:vm</code> with a frozen <code>lib</code> global. <code>node:vm</code> is <b>defence-in-depth, not a hard security boundary</b>. Synthesized recipes are scanned for canonical escape primitives (<code>process</code>, <code>require</code>, <code>constructor</code>, <code>Function</code>, <code>eval</code>) and rejected on match. For untrusted third-party recipes, run kolm under a hardened isolation layer (isolated-vm, Wasmtime, Firecracker). Roadmap: switch the default sandbox to isolated-vm.</p>
         </div>
 
       </div>

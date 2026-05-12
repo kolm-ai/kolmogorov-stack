@@ -48,7 +48,7 @@ function setSessionCookie(res, apiKey) {
   res.cookie('kolm_session', apiKey, {
     httpOnly: true,
     secure: isProductionRuntime(),
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000,
     path: '/',
   });
