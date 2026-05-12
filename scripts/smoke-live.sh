@@ -641,7 +641,7 @@ check "/articles advertises RSS"       has "$AI" 'application/rss+xml'
 
 # Homepage hero thesis + GitHub star + ICP doors
 H2=$(curl -s "$URL/")
-check "homepage thesis (compounding)"  has "$H2" 'Every run makes it better'
+check "homepage thesis (compounding)"  has "$H2" 'Each compile bakes in everything'
 check "homepage 2-CTA: Try kolm"       has "$H2" 'Try kolm &rarr;'
 check "homepage 2-CTA: Book a demo"    has "$H2" 'Book a demo &rarr;'
 check "homepage demo mailto"           has "$H2" 'mailto:founders@kolm.ai'
@@ -710,7 +710,7 @@ echo ""
 echo "=== 30. v7.0 day-1 — brand anchor + rent-vs-buy ==="
 B30_HOME=$(curl -s "$URL/")
 check "homepage H1 lock 'compiled to your task'" has "$B30_HOME" 'compiled to your task'
-check "homepage compounding thesis line"           has "$B30_HOME" 'Every run makes it better'
+check "homepage compounding thesis line"           has "$B30_HOME" 'Each compile bakes in everything'
 check "homepage reg-tele open spec id"             has "$B30_HOME" 'reg-tele-id.*open spec'
 B30_MAN=$(curl -s "$URL/manifesto")
 check "/manifesto has brand-anchor paragraph"      hashi "$B30_MAN" 'andrey kolmogorov\|smallest specialist program'

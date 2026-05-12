@@ -241,7 +241,7 @@
     <p>For each task (&ldquo;summarize the chart in 50 words&rdquo;, &ldquo;extract medications and dosages&rdquo;, &ldquo;flag billing-code mismatches&rdquo;), write 5&ndash;10 ideal output examples and a 30-line scoring function. The compiler synthesizes the rest. The verifier is reviewable, version-controlled, and content-hashed.</p>
 
     <h3>Step 3: Compile.</h3>
-    <p>Run <code>kolm compile</code> with the de-identified seed set, your verifier, and a frontier API key. The compiler produces a signed artifact with the recipe pack, the LoRA delta distilled from teacher labels, the recall index, and the receipt chain. Each layer is hashed into the manifest before the K-score gate runs.</p>
+    <p>Run <code>kolm compile</code> with the de-identified seed set, your verifier, and a frontier API key. The compiler produces a signed artifact with the recipe pack, an optional KOLMPACK behavior pack (<i>target architecture: native GGUF-LoRA distilled from teacher labels</i>), an optional KOLMIDX lookup container (<i>target architecture: sqlite-vec recall index</i>), and the HMAC receipt chain. Each layer is hashed into the manifest before the K-score gate runs.</p>
 
     <h3>Step 4: Sign the artifact.</h3>
     <p>The compiler emits a <code>.kolm</code> artifact with a manifest, recipe pack, verifier metadata, held-out tests, and HMAC-bound receipt evidence. The K-score is on the cover; below the configured gate, the artifact should not ship.</p>
