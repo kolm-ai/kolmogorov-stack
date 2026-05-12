@@ -513,7 +513,7 @@ check "/serve clients have h4 cursor"      has "$SERVE_BODY" '<h4>Cursor</h4>'
 check "/serve clients have h4 continue"    has "$SERVE_BODY" '<h4>Continue.dev</h4>'
 check "/serve no orphan offline dup"       hashno "$SERVE_FLAT" 'artifact-dependent</span></div>        <div class="stat"><span class="lbl">Offline'
 check "/serve no orphan receipt fragment"  hashno "$SERVE_BODY" 'checks the upstream anchor, useful when an artifact is shared across machines.</p>'
-check "/serve answer carries receipt h2"   has "$SERVE_BODY" 'Every answer carries a receipt.'
+check "/serve receipts h2"                 has "$SERVE_BODY" 'Receipts: shipped today, deeper tomorrow.'
 check "/serve footer p valid"              has "$SERVE_BODY" 'max-width:36ch;color:var(--ink-faint)">The private AI compiler.</p>'
 for p in serve anatomy cloud k-score; do
   body=$(curl -s "$URL/$p")
