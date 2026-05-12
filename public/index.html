@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="kolm">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="kolm &middot; compile your own AI">
-<meta property="og:description" content="kolm compiles a task into a working AI you own. Model + examples + evaluator + signed receipts, packaged into one runnable artifact. Runs on a laptop, a phone, or in your environment. Your data never moves.">
+<meta property="og:description" content="kolm compiles a task into a working AI you own. Recipes + examples + evaluator + signed receipts, packaged into one runnable artifact. Runs on hardware you control. Inference stays where you put it.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -24,7 +24,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
 <meta name="twitter:title" content="kolm &middot; compile your own AI">
-<meta name="twitter:description" content="kolm compiles a task into a working AI you own. Model + examples + evaluator + signed receipts, packaged into one runnable artifact. Runs on a laptop, a phone, or in your environment. Your data never moves.">
+<meta name="twitter:description" content="kolm compiles a task into a working AI you own. Recipes + examples + evaluator + signed receipts, packaged into one runnable artifact. Runs on hardware you control. Inference stays where you put it.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -628,25 +628,25 @@
       "installUrl": "https://kolm.ai/quickstart",
       "softwareHelp": "https://kolm.ai/docs",
       "releaseNotes": "https://kolm.ai/changelog",
-      "description": "Kolmogorov Stack (kolm) is an AI compiler that turns a task, examples, and approved data into a signed .kolm artifact that runs on a laptop, phone, or inside a network. Every artifact ships with an HMAC-signed receipt and a K-score quality gate.",
+      "description": "Kolmogorov Stack (kolm) is an AI compiler that turns a task, examples, and approved data into a signed .kolm artifact that runs on hardware you control. Every artifact ships with an HMAC-signed receipt and a K-score quality gate.",
       "publisher": { "@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai" },
       "featureList": [
         "Compile natural-language task + examples into a signed .kolm artifact",
-        "On-device runtime with microsecond inference and zero egress",
+        "Local recipe runtime with a monitored zero-egress benchmark harness",
         "HMAC-signed receipt on every run for verifiable inference",
         "K-score quality gate (accuracy, latency, size, cost, coverage)",
         "Model Context Protocol (MCP) server bundled with every artifact",
         "Public artifact registry and reproducible benchmark leaderboard",
         "Hooks dispatcher (PreCompile, PostCompile, PreRun, PostRun, PreBench, PostBench)",
-        "Per-tenant receipt secret with optional Sigstore co-signature"
+        "Per-tenant receipt secret with HMAC v0.1 verification today (Ed25519 ships in RS-2)"
       ],
       "offers": [
         { "@type": "Offer", "name": "Developer", "price": "0",   "priceCurrency": "USD", "category": "free",     "description": "3 compiles/mo, local-only, no plan." },
         { "@type": "Offer", "name": "Starter",   "price": "9",   "priceCurrency": "USD", "category": "starter",  "description": "Solo developer plan. 50 compiles/mo." },
         { "@type": "Offer", "name": "Pro",       "price": "49",  "priceCurrency": "USD", "category": "pro",      "description": "200k compile credits, private registry, 10M-vector recall pool." },
         { "@type": "Offer", "name": "Teams",     "price": "149", "priceCurrency": "USD", "category": "teams",    "description": "5 seats, shared artifact cache, SSO via Google Workspace, audit log, 30M-vector recall pool." },
-        { "@type": "Offer", "name": "Business",  "price": "1499","priceCurrency": "USD", "category": "business", "description": "25 seats, BAA available, dedicated registry, priority compile queue." },
-        { "@type": "Offer", "name": "Enterprise","price": "2999","priceCurrency": "USD", "category": "enterprise","description": "Self-serve enterprise: VPC peering optional, custom retention, signed pilots." }
+        { "@type": "Offer", "name": "Business",  "price": "1499","priceCurrency": "USD", "category": "business", "description": "25 seats, BAA on request, dedicated registry, priority compile queue." },
+        { "@type": "Offer", "name": "Enterprise","price": "2999","priceCurrency": "USD", "category": "enterprise","description": "Self-serve enterprise: VPC peering on request, custom retention, signed pilots." }
       ],
       "aggregateRating": null
     },
@@ -654,7 +654,7 @@
       "@type": "HowTo",
       "@id": "https://kolm.ai/#howto",
       "name": "How to compile a private AI with kolm",
-      "description": "Describe a task, get back a signed .kolm artifact you own and can run on your hardware. No data leaves at runtime.",
+      "description": "Describe a task, get back a signed .kolm artifact you own and can run on your hardware. Inference stays on the hardware you put it on.",
       "totalTime": "PT5M",
       "step": [
         {"@type": "HowToStep", "position": 1, "name": "Install kolm CLI", "text": "Install the kolm CLI from GitHub: npm i -g github:sneaky-hippo/kolmogorov-stack."},
@@ -675,7 +675,7 @@
         {
           "@type": "Question",
           "name": "Can I improve my AI over time?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Capture real use with consent and recompile with better examples. The K-score gate refuses to ship a regression, so each compile is strictly better than the last." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Capture real use with consent and recompile with better examples. The K-score gate refuses to ship a regression, so each version meets or beats the last." }
         },
         {
           "@type": "Question",
@@ -685,7 +685,7 @@
         {
           "@type": "Question",
           "name": "What is actually inside a .kolm file?",
-          "acceptedAnswer": { "@type": "Answer", "text": "A small model, the curated examples, the evaluator, a manifest, and a signed HMAC receipt. One zip-format artifact built against the open RS-1 spec." }
+          "acceptedAnswer": { "@type": "Answer", "text": "A model pointer (model.gguf record), the curated examples, the deterministic recipes, the evaluator, a manifest, and a signed HMAC receipt. One zip-format artifact built against the open RS-1 spec." }
         },
         {
           "@type": "Question",
@@ -695,7 +695,7 @@
         {
           "@type": "Question",
           "name": "Does my data leave the device at runtime?",
-          "acceptedAnswer": { "@type": "Answer", "text": "No bytes leave at runtime. Compilation runs against your approved data only; the threat model document spells out exactly what each compile step reads and writes." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Inference is local — the deterministic recipe runtime is in-process and the benchmark harness ships with a zero-egress monitor. Compilation runs against your approved data only; the threat model document spells out exactly what each compile step reads and writes." }
         },
         {
           "@type": "Question",
@@ -1053,7 +1053,7 @@
   <p class="ca-foot">
     <b>4 minutes.</b> One <code>.kolm</code> file. Yours.
     <span class="ca-os" aria-label="supported platforms">
-      Runs on <b>macOS</b> &middot; <b>Linux</b> &middot; <b>Windows</b> &middot; <b>iOS</b> &middot; <b>Android</b>
+      Targets <b>macOS</b> &middot; <b>Linux</b> &middot; <b>Windows</b> today &middot; <b>iOS</b> &middot; <b>Android</b> in RS-2
     </span>
     <a href="/anatomy">technical anatomy &rarr;</a>
   </p>
@@ -1141,12 +1141,12 @@
     <li class="ac-card">
       <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="1.5"/><path d="M2 17h20l-1.5 3H3.5z"/></svg></span>
       <h3>Run it anywhere</h3>
-      <p>Same file. No internet at runtime. <b>Any device, any OS.</b></p>
+      <p>Same file. Same K-score. Same signed receipt. <b>One artifact, every target.</b></p>
       <div class="ac-where">
         <span>macOS</span><span>Linux</span><span>Windows</span><span>iOS</span><span>Android</span>
       </div>
       <div class="ac-where ac-where-ff">
-        <span>laptop</span><span>phone</span><span>server</span><span>edge</span>
+        <span>laptop</span><span>server</span><span>phone (RS-2)</span><span>edge (RS-2)</span>
       </div>
       <a href="/anatomy" class="ac-link">how it runs &rarr;</a>
     </li>
@@ -1154,7 +1154,7 @@
     <li class="ac-card">
       <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.3"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.3"/><path d="M3 20v-5h5"/></svg></span>
       <h3>Improve it over time</h3>
-      <p>Capture real calls. Recompile. <b>Each version, strictly better.</b> Quality is gated.</p>
+      <p>Capture real calls. Recompile. <b>Each version meets or beats the last.</b> Quality is gated.</p>
       <div class="ac-loop">
         <em>use</em><b>&rarr;</b><em>capture</em><b>&rarr;</b><em>recompile</em><b>&rarr;</b><em>K &uarr;</em>
       </div>
@@ -1214,8 +1214,8 @@
     <div class="uc-grid">
       <a href="/healthcare" class="uc-card uc-card-reg">
         <span class="uc-vert">healthcare</span>
-        <h3>PHI never leaves the network.</h3>
-        <p>Compile against your data inside the BAA boundary. Sign every output. Audit-ready logs that prove which version answered which question.</p>
+        <h3>Healthcare data, your hardware.</h3>
+        <p>Compile against approved data on infrastructure your team controls. Sign every output. Audit-ready logs that prove which version answered which question.</p>
         <span class="uc-tag">healthcare &rarr;</span>
       </a>
       <a href="/finance" class="uc-card uc-card-reg">
@@ -1237,8 +1237,8 @@
     <div class="uc-grid">
       <a href="/edge" class="uc-card">
         <span class="uc-vert">phones</span>
-        <h3>An AI feature that works on the subway.</h3>
-        <p>Bundle the <code style="font-family:var(--mono);color:#7ef0d2">.kolm</code> in the app. Inference runs on the phone. Zero network. Works in airplane mode, behind a firewall, on the user&rsquo;s schedule.</p>
+        <h3>An AI feature that ships in your app.</h3>
+        <p>Bundle the <code style="font-family:var(--mono);color:#7ef0d2">.kolm</code> in your build. Deterministic recipe runtime runs in your app sandbox today; on-device model inference is the RS-2 gate.</p>
         <span class="uc-tag">edge &rarr;</span>
       </a>
       <a href="/edge" class="uc-card">
@@ -1249,8 +1249,8 @@
       </a>
       <a href="/anatomy" class="uc-card">
         <span class="uc-vert">your own inference</span>
-        <h3>The model and the runtime are yours.</h3>
-        <p>One signed file, one open spec. Run it on a laptop, a phone, a server, an air-gapped box. The inference belongs to you, today and a decade from now.</p>
+        <h3>The artifact and the runtime are yours.</h3>
+        <p>One signed file, one open spec. Runs on a laptop or server today; on-device and offline targets ship in RS-2. The inference belongs to you, today and a decade from now.</p>
         <span class="uc-tag">anatomy &rarr;</span>
       </a>
     </div>
@@ -1338,7 +1338,7 @@
   <dl class="hf-grid">
     <div>
       <dt class="hf-q"><b>Q.</b>Can I improve my AI over time?</dt>
-      <dd class="hf-a">Yes. Capture real use (with consent), recompile with better examples. The K-score gate refuses to ship a regression, so each compile is strictly better. <a href="/evolve">how the loop works &rarr;</a></dd>
+      <dd class="hf-a">Yes. Capture real use (with consent), recompile with better examples. The K-score gate refuses to ship a regression, so each version meets or beats the last. <a href="/evolve">how the loop works &rarr;</a></dd>
     </div>
     <div>
       <dt class="hf-q"><b>Q.</b>Does it work with Claude Code, Cursor, Continue?</dt>
@@ -1346,7 +1346,7 @@
     </div>
     <div>
       <dt class="hf-q"><b>Q.</b>What is actually inside the <code>.kolm</code> file?</dt>
-      <dd class="hf-a">A small model, your examples, the evaluator, a manifest, and a signed receipt. One zip-format artifact, fully open spec. <a href="/anatomy">anatomy of a .kolm &rarr;</a></dd>
+      <dd class="hf-a">A model pointer, your examples, the deterministic recipes, the evaluator, a manifest, and a signed HMAC receipt. One zip-format artifact, fully open spec. <a href="/anatomy">anatomy of a .kolm &rarr;</a></dd>
     </div>
     <div>
       <dt class="hf-q"><b>Q.</b>What if I want to leave kolm later?</dt>
@@ -1354,7 +1354,7 @@
     </div>
     <div>
       <dt class="hf-q"><b>Q.</b>Does my data leave the device?</dt>
-      <dd class="hf-a">No bytes leave at runtime. Compilation happens against your approved data; we publish a threat model that spells out exactly what each step touches. <a href="/threat-model">threat model &rarr;</a></dd>
+      <dd class="hf-a">Inference is local — the deterministic recipe runtime is in-process and the benchmark harness ships a zero-egress monitor. Compilation happens against your approved data; we publish a threat model that spells out exactly what each step touches. <a href="/threat-model">threat model &rarr;</a></dd>
     </div>
     <div>
       <dt class="hf-q"><b>Q.</b>What does it cost?</dt>
