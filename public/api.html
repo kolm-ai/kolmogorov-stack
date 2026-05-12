@@ -594,23 +594,24 @@ count_only  bool     "1" | "true"</pre>
           <div class="endpoint" id="auto-distill">
             <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/specialists/auto-distill</span><span class="auth-pill bearer">bearer</span><span class="auth-pill" style="background:rgba(236,231,220,0.06);border:1px solid var(--line);color:var(--ink-mute);">preview</span></div>
             <div class="ep-body">
-              <p><b>Preview.</b> Kick off an adapter training run against a namespace's captured corpus. Locked under 1,000 pairs (returns 400 with a count). When the training bridge is unavailable the route returns 503; integration is roadmap. Once eligible and bridged, returns a job id you can poll. The resulting <code>.kolm</code> is signed and downloadable through <code>/v1/compile/:id/.kolm</code>.</p>
+              <p><b>Preview.</b> Kick off an adapter training run against a namespace's captured corpus. Locked under 1,000 pairs (returns 400 with a count). <b>Shipped today:</b> the route counts pairs by <code>corpus_namespace</code> and, when <code>KOLM_TRAINER_BRIDGE_URL</code> is configured, forwards a job to the external bridge with a callback URL. <b>Target architecture:</b> a server-owned status endpoint, captured-job ledger, signed-artifact return path through <code>/v1/compile/:id/.kolm</code>, and triage-binding (only <code>kept</code> non-error rows counted). Without the bridge the route returns 503.</p>
               <h5>Request</h5>
               <pre class="req">{
   "namespace":   "support-classifier",
   "base_model":  "qwen2.5-coder-7b-instruct",
   "target_size": "phi-3-mini"
 }</pre>
-              <h5>Response (200)</h5>
+              <h5>Response (200, bridge configured)</h5>
               <pre class="res">{
   "ok":          true,
   "job_id":      "distill_4f8a...",
-  "status_url":  "https://kolm.ai/v1/specialists/auto-distill/4f8a/status",
   "namespace":   "support-classifier",
   "base_model":  "qwen2.5-coder-7b-instruct",
   "target_size": "phi-3-mini",
-  "pair_count":  4287
+  "pair_count":  4287,
+  "bridge":      "external"
 }</pre>
+              <p style="margin-top:8px;color:var(--ink-mute);font-size:13px"><i>Note:</i> the bridge owns delivery today; a server-side <code>/v1/specialists/auto-distill/:id/status</code> endpoint is target architecture, not shipped.</p>
               <h5>Errors</h5>
               <div class="errors">
                 <span class="code">400</span><span class="desc">not enough captures &middot; <code>{ count, threshold: 1000, message }</code></span>

@@ -124,7 +124,7 @@
 
     <div class="term">
       <h3>kolm <span class="alias">noun &middot; the binary</span></h3>
-      <p>The CLI. Invoked as <code>kolm</code> in a shell. Subcommands: <code>compile</code>, <code>run</code>, <code>inspect</code>, <code>verify</code>, <code>serve</code>, <code>eval</code>, <code>benchmark</code>, <code>score</code>, <code>capture</code>, <code>distill</code>, <code>doctor</code>, <code>version</code>. To Kolmogorov what <code>git</code> is to Git or <code>gcc</code> is to GCC.</p>
+      <p>The CLI. Invoked as <code>kolm</code> in a shell. Subcommands: <code>init</code>, <code>new</code>, <code>compile</code>, <code>run</code>, <code>eval</code>, <code>benchmark</code>, <code>score</code>, <code>inspect</code>, <code>serve</code>, <code>publish</code>, <code>capture</code>, <code>distill</code>, <code>install</code>, <code>tune</code>, <code>rag</code>, <code>doctor</code>, <code>logs</code>, <code>query</code>, <code>version</code>. To Kolmogorov what <code>git</code> is to Git or <code>gcc</code> is to GCC.</p>
     </div>
 
     <div class="term">
@@ -158,8 +158,8 @@
     </div>
 
     <div class="term">
-      <h3>distill <span class="alias">verb &middot; train the student</span></h3>
-      <p>The training step inside <code>kolm compile</code>. Takes the verified labels from k-sample and fits a LoRA adapter on the chosen base model. Produces the <code>adapter.bin</code> entry of the artifact.</p>
+      <h3>distill <span class="alias">verb &middot; hand a corpus to the trainer</span></h3>
+      <p><code>kolm distill</code> (and the underlying <code>POST /v1/specialists/auto-distill</code>) hands a tenant's namespace corpus to an external trainer bridge once it crosses 1,000 captured pairs. The bridge owns the fit, scoring, and signing today; the route returns 503 without it. A closed-loop, server-owned distill that returns a signed <code>.kolm</code> directly through <code>/v1/compile/:id/.kolm</code> is target architecture.</p>
     </div>
 
     <div class="term">
@@ -168,8 +168,8 @@
     </div>
 
     <div class="term">
-      <h3>receipt <span class="alias">noun &middot; the per-call proof</span></h3>
-      <p>An HMAC-SHA256 record of one inference call: input hash, output hash, timestamp, artifact id, K-score at ship time. Receipts stay on the device that made the call; they can be exported for audit. Optional Sigstore Rekor anchor for tamper-evident timestamping.</p>
+      <h3>receipt <span class="alias">noun &middot; the per-call run metadata</span></h3>
+      <p><b>Shipped today:</b> each <code>kolm run</code> invocation emits a <code>_kolm</code> block carrying input hash, output hash, timestamp, artifact id, and K-score at ship time, alongside the artifact's HMAC-SHA256 signature over its archive. The issuer or any holder of the shared tenant secret can re-verify. <b>Target architecture:</b> per-call HMAC chaining across requests and Sigstore Rekor anchoring for tamper-evident timestamping.</p>
     </div>
 
     <div class="term">
@@ -204,12 +204,12 @@
 
     <div class="term">
       <h3>MCP <span class="alias">noun &middot; Model Context Protocol</span></h3>
-      <p>The protocol an artifact speaks when started with <code>kolm serve --mcp</code>. Discovered by clients (claude code, cursor, continue, open mcp client) over stdio or SSE on loopback first, with optional external exposure.</p>
+      <p>The protocol an artifact speaks when started with <code>kolm serve --mcp</code>. Clients (claude code, cursor, continue, cline) connect over stdio by default; pass <code>--http</code> to bind <code>127.0.0.1:8765</code>. SSE transport and zeroconf/mDNS discovery are target architecture, not shipped today.</p>
     </div>
 
     <div class="term">
       <h3>compile flywheel <span class="alias">noun &middot; the loop</span></h3>
-      <p>The capture-and-distill loop: every API call you proxy generates labels, every 1000 verified labels can become a fresh LoRA, every fresh LoRA reduces your dependence on the frontier. The thing you buy when you pay kolm is the flywheel, not the compute.</p>
+      <p>The capture-and-distill loop. <b>Shipped today:</b> every proxied call lands in the tenant corpus, and a tenant can hand a 1000-pair namespace to an external trainer bridge. <b>Target architecture:</b> closed-loop in-app distill, triage-bound exports (kept-only), and revocation. The thing you buy when you pay kolm is the rails, not the compute.</p>
     </div>
 
   </div>
