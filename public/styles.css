@@ -627,22 +627,7 @@ p code, li code {
   gap: 56px;
 }
 .home-hero::before,
-.home-hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.home-hero::before {
-  z-index: 0;
-  background:
-    linear-gradient(90deg, rgba(236,231,220, 0.12), transparent 28%),
-    linear-gradient(180deg, rgba(236,231,220,0.05), transparent 26%);
-}
-.home-hero::after {
-  z-index: 0;
-  background: none;
-}
+.home-hero::after { content: none !important; }
 .home-hero .hero-copy {
   max-width: 760px;
 }

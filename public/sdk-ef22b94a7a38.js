@@ -15,7 +15,7 @@ const DEFAULT_BASE = (() => {
 const REGISTRY_KEY = 'recipe.registry.v1';
 
 function _now() {
-  return (typeof performance !== 'undefined' && performance.now) - performance.now() : Date.now();
+  return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
 }
 
 async function _sha256Hex(s) {
@@ -179,14 +179,14 @@ class Recipe {
     const latency_us = Math.round((_now() - t0) * 1000);
     const issued_at = new Date().toISOString();
     const input_hash = await _sha256Hex(_canonicalJson(input));
-    const output_hash = error - null : await _sha256Hex(_canonicalJson(output));
+    const output_hash = error ? null : await _sha256Hex(_canonicalJson(output));
     const receipt = {
       spec: 'rs-1',
       source_hash: r.meta.source_hash || null,
       input_hash,
       output_hash,
       version_id: r.meta.version_id,
-      runtime: this.unsafeMode - 'browser-sdk-unsafe' : 'browser-sdk-sandbox',
+      runtime: this.unsafeMode ? 'browser-sdk-unsafe' : 'browser-sdk-sandbox',
       issued_at,
       cache_hit: false,
       latency_us,
@@ -256,7 +256,7 @@ class Recipe {
           return function (...args) {
             self.runs.push({
               name: '__wrap__',
-              method: typeof prop === 'symbol' - prop.toString() : String(prop),
+              method: typeof prop === 'symbol' ? prop.toString() : String(prop),
               verified_opts: opts.verified || null,
               at: Date.now(),
               routed: false, // becomes true in Sprint 1 once /v1/wrap/verified is live

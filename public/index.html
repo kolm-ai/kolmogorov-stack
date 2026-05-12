@@ -747,12 +747,6 @@
         </div>
         <output id="nl-out" aria-live="polite"></output>
       </div>
-
-      <ul class="hero-chips" aria-label="proof points">
-        <li><b>4 min</b> prompt to compiled <span class="mono">.kolm</span></li>
-        <li><b>0 bytes</b> leave the device at runtime</li>
-        <li><b>K &ge; 0.85</b> quality gate</li>
-      </ul>
     </div>
   </div>
 </section>
@@ -764,71 +758,15 @@
   .home-hero-stacked h1 { font-size: clamp(48px, 6.6vw, 84px); max-width: 22ch; line-height: 1.02; letter-spacing: -0.032em; }
   @media (max-width: 720px) { .home-hero-stacked h1 { font-size: clamp(36px, 8vw, 52px); } }
 
-  /* v7.11.4 hero rhythm — measured, deliberate Apple-style gaps:
-     H1 (24) lede (28) actions (28) NL (36) chips (border-top sep) (32 pad-bottom)
-     Earlier 40/36/26 margins compounded with NL .nl-try margin-top 44 made
-     actions-to-NL feel like an 84px chasm. Tightened to 24+32=56 effective. */
-  .home-hero-stacked .hero-copy > h1 { margin: 0 0 24px; }
-  .home-hero-stacked .lede { margin: 0 0 28px; line-height: 1.45; font-size: 19px; max-width: 30ch; }
-  .home-hero-stacked .actions { margin: 0 0 28px; }
-  .home-hero-stacked .nl-try { margin: 0 0 32px !important; max-width: 720px; }
-  .home-hero-stacked .hero-chips {
-    list-style: none;
-    padding: 22px 0 0;
-    margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 18px 28px;
-    border-top: 1px solid var(--line);
-  }
-
-  /* Cred-strip: combined .exe anchor + capture CTA on one mono line.
-     Lives below the CTAs as quiet post-action support, not as another
-     row competing for the eye. Single line on desktop, wraps on mobile. */
-  .home-hero-stacked .hero-anchor {
-    margin: 0;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--ink-mute, #b5bdb1);
-    letter-spacing: 0.01em;
-    line-height: 1.5;
-  }
-  .home-hero-stacked .hero-anchor b { color: #7ef0d2; font-weight: 580; }
-  .home-hero-stacked .hero-anchor-link { color: #7ef0d2; border-bottom: 1px solid rgba(126,240,210,0.32); }
-  .home-hero-stacked .hero-anchor-link:hover { color: #c1f5e3; }
-  [data-theme=light] .home-hero-stacked .hero-anchor-link { color: #0a8862; border-color: rgba(10,136,98,0.32); }
-  .home-hero-stacked .hero-chips li {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--ink-faint, #737c73);
-    letter-spacing: 0.01em;
-    line-height: 1.3;
-    padding: 0;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-  }
-  .home-hero-stacked .hero-chips li b {
-    color: var(--ink, #faf2e1);
-    font-weight: 580;
-    margin-right: 6px;
-  }
-  .home-hero-stacked .hero-chips .mono {
-    font-family: var(--mono);
-    color: var(--ink, #faf2e1);
-  }
+  /* Apple-grade hero rhythm: one measured beat between each element.
+     H1 → lede 20px. lede → actions 32px. actions → NL try 40px. */
+  .home-hero-stacked .hero-copy > h1 { margin: 0 0 20px; }
+  .home-hero-stacked .lede { margin: 0 0 32px; line-height: 1.4; font-size: 20px; max-width: 38ch; color: var(--ink-mute, #b5bdb1); }
+  .home-hero-stacked .actions { margin: 0 0 40px; }
+  .home-hero-stacked .nl-try { margin: 0 !important; max-width: 720px; }
   @media (max-width: 520px) {
-    .home-hero-stacked .hero-chips { gap: 10px 18px; }
-    .home-hero-stacked .hero-chips li { font-size: 11.5px; }
-  }
-  [data-theme=light] .home-hero-stacked .hero-chips { border-color: rgba(12,14,16, 0.10); }
-  [data-theme=light] .home-hero-stacked .hero-chips li { color: #4b5158; }
-  [data-theme=light] .home-hero-stacked .hero-chips li b { color: #0c0e10; }
-  @media (max-width: 520px) {
-    .home-hero-stacked .hero-anchor { font-size: 12.5px; }
-    .home-hero-stacked .lede { margin-bottom: 24px; }
-    .home-hero-stacked .hero-chips { margin-bottom: 24px; }
-    .home-hero-stacked .actions { margin-bottom: 22px; }
+    .home-hero-stacked .lede { margin-bottom: 24px; font-size: 17px; }
+    .home-hero-stacked .actions { margin-bottom: 28px; }
   }
 
   .nl-try { margin: 44px 0 0; max-width: 720px; }

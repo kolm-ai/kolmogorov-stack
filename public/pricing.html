@@ -49,6 +49,7 @@
       "@type": "FAQPage",
       "mainEntity": [
         {"@type": "Question", "name": "Is there a free plan?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The Developer plan is free, gives you 3 compiles per month, and lets you run any local .kolm artifact at zero per-call cost. Local CLI runtime is always free."}},
+        {"@type": "Question", "name": "What counts as a compile?", "acceptedAnswer": {"@type": "Answer", "text": "One billed compile equals one job that reaches the K-score gate, pass or fail. Re-runs from the same spec inside the same calendar day do not double-bill on Pro and Enterprise. Sub-gate failures are free."}},
         {"@type": "Question", "name": "Do I need to bring my own frontier-model key?", "acceptedAnswer": {"@type": "Answer", "text": "Yes for paid plans. kolm uses your frontier-model key (Anthropic, OpenAI, or compatible) during compile only. We do not relay your key or your data. After the compile finishes, the artifact runs locally with no per-call cost."}},
         {"@type": "Question", "name": "Can I cancel anytime?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Plans are month-to-month. Cancel from /account and you drop to free immediately. Your compiled .kolm artifacts stay with you — they are local files you own."}},
         {"@type": "Question", "name": "What is included in Enterprise?", "acceptedAnswer": {"@type": "Answer", "text": "Self-serve $2,999/mo Enterprise: 50 seats, optional VPC peering, custom audit retention, signed 30-day pilots, BAA, priority compile queue, and dedicated registry shard."}},
@@ -708,6 +709,10 @@
       <div class="faq-card">
         <h3>Who pays for the model API calls?</h3>
         <p>You do. kolm uses your key only at compile. Never resells tokens, never marks up inference.</p>
+      </div>
+      <div class="faq-card">
+        <h3>What counts as a compile?</h3>
+        <p>One billed compile = one job that reaches the K-score gate (pass or fail). Re-runs from the same spec inside the same calendar day don't double-bill on Pro and Enterprise. Sub-gate failures are free.</p>
       </div>
       <div class="faq-card">
         <h3>What does one compile produce?</h3>

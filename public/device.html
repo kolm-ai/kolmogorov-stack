@@ -285,7 +285,7 @@ async function verifyAllRecipes(list) {
 function fmt(out) {
   if (out === undefined) return 'undefined';
   if (out === null) return 'null';
-  if (typeof out === 'boolean') return out - 'true' : 'false';
+  if (typeof out === 'boolean') return out ? 'true' : 'false';
   if (typeof out === 'string') return out.length > 80 - out.slice(0, 80) + '…' : out;
   if (typeof out === 'number') return String(out);
   try { const s = JSON.stringify(out); return s.length > 200 - s.slice(0, 200) + '…' : s; }
@@ -368,7 +368,7 @@ async function runAll(text) {
       const did = fired(res.output);
       el.classList.toggle('fired', did);
       out.textContent = fmt(res.output);
-      out.style.color = did - 'var(--ink)' : 'var(--ink-mute)';
+      out.style.color = did ? 'var(--ink)' : 'var(--ink-mute)';
       lat.textContent = (res.latency_us || 0) + ' µs';
     }
   }
@@ -404,8 +404,8 @@ document.querySelectorAll('[data-demo]').forEach((b) => {
     await verifyAllRecipes(list);
     const verifiedN = verifiedRecipes.size;
     const refusedN = refusedRecipes.size;
-    sRecipes.textContent = list.length + ' recipes' + (refusedN - ` (${refusedN} unsigned)` : '');
-    sSize.textContent = (env.total_bytes - Math.round(env.total_bytes / 102.4) / 10 : Math.round(JSON.stringify(env).length / 102.4) / 10) + ' KB';
+    sRecipes.textContent = list.length + ' recipes' + (refusedN ? ` (${refusedN} unsigned)` : '');
+    sSize.textContent = (env.total_bytes ? Math.round(env.total_bytes / 102.4) / 10 : Math.round(JSON.stringify(env).length / 102.4) / 10) + ' KB';
     sHash.textContent = env.registry_hash || '…';
     sNetwork.textContent = '1 (registry)';
     renderEmpty(list);
