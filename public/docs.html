@@ -68,6 +68,46 @@
   .next-hint{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:22px 0 -8px;letter-spacing:0.04em}
   .next-hint a{color:var(--ink-mute);border-bottom:1px solid var(--line)}
   .next-hint a:hover{color:var(--accent);border-color:var(--accent)}
+
+  /* v7.11.3 docs hero re-frame — quiet, devs read code not marketing */
+  .docs-main h1{font-weight:560;letter-spacing:-0.02em;margin-bottom:14px}
+  .docs-main .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:18px}
+  .docs-main .eyebrow .pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 8px rgba(126,240,210,0.55)}
+
+  /* v7.11.3 light mode — make sure rail/code/notes/tabs all read cleanly */
+  [data-theme=light] pre.code-block{background:#0c0e10;border-color:rgba(12,14,16,0.10);color:#e6e6e6}
+  [data-theme=light] pre.code-block .copy{background:rgba(255,255,255,0.10);border-color:rgba(255,255,255,0.16);color:#c9c2b2}
+  [data-theme=light] pre.code-block .copy:hover{background:rgba(255,255,255,0.16);color:#ffffff}
+  [data-theme=light] .docs-rail a{color:#4b5158}
+  [data-theme=light] .docs-rail a:hover{color:#0c0e10}
+  [data-theme=light] .docs-rail a.active{color:#0c0e10;border-left-color:#0a8862}
+  [data-theme=light] .docs-rail .group-h{color:#737c73}
+  [data-theme=light] .docs-main h3{color:#737c73}
+  [data-theme=light] .docs-main code:not(pre code){color:#0c0e10;background:rgba(12,14,16,0.04);border-color:rgba(12,14,16,0.08)}
+  [data-theme=light] .docs-main .eyebrow{color:#737c73}
+  [data-theme=light] .tabs{border-bottom-color:rgba(12,14,16,0.08)}
+  [data-theme=light] .tabs button{color:#737c73}
+  [data-theme=light] .tabs button.on{color:#0c0e10;border-bottom-color:#0a8862}
+  [data-theme=light] .tabs button:hover{color:#0c0e10}
+  [data-theme=light] .note{background:rgba(10,136,98,0.05);border-left-color:#0a8862;color:#4b5158}
+  [data-theme=light] .note b{color:#0c0e10}
+  [data-theme=light] .endpoint-tag .verb{background:rgba(12,14,16,0.06);color:#0c0e10}
+  [data-theme=light] .endpoint-tag .verb.post{background:rgba(10,136,98,0.12);color:#0a8862}
+  [data-theme=light] .endpoint-tag .verb.get{background:rgba(76,125,255,0.12);color:#3b62cf}
+  [data-theme=light] .endpoint-tag .path{color:#4b5158}
+  [data-theme=light] .endpoint-tag .auth{color:#737c73}
+  [data-theme=light] .resp-label{color:#737c73}
+  [data-theme=light] .resp-label::before{background:#0a8862}
+  [data-theme=light] .resp-label.live::after{color:#737c73}
+  [data-theme=light] .kbd{color:#4b5158;background:#ffffff;border-color:rgba(12,14,16,0.10)}
+  [data-theme=light] .docs-next a{background:#ffffff;border-color:rgba(12,14,16,0.08);box-shadow:0 1px 2px rgba(12,14,16,0.03)}
+  [data-theme=light] .docs-next a:hover{background:#f9faf9;border-color:#0a8862}
+  [data-theme=light] .docs-next .lbl{color:#737c73}
+  [data-theme=light] .docs-next .ttl{color:#0c0e10}
+  [data-theme=light] .docs-next .sub{color:#4b5158}
+  [data-theme=light] .next-hint{color:#737c73}
+  [data-theme=light] .next-hint a{color:#4b5158;border-bottom-color:rgba(12,14,16,0.16)}
+  [data-theme=light] .next-hint a:hover{color:#0a8862;border-bottom-color:#0a8862}
 </style>
 <script type="application/ld+json">
 {

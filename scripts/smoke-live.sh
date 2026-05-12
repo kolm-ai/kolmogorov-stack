@@ -641,13 +641,13 @@ check "/articles advertises RSS"       has "$AI" 'application/rss+xml'
 
 # Homepage hero thesis + GitHub star + ICP doors
 H2=$(curl -s "$URL/")
-check "homepage compile-anatomy thesis" has "$H2" 'From a sentence to a signed file in four steps'
+check "homepage compile-anatomy thesis" has "$H2" 'Sentence to signed file. Four steps'
 check "homepage 2-CTA: Try kolm"       has "$H2" 'Try kolm &rarr;'
 check "homepage 2-CTA: Book a demo"    has "$H2" 'Book a demo &rarr;'
 check "homepage demo mailto"           has "$H2" 'mailto:founders@kolm.ai'
 check "homepage registry counter"      has "$H2" 'js-registry-count'
 check "homepage registry endpoint"     has "$H2" "fetch('/v1/registry/public'"
-check "homepage intuitive lede"        has "$H2" 'A real AI that lives on your hardware'
+check "homepage intuitive lede"        has "$H2" 'A real AI that runs on your hardware'
 check "homepage roi link"              has "$H2" '/roi'
 check "homepage nav: Solutions"        has "$H2" '>Solutions<'
 check "homepage nav: Developers"       has "$H2" '>Developers<'
@@ -1144,7 +1144,7 @@ ART_IDX=$(curl -s "$URL/articles")
 check "/articles index lists rent-vs-buy"       has "$ART_IDX" "/articles/rent-vs-buy-compute"
 UC_IDX=$(curl -s "$URL/use-cases")
 check "/use-cases index lists capture+distill"  has "$UC_IDX" "/use-cases/capture-and-distill"
-check "/use-cases index says nine shapes"       has "$UC_IDX" "Nine workflow shapes\|nine shapes"
+check "/use-cases index three audiences"        has "$UC_IDX" "Three audiences, nine workflows\|Which kolm are you"
 
 # Sitemap entries for both new URLs.
 WE_SM=$(curl -s "$URL/sitemap.xml")
@@ -1318,7 +1318,7 @@ echo "=== 45. homepage v7.9.5 consolidated surface ==="
 HOME=$(curl -s "$URL/")
 # v7.9.5: reg-strip, cred-band, vr 3-card grid, reg-tele all deleted as duplicates/clutter.
 # Consolidated to: hero · video · compile-anatomy · ROI-calc · uc-strip (4 cards incl. regulated) · trust-line · CTA
-check "/ compile-anatomy thesis"        has "$HOME" 'From a sentence to a signed file in four steps'
+check "/ compile-anatomy thesis"        has "$HOME" 'Sentence to signed file. Four steps'
 check "/ compile-anatomy step read"     has "$HOME" 'Read your task'
 check "/ compile-anatomy step train"    has "$HOME" 'Train a small model'
 check "/ compile-anatomy step sign"     has "$HOME" 'Score and sign'

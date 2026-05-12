@@ -297,20 +297,30 @@
     .hero-video-wrap { background-image: url('/video/kolm-hero-poster.jpg'); background-size: cover; background-position: center; }
   }
 
-  /* v7.11.1 — light-mode hero video panel. Dark gradient + heavy shadow
-     produced a "white shadow" bleed on cream backgrounds. Replace with
-     cream-tinted neutral so the video sits on the page like a polaroid. */
-  [data-theme=light] .hero-demo-panel { border-color: rgba(0,0,0,0.12); background: linear-gradient(180deg, #ffffff, #f6f4ee); box-shadow: 0 10px 28px rgba(20,24,30, 0.06), 0 1px 2px rgba(20,24,30, 0.04); }
-  [data-theme=light] .hero-demo-head { color: #4b5158; border-bottom-color: rgba(0,0,0,0.08); }
+  /* v7.11.3 — light-mode hero video bleed root cause. Dark opaque video
+     bitmap + object-fit:cover hides any wrap background, so the only way
+     to remove the "white shadow" complaint is to wrap the video in a
+     visible cream frame (polaroid). 3-layer outer elevation makes the
+     panel feel placed on the page, not bolted to it. */
+  [data-theme=light] .hero-demo-panel {
+    border-color: rgba(12,14,16, 0.08);
+    background: #faf7f0;
+    box-shadow:
+      0 1px 2px rgba(12,14,16, 0.04),
+      0 8px 20px rgba(12,14,16, 0.06),
+      0 32px 60px -20px rgba(12,14,16, 0.10);
+  }
+  [data-theme=light] .hero-demo-head { color: #4b5158; border-bottom-color: rgba(12,14,16, 0.06); background: #ffffff; }
   [data-theme=light] .hero-demo-head .live-pulse { color: #0a8862; }
   [data-theme=light] .hero-demo-head .live-pulse::before { background: #0a8862; box-shadow: 0 0 6px rgba(10,136,98,0.4); }
-  [data-theme=light] .hero-video-panel { background: #efece4; }
-  [data-theme=light] .hero-video-wrap { background: #efece4; }
-  [data-theme=light] .hero-video-wrap video { background: #efece4; }
-  [data-theme=light] .hero-video-wrap::after { box-shadow: inset 0 0 0 1px rgba(0,0,0, 0.05), inset 0 -60px 40px -40px rgba(0,0,0, 0.06); }
-  [data-theme=light] .hero-video-foot { color: #4b5158; border-top-color: rgba(0,0,0,0.08); }
+  /* Cream chrome around the video — fixes "white shadow bleeding through video" */
+  [data-theme=light] .hero-video-panel { background: #faf7f0; padding: 14px 14px 0; }
+  [data-theme=light] .hero-video-wrap { background: #0c0e10; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(12,14,16, 0.10), 0 6px 14px -4px rgba(12,14,16, 0.10); }
+  [data-theme=light] .hero-video-wrap video { background: #0c0e10; }
+  [data-theme=light] .hero-video-wrap::after { box-shadow: inset 0 0 0 1px rgba(255,255,255, 0.06), inset 0 -60px 40px -40px rgba(0,0,0, 0.20); }
+  [data-theme=light] .hero-video-foot { color: #4b5158; border-top-color: rgba(12,14,16, 0.06); background: #ffffff; margin-top: 14px; }
   [data-theme=light] .hero-video-foot a { color: #0a8862; }
-  [data-theme=light] .hv-btn { color: #4b5158; background: rgba(255,255,255, 0.85); border-color: rgba(0,0,0,0.10); }
+  [data-theme=light] .hv-btn { color: #4b5158; background: rgba(255,255,255, 0.92); border-color: rgba(12,14,16, 0.10); }
   [data-theme=light] .hv-btn:hover { color: #0c0e10; background: #ffffff; border-color: rgba(10,136,98, 0.32); }
 
   /* v7.9.4 — wide video panel (full-bleed, video is the centerpiece) */
@@ -353,27 +363,31 @@
   .hero-demo-calc .hero-demo-panel { width: 100%; }
   .hero-demo-calc .hero-demo-body { padding: 22px 24px; }
 
-  /* v7.9.4 — "what compile means" 4-step anatomy section */
-  .compile-anatomy { max-width: 1320px; margin: 56px auto 0; padding: 0 32px; }
-  .compile-anatomy .ca-head { text-align: center; max-width: 880px; margin: 0 auto 36px; }
-  .compile-anatomy .ca-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint, #737c73); margin-bottom: 16px; }
+  /* v7.11.3 — "what compile means" 4-step anatomy section. Spacing facelift:
+     larger section margin, bigger heading rhythm, more card padding, more
+     vertical air around the card grid. Each card is now ~min-h 200px so the
+     four cards form a visibly even row. */
+  .compile-anatomy { max-width: 1320px; margin: 96px auto 0; padding: 0 32px; }
+  .compile-anatomy .ca-head { text-align: center; max-width: 880px; margin: 0 auto 56px; }
+  .compile-anatomy .ca-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint, #737c73); margin-bottom: 18px; }
   .compile-anatomy .ca-eyebrow .pulse { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210,0.55); }
   .compile-anatomy .ca-h { font-size: clamp(34px, 4.2vw, 54px); line-height: 1.05; letter-spacing: -0.028em; margin: 0 0 18px; font-weight: 600; }
-  .compile-anatomy .ca-sub { font-size: 18.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; max-width: 760px; margin-left: auto; margin-right: auto; }
+  .compile-anatomy .ca-sub { font-size: 18px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0; max-width: 560px; margin-left: auto; margin-right: auto; }
   .compile-anatomy .ca-sub b { color: var(--ink, #faf2e1); font-weight: 540; }
   .compile-anatomy .ca-sub code { font-family: var(--mono); color: #7ef0d2; }
-  .compile-anatomy .ca-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .compile-anatomy .ca-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
   @media (max-width: 1080px) { .compile-anatomy .ca-steps { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 640px) { .compile-anatomy .ca-steps { grid-template-columns: 1fr; gap: 14px; } }
-  .compile-anatomy .ca-step { position: relative; padding: 28px 24px 24px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 14px; background: linear-gradient(180deg, rgba(21,26,33,0.5), rgba(11,13,16,0.5)); display: flex; flex-direction: column; gap: 10px; transition: border-color 160ms, transform 160ms; }
+  @media (max-width: 640px) { .compile-anatomy .ca-steps { grid-template-columns: 1fr; gap: 16px; } }
+  .compile-anatomy .ca-step { position: relative; padding: 32px 28px 28px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 14px; background: linear-gradient(180deg, rgba(21,26,33,0.5), rgba(11,13,16,0.5)); display: flex; flex-direction: column; gap: 14px; transition: border-color 160ms, transform 160ms; min-height: 200px; }
   .compile-anatomy .ca-step:hover { border-color: rgba(126,240,210, 0.32); transform: translateY(-2px); }
-  .compile-anatomy .ca-num { font-family: var(--mono); font-size: 13px; letter-spacing: 0.14em; color: #7ef0d2; }
-  .compile-anatomy .ca-step h3 { font-size: 23px; line-height: 1.15; letter-spacing: -0.018em; margin: 0; font-weight: 580; color: var(--ink, #faf2e1); }
-  .compile-anatomy .ca-step p { font-size: 14.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; }
-  .compile-anatomy .ca-out { display: block; font-family: var(--mono); font-size: 12px; color: var(--ink-soft, #ece1c4); letter-spacing: 0.02em; margin-top: auto; padding: 9px 12px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 7px; background: rgba(0,0,0,0.28); }
-  .compile-anatomy .ca-foot { margin: 28px auto 0; text-align: center; font-size: 14.5px; color: var(--ink-mute, #b5bdb1); max-width: 820px; line-height: 1.55; }
+  .compile-anatomy .ca-num { font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em; color: #7ef0d2; }
+  .compile-anatomy .ca-step h3 { font-size: 22px; line-height: 1.18; letter-spacing: -0.018em; margin: 0; font-weight: 580; color: var(--ink, #faf2e1); }
+  .compile-anatomy .ca-step p { font-size: 14.5px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0; }
+  .compile-anatomy .ca-out { display: block; font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); letter-spacing: 0.02em; margin-top: auto; padding: 10px 12px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 7px; background: rgba(0,0,0,0.28); }
+  .compile-anatomy .ca-foot { margin: 40px auto 0; text-align: center; font-size: 15px; color: var(--ink-mute, #b5bdb1); max-width: 720px; line-height: 1.55; }
+  .compile-anatomy .ca-foot b { color: var(--ink, #faf2e1); font-weight: 540; }
   .compile-anatomy .ca-foot code { font-family: var(--mono); color: #7ef0d2; padding: 1px 5px; background: rgba(126,240,210,0.05); border: 1px solid rgba(126,240,210,0.18); border-radius: 4px; font-size: 12.5px; }
-  .compile-anatomy .ca-foot a { color: #7ef0d2; border-bottom: 1px solid rgba(126,240,210, 0.35); margin-left: 8px; }
+  .compile-anatomy .ca-foot a { color: #7ef0d2; border-bottom: 1px solid rgba(126,240,210, 0.35); margin-left: 10px; }
   .compile-anatomy .ca-foot a:hover { color: #c1f5e3; }
 
   /* compact cost calc · hero variant */
@@ -715,22 +729,13 @@
 <section class="hero home-hero home-hero-stacked">
   <div class="wrap">
     <div class="hero-copy">
-      <div class="eyebrow"><span class="pulse"></span>Your data. Your model. Your hardware.</div>
       <h1>Compile your own AI.</h1>
-      <p class="lede"><b>A real AI that lives on your hardware.</b> One signed file you ship anywhere &middot; laptop, phone, or inside your network. Yours forever.</p>
-
-      <ul class="hero-chips" aria-label="proof points">
-        <li><b>4 min</b> from prompt to compiled <span class="mono">.kolm</span></li>
-        <li><b>0 bytes</b> ever leave the device at runtime</li>
-        <li><b>K &ge; 0.85</b> quality gate on every artifact</li>
-      </ul>
+      <p class="lede">A real AI that runs on your hardware. One signed file. Yours forever.</p>
 
       <div class="actions">
         <a href="/quickstart" class="btn primary lg">Try kolm &rarr;</a>
         <a href="mailto:founders@kolm.ai?subject=kolm%20demo" class="btn ghost lg">Book a demo &rarr;</a>
       </div>
-
-      <p class="hero-anchor">.exe is to software what <b>.kolm</b> is to AI &middot; <a href="/capture" class="hero-anchor-link">already paying OpenAI? turn that bill local &rarr;</a></p>
 
       <div class="nl-try" aria-label="natural-language try-it">
         <div class="nl-head">
@@ -738,7 +743,7 @@
           <span>Describe what your AI should do. <b>We&rsquo;ll compile it.</b></span>
         </div>
         <form id="nl-form" autocomplete="off">
-          <input id="nl-input" type="text" placeholder='Try: "compile a recipe that classifies support tickets by urgency"' aria-label="natural-language prompt" maxlength="220">
+          <input id="nl-input" type="text" placeholder='Try: "classify support tickets by urgency"' aria-label="natural-language prompt" maxlength="220">
           <button type="submit" class="nl-go" aria-label="ask">compile &rarr;</button>
         </form>
         <div class="nl-chips" aria-label="example prompts">
@@ -748,6 +753,12 @@
         </div>
         <output id="nl-out" aria-live="polite"></output>
       </div>
+
+      <ul class="hero-chips" aria-label="proof points">
+        <li><b>4 min</b> prompt to compiled <span class="mono">.kolm</span></li>
+        <li><b>0 bytes</b> leave the device at runtime</li>
+        <li><b>K &ge; 0.85</b> quality gate</li>
+      </ul>
     </div>
   </div>
 </section>
@@ -759,21 +770,20 @@
   .home-hero-stacked h1 { font-size: clamp(48px, 6.6vw, 84px); max-width: 22ch; line-height: 1.02; letter-spacing: -0.032em; }
   @media (max-width: 720px) { .home-hero-stacked h1 { font-size: clamp(36px, 8vw, 52px); } }
 
-  /* v7.11.2 hero spacing — give each band real breathing room so the hero
-     reads as 5 distinct rhythms instead of a word sandwich:
-       H1 → lede → chips → CTAs → cred-strip → NL widget */
-  .home-hero-stacked .hero-copy > .eyebrow { margin-bottom: 16px; }
-  .home-hero-stacked .hero-copy > h1 { margin: 0 0 22px; }
-  .home-hero-stacked .lede { margin: 0 0 30px; line-height: 1.5; }
+  /* v7.11.3 hero spacing — minimal hero rhythm: H1 → lede → CTAs → NL → chips.
+     Bigger jumps between bands, no eyebrow/cred competition for the eye. */
+  .home-hero-stacked .hero-copy > h1 { margin: 0 0 26px; }
+  .home-hero-stacked .lede { margin: 0 0 36px; line-height: 1.45; font-size: 19px; max-width: 30ch; }
+  .home-hero-stacked .actions { margin: 0 0 40px; }
   .home-hero-stacked .hero-chips {
     list-style: none;
-    padding: 0;
-    margin: 0 0 32px;
+    padding: 18px 0 0;
+    margin: 22px 0 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 18px 28px;
+    border-top: 1px solid var(--line);
   }
-  .home-hero-stacked .actions { margin: 0 0 28px; }
 
   /* Cred-strip: combined .exe anchor + capture CTA on one mono line.
      Lives below the CTAs as quiet post-action support, not as another
@@ -792,34 +802,31 @@
   [data-theme=light] .home-hero-stacked .hero-anchor-link { color: #0a8862; border-color: rgba(10,136,98,0.32); }
   .home-hero-stacked .hero-chips li {
     font-family: var(--mono);
-    font-size: 12.5px;
-    color: var(--ink-mute, #b5bdb1);
-    background: rgba(126,240,210,0.04);
-    border: 1px solid rgba(126,240,210,0.18);
-    border-radius: 7px;
-    padding: 7px 12px;
-    letter-spacing: 0;
+    font-size: 12px;
+    color: var(--ink-faint, #737c73);
+    letter-spacing: 0.01em;
     line-height: 1.3;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
   }
   .home-hero-stacked .hero-chips li b {
-    color: #7ef0d2;
+    color: var(--ink, #faf2e1);
     font-weight: 580;
-    margin-right: 4px;
+    margin-right: 6px;
   }
   .home-hero-stacked .hero-chips .mono {
     font-family: var(--mono);
     color: var(--ink, #faf2e1);
   }
   @media (max-width: 520px) {
-    .home-hero-stacked .hero-chips { gap: 8px; }
-    .home-hero-stacked .hero-chips li { font-size: 11.5px; padding: 6px 10px; }
+    .home-hero-stacked .hero-chips { gap: 10px 18px; }
+    .home-hero-stacked .hero-chips li { font-size: 11.5px; }
   }
-  [data-theme=light] .home-hero-stacked .hero-chips li {
-    background: rgba(10,136,98,0.06);
-    border-color: rgba(10,136,98,0.22);
-    color: #1f2429;
-  }
-  [data-theme=light] .home-hero-stacked .hero-chips li b { color: #0a8862; }
+  [data-theme=light] .home-hero-stacked .hero-chips { border-color: rgba(12,14,16, 0.10); }
+  [data-theme=light] .home-hero-stacked .hero-chips li { color: #4b5158; }
+  [data-theme=light] .home-hero-stacked .hero-chips li b { color: #0c0e10; }
   @media (max-width: 520px) {
     .home-hero-stacked .hero-anchor { font-size: 12.5px; }
     .home-hero-stacked .lede { margin-bottom: 24px; }
@@ -1007,40 +1014,40 @@
 <section class="compile-anatomy" aria-label="what compile means">
   <div class="ca-head">
     <div class="ca-eyebrow"><span class="pulse"></span>what compile does</div>
-    <h2 class="ca-h">From a sentence to a signed file in four steps.</h2>
-    <p class="ca-sub">You type what your AI should do. The compiler takes it from there. Four short steps and you have one <code>.kolm</code> file that runs on your hardware and gives the same answer every time.</p>
+    <h2 class="ca-h">Sentence to signed file. Four steps.</h2>
+    <p class="ca-sub">You type what your AI should do. The compiler takes it from there.</p>
   </div>
 
   <ol class="ca-steps">
     <li class="ca-step">
       <span class="ca-num">01</span>
       <h3>Read your task</h3>
-      <p>Plain English in. The compiler turns &ldquo;classify support tickets by urgency&rdquo; into a structured task with inputs, outputs, and what counts as right.</p>
-      <code class="ca-out">task &middot; inputs &middot; outputs &middot; success rule</code>
+      <p>Plain English in. Structured task out.</p>
+      <code class="ca-out">inputs &middot; outputs &middot; success rule</code>
     </li>
     <li class="ca-step">
       <span class="ca-num">02</span>
       <h3>Build the data</h3>
-      <p>Generates the training examples for you. Hundreds of right answers and the tricky edge cases. The coverage you would never sit down and write by hand.</p>
+      <p>Generates the examples. Right answers plus edge cases.</p>
       <code class="ca-out">144 examples &middot; 24 hard cases</code>
     </li>
     <li class="ca-step">
       <span class="ca-num">03</span>
       <h3>Train a small model</h3>
-      <p>Shrinks the work into a tiny file. No prompts to maintain. No model server to babysit. Same answer twice, microsecond latency, runs on the laptop you already own.</p>
-      <code class="ca-out">38 MB &middot; 0.6 ms per call &middot; offline</code>
+      <p>Shrinks the work to a tiny file. Microsecond latency.</p>
+      <code class="ca-out">38 MB &middot; 0.6 ms &middot; offline</code>
     </li>
     <li class="ca-step">
       <span class="ca-num">04</span>
       <h3>Score and sign</h3>
-      <p>Checks accuracy, size, speed, cost. Must clear <b>K &ge; 0.85</b> or the build fails &mdash; nothing ships that isn&rsquo;t good enough. Then signs it so anyone you trust can verify it.</p>
-      <code class="ca-out">K = 0.917 &middot; passed &middot; sha256 7f3a&hellip;c81</code>
+      <p>Must clear <b>K &ge; 0.85</b>. Then signs it.</p>
+      <code class="ca-out">K = 0.917 &middot; sha256 7f3a&hellip;c81</code>
     </li>
   </ol>
 
   <p class="ca-foot">
-    Average run: <b>4 minutes</b>. Output: one <code>.kolm</code> file you own. Runs offline. Same answer every time. No per-call bill. No vendor kill switch.
-    <a href="/anatomy">read the technical anatomy &rarr;</a>
+    <b>4 minutes.</b> One <code>.kolm</code> file. Yours.
+    <a href="/anatomy">technical anatomy &rarr;</a>
   </p>
 </section>
 
@@ -1049,16 +1056,14 @@
   /* v7.11 — "Then what?" 3-card section. Answers the journey after compile.
      Same visual rhythm as compile-anatomy but only 3 cards, larger illustrations,
      pointed at the post-compile lifecycle (run / improve / own). */
-  .after-compile { max-width: 1320px; margin: 72px auto 0; padding: 0 32px; }
-  .after-compile .ac-head { text-align: center; max-width: 880px; margin: 0 auto 36px; }
-  .after-compile .ac-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint, #737c73); margin-bottom: 16px; }
-  .after-compile .ac-eyebrow .pulse { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210,0.55); }
-  .after-compile .ac-h { font-size: clamp(32px, 4vw, 50px); line-height: 1.05; letter-spacing: -0.028em; margin: 0 0 18px; font-weight: 600; }
-  .after-compile .ac-sub { font-size: 18px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; max-width: 720px; margin-left: auto; margin-right: auto; }
+  .after-compile { max-width: 1320px; margin: 96px auto 0; padding: 0 32px; }
+  .after-compile .ac-head { text-align: center; max-width: 880px; margin: 0 auto 56px; }
+  .after-compile .ac-h { font-size: clamp(34px, 4vw, 52px); line-height: 1.05; letter-spacing: -0.028em; margin: 0 0 20px; font-weight: 600; }
+  .after-compile .ac-sub { font-size: 18px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0 auto; max-width: 560px; }
   .after-compile .ac-sub b { color: var(--ink, #faf2e1); font-weight: 540; }
-  .after-compile .ac-cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .after-compile .ac-cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   @media (max-width: 980px) { .after-compile .ac-cards { grid-template-columns: 1fr; gap: 14px; } }
-  .after-compile .ac-card { position: relative; padding: 28px 26px 26px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 14px; background: linear-gradient(180deg, rgba(21,26,33,0.5), rgba(11,13,16,0.5)); display: flex; flex-direction: column; gap: 12px; transition: border-color 160ms, transform 160ms; }
+  .after-compile .ac-card { position: relative; padding: 32px 28px 28px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 14px; background: linear-gradient(180deg, rgba(21,26,33,0.5), rgba(11,13,16,0.5)); display: flex; flex-direction: column; gap: 14px; min-height: 200px; transition: border-color 160ms, transform 160ms; }
   .after-compile .ac-card:hover { border-color: rgba(126,240,210, 0.32); transform: translateY(-2px); }
   .after-compile .ac-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #7ef0d2; }
   .after-compile .ac-card h3 { font-size: 22px; line-height: 1.15; letter-spacing: -0.018em; margin: 0; font-weight: 580; color: var(--ink, #faf2e1); }
@@ -1081,16 +1086,15 @@
 
 <section class="after-compile" aria-label="what happens after compile">
   <div class="ac-head">
-    <div class="ac-eyebrow"><span class="pulse"></span>after compile</div>
-    <h2 class="ac-h">Then what? Three things you can do forever.</h2>
-    <p class="ac-sub">One <code style="font-family:var(--mono);color:#7ef0d2">.kolm</code> file. Runs where you need it. Gets stronger as you use it. Stays yours either way.</p>
+    <h2 class="ac-h">Then what? Three things, forever.</h2>
+    <p class="ac-sub">One file. Runs where you put it. Gets better as you use it. Stays yours.</p>
   </div>
 
   <ol class="ac-cards">
     <li class="ac-card">
       <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="1.5"/><path d="M2 17h20l-1.5 3H3.5z"/></svg></span>
       <h3>Run it anywhere</h3>
-      <p>Same file, no internet at runtime. Drop into a CLI, an HTTP server, an MCP harness, or an offline device. <b>One artifact, four targets.</b></p>
+      <p>Same file. No internet at runtime. <b>One artifact. Four targets.</b></p>
       <div class="ac-where">
         <span>laptop</span><span>phone</span><span>server</span><span>edge</span>
       </div>
@@ -1100,7 +1104,7 @@
     <li class="ac-card">
       <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.3"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.3"/><path d="M3 20v-5h5"/></svg></span>
       <h3>Improve it over time</h3>
-      <p>Capture the calls people actually make. Recompile with the real examples. <b>Each version is a strictly better version</b> &mdash; quality is gated, never silently regressed.</p>
+      <p>Capture real calls. Recompile. <b>Each version, strictly better.</b> Quality is gated.</p>
       <div class="ac-loop">
         <em>use</em><b>&rarr;</b><em>capture</em><b>&rarr;</b><em>recompile</em><b>&rarr;</b><em>K &uarr;</em>
       </div>
@@ -1110,7 +1114,7 @@
     <li class="ac-card">
       <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg></span>
       <h3>Keep it forever</h3>
-      <p>Signed. Self-verifying. Works without us. <b>No remote kill switch</b>, no per-call bill, no vendor in the middle. Run it next year, run it offline.</p>
+      <p>Signed. Portable. <b>No kill switch.</b> No per-call bill. Run it next year, offline.</p>
       <div class="ac-where">
         <span>signed</span><span>portable</span><span>open spec</span>
       </div>
