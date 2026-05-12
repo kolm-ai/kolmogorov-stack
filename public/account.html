@@ -171,7 +171,7 @@
 
       <section class="card settings-card danger-card">
         <h2>Session &amp; account</h2>
-        <p>Sign out clears local browser keys. Delete account removes all artifacts and tenants. Not reversible.</p>
+        <p>Sign out clears local browser keys. <b>Delete account</b> deactivates the tenant today: the API key is revoked, billing cancels, and the session clears. Concepts, versions, observations, invocations, compile jobs, and artifact zips remain in storage; full purge is target architecture. For an operator-run purge, email <a href="mailto:dev@kolm.ai?subject=Account%20purge">dev@kolm.ai</a>.</p>
         <div class="toolbar" style="flex-wrap:wrap;gap:8px">
           <button id="acct-logout" class="btn ghost" type="button">Sign out</button>
           <button id="acct-delete" class="btn ghost" type="button" style="border-color:rgba(255,107,145,0.32);color:#ff6b91">Delete account</button>
@@ -468,7 +468,7 @@
   });
 
   $('acct-delete').addEventListener('click', async function () {
-    var typed = prompt('This permanently deletes your account, artifacts, and tenants. To confirm, type:\n\n  DELETE my-org\n\nReplace my-org with your tenant name.');
+    var typed = prompt('This deactivates your account: API key is revoked, billing cancels, session clears. Concepts/versions/observations/artifacts remain in storage (full purge is target architecture; email dev@kolm.ai for an operator-run purge). To confirm, type:\n\n  DELETE my-org\n\nReplace my-org with your tenant name.');
     if (!typed) return;
     try {
       var body = await KS.api('/v1/account/delete', {
@@ -476,7 +476,7 @@
         body: JSON.stringify({ confirm: typed })
       });
       if (body && body.ok) {
-        $('acct-delete-status').textContent = 'Account deleted. Goodbye.';
+        $('acct-delete-status').textContent = 'Account deactivated. Goodbye.';
         KS.clearApiKey();
         setTimeout(function () { location.href = '/'; }, 1800);
       } else {

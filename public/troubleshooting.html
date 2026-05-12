@@ -218,11 +218,11 @@
       <h2>Serve</h2>
       <div class="qa">
         <h3>kolm serve --mcp: client cannot find the server</h3>
-        <p>MCP discovery uses mDNS plus a <code>.well-known/mcp.json</code> on loopback. Confirm the server is on with <code>kolm serve --status</code> and that the client (claude code, cursor, continue) is configured for stdio or SSE. Loopback first; only expose externally if you understand the auth implications.</p>
+        <p><b>Shipped today:</b> <code>kolm serve --mcp</code> speaks line-delimited JSON-RPC over stdio (the MCP default), so the client must spawn it as a subprocess. Run <code>kolm install &lt;harness&gt; --apply</code> for claude-code / cursor / continue / cline to wire the command into the right config file. <b>Target architecture:</b> mDNS announce and <code>.well-known/mcp.json</code> publishing for zero-config discovery are roadmap, not shipped.</p>
       </div>
       <div class="qa">
-        <h3>kolm serve: port in use</h3>
-        <p>Default is 7327. Change with <code>--port 7328</code>. To find what is on 7327: <code>lsof -iTCP:7327 -sTCP:LISTEN</code>.</p>
+        <h3>kolm serve --http: port in use</h3>
+        <p>The optional HTTP transport (<code>kolm serve --mcp --http</code>) binds <code>127.0.0.1:8765</code>. Change with <code>--http-port 8766</code>. To find what is on 8765: <code>lsof -iTCP:8765 -sTCP:LISTEN</code>. The default stdio transport has no port.</p>
       </div>
       <div class="qa">
         <h3>MCP tool calls return empty</h3>

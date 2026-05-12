@@ -156,7 +156,7 @@
       <span class="here">UC-01 &middot; agentic coding</span>
     </div>
     <h1>A compiled coding specialist your <span class="tone">agent calls</span> over MCP.</h1>
-    <p class="lede">Cursor, Claude Code, Cline, Aider, Continue all share one shape: high-frequency calls into your repo for conventions, types, error classes, and test scaffolds. <b>kolm</b> compiles those calls into a per-project signed artifact (a single <code>.kolm</code> file) that the agent calls over MCP. The artifact is a compiled binary, not a cache. <b>Offline. K-score gated. Zero runtime egress. 100% deterministic.</b></p>
+    <p class="lede">Cursor, Claude Code, Cline, Aider, Continue all share one shape: high-frequency calls into your repo for conventions, types, error classes, and test scaffolds. <b>kolm</b> compiles those calls into a per-project signed artifact (a single <code>.kolm</code> file) that the agent calls over MCP via <code>kolm serve --mcp</code>. The artifact is a compiled recipe pack, not a cache. <b>Shipped today:</b> recipe-mode local execution, signed-at-load manifest verification, K-score recorded at compile time. <b>Target architecture:</b> bundled model + LoRA for fully offline runs, in-process egress monitor on the MCP path, deterministic-output guarantee. Today the benchmark patches the Node API surface; MCP <code>tools/call</code> dispatches to <code>runArtifact</code> directly.</p>
     <div class="cta-row">
       <a href="/signup?plan=pro" class="btn-primary">Start Pro &rarr;</a>
       <a href="/serve" class="btn-link">See the MCP integration <span aria-hidden="true">&rarr;</span></a>
@@ -231,9 +231,9 @@
 <span class="ok">✓</span> MCP server on stdin/stdout, protocol 2024-11-05
 <span class="ok">✓</span> 1 tool registered: type-completion (signed, k=0.91)
 
-<span class="cm"># 3. add to Claude Code / Cursor MCP config and call from any turn.</span>
-<span class="pmt">$</span> cat ~/.config/claude/mcp.json
-{ &quot;mcpServers&quot;: { &quot;kolm&quot;: { &quot;command&quot;: &quot;kolm&quot;, &quot;args&quot;: [&quot;serve&quot;, &quot;--mcp&quot;] } } }
+<span class="cm"># 3. wire Claude Code (or cursor/continue/cline) via the install verb.</span>
+<span class="pmt">$</span> kolm install claude-code --apply
+<span class="ok">✓</span> wrote mcpServers.kolm into ~/.claude/settings.json
 <span class="cm">  agent calls the artifact, not the cloud, for the operations</span>
 <span class="cm">  it ran the gate against. re-compile when the inputs change.</span></pre>
     </div>

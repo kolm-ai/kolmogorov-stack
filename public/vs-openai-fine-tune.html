@@ -165,7 +165,7 @@
       <p><b>You own the file.</b> The whole point. The <code>.kolm</code> file lands on your hard drive. You can run it offline, ship it to a customer, deploy it on a phone, fork it, audit it, anchor its hash on-chain. None of that is possible with a hosted fine-tune.</p>
       <p><b>$0 marginal inference.</b> After the compile, you are not paying per call. You bought the artifact; running it is your hardware cost only. For high-volume tasks this crosses a break-even point fast.</p>
       <p><b>Privacy and sovereignty.</b> The captured pairs and the resulting model never leave your control once compiled. For HIPAA, finance, defense, or any data-residency regime, this is the difference between "we can ship" and "we can't ship."</p>
-      <p><b>Receipts.</b> Every output a <code>.kolm</code> produces ships with an HMAC-SHA256 receipt chain. OpenAI does not sign individual outputs.</p>
+      <p><b>Receipts.</b> Each <code>.kolm</code> artifact ships with an HMAC-SHA256 signature over the archive; each invocation returns a <code>_kolm</code> run metadata block the issuer or any holder of the shared tenant secret can re-verify. OpenAI does not sign artifacts or per-call metadata.</p>
       <p><b>Portability across stacks.</b> The <code>.kolm</code> file runs through llama.cpp, vLLM, MLX, or our own runtime. It is not bound to any vendor.</p>
     </div>
 
@@ -209,7 +209,7 @@
           <tr>
             <td class="row-h">Receipts / signing</td>
             <td data-l="OpenAI"><span class="no">no</span></td>
-            <td data-l="kolm"><span class="ok">HMAC-SHA256 chain</span> on every output</td>
+            <td data-l="kolm"><span class="ok">HMAC-SHA256 artifact signature</span> + per-call <code>_kolm</code> run metadata</td>
           </tr>
           <tr>
             <td class="row-h">Data residency</td>

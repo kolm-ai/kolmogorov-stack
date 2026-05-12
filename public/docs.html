@@ -344,7 +344,7 @@ api_key = data["api_key"]</code></pre>
 }</code></pre>
 
     <h2 id="receipts">Receipts</h2>
-    <p>Every <code>/v1/run</code> emits an HMAC-SHA256 chain: <code>source_hash &middot; input_hash &middot; output_hash &middot; version_id &middot; issued_at</code>. The HMAC is computed with your tenant's receipt secret. Anyone holding that secret can re-verify offline (Ed25519 public-key receipts are roadmap).</p>
+    <p><b>Shipped today:</b> each <code>.kolm</code> artifact carries a single HMAC-SHA256 signature over the archive contents (manifest + layer hashes); each <code>/v1/run</code> response returns a <code>_kolm</code> metadata block with <code>source_hash &middot; input_hash &middot; output_hash &middot; version_id &middot; issued_at</code> that the issuer or any holder of the shared tenant receipt secret can re-verify. <b>Target architecture:</b> per-call HMAC chaining across requests and Ed25519 public-key receipts are roadmap, not shipped.</p>
     <pre class="code-block"><button class="copy" type="button">copy</button><code># offline verifier (Node)
 import crypto from "crypto";
 const r = receipt;       // the receipt object from /v1/run
@@ -372,9 +372,10 @@ kolm install claude-code   # wire up an agent harness
 kolm doctor            # check env, keys, port, version</code></pre>
 
     <h2 id="mcp">MCP serve</h2>
-    <p><code>kolm serve --mcp</code> exposes your local artifacts as MCP tools over stdio. Auto-discovered by Claude Code and Cursor after <code>kolm install claude-code</code>.</p>
-    <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm serve --mcp --port 7777
-kolm install claude-code --apply       # registers the MCP server in ~/.claude/mcp.json</code></pre>
+    <p><code>kolm serve --mcp</code> exposes your local artifacts as MCP tools over stdio (the MCP default). The client spawns it as a subprocess - <code>kolm install &lt;harness&gt; --apply</code> writes the spawn config into the right place for claude-code / cursor / continue / cline. Pass <code>--http</code> to add an optional HTTP JSON-RPC endpoint on <code>127.0.0.1:8765</code>.</p>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm serve --mcp                  # stdio (default)
+kolm serve --mcp --http           # also listen on 127.0.0.1:8765
+kolm install claude-code --apply  # writes mcpServers.kolm into ~/.claude/settings.json</code></pre>
 
     <h2 id="hooks">Hooks</h2>
     <p>Six lifecycle hooks declared in <code>kolm.yaml</code>: <code>PreCompile</code>, <code>PostCompile</code>, <code>PreRun</code>, <code>PostRun</code>, <code>PreBench</code>, <code>PostBench</code>. Each runs a shell command with hook context on stdin.</p>

@@ -165,7 +165,7 @@
       <p><b>You own the file.</b> The deliverable is portable. Run it on your laptop, ship it to a customer, deploy it air-gapped, embed it in a phone app. None of that is possible when the model is on Together's servers.</p>
       <p><b>$0 marginal inference.</b> Per-token billing scales linearly with traffic; flat-compile + own-hardware does not. For high-volume tasks the curves cross fast.</p>
       <p><b>Verifier-gated training.</b> kolm runs every captured pair through a synthesized verifier before it lands in the training set. The result is higher-quality labels and a tighter K-score gate. Together does the supervised fit but doesn't ship a verifier-gating layer.</p>
-      <p><b>Receipts.</b> Every <code>.kolm</code> output ships with an HMAC-SHA256 receipt chain. Together has no equivalent.</p>
+      <p><b>Receipts.</b> Each <code>.kolm</code> artifact ships with an HMAC-SHA256 signature over the archive; each invocation returns a <code>_kolm</code> run metadata block the issuer or any holder of the shared tenant secret can re-verify. Together has no equivalent.</p>
       <p><b>No sustained vendor cost.</b> If Together's pricing changes, your fine-tune lives on a moving floor. If kolm's pricing changes, the <code>.kolm</code> files you already compiled keep running on your hardware.</p>
     </div>
 
@@ -214,7 +214,7 @@
           <tr>
             <td class="row-h">Receipts / signing</td>
             <td data-l="Together"><span class="no">no</span></td>
-            <td data-l="kolm"><span class="ok">HMAC-SHA256 chain</span></td>
+            <td data-l="kolm"><span class="ok">HMAC-SHA256 artifact signature</span> + per-call <code>_kolm</code> run metadata</td>
           </tr>
           <tr>
             <td class="row-h">Data residency</td>

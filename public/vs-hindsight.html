@@ -165,7 +165,7 @@
       <h2>Where kolm wins</h2>
       <p><b>Consolidation, not just retrieval.</b> The captured pairs aren't just for recall - they're labelled training data. We run them through a verifier, filter to the high-confidence subset, and distill a smaller model. Nine consolidation strategies feed the trainer; retrieval is one of them, not the whole thing.</p>
       <p><b>The deliverable is a model, not a recall API.</b> Hindsight gives you back better context to feed to a frontier model. We give you back a <code>.kolm</code> file - the model itself - signed, portable, runnable offline. Once compiled, you don't need the frontier for that task.</p>
-      <p><b>Receipts and signing.</b> Every output a <code>.kolm</code> produces ships with an HMAC-SHA256 receipt chain. Hindsight has no equivalent because there's no artifact to sign.</p>
+      <p><b>Receipts and signing.</b> Each <code>.kolm</code> artifact ships with an HMAC-SHA256 signature over the archive; each invocation returns a <code>_kolm</code> run metadata block the issuer or any holder of the shared tenant secret can re-verify. Hindsight has no equivalent because there's no artifact to sign.</p>
       <p><b>Cost shape.</b> Hindsight + frontier scales linearly with traffic; you pay for the LLM call every turn. kolm scales as a fixed compile cost + $0 marginal inference (the <code>.kolm</code> runs on your hardware). Past the compile threshold, the cost curves diverge.</p>
     </div>
 
@@ -219,7 +219,7 @@
           <tr>
             <td class="row-h">Receipts / signing</td>
             <td data-l="Hindsight"><span class="no">no</span></td>
-            <td data-l="kolm"><span class="ok">HMAC-SHA256 receipt chain</span></td>
+            <td data-l="kolm"><span class="ok">HMAC-SHA256 artifact signature</span> + per-call <code>_kolm</code> run metadata</td>
           </tr>
           <tr>
             <td class="row-h">Cost shape</td>

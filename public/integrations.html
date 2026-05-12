@@ -142,11 +142,11 @@
       <p class="kicker">If your agent speaks MCP, it can drive kolm. If your editor speaks Cursor rules or Claude Code skills, it can drive kolm.</p>
       <div class="grid">
         <div class="ig">
-          <div class="top"><h3>Claude Desktop (MCP)</h3><span class="stat shipped">shipped</span></div>
-          <p>Add kolm as an MCP server in <code>~/.claude/mcp.json</code>. Claude can synthesize, run, and verify recipes as MCP tools - no extra glue.</p>
+          <div class="top"><h3>Claude Code (MCP)</h3><span class="stat shipped">shipped</span></div>
+          <p>Run <code>kolm install claude-code --apply</code> and the installer writes <code>mcpServers.kolm</code> into <code>~/.claude/settings.json</code>. Claude can then synthesize, run, and inspect recipes as MCP tools over stdio - no manual JSON editing.</p>
           <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
-# in ~/.claude/mcp.json
-{ "mcpServers": { "kolm": { "command": "kolm", "args": ["serve", "--mcp"] } } }</pre>
+kolm install claude-code --apply
+# writes ~/.claude/settings.json mcpServers.kolm: { command: "kolm", args: ["serve","--mcp"] }</pre>
           <div class="links"><a href="/serve">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack">source</a></div>
         </div>
 

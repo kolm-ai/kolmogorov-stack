@@ -147,18 +147,20 @@
 <section class="hero">
   <div class="wrap">
     <div class="eyebrow"><span class="num">03</span> · Discovery</div>
-    <h1><span class="tone">kolm serve --mcp.</span> One command. Any agent finds it.</h1>
+    <h1><span class="tone">kolm serve --mcp.</span> One command. One harness config.</h1>
     <p class="lede">Wrap any <code>.kolm</code> artifact in a Model Context Protocol server.
-      Claude, Cursor, Continue, and every MCP-aware agent <b>discovers it without configuration.</b>
-      Local first. Frontier as fallback. Receipts on every call.</p>
-    <pre><span class="com"># In a .kolm directory or pointing at a file</span>
-$ kolm serve --mcp <span class="key">support-triage.kolm</span>
+      Claude, Cursor, Continue, and Cline plug in via <code>kolm install &lt;harness&gt; --apply</code>; the harness config points at the local <code>kolm serve --mcp</code> stdio command.
+      Each call returns the artifact output plus <code>_kolm</code> run metadata (recipe id, latency, K-score, audit fields). Automatic mDNS discovery, SSE transport, and <code>.well-known/mcp.json</code> publishing are target architecture.</p>
+    <pre><span class="com"># Default: line-delimited JSON-RPC over stdio (no port).</span>
+$ kolm serve --mcp
 
-  <span class="ok">●</span> kolm <span class="key">v0.4</span> · serving <span class="key">support-triage.kolm</span>
-  <span class="ok">●</span> mcp endpoint   : http://127.0.0.1:7327
-  <span class="ok">●</span> protocol       : mcp/0.1 + sse
-  <span class="ok">●</span> tools exposed  : <span class="key">triage</span>, <span class="key">explain_label</span>
-  <span class="ok">●</span> receipts       : on (hmac, anchors empty)</pre>
+  <span class="ok">●</span> kolm <span class="key">v0.4</span> · serving artifacts from <span class="key">~/.kolm/artifacts</span>
+  <span class="ok">●</span> transport      : stdio json-rpc
+  <span class="ok">●</span> tools/list     : 5 artifacts discovered
+  <span class="ok">●</span> receipts       : signed artifact-level (per-call HMAC is target arch)
+
+<span class="com"># Optional: localhost HTTP JSON-RPC on 127.0.0.1:8765</span>
+$ kolm serve --mcp --http
 
   </div>
 </section>
@@ -185,8 +187,8 @@ $ kolm serve --mcp <span class="key">support-triage.kolm</span>
         <div class="stat"><span class="lbl">Cost / 1k calls</span><span class="val">recipe-mode local</span></div>
         <div class="stat"><span class="lbl">Privacy</span><span class="val">local CLI boundary</span></div>
         <div class="stat"><span class="lbl">Offline</span><span class="val">artifact-dependent</span></div>
-        <div class="stat"><span class="lbl">Receipt</span><span class="val">HMAC chain on every call</span></div>
-        <div class="stat"><span class="lbl">Discovery</span><span class="val">auto via mDNS + .well-known</span></div>
+        <div class="stat"><span class="lbl">Receipt</span><span class="val">signed artifact + _kolm run metadata</span></div>
+        <div class="stat"><span class="lbl">Discovery</span><span class="val">kolm install &lt;harness&gt; --apply</span></div>
       </div>
     </div>
   </div>
@@ -195,25 +197,24 @@ $ kolm serve --mcp <span class="key">support-triage.kolm</span>
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="num">02</span> · How it works</div>
-    <p class="lede">No daemons. No control plane. Run the binary, agents see it.
-      Stop the binary, they don&rsquo;t.</p>
+    <p class="lede">No daemons. No control plane. The harness spawns <code>kolm serve --mcp</code> over stdio; close the harness and the process exits.</p>
 
     <div class="steps">
       <div class="step">
         <div class="n">01</div>
-        <p>kolm binds <code>127.0.0.1:7327</code> by default and writes a <code>.well-known/mcp.json</code> next to the artifact so any client on this machine can read its capabilities.</p>
+        <p><b>Shipped today:</b> <code>kolm serve --mcp</code> speaks line-delimited JSON-RPC over stdio (the MCP default transport). Pass <code>--http</code> to expose a localhost HTTP JSON-RPC endpoint on <code>127.0.0.1:8765</code> for clients that prefer HTTP. mDNS announce and <code>.well-known/mcp.json</code> publishing are target architecture.</p>
       </div>
       <div class="step">
         <div class="n">02</div>
-        <p>kolm announces itself as <code>_kolm._tcp.local</code> for LAN-aware clients. No router config needed; loopback works fine for solo dev.</p>
+        <p><b>Shipped today:</b> <code>kolm install &lt;harness&gt; --apply</code> wires the harness config for <code>claude-code</code>, <code>cursor</code>, <code>continue</code>, and <code>cline</code>. Each harness points at a local <code>kolm serve --mcp</code> command; there is no auto-discovery yet.</p>
       </div>
       <div class="step">
         <div class="n">03</div>
-        <p>The artifact&rsquo;s manifest signs a short-lived bearer token; clients exchange it on first connect. Every tool call returns a hmac-chained receipt.</p>
+        <p><b>Shipped today:</b> the artifact signature is verified when an artifact is loaded; <code>tools/call</code> returns the recipe output plus <code>_kolm</code> run metadata (recipe id, latency, K-score, audit fields). Short-lived bearer-token exchange and per-call HMAC chaining are target architecture.</p>
       </div>
       <div class="step">
         <div class="n">04</div>
-        <p>Standard MCP over SSE. Tool schemas come straight from the artifact&rsquo;s manifest, so the agent sees exactly the surface kolm sealed in.</p>
+        <p><b>Shipped today:</b> <code>tools/list</code> surfaces each artifact's recipes as MCP tools; schemas come straight from the artifact manifest, so the agent sees only the surface kolm sealed in. SSE transport is target architecture.</p>
       </div>
     </div>
   </div>
@@ -246,10 +247,8 @@ $ kolm serve --mcp <span class="key">support-triage.kolm</span>
 
 <section>
   <div class="wrap">
-    <h2>Every answer carries a receipt.</h2>
-    <p>kolm receipts bind the source hash, input hash, output hash, runtime version, and issue time with HMAC-SHA256 on every output.
-      Verification works fully offline against the artifact bytes and retained receipt evidence.
-      The Enterprise tier extends the chain with Sigstore / Rekor anchoring for cross-organization audit, useful when an artifact is shared across machines.</p>
+    <h2>Receipts: shipped today, deeper tomorrow.</h2>
+    <p><b>Shipped today:</b> every <code>.kolm</code> artifact carries an HMAC-SHA256 signed manifest binding source hashes, input/output schemas, runtime version, and issue time; <code>kolm inspect</code> re-verifies the artifact bytes against the shared tenant receipt secret. MCP <code>tools/call</code> returns <code>_kolm</code> run metadata (recipe id, latency, K-score, audit fields). <b>Target architecture:</b> per-call HMAC chaining over input/output hashes, plus optional Sigstore / Rekor anchoring on Enterprise for cross-organization audit when an artifact is shared across machines.</p>
 
     <pre>$ kolm serve --mcp support-triage.kolm | jq '.receipts[0]'
 {
