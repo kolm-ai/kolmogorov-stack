@@ -1861,12 +1861,14 @@ header.site .left {
   align-items: center !important;
   gap: 36px !important;
 }
-header.site .left nav,
-header.site nav,
-header.site-header .site-nav {
-  display: flex !important;
-  align-items: center !important;
-  gap: 22px !important;
+@media (min-width: 921px) {
+  header.site .left nav,
+  header.site nav,
+  header.site-header .site-nav {
+    display: flex !important;
+    align-items: center !important;
+    gap: 22px !important;
+  }
 }
 header.site .left nav a,
 header.site nav a,
@@ -2863,14 +2865,22 @@ section.vr-calc-only { padding-top: var(--sp-section-tight) !important; padding-
   section.vr-calc-only { padding-top: var(--sp-section-mob-tight) !important; padding-bottom: var(--sp-section-mob-tight) !important; }
 }
 
-/* Tighten home hero on mobile - the compounding margins were leaking */
+/* Tighten home hero on mobile - the compounding margins were leaking.
+   Applies to both legacy .home-hero-stacked and v7.13 .home-hero-split. */
 @media (max-width: 720px) {
-  .home-hero-stacked { padding-bottom: 28px !important; }
-  .home-hero-stacked .hero-copy > h1 { margin: 0 0 18px !important; font-size: clamp(36px, 9vw, 56px) !important; line-height: 1.04 !important; }
-  .home-hero-stacked .lede { margin: 0 0 22px !important; font-size: 17px !important; line-height: 1.45 !important; }
-  .home-hero-stacked .actions { margin: 0 0 22px !important; gap: 10px !important; }
-  .home-hero-stacked .actions .btn { width: 100% !important; justify-content: center !important; padding: 14px 20px !important; }
-  .home-hero-stacked .nl-try { margin: 0 !important; }
+  .home-hero-stacked,
+  .home-hero-split { padding-bottom: 28px !important; }
+  .home-hero-stacked .hero-copy > h1,
+  .home-hero-split .hero-copy > h1 { margin: 0 0 18px !important; font-size: clamp(36px, 9vw, 56px) !important; line-height: 1.04 !important; }
+  .home-hero-stacked .lede,
+  .home-hero-split .lede { margin: 0 0 22px !important; font-size: 17px !important; line-height: 1.45 !important; }
+  .home-hero-stacked .actions,
+  .home-hero-split .actions { margin: 0 0 22px !important; gap: 10px !important; }
+  .home-hero-stacked .actions .btn,
+  .home-hero-split .actions .btn { width: 100% !important; justify-content: center !important; padding: 14px 20px !important; }
+  .home-hero-stacked .nl-try,
+  .home-hero-split .nl-try { margin: 0 !important; }
+  .home-hero-split .hero-side { margin-top: 32px !important; }
 }
 
 /* ---- Mobile tap target + input minimums ---------------------- */

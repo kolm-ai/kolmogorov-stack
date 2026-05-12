@@ -724,7 +724,7 @@
 
 <main>
 
-<section class="hero home-hero home-hero-stacked">
+<section class="hero home-hero home-hero-split">
   <div class="wrap">
     <div class="hero-copy">
       <h1>Compile your own AI.</h1>
@@ -748,26 +748,132 @@
         <output id="nl-out" aria-live="polite"></output>
       </div>
     </div>
+
+    <aside class="hero-side" aria-label="live product demo">
+      <div class="hero-demo-panel hero-video-panel" id="hero-video-panel">
+        <div class="hero-demo-head">
+          <span>kolm in 17 seconds</span>
+          <span class="hero-video-actions">
+            <button type="button" class="hv-btn" id="hv-playpause" aria-label="play or pause demo" aria-pressed="true">
+              <span class="hv-ico hv-ico-pause" aria-hidden="true"></span>
+              <span class="hv-lab">pause</span>
+            </button>
+          </span>
+        </div>
+        <div class="hero-video-wrap">
+          <video
+            id="hero-video"
+            autoplay muted loop playsinline preload="metadata"
+            poster="/video/kolm-hero-poster.jpg"
+            aria-label="kolm demo. Write what your AI should do in plain English. Press compile. Get back one file that runs offline, gives the same answer every time, and is yours forever.">
+            <source src="/video/kolm-hero.webm" type="video/webm">
+            <source src="/video/kolm-hero.mp4" type="video/mp4">
+            <noscript><img src="/video/kolm-hero-poster.jpg" alt="describe your AI in english, kolm compiles it into one file you own."></noscript>
+          </video>
+        </div>
+        <div class="hero-video-foot">
+          <a href="/anatomy">anatomy of a .kolm &rarr;</a>
+        </div>
+      </div>
+
+      <p class="hero-proof">
+        <span class="hp-dot" aria-hidden="true"></span>
+        <span><b>38 MB</b> artifact</span>
+        <span class="hp-sep" aria-hidden="true">&middot;</span>
+        <span><b>0.6 ms</b> median</span>
+        <span class="hp-sep" aria-hidden="true">&middot;</span>
+        <span><b>K = 0.917</b> on /spec eval set</span>
+        <a href="/spec" class="hp-link">verify &rarr;</a>
+      </p>
+    </aside>
   </div>
 </section>
 
 <style>
-  .home-hero-stacked { min-height: auto; padding-bottom: 36px; border-bottom: 0; }
-  .home-hero-stacked .wrap { display: block; max-width: 1180px; }
-  .home-hero-stacked .hero-copy { max-width: 880px; }
-  .home-hero-stacked h1 { font-size: clamp(48px, 6.6vw, 84px); max-width: 22ch; line-height: 1.02; letter-spacing: -0.032em; }
-  @media (max-width: 720px) { .home-hero-stacked h1 { font-size: clamp(36px, 8vw, 52px); } }
+  /* v7.13 — split hero. Copy left, live video panel + proof line right on
+     desktop ≥1100px. Below that, stack as a single column with the video
+     dropping under the copy. The grid is asymmetric (1.04fr : 1fr) so the
+     copy carries the visual weight while the demo lands at a smaller, more
+     poster-friendly aspect than the prior full-bleed strip. */
+  .home-hero-split { min-height: auto; padding-bottom: 36px; border-bottom: 0; }
+  .home-hero-split .wrap { display: block; max-width: 1320px; }
+  .home-hero-split .hero-copy { max-width: 640px; }
+  .home-hero-split h1 { font-size: clamp(44px, 5.6vw, 76px); max-width: 18ch; line-height: 1.02; letter-spacing: -0.032em; }
+  @media (max-width: 720px) { .home-hero-split h1 { font-size: clamp(36px, 8vw, 52px); } }
 
   /* Apple-grade hero rhythm: one measured beat between each element.
-     H1 → lede 20px. lede → actions 32px. actions → NL try 40px. */
-  .home-hero-stacked .hero-copy > h1 { margin: 0 0 20px; }
-  .home-hero-stacked .lede { margin: 0 0 32px; line-height: 1.4; font-size: 20px; max-width: 38ch; color: var(--ink-mute, #b5bdb1); }
-  .home-hero-stacked .actions { margin: 0 0 40px; }
-  .home-hero-stacked .nl-try { margin: 0 !important; max-width: 720px; }
+     H1 → lede 20px. lede → actions 32px. actions → NL try 36px. */
+  .home-hero-split .hero-copy > h1 { margin: 0 0 20px; }
+  .home-hero-split .lede { margin: 0 0 32px; line-height: 1.4; font-size: 20px; max-width: 36ch; color: var(--ink-mute, #b5bdb1); }
+  .home-hero-split .actions { margin: 0 0 36px; }
+  .home-hero-split .nl-try { margin: 0 !important; max-width: 640px; }
   @media (max-width: 520px) {
-    .home-hero-stacked .lede { margin-bottom: 24px; font-size: 17px; }
-    .home-hero-stacked .actions { margin-bottom: 28px; }
+    .home-hero-split .lede { margin-bottom: 24px; font-size: 17px; }
+    .home-hero-split .actions { margin-bottom: 28px; }
   }
+
+  /* Desktop grid kicks in at 1100px so the copy column gets ~620px width
+     without crowding the video. The video aspect-ratio is 16:9, so at
+     580px wide it renders ~326px tall — about the same height as the copy
+     stack (H1 + lede + 2 CTAs + NL bot), which keeps both columns visually
+     balanced. */
+  @media (min-width: 1100px) {
+    .home-hero-split .wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr);
+      column-gap: 64px;
+      align-items: start;
+    }
+    .home-hero-split .hero-side { margin-top: 0; }
+  }
+  @media (max-width: 1099px) {
+    .home-hero-split .hero-side { margin-top: 56px; max-width: 880px; }
+  }
+
+  /* Hero side column — frames the video and proof line. */
+  .home-hero-split .hero-side .hero-demo-panel { margin: 0; max-width: none; }
+  .home-hero-split .hero-side .hero-video-wrap { aspect-ratio: 16 / 9; }
+
+  /* Proof line — single mono caption under the video. NOT the "moustache"
+     pattern: this is one inline row that ends with a verify link, anchored
+     to the video as a caption rather than competing with H1 above the fold.
+     Pattern: dot · 38 MB artifact · 0.6 ms median · K = 0.917 on /spec → verify */
+  .hero-proof {
+    display: flex; align-items: center; gap: 10px 12px;
+    margin: 18px 0 0;
+    font-family: var(--mono, ui-monospace);
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink-mute, #b5bdb1);
+    flex-wrap: wrap;
+    letter-spacing: 0.01em;
+  }
+  .hero-proof b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .hero-proof .hp-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #7ef0d2;
+    box-shadow: 0 0 8px rgba(126, 240, 210, 0.55);
+    flex: 0 0 7px;
+  }
+  .hero-proof .hp-sep { color: var(--ink-faint, #737c73); opacity: 0.7; }
+  .hero-proof .hp-link {
+    margin-left: auto;
+    color: #7ef0d2;
+    border-bottom: 1px solid rgba(126, 240, 210, 0.32);
+    text-decoration: none;
+    transition: border-color 140ms;
+  }
+  .hero-proof .hp-link:hover { border-bottom-color: rgba(126, 240, 210, 0.7); }
+  @media (max-width: 520px) {
+    .hero-proof { font-size: 12px; gap: 8px 10px; }
+    .hero-proof .hp-link { margin-left: 0; flex-basis: 100%; }
+  }
+  [data-theme=light] .hero-proof { color: #4b5158; }
+  [data-theme=light] .hero-proof b { color: #0c0e10; }
+  [data-theme=light] .hero-proof .hp-dot { background: #0a8862; box-shadow: 0 0 8px rgba(10, 136, 98, 0.45); }
+  [data-theme=light] .hero-proof .hp-sep { color: #9aa1a6; }
+  [data-theme=light] .hero-proof .hp-link { color: #0a8862; border-bottom-color: rgba(10, 136, 98, 0.32); }
+  [data-theme=light] .hero-proof .hp-link:hover { border-bottom-color: rgba(10, 136, 98, 0.7); }
 
   .nl-try { margin: 44px 0 0; max-width: 720px; }
   .nl-try .nl-head { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
@@ -914,37 +1020,6 @@
 })();
 </script>
 
-<section class="hero-demo hero-demo-wide" aria-label="live product demo">
-  <div class="hero-demo-panel hero-video-panel hero-video-panel-wide" id="hero-video-panel">
-    <div class="hero-demo-head">
-      <span>kolm in 17 seconds</span>
-      <span class="hero-video-actions">
-        <button type="button" class="hv-btn" id="hv-playpause" aria-label="play or pause demo" aria-pressed="true">
-          <span class="hv-ico hv-ico-pause" aria-hidden="true"></span>
-          <span class="hv-lab">pause</span>
-        </button>
-        <button type="button" class="hv-btn" id="hv-size" aria-label="toggle video size" aria-pressed="false">
-          <span class="hv-ico hv-ico-shrink" aria-hidden="true"></span>
-          <span class="hv-lab">smaller</span>
-        </button>
-      </span>
-    </div>
-    <div class="hero-video-wrap">
-      <video
-        id="hero-video"
-        autoplay muted loop playsinline preload="metadata"
-        poster="/video/kolm-hero-poster.jpg"
-        aria-label="kolm demo. Write what your AI should do in plain English. Press compile. Get back one file that runs offline, gives the same answer every time, and is yours forever.">
-        <source src="/video/kolm-hero.webm" type="video/webm">
-        <source src="/video/kolm-hero.mp4" type="video/mp4">
-        <noscript><img src="/video/kolm-hero-poster.jpg" alt="describe your AI in english, kolm compiles it into one file you own."></noscript>
-      </video>
-    </div>
-    <div class="hero-video-foot">
-      <a href="/anatomy">anatomy of a .kolm &rarr;</a>
-    </div>
-  </div>
-</section>
 
 <section class="compile-anatomy" aria-label="what compile means">
   <div class="ca-head">
