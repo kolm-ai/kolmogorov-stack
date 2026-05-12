@@ -608,23 +608,33 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "What is kolm?",
-          "acceptedAnswer": { "@type": "Answer", "text": "kolm is a private AI compiler. It turns a task, examples, and approved data into a signed .kolm artifact that can be run and verified locally." }
+          "name": "Can I improve my AI over time?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Capture real use with consent and recompile with better examples. The K-score gate refuses to ship a regression, so each compile is strictly better than the last." }
         },
         {
           "@type": "Question",
-          "name": "What does compiler cache for intelligence mean?",
-          "acceptedAnswer": { "@type": "Answer", "text": "It means the expensive frontier-model work happens at compile time. The approved behavior is cached into a portable artifact so runtime use can be local, repeatable, and auditable." }
+          "name": "Does kolm work with Claude Code, Cursor, or Continue?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Run `kolm install <harness>` and the compiled .kolm artifact appears as an MCP tool inside the agent. Stdio is the default transport; HTTP is optional." }
         },
         {
           "@type": "Question",
-          "name": "Does user data leave the device at runtime?",
-          "acceptedAnswer": { "@type": "Answer", "text": "kolm is designed for local-boundary AI: the artifact, verifier, and receipt evidence travel with the workload so inference can be reviewed inside the user or customer boundary." }
+          "name": "What is actually inside a .kolm file?",
+          "acceptedAnswer": { "@type": "Answer", "text": "A small model, the curated examples, the evaluator, a manifest, and a signed HMAC receipt. One zip-format artifact built against the open RS-1 spec." }
         },
         {
           "@type": "Question",
-          "name": "What is the K-score?",
-          "acceptedAnswer": { "@type": "Answer", "text": "K-score is a visible quality gate for a .kolm artifact. It blends accuracy, latency, size, cost, and coverage into a single release score." }
+          "name": "What if I want to leave kolm later?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The .kolm file is yours, the runtime is MIT licensed, and the spec is open. You can run the artifact forever on any hardware you control with no vendor in the loop." }
+        },
+        {
+          "@type": "Question",
+          "name": "Does my data leave the device at runtime?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No bytes leave at runtime. Compilation runs against your approved data only; the threat model document spells out exactly what each compile step reads and writes." }
+        },
+        {
+          "@type": "Question",
+          "name": "What does kolm cost?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The CLI runtime is free and MIT. Cloud compile and the registry start at $9/month for the Starter tier; team and enterprise tiers add seats, BAA, and SLAs." }
         }
       ]
     }
@@ -922,7 +932,7 @@
 <section class="hero-demo hero-demo-wide" aria-label="live product demo">
   <div class="hero-demo-panel hero-video-panel hero-video-panel-wide" id="hero-video-panel">
     <div class="hero-demo-head">
-      <span>describe &middot; compile &middot; yours forever</span>
+      <span>kolm in 17 seconds</span>
       <span class="hero-video-actions">
         <button type="button" class="hv-btn" id="hv-playpause" aria-label="play or pause demo" aria-pressed="true">
           <span class="hv-ico hv-ico-pause" aria-hidden="true"></span>
@@ -946,11 +956,6 @@
       </video>
     </div>
     <div class="hero-video-foot">
-      <span class="scenes" aria-hidden="true">
-        <span><b>01</b>describe</span>
-        <span><b>02</b>compile</span>
-        <span><b>03</b>yours</span>
-      </span>
       <a href="/anatomy">anatomy of a .kolm &rarr;</a>
     </div>
   </div>
@@ -994,6 +999,81 @@
     The output is one <code>.kolm</code> file you own. Runs offline. Same answer every time. No per-call bill. No remote kill switch.
     <a href="/anatomy">how it works under the hood &rarr;</a>
   </p>
+</section>
+
+
+<style>
+  /* v7.11 — "Then what?" 3-card section. Answers the journey after compile.
+     Same visual rhythm as compile-anatomy but only 3 cards, larger illustrations,
+     pointed at the post-compile lifecycle (run / improve / own). */
+  .after-compile { max-width: 1320px; margin: 72px auto 0; padding: 0 32px; }
+  .after-compile .ac-head { text-align: center; max-width: 880px; margin: 0 auto 36px; }
+  .after-compile .ac-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint, #737c73); margin-bottom: 16px; }
+  .after-compile .ac-eyebrow .pulse { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210,0.55); }
+  .after-compile .ac-h { font-size: clamp(32px, 4vw, 50px); line-height: 1.05; letter-spacing: -0.028em; margin: 0 0 18px; font-weight: 600; }
+  .after-compile .ac-sub { font-size: 18px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; max-width: 720px; margin-left: auto; margin-right: auto; }
+  .after-compile .ac-sub b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .after-compile .ac-cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 980px) { .after-compile .ac-cards { grid-template-columns: 1fr; gap: 14px; } }
+  .after-compile .ac-card { position: relative; padding: 28px 26px 26px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 14px; background: linear-gradient(180deg, rgba(21,26,33,0.5), rgba(11,13,16,0.5)); display: flex; flex-direction: column; gap: 12px; transition: border-color 160ms, transform 160ms; }
+  .after-compile .ac-card:hover { border-color: rgba(126,240,210, 0.32); transform: translateY(-2px); }
+  .after-compile .ac-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #7ef0d2; }
+  .after-compile .ac-card h3 { font-size: 22px; line-height: 1.15; letter-spacing: -0.018em; margin: 0; font-weight: 580; color: var(--ink, #faf2e1); }
+  .after-compile .ac-card p { font-size: 14.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; }
+  .after-compile .ac-card p b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .after-compile .ac-where { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; }
+  .after-compile .ac-where span { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); border: 1px solid var(--line, rgba(255,255,255,0.10)); border-radius: 5px; padding: 4px 8px; letter-spacing: 0.02em; background: rgba(0,0,0,0.18); }
+  .after-compile .ac-loop { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin: 4px 0 0; font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); letter-spacing: 0.02em; }
+  .after-compile .ac-loop em { font-style: normal; padding: 4px 9px; border: 1px solid rgba(126,240,210,0.22); border-radius: 5px; background: rgba(126,240,210,0.05); }
+  .after-compile .ac-loop b { color: #7ef0d2; font-weight: 540; }
+  .after-compile .ac-link { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 10px; font-family: var(--mono); font-size: 12.5px; color: #7ef0d2; border-bottom: 0; }
+  .after-compile .ac-link:hover { color: #c1f5e3; }
+  [data-theme=light] .after-compile .ac-card { background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(250,250,250,0.55)); }
+  [data-theme=light] .after-compile .ac-icon { color: #0a8862; }
+  [data-theme=light] .after-compile .ac-where span { background: rgba(255,255,255,0.6); color: #1f2429; border-color: rgba(0,0,0,0.10); }
+  [data-theme=light] .after-compile .ac-loop em { border-color: rgba(10,136,98,0.28); background: rgba(10,136,98,0.06); color: #1f2429; }
+  [data-theme=light] .after-compile .ac-loop b { color: #0a8862; }
+  [data-theme=light] .after-compile .ac-link { color: #0a8862; }
+</style>
+
+<section class="after-compile" aria-label="what happens after compile">
+  <div class="ac-head">
+    <div class="ac-eyebrow"><span class="pulse"></span>after compile</div>
+    <h2 class="ac-h">Then what? Three things you can do forever.</h2>
+    <p class="ac-sub">One <code style="font-family:var(--mono);color:#7ef0d2">.kolm</code> file. Runs where you need it. Gets stronger as you use it. Stays yours either way.</p>
+  </div>
+
+  <ol class="ac-cards">
+    <li class="ac-card">
+      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="1.5"/><path d="M2 17h20l-1.5 3H3.5z"/></svg></span>
+      <h3>Run it anywhere</h3>
+      <p>Same file, no internet at runtime. Drop into a CLI, an HTTP server, an MCP harness, or an offline device. <b>One artifact, four targets.</b></p>
+      <div class="ac-where">
+        <span>laptop</span><span>phone</span><span>server</span><span>edge</span>
+      </div>
+      <a href="/anatomy" class="ac-link">how it runs &rarr;</a>
+    </li>
+
+    <li class="ac-card">
+      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.3"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.3"/><path d="M3 20v-5h5"/></svg></span>
+      <h3>Improve it over time</h3>
+      <p>Capture the calls people actually make. Recompile with the real examples. <b>Each version is a strictly better version</b> &mdash; quality is gated, never silently regressed.</p>
+      <div class="ac-loop">
+        <em>use</em><b>&rarr;</b><em>capture</em><b>&rarr;</b><em>recompile</em><b>&rarr;</b><em>K &uarr;</em>
+      </div>
+      <a href="/evolve" class="ac-link">improvement loop &rarr;</a>
+    </li>
+
+    <li class="ac-card">
+      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg></span>
+      <h3>Keep it forever</h3>
+      <p>Signed. Self-verifying. Works without us. <b>No remote kill switch</b>, no per-call bill, no vendor in the middle. Run it next year, run it offline.</p>
+      <div class="ac-where">
+        <span>signed</span><span>portable</span><span>open spec</span>
+      </div>
+      <a href="/spec" class="ac-link">rs-1 open spec &rarr;</a>
+    </li>
+  </ol>
 </section>
 
 
@@ -1080,7 +1160,72 @@
   @media (max-width: 720px) { .trust-line .tl-wrap { grid-template-columns: 1fr 1fr; } }
 </style>
 
-<section class="bottom-cta" aria-label="get started" style="text-align:center;padding:54px 24px 80px;border-top:1px solid var(--line)">
+<style>
+  /* v7.11 — compact FAQ section answering the most-asked open questions
+     inline on the homepage so a buyer doesn't have to navigate to /faq.
+     4 Q&As, monospace question, plain-prose answer. SOTA restraint: no
+     accordions, no chevrons, no JS — just static text with anchors out
+     to deeper pages when curiosity grows. */
+  .home-faq { max-width: 1080px; margin: 64px auto 0; padding: 0 32px; }
+  .home-faq .hf-head { text-align: center; max-width: 760px; margin: 0 auto 32px; }
+  .home-faq .hf-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint, #737c73); margin-bottom: 14px; }
+  .home-faq .hf-eyebrow .pulse { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210,0.55); }
+  .home-faq .hf-h { font-size: clamp(28px, 3.4vw, 42px); line-height: 1.08; letter-spacing: -0.026em; margin: 0; font-weight: 600; }
+  .home-faq .hf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 36px; margin: 0; padding: 0; list-style: none; }
+  @media (max-width: 760px) { .home-faq .hf-grid { grid-template-columns: 1fr; gap: 22px; } }
+  .home-faq .hf-q { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.04em; color: var(--ink-mute, #b5bdb1); margin: 0 0 8px; text-transform: uppercase; }
+  .home-faq .hf-q b { color: #7ef0d2; font-weight: 580; margin-right: 7px; }
+  .home-faq .hf-a { font-size: 15.5px; line-height: 1.55; color: var(--ink, #faf2e1); margin: 0; }
+  .home-faq .hf-a a { color: #7ef0d2; border-bottom: 1px solid rgba(126,240,210,0.32); }
+  .home-faq .hf-a a:hover { color: #c1f5e3; }
+  .home-faq .hf-a code { font-family: var(--mono); font-size: 13px; color: #7ef0d2; background: rgba(126,240,210,0.05); border: 1px solid rgba(126,240,210,0.16); border-radius: 4px; padding: 1px 6px; }
+  .home-faq .hf-more { text-align: center; margin: 32px 0 0; font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint, #737c73); letter-spacing: 0.02em; }
+  .home-faq .hf-more a { color: #7ef0d2; }
+  [data-theme=light] .home-faq .hf-q b { color: #0a8862; }
+  [data-theme=light] .home-faq .hf-a { color: #1f2429; }
+  [data-theme=light] .home-faq .hf-a a { color: #0a8862; border-color: rgba(10,136,98,0.32); }
+  [data-theme=light] .home-faq .hf-a code { color: #0a8862; background: rgba(10,136,98,0.06); border-color: rgba(10,136,98,0.22); }
+  [data-theme=light] .home-faq .hf-more a { color: #0a8862; }
+</style>
+
+<section class="home-faq" aria-label="common questions">
+  <div class="hf-head">
+    <div class="hf-eyebrow"><span class="pulse"></span>common questions</div>
+    <h2 class="hf-h">What people ask before they try it.</h2>
+  </div>
+
+  <dl class="hf-grid">
+    <div>
+      <dt class="hf-q"><b>Q.</b>Can I improve my AI over time?</dt>
+      <dd class="hf-a">Yes. Capture real use (with consent), recompile with better examples. The K-score gate refuses to ship a regression, so each compile is strictly better. <a href="/evolve">how the loop works &rarr;</a></dd>
+    </div>
+    <div>
+      <dt class="hf-q"><b>Q.</b>Does it work with Claude Code, Cursor, Continue?</dt>
+      <dd class="hf-a">Yes. Run <code>kolm install &lt;harness&gt;</code> and your <code>.kolm</code> shows up as an MCP tool inside the agent. Stdio by default; HTTP optional. <a href="/docs">install the harness &rarr;</a></dd>
+    </div>
+    <div>
+      <dt class="hf-q"><b>Q.</b>What is actually inside the <code>.kolm</code> file?</dt>
+      <dd class="hf-a">A small model, your examples, the evaluator, a manifest, and a signed receipt. One zip-format artifact, fully open spec. <a href="/anatomy">anatomy of a .kolm &rarr;</a></dd>
+    </div>
+    <div>
+      <dt class="hf-q"><b>Q.</b>What if I want to leave kolm later?</dt>
+      <dd class="hf-a">The file is yours. The runtime is MIT. The spec is open. Run it forever without us, on any hardware you control. <a href="/spec">rs-1 open spec &rarr;</a></dd>
+    </div>
+    <div>
+      <dt class="hf-q"><b>Q.</b>Does my data leave the device?</dt>
+      <dd class="hf-a">No bytes leave at runtime. Compilation happens against your approved data; we publish a threat model that spells out exactly what each step touches. <a href="/threat-model">threat model &rarr;</a></dd>
+    </div>
+    <div>
+      <dt class="hf-q"><b>Q.</b>What does it cost?</dt>
+      <dd class="hf-a">The CLI runtime is free and MIT. Cloud compile + registry starts at $9/mo; team and enterprise tiers add seats, BAA, and SLAs. <a href="/pricing">see pricing &rarr;</a></dd>
+    </div>
+  </dl>
+
+  <p class="hf-more">Twenty more answers at <a href="/faq">/faq</a> &middot; or just <a href="/quickstart">try kolm &rarr;</a></p>
+</section>
+
+
+<section class="bottom-cta" aria-label="get started" style="text-align:center;padding:54px 24px 80px;border-top:1px solid var(--line);margin-top:48px">
   <p style="font-family:var(--mono);font-size:14px;color:var(--ink-mute);margin:0 0 18px">Ready to compile your first artifact?</p>
   <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
     <a href="/quickstart" class="cta">Try kolm &rarr;</a>
