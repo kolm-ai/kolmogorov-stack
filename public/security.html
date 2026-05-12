@@ -474,7 +474,7 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">04</span><span>Supply chain</span></div>
     <h2>What ran. <span class="tone">Where the bytes came from.</span></h2>
-    <p class="sec-lede">CLI, runtime, SDK, registry, Docker, npm, Homebrew: reproducible from source, attested at build, signed before publication.</p>
+    <p class="sec-lede">CLI, runtime, SDK, registry, Docker, npm, Homebrew. Target architecture: reproducible from source, attested at build, signed before publication. Shipped today: <code>security.txt</code> + PGP contact and pinned lockfiles in the repo; SLSA provenance, Sigstore signatures, and CycloneDX SBOM are wired in design but not yet emitted by a release workflow &mdash; mark these as roadmap until the first signed release ships.</p>
 
     <div class="compl">
       <div class="compl-card">
@@ -483,14 +483,14 @@
         <p>Release tags trigger a hermetic build. <code>provenance.intoto.jsonl</code> signed by runner identity. Verify with <code>slsa-verifier</code>.</p>
       </div>
       <div class="compl-card">
-        <div class="head"><span class="nm">Sigstore</span><span class="st">live</span></div>
+        <div class="head"><span class="nm">Sigstore</span><span class="st flight">target &middot; first signed release</span></div>
         <h4>Cosign signatures on every published artifact.</h4>
-        <p>npm, Homebrew, Docker, release zips, registry deltas: keyless Sigstore. <code>cosign verify</code> hits Rekor without contacting kolm.</p>
+        <p>Target: npm, Homebrew, Docker, release zips, registry deltas signed via keyless Sigstore; <code>cosign verify</code> hits Rekor without contacting kolm. No release workflow has emitted Cosign signatures yet &mdash; treat as roadmap.</p>
       </div>
       <div class="compl-card">
-        <div class="head"><span class="nm">SBOM</span><span class="st">CycloneDX 1.5</span></div>
+        <div class="head"><span class="nm">SBOM</span><span class="st flight">CycloneDX 1.5 &middot; target</span></div>
         <h4>One SBOM per release, machine-readable.</h4>
-        <p><code>github.com/sneaky-hippo/kolmogorov-stack/releases/&lt;tag&gt;/sbom.cdx.json</code>. Every transitive dep named, versioned, hashed. Diffable release-to-release.</p>
+        <p>Target: <code>github.com/sneaky-hippo/kolmogorov-stack/releases/&lt;tag&gt;/sbom.cdx.json</code>; every transitive dep named, versioned, hashed; diffable release-to-release. Lockfiles ship today; CycloneDX emission is wired to release but no signed SBOM artifact has been published yet.</p>
       </div>
       <div class="compl-card">
         <div class="head"><span class="nm">Reproducible build</span><span class="st flight">verified per release</span></div>
@@ -521,7 +521,7 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">05</span><span>Data handling</span></div>
     <h2>What we hold.<br><span class="tone">What we don't.</span></h2>
-    <p class="sec-lede">Where data lives, by class and deployment.</p>
+    <p class="sec-lede">Where data lives, by class and deployment. Note on deletion: today <code>POST /v1/account/delete</code> deactivates the tenant (key stops working, billing cancels) but does not yet purge concepts, versions, observations, invocations, compile jobs, or artifact zips. Full purge + retention jobs are tracked as roadmap; for regulated deployments, run the customer-hosted bridge so the data never leaves your boundary.</p>
 
     <div class="data-tbl">
       <table>
