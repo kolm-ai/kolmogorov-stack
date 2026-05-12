@@ -297,6 +297,22 @@
     .hero-video-wrap { background-image: url('/video/kolm-hero-poster.jpg'); background-size: cover; background-position: center; }
   }
 
+  /* v7.11.1 — light-mode hero video panel. Dark gradient + heavy shadow
+     produced a "white shadow" bleed on cream backgrounds. Replace with
+     cream-tinted neutral so the video sits on the page like a polaroid. */
+  [data-theme=light] .hero-demo-panel { border-color: rgba(0,0,0,0.12); background: linear-gradient(180deg, #ffffff, #f6f4ee); box-shadow: 0 10px 28px rgba(20,24,30, 0.06), 0 1px 2px rgba(20,24,30, 0.04); }
+  [data-theme=light] .hero-demo-head { color: #4b5158; border-bottom-color: rgba(0,0,0,0.08); }
+  [data-theme=light] .hero-demo-head .live-pulse { color: #0a8862; }
+  [data-theme=light] .hero-demo-head .live-pulse::before { background: #0a8862; box-shadow: 0 0 6px rgba(10,136,98,0.4); }
+  [data-theme=light] .hero-video-panel { background: #efece4; }
+  [data-theme=light] .hero-video-wrap { background: #efece4; }
+  [data-theme=light] .hero-video-wrap video { background: #efece4; }
+  [data-theme=light] .hero-video-wrap::after { box-shadow: inset 0 0 0 1px rgba(0,0,0, 0.05), inset 0 -60px 40px -40px rgba(0,0,0, 0.06); }
+  [data-theme=light] .hero-video-foot { color: #4b5158; border-top-color: rgba(0,0,0,0.08); }
+  [data-theme=light] .hero-video-foot a { color: #0a8862; }
+  [data-theme=light] .hv-btn { color: #4b5158; background: rgba(255,255,255, 0.85); border-color: rgba(0,0,0,0.10); }
+  [data-theme=light] .hv-btn:hover { color: #0c0e10; background: #ffffff; border-color: rgba(10,136,98, 0.32); }
+
   /* v7.9.4 — wide video panel (full-bleed, video is the centerpiece) */
   .hero-demo-wide { margin: 44px auto 0; max-width: 1320px; padding: 0 32px; transition: max-width 220ms cubic-bezier(.2,.7,.2,1); }
   .hero-demo-wide.compact { max-width: 860px; }
@@ -433,7 +449,18 @@
   .uc-strip .uc-head { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
   .uc-strip .uc-head::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210,0.55); }
   .uc-strip h2 { font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; margin: 0 0 6px; }
-  .uc-strip .uc-sub { color: var(--ink-mute); font-size: 14px; line-height: 1.6; margin: 0 0 22px; max-width: 64ch; }
+  .uc-strip .uc-sub { color: var(--ink-mute); font-size: 14px; line-height: 1.6; margin: 0 0 20px; max-width: 64ch; }
+  .uc-strip .uc-sub b { color: var(--ink, #faf2e1); font-weight: 540; }
+  /* v7.11.2 — switchable industry tabs. SOTA restraint: tiny mono pills,
+     teal active fill on dark / emerald on light. Cards swap with crossfade. */
+  .uc-strip .uc-tabs { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 999px; margin: 0 0 18px; background: rgba(0,0,0, 0.18); flex-wrap: wrap; }
+  .uc-strip .uc-tab { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.04em; padding: 8px 14px; border-radius: 999px; border: 0; background: transparent; color: var(--ink-mute, #b5bdb1); cursor: pointer; transition: color 160ms, background 160ms; text-transform: lowercase; }
+  .uc-strip .uc-tab:hover { color: var(--ink, #faf2e1); }
+  .uc-strip .uc-tab.is-on { color: #0c0e10; background: #7ef0d2; }
+  .uc-strip .uc-tab:focus-visible { outline: 2px solid #7ef0d2; outline-offset: 2px; }
+  .uc-strip .uc-panel { animation: ucFade 240ms ease-out; }
+  .uc-strip .uc-panel[hidden] { display: none; }
+  @keyframes ucFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   .uc-strip .uc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   @media (max-width: 860px) { .uc-strip .uc-grid { grid-template-columns: 1fr; } }
   .uc-strip .uc-card { display: flex; flex-direction: column; gap: 8px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); min-width: 0; min-height: 176px; text-decoration: none; color: inherit; transition: border-color 160ms, transform 160ms; }
@@ -442,6 +469,29 @@
   .uc-strip .uc-card h3 { font-size: 16px; line-height: 1.32; margin: 0; color: var(--fg); font-weight: 540; }
   .uc-strip .uc-card p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; }
   .uc-strip .uc-card .uc-tag { margin-top: auto; font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); letter-spacing: 0.04em; }
+  /* v7.11.2 — own-inference seal: pinned line under cards reinforcing the
+     thing every panel has in common. The inference belongs to you. */
+  .uc-strip .uc-seal { margin: 22px 0 0; padding: 14px 18px; border: 1px dashed var(--line); border-radius: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute, #b5bdb1); letter-spacing: 0.02em; background: rgba(126,240,210,0.03); }
+  .uc-strip .uc-seal b { color: #7ef0d2; font-weight: 580; }
+  .uc-strip .uc-seal .seal-sep { opacity: 0.5; }
+  .uc-strip .uc-seal a { color: var(--ink, #faf2e1); border-bottom: 1px solid rgba(126,240,210, 0.32); margin-left: auto; padding-bottom: 1px; }
+  .uc-strip .uc-seal a:hover { color: #7ef0d2; }
+  @media (max-width: 640px) {
+    .uc-strip .uc-seal { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .uc-strip .uc-seal a { margin-left: 0; }
+  }
+  [data-theme=light] .uc-strip .uc-tabs { background: rgba(0,0,0, 0.04); border-color: rgba(0,0,0, 0.10); }
+  [data-theme=light] .uc-strip .uc-tab { color: #4b5158; }
+  [data-theme=light] .uc-strip .uc-tab:hover { color: #0c0e10; }
+  [data-theme=light] .uc-strip .uc-tab.is-on { color: #ffffff; background: #0a8862; }
+  [data-theme=light] .uc-strip .uc-tab:focus-visible { outline-color: #0a8862; }
+  [data-theme=light] .uc-strip .uc-card { background: #ffffff; border-color: rgba(0,0,0, 0.10); }
+  [data-theme=light] .uc-strip .uc-card:hover { border-color: rgba(10,136,98, 0.32); }
+  [data-theme=light] .uc-strip .uc-card .uc-vert { color: #0a8862; }
+  [data-theme=light] .uc-strip .uc-seal { background: rgba(10,136,98, 0.04); border-color: rgba(10,136,98, 0.22); color: #4b5158; }
+  [data-theme=light] .uc-strip .uc-seal b { color: #0a8862; }
+  [data-theme=light] .uc-strip .uc-seal a { color: #0c0e10; border-color: rgba(10,136,98, 0.32); }
+  [data-theme=light] .uc-strip .uc-seal a:hover { color: #0a8862; }
   .uc-covers { margin: 18px 0 0; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0.02em; text-align: center; }
   .uc-covers a { color: var(--ink-mute); border-bottom: 1px solid rgba(126,240,210,0.18); padding-bottom: 1px; transition: color 160ms, border-color 160ms; }
   .uc-covers a:hover { color: var(--accent); border-bottom-color: var(--accent); }
@@ -667,7 +717,7 @@
     <div class="hero-copy">
       <div class="eyebrow"><span class="pulse"></span>Your data. Your model. Your hardware.</div>
       <h1>Compile your own AI.</h1>
-      <p class="lede"><b>A real AI that lives on your hardware.</b> One signed file you ship anywhere &middot; laptop, phone, or inside your network. No data leaves. No vendor can revoke it. Yours forever.</p>
+      <p class="lede"><b>A real AI that lives on your hardware.</b> One signed file you ship anywhere &middot; laptop, phone, or inside your network. Yours forever.</p>
 
       <ul class="hero-chips" aria-label="proof points">
         <li><b>4 min</b> from prompt to compiled <span class="mono">.kolm</span></li>
@@ -675,18 +725,12 @@
         <li><b>K &ge; 0.85</b> quality gate on every artifact</li>
       </ul>
 
-      <p class="hero-anchor">.exe is to software what <b>.kolm</b> is to AI</p>
-
       <div class="actions">
         <a href="/quickstart" class="btn primary lg">Try kolm &rarr;</a>
         <a href="mailto:founders@kolm.ai?subject=kolm%20demo" class="btn ghost lg">Book a demo &rarr;</a>
       </div>
 
-      <p class="hero-claim">microsecond inference &middot; zero egress &middot; yours forever</p>
-
-      <p class="hero-microcopy" style="margin-top:14px;font-size:12.5px;font-family:var(--mono);color:var(--ink-faint);letter-spacing:0;max-width:54ch;line-height:1.55">
-        already paying OpenAI? <a href="/capture" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.35)">turn that bill into a local model &rarr;</a>
-      </p>
+      <p class="hero-anchor">.exe is to software what <b>.kolm</b> is to AI &middot; <a href="/capture" class="hero-anchor-link">already paying OpenAI? turn that bill local &rarr;</a></p>
 
       <div class="nl-try" aria-label="natural-language try-it">
         <div class="nl-head">
@@ -715,31 +759,37 @@
   .home-hero-stacked h1 { font-size: clamp(48px, 6.6vw, 84px); max-width: 22ch; line-height: 1.02; letter-spacing: -0.032em; }
   @media (max-width: 720px) { .home-hero-stacked h1 { font-size: clamp(36px, 8vw, 52px); } }
 
-  /* Hero anchor + claim cred-strip rows. Mono, faint, single-line, anchor
-     the unfamiliar (.kolm) to the universal (.exe) and surface the proof
-     line (microsecond inference, zero egress, ownership) without compete
-     with the H1 visual weight. */
-  .home-hero-stacked .hero-anchor {
-    margin: 18px 0 4px;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--ink-mute, #b5bdb1);
-    letter-spacing: 0.01em;
-    line-height: 1.4;
-  }
-  .home-hero-stacked .hero-anchor b { color: #7ef0d2; font-weight: 580; }
-
-  /* 3-chip proof bar: real product attributes, concrete numbers, anchors the
-     abstract H1 to verifiable facts. Lives between lede and .exe anchor so it
-     reads as substantive proof on first glance — fights the sparse feeling. */
+  /* v7.11.2 hero spacing — give each band real breathing room so the hero
+     reads as 5 distinct rhythms instead of a word sandwich:
+       H1 → lede → chips → CTAs → cred-strip → NL widget */
+  .home-hero-stacked .hero-copy > .eyebrow { margin-bottom: 16px; }
+  .home-hero-stacked .hero-copy > h1 { margin: 0 0 22px; }
+  .home-hero-stacked .lede { margin: 0 0 30px; line-height: 1.5; }
   .home-hero-stacked .hero-chips {
     list-style: none;
     padding: 0;
-    margin: 22px 0 4px;
+    margin: 0 0 32px;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
   }
+  .home-hero-stacked .actions { margin: 0 0 28px; }
+
+  /* Cred-strip: combined .exe anchor + capture CTA on one mono line.
+     Lives below the CTAs as quiet post-action support, not as another
+     row competing for the eye. Single line on desktop, wraps on mobile. */
+  .home-hero-stacked .hero-anchor {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-mute, #b5bdb1);
+    letter-spacing: 0.01em;
+    line-height: 1.5;
+  }
+  .home-hero-stacked .hero-anchor b { color: #7ef0d2; font-weight: 580; }
+  .home-hero-stacked .hero-anchor-link { color: #7ef0d2; border-bottom: 1px solid rgba(126,240,210,0.32); }
+  .home-hero-stacked .hero-anchor-link:hover { color: #c1f5e3; }
+  [data-theme=light] .home-hero-stacked .hero-anchor-link { color: #0a8862; border-color: rgba(10,136,98,0.32); }
   .home-hero-stacked .hero-chips li {
     font-family: var(--mono);
     font-size: 12.5px;
@@ -770,21 +820,14 @@
     color: #1f2429;
   }
   [data-theme=light] .home-hero-stacked .hero-chips li b { color: #0a8862; }
-  .home-hero-stacked .hero-claim {
-    margin: 16px 0 0;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--ink-faint, #737c73);
-    letter-spacing: 0.04em;
-    text-transform: lowercase;
-    line-height: 1.4;
-  }
   @media (max-width: 520px) {
     .home-hero-stacked .hero-anchor { font-size: 12.5px; }
-    .home-hero-stacked .hero-claim { font-size: 11.5px; }
+    .home-hero-stacked .lede { margin-bottom: 24px; }
+    .home-hero-stacked .hero-chips { margin-bottom: 24px; }
+    .home-hero-stacked .actions { margin-bottom: 22px; }
   }
 
-  .nl-try { margin: 28px 0 0; max-width: 720px; }
+  .nl-try { margin: 44px 0 0; max-width: 720px; }
   .nl-try .nl-head { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
   .nl-try .nl-head b { color: var(--ink-mute, #b5bdb1); font-weight: 540; text-transform: none; letter-spacing: 0; }
   .nl-try .nl-dot { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126, 240, 210, 0.6); display: inline-block; }
@@ -963,41 +1006,41 @@
 
 <section class="compile-anatomy" aria-label="what compile means">
   <div class="ca-head">
-    <div class="ca-eyebrow"><span class="pulse"></span>what &ldquo;compile&rdquo; actually does</div>
-    <h2 class="ca-h">Four passes. One file. Yours forever.</h2>
-    <p class="ca-sub">Describe the task in plain English. The compiler runs four passes and hands you one <code>.kolm</code> file. Run it twice, you get the same answer twice. Always.</p>
+    <div class="ca-eyebrow"><span class="pulse"></span>what compile does</div>
+    <h2 class="ca-h">From a sentence to a signed file in four steps.</h2>
+    <p class="ca-sub">You type what your AI should do. The compiler takes it from there. Four short steps and you have one <code>.kolm</code> file that runs on your hardware and gives the same answer every time.</p>
   </div>
 
   <ol class="ca-steps">
     <li class="ca-step">
       <span class="ca-num">01</span>
-      <h3>Synthesize</h3>
-      <p>Generates the examples your task needs to handle. Right answers and tricky edge cases. Coverage you&rsquo;d never sit down and write yourself.</p>
-      <code class="ca-out">24 right answers &middot; 18 hard cases</code>
+      <h3>Read your task</h3>
+      <p>Plain English in. The compiler turns &ldquo;classify support tickets by urgency&rdquo; into a structured task with inputs, outputs, and what counts as right.</p>
+      <code class="ca-out">task &middot; inputs &middot; outputs &middot; success rule</code>
     </li>
     <li class="ca-step">
       <span class="ca-num">02</span>
-      <h3>Distill</h3>
-      <p>Shrinks the task into a small, fast file. No prompts to maintain. No model server to keep running.</p>
-      <code class="ca-out">small &middot; fast &middot; same answer twice</code>
+      <h3>Build the data</h3>
+      <p>Generates the training examples for you. Hundreds of right answers and the tricky edge cases. The coverage you would never sit down and write by hand.</p>
+      <code class="ca-out">144 examples &middot; 24 hard cases</code>
     </li>
     <li class="ca-step">
       <span class="ca-num">03</span>
-      <h3>Score</h3>
-      <p>Checks the result on accuracy, size, speed, and cost. If it doesn&rsquo;t clear 85%, the compile fails. Nothing ships unless it&rsquo;s good enough.</p>
-      <code class="ca-out">score 0.917 &middot; minimum 0.85 &middot; passed</code>
+      <h3>Train a small model</h3>
+      <p>Shrinks the work into a tiny file. No prompts to maintain. No model server to babysit. Same answer twice, microsecond latency, runs on the laptop you already own.</p>
+      <code class="ca-out">38 MB &middot; 0.6 ms per call &middot; offline</code>
     </li>
     <li class="ca-step">
       <span class="ca-num">04</span>
-      <h3>Sign</h3>
-      <p>Signs the file so anyone you trust can verify it hasn&rsquo;t been tampered with. The file is yours. The audit trail is yours. No vendor in the middle.</p>
-      <code class="ca-out">sha256 7f3a&hellip;c81 &middot; signed</code>
+      <h3>Score and sign</h3>
+      <p>Checks accuracy, size, speed, cost. Must clear <b>K &ge; 0.85</b> or the build fails &mdash; nothing ships that isn&rsquo;t good enough. Then signs it so anyone you trust can verify it.</p>
+      <code class="ca-out">K = 0.917 &middot; passed &middot; sha256 7f3a&hellip;c81</code>
     </li>
   </ol>
 
   <p class="ca-foot">
-    The output is one <code>.kolm</code> file you own. Runs offline. Same answer every time. No per-call bill. No remote kill switch.
-    <a href="/anatomy">how it works under the hood &rarr;</a>
+    Average run: <b>4 minutes</b>. Output: one <code>.kolm</code> file you own. Runs offline. Same answer every time. No per-call bill. No vendor kill switch.
+    <a href="/anatomy">read the technical anatomy &rarr;</a>
   </p>
 </section>
 
@@ -1114,29 +1157,125 @@
 <section class="uc-strip" aria-label="what teams build with kolm">
   <div class="uc-head">what teams build</div>
   <h2>From coding agents to clinical intake.</h2>
-  <p class="uc-sub">Most teams pick kolm because they want to own the AI that runs their business. Not just to pass audits.</p>
-  <div class="uc-grid">
-    <a href="/cookbook" class="uc-card">
-      <span class="uc-vert">coding</span>
-      <h3>Agents that don&rsquo;t leak your codebase.</h3>
-      <p>Train a small model on your own code. Point Cursor, Claude Code, or Continue at it.</p>
-      <span class="uc-tag">recipes &rarr;</span>
-    </a>
-    <a href="/capture" class="uc-card">
-      <span class="uc-vert">ai startup</span>
-      <h3>Cut the OpenAI bill. Keep the model.</h3>
-      <p>Route your AI calls through kolm. Every paid call becomes training data. Once it&rsquo;s enough, kolm builds you a signed local model.</p>
-      <span class="uc-tag">how capture works &rarr;</span>
-    </a>
-    <a href="/enterprise" class="uc-card uc-card-reg">
-      <span class="uc-vert">regulated &middot; on-device</span>
-      <h3>Health records, payment data, privileged work. All stay inside.</h3>
-      <p>Compile inside your network or onto the device itself. Sign every output. No data leaves.</p>
-      <span class="uc-tag">enterprise &rarr;</span>
-    </a>
+  <p class="uc-sub">kolm fits wherever your team works &mdash; <b>everyday AI features, regulated environments, or fully on-device</b>. Same idea every time: type a sentence, get an AI that runs where you choose. The inference is yours.</p>
+
+  <div class="uc-tabs" role="tablist" aria-label="industry">
+    <button type="button" class="uc-tab is-on" data-tab="everyday" role="tab" aria-selected="true" aria-controls="uc-panel-everyday">everyday AI</button>
+    <button type="button" class="uc-tab" data-tab="regulated" role="tab" aria-selected="false" aria-controls="uc-panel-regulated">regulated</button>
+    <button type="button" class="uc-tab" data-tab="device" role="tab" aria-selected="false" aria-controls="uc-panel-device">on-device</button>
   </div>
-  <p class="uc-covers">covers <a href="/healthcare">healthcare</a><span class="sep">&middot;</span><a href="/finance">finance</a><span class="sep">&middot;</span><a href="/legal">legal</a><span class="sep">&middot;</span><a href="/edge">edge / on-device</a></p>
+
+  <div class="uc-panel" id="uc-panel-everyday" data-panel="everyday" role="tabpanel" aria-labelledby="uc-tab-everyday">
+    <div class="uc-grid">
+      <a href="/cookbook" class="uc-card">
+        <span class="uc-vert">coding agents</span>
+        <h3>Agents that don&rsquo;t leak your codebase.</h3>
+        <p>Train a small model on your own code. Point Cursor, Claude Code, or Continue at it through MCP. The codebase never lands in someone else&rsquo;s training set.</p>
+        <span class="uc-tag">recipes &rarr;</span>
+      </a>
+      <a href="/capture" class="uc-card">
+        <span class="uc-vert">ai startups</span>
+        <h3>Cut the OpenAI bill. Keep the model.</h3>
+        <p>Route AI calls through kolm. Every paid call becomes training data. Once you have enough, kolm builds you a signed local model that does the same job for free.</p>
+        <span class="uc-tag">how capture works &rarr;</span>
+      </a>
+      <a href="/use-cases" class="uc-card">
+        <span class="uc-vert">consumer apps</span>
+        <h3>Ship an AI feature you don&rsquo;t have to keep paying for.</h3>
+        <p>Compile once. Bundle the <code style="font-family:var(--mono);color:#7ef0d2">.kolm</code> in your release. Inference runs on the user&rsquo;s device. No per-call cost, no rate limits, no model server.</p>
+        <span class="uc-tag">use cases &rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="uc-panel" id="uc-panel-regulated" data-panel="regulated" role="tabpanel" aria-labelledby="uc-tab-regulated" hidden>
+    <div class="uc-grid">
+      <a href="/healthcare" class="uc-card uc-card-reg">
+        <span class="uc-vert">healthcare</span>
+        <h3>PHI never leaves the network.</h3>
+        <p>Compile against your data inside the BAA boundary. Sign every output. Audit-ready logs that prove which version answered which question.</p>
+        <span class="uc-tag">healthcare &rarr;</span>
+      </a>
+      <a href="/finance" class="uc-card uc-card-reg">
+        <span class="uc-vert">finance</span>
+        <h3>Payment data, KYC, model risk.</h3>
+        <p>Reproducible model, K-score gate, signed receipt on every inference. Model-risk review gets one signed file instead of a vendor&rsquo;s black box.</p>
+        <span class="uc-tag">finance &rarr;</span>
+      </a>
+      <a href="/legal" class="uc-card uc-card-reg">
+        <span class="uc-vert">legal</span>
+        <h3>Privileged work, no third-party eyes.</h3>
+        <p>Local inference on attorney-client material. No vendor in the loop. Discoverable audit log if you ever need to prove what the AI saw and said.</p>
+        <span class="uc-tag">legal &rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="uc-panel" id="uc-panel-device" data-panel="device" role="tabpanel" aria-labelledby="uc-tab-device" hidden>
+    <div class="uc-grid">
+      <a href="/edge" class="uc-card">
+        <span class="uc-vert">phones</span>
+        <h3>An AI feature that works on the subway.</h3>
+        <p>Bundle the <code style="font-family:var(--mono);color:#7ef0d2">.kolm</code> in the app. Inference runs on the phone. Zero network. Works in airplane mode, behind a firewall, on the user&rsquo;s schedule.</p>
+        <span class="uc-tag">edge &rarr;</span>
+      </a>
+      <a href="/edge" class="uc-card">
+        <span class="uc-vert">edge hardware</span>
+        <h3>Factory floors. Disconnected sites.</h3>
+        <p>The compiled model runs on the box you put on the floor. No round-trip to a cloud. No outage when the link drops. Microsecond latency at the source.</p>
+        <span class="uc-tag">edge &rarr;</span>
+      </a>
+      <a href="/anatomy" class="uc-card">
+        <span class="uc-vert">your own inference</span>
+        <h3>The model and the runtime are yours.</h3>
+        <p>One signed file, one open spec. Run it on a laptop, a phone, a server, an air-gapped box. The inference belongs to you, today and a decade from now.</p>
+        <span class="uc-tag">anatomy &rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="uc-seal" aria-label="every tab, same promise">
+    <span><b>Same promise in every tab.</b></span>
+    <span class="seal-sep">&middot;</span>
+    <span>The model runs on your hardware.</span>
+    <span class="seal-sep">&middot;</span>
+    <span>The inference belongs to you.</span>
+    <a href="/enterprise">deploy across your team &rarr;</a>
+  </div>
+
+  <p class="uc-covers">covers <a href="/healthcare">healthcare</a><span class="sep">&middot;</span><a href="/finance">finance</a><span class="sep">&middot;</span><a href="/legal">legal</a><span class="sep">&middot;</span><a href="/edge">edge / on-device</a><span class="sep">&middot;</span><a href="/cookbook">developer recipes</a></p>
 </section>
+<script>
+  (function ucTabs() {
+    var tabs = document.querySelectorAll('.uc-strip .uc-tab');
+    var panels = document.querySelectorAll('.uc-strip .uc-panel');
+    if (!tabs.length) return;
+    function show(which) {
+      tabs.forEach(function (t) {
+        var on = t.dataset.tab === which;
+        t.classList.toggle('is-on', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+      });
+      panels.forEach(function (p) {
+        var on = p.dataset.panel === which;
+        p.hidden = !on;
+      });
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { show(t.dataset.tab); });
+      t.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        e.preventDefault();
+        var list = Array.prototype.slice.call(tabs);
+        var i = list.indexOf(t);
+        var next = (i + (e.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length;
+        list[next].focus();
+        show(list[next].dataset.tab);
+      });
+    });
+  })();
+</script>
 
 <section class="trust-line" aria-label="trust posture">
   <div class="tl-wrap">

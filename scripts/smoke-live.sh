@@ -641,7 +641,7 @@ check "/articles advertises RSS"       has "$AI" 'application/rss+xml'
 
 # Homepage hero thesis + GitHub star + ICP doors
 H2=$(curl -s "$URL/")
-check "homepage compile-anatomy thesis" has "$H2" 'Four passes. One file'
+check "homepage compile-anatomy thesis" has "$H2" 'From a sentence to a signed file in four steps'
 check "homepage 2-CTA: Try kolm"       has "$H2" 'Try kolm &rarr;'
 check "homepage 2-CTA: Book a demo"    has "$H2" 'Book a demo &rarr;'
 check "homepage demo mailto"           has "$H2" 'mailto:founders@kolm.ai'
@@ -1318,12 +1318,17 @@ echo "=== 45. homepage v7.9.5 consolidated surface ==="
 HOME=$(curl -s "$URL/")
 # v7.9.5: reg-strip, cred-band, vr 3-card grid, reg-tele all deleted as duplicates/clutter.
 # Consolidated to: hero · video · compile-anatomy · ROI-calc · uc-strip (4 cards incl. regulated) · trust-line · CTA
-check "/ compile-anatomy thesis"        has "$HOME" 'Four passes. One file'
-check "/ compile-anatomy step synth"    has "$HOME" 'Synthesize'
-check "/ compile-anatomy step sign"     has "$HOME" 'Sign'
+check "/ compile-anatomy thesis"        has "$HOME" 'From a sentence to a signed file in four steps'
+check "/ compile-anatomy step read"     has "$HOME" 'Read your task'
+check "/ compile-anatomy step train"    has "$HOME" 'Train a small model'
+check "/ compile-anatomy step sign"     has "$HOME" 'Score and sign'
+check "/ uc-tabs everyday"              has "$HOME" 'data-tab="everyday"'
+check "/ uc-tabs regulated"             has "$HOME" 'data-tab="regulated"'
+check "/ uc-tabs device"                has "$HOME" 'data-tab="device"'
 check "/ uc-card coding"                has "$HOME" 'Agents that don'
 check "/ uc-card capture"               has "$HOME" 'Cut the OpenAI bill'
 check "/ uc-card regulated"             has "$HOME" 'class="uc-card uc-card-reg"'
+check "/ uc-seal own inference"         has "$HOME" 'The inference belongs to you'
 check "/ uc-covers footnote"            has "$HOME" 'class="uc-covers"'
 check "/ uc-covers hc link"             has "$HOME" 'href="/healthcare">healthcare'
 check "/ uc-covers fi link"             has "$HOME" 'href="/finance">finance'
