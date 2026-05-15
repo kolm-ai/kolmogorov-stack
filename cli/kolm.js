@@ -188,15 +188,23 @@ function fmtBytes(n) {
 // K-score is per-artifact (not per-model): each .kolm gets its own score from
 // its own frozen eval set. The header always names the file so buyers can't
 // confuse this with a leaderboard for the base model underneath.
-function fmtKScore(k, artifactName) {
+//
+// fmtKScoreLine returns the single header line shared across compile / verify
+// / score / eval / diff / improve. The format is fixed so different verbs feel
+// like one product: "K-score for <file>: <composite> (gate >= 0.85 - pass|fail)".
+function fmtKScoreLine(k, artifactName) {
   if (!k) return '(no k-score on this artifact)';
   const composite = typeof k.composite === 'number' ? k.composite.toFixed(3) : k.composite;
   const ships = (typeof k.composite === 'number') ? (k.composite >= 0.85 ? 'pass' : 'fail') : null;
-  const header = artifactName
+  return artifactName
     ? `K-score for ${artifactName}: ${composite}${ships ? `  (gate >= 0.85 - ${ships})` : ''}`
     : `K-score (for this artifact, not the base model): ${composite}${ships ? `  (gate >= 0.85 - ${ships})` : ''}`;
+}
+
+function fmtKScore(k, artifactName) {
+  if (!k) return '(no k-score on this artifact)';
   return [
-    header,
+    fmtKScoreLine(k, artifactName),
     `  accuracy:  ${(k.accuracy * 100).toFixed(1)}%`,
     `  coverage:  ${(k.coverage * 100).toFixed(1)}%`,
     `  size:      ${fmtBytes(k.size_bytes)}`,
@@ -223,6 +231,7 @@ COMMANDS
   login [--key ks_...]             save an API key to ~/.kolm/config.json
   whoami                           echo current tenant + plan + base
   new <name> [--from <template>]   scaffold a spec.json you can compile
+  build <name> [--from <tpl>]      one-shot: new + seeds + compile + verify (the fastest path)
   compile "<task>" [opts]          cloud-compile a task into a .kolm artifact
   compile --spec <file|->           offline build from a JSON spec (any author, AI included)
   train --spec <file>              alias for compile from a spec (training entry point)
@@ -506,6 +515,31 @@ a note. Pass --force to overwrite, or --out <path> to choose explicitly.
 The output is a JSON file at <name>.spec.json that you can compile with:
   kolm compile --spec <name>.spec.json --out <name>.kolm
 `,
+  build: `kolm build - one-shot wrapper: scaffold + seed + compile + verify.
+
+USAGE
+  kolm build <name> [--from <template>] [--examples <file>] [--out <file>]
+
+Compresses the four-step new -> seeds new -> compile -> verify chain into one
+command. Use this for a first run on a new task. After it prints the K-score
+and failing-case breakdown, edit recipes[0].source in <name>.spec.json or your
+expected outputs in seeds.jsonl, and rerun kolm compile.
+
+TEMPLATES
+  --from summarizer | redactor | classifier | extractor | blank
+  (auto-picked from <name> if you skip --from)
+
+FLAGS
+  --examples <file>  JSONL of {"input":..., "expected":...} or {"input":..., "output":...}
+                     rows. If omitted, kolm scaffolds seeds.jsonl from the template.
+  --out <file>       artifact path (default: <name>.kolm)
+  --force            overwrite existing spec at <name>.spec.json
+  --yes, -y          skip the "use blank?" confirmation prompt
+
+EXAMPLE
+  kolm build my-redactor --from redactor
+  kolm build triage --from classifier --examples my-tickets.jsonl
+`,
   run: `kolm run - execute a .kolm artifact locally.
 
 USAGE
@@ -521,13 +555,23 @@ EXAMPLES
   kolm run redactor.kolm '{"text":"id 12-345"}' --params '{"extra_patterns":[{"name":"emp_id","regex":"\\\\b\\\\d{2}-\\\\d{3}\\\\b","replacement":"[ID]"}]}'
   kolm run redactor.kolm '{"text":"..."}' --params @hospital-rules.json
 `,
-  eval: `kolm eval - re-run a .kolm's embedded eval set and recompute its K-score.
+  eval: `kolm eval - re-run a .kolm's embedded eval set and show per-case results.
 
 K-score is per-artifact: each .kolm has its own eval set and its own number.
-This command re-runs THIS artifact's evals and prints THIS artifact's K-score.
+This command re-runs THIS artifact's evals and prints THIS artifact's pass/fail
+breakdown plus what each failing case got vs what was expected.
 
 USAGE
-  kolm eval <artifact.kolm>
+  kolm eval <artifact.kolm> [--trace] [--json]
+
+FLAGS
+  --trace        show every failing case (default: first 5)
+  --json         emit the full machine-readable doc (used by CI / agents)
+
+EXAMPLE
+  kolm eval my-redactor.kolm
+  kolm eval my-redactor.kolm --trace
+  kolm eval my-redactor.kolm --json > eval-report.json
 `,
   benchmark: `kolm bench - reproducible artifact benchmark (alias: benchmark).
 
@@ -1414,11 +1458,14 @@ const SPEC_TEMPLATES = {
     }],
     pack: {
       spec: 'kolm-pack-1',
-      description: 'starter categories — tenants extend via params.extra_categories',
+      description: 'starter categories for support-ticket triage — tenants extend via params.extra_categories',
       fallback_label: 'general',
       categories: [
-        { name: 'billing', keywords: ['refund', 'invoice', 'payment'] },
-        { name: 'bug',     keywords: ['error', 'crash', 'broken'] },
+        { name: 'billing',          keywords: ['refund', 'invoice', 'payment', 'charge', 'subscription'] },
+        { name: 'bug',              keywords: ['error', 'crash', 'broken', 'fails', 'not working', '500'] },
+        { name: 'auth',             keywords: ['password', 'reset', 'login', 'sign in', 'mfa', '2fa', 'account'] },
+        { name: 'feature_request',  keywords: ['feature', 'would love', 'wish', 'request', 'dark mode', 'support for'] },
+        { name: 'how_to',           keywords: ['how do i', 'how can i', 'where do i', 'tutorial', 'docs'] },
       ],
     },
     index: {
@@ -1783,6 +1830,109 @@ async function cmdNew(args) {
   console.log(`docs: /docs/AUTHORING.md for the full schema + sensitive-data caveats.`);
 }
 
+// `kolm build <name> [--from <template>] [--examples <file>] [--out <path>]`
+//
+// One-shot wrapper: scaffolds the spec, scaffolds seeds (if none exist),
+// compiles with honest eval, and runs verify. The point is to compress the
+// 4-step new + seeds new + compile + verify chain into a single command so a
+// first-time buyer goes from "I want a redactor" to "K=0.7026, here is what's
+// failing" in one invocation. The user then iterates the recipe or the
+// expected outputs and re-runs `kolm compile`.
+async function cmdBuild(args) {
+  if (maybeHelp('build', args)) return;
+  const positional = args.find(a => !a.startsWith('--'));
+  if (!positional) {
+    console.error('usage: kolm build <name> [--from <template>] [--examples <file>]');
+    console.error('');
+    console.error('one-shot wrapper:  kolm new + kolm seeds new + kolm compile --spec + kolm verify');
+    console.error('');
+    console.error('templates: blank, summarizer, redactor, classifier, extractor');
+    console.error('');
+    console.error('example:');
+    console.error('  kolm build my-redactor --from redactor');
+    console.error('  kolm build my-redactor --from redactor --examples my-seeds.jsonl');
+    const err = new Error('missing name');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  const name = slugify(positional);
+  const fromFlag = pickFlag(args, '--from') || (() => {
+    const lower = name.toLowerCase();
+    if (/redact|deidentify|phi|pii|scrub|mask/.test(lower)) return 'redactor';
+    if (/classif|triag|categor|label|route/.test(lower)) return 'classifier';
+    if (/extract|parse|invoice/.test(lower)) return 'extractor';
+    if (/summari[sz]|abstract|tldr|digest/.test(lower)) return 'summarizer';
+    return 'blank';
+  })();
+  const examplesFlag = pickFlag(args, '--examples') || pickFlag(args, '--seeds');
+  const outFlag = pickFlag(args, '--out');
+  const autoYes = args.includes('--yes') || args.includes('-y') || process.env.KOLM_AUTO_YES === '1';
+
+  const specPath = path.resolve(process.cwd(), `${name}.spec.json`);
+  const artPath = outFlag
+    ? path.resolve(process.cwd(), outFlag)
+    : path.resolve(process.cwd(), `${name}.kolm`);
+  const seedsPath = examplesFlag
+    ? path.resolve(process.cwd(), examplesFlag)
+    : path.resolve(process.cwd(), 'seeds.jsonl');
+
+  // Step 1: spec scaffold
+  console.log(`[1/4] scaffold spec`);
+  if (fs.existsSync(specPath) && !args.includes('--force')) {
+    console.log(`  reusing existing ${path.basename(specPath)}`);
+  } else {
+    const newArgs = [name, '--from', fromFlag, '--out', specPath];
+    if (autoYes) newArgs.push('--yes');
+    if (args.includes('--force')) newArgs.push('--force');
+    await cmdNew(newArgs);
+  }
+
+  // Step 2: seeds scaffold (only if --examples not provided AND no seeds.jsonl exists)
+  console.log(`[2/4] seeds`);
+  if (examplesFlag) {
+    if (!fs.existsSync(seedsPath)) {
+      const err = new Error(`--examples ${examplesFlag} not found`);
+      err.exitCode = EXIT.NOT_FOUND;
+      throw err;
+    }
+    console.log(`  using provided examples: ${path.relative(process.cwd(), seedsPath) || seedsPath}`);
+  } else if (fs.existsSync(seedsPath)) {
+    console.log(`  reusing existing ${path.basename(seedsPath)}`);
+  } else {
+    // Scaffold seeds via the same alias resolution `kolm seeds new` uses.
+    const seedName = SEED_TEMPLATE_ALIASES[fromFlag] || (SEED_TEMPLATES[fromFlag] ? fromFlag : 'generic');
+    await cmdSeedsNew([seedName]);
+  }
+
+  // Step 3: compile (honest eval baked in)
+  console.log(`[3/4] compile`);
+  const compileArgs = ['--spec', specPath, '--examples', seedsPath, '--out', artPath, '--no-skill'];
+  await cmdCompile(compileArgs);
+
+  // Step 4: verify. Capture the verdict so we can still print iterate guidance
+  // when the artifact fails the gate (which IS the diagnostic path on a first
+  // build with placeholder seeds). We re-raise the verify error after, so the
+  // exit code stays non-zero for CI.
+  console.log(`[4/4] verify`);
+  let verifyErr = null;
+  try { await cmdVerify([artPath]); }
+  catch (e) { verifyErr = e; }
+
+  console.log('');
+  if (verifyErr) {
+    console.log(`built but did NOT pass: ${path.relative(process.cwd(), artPath) || artPath}`);
+  } else {
+    console.log(`done. ${path.relative(process.cwd(), artPath) || artPath}`);
+  }
+  console.log('');
+  console.log('iterate:');
+  console.log(`  - replace placeholder examples in ${path.basename(seedsPath)} with YOUR data`);
+  console.log(`  - tune recipes[0].source in ${path.basename(specPath)} (the regex / logic)`);
+  console.log(`  - rerun:  kolm compile --spec ${path.basename(specPath)} --examples ${path.basename(seedsPath)} --out ${path.basename(artPath)}`);
+  console.log('  - eval each failing case:  kolm eval ' + path.basename(artPath) + ' --trace');
+  if (verifyErr) throw verifyErr;
+}
+
 async function cmdLogin(args) {
   if (maybeHelp('login', args)) return;
   const c = loadConfig();
@@ -1974,7 +2124,7 @@ async function cmdCompile(args) {
     console.log(`  cost:      ${r.estimate.cost_usd == null ? '(varies)' : '$' + r.estimate.cost_usd.toFixed(2)}`);
     if (r.result && r.result.artifact_path) {
       console.log(`  artifact:  ${r.result.artifact_path}`);
-      if (r.result.k_score) console.log(`  K-score for ${path.basename(r.result.artifact_path)}: ${r.result.k_score.composite}  (gate >= 0.85)`);
+      if (r.result.k_score) console.log('  ' + fmtKScoreLine(r.result.k_score, path.basename(r.result.artifact_path)));
       console.log('');
       console.log(`run:    kolm run ${path.basename(r.result.artifact_path)} '<input-json>'`);
     } else {
@@ -2004,6 +2154,58 @@ async function cmdCompile(args) {
     let spec;
     try { spec = JSON.parse(raw); }
     catch (e) { console.error(`error: spec is not valid JSON: ${e.message}`); process.exit(1); }
+
+    // --examples <file.jsonl> (alias --seeds): merge user-provided eval rows
+    // into spec.evals.cases. Without this the user's training data is invisible
+    // to compile and the K-score reflects only the spec's embedded test set.
+    // Each row needs at minimum {input, expected} or {input, output}.
+    const exFlag = pickFlag(args, '--examples') || pickFlag(args, '--seeds');
+    if (exFlag) {
+      let exPath;
+      try { exPath = fs.realpathSync(exFlag); }
+      catch { console.error(`error: cannot find examples file: ${exFlag}\nhint: run \`kolm seeds new <template>\` to scaffold seeds.jsonl, or pass an existing path.`); process.exit(1); }
+      let userRows = [];
+      try {
+        const lines = fs.readFileSync(exPath, 'utf-8').split(/\r?\n/).filter(Boolean);
+        for (const ln of lines) {
+          try {
+            const row = JSON.parse(ln);
+            // Accept either {input, expected} (eval shape) or {input, output} (training shape).
+            const expected = row.expected != null ? row.expected : row.output;
+            if (row.input == null || expected == null) continue;
+            userRows.push({
+              id: row.id || `user_${userRows.length + 1}`,
+              input: row.input,
+              expected,
+              ...(row.params ? { params: row.params } : {}),
+              ...(row.tags ? { tags: row.tags } : {}),
+              source: row.source || 'user-example',
+            });
+          } catch { /* skip malformed */ }
+        }
+      } catch (e) {
+        console.error(`error: cannot read examples ${exPath}: ${e.message}`); process.exit(1);
+      }
+      if (!userRows.length) {
+        console.error(`error: no usable rows in ${exPath}. each line needs {"input":..., "expected":...} or {"input":..., "output":...}.`); process.exit(1);
+      }
+      spec.evals = spec.evals || { spec: 'rs-1-evals', cases: [], coverage: 0 };
+      const baseCases = Array.isArray(spec.evals.cases) ? spec.evals.cases : [];
+      // De-dupe by id if the spec already has user_N from a prior compile.
+      const seenIds = new Set(baseCases.map(c => c.id).filter(Boolean));
+      const merged = baseCases.slice();
+      let added = 0;
+      for (const r of userRows) {
+        let id = r.id;
+        if (seenIds.has(id)) id = `${id}_${added + 1}`;
+        seenIds.add(id);
+        merged.push({ ...r, id });
+        added++;
+      }
+      spec.evals.cases = merged;
+      spec.evals.n = merged.length;
+      console.log(`loaded ${added} user examples from ${path.relative(process.cwd(), exPath) || exPath} (merged into evals, total ${merged.length} cases)`);
+    }
     const outIdxL = args.indexOf('--out');
     const outArg = outIdxL >= 0 ? args[outIdxL + 1] : null;
     const outDirL = outArg && outArg.endsWith('.kolm') ? path.dirname(outArg) : (outArg || ARTIFACTS_DIR);
@@ -2018,7 +2220,19 @@ async function cmdCompile(args) {
       console.log(`built: ${r.outPath}`);
       console.log(`bytes: ${r.bytes}`);
       console.log(`sha256: ${r.sha256}`);
-      if (r.k_score) console.log(`K-score for ${path.basename(r.outPath)}: ${r.k_score.composite}  (gate >= 0.85)`);
+      if (r.k_score) {
+        console.log(fmtKScoreLine(r.k_score, path.basename(r.outPath)));
+      }
+      if (r.evals_report) {
+        const er = r.evals_report;
+        console.log(`evals:     ${er.passed} / ${er.total} cases pass${er.failing && er.failing.length ? ` (${er.failing.length} failing)` : ''}`);
+        if (er.failing && er.failing.length) {
+          const sample = er.failing.slice(0, 5).map(f => f.id || '?').join(', ');
+          console.log(`failing:   ${sample}${er.failing.length > 5 ? ` ... (+${er.failing.length - 5} more)` : ''}`);
+          console.log(`fix:       inspect failing cases with \`kolm eval ${path.basename(r.outPath)} --trace\`,`);
+          console.log(`           extend recipes[0].source patterns, or fix expected outputs.`);
+        }
+      }
       if (!args.includes('--no-skill')) {
         try {
           const skillPath = writeSkillSidecar({
@@ -2044,8 +2258,42 @@ async function cmdCompile(args) {
   }
 
   // ---- Cloud-compile path (existing): synthesize from task + corpus + examples.
+  // --airgap (or KOLM_AIRGAP=1) forbids cloud roundtrip. If a spec exists in
+  // cwd matching the task slug, route there; otherwise fail clean with a hint.
+  const wantsAirgap = args.includes('--airgap') || !!process.env.KOLM_AIRGAP;
+  if (wantsAirgap) {
+    const taskHint = args.find(a => !a.startsWith('--'));
+    const slug = taskHint ? String(taskHint).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) : '';
+    const candidates = slug ? [
+      path.resolve(process.cwd(), `${slug}.spec.json`),
+      path.resolve(process.cwd(), `${slug.split('-')[0]}.spec.json`),
+    ] : [];
+    const foundSpec = candidates.find(p => { try { return fs.existsSync(p); } catch { return false; } });
+    if (foundSpec) {
+      console.log(`airgap: routing to spec-mode compile (${path.basename(foundSpec)})`);
+      const exArg = pickFlag(args, '--examples') || pickFlag(args, '--seeds');
+      const outArg = pickFlag(args, '--out');
+      const newArgs = ['--spec', foundSpec];
+      if (exArg) newArgs.push('--examples', exArg);
+      if (outArg) newArgs.push('--out', outArg);
+      return cmdCompile(newArgs);
+    }
+    console.error('error: --airgap can\'t reach the cloud, and no matching spec found in cwd.');
+    console.error('hint: scaffold one first:');
+    console.error(`  kolm new ${slug || 'my-model'} --from redactor   # or classifier, extractor, summarizer`);
+    console.error(`  kolm compile --spec ${slug || 'my-model'}.spec.json --examples seeds.jsonl`);
+    const err = new Error('--airgap requires --spec or a matching spec in cwd');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
   const c = loadConfig();
-  if (!c.api_key) { console.error('not logged in. run: kolm login\n(or use --spec <file.json> for offline spec-driven compile)'); process.exit(1); }
+  if (!c.api_key) {
+    console.error('not logged in. run: kolm login');
+    console.error('(or use --spec <file.json> for offline spec-driven compile, or pass --airgap to compile from a local spec.)');
+    const err = new Error('not logged in');
+    err.exitCode = EXIT.MISSING_PREREQ;
+    throw err;
+  }
   const { dispatch: dispatchCloud } = await import('../src/hooks.js');
   const preCloudTask = args.find(a => !a.startsWith('--'));
   const preCloudOk = await dispatchCloud('PreCompile', { command: 'compile', cwd: process.cwd(), task: preCloudTask, cloud: true }, { onResult: printHookResult });
@@ -2276,10 +2524,12 @@ async function cmdRun(args) {
 
 async function cmdEval(args) {
   if (maybeHelp('eval', args)) return;
-  // cmdEval already emits JSON unconditionally. Accept --json explicitly so
-  // it's documented in help + survives flag-validation when that lands.
-  const jsonOut = args.includes('--json'); // eslint-disable-line no-unused-vars
-  const positional = args.filter(a => a !== '--json');
+  // Default to a human-readable summary so `kolm eval my.kolm` is useful at a
+  // glance. Pass --json for the full machine-readable doc (used by CI / agents).
+  // --trace forces per-case failure detail; without it we show the top 5.
+  const jsonOut = args.includes('--json');
+  const traceFlag = args.includes('--trace');
+  const positional = args.filter(a => !a.startsWith('--'));
   const ap = resolveArtifact(positional[0]);
   if (!ap) {
     const err = new Error(`artifact not found: ${positional[0]}`);
@@ -2288,7 +2538,39 @@ async function cmdEval(args) {
   }
   await withRunner(async ({ evalArtifact }) => {
     const r = await evalArtifact(ap);
-    console.log(JSON.stringify(r, null, 2));
+    if (jsonOut) { console.log(JSON.stringify(r, null, 2)); return; }
+    const name = path.basename(ap);
+    const total = r.n != null ? r.n : (Array.isArray(r.cases) ? r.cases.length : 0);
+    const passed = r.passed != null ? r.passed : (total - (r.errors ? r.errors.length : 0));
+    const accPct = typeof r.accuracy === 'number' ? (r.accuracy * 100).toFixed(1) + '%' : '?';
+    const lat = r.p50_latency_us != null ? `${r.p50_latency_us}us` : '?';
+    console.log(`eval: ${name}`);
+    console.log(`  passed:    ${passed} / ${total}  (${accPct})`);
+    console.log(`  p50_lat:   ${lat}`);
+    const errs = Array.isArray(r.errors) ? r.errors : [];
+    if (errs.length === 0) {
+      console.log(`  failures:  none`);
+      return;
+    }
+    const showAll = traceFlag;
+    const slice = showAll ? errs : errs.slice(0, 5);
+    console.log(`  failures:  ${errs.length}${showAll ? '' : (errs.length > 5 ? ` (showing first 5; pass --trace to see all)` : '')}`);
+    for (const e of slice) {
+      const id = e.id || '(no id)';
+      const ex = typeof e.expected === 'string' ? e.expected : JSON.stringify(e.expected);
+      const gotStr = typeof e.got === 'string' ? e.got : (e.got && typeof e.got === 'object' ? JSON.stringify(e.got) : String(e.got));
+      const trunc = (s, n) => s == null ? '(null)' : (String(s).length > n ? String(s).slice(0, n) + '...' : String(s));
+      console.log(`  - ${id}`);
+      console.log(`      expected: ${trunc(ex, 100)}`);
+      console.log(`      got:      ${trunc(gotStr, 100)}`);
+      if (e.error) console.log(`      error:    ${trunc(e.error, 100)}`);
+    }
+    if (errs.length > 0) {
+      console.log('');
+      console.log(`hint: edit recipes[0].source in the spec to handle these inputs,`);
+      console.log(`      or fix the expected outputs if they don't match what you actually want.`);
+      console.log(`      re-compile with:  kolm compile --spec <spec>.spec.json --examples <seeds>.jsonl --out ${name}`);
+    }
   });
 }
 
@@ -2638,7 +2920,7 @@ async function cmdVerify(args) {
   } else {
     console.log(`verdict: ${result.verdict}`);
     console.log(`cid:     ${result.manifest.cid}`);
-    console.log(`K-score for ${path.basename(ap)}: ${(result.manifest.k_score?.composite ?? 0).toFixed(4)}  (per-artifact gate, not a base-model score)`);
+    console.log(fmtKScoreLine(result.manifest.k_score, path.basename(ap)));
     for (const c of result.checks) {
       const tag = c.status === 'pass' ? 'ok  ' : c.status === 'warn' ? 'warn' : 'fail';
       console.log(`  [${tag}] ${c.name}: ${c.detail}`);
@@ -3262,7 +3544,7 @@ async function cmdTune(args) {
       console.log('revision ' + rev);
       console.log('  pass:     ' + e.pass + '/' + e.total + '  (' + (e.accuracy * 100).toFixed(1) + '% acc)');
       if (e.p50_latency_us != null) console.log('  p50:      ' + e.p50_latency_us + 'us');
-      console.log('  K-score for ' + path.basename(ap) + ': ' + e.k_score.composite + '  (gate >= 0.85)');
+      console.log('  ' + fmtKScoreLine(e.k_score, path.basename(ap)));
       console.log('  ships:    ' + (e.k_score.ships ? 'YES' : 'NO'));
       return;
     }
@@ -3274,7 +3556,7 @@ async function cmdTune(args) {
       try {
         const r = await tune.promoteRevision({ artifactPath: ap, revision: rev, force });
         console.log('ok  promoted ' + r.promoted + '  (prev=' + (r.previous || 'none') + ')');
-        console.log('    K-score for ' + path.basename(ap) + ': ' + r.k_score.composite);
+        console.log('    ' + fmtKScoreLine(r.k_score, path.basename(ap)));
       } catch (e) {
         console.error(e.message);
         process.exit(e.code === 'K_GATE' ? 2 : 1);
@@ -5758,7 +6040,7 @@ function looksLikeNaturalLanguage(cmd, rest) {
 // Single source of truth for the verb + subcommand tables the shell completion
 // scripts consume. Keep this in sync with the dispatch switch below.
 const COMPLETION_VERBS = [
-  'init', 'signup', 'login', 'whoami', 'new', 'compile', 'train', 'run', 'eval', 'benchmark', 'bench',
+  'init', 'signup', 'login', 'whoami', 'new', 'build', 'compile', 'train', 'run', 'eval', 'benchmark', 'bench',
   'score', 'inspect', 'diff', 'verify', 'serve', 'publish', 'capture', 'labels', 'distill',
   'config', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'logs', 'ask', 'chat', 'version', 'help', 'completion', 'upgrade', 'update',
@@ -6265,26 +6547,41 @@ async function cmdUpgrade(args) {
 // because the point is to teach the format and unblock the user, not to generate
 // training data from thin air.
 const SEED_TEMPLATES = {
+  // phi-redactor seeds align with the redactor spec template's output shape
+  // ({redacted, hits}). matches() does subset-equal on objects, so expected =
+  // {redacted: "..."} passes regardless of the hits array. Three rows pass the
+  // starter recipe (date/phone/email/SSN_LIKE patterns shipped); two fail (name
+  // and address have no default pattern) so the user immediately sees what to
+  // extend. K-score reflects this honestly: ~0.6 on first build, climbing as
+  // the user adds patterns to recipes[0].source for the cases they care about.
   'phi-redactor': [
-    { input: 'patient John Doe MRN 1234567 visited on 2024-03-12 for follow-up.', output: 'patient [REDACTED] MRN [REDACTED] visited on [DATE] for follow-up.', tags: ['name', 'mrn', 'date'] },
-    { input: 'contact Jane Smith at 555-123-4567 or jsmith@example.com', output: 'contact [REDACTED] at [PHONE] or [EMAIL]', tags: ['name', 'phone', 'email'] },
-    { input: 'SSN 555-44-3333 was flagged in the audit log.', output: 'SSN [REDACTED] was flagged in the audit log.', tags: ['ssn'] },
-    { input: 'address: 1234 Oak Street, Springfield, IL 62701', output: 'address: [REDACTED]', tags: ['address'] },
-    { input: 'DOB 1975-08-14, admitted 2024-01-09, MRN 7890123.', output: 'DOB [DATE], admitted [DATE], MRN [REDACTED].', tags: ['dob', 'date', 'mrn'] },
+    { input: 'follow-up scheduled 2024-03-12.', output: { redacted: 'follow-up scheduled [DATE].' }, tags: ['date'] },
+    { input: 'contact 555-123-4567 or jsmith@example.com', output: { redacted: 'contact [PHONE] or [EMAIL]' }, tags: ['phone', 'email'] },
+    { input: 'SSN 555-44-3333 was flagged.', output: { redacted: 'SSN [SSN] was flagged.' }, tags: ['ssn'] },
+    { input: 'patient John Doe visited the clinic.', output: { redacted: 'patient [NAME] visited the clinic.' }, tags: ['name'] },
+    { input: 'address: 1234 Oak Street, Springfield, IL 62701', output: { redacted: 'address: [ADDRESS]' }, tags: ['address'] },
   ],
+  // ticket-classifier seeds match the classifier recipe's {label, score, scores}
+  // shape via subset-equal on {label}. Default pack has 'billing' and 'bug';
+  // the other 3 are categories the user adds at run time via
+  // params.extra_categories. First-build K reflects the user's pack gap honestly.
   'ticket-classifier': [
-    { input: 'my password reset email never arrived. been waiting 20 minutes.', output: 'auth', tags: ['auth'] },
-    { input: 'invoice from last month shows the wrong amount, please refund.', output: 'billing', tags: ['billing'] },
-    { input: 'when i click export the page just spins forever and never finishes.', output: 'bug', tags: ['bug'] },
-    { input: 'would love to see dark mode in the dashboard.', output: 'feature_request', tags: ['feature_request'] },
-    { input: 'how do i add a teammate to my workspace?', output: 'how_to', tags: ['how_to'] },
+    { input: 'invoice from last month shows the wrong amount, please refund.', output: { label: 'billing' }, tags: ['billing'] },
+    { input: 'when i click export the page just crashes with a 500 error.', output: { label: 'bug' }, tags: ['bug'] },
+    { input: 'my password reset email never arrived. been waiting 20 minutes.', output: { label: 'auth' }, tags: ['auth'] },
+    { input: 'would love to see dark mode in the dashboard.', output: { label: 'feature_request' }, tags: ['feature_request'] },
+    { input: 'how do i add a teammate to my workspace?', output: { label: 'how_to' }, tags: ['how_to'] },
   ],
+  // invoice-extractor seeds match the extractor recipe's {fields, raw} shape via
+  // subset-equal on {fields}. Default pack rule is iso_date only; the recipe
+  // returns null for fields it can't parse. Seeds with iso dates pass; the one
+  // with US-format dates fails to teach the user to add a date_us rule.
   'invoice-extractor': [
-    { input: 'Invoice from Acme Corp, dated 2024-03-15, total $1,234.56', output: '{"vendor": "Acme Corp", "amount": 1234.56, "date": "2024-03-15"}', tags: ['vendor', 'amount', 'date'] },
-    { input: 'Bill: Globex LLC -- amount due 99.00 USD, invoice date 04/02/2024', output: '{"vendor": "Globex LLC", "amount": 99.00, "date": "2024-04-02"}', tags: ['vendor', 'amount', 'date'] },
-    { input: 'INV-7821: Initech, $4,500.00, billed 2023-12-30.', output: '{"vendor": "Initech", "amount": 4500.00, "date": "2023-12-30"}', tags: ['vendor', 'amount', 'date'] },
-    { input: 'Soylent Industries invoice 2024-05-01 for 250.00', output: '{"vendor": "Soylent Industries", "amount": 250.00, "date": "2024-05-01"}', tags: ['vendor', 'amount', 'date'] },
-    { input: 'Hooli, total: 12345.67, date: 2024-02-09', output: '{"vendor": "Hooli", "amount": 12345.67, "date": "2024-02-09"}', tags: ['vendor', 'amount', 'date'] },
+    { input: 'Invoice from Acme Corp, dated 2024-03-15, total $1,234.56', output: { fields: { iso_date: '2024-03-15' } }, tags: ['iso_date'] },
+    { input: 'INV-7821: Initech, $4,500.00, billed 2023-12-30.', output: { fields: { iso_date: '2023-12-30' } }, tags: ['iso_date'] },
+    { input: 'Soylent Industries invoice 2024-05-01 for 250.00', output: { fields: { iso_date: '2024-05-01' } }, tags: ['iso_date'] },
+    { input: 'Bill: Globex LLC, amount due 99.00 USD, invoice date 04/02/2024', output: { fields: { iso_date: '2024-04-02' } }, tags: ['date_us'] },
+    { input: 'Hooli, total: 12345.67, date: 2024-02-09, vendor: Hooli Inc.', output: { fields: { iso_date: '2024-02-09', vendor: 'Hooli Inc.' } }, tags: ['iso_date', 'vendor'] },
   ],
   'generic': [
     { input: 'sample input one. replace with your real example.', output: 'sample expected output one.', tags: ['placeholder'] },
@@ -6603,6 +6900,27 @@ async function mutateViaLocalLlm(seed, rng, opts) {
   });
 }
 
+// Spec-template names (used by `kolm new --from <name>`) -> canonical seed
+// template name. Lets `kolm seeds new redactor` resolve to phi-redactor without
+// the user having to know the internal naming. This makes the `kolm new ... `
+// next-steps hint line up with what actually works.
+const SEED_TEMPLATE_ALIASES = {
+  redactor: 'phi-redactor',
+  redact: 'phi-redactor',
+  pii: 'phi-redactor',
+  phi: 'phi-redactor',
+  classifier: 'ticket-classifier',
+  classify: 'ticket-classifier',
+  ticket: 'ticket-classifier',
+  triage: 'ticket-classifier',
+  extractor: 'invoice-extractor',
+  extract: 'invoice-extractor',
+  invoice: 'invoice-extractor',
+  summarizer: 'generic',
+  summarize: 'generic',
+  blank: 'generic',
+};
+
 // `kolm seeds new <name>`
 async function cmdSeedsNew(args) {
   const positional = args.find(a => !a.startsWith('--'));
@@ -6611,12 +6929,17 @@ async function cmdSeedsNew(args) {
     err.exitCode = EXIT.BAD_ARGS;
     throw err;
   }
-  const name = String(positional).toLowerCase();
+  const rawName = String(positional).toLowerCase();
+  const name = SEED_TEMPLATE_ALIASES[rawName] || rawName;
   const tmpl = SEED_TEMPLATES[name];
   if (!tmpl) {
-    const err = new Error(`unknown template "${name}". choose: ${Object.keys(SEED_TEMPLATES).join(', ')}`);
+    const valid = Object.keys(SEED_TEMPLATES).concat(Object.keys(SEED_TEMPLATE_ALIASES));
+    const err = new Error(`unknown template "${rawName}". choose: ${Object.keys(SEED_TEMPLATES).join(', ')} (or aliases: ${Object.keys(SEED_TEMPLATE_ALIASES).join(', ')})`);
     err.exitCode = EXIT.BAD_ARGS;
     throw err;
+  }
+  if (name !== rawName) {
+    console.error(`(alias: ${rawName} -> ${name})`);
   }
   const outFlag = pickFlag(args, '--out');
   const outPath = outFlag
@@ -6633,13 +6956,33 @@ async function cmdSeedsNew(args) {
   writeJsonl(rows, outPath);
   console.log(`wrote ${rows.length} starter rows to ${outPath}`);
   console.log('');
+  // Auto-detect a matching spec in cwd so the next-step is copy-pasteable.
+  let specHint = '<your-spec>.spec.json';
+  let artHint = '<your-name>.kolm';
+  try {
+    const cwdFiles = fs.readdirSync(process.cwd()).filter(f => f.endsWith('.spec.json'));
+    if (cwdFiles.length === 1) {
+      specHint = cwdFiles[0];
+      artHint = specHint.replace(/\.spec\.json$/, '.kolm');
+    } else if (cwdFiles.length > 1) {
+      // Prefer the one whose stem matches the seed template name.
+      const stemMatch = cwdFiles.find(f => f.startsWith(name) || f.startsWith(rawName));
+      if (stemMatch) {
+        specHint = stemMatch;
+        artHint = stemMatch.replace(/\.spec\.json$/, '.kolm');
+      }
+    }
+  } catch {}
   console.log('next:');
-  console.log(`  1. edit ${path.basename(outPath)} and replace placeholders with YOUR real examples (>= 5 recommended)`);
-  console.log(`  2. expand:  kolm seeds generate --from ${path.basename(outPath)} --count 200`);
-  console.log(`  3. train:   kolm train --spec <spec> --seeds ${path.basename(outPath)}`);
+  console.log(`  1. edit ${path.basename(outPath)} - replace placeholders with YOUR real examples (>= 5 recommended)`);
+  console.log(`  2. compile: kolm compile --spec ${specHint} --examples ${path.basename(outPath)} --out ${artHint}`);
+  console.log(`  3. verify:  kolm verify ${artHint}`);
+  console.log(`  4. (more)   kolm seeds generate --from ${path.basename(outPath)} --count 200   # expand via deterministic mutation`);
   console.log('');
   console.log('honesty: these starter rows are PLACEHOLDERS, not training data.');
   console.log('         replace them with examples you actually want the model to learn from.');
+  console.log('         K-score against placeholders means nothing; K-score against your real');
+  console.log('         examples is the only number that should drive ship/no-ship decisions.');
 }
 
 // `kolm seeds generate --from <file> --count N [--strategy s] [--seed-rng N] [--out p]`
@@ -7590,6 +7933,7 @@ async function main() {
       case 'login':    await withErrorContext('login',    () => cmdLogin(rest)); break;
       case 'whoami':   await withErrorContext('whoami',   () => cmdWhoami(rest)); break;
       case 'new':      await withErrorContext('new',      () => cmdNew(rest)); break;
+      case 'build':    await withErrorContext('build',    () => cmdBuild(rest)); break;
       case 'compile':  await withErrorContext('compile',  () => cmdCompile(rest)); break;
       case 'train':    await withErrorContext('train',    () => cmdTrain(rest)); break;
       case 'run':      await withErrorContext('run',      () => cmdRun(rest)); break;

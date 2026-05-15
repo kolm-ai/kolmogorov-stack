@@ -331,7 +331,7 @@ export async function evalArtifact(artifactPath, opts = {}) {
     try {
       const r = await runArtifact(artifactPath, c.input, { params: c.params || opts.params });
       latencies.push(r.latency_us);
-      if (deepEqual(r.output, c.expected)) passed++;
+      if (matches(r.output, c.expected)) passed++;
       else errors.push({ id: c.id, expected: c.expected, got: r.output });
     } catch (e) {
       errors.push({ id: c.id, error: String(e.message || e) });
@@ -348,18 +348,26 @@ export async function evalArtifact(artifactPath, opts = {}) {
   };
 }
 
-function deepEqual(a, b) {
-  if (a === b) return true;
-  if (typeof a !== typeof b) return false;
-  if (a === null || b === null) return a === b;
-  if (Array.isArray(a)) return Array.isArray(b) && a.length === b.length && a.every((v, i) => deepEqual(v, b[i]));
-  if (typeof a === 'object') {
-    const ka = Object.keys(a), kb = Object.keys(b);
-    if (ka.length !== kb.length) return false;
-    return ka.every(k => deepEqual(a[k], b[k]));
+// Subset-equal matcher mirroring verifier.verify's `matches`. Compile-time and
+// runtime eval must use the same matcher or the user sees different pass counts
+// from `kolm compile --spec` vs `kolm eval`. The verifier's logic is canonical;
+// this is a copy because src/artifact-runner.js is the runtime hot path and we
+// don't want it to pull the full verifier sandbox (vm, source guards, etc.)
+// just for the matcher.
+function matches(actual, expected) {
+  if (expected === undefined || expected === null) return actual !== undefined;
+  if (typeof expected === 'function') return expected(actual);
+  if (Array.isArray(expected) && Array.isArray(actual)) {
+    if (actual.length !== expected.length) return false;
+    return actual.every((a, i) => matches(a, expected[i]));
   }
-  if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) < 1e-9;
-  return false;
+  if (typeof expected === 'object' && expected && typeof actual === 'object' && actual) {
+    return Object.keys(expected).every(k => matches(actual[k], expected[k]));
+  }
+  if (typeof expected === 'number' && typeof actual === 'number') {
+    return Math.abs(actual - expected) < 1e-6;
+  }
+  return actual === expected;
 }
 
 // Return the manifest + recipe summary + K-score for a UI-style overview.
