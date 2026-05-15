@@ -1,0 +1,26 @@
+{
+  "id": "general-qwen-3b",
+  "name": "General-purpose assistant (Qwen 2.5 3B)",
+  "task": "Follow instructions across reasoning, summarization, code, math, and structured output. The smallest Qwen that holds JSON-schema compliance under load. Quantized to int4 for laptop-class deployment.",
+  "verifier": "On a 200-row holdout: JSON-schema compliance >= 0.95, instruction-followed >= 0.90 (judged), token-overrun rate < 0.02, refusal rate on benign prompts < 0.01.",
+  "target_size": "3b",
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "epochs": 2,
+  "lora_r": 16,
+  "lora_alpha": 32,
+  "lora_dropout": 0.05,
+  "lr": 1e-4,
+  "max_seq_len": 4096,
+  "seeds_path": "./seeds.jsonl",
+  "tags": ["general", "instruction-following", "json-schema", "quantized"],
+  "license": "Apache-2.0",
+  "k_score_gate": 0.85,
+  "k_score_components": {
+    "accuracy": 0.40,
+    "size": 0.15,
+    "latency": 0.15,
+    "cost": 0.15,
+    "coverage": 0.15
+  },
+  "notes": "3B is the smallest base that holds JSON-schema compliance at >0.95 after light fine-tune. Larger seeds set (5-10k diverse examples) recommended for production; 50 seeds here is a smoke-test starter. Pair with `kolm export --format gguf-q4_k_m` after training for laptop deployment."
+}

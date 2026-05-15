@@ -1,0 +1,26 @@
+{
+  "id": "phi-redactor",
+  "name": "PHI / PII redactor",
+  "task": "Redact protected health information and personally identifiable information from free-text clinical and customer-support notes. Replace names, dates, MRN/SSN, addresses, phone numbers, and emails with role-tagged placeholders (e.g. [PATIENT], [DOB], [MRN], [ADDRESS]). Preserve clinical content verbatim.",
+  "verifier": "On a 250-row holdout of synthetic-but-realistic PHI: recall on PII spans >= 0.98 (false-negative on a real identifier is the failure mode), precision >= 0.95 (don't over-redact clinical terms), exact-tag match >= 0.90, zero hallucinated content outside the redaction tags.",
+  "target_size": "7b",
+  "base_model": "Qwen/Qwen2.5-7B-Instruct",
+  "epochs": 3,
+  "lora_r": 16,
+  "lora_alpha": 32,
+  "lora_dropout": 0.05,
+  "lr": 2e-4,
+  "max_seq_len": 2048,
+  "seeds_path": "./seeds.jsonl",
+  "tags": ["redaction", "phi", "pii", "healthcare", "compliance"],
+  "license": "Apache-2.0",
+  "k_score_gate": 0.90,
+  "k_score_components": {
+    "accuracy": 0.50,
+    "size": 0.10,
+    "latency": 0.15,
+    "cost": 0.10,
+    "coverage": 0.15
+  },
+  "notes": "Higher accuracy weight (0.50) and higher gate (0.90) than general models: a missed identifier in production is a HIPAA incident, so we accept smaller models on size/cost trade-offs to push the recall ceiling. Recall is asymmetrically more important than precision — over-redacting a clinical term is a usability bug, under-redacting an identifier is a breach. Pair with a rule-based pre-pass for SSN/phone/email regex catches before model inference. Production deployments should add domain-specific seed data (cardiology, oncology, etc.) — 200 generic seeds here is a smoke-test starter; ship-grade redactors use 2-5k pairs."
+}

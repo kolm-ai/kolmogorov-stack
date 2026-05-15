@@ -6033,7 +6033,7 @@ async function cmdCloudTrain(args) {
     console.error('error: name required. usage: kolm cloud train <name> [--seeds <f.jsonl>] [--base <model>] [--confirm]');
     process.exit(1);
   }
-  const seedsPath = pickFlag(args, '--seeds') || pickFlag(args, '--examples') || './seeds.jsonl';
+  const seedsFlag = pickFlag(args, '--seeds') || pickFlag(args, '--examples');
   const baseModel = pickFlag(args, '--base') || pickFlag(args, '--base-model') || 'Qwen/Qwen2.5-7B-Instruct';
   const targetSize = pickFlag(args, '--target-size') || '7b';
   const epochs = Number(pickFlag(args, '--epochs') || 3);
@@ -6051,14 +6051,42 @@ async function cmdCloudTrain(args) {
     process.exit(2);
   }
 
-  // Validate seeds exist.
+  // Resolve `name` into (specPath, seedsPath, id). Three accepted shapes:
+  //   1. directory:        models/en-zh-translator/   → spec.json + seeds.jsonl inside
+  //   2. spec file:        path/to/x.spec.json        → sibling seeds.jsonl
+  //   3. bare slug:        my-redactor                → try ./my-redactor.spec.json then ./my-redactor/spec.json
+  // The buyer's first arg is the recipe handle; we never re-slugify it into the id.
+  // The spec's own `id` field is the canonical name on the artifact record.
+  let specPath = null;
+  let specDir = null;
+  const argResolved = path.resolve(name);
+  if (fs.existsSync(argResolved) && fs.statSync(argResolved).isDirectory()) {
+    const candidate = path.join(argResolved, 'spec.json');
+    if (fs.existsSync(candidate)) specPath = candidate;
+    specDir = argResolved;
+  } else if (name.endsWith('.spec.json') && fs.existsSync(argResolved)) {
+    specPath = argResolved;
+    specDir = path.dirname(argResolved);
+  } else {
+    const tryDotSpec = path.resolve(`${name}.spec.json`);
+    const tryDirSpec = path.resolve(name, 'spec.json');
+    if (fs.existsSync(tryDotSpec)) { specPath = tryDotSpec; specDir = path.dirname(tryDotSpec); }
+    else if (fs.existsSync(tryDirSpec)) { specPath = tryDirSpec; specDir = path.dirname(tryDirSpec); }
+  }
+
+  // Seeds resolution: explicit flag > sibling of spec > cwd fallback.
+  let seedsPath = seedsFlag
+    ? path.resolve(seedsFlag)
+    : specDir && fs.existsSync(path.join(specDir, 'seeds.jsonl'))
+      ? path.join(specDir, 'seeds.jsonl')
+      : path.resolve('./seeds.jsonl');
+
   if (!fs.existsSync(seedsPath)) {
     console.error(`error: seeds file not found: ${seedsPath}`);
     console.error('  scaffold one with: kolm seeds new <template>    (e.g. redactor, classifier, extractor)');
     console.error('  or pass --seeds <path.jsonl>');
     process.exit(1);
   }
-  // Count pairs.
   let pairCount = 0;
   try {
     const txt = fs.readFileSync(seedsPath, 'utf-8');
@@ -6067,42 +6095,42 @@ async function cmdCloudTrain(args) {
     console.error(`error: cannot read seeds: ${e.message}`); process.exit(1);
   }
   if (pairCount < 10) {
-    console.error(`error: need ≥10 training pairs in ${seedsPath}, got ${pairCount}.`);
+    console.error(`error: need >=10 training pairs in ${seedsPath}, got ${pairCount}.`);
     console.error('  generate more with: kolm seeds generate --n 100');
     process.exit(1);
   }
 
-  // Build the spec object the backend adapter expects.
-  const specPath = path.resolve(name.endsWith('.spec.json') ? name : `${name}.spec.json`);
   let spec = null;
-  if (fs.existsSync(specPath)) {
+  if (specPath) {
     try { spec = JSON.parse(fs.readFileSync(specPath, 'utf-8')); }
     catch (e) { console.error(`error: cannot parse ${specPath}: ${e.message}`); process.exit(1); }
   }
-  const cleanId = name.replace(/\.spec\.json$/, '').replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+  // Fallback id: basename of the dir or the name without extension; never the
+  // slash-slugified full path.
+  const fallbackId = (specDir ? path.basename(specDir) : name.replace(/\.spec\.json$/, ''))
+    .replace(/[^a-z0-9-]/gi, '-').toLowerCase();
   if (!spec) {
-    // No spec on disk — synthesize a minimal one.
     spec = {
-      id: cleanId,
-      name,
+      id: fallbackId,
+      name: fallbackId,
       target_size: targetSize,
       base_model: baseModel,
       epochs,
       lora_r: loraR,
       lora_alpha: loraAlpha,
-      seeds_path: path.resolve(seedsPath),
+      seeds_path: seedsPath,
     };
   } else {
     // Existing spec on disk — coerce its training fields. Treat literal "none"
     // as unset (legacy compile specs use base_model: "none" to mean rule-only).
-    spec.id = spec.id || spec.name || spec.job_id || cleanId;
+    spec.id = spec.id || spec.name || spec.job_id || fallbackId;
     spec.name = spec.name || spec.id;
     spec.base_model = (spec.base_model && spec.base_model !== 'none') ? spec.base_model : baseModel;
     spec.target_size = spec.target_size || targetSize;
     spec.epochs = spec.epochs || epochs;
     spec.lora_r = spec.lora_r || loraR;
     spec.lora_alpha = spec.lora_alpha || loraAlpha;
-    spec.seeds_path = path.resolve(seedsPath);
+    spec.seeds_path = seedsPath;
   }
 
   // Load the backend adapter. Quote first (no auth needed), check availability
@@ -6205,7 +6233,7 @@ async function cmdCloudTrain(args) {
   console.log('');
   console.log('next steps:');
   console.log(`  serve via together:    https://api.together.xyz/v1/chat/completions  (model: ${result.metrics.together_model_output})`);
-  console.log(`  package as .kolm:      kolm compile --spec ${specPath}  (uses the adapter you just trained)`);
+  console.log(`  package as .kolm:      kolm compile --spec ${specPath || (spec.id + '.spec.json')}  (uses the adapter you just trained)`);
   console.log(`  see all your trains:   ls ${artifactsDir}/*.cloud-train.json`);
 }
 

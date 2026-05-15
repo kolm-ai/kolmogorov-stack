@@ -1,0 +1,26 @@
+{
+  "id": "en-zh-translator",
+  "name": "English to Mandarin translator",
+  "task": "Translate English source text into Simplified Mandarin Chinese. Maintain register, idiom, and code-switching faithfulness; preserve tagged code blocks verbatim.",
+  "verifier": "BLEU-4 against held-out reference set + Mandarin character ratio >= 0.7 in output + zero source-language tokens after the first character.",
+  "target_size": "7b",
+  "base_model": "Qwen/Qwen2.5-7B-Instruct",
+  "epochs": 3,
+  "lora_r": 16,
+  "lora_alpha": 32,
+  "lora_dropout": 0.05,
+  "lr": 2e-4,
+  "max_seq_len": 2048,
+  "seeds_path": "./seeds.jsonl",
+  "tags": ["translation", "multilingual", "zh-CN"],
+  "license": "Apache-2.0",
+  "k_score_gate": 0.85,
+  "k_score_components": {
+    "accuracy": 0.40,
+    "size": 0.15,
+    "latency": 0.15,
+    "cost": 0.15,
+    "coverage": 0.15
+  },
+  "notes": "Qwen 2.5 was trained heavily on Chinese, so it's the strongest base for this task. A 7B LoRA fine-tune on 1-2k high-quality en-zh pairs gets to professional-translator quality on news/general-domain text. For technical domains (medical, legal, finance) extend seeds with domain glossary pairs."
+}
