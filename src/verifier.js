@@ -15,39 +15,85 @@ const DEFAULT_TIMEOUT_MS = 150;
 // context). We block the canonical escape primitives via a string scan before
 // the source ever reaches the compiler. Synthesized recipes never need any of
 // these — they operate on the `lib` argument only.
+// [token, friendly-hint]. Hint shown in the error message so authors don't
+// have to dig through kolm help compile to learn the workaround.
 const DANGEROUS = [
-  /\bprocess\b/,
-  /\brequire\b/,
-  /\bmodule\b/,
-  /\bglobal(This)?\b/,
-  /\b__dirname\b/,
-  /\b__filename\b/,
-  /\bimport\s*\(/,
-  /\bFunction\s*\(/,
-  /\beval\s*\(/,
-  /\bconstructor\b/,
-  /\bprototype\b/,
-  /\bArrayBuffer\b/,
-  /\bSharedArrayBuffer\b/,
-  /\bAtomics\b/,
+  [/\bprocess\b/,             'process',             'access env via lib.params (set in spec.recipes[].params)'],
+  [/\brequire\b/,             'require',             'recipes are sandboxed — use only the frozen lib helpers'],
+  [/\bmodule\b/,              'module',              'recipes do NOT use module.exports — just declare top-level function generate(input, lib)'],
+  [/\bglobal(This)?\b/,       'global / globalThis', 'no globals — pass everything through lib or the input arg'],
+  [/\b__dirname\b/,           '__dirname',           'no filesystem — recipes are pure functions on (input, lib)'],
+  [/\b__filename\b/,          '__filename',          'no filesystem — recipes are pure functions on (input, lib)'],
+  [/\bimport\s*\(/,           'import()',            'dynamic imports disabled — all deps must come through lib'],
+  [/\bFunction\s*\(/,         'Function()',          'no dynamic code — write straight JS'],
+  [/\beval\s*\(/,             'eval()',              'no dynamic code — write straight JS'],
+  [/\bconstructor\b/,         'constructor',         'avoid .constructor access — pre-construct instances if you need them'],
+  [/\bprototype\b/,           'prototype',           'use Object.hasOwn(obj, k) instead of .hasOwnProperty; iterate via Object.keys()'],
+  [/\bArrayBuffer\b/,         'ArrayBuffer',         'no typed arrays — use plain JS arrays/strings'],
+  [/\bSharedArrayBuffer\b/,   'SharedArrayBuffer',   'no typed arrays — use plain JS arrays/strings'],
+  [/\bAtomics\b/,             'Atomics',             'no shared memory primitives — recipes are single-shot'],
   // Hardening additions (no legitimate fixture uses these as of 2026-05-14;
   // re-check with `grep -c` against data/versions.json before removing).
-  /\bReflect\b/,
-  /\bProxy\b/,
-  /\bWeakRef\b/,
-  /\bFinalizationRegistry\b/,
-  /\bsetTimeout\b/,
-  /\bsetInterval\b/,
-  /\bsetImmediate\b/,
-  /\bqueueMicrotask\b/,
+  [/\bReflect\b/,             'Reflect',             'use direct property access — no Reflect.* meta-programming'],
+  [/\bProxy\b/,               'Proxy',               'no proxies — build plain objects'],
+  [/\bWeakRef\b/,             'WeakRef',             'no weak refs — recipes are short-lived pure functions'],
+  [/\bFinalizationRegistry\b/, 'FinalizationRegistry', 'no finalizers — recipes are short-lived pure functions'],
+  [/\bsetTimeout\b/,          'setTimeout',          'no timers — recipes must be synchronous'],
+  [/\bsetInterval\b/,         'setInterval',         'no timers — recipes must be synchronous'],
+  [/\bsetImmediate\b/,        'setImmediate',        'no timers — recipes must be synchronous'],
+  [/\bqueueMicrotask\b/,      'queueMicrotask',      'no microtasks — recipes must be synchronous'],
 ];
+
+// Strip JS comments + string literals before sandbox scanning. Otherwise an
+// author writing `// avoid prototype, process, require` in a header comment
+// gets blocked by the safeguard they were documenting. False positives in
+// comments/strings are the #1 first-time-author trap (agent batch 50, retry
+// 44 hit this exact pattern).
+function stripCommentsAndStrings(src) {
+  let out = '';
+  let i = 0;
+  const n = src.length;
+  while (i < n) {
+    const c = src[i];
+    const c2 = src[i + 1];
+    if (c === '/' && c2 === '/') {
+      while (i < n && src[i] !== '\n') i++;
+      out += ' ';
+      continue;
+    }
+    if (c === '/' && c2 === '*') {
+      i += 2;
+      while (i < n && !(src[i] === '*' && src[i + 1] === '/')) i++;
+      i += 2;
+      out += ' ';
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') {
+      const q = c;
+      i++;
+      while (i < n && src[i] !== q) {
+        if (src[i] === '\\') i += 2; else i++;
+      }
+      i++;
+      out += ' ';
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
 
 function assertSafeSource(source) {
   if (typeof source !== 'string') throw new Error('source must be a string');
   if (source.length > 64 * 1024) throw new Error('source too large (>64 KiB)');
-  for (const re of DANGEROUS) {
-    if (re.test(source)) {
-      throw new Error('source contains a forbidden identifier (' + re.source + ')');
+  const scanned = stripCommentsAndStrings(source);
+  for (const [re, name, hint] of DANGEROUS) {
+    if (re.test(scanned)) {
+      throw new Error(
+        `source contains a forbidden identifier '${name}': ${hint}.\n` +
+        `  See 'kolm help compile' FORBIDDEN IDENTIFIERS section for the full list.`
+      );
     }
   }
 }
