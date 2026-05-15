@@ -111,10 +111,23 @@ code, pre, kbd, .mono {
    ============================================================ */
 .site-header {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(11,13,16,0.88);
+  background: rgba(11,13,16,0.96);
   backdrop-filter: saturate(130%) blur(18px);
   -webkit-backdrop-filter: saturate(130%) blur(18px);
   border-bottom: 1px solid var(--line);
+}
+[data-theme=light] .site-header {
+  background: rgba(247,244,236,0.96);
+  border-bottom-color: rgba(12,14,16,0.08);
+}
+[data-theme=light] .site-header .brand,
+[data-theme=light] .site-header .site-nav a,
+[data-theme=light] .site-header .site-actions a:not(.cta) {
+  color: #0c0e10;
+}
+[data-theme=light] .site-header .site-nav a:hover,
+[data-theme=light] .site-header .site-actions a:not(.cta):hover {
+  color: #059669;
 }
 .site-header .wrap {
   display: flex; align-items: center; gap: 24px;
