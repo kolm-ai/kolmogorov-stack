@@ -213,9 +213,12 @@ COMMANDS
   init [--name <slug>]             scaffold kolm.yaml + .kolm/ at cwd (project bootstrap)
   signup --email <addr>            provision a tenant + API key from the CLI
   login [--key ks_...]             save an API key to ~/.kolm/config.json
+  whoami                           echo current tenant + plan + base
   new <name> [--from <template>]   scaffold a spec.json you can compile
   compile "<task>" [opts]          cloud-compile a task into a .kolm artifact
   compile --spec <file|->           offline build from a JSON spec (any author, AI included)
+  train --spec <file>              alias for compile from a spec (training entry point)
+  train --namespace <n>            alias for distill (after capture)
   run <art.kolm> '<input>'         execute a .kolm against an input
   eval <art.kolm>                  re-run embedded evals, print K-score
   bench <art.kolm> [opts]          emit artifact benchmark JSON (alias: benchmark)
@@ -311,6 +314,44 @@ OPTIONS
 
 On success: the api_key is saved to ~/.kolm/config.json (mode 0600) and printed
 truncated. Paid plans also return a Stripe billing URL you can open in a browser.
+`,
+  whoami: `kolm whoami - echo the current tenant + plan + cloud base.
+
+USAGE
+  kolm whoami [--json]
+
+Hits GET /v1/account with the saved API key and prints the tenant id, plan,
+quota, seats, and the kolm cloud base URL. With --json, emits the raw account
+envelope so scripts can parse it.
+
+Exit codes:
+  0   logged in, account fetched
+  1   not logged in (no api_key in ~/.kolm/config.json or KOLM_API_KEY env)
+  2   logged in but cloud rejected the key (rotated, revoked, or wrong base)
+`,
+  train: `kolm train - build a .kolm artifact from a spec or distill a captured namespace.
+
+USAGE
+  kolm train --spec <file.json> [--out <path>]   offline build from a JSON spec
+  kolm train --namespace <n> [--base-model <m>]  distill the captured namespace
+
+OPTIONS (--spec mode)
+  --spec <file>                JSON spec written by you or 'kolm new'
+  --out <dir|file.kolm>        where to drop the artifact (default ~/.kolm/artifacts)
+  --base-model <name>          base model name embedded in the manifest
+
+OPTIONS (--namespace mode)
+  --namespace, -n <n>          the namespace captured via 'kolm capture'
+  --base-model <name>          base model (default: Qwen/Qwen2.5-3B-Instruct)
+  --target, --target-size <s>  target artifact size (default: phi-3-mini)
+
+The two modes are aliases for 'kolm compile --spec' and 'kolm distill --namespace'.
+The verb 'train' exists because that's what most buyers expect to type. The actual
+job is the same.
+
+EXAMPLES
+  kolm train --spec phi-redactor.spec.json
+  kolm train --namespace claims-router --base-model Qwen/Qwen2.5-7B-Instruct
 `,
   compile: `kolm compile - build a .kolm artifact (cloud-synthesised or local spec).
 
@@ -1269,6 +1310,60 @@ async function cmdSignup(args) {
   console.log('  kolm init                # scaffold a project in the current directory');
   console.log('  kolm new my-skill --from classifier');
   console.log('  kolm compile --spec my-skill.spec.json');
+}
+
+async function cmdWhoami(args) {
+  if (maybeHelp('whoami', args)) return;
+  const jsonOut = args.includes('--json');
+  const c = loadConfig();
+  if (!c.api_key) {
+    if (jsonOut) {
+      console.log(JSON.stringify({ logged_in: false, base: c.base, hint: 'run: kolm login --key ks_... or kolm signup --email you@example.com' }));
+    } else {
+      console.error('not logged in.');
+      console.error('hint: run `kolm login --key ks_...` or `kolm signup --email you@example.com`');
+    }
+    process.exit(1);
+  }
+  let a;
+  try {
+    a = await api(c, 'GET', '/v1/account');
+  } catch (e) {
+    if (jsonOut) {
+      console.log(JSON.stringify({ logged_in: false, base: c.base, error: e.message }));
+    } else {
+      console.error('cloud rejected the saved key:', e.message);
+      console.error('hint: the key may have been rotated or revoked. run `kolm login --key ks_...` again.');
+    }
+    process.exit(2);
+  }
+  if (jsonOut) {
+    console.log(JSON.stringify({ logged_in: true, base: c.base, tenant: a }));
+    return;
+  }
+  console.log('tenant:  ' + (a.id || a.name || '-'));
+  console.log('plan:    ' + (a.plan || '-'));
+  if (a.quota !== undefined) console.log('quota:   ' + a.quota);
+  if (a.seats !== undefined) console.log('seats:   ' + a.seats);
+  console.log('base:    ' + c.base);
+  console.log('key:     ' + (c.api_key || '').slice(0, 12) + '...');
+}
+
+async function cmdTrain(args) {
+  if (maybeHelp('train', args)) return;
+  const hasSpec = args.includes('--spec');
+  const hasNamespace = args.includes('--namespace') || args.includes('-n');
+  if (hasSpec && hasNamespace) {
+    console.error('error: pass either --spec or --namespace, not both.');
+    console.error('hint: --spec compiles from a written recipe; --namespace distills from captured pairs.');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (hasSpec) return cmdCompile(args);
+  if (hasNamespace) return cmdDistill(args);
+  console.error('usage: kolm train --spec <file.json>   (compile from spec)');
+  console.error('       kolm train --namespace <n>      (distill captured pairs)');
+  console.error('see:   kolm help train');
+  process.exit(EXIT.BAD_ARGS);
 }
 
 async function readStdin() {
@@ -3608,7 +3703,7 @@ function looksLikeNaturalLanguage(cmd, rest) {
 // Single source of truth for the verb + subcommand tables the shell completion
 // scripts consume. Keep this in sync with the dispatch switch below.
 const COMPLETION_VERBS = [
-  'init', 'signup', 'login', 'new', 'compile', 'run', 'eval', 'benchmark', 'bench',
+  'init', 'signup', 'login', 'whoami', 'new', 'compile', 'train', 'run', 'eval', 'benchmark', 'bench',
   'score', 'inspect', 'diff', 'verify', 'serve', 'publish', 'capture', 'labels', 'distill',
   'config', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'logs', 'ask', 'version', 'help', 'completion', 'upgrade', 'update',
@@ -4478,8 +4573,10 @@ async function main() {
       case 'init':     await withErrorContext('init',     () => cmdInit(rest)); break;
       case 'signup':   await withErrorContext('signup',   () => cmdSignup(rest)); break;
       case 'login':    await withErrorContext('login',    () => cmdLogin(rest)); break;
+      case 'whoami':   await withErrorContext('whoami',   () => cmdWhoami(rest)); break;
       case 'new':      await withErrorContext('new',      () => cmdNew(rest)); break;
       case 'compile':  await withErrorContext('compile',  () => cmdCompile(rest)); break;
+      case 'train':    await withErrorContext('train',    () => cmdTrain(rest)); break;
       case 'run':      await withErrorContext('run',      () => cmdRun(rest)); break;
       case 'eval':     await withErrorContext('eval',     () => cmdEval(rest)); break;
       case 'benchmark':
