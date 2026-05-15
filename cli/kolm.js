@@ -4173,7 +4173,22 @@ async function cmdChat(args) {
     const localReply = localAssistantParse(promptText);
     const plan = chatPlanAction(promptText, localReply);
     if (!plan) return null;
-    if (plan.action === 'compile_cloud') return null;
+    // For compile_cloud we usually want the cloud roundtrip (it does the
+    // actual work). EXCEPTION: if the user referenced an examples file in
+    // the prompt and chatPlanAction wired it as --examples, going through
+    // /v1/assistant would fire a cloud compile WITHOUT the file (the cloud
+    // never sees the local fs). Better to short-circuit and dispatch
+    // locally so `kolm compile <task> --examples <file>` uploads the file
+    // via the existing multipart compile flow.
+    if (plan.action === 'compile_cloud') {
+      if (plan.argv && plan.argv.indexOf('--examples') >= 0) {
+        localReply._source = 'action';
+        localReply.narration = "kicking off a cloud compile with your examples file.";
+        localReply.next_steps = [];
+        return { reply: localReply, plan: plan };
+      }
+      return null;
+    }
     // We deliberately route this through the LOCAL parser to avoid double-
     // executing on the server. The narration is still accurate (these intents
     // are local-only by design) so we tag it as "action" rather than "airgap"
