@@ -11,6 +11,8 @@ kolm run your-artifact.kolm "new input"
 
 You bring your own frontier API key. kolm uses it once, during compile. The result is a single signed file with model, examples, evaluator, and receipt chain. Runs on a laptop, phone, or in your VPC. Your data never moves.
 
+If you'd rather talk to the CLI, `kolm chat` opens an interactive session that maps natural-language asks to real verbs — "make me a redactor recipe" runs `kolm new --from redactor`, "anonymize my customer data" runs `kolm seeds generate --strategy redact-pii-templated`, "upgrade kolm" runs `kolm update`. Add `--airgap` to keep it narration-only on disconnected boxes. `kolm anonymize <file>.jsonl` is a first-class shortcut for the same PII-templated seeds path with no LLM and no network.
+
 ## Primary use case: clinical AI inside the hospital network
 
 kolm was built around healthcare. The architecture supports BAA-bounded deployment so PHI never leaves the hosts your security team already trusts. Reference workloads: prior-auth triage, encounter-note drafting for sign-off, ICD-10 coding, intake routing, drug-name redaction. Every output carries an HMAC-bound receipt your clinical informatics committee can re-verify. See [public/healthcare.html](public/healthcare.html) for the canonical positioning and the reference artifacts (hipaa-summarizer, intake-triage, drug-name-redact). BAA review is a per-customer step in Enterprise onboarding, not a generic template the product ships.
