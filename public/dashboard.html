@@ -84,6 +84,536 @@
   })();
   </script>
 
+  <style>
+    .dash-chat{margin:8px 0 18px;padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card)}
+    .dash-chat-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+    .dash-chat-title{font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em;margin:0}
+    .dash-chat-sub{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+    .dash-chat-row{display:flex;gap:8px;align-items:stretch;flex-wrap:nowrap}
+    .dash-chat-input{flex:1;min-width:0;background:var(--bg-elev,#0e1218);color:var(--ink);border:1px solid var(--line-strong);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:13px;line-height:1.5;resize:vertical;min-height:42px;max-height:140px;outline:none;transition:border-color 120ms}
+    .dash-chat-input:focus{border-color:var(--accent)}
+    .dash-chat-input::placeholder{color:var(--ink-faint)}
+    .dash-chat-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .dash-chat-send{appearance:none;background:var(--accent);color:#0b0d10;border:1px solid var(--accent);border-radius:6px;padding:9px 16px;font-family:var(--mono);font-size:12.5px;font-weight:500;cursor:pointer;transition:opacity 120ms}
+    .dash-chat-send:hover{opacity:0.85}
+    .dash-chat-send:disabled{opacity:0.45;cursor:not-allowed}
+    .dash-chat-link{font-family:var(--mono);font-size:12px;color:var(--ink-mute);border-bottom:1px dashed var(--line-strong);padding-bottom:1px}
+    .dash-chat-link:hover{color:var(--ink)}
+    .dash-chat-clear{appearance:none;background:transparent;border:1px solid var(--line-strong);border-radius:6px;color:var(--ink-mute);font-family:var(--mono);font-size:11.5px;padding:6px 10px;cursor:pointer;transition:color 120ms,border-color 120ms}
+    .dash-chat-clear:hover{color:var(--ink);border-color:var(--ink-faint)}
+    .dash-chat-hint{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);letter-spacing:0.04em;margin-left:auto}
+    .dash-chat-hint .kbd{display:inline-block;border:1px solid var(--line-strong);border-radius:3px;padding:0 5px;font-size:10px;color:var(--ink-mute)}
+    .dash-chat-out{margin-top:12px;display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto}
+    .dash-chat-out:empty{display:none}
+    .dash-chat-turn{display:flex;flex-direction:column;gap:4px;padding:9px 12px;border:1px solid var(--line);border-radius:6px}
+    .dash-chat-turn.user{background:rgba(127,222,255,0.04);border-color:rgba(127,222,255,0.12)}
+    .dash-chat-turn.kolm{background:var(--bg-elev,rgba(255,255,255,0.02))}
+    .dash-chat-role{font-family:var(--mono);font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em}
+    .dash-chat-text{font-size:13.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap;word-wrap:break-word}
+    .dash-chat-next{display:flex;flex-direction:column;gap:3px;margin-top:6px;padding-left:8px;border-left:2px solid var(--line-strong);font-family:var(--mono);font-size:12px;color:var(--ink-mute)}
+    .dash-chat-next a{color:var(--accent);border-bottom:1px dashed var(--line-strong);padding-bottom:1px;display:inline-block}
+    .dash-chat-next a:hover{color:var(--accent-strong,var(--accent))}
+    .dash-chat-card{margin-top:6px;padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:5px;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);line-height:1.6}
+    .dash-chat-card b{color:var(--ink);font-weight:500}
+    .dash-chat-card a{color:var(--accent);border-bottom:1px dashed var(--line-strong)}
+    .dash-chat-stages{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+    .dash-chat-pill{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:0.04em;padding:2px 7px;border-radius:999px;border:1px solid var(--line-strong);color:var(--ink-mute);background:var(--bg)}
+    .dash-chat-pill.ok{color:var(--accent-cyan,#7ef0d2);border-color:rgba(127,222,255,0.30)}
+    .dash-chat-pill.err{color:var(--bad,#ff6b91);border-color:rgba(255,107,145,0.30)}
+    .dash-chat-gate{margin:8px 0 0;padding:10px 12px;border:1px dashed var(--line-strong);border-radius:6px;font-family:var(--mono);font-size:12px;color:var(--ink-mute)}
+    .dash-chat-gate a{color:var(--accent);border-bottom:1px dashed var(--line-strong)}
+    @media (max-width:680px){
+      .dash-chat-row{flex-direction:column}
+      .dash-chat-send{width:100%;padding:11px 16px}
+      .dash-chat-actions{flex-direction:column;align-items:flex-start}
+      .dash-chat-hint{margin-left:0}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .dash-chat-input,.dash-chat-send,.dash-chat-clear,.dash-chat-link{transition:none}
+    }
+  </style>
+
+  <section class="dash-chat" id="dash-chat" aria-labelledby="dash-chat-h2">
+    <div class="dash-chat-head">
+      <h2 class="dash-chat-title" id="dash-chat-h2">Ask kolm</h2>
+      <span class="dash-chat-sub">Natural language. Manages your models. Stays in your account.</span>
+    </div>
+    <div id="dash-chat-gate" class="dash-chat-gate" hidden>
+      You are not signed in. <a href="/signup?return=/dashboard">Sign in to chat</a>.
+    </div>
+    <div id="dash-chat-body">
+      <div class="dash-chat-row">
+        <textarea
+          id="dash-chat-input"
+          class="dash-chat-input"
+          rows="1"
+          aria-label="Ask kolm"
+          placeholder='type a prompt, e.g. "show my last 5 compiles" or "compile a phi redactor"'></textarea>
+        <button type="button" id="dash-chat-send" class="dash-chat-send">Send</button>
+      </div>
+      <div class="dash-chat-actions">
+        <a id="dash-chat-open" class="dash-chat-link" href="/ask">Open /ask</a>
+        <button type="button" id="dash-chat-clear" class="dash-chat-clear" hidden>Clear</button>
+        <span class="dash-chat-hint"><span class="kbd">Ctrl</span> or <span class="kbd">Cmd</span> + <span class="kbd">Enter</span> sends</span>
+      </div>
+      <div id="dash-chat-out" class="dash-chat-out" role="log" aria-live="polite" aria-atomic="false"></div>
+    </div>
+  </section>
+
+  <script>
+  (function(){
+    // -------- dash-chat dock: embedded NL surface over POST /v1/assistant.
+    // Same key-read pattern as /ask and /train (4-alias fallback). Cookie auth
+    // also works because credentials:'include' is set on every call.
+    var KEY_NAMES = ['kolm_api_key', 'apiKey', 'recipeApiKey', 'ks_api_key'];
+    function readKey(){
+      for (var i = 0; i < KEY_NAMES.length; i++) {
+        try { var v = localStorage.getItem(KEY_NAMES[i]); if (v && /^ks_[0-9a-f]{32}$/.test(v)) return v; } catch (_) {}
+      }
+      return null;
+    }
+
+    var STORE_KEY = 'kolm-dash-chat-v1';
+    var MAX_PERSISTED = 20;
+    var MAX_VISIBLE = 6;
+
+    var gateEl = document.getElementById('dash-chat-gate');
+    var bodyEl = document.getElementById('dash-chat-body');
+    var inputEl = document.getElementById('dash-chat-input');
+    var sendEl = document.getElementById('dash-chat-send');
+    var openEl = document.getElementById('dash-chat-open');
+    var clearEl = document.getElementById('dash-chat-clear');
+    var outEl = document.getElementById('dash-chat-out');
+
+    // -------- persistence --------
+    function loadHistory(){
+      try {
+        var raw = localStorage.getItem(STORE_KEY);
+        if (!raw) return [];
+        var arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch (_) { return []; }
+    }
+    function saveHistory(turns){
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(turns.slice(-MAX_PERSISTED))); } catch (_) {}
+    }
+    function clearHistory(){
+      try { localStorage.removeItem(STORE_KEY); } catch (_) {}
+    }
+
+    var history = loadHistory();
+
+    function escapeHtml(s){
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // -------- rendering --------
+    function renderHistory(){
+      outEl.innerHTML = '';
+      var visible = history.slice(-MAX_VISIBLE);
+      visible.forEach(function(t){ renderTurn(t, /*persist*/ false); });
+      clearEl.hidden = history.length === 0;
+      outEl.scrollTop = outEl.scrollHeight;
+    }
+
+    function renderTurn(turn, persist){
+      var t = document.createElement('div');
+      t.className = 'dash-chat-turn ' + (turn.role === 'user' ? 'user' : 'kolm');
+      t.dataset.turnId = turn.id || String(Date.now());
+
+      var role = document.createElement('div');
+      role.className = 'dash-chat-role';
+      role.textContent = turn.role === 'user' ? 'you' : 'kolm';
+      t.appendChild(role);
+
+      var text = document.createElement('div');
+      text.className = 'dash-chat-text';
+      text.textContent = turn.text || '';
+      t.appendChild(text);
+
+      if (turn.stages && turn.stages.length) {
+        var stages = document.createElement('div');
+        stages.className = 'dash-chat-stages';
+        turn.stages.forEach(function(name){
+          var pill = document.createElement('span');
+          pill.className = 'dash-chat-pill ok';
+          pill.textContent = name;
+          stages.appendChild(pill);
+        });
+        t.appendChild(stages);
+      }
+
+      if (turn.card) {
+        var card = document.createElement('div');
+        card.className = 'dash-chat-card';
+        card.innerHTML = turn.card;
+        t.appendChild(card);
+      }
+
+      if (turn.nextSteps && turn.nextSteps.length) {
+        var n = document.createElement('div');
+        n.className = 'dash-chat-next';
+        turn.nextSteps.forEach(function(step){
+          var row = document.createElement('div');
+          if (step.href) {
+            row.innerHTML = '&rarr; <a href="' + escapeHtml(step.href) + '"' +
+              (/^https?:/.test(step.href) ? ' target="_blank" rel="noopener"' : '') +
+              '>' + escapeHtml(step.label) + '</a>';
+          } else {
+            row.textContent = '→ ' + (step.label || '');
+          }
+          n.appendChild(row);
+        });
+        t.appendChild(n);
+      }
+
+      outEl.appendChild(t);
+
+      // Trim DOM to last MAX_VISIBLE turns.
+      while (outEl.children.length > MAX_VISIBLE) {
+        outEl.removeChild(outEl.firstChild);
+      }
+      outEl.scrollTop = outEl.scrollHeight;
+
+      if (persist) {
+        history.push(turn);
+        saveHistory(history);
+        clearEl.hidden = false;
+      }
+      return t;
+    }
+
+    function appendTurn(role, text, opts){
+      opts = opts || {};
+      var turn = {
+        id: String(Date.now()) + '-' + Math.random().toString(36).slice(2, 6),
+        role: role,
+        text: text || '',
+        nextSteps: opts.nextSteps || null,
+        card: opts.card || null,
+        stages: opts.stages || null
+      };
+      renderTurn(turn, /*persist*/ true);
+      return turn;
+    }
+
+    function updateTurnText(turnId, text){
+      var node = outEl.querySelector('[data-turn-id="' + turnId + '"] .dash-chat-text');
+      if (node) node.textContent = text;
+      // Also update history.
+      for (var i = history.length - 1; i >= 0; i--) {
+        if (history[i].id === turnId) { history[i].text = text; break; }
+      }
+      saveHistory(history);
+    }
+
+    function updateTurnStages(turnId, names){
+      var turnEl = outEl.querySelector('[data-turn-id="' + turnId + '"]');
+      if (!turnEl) return;
+      var stagesEl = turnEl.querySelector('.dash-chat-stages');
+      if (!stagesEl) {
+        stagesEl = document.createElement('div');
+        stagesEl.className = 'dash-chat-stages';
+        turnEl.appendChild(stagesEl);
+      }
+      var seen = {};
+      Array.prototype.forEach.call(stagesEl.querySelectorAll('.dash-chat-pill'), function(p){ seen[p.textContent] = true; });
+      names.forEach(function(name){
+        if (seen[name]) return;
+        var pill = document.createElement('span');
+        pill.className = 'dash-chat-pill ok';
+        pill.textContent = name;
+        stagesEl.appendChild(pill);
+      });
+      // Update history.
+      for (var i = history.length - 1; i >= 0; i--) {
+        if (history[i].id === turnId) {
+          history[i].stages = (history[i].stages || []).concat(names.filter(function(n){ return !seen[n]; }));
+          break;
+        }
+      }
+      saveHistory(history);
+    }
+
+    function setTurnNextSteps(turnId, steps){
+      var turnEl = outEl.querySelector('[data-turn-id="' + turnId + '"]');
+      if (!turnEl) return;
+      var existing = turnEl.querySelector('.dash-chat-next');
+      if (existing) existing.remove();
+      if (!steps || !steps.length) return;
+      var n = document.createElement('div');
+      n.className = 'dash-chat-next';
+      steps.forEach(function(step){
+        var row = document.createElement('div');
+        if (step.href) {
+          row.innerHTML = '&rarr; <a href="' + escapeHtml(step.href) + '"' +
+            (/^https?:/.test(step.href) ? ' target="_blank" rel="noopener"' : '') +
+            '>' + escapeHtml(step.label) + '</a>';
+        } else {
+          row.textContent = '→ ' + (step.label || '');
+        }
+        n.appendChild(row);
+      });
+      turnEl.appendChild(n);
+      // Update history.
+      for (var i = history.length - 1; i >= 0; i--) {
+        if (history[i].id === turnId) { history[i].nextSteps = steps; break; }
+      }
+      saveHistory(history);
+    }
+
+    // -------- data card rendering for known intents --------
+    function buildDataCard(intent, data){
+      if (!data) return null;
+      if (intent === 'compile' && data.job_id) {
+        var href = data.poll || ('/compile?job=' + encodeURIComponent(data.job_id));
+        return 'Job kicked off: <b>' + escapeHtml(data.job_id) + '</b><br>' +
+               '<a href="' + escapeHtml(href) + '">View job &rarr;</a>';
+      }
+      if (intent === 'list' && Array.isArray(data.items) && data.items.length) {
+        var lines = data.items.slice(0, 6).map(function(it){
+          var k = (typeof it.k_score === 'number') ? ' K=' + it.k_score.toFixed(2) : '';
+          return escapeHtml(it.name || it.id || '?') + k;
+        }).join('<br>');
+        return lines + (data.items.length > 6 ? '<br><b>+ ' + (data.items.length - 6) + ' more</b>' : '');
+      }
+      if (intent === 'install' && data.command) {
+        return '<b>' + escapeHtml(data.command) + '</b>';
+      }
+      if (intent === 'upgrade' && data.billing_url) {
+        return '<a href="' + escapeHtml(data.billing_url) + '" target="_blank" rel="noopener">Open billing &rarr;</a>';
+      }
+      if (intent === 'usage' && (typeof data.used === 'number' || typeof data.quota === 'number')) {
+        var used = data.used != null ? data.used : '?';
+        var quota = data.quota != null ? data.quota : '?';
+        return 'Usage: <b>' + escapeHtml(used) + ' / ' + escapeHtml(quota) + '</b>';
+      }
+      if (intent === 'status' && data.plan) {
+        return 'Plan: <b>' + escapeHtml(data.plan) + '</b>' +
+               (data.tenant ? '<br>Tenant: ' + escapeHtml(data.tenant) : '');
+      }
+      return null;
+    }
+
+    // -------- compile polling --------
+    var polling = false;
+    var pollTimer = null;
+    var seenStages = {};
+
+    function stopPolling(){ polling = false; if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; } }
+
+    function pollCompileJob(jobId, key, turnId){
+      if (!polling) return;
+      var headers = { 'Accept': 'application/json' };
+      if (key) headers['Authorization'] = 'Bearer ' + key;
+      fetch('/v1/compile/' + encodeURIComponent(jobId), {
+        method: 'GET', headers: headers, credentials: 'include'
+      }).then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(body){
+          return { ok: res.ok, status: res.status, body: body };
+        });
+      }).then(function(r){
+        if (!polling) return;
+        if (r.status === 401 || r.status === 403) { stopPolling(); return handleAuthFail(); }
+        if (r.status === 429) { stopPolling(); return handleQuotaFail(); }
+        if (!r.ok) {
+          pollTimer = setTimeout(function(){ pollCompileJob(jobId, key, turnId); }, 1600);
+          return;
+        }
+        var j = r.body || {};
+        var newNames = [];
+        if (Array.isArray(j.stages)) {
+          for (var i = 0; i < j.stages.length; i++) {
+            var s = j.stages[i];
+            var k = (s.name || '') + '@' + (s.at || i);
+            if (!seenStages[k]) { seenStages[k] = true; newNames.push(s.name); }
+          }
+        }
+        if (newNames.length) updateTurnStages(turnId, newNames);
+
+        if (j.status === 'completed') {
+          stopPolling();
+          var kStr = (typeof j.k_score === 'number') ? j.k_score.toFixed(4) : '-';
+          var artifactUrl = j.artifact_url || ('/v1/compile/' + jobId + '/.kolm');
+          updateTurnText(turnId, 'Done. K-score ' + kStr + '. Artifact ready.');
+          setTurnNextSteps(turnId, [
+            { label: 'Download .kolm', href: artifactUrl },
+            { label: 'Verify in browser', href: '/verify-prod' },
+            { label: 'Open job', href: '/compile?job=' + encodeURIComponent(jobId) }
+          ]);
+          enableSend();
+        } else if (j.status === 'failed') {
+          stopPolling();
+          var why = j.error || 'unknown error';
+          updateTurnText(turnId, 'Compile failed: ' + why);
+          setTurnNextSteps(turnId, [
+            { label: 'Edit by hand', href: '/train' },
+            { label: 'Open /ask for more context', href: '/ask' }
+          ]);
+          enableSend();
+        } else {
+          pollTimer = setTimeout(function(){ pollCompileJob(jobId, key, turnId); }, 800);
+        }
+      }).catch(function(){
+        if (!polling) return;
+        pollTimer = setTimeout(function(){ pollCompileJob(jobId, key, turnId); }, 2000);
+      });
+    }
+
+    // -------- send / fail handlers --------
+    function disableSend(){ sendEl.disabled = true; sendEl.textContent = 'Sending'; }
+    function enableSend(){ sendEl.disabled = false; sendEl.textContent = 'Send'; }
+
+    function handleAuthFail(){
+      appendTurn('kolm', 'Your API key was rejected. Sign in again to keep going.', {
+        nextSteps: [ { label: 'Sign in', href: '/signup?return=/dashboard' } ]
+      });
+      enableSend();
+    }
+    function handleQuotaFail(){
+      appendTurn('kolm', 'Compile quota used for this period. New builds resume next cycle or after an upgrade.', {
+        nextSteps: [
+          { label: 'View plans', href: '/pricing' },
+          { label: 'Account usage', href: '/account' }
+        ]
+      });
+      enableSend();
+    }
+    function handleServerFail(detail){
+      appendTurn('kolm', 'kolm.ai had a hiccup. Try again in a minute.' + (detail ? ' (' + detail + ')' : ''), {
+        nextSteps: [ { label: 'Retry', href: '#' } ]
+      });
+      enableSend();
+    }
+
+    function callAssistant(prompt, key){
+      var headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+      if (key) headers['Authorization'] = 'Bearer ' + key;
+      return fetch('/v1/assistant', {
+        method: 'POST',
+        headers: headers,
+        credentials: 'include',
+        body: JSON.stringify({ prompt: prompt })
+      }).then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(body){
+          return { ok: res.ok, status: res.status, body: body };
+        });
+      });
+    }
+
+    function handleSend(){
+      var prompt = (inputEl.value || '').trim();
+      if (!prompt) return;
+      var key = readKey();
+      // Note: cookie auth also works server-side via credentials:'include',
+      // so we proceed even without a localStorage key. 401 redirects.
+      appendTurn('user', prompt);
+      inputEl.value = '';
+      autoresize();
+      disableSend();
+      callAssistant(prompt, key).then(function(r){
+        if (r.status === 401 || r.status === 403) return handleAuthFail();
+        if (r.status === 429) return handleQuotaFail();
+        if (r.status >= 500) return handleServerFail('POST /v1/assistant returned ' + r.status);
+        var b = r.body || {};
+        if (!r.ok) return handleServerFail((b && b.error) ? b.error : ('status ' + r.status));
+
+        var intent = b.intent || 'help';
+        var narration = b.narration || 'OK.';
+        var data = b.data || {};
+        var nextSteps = Array.isArray(b.next_steps) ? b.next_steps : null;
+        var card = buildDataCard(intent, data);
+
+        // Compile intent with job_id: poll the job and stream stages.
+        if (intent === 'compile' && data.job_id) {
+          var turn = appendTurn('kolm',
+            narration + ' Job ' + data.job_id + '. Watching ' + (data.poll || ('/v1/compile/' + data.job_id)) + '.',
+            { card: card, nextSteps: nextSteps, stages: ['recall.start'] }
+          );
+          seenStages = { 'recall.start@init': true };
+          // If server already finished synchronously, surface artifact immediately.
+          if (data.status === 'completed' && data.artifact_url) {
+            updateTurnText(turn.id, 'Done. K-score ' +
+              (typeof data.k_score === 'number' ? data.k_score.toFixed(4) : '-') + '. Artifact ready.');
+            setTurnNextSteps(turn.id, [
+              { label: 'Download .kolm', href: data.artifact_url },
+              { label: 'Verify in browser', href: '/verify-prod' },
+              { label: 'Open job', href: '/compile?job=' + encodeURIComponent(data.job_id) }
+            ]);
+            enableSend();
+          } else {
+            polling = true;
+            pollCompileJob(data.job_id, key, turn.id);
+          }
+          return;
+        }
+
+        appendTurn('kolm', narration, { card: card, nextSteps: nextSteps });
+        enableSend();
+      }).catch(function(){
+        handleServerFail('network error');
+      });
+    }
+
+    // -------- input UX --------
+    function autoresize(){
+      inputEl.style.height = 'auto';
+      inputEl.style.height = Math.min(140, inputEl.scrollHeight) + 'px';
+    }
+    inputEl.addEventListener('input', function(){
+      autoresize();
+      // Live-update /ask deep-link with current prompt so opening /ask carries
+      // the in-progress text over without the user having to retype.
+      var v = inputEl.value.trim();
+      openEl.href = v ? ('/ask?prompt=' + encodeURIComponent(v.slice(0, 500))) : '/ask';
+    });
+    inputEl.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+    sendEl.addEventListener('click', handleSend);
+    clearEl.addEventListener('click', function(){
+      history = [];
+      clearHistory();
+      outEl.innerHTML = '';
+      clearEl.hidden = true;
+    });
+
+    // -------- init: auth-gate or render history --------
+    function init(){
+      var key = readKey();
+      // We let cookie-only sessions through. The assistant call will 401 if
+      // neither cookie nor key is valid, and we surface the sign-in path.
+      // The hard gate only fires when there is no key AND we can confirm no
+      // session cookie (via a cheap probe on /v1/account).
+      if (!key) {
+        fetch('/v1/account', { credentials: 'include' }).then(function(r){
+          if (r.status === 401 || r.status === 403) {
+            gateEl.hidden = false;
+            bodyEl.hidden = true;
+          }
+        }).catch(function(){ /* network error: leave dock open, send will fail loud */ });
+      }
+      renderHistory();
+      // Greeting on first ever visit.
+      if (history.length === 0) {
+        appendTurn('kolm', 'Hi. I can manage your builds, status, usage, plan, and start compiles from here. Try the prompts below, or open /ask for the full surface.', {
+          nextSteps: [
+            { label: 'show my builds', href: '#' },
+            { label: 'open /ask', href: '/ask' }
+          ]
+        });
+      }
+      autoresize();
+    }
+    init();
+  })();
+  </script>
+
   <section class="dashboard-panel" id="dash-compile" aria-labelledby="dash-compile-h2" style="margin-top:8px">
     <div class="section-head">
       <h2 id="dash-compile-h2">Compile a recipe</h2>
@@ -329,7 +859,7 @@
   }
 
   async function loadAccount() {
-    // Try /v1/account first — works via session cookie (OAuth flow) OR
+    // Try /v1/account first; works via session cookie (OAuth flow) OR
     // localStorage api key. If neither works the call 401s and we redirect.
     try {
       var account = await KS.api('/v1/account');

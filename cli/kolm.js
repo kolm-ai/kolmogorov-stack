@@ -243,6 +243,7 @@ COMMANDS
   doctor                           sanity-check env (config, cloud, docker, project)
   logs [--limit n] [--artifact x]  tail local run history (~/.kolm/logs/runs.jsonl)
   ask "<question>"                 natural-language gateway: status, builds, install, compile, upgrade
+  chat                             interactive natural-language session (airgap-safe)
   config [base|api_key] [value]    inspect or set config
   completion <bash|zsh|fish>       emit a shell completion script for the requested shell
   upgrade                          check for a newer kolm release (does not install)
@@ -291,6 +292,45 @@ EXAMPLES
 
 The server-side intent parser is deterministic and rule-based (never an LLM,
 never your data leaving) and returns a narration + concrete next steps.
+`,
+  chat: `kolm chat - interactive natural-language session.
+
+USAGE
+  kolm chat [--airgap] [--once "<prompt>"] [--json]
+
+DESCRIPTION
+  Open an interactive natural-language session with kolm. Talks to the
+  hosted /v1/assistant rule-based parser when online (deterministic, no LLM,
+  no telemetry). Falls back to a local mirror of the same parser when
+  offline or when --airgap is set, so the chat works on a fully air-gapped
+  machine.
+
+FLAGS
+  --airgap, --offline       force local rule-based parser only, no network
+  --once "<prompt>"         non-interactive single-prompt mode
+  --json                    machine-readable JSON output (with --once)
+
+SLASH COMMANDS (interactive mode)
+  /help                     show this menu
+  /exit, /quit              leave the session
+  /clear                    clear the screen
+  /airgap                   toggle airgap mode mid-session
+
+ENVIRONMENT
+  KOLM_AIRGAP=1             same as --airgap, useful for air-gapped CI
+  KOLM_BASE=https://...     override the assistant endpoint
+
+EXAMPLES
+  kolm chat                          start an interactive session
+  kolm chat --airgap                 force offline mode
+  kolm chat --once "show my builds"  one-shot query and exit
+  echo "compile a phi redactor" | kolm chat --once -  read prompt from stdin
+
+NOTES
+  The local parser handles the same intents as the hosted endpoint: help,
+  status, usage, list, compile, run, tune, install, upgrade, doctor. Heavy
+  intents (compile, run) print the right CLI command for you to execute
+  locally; light intents (status, list, help) return immediately.
 `,
   login: `kolm login - save an API key to ~/.kolm/config.json.
 
@@ -2942,6 +2982,414 @@ async function cmdAsk(args) {
   }
 }
 
+// ---------- natural-language chat (REPL) ----------
+// `kolm chat` opens an interactive natural-language session. Talks to the
+// hosted /v1/assistant rule-based parser when online (deterministic, no LLM,
+// no telemetry), with a local mirror of the same parser when offline or when
+// --airgap is set. The local fallback covers every intent so the REPL stays
+// useful on fully air-gapped machines: it cannot run real cloud compiles,
+// but it tells the user which kolm verb to run and renders the canonical
+// next steps. Reachable from `kolm chat`, `kolm chat --once "<prompt>"`,
+// `echo "<prompt>" | kolm chat --once -` and `KOLM_AIRGAP=1 kolm chat`.
+
+// Mirror of src/assistant.js detectIntent. Pure JS, no I/O, deterministic.
+// Same regex precedence as the server so a given prompt produces the same
+// intent on-box and off-box. Keep these in sync when the server parser
+// changes.
+function chatLc(s) { return String(s == null ? '' : s).toLowerCase(); }
+function chatTrim(s) { return String(s == null ? '' : s).trim(); }
+
+function chatDetectIntent(prompt) {
+  const p = chatLc(prompt);
+  if (!p) return 'help';
+  if (/^(help|hi|hello|hey|what can you do|what do you do)\b/.test(p)) return 'help';
+  if (/\b(doctor|debug|why( is| 's|s) it broken|whats wrong|health check)\b/.test(p)) return 'doctor';
+  if (/\b(usage|how much (have i|did i)|left in (my )?quota|consumed|burning)\b/.test(p)) return 'usage';
+  if (/\b(status|account|where am i|am i on|what plan)\b/.test(p)) return 'status';
+  if (/\b(list|show|all my|what (have i|did i) (build|compile|ship))\b/.test(p)) return 'list';
+  if (/\b(upgrade|go pro|move to pro|switch to|change plan)\b/.test(p)) return 'upgrade';
+  if (/\b(install|wire up|hook up|claude code|cursor|continue|cline)\b/.test(p)) return 'install';
+  if (/\b(tune|train|evolve|fine ?tune|fine ?tuning)\b/.test(p)) return 'tune';
+  if (/\b(run|execute|invoke|call)\b/.test(p)) return 'run';
+  if (/\b(compile|build|make|create|new)\b/.test(p)) return 'compile';
+  return 'help';
+}
+
+function chatExtractTask(prompt) {
+  return chatTrim(prompt)
+    .replace(/^(please\s+)?(compile|build|make|create|new)\s+(me\s+)?(a\s+|an\s+)?(recipe\s+|concept\s+|artifact\s+|kolm\s+)?(that\s+|to\s+|for\s+|which\s+)?/i, '')
+    .replace(/^[a-z\- ]{1,20}\s+to\s+/i, '');
+}
+
+function chatExtractTargetPlan(prompt) {
+  const p = chatLc(prompt);
+  const plans = ['enterprise', 'business', 'teams', 'pro', 'starter'];
+  for (let i = 0; i < plans.length; i++) {
+    if (p.indexOf(plans[i]) >= 0) return plans[i];
+  }
+  return 'pro';
+}
+
+function chatExtractHarness(prompt) {
+  const p = chatLc(prompt);
+  const list = ['claude-code', 'claude code', 'cursor', 'continue', 'cline'];
+  for (let i = 0; i < list.length; i++) {
+    if (p.indexOf(list[i]) >= 0) return list[i].replace(' ', '-');
+  }
+  return null;
+}
+
+function chatExtractConcept(prompt) {
+  const tokens = chatTrim(prompt).split(/\s+/);
+  const last = tokens[tokens.length - 1];
+  if (!last) return null;
+  if (/^cpt_/.test(last)) return last;
+  if (last.length >= 3 && last.length <= 64) return last;
+  return null;
+}
+
+// Pure rule-based local mirror of /v1/assistant. Returns the same
+// { ok, intent, narration, data?, next_steps? } shape the server returns,
+// so renderChatReply works identically for both paths. Heavy intents
+// (compile, run) surface the right local CLI command rather than firing
+// any network call.
+function localAssistantParse(prompt) {
+  const intent = chatDetectIntent(prompt);
+  switch (intent) {
+    case 'help':
+      return {
+        ok: true,
+        intent: 'help',
+        narration: "I can help you compile, run, list, train, install, upgrade, or check status. Try 'compile a phi redactor' or 'show my last 3 compiles'.",
+        next_steps: [
+          { label: 'status',  prompt: 'show my status' },
+          { label: 'list',    prompt: 'show my builds' },
+          { label: 'compile', prompt: 'compile a recipe that redacts secrets' },
+          { label: 'install', prompt: 'install claude-code' },
+          { label: 'tune',    prompt: 'start tune loop' },
+          { label: 'upgrade', prompt: 'upgrade to pro' },
+        ],
+      };
+    case 'status':
+    case 'usage':
+      return {
+        ok: true,
+        intent: intent,
+        narration: "Run 'kolm whoami' for account snapshot (offline-safe). Online: I'd pull live plan + quota.",
+        next_steps: [
+          { label: 'whoami',  command: 'kolm whoami' },
+          { label: 'doctor',  command: 'kolm doctor' },
+        ],
+      };
+    case 'list':
+      return {
+        ok: true,
+        intent: 'list',
+        narration: "Run 'kolm artifacts list' or check ~/.kolm/recipes/ for local artifacts.",
+        next_steps: [
+          { label: 'list',    command: 'kolm artifacts list' },
+          { label: 'inspect', command: 'kolm inspect <art.kolm>' },
+        ],
+      };
+    case 'compile': {
+      const task = chatExtractTask(prompt);
+      const tail = task && task.length >= 4 ? ' "' + task + '"' : ' "<describe the recipe>"';
+      return {
+        ok: true,
+        intent: 'compile',
+        narration: "Online: I'd kick off a compile job. Offline: run 'kolm compile <task>' to start one locally.",
+        data: { task: task || null, command: 'kolm compile' + tail },
+        next_steps: [
+          { label: 'compile',  command: 'kolm compile' + tail },
+          { label: 'new spec', command: 'kolm new <name> --from blank' },
+          { label: 'verify',   command: 'kolm verify <art.kolm> --binder report.html' },
+        ],
+      };
+    }
+    case 'run': {
+      const cid = chatExtractConcept(prompt);
+      const tail = cid ? ' ' + cid + '.kolm "<input>"' : ' <artifact>.kolm "<input>"';
+      return {
+        ok: true,
+        intent: 'run',
+        narration: "Run 'kolm run <artifact>.kolm \"<input>\"' to invoke a compiled artifact locally.",
+        data: { concept_id: cid, command: 'kolm run' + tail },
+        next_steps: [
+          { label: 'run',     command: 'kolm run' + tail },
+          { label: 'list',    command: 'kolm artifacts list' },
+        ],
+      };
+    }
+    case 'tune':
+    case 'evolve':
+      return {
+        ok: true,
+        intent: 'tune',
+        narration: "Run 'kolm train --spec <file>.spec.json' to start a local distill loop.",
+        next_steps: [
+          { label: 'train',     command: 'kolm train --spec <file>.spec.json' },
+          { label: 'tune init', command: 'kolm tune init' },
+          { label: 'capture',   command: 'kolm tune capture-on' },
+          { label: 'step',      command: 'kolm tune step --airgap' },
+        ],
+      };
+    case 'install': {
+      const h = chatExtractHarness(prompt);
+      const target = h || '<harness>';
+      return {
+        ok: true,
+        intent: 'install',
+        narration: "Run 'kolm install claude-code' (or cursor / continue / cline) to wire kolm into your IDE.",
+        data: { harness: h, command: 'kolm install ' + target + ' --apply' },
+        next_steps: [
+          { label: 'claude-code', command: 'kolm install claude-code --apply' },
+          { label: 'cursor',      command: 'kolm install cursor --apply' },
+          { label: 'continue',    command: 'kolm install continue --apply' },
+          { label: 'cline',       command: 'kolm install cline --apply' },
+        ],
+      };
+    }
+    case 'upgrade': {
+      const target = chatExtractTargetPlan(prompt);
+      return {
+        ok: true,
+        intent: 'upgrade',
+        narration: "Run 'kolm plan --target pro' for an upgrade link. Plans: starter $19 . pro $99 . teams $299 . business $999.",
+        data: { target: target, command: 'kolm plan --target ' + target },
+        next_steps: [
+          { label: 'plan',    command: 'kolm plan --target ' + target },
+          { label: 'whoami',  command: 'kolm whoami' },
+        ],
+      };
+    }
+    case 'doctor':
+      return {
+        ok: true,
+        intent: 'doctor',
+        narration: "Run 'kolm doctor' for a config + connectivity snapshot.",
+        next_steps: [
+          { label: 'doctor', command: 'kolm doctor' },
+          { label: 'config', command: 'kolm config' },
+        ],
+      };
+    default:
+      return {
+        ok: true,
+        intent: 'help',
+        narration: "I am not sure what you meant. Try 'help'.",
+      };
+  }
+}
+
+// Try the hosted assistant first. On network error or when --airgap is set,
+// fall back to the local parser. Both paths return the same shape.
+async function sendChat(c, prompt, opts) {
+  const airgap = !!(opts && opts.airgap);
+  if (airgap) {
+    const r = localAssistantParse(prompt);
+    r._source = 'local';
+    return r;
+  }
+  if (!c.api_key) {
+    // No key, no network round-trip possible. Treat as airgap and tag it.
+    const r = localAssistantParse(prompt);
+    r._source = 'local';
+    r._note = 'not signed in. run: kolm login   (offline reply shown)';
+    return r;
+  }
+  try {
+    const r = await api(c, 'POST', '/v1/assistant', { prompt: prompt });
+    r._source = 'cloud';
+    return r;
+  } catch (e) {
+    // Auth errors are not network errors. Surface them so the caller sees
+    // the same hint cmdAsk surfaces. Network / DNS / fetch errors fall
+    // back to the offline mirror.
+    if (e && (e.status === 401 || e.status === 403)) {
+      return {
+        ok: false,
+        intent: 'help',
+        narration: 'auth_required. run: kolm login',
+        _source: 'cloud',
+      };
+    }
+    const r = localAssistantParse(prompt);
+    r._source = 'local';
+    r._note = 'network unreachable (' + (e && e.message || 'error') + '). offline reply shown.';
+    return r;
+  }
+}
+
+function renderChatReply(reply) {
+  if (!reply) {
+    console.log(color('31', 'kolm > (no reply)'));
+    return;
+  }
+  const tag = reply._source === 'local' ? color('2', '[airgap] ') : '';
+  const head = color('36', 'kolm') + ' ' + color('2', '>') + ' ';
+  const narration = reply.narration || (reply.ok === false ? '(no narration)' : '');
+  // The narration may contain newlines (doctor case). Indent continuation
+  // lines so they line up under the bubble head.
+  const lines = String(narration).split('\n');
+  console.log(tag + head + lines[0]);
+  for (let i = 1; i < lines.length; i++) {
+    console.log('       ' + lines[i]);
+  }
+  // Render a small structured card when the server (or local) returns a
+  // job/artifact/command we can show in 2-4 lines.
+  const d = reply.data || {};
+  const card = [];
+  if (d.job_id) card.push('  job:      ' + d.job_id);
+  if (d.status) card.push('  status:   ' + d.status);
+  if (d.k_score != null) card.push('  k_score:  ' + d.k_score);
+  if (d.artifact_url) card.push('  artifact: ' + d.artifact_url);
+  if (d.poll && !d.job_id) card.push('  poll:     ' + d.poll);
+  if (d.command && !card.length) card.push('  ' + d.command);
+  if (card.length) {
+    console.log('');
+    for (let i = 0; i < card.length; i++) console.log(card[i]);
+  }
+  if (Array.isArray(d.items) && d.items.length) {
+    console.log('');
+    const rows = d.items.slice(0, 6);
+    for (let i = 0; i < rows.length; i++) {
+      const it = rows[i];
+      const id = String(it.id || '').padEnd(24);
+      const name = String(it.name || '').padEnd(28);
+      const k = it.k_score != null ? 'K=' + it.k_score : '';
+      console.log('  ' + id + ' ' + name + ' ' + k);
+    }
+  }
+  if (Array.isArray(reply.next_steps) && reply.next_steps.length) {
+    console.log('');
+    const steps = reply.next_steps.slice(0, 8);
+    for (let i = 0; i < steps.length; i++) {
+      const s = steps[i];
+      const tail = s.command ? s.command
+                : s.prompt  ? 'kolm ask "' + s.prompt + '"'
+                : s.href    ? s.href
+                : '';
+      const label = String(s.label || '').padEnd(12);
+      console.log('  ' + color('2', '->') + ' ' + label + ' ' + tail);
+    }
+  }
+  if (reply._note) {
+    console.log('');
+    console.log(color('33', '  note: ' + reply._note));
+  }
+}
+
+function printChatHelp() {
+  console.log('');
+  console.log(color('1', 'slash commands'));
+  console.log('  /help                show this menu');
+  console.log('  /exit, /quit         leave the session');
+  console.log('  /clear               clear the screen');
+  console.log('  /airgap              toggle airgap mode mid-session');
+  console.log('');
+  console.log(color('1', 'examples'));
+  console.log("  show my status");
+  console.log("  show my last 3 builds");
+  console.log("  compile a recipe that redacts phi");
+  console.log("  install claude-code");
+  console.log("  upgrade to pro");
+  console.log('');
+}
+
+function readStdinSync() {
+  // Drain stdin synchronously for `--once -`. Used so a piped prompt
+  // (e.g. `echo "..." | kolm chat --once -`) reads cleanly without the
+  // interactive readline loop ever starting.
+  try {
+    const buf = fs.readFileSync(0, 'utf8');
+    return chatTrim(buf);
+  } catch (_e) {
+    return '';
+  }
+}
+
+async function cmdChat(args) {
+  args = args || [];
+  if (args.indexOf('--help') >= 0 || args.indexOf('-h') >= 0) {
+    console.log(HELP.chat);
+    process.exit(EXIT.OK);
+  }
+
+  let onceMode = false;
+  let oncePrompt = null;
+  let jsonMode = false;
+  let airgapMode = process.env.KOLM_AIRGAP === '1';
+  let i = 0;
+  while (i < args.length) {
+    const a = args[i];
+    if (a === '--once') { onceMode = true; oncePrompt = args[i + 1] != null ? args[i + 1] : ''; i += 2; continue; }
+    if (a === '--json') { jsonMode = true; i++; continue; }
+    if (a === '--airgap' || a === '--offline') { airgapMode = true; i++; continue; }
+    if (a === '--online') { airgapMode = false; i++; continue; }
+    i++;
+  }
+
+  const c = loadConfig();
+
+  if (onceMode) {
+    let prompt = String(oncePrompt == null ? '' : oncePrompt).replace(/^["']|["']$/g, '');
+    if (prompt === '-' || prompt === '') {
+      prompt = readStdinSync();
+    }
+    const reply = await sendChat(c, prompt, { airgap: airgapMode });
+    if (jsonMode) {
+      console.log(JSON.stringify(reply));
+    } else {
+      renderChatReply(reply);
+    }
+    process.exit(reply && reply.ok === false ? EXIT.EXECUTION : EXIT.OK);
+  }
+
+  const readline = require('readline');
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
+
+  console.log(color('2', 'kolm chat') + ' . interactive assistant');
+  console.log(color('2', "type a prompt, " + color('1', '/help') + ' for commands, ' + color('1', '/exit') + ' or Ctrl+C to quit'));
+  if (airgapMode) console.log(color('2', 'mode: ' + color('1', 'airgapped') + ' . local rule-based parser only'));
+  if (!c.api_key && !airgapMode) console.log(color('33', 'no api key. replies will use the offline rule-based parser. run: kolm login'));
+  console.log('');
+
+  const prompt = function () { rl.question(color('32', 'you ') + color('2', '> '), onLine); };
+
+  const onLine = async function (line) {
+    const input = chatTrim(line);
+    if (!input) { prompt(); return; }
+
+    if (input === '/exit' || input === '/quit') { rl.close(); return; }
+    if (input === '/help') { printChatHelp(); prompt(); return; }
+    if (input === '/clear') { process.stdout.write('\x1b[2J\x1b[H'); prompt(); return; }
+    if (input === '/airgap') {
+      airgapMode = !airgapMode;
+      console.log(color('2', 'airgap mode: ' + (airgapMode ? 'on' : 'off')));
+      prompt();
+      return;
+    }
+    if (input === '/online') {
+      airgapMode = false;
+      console.log(color('2', 'airgap mode: off'));
+      prompt();
+      return;
+    }
+
+    try {
+      const reply = await sendChat(c, input, { airgap: airgapMode });
+      renderChatReply(reply);
+    } catch (e) {
+      console.log(color('31', 'error: ') + (e && e.message || e));
+    }
+    console.log('');
+    prompt();
+  };
+
+  rl.on('close', function () { process.stdout.write('\n' + color('2', 'bye') + '\n'); process.exit(EXIT.OK); });
+  prompt();
+}
+
 // ---------- kolm team ----------
 // Multi-tenant team management against /v1/teams/*.
 function flag(args, name) {
@@ -3765,7 +4213,7 @@ const COMPLETION_VERBS = [
   'init', 'signup', 'login', 'whoami', 'new', 'compile', 'train', 'run', 'eval', 'benchmark', 'bench',
   'score', 'inspect', 'diff', 'verify', 'serve', 'publish', 'capture', 'labels', 'distill',
   'config', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
-  'compute', 'doctor', 'logs', 'ask', 'version', 'help', 'completion', 'upgrade', 'update',
+  'compute', 'doctor', 'logs', 'ask', 'chat', 'version', 'help', 'completion', 'upgrade', 'update',
   'models', 'gpu', 'export',
 ];
 const COMPLETION_SUBS = {
@@ -4851,6 +5299,7 @@ async function main() {
       case 'doctor':   await withErrorContext('doctor',   () => cmdDoctor(rest)); break;
       case 'logs':     await withErrorContext('logs',     () => cmdLogs(rest)); break;
       case 'ask':      await withErrorContext('ask',      () => cmdAsk(rest)); break;
+      case 'chat':     await withErrorContext('chat',     () => cmdChat(rest)); break;
       case 'completion': await withErrorContext('completion', () => cmdCompletion(rest)); break;
       case 'upgrade':  await withErrorContext('upgrade',  () => cmdUpgrade(rest)); break;
       case 'update':
