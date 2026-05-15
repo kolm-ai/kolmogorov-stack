@@ -101,6 +101,32 @@
   .cmdbox pre .arg{color:#10b981}
   .cmdbox pre .kw{color:#b0bbff}
 
+  section.flow{padding:8px 0 28px}
+  .flow-head{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 12px;gap:18px;flex-wrap:wrap}
+  .flow-head h2{margin:0;font-size:clamp(20px,2.2vw,26px);line-height:1.2;font-weight:500;color:var(--ink)}
+  .flow-head .flow-sub{font-size:13.5px;color:var(--ink-mute);max-width:54ch}
+  .flow-head button.copy-all{background:transparent;border:1px solid var(--line-strong);color:var(--ink-mute);font-family:var(--mono);font-size:12px;border-radius:6px;padding:7px 14px;cursor:pointer;transition:color 120ms,border-color 120ms;white-space:nowrap}
+  .flow-head button.copy-all:hover{color:#10b981;border-color:#10b981}
+  .steps{display:grid;grid-template-columns:1fr;gap:14px}
+  .step{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .step-head{display:flex;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line)}
+  .step-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(16,185,129,0.12);color:#10b981;font-family:var(--mono);font-size:12px;border:1px solid rgba(16,185,129,0.4);flex-shrink:0}
+  .step-title{font-size:15px;color:var(--ink);font-weight:500}
+  .step-note{margin-left:auto;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em}
+  .step-body{padding:16px 22px 18px}
+  .step-body p{margin:0 0 10px;font-size:13.5px;color:var(--ink-mute);line-height:1.6}
+  .step-body p:last-child{margin-bottom:0}
+  .step-body p b{color:var(--ink);font-weight:500}
+  .step-body p a{color:#10b981;text-decoration:underline;text-decoration-color:rgba(16,185,129,0.4);text-underline-offset:3px}
+  .step-body p a:hover{text-decoration-color:#10b981}
+  .step-cmd{margin:6px 0 10px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--ink);white-space:pre-wrap;word-break:break-word;overflow-x:auto}
+  .step-cmd .com{color:var(--ink-faint)}
+  .step-cmd .arg{color:#10b981}
+  .step-cmd .kw{color:#b0bbff}
+  .step-cmd .str{color:var(--warn)}
+  .toolchain-line{margin-top:8px;font-size:12.5px;color:var(--ink-faint);font-family:var(--mono)}
+  .toolchain-line code{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+
   section.body{padding:36px 0 80px}
   section.body h2{margin:48px 0 14px;font-size:clamp(22px,2.4vw,28px);line-height:1.2;font-weight:500;color:var(--ink)}
   section.body p{margin:0 0 16px;font-size:16px;line-height:1.7;color:var(--ink-mute)}
@@ -236,6 +262,74 @@
   </div>
 </section>
 
+<section class="flow">
+  <div class="wrap">
+    <div class="flow-head">
+      <div>
+        <h2>Transfer flow.</h2>
+        <p class="flow-sub">The four steps below update with your picker selection. Real commands, real toolchains. Run them in order on the source machine, then on the target device.</p>
+      </div>
+      <button type="button" class="copy-all" id="copy-all">Copy all 4 steps</button>
+    </div>
+
+    <div class="steps">
+
+      <div class="step" id="step-1">
+        <div class="step-head">
+          <span class="step-num">1</span>
+          <span class="step-title">Build the export from your <code>.kolm</code>.</span>
+          <span class="step-note">on source machine</span>
+        </div>
+        <div class="step-body">
+          <p>Convert the <code>.kolm</code> artifact into a <b id="s1-backend">gguf</b> file for the picked target. The export embeds the manifest, the quant tier, the K-score on the eval pack, and a SHA-256 of the resulting payload.</p>
+          <pre class="step-cmd" id="s1-cmd">$ kolm export</pre>
+          <p class="toolchain-line">Requires the <b id="s1-toolchain">llama.cpp</b> toolchain. <span id="s1-install"></span></p>
+        </div>
+      </div>
+
+      <div class="step" id="step-2">
+        <div class="step-head">
+          <span class="step-num">2</span>
+          <span class="step-title">Move it to the device.</span>
+          <span class="step-note" id="s2-note">via scp</span>
+        </div>
+        <div class="step-body">
+          <p id="s2-prose">Copy the exported file onto the target box.</p>
+          <pre class="step-cmd" id="s2-cmd">$ scp ./out user@device:~/</pre>
+          <p class="toolchain-line" id="s2-tip">Tip: signed transfer is optional but recommended. See <a href="/airgap">/airgap</a> for sneakernet patterns.</p>
+        </div>
+      </div>
+
+      <div class="step" id="step-3">
+        <div class="step-head">
+          <span class="step-num">3</span>
+          <span class="step-title">Run on the target device.</span>
+          <span class="step-note" id="s3-note">runtime</span>
+        </div>
+        <div class="step-body">
+          <p id="s3-prose">Invoke the runtime that matches the backend. Output goes to stdout. Bind to a local port to wire up an OpenAI-compat client.</p>
+          <pre class="step-cmd" id="s3-cmd">$ run</pre>
+          <p class="toolchain-line" id="s3-alt"></p>
+        </div>
+      </div>
+
+      <div class="step" id="step-4">
+        <div class="step-head">
+          <span class="step-num">4</span>
+          <span class="step-title">Verify the artifact stayed honest.</span>
+          <span class="step-note">optional</span>
+        </div>
+        <div class="step-body">
+          <p>On the source machine, regenerate the binder and compare. Quantization can drop K-score by a fraction of a point. Confirm the drop is within tolerance for your task before procurement signs off.</p>
+          <pre class="step-cmd" id="s4-cmd">$ kolm verify</pre>
+          <p class="toolchain-line">Reviewer-grade evidence: <a href="/verify-prod">/verify-prod</a> accepts the same <code>.kolm</code> in the browser and runs the same six checks.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <section class="body">
   <div class="wrap">
 
@@ -284,6 +378,26 @@
 
     <h2>One command after you pick.</h2>
     <p>The generated command runs end to end against the local Python toolchain (<code>llama.cpp</code> for gguf, <code>mlx-lm</code> for mlx, <code>optimum-cli</code> for onnx, <code>trtllm-build</code> for tensorrt). The <code>--preview</code> flag returns the same forecast as JSON without invoking the toolchain, which is useful in CI or on a box that does not have the converter installed.</p>
+
+    <h2>Per-device quickstarts.</h2>
+    <p>Three devices have full install-and-run quickstarts that go beyond the live picker: hardware-specific toolchain setup, transfer mechanics, runtime sanity checks, and the inevitable Apple/Linux/iOS-specific footnotes.</p>
+    <div class="signpost">
+      <a href="/device-transfer/raspberry-pi-5">
+        <span class="lab">quickstart</span>
+        <span class="v">Raspberry Pi 5 <span class="arrow">&rarr;</span></span>
+        <p>apt + llama.cpp from source on ARM64, scp from the source Mac/Linux box, then <code>llama-cli</code> or <code>llama-server</code>. 4GB vs 8GB realism.</p>
+      </a>
+      <a href="/device-transfer/m3-mac">
+        <span class="lab">quickstart</span>
+        <span class="v">M3 Mac <span class="arrow">&rarr;</span></span>
+        <p>venv + <code>mlx-lm</code>, no transfer (local run), and an <code>mlx_lm.server</code> on :8080. The Apple Silicon unified-memory ceiling explained.</p>
+      </a>
+      <a href="/device-transfer/iphone-15-pro">
+        <span class="lab">quickstart</span>
+        <span class="v">iPhone 15 Pro <span class="arrow">&rarr;</span></span>
+        <p>CoreML export + Xcode bundle + the personal-team vs paid Developer Program paths. Why there is no <code>scp</code> path to a stock iPhone.</p>
+      </a>
+    </div>
 
     <div class="signpost">
       <a href="/research/edge-artifact-sizing">
@@ -402,6 +516,141 @@
 
   var BACKEND_EXT = { gguf: 'gguf', mlx: 'mlx', onnx: 'onnx', coreml: 'mlpackage', tensorrt: 'engine' };
 
+  // Toolchain metadata per backend. Used by Step 1 prose and the install hint.
+  var TOOLCHAIN = {
+    gguf:     { name: 'llama.cpp',    install: 'Install: <code>git clone https://github.com/ggerganov/llama.cpp &amp;&amp; cd llama.cpp &amp;&amp; make</code>.' },
+    mlx:      { name: 'mlx_lm',       install: 'Install: <code>pip install mlx mlx-lm</code>.' },
+    onnx:     { name: 'onnxruntime',  install: 'Install: <code>pip install onnxruntime optimum[exporters]</code>.' },
+    coreml:   { name: 'coremltools',  install: 'Install: <code>pip install coremltools</code>. Bundle through Xcode for on-device.' },
+    tensorrt: { name: 'TensorRT-LLM', install: 'TensorRT-LLM build is involved. See the <a href="https://nvidia.github.io/TensorRT-LLM/" rel="noopener">NVIDIA TensorRT-LLM docs</a>.' }
+  };
+
+  // Per-device transfer recipe. Drives Step 2 prose, Step 3 run line, Step 3 alt.
+  // Each function returns { s2_note, s2_prose, s2_cmd, s2_tip, s3_note, s3_cmd, s3_alt }.
+  // The picker passes the export filename and the backend.
+  function transferRecipe(devKey, outName, backend){
+    var safe = outName.replace(/[^a-z0-9._\-]/gi, '_');
+    var promptStr = '"Summarize this paragraph in one sentence."';
+
+    // STEP 3 templates, keyed by backend.
+    function runLine(b){
+      if (b === 'gguf') {
+        return {
+          cmd: '$ llama-cli -m ' + safe + ' \\\n           -p ' + promptStr + ' \\\n           -n 256 --temp 0.2',
+          alt: 'Or via Ollama: <code>ollama create my-kolm -f Modelfile &amp;&amp; ollama run my-kolm</code>. The Modelfile points <code>FROM</code> at the local <code>' + safe + '</code>.'
+        };
+      }
+      if (b === 'mlx') {
+        var modelDir = safe.replace(/\.mlx$/, '');
+        return {
+          cmd: '$ python -m mlx_lm.generate \\\n           --model ./' + modelDir + ' \\\n           --prompt ' + promptStr + ' \\\n           --max-tokens 256',
+          alt: 'For a server: <code>python -m mlx_lm.server --model ./' + modelDir + ' --port 8080</code> exposes an OpenAI-compat endpoint.'
+        };
+      }
+      if (b === 'onnx') {
+        return {
+          cmd: '$ python - <<\'PY\'\nimport onnxruntime as ort\nsess = ort.InferenceSession("' + safe + '")\n# tokenize input, build inputs dict, then:\nout = sess.run(None, inputs)\nprint(out)\nPY',
+          alt: 'On Android, link the same <code>.onnx</code> against ONNX Runtime Mobile. On Snapdragon X Elite laptops, use the DirectML EP for NPU offload.'
+        };
+      }
+      if (b === 'coreml') {
+        return {
+          cmd: '// In Xcode, add the .mlpackage to your target.\n// Then in Swift:\nlet model = try MyKolmModel(configuration: MLModelConfiguration())\nlet out = try model.prediction(input: input)',
+          alt: 'iOS deployment ships through Xcode and TestFlight or App Store. See the <a href="https://developer.apple.com/documentation/coreml" rel="noopener">Apple CoreML docs</a> for the full app-side wiring.'
+        };
+      }
+      if (b === 'tensorrt') {
+        var engineDir = safe.replace(/\.engine$/, '');
+        return {
+          cmd: '$ trtllm-build --checkpoint_dir ./' + engineDir + '/ckpt \\\n               --output_dir ./' + engineDir + '/engine \\\n               --gemm_plugin float16\n$ trtllm-serve ./' + engineDir + '/engine --port 8000',
+          alt: 'On Jetson AGX, prefer <code>trtllm-serve</code> over <code>llama-cli</code> for sustained-throughput workloads. See the <a href="https://nvidia.github.io/TensorRT-LLM/" rel="noopener">TensorRT-LLM serve guide</a>.'
+        };
+      }
+      return { cmd: '$ run ' + safe, alt: '' };
+    }
+
+    var run = runLine(backend);
+
+    // STEP 2 prose and command per device family.
+    var apple = (devKey === 'm3-pro' || devKey === 'm3-max');
+    var iphone = (devKey === 'iphone-15-pro');
+    var android = (devKey === 'pixel-8');
+    var rtx = (devKey === 'rtx-4090');
+    var steam = (devKey === 'steam-deck');
+
+    if (apple) {
+      return {
+        s2_note: 'on-disk (local Mac)',
+        s2_prose: 'No transfer needed. Apple Silicon runs MLX natively against the local working directory. Keep <code>' + safe + '</code> next to your project.',
+        s2_cmd:  '$ mv ./exports/' + safe + ' ~/models/\n$ ls -lh ~/models/' + safe,
+        s2_tip:  'For a remote Mac (e.g. Mac mini in a closet): use <code>scp ./exports/' + safe + ' user@mac-mini.local:~/models/</code>.',
+        s3_note: 'mlx_lm runtime',
+        s3_cmd:  run.cmd,
+        s3_alt:  run.alt
+      };
+    }
+    if (iphone) {
+      return {
+        s2_note: 'via Xcode bundle',
+        s2_prose: 'CoreML packages ship inside an iOS app bundle. Drag <code>' + safe + '</code> into your Xcode project, then build for device or push to TestFlight. There is no <code>scp</code> path to a stock iPhone.',
+        s2_cmd:  '// In Xcode: Project Navigator > drag ' + safe + ' into the target.\n// Target Membership: check the app target.\n// Build > Run on connected device.',
+        s2_tip:  'Sideload requires a paid Apple Developer account. For a non-Apple path on iOS, see <a href="https://developer.apple.com/documentation/coreml" rel="noopener">Apple CoreML</a>.',
+        s3_note: 'CoreML in-app',
+        s3_cmd:  run.cmd,
+        s3_alt:  run.alt
+      };
+    }
+    if (android) {
+      return {
+        s2_note: 'via adb push',
+        s2_prose: 'Android ships ONNX through ONNX Runtime Mobile inside an app. Push the <code>' + safe + '</code> file into the app sandbox during install, or place it in the assets folder before building.',
+        s2_cmd:  '$ adb push ./exports/' + safe + ' /sdcard/Android/data/com.your.app/files/\n# Or bundle in app/src/main/assets/ and read at runtime.',
+        s2_tip:  'For Pixel 8 Tensor G3 NPU offload, build ONNX Runtime with the QNN EP. <a href="https://onnxruntime.ai/docs/execution-providers/QNN-ExecutionProvider.html" rel="noopener">ORT QNN docs</a>.',
+        s3_note: 'ONNX Runtime',
+        s3_cmd:  run.cmd,
+        s3_alt:  run.alt
+      };
+    }
+    if (rtx) {
+      return {
+        s2_note: 'local copy',
+        s2_prose: 'A 4090 desktop typically is the box you exported from. Move the file into your local model directory.',
+        s2_cmd:  '$ mv ./exports/' + safe + ' ~/models/\n$ ls -lh ~/models/' + safe,
+        s2_tip:  'For a remote workstation, use <code>scp ./exports/' + safe + ' user@workstation.local:~/models/</code>.',
+        s3_note: 'GGUF + CUDA',
+        s3_cmd:  run.cmd,
+        s3_alt:  run.alt + ' Build llama.cpp with <code>make GGML_CUDA=1</code> for full 4090 throughput.'
+      };
+    }
+    if (steam) {
+      return {
+        s2_note: 'local copy or scp',
+        s2_prose: 'Steam Deck runs Linux. Either copy the file directly over network share, or SSH in and pull.',
+        s2_cmd:  '$ scp ./exports/' + safe + ' deck@steamdeck.local:~/models/',
+        s2_tip:  'Enable SSH on the Deck via Desktop Mode first. llama.cpp Vulkan build runs against the RDNA2 iGPU: <code>make GGML_VULKAN=1</code>.',
+        s3_note: 'GGUF + Vulkan',
+        s3_cmd:  run.cmd,
+        s3_alt:  run.alt
+      };
+    }
+
+    // Default SSH-able Linux box (Pi 5, Jetson, Snapdragon X Elite running Linux).
+    var userHost;
+    if (devKey === 'pi5-4' || devKey === 'pi5-8') userHost = 'pi@raspberrypi.local';
+    else if (devKey === 'jetson-orin-nano' || devKey === 'jetson-agx-32' || devKey === 'jetson-agx-64') userHost = 'nvidia@jetson.local';
+    else if (devKey === 'snapdragon-x-elite') userHost = 'user@laptop.local';
+    else userHost = 'user@device.local';
+    return {
+      s2_note: 'via scp',
+      s2_prose: 'The target is SSH-able. Copy the export over the network with <code>scp</code> (or <code>rsync</code> for resumable transfers on large files).',
+      s2_cmd:  '$ scp ./exports/' + safe + ' ' + userHost + ':~/models/\n# resumable alternative:\n$ rsync -avP ./exports/' + safe + ' ' + userHost + ':~/models/',
+      s2_tip:  'For air-gapped boxes, write the artifact to a USB key and sneakernet it. See <a href="/airgap">/airgap</a>.',
+      s3_note: backend === 'tensorrt' ? 'TensorRT-LLM' : 'GGUF runtime',
+      s3_cmd:  run.cmd,
+      s3_alt:  run.alt
+    };
+  }
+
   function forecast(srcKey, qKey, devKey){
     var base = BASES[srcKey];
     var dev = DEVICES[devKey];
@@ -499,12 +748,60 @@
     document.getElementById('cmd').innerHTML = cmd;
 
     // Stash plain-text command for copy.
-    window._kolmExportCmd =
+    var exportCmdPlain =
       'kolm export ' + artifactName +
       ' --backend ' + f.backend +
       ' --device ' + devFlag +
       ' --quant ' + q +
       ' --output ' + outName;
+    window._kolmExportCmd = exportCmdPlain;
+
+    // === Transfer flow steps (Part A): update live with picker state.
+    var tc = TOOLCHAIN[f.backend];
+    document.getElementById('s1-backend').textContent = f.backend;
+    document.getElementById('s1-toolchain').textContent = tc.name;
+    document.getElementById('s1-install').innerHTML = tc.install;
+    var s1HighlightedCmd = [
+      '<span class="kw">$</span> kolm export ' + artifactName + ' \\',
+      '              <span class="arg">--backend</span> ' + f.backend + ' \\',
+      '              <span class="arg">--device</span> ' + devFlag + ' \\',
+      '              <span class="arg">--quant</span> ' + q + ' \\',
+      '              <span class="arg">--out</span> ./exports/'
+    ].join('\n');
+    document.getElementById('s1-cmd').innerHTML = s1HighlightedCmd;
+    var s1Plain =
+      'kolm export ' + artifactName +
+      ' --backend ' + f.backend +
+      ' --device ' + devFlag +
+      ' --quant ' + q +
+      ' --out ./exports/';
+
+    var recipe = transferRecipe(dev, outName, f.backend);
+    document.getElementById('s2-note').textContent = recipe.s2_note;
+    document.getElementById('s2-prose').innerHTML = recipe.s2_prose;
+    document.getElementById('s2-cmd').textContent = recipe.s2_cmd;
+    document.getElementById('s2-tip').innerHTML = recipe.s2_tip;
+    document.getElementById('s3-note').textContent = recipe.s3_note;
+    document.getElementById('s3-cmd').textContent = recipe.s3_cmd;
+    document.getElementById('s3-alt').innerHTML = recipe.s3_alt;
+
+    var s4Cmd = 'kolm verify ' + artifactName + ' --binder report.html';
+    document.getElementById('s4-cmd').innerHTML =
+      '<span class="kw">$</span> kolm verify ' + artifactName + ' <span class="arg">--binder</span> report.html\n' +
+      '<span class="com"># compare K-score forecast against your eval set</span>\n' +
+      '<span class="kw">$</span> kolm bench ' + artifactName + ' <span class="arg">--device</span> ' + devFlag + ' <span class="arg">--evals</span> ./your-evals.jsonl';
+
+    // Stash plain-text per-step strings for the runbook copy.
+    window._kolmRunbook = {
+      base: f.base,
+      device: f.device,
+      quant: f.quant,
+      backend: f.backend,
+      s1: s1Plain,
+      s2: recipe.s2_cmd,
+      s3: recipe.s3_cmd,
+      s4: s4Cmd
+    };
   }
 
   document.getElementById('src').addEventListener('change', render);
@@ -525,6 +822,59 @@
         var prev = b.textContent;
         b.textContent = 'copied';
         setTimeout(function(){ b.textContent = prev; }, 1200);
+      });
+    }
+  });
+
+  function stripShellPrefix(s){
+    return s.split('\n').map(function(line){
+      return line.replace(/^\$ /, '').replace(/^# /, '# ');
+    }).join('\n');
+  }
+
+  document.getElementById('copy-all').addEventListener('click', function(){
+    var r = window._kolmRunbook;
+    if (!r) return;
+    var md = [
+      '# kolm device transfer runbook',
+      '',
+      '- base: ' + r.base,
+      '- device: ' + r.device,
+      '- quant: ' + r.quant,
+      '- backend: ' + r.backend,
+      '',
+      '## Step 1. Build the export',
+      '',
+      '```bash',
+      r.s1,
+      '```',
+      '',
+      '## Step 2. Move it to the device',
+      '',
+      '```bash',
+      stripShellPrefix(r.s2),
+      '```',
+      '',
+      '## Step 3. Run on the target device',
+      '',
+      '```bash',
+      stripShellPrefix(r.s3),
+      '```',
+      '',
+      '## Step 4. Verify',
+      '',
+      '```bash',
+      r.s4,
+      '```',
+      '',
+      'See https://kolm.ai/device-transfer for the live picker.'
+    ].join('\n');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(md).then(function(){
+        var b = document.getElementById('copy-all');
+        var prev = b.textContent;
+        b.textContent = 'Copied runbook';
+        setTimeout(function(){ b.textContent = prev; }, 1400);
       });
     }
   });
