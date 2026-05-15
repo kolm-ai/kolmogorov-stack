@@ -107,9 +107,16 @@ export async function compileSpec(spec, opts = {}) {
     schema: r.schema || null,
   }));
 
+  // Auto-derive n from cases.length. A spec inherited from a template with
+  // `n: 1` and 7 actual cases would previously ship a manifest claiming n=1
+  // while the evaluator still ran all 7 — confusing buyers reading inspect
+  // output. We always trust cases.length and warn on mismatch.
+  if (spec.evals && Array.isArray(spec.evals.cases) && typeof spec.evals.n === 'number' && spec.evals.n !== spec.evals.cases.length) {
+    console.error(`warning: spec.evals.n=${spec.evals.n} but cases.length=${spec.evals.cases.length}; using ${spec.evals.cases.length}.`);
+  }
   const evals = spec.evals && spec.evals.cases ? {
     spec: spec.evals.spec || 'rs-1-evals',
-    n: spec.evals.n || spec.evals.cases.length,
+    n: spec.evals.cases.length,
     cases: spec.evals.cases,
     coverage: typeof spec.evals.coverage === 'number' ? spec.evals.coverage : 1.0,
   } : { spec: 'rs-1-evals', n: 0, cases: [] };

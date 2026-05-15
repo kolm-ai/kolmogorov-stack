@@ -193,13 +193,20 @@ function fmtBytes(n) {
 // fmtKScoreLine returns the single header line shared across compile / verify
 // / score / eval / diff / improve. The format is fixed so different verbs feel
 // like one product: "K-score for <file>: <composite> (gate >= 0.85 - pass|fail)".
+function kGate() {
+  const env = Number(process.env.KOLM_K_GATE);
+  if (Number.isFinite(env) && env >= 0 && env <= 1) return env;
+  return 0.85;
+}
 function fmtKScoreLine(k, artifactName) {
   if (!k) return '(no k-score on this artifact)';
   const composite = typeof k.composite === 'number' ? k.composite.toFixed(3) : k.composite;
-  const ships = (typeof k.composite === 'number') ? (k.composite >= 0.85 ? 'pass' : 'fail') : null;
+  const gate = kGate();
+  const gateLbl = gate.toFixed(2);
+  const ships = (typeof k.composite === 'number') ? (k.composite >= gate ? 'pass' : 'fail') : null;
   return artifactName
-    ? `K-score for ${artifactName}: ${composite}${ships ? `  (gate >= 0.85 - ${ships})` : ''}`
-    : `K-score (for this artifact, not the base model): ${composite}${ships ? `  (gate >= 0.85 - ${ships})` : ''}`;
+    ? `K-score for ${artifactName}: ${composite}${ships ? `  (gate >= ${gateLbl} - ${ships})` : ''}`
+    : `K-score (for this artifact, not the base model): ${composite}${ships ? `  (gate >= ${gateLbl} - ${ships})` : ''}`;
 }
 
 function fmtKScore(k, artifactName) {
@@ -455,6 +462,30 @@ OPTIONS (cloud)
 OPTIONS (spec)
   --spec <file|->              JSON spec describing recipes + evals + optional pack/index
   --out <file.kolm|dir>        output path (.kolm) or directory; default ~/.kolm/artifacts
+  --examples <file.jsonl>      merge external eval rows into spec.evals.cases
+  --gate <n>                   K-score gate override (default 0.85). Use --gate 0.75 to
+                               accept lower-scoring artifacts; --gate 0.95 for stricter.
+                               Compile still emits the artifact; the gate verdict line
+                               (pass|fail) reflects this threshold.
+
+RECIPE SOURCE - two ways to author
+  Inline:    "recipes": [{ "source": "function generate(input, lib) {...}" }]
+  Sidecar:   "recipes": [{ "source_file": "./recipe.js" }]
+  source_file is resolved relative to the spec file. Use it to author JS in a
+  real editor with linting/highlighting instead of escaping a one-line string
+  inside JSON. If both fields exist on the same recipe, "source" wins.
+
+FORBIDDEN IDENTIFIERS (sandbox guard, scanned in recipes[].source)
+  process, require, module, global, globalThis, __dirname, __filename,
+  import(, Function(, eval(, constructor, prototype, ArrayBuffer,
+  SharedArrayBuffer, Atomics, Reflect, Proxy, WeakRef, FinalizationRegistry,
+  setTimeout, setInterval, setImmediate, queueMicrotask
+  These tokens are blocked because they enable sandbox escape from node:vm.
+  Recipes operate on the frozen \`lib\` argument only - no Node, no DOM, no
+  network. Workarounds:
+    - Object.prototype.hasOwnProperty.call(x,k)  -> use \`k in x\` or Object.hasOwn(x, k)
+    - process.env.X                              -> not available; pass via lib.params
+    - require('node:crypto')                     -> use lib.hash (sha-256 helper)
 
 SKILL.md sidecar
   By default, every successful compile also emits a SKILL.md next to the artifact
@@ -547,13 +578,20 @@ EXAMPLE
   run: `kolm run - execute a .kolm artifact locally.
 
 USAGE
-  kolm run <artifact.kolm> '<input-json>' [--params <json|@file>] [--json]
-  kolm run <artifact.kolm> --input <file|@file|->          read input from a file or stdin
+  kolm run <artifact.kolm> --input <file|->                read input from file or stdin (recommended)
+  kolm run <artifact.kolm> '<input-json>' [--params ...]   pass input inline as JSON
   cat input.json | kolm run <artifact.kolm>                stdin auto-detected when no positional input
 
+WINDOWS QUOTING NOTE
+  Windows cmd.exe does NOT honor single quotes, and PowerShell expands $ inside
+  double-quoted JSON. The portable form is --input @sample.json (or piped stdin):
+    PS> echo {"text":"hi"} > in.json
+    PS> kolm run x.kolm --input in.json
+  Or use bash/zsh/git-bash where 'single-quoted JSON' works as written.
+
 The input is parsed as JSON when possible; otherwise passed as a bare string.
---input lets you skip shell-quoting pain on Windows cmd (where single quotes
-aren't honored) — pass a file path or '-' for stdin instead. --params lets you
+--input lets you skip shell-quoting pain on Windows cmd — pass a file path or
+'-' for stdin instead. --params lets you
 pass tenant-runtime config to the recipes (extra patterns, allowlists, vertical
 rules). Recipes read these via lib.params. Tenant params are never persisted by
 the runtime and never re-signed into the artifact.
@@ -2280,6 +2318,19 @@ async function cmdCompile(args) {
   // .kolm by writing JSON. No cloud, no account. The artifact is signed with
   // a per-user secret stored at ~/.kolm/config.json (auto-generated on first
   // run); set RECIPE_RECEIPT_SECRET in env to share signatures across teams.
+  // --gate <n>: override K-score gate (default 0.85). Applied via env var so
+  // every K-line printer (compile/verify/score/inspect/eval/diff/improve) sees
+  // the same threshold. Validated to [0.0, 1.0]; out-of-range falls back to
+  // default with a warning.
+  const gateIdxC = args.indexOf('--gate');
+  if (gateIdxC >= 0) {
+    const gv = Number(args[gateIdxC + 1]);
+    if (!Number.isFinite(gv) || gv < 0 || gv > 1) {
+      console.error(`warning: --gate ${args[gateIdxC + 1]} out of range [0, 1]; using default 0.85.`);
+    } else {
+      process.env.KOLM_K_GATE = String(gv);
+    }
+  }
   const specIdx = args.indexOf('--spec');
   if (specIdx >= 0) {
     const specArg = args[specIdx + 1];
@@ -2297,6 +2348,43 @@ async function cmdCompile(args) {
     let spec;
     try { spec = JSON.parse(raw); }
     catch (e) { console.error(`error: spec is not valid JSON: ${e.message}`); process.exit(1); }
+
+    // recipes[i].source_file: <path>  — author-friendly alternative to embedding
+    // the JS function as a JSON-escaped one-liner in recipes[i].source. Path is
+    // resolved relative to the spec file (or cwd for stdin specs). File contents
+    // become recipes[i].source so the rest of the pipeline is unchanged.
+    // If both source and source_file are set, source wins and a warning is logged.
+    if (Array.isArray(spec.recipes) && specArg !== '-' && specArg !== '/dev/stdin') {
+      const specDir = path.dirname(path.resolve(specArg));
+      for (const r of spec.recipes) {
+        if (r && typeof r === 'object' && typeof r.source_file === 'string') {
+          const sf = r.source_file;
+          if (typeof r.source === 'string' && r.source.length > 0) {
+            console.error(`warning: recipe ${r.id || '?'} has both source and source_file; using source.`);
+            continue;
+          }
+          const sfPath = path.isAbsolute(sf) ? sf : path.resolve(specDir, sf);
+          try {
+            r.source = fs.readFileSync(sfPath, 'utf8');
+          } catch (e) {
+            console.error(`error: cannot read recipe source_file ${sfPath}: ${e.message}`);
+            process.exit(1);
+          }
+        }
+      }
+    } else if (Array.isArray(spec.recipes) && (specArg === '-' || specArg === '/dev/stdin')) {
+      for (const r of spec.recipes) {
+        if (r && typeof r === 'object' && typeof r.source_file === 'string' && (!r.source || !r.source.length)) {
+          const sfPath = path.isAbsolute(r.source_file) ? r.source_file : path.resolve(process.cwd(), r.source_file);
+          try {
+            r.source = fs.readFileSync(sfPath, 'utf8');
+          } catch (e) {
+            console.error(`error: cannot read recipe source_file ${sfPath}: ${e.message}`);
+            process.exit(1);
+          }
+        }
+      }
+    }
 
     // --examples <file.jsonl> (alias --seeds): merge user-provided eval rows
     // into spec.evals.cases. Without this the user's training data is invisible
@@ -3007,8 +3095,22 @@ async function cmdInspect(args) {
   }
   await withRunner(async ({ inspectArtifact }) => {
     const m = inspectArtifact(ap);
+    // Compute sha256 of the .kolm file on disk so callers don't need to shell
+    // out to sha256sum to learn the artifact identity. Top-level field in both
+    // text and --json output.
+    let fileSha = null;
+    try {
+      const buf = fs.readFileSync(ap);
+      fileSha = crypto.createHash('sha256').update(buf).digest('hex');
+    } catch {}
     if (jsonOut) {
-      console.log(JSON.stringify(m, null, 2));
+      const out = { ...m };
+      if (fileSha) {
+        out.sha256 = fileSha;
+        out.sha256_short = fileSha.slice(0, 12);
+      }
+      out.path = path.resolve(ap);
+      console.log(JSON.stringify(out, null, 2));
       return;
     }
     // Text mode: human-readable summary, --json for the full dump.
