@@ -604,10 +604,11 @@
   .compile-anatomy .ca-sub { font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0; max-width: 56ch; margin-left: auto; margin-right: auto; }
   .compile-anatomy .ca-sub b { color: var(--ink, #faf2e1); font-weight: 500; }
   .compile-anatomy .ca-sub code { font-family: var(--mono); color: var(--kolm-accent, #10b981); }
-  .compile-anatomy .ca-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-  @media (max-width: 1080px) { .compile-anatomy .ca-steps { grid-template-columns: repeat(2, 1fr); } }
+  .compile-anatomy .ca-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  @media (max-width: 1080px) { .compile-anatomy .ca-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 640px) { .compile-anatomy .ca-steps { grid-template-columns: 1fr; gap: 16px; } }
-  .compile-anatomy .ca-step { position: relative; padding: 28px 24px 24px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: rgba(21,26,33,0.32); display: flex; flex-direction: column; gap: 12px; transition: border-color 160ms; min-height: 180px; }
+  .compile-anatomy .ca-step { position: relative; padding: 28px 24px 24px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: rgba(21,26,33,0.32); display: flex; flex-direction: column; gap: 12px; transition: border-color 160ms; min-height: 180px; min-width: 0; }
+  .compile-anatomy .ca-out { overflow-wrap: anywhere; word-break: break-word; }
   .compile-anatomy .ca-step:hover { border-color: rgba(255,255,255,0.16); }
   .compile-anatomy .ca-num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; color: var(--ink-faint, #737c73); }
   .compile-anatomy .ca-step h3 { font-size: 22px; line-height: 1.18; letter-spacing: -0.018em; margin: 0; font-weight: 500; color: var(--ink, #faf2e1); }
@@ -829,7 +830,7 @@
         "https://twitter.com/kolm_ai"
       ],
       "foundingDate": "2026-04",
-      "description": "kolm is an AI compiler. Build, train, and keep your own AI as one file that runs on your hardware. Trained on your data, owned by you.",
+      "description": "kolm is an AI compiler. Build, train, and keep your own AI as one file that runs on your hardware. Your own AI, trained on your data, owned by you.",
       "contactPoint": {
         "@type": "ContactPoint",
         "email": "founders@kolm.ai",
@@ -977,7 +978,7 @@
       <span class="hq-sep" aria-hidden="true">&middot;</span>
       <span><b>11.6&times;</b> cheaper than the frontier</span>
       <span class="hq-sep" aria-hidden="true">&middot;</span>
-      <span><b>Trained on your data</b></span>
+      <span><b>Your own AI, trained on your data</b></span>
       <span class="hq-sep" aria-hidden="true">&middot;</span>
       <span><b>Runs offline</b></span>
       <a href="/benchmarks" class="hq-link">how we measure &rarr;</a>
@@ -1128,7 +1129,7 @@
               <div class="hcn-rec-row" data-rr="3"><span class="hcn-rec-key">run it</span><span class="hcn-rec-val"><b>kolm run phi-redactor.kolm</b></span></div>
             </div>
           </div>
-          <div class="hcn-hero" id="hcn-hero-text">Your AI. <b>Trained on your data.</b> Yours forever.</div>
+          <div class="hcn-hero" id="hcn-hero-text"><b>Your own AI</b>, trained on your data. Yours forever.</div>
         </div>
 
         <noscript><img src="/video/kolm-hero-poster.jpg" alt="kolm: compile a task into one signed file that runs anywhere." width="1200" height="800" decoding="async" loading="lazy"></noscript>
@@ -2140,9 +2141,18 @@
   }
   .access-anywhere .aa-row {
     padding: 24px 22px; border-radius: 14px;
-    background: var(--bg-card, rgba(255,255,255,0.02));
+    background: rgba(255,255,255,0.02);
     border: 1px solid var(--line, rgba(255,255,255,0.08));
   }
+  /* Light mode: paper-white cards on cream page (not beige-on-beige). */
+  [data-theme="light"] .access-anywhere .aa-row {
+    background: #ffffff;
+    border-color: rgba(24,23,26,0.10);
+    box-shadow: 0 1px 2px rgba(24,23,26,0.04);
+  }
+  [data-theme="light"] .access-anywhere .aa-row h3 { color: #18171a; }
+  [data-theme="light"] .access-anywhere .aa-row p { color: #45413a; }
+  [data-theme="light"] .access-anywhere .aa-row-num { color: #8a8478; }
   .access-anywhere .aa-row-num {
     font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73);
     letter-spacing: 0.16em; margin-bottom: 10px;

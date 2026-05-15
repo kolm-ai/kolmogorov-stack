@@ -545,11 +545,15 @@ EXAMPLE
 
 USAGE
   kolm run <artifact.kolm> '<input-json>' [--params <json|@file>] [--json]
+  kolm run <artifact.kolm> --input <file|@file|->          read input from a file or stdin
+  cat input.json | kolm run <artifact.kolm>                stdin auto-detected when no positional input
 
 The input is parsed as JSON when possible; otherwise passed as a bare string.
---params lets you pass tenant-runtime config to the recipes (extra patterns,
-allowlists, vertical rules). Recipes read these via lib.params. Tenant params
-are never persisted by the runtime and never re-signed into the artifact.
+--input lets you skip shell-quoting pain on Windows cmd (where single quotes
+aren't honored) — pass a file path or '-' for stdin instead. --params lets you
+pass tenant-runtime config to the recipes (extra patterns, allowlists, vertical
+rules). Recipes read these via lib.params. Tenant params are never persisted by
+the runtime and never re-signed into the artifact.
 
 Default output is the recipe's output only (pretty JSON, or string), with a
 one-line footer on stderr: 'recipe: <id>  ·  <latency>'. Pipes cleanly:
@@ -560,6 +564,8 @@ everything.
 
 EXAMPLES
   kolm run redactor.kolm '{"text":"call 555-1212"}'
+  kolm run redactor.kolm --input @sample.json
+  cat sample.json | kolm run redactor.kolm
   kolm run redactor.kolm '{"text":"call 555-1212"}' --json
   kolm run redactor.kolm '{"text":"id 12-345"}' --params '{"extra_patterns":[{"name":"emp_id","regex":"\\\\b\\\\d{2}-\\\\d{3}\\\\b","replacement":"[ID]"}]}'
   kolm run redactor.kolm '{"text":"..."}' --params @hospital-rules.json
@@ -642,10 +648,14 @@ SCANS
 The default output is a table: name, K-score, size, age, source.
 --json emits a machine-readable array (script-friendly).
 `,
-  inspect: `kolm inspect - dump manifest + recipes + signature.
+  inspect: `kolm inspect - show what a .kolm artifact is, in plain text.
 
 USAGE
-  kolm inspect <artifact.kolm>
+  kolm inspect <artifact.kolm>          human-readable summary (task, K-score, build time, signature)
+  kolm inspect <artifact.kolm> --json   full manifest dump (CI / agent shape)
+
+Text mode is the default. --json keeps the old behaviour for scripts that
+parse the full manifest (recipe names, pack/index keys, signature mode, etc.).
 `,
   export: `kolm export - convert a .kolm into a target-runtime artifact (gguf, mlx, onnx, coreml, tensorrt).
 
@@ -2485,11 +2495,18 @@ function resolveArtifact(p) {
 
 async function cmdRun(args) {
   if (maybeHelp('run', args)) return;
-  // pull --params <json|@file> off args before resolving positional argv
+  // Pull --params <json|@file> and --input <file|@file|-> off args before
+  // resolving positional argv. --input handles 3 buyer-friendly shapes:
+  //   --input @path  : read path as JSON (auto-detect) or plain text
+  //   --input path   : same (the @ is optional)
+  //   --input -      : read input from stdin
+  // Plus stdin fallback when positional input is missing and stdin is piped.
   let paramsArg = null;
+  let inputArg = null;
   const cleaned = [];
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--params' && i + 1 < args.length) { paramsArg = args[i + 1]; i++; }
+    else if (args[i] === '--input' && i + 1 < args.length) { inputArg = args[i + 1]; i++; }
     else if (args[i] === '--json') { /* consumed below */ cleaned.push(args[i]); }
     else cleaned.push(args[i]);
   }
@@ -2502,11 +2519,38 @@ async function cmdRun(args) {
     err.exitCode = EXIT.NOT_FOUND;
     throw err;
   }
-  const inputRaw = positional[1];
+  // Decide where input comes from: --input flag wins, then positional, then stdin.
+  let inputRaw = null;
+  if (inputArg) {
+    if (inputArg === '-') {
+      inputRaw = fs.readFileSync(0, 'utf8');
+    } else {
+      const filePath = inputArg.startsWith('@') ? inputArg.slice(1) : inputArg;
+      if (!fs.existsSync(filePath)) {
+        const err = new Error(`--input file not found: ${filePath}`);
+        err.exitCode = EXIT.NOT_FOUND;
+        throw err;
+      }
+      inputRaw = fs.readFileSync(filePath, 'utf8');
+    }
+  } else if (positional[1] !== undefined) {
+    inputRaw = positional[1];
+  } else if (!process.stdin.isTTY) {
+    // Piped stdin with no positional arg: cat foo.txt | kolm run art.kolm
+    try { inputRaw = fs.readFileSync(0, 'utf8'); } catch { inputRaw = null; }
+    if (inputRaw != null) inputRaw = inputRaw.replace(/\r?\n$/, '');
+  }
   let input = null;
-  if (inputRaw) {
-    try { input = JSON.parse(inputRaw); }
-    catch { input = inputRaw; }
+  if (inputRaw != null && inputRaw !== '') {
+    const trimmed = inputRaw.trim();
+    // If it looks like JSON, parse it. Otherwise pass the raw string through;
+    // the recipe is responsible for handling string vs object shapes.
+    if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.startsWith('"')) {
+      try { input = JSON.parse(trimmed); }
+      catch { input = inputRaw; }
+    } else {
+      input = inputRaw;
+    }
   }
   let params = null;
   if (paramsArg) {
@@ -2842,17 +2886,58 @@ async function cmdScore(args) {
   });
 }
 
+// cmdInspect: text mode by default, --json keeps the full machine dump.
+// Same wave-38 pattern as cmdRun. Text mode shows the buyer what they need
+// (task, K-score, build time, signature, recipes) without 44 lines of JSON.
 async function cmdInspect(args) {
   if (maybeHelp('inspect', args)) return;
-  const ap = resolveArtifact(args[0]);
+  const jsonOut = args.includes('--json');
+  const positional = args.filter(a => !a.startsWith('--'));
+  const ap = resolveArtifact(positional[0]);
   if (!ap) {
-    const err = new Error(`artifact not found: ${args[0]}`);
+    const err = new Error(`artifact not found: ${positional[0]}`);
     err.exitCode = EXIT.NOT_FOUND;
     throw err;
   }
   await withRunner(async ({ inspectArtifact }) => {
     const m = inspectArtifact(ap);
-    console.log(JSON.stringify(m, null, 2));
+    if (jsonOut) {
+      console.log(JSON.stringify(m, null, 2));
+      return;
+    }
+    // Text mode: human-readable summary, --json for the full dump.
+    const basename = path.basename(ap);
+    let sizeOnDisk = null;
+    try { sizeOnDisk = fs.statSync(ap).size; } catch {}
+    const builtAt = m.created_at ? new Date(m.created_at) : null;
+    const ageSec = builtAt ? Math.max(1, Math.floor((Date.now() - builtAt.getTime()) / 1000)) : null;
+    const fmtAge = (sec) => {
+      if (sec == null) return '?';
+      if (sec < 60) return sec + 's ago';
+      if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
+      if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+      return Math.floor(sec / 86400) + 'd ago';
+    };
+    const builtFmt = builtAt
+      ? `${builtAt.toISOString().slice(0, 19).replace('T', ' ')}Z (${fmtAge(ageSec)})`
+      : '?';
+    console.log(`artifact: ${basename}`);
+    console.log(`task:     ${m.task || '?'}`);
+    console.log(`built:    ${builtFmt}`);
+    if (sizeOnDisk != null) console.log(`size:     ${fmtBytes(sizeOnDisk)} on disk`);
+    console.log('');
+    console.log(fmtKScore(m.k_score, basename));
+    console.log('');
+    console.log(`runtime:    ${m.runtime || '?'}`);
+    console.log(`tier:       ${m.tier || '?'}`);
+    console.log(`base model: ${m.base_model || 'none'}`);
+    const sigMode = m.signature_mode || '?';
+    const sigStatus = m.signature_valid === true ? 'valid' : (m.signature_valid === false ? 'INVALID' : 'unknown');
+    console.log(`signature:  ${sigStatus} (${sigMode})`);
+    const recipeNames = Array.isArray(m.recipe_names) ? m.recipe_names : [];
+    const recipeList = recipeNames.length ? ` (${recipeNames.join(', ')})` : '';
+    console.log(`recipes:    ${m.recipes_n != null ? m.recipes_n : '?'}${recipeList}`);
+    console.log(`evals:      ${m.evals_n != null ? `${m.evals_n} cases` : '?'}`);
   });
 }
 
