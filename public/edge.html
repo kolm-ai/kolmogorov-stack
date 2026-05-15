@@ -183,6 +183,7 @@ runtime: arm64-cpu, p50 4.2ms, 0 network calls
 $ kolm run fault-triage.kolm --in /dev/sensors/vib0
 runtime: x86_64-cpu, p50 3.8ms, 0 network calls</pre>
       <p class="sec-lede" style="margin-top:18px">No retargeting. No re-quantization. The compiler chose the right primitives at compile time; the runtime adapts to the host.</p>
+      <p class="sec-lede" style="margin-top:8px">Need a forecast before you compile? <a href="/device-transfer" style="color:var(--accent)">Try the device-transfer picker &rarr;</a> Pick a base, a quant, and a target box. See estimated size, throughput, K-loss, and the export command.</p>
     </div>
   </section>
 
@@ -297,9 +298,9 @@ runtime: x86_64-cpu, p50 3.8ms, 0 network calls</pre>
         <h4>Deploy</h4>
         <a href="/compute">Backends</a>
         <a href="/airgap">Air-gap</a>
+        <a href="/device-transfer">Device transfer</a>
         <a href="/integrations/cloudflare">Cloudflare</a>
         <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
       </div>
       <div>
         <h4>Proof</h4>

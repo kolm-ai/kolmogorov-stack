@@ -152,8 +152,20 @@
 
     <div class="panel">
       <h3><span class="step">Step 4</span>Watch the run</h3>
-      <p>Live training log streams here once you start. Stop any time; partial checkpoints are kept.</p>
+      <p>Live training log streams here once you start. Preview run is a simulated walkthrough; Run for real hits <code>POST /v1/compile</code> against this account and streams the receipt chain back.</p>
       <div class="log" id="log"><div><span class="ts">[--:--:--]</span> waiting to start&hellip;</div></div>
+      <div id="result" hidden style="margin-top:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg)">
+          <div style="color:var(--ink-faint)">Job</div><div id="r-job" style="color:var(--ink);text-align:right;word-break:break-all"></div>
+          <div style="color:var(--ink-faint)">Status</div><div id="r-status" style="color:var(--ink);text-align:right"></div>
+          <div style="color:var(--ink-faint)">K-score</div><div id="r-k" style="color:var(--ink);text-align:right;font-variant-numeric:tabular-nums"></div>
+          <div style="color:var(--ink-faint)">CID</div><div id="r-cid" style="color:var(--ink);text-align:right;word-break:break-all"></div>
+          <div style="color:var(--ink-faint)">Artifact hash</div><div id="r-hash" style="color:var(--ink);text-align:right;word-break:break-all"></div>
+          <div style="color:var(--ink-faint)">Bytes</div><div id="r-bytes" style="color:var(--ink);text-align:right;font-variant-numeric:tabular-nums"></div>
+        </div>
+        <div id="r-chain" style="margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);font-family:var(--mono);font-size:12px;color:var(--ink-mute);line-height:1.7"></div>
+        <div id="r-actions" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px"></div>
+      </div>
     </div>
 
   </div>
@@ -168,8 +180,9 @@
         <dt>Est. wall time</dt><dd id="q-wall">~38 min</dd>
         <dt>Est. cost</dt><dd id="q-cost">~$8.20</dd>
       </dl>
-      <button class="cta-btn" id="compile" disabled type="button">Compile</button>
-      <p style="font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);margin:14px 0 0;line-height:1.5">Charged on success only. If the K-score gate fails, you pay $0 and we keep the partial trace for diagnosis.</p>
+      <button class="cta-btn" id="compile" disabled type="button">Run for real</button>
+      <button class="cta-btn" id="preview" type="button" style="background:transparent;color:var(--ink);border:1px solid var(--line);margin-top:8px">Preview run (simulated)</button>
+      <p style="font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);margin:14px 0 0;line-height:1.5">Run for real calls <code>POST /v1/compile</code> in this account and streams the 5-step HMAC receipt back. Charged on success only. If the K-score gate fails, you pay $0 and we keep the partial trace for diagnosis.</p>
     </div>
 
     <div class="panel">
@@ -202,21 +215,45 @@
   var qCost = document.getElementById('q-cost');
   var qEx = document.getElementById('q-ex');
   var compile = document.getElementById('compile');
+  var preview = document.getElementById('preview');
   var fileInput = document.getElementById('file');
   var drop = document.getElementById('drop');
   var log = document.getElementById('log');
   var kgate = document.getElementById('kgate');
   var taskgate = document.getElementById('taskgate');
   var pack = document.getElementById('pack');
+  var backendSel = document.getElementById('backend');
+  var recipeBox = document.getElementById('recipe');
   var gK = document.getElementById('gate-k');
   var gT = document.getElementById('gate-t');
   var gP = document.getElementById('gate-p');
+  var result = document.getElementById('result');
+  var rJob = document.getElementById('r-job');
+  var rStatus = document.getElementById('r-status');
+  var rK = document.getElementById('r-k');
+  var rCid = document.getElementById('r-cid');
+  var rHash = document.getElementById('r-hash');
+  var rBytes = document.getElementById('r-bytes');
+  var rChain = document.getElementById('r-chain');
+  var rActions = document.getElementById('r-actions');
 
   var selectedBase = picks[0].dataset.name;
   var selectedParams = picks[0].dataset.params;
   var costByParams = {'3.8B': 4.0, '7B': 7.0, '8B': 8.2, '9B': 9.4, '70B': 48, '141B': 72};
   var wallByParams = {'3.8B': '~22 min', '7B': '~34 min', '8B': '~38 min', '9B': '~42 min', '70B': '~3 hr 50 min', '141B': '~6 hr 10 min'};
   var nExamples = 0;
+
+  // signup.html writes the API key under multiple aliases; kolm_api_key is the
+  // canonical name. We read the canonical and fall back so a user who signed in
+  // via /signin (which only sets kolm_api_key) still gets through.
+  var KEY_NAMES = ['kolm_api_key', 'apiKey', 'recipeApiKey', 'ks_api_key'];
+  function readKey(){
+    for (var i = 0; i < KEY_NAMES.length; i++) {
+      try { var v = localStorage.getItem(KEY_NAMES[i]); if (v && /^ks_[0-9a-f]{32}$/.test(v)) return v; } catch (_) {}
+    }
+    return null;
+  }
+  function maskKey(k){ return k ? (k.slice(0, 6) + '...' + k.slice(-4)) : ''; }
 
   function updateQuote(){
     qBase.textContent = selectedBase.split('/').pop();
@@ -270,15 +307,22 @@
     log.appendChild(d);
     log.scrollTop = log.scrollHeight;
   }
+  function escapeHtml(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
 
-  compile.addEventListener('click', function(){
-    compile.disabled = true;
-    compile.textContent = 'Compiling…';
-    log.innerHTML = '';
-    var seq = [
+  // ---- Preview path (clearly labeled simulated walkthrough) ----
+  // The PREVIEW_SEQ array is the OLD hardcoded log; it survives only behind
+  // the "Preview run (simulated)" button so users can dry-run the wizard
+  // before they spend credits. Run for real is the live /v1/compile path.
+  var PREVIEW_SEQ_BUILDER = function(){
+    return [
+      ['preview mode: this is a simulated walkthrough, no compute is spent', 'ok', 100],
       ['validating recipe + manifest', null, 200],
       ['materializing examples ('+nExamples+' files)', null, 400],
-      ['picking backend: '+(document.getElementById('backend').value || 'local-cuda'), null, 350],
+      ['picking backend: '+(backendSel.value || 'local-cuda'), null, 350],
       ['provisioning A100-80GB', null, 800],
       ['warmup + LoRA init (r=32, alpha=64)', null, 600],
       ['SFT step 250 / 2000 &middot; loss 1.84', null, 800],
@@ -287,14 +331,23 @@
       ['eval &middot; K-score 0.93 (gate ≥ '+ (parseFloat(kgate.value)||0.9).toFixed(2)+')', 'ok', 700],
       ['signing manifest &middot; HMAC-SHA256', null, 350],
       ['artifact: build/my-model.kolm &middot; 9.4 GB', 'ok', 300],
-      ['done. receipt available in /dashboard', 'ok', 100],
+      ['preview complete. click Run for real to compile against your account.', 'ok', 100],
     ];
+  };
+
+  preview.addEventListener('click', function(){
+    preview.disabled = true;
+    compile.disabled = true;
+    preview.textContent = 'Previewing…';
+    log.innerHTML = '';
+    result.hidden = true;
+    var seq = PREVIEW_SEQ_BUILDER();
     var i = 0;
     function next(){
       if(i >= seq.length){
-        compile.textContent = 'Open in dashboard →';
-        compile.disabled = false;
-        compile.onclick = function(){location.href='/dashboard';};
+        preview.textContent = 'Preview run (simulated)';
+        preview.disabled = false;
+        compile.disabled = nExamples === 0;
         return;
       }
       var s = seq[i++];
@@ -304,8 +357,330 @@
     setTimeout(next, 200);
   });
 
+  // ---- Live path: POST /v1/compile + poll GET /v1/compile/{id} ----
+  function buildTaskDescription(){
+    // Compose a single task string from the wizard fields. Server accepts
+    // task + base_model + k_threshold as first-class params; everything
+    // else (pack, backend, recipe textarea) gets embedded in task text so
+    // it travels in the manifest under the task field.
+    var parts = [];
+    parts.push('In-account training run from /train wizard.');
+    parts.push('base=' + selectedBase);
+    if (backendSel.value) parts.push('backend=' + backendSel.value);
+    if (pack.value) parts.push('compliance_pack=' + pack.value);
+    var taskMin = parseFloat(taskgate.value); if (Number.isFinite(taskMin)) parts.push('task_metric_min=' + taskMin.toFixed(2));
+    if (nExamples) parts.push('uploaded_files=' + nExamples);
+    var recipe = (recipeBox.value || '').trim();
+    if (recipe) parts.push('recipe=' + recipe.replace(/\s+/g, ' ').slice(0, 1200));
+    return parts.join(' ');
+  }
+
+  function setResultRow(job){
+    rJob.textContent = job.job_id || job.id || '';
+    rStatus.textContent = job.status || '';
+    rK.textContent = (typeof job.k_score === 'number') ? job.k_score.toFixed(4) : '-';
+    rCid.textContent = job.cid || '-';
+    rHash.textContent = job.artifact_hash || '-';
+    rBytes.textContent = (typeof job.artifact_bytes === 'number') ? job.artifact_bytes.toLocaleString() : '-';
+  }
+
+  function renderChain(receipt){
+    if (!receipt || !Array.isArray(receipt.chain)) { rChain.innerHTML = ''; return; }
+    var rows = receipt.chain.map(function(step, idx){
+      var num = idx + 1;
+      var hmacShort = step.hmac ? (step.hmac.slice(0, 12) + '…') : '';
+      return '<div><span class="ok">[step ' + num + '/5]</span> ' +
+        '<span style="color:var(--ink)">' + escapeHtml(step.step) + '</span> ' +
+        '<span style="color:var(--ink-faint)">HMAC ' + escapeHtml(hmacShort) + '</span></div>';
+    }).join('');
+    var meta = '';
+    if (receipt.signature_alg) {
+      meta = '<div style="margin-top:6px;color:var(--ink-faint)">alg=' + escapeHtml(receipt.signature_alg) +
+        (receipt.signed_by ? ' &middot; signed_by=' + escapeHtml(receipt.signed_by) : '') +
+        (receipt.receipt_id ? ' &middot; receipt_id=' + escapeHtml(receipt.receipt_id) : '') + '</div>';
+    }
+    rChain.innerHTML = rows + meta;
+  }
+
+  function renderActions(job){
+    rActions.innerHTML = '';
+    if (job.status === 'completed' && job.artifact_url) {
+      var a = document.createElement('a');
+      a.className = 'cta-btn';
+      a.style.width = 'auto';
+      a.style.margin = '0';
+      a.style.padding = '10px 16px';
+      a.style.textDecoration = 'none';
+      a.style.display = 'inline-block';
+      a.href = job.artifact_url;
+      a.download = (job.job_id || job.id || 'artifact') + '.kolm';
+      a.textContent = 'Download .kolm';
+      rActions.appendChild(a);
+
+      var v = document.createElement('a');
+      v.className = 'cta-btn';
+      v.style.width = 'auto';
+      v.style.margin = '0';
+      v.style.padding = '10px 16px';
+      v.style.background = 'transparent';
+      v.style.color = 'var(--ink)';
+      v.style.border = '1px solid var(--line)';
+      v.style.textDecoration = 'none';
+      v.style.display = 'inline-block';
+      v.href = '/verify-prod';
+      v.textContent = 'Verify in browser →';
+      rActions.appendChild(v);
+
+      var d = document.createElement('a');
+      d.className = 'cta-btn';
+      d.style.width = 'auto';
+      d.style.margin = '0';
+      d.style.padding = '10px 16px';
+      d.style.background = 'transparent';
+      d.style.color = 'var(--ink)';
+      d.style.border = '1px solid var(--line)';
+      d.style.textDecoration = 'none';
+      d.style.display = 'inline-block';
+      d.href = '/dashboard';
+      d.textContent = 'Open dashboard';
+      rActions.appendChild(d);
+    } else if (job.status === 'failed') {
+      var r = document.createElement('button');
+      r.type = 'button';
+      r.className = 'cta-btn';
+      r.style.width = 'auto';
+      r.style.margin = '0';
+      r.style.padding = '10px 16px';
+      r.textContent = 'Retry';
+      r.addEventListener('click', function(){
+        result.hidden = true;
+        log.innerHTML = '';
+        runLive();
+      });
+      rActions.appendChild(r);
+    }
+  }
+
+  var polling = false;
+  var pollTimer = null;
+  var seenStages = {};
+
+  function stopPolling(){ polling = false; if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; } }
+
+  function pollJob(jobId, key){
+    if (!polling) return;
+    fetch('/v1/compile/' + encodeURIComponent(jobId), {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' },
+      credentials: 'include',
+    }).then(function(res){
+      return res.json().catch(function(){ return {}; }).then(function(body){ return { ok: res.ok, status: res.status, body: body }; });
+    }).then(function(r){
+      if (!polling) return;
+      if (r.status === 401 || r.status === 403) {
+        stopPolling();
+        return failAuth();
+      }
+      if (r.status === 429) {
+        stopPolling();
+        return failQuota();
+      }
+      if (r.status >= 500) {
+        stopPolling();
+        return failServer('GET /v1/compile/' + jobId + ' returned ' + r.status);
+      }
+      if (!r.ok) {
+        stopPolling();
+        return failServer((r.body && r.body.error) ? r.body.error : ('status ' + r.status));
+      }
+      var j = r.body || {};
+      // Stream new stages
+      if (Array.isArray(j.stages)) {
+        for (var i = 0; i < j.stages.length; i++) {
+          var s = j.stages[i];
+          var key2 = (s.name || '') + '@' + (s.at || i);
+          if (!seenStages[key2]) {
+            seenStages[key2] = true;
+            var extras = [];
+            if (typeof s.bytes === 'number') extras.push(s.bytes.toLocaleString() + ' bytes');
+            if (typeof s.k_score === 'number') extras.push('K=' + s.k_score.toFixed(4));
+            if (typeof s.recipes_n === 'number') extras.push(s.recipes_n + ' recipes');
+            if (typeof s.chunks_n === 'number') extras.push(s.chunks_n + ' chunks');
+            if (typeof s.pass_rate === 'number') extras.push('pass=' + s.pass_rate.toFixed(3));
+            if (s.error) extras.push('error: ' + s.error);
+            var line = s.name + (extras.length ? ' &middot; ' + extras.join(' &middot; ') : '');
+            logLine(line, /error/i.test(s.name) ? null : 'ok');
+          }
+        }
+      }
+      // Update progress line if changed
+      if (typeof j.progress === 'number' && j.progress > 0 && j.progress < 100) {
+        // progress is already implied by stages; suppress redundant lines
+      }
+      // Update result panel live
+      result.hidden = false;
+      setResultRow(j);
+      if (j.receipt) renderChain(j.receipt);
+
+      if (j.status === 'completed') {
+        stopPolling();
+        logLine('completed &middot; K=' + (typeof j.k_score === 'number' ? j.k_score.toFixed(4) : '-') +
+          ' &middot; cid=' + (j.cid || '-'), 'ok');
+        compile.textContent = 'Run for real';
+        compile.disabled = nExamples === 0;
+        preview.disabled = false;
+        renderActions(j);
+      } else if (j.status === 'failed') {
+        stopPolling();
+        logLine('failed: ' + (j.error || 'unknown error'), null);
+        compile.textContent = 'Run for real';
+        compile.disabled = nExamples === 0;
+        preview.disabled = false;
+        renderActions(j);
+      } else {
+        pollTimer = setTimeout(function(){ pollJob(jobId, key); }, 500);
+      }
+    }).catch(function(){
+      if (!polling) return;
+      // Transient network error: keep polling, but slow down. The job is
+      // running server-side regardless; we just lost a snapshot.
+      logLine('network hiccup while polling; retrying in 2s', null);
+      pollTimer = setTimeout(function(){ pollJob(jobId, key); }, 2000);
+    });
+  }
+
+  function failAuth(){
+    logLine('your API key was rejected. sign in again to continue.', null);
+    compile.textContent = 'Run for real';
+    compile.disabled = nExamples === 0;
+    preview.disabled = false;
+    rActions.innerHTML = '';
+    var a = document.createElement('a');
+    a.className = 'cta-btn';
+    a.style.width = 'auto';
+    a.style.margin = '0';
+    a.style.padding = '10px 16px';
+    a.style.textDecoration = 'none';
+    a.style.display = 'inline-block';
+    a.href = '/signup?return=/train';
+    a.textContent = 'Sign in again';
+    rActions.appendChild(a);
+    result.hidden = false;
+  }
+
+  function failQuota(){
+    logLine('daily compile quota reached on this plan. upgrade to keep going.', null);
+    compile.textContent = 'Run for real';
+    compile.disabled = nExamples === 0;
+    preview.disabled = false;
+    rActions.innerHTML = '';
+    var a = document.createElement('a');
+    a.className = 'cta-btn';
+    a.style.width = 'auto';
+    a.style.margin = '0';
+    a.style.padding = '10px 16px';
+    a.style.textDecoration = 'none';
+    a.style.display = 'inline-block';
+    a.href = '/pricing';
+    a.textContent = 'View plans';
+    rActions.appendChild(a);
+    result.hidden = false;
+  }
+
+  function failServer(detail){
+    logLine('kolm.ai had a hiccup. try again in a minute. ' + (detail ? '(' + detail + ')' : ''), null);
+    compile.textContent = 'Run for real';
+    compile.disabled = nExamples === 0;
+    preview.disabled = false;
+    rActions.innerHTML = '';
+    var r = document.createElement('button');
+    r.type = 'button';
+    r.className = 'cta-btn';
+    r.style.width = 'auto';
+    r.style.margin = '0';
+    r.style.padding = '10px 16px';
+    r.textContent = 'Retry';
+    r.addEventListener('click', function(){
+      result.hidden = true;
+      log.innerHTML = '';
+      runLive();
+    });
+    rActions.appendChild(r);
+    result.hidden = false;
+  }
+
+  function runLive(){
+    var key = readKey();
+    if (!key) {
+      // Preserve a return path so the user lands back here after signup.
+      try { window.location.href = '/signup?return=/train'; } catch (_) { window.location = '/signup?return=/train'; }
+      return;
+    }
+    compile.disabled = true;
+    preview.disabled = true;
+    compile.textContent = 'Compiling…';
+    log.innerHTML = '';
+    result.hidden = true;
+    rChain.innerHTML = '';
+    rActions.innerHTML = '';
+    seenStages = {};
+
+    var threshold = parseFloat(kgate.value);
+    if (!Number.isFinite(threshold)) threshold = 0.90;
+    threshold = Math.max(0.50, Math.min(0.99, threshold));
+
+    var body = {
+      task: buildTaskDescription(),
+      base_model: selectedBase,
+      k_threshold: threshold,
+      examples: [],
+    };
+
+    logLine('signed in as ' + maskKey(key) + ' &middot; posting /v1/compile', 'ok');
+    logLine('base=' + selectedBase + ' &middot; k_threshold=' + threshold.toFixed(2) +
+      ' &middot; backend=' + (backendSel.value || 'auto') +
+      ' &middot; pack=' + (pack.value || 'none'), null);
+
+    fetch('/v1/compile', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + key,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(body),
+    }).then(function(res){
+      return res.json().catch(function(){ return {}; }).then(function(b){ return { ok: res.ok, status: res.status, body: b }; });
+    }).then(function(r){
+      if (r.status === 401 || r.status === 403) return failAuth();
+      if (r.status === 429) return failQuota();
+      if (r.status >= 500) return failServer('POST /v1/compile returned ' + r.status);
+      if (!r.ok) {
+        return failServer((r.body && r.body.error) ? r.body.error : ('status ' + r.status));
+      }
+      var jobId = r.body && (r.body.job_id || r.body.id);
+      if (!jobId) return failServer('no job_id in response');
+      logLine('job queued: ' + jobId + ' &middot; polling /v1/compile/' + jobId + ' every 500ms', 'ok');
+      result.hidden = false;
+      setResultRow({ job_id: jobId, status: r.body.status || 'queued' });
+      polling = true;
+      pollJob(jobId, key);
+    }).catch(function(){
+      failServer('network error reaching /v1/compile');
+    });
+  }
+
+  compile.addEventListener('click', runLive);
+
   updateQuote();
   updateGates();
+
+  // Auth hint: if the user lands here without a key, surface it in the log
+  // (don't auto-redirect, because they may want to preview-run first).
+  if (!readKey()) {
+    logLine('no API key stored in this browser. preview mode works; Run for real will route you through /signup.', null);
+  }
 })();
 </script>
 </body>

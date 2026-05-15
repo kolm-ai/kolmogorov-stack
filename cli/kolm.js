@@ -224,6 +224,7 @@ COMMANDS
   bench <art.kolm> [opts]          emit artifact benchmark JSON (alias: benchmark)
   score <art.kolm>                 print just the K-score
   inspect <art.kolm>               manifest + recipes + signature
+  export <art.kolm> [opts]         convert a .kolm to GGUF / MLX / ONNX / CoreML / TensorRT (--preview = forecast JSON, no toolchain)
   verify <art.kolm> [--binder out.html]  full verification + optional printable compliance binder
   serve [--mcp] [--http] [--port]  expose ~/.kolm/artifacts/* as MCP tools
   publish <art.kolm>               push to public gallery (Sprint 4)
@@ -487,6 +488,64 @@ USAGE
 
 USAGE
   kolm inspect <artifact.kolm>
+`,
+  export: `kolm export - convert a .kolm into a target-runtime artifact (gguf, mlx, onnx, coreml, tensorrt).
+
+USAGE
+  kolm export <artifact.kolm> --backend <name> [opts]              full export (toolchain required)
+  kolm export <artifact.kolm> --preview --device <name> --quant <q>  forecast JSON only (no toolchain)
+
+BACKENDS
+  gguf       llama.cpp / Ollama / LM Studio (ARM, x86, Vulkan, CUDA via llama.cpp)
+  mlx        Apple Silicon (mlx_lm; M1/M2/M3 family)
+  onnx       Windows / generic edge / Android via ONNX Runtime Mobile
+  coreml     iPhone / iPad / Mac (Neural Engine)
+  tensorrt   NVIDIA serving (Ampere or newer recommended)
+
+OPTIONS (export)
+  --backend <name>             one of the backends above (required)
+  --out <dir>                  output directory (default ./exports)
+  --quant <q4_k_m|q5_k_m|q8_0|f16|int4|int8|fp16>   quantization tier (backend-specific)
+  --base-model <hf-id>         override the manifest's base model id
+  --opset <n>                  onnx opset version
+  --quantize / --q4            mlx q4 quantize flag
+
+OPTIONS (preview)
+  --preview                    do not run the toolchain; emit forecast JSON to stdout
+  --device <name>              target device label (see /device-transfer for the picker)
+                                supported keys: pi5-4, pi5-8, jetson-orin-nano, jetson-agx-32,
+                                jetson-agx-64, steam-deck, m3-pro, m3-max, snapdragon-x-elite,
+                                rtx-4090, iphone-15-pro, pixel-8
+  --quant <q>                  one of: fp16 | int8 | int4 (default int4) | int3
+  --base <key>                 source base key. supported: llama-3.1-8b, llama-3.2-3b,
+                                llama-3.2-1b, phi-3-mini, mistral-7b. defaults to inferred
+                                from the .kolm manifest, or to llama-3.2-3b if no artifact is
+                                provided.
+  --json                       emit JSON (default when --preview is set)
+
+PREVIEW OUTPUT
+  {
+    "device":                "M3 Pro MacBook Pro (18GB)",
+    "quant":                 "int4",
+    "size_mb":               1741,
+    "estimated_latency_ms":  33.3,
+    "tok_per_s":             30,
+    "k_loss":                -0.02,
+    "k_score_est":           0.910,
+    "fits":                  true,
+    "backend":               "mlx"
+  }
+
+The preview path runs in pure JS using the same lookup table as /device-transfer
+on the web. It does NOT touch python / llama.cpp / mlx_lm / optimum / trtllm. If
+the artifact path resolves on disk, the manifest is consulted for an inferred
+base; otherwise the --base flag (or default) is used.
+
+EXAMPLES
+  kolm export job_xy.kolm --backend gguf --quant q4_k_m --out ./out
+  kolm export your-artifact.kolm --backend mlx --quantize
+  kolm export job_xy.kolm --preview --device m3-pro --quant int4
+  kolm export --preview --device pi5-4 --quant int4 --base llama-3.2-3b
 `,
   verify: `kolm verify - run every offline check kolm makes about an artifact
 and (optionally) emit a printable HTML compliance binder a security reviewer
@@ -3707,7 +3766,7 @@ const COMPLETION_VERBS = [
   'score', 'inspect', 'diff', 'verify', 'serve', 'publish', 'capture', 'labels', 'distill',
   'config', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'logs', 'ask', 'version', 'help', 'completion', 'upgrade', 'update',
-  'models', 'gpu',
+  'models', 'gpu', 'export',
 ];
 const COMPLETION_SUBS = {
   compute: ['list', 'detect', 'pick', 'use', 'info', 'test', 'status'],
@@ -4248,21 +4307,211 @@ async function cmdUpdate(args) {
 //                              [--out <dir>] [--quant <q4_k_m|q5_k_m|q8_0|f16>]
 //                              [--base-model <hf-id>]`
 //
-// Honest path: spawn `python -m apps.export` with the user's Python (3.10+ on
-// PATH). If python isn't there, or the backend's toolchain isn't installed,
-// we surface the install hint from the backend module instead of pretending.
-async function cmdExport(args) {
-  if (maybeHelp('export', args)) return;
-  const artifact = args.find(a => !a.startsWith('--'));
-  if (!artifact) {
-    const e = new Error('usage: kolm export <artifact.kolm> --backend <name>');
+// `kolm export <artifact.kolm> --preview --device <name> --quant <q>`
+//   Computes the forecast (size_mb, tok/s, k_loss, fits, backend) in pure JS
+//   using the same lookup table as /device-transfer. No python, no toolchain.
+//
+// Honest path (non-preview): spawn `python -m apps.export` with the user's
+// Python (3.10+ on PATH). If python isn't there, or the backend's toolchain
+// isn't installed, we surface the install hint from the backend module
+// instead of pretending.
+
+// Device-transfer lookup table. Keep in sync with the JS object on
+// public/device-transfer.html (search: DEVICE_TRANSFER_TABLE).
+const DEVICE_TRANSFER_TABLE = {
+  BASES: {
+    'llama-3.1-8b':  { label: 'Llama-3.1-8B',       params_b: 8.0, sizes_gb: { fp16: 16.0, int8: 8.0,  int4: 4.4,  int3: 3.3  }, fp16_k: 0.94 },
+    'llama-3.2-3b':  { label: 'Llama-3.2-3B',       params_b: 3.2, sizes_gb: { fp16: 6.0,  int8: 3.0,  int4: 1.7,  int3: 1.3  }, fp16_k: 0.93 },
+    'llama-3.2-1b':  { label: 'Llama-3.2-1B',       params_b: 1.2, sizes_gb: { fp16: 2.0,  int8: 1.0,  int4: 0.58, int3: 0.44 }, fp16_k: 0.90 },
+    'phi-3-mini':    { label: 'Phi-3-mini-3.8B',    params_b: 3.8, sizes_gb: { fp16: 7.6,  int8: 3.8,  int4: 2.1,  int3: 1.6  }, fp16_k: 0.92 },
+    'mistral-7b':    { label: 'Mistral-7B',         params_b: 7.2, sizes_gb: { fp16: 14.0, int8: 7.0,  int4: 3.9,  int3: 2.9  }, fp16_k: 0.93 },
+  },
+  K_LOSS: { fp16: 0.0, int8: -0.005, int4: -0.02, int3: -0.05 },
+  QUANT_RATE_SCALE: { fp16: 0.30, int8: 0.55, int4: 1.0, int3: 1.15 },
+  DEVICES: {
+    'pi5-4':              { label: 'Raspberry Pi 5 (4GB)',           ram_gb: 4,  base_rate: 4,   typical_class: '3b', backend: 'gguf' },
+    'pi5-8':              { label: 'Raspberry Pi 5 (8GB)',           ram_gb: 8,  base_rate: 4,   typical_class: '3b', backend: 'gguf' },
+    'jetson-orin-nano':   { label: 'Jetson Orin Nano (8GB)',         ram_gb: 8,  base_rate: 12,  typical_class: '7b', backend: 'gguf' },
+    'jetson-agx-32':      { label: 'Jetson AGX Orin (32GB)',         ram_gb: 32, base_rate: 32,  typical_class: '7b', backend: 'tensorrt' },
+    'jetson-agx-64':      { label: 'Jetson AGX Orin (64GB)',         ram_gb: 64, base_rate: 35,  typical_class: '7b', backend: 'tensorrt' },
+    'steam-deck':         { label: 'Steam Deck (16GB)',              ram_gb: 16, base_rate: 15,  typical_class: '7b', backend: 'gguf' },
+    'm3-pro':             { label: 'M3 Pro MacBook Pro (18GB)',      ram_gb: 18, base_rate: 30,  typical_class: '7b', backend: 'mlx' },
+    'm3-max':             { label: 'M3 Max MacBook Pro (36GB)',      ram_gb: 36, base_rate: 60,  typical_class: '7b', backend: 'mlx' },
+    'snapdragon-x-elite': { label: 'Snapdragon X Elite laptop',      ram_gb: 32, base_rate: 40,  typical_class: '7b', backend: 'onnx' },
+    'rtx-4090':           { label: 'NVIDIA RTX 4090 desktop',        ram_gb: 24, base_rate: 175, typical_class: '7b', backend: 'gguf' },
+    'iphone-15-pro':      { label: 'iPhone 15 Pro (8GB)',            ram_gb: 8,  base_rate: 12,  typical_class: '3b', backend: 'coreml' },
+    'pixel-8':            { label: 'Pixel 8 (8GB)',                  ram_gb: 8,  base_rate: 10,  typical_class: '3b', backend: 'onnx' },
+  },
+};
+
+// Resolve a friendly device key from a free-form --device string. Accepts the
+// internal key (e.g. 'm3-pro'), the label substring ('M3 Pro'), or a slugified
+// form. Returns the canonical key or null.
+function resolveDeviceKey(input) {
+  if (!input) return null;
+  const t = DEVICE_TRANSFER_TABLE.DEVICES;
+  if (t[input]) return input;
+  const norm = String(input).toLowerCase().trim();
+  // Exact slug match.
+  for (const k of Object.keys(t)) if (k.toLowerCase() === norm) return k;
+  // Substring match against label or key.
+  for (const k of Object.keys(t)) {
+    if (k.toLowerCase().includes(norm)) return k;
+    if (t[k].label.toLowerCase().includes(norm)) return k;
+  }
+  return null;
+}
+
+// Normalize a quant flag. Accepts fp16 / int8 / int4 / int3, plus the gguf
+// aliases q4_k_m / q5_k_m / q8_0 / f16 (mapping to the nearest tier the
+// forecast table understands).
+function resolveQuantKey(input) {
+  if (!input) return 'int4';
+  const s = String(input).toLowerCase();
+  if (s === 'fp16' || s === 'f16' || s === 'bf16' || s === 'f32') return 'fp16';
+  if (s === 'int8' || s === 'q8_0') return 'int8';
+  if (s === 'int4' || s === 'q4_k_m' || s === 'q5_k_m' || s === 'q4_0') return 'int4';
+  if (s === 'int3' || s === 'q3_k_s' || s === 'q3_0') return 'int3';
+  return null;
+}
+
+// Infer a base key from a .kolm manifest, best-effort. Returns null on miss.
+function inferBaseFromManifest(artifactPath) {
+  if (!artifactPath) return null;
+  try {
+    // Read just the manifest.json out of the zip without extracting all of it.
+    // We use a tiny zip-central-directory walk via the existing util if
+    // present; otherwise we shell out to `unzip -p`. Both are best-effort.
+    const buf = fs.readFileSync(artifactPath);
+    // Find "manifest.json" in the central directory. A .kolm is a zip;
+    // the manifest is small. We do a string search for the bytes.
+    const needle = Buffer.from('manifest.json');
+    let idx = buf.indexOf(needle);
+    if (idx < 0) return null;
+    // Scan forward looking for the local file header signature 0x04034b50
+    // before this filename. The local-header layout puts a small JSON blob
+    // right after the filename when compression method is 0 (stored).
+    // Easiest portable path: just regex out a "base":"..." string near
+    // the first manifest.json filename hit. The manifest is small enough
+    // that this is reliable for our writer.
+    const slice = buf.slice(idx, Math.min(buf.length, idx + 8192)).toString('utf8');
+    const m = slice.match(/"base"\s*:\s*"([^"]+)"/);
+    if (!m) return null;
+    const bs = m[1].toLowerCase();
+    // Heuristic: map common HF ids to our base keys.
+    if (bs.includes('llama-3.1-8b') || bs.includes('llama-3-8b')) return 'llama-3.1-8b';
+    if (bs.includes('llama-3.2-3b') || bs.includes('llama-3-3b')) return 'llama-3.2-3b';
+    if (bs.includes('llama-3.2-1b') || bs.includes('llama-3-1b')) return 'llama-3.2-1b';
+    if (bs.includes('phi-3') || bs.includes('phi3')) return 'phi-3-mini';
+    if (bs.includes('mistral-7b') || bs.includes('mistral_7b')) return 'mistral-7b';
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Compute the forecast. Mirrors the JS function on /device-transfer.
+function computeExportPreview({ baseKey, quantKey, deviceKey }) {
+  const T = DEVICE_TRANSFER_TABLE;
+  const base = T.BASES[baseKey];
+  const dev = T.DEVICES[deviceKey];
+  if (!base) {
+    const e = new Error(`unknown base: ${baseKey}. one of: ${Object.keys(T.BASES).join(', ')}`);
     e.exitCode = EXIT.BAD_ARGS;
     throw e;
   }
+  if (!dev) {
+    const e = new Error(`unknown device: ${deviceKey}. one of: ${Object.keys(T.DEVICES).join(', ')}`);
+    e.exitCode = EXIT.BAD_ARGS;
+    throw e;
+  }
+  const sizeGb = base.sizes_gb[quantKey];
+  const kLoss = T.K_LOSS[quantKey];
+  const kEst = Math.max(0, base.fp16_k + kLoss);
+  const refParams = dev.typical_class === '3b' ? 3.2 : 7.2;
+  const paramScale = refParams / base.params_b;
+  let rate = dev.base_rate * T.QUANT_RATE_SCALE[quantKey] * paramScale;
+  rate = Math.round(rate * 10) / 10;
+  const needGb = sizeGb + 1.0;
+  const fitPct = needGb / dev.ram_gb;
+  let verdict = 'fit';
+  if (fitPct > 1.0) verdict = 'over';
+  else if (fitPct > 0.80) verdict = 'tight';
+  const ms = rate > 0 ? Math.round(1000 / rate * 10) / 10 : null;
+  return {
+    device: dev.label,
+    device_key: deviceKey,
+    quant: quantKey,
+    base: base.label,
+    base_key: baseKey,
+    size_gb: sizeGb,
+    size_mb: Math.round(sizeGb * 1024),
+    estimated_latency_ms: ms,
+    tok_per_s: rate,
+    k_score_fp16: base.fp16_k,
+    k_loss: kLoss,
+    k_score_est: Math.round(kEst * 1000) / 1000,
+    fits: verdict !== 'over',
+    fit_verdict: verdict,
+    need_gb: Math.round(needGb * 10) / 10,
+    device_ram_gb: dev.ram_gb,
+    backend: dev.backend,
+    note: 'forecast. estimates from public llama.cpp / MLX / CoreML benchmarks (2025). measure on your actual hardware before procurement.',
+  };
+}
+
+async function cmdExport(args) {
+  if (maybeHelp('export', args)) return;
   const get = (flag) => {
     const i = args.indexOf(flag);
     return i >= 0 ? args[i + 1] : null;
   };
+  const isPreview = args.includes('--preview');
+  const artifact = args.find(a => !a.startsWith('--'));
+
+  // ---------- preview path: no toolchain, no artifact required ----------
+  if (isPreview) {
+    const quantKey = resolveQuantKey(get('--quant')) || 'int4';
+    if (!resolveQuantKey(get('--quant') || 'int4')) {
+      const e = new Error(`--quant invalid. one of: fp16 | int8 | int4 | int3 (gguf aliases: q4_k_m, q5_k_m, q8_0, f16, q3_k_s)`);
+      e.exitCode = EXIT.BAD_ARGS;
+      throw e;
+    }
+    const deviceArg = get('--device');
+    if (!deviceArg) {
+      const e = new Error('--device required for --preview. one of: ' + Object.keys(DEVICE_TRANSFER_TABLE.DEVICES).join(', '));
+      e.exitCode = EXIT.BAD_ARGS;
+      throw e;
+    }
+    const deviceKey = resolveDeviceKey(deviceArg);
+    if (!deviceKey) {
+      const e = new Error(`--device unknown: ${deviceArg}. one of: ${Object.keys(DEVICE_TRANSFER_TABLE.DEVICES).join(', ')}`);
+      e.exitCode = EXIT.BAD_ARGS;
+      throw e;
+    }
+    // Resolve base: explicit --base wins, else inferred from artifact, else default.
+    let baseKey = get('--base') || null;
+    if (!baseKey && artifact) {
+      const ap = resolveArtifact(artifact);
+      if (ap) baseKey = inferBaseFromManifest(ap);
+    }
+    if (!baseKey) baseKey = 'llama-3.2-3b';
+    if (!DEVICE_TRANSFER_TABLE.BASES[baseKey]) {
+      const e = new Error(`--base unknown: ${baseKey}. one of: ${Object.keys(DEVICE_TRANSFER_TABLE.BASES).join(', ')}`);
+      e.exitCode = EXIT.BAD_ARGS;
+      throw e;
+    }
+    const result = computeExportPreview({ baseKey, quantKey, deviceKey });
+    process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+    return;
+  }
+
+  // ---------- real export path ----------
+  if (!artifact) {
+    const e = new Error('usage: kolm export <artifact.kolm> --backend <name>  (or --preview --device <name> --quant <q>)');
+    e.exitCode = EXIT.BAD_ARGS;
+    throw e;
+  }
   const backend = get('--backend');
   if (!backend) {
     const e = new Error('--backend required. one of: gguf | mlx | executorch | tensorrt | coreml | onnx');
