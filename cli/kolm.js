@@ -4189,6 +4189,13 @@ async function cmdChat(args) {
     if (airgapMode) return false; // narration-only in airgap mode
     const plan = chatPlanAction(promptText, reply);
     if (!plan) return false;
+    // If the cloud already kicked off a compile job in its /v1/assistant
+    // response (reply.data.job_id present), do NOT also dispatch a local
+    // `kolm compile`. The cloud roundtrip IS the compile — re-firing it
+    // would create a duplicate job and burn the user's quota twice.
+    if (plan.action === 'compile_cloud' && reply && reply.data && reply.data.job_id) {
+      return false;
+    }
     if (jsonMode) {
       // --json contract: stdout stays a single parseable document. Surface
       // the plan in the reply rather than executing.
@@ -4325,7 +4332,11 @@ async function cmdChat(args) {
       // run it. Airgap mode stays narration-only.
       if (!airgapMode) {
         const plan = sc ? sc.plan : chatPlanAction(input, reply);
-        if (plan) {
+        // Cloud already executed the compile (reply.data.job_id is set);
+        // skip the local dispatch to avoid burning a second compile.
+        const cloudAlreadyCompiled = plan && plan.action === 'compile_cloud' &&
+          reply && reply.data && reply.data.job_id;
+        if (plan && !cloudAlreadyCompiled) {
           let go = true;
           if (plan.expensive && !autoYes) {
             go = await chatConfirm(plan.label);
