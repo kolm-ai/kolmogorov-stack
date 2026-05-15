@@ -220,6 +220,7 @@ COMMANDS
   train --spec <file>              alias for compile from a spec (training entry point)
   train --namespace <n>            alias for distill (after capture)
   seeds <sub>                      local-first training-data helpers (new|generate|list|bootstrap)
+  anonymize <file.jsonl> [opts]    shortcut for 'seeds generate --strategy redact-pii-templated'
   run <art.kolm> '<input>'         execute a .kolm against an input
   eval <art.kolm>                  re-run embedded evals, print K-score
   bench <art.kolm> [opts]          emit artifact benchmark JSON (alias: benchmark)
@@ -299,21 +300,30 @@ EXAMPLES
 The server-side intent parser is deterministic and rule-based (never an LLM,
 never your data leaving) and returns a narration + concrete next steps.
 `,
-  chat: `kolm chat - interactive natural-language session.
+  chat: `kolm chat - interactive natural-language session that EXECUTES commands.
 
 USAGE
-  kolm chat [--airgap] [--once "<prompt>"] [--json]
+  kolm chat [--airgap] [--once "<prompt>"] [--yes] [--json]
 
 DESCRIPTION
-  Open an interactive natural-language session with kolm. Talks to the
-  hosted /v1/assistant rule-based parser when online (deterministic, no LLM,
-  no telemetry). Falls back to a local mirror of the same parser when
-  offline or when --airgap is set, so the chat works on a fully air-gapped
-  machine.
+  Open an interactive natural-language session with kolm. When you ask it
+  to DO something ("make a redactor for medical notes", "anonymize my
+  customer data", "upgrade kolm"), chat now runs the matching kolm
+  subcommand for you. Informational asks ("show my key", "what artifacts
+  do I have") keep the existing narration-only behavior.
+
+  Before running a destructive or expensive command chat prints the exact
+  argv it is about to execute and asks for confirmation. Default is yes.
+  Pass --yes to auto-confirm, or set KOLM_CHAT_AUTO=1. In --once mode chat
+  auto-confirms (non-interactive shells cannot read a prompt).
+
+  Airgap mode (--airgap or KOLM_AIRGAP=1) keeps chat narration-only and
+  never shells out, so it stays deterministic on an air-gapped machine.
 
 FLAGS
-  --airgap, --offline       force local rule-based parser only, no network
-  --once "<prompt>"         non-interactive single-prompt mode
+  --airgap, --offline       narration-only, no shell-out, no cloud calls
+  --once "<prompt>"         non-interactive single-prompt mode (auto-confirms)
+  --yes, -y                 skip the [Y/n] confirmation prompt before actions
   --json                    machine-readable JSON output (with --once)
 
 SLASH COMMANDS (interactive mode)
@@ -321,22 +331,26 @@ SLASH COMMANDS (interactive mode)
   /exit, /quit              leave the session
   /clear                    clear the screen
   /airgap                   toggle airgap mode mid-session
+  /yes                      toggle auto-confirm mid-session
 
 ENVIRONMENT
   KOLM_AIRGAP=1             same as --airgap, useful for air-gapped CI
+  KOLM_CHAT_AUTO=1          same as --yes, useful for unattended scripts
   KOLM_BASE=https://...     override the assistant endpoint
 
 EXAMPLES
-  kolm chat                          start an interactive session
-  kolm chat --airgap                 force offline mode
-  kolm chat --once "show my builds"  one-shot query and exit
-  echo "compile a phi redactor" | kolm chat --once -  read prompt from stdin
+  kolm chat                                       start an interactive session
+  kolm chat --once "make a redactor for medical notes" --yes
+  kolm chat --once "anonymize my customer data"   prompts then runs kolm seeds generate
+  kolm chat --once "upgrade kolm" --yes           runs kolm upgrade for you
+  kolm chat --once "show my key"                  narrates (informational, no shell-out)
+  kolm chat --airgap                              force offline, narration-only
 
 NOTES
-  The local parser handles the same intents as the hosted endpoint: help,
-  status, usage, list, compile, run, tune, install, upgrade, doctor. Heavy
-  intents (compile, run) print the right CLI command for you to execute
-  locally; light intents (status, list, help) return immediately.
+  Actionable intents (new, compile, run, seeds generate, upgrade, doctor)
+  dispatch to the matching cmd* function with rebuilt argv. Informational
+  intents (status, usage, list, whoami, help) keep their narration. In
+  --airgap mode every intent is narration-only.
 `,
   login: `kolm login - save an API key to ~/.kolm/config.json.
 
@@ -457,7 +471,7 @@ EXAMPLES
   new: `kolm new - scaffold a spec.json you can compile into a .kolm.
 
 USAGE
-  kolm new <name> [--from <template>] [--out <file>]
+  kolm new <name> [--from <template>] [--out <file>] [--force] [--yes]
 
 TEMPLATES
   --from summarizer   deterministic sentence-pick summarizer (no LLM, ships working)
@@ -466,12 +480,23 @@ TEMPLATES
   --from classifier   keyword-weighted classifier (categories pack)
   --from blank        STUB - echoes input back unchanged; replace recipes[0].source before shipping
 
+FLAGS
+  --out <file>        write to this exact path. Errors if the file exists (no auto-bump).
+  --force             overwrite the output path silently (works with --out or the default).
+  --yes, -y           in interactive shells, skip the "use blank?" confirmation prompt.
+                      Also honors KOLM_AUTO_YES=1 in the environment.
+
 If --from is omitted and the name hints at a task (summari*, redact*, classif*,
 extract*) kolm picks a matching template. Otherwise the blank stub is used; a
-warning is printed when the blank stub is selected so you don't ship an echo.
+warning is printed when the blank stub is selected and (in a TTY) you'll be
+asked to confirm so you don't accidentally ship an echo.
 
-The output is a JSON file at <name>.spec.json (or --out <file>) that you can
-compile with: kolm compile --spec <name>.spec.json --out <name>.kolm
+If <name>.spec.json already exists and --out wasn't passed, kolm auto-bumps to
+<name>-2.spec.json, <name>-3.spec.json, ... up to <name>-10.spec.json and prints
+a note. Pass --force to overwrite, or --out <path> to choose explicitly.
+
+The output is a JSON file at <name>.spec.json that you can compile with:
+  kolm compile --spec <name>.spec.json --out <name>.kolm
 `,
   run: `kolm run - execute a .kolm artifact locally.
 
@@ -938,6 +963,32 @@ HONESTY
   We never hallucinate data from thin air. Every strategy requires seeds as input
   (except bootstrap which ships public-domain data). Provenance is recorded on every
   row. Determinism: same --from + --strategy + --seed-rng -> identical bytes.
+`,
+  anonymize: `kolm anonymize - shortcut for "seeds generate --strategy redact-pii-templated".
+
+USAGE
+  kolm anonymize <file.jsonl> [--count <N>] [--out <path>] [--seed-rng <int>] [--json]
+
+Reads a jsonl of rows (each row at minimum has "input" / "output" fields the same
+way kolm seeds expects them), runs the rule-based PII permutation strategy over
+them, and writes the result to <basename>-anonymized.jsonl by default.
+
+DEFAULTS
+  --count       50
+  --strategy    redact-pii-templated (locked; this is the verb you wanted)
+  --seed-rng    1
+  --out         <basename of input>-anonymized.jsonl in the current directory
+
+Every row in the output is tagged source="templated" with a from_seed pointer
+into the original file. No data is sent over the network. No LLM is consulted.
+
+For more control (other strategies, different output dir, different counts,
+local-llm mode) call \`kolm seeds generate\` directly.
+
+EXAMPLES
+  kolm anonymize support-tickets.jsonl
+  kolm anonymize phi-rows.jsonl --count 200 --seed-rng 42
+  kolm anonymize raw.jsonl --out clean.jsonl
 `,
   models: `kolm models - inspect the local model registry (license + size + recommendation).
 
@@ -1610,41 +1661,112 @@ async function cmdNew(args) {
     throw err;
   }
   const outIdx = args.indexOf('--out');
-  const outPath = outIdx >= 0 ? args[outIdx + 1] : path.resolve(process.cwd(), `${name}.spec.json`);
-  if (fs.existsSync(outPath)) { console.error(`error: ${outPath} already exists. pick a new name or --out <path>.`); process.exit(1); }
+  const explicitOut = outIdx >= 0 ? args[outIdx + 1] : null;
+  const force = args.includes('--force');
+  const autoYes = args.includes('--yes') || args.includes('-y') || process.env.KOLM_AUTO_YES === '1';
+  // Default out path. If the default collides, auto-bump to <name>-2.spec.json,
+  // <name>-3.spec.json, up to <name>-10.spec.json. Explicit --out is honored
+  // exactly (no auto-bump) so scripts get predictable paths. --force overwrites
+  // either the default or the explicit path silently.
+  let outPath;
+  let autoBumped = false;
+  let originalDefaultPath = null;
+  if (explicitOut) {
+    outPath = path.resolve(process.cwd(), explicitOut);
+    if (fs.existsSync(outPath) && !force) {
+      console.error(`error: ${outPath} already exists. pass --force to overwrite or pick a different --out path.`);
+      process.exit(1);
+    }
+  } else {
+    const defaultPath = path.resolve(process.cwd(), `${name}.spec.json`);
+    originalDefaultPath = defaultPath;
+    if (!fs.existsSync(defaultPath) || force) {
+      outPath = defaultPath;
+    } else {
+      // Auto-bump: try <name>-2, <name>-3, ... <name>-10.
+      let picked = null;
+      for (let i = 2; i <= 10; i++) {
+        const candidate = path.resolve(process.cwd(), `${name}-${i}.spec.json`);
+        if (!fs.existsSync(candidate)) { picked = candidate; break; }
+      }
+      if (!picked) {
+        console.error(`error: ${defaultPath} and ${name}-2..${name}-10 all exist. clean up or pass --out <path> or --force.`);
+        process.exit(1);
+      }
+      outPath = picked;
+      autoBumped = true;
+    }
+  }
+  // Blank-template guard: warn aggressively, and in TTY interactively prompt
+  // before writing the echo-stub. This is the exact failure mode the user hit
+  // (compiling echo-stub without realizing). Non-TTY proceeds with warning to
+  // stderr so --once style invocations still work.
+  if (tmplName === 'blank') {
+    const warn = (s) => process.stderr.write(s + '\n');
+    warn('');
+    warn('WARNING: the blank template is a STUB that echoes input back unchanged.');
+    warn('         it compiles, signs, and passes its own eval - but does no real work.');
+    warn('         edit recipes[0].source before you ship. concrete templates that work');
+    warn('         out of the box: --from summarizer | redactor | extractor | classifier');
+    warn('');
+    if (process.stdin.isTTY && !autoYes) {
+      const ans = (await prompt('continue with the echo-stub template? [y/N] ')).trim().toLowerCase();
+      if (ans !== 'y' && ans !== 'yes') {
+        console.log('aborted. nothing was written.');
+        console.log('tip: pick a concrete template, e.g. `kolm new ' + name + ' --from summarizer`.');
+        return;
+      }
+    }
+  }
   const jobId = `job_${name.replace(/-/g, '_')}_v1`;
   const spec = tmpl(jobId);
   fs.writeFileSync(outPath, JSON.stringify(spec, null, 2) + '\n');
   const relSpec = path.relative(process.cwd(), outPath) || outPath;
-  console.log(`wrote: ${outPath}`);
+  if (autoBumped && originalDefaultPath) {
+    const relOrig = path.relative(process.cwd(), originalDefaultPath) || originalDefaultPath;
+    console.log(`note: ${relOrig} already exists. wrote: ${outPath}.`);
+  } else {
+    console.log(`wrote: ${outPath}`);
+  }
   if (!explicitFrom && inferred) {
     console.log(`template: ${tmplName} (inferred from name "${name}"; override with --from blank)`);
   } else {
     console.log(`template: ${tmplName}`);
   }
-  if (tmplName === 'blank') {
-    console.log('');
-    console.log('WARNING: the blank template is a STUB that echoes input back unchanged.');
-    console.log('         it compiles, signs, and passes its own eval - but does no real work.');
-    console.log('         edit recipes[0].source before you ship. concrete templates that work');
-    console.log('         out of the box: --from summarizer | redactor | extractor | classifier');
-  }
+  // For non-blank templates the WARNING block is unnecessary; only blank gets
+  // it (emitted to stderr above so the y/N prompt is co-located).
   console.log('');
   console.log('next steps:');
-  console.log(`  1. compile:  kolm compile --spec ${relSpec} --out ${name}.kolm`);
+  // Derive the artifact basename from the (possibly auto-bumped) spec path so
+  // hints stay consistent: email-summarizer-2.spec.json -> email-summarizer-2.kolm.
+  const artBase = path.basename(outPath).replace(/\.spec\.json$/i, '');
+  console.log(`  1. compile:  kolm compile --spec ${relSpec} --out ${artBase}.kolm`);
   if (tmplName === 'summarizer') {
-    console.log(`  2. run:      kolm run ${name}.kolm '{"text":"first sentence. second one. third one too."}'`);
+    console.log(`  2. run:      kolm run ${artBase}.kolm '{"text":"first sentence. second one. third one too."}'`);
   } else if (tmplName === 'redactor') {
-    console.log(`  2. run:      kolm run ${name}.kolm '{"text":"call 555-123-4567 today"}'`);
+    console.log(`  2. run:      kolm run ${artBase}.kolm '{"text":"call 555-123-4567 today"}'`);
   } else if (tmplName === 'extractor') {
-    console.log(`  2. run:      kolm run ${name}.kolm '{"text":"invoice dated 2026-05-09"}'`);
+    console.log(`  2. run:      kolm run ${artBase}.kolm '{"text":"invoice dated 2026-05-09"}'`);
   } else if (tmplName === 'classifier') {
-    console.log(`  2. run:      kolm run ${name}.kolm '{"text":"I need a refund"}'`);
+    console.log(`  2. run:      kolm run ${artBase}.kolm '{"text":"I need a refund"}'`);
   } else {
-    console.log(`  2. run:      kolm run ${name}.kolm '{"text":"any input"}'`);
+    console.log(`  2. run:      kolm run ${artBase}.kolm '{"text":"any input"}'`);
   }
-  console.log(`  3. verify:   kolm verify ${name}.kolm`);
-  console.log(`  4. inspect:  kolm inspect ${name}.kolm`);
+  console.log(`  3. verify:   kolm verify ${artBase}.kolm`);
+  console.log(`  4. inspect:  kolm inspect ${artBase}.kolm`);
+  // Surface the training-data flow as a first-class step for real templates.
+  // Skip for blank (no template to seed from). Summarizer has no shipped
+  // seed-template today; we point at 'generic' so the verb stays discoverable.
+  const seedTemplateMap = {
+    summarizer: 'generic',
+    redactor: 'phi-redactor',
+    classifier: 'ticket-classifier',
+    extractor: 'invoice-extractor',
+  };
+  const seedName = seedTemplateMap[tmplName];
+  if (seedName) {
+    console.log(`  5. add training data:  kolm seeds new ${seedName}   # scaffold + iterate on your real examples`);
+  }
   console.log('');
   console.log(`to edit behavior, open ${relSpec} and change recipes[0].source (a JS function).`);
   console.log(`docs: /docs/AUTHORING.md for the full schema + sensitive-data caveats.`);
@@ -2975,6 +3097,12 @@ async function cmdDoctor(args) {
     process.exit(EXIT.MISSING_PREREQ);
   }
   process.stdout.write(`all required checks pass (${yellow} warning${yellow === 1 ? '' : 's'}).\n`);
+  // Training-data tip: surfaces kolm seeds so new users know the path exists.
+  // Two-line nudge, not a check (doesn't affect exit code or counters).
+  process.stdout.write('\n');
+  process.stdout.write('tip: to bootstrap training data for your task, run:\n');
+  process.stdout.write('  kolm seeds new <template>          # scaffold a starter seed file\n');
+  process.stdout.write('  kolm seeds bootstrap --task phi-redactor   # public-domain seed dataset\n');
 }
 
 // kolm logs — tail the local run-history log. Each kolm run / kolm bench / mcp
@@ -3420,7 +3548,7 @@ function chatDetectIntent(prompt) {
   // compile. Mirrors src/assistant.js so airgap parity holds.
   if (CHAT_JOB_ID_RE.test(p)) return 'job_status';
   if (/^(help|hi|hello|hey|what can you do|what do you do)\b/.test(p)) return 'help';
-  if (/\b(doctor|debug|why( is| 's|s) it broken|whats wrong|health check)\b/.test(p)) return 'doctor';
+  if (/\b(doctor|debug|why( is| 's|s) it broken|whats wrong|health check|check setup|check (my )?(setup|health|install|environment|config))\b/.test(p)) return 'doctor';
   if (/\b(usage|how much (have i|did i)|left in (my )?quota|consumed|burning)\b/.test(p)) return 'usage';
   if (/\b(status|account|where am i|am i on|what plan)\b/.test(p)) return 'status';
   if (/\b(list|show|all my|what (have i|did i) (build|compile|ship))\b/.test(p)) return 'list';
@@ -3662,7 +3790,9 @@ function renderChatReply(reply) {
     console.log(color('31', 'kolm > (no reply)'));
     return;
   }
-  const tag = reply._source === 'local' ? color('2', '[airgap] ') : '';
+  const tag = reply._source === 'local' ? color('2', '[airgap] ')
+            : reply._source === 'action' ? color('2', '[action] ')
+            : '';
   const head = color('36', 'kolm') + ' ' + color('2', '>') + ' ';
   const narration = reply.narration || (reply.ok === false ? '(no narration)' : '');
   // The narration may contain newlines (doctor case). Indent continuation
@@ -3722,14 +3852,20 @@ function printChatHelp() {
   console.log('  /help                show this menu');
   console.log('  /exit, /quit         leave the session');
   console.log('  /clear               clear the screen');
-  console.log('  /airgap              toggle airgap mode mid-session');
+  console.log('  /airgap              toggle airgap mode (narration-only, no shell-out)');
+  console.log('  /yes                 toggle auto-confirm for actions');
   console.log('');
-  console.log(color('1', 'examples'));
-  console.log("  show my status");
-  console.log("  show my last 3 builds");
-  console.log("  compile a recipe that redacts phi");
-  console.log("  install claude-code");
-  console.log("  upgrade to pro");
+  console.log(color('1', 'action examples') + color('2', ' . chat will run the matching kolm verb (with confirm)'));
+  console.log('  make a redactor for medical notes        -> kolm new ... --from redactor');
+  console.log('  build me a summarizer                    -> kolm new ... --from summarizer');
+  console.log('  anonymize my customer data               -> kolm seeds generate --strategy redact-pii-templated');
+  console.log('  upgrade kolm                             -> kolm upgrade');
+  console.log('  check setup                              -> kolm doctor');
+  console.log('');
+  console.log(color('1', 'narration examples') + color('2', ' . chat replies, no shell-out'));
+  console.log('  show my status');
+  console.log('  show my last 3 builds');
+  console.log('  install claude-code');
   console.log('');
 }
 
@@ -3745,6 +3881,218 @@ function readStdinSync() {
   }
 }
 
+// --- action-mode helpers ------------------------------------------------
+// The classifier in localAssistantParse() (mirrored on the server) returns a
+// narrative reply for every intent. Action mode adds a second pass: for the
+// subset of intents that map cleanly to a concrete kolm verb, we rebuild the
+// argv and dispatch to the matching cmd* function.
+//
+// Informational intents (status / usage / list / help / install) stay
+// narration-only. They are the read-only reference card and the chat dock
+// already renders them well. Airgap mode forces every intent narration-only.
+
+// Map a free-text prompt to one of the SPEC_TEMPLATES keys, with a sensible
+// fallback to blank. Same heuristic the `kolm new` auto-template uses on the
+// name slug, but applied to the entire prompt so phrases like "make a redactor
+// for medical notes" or "build me a summarizer" resolve cleanly.
+// Find a seeds.jsonl-shaped file in the current working directory so the
+// "anonymize my customer data" -> `kolm seeds generate` plan has a concrete
+// --from path. Prefers ./seeds.jsonl, then any *.jsonl. Returns the basename
+// (relative) so the action label stays readable in the [Y/n] prompt.
+function findSeedsFileInCwd() {
+  try {
+    const cwd = process.cwd();
+    const preferred = path.join(cwd, 'seeds.jsonl');
+    if (fs.existsSync(preferred)) return 'seeds.jsonl';
+    const entries = fs.readdirSync(cwd).filter(function (f) { return /\.jsonl$/i.test(f); });
+    if (entries.length === 1) return entries[0];
+    // If multiple jsonls present, prefer the lexicographically first so the
+    // plan is deterministic. The user can always re-run with explicit args.
+    if (entries.length > 1) return entries.sort()[0];
+  } catch (_e) { /* ignore */ }
+  return null;
+}
+
+function chatInferTemplate(prompt) {
+  const p = chatLc(prompt);
+  // Use prefix word-boundaries only so "redactor"/"summarizer"/"classifier" /
+  // "extractor" all match their root verbs cleanly. \b on both sides would
+  // miss "redactor" because the trailing "or" keeps it inside the word.
+  if (/\b(redact|deidentify|de-identify|phi|pii|scrub|mask|anonymi[sz]e)/.test(p)) return 'redactor';
+  if (/\b(summari[sz]|abstract|tldr|tl-dr|digest|brief)/.test(p)) return 'summarizer';
+  if (/\b(classif|triag|categor|label|route|router|sort)/.test(p)) return 'classifier';
+  if (/\b(extract|parse|fields|invoice|receipt)/.test(p)) return 'extractor';
+  return 'blank';
+}
+
+// Pick a short slug name out of a free-text "make/build/create a {kind}" ask.
+// We use the inferred template name as the spine ("redactor", "summarizer",
+// etc.) and let the user rename later via --out. This avoids guessing a domain
+// slug ("medical-notes-redactor") that the user didn't actually type.
+function chatInferArtifactName(prompt, template) {
+  const stripped = chatTrim(prompt)
+    .replace(/^(please\s+)?(compile|build|make|create|new)\s+(me\s+)?(a\s+|an\s+)?/i, '')
+    .replace(/\s+(for|to|that|which|from)\s+.*$/i, '');
+  const candidate = slugify(stripped);
+  if (candidate && candidate !== 'artifact' && candidate.length >= 3 && candidate.length <= 40) return candidate;
+  return template === 'blank' ? 'my-artifact' : 'my-' + template;
+}
+
+// Decide whether a parsed reply maps to an executable kolm verb. Returns
+// either { action: 'new'|'compile_cloud'|'seeds_generate'|'upgrade'|'doctor',
+// argv, label, expensive } or null when the intent is informational only.
+//
+// We INTENTIONALLY pass through {status, usage, list, install, help,
+// job_status, tune, run} as narration-only. status/list/install are the
+// reference-card surface; job_status only works online; run needs a concrete
+// artifact id which the local parser cannot reliably extract from a chat
+// prompt without surprising the user.
+function chatPlanAction(prompt, reply) {
+  if (!reply || reply.ok === false) return null;
+  const intent = reply.intent;
+  const lower = chatLc(prompt);
+
+  if (intent === 'compile') {
+    const task = chatExtractTask(prompt);
+    // "make/build/create a {redactor|summarizer|...}" without a real task body
+    // is a scaffold ask, not a cloud-compile ask. Route it through `kolm new`
+    // so the user gets a spec.json they can edit + compile offline.
+    const scaffoldVerb = /^(please\s+)?(make|build|create|new|scaffold|generate)\b/.test(lower);
+    const looksLikeKind = /\b(redactor|summari[sz]er|classifier|extractor|recipe|artifact|kolm)\b/.test(lower);
+    if (scaffoldVerb && looksLikeKind) {
+      const tmpl = chatInferTemplate(prompt);
+      const name = chatInferArtifactName(prompt, tmpl);
+      return {
+        action: 'new',
+        argv: [name, '--from', tmpl],
+        label: 'kolm new ' + name + ' --from ' + tmpl,
+        expensive: false,
+      };
+    }
+    // Otherwise treat it as a real cloud-compile task. Needs an account so
+    // we mark it expensive (prompts unless --yes).
+    if (task && task.length >= 4) {
+      return {
+        action: 'compile_cloud',
+        argv: [task],
+        label: 'kolm compile "' + task + '"',
+        expensive: true,
+      };
+    }
+    return null;
+  }
+
+  // "anonymize my customer data", "generate more examples", "make training data"
+  if (/\b(anonymi[sz]e|redact|de-?identify|scrub)\b/.test(lower) && /\b(data|customer|dataset|examples|rows|seeds)\b/.test(lower)) {
+    const from = findSeedsFileInCwd();
+    if (!from) return null; // bail to narration so user sees a real hint
+    return {
+      action: 'seeds_generate',
+      argv: ['generate', '--from', from, '--strategy', 'redact-pii-templated', '--count', '50'],
+      label: 'kolm seeds generate --from ' + from + ' --strategy redact-pii-templated --count 50',
+      expensive: false,
+    };
+  }
+  if (/\b(generate|expand|mutate)\b/.test(lower) && /\b(training data|examples|seeds|rows|dataset)\b/.test(lower)) {
+    const from = findSeedsFileInCwd();
+    if (!from) return null;
+    return {
+      action: 'seeds_generate',
+      argv: ['generate', '--from', from, '--strategy', 'templated', '--count', '50'],
+      label: 'kolm seeds generate --from ' + from + ' --strategy templated --count 50',
+      expensive: false,
+    };
+  }
+
+  if (intent === 'upgrade') {
+    // Be careful here: the server "upgrade" intent is plan-upgrade (billing).
+    // We only re-route to `kolm upgrade` (the version-check verb) when the
+    // user clearly meant "update the CLI", not "switch plans".
+    if (/\b(upgrade|update)\s+(the\s+)?(kolm|cli|client|tool|binary|package)\b/.test(lower)
+        || /\b(latest|newer|new)\s+version\b/.test(lower)
+        || /\b(kolm|cli)\s+(version|release)\b/.test(lower)) {
+      return {
+        action: 'upgrade',
+        argv: [],
+        label: 'kolm upgrade',
+        expensive: true,
+      };
+    }
+    return null;
+  }
+
+  if (intent === 'doctor') {
+    return {
+      action: 'doctor',
+      argv: [],
+      label: 'kolm doctor',
+      expensive: false,
+    };
+  }
+
+  return null;
+}
+
+// One-shot [Y/n] prompt. Resolves true on Y / Enter / blank, false on N.
+// Skipped (auto-yes) in non-TTY contexts so piped / CI usage doesn't hang.
+function chatConfirm(label) {
+  if (!process.stdin.isTTY) return Promise.resolve(true);
+  return new Promise(function (resolve) {
+    const readline = require('readline');
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    rl.question(color('36', 'kolm') + ' ' + color('2', '>') + ' about to run: ' + color('1', label) + ' . proceed? [Y/n] ', function (a) {
+      rl.close();
+      const ans = String(a || '').trim().toLowerCase();
+      resolve(!(ans === 'n' || ans === 'no'));
+    });
+  });
+}
+
+// Dispatch a parsed plan to the appropriate cmd* function. Caller is
+// responsible for printing the "about to run" header (so the [Y/n] flow and
+// the cheap-action path can share the same line). Returns { ok, exitCode? }
+// so the caller can decide whether to chain follow-ups.
+async function chatRunAction(plan) {
+  console.log('');
+  try {
+    if (plan.action === 'new')              await cmdNew(plan.argv);
+    else if (plan.action === 'compile_cloud') await cmdCompile(plan.argv);
+    else if (plan.action === 'seeds_generate') await cmdSeeds(plan.argv);
+    else if (plan.action === 'upgrade')     await cmdUpgrade(plan.argv);
+    else if (plan.action === 'doctor')      await cmdDoctor(plan.argv);
+    else return { ok: false, error: 'unknown action: ' + plan.action };
+    return { ok: true };
+  } catch (e) {
+    console.log(color('31', 'kolm > action failed: ') + (e && e.message || e));
+    return { ok: false, error: e && e.message || String(e), exitCode: e && e.exitCode || EXIT.EXECUTION };
+  }
+}
+
+// Print 1-2 sensible follow-ups after a successful action. Mirrors the
+// next_steps array shape the chat dock already understands.
+function chatPrintNextSteps(plan) {
+  if (!plan) return;
+  console.log('');
+  console.log(color('36', 'kolm') + ' ' + color('2', '>') + ' done. next:');
+  if (plan.action === 'new') {
+    const name = plan.argv[0];
+    console.log('  ' + color('2', '->') + ' compile  kolm compile --spec ' + name + '.spec.json');
+    console.log('  ' + color('2', '->') + ' edit     open ' + name + '.spec.json and tweak recipes[0].source');
+  } else if (plan.action === 'compile_cloud') {
+    console.log('  ' + color('2', '->') + ' list     kolm artifacts list');
+    console.log('  ' + color('2', '->') + ' run      kolm run <artifact>.kolm \'<input-json>\'');
+  } else if (plan.action === 'seeds_generate') {
+    console.log('  ' + color('2', '->') + ' inspect  kolm seeds list');
+    console.log('  ' + color('2', '->') + ' train    kolm train --spec <spec> --seeds <file>.jsonl');
+  } else if (plan.action === 'upgrade') {
+    console.log('  ' + color('2', '->') + ' apply    kolm update');
+    console.log('  ' + color('2', '->') + ' version  kolm version');
+  } else if (plan.action === 'doctor') {
+    console.log('  ' + color('2', '->') + ' login    kolm login');
+    console.log('  ' + color('2', '->') + ' init     kolm init');
+  }
+}
+
 async function cmdChat(args) {
   args = args || [];
   if (args.indexOf('--help') >= 0 || args.indexOf('-h') >= 0) {
@@ -3756,6 +4104,7 @@ async function cmdChat(args) {
   let oncePrompt = null;
   let jsonMode = false;
   let airgapMode = process.env.KOLM_AIRGAP === '1';
+  let autoYes = process.env.KOLM_CHAT_AUTO === '1';
   let i = 0;
   while (i < args.length) {
     const a = args[i];
@@ -3763,68 +4112,204 @@ async function cmdChat(args) {
     if (a === '--json') { jsonMode = true; i++; continue; }
     if (a === '--airgap' || a === '--offline') { airgapMode = true; i++; continue; }
     if (a === '--online') { airgapMode = false; i++; continue; }
+    if (a === '--yes' || a === '-y') { autoYes = true; i++; continue; }
     i++;
   }
+  // Non-interactive (no TTY) shells cannot answer a [Y/n] prompt, and the
+  // --once path is explicitly one-shot. Auto-yes in both so chat does not
+  // hang forever waiting on stdin.
+  const effectiveAutoYes = autoYes || onceMode || !process.stdin.isTTY;
 
   const c = loadConfig();
 
-  if (onceMode) {
-    let prompt = String(oncePrompt == null ? '' : oncePrompt).replace(/^["']|["']$/g, '');
-    if (prompt === '-' || prompt === '') {
-      prompt = readStdinSync();
+  // Local-only action short-circuit. The server's /v1/assistant fires a real
+  // compile job for ANY "make/build/create" prompt, which would double-execute
+  // when chat ALSO scaffolds locally via cmdNew. For local-only actions
+  // (new / seeds generate / upgrade / doctor) we skip the cloud roundtrip
+  // entirely and run the local plan with offline narration. compile_cloud
+  // still goes through sendChat -> cloud because the work happens server-side.
+  function localShortCircuitPlan(promptText) {
+    if (airgapMode) return null;
+    const localReply = localAssistantParse(promptText);
+    const plan = chatPlanAction(promptText, localReply);
+    if (!plan) return null;
+    if (plan.action === 'compile_cloud') return null;
+    // We deliberately route this through the LOCAL parser to avoid double-
+    // executing on the server. The narration is still accurate (these intents
+    // are local-only by design) so we tag it as "action" rather than "airgap"
+    // to avoid implying the network is unreachable.
+    localReply._source = 'action';
+    // Override the narration when the local parser's framing does not match
+    // the action we are about to take. The default narration for "upgrade"
+    // is plan-upgrade (billing); we are about to run the CLI self-update verb.
+    if (plan.action === 'upgrade') {
+      localReply.narration = "checking for a newer kolm CLI release. (this is the version-check verb, not a plan/billing change.)";
+      delete localReply.data;
+      localReply.next_steps = [{ label: 'apply', command: 'kolm update' }];
+    } else if (plan.action === 'new') {
+      localReply.narration = "scaffolding a starter spec.json for you to compile and edit.";
+      localReply.next_steps = [];
+    } else if (plan.action === 'seeds_generate') {
+      localReply.narration = "expanding your seed file via rule-based mutation. nothing leaves the box.";
+      localReply.next_steps = [];
     }
-    const reply = await sendChat(c, prompt, { airgap: airgapMode });
+    return { reply: localReply, plan: plan };
+  }
+
+  // Decide-then-act helper used by both the --once and interactive paths.
+  // Returns true if an action was dispatched (caller can short-circuit the
+  // narration), false if the intent should fall through to renderChatReply.
+  async function maybeAct(reply, promptText) {
+    if (airgapMode) return false; // narration-only in airgap mode
+    const plan = chatPlanAction(promptText, reply);
+    if (!plan) return false;
     if (jsonMode) {
-      console.log(JSON.stringify(reply));
-    } else {
-      renderChatReply(reply);
+      // --json contract: stdout stays a single parseable document. Surface
+      // the plan in the reply rather than executing.
+      reply._planned_action = plan;
+      return false;
     }
-    process.exit(reply && reply.ok === false ? EXIT.EXECUTION : EXIT.OK);
+    if (plan.expensive && !effectiveAutoYes) {
+      const ok = await chatConfirm(plan.label);
+      if (!ok) {
+        console.log(color('2', 'kolm > skipped. (no action taken)'));
+        return true;
+      }
+    } else {
+      // Auto-yes path (cheap action OR effectiveAutoYes). Print what we are
+      // about to run so the user is never surprised, but skip the [Y/n] gate.
+      console.log(color('36', 'kolm') + ' ' + color('2', '>') + ' about to run: ' + color('1', plan.label));
+    }
+    const r = await chatRunAction(plan);
+    if (r.ok) chatPrintNextSteps(plan);
+    return true;
+  }
+
+  if (onceMode) {
+    let promptText = String(oncePrompt == null ? '' : oncePrompt).replace(/^["']|["']$/g, '');
+    if (promptText === '-' || promptText === '') {
+      promptText = readStdinSync();
+    }
+    // Local-only actions take the short-circuit path: no cloud roundtrip.
+    const sc = !jsonMode ? localShortCircuitPlan(promptText) : null;
+    if (sc) {
+      renderChatReply(sc.reply);
+      const plan = sc.plan;
+      if (plan.expensive && !effectiveAutoYes) {
+        const ok = await chatConfirm(plan.label);
+        if (!ok) {
+          console.log(color('2', 'kolm > skipped. (no action taken)'));
+          process.exitCode = EXIT.OK;
+          return;
+        }
+      } else {
+        // Auto-yes path. Print what we are about to run so the user always
+        // sees the resolved command before output starts.
+        console.log(color('36', 'kolm') + ' ' + color('2', '>') + ' about to run: ' + color('1', plan.label));
+      }
+      const r = await chatRunAction(plan);
+      if (r.ok) chatPrintNextSteps(plan);
+      // Set exit code and return rather than process.exit() so lingering
+      // handles (open fetch sockets from cmdDoctor's cloud reachability check,
+      // etc.) drain cleanly. process.exit() while a UV handle is closing
+      // trips a libuv assertion on Windows.
+      process.exitCode = r.ok ? EXIT.OK : (r.exitCode || EXIT.EXECUTION);
+      return;
+    }
+    const reply = await sendChat(c, promptText, { airgap: airgapMode });
+    if (jsonMode) {
+      // Annotate the JSON reply with the planned action (if any) so callers
+      // can decide what to dispatch. We do not execute in --json mode.
+      const plan = airgapMode ? null : chatPlanAction(promptText, reply);
+      if (plan) reply._planned_action = plan;
+      console.log(JSON.stringify(reply));
+      process.exitCode = reply && reply.ok === false ? EXIT.EXECUTION : EXIT.OK;
+      return;
+    }
+    renderChatReply(reply);
+    const acted = await maybeAct(reply, promptText);
+    // If we dispatched, exit on the action result; otherwise on reply.ok.
+    if (!acted) {
+      process.exitCode = reply && reply.ok === false ? EXIT.EXECUTION : EXIT.OK;
+      return;
+    }
+    process.exitCode = EXIT.OK;
+    return;
   }
 
   const readline = require('readline');
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
 
-  console.log(color('2', 'kolm chat') + ' . interactive assistant');
+  console.log(color('2', 'kolm chat') + ' . interactive assistant (action mode)');
   console.log(color('2', "type a prompt, " + color('1', '/help') + ' for commands, ' + color('1', '/exit') + ' or Ctrl+C to quit'));
-  if (airgapMode) console.log(color('2', 'mode: ' + color('1', 'airgapped') + ' . local rule-based parser only'));
+  if (airgapMode) console.log(color('2', 'mode: ' + color('1', 'airgapped') + ' . narration only, no shell-out'));
+  if (autoYes) console.log(color('2', 'mode: ' + color('1', 'auto-confirm') + ' . will run actions without prompting'));
   if (!c.api_key && !airgapMode) console.log(color('33', 'no api key. replies will use the offline rule-based parser. run: kolm login'));
   console.log('');
 
-  const prompt = function () { rl.question(color('32', 'you ') + color('2', '> '), onLine); };
+  const promptOnce = function () { rl.question(color('32', 'you ') + color('2', '> '), onLine); };
 
   const onLine = async function (line) {
     const input = chatTrim(line);
-    if (!input) { prompt(); return; }
+    if (!input) { promptOnce(); return; }
 
     if (input === '/exit' || input === '/quit') { rl.close(); return; }
-    if (input === '/help') { printChatHelp(); prompt(); return; }
-    if (input === '/clear') { process.stdout.write('\x1b[2J\x1b[H'); prompt(); return; }
+    if (input === '/help') { printChatHelp(); promptOnce(); return; }
+    if (input === '/clear') { process.stdout.write('\x1b[2J\x1b[H'); promptOnce(); return; }
     if (input === '/airgap') {
       airgapMode = !airgapMode;
       console.log(color('2', 'airgap mode: ' + (airgapMode ? 'on' : 'off')));
-      prompt();
+      promptOnce();
       return;
     }
     if (input === '/online') {
       airgapMode = false;
       console.log(color('2', 'airgap mode: off'));
-      prompt();
+      promptOnce();
+      return;
+    }
+    if (input === '/yes') {
+      autoYes = !autoYes;
+      console.log(color('2', 'auto-confirm: ' + (autoYes ? 'on' : 'off')));
+      promptOnce();
       return;
     }
 
     try {
-      const reply = await sendChat(c, input, { airgap: airgapMode });
+      // Local-only actions short-circuit the cloud roundtrip so the server's
+      // /v1/assistant does not double-execute (it fires a real compile job for
+      // "make/build/create" prompts).
+      const sc = localShortCircuitPlan(input);
+      const reply = sc ? sc.reply : await sendChat(c, input, { airgap: airgapMode });
       renderChatReply(reply);
+      // Action-mode: if the intent maps to a concrete kolm verb, prompt and
+      // run it. Airgap mode stays narration-only.
+      if (!airgapMode) {
+        const plan = sc ? sc.plan : chatPlanAction(input, reply);
+        if (plan) {
+          let go = true;
+          if (plan.expensive && !autoYes) {
+            go = await chatConfirm(plan.label);
+          } else {
+            console.log(color('36', 'kolm') + ' ' + color('2', '>') + ' about to run: ' + color('1', plan.label));
+          }
+          if (go) {
+            const r = await chatRunAction(plan);
+            if (r.ok) chatPrintNextSteps(plan);
+          } else {
+            console.log(color('2', 'kolm > skipped. (no action taken)'));
+          }
+        }
+      }
     } catch (e) {
       console.log(color('31', 'error: ') + (e && e.message || e));
     }
     console.log('');
-    prompt();
+    promptOnce();
   };
 
   rl.on('close', function () { process.stdout.write('\n' + color('2', 'bye') + '\n'); process.exit(EXIT.OK); });
-  prompt();
+  promptOnce();
 }
 
 // ---------- kolm team ----------
@@ -4627,7 +5112,7 @@ const COMPLETION_VERBS = [
   'score', 'inspect', 'diff', 'verify', 'serve', 'publish', 'capture', 'labels', 'distill',
   'config', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'logs', 'ask', 'chat', 'version', 'help', 'completion', 'upgrade', 'update',
-  'models', 'gpu', 'export', 'seeds', 'improve', 'instant',
+  'models', 'gpu', 'export', 'seeds', 'anonymize', 'improve', 'instant',
 ];
 const COMPLETION_SUBS = {
   compute: ['list', 'detect', 'pick', 'use', 'info', 'test', 'status'],
@@ -5788,6 +6273,62 @@ async function cmdSeedsBootstrap(args) {
   console.log(`  kolm seeds generate --from ${path.relative(process.cwd(), outPath)} --count 200 --strategy redact-pii-templated`);
 }
 
+// `kolm anonymize <file>` - thin shortcut for `kolm seeds generate --strategy
+// redact-pii-templated`. Buyers asked for "anonymize my data" as a first-class
+// verb; the heavy lifting is the same rule-based PII permutation cmdSeedsGenerate
+// already implements. We dispatch to it with sensible defaults so the most
+// common path (here is my jsonl, give me anonymized rows) is one verb.
+async function cmdAnonymize(args) {
+  if (maybeHelp('anonymize', args)) return;
+  const positional = args.find(a => !a.startsWith('--'));
+  if (!positional) {
+    const err = new Error('kolm anonymize <file.jsonl> [--count <N>] [--out <path>] [--seed-rng <int>]');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  const inputPath = path.resolve(process.cwd(), positional);
+  if (!fs.existsSync(inputPath)) {
+    const err = new Error(`anonymize input not found: ${inputPath}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
+  const countFlag = pickFlag(args, '--count') || pickFlag(args, '-n') || '50';
+  const seedRngFlag = pickFlag(args, '--seed-rng') || '1';
+  const outFlag = pickFlag(args, '--out');
+  const jsonOut = args.includes('--json');
+  // Default output path is <basename>-anonymized.jsonl in the cwd.
+  const inBase = path.basename(inputPath).replace(/\.jsonl?$/i, '');
+  const defaultOut = path.resolve(process.cwd(), `${inBase}-anonymized.jsonl`);
+  const outPath = outFlag ? path.resolve(process.cwd(), outFlag) : defaultOut;
+  // Dispatch through cmdSeedsGenerate with locked strategy. --yes because there
+  // is no remote endpoint to confirm: redact-pii-templated is fully local.
+  const genArgs = [
+    '--from', inputPath,
+    '--count', String(countFlag),
+    '--strategy', 'redact-pii-templated',
+    '--seed-rng', String(seedRngFlag),
+    '--out', outPath,
+    '--yes',
+  ];
+  if (jsonOut) genArgs.push('--json');
+  await cmdSeedsGenerate(genArgs);
+  if (!jsonOut) {
+    // Re-count what landed on disk so the summary reflects the real file, not
+    // the request. Skips blank/comment lines the same way loadSeeds does.
+    let total = 0;
+    try {
+      const lines = fs.readFileSync(outPath, 'utf8').split(/\r?\n/);
+      for (const ln of lines) {
+        const t = ln.trim();
+        if (!t || t.startsWith('//') || t.startsWith('#')) continue;
+        total++;
+      }
+    } catch (e) { /* keep total=0 if read fails */ }
+    console.log('');
+    console.log(`wrote ${total} rows. all sources marked as 'seed' or 'templated' (rule-based PII redaction; no network, no LLM).`);
+  }
+}
+
 // `kolm seeds` dispatcher.
 async function cmdSeeds(args) {
   const sub = args && args[0];
@@ -6435,6 +6976,7 @@ async function main() {
       case 'gpu':      await withErrorContext('gpu',      () => cmdGpu(rest)); break;
       case 'export':   await withErrorContext('export',   () => cmdExport(rest)); break;
       case 'seeds':    await withErrorContext('seeds',    () => cmdSeeds(rest)); break;
+      case 'anonymize':await withErrorContext('anonymize',() => cmdAnonymize(rest)); break;
       case 'improve':  await withErrorContext('improve',  () => cmdImprove(rest)); break;
       case 'instant':  await withErrorContext('instant',  () => cmdInstant(rest)); break;
       case 'version':  await withErrorContext('version',  () => cmdVersion(rest)); break;

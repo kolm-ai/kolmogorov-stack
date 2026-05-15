@@ -76,13 +76,24 @@ export function recordCloudTrusted(artifactPath, meta = {}) {
   }
 }
 
-function isCloudTrusted(artifactBuf) {
+export function isCloudTrusted(artifactBuf) {
   const flag = process.env.KOLM_TRUST_CLOUD_ARTIFACTS;
   if (flag === '0' || flag === 'false') return null;
   try {
     const sha = crypto.createHash('sha256').update(artifactBuf).digest('hex');
     const j = loadCloudTrust();
     return j.trusted[sha] ? sha : null;
+  } catch { return null; }
+}
+
+// Convenience wrapper: returns the sha of the artifact at `artifactPath`
+// if it is in the cloud-trust list, else null. Used by the verifier so the
+// deeper HMAC checks (audit chain, credential) can switch to structural
+// integrity mode without duplicating the file-read + sha logic.
+export function isArtifactPathCloudTrusted(artifactPath) {
+  try {
+    const buf = fs.readFileSync(artifactPath);
+    return isCloudTrusted(buf);
   } catch { return null; }
 }
 

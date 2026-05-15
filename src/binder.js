@@ -45,7 +45,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { loadArtifact } from './artifact-runner.js';
+import { loadArtifact, isArtifactPathCloudTrusted } from './artifact-runner.js';
 import { cidFromManifestHashes, parseCid, shortCid } from './cid.js';
 import { verifyCredential } from './provenance.js';
 import { effectiveReceiptSecret } from './env.js';
@@ -94,6 +94,56 @@ function fmtCost(c) {
   return `$${c.toFixed(4)}`;
 }
 
+// Structural-integrity checks. Used when the artifact is cloud-trusted (the
+// local CLI lacks RECIPE_RECEIPT_SECRET, so HMAC verification is impossible)
+// to confirm the chain and credential are well-formed and bind to this
+// exact manifest. The trust list pins the bytes-on-disk by sha256.
+
+function chainStructuralIntegrityOk(receipt) {
+  if (!receipt || typeof receipt !== 'object') return { ok: false, reason: 'receipt missing or not an object' };
+  if (!Array.isArray(receipt.chain)) return { ok: false, reason: 'receipt.chain not an array' };
+  if (receipt.chain.length === 0) return { ok: false, reason: 'receipt.chain is empty' };
+  for (let i = 0; i < receipt.chain.length; i++) {
+    const step = receipt.chain[i];
+    if (!step || typeof step !== 'object') return { ok: false, reason: `step ${i} not an object` };
+    for (const f of ['step', 'input_hash', 'output_hash', 'hmac']) {
+      if (typeof step[f] !== 'string' || step[f].length === 0) return { ok: false, reason: `step ${i} missing field ${f}` };
+    }
+    // Chain link: each step's input_hash should reference the prior step's
+    // output_hash. The first step's input is the task spec hash, so it has
+    // no predecessor to compare against.
+    if (i > 0) {
+      const prior = receipt.chain[i - 1];
+      if (step.input_hash !== prior.output_hash) {
+        return { ok: false, reason: `step ${i} input_hash does not link to step ${i - 1} output_hash` };
+      }
+    }
+  }
+  if (typeof receipt.signature !== 'string' || receipt.signature.length === 0) {
+    return { ok: false, reason: 'receipt body signature missing' };
+  }
+  return { ok: true };
+}
+
+function credentialStructuralIntegrityOk(credential, manifest) {
+  if (!credential || typeof credential !== 'object') return { ok: false, reason: 'credential missing or not an object' };
+  if (credential.spec !== 'kolm-credential/0.1') return { ok: false, reason: `unexpected spec ${credential.spec}` };
+  for (const f of ['type', 'claim_generator', 'artifact_hash', 'cid', 'signature', 'signature_alg', 'signed_at']) {
+    if (typeof credential[f] !== 'string' || credential[f].length === 0) {
+      return { ok: false, reason: `credential missing field ${f}` };
+    }
+  }
+  if (!credential.assertions || typeof credential.assertions !== 'object') {
+    return { ok: false, reason: 'credential.assertions missing or not an object' };
+  }
+  // The credential's cid must match the manifest's cid: the credential
+  // is bound to this artifact, not some other one.
+  if (manifest && manifest.cid && credential.cid !== manifest.cid) {
+    return { ok: false, reason: `credential cid does not match manifest cid` };
+  }
+  return { ok: true };
+}
+
 // ---------------------------------------------------------------------------
 // Verification harness — runs every check the binder reports on. Each check
 // returns `{ name, status: 'pass'|'fail'|'warn', detail }`. A failing check
@@ -104,13 +154,26 @@ function fmtCost(c) {
 async function verifyArtifact(bundle) {
   const checks = [];
 
+  // Cloud-trust detection. When the artifact bytes are recorded in
+  // ~/.kolm/cloud-trusted.json (set by `kolm compile` cloud path on download),
+  // the local CLI does not hold the RECIPE_RECEIPT_SECRET that signed the
+  // chain. The deeper HMAC checks below then switch to structural-integrity
+  // mode: we confirm the chain and credential are well-formed and bind to
+  // this exact manifest, but skip the HMAC seal. The artifact's sha256 in the
+  // trust list is the proof we downloaded these exact bytes.
+  const cloudTrustedSha = bundle.signature_mode === 'cloud-trusted'
+    ? isArtifactPathCloudTrusted(bundle.artifact_path)
+    : null;
+
   // 1. Signature already verified by loadArtifact — if we got here, the
-  // legacy signature.sig HMAC matched. Record it.
+  // legacy signature.sig HMAC matched, or the artifact is cloud-trusted.
   checks.push({
     name: 'Manifest signature (legacy HMAC)',
     status: bundle.signature_valid ? 'pass' : 'fail',
     detail: bundle.signature_valid
-      ? 'signature.sig HMAC matches manifest.json sha256'
+      ? (bundle.signature_mode === 'cloud-trusted'
+          ? 'cloud-signed; trusted via local list (artifact sha256 in ~/.kolm/cloud-trusted.json)'
+          : 'signature.sig HMAC matches manifest.json sha256')
       : 'signature.sig did not verify (mismatch)',
   });
 
@@ -138,6 +201,11 @@ async function verifyArtifact(bundle) {
 
   // 3. Receipt chain — every step's HMAC verifies under the same secret.
   // If the secret isn't available we report "structural" pass + "unverified".
+  // When the artifact is cloud-trusted (sha256 recorded in
+  // ~/.kolm/cloud-trusted.json by `kolm compile` cloud path), HMAC verification
+  // is impossible locally (the cloud holds the secret) so we fall back to a
+  // structural-integrity check: chain shape valid, each step well-formed,
+  // step output_hash threads into the next step's input_hash.
   const receipt = bundle.receipt;
   if (!receipt) {
     checks.push({
@@ -147,7 +215,19 @@ async function verifyArtifact(bundle) {
     });
   } else {
     const secret = effectiveReceiptSecret({ includeLegacyArtifactSecret: true });
-    if (!secret) {
+    const chainStructureOk = chainStructuralIntegrityOk(receipt);
+    if (cloudTrustedSha) {
+      // Cloud-trust path. Structural check stands in for HMAC verification
+      // because the cloud holds the signing secret. The bytes-on-disk are
+      // pinned by sha256 in ~/.kolm/cloud-trusted.json.
+      checks.push({
+        name: 'Audit chain (HMAC receipt)',
+        status: chainStructureOk.ok ? 'pass' : 'fail',
+        detail: chainStructureOk.ok
+          ? `structural integrity verified across ${receipt.chain?.length || 0} steps (cloud-signed; HMAC chain seal trusted via cloud-trust list)`
+          : `chain structural integrity failed: ${chainStructureOk.reason}`,
+      });
+    } else if (!secret) {
       checks.push({
         name: 'Audit chain (HMAC receipt)',
         status: 'warn',
@@ -215,7 +295,20 @@ async function verifyArtifact(bundle) {
     });
   } else {
     const secret = effectiveReceiptSecret({ includeLegacyArtifactSecret: true });
-    if (!secret) {
+    const credStructure = credentialStructuralIntegrityOk(credential, bundle.manifest);
+    if (cloudTrustedSha) {
+      // Cloud-trust path. The credential signature was produced with the
+      // cloud's secret which the local CLI does not hold. Confirm the
+      // credential is well-formed and binds to this exact manifest, then
+      // trust the signature via the cloud-trust list.
+      checks.push({
+        name: 'Provenance credential',
+        status: credStructure.ok ? 'pass' : 'fail',
+        detail: credStructure.ok
+          ? `credential structure verified (${credential.spec}; cloud-signed; signature trusted via cloud-trust list)`
+          : `credential structural integrity failed: ${credStructure.reason}`,
+      });
+    } else if (!secret) {
       checks.push({
         name: 'Provenance credential',
         status: 'warn',
@@ -233,20 +326,31 @@ async function verifyArtifact(bundle) {
     }
   }
 
-  // 6. Eval coverage — at least one case ran.
+  // 6. Eval coverage — at least one case ran. When every case is
+  // auto-synthesized from the task description (no user-provided examples),
+  // downgrade to warn so the buyer knows the gate cleared on synthetic eval
+  // input. One real user-provided case is enough to flip the status to pass.
   const evals = bundle.evals;
-  const n = evals?.cases?.length ?? 0;
+  const cases = evals?.cases || [];
+  const n = cases.length;
+  const autoN = cases.filter(c => c && c.auto_synthesized).length;
   if (n === 0) {
     checks.push({
       name: 'Eval coverage',
       status: 'warn',
       detail: 'artifact ships zero eval cases — K-score reflects training pass-rate only',
     });
+  } else if (autoN === n) {
+    checks.push({
+      name: 'Eval coverage',
+      status: 'warn',
+      detail: `${n} eval case${n === 1 ? '' : 's'} shipped (all auto-synthesized from task description; add real cases via kolm new --from <template>)`,
+    });
   } else {
     checks.push({
       name: 'Eval coverage',
       status: 'pass',
-      detail: `${n} eval case${n === 1 ? '' : 's'} embedded; judge_id=${manifest.judge_id || 'unknown'}`,
+      detail: `${n} eval case${n === 1 ? '' : 's'} embedded${autoN > 0 ? ` (${autoN} auto-synthesized, ${n - autoN} user-provided)` : ''}; judge_id=${manifest.judge_id || 'unknown'}`,
     });
   }
 
