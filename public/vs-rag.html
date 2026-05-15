@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>kolm vs RAG: orchestration vs compilation</title>
-<meta name="description" content="RAG retrieves chunks at query time and ships them through a frontier API. kolm compiles a small task-specific artifact that runs locally with a bundled recall index. Different tradeoffs.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm vs RAG: compiled artifact vs query-time orchestration</title>
+<meta name="description" content="RAG retrieves chunks at query time through a frontier API. kolm compiles a small task-specific artifact that runs locally with a recall index.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm vs RAG">
 <meta property="og:description" content="RAG is orchestration. kolm is a compiled artifact. The difference is what runs at request time.">
@@ -40,13 +41,13 @@
   header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
   section.hero { padding: 88px 0 32px; }
@@ -58,20 +59,20 @@
   .one-line { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 14px; margin: 24px 0 0; align-items: stretch; }
   @media (max-width: 720px) { .one-line { grid-template-columns: 1fr; } .one-line .arrow { display: none; } }
   .one-line .col { padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
-  .one-line .col h3 { margin: 0 0 8px; font-size: 15px; font-weight: 540; color: var(--ink); }
+  .one-line .col h3 { margin: 0 0 8px; font-size: 15px; font-weight: 500; color: var(--ink); }
   .one-line .col p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
   .one-line .arrow { display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: var(--mono); font-size: 22px; }
 
   .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
-  .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; }
+  .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
   .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
 
   table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
   table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
-  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 540; }
+  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
   table.tbl td { color: var(--ink-mute); }
-  table.tbl td b { color: var(--ink); font-weight: 540; }
-  table.tbl td.row-h { color: var(--ink); font-weight: 540; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; width: 26%; }
+  table.tbl td b { color: var(--ink); font-weight: 500; }
+  table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; width: 26%; }
   table.tbl td .ok { color: var(--good); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
   table.tbl td .no { color: var(--bad); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
   table.tbl td .partial { color: var(--ink-faint); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
@@ -92,10 +93,10 @@
   pre.code .k { color: var(--accent-strong); }
 
   .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
-  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 540; color: var(--ink); }
+  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
   .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
   .verdict p:last-child { margin-bottom: 0; }
-  .verdict b { color: var(--ink); font-weight: 540; }
+  .verdict b { color: var(--ink); font-weight: 500; }
 
   footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
   footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
@@ -103,6 +104,7 @@
 </style>
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"kolm","description":"kolm vs RAG: orchestration vs compilation. kolm freezes retrieval into a signed .kolm artifact for deterministic, offline runs.","brand":{"@type":"Brand","name":"Kolmogorov"},"url":"https://kolm.ai/vs-rag","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","url":"https://kolm.ai/pricing"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://kolm.ai/compare"},{"@type":"ListItem","position":3,"name":"kolm vs RAG"}]}</script>
 </head>
 <body>
 
@@ -113,6 +115,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -124,9 +127,9 @@
   </div>
 </header>
 
-<section class="hero">
+<section class="hero frontier-bg">
   <div class="wrap">
-    <span class="pill">vs RAG</span>
+    <div class="hero-eyebrow"><span class="he-dot"></span>vs RAG &middot; compile, don't orchestrate</div>
     <h1>RAG is orchestration. <span class="tone">kolm is a build.</span></h1>
     <p class="lede">Retrieval-Augmented Generation glues a vector store to a frontier API at query time. Useful, and painful when you scale, when you need offline, when you need proof. kolm compiles those moving parts into one signed file.</p>
 
@@ -177,7 +180,7 @@
           </tr>
           <tr>
             <td class="row-h">Compile cost</td>
-            <td data-l="RAG"><span class="ok">$0</span>, just plumbing</td>
+            <td data-l="RAG"><span class="ok">$0</span>, only plumbing</td>
             <td data-l="kolm">Frontier-API cost for k-sample distillation pass (typically &lt;$50 for an SMB corpus)</td>
           </tr>
           <tr>
@@ -259,9 +262,53 @@ kolm run support.kolm <span class="k">"can I downgrade mid-cycle?"</span> --rece
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolm v0.1.0 · the AI compiler</span>
-    <span><a href="/manifesto">Manifesto</a> · <a href="/security">Security</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

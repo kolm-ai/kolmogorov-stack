@@ -112,7 +112,7 @@ The math: a 50-engineer team running 80k Opus calls/month at ~$12k/mo. After two
 The compiler is honest:
 - K-score gate at 0.85; below that, no artifact ships.
 - Receipts are HMAC-SHA256 chains over (corpus hash, eval set, K-score, base model, LoRA delta).
-- Reproducible benchmark: `kolm bench --reproduce swebench-lite-n150 --seed 42` lands within ±2pp of our +10.67pp lift on the official swebench 4.1.0 evaluator.
+- Reproducible benchmark: `kolm bench --reproduce swebench-lite-n150 --seed 42` runs the harness locally on the official swebench 4.1.0 evaluator. Headline number lands when the first end-to-end signed run completes.
 
 Try it: https://kolm.ai/use-cases/capture-and-distill
 The thesis: https://kolm.ai/articles/rent-vs-buy-compute
@@ -145,11 +145,9 @@ The artifact won't ship below 0.85.
 
 ```
 3.
-We re-ran our SWE-bench Lite benchmark at n=150 with the official swebench 4.1.0 evaluator, seed pinned, Anthropic provider locked.
+The benchmark harness ships at `kolm bench --reproduce swebench-lite-n150` against the official swebench 4.1.0 evaluator, seed pinned, Anthropic provider locked.
 
-+10.67pp strict, 95% CI [+4.67, +16.67], p<0.05.
-
-`kolm bench --reproduce swebench-lite-n150` lands within ±2pp on your machine.
+No headline lift gets posted until the first end-to-end signed run completes. Run it yourself, sign your own number.
 
 https://kolm.ai/articles/how-we-benchmark
 ```
@@ -173,7 +171,7 @@ Read the worked example: https://kolm.ai/articles/rent-vs-buy-compute
 2.
 The benchmark number on the homepage of every AI startup is a feeling unless it ships with a reproducer.
 
-We picked one number · SWE-bench Lite +10.67pp · re-ran it at n=150 with seed=42 against the official swebench 4.1.0 evaluator, and shipped a CLI that anyone can run on their own machine in 90 minutes for under $30.
+We picked one benchmark · SWE-bench Lite at n=150 with seed=42 against the official swebench 4.1.0 evaluator · and shipped a CLI that anyone can run on their own machine in 90 minutes for under $30. The headline number lands when the first end-to-end signed run completes; until then the only honest claim is the harness.
 
 If your reproduce attempt lands more than ±2pp away from ours, the methodology page has a diagnosis flowchart for what likely went wrong.
 
@@ -197,7 +195,7 @@ https://kolm.ai/anatomy
 
 ### Hermes Discord cross-post (anchored to Hermes thesis pairing)
 
-The Hermes community owns the strongest open-source memory + agent harness loop. The cross-post leads with the agent-hooks integration (REM hooks → +10.67pp on SWE-bench Lite) and only secondarily with the rent-vs-buy thesis. Length: under 200 words. Owner: founder.
+The Hermes community owns the strongest open-source memory + agent harness loop. The cross-post leads with the agent-hooks integration (REM hooks compose cleanly with the kolm capture loop) and only secondarily with the rent-vs-buy thesis. Length: under 200 words. Owner: founder.
 
 ### ProductHunt schedule
 

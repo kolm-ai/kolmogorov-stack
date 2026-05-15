@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Daily recap recipe · kolm cookbook</title>
 <meta name="description" content="Compile a signed local model that turns your day's logs, commits, and messages into a one-paragraph recap. Trained on your own writing, runs on-device.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Daily-recap recipe">
 <meta property="og:description" content="Local end-of-day recap in your voice. Signed, offline.">
@@ -92,6 +93,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -159,10 +161,10 @@
         <pre class="code">commits: [kolm@a1b2c3] fix smoke 304 redirect, [kolm@d4e5f6] add cookbook idx
 calendar: 10:00 standup, 14:00 design partner #2 call (45m)
 slack-dms: alex@studio "thursday coffee?", jen "sent the contract"
-keep-notes: "the verifier idea is the right wedge · write it down"</pre>
+keep-notes: "the verifier idea is the right framing · write it down"</pre>
         <div class="pair-h">output</div>
         <pre class="code">{
-  <span class="k">"recap"</span>: <span class="k">"good day. fixed the smoke redirect that was eating my morning, then shipped the cookbook index. design partner call with #2 went well · they get the verifier wedge. jen sent the contract. wrote down the wedge framing because it's the right one."</span>,
+  <span class="k">"recap"</span>: <span class="k">"good day. fixed the smoke redirect that was eating my morning, then shipped the cookbook index. design partner call with #2 went well · they get the verifier framing. jen sent the contract. wrote down the framing framing because it's the right one."</span>,
   <span class="k">"highlights"</span>: [<span class="k">"smoke fix"</span>, <span class="k">"DP #2 call"</span>, <span class="k">"contract from jen"</span>],
   <span class="k">"mood"</span>: <span class="k">"flowing"</span>,
   <span class="k">"open_loops"</span>: [<span class="k">"thursday coffee with alex - reply needed"</span>]
@@ -224,9 +226,53 @@ keep-notes: "the verifier idea is the right wedge · write it down"</pre>
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolm cookbook &middot; <a href="/cookbook">all recipes</a></span>
-    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

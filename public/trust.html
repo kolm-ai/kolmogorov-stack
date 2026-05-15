@@ -1,19 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Trust · kolm</title>
 <meta name="description" content="kolm trust center: subprocessors, data residency, SLA, security policy, and the verification primitives that make every output auditable.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm trust center">
 <meta property="og:description" content="Compliance posture, subprocessor list, SLA, and the verification primitives behind every signed kolm artifact.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/trust">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="kolm trust center">
+<meta name="twitter:description" content="Compliance posture, subprocessor list, SLA, and the verification primitives behind every signed kolm artifact.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/trust">
@@ -39,14 +42,14 @@
   header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
   header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   header.site .right .cta:hover { background: #fff; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
@@ -56,7 +59,7 @@
   h1 { margin: 22px 0 16px; font-size: clamp(36px, 5.4vw, 56px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
   h1 .tone { color: var(--accent); }
   p.lede { margin: 0 0 28px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
 
   .toc { display: flex; flex-wrap: wrap; gap: 8px 12px; margin: 28px 0 0; padding: 0; list-style: none; }
   .toc a { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--ink-faint); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; transition: color 120ms, border-color 120ms; }
@@ -64,7 +67,7 @@
 
   .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
   .group:first-of-type { margin-top: 8px; padding-top: 0; border-top: 0; }
-  .group h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; letter-spacing: 0; }
+  .group h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; letter-spacing: 0; }
   .group p.kicker { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; max-width: 64ch; }
 
   .grid { display: grid; gap: 16px; }
@@ -73,7 +76,7 @@
   @media (max-width: 720px) { .grid.c-2, .grid.c-3 { grid-template-columns: 1fr; } }
 
   .card { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); }
-  .card h3 { margin: 0 0 8px; font-size: 16px; font-weight: 540; color: var(--ink); }
+  .card h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink); }
   .card p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
   .card .meta { margin-top: 12px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; }
   .card .meta.ok { color: var(--good); }
@@ -83,9 +86,9 @@
 
   table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0 0; }
   table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 12px 14px; text-align: left; vertical-align: top; }
-  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 540; }
+  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
   table.tbl td { color: var(--ink-mute); }
-  table.tbl td b { color: var(--ink); font-weight: 540; }
+  table.tbl td b { color: var(--ink); font-weight: 500; }
   table.tbl code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
   table.tbl tr:hover td { background: rgba(236,231,220, 0.022); }
 
@@ -102,7 +105,7 @@
 
   ul.bul { margin: 8px 0 0; padding: 0 0 0 18px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.65; }
   ul.bul li { margin-bottom: 6px; }
-  ul.bul li b { color: var(--ink); font-weight: 540; }
+  ul.bul li b { color: var(--ink); font-weight: 500; }
 
   footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
   footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
@@ -155,6 +158,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -166,8 +170,9 @@
   </div>
 </header>
 
-<section class="hero">
+<section class="hero frontier-bg">
   <div class="wrap">
+    <div class="hero-eyebrow"><span class="he-dot"></span>Trust &middot; verify, don't trust</div>
     <h1>Compliance is a <span class="tone">build artifact.</span></h1>
     <p class="lede">Every <code>.kolm</code> ships with a manifest hash, an HMAC-SHA256 artifact signature over the archive, and an explicit K-score gate. <b>Each run returns a <code>_kolm</code> receipt the issuer or any holder of the shared tenant secret can re-verify.</b></p>
     <ul class="toc">
@@ -332,7 +337,7 @@
     <div class="group" id="verification">
       <h2>How verification works</h2>
       <p class="kicker">What kolm signs. What tampering looks like. What verification proves.</p>
-      <h3 style="margin:18px 0 10px;font-size:15px;font-weight:540;color:var(--ink);">The chain</h3>
+      <h3 style="margin:18px 0 10px;font-size:15px;font-weight: 500;color:var(--ink);">The chain</h3>
       <pre class="code">manifest.json   = { artifact_id, base_model_hash, recipe_pack_hash, k_score, build_time }
 manifest_hash   = sha256(manifest.json)
 receipt[0]      = HMAC(secret, manifest_hash)
@@ -340,7 +345,7 @@ receipt[i]      = HMAC(secret, receipt[i-1] || input_hash[i] || output_hash[i])
 signature       = HMAC(secret, receipt[N])</pre>
       <p style="color:var(--ink-mute);font-size:14.5px;line-height:1.65;">Each receipt chains to the previous. <b>Insert, reorder, or remove any output: every later receipt invalidates.</b> Auditors check the tail signature against the published artifact_id and HMAC reference. <a href="/anatomy#walker" style="color:var(--accent);">Walk the four rings interactively &rarr;</a></p>
 
-      <h3 style="margin:24px 0 10px;font-size:15px;font-weight:540;color:var(--ink);">Verify a receipt yourself</h3>
+      <h3 style="margin:24px 0 10px;font-size:15px;font-weight: 500;color:var(--ink);">Verify a receipt yourself</h3>
       <p style="color:var(--ink-mute);font-size:14.5px;line-height:1.65;">Public endpoint, no auth. POSTs to <code>/v1/receipts/verify</code>; broken rings come back named, e.g. <code>chain[3] hmac mismatch</code>. <code>kolm inspect</code> uses the same endpoint.</p>
       <div id="rcpt-widget" style="margin:14px 0 6px;border:1px solid var(--line-strong);border-radius:10px;background:var(--bg-elev);padding:14px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:12px;flex-wrap:wrap;">
@@ -353,7 +358,7 @@ signature       = HMAC(secret, receipt[N])</pre>
         <textarea id="rcpt-input" spellcheck="false" autocorrect="off" autocapitalize="off" placeholder='{"kolm_version":"0.1","artifact_hash":"...","chain":[{"step":0,"input_hash":"...","output_hash":"...","hmac":"..."}],"signature":"..."}' style="width:100%;min-height:160px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:12px;font-family:var(--mono);font-size:12.5px;color:var(--ink);resize:vertical;line-height:1.5;outline:none;"></textarea>
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap;">
           <span id="rcpt-hint" style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);">accepts v0.1, drive-by, or rs-1 legacy</span>
-          <button type="button" id="rcpt-verify" style="font-family:var(--sans);font-size:13px;font-weight:540;background:var(--ink);color:var(--bg);border:0;border-radius:6px;padding:8px 16px;cursor:pointer;">Verify chain</button>
+          <button type="button" id="rcpt-verify" style="font-family:var(--sans);font-size:13px;font-weight: 500;background:var(--ink);color:var(--bg);border:0;border-radius:6px;padding:8px 16px;cursor:pointer;">Verify chain</button>
         </div>
         <div id="rcpt-result" style="margin-top:14px;display:none;border-top:1px solid var(--line);padding-top:14px;"></div>
       </div>
@@ -362,9 +367,9 @@ signature       = HMAC(secret, receipt[N])</pre>
   -H "Content-Type: application/json" \
   -d '{"receipt": {"kolm_version":"0.1", "artifact_hash":"...", "chain":[...], "signature":"..."}}'</pre>
 
-      <h3 style="margin:24px 0 10px;font-size:15px;font-weight:540;color:var(--ink);">Optional Sigstore Rekor anchor</h3>
+      <h3 style="margin:24px 0 10px;font-size:15px;font-weight: 500;color:var(--ink);">Optional Sigstore Rekor anchor</h3>
       <p style="color:var(--ink-mute);font-size:14.5px;line-height:1.65;">Receipts can carry an <code>anchors</code> array. Kinds: <code>http</code> (Sigstore Rekor), <code>arweave</code>, <code>btc-op-return</code>, <code>ots</code>. v0.1 runtimes ignore the field if absent. Schema: <a href="/docs/receipt-v0.1.json" style="color:var(--accent);">receipt-v0.1.json</a>.</p>
-      <h3 style="margin:24px 0 10px;font-size:15px;font-weight:540;color:var(--ink);">What this defends against</h3>
+      <h3 style="margin:24px 0 10px;font-size:15px;font-weight: 500;color:var(--ink);">What this defends against</h3>
       <ul class="bul">
         <li><b>Output tampering.</b> Chain breaks on rewrite.</li>
         <li><b>Model swap.</b> Manifest hash differs; gate fails.</li>
@@ -372,7 +377,7 @@ signature       = HMAC(secret, receipt[N])</pre>
         <li><b>Input replay.</b> Receipts embed input hash; different inputs, different chain.</li>
         <li><b>Auditor fraud.</b> Chain verifiable from the public anchor; no auditor trust required.</li>
       </ul>
-      <h3 style="margin:24px 0 10px;font-size:15px;font-weight:540;color:var(--ink);">What this does not defend against</h3>
+      <h3 style="margin:24px 0 10px;font-size:15px;font-weight: 500;color:var(--ink);">What this does not defend against</h3>
       <ul class="bul">
         <li><b>Malicious training data.</b> Poisoned <code>--examples</code> poison the artifact. Verification proves provenance, not correctness.</li>
         <li><b>K-score gaming.</b> Verifier sharing data with what it scores leaves K uninformative. Hold out the test source.</li>
@@ -399,7 +404,7 @@ signature       = HMAC(secret, receipt[N])</pre>
         </tbody>
       </table>
 
-      <h3 style="margin:24px 0 10px;font-size:15px;font-weight:540;color:var(--ink);">A passing release</h3>
+      <h3 style="margin:24px 0 10px;font-size:15px;font-weight: 500;color:var(--ink);">A passing release</h3>
       <p style="color:var(--ink-mute);font-size:14.5px;line-height:1.65;">From <code>kolm bench</code>:</p>
       <pre class="code">A = 0.92    accuracy   :: 138/150 held-out tasks pass
 S = 0.85    size       :: 3.4 GB inside a 5.0 GB envelope
@@ -413,7 +418,7 @@ K = 0.40&middot;0.92 + 0.15&middot;0.85 + 0.15&middot;0.90 + 0.15&middot;0.88 + 
 
 gate = 0.85    K &ge; gate    promote</pre>
 
-      <h3 style="margin:24px 0 10px;font-size:15px;font-weight:540;color:var(--ink);">A drifted release</h3>
+      <h3 style="margin:24px 0 10px;font-size:15px;font-weight: 500;color:var(--ink);">A drifted release</h3>
       <p style="color:var(--ink-mute);font-size:14.5px;line-height:1.65;">Accuracy slipped on math-style; S, L, C, V unchanged:</p>
       <pre class="code">A = 0.78    accuracy   :: 117/150 (drift on math-style tasks)
 S = 0.85
@@ -427,7 +432,7 @@ K = 0.40&middot;0.78 + 0.15&middot;0.85 + 0.15&middot;0.90 + 0.15&middot;0.88 + 
 
 gate = 0.85    K &lt; gate    DO NOT PROMOTE</pre>
 
-      <p style="color:var(--ink-mute);font-size:14.5px;line-height:1.65;margin-top:14px;"><b style="color:var(--ink);font-weight:540;">Two relaxed gates.</b> Safety-critical: <code>K &ge; 0.95</code>. Prototype: <code>K &ge; 0.70</code> with <code>kolm.unstable</code> tag. Public default: <b>0.85</b>. Gate, inputs, and held-out eval set are part of the receipt chain; any component measured against training is named in the receipt.</p>
+      <p style="color:var(--ink-mute);font-size:14.5px;line-height:1.65;margin-top:14px;"><b style="color:var(--ink);font-weight: 500;">Two relaxed gates.</b> Safety-critical: <code>K &ge; 0.95</code>. Prototype: <code>K &ge; 0.70</code> with <code>kolm.unstable</code> tag. Public default: <b>0.85</b>. Gate, inputs, and held-out eval set are part of the receipt chain; any component measured against training is named in the receipt.</p>
     </div>
 
     <div class="group" id="docs">
@@ -463,9 +468,53 @@ gate = 0.85    K &lt; gate    DO NOT PROMOTE</pre>
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolm v0.1.0 - the AI compiler</span>
-    <span><a href="/manifesto">Manifesto</a> - <a href="/security">Security</a> - <a href="/privacy">Privacy</a> - <a href="/terms">Terms</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 
@@ -503,11 +552,11 @@ gate = 0.85    K &lt; gate    DO NOT PROMOTE</pre>
       return;
     }
     if (state === 'parse-error') {
-      result.innerHTML = '<div style="display:flex;gap:10px;align-items:flex-start;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-top:7px;flex:none;"></span><div><div style="font-family:var(--mono);font-size:13px;color:var(--bad);font-weight:540;">JSON parse error</div><div style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-top:4px;">' + escape(data) + '</div></div></div>';
+      result.innerHTML = '<div style="display:flex;gap:10px;align-items:flex-start;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-top:7px;flex:none;"></span><div><div style="font-family:var(--mono);font-size:13px;color:var(--bad);font-weight: 500;">JSON parse error</div><div style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-top:4px;">' + escape(data) + '</div></div></div>';
       return;
     }
     if (state === 'network-error') {
-      result.innerHTML = '<div style="display:flex;gap:10px;align-items:flex-start;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-top:7px;flex:none;"></span><div><div style="font-family:var(--mono);font-size:13px;color:var(--bad);font-weight:540;">network error</div><div style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-top:4px;">' + escape(data) + '</div></div></div>';
+      result.innerHTML = '<div style="display:flex;gap:10px;align-items:flex-start;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-top:7px;flex:none;"></span><div><div style="font-family:var(--mono);font-size:13px;color:var(--bad);font-weight: 500;">network error</div><div style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-top:4px;">' + escape(data) + '</div></div></div>';
       return;
     }
     var verified = !!data.verified;
@@ -517,7 +566,7 @@ gate = 0.85    K &lt; gate    DO NOT PROMOTE</pre>
     var labelColor = verified ? 'var(--good)' : 'var(--bad)';
     var html = '<div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">';
     html += '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + dot + ';"></span>';
-    html += '<span style="font-family:var(--mono);font-size:13px;color:' + labelColor + ';font-weight:540;text-transform:uppercase;letter-spacing:0.05em;">' + label + '</span>';
+    html += '<span style="font-family:var(--mono);font-size:13px;color:' + labelColor + ';font-weight: 500;text-transform:uppercase;letter-spacing:0.05em;">' + label + '</span>';
     if (data.mode) {
       html += '<span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);">mode: ' + escape(data.mode) + '</span>';
     }

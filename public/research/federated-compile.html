@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Federated compile &middot; LoRA fine-tuning under secure aggregation | kolm research</title>
+<meta name="description" content="Federated training of LoRA adapters across hospitals, banks, and law firms that cannot share rows. FedAvg with Bonawitz pairwise PRG masks for secure aggregation and (eps, delta)-differential privacy on the per-client update.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Federated compile . kolm research">
+<meta property="og:description" content="LoRA across hospitals, banks, and law firms. FedAvg + secure aggregation + differential privacy on the per-client update.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-05-14">
+<meta property="article:author" content="Kolmogorov">
+<meta property="article:section" content="training">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Federated compile">
+<meta name="twitter:description" content="LoRA fine-tuning under secure aggregation. Pairwise PRG masks, DP-clipped updates, signed per-round receipts.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/federated-compile">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/federated-compile">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="/escape.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "Federated compile: LoRA fine-tuning under secure aggregation",
+      "description": "FedAvg over LoRA adapters with Bonawitz pairwise PRG masks and (eps, delta)-differential privacy on the per-client update. How kolm trains across data that cannot move.",
+      "url": "https://kolm.ai/research/federated-compile",
+      "author": {"@type": "Organization", "name": "Kolmogorov"},
+      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+      "datePublished": "2026-05-14",
+      "articleSection": "training",
+      "keywords": "federated learning, FedAvg, secure aggregation, differential privacy, LoRA, healthcare AI, on-prem training",
+      "citation": [
+        "McMahan et al, 2017, arXiv:1602.05629 (FedAvg)",
+        "Bonawitz et al, CCS 2017 (Practical Secure Aggregation for Privacy-Preserving Machine Learning)",
+        "Beutel et al, 2020, arXiv:2007.14390 (Flower)",
+        "Abadi et al, CCS 2016 (Deep Learning with Differential Privacy)"
+      ],
+      "license": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+        {"@type": "ListItem", "position": 3, "name": "Federated compile", "item": "https://kolm.ai/research/federated-compile"}
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+  a:hover{border-bottom-color:var(--ink)}
+  .nb{border:0}
+  ::selection{background:rgba(236,231,220,0.30)}
+  .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+  @media(max-width:720px){.wrap{padding:0 20px}}
+  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+  @media(max-width:720px){header.site .row{padding:0 20px}}
+  header.site .left{display:flex;align-items:center;gap:36px}
+  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+  header.site .brand span{font-weight:500;font-size:16px;letter-spacing:0}
+  header.site nav{display:flex;gap:22px}
+  header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+  header.site .right{display:flex;align-items:center;gap:14px}
+  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+  header.site .right .ghost:hover{color:var(--ink)}
+  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500;border:0}
+  main{padding:80px 0 96px;flex:1}
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+  h1{font-weight:500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+  .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+  h2{font-weight:500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+  h3{font-weight:500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+  p{color:var(--ink-mute);margin:0 0 14px}
+  p strong{color:var(--ink);font-weight:500}
+  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+  ul li{margin:6px 0}
+  .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+  .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  .table th{font-weight:500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+  .table tr:last-child td{border-bottom:0}
+  .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+  .citations a{color:var(--ink-mute)}
+  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+  footer a{color:var(--ink-mute);border:0}
+  footer a:hover{color:var(--ink)}
+  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+  .footer-row a{color:inherit}
+</style>
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="row">
+    <div class="left">
+      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+      <nav>
+        <a href="/use-cases">Solutions</a>
+        <a href="/docs">Developers</a>
+        <a href="/research" class="active">Research</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="hero-eyebrow"><span class="he-dot"></span>research . training . 12 min read</div>
+    <h1>Federated compile.</h1>
+    <p class="lede">Hospitals cannot pool patient notes. Banks cannot pool dispute transcripts. Law firms cannot pool draft pleadings. The data is exactly where the model improvement would come from, and exactly where it cannot leave. Federated training fixes the locality problem; secure aggregation and differential privacy fix the leakage problem on top. kolm runs FedAvg over LoRA adapters with Bonawitz pairwise masks and a clip-and-noise privacy accountant on each client's update.</p>
+
+    <div class="meta-line">
+      <span>May 14, 2026</span>
+      <span>&middot;</span>
+      <span>Kolmogorov research</span>
+      <span>&middot;</span>
+      <span>apps/trainer/federated.py</span>
+    </div>
+
+    <h2>FedAvg in one paragraph</h2>
+
+    <p>McMahan et al (2017) proposed Federated Averaging: each client trains for some local steps on its private data, sends only the parameter delta to the coordinator, and the coordinator averages the deltas weighted by the number of examples each client saw. The global model takes a step; round ends; next round picks a fresh set of clients and repeats. No raw rows ever leave the client. The communication payload is the model size, not the dataset size, and the wall-clock is dominated by the slowest client (the &quot;straggler&quot; problem).</p>
+
+    <p>Naive FedAvg over a 7B base model would send 7 GB per client per round. That is the first thing LoRA fixes.</p>
+
+    <h2>Why LoRA is the right adapter shape for federation</h2>
+
+    <p>LoRA factorizes the per-layer weight update as <code>&Delta;W = B &middot; A</code> where <code>A</code> is r-by-d and <code>B</code> is d-by-r. For a 7B base with <code>r=16</code> and the standard attention-projection target set, the adapter is roughly 50 MB. The base model is loaded once on each client from a public mirror and never moves. The round-trip is now <strong>50 MB up, 50 MB down</strong>, not 7 GB. On a 100-Mbps clinic uplink that is four seconds per round instead of nine minutes.</p>
+
+    <p>Two structural properties of LoRA make it well-suited to federation that the original LoRA paper did not call out:</p>
+
+    <ul>
+      <li><strong>Linear in the deltas.</strong> The federated average over <code>A</code> and <code>B</code> tensors is exactly the average over <code>&Delta;W = B &middot; A</code> at each layer. No coordinate-mismatch issues like you get when averaging full-precision weights after stochastic quantization.</li>
+      <li><strong>Bounded sensitivity by design.</strong> Per-client clipping (the DP step below) is cheap and well-conditioned because the parameter vector is small and structured.</li>
+    </ul>
+
+    <h2>Pairwise PRG-derived masks (Bonawitz et al, 2017)</h2>
+
+    <p>The coordinator should never see any client's individual update; the privacy guarantee is that only the sum (or weighted average) is revealed. Bonawitz et al introduced a clean construction. For each ordered pair of clients <code>(i, j)</code> with <code>i &lt; j</code>, derive a shared seed from a Diffie-Hellman exchange (or from a pre-distributed key for kolm's enterprise deployments), expand the seed into a pseudo-random mask the size of the model, and have client <code>i</code> add the mask while client <code>j</code> subtracts it. When the coordinator sums the masked updates, every mask cancels with its twin and the result is the clean sum.</p>
+
+    <p>kolm's implementation derives each pairwise mask as <code>HMAC-SHA256(round_seed, sorted(id_i, id_j)) &rarr; expand to LoRA-shape</code>. The expansion is done in 32-byte blocks and reshaped to match each (A, B) tensor in order; the sign is determined by whether the client's id sorts before or after its peer's. This produces a deterministic mask without an interactive key exchange, at the cost of requiring the coordinator to know which clients are participating in a round (it does anyway).</p>
+
+    <pre>def _pairwise_mask(seed: bytes, lo: str, hi: str, shape: tuple, sign: int) -&gt; np.ndarray:
+    key = hmac.new(seed, f&quot;{lo}|{hi}&quot;.encode(), sha256).digest()
+    nbytes = int(np.prod(shape)) * 4
+    stream = b&quot;&quot;.join(hmac.new(key, i.to_bytes(4, &quot;big&quot;), sha256).digest()
+                       for i in range((nbytes + 31) // 32))
+    flat = np.frombuffer(stream[:nbytes], dtype=np.float32).copy()
+    return sign * flat.reshape(shape) * 1e-3</pre>
+
+    <h2>Differential privacy on the per-client update</h2>
+
+    <p>Secure aggregation hides the individual update from the coordinator but does not hide the sum, and a determined adversary can still infer membership from the trajectory of the global model. The defense is differential privacy on each client's contribution: clip the LoRA delta vector to L2 norm <code>C</code> and add Gaussian noise with standard deviation <code>&sigma; &middot; C</code>. The <code>(eps, delta)</code> accountant tracks the privacy budget consumed across rounds.</p>
+
+    <pre>def _clip_and_noise(delta: dict, clip_norm: float, sigma: float, rng) -&gt; dict:
+    flat = np.concatenate([t.reshape(-1) for t in delta.values()])
+    norm = float(np.linalg.norm(flat))
+    scale = min(1.0, clip_norm / (norm + 1e-12))
+    out = {}
+    for name, tensor in delta.items():
+        clipped = tensor * scale
+        noise = rng.normal(0.0, sigma * clip_norm, size=tensor.shape).astype(tensor.dtype)
+        out[name] = clipped + noise
+    return out</pre>
+
+    <p>Per-round accountant: <code>(eps_round, delta_round) = analyze_gaussian(sigma, q=clients_per_round/total_clients)</code>. The composition over <code>T</code> rounds is reported in the manifest so a security reviewer can audit the budget against the buyer's policy.</p>
+
+    <h2>Round orchestration</h2>
+
+    <table class="table">
+      <thead><tr><th>Step</th><th>Coordinator</th><th>Client</th></tr></thead>
+      <tbody>
+        <tr><td>1. Select</td><td>Picks a subset of clients (typically 30-100 out of the cohort) and broadcasts the round seed</td><td>Receives the seed; loads the current global adapter</td></tr>
+        <tr><td>2. Train</td><td>Idle</td><td>Trains LoRA for E local epochs on its private data (typical: 1-3)</td></tr>
+        <tr><td>3. Clip + noise</td><td>Idle</td><td>Computes &Delta;A, &Delta;B; clips to L2 norm C; adds Gaussian noise</td></tr>
+        <tr><td>4. Mask</td><td>Idle</td><td>Adds Bonawitz pairwise masks for every peer in this round</td></tr>
+        <tr><td>5. Upload</td><td>Receives masked, noised delta</td><td>Sends masked, noised delta; HMAC-signs the payload</td></tr>
+        <tr><td>6. Aggregate</td><td>Sums the deltas weighted by n_examples; masks cancel pairwise; emits new global adapter + round receipt</td><td>Idle</td></tr>
+      </tbody>
+    </table>
+
+    <p>The round receipt records <code>round_id, seed, n_clients, eps_cumulative, delta_cumulative, k_score, adapter_cid</code>. The chain is HMAC-linked round to round so a reviewer can verify the trajectory.</p>
+
+    <h2>Edge cases worth naming</h2>
+
+    <p><strong>Dropout during a round.</strong> If client <code>j</code> goes offline after the seed exchange but before upload, every peer's mask that included <code>j</code> is still in the sum and there is no twin to cancel it. The fix is the secure-aggregation paper's standard remedy: have clients secret-share their PRG seeds with t-of-n peers at the start of the round, and have the coordinator reconstruct the seeds of dropped clients to unmask the survivors. kolm uses a Shamir t-of-n scheme with t=ceil(n/2)+1; the receipt records how many reconstructions happened.</p>
+
+    <p><strong>The DP accountant is the limit, not the loss.</strong> Buyers think the federated job runs until the loss converges. With DP it runs until the privacy budget is exhausted, then it stops. The trainer reports the budget burn rate at every round so the buyer can either lower &sigma; (less noise, faster budget burn, larger per-round footprint) or accept fewer rounds.</p>
+
+    <p><strong>KL drift between clients.</strong> Clinic A's notes and clinic B's notes drift in distribution. A naive FedAvg can stall or oscillate. The standard mitigations are FedProx (proximal regularization toward the global) and per-client adapter warmup. kolm defaults to a 1-epoch warmup against a small shared seed dataset; the seed dataset itself is in the manifest.</p>
+
+    <p><strong>Adversarial clients.</strong> Secure aggregation prevents an honest-but-curious coordinator from seeing individual updates, not a malicious client from sending a poisoned one. kolm clips before noising (which bounds any single client's contribution) and reports the per-round update-norm distribution so an outlier client can be flagged offline.</p>
+
+    <h2>What the receipt records</h2>
+
+    <pre>"federated": {
+  "method": "fedavg_lora_bonawitz_dp",
+  "n_rounds": 24,
+  "clients_per_round": 32,
+  "total_clients": 117,
+  "local_epochs": 2,
+  "clip_norm": 1.0,
+  "sigma_dp": 1.1,
+  "eps_cumulative": 4.8,
+  "delta_cumulative": 1.0e-5,
+  "shamir_threshold": 17,
+  "dropouts_recovered": 6,
+  "papers": [
+    "arXiv:1602.05629",
+    "Bonawitz-CCS-2017",
+    "arXiv:2007.14390",
+    "Abadi-CCS-2016"
+  ]
+}</pre>
+
+    <p>The canonical-JSON manifest hash covers this block, so a tampered receipt invalidates the artifact signature. The auditor checks the privacy budget against the buyer's stated policy and the dropout-recovery count against the secure-aggregation paper's threshold.</p>
+
+    <h2>Where federated compile fits in the stack</h2>
+
+    <p>A central regulator (Mayo Clinic's data office, a bank's CISO, a law firm's risk committee) cannot move data out, and a single tenant's data is not enough to make the model competitive against a frontier baseline. Federation is the workaround. kolm's stance is that federation is one tool among several: a single-tenant on-prem job is simpler and should be tried first; federation is the layer you add when the model needs cross-site signal and the cross-site signal cannot move. The federated adapter ships through the same K-score gate and HMAC chain as a single-tenant adapter; the difference is that the receipt has the privacy accountant attached.</p>
+
+    <div class="citations">
+      <p><strong>Citations</strong></p>
+      <p>McMahan, H. B. et al. <em>Communication-Efficient Learning of Deep Networks from Decentralized Data</em>. arXiv:1602.05629, 2017. The FedAvg paper.</p>
+      <p>Bonawitz, K. et al. <em>Practical Secure Aggregation for Privacy-Preserving Machine Learning</em>. CCS 2017. Pairwise PRG-derived masks and t-of-n Shamir recovery for dropouts.</p>
+      <p>Beutel, D. J. et al. <em>Flower: A Friendly Federated Learning Framework</em>. arXiv:2007.14390, 2020.</p>
+      <p>Abadi, M. et al. <em>Deep Learning with Differential Privacy</em>. CCS 2016. The clip-and-noise mechanism and the moments accountant.</p>
+    </div>
+
+    <div class="meta-line" style="margin-top:36px">
+      <a class="nb" href="/research">&larr; Back to research</a>
+      <span>&middot;</span>
+      <a class="nb" href="/research#federated">Frontier reference &middot; Federated compile</a>
+      <span>&middot;</span>
+      <a class="nb" href="/spec">RS-1 spec</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+<script src="/nav.js"></script>
+</body>
+</html>

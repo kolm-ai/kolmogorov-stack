@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Leaderboard · kolm</title>
 <meta name="description" content="Public demo catalog of .kolm artifacts, grouped by vertical. K-score columns populate when authors include evaluation evidence. A curated, signed, verified-rank leaderboard is target architecture.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Leaderboard · kolm">
 <meta property="og:description" content="Demo catalog of public .kolm entries by vertical. K-score populates when the author publishes eval evidence. Curated, signed, comparable ranking is target architecture.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/leaderboard">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="Leaderboard · kolm">
+<meta name="twitter:description" content="Demo catalog of public .kolm entries by vertical. K-score populates when the author publishes eval evidence. Curated, signed, comparable ranking is target architecture.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/leaderboard">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -70,18 +74,18 @@
   header.site .left{display:flex;align-items:center;gap:36px}
   header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
   header.site .brand img{height:18px;width:18px}
-  header.site .brand span{font-weight:540;font-size:16px;letter-spacing:0}
+  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
   header.site nav{display:flex;gap:22px}
   header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
   header.site nav a:hover,header.site nav a.active{color:var(--ink)}
   header.site .right{display:flex;align-items:center;gap:14px}
   header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
   header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:540}
+  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
 
   main{padding:48px 0 96px;flex:1}
   .head{margin-bottom:28px;display:flex;align-items:end;justify-content:space-between;gap:24px;flex-wrap:wrap}
-  .head h1{font-family:var(--sans);font-weight:540;letter-spacing:0;line-height:1.05;font-size:38px;margin:0 0 8px}
+  .head h1{font-family:var(--sans);font-weight: 500;letter-spacing:0;line-height:1.05;font-size:38px;margin:0 0 8px}
   .head .lede{color:var(--ink-mute);font-size:15px;margin:0;max-width:62ch}
   .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
   .eyebrow .num{color:var(--accent)}
@@ -104,7 +108,7 @@
   .lb-row.silver .rank{color:#c8c5b8}
   .lb-row.bronze .rank{color:#d39e6e}
   .lb-row .meta{min-width:0}
-  .lb-row .meta .name{font-size:14.5px;font-weight:540;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:0}
+  .lb-row .meta .name{font-size:14.5px;font-weight: 500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:0}
   .lb-row .meta .desc{font-size:12.5px;color:var(--ink-mute);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lb-row .meta .tags{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
   .lb-row .meta .pill{font-family:var(--mono);font-size:10.5px;padding:2px 7px;border:1px solid var(--line-strong);border-radius:4px;color:var(--ink-faint);letter-spacing:0}
@@ -123,20 +127,20 @@
 
   .empty{padding:80px 22px;text-align:center;border:1px dashed var(--line-strong);border-radius:8px;color:var(--ink-mute);font-size:14px}
   .empty .glyph{font-family:var(--mono);color:var(--ink-faint);font-size:24px;margin-bottom:14px}
-  .empty h3{font-family:var(--sans);font-size:18px;font-weight:540;letter-spacing:0;margin:0 0 6px;color:var(--ink)}
+  .empty h3{font-family:var(--sans);font-size:18px;font-weight: 500;letter-spacing:0;margin:0 0 6px;color:var(--ink)}
   .empty p{color:var(--ink-mute);font-size:13.5px;margin:0 auto;max-width:440px}
 
   .skel{padding:14px 18px;border-bottom:1px solid var(--line);height:54px;background:linear-gradient(90deg,var(--bg-elev),var(--bg-card),var(--bg-elev));background-size:200% 100%;animation:shimmer 1.6s linear infinite}
   @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
   .legend{margin-top:32px;padding:18px 22px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);font-size:13px;color:var(--ink-mute);display:flex;gap:24px;flex-wrap:wrap;align-items:center}
-  .legend strong{color:var(--ink);font-weight:540}
+  .legend strong{color:var(--ink);font-weight: 500}
   .legend code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
 
   .cta-row{margin-top:48px;padding:32px 28px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
-  .cta-row h3{margin:0 0 6px;font-size:18px;font-weight:540;letter-spacing:0;color:var(--ink)}
+  .cta-row h3{margin:0 0 6px;font-size:18px;font-weight: 500;letter-spacing:0;color:var(--ink)}
   .cta-row p{margin:0;color:var(--ink-mute);font-size:13.5px;max-width:60ch}
-  .cta-row .btn{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:10px 18px;font-size:13.5px;font-weight:540;letter-spacing:0}
+  .cta-row .btn{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:10px 18px;font-size:13.5px;font-weight: 500;letter-spacing:0}
 
   footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
   footer a{color:var(--ink-mute)}
@@ -153,6 +157,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -170,9 +175,9 @@
     <div class="head">
       <div>
         <h1>Public demo catalog.</h1>
-        <p class="lede">Every public <code style="font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px">.kolm</code> entry, grouped by vertical. <b>Today:</b> rows show what authors submit; K-score, latency, size and signature evidence display only when the author publishes them. <b>Target architecture:</b> a curated, signed, comparable leaderboard with review enforcement, evidence fields, and revocation - tracked in <a href="/changelog" style="color:var(--ink);text-decoration:underline">/changelog</a>.</p>
+        <p class="lede">Every public <code style="font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px">.kolm</code> entry, grouped by vertical. <b>Today:</b> rows show what authors submit; K-score, latency, size and signature evidence display only when the author publishes them. <b>Target architecture:</b> a curated, signed, comparable leaderboard with review enforcement, evidence fields, and revocation - tracked in <a href="/roadmap" style="color:var(--ink);text-decoration:underline">/roadmap</a>.</p>
       </div>
-      <a class="btn" href="/compile" style="display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:9px 14px;font-size:13px;font-weight:540">Publish your own <span aria-hidden="true">&rarr;</span></a>
+      <a class="btn" href="/compile" style="display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:9px 14px;font-size:13px;font-weight: 500">Publish your own <span aria-hidden="true">&rarr;</span></a>
     </div>
 
     <div class="controls">
@@ -185,7 +190,7 @@
         <button id="f-support" data-cat="customer-support">Support</button>
         <button id="f-moderation" data-cat="content-moderation">Moderation</button>
       </div>
-      <span class="count" id="count">…</span>
+      <span class="count" id="count">??/span>
     </div>
 
     <div class="table" id="table">
@@ -205,8 +210,8 @@
 
     <div class="legend">
       <span><strong>K-score</strong> = 0.40·accuracy + 0.15·size + 0.15·latency + 0.15·cost + 0.15·coverage</span>
-      <span><a href="/k-score" style="color:var(--ink);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px;text-decoration-color:rgba(255,255,255,0.18)">how it’s computed →</a></span>
-      <span><a href="/atlas" style="color:var(--ink-mute)">browse all by date →</a></span>
+      <span><a href="/k-score" style="color:var(--ink);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px;text-decoration-color:rgba(255,255,255,0.18)">how it? computed ??/a></span>
+      <span><a href="/research" style="color:var(--ink-mute)">browse research &rarr;</a></span>
     </div>
 
     <div class="cta-row">
@@ -214,21 +219,59 @@
         <h3>Beat one of these.</h3>
         <p>Compile your own specialist with <code style="font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px">kolm compile</code>, and publish it back to the registry. K-score is computed on a public eval set so the rank is comparable.</p>
       </div>
-      <a class="btn" href="/build-your-own">Start a recipe →</a>
+      <a class="btn" href="/build-your-own">Start a recipe ??/a>
     </div>
   </div>
 </main>
 
-<footer>
-  <div>&copy; 2026 Kolmogorov · the AI compiler · <a href="/docs/rs-1.md">RS-1 spec</a> · <a href="/docs">Docs</a> · <a href="/articles">Articles</a> · <a href="/security">Security</a></div>
-  <div class="wrap row" style="margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex">
-    <a href="/manifesto" style="color:inherit">Manifesto</a>
-    <a href="/trust" style="color:inherit">Trust</a>
-    <a href="/security" style="color:inherit">Security</a>
-    <a href="/privacy" style="color:inherit">Privacy</a>
-    <a href="/terms" style="color:inherit">Terms</a>
-    <a href="/changelog" style="color:inherit">Changelog</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" style="color:inherit">GitHub</a>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

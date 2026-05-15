@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Captures · kolm</title>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Captures &middot; kolm</title>
 <meta name="description" content="Every inference your agents make, captured and triaged. Keep / discard / promote each observation. When a namespace hits 1,000 pairs, distill it into a signed .kolm artifact.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm captures inbox">
 <meta property="og:description" content="Rent-vs-buy inbox: capture every upstream inference, triage with one click, distill into a Specialist when ready.">
@@ -40,14 +41,14 @@
   header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
   header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
 
   section.hero { padding: 88px 0 24px; }
   .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
@@ -55,9 +56,9 @@
   h1 { margin: 22px 0 16px; font-size: clamp(36px, 5.4vw, 56px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
   h1 .tone { color: var(--good); }
   p.lede { margin: 0 0 28px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
 
-  h2 { margin: 48px 0 12px; font-size: 22px; font-weight: 540; }
+  h2 { margin: 48px 0 12px; font-size: 22px; font-weight: 500; }
   p { margin: 0 0 14px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.65; }
   p code, li code, td code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
 
@@ -73,16 +74,16 @@
   .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 24px; align-items: center; }
   .toolbar .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--ink-mute); cursor: pointer; }
   .toolbar .btn:hover { color: var(--ink); }
-  .toolbar .btn.primary { background: var(--good); color: var(--bg); border-color: var(--good); font-weight: 540; }
+  .toolbar .btn.primary { background: var(--good); color: var(--bg); border-color: var(--good); font-weight: 500; }
   .toolbar .btn.primary:hover { color: var(--bg); opacity: 0.9; }
   .toolbar .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .toolbar select { background: var(--bg-elev); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; padding: 6px 10px; font-family: var(--mono); font-size: 12px; }
 
   table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0 0; table-layout: fixed; }
   table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
-  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 540; }
+  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
   table.tbl td { color: var(--ink-mute); word-break: break-word; }
-  table.tbl td b { color: var(--ink); font-weight: 540; }
+  table.tbl td b { color: var(--ink); font-weight: 500; }
   table.tbl td.excerpt { font-family: var(--mono); font-size: 12px; color: var(--ink); }
   table.tbl td.actions { white-space: nowrap; }
   table.tbl tr.discarded td { opacity: 0.4; text-decoration: line-through; }
@@ -102,12 +103,12 @@
   pre.code .arg { color: var(--accent-strong); }
 
   .panel { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); margin: 16px 0; }
-  .panel h3 { margin: 0 0 8px; font-size: 16px; font-weight: 540; color: var(--ink); }
+  .panel h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink); }
   .panel p { font-size: 14px; }
 
   .empty { display: none; padding: 32px; border: 1px dashed var(--line-strong); border-radius: 10px; background: var(--bg-elev); margin: 16px 0; text-align: center; }
   .empty.on { display: block; }
-  .empty h3 { margin: 0 0 12px; font-size: 17px; font-weight: 540; color: var(--ink); }
+  .empty h3 { margin: 0 0 12px; font-size: 17px; font-weight: 500; color: var(--ink); }
   .empty p { font-size: 14px; max-width: 60ch; margin: 0 auto 16px; }
 
   .ns-tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--ink-mute); background: var(--bg-card); }
@@ -125,7 +126,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "Captures · kolm",
+  "name": "Captures &middot; kolm",
   "description": "Per-tenant capture inbox: keep, discard, or promote each upstream inference. Distill into a signed .kolm artifact at 1,000 pairs.",
   "url": "https://kolm.ai/captures",
   "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
@@ -141,13 +142,14 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
     <div class="right">
       <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
+      <a href="/account" class="ghost">account</a>
+      <a href="/dashboard" class="cta">Dashboard &rarr;</a>
     </div>
   </div>
 </header>
@@ -165,7 +167,7 @@
     <div id="livewrap" style="display:none">
       <div class="stats">
         <div class="stat"><div class="k">Captured</div><div class="v" id="stat-total">0</div></div>
-        <div class="stat ready"><div class="k">Ready to distill</div><div class="v" id="stat-ready">0 <small>≥1,000 pairs / namespace</small></div></div>
+        <div class="stat ready"><div class="k">Ready to distill</div><div class="v" id="stat-ready">0 <small>&lt; 1,000 pairs / namespace</small></div></div>
         <div class="stat"><div class="k">Namespaces</div><div class="v" id="stat-ns">0</div></div>
       </div>
 
@@ -194,11 +196,11 @@
         <h3>No captures yet</h3>
         <p>Point your provider client at kolm. Every upstream call is hashed and lands here. Triage with one click. Below, the two paths.</p>
         <div style="text-align:left;max-width:680px;margin:16px auto 0">
-          <p style="margin:0 0 6px;color:var(--ink);font-weight:540;font-family:var(--mono);font-size:12px">OpenAI clients</p>
+          <p style="margin:0 0 6px;color:var(--ink);font-weight: 500;font-family:var(--mono);font-size:12px">OpenAI clients</p>
           <pre class="code"><span class="com"># Forward every chat completion through kolm. Your OpenAI key is</span>
 <span class="com"># forwarded once and dropped, never persisted.</span>
 <span class="arg">export</span> OPENAI_BASE_URL=<span class="ok">https://kolm.ai/v1/capture/openai</span></pre>
-          <p style="margin:14px 0 6px;color:var(--ink);font-weight:540;font-family:var(--mono);font-size:12px">Anthropic clients</p>
+          <p style="margin:14px 0 6px;color:var(--ink);font-weight: 500;font-family:var(--mono);font-size:12px">Anthropic clients</p>
           <pre class="code"><span class="arg">export</span> ANTHROPIC_API_URL=<span class="ok">https://kolm.ai/v1/capture/anthropic</span></pre>
         </div>
       </div>
@@ -222,18 +224,61 @@
 
 <div id="toast" class="toast"></div>
 
-<footer class="site">
-  <div class="wrap-wide row">
-    <span>Kolmogorov &middot; The AI compiler &middot; Open standard, MIT-licensed.</span>
-  </div>
-  <div class="wrap-wide row" style="margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint)">
-    <a href="/manifesto">Manifesto</a>
-    <a href="/trust">Trust</a>
-    <a href="/security">Security</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/terms">Terms</a>
-    <a href="/changelog">Changelog</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta">
+      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+    </div>
+    <div class="links">
+      <div>
+        <div class="col-h">build</div>
+        <a href="/capture">capture</a>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/recall">recall</a>
+        <a href="/evolve">evolve</a>
+        <a href="/sdks">sdks</a>
+        <a href="/openai">openai compat</a>
+        <a href="/agents">agents</a>
+      </div>
+      <div>
+        <div class="col-h">deploy</div>
+        <a href="/teams">teams</a>
+        <a href="/tunnels">remote access</a>
+        <a href="/byoc">byoc cloud</a>
+        <a href="/airgap">airgap</a>
+        <a href="/enterprise">enterprise</a>
+      </div>
+      <div>
+        <div class="col-h">proof</div>
+        <a href="/benchmarks">benchmarks</a>
+        <a href="/research">research</a>
+        <a href="/k-score">k-score</a>
+        <a href="/leaderboard">registry</a>
+        <a href="/spec">rs-1 spec</a>
+        <a href="/showcase">showcase</a>
+      </div>
+      <div>
+        <div class="col-h">industries</div>
+        <a href="/healthcare">healthcare</a>
+        <a href="/finance">finance</a>
+        <a href="/legal">legal</a>
+        <a href="/edge">edge</a>
+        <a href="/cookbook">cookbook</a>
+        <a href="/compliance-packs">compliance packs</a>
+      </div>
+      <div>
+        <div class="col-h">company</div>
+        <a href="/pricing">pricing</a>
+        <a href="/docs">docs</a>
+        <a href="/roadmap">roadmap</a>
+        <a href="/manifesto">manifesto</a>
+        <a href="/roi">roi</a>
+      </div>
+    </div>
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+    </small>
   </div>
 </footer>
 
@@ -284,7 +329,7 @@
       document.getElementById('stat-total').textContent = j.total || 0;
       var ready = j.ready_to_distill || [];
       state.ready = ready;
-      document.getElementById('stat-ready').innerHTML = ready.length + ' <small>' + (ready.length ? ready.map(function (x) { return esc(x.namespace); }).join(', ') : '≥1,000 pairs / namespace') + '</small>';
+      document.getElementById('stat-ready').innerHTML = ready.length + ' <small>' + (ready.length ? ready.map(function (x) { return esc(x.namespace); }).join(', ') : '&lt; 1,000 pairs / namespace') + '</small>';
       document.getElementById('stat-ns').textContent = (j.namespaces || []).length;
       var distillBtn = document.getElementById('distill');
       distillBtn.disabled = ready.length === 0;

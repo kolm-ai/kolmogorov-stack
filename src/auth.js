@@ -215,6 +215,34 @@ export function rotateTenantKey(tenant_id) {
   return newKey;
 }
 
+// Rotate a tenant's receipt-signing secret. The previous secret is preserved
+// in tenant.previous_receipt_secrets[] so existing artifacts and audit-chain
+// rows signed with the old key continue to verify. Verifiers walk the list
+// and accept the first match — see env.tenantReceiptVerificationKeys.
+export function rotateTenantReceiptSecret(tenant_id) {
+  const tenant = findOne('tenants', x => x.id === tenant_id);
+  if (!tenant) throw new Error('tenant not found');
+  const newSecret = 'ks_receipt_' + crypto.randomBytes(24).toString('hex');
+  const newKeyId = `tk_${tenant_id.slice(-8)}_${crypto.randomBytes(3).toString('hex')}`;
+  const previous = Array.isArray(tenant.previous_receipt_secrets) ? tenant.previous_receipt_secrets.slice() : [];
+  if (tenant.receipt_secret) {
+    previous.unshift({
+      secret: tenant.receipt_secret,
+      key_id: tenant.receipt_key_id || 'previous',
+      retired_at: new Date().toISOString(),
+    });
+  }
+  // Keep at most 3 historical keys (current + 3 previous = 4 total verification keys).
+  while (previous.length > 3) previous.pop();
+  update('tenants', x => x.id === tenant_id, {
+    receipt_secret: newSecret,
+    receipt_key_id: newKeyId,
+    receipt_rotated_at: new Date().toISOString(),
+    previous_receipt_secrets: previous,
+  });
+  return { key_id: newKeyId, rotated_at: new Date().toISOString(), previous_count: previous.length };
+}
+
 function takeToken(t) {
   const now = Date.now();
   let b = buckets.get(t.id);
@@ -250,7 +278,11 @@ const PUBLIC_API = (p) =>
   p === '/v1/registry/public' ||
   p === '/v1/stripe/webhook' ||
   p === '/v1/oauth/providers' ||
-  /^\/v1\/oauth\/(google|github)\/(start|callback)$/.test(p);
+  p === '/v1/byoc/attestation' ||
+  p === '/v1/byoc/targets' ||
+  /^\/v1\/teams\/invites\/[A-Za-z0-9_\-]+$/.test(p) ||                  // preview is public; /accept is its own path
+  /^\/v1\/oauth\/(google|github)\/(start|callback)$/.test(p) ||
+  /^\/v1\/tunnel\/agent\/[A-Za-z0-9_\-]+(?:\/response)?$/.test(p);
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || (isProductionRuntime() ? null : 'ks_admin_change_me');
@@ -328,6 +360,49 @@ export function chargeUsage(tenant_record, units = 1) {
     used: (tenant_record.used || 0) + units,
     last_used_at: new Date().toISOString(),
   });
+}
+
+// Plan-tier entitlement gate. Use as middleware on routes that should only be
+// available to a subset of plans (e.g. /v1/teams, /v1/tunnels, /v1/byoc).
+// Admin tokens always pass. Returns 402 with a hint to upgrade when the
+// tenant's plan is not in the allowed set; pending paid plans get a 402 with
+// `pending=true` instead of being silently denied.
+//
+// Usage:
+//   const requireTeams = requirePlan(['teams','business','enterprise'], 'teams workspace');
+//   r.post('/v1/teams', requireTeams, (req, res) => { ... });
+export function requirePlan(allowedPlans, feature = 'this feature') {
+  const allowed = new Set((allowedPlans || []).map(p => String(p).toLowerCase()));
+  return function entitlementMiddleware(req, res, next) {
+    if (req.is_admin) return next();
+    const t = req.tenant_record;
+    if (!t) {
+      return res.status(401).json({
+        error: 'authentication required',
+        feature,
+        hint: 'set Authorization: Bearer <api_key>',
+      });
+    }
+    const plan = String(t.plan || 'free').toLowerCase();
+    if (allowed.has(plan)) return next();
+    // Pending upgrade — show as "payment pending" rather than "upgrade".
+    if (t.pending_plan && allowed.has(String(t.pending_plan).toLowerCase())) {
+      return res.status(402).json({
+        error: 'plan upgrade pending payment',
+        feature,
+        current_plan: plan,
+        pending_plan: t.pending_plan,
+        hint: 'complete checkout to unlock',
+      });
+    }
+    return res.status(402).json({
+      error: 'plan upgrade required',
+      feature,
+      current_plan: plan,
+      allowed_plans: Array.from(allowed),
+      hint: `POST /v1/account/change-plan with one of: ${Array.from(allowed).join(', ')}`,
+    });
+  };
 }
 
 export function rateLimitStats() {

@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>How kolm works · compile, serve, run, distill the loop</title>
 <meta name="description" content="The compile pipeline end-to-end: a task description, examples, and a frontier model become a signed .kolm artifact that runs offline.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="How kolm works · compile, serve, run, distill the loop">
 <meta property="og:description" content="The compile pipeline, end-to-end. How a task becomes a signed, portable, runnable artifact.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/how-it-works">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="How kolm works · compile, serve, run, distill the loop">
+<meta name="twitter:description" content="The compile pipeline, end-to-end. How a task becomes a signed, portable, runnable artifact.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/how-it-works">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -22,8 +26,8 @@
 <style>
   .hiw-step { display: grid; grid-template-columns: 60px 1fr; gap: 28px; margin-bottom: 48px; padding-bottom: 36px; border-bottom: 1px solid var(--line); }
   .hiw-step:last-child { border-bottom: 0; }
-  .hiw-num { font-family: var(--mono); font-size: 32px; font-weight: 540; color: var(--violet, #faf2e1); line-height: 1; }
-  .hiw-step h2 { margin: 0 0 8px; font-size: 22px; font-weight: 540; line-height: 1.2; }
+  .hiw-num { font-family: var(--mono); font-size: 32px; font-weight: 500; color: var(--violet, #faf2e1); line-height: 1; }
+  .hiw-step h2 { margin: 0 0 8px; font-size: 22px; font-weight: 500; line-height: 1.2; }
   .hiw-step .summary { margin: 0 0 16px; font-size: 14px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; max-width: 70ch; }
   .hiw-step h4 { margin: 18px 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint, #737c73); font-family: var(--mono); }
   .hiw-step p { margin: 0 0 10px; font-size: 13.5px; color: var(--fg-2, #c9c2b2); line-height: 1.6; max-width: 70ch; }
@@ -36,8 +40,8 @@
   .pipe-grid .row:last-child { border-bottom: 1px solid var(--line); }
   .pipe-grid .col { padding: 0 16px 0 0; }
   .pipe-grid .num { font-family: var(--mono); font-size: 11px; color: var(--violet, #faf2e1); letter-spacing: 0.06em; padding: 2px 0 0; }
-  .pipe-grid .name { font-family: var(--mono); font-size: 13px; color: var(--ink, #faf2e1); font-weight: 540; letter-spacing: -0.005em; }
-  .pipe-grid .col h5 { margin: 0 0 4px; font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint, #737c73); font-weight: 540; }
+  .pipe-grid .name { font-family: var(--mono); font-size: 13px; color: var(--ink, #faf2e1); font-weight: 500; letter-spacing: -0.005em; }
+  .pipe-grid .col h5 { margin: 0 0 4px; font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint, #737c73); font-weight: 500; }
   .pipe-grid .col p { margin: 0; font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.55; }
   .pipe-grid .head { border-top: 0; padding: 0 0 10px; }
   .pipe-grid .head .col h5 { color: var(--ink-faint, #737c73); }
@@ -49,7 +53,7 @@
   }
   .spec-table { width: 100%; max-width: 70ch; border-collapse: collapse; margin: 8px 0 0; font-size: 13px; }
   .spec-table th, .spec-table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  .spec-table th { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint, #737c73); font-weight: 540; width: 30%; }
+  .spec-table th { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint, #737c73); font-weight: 500; width: 30%; }
   .spec-table td { color: var(--ink-mute, #b5bdb1); line-height: 1.55; }
   .spec-table td code { font-size: 12px; }
 </style>
@@ -102,6 +106,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -113,10 +118,10 @@
 </header>
 
 <main>
-  <section class="hero">
+  <section class="hero frontier-bg">
     <div class="wrap">
-      <div class="eyebrow"><span class="pulse"></span>How it works</div>
-      <h1>Compile, end-to-end.</h1>
+      <div class="hero-eyebrow"><span class="he-dot"></span>How it works &middot; 8 stages &middot; gather to sign</div>
+      <h1>Compile, <span class="tone">end-to-end.</span></h1>
       <p class="lede">Eight stages: gather, spec, synthesize, k-sample, verify, fit, observe, sign. Frontier as teacher, artifact as student, receipt as audit row. Reads like a paper because the only credible answer to "how does it work" is one an engineer can implement.</p>
     </div>
   </section>
@@ -232,7 +237,7 @@ the K-score is the mean over the held-out eval set.</pre>
         <div class="hiw-num">03</div>
         <div>
           <h2>Synthesize: draft the recipe pack from the examples.</h2>
-          <p class="summary">Most tokens in structured tasks are deterministic given the prefix. The compiler emits a <em>recipe pack</em> indexed by prefix shape and recalled-context embedding. At run time, recipes draft boring tokens; the LoRA fills the substantive ones. The speculative-decoding moat.</p>
+          <p class="summary">Most tokens in structured tasks are deterministic given the prefix. The compiler emits a <em>recipe pack</em> indexed by prefix shape and recalled-context embedding. At run time, recipes draft boring tokens; the LoRA fills the substantive ones. The speculative-decoding mechanism.</p>
 
           <h4>What ships in the pack</h4>
           <ul>
@@ -372,9 +377,54 @@ the K-score is the mean over the held-out eval set.</pre>
   </section>
 </main>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <div class="meta">kolm how it works / <a href="/anatomy">.kolm anatomy</a> / <a href="/k-score">K-score</a></div>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

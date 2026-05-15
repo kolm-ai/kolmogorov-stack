@@ -1,0 +1,24 @@
+{
+  "mode": "pattern",
+  "job_id": "job_phi_redactor_v1",
+  "n": 5000,
+  "warmup": 200,
+  "latency": {
+    "n": 5000,
+    "min_us": 0,
+    "p50_us": 1,
+    "p95_us": 1,
+    "p99_us": 2,
+    "max_us": 258,
+    "mean_us": 1,
+    "calls_per_sec": 1165990
+  },
+  "note": "Pattern-match recipes run as compiled JS in V8. Numbers are end-to-end (input parse + match + output).",
+  "box": {
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.14.0",
+    "cpus": 16
+  },
+  "timestamp": "2026-05-14T11:56:13.047Z"
+}

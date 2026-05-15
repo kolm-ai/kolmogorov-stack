@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>kolm Verify</title>
+<style>
+  body{font:13px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#ece7dc;background:#0b0d10;margin:0;padding:14px 16px;width:300px}
+  h1{font-size:14px;font-weight:500;margin:0 0 10px;letter-spacing:-0.01em}
+  p{color:#b5bdb1;margin:0 0 10px;line-height:1.5}
+  a{color:#10b981;text-decoration:none}
+  .ok{color:#10b981}
+  .bad{color:#ff6b91}
+  hr{border:0;border-top:1px solid rgba(236,231,220,0.08);margin:10px 0}
+  .row{display:flex;justify-content:space-between;font-size:11.5px;color:#737c73;margin:4px 0}
+</style>
+</head>
+<body>
+  <h1>kolm Verify</h1>
+  <p>Right-click any <code>.kolm</code> link &rarr; <b>Verify with kolm</b>.</p>
+  <hr>
+  <div id="status">
+    <p>Issuer pubkey: <span id="ikey">checking&hellip;</span></p>
+    <p>Last verified: <span id="last">never</span></p>
+  </div>
+  <hr>
+  <p><a href="https://kolm.ai/verify-prod" target="_blank">open browser verifier &rarr;</a></p>
+  <script src="popup.js"></script>
+</body>
+</html>

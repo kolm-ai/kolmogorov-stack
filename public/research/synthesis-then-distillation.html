@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Synthesis-then-distillation: building task corpora without seed data &middot; kolm research</title>
+<meta name="description" content="How kolm builds a training corpus from a task spec when the user has zero captured pairs. Synthesize from a frontier model, distill from a teacher, reject malformed pairs with a verifier, K-select for diversity.">
+<meta name="keywords" content="synthetic data, knowledge distillation, teacher model, kolm compile, mode collapse, label skew, K-sampling, verifier">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta name="author" content="kolm">
+<meta name="robots" content="index,follow,max-snippet:-1">
+<meta property="og:site_name" content="kolm">
+<meta property="og:title" content="Synthesis-then-distillation: building task corpora without seed data">
+<meta property="og:description" content="Two passes, one verifier, one diversity-weighted K-selection. The synthetic-data pipeline kolm runs when the user has zero seed examples.">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Synthesis-then-distillation: building task corpora without seed data">
+<meta name="twitter:description" content="The synthetic-data pipeline kolm runs when the user has zero seed examples.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/synthesis-then-distillation">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/synthesis-then-distillation">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "Synthesis-then-distillation: building task corpora without seed data",
+      "description": "How kolm builds a training corpus from a task spec when the user has zero captured pairs. Synthesize from a frontier model, distill from a teacher, reject malformed pairs with a verifier, K-select for diversity.",
+      "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+      "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+      "datePublished": "2026-05-14",
+      "dateModified": "2026-05-14",
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/synthesis-then-distillation" },
+      "image": "https://kolm.ai/og-card.svg",
+      "keywords": "synthetic data, distillation, kolm compile, mode collapse, K-sampling, verifier",
+      "articleSection": "Methods",
+      "wordCount": 1880
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+        {"@type": "ListItem", "position": 3, "name": "Synthesis-then-distillation", "item": "https://kolm.ai/research/synthesis-then-distillation"}
+      ]
+    }
+  ]
+}
+</script>
+<style>
+  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+  .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+  @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+
+  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+  header.site .left{display:flex;align-items:center;gap:36px}
+  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+  header.site .brand span{font-weight:500;font-size:16px}
+  header.site nav{display:flex;gap:22px}
+  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+  header.site nav a:hover{color:var(--ink)}
+  header.site .right{display:flex;align-items:center;gap:14px}
+  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+  header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+  @media(max-width:720px){header.site nav{display:none}}
+
+  section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+  section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+  section.hero .wrap{position:relative}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+  .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+  h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+  h1 .tone{color:#10b981}
+  p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+  p.lede b{color:var(--ink);font-weight:500}
+  .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+  .meta b{color:var(--ink-mute);font-weight:500}
+
+  article{padding:36px 0 96px}
+  article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+  article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+  article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+  article p b{color:var(--ink);font-weight:500}
+  article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+  article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+  article blockquote p{color:var(--ink);margin:0;font-weight:500}
+  article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+  article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+  article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+  article ul li b{color:var(--ink);font-weight:500}
+  article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+  article pre .com{color:var(--ink-faint)}
+  article pre .arg{color:#10b981}
+  article pre .kw{color:#b0bbff}
+  article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+  article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+  article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+  article table td b{color:var(--ink)}
+
+  .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+  .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+  .toc ol{margin:0;padding-left:20px}
+  .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+  .toc li a{color:var(--ink-mute)}
+  .toc li a:hover{color:#10b981}
+
+  .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+  @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+  .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+  .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+  .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+  .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+  .signpost a .v .arrow{color:#10b981;margin-left:6px}
+  .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+
+  footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+  footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+</style>
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap-wide row">
+    <div class="left">
+      <a href="/" class="brand"><span>kolm</span></a>
+      <nav>
+        <a href="/use-cases">Solutions</a>
+        <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="pill"><span class="dot"></span>Research &middot; Methods &middot; 2026-05-14 &middot; 11 min read</span>
+    <h1>Synthesis-then-distillation: <span class="tone">building task corpora without seed data.</span></h1>
+    <p class="lede">The user has a task description and zero captured pairs. <b>The compile loop synthesizes a corpus from the spec, distills from a teacher, rejects malformed pairs with a deterministic verifier, and K-selects for diversity.</b> Two passes, four guard rails, one honest cap on quality.</p>
+    <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;synthesis &middot; distillation &middot; data</span></div>
+  </div>
+</section>
+
+<article>
+  <div class="wrap">
+
+    <div class="toc">
+      <h5>Contents</h5>
+      <ol>
+        <li><a href="#cold">The cold-start problem</a></li>
+        <li><a href="#two-pass">Two passes: synthesize, then distill</a></li>
+        <li><a href="#verifier">The verifier gate</a></li>
+        <li><a href="#k-select">K-selection for diversity</a></li>
+        <li><a href="#failures">Three failure modes and their tells</a></li>
+        <li><a href="#ceiling">The synthetic-only ceiling</a></li>
+      </ol>
+    </div>
+
+    <h2 id="cold">The cold-start problem.</h2>
+    <p>The textbook setup for a fine-tune is a thousand labeled pairs in hand. The realistic setup is a task description and nothing else. A founder wants a refund-classifier; a support team wants a ticket-router; a clinician wants a drug-interaction filter. None of them have a curated jsonl. They have a sentence.</p>
+    <p>The pre-2024 answer was: go capture some data, come back in two weeks. The post-2024 answer is: a frontier model is good enough at generating in-distribution training pairs for narrow tasks that you can bootstrap from zero. <b>Synthesis is not a substitute for captured production traffic. It is a way to ship the first artifact while the capture pipeline accumulates real pairs.</b></p>
+    <p>The kolm compile loop runs synthesis automatically when the corpus is empty or below threshold. The verb is <code>kolm compile</code> with an <code>--examples</code> flag that doubles as the seed for the verifier; when no examples are supplied, the loop falls back to the spec alone.</p>
+
+    <pre><span class="kw">$</span> kolm compile -t refund_flagger
+<span class="arg">[synth]</span>     no seed corpus; entering synth-then-distill mode
+<span class="arg">[synth]</span>     teacher: claude-opus-4-7 (api)
+<span class="arg">[synth]</span>     candidates per spec: N=12, target K=4
+<span class="arg">[synth]</span>     generating 240 candidate pairs across 60 spec slices
+<span class="arg">[verify]</span>    rejected 53 / 240 (22%) malformed or off-spec
+<span class="arg">[k-sel]</span>     selected 180 diverse pairs across 12 clusters
+<span class="arg">[distill]</span>   teacher rollout on 180 pairs &rarr; LoRA training set
+<span class="arg">[K-score]</span>   0.887 (ships at 0.85 gate)</pre>
+
+    <h2 id="two-pass">Two passes: synthesize, then distill.</h2>
+    <p>The pipeline runs in two named passes with different inputs and different teachers. They look like one step from the CLI; they are two steps internally.</p>
+    <p><b>Pass one: synthesize the spec slice.</b> The compiler decomposes the task description into a small number of spec slices: input shape, output shape, edge cases, negation cases, near-miss cases. For a refund classifier, the slices are roughly <em>clear refund request</em>, <em>refund-adjacent question</em>, <em>policy clarification</em>, <em>angry-but-not-asking</em>, <em>not refund-related</em>. The teacher is prompted N times per slice with a temperature high enough to surface lexical variation (typically T=1.0, top_p=0.92). The output is an unfiltered set of N candidate inputs per slice, plus a teacher-generated rationale that explains why each candidate fits the slice.</p>
+    <p>This pass is the one most likely to be done badly. Three failure modes (mode collapse, lexical regression, label distribution skew) all live here. The cure is structural: each slice has a verifier-side schema, the teacher temperature stays high, and the candidates land in a pool that is later K-sampled, not consumed in order.</p>
+    <p><b>Pass two: distill the labels.</b> Once the inputs are in the pool and verified, the teacher is prompted again, this time at low temperature (T=0.2), to produce the canonical label for each input. The temperature flip is intentional. <em>Diverse inputs, deterministic labels.</em> This is the pattern that makes synthetic training data work; the inverse (low-temperature inputs, high-temperature labels) collapses the distribution and teaches the student to babble.</p>
+    <p>Pass two writes a jsonl that looks like every other captured corpus. The downstream trainer (<code>kolm distill</code>) does not know or care whether the pairs came from a real session or a synthesis run. The receipt chain marks the provenance: <code>seeds.source = "synth"</code> in the canonical-JSON envelope.</p>
+
+    <h2 id="verifier">The verifier gate.</h2>
+    <p>Every synthesized pair passes through a deterministic verifier before it joins the training set. The verifier is not an LLM. It is a small JavaScript generator (in the inline-spec case) or a JSON-schema checker (in the structured-spec case) that takes <code>(input, expected_output)</code> and returns <code>(ok, reject_reason)</code>. The signature is plain:</p>
+
+    <pre><span class="com">// src/verifier.js</span>
+<span class="kw">export function</span> verify(generator, { positives = [], negatives = [], property_tests = [] }) {
+  <span class="com">// run the generator against each example, count rejects,</span>
+  <span class="com">// return reject_rate, accuracy, and a trace for the audit log</span>
+  <span class="kw">return</span> {
+    accuracy: round(accOk / total, 3),
+    reject_rate_negative: round(negRate, 3),
+    trace,
+  };
+}</pre>
+
+    <p>The verifier is called twice in the synth pipeline. The first call is the per-candidate gate: if the input does not fit the slice schema (wrong type, wrong shape, off-topic), the pair is dropped before it ever sees pass two. The second call is the post-distill audit: the held-out positives and negatives are run against the freshly distilled student to compute the K-score for the artifact.</p>
+    <p><b>Why deterministic?</b> Because the only reliable way to reject malformed teacher output at scale is a rule that returns the same answer on the same input every time. An LLM-as-judge is not deterministic; the same pair will be accepted on Monday and rejected on Tuesday. The verifier is allowed to be conservative; it is not allowed to be flaky.</p>
+
+    <h2 id="k-select">K-selection for diversity.</h2>
+    <p>The teacher returns N candidates per spec slice. Even after the verifier drops the malformed ones, the remaining pool is correlated: candidates from the same slice tend to use similar vocabulary, similar sentence structure, similar named entities. Training on the full pool teaches the student to memorize the teacher's surface patterns, not the underlying task.</p>
+    <p>The cure is K-selection. From the verified pool of M candidates per slice, the compiler keeps the K most-diverse and most-aligned-with-spec, where K is a fraction of M (typically 1/3 to 1/2). The selection is the smaller of two scoring loops:</p>
+    <ul>
+      <li><b>Embedding clustering.</b> Each candidate is embedded with a small open model; pairwise cosine distance partitions the pool into clusters; one candidate is drawn from each cluster until K is reached.</li>
+      <li><b>Verifier-score ranking.</b> Each candidate has a verifier score in [0, 1] capturing how cleanly it fits the slice schema. Inside each cluster, the highest-scored candidate wins.</li>
+    </ul>
+    <p>The diversity-weighted selection is what keeps the synthetic corpus from looking like fifty paraphrases of the same sentence. The verifier-score tiebreaker is what keeps the picker from choosing the weirdest candidate in each cluster. Together they encode the same stance as the temperature flip: <em>broad inputs, sharp labels.</em></p>
+
+    <p>A reference run on the refund-flagger task above:</p>
+
+    <pre><span class="com"># slice-by-slice K-selection trace</span>
+<span class="arg">slice 1/5</span>  clear_refund_request
+  candidates: 48     verified: 41     clusters: 11     selected: 18
+<span class="arg">slice 2/5</span>  refund_adjacent_question
+  candidates: 48     verified: 37     clusters: 9      selected: 14
+<span class="arg">slice 3/5</span>  policy_clarification
+  candidates: 48     verified: 39     clusters: 10     selected: 16
+<span class="arg">slice 4/5</span>  angry_not_asking
+  candidates: 48     verified: 30     clusters: 8      selected: 12
+<span class="arg">slice 5/5</span>  not_refund_related
+  candidates: 48     verified: 40     clusters: 12     selected: 20
+<span class="arg">TOTAL</span>    240 candidates &rarr; 187 verified &rarr; 80 K-selected pairs</pre>
+
+    <h2 id="failures">Three failure modes and their tells.</h2>
+    <p>The pipeline is built around three pathologies that synthesis is known to produce. Each has a tell the compiler logs and a mitigation the compiler applies.</p>
+
+    <p><b>Mode collapse.</b> The teacher locks onto a narrow lexical pattern and produces fifty variants of the same sentence. The tell is the embedding cluster count: if N=12 candidates per slice produce one or two clusters, the pool is collapsed. The mitigation is a temperature bump on pass one and, if that fails twice, a switch to a different teacher model. The compiler logs <code>collapse_detected: true</code> and the K-score gate refuses to ship the artifact below 0.85.</p>
+
+    <p><b>Lexical regression.</b> The teacher reaches for its own training distribution instead of the task slice. A refund-classifier slice on "policy clarification" starts returning customer-service script openers ("Thank you for reaching out"). The tell is the verifier reject rate: when reject_rate climbs above 30% on a single slice, the slice is regenerated with a stricter prompt anchored to two human-written exemplars (if available) or to a hand-built JSON schema (otherwise).</p>
+
+    <p><b>Label distribution skew.</b> The teacher's prior over labels diverges from the spec. A refund-classifier specced to be 50/50 refund-vs-not lands at 80/20 in the synthesized set, because the teacher's training data is biased toward refund-shaped requests. The tell is the post-pass-two label histogram. The mitigation is stratified resampling: the compiler downsamples the over-represented class until the label distribution matches the spec within 5 percentage points.</p>
+
+    <blockquote>
+      <p>The three failure modes are not exotic. They are the default behavior of a high-temperature teacher with no constraints. The verifier, the K-selection, and the stratified resample are the three guard rails that keep them from showing up inside a shipped artifact.</p>
+    </blockquote>
+
+    <h2 id="ceiling">The synthetic-only ceiling.</h2>
+    <p>Synthesis-then-distillation is good. It is not as good as real data. The K-scores we see across the public registry tell a consistent story:</p>
+
+    <ul>
+      <li><b>Synthetic-only artifacts</b> on a narrow task (single-slot classification, bounded structured extraction) ship at K=0.86 to K=0.91. They pass the gate, but the long tail of edge cases is uncovered.</li>
+      <li><b>Synthetic-then-captured artifacts</b> (a synth bootstrap plus 200-500 captured pairs from production traffic) push K to 0.93-0.96. The captured pairs disproportionately cover the failure modes the synth missed.</li>
+      <li><b>Captured-only artifacts</b> with 1000+ pairs cap out at K=0.95-0.98 on the same task class. Beyond that, the limit is the base model and the eval pack itself.</li>
+    </ul>
+
+    <p>This is the honest framing on the homepage and in the docs. The synth path exists so you can ship something the first hour, but the production path is always: ship the synth artifact, route 5% of traffic through it under <code>kolm capture</code>, replace with the recompiled artifact a week later. The receipt chain on the second artifact records the provenance flip: <code>seeds.source = "captured"</code> instead of <code>"synth"</code>. The K-score band moves up. The artifact bytes change. The wire format does not.</p>
+
+    <p>The single-line argument for keeping the synth path in the compiler at all is that the alternative (asking the user to hand-curate a thousand pairs before they can run anything) is the reason most "fine-tune your own model" tools have a 3% activation rate. The synth path is the difference between an unactivated user and a user with a 0.89-K artifact in their hand who knows what to capture next.</p>
+
+    <h2 id="related">Related work.</h2>
+    <ul>
+      <li><b>Self-Instruct</b> (Wang et al., <a href="https://arxiv.org/abs/2212.10560" rel="noopener">arxiv 2212.10560</a>). The original synthesis-then-finetune pipeline. The compile loop's pass-one structure is a direct descendant.</li>
+      <li><b>Alpaca</b> (Taori et al., 2023). Demonstrated that 52k teacher-generated pairs can fine-tune a small base into a usable instruction-follower. The data ceiling argument is exactly the lesson learned there.</li>
+      <li><b>WizardLM Evol-Instruct</b> (Xu et al., <a href="https://arxiv.org/abs/2304.12244" rel="noopener">arxiv 2304.12244</a>). The diversity-via-prompt-evolution approach we draw from on the slice-decomposition step.</li>
+      <li><b><a href="/research/k-sampling">K-sampling at compile time</a></b>. The companion paper on the diversity-weighted selection algorithm.</li>
+      <li><b><a href="/research/case-for-adapters">The case for adapters</a></b>. Why the distilled student is a LoRA, not a merged checkpoint.</li>
+    </ul>
+
+    <div class="signpost">
+      <a href="/research/k-sampling">
+        <span class="lab">read next</span>
+        <span class="v">K-sampling <span class="arrow">&rarr;</span></span>
+        <p>The diversity-weighted selection step that turns N candidates into K training pairs.</p>
+      </a>
+      <a href="/research/case-for-adapters">
+        <span class="lab">read next</span>
+        <span class="v">Adapters, not checkpoints <span class="arrow">&rarr;</span></span>
+        <p>Why the output of synth-then-distill is a 30-200MB LoRA, not a merged 10GB checkpoint.</p>
+      </a>
+      <a href="/docs">
+        <span class="lab">docs</span>
+        <span class="v">kolm compile reference <span class="arrow">&rarr;</span></span>
+        <p>CLI surface for the compile loop. The synth path is the default when <code>--examples</code> is empty.</p>
+      </a>
+      <a href="/spec">
+        <span class="lab">spec</span>
+        <span class="v">RS-1 spec <span class="arrow">&rarr;</span></span>
+        <p>The on-disk shape of a <code>.kolm</code> artifact. The provenance field lives in <code>seeds.source</code>.</p>
+      </a>
+    </div>
+
+  </div>
+</article>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

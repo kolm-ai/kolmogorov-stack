@@ -1,0 +1,47 @@
+{
+  "pack": "sox-lite",
+  "version": "0.1.0",
+  "task": "Classify financial disclosure paragraphs from 10-K / 10-Q MD&A sections into three labels: forward_looking, historical, risk_factor. Return only the label string. Refuse to interpret or summarize.",
+  "preset": "lora-fast",
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "lora_rank": 8,
+  "k_threshold": 0.88,
+  "training": {
+    "max_steps": 600,
+    "learning_rate": 2e-4,
+    "warmup_ratio": 0.03,
+    "batch_size": 16,
+    "gradient_accumulation": 2,
+    "seed": 42
+  },
+  "verifier": {
+    "kind": "answer_key",
+    "params": {
+      "keys": ["forward_looking", "historical", "risk_factor"]
+    }
+  },
+  "evaluation": {
+    "metrics": ["accuracy", "macro_f1", "per_class_recall"],
+    "primary": "macro_f1",
+    "target": 0.90,
+    "held_out_ratio": 0.20
+  },
+  "deployment": {
+    "default_runtime": "gguf",
+    "tee_supported": ["aws-nitro", "gcp-cvm", "azure-cvm", "docker"],
+    "egress_required": false
+  },
+  "policy": {
+    "refuses": [
+      "summarizing disclosure language",
+      "predicting stock impact",
+      "free-form analysis"
+    ]
+  },
+  "compliance_metadata": {
+    "framework": "SOX 404 / COSO",
+    "control_category": "[BUYER fills: ITGC / process-level / entity-level]",
+    "data_classification": "MNPI",
+    "geo_constraint": "US"
+  }
+}

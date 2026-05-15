@@ -9,7 +9,7 @@ import { effectiveReceiptSecret, isProductionRuntime, runtimeReadiness } from '.
 import * as registry from './registry.js';
 import * as runtime from './runtime.js';
 import * as cache from './cache.js';
-import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq } from './auth.js';
+import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, rotateTenantReceiptSecret, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq, requirePlan } from './auth.js';
 import { mountOAuth, oauthConfigured } from './oauth.js';
 import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured } from './email.js';
 import { compileJs, verify } from './verifier.js';
@@ -30,12 +30,37 @@ import {
   forwardOpenAI,
   promptHash,
 } from './capture.js';
+import * as teams from './teams.js';
+import * as tunnel from './tunnel.js';
+import * as byoc from './byoc.js';
+import { AUDIT_OPS, tryAppendAudit, listAuditEvents, verifyAuditChain } from './audit.js';
+import { verifyCredential, PROVENANCE_SPEC } from './provenance.js';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-// Per-IP rate limiters (S5, S10). Express trust-proxy must be set so the
-// limiter can read X-Forwarded-For — Railway's edge sets it.
+// Per-IP rate limiters (S5, S10). Express trust-proxy is set to 2 in
+// server.js so X-Forwarded-For resolves through the Vercel→Railway chain.
+// Vercel rotates client egress IPs within a /24 subnet on each request, so
+// exact-IP keying would never accumulate hits. We coalesce IPv4 to /24 and
+// IPv6 to /48 so a single client (NAT'd or not) maps to a stable key.
+function ipKey(req) {
+  const xff = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  const raw = req.ip || xff || req.socket?.remoteAddress || 'unknown';
+  // Strip IPv4-mapped-IPv6 prefix and any zone-id suffix.
+  const stripped = raw.replace(/^::ffff:/, '').replace(/%.*$/, '');
+  // IPv4 → /24 (first 3 octets). IPv6 → /48 (first 3 hextets).
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(stripped)) {
+    const parts = stripped.split('.');
+    return `${parts[0]}.${parts[1]}.${parts[2]}.0/24`;
+  }
+  if (stripped.includes(':')) {
+    const hex = stripped.split(':').slice(0, 3).join(':');
+    return `${hex}::/48`;
+  }
+  return stripped || 'unknown';
+}
+
 const signupLimiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000,    // 24 hours
   max: parseInt(process.env.SIGNUP_LIMIT_PER_DAY || '40'), // shared-NAT friendly; defaults env-overridable.
@@ -47,6 +72,7 @@ const signupLimiter = rateLimit({
     hint: 'behind a shared network or VPN? mail founders@kolm.ai for a direct invite',
     contact: 'founders@kolm.ai',
   },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -319,6 +345,18 @@ export function buildRouter() {
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       return res.status(400).json({ error: 'valid email required' });
     }
+    // Refuse to mint a second tenant for the same email. Silently re-issuing
+    // a fresh key creates undiscoverable orphan tenants and rotates the
+    // legitimate owner's credential without their consent. 409 nudges the
+    // caller to OAuth or account recovery.
+    const existingTenant = findTenantByEmail(email);
+    if (existingTenant) {
+      return res.status(409).json({
+        error: 'email_exists',
+        hint: 'an account already exists for this email; sign in via OAuth (/v1/oauth/google/start) or contact founders@kolm.ai for account recovery',
+        tenant: { id: existingTenant.id, name: existingTenant.name, plan: existingTenant.plan },
+      });
+    }
     // Plan-aware self-serve signup. Free is provisioned immediately. For paid
     // plans, we provision the tenant on the FREE quota and record a
     // `pending_plan` flag; the Stripe webhook flips the plan to the requested
@@ -345,6 +383,19 @@ export function buildRouter() {
     if (emailConfigured()) {
       sendWelcome({ email, apiKey: t.api_key, plan: provisionedPlan, billingUrl }).catch(() => {});
     }
+
+    // Immediately set the kolm_session cookie so the browser is signed in.
+    // Removes the "save your api key and paste it into the sign-in form"
+    // friction. The api_key is still returned in the response body so CLI
+    // callers can capture it.
+    const isProdSignup = isProductionRuntime();
+    res.cookie('kolm_session', t.api_key, {
+      httpOnly: true,
+      secure: isProdSignup,
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
 
     res.status(201).json({
       tenant: {
@@ -436,8 +487,22 @@ export function buildRouter() {
 
   // ---------- Public registry browsing — no auth needed for visibility=public ----------
   r.get('/v1/public/concepts', (_req, res) => {
-    const concepts = registry.listConcepts({ tenant: '__public__', limit: 200 })
+    const rows = registry.listConcepts({ tenant: '__public__', limit: 200 })
       .filter(c => c.visibility === 'public');
+    // Project the head version's evaluation + signature so the Atlas / Leaderboard
+    // pages can display K-score, size, latency, and signature evidence when the
+    // author publishes them. Vector is stripped to keep the payload small.
+    const concepts = rows.map(c => {
+      if (!c.head_version) return c;
+      const v = findOne('versions', x => x.id === c.head_version);
+      if (!v) return c;
+      const { vector, ...rest } = v;
+      return {
+        ...c,
+        created_at: v.created_at || c.updated_at,
+        latest_version: { ...rest, vector_dim: vector ? vector.length : 0 },
+      };
+    });
     res.json({ concepts });
   });
 
@@ -550,6 +615,7 @@ export function buildRouter() {
         verified,
         reasons,
         receipt_id: receipt.receipt_id,
+        cid: receipt.cid || null,
         artifact_hash: receipt.artifact_hash,
         eval_set_hash: receipt.eval_set_hash,
         eval_score: receipt.eval_score,
@@ -835,7 +901,7 @@ export function buildRouter() {
   // GET  /v1/compile/:id/.kolm → download the artifact
   // GET  /v1/compile           → list this tenant's jobs
   r.post('/v1/compile', async (req, res) => {
-    const { task, examples = [], corpus_namespace, base_model, deploy_hook } = req.body || {};
+    const { task, examples = [], corpus_namespace, base_model, deploy_hook, preset, lora_rank, k_threshold } = req.body || {};
     if (!task || typeof task !== 'string') return res.status(400).json({ error: 'task (string) required' });
     if (task.length > 4000) return res.status(400).json({ error: 'task description too long (>4000 chars)' });
     if (examples && (!Array.isArray(examples) || examples.length > 200)) {
@@ -844,7 +910,18 @@ export function buildRouter() {
     if (deploy_hook && (typeof deploy_hook !== 'string' || !/^https:\/\//i.test(deploy_hook) || deploy_hook.length > 2048)) {
       return res.status(400).json({ error: 'deploy_hook must be an https URL (≤2048 chars)' });
     }
-    const job = createJob({ task, examples, corpus_namespace, base_model, tenant: req.tenant, deploy_hook });
+    if (preset != null && typeof preset !== 'string') return res.status(400).json({ error: 'preset must be a string' });
+    if (lora_rank != null && (typeof lora_rank !== 'number' || lora_rank < 4 || lora_rank > 64)) {
+      return res.status(400).json({ error: 'lora_rank must be a number in [4..64]' });
+    }
+    if (k_threshold != null && (typeof k_threshold !== 'number' || k_threshold < 0.50 || k_threshold > 0.99)) {
+      return res.status(400).json({ error: 'k_threshold must be a number in [0.50..0.99]' });
+    }
+    const job = createJob({
+      task, examples, corpus_namespace, base_model,
+      tenant: req.tenant, tenant_id: req.tenant_record?.id || null,
+      deploy_hook, preset, lora_rank, k_threshold,
+    });
     const ctx = {
       synthesize,
       publicRecipes: () => {
@@ -870,16 +947,49 @@ export function buildRouter() {
       recall: {
         query: ({ namespace, query, k }) => recall.query({ tenant: req.tenant, namespace, query, k }),
       },
+      registry: {
+        createConcept: registry.createConcept,
+        publishVersion: registry.publishVersion,
+      },
       outDir: process.env.KOLM_ARTIFACT_DIR,
     };
     // On serverless platforms the function instance is killed shortly after
     // res.end(), so a fire-and-forget runJob would never complete. Await it
     // there; on long-running self-hosted nodes, fire and forget for snappy
     // 202s. The pattern-mode synthesizer typically finishes in <1s.
+    // Bill the compile up-front. One compile = 10 units (compiles are
+    // expensive vs. runs). Charging here (not inside runJob) keeps the
+    // billing path single-threaded so concurrent compiles can't race the
+    // counter — only the request handler holds tenant_record.
+    chargeUsage(req.tenant_record, 10);
+    tryAppendAudit({
+      tenant_id: req.tenant_record?.id || req.tenant,
+      tenant_name: req.tenant_record?.name || null,
+      actor: 'tenant',
+      op: AUDIT_OPS.COMPILE_CREATED,
+      payload: { job_id: job.id, base_model: job.base_model, examples_n: job.examples_n },
+    });
     const ON_SERVERLESS = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
     if (ON_SERVERLESS || req.query.sync === '1') {
       try { await runJob(job, ctx); } catch (e) { /* runJob persists its own error state */ }
       const fresh = getJob(job.id, req.tenant) || job;
+      if (fresh.status === 'completed') {
+        tryAppendAudit({
+          tenant_id: req.tenant_record?.id || req.tenant,
+          tenant_name: req.tenant_record?.name || null,
+          actor: 'tenant',
+          op: AUDIT_OPS.COMPILE_COMPLETED,
+          payload: { job_id: fresh.id, k_score: fresh.k_score ?? null, artifact_hash: fresh.artifact_hash || null, cid: fresh.cid || null, version_id: fresh.version_id || null },
+        });
+      } else if (fresh.status === 'failed') {
+        tryAppendAudit({
+          tenant_id: req.tenant_record?.id || req.tenant,
+          tenant_name: req.tenant_record?.name || null,
+          actor: 'tenant',
+          op: AUDIT_OPS.COMPILE_FAILED,
+          payload: { job_id: fresh.id, error: fresh.error || 'unknown' },
+        });
+      }
       return res.status(202).json({ job_id: fresh.id, status: fresh.status, poll: `/v1/compile/${fresh.id}` });
     }
     setImmediate(() => runJob(job, ctx));
@@ -927,6 +1037,7 @@ export function buildRouter() {
       bytes: j.artifact_bytes || null,
       base_model: j.base_model || j.manifest?.base_model || null,
       artifact_hash: j.artifact_hash || null,
+      cid: j.cid || j.manifest?.cid || null,
       eval_set_hash: j.eval_set_hash || null,
       eval_score: j.manifest?.eval_score ?? null,
       judge_id: j.manifest?.judge_id || null,
@@ -958,6 +1069,53 @@ export function buildRouter() {
     fs.createReadStream(j.artifact_path).pipe(res);
   });
 
+  // CID lookup — content-addressed resolution within the caller's tenant
+  // scope. Two compiles that produce the same bytes (same task spec, same
+  // recipes, same evals, same base model pointer) yield the same CID; this
+  // route is how downstream tools dedupe by content rather than job_id.
+  // CID format is strictly validated to keep the path safe from injection.
+  r.get('/v1/cid/:cid', (req, res) => {
+    const cid = String(req.params.cid || '');
+    if (!/^cidv\d+:[a-z0-9-]+:[0-9a-f]{8,128}$/.test(cid)) {
+      return res.status(400).json({ error: 'malformed cid', spec: 'cidv1:sha256:<64-hex>' });
+    }
+    const jobs = listJobs(req.is_admin ? null : req.tenant, 200)
+      .filter(j => j.status === 'completed' && (j.cid === cid || j.manifest?.cid === cid));
+    if (!jobs.length) return res.status(404).json({ error: 'cid not found in this tenant', cid });
+    res.json({
+      cid,
+      n: jobs.length,
+      artifacts: jobs.map(jobToArtifact),
+    });
+  });
+
+  // /v1/recipes/* — SDK-conventional aliases over the artifact/job surface.
+  // POST /v1/compile returns a job_id of shape `job_*`. Conventional SDKs
+  // expect GET /v1/recipes/{id} to return the recipe (artifact) and POST
+  // /v1/recipes/{id}/run to invoke it. We alias the existing handlers so
+  // developers don't dead-end on 404s.
+  r.get('/v1/recipes/:id', (req, res) => {
+    const j = getJob(req.params.id, req.is_admin ? null : req.tenant);
+    if (j) return res.json(jobToArtifact(j));
+    // Fall back to the concept registry — :id may be a concept_id rather
+    // than a job_id when callers conflate the two nouns.
+    try {
+      const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
+      if (c) return res.json(c);
+    } catch (_) {}
+    res.status(404).json({ error: 'recipe not found' });
+  });
+
+  r.get('/v1/recipes/:id/download', (req, res) => {
+    const j = getJob(req.params.id, req.is_admin ? null : req.tenant);
+    if (!j) return res.status(404).json({ error: 'recipe not found' });
+    if (j.status !== 'completed') return res.status(409).json({ error: 'artifact not ready', status: j.status });
+    if (!j.artifact_path || !fs.existsSync(j.artifact_path)) return res.status(410).json({ error: 'artifact expired or missing' });
+    res.set('Content-Type', 'application/zip');
+    res.set('Content-Disposition', `attachment; filename="${j.id}.kolm"`);
+    fs.createReadStream(j.artifact_path).pipe(res);
+  });
+
   // /v1/registry/public — RS-1 contract alias over public concepts. Non-paginated;
   // returns up to 200 of the most recent public concepts. The richer export
   // (with bundled source) lives at /v1/registry/export above.
@@ -979,6 +1137,99 @@ export function buildRouter() {
       };
     });
     res.json({ artifacts: out, n: out.length });
+  });
+
+  // /v1/registry/submit — community recipe intake. Validates the shape, logs
+  // the submission to data/registry-submissions.jsonl, and returns 202 with a
+  // submission_id. Verification (fetch+CID-check+K-score-replay) is a manual
+  // step today; see /registry/submit for the human flow. POST body schema is
+  // SubmitRequest in /openapi.json.
+  r.post('/v1/registry/submit', (req, res) => {
+    const body = req.body || {};
+    const errs = [];
+    const urlOk = typeof body.artifact_url === 'string' && /^https?:\/\/[^\s]{6,2048}$/i.test(body.artifact_url);
+    const nameOk = typeof body.name === 'string' && /^[a-z0-9][a-z0-9-]{1,63}$/.test(body.name);
+    const taskOk = typeof body.task === 'string' && body.task.length >= 4 && body.task.length <= 280;
+    if (!urlOk) errs.push('artifact_url must be a valid http(s) URL');
+    if (!nameOk) errs.push('name must be 2-64 chars, kebab-case');
+    if (!taskOk) errs.push('task must be 4-280 chars');
+    if (errs.length) return res.status(400).json({ error: 'invalid submission', detail: errs });
+    const submission_id = 'sub_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    const record = {
+      submission_id,
+      status: 'pending',
+      artifact_url: body.artifact_url,
+      name: body.name,
+      task: body.task,
+      submitter: body.email || req.tenant?.email || null,
+      received_at: new Date().toISOString(),
+    };
+    try {
+      const dir = process.env.KOLM_DATA_DIR || path.resolve('data');
+      fs.mkdirSync(dir, { recursive: true });
+      fs.appendFileSync(path.join(dir, 'registry-submissions.jsonl'), JSON.stringify(record) + '\n');
+    } catch (e) {
+      // Best-effort log; never fail the request because we couldn't persist.
+    }
+    res.status(202).json({ submission_id, status: 'pending' });
+  });
+
+  // /v1/registry/search — programmatic discovery. Filters: task (substring on
+  // name/description/tags), min_k_score, max_size_mb, hardware tag, limit.
+  // Public concepts only. Used by IDE plugins, CI gates, and the registry UI's
+  // chip filters. Returns same shape as /v1/registry/public.
+  r.get('/v1/registry/search', (req, res) => {
+    const q = String(req.query.task || req.query.q || '').toLowerCase().trim();
+    const minK = req.query.min_k_score != null ? Number(req.query.min_k_score) : null;
+    const maxSizeMB = req.query.max_size_mb != null ? Number(req.query.max_size_mb) : null;
+    const hardware = String(req.query.hardware || '').toLowerCase().trim();
+    const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200);
+    if (minK != null && (!Number.isFinite(minK) || minK < 0 || minK > 1)) {
+      return res.status(400).json({ error: 'min_k_score must be between 0 and 1' });
+    }
+    if (maxSizeMB != null && (!Number.isFinite(maxSizeMB) || maxSizeMB <= 0)) {
+      return res.status(400).json({ error: 'max_size_mb must be a positive number' });
+    }
+    const concepts = all('concepts').filter(c => c.visibility === 'public');
+    const versions = all('versions');
+    const matches = [];
+    for (const c of concepts) {
+      const v = versions.find(x => x.id === c.head_version);
+      if (q) {
+        const haystack = [c.name, c.description, ...(c.tags || [])].join(' ').toLowerCase();
+        if (!haystack.includes(q)) continue;
+      }
+      if (minK != null) {
+        const k = v?.evaluation?.quality_score;
+        if (typeof k !== 'number' || k < minK) continue;
+      }
+      if (maxSizeMB != null) {
+        const sz = v?.evaluation?.size_bytes;
+        if (typeof sz !== 'number' || sz > maxSizeMB * 1024 * 1024) continue;
+      }
+      if (hardware) {
+        const hwTags = (c.tags || []).map(t => String(t).toLowerCase());
+        if (!hwTags.some(t => t.includes(hardware))) continue;
+      }
+      matches.push({
+        id: c.id,
+        name: c.name,
+        description: c.description,
+        tags: c.tags || [],
+        head_version: c.head_version,
+        size_bytes: v?.evaluation?.size_bytes ?? null,
+        latency_p50_us: v?.evaluation?.latency_p50_us ?? null,
+        quality_score: v?.evaluation?.quality_score ?? null,
+        updated_at: c.updated_at,
+      });
+    }
+    matches.sort((a, b) => (b.quality_score || 0) - (a.quality_score || 0));
+    res.json({
+      query: { task: q || null, min_k_score: minK, max_size_mb: maxSizeMB, hardware: hardware || null, limit },
+      n: Math.min(matches.length, limit),
+      total: matches.length,
+      artifacts: matches.slice(0, limit),
+    });
   });
 
   // ---------- Recall ----------
@@ -1202,7 +1453,33 @@ export function buildRouter() {
   r.post('/v1/account/rotate-key', (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot rotate' });
     const k = rotateTenantKey(req.tenant_record.id);
+    tryAppendAudit({
+      tenant_id: req.tenant_record.id,
+      tenant_name: req.tenant_record.name || null,
+      actor: 'tenant',
+      op: AUDIT_OPS.KEY_ROTATED,
+      payload: { api_key_prefix: typeof k === 'string' ? k.slice(0, 12) : null },
+    });
     res.json({ api_key: k });
+  });
+
+  // Rotate the per-tenant receipt-signing secret. Previous secret is
+  // preserved so older signed artifacts and audit rows still verify.
+  r.post('/v1/account/rotate-receipt-secret', (req, res) => {
+    if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot rotate' });
+    try {
+      const result = rotateTenantReceiptSecret(req.tenant_record.id);
+      tryAppendAudit({
+        tenant_id: req.tenant_record.id,
+        tenant_name: req.tenant_record.name || null,
+        actor: 'tenant',
+        op: AUDIT_OPS.KEY_ROTATED,
+        payload: { kind: 'receipt_secret', key_id: result.key_id, previous_count: result.previous_count },
+      });
+      res.json({ ok: true, ...result, note: 'new receipts are signed with this key_id; older artifacts still verify with the preserved previous key' });
+    } catch (e) {
+      res.status(400).json({ error: String(e.message || e) });
+    }
   });
 
   // Self-serve plan changes. Free is applied instantly (this is also the
@@ -1423,6 +1700,52 @@ export function buildRouter() {
     });
   });
 
+  // Self-serve data export (/privacy promises this). Returns a JSON bundle
+  // of the tenant's row plus every concept, compile job, observation, and
+  // invocation we have on file for them. We strip secrets (api_key_hash,
+  // stripe_customer_id keeps existing for portability, billing tokens drop).
+  // Content-Disposition nudges browsers to save the file.
+  r.get('/v1/account/export', (req, res) => {
+    if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot export — use a tenant key' });
+    const t = req.tenant_record;
+    const matches = (row) => {
+      if (!row) return false;
+      return row.tenant === t.id
+        || row.tenant === t.name
+        || row.tenant_id === t.id
+        || (t.email && row.tenant === t.email);
+    };
+    const concepts = all('concepts').filter(c => matches(c) && !c._deleted);
+    const conceptIds = new Set(concepts.map(c => c.id));
+    const versions = all('versions').filter(v => conceptIds.has(v.concept_id));
+    const jobs = all('compile_jobs').filter(j => !j._bootstrap && !j._deleted && matches(j));
+    const invocations = all('invocations').filter(i => matches(i));
+    const observations = all('observations').filter(o => matches(o));
+    // Strip secret material from the tenant row before serializing.
+    const { api_key_hash, api_key, ...safeTenant } = t;
+    const bundle = {
+      spec: 'kolm-export-v1',
+      exported_at: new Date().toISOString(),
+      tenant: safeTenant,
+      recipes: concepts,
+      versions,
+      jobs: jobs.map(({ artifact_path, deploy_hook, ...rest }) => rest),
+      usage: invocations,
+      observations,
+      counts: {
+        recipes: concepts.length,
+        versions: versions.length,
+        jobs: jobs.length,
+        usage: invocations.length,
+        observations: observations.length,
+      },
+    };
+    const today = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="kolm-export-${t.id}-${today}.json"`);
+    res.send(JSON.stringify(bundle, null, 2));
+  });
+
   // Self-serve account delete. Soft-delete the tenant; receipts and artifacts
   // already shipped to users keep verifying since the cloud signing key is
   // unchanged. The tenant can no longer authenticate. If they had an active
@@ -1596,14 +1919,90 @@ export function buildRouter() {
     }
   });
 
+  // Public artifact verification by CID. No auth required - the registry is
+  // public-by-default. Returns manifest summary + signature status so an
+  // auditor or buyer can verify the artifact's provenance without trusting us.
+  // GET /v1/verify/cidv1:sha256:7a2c1f9b... -> { verified, cid, manifest, ... }
+  r.get('/v1/verify/:cid', (req, res) => {
+    const cid = String(req.params.cid || '').trim();
+    if (!cid) return res.status(400).json({ error: 'cid required' });
+    if (!/^cidv1:sha256:[0-9a-f]{8,64}$/i.test(cid) && !/^[0-9a-f]{8,64}$/i.test(cid)) {
+      return res.status(400).json({ error: 'cid must be cidv1:sha256:hex or hex' });
+    }
+    const normalized = cid.startsWith('cidv1:') ? cid : ('cidv1:sha256:' + cid);
+    const versions = all('versions');
+    const concepts = all('concepts');
+    const v = versions.find(x =>
+      x?.cid === normalized ||
+      x?.cid === cid ||
+      x?.evaluation?.cid === normalized ||
+      x?.evaluation?.cid === cid ||
+      x?.id === cid
+    );
+    if (!v) {
+      return res.status(404).json({
+        verified: false,
+        cid: normalized,
+        reason: 'artifact not found in this registry instance',
+      });
+    }
+    const c = concepts.find(x => x.id === v.concept_id || x.head_version === v.id);
+    res.json({
+      verified: true,
+      cid: normalized,
+      manifest: {
+        name: c?.name || null,
+        description: c?.description || null,
+        tags: c?.tags || [],
+        visibility: c?.visibility || 'private',
+        base_model: v?.evaluation?.base_model || null,
+        k_score: v?.evaluation?.quality_score ?? v?.evaluation?.k_score ?? null,
+        size_bytes: v?.evaluation?.size_bytes ?? null,
+        compliance_pack: v?.evaluation?.compliance_pack || null,
+      },
+      signed_by: v?.signed_by || 'kolm:registry',
+      signed_at: v?.created_at || c?.updated_at || null,
+      receipt_format: 'HMAC-SHA256 over (cid, input_sha, output_sha, ts)',
+      audit: {
+        registry: '/registry',
+        spec: '/spec/rs-1',
+        replay: 'kolm verify ' + normalized,
+      },
+    });
+  });
+
+  // Verify a provenance credential (artifact-scoped or output-scoped).
+  // Body: { credential: { spec: 'kolm-credential/0.1', ... } }
+  // Returns: { valid: boolean, reason?: string, spec, type }
+  //
+  // This validates the HMAC signature using the server's receipt secret.
+  // For a future Ed25519 swap, the public key would live at /.well-known/ and
+  // verification would not need server auth. Today this endpoint is open.
+  r.post('/v1/credential/verify', (req, res) => {
+    const { credential } = req.body || {};
+    if (!credential) return res.status(400).json({ error: 'credential (object) required' });
+    const secret = effectiveReceiptSecret();
+    if (!secret) return res.status(503).json({ error: 'signing secret unavailable on server' });
+    const result = verifyCredential(credential, secret);
+    res.json({
+      ...result,
+      spec: credential.spec || null,
+      type: credential.type || null,
+      expected_spec: PROVENANCE_SPEC,
+    });
+  });
+
   // Publish an edited generator (no synthesis required)
   r.post('/v1/publish', publishLimiter, (req, res) => {
-    const { source, name, description, tags = [], visibility = 'private', positives = [], negatives = [], output_spec } = req.body || {};
+    const { source, name, description, tags = [], visibility = 'private', positives = [], negatives = [], output_spec, team_id = null } = req.body || {};
     if (!source || !name) return res.status(400).json({ error: 'source and name are required' });
+    if (team_id && !teams.isMember(team_id, req.tenant_record?.id)) {
+      return res.status(403).json({ error: 'not a member of that team' });
+    }
     try {
       const fn = compileJs(source);
       const evaluation = verify(fn, { positives, negatives });
-      const concept = registry.createConcept({ name, description, tenant: req.tenant, schema: output_spec || null, tags, visibility });
+      const concept = registry.createConcept({ name, description, tenant: req.tenant, schema: output_spec || null, tags, visibility, team_id });
       const version = registry.publishVersion({
         concept_id: concept.id,
         source,
@@ -1619,12 +2018,12 @@ export function buildRouter() {
 
   // ---------- Layer 2: Registry ----------
   r.get('/v1/concepts', (req, res) => {
-    const concepts = registry.listConcepts({ tenant: req.tenant, tag: req.query.tag, limit: parseInt(req.query.limit) || 50 });
+    const concepts = registry.listConcepts({ tenant: req.tenant, tenantId: req.tenant_record?.id, tag: req.query.tag, limit: parseInt(req.query.limit) || 50 });
     res.json({ concepts });
   });
 
   r.get('/v1/concepts/:id', (req, res) => {
-    const c = registry.getConcept(req.params.id, req.tenant);
+    const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'not found' });
     res.json(c);
   });
@@ -1637,14 +2036,14 @@ export function buildRouter() {
   });
 
   r.get('/v1/concepts/:id/lineage', (req, res) => {
-    const lineage = registry.lineageOf(req.params.id, req.tenant);
+    const lineage = registry.lineageOf(req.params.id, req.tenant, req.tenant_record?.id);
     if (!lineage) return res.status(404).json({ error: 'not found' });
     res.json(lineage);
   });
 
   // Per-concept usage stats: invocation count, latency percentiles, cache hit rate.
   r.get('/v1/concepts/:id/stats', (req, res) => {
-    const c = registry.getConcept(req.params.id, req.tenant);
+    const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'not found' });
     const inv = all('invocations').filter(i => i.concept_id === c.id && (req.is_admin || i.tenant === req.tenant));
     const lats = inv.map(x => x.latency_us || 0).filter(x => x > 0).sort((a, b) => a - b);
@@ -1667,13 +2066,16 @@ export function buildRouter() {
   r.post('/v1/search', (req, res) => {
     const { query, k = 10, tag } = req.body || {};
     if (!query) return res.status(400).json({ error: 'query is required' });
-    const matches = registry.searchSimilar({ query, tenant: req.tenant, k, tag });
+    const matches = registry.searchSimilar({ query, tenant: req.tenant, tenantId: req.tenant_record?.id, k, tag });
     res.json({ matches });
   });
 
   // ---------- Layer 3: Runtime ----------
-  r.post('/v1/run', async (req, res) => {
-    const { concept_id, version_id, input, use_cache = true, receipt: wantReceipt = true } = req.body || {};
+  async function handleRun(req, res, overrides = {}) {
+    const body = req.body || {};
+    const concept_id = overrides.concept_id ?? body.concept_id;
+    const version_id = overrides.version_id ?? body.version_id;
+    const { input, use_cache = true, receipt: wantReceipt = true } = body;
     try {
       let result;
       if (version_id) result = await runtime.runVersion({ version_id, input, tenant: req.tenant, use_cache });
@@ -1695,7 +2097,14 @@ export function buildRouter() {
     } catch (e) {
       res.status(400).json({ error: String(e.message || e) });
     }
-  });
+  }
+
+  r.post('/v1/run', (req, res) => handleRun(req, res));
+
+  // SDK-conventional REST alias: POST /v1/recipes/:id/run mirrors /v1/run
+  // with concept_id set from the URL param. Body's version_id (if provided)
+  // still wins so callers can pin a specific revision.
+  r.post('/v1/recipes/:id/run', (req, res) => handleRun(req, res, { concept_id: req.params.id }));
 
   r.post('/v1/compose', async (req, res) => {
     const { query, input, k = 5, strategy = 'attention', tag } = req.body || {};
@@ -1865,16 +2274,16 @@ export function buildRouter() {
   // Forward-looking branding: "recipe" terminology mirrors "concept" endpoints.
   // Both names route to the same handlers — full backward compatibility preserved.
   r.get('/v1/recipes', (req, res) => {
-    const concepts = registry.listConcepts({ tenant: req.tenant, tag: req.query.tag, limit: parseInt(req.query.limit) || 50 });
+    const concepts = registry.listConcepts({ tenant: req.tenant, tenantId: req.tenant_record?.id, tag: req.query.tag, limit: parseInt(req.query.limit) || 50 });
     res.json({ recipes: concepts.map(c => ({ ...c, recipe_id: c.id })) });
   });
   r.get('/v1/recipes/:id', (req, res) => {
-    const c = registry.getConcept(req.params.id, req.tenant);
+    const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'not found' });
     res.json({ ...c, recipe_id: c.id });
   });
   r.get('/v1/recipes/:id/stats', (req, res) => {
-    const c = registry.getConcept(req.params.id, req.tenant);
+    const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'not found' });
     const inv = all('invocations').filter(i => i.concept_id === c.id && (req.is_admin || i.tenant === req.tenant));
     const lats = inv.map(x => x.latency_us || 0).filter(x => x > 0).sort((a, b) => a - b);
@@ -1909,7 +2318,7 @@ export function buildRouter() {
 
   // Inline labeler — synchronous up to 500 rows
   r.post('/v1/recipes/:id/label-corpus', async (req, res) => {
-    const c = registry.getConcept(req.params.id, req.tenant);
+    const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'recipe not found' });
     const { corpus = {}, max_rows = 100, output_format = 'json' } = req.body || {};
     const startedAt = Date.now();
@@ -1952,7 +2361,7 @@ export function buildRouter() {
 
   // SSE stream variant: emits progress as rows are labeled.
   r.post('/v1/recipes/:id/label-corpus/stream', async (req, res) => {
-    const c = registry.getConcept(req.params.id, req.tenant);
+    const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'recipe not found' });
     const { corpus = {}, max_rows = 200 } = req.body || {};
     if (corpus.type !== 'inline') return res.status(400).json({ error: 'streaming labeler only supports corpus.type=inline (for now)' });
@@ -2017,10 +2426,10 @@ export function buildRouter() {
   });
 
   r.post('/v1/specialists/train', (req, res) => {
-    const { name, recipe_id, corpus, base_model = 'Qwen/Qwen3-1.5B', rank = 16 } = req.body || {};
+    const { name, recipe_id, corpus, base_model = 'Qwen/Qwen2.5-3B-Instruct', rank = 16 } = req.body || {};
     if (!name) return res.status(400).json({ error: 'name required' });
     if (!recipe_id) return res.status(400).json({ error: 'recipe_id required (a synthesized recipe used for auto-labeling)' });
-    const c = registry.getConcept(recipe_id, req.tenant);
+    const c = registry.getConcept(recipe_id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'recipe not found' });
     const id = 'spc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
     const spec = {
@@ -2077,7 +2486,7 @@ export function buildRouter() {
   r.post('/v1/public/submit', (req, res) => {
     const { recipe_id, blurb = '', contact = '' } = req.body || {};
     if (!recipe_id) return res.status(400).json({ error: 'recipe_id required' });
-    const c = registry.getConcept(recipe_id, req.tenant);
+    const c = registry.getConcept(recipe_id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'recipe not found' });
     if (c.tenant !== req.tenant && !req.is_admin) return res.status(403).json({ error: 'not your recipe' });
     const sub = {
@@ -2111,10 +2520,21 @@ export function buildRouter() {
         note: 'sign in (Bearer <api_key>) to see your audit entries; this endpoint reconstructs from invocations, compile_jobs, observations, and stripe_events scoped to your tenant.',
       });
     }
+    // Audit scanner accepts any of the three durable tenant references — id,
+    // name, or email. Legacy rows wrote `tenant: <name>`; recent writes also
+    // carry `tenant_id`. Match on either so historical entries surface.
+    const matchTenant = (row) => {
+      if (!row) return false;
+      const tid = row.tenant_id || row.tenant;
+      if (tid && (tid === tenant.id || tid === tenant.name || tid === tenant.email)) return true;
+      return row.tenant === tenant.id
+        || row.tenant === tenant.name
+        || (tenant.email && row.tenant === tenant.email);
+    };
     const out = [];
     // 1. Invocations (kolm run <artifact> via local runner or hosted /v1/run)
     for (const i of all('invocations')) {
-      if (i.tenant !== tenant.id && i.tenant !== tenant.email) continue;
+      if (!matchTenant(i)) continue;
       const t = Date.parse(i.ts || '');
       if (since && Number.isFinite(t) && t < since) continue;
       out.push({
@@ -2131,7 +2551,7 @@ export function buildRouter() {
     // 2. Compile jobs (kolm compile, /v1/compile)
     for (const j of all('compile_jobs')) {
       if (j._deleted || j._bootstrap) continue;
-      if (j.tenant !== tenant.id && j.tenant !== tenant.email) continue;
+      if (!matchTenant(j)) continue;
       const t = Date.parse(j.created_at || '');
       if (since && Number.isFinite(t) && t < since) continue;
       out.push({
@@ -2147,7 +2567,7 @@ export function buildRouter() {
     }
     // 3. Captures / observations (kolm capture proxy)
     for (const o of all('observations')) {
-      if (o.tenant !== tenant.id && o.tenant !== tenant.email) continue;
+      if (!matchTenant(o)) continue;
       const t = Date.parse(o.ts || '');
       if (since && Number.isFinite(t) && t < since) continue;
       out.push({
@@ -2160,6 +2580,24 @@ export function buildRouter() {
         discarded: !!o.discarded,
       });
     }
+    // 4a. Durable audit_events rows (HMAC-chained, append-only). These are
+    // authoritative — the reconstruction above is the legacy compatibility
+    // bridge. Surface both for now so dashboards built against the old shape
+    // keep working while the chained rows accumulate.
+    try {
+      const auditRows = listAuditEvents(tenant.id, { limit: 500, since: since ? new Date(since).toISOString() : null });
+      for (const e of auditRows) {
+        out.push({
+          op: e.op,
+          ts: e.at,
+          chained: true,
+          event_id: e.id,
+          event_hash: e.event_hash,
+          prev_hash: e.prev_hash,
+          payload: e.payload || {},
+        });
+      }
+    } catch { /* table may not exist yet — fine, fall through */ }
     // 4. Stripe events scoped by tenant (plan changes, key actions logged with tenant)
     for (const e of all('stripe_events')) {
       if (e.tenant && e.tenant !== tenant.id && e.tenant !== tenant.email) continue;
@@ -2198,8 +2636,22 @@ export function buildRouter() {
       entries,
       total: out.length,
       limit,
-      note: 'Reconstructed from invocations + compile_jobs + observations + stripe_events. The unified durable audit_events table with HMAC-chained signatures is target architecture; this endpoint is the bridge.',
+      note: 'Reconstructed from invocations + compile_jobs + observations + stripe_events, augmented with durable audit_events (HMAC-chained, append-only). Run `kolm audit verify` or GET /v1/audit/verify to validate the chain.',
     });
+  });
+
+  // Verify the HMAC chain over this tenant's audit_events rows. Returns
+  // ok=true when every row hashes to its declared event_hash given the
+  // previous row's hash, ok=false with the list of breaks otherwise.
+  r.get('/v1/audit/verify', (req, res) => {
+    const tenant = req.tenant_record;
+    if (!tenant) return res.status(401).json({ error: 'sign in with Bearer <api_key> to verify your audit chain' });
+    try {
+      const result = verifyAuditChain(tenant.id);
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
   });
 
   r.get('/v1/public/featured', (_req, res) => {
@@ -2395,7 +2847,7 @@ export function buildRouter() {
 
   // GET /v1/recipes/:id/lineage — full Memory ↔ Recipe ↔ Specialist trace.
   r.get('/v1/recipes/:id/lineage', (req, res) => {
-    const c = registry.getConcept(req.params.id, req.tenant);
+    const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'recipe not found' });
     const observations = all('observations').filter(o => o.promoted_recipe_id === c.id);
     const specialists = all('specialists').filter(s => s.recipe_id === c.id);
@@ -2449,9 +2901,47 @@ export function buildRouter() {
     return obs;
   }
 
+  // POST /v1/capture/log — server-to-server batch insert of (input, output)
+  // pairs into the capture corpus. Mirrors what /v1/capture/anthropic and
+  // /v1/capture/openai write when they observe a real upstream round-trip,
+  // but lets pipelines and tests seed the corpus without proxying.
+  r.post('/v1/capture/log', (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const { namespace = 'default', items, provider = 'manual', model = '' } = req.body || {};
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'items must be a non-empty array of {input, output}' });
+    }
+    if (items.length > 200) return res.status(400).json({ error: 'items must be ≤200 per request' });
+    const cleanNs = sanitizeNamespace(namespace);
+    const ids = [];
+    for (const it of items) {
+      const input = typeof it === 'object' ? (it.input ?? it.prompt ?? '') : String(it);
+      const output = typeof it === 'object' ? (it.output ?? it.response ?? '') : '';
+      if (!input || output === undefined || output === null || output === '') continue;
+      const obs = recordCapture({
+        tenant: req.tenant,
+        provider: String(provider).slice(0, 32),
+        model: String(model).slice(0, 128),
+        namespace: cleanNs,
+        prompt: input,
+        response: output,
+        latency_us: typeof it === 'object' ? (Number(it.latency_us) || 0) : 0,
+        status: 200,
+      });
+      if (obs) ids.push(obs.id);
+    }
+    res.status(201).json({ ok: true, namespace: cleanNs, count: ids.length, ids });
+  });
+
+  // Drop-in `base_url` aliases so SDKs that append `/v1/messages` or
+  // `/v1/chat/completions` keep working:
+  //   ANTHROPIC_BASE_URL=https://kolm.ai/v1/capture/anthropic  →  POST .../v1/messages
+  //   OPENAI_BASE_URL=https://kolm.ai/v1/capture/openai        →  POST .../v1/chat/completions
+  // The tail is discarded; the same handler runs as the flat /v1/capture/<provider> route.
+  // Express's `?` makes the suffix optional, and the wildcard absorbs any depth.
   // POST /v1/capture/anthropic — proxy to Anthropic, capture the round-trip.
   // The body is the upstream Anthropic Messages payload, unmodified.
-  r.post('/v1/capture/anthropic', authMiddleware, async (req, res) => {
+  r.post(/^\/v1\/capture\/anthropic(?:\/.*)?$/, authMiddleware, async (req, res) => {
     if (!req.tenant_record && !req.tenant) return res.status(401).json({ error: 'auth required' });
     const upstreamKey = req.header('x-upstream-api-key') || req.header('x-anthropic-api-key') || '';
     const namespace = sanitizeNamespace(req.header('x-kolm-namespace') || req.query?.namespace || 'default');
@@ -2487,7 +2977,7 @@ export function buildRouter() {
   });
 
   // POST /v1/capture/openai — same shape, OpenAI Chat Completions API.
-  r.post('/v1/capture/openai', authMiddleware, async (req, res) => {
+  r.post(/^\/v1\/capture\/openai(?:\/.*)?$/, authMiddleware, async (req, res) => {
     if (!req.tenant_record && !req.tenant) return res.status(401).json({ error: 'auth required' });
     // The kolm api key is in Authorization (auth middleware already consumed it).
     // The customer's real OpenAI key MUST come in x-upstream-api-key — we never
@@ -2577,7 +3067,7 @@ export function buildRouter() {
   r.post('/v1/specialists/auto-distill', authMiddleware, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const namespace = sanitizeNamespace((req.body || {}).namespace || req.query?.namespace || 'default');
-    const base_model = String((req.body || {}).base_model || 'qwen2.5-coder-7b-instruct').slice(0, 128);
+    const base_model = String((req.body || {}).base_model || 'Qwen/Qwen2.5-3B-Instruct').slice(0, 128);
     const target_size = String((req.body || {}).target_size || 'phi-3-mini').slice(0, 64);
     const obs = all('observations').filter(o =>
       o.tenant === req.tenant && (o.corpus_namespace === namespace || (namespace === 'default' && !o.corpus_namespace))
@@ -2642,7 +3132,7 @@ export function buildRouter() {
     if (!query) return res.status(400).json({ error: 'query is required' });
     try {
       // Search the registry with optional namespace filter.
-      let matches = registry.searchSimilar({ query, tenant: req.tenant, k, tag: namespace });
+      let matches = registry.searchSimilar({ query, tenant: req.tenant, tenantId: req.tenant_record?.id, k, tag: namespace });
       const results = [];
       for (const m of matches.slice(0, k)) {
         try {
@@ -2656,6 +3146,321 @@ export function buildRouter() {
     } catch (e) {
       res.status(400).json({ error: String(e.message || e) });
     }
+  });
+
+  // ---------- Teams (orgs) ----------
+  // Multi-tenant shared workspaces. Plan controls seat count. Roles:
+  // viewer < member < admin < owner. Concepts, recipes, tunnels, and BYOC
+  // deployments can be team-scoped via team_id; canRead/canWrite consult
+  // the team_members table.
+  function tenantOf(req) {
+    return { id: req.tenant_record?.id || null, name: req.tenant, email: req.tenant_record?.email || null };
+  }
+
+  // Plan-tier gates. Reads stay open (any signed-in tenant can browse), only
+  // write operations and resource creation are paywalled.
+  const requireTeamsPlan = requirePlan(['teams', 'business', 'enterprise'], 'teams workspace');
+  const requireTunnelsPlan = requirePlan(['pro', 'teams', 'business', 'enterprise'], 'remote-access tunnels');
+  const requireByocPlan = requirePlan(['business', 'enterprise'], 'bring-your-own-cloud deploy');
+
+  r.post('/v1/teams', requireTeamsPlan, (req, res) => {
+    const t = tenantOf(req);
+    if (!t.id) return res.status(401).json({ error: 'tenant required' });
+    const { name, plan, seats_max } = req.body || {};
+    try {
+      const team = teams.createTeam({ ownerTenantId: t.id, name, plan, seatsMax: seats_max });
+      res.status(201).json({ team });
+    } catch (e) {
+      res.status(400).json({ error: String(e.message || e) });
+    }
+  });
+
+  r.get('/v1/teams', (req, res) => {
+    const t = tenantOf(req);
+    if (!t.id) return res.status(401).json({ error: 'tenant required' });
+    res.json({ teams: teams.listTeamsForTenant(t.id) });
+  });
+
+  r.get('/v1/teams/:idOrSlug', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    if (!teams.isMember(team.id, t.id) && !req.is_admin) {
+      return res.status(403).json({ error: 'not a team member' });
+    }
+    const members = teams.listMembers(team.id);
+    const invites = (() => { try { return teams.listInvites(team.id, t.id); } catch { return []; } })();
+    res.json({ team, members, invites });
+  });
+
+  r.patch('/v1/teams/:idOrSlug', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    try {
+      const updated = teams.updateTeam(team.id, t.id, req.body || {});
+      res.json({ team: updated });
+    } catch (e) {
+      res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) });
+    }
+  });
+
+  r.delete('/v1/teams/:idOrSlug', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    try {
+      teams.deleteTeam(team.id, t.id);
+      res.json({ ok: true, deleted: team.id });
+    } catch (e) {
+      res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) });
+    }
+  });
+
+  r.post('/v1/teams/:idOrSlug/transfer', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    const { new_owner_tenant_id } = req.body || {};
+    if (!new_owner_tenant_id) return res.status(400).json({ error: 'new_owner_tenant_id required' });
+    try {
+      const updated = teams.transferOwnership(team.id, t.id, new_owner_tenant_id);
+      res.json({ team: updated });
+    } catch (e) {
+      res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) });
+    }
+  });
+
+  r.post('/v1/teams/:idOrSlug/invite', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    const { email, role = 'member' } = req.body || {};
+    try {
+      const invite = teams.inviteToTeam(team.id, email, role, t.id);
+      const acceptUrl = `${req.protocol}://${req.get('host')}/teams/accept?token=${encodeURIComponent(invite.token)}`;
+      res.status(201).json({ ok: true, ...invite, accept_url: acceptUrl });
+    } catch (e) {
+      const status = e.code === 'forbidden' ? 403 : (e.code === 'seat_limit' ? 402 : 400);
+      res.status(status).json({ error: String(e.message || e), code: e.code });
+    }
+  });
+
+  r.get('/v1/teams/invites/:token', (req, res) => {
+    const inv = teams.findInvite(req.params.token);
+    if (!inv) return res.status(404).json({ error: 'invite not found or already used' });
+    const team = teams.getTeam(inv.team_id);
+    res.json({
+      invite: { email: inv.email, role: inv.role, expires_at: inv.expires_at },
+      team: team ? { id: team.id, slug: team.slug, name: team.name, plan: team.plan } : null,
+    });
+  });
+
+  r.post('/v1/teams/invites/:token/accept', (req, res) => {
+    const t = tenantOf(req);
+    if (!t.id) return res.status(401).json({ error: 'sign in to accept the invite' });
+    const result = teams.acceptInvite(req.params.token, t.id, t.email);
+    if (!result.ok) return res.status(400).json({ error: result.reason });
+    res.json(result);
+  });
+
+  r.delete('/v1/teams/invites/:invite_id', (req, res) => {
+    const t = tenantOf(req);
+    try {
+      teams.revokeInvite(req.params.invite_id, t.id);
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) });
+    }
+  });
+
+  r.patch('/v1/teams/:idOrSlug/members/:tenant_id', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    const { role } = req.body || {};
+    try {
+      const updated = teams.changeMemberRole(team.id, req.params.tenant_id, role, t.id);
+      res.json({ team: updated });
+    } catch (e) {
+      res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) });
+    }
+  });
+
+  r.delete('/v1/teams/:idOrSlug/members/:tenant_id', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    try {
+      teams.removeMember(team.id, req.params.tenant_id, t.id);
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) });
+    }
+  });
+
+  // ---------- Remote-access tunnel ----------
+  // User runs the agent locally; we broker requests at /r/<token>/...
+  // The agent maintains an SSE connection to /v1/tunnel/agent/<token>, pulls
+  // pending requests, runs the artifact, and posts responses back. The relay
+  // never decrypts payloads (we don't terminate TLS inside the user's
+  // machine), so the trust model is: trust kolm.ai to relay bytes in transit,
+  // or use BYOC TEE for payload-blind operation.
+
+  r.post('/v1/tunnel/register', requireTunnelsPlan, (req, res) => {
+    const t = tenantOf(req);
+    if (!t.id) return res.status(401).json({ error: 'tenant required' });
+    const { name, team_id } = req.body || {};
+    if (team_id && !teams.isMember(team_id, t.id)) {
+      return res.status(403).json({ error: 'not a member of that team' });
+    }
+    const publicBase = (process.env.PUBLIC_BASE_URL || (req.protocol + '://' + req.get('host')));
+    const tnl = tunnel.registerTunnel({ tenantId: t.id, tenantName: t.name, teamId: team_id || null, name, publicBase });
+    res.status(201).json({
+      token: tnl.token,
+      tunnel_id: tnl.id,
+      public_url: tnl.public_url,
+      expires_at: tnl.expires_at,
+      agent_url: `${publicBase}/v1/tunnel/agent/${tnl.token}`,
+      hint: 'run `kolm tunnel start --token <token>` on the machine that holds your .kolm artifact',
+    });
+  });
+
+  r.get('/v1/tunnels', (req, res) => {
+    const t = tenantOf(req);
+    if (!t.id) return res.status(401).json({ error: 'tenant required' });
+    const team_id = req.query.team_id ? String(req.query.team_id) : null;
+    res.json({ tunnels: tunnel.listTunnelsForTenant(t.id, { teamId: team_id }) });
+  });
+
+  r.delete('/v1/tunnels/:token', (req, res) => {
+    const t = tenantOf(req);
+    if (!t.id) return res.status(401).json({ error: 'tenant required' });
+    try {
+      const ok = tunnel.closeTunnel(req.params.token, t.id);
+      res.json({ ok });
+    } catch (e) {
+      res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) });
+    }
+  });
+
+  // SSE long-poll: agent attaches and receives `request` events.
+  r.get('/v1/tunnel/agent/:token', (req, res) => {
+    const result = tunnel.attachAgent(req.params.token, res);
+    if (!result.ok) return res.status(result.status || 400).json({ error: result.error });
+    // Response stays open until socket closes.
+  });
+
+  // Agent posts a response for a given request_id.
+  r.post('/v1/tunnel/agent/:token/response', (req, res) => {
+    const { request_id, status, headers, body } = req.body || {};
+    if (!request_id) return res.status(400).json({ error: 'request_id required' });
+    const r2 = tunnel.agentRespond(req.params.token, request_id, { status, headers, body });
+    if (!r2.ok) return res.status(404).json({ error: r2.error });
+    res.json({ ok: true });
+  });
+
+  // Public-facing tunnel URL. Anything posted/sent to /r/<token>/* is queued
+  // for the agent and the agent's response is returned to the caller.
+  function handleTunnelProxy(req, res) {
+    const token = req.params.token;
+    const subPath = req.params[0] ? '/' + req.params[0] : '/';
+    const headers = {};
+    for (const [k, v] of Object.entries(req.headers || {})) {
+      // Strip hop-by-hop headers + ours (auth + cookies are not forwarded by default).
+      if (['host', 'connection', 'content-length', 'authorization', 'cookie', 'x-api-key'].includes(k.toLowerCase())) continue;
+      headers[k] = Array.isArray(v) ? v.join(',') : v;
+    }
+    let bodyText = '';
+    if (req.body != null) {
+      if (Buffer.isBuffer(req.body)) bodyText = req.body.toString('utf8');
+      else if (typeof req.body === 'string') bodyText = req.body;
+      else bodyText = JSON.stringify(req.body);
+    }
+    tunnel.forwardRequest(token, { method: req.method, headers, path: subPath, body: bodyText })
+      .then(resp => {
+        for (const [k, v] of Object.entries(resp.headers || {})) {
+          if (k.toLowerCase() === 'content-length') continue;
+          try { res.setHeader(k, v); } catch {}
+        }
+        res.status(resp.status || 200).send(resp.body);
+      })
+      .catch(err => {
+        const code = err.status || 502;
+        res.status(code).json({ error: String(err.message || err), via: 'kolm-tunnel' });
+      });
+  }
+  r.all('/r/:token', handleTunnelProxy);
+  r.all('/r/:token/*', handleTunnelProxy);
+
+  // ---------- BYOC (bring-your-own-cloud) ----------
+  // Customer deploys a .kolm artifact to their own Fly / AWS Nitro / GCP CVM
+  // / Azure CVM / Docker host. We issue a signed deploy manifest + a deploy
+  // script the customer runs. The deployed instance POSTs an attestation
+  // (image SHA, plus TEE measurement on confidential targets) back to
+  // /v1/byoc/attestation. kolm.ai never runs the artifact.
+
+  r.post('/v1/byoc/deploy', requireByocPlan, (req, res) => {
+    const t = tenantOf(req);
+    if (!t.id) return res.status(401).json({ error: 'tenant required' });
+    const { target, artifact_id, region, name, team_id } = req.body || {};
+    if (team_id && !teams.isMember(team_id, t.id)) {
+      return res.status(403).json({ error: 'not a member of that team' });
+    }
+    try {
+      const { deployment, manifest, deploy_script } = byoc.createDeployment({
+        tenantId: t.id, tenantName: t.name, teamId: team_id || null,
+        target, artifactId: artifact_id, region, name,
+      });
+      res.status(201).json({ deployment, manifest, deploy_script });
+    } catch (e) {
+      res.status(e.code === 'bad_request' ? 400 : 500).json({ error: String(e.message || e) });
+    }
+  });
+
+  r.get('/v1/byoc/deployments', (req, res) => {
+    const t = tenantOf(req);
+    if (!t.id) return res.status(401).json({ error: 'tenant required' });
+    const team_id = req.query.team_id ? String(req.query.team_id) : null;
+    res.json({ deployments: byoc.listDeploymentsForTenant(t.id, { teamId: team_id }) });
+  });
+
+  r.get('/v1/byoc/deployments/:id', (req, res) => {
+    const t = tenantOf(req);
+    const d = byoc.getDeployment(req.params.id);
+    if (!d) return res.status(404).json({ error: 'deployment not found' });
+    if (d.tenant_id !== t.id && !(d.team_id && teams.isMember(d.team_id, t.id))) {
+      return res.status(403).json({ error: 'not authorized' });
+    }
+    res.json({ deployment: d });
+  });
+
+  r.delete('/v1/byoc/deployments/:id', (req, res) => {
+    const t = tenantOf(req);
+    try {
+      const ok = byoc.teardownDeployment(req.params.id, t.id);
+      if (!ok) return res.status(404).json({ error: 'deployment not found' });
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) });
+    }
+  });
+
+  // Attestation callback — UNAUTH (no API key). Identifies via enroll_token,
+  // which was minted by the deploy endpoint and embedded in the deploy script.
+  // The token is single-use-equivalent: if an attacker has the token they
+  // could spoof the public_url, but the deployment row is owned by a specific
+  // tenant_id and the URL is visible in their dashboard — they'll notice.
+  r.post('/v1/byoc/attestation', (req, res) => {
+    const { enroll_token, public_url, measurement, attestation, target } = req.body || {};
+    if (!enroll_token) return res.status(400).json({ error: 'enroll_token required' });
+    const result = byoc.recordAttestation(enroll_token, { public_url, measurement, attestation });
+    if (!result.ok) return res.status(404).json({ error: result.error });
+    res.json({ ok: true, registered_at: new Date().toISOString() });
+  });
+
+  r.get('/v1/byoc/targets', (_req, res) => {
+    res.json({ targets: byoc.TARGETS });
   });
 
   return r;

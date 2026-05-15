@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm vs Together AI | axis-by-axis matrix</title>
+<meta name="description" content="Eleven axes that separate a kolm-compiled signed artifact from a Together AI hosted-inference endpoint. Every row links to proof.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/compare/kolm-vs-together">
+<style>
+  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+  body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+  header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+  header.site nav a{color:inherit;text-decoration:none}
+  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+  .hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
+  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  h1{font-size:46px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:780px}
+  .lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:680px;margin:0}
+  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:20px 0 0;letter-spacing:0.04em}
+  table.matrix{width:100%;border-collapse:collapse;margin:48px 0;font-size:14px}
+  table.matrix th{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);text-align:left;padding:14px 12px;border-bottom:1px solid var(--line);font-weight:400}
+  table.matrix td{padding:18px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
+  table.matrix td.axis{font-weight:500;color:var(--ink);min-width:160px}
+  table.matrix td.kolm{color:var(--ink)}
+  table.matrix td.kolm b{color:var(--accent);font-weight:500}
+  table.matrix td.other{color:var(--ink-mute)}
+  table.matrix td.other b{color:var(--ink);font-weight:500}
+  table.matrix td.why{color:var(--ink-mute);font-size:13.5px}
+  table.matrix td.proof a{color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:12.5px;border-bottom:1px dashed rgba(16,185,129,0.32)}
+  table.matrix td.proof a:hover{border-bottom-color:var(--accent)}
+  table.matrix tr.win-kolm td.kolm{background:rgba(16,185,129,0.06)}
+  table.matrix tr.win-other td.other{background:rgba(236,231,220,0.04)}
+  table.matrix tr.tie td.kolm, table.matrix tr.tie td.other{background:rgba(236,231,220,0.02)}
+  @media(max-width:880px){table.matrix,table.matrix thead,table.matrix tbody,table.matrix tr,table.matrix td,table.matrix th{display:block}table.matrix th{display:none}table.matrix tr{border-bottom:2px solid var(--line);padding:18px 0}table.matrix td{padding:6px 0;border:none}table.matrix td.axis{font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-family:var(--mono);margin-bottom:6px}}
+  .close{padding:48px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .close h2{font-size:24px;font-weight:500;letter-spacing:-0.012em;margin:0 0 16px}
+  .close p{color:var(--ink-mute);max-width:680px;margin:0 0 16px}
+  .actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn:hover{transform:translateY(-1px)}
+  footer{padding:36px 0;color:var(--ink-faint);font-size:13px}
+  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/quickstart">quickstart</a><a href="/pricing">pricing</a><a href="/docs">docs</a><a href="/compare">compare</a></nav></div></header>
+<main>
+<section class="hero">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; vs Together</p>
+    <h1>kolm vs Together AI.</h1>
+    <p class="lede">Together is best-in-class for hosted inference on open-weight models. The matrix below is for the case where you want to ship the model to where the work happens, not the other way around. Together has hardware we don't sell. We have artifacts they don't ship.</p>
+    <p class="stamp">Eleven axes. Reviewed 2026-05-15.</p>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <table class="matrix">
+      <thead><tr><th>Axis</th><th>kolm</th><th>Together</th><th>Why it matters</th><th>Proof</th></tr></thead>
+      <tbody>
+      <tr class="win-kolm"><td class="axis">Run location</td><td class="kolm"><b>your hardware</b></td><td class="other">their hardware</td><td class="why">Regulated data, edge fleets, and air-gap zones cannot leave the perimeter.</td><td class="proof"><a href="/edge">/edge &rarr;</a></td></tr>
+      <tr class="win-kolm"><td class="axis">Pricing</td><td class="kolm"><b>flat compile</b>, $0 to serve</td><td class="other">per-token forever</td><td class="why">At volume the line crosses fast. 11.6&times; cheaper per million on the workloads we benchmark.</td><td class="proof"><a href="/roi">/roi &rarr;</a></td></tr>
+      <tr class="win-kolm"><td class="axis">Receipt chain</td><td class="kolm"><b>HMAC-SHA256</b> per inference</td><td class="other">none</td><td class="why">An auditor can re-verify months later that the model saw exactly that input.</td><td class="proof"><a href="/docs/showcase/receipt.json">receipt JSON &rarr;</a></td></tr>
+      <tr class="win-kolm"><td class="axis">Latency p50</td><td class="kolm"><b>0.6 ms</b> local</td><td class="other">80&ndash;200 ms network</td><td class="why">Real-time UIs and on-device features need the lower number.</td><td class="proof"><a href="/benchmarks">/benchmarks &rarr;</a></td></tr>
+      <tr class="win-kolm"><td class="axis">Offline run</td><td class="kolm"><b>yes</b>, deterministic</td><td class="other">no</td><td class="why">Field engineering, defense, retail kiosks, in-vehicle compute.</td><td class="proof"><a href="/airgap">/airgap &rarr;</a></td></tr>
+      <tr class="tie"><td class="axis">Speculative decoding</td><td class="kolm">EAGLE-3, Lookahead, REST</td><td class="other"><b>yes</b>, EAGLE-2 and Medusa</td><td class="why">Both ship a decoder stack. We win on EAGLE-3, they win on traffic scale.</td><td class="proof"><a href="/research/eagle3-lookahead">paper &rarr;</a></td></tr>
+      <tr class="tie"><td class="axis">Disaggregated PD</td><td class="kolm">DistServe / Mooncake</td><td class="other"><b>yes</b></td><td class="why">A real engineering investment, both shops did it.</td><td class="proof"><a href="/research">/research &rarr;</a></td></tr>
+      <tr class="win-kolm"><td class="axis">Quantization baked into artifact</td><td class="kolm"><b>INT4 / INT8 / NVFP4</b> at compile</td><td class="other">dynamic at serve</td><td class="why">Baking quantization at compile time is what makes the size and latency numbers deterministic.</td><td class="proof"><a href="/research#nvfp4">NVFP4 &rarr;</a></td></tr>
+      <tr class="win-kolm"><td class="axis">Compliance posture</td><td class="kolm"><b>on-prem by default</b>, BAA template ready</td><td class="other">shared infra, SOC 2</td><td class="why">Healthcare and finance procurement starts here.</td><td class="proof"><a href="/compliance-packs">/compliance-packs &rarr;</a></td></tr>
+      <tr class="win-kolm"><td class="axis">Vendor exit</td><td class="kolm">file on disk, public spec</td><td class="other">API migration</td><td class="why">Owning the artifact means a vendor outage or repricing doesn't pause your product.</td><td class="proof"><a href="/spec">RS-1 spec &rarr;</a></td></tr>
+      <tr class="win-kolm"><td class="axis">K-score quality gate</td><td class="kolm"><b>compile-time blocking</b></td><td class="other">none</td><td class="why">A blocking gate is a contract that protects production.</td><td class="proof"><a href="/k-score">K-score formal &rarr;</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="close">
+  <div class="wrap">
+    <h2>When Together is the right answer.</h2>
+    <p>You need raw scale on open-weight inference today, your data is fine on shared infra, and you want a one-line API. Together has the operational maturity to serve millions of tokens per second on hardware you don't have to operate.</p>
+    <h2 style="margin-top:32px">When kolm is the right answer.</h2>
+    <p>You operate in a regulated zone, you want to own the model, or your per-token bill is starting to look like rent on a Lambo. The signed file with a receipt chain is the shape your compliance officer and your CFO converge on.</p>
+    <div class="actions"><a class="btn primary" href="/quickstart">Compile your first AI &rarr;</a><a class="btn" href="/docs/showcase/receipt.json" target="_blank">Open a receipt &rarr;</a></div>
+  </div>
+</section>
+</main>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

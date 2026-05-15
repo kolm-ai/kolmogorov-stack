@@ -1,20 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Anatomy of .kolm · kolm</title>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Anatomy of .kolm ·kolm</title>
 <meta name="description" content="What's inside a .kolm file: model, adapter, recipe pack, recall index, eval suite, manifest, signature. Every byte is reproducible.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="Anatomy of .kolm · the signed binary you own">
+<meta property="og:title" content="Anatomy of .kolm ·the signed binary you own">
 <meta property="og:description" content="Seven layers, byte-identical reruns, HMAC-chained receipts. The portable artifact that comes out of kolm compile.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/anatomy">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="Anatomy of .kolm ·the signed binary you own">
+<meta name="twitter:description" content="Seven layers, byte-identical reruns, HMAC-chained receipts. The portable artifact that comes out of kolm compile.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/anatomy">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -35,14 +39,14 @@
   header.site .left{display:flex;align-items:center;gap:36px}
   header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
   header.site .brand img{height:18px;width:18px}
-  header.site .brand span{font-weight:540;font-size:16px;letter-spacing: 0}
+  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing: 0}
   header.site nav{display:flex;gap:22px}
   header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
   header.site nav a:hover,header.site nav a.active{color:var(--ink)}
   header.site .right{display:flex;align-items:center;gap:14px}
   header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
   header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:540;letter-spacing: 0;position:relative}
+  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;letter-spacing: 0;position:relative}
   section.hero{padding:96px 0 64px}
   section.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 900px 480px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%);pointer-events:none}
   section.hero .wrap{position:relative}
@@ -53,10 +57,10 @@
 
   h1{margin:0 0 22px;font-size:clamp(36px,5vw,60px);line-height:1.05;font-weight:500;letter-spacing: 0;color:var(--ink);max-width:18ch}
   h1 .tone{color:var(--accent)}
-  h2{margin:0 0 16px;font-size:clamp(24px,3vw,34px);line-height:1.15;font-weight:540;letter-spacing: 0;max-width:24ch}
+  h2{margin:0 0 16px;font-size:clamp(24px,3vw,34px);line-height:1.15;font-weight: 500;letter-spacing: 0;max-width:24ch}
   h2 .tone{color:var(--accent)}
-  h3{margin:0 0 8px;font-size:16px;font-weight:540;letter-spacing: 0;font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:60ch}
-  p.lede b{color:var(--ink);font-weight:540}
+  h3{margin:0 0 8px;font-size:16px;font-weight: 500;letter-spacing: 0;font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:60ch}
+  p.lede b{color:var(--ink);font-weight: 500}
   p.lede code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
   p{color:var(--ink-mute);max-width:62ch}
   p code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
@@ -69,7 +73,7 @@
   ul.parts li:last-child{border-bottom:none}
   ul.parts li:hover{background:var(--bg-card)}
   ul.parts .icon{font-family:var(--mono);font-size:11px;letter-spacing: 0;text-transform:uppercase;color:var(--accent);padding:3px 8px;background:var(--accent-soft);border:1px solid rgba(236,231,220, 0.18);border-radius:4px;line-height:1;margin-top:4px;min-width:60px;text-align:center}
-  ul.parts .body h3{margin:0 0 4px;font-size:14.5px;color:var(--ink);font-weight:540}
+  ul.parts .body h3{margin:0 0 4px;font-size:14.5px;color:var(--ink);font-weight: 500}
   ul.parts .body p{margin:0;font-size:13px;color:var(--ink-mute);max-width:48ch;line-height:1.55}
   ul.parts .body p code{font-family:var(--mono);font-size:11.5px;color:var(--ink);background:var(--bg);padding:1px 4px;border-radius:3px}
   ul.parts .size{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);align-self:start;padding-top:6px}
@@ -88,11 +92,11 @@
   .invariants{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:36px}
   @media(max-width:880px){.invariants{grid-template-columns:1fr}}
   .invariants .cell{padding:24px 22px;background:var(--bg-elev)}
-  .invariants .cell h4{margin:0 0 6px;font-size:14px;color:var(--ink);font-weight:540}
+  .invariants .cell h4{margin:0 0 6px;font-size:14px;color:var(--ink);font-weight: 500}
   .invariants .cell p{margin:0;font-size:13px;color:var(--ink-mute);line-height:1.55}
 
   .cta-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:36px}
-  .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);border-radius:6px;padding:11px 18px;font-size:14px;font-weight:540;letter-spacing: 0;transition:background 120ms}
+  .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);border-radius:6px;padding:11px 18px;font-size:14px;font-weight: 500;letter-spacing: 0;transition:background 120ms}
   .btn-primary:hover{background:#fff}
   .btn-link{display:inline-flex;align-items:center;gap:6px;color:var(--ink);padding:11px 14px;font-size:14px;font-weight:500}
   .btn-link:hover{color:var(--accent)}
@@ -100,7 +104,7 @@
   footer{border-top:1px solid var(--line);padding:48px 0 36px;color:var(--ink-faint);font-size:12.5px}
   footer .cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:24px}
   @media(max-width:720px){footer .cols{grid-template-columns:1fr 1fr;gap:24px}}
-  footer h4{font-size:11px;color:var(--ink-mute);letter-spacing: 0;text-transform:uppercase;margin:0 0 10px;font-weight:540}
+  footer h4{font-size:11px;color:var(--ink-mute);letter-spacing: 0;text-transform:uppercase;margin:0 0 10px;font-weight: 500}
   footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
   footer ul a{color:var(--ink-faint);transition:color 120ms}
   footer ul a:hover{color:var(--ink)}
@@ -113,10 +117,10 @@
   .plate .stamp{position:absolute;top:22px;left:24px;z-index:3;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute);border:1px solid rgba(236,231,220, 0.22);background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:6px 12px;border-radius:4px}
   .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(236,231,220, 0.85)}
   .plate .cap{position:absolute;left:30px;right:30px;bottom:26px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
-  .plate .cap .title{font-family:var(--sans);font-size:clamp(20px,2.2vw,28px);font-weight:540;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:60%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
+  .plate .cap .title{font-family:var(--sans);font-size:clamp(20px,2.2vw,28px);font-weight: 500;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:60%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
   .plate .cap .title .tone{background:linear-gradient(170deg,#faf2e1 0%,#c9c2b2 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   .plate .cap .meta{font-family:var(--mono);font-size:11px;color:var(--ink-mute);letter-spacing: 0;text-align:right;line-height:1.7}
-  .plate .cap .meta b{color:var(--ink);font-weight:520}
+  .plate .cap .meta b{color:var(--ink);font-weight: 500}
   @media(max-width:720px){.plate .cap{left:16px;right:16px;bottom:14px;flex-direction:column;align-items:flex-start;gap:10px}.plate .cap .title{font-size:17px;max-width:100%}.plate .cap .meta{text-align:left;font-size:10.5px}.plate .stamp{top:14px;left:14px;font-size:9.5px;padding:5px 10px}}
 </style>
 <link rel="stylesheet" href="/brand-refresh.css">
@@ -167,6 +171,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -180,7 +185,7 @@
 
 <section class="hero">
   <div class="wrap">
-    <div class="eyebrow"><span class="num">02</span> · Anatomy</div>
+    <div class="eyebrow"><span class="num">02</span> ·Anatomy</div>
     <h1>One file. <span class="tone">Seven layers.</span></h1>
     <p class="lede">A <code>.kolm</code> is a deterministic zip with a fixed schema (<code>RS-1</code>).
       Every layer is reproducible from <code>(task, examples, base_model, recipe_registry@version)</code>.
@@ -192,7 +197,7 @@
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">01</span> · What’s inside</div>
+    <div class="eyebrow"><span class="num">01</span> ·What'inside</div>
     <h2>The seven parts.</h2>
     <p class="lede">Listed in the order kolm writes them. Sizes are an example
       from a typical task; small artifacts run ~30 MB, large ones cap around 3 GB.</p>
@@ -202,7 +207,7 @@
         <li>
           <span class="icon">01</span>
           <div class="body">
-            <h3>model.gguf <span style="color:var(--ink-faint);font-weight:500;font-size:11px;font-family:var(--mono);text-transform:uppercase;margin-left:6px">v0.1 · pointer</span></h3>
+            <h3>model.gguf <span style="color:var(--ink-faint);font-weight:500;font-size:11px;font-family:var(--mono);text-transform:uppercase;margin-left:6px">v0.1 ·pointer</span></h3>
             <p>In v0.1 this slot holds a signed JSON pointer to the base-model release (<code>runtime: cloud</code>); native INT4 weight packaging is a roadmap tier.</p>
           </div>
           <span class="size">target 2.1 GB</span>
@@ -210,7 +215,7 @@
         <li>
           <span class="icon">02</span>
           <div class="body">
-            <h3>lora.bin <span style="color:var(--ink-faint);font-weight:500;font-size:11px;font-family:var(--mono);text-transform:uppercase;margin-left:6px">v0.1 · KOLMPACK</span></h3>
+            <h3>lora.bin <span style="color:var(--ink-faint);font-weight:500;font-size:11px;font-family:var(--mono);text-transform:uppercase;margin-left:6px">v0.1 ·KOLMPACK</span></h3>
             <p>In v0.1 this slot holds an optional <code>KOLMPACK</code> behavior pack (deterministic categories/rules). Distilled LoRA adapters are a roadmap tier.</p>
           </div>
           <span class="size">target 82 MB</span>
@@ -226,7 +231,7 @@
         <li>
           <span class="icon">04</span>
           <div class="body">
-            <h3>index.sqlite-vec <span style="color:var(--ink-faint);font-weight:500;font-size:11px;font-family:var(--mono);text-transform:uppercase;margin-left:6px">v0.1 · KOLMIDX</span></h3>
+            <h3>index.sqlite-vec <span style="color:var(--ink-faint);font-weight:500;font-size:11px;font-family:var(--mono);text-transform:uppercase;margin-left:6px">v0.1 ·KOLMIDX</span></h3>
             <p>In v0.1 this slot holds an optional <code>KOLMIDX</code> JSON lookup container. A real sqlite-vec multimodal index is a roadmap tier.</p>
           </div>
           <span class="size">target 11 MB</span>
@@ -264,7 +269,7 @@
             output {label,severity}",
   <span class="key">"base_model"</span>: {
     "id": "qwen2.5-coder-7b-instruct-q4_0",
-    "hash": "sha256:9f1a…b3"
+    "hash": "sha256:9f1a - ?"
   },
   <span class="key">"k_score"</span>: <span class="num">0.94</span>,
   <span class="key">"k_components"</span>: {
@@ -291,13 +296,13 @@
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">02</span> · Three invariants</div>
+    <div class="eyebrow"><span class="num">02</span> ·Three invariants</div>
     <h2>Three rules <span class="tone">every .kolm respects.</span></h2>
 
     <div class="invariants">
       <div class="cell">
         <h4>Reproducible</h4>
-        <p>Same <code>(task, examples, base, registry@v)</code> &nbsp;→&nbsp; byte-identical zip. No hidden randomness; sampling seeds are pinned in the manifest.</p>
+        <p>Same <code>(task, examples, base, registry@v)</code> &nbsp; - nbsp; byte-identical zip. No hidden randomness; sampling seeds are pinned in the manifest.</p>
       </div>
       <div class="cell">
         <h4>Self-evaluating</h4>
@@ -313,8 +318,8 @@
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">03</span> · Walk the chain</div>
-    <h2>Four rings. <span class="tone">One signature.</span></h2>
+    <div class="eyebrow"><span class="num">03</span> ·Walk the chain</div>
+    <h2 id="walker">Four rings. <span class="tone">One signature.</span></h2>
     <p class="lede">The <code>signature.sig</code> file is the tail of a 4-ring HMAC-SHA256 chain.
       Each ring covers the previous ring's tag plus a fresh set of layer hashes.
       Tampering with one byte of <em>any</em> layer changes that ring's tag and cascades through every downstream ring.
@@ -325,21 +330,21 @@
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">04</span> · Inspect</div>
+    <div class="eyebrow"><span class="num">04</span> ·Inspect</div>
     <h2>Open the box.</h2>
     <p class="lede">Every artifact is a normal zip. <code>kolm inspect</code> formats the
-      contents for humans; <code>unzip -l</code> works fine if you don’t have kolm installed.</p>
+      contents for humans; <code>unzip -l</code> works fine if you don'have kolm installed.</p>
 
     <pre>$ kolm inspect <span class="key">support-triage.kolm</span>
 
   layer            size    sha256
-  ───────────────  ──────  ─────────────────
-  model.gguf       2.1 GB  9f1a8c…b3
-  lora.bin         82  MB  4d22ef…c1
-  recipes.json     7.2 MB  ab02f1…7e
-  index.sqlite-vec 11  MB  8b73e9…02
-  tests.jsonl      1.4 MB  ef44a3…c8
-  manifest.json    12 KB   1a92c4…aa
+   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -    -  -  -  -  -  -    -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
+  model.gguf       2.1 GB  9f1a8c - ?
+  lora.bin         82  MB  4d22ef - ?
+  recipes.json     7.2 MB  ab02f1&hellip;e
+  index.sqlite-vec 11  MB  8b73e9&hellip;2
+  tests.jsonl      1.4 MB  ef44a3 - ?
+  manifest.json    12 KB   1a92c4&hellip;  
   signature.sig    256 B   <span class="ok">verified</span>
 
   total            2.21 GB
@@ -347,34 +352,61 @@
   signature        <span class="ok">ok</span>     anchored to rs-1@2026-05-06</pre>
 
     <div class="cta-row">
-      <a href="/signup" class="btn-primary">Compile your first artifact <span aria-hidden="true">&rarr;</span></a>
+      <a href="/signup" class="btn-primary">Compile your first AI <span aria-hidden="true">&rarr;</span></a>
       <a href="/k-score" class="btn-link">How K-score is computed <span aria-hidden="true">&rarr;</span></a>
       <a href="/docs/rs-1.md" class="btn-link">Read RS-1 spec <span aria-hidden="true">&rarr;</span></a>
     </div>
   </div>
 </section>
 
-<footer>
-  <div class="wrap">
-    <div class="cols">
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
       <div>
-        <a class="brand" href="/" style="display:inline-flex;align-items:center;gap:9px;color:var(--ink);margin-bottom:10px">
-          
-          <span style="font-weight:540;font-size:15px;letter-spacing: 0">kolm</span>
-        </a>
-        <p style="font-size:12.5px;margin:0;max-width:36ch;color:var(--ink-faint)">The private AI compiler.</p>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
       </div>
-      <div><h4>Product</h4><ul><li><a href="/compile">Compile</a></li><li><a href="/serve">Serve --mcp</a></li><li><a href="/anatomy">.kolm format</a></li><li><a href="/k-score">K-score</a></li>
-          <li><a href="/benchmarks">Benchmarks</a></li>
-          <li><a href="/compare">Compare</a></li></ul></div>
-      <div><h4>Develop</h4><ul><li><a href="/docs">Docs</a></li><li><a href="/articles">Articles</a></li><li><a href="/atlas">Atlas</a></li><li><a href="/pricing">Pricing</a></li></ul></div>
-      <div><h4>Trust</h4><ul><li><a href="/security">Security</a></li><li><a href="/docs/rs-1.md">RS-1 spec</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a></li></ul></div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
     </div>
-    <div class="legal">
-      <span>© 2026 Kolmogorov · the AI compiler</span>
-      <span>Recipe (RS-1, MIT) · Receipts (RS-1-receipts, MIT)</span>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
     </div>
-    <small class="footer-tag" style="display:block;margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--ink-faint,#6b7280);letter-spacing:0;">kolm &middot; open spec &middot; MIT licensed runtime &middot; kolm.ai</small>
   </div>
 </footer>
 

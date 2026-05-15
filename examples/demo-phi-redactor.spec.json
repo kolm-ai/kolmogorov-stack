@@ -1,0 +1,42 @@
+{
+  "job_id": "job_phi_redactor_v1",
+  "task": "Redact protected-health-information (PHI) from clinical free-text. Returns the input with PHI fields masked: names, MRN, SSN, phone numbers, email addresses, dates, and US zip codes.",
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "target_device": "any",
+  "recipes": [
+    {
+      "id": "rcp_phi_redact_v1",
+      "name": "PHI redactor — pattern based",
+      "tags": ["healthcare", "hipaa", "redaction", "phi"],
+      "schema": {
+        "input": { "type": "object", "properties": { "text": { "type": "string" } }, "required": ["text"] },
+        "output": { "type": "object", "properties": { "redacted": { "type": "string" } } }
+      },
+      "source": "function generate(input, lib) {\n  const text = (input && input.text != null) ? String(input.text) : String(input || '');\n  let out = text;\n  out = out.replace(/\\b\\d{3}-\\d{2}-\\d{4}\\b/g, '[REDACTED:SSN]');\n  out = out.replace(/\\bMRN[:#\\s]?\\s*\\d{4,10}\\b/gi, '[REDACTED:MRN]');\n  out = out.replace(/\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b/g, '[REDACTED:EMAIL]');\n  out = out.replace(/\\b(?:\\+?1[-.\\s]?)?\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}\\b/g, '[REDACTED:PHONE]');\n  out = out.replace(/\\b\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}\\b/g, '[REDACTED:DATE]');\n  out = out.replace(/\\b\\d{4}-\\d{2}-\\d{2}\\b/g, '[REDACTED:DATE]');\n  out = out.replace(/\\b\\d{5}(?:-\\d{4})?\\b/g, '[REDACTED:ZIP]');\n  out = out.replace(/\\b(?:Mr\\.?|Mrs\\.?|Ms\\.?|Dr\\.?)\\s+[A-Z][a-z]+(?:\\s+[A-Z][a-z]+)?\\b/g, '[REDACTED:NAME]');\n  out = out.replace(/\\bPatient[:\\s]+[A-Z][a-z]+(?:\\s+[A-Z][a-z]+)?\\b/g, 'Patient: [REDACTED:NAME]');\n  return { redacted: out };\n}"
+    }
+  ],
+  "evals": {
+    "spec": "rs-1-evals",
+    "n": 8,
+    "coverage": 1.0,
+    "cases": [
+      { "id": "ev_01", "input": { "text": "Patient: Jane Doe, MRN 1234567, DOB 01/15/1980, SSN 123-45-6789" }, "expected": { "redacted": "Patient: [REDACTED:NAME], [REDACTED:MRN], DOB [REDACTED:DATE], SSN [REDACTED:SSN]" } },
+      { "id": "ev_02", "input": { "text": "Call Dr. Smith at 555-867-5309 or smith@hospital.org" }, "expected": { "redacted": "Call [REDACTED:NAME] at [REDACTED:PHONE] or [REDACTED:EMAIL]" } },
+      { "id": "ev_03", "input": { "text": "Visit scheduled 2026-03-14 in Boston 02114" }, "expected": { "redacted": "Visit scheduled [REDACTED:DATE] in Boston [REDACTED:ZIP]" } },
+      { "id": "ev_04", "input": { "text": "Lab values normal. Vitals stable. Discharge home." }, "expected": { "redacted": "Lab values normal. Vitals stable. Discharge home." } },
+      { "id": "ev_05", "input": { "text": "Patient: John Smith reports headache for 2 days" }, "expected": { "redacted": "Patient: [REDACTED:NAME] reports headache for 2 days" } },
+      { "id": "ev_06", "input": { "text": "Ph: (415) 555-1212 Em: contact@clinic.net" }, "expected": { "redacted": "Ph: [REDACTED:PHONE] Em: [REDACTED:EMAIL]" } },
+      { "id": "ev_07", "input": { "text": "MRN: 9988776, DOS 12/31/2025" }, "expected": { "redacted": "[REDACTED:MRN], DOS [REDACTED:DATE]" } },
+      { "id": "ev_08", "input": { "text": "" }, "expected": { "redacted": "" } }
+    ]
+  },
+  "training_stats": {
+    "approach": "deterministic pattern rules + 8 eval cases",
+    "examples_seen": 0,
+    "regex_count": 9,
+    "pass_rate_positive": 0.875,
+    "verifier_accepted": true,
+    "latency_p50_us": 80,
+    "cost_usd_per_call": 0
+  }
+}

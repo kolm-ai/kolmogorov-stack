@@ -3,13 +3,19 @@
 The AI compiler. Compile a task into a signed `.kolm` artifact you own, run it offline on any device, verify every output.
 
 ```bash
-npm i -g @kolmogorov/kolm
-kolm login
+npm i -g github:sneaky-hippo/kolmogorov-stack
+kolm signup --email you@example.com         # or: kolm login --key ks_... (paste from /signup)
 kolm compile "your task" --examples ./examples.jsonl
 kolm run your-artifact.kolm "new input"
 ```
 
 You bring your own frontier API key. kolm uses it once, during compile. The result is a single signed file with model, examples, evaluator, and receipt chain. Runs on a laptop, phone, or in your VPC. Your data never moves.
+
+## Primary use case: clinical AI inside the hospital network
+
+kolm was built around healthcare. The architecture supports BAA-bounded deployment so PHI never leaves the hosts your security team already trusts. Reference workloads: prior-auth triage, encounter-note drafting for sign-off, ICD-10 coding, intake routing, drug-name redaction. Every output carries an HMAC-bound receipt your clinical informatics committee can re-verify. See [public/healthcare.html](public/healthcare.html) for the canonical positioning and the reference artifacts (hipaa-summarizer, intake-triage, drug-name-redact). BAA review is a per-customer step in Enterprise onboarding, not a generic template the product ships.
+
+Other supported deployment shapes: finance (SR 11-7 model risk, examinable receipt chain), legal (privileged work inside the firm boundary), edge and offline.
 
 Live: https://kolm.ai · Open spec: [public/docs/rs-1.md](public/docs/rs-1.md) · MIT licensed.
 

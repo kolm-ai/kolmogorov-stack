@@ -1,0 +1,68 @@
+{
+  "pack": "finance-sr11-7",
+  "version": "0.1.0",
+  "task": "Classify financial transactions into structured records with category, amount, currency, counterparty, regulatory flags, and confidence. Return strict JSON matching the provided schema. Refuse to invent transactions not present in the input.",
+  "preset": "fc-tools",
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "lora_rank": 32,
+  "k_threshold": 0.90,
+  "training": {
+    "max_steps": 1200,
+    "learning_rate": 1e-4,
+    "warmup_ratio": 0.05,
+    "batch_size": 4,
+    "gradient_accumulation": 8,
+    "seed": 42
+  },
+  "verifier": {
+    "kind": "json_schema",
+    "params": {
+      "schema": {
+        "type": "object",
+        "required": ["category", "amount", "currency", "confidence"],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": ["transfer", "payment", "fee", "interest", "deposit", "withdrawal", "refund", "other"]
+          },
+          "amount": { "type": "number", "minimum": 0 },
+          "currency": { "type": "string", "minLength": 3, "maxLength": 3 },
+          "counterparty": { "type": ["string", "null"] },
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["aml", "ofac", "structuring", "high-risk-geo", "pep", "fraud-likely"]
+            }
+          },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    }
+  },
+  "evaluation": {
+    "metrics": ["accuracy", "macro_f1", "calibration_ece", "schema_compliance"],
+    "primary": "macro_f1",
+    "target": 0.92,
+    "held_out_ratio": 0.20
+  },
+  "deployment": {
+    "default_runtime": "gguf",
+    "constrained_decoding": true,
+    "tee_supported": ["aws-nitro", "gcp-cvm", "azure-cvm"],
+    "egress_required": false
+  },
+  "policy": {
+    "refuses": [
+      "fabricating transactions not in input",
+      "lowering flag thresholds at runtime",
+      "free-form prose output"
+    ]
+  },
+  "compliance_metadata": {
+    "framework": "SR 11-7 / OCC 2011-12",
+    "model_risk_tier": "[BUYER fills: tier 1 / 2 / 3]",
+    "data_classification": "NPI",
+    "geo_constraint": "US"
+  }
+}

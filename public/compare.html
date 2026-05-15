@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>kolm vs OpenPipe, Predibase, Core ML, LiteRT, ONNX · kolm</title>
 <meta name="description" content="kolm head-to-head with distillation platforms (Predibase, OpenPipe, Fireworks, Together) and on-device runtimes (Core ML, LiteRT, ONNX, ExecuTorch). What kolm replaces.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:site_name" content="kolm">
 <meta property="og:title" content="kolm vs distillation platforms and device runtimes">
@@ -72,6 +73,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -83,14 +85,14 @@
 </header>
 
 <main>
-<section class="hero">
+<section class="hero frontier-bg">
   <div class="wrap">
     <div class="hero-copy">
-      <div class="eyebrow"><span class="pulse"></span>competitive positioning</div>
-      <h1>kolm is the compiler layer above device runtimes.</h1>
+      <div class="hero-eyebrow"><span class="he-dot"></span>Compare &middot; positioning &middot; compiler layer</div>
+      <h1>kolm is the <span class="tone">compiler layer</span> above device runtimes.</h1>
       <p class="lede">Core ML, LiteRT, ONNX Runtime, and ExecuTorch are excellent runtimes. kolm sits one layer above them: it compiles regulated workflows into signed artifacts with receipts, K-score gates, and a compliance trail those runtimes do not own.</p>
       <div class="actions">
-        <a href="/benchmarks" class="btn primary">read benchmarks</a>
+        <a href="/benchmarks" class="btn primary electric">read benchmarks</a>
         <a href="/security" class="btn ghost">review security</a>
       </div>
     </div>
@@ -124,7 +126,7 @@
             <div class="flow-step"><span class="node"></span><div><strong>dispatch</strong><small>best device runtime per target</small></div></div>
           </div>
           <div class="proof-card">
-            <div class="label">wedge</div>
+            <div class="label">why this layer</div>
             <p>Privacy and compliance are not runtime features by themselves. They need artifact provenance, eval evidence, and operational receipts.</p>
           </div>
         </div>
@@ -213,7 +215,7 @@
           </tr>
           <tr>
             <td><strong>OpenPipe</strong></td>
-            <td>Production capture &rarr; auto-fine-tune &rarr; hosted inference; cost-reduction wedge.</td>
+            <td>Production capture &rarr; auto-fine-tune &rarr; hosted inference; cost-reduction angle.</td>
             <td>OpenPipe cloud (or BYO inference).</td>
             <td>The pipeline lives on OpenPipe. Pulling out is a project.</td>
             <td>kolm is the artifact pipeline. Capture &rarr; verifier &rarr; LoRA &rarr; signed file. The artifact moves with you; the registry replaces the platform graph.</td>
@@ -230,7 +232,7 @@
             <td>Open-model serving + fine-tune; OSS-friendly, broad model menu.</td>
             <td>Together cloud, with private deploy contracts.</td>
             <td>Weights are theoretically portable; the running config and eval pipeline are not.</td>
-            <td>kolm packages weights + adapter + recipe pack + verifier + eval suite + receipts in one zip. The eval and the gate travel with the model; that's what makes it auditable, not just hostable.</td>
+            <td>kolm packages weights + adapter + recipe pack + verifier + eval suite + receipts in one zip. The eval and the gate travel with the model; that's what makes the result auditable, not only hostable.</td>
           </tr>
           <tr>
             <td><strong>kolm</strong></td>
@@ -347,40 +349,53 @@
 </section>
 </main>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <div class="meta">
-      kolm v0.1.0 - MIT license - <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> - <a href="/status">status</a>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
     </div>
-    <div class="links">
-      <div>
-        <div class="col-h">product</div>
-        <a href="/compile">compile</a>
-        <a href="/run">run</a>
-        <a href="/recall">recall</a>
-        <a href="/serve">serve</a>
-      </div>
-      <div>
-        <div class="col-h">docs</div>
-        <a href="/quickstart">quickstart</a>
-        <a href="/docs">spec</a>
-        <a href="/benchmarks">benchmarks</a>
-        <a href="/compare">compare</a>
-      </div>
-      <div>
-        <div class="col-h">trust</div>
-        <a href="/security">security</a>
-        <a href="/privacy">privacy</a>
-        <a href="/terms">terms</a>
-        <a href="/faq">faq</a>
-      </div>
-      <div>
-        <div class="col-h">account</div>
-        <a href="/signup">sign up</a>
-        <a href="/signin">sign in</a>
-        <a href="/pricing">pricing</a>
-        <a href="/articles">articles</a>
-      </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
     </div>
   </div>
 </footer>

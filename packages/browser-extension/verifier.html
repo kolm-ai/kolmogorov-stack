@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>kolm Verify &middot; artifact check</title>
+<style>
+  body{font:13px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#ece7dc;background:#0b0d10;margin:0;padding:32px 24px;max-width:760px}
+  h1{font-size:18px;font-weight:500;margin:0 0 8px;letter-spacing:-0.01em;color:#ece7dc;font-family:-apple-system,Inter,system-ui,sans-serif}
+  p{color:#b5bdb1;margin:0 0 14px;line-height:1.6;font-family:-apple-system,Inter,system-ui,sans-serif}
+  .src{color:#737c73;font-size:11.5px;word-break:break-all;margin-bottom:18px}
+  .lines{background:#101316;border:1px solid rgba(236,231,220,0.08);border-radius:8px;padding:14px 16px;line-height:1.7;white-space:pre-wrap;font-size:13px}
+  .ok{color:#10b981}
+  .bad{color:#ff6b91}
+  .mute{color:#737c73}
+</style>
+</head>
+<body>
+  <h1>kolm Verify</h1>
+  <p>Verifying the .kolm artifact you right-clicked. Everything runs in this tab. Nothing is uploaded.</p>
+  <div class="src" id="src"></div>
+  <div class="lines" id="out">starting&hellip;</div>
+  <script src="verifier.js"></script>
+</body>
+</html>

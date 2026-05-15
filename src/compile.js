@@ -23,20 +23,55 @@ function ensureJobsTable() {
   }
 }
 
-export function createJob({ task, examples, corpus_namespace, base_model, tenant, deploy_hook }) {
+const VALID_PRESETS = new Set([
+  'sft',            // plain SFT
+  'lora-fast',      // Unsloth-style fast LoRA (default)
+  'long-context',   // YaRN/NTK/Linear PI
+  'vlm',            // Qwen2.5-VL frozen vision tower
+  'merge-adapters', // SLERP/TIES/DARE
+  'embed',          // InfoNCE + Matryoshka
+  'fc-tools',       // function-calling SFT (Hermes-FC)
+  'grpo-reasoning', // verifiable-reward online RL
+  'instant',        // TAID-inspired zero-shot
+]);
+
+function clampRank(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v)) return 16;
+  if (v < 4) return 4;
+  if (v > 64) return 64;
+  return Math.round(v);
+}
+
+function clampThreshold(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v)) return 0.85;
+  if (v < 0.50) return 0.50;
+  if (v > 0.99) return 0.99;
+  return Math.round(v * 100) / 100;
+}
+
+export function createJob({
+  task, examples, corpus_namespace, base_model,
+  tenant, tenant_id, deploy_hook,
+  preset, lora_rank, k_threshold,
+}) {
   ensureJobsTable();
   const id = 'job_' + crypto.randomBytes(6).toString('hex');
-  // Per-job deploy_hook beats env-var default. Both must be https to dodge SSRF.
   const envHook = process.env.KOLM_DEPLOY_HOOK_URL || '';
   const rawHook = typeof deploy_hook === 'string' && deploy_hook ? deploy_hook : envHook;
   const hook = /^https:\/\//i.test(rawHook) ? rawHook : null;
   const job = {
     id,
     tenant,
+    tenant_id: tenant_id || null,
     task: typeof task === 'string' ? task : JSON.stringify(task),
     examples_n: Array.isArray(examples) ? examples.length : 0,
     corpus_namespace: corpus_namespace || null,
-    base_model: base_model || 'qwen2.5-coder-7b-instruct-q4_0',
+    base_model: base_model || 'Qwen/Qwen2.5-3B-Instruct',
+    preset: preset && VALID_PRESETS.has(preset) ? preset : 'lora-fast',
+    lora_rank: clampRank(lora_rank),
+    k_threshold: clampThreshold(k_threshold),
     deploy_hook: hook,
     deploy_status: hook ? 'pending' : 'skipped',
     deploy_attempted_at: null,
@@ -139,17 +174,56 @@ export async function runJob(job, ctx) {
     setStage(job, 'decompose.start');
     const baseRecipes = ctx.publicRecipes() || [];
     const recipes = [];
+    let registered_concept_id = null;
+    let registered_version_id = null;
     if (synthesis_result && synthesis_result.accepted && synthesis_result.source) {
+      const synthName = (job.task || 'task').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'synthesized';
+      // Register the synthesized recipe as a real concept so the caller can
+      // POST /v1/recipes/{id}/run against their freshly compiled artifact.
+      // ctx.registry is optional — if absent, fall back to ephemeral ids and
+      // the artifact still bundles the recipe (it just isn't runnable via the
+      // HTTP run endpoint without a separate publish step).
+      if (ctx.registry && typeof ctx.registry.createConcept === 'function') {
+        try {
+          const concept = ctx.registry.createConcept({
+            name: synthName,
+            description: (job.task || '').slice(0, 400),
+            tenant: job.tenant,
+            schema: null,
+            tags: ['compiled'],
+            visibility: 'private',
+          });
+          const version = ctx.registry.publishVersion({
+            concept_id: concept.id,
+            source: synthesis_result.source,
+            evaluation: {
+              quality_score: synthesis_result.quality_score ?? null,
+              pass_rate_positive: synthesis_result.pass_rate_positive ?? null,
+              reject_rate_negative: synthesis_result.reject_rate_negative ?? null,
+              latency_p50_us: synthesis_result.latency_p50_us ?? null,
+              size_bytes: synthesis_result.size_bytes ?? null,
+              source_hash: synthesis_result.source_hash ?? null,
+              strategy: synthesis_result.strategy ?? null,
+            },
+            lineage: { compiled_from_job: job.id },
+          });
+          registered_concept_id = concept.id;
+          registered_version_id = version.id;
+        } catch (e) {
+          setStage(job, 'register.error', { error: String(e.message || e) });
+        }
+      }
       recipes.push({
-        id: `cpt_synth_${job.id}`,
-        version_id: `ver_synth_${job.id}`,
-        name: (job.task || 'task').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'synthesized',
+        id: registered_concept_id || `cpt_synth_${job.id}`,
+        version_id: registered_version_id || `ver_synth_${job.id}`,
+        name: synthName,
         source: synthesis_result.source,
+        source_hash: synthesis_result.source_hash || null,
         synthesized: true,
       });
     }
     for (const r of baseRecipes) recipes.push(r);
-    setStage(job, 'decompose.done', { recipes_n: recipes.length, synthesized: !!(synthesis_result && synthesis_result.accepted) });
+    setStage(job, 'decompose.done', { recipes_n: recipes.length, synthesized: !!(synthesis_result && synthesis_result.accepted), concept_id: registered_concept_id });
     setStatus(job, 'running', { progress: 80 });
 
     // Stage 4 — Run / package: assemble + sign the .kolm artifact.
@@ -189,13 +263,28 @@ export async function runJob(job, ctx) {
     });
     setStage(job, 'package.done', { bytes: built.bytes, k_score: built.k_score });
 
+    const threshold = typeof job.k_threshold === 'number' ? job.k_threshold : 0.85;
+    if (typeof built.k_score === 'number' && built.k_score < threshold) {
+      setStatus(job, 'failed', {
+        error: `k_score ${built.k_score.toFixed(3)} below threshold ${threshold.toFixed(2)} — no artifact written`,
+        k_score: built.k_score,
+        artifact_path: null,
+        artifact_bytes: null,
+        failed_at: new Date().toISOString(),
+      });
+      return;
+    }
+
     setStatus(job, 'completed', {
       progress: 100,
       artifact_path: built.outPath,
       artifact_bytes: built.bytes,
       manifest: built.manifest,
       receipt: built.receipt,
+      concept_id: registered_concept_id,
+      version_id: registered_version_id,
       artifact_hash: built.artifact_hash,
+      cid: built.cid,
       eval_set_hash: built.eval_set_hash,
       k_score: built.k_score,
       completed_at: new Date().toISOString(),
@@ -210,6 +299,7 @@ export async function runJob(job, ctx) {
         job_id: job.id,
         artifact_url: `/v1/compile/${job.id}/.kolm`,
         artifact_hash: built.artifact_hash || null,
+        cid: built.cid || null,
         k_score: built.k_score || null,
         base_model: job.base_model,
         completed_at: job.completed_at,

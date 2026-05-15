@@ -16,8 +16,9 @@
 
   // Active state only. Path-driven; idempotent; never rewrites innerHTML.
   var path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
-  var devRe = /^\/(docs|compile|run|recall|serve|evolve|anatomy|k-score|spec|api|sdk|build-your-own|quickstart|integrations|articles|cookbook|architecture|benchmarks|leaderboard|launch|troubleshooting|faq|press|changelog)(\/|$)/;
-  var solRe = /^\/(use-cases|healthcare|finance|legal|defense|edge|enterprise|customers|roi|whitepaper|motion|baa)(\/|$)/;
+  var devRe = /^\/(docs|compile|run|recall|serve|evolve|anatomy|k-score|spec|api|sdk|build-your-own|quickstart|integrations|articles|cookbook|architecture|launch|troubleshooting|faq|press|changelog)(\/|$)/;
+  var solRe = /^\/(use-cases|healthcare|finance|legal|defense|edge|enterprise|customers|roi|whitepaper|motion|baa|teams|tunnels|byoc|airgap)(\/|$)/;
+  var resRe = /^\/(research|benchmarks|leaderboard|whitepaper)(\/|$)/;
   var prRe  = /^\/pricing(\/|$)/;
   var anchors = nav.querySelectorAll('a');
   for (var i = 0; i < anchors.length; i++) {
@@ -26,6 +27,7 @@
     var isActive =
       (href === '/use-cases' && solRe.test(path)) ||
       (href === '/docs'      && devRe.test(path)) ||
+      (href === '/research'  && resRe.test(path)) ||
       (href === '/pricing'   && prRe.test(path));
     if (isActive) {
       a.classList.add('active');

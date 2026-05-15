@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Remote access · kolm</title>
+<meta name="description" content="Reach your self-hosted .kolm artifact from anywhere via a kolm.ai tunnel. The model and data stay on your machine.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="https://kolm.ai/tunnels">
+<meta property="og:title" content="Remote access · kolm">
+<meta property="og:description" content="Reach your self-hosted .kolm artifact from anywhere. Model and data stay local.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/use-cases">Solutions</a>
+      <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
+      <a href="/pricing">Pricing</a>
+    </nav>
+    <div class="site-actions">
+      <a href="/dashboard">dashboard</a>
+      <a href="/account">account</a>
+    </div>
+  </div>
+</header>
+
+<main class="page-main">
+  <section class="page-head">
+    <div>
+      <div class="eyebrow"><span class="pulse"></span>Remote access · beta</div>
+      <h1>Tunnels</h1>
+      <p class="lede">Give your self-hosted .kolm a public URL without opening a port. The model and data stay on your hardware; kolm.ai brokers requests over an authenticated stream the agent pulls from. Pro plan and up.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn ghost" href="/docs#remote">Read the docs</a>
+      <button class="btn primary" id="new-tunnel">New tunnel</button>
+    </div>
+  </section>
+
+  <section class="dashboard-panel" id="create-panel" hidden>
+    <div class="section-head">
+      <h2>Mint a tunnel</h2>
+      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">7-day idle expiry · last-write-wins agent replacement</span>
+    </div>
+    <form id="ct-form" autocomplete="off" style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
+      <label style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Name <em style="font-style:normal;color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">optional</em></span>
+        <input id="ct-name" type="text" maxlength="60" placeholder="laptop-support-bot" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Team <em style="font-style:normal;color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">optional · share with workspace</em></span>
+        <select id="ct-team" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px;max-width:360px">
+          <option value="">&middot; personal &middot;</option>
+        </select>
+      </label>
+      <div style="display:flex;gap:12px">
+        <button type="submit" class="btn primary">Mint &rarr;</button>
+        <button type="button" class="btn ghost" id="ct-cancel">Cancel</button>
+      </div>
+      <div id="ct-status" aria-live="polite" style="font-family:var(--mono);font-size:12px;color:var(--ink-mute)"></div>
+    </form>
+  </section>
+
+  <section class="dashboard-panel" id="onboard-panel" hidden>
+    <div class="section-head">
+      <h2>Start the local agent</h2>
+      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Run this on the machine that holds the .kolm</span>
+    </div>
+    <div style="margin-top:14px;font-family:var(--mono);font-size:13px;line-height:1.7">
+      <div style="color:var(--ink-mute);margin-bottom:6px">Your tunnel:</div>
+      <div id="ob-url" style="padding:10px 12px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;word-break:break-all"></div>
+      <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Run the agent locally:</div>
+      <pre id="ob-cmd" style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto"></pre>
+      <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Then call your AI from anywhere:</div>
+      <pre id="ob-curl" style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto"></pre>
+    </div>
+  </section>
+
+  <section class="dashboard-panel">
+    <div class="section-head">
+      <h2>Active tunnels</h2>
+      <span id="list-sub" style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Loading</span>
+    </div>
+    <div id="tun-list" style="display:flex;flex-direction:column;gap:10px;margin-top:14px"></div>
+  </section>
+
+  <section class="dashboard-panel">
+    <div class="section-head">
+      <h2>How it works</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6">
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">01 &middot; mint</div>
+        <p>You get a token and a public URL <code style="font-family:var(--mono);font-size:12px">https://kolm.ai/r/&lt;token&gt;</code>. Nothing serves yet.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">02 &middot; agent</div>
+        <p><code style="font-family:var(--mono);font-size:12px">kolm tunnel start</code> opens an authenticated stream from your machine to the broker. Outbound only.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">03 &middot; serve</div>
+        <p>Requests arrive on the public URL, get queued for your agent, run against your local .kolm, and the response flows back.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">04 &middot; close</div>
+        <p>Close the tunnel here or stop the agent. Idle tunnels expire after 7 days.</p>
+      </div>
+    </div>
+    <p style="margin-top:18px;padding:12px 14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;font-size:13px;line-height:1.6;color:var(--ink-mute)">
+      Trust model: kolm.ai sees the bytes in transit because TLS terminates on our edge. For payload-blind operation, deploy in a Trusted Execution Environment via <a href="/byoc" style="color:var(--accent);text-decoration:underline">BYOC</a>.
+    </p>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/app.js"></script>
+<script>
+(function () {
+  const KS = window.KS;
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c]);
+
+  async function ensureAuth() {
+    let key = KS.apiKey();
+    if (!key) { try { key = await KS.hydrateSession(); } catch (_) {} }
+    if (!key) { window.location.href = '/signup?next=' + encodeURIComponent('/tunnels'); return false; }
+    return true;
+  }
+
+  async function loadTeams() {
+    try {
+      const r = await KS.api('/v1/teams');
+      const sel = $('ct-team');
+      for (const t of (r.teams || [])) {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = t.name + ' (/' + t.slug + ')';
+        sel.appendChild(opt);
+      }
+    } catch (_) {}
+  }
+
+  async function refreshList() {
+    $('list-sub').textContent = 'Loading';
+    try {
+      const r = await KS.api('/v1/tunnels');
+      const list = $('tun-list');
+      list.innerHTML = '';
+      if (!r.tunnels || !r.tunnels.length) {
+        list.innerHTML = '<p style="color:var(--ink-faint);font-family:var(--mono);font-size:13px">No tunnels yet. Mint one above to give your local .kolm a public URL.</p>';
+        $('list-sub').textContent = '0 tunnels';
+        return;
+      }
+      for (const t of r.tunnels) {
+        const row = document.createElement('div');
+        row.style.cssText = 'background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:8px;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap';
+        row.innerHTML = `
+          <div style="min-width:0;flex:1">
+            <div style="font-weight:500;font-size:15px">${esc(t.name || '(unnamed)')}</div>
+            <div style="font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);margin-top:3px">${esc(t.token)}</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--ink);margin-top:8px;word-break:break-all"><a href="${esc(t.public_url)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">${esc(t.public_url)}</a></div>
+            <div style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin-top:6px">${t.live ? '<span style="color:var(--good)">live</span>' : 'idle'} &middot; ${t.requests_count || 0} req &middot; expires ${esc((t.expires_at || '').slice(0,10))}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn ghost" data-action="copy" data-url="${esc(t.public_url)}" style="font-size:11px;padding:6px 10px">copy URL</button>
+            <button class="btn ghost" data-action="close" data-token="${esc(t.token)}" style="font-size:11px;padding:6px 10px">close</button>
+          </div>`;
+        list.appendChild(row);
+      }
+      $('list-sub').textContent = r.tunnels.length + ' tunnel' + (r.tunnels.length === 1 ? '' : 's');
+    } catch (e) {
+      $('list-sub').textContent = 'error';
+    }
+  }
+
+  $('new-tunnel').addEventListener('click', () => { $('create-panel').hidden = false; $('ct-name').focus(); });
+  $('ct-cancel').addEventListener('click', () => { $('create-panel').hidden = true; });
+
+  $('ct-form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const body = {};
+    const name = $('ct-name').value.trim(); if (name) body.name = name;
+    const team = $('ct-team').value; if (team) body.team_id = team;
+    $('ct-status').textContent = 'minting...';
+    try {
+      const r = await KS.api('/v1/tunnel/register', { method: 'POST', body: JSON.stringify(body) });
+      $('ct-status').textContent = '';
+      $('create-panel').hidden = true;
+      $('onboard-panel').hidden = false;
+      $('ob-url').textContent = r.public_url;
+      $('ob-cmd').textContent = 'kolm tunnel start --token ' + r.token + ' --artifact <path/to/your.kolm>';
+      $('ob-curl').textContent = "curl -sS -X POST '" + r.public_url + "' \\\n  -H 'content-type: application/json' \\\n  -d '{\"input\": \"your prompt here\"}'";
+      $('onboard-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      await refreshList();
+    } catch (e) {
+      $('ct-status').textContent = 'failed: ' + (e.message || '');
+    }
+  });
+
+  document.addEventListener('click', async (ev) => {
+    const t = ev.target;
+    if (!(t instanceof Element)) return;
+    const action = t.getAttribute('data-action');
+    if (!action) return;
+    if (action === 'copy') {
+      const url = t.getAttribute('data-url');
+      try { await navigator.clipboard.writeText(url); KS.toast('URL copied'); }
+      catch { KS.toast(url); }
+    }
+    if (action === 'close') {
+      if (!confirm('Close this tunnel? Any caller hitting the public URL will get 502.')) return;
+      try {
+        await KS.api('/v1/tunnels/' + encodeURIComponent(t.getAttribute('data-token')), { method: 'DELETE' });
+        KS.toast('tunnel closed');
+        await refreshList();
+      } catch (e) { KS.toast('failed: ' + e.message); }
+    }
+  });
+
+  (async () => {
+    if (!(await ensureAuth())) return;
+    await loadTeams();
+    await refreshList();
+  })();
+})();
+</script>
+</body>
+</html>

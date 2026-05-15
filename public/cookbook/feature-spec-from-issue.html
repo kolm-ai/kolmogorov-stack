@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Feature spec from issue recipe · kolm cookbook</title>
 <meta name="description" content="Compile a signed local model that turns a GitHub issue into a 4-section feature spec: problem, scope, success criteria, open questions. 80 gold pairs, runs offline.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Feature-spec recipe">
 <meta property="og:description" content="Local issue-to-PRD writer. Brand-voice tuned, signed, offline.">
@@ -92,6 +93,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -126,7 +128,7 @@
 
     <div class="group">
       <h2>What this recipe does</h2>
-      <p>A PM gets a 3-paragraph issue. Before they can scope it, they spend 20 minutes restructuring it into a spec. Same template every time. This recipe does the restructure pass and stops there · it doesn't decide product strategy or set priorities, it just turns prose into the shape your team reviews.</p>
+      <p>A PM gets a 3-paragraph issue. Before they can scope it, they spend 20 minutes restructuring it into a spec. Same template every time. This recipe does the restructure pass and stops there · it doesn't decide product strategy or set priorities, it only turns prose into the shape your team reviews.</p>
       <p>The verifier enforces (a) all four sections present, (b) each "success criterion" is testable (must contain a measurable verb), (c) the brand-voice gate from the docstring recipe · your prevailing tone, not a generic LLM voice.</p>
     </div>
 
@@ -258,9 +260,53 @@ jobs:
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolm cookbook &middot; <a href="/cookbook">all recipes</a></span>
-    <span><a href="/manifesto">Manifesto</a> &middot; <a href="/security">Security</a> &middot; <a href="/privacy">Privacy</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

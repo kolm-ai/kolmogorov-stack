@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Adapter merging &middot; TIES, DARE, SLERP, linear | kolm research</title>
+<meta name="description" content="Four pure-tensor ops over PEFT LoRA adapters. Linear is the floor; SLERP traces the unit sphere; DARE drops 50% with Bernoulli and rescales by 1/density; TIES trims, elects sign by weighted vote, merges agreeing entries. Deterministic with a fixed seed.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Adapter merging . kolm research">
+<meta property="og:description" content="TIES, DARE, SLERP, linear. Four pure-tensor merge ops, written down.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-05-14">
+<meta property="article:author" content="Kolmogorov">
+<meta property="article:section" content="methods">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Adapter merging">
+<meta name="twitter:description" content="Four merge methods, one config, deterministic results.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/adapter-merging">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/adapter-merging">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="/escape.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "Adapter merging: TIES, DARE, SLERP, linear",
+      "description": "Four pure-tensor merge methods over PEFT LoRA adapters, with their gating conditions and trade-offs.",
+      "url": "https://kolm.ai/research/adapter-merging",
+      "author": {"@type": "Organization", "name": "Kolmogorov"},
+      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+      "datePublished": "2026-05-14",
+      "articleSection": "methods",
+      "keywords": "adapter merging, LoRA merging, TIES, DARE, SLERP, mergekit, model merging",
+      "citation": [
+        "Yadav et al, 2023, arXiv:2306.01708 (TIES)",
+        "Yu et al, 2023, arXiv:2311.03099 (DARE)",
+        "Goddard et al, 2024, arXiv:2403.13257 (Arcee mergekit)"
+      ],
+      "license": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+        {"@type": "ListItem", "position": 3, "name": "Adapter merging", "item": "https://kolm.ai/research/adapter-merging"}
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+  a:hover{border-bottom-color:var(--ink)}
+  .nb{border:0}
+  ::selection{background:rgba(236,231,220,0.30)}
+
+  .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+  @media(max-width:720px){.wrap{padding:0 20px}}
+
+  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+  @media(max-width:720px){header.site .row{padding:0 20px}}
+  header.site .left{display:flex;align-items:center;gap:36px}
+  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
+  header.site nav{display:flex;gap:22px}
+  header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+  header.site .right{display:flex;align-items:center;gap:14px}
+  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+  header.site .right .ghost:hover{color:var(--ink)}
+  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
+
+  main{padding:80px 0 96px;flex:1}
+
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+
+  h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+  .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+  h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+  h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+  p{color:var(--ink-mute);margin:0 0 14px}
+  p strong{color:var(--ink);font-weight: 500}
+  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+  ul li{margin:6px 0}
+
+  .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+
+  .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+  .table tr:last-child td{border-bottom:0}
+
+  .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+  .citations a{color:var(--ink-mute)}
+
+  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+  footer a{color:var(--ink-mute);border:0}
+  footer a:hover{color:var(--ink)}
+  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+  .footer-row a{color:inherit}
+</style>
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="row">
+    <div class="left">
+      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+      <nav>
+        <a href="/use-cases">Solutions</a>
+        <a href="/docs">Developers</a>
+        <a href="/research" class="active">Research</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="hero-eyebrow"><span class="he-dot"></span>research . methods . 12 min read</div>
+    <h1>Four ways to merge an adapter.</h1>
+    <p class="lede">A LoRA adapter is a stack of small tensors. Merging two adapters is a tensor operation. Choosing how those tensors combine is a design decision with four published answers, each with a different failure mode. Below: when each one is right.</p>
+
+    <div class="meta-line">
+      <span>May 14, 2026</span>
+      <span>&middot;</span>
+      <span>Kolmogorov research</span>
+      <span>&middot;</span>
+      <span>apps/trainer/merge.py</span>
+    </div>
+
+    <h2>What you actually merge</h2>
+
+    <p>A PEFT LoRA adapter is a dict mapping layer names to weight tensors of two shapes: <code>lora_A</code> (low-rank input projection) and <code>lora_B</code> (low-rank output projection). For two adapters to be mergeable they must share the base model and have the same target modules at the same shapes. The merge operates on the corresponding tensors; the merged result is a new adapter with the same shape signature.</p>
+
+    <p>The four methods differ in how they reduce N input tensors to one. Below, <code>w_i</code> are the per-adapter weights (defaulting to <code>1/N</code>), and <code>t_i</code> are the tensors being combined at one layer.</p>
+
+    <h2>The four ops</h2>
+
+    <table class="table">
+      <thead><tr><th>Method</th><th>Per-layer op</th><th>Best for</th></tr></thead>
+      <tbody>
+        <tr><td>Linear</td><td>weighted sum: <code>sum(w_i &middot; t_i)</code></td><td>Two adapters trained on disjoint subsets of one task</td></tr>
+        <tr><td>SLERP</td><td>spherical interpolation along the unit sphere</td><td>Exactly two adapters; preserves norm</td></tr>
+        <tr><td>DARE</td><td>Bernoulli mask + linear: drop with probability <code>1-density</code>, rescale survivors by <code>1/density</code></td><td>Combining adapters with redundant capacity</td></tr>
+        <tr><td>TIES</td><td>trim by magnitude topk, sign-elect by weighted sum, merge only agreeing entries</td><td>Combining adapters trained on different tasks</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Linear is the floor</h2>
+
+    <pre>def linear(tensors, weights):
+    return sum(w * t for w, t in zip(weights, tensors))</pre>
+
+    <p>The simplest case. Use this when two adapters were trained on the same task with different subsets of the same dataset, and you want their combined behavior. It does not survive task-interference: an adapter trained for SQL generation and one trained for English summarization will produce a merged tensor that does both badly and neither well.</p>
+
+    <h2>SLERP traces the unit sphere</h2>
+
+    <pre>def slerp(t1, t2, alpha):
+    cos = dot(t1, t2) / (norm(t1) * norm(t2))
+    theta = acos(clamp(cos, -1, 1))
+    if sin(theta) &lt; 1e-6:
+        return (1-alpha)*t1 + alpha*t2  # linear fallback
+    return (sin((1-alpha)*theta) / sin(theta)) * t1 + \
+           (sin(alpha*theta) / sin(theta)) * t2</pre>
+
+    <p>SLERP is the right interpolation when you want to preserve the norm of the tensor. A linear interpolation of two unit vectors at 90 degrees produces a vector of norm <code>sqrt(2)/2</code>, not 1. The model behaves differently at lower norms; SLERP avoids that drift.</p>
+
+    <p>The kolm implementation falls back to linear when <code>sin(theta) &lt; 1e-6</code>, which catches the degenerate case of two parallel tensors (or the same tensor merged with itself). SLERP is two-input only by definition; for N&gt;2 inputs the implementation pairs adjacent inputs and merges left-to-right, which is what mergekit does.</p>
+
+    <h2>DARE drops then rescales</h2>
+
+    <pre>def dare(tensor, density, seed):
+    mask = bernoulli(p=density, shape=tensor.shape, seed=seed)
+    return tensor * mask / density</pre>
+
+    <p>DARE (Yu et al 2023, Drop And REscale) operates on a single adapter relative to the base: each parameter is dropped with probability <code>1-density</code> and survivors are rescaled by <code>1/density</code> so the expectation is preserved. The intuition is that fine-tuned adapters carry a lot of redundant capacity; dropping 50% rarely hurts, and the surviving signal can combine more cleanly with another adapter's surviving signal.</p>
+
+    <p>In a multi-adapter merge, DARE is the prep step: each input adapter is DARE'd first, then the results are linearly combined. The published recipe combines DARE with TIES (DARE-TIES) and is the recommended default for combining three or more task adapters.</p>
+
+    <h2>TIES is the most powerful op</h2>
+
+    <pre>def ties(tensors, weights, density):
+    # 1. Trim each tensor to keep only the top-K magnitudes
+    trimmed = [keep_topk(t, density) for t in tensors]
+
+    # 2. Sign-elect: the elected sign is the sign of the weighted sum
+    elected = sign(sum(w * t for w, t in zip(weights, trimmed)))
+
+    # 3. Merge only entries agreeing with the elected sign
+    agreement = [(sign(t) == elected) for t in trimmed]
+    n_agree = sum(agreement)  # per-position
+    merged = sum(w * t * agree for w, t, agree in zip(weights, trimmed, agreement))
+
+    # 4. Normalise by agreement count (avoid div-by-zero)
+    return merged / max(n_agree, 1) * sum(weights)</pre>
+
+    <p>TIES (Yadav et al 2023, TRIM-ELECT-SUM) is the published winner for cross-task merges. The idea: most parameters are tied to a specific task; trim away the small-magnitude ones (they're noise), then for each remaining position pick the sign that the majority of adapters agree on (weighted by adapter importance), and average only the agreeing entries.</p>
+
+    <p>The kolm implementation rescales the final result by <code>sum(weights)</code> to preserve the expected magnitude regardless of <code>density</code>. This is a deviation from the original paper, which left the magnitude unrescaled; the rescaled version composes more cleanly with downstream inference because the merged adapter's effective LR matches the sum of input adapter weights.</p>
+
+    <h2>The minimal call</h2>
+
+    <pre>from apps.trainer.merge import merge_adapters, MergeConfig
+
+merged = merge_adapters(
+    adapters=[adapter_sql, adapter_python, adapter_chat],
+    config=MergeConfig(
+        method="ties",
+        weights=[1.0, 1.0, 0.5],   # chat gets half-weight
+        density=0.5,                # keep top-50% magnitude
+        seed=42,
+    ),
+)
+merged.save_pretrained("./merged-adapter")</pre>
+
+    <p>The output is a PEFT adapter directory ready to load against the same base model. The merged adapter participates in the registry the same way a trained one does: receipt, CID, signature, K-score gate.</p>
+
+    <h2>What lands in the receipt</h2>
+
+    <pre>"merge": {
+  "method": "ties",
+  "papers": ["arXiv:2306.01708", "arXiv:2311.03099"],
+  "source_adapters": [
+    {"cid": "cidv1:sha256:...sql", "weight": 1.0},
+    {"cid": "cidv1:sha256:...python", "weight": 1.0},
+    {"cid": "cidv1:sha256:...chat", "weight": 0.5}
+  ],
+  "density": 0.5,
+  "seed": 42,
+  "n_layers": 64,
+  "n_params": 18874368
+}</pre>
+
+    <p>Each source adapter is pinned by CID. The verifier can reconstruct the merge bit-for-bit from the sources, the method, the weights, and the seed; this is what makes adapter merges reproducible across deployments.</p>
+
+    <h2>Determinism</h2>
+
+    <p>Linear, SLERP, and TIES are deterministic by definition (no random numbers). DARE uses a Bernoulli mask, so the trainer pins a seed and the receipt records it. Re-running the merge with the same inputs, method, weights, density, and seed produces byte-identical output. This is the property that makes merge artifacts admissible into the registry alongside trained artifacts.</p>
+
+    <h2>When to merge vs. retrain</h2>
+
+    <p>Merging is cheap (seconds, no GPU) and reproducible (the merged adapter is a function of its inputs). Retraining is expensive (GPU-hours) and produces a new artifact with new captures. The honest decision rule is:</p>
+
+    <ul>
+      <li>If the buyer has a single coherent task with multiple capture batches, retrain on the union. K-score will be higher.</li>
+      <li>If the buyer has multiple distinct tasks that should coexist in one adapter, merge with TIES. K-score on each task individually will be 80-95% of the standalone adapter; combined coverage exceeds either.</li>
+      <li>If the buyer has two adapters trained on the same task with different data subsets, merge with linear. Treat the result as an ensemble.</li>
+      <li>If the buyer wants to interpolate between two checkpoints (e.g., for an A/B), SLERP is the right primitive.</li>
+    </ul>
+
+    <h2>Edge cases worth naming</h2>
+
+    <p><strong>Shape mismatches.</strong> Adapters trained on different bases (Qwen2.5-7B vs Llama-3.1-8B) cannot be merged because their tensor shapes differ. The trainer detects this from the PEFT config and fails loudly. There is no automatic projection step; the buyer must pick one base and retrain.</p>
+
+    <p><strong>Rank mismatches.</strong> Two adapters with different LoRA rank (r=16 vs r=32) cannot be merged directly. The kolm implementation pads the smaller to the larger with zeros in the second half of the rank dimension; the result preserves the lower-rank adapter's behavior exactly and adds zero contribution from the missing rank slots. This is a deviation from mergekit, which refuses; the kolm path is more useful and the receipt records that padding occurred.</p>
+
+    <p><strong>The merged adapter has no captures.</strong> Because merging is a tensor operation, there is no capture pack associated with the merged result. The K-score gate runs against a buyer-supplied eval pack instead. If the buyer does not have one, the trainer falls back to the union of the source adapters' eval packs (which is a fair test) and warns.</p>
+
+    <h2>Where this fits in the kolm compile loop</h2>
+
+    <p>Merging is a post-training step. The buyer's spec names the source adapters by CID and the merge method; the trainer materialises the inputs from the registry, runs the merge, gates with K-score, signs, and publishes. The merged artifact is registry-equivalent to a trained one and can be a source for further merges (the source-adapter chain in the receipt is recursive).</p>
+
+    <div class="citations">
+      <p><strong>Citations</strong></p>
+      <p>Yadav, P. et al. <em>TIES-Merging: Resolving Interference When Merging Models</em>. arXiv:2306.01708, 2023.</p>
+      <p>Yu, L. et al. <em>Language Models are Super Mario: Absorbing Abilities from Homologous Models as a Free Lunch</em>. arXiv:2311.03099, 2023 (DARE).</p>
+      <p>Goddard, C. et al. <em>Arcee's MergeKit: A Toolkit for Merging Large Language Models</em>. arXiv:2403.13257, 2024.</p>
+    </div>
+
+    <div class="meta-line" style="margin-top:36px">
+      <a class="nb" href="/research">&larr; Back to research</a>
+      <span>&middot;</span>
+      <a class="nb" href="/research#merge">Frontier reference &middot; Adapter merging</a>
+      <span>&middot;</span>
+      <a class="nb" href="/spec">RS-1 spec</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+<script src="/nav.js"></script>
+</body>
+</html>

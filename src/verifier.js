@@ -8,7 +8,7 @@ import vm from 'node:vm';
 import crypto from 'node:crypto';
 import { subroutines } from './library.js';
 
-const DEFAULT_TIMEOUT_MS = 250;
+const DEFAULT_TIMEOUT_MS = 150;
 
 // Defence-in-depth: node:vm is not a hard security boundary (a hostile script
 // can reach `Function` via `this.constructor.constructor` and escape an empty
@@ -30,6 +30,16 @@ const DANGEROUS = [
   /\bArrayBuffer\b/,
   /\bSharedArrayBuffer\b/,
   /\bAtomics\b/,
+  // Hardening additions (no legitimate fixture uses these as of 2026-05-14;
+  // re-check with `grep -c` against data/versions.json before removing).
+  /\bReflect\b/,
+  /\bProxy\b/,
+  /\bWeakRef\b/,
+  /\bFinalizationRegistry\b/,
+  /\bsetTimeout\b/,
+  /\bsetInterval\b/,
+  /\bsetImmediate\b/,
+  /\bqueueMicrotask\b/,
 ];
 
 function assertSafeSource(source) {

@@ -59,6 +59,69 @@ const KOLM_DIR = path.join(HOME, '.kolm');
 const CONFIG_PATH = path.join(KOLM_DIR, 'config.json');
 const ARTIFACTS_DIR = path.join(KOLM_DIR, 'artifacts');
 
+// Canonical exit codes. Use these instead of bare process.exit(1).
+//   OK              - success
+//   BAD_ARGS        - unknown command / unknown flag / missing required arg / "usage:" errors
+//   MISSING_PREREQ  - environment-level miss (no docker, no api key, not logged in)
+//   EXECUTION       - the command ran but failed at runtime (run/eval/distill threw)
+//   NOT_FOUND       - file/artifact/resource not present on disk or server
+const EXIT = {
+  OK: 0,
+  BAD_ARGS: 1,
+  MISSING_PREREQ: 3,
+  EXECUTION: 4,
+  NOT_FOUND: 5,
+};
+
+// Error-context wrapper. Wraps a cmd* invocation so any thrown error gets
+// prefixed with `[kolm <verb>]` and an optional hint line for common patterns.
+// The wrapper does NOT swallow exit codes: if the thrown error carries an
+// `.exitCode` matching an EXIT.* constant, the top-level catch in main()
+// honors it. If a cmd* function calls process.exit() directly, the wrapper
+// never sees it (by design — those paths print their own context already).
+//
+// Hints fire on:
+//   ENOENT + path that looks like a .kolm artifact -> suggest `kolm inspect`
+//   HTTP 401 / "auth_required" -> suggest `kolm login`
+//   "not signed in" message  -> suggest `kolm login`
+function errorHint(verb, err) {
+    const msg = String(err && err.message || '');
+    const code = err && err.code;
+    // HTTP 401 from api() throws set .status = 401.
+    if (err && err.status === 401) {
+        return 'hint: not signed in. run `kolm login` or set KOLM_API_KEY.';
+    }
+    if (/auth_required|not signed in|unauthori[sz]ed/i.test(msg)) {
+        return 'hint: run `kolm login` to authenticate.';
+    }
+    if (code === 'ENOENT' && /\.kolm\b/.test(msg)) {
+        return 'hint: list available artifacts with `kolm logs` or check ~/.kolm/artifacts/.';
+    }
+    if (/artifact not found/i.test(msg)) {
+        return 'hint: try `kolm inspect <id>` or list artifacts under ~/.kolm/artifacts/.';
+    }
+    return null;
+}
+
+async function withErrorContext(verb, fn) {
+    try {
+        return await fn();
+    } catch (e) {
+        const original = e && e.message ? e.message : String(e);
+        const wrapped = `[kolm ${verb}] ${original}`;
+        const hint = errorHint(verb, e);
+        const out = new Error(hint ? `${wrapped}\n${hint}` : wrapped);
+        // Preserve original error metadata so the global catch + KOLM_DEBUG keep working.
+        if (e && e.stack) out.stack = e.stack;
+        if (e && e.status != null) out.status = e.status;
+        if (e && e.code != null) out.code = e.code;
+        if (e && e.body != null) out.body = e.body;
+        // Preserve / default exitCode so main() can honor EXIT.* semantics.
+        if (e && Number.isInteger(e.exitCode)) out.exitCode = e.exitCode;
+        throw out;
+    }
+}
+
 function ensureDir() {
   fs.mkdirSync(KOLM_DIR, { recursive: true });
   fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
@@ -66,8 +129,19 @@ function ensureDir() {
 
 function loadConfig() {
   ensureDir();
-  if (!fs.existsSync(CONFIG_PATH)) return { base: process.env.KOLM_BASE || 'https://kolm.ai', api_key: process.env.KOLM_API_KEY || null };
-  try { return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8')); } catch { return {}; }
+  let c;
+  if (!fs.existsSync(CONFIG_PATH)) {
+    c = {};
+  } else {
+    try { c = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8')); } catch { c = {}; }
+  }
+  // Env vars override on every load so KOLM_BASE / KOLM_API_KEY work even when
+  // a stale config file is on disk (the docs in HELP._root promise this).
+  if (process.env.KOLM_BASE) c.base = process.env.KOLM_BASE;
+  if (process.env.KOLM_API_KEY) c.api_key = process.env.KOLM_API_KEY;
+  if (!c.base) c.base = 'https://kolm.ai';
+  if (!('api_key' in c)) c.api_key = null;
+  return c;
 }
 function saveConfig(c) {
   ensureDir();
@@ -97,6 +171,13 @@ async function api(c, method, path_, body) {
 }
 
 // ---------- helpers ----------
+// NO_COLOR-aware ANSI helper. Respects the cross-language NO_COLOR convention
+// (https://no-color.org), TERM=dumb, and non-tty stdout (pipes, CI, file
+// capture). Existing hand-coded \x1b[ escapes elsewhere in the file are left
+// alone — call sites that want gated color use color('1;32', 'PASS').
+const SUPPORTS_COLOR = process.stdout.isTTY && !process.env.NO_COLOR && process.env.TERM !== 'dumb';
+function color(code, s) { return SUPPORTS_COLOR ? `\x1b[${code}m${s}\x1b[0m` : s; }
+
 function fmtBytes(n) {
   if (n == null) return '?';
   if (n < 1024) return n + 'B';
@@ -130,7 +211,8 @@ USAGE
 
 COMMANDS
   init [--name <slug>]             scaffold kolm.yaml + .kolm/ at cwd (project bootstrap)
-  login                            authenticate to a kolm cloud
+  signup --email <addr>            provision a tenant + API key from the CLI
+  login [--key ks_...]             save an API key to ~/.kolm/config.json
   new <name> [--from <template>]   scaffold a spec.json you can compile
   compile "<task>" [opts]          cloud-compile a task into a .kolm artifact
   compile --spec <file|->           offline build from a JSON spec (any author, AI included)
@@ -139,6 +221,7 @@ COMMANDS
   bench <art.kolm> [opts]          emit artifact benchmark JSON (alias: benchmark)
   score <art.kolm>                 print just the K-score
   inspect <art.kolm>               manifest + recipes + signature
+  verify <art.kolm> [--binder out.html]  full verification + optional printable compliance binder
   serve [--mcp] [--http] [--port]  expose ~/.kolm/artifacts/* as MCP tools
   publish <art.kolm>               push to public gallery (Sprint 4)
   capture --provider <p> --as <t>  configure a drop-in proxy for OpenAI/Anthropic
@@ -148,10 +231,18 @@ COMMANDS
   install <harness> [--apply]      wire kolm MCP into Claude Code / Cursor / Continue / Cline
   tune <sub>                       evolve a local adapter (init|capture-on|step|eval|promote|watch)
   rag <sub>                        airgapped local lookup (index|query|attach|list)
+  team <sub>                       multi-tenant workspaces (create|list|show|invite|accept|members|role|remove)
+  tunnel <sub>                     remote access to a self-hosted .kolm (new|list|start|close)
+  cloud <sub>                      bring-your-own-cloud deploy (targets|deploy|list|show|destroy)
+  airgap <sub>                     hard-offline mode (status|enable|disable|verify)
+  compute <sub>                    where training runs (list|detect|pick|use|info|test|status)
   doctor                           sanity-check env (config, cloud, docker, project)
   logs [--limit n] [--artifact x]  tail local run history (~/.kolm/logs/runs.jsonl)
   ask "<question>"                 natural-language gateway: status, builds, install, compile, upgrade
   config [base|api_key] [value]    inspect or set config
+  completion <bash|zsh|fish>       emit a shell completion script for the requested shell
+  upgrade                          check for a newer kolm release (does not install)
+  update                           self-install the latest kolm from github (one-shot, no reinstall)
   version                          print version (CLI + server contract)
 
 ENVIRONMENT
@@ -194,15 +285,32 @@ EXAMPLES
   kolm ask "how much have i used this month"
   kolm ask "upgrade to pro"
 
-The server-side intent parser is deterministic and rule-based — never an LLM,
-never your data leaving — and returns a narration + concrete next steps.
+The server-side intent parser is deterministic and rule-based (never an LLM,
+never your data leaving) and returns a narration + concrete next steps.
 `,
-  login: `kolm login - paste your API key from the cloud dashboard.
+  login: `kolm login - save an API key to ~/.kolm/config.json.
 
 USAGE
-  kolm login
+  kolm login                       interactive paste prompt
+  kolm login --key ks_...          non-interactive (CI, scripts, mobile copy-paste)
+  echo ks_... | kolm login         non-interactive via stdin
 
-The key is stored at ~/.kolm/config.json (mode 0600). Get a key at https://kolm.ai/signin.
+The key is stored at ~/.kolm/config.json (mode 0600). Get a key at https://kolm.ai/signup
+or run \`kolm signup --email you@example.com\` to provision one without the web flow.
+`,
+  signup: `kolm signup - provision a new tenant + API key from the CLI.
+
+USAGE
+  kolm signup --email you@example.com
+  kolm signup --email you@example.com --name "Your Name" --plan free
+
+OPTIONS
+  --email, -e <addr>     required when stdin is not a TTY
+  --name, -n  <text>     optional display name
+  --plan      <id>       free | starter | pro | teams | enterprise (default: free)
+
+On success: the api_key is saved to ~/.kolm/config.json (mode 0600) and printed
+truncated. Paid plans also return a Stripe billing URL you can open in a browser.
 `,
   compile: `kolm compile - build a .kolm artifact (cloud-synthesised or local spec).
 
@@ -213,7 +321,7 @@ USAGE
 
 OPTIONS (cloud)
   --data <dir>                 corpus dir to ground the compile in (Recall)
-  --base-model <name>          base model (default: qwen2.5-coder-7b-instruct-q4_0)
+  --base-model <name>          base model (default: Qwen/Qwen2.5-3B-Instruct)
   --examples <file.jsonl>      seed examples for the verifier
   --out <dir|file.kolm>        where to drop the artifact (default ~/.kolm/artifacts)
   --deploy-hook <https-url>    POST {job_id,artifact_url,k_score,...} to this webhook
@@ -339,13 +447,58 @@ USAGE
 USAGE
   kolm inspect <artifact.kolm>
 `,
-  serve: `kolm serve - expose ~/.kolm/artifacts/* as MCP tools so frontier agents call them.
+  verify: `kolm verify - run every offline check kolm makes about an artifact
+and (optionally) emit a printable HTML compliance binder a security reviewer
+signs off on before a deploy.
 
 USAGE
-  kolm serve --mcp [--http] [--port <n>]
+  kolm verify <artifact.kolm> [--binder out.html] [--json]
 
-NOTES
-  --mcp is required in Sprint 1; HTTP is the only optional transport.
+WHAT GETS CHECKED
+  * manifest signature (legacy HMAC over manifest.json)
+  * content identifier round-trip (recompute CID from manifest.hashes)
+  * 5-step HMAC audit chain (task -> seeds -> recipes -> evals -> package)
+  * receipt body signature (binds artifact_hash + eval_set_hash + chain)
+  * provenance credential (kolm-credential/0.1)
+  * K-score gate (composite >= 0.85 by default)
+  * eval coverage (case count + judge id)
+
+OUTPUT
+  Plain mode prints one line per check + verdict. --json emits a machine-readable
+  block for CI / SBOM tooling. --binder writes the full HTML report to the path
+  you give it; open it in any browser, print or "Save as PDF" for the auditor.
+
+EXIT CODES
+  0  every check passed (warnings are still 0)
+  4  one or more checks failed
+  5  artifact not found
+`,
+  serve: `kolm serve - expose .kolm artifacts as MCP tools or as an HTTP server.
+
+USAGE
+  kolm serve --mcp [--port <n>]                     # frontier-agent transport
+  kolm serve --http <art.kolm> [--port <n>] [--host H]  # OpenAI-compatible HTTP
+
+WHAT EACH MODE GIVES YOU
+  --mcp   : Every artifact in ~/.kolm/artifacts/ becomes a tool that
+            Claude Code / Cursor / Continue can call. Microsecond pattern-match
+            execution. No GPU needed.
+  --http  : One generative artifact gets served via vLLM (preferred) or
+            transformers as an OpenAI-compatible /v1/chat/completions endpoint.
+            Speculative decoding via the artifact's declared draft model.
+            FP8 KV cache on Hopper/Blackwell. AWQ/GPTQ weights work when the
+            artifact's base model is already quantized.
+
+EXAMPLES
+  kolm serve --mcp                                  # what Claude Code sees
+  kolm serve --http job_foo.kolm --port 8765        # local OpenAI server
+  KOLM_FORCE_TRANSFORMERS=1 kolm serve --http foo.kolm  # skip vLLM, use HF only
+
+ENV
+  KOLM_MAX_MODEL_LEN              vLLM max_model_len (default 8192)
+  KOLM_NUM_SPECULATIVE_TOKENS     vLLM speculative tokens (default 5)
+  KOLM_FORCE_TRANSFORMERS=1       prefer transformers.generate() over vLLM
+  KOLM_LORA_DIR                   where to extract LoRA packs (default ~/.kolm/lora)
 `,
   publish: `kolm publish - push to the public gallery.
 
@@ -395,7 +548,7 @@ USAGE
   kolm distill --namespace <n> [--base-model <name>] [--target <size>]
 
 DEFAULTS
-  --base-model qwen2.5-coder-7b-instruct
+  --base-model Qwen/Qwen2.5-3B-Instruct
   --target     phi-3-mini
 
 EXIT CODES
@@ -498,6 +651,64 @@ DEPENDENCIES (only for \`tune step\`, not for the rest)
   pip install 'torch>=2.2' 'transformers>=4.42' 'peft>=0.11' 'datasets>=2.18' 'accelerate>=0.30' 'trl>=0.9'
 `,
 
+  completion: `kolm completion - emit a shell completion script.
+
+USAGE
+  kolm completion <bash|zsh|fish>
+
+EXAMPLES
+  Bash:  kolm completion bash >> ~/.bashrc
+  Zsh:   kolm completion zsh > ~/.zsh/completions/_kolm
+  Fish:  kolm completion fish > ~/.config/fish/completions/kolm.fish
+
+The script wires up tab completion for top-level verbs (init, login, new,
+compile, run, eval, benchmark, score, inspect, serve, publish, capture, labels,
+distill, config, install, tune, rag, team, tunnel, cloud, airgap, compute,
+doctor, logs, ask, version, help, completion, upgrade) and second-level
+subcommands for compute, airgap, team, tunnel, and cloud.
+
+After installing, restart your shell or source the file.
+`,
+  upgrade: `kolm upgrade - check for a newer kolm release.
+
+USAGE
+  kolm upgrade [--json]
+
+FLAGS
+  --json                emit { current, latest, status } as JSON
+
+EXAMPLES
+  kolm upgrade                     # human-readable check
+  kolm upgrade --json | jq .status # script-friendly
+
+Reads the current version from package.json. Queries npm for the latest
+published kolm release with a 5s timeout. If a newer version is available, it
+prints the upgrade command. It does NOT auto-upgrade (too many footguns).
+
+Status values: current, outdated, unknown (network or npm unavailable).
+`,
+  update: `kolm update - self-install the latest kolm from the canonical github source.
+
+USAGE
+  kolm update [--dry-run] [--json]
+
+FLAGS
+  --dry-run             print the command that would run, do not install
+  --json                emit { source, before, after, status } as JSON
+
+EXAMPLES
+  kolm update                      # install latest from github
+  kolm update --dry-run            # preview only
+  kolm update --json | jq .status  # script-friendly
+
+Runs \`npm i -g github:sneaky-hippo/kolmogorov-stack\` against the npm on PATH,
+streaming its output. On windows we shell through \`cmd /c\` so npm.cmd resolves.
+Exits non-zero if npm fails (usually a perms issue - try sudo or admin shell).
+
+Distinction: kolm upgrade only checks for a newer release. kolm update actually
+installs it. The github source bypasses the npm registry (the bare \`kolm\` name
+on npm is squatted), which is also the install path documented in README.md.
+`,
   rag: `kolm rag - airgapped local retrieval (BM25, no embedder, no network).
 
 USAGE
@@ -952,12 +1163,20 @@ async function cmdInit(args) {
 async function cmdNew(args) {
   if (maybeHelp('new', args)) return;
   const positional = args.find(a => !a.startsWith('--'));
-  if (!positional) { console.error('error: kolm new <name> [--from blank|redactor|extractor|classifier]'); process.exit(1); }
+  if (!positional) {
+    const err = new Error('kolm new <name> [--from blank|redactor|extractor|classifier]');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
   const name = slugify(positional);
   const fromIdx = args.indexOf('--from');
   const tmplName = (fromIdx >= 0 ? args[fromIdx + 1] : 'blank') || 'blank';
   const tmpl = SPEC_TEMPLATES[tmplName];
-  if (!tmpl) { console.error(`error: unknown template "${tmplName}". choose: ${Object.keys(SPEC_TEMPLATES).join(', ')}`); process.exit(1); }
+  if (!tmpl) {
+    const err = new Error(`unknown template "${tmplName}". choose: ${Object.keys(SPEC_TEMPLATES).join(', ')}`);
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
   const outIdx = args.indexOf('--out');
   const outPath = outIdx >= 0 ? args[outIdx + 1] : path.resolve(process.cwd(), `${name}.spec.json`);
   if (fs.existsSync(outPath)) { console.error(`error: ${outPath} already exists. pick a new name or --out <path>.`); process.exit(1); }
@@ -974,22 +1193,82 @@ async function cmdNew(args) {
 async function cmdLogin(args) {
   if (maybeHelp('login', args)) return;
   const c = loadConfig();
-  console.log('kolm login - paste your API key from the cloud dashboard.');
-  console.log(`Cloud: ${c.base}`);
-  const key = (await prompt('API key (ks_...): ')).trim();
+  const keyFlag = pickFlag(args, '--key') || pickFlag(args, '-k');
+  let key;
+  if (keyFlag) {
+    key = keyFlag.trim();
+  } else if (!process.stdin.isTTY) {
+    key = (await readStdin()).trim();
+  } else {
+    console.log('kolm login - paste your API key from kolm.ai/signup.');
+    console.log(`Cloud: ${c.base}`);
+    key = (await prompt('API key (ks_...): ')).trim();
+  }
   if (!key.startsWith('ks_')) {
     console.error('error: API key must start with "ks_"');
+    console.error('hint: get one from kolm.ai/signup, or run `kolm signup --email you@example.com`.');
     process.exit(1);
   }
   c.api_key = key;
   saveConfig(c);
-  // sanity-check
   try {
     const a = await api(c, 'GET', '/v1/account');
     console.log(`logged in. tenant=${a.id || 'admin'} plan=${a.plan || '-'}`);
   } catch (e) {
     console.error('saved config but health check failed:', e.message);
   }
+}
+
+async function cmdSignup(args) {
+  if (maybeHelp('signup', args)) return;
+  const c = loadConfig();
+  const emailFlag = pickFlag(args, '--email') || pickFlag(args, '-e');
+  const nameFlag = pickFlag(args, '--name') || pickFlag(args, '-n');
+  const planFlag = pickFlag(args, '--plan') || 'free';
+  let email = emailFlag;
+  if (!email) {
+    if (!process.stdin.isTTY) {
+      console.error('error: --email <address> required when stdin is not a TTY.');
+      process.exit(1);
+    }
+    email = (await prompt('email: ')).trim();
+  }
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    console.error('error: --email must be a valid email address.');
+    process.exit(1);
+  }
+  const body = { email };
+  if (nameFlag) body.name = nameFlag;
+  if (planFlag && planFlag !== 'free') body.plan = planFlag;
+  let resp;
+  try {
+    resp = await api(c, 'POST', '/v1/signup', body);
+  } catch (e) {
+    console.error('signup failed:', e.message);
+    console.error('hint: visit ' + c.base + '/signup if the API is unreachable.');
+    process.exit(1);
+  }
+  if (!resp || !resp.api_key || !resp.api_key.startsWith('ks_')) {
+    console.error('signup returned no api_key. response: ' + JSON.stringify(resp).slice(0, 200));
+    process.exit(1);
+  }
+  c.api_key = resp.api_key;
+  saveConfig(c);
+  const tenant = resp.tenant || {};
+  console.log('ok  signed up.');
+  console.log('    email:   ' + email);
+  console.log('    tenant:  ' + (tenant.name || tenant.id || '-'));
+  console.log('    plan:    ' + (tenant.plan || planFlag));
+  console.log('    api_key: ' + resp.api_key.slice(0, 12) + '...  (saved to ' + CONFIG_PATH + ')');
+  if (resp.billing_url) {
+    console.log('');
+    console.log('billing: ' + resp.billing_url);
+  }
+  console.log('');
+  console.log('next:');
+  console.log('  kolm init                # scaffold a project in the current directory');
+  console.log('  kolm new my-skill --from classifier');
+  console.log('  kolm compile --spec my-skill.spec.json');
 }
 
 async function readStdin() {
@@ -1005,6 +1284,57 @@ async function readStdin() {
 async function cmdCompile(args) {
   if (maybeHelp('compile', args)) return;
   firstRunBannerIfNeeded();
+
+  // ---- Rent-compile path: ship a spec to a rental backend (modal/vast/lambda/runpod),
+  // train remotely, fetch the .kolm back. Must run BEFORE the local --spec path
+  // since both require --spec; the presence of --rent decides where the work lands.
+  const rentIdxEarly = args.indexOf('--rent');
+  if (rentIdxEarly >= 0) {
+    const backend = args[rentIdxEarly + 1];
+    if (!backend) { console.error('error: --rent needs a backend name. try: kolm compute list'); process.exit(EXIT.BAD_ARGS); }
+    const specIdx2 = args.indexOf('--spec');
+    if (specIdx2 < 0) { console.error('error: --rent requires --spec <file.json>'); process.exit(EXIT.BAD_ARGS); }
+    const specArg2 = args[specIdx2 + 1];
+    let spec2;
+    try { spec2 = JSON.parse(fs.readFileSync(specArg2, 'utf-8')); }
+    catch (e) { console.error(`error: cannot read spec: ${e.message}`); process.exit(EXIT.NOT_FOUND); }
+    const confirm = args.includes('--confirm');
+    const budgetIdxR = args.indexOf('--budget');
+    const budget = budgetIdxR >= 0 ? Number(args[budgetIdxR + 1]) : null;
+    const { default: renter } = await import('../src/compute/rent.js');
+    const r = await renter.rent(spec2, {
+      backend,
+      confirm,
+      budget_usd: Number.isFinite(budget) ? budget : null,
+      on_progress: ({ stage, pct }) => console.error(`  [${backend}] ${stage} ${pct != null ? pct + '%' : ''}`),
+    });
+    if (r.dry_run) {
+      console.log(`quote for ${r.backend}:`);
+      console.log(`  duration:   ${r.estimate.duration_human}`);
+      console.log(`  cost:       ${r.estimate.cost_usd == null ? '(varies)' : '$' + r.estimate.cost_usd.toFixed(2)}`);
+      console.log(`  basis:      ${r.estimate.cost_basis}`);
+      console.log('');
+      console.log('pass --confirm to actually rent + train. e.g.');
+      console.log(`  kolm compile --spec ${specArg2} --rent ${backend} --confirm`);
+      return;
+    }
+    if (!r.ok) {
+      console.error(`compile --rent failed: ${r.reason}`);
+      process.exit(EXIT.EXECUTION);
+    }
+    console.log(`rented ${r.backend} (${r.rental.teardown} teardown)`);
+    console.log(`  duration:  ${r.estimate.duration_human} (quoted)`);
+    console.log(`  cost:      ${r.estimate.cost_usd == null ? '(varies)' : '$' + r.estimate.cost_usd.toFixed(2)}`);
+    if (r.result && r.result.artifact_path) {
+      console.log(`  artifact:  ${r.result.artifact_path}`);
+      if (r.result.k_score) console.log(`  k_score:   ${r.result.k_score.composite}`);
+      console.log('');
+      console.log(`run:    kolm run ${path.basename(r.result.artifact_path)} '<input-json>'`);
+    } else {
+      console.log('(adapter did not return an artifact path — check ~/.kolm/artifacts/)');
+    }
+    return;
+  }
 
   // ---- Spec-driven local compile path: anyone (or any AI agent) can author a
   // .kolm by writing JSON. No cloud, no account. The artifact is signed with
@@ -1214,11 +1544,19 @@ async function cmdRun(args) {
   const cleaned = [];
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--params' && i + 1 < args.length) { paramsArg = args[i + 1]; i++; }
+    else if (args[i] === '--json') { /* consumed below */ cleaned.push(args[i]); }
     else cleaned.push(args[i]);
   }
-  const ap = resolveArtifact(cleaned[0]);
-  if (!ap) { console.error('error: artifact not found:', cleaned[0]); process.exit(1); }
-  const inputRaw = cleaned[1];
+  const jsonOut = cleaned.includes('--json');
+  // strip --json out of positional resolution so it isn't read as artifact/input
+  const positional = cleaned.filter(a => a !== '--json');
+  const ap = resolveArtifact(positional[0]);
+  if (!ap) {
+    const err = new Error(`artifact not found: ${positional[0]}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
+  const inputRaw = positional[1];
   let input = null;
   if (inputRaw) {
     try { input = JSON.parse(inputRaw); }
@@ -1236,26 +1574,47 @@ async function cmdRun(args) {
   await withRunner(async ({ runArtifact }) => {
     try {
       const r = await runArtifact(ap, input, { params });
-      console.log(JSON.stringify({ output: r.output, recipe: r.recipe_name || r.recipe_id, latency_us: r.latency_us, k_score: r.k_score, receipt: r.receipt, audit: r.audit }, null, 2));
+      // cmdRun's text path was already a JSON dump, so --json behaves identically.
+      // Gating still flips the contract: --json guarantees stdout is parseable
+      // JSON (no narration ever) so downstream tools can `kolm run … --json | jq`.
+      const result = { output: r.output, recipe: r.recipe_name || r.recipe_id, latency_us: r.latency_us, k_score: r.k_score, receipt: r.receipt, audit: r.audit };
+      console.log(JSON.stringify(result, null, 2));
       appendRunLog({ command: 'run', artifact: ap, recipe_id: r.recipe_id, recipe_name: r.recipe_name, latency_us: r.latency_us, k_composite: r.k_score?.composite, ok: r.audit?.ok !== false });
       try {
         const { appendCapture } = await import('../src/tune.js');
         appendCapture(ap, { input, output: r.output, recipe: r.recipe_name || r.recipe_id, latency_us: r.latency_us });
       } catch {}
-      await dispatchRun('PostRun', { command: 'run', cwd: process.cwd(), artifact: ap, latency_us: r.latency_us, k_score: r.k_score, recipe: r.recipe_name || r.recipe_id }, { onResult: printHookResult });
+      if (!jsonOut) {
+        await dispatchRun('PostRun', { command: 'run', cwd: process.cwd(), artifact: ap, latency_us: r.latency_us, k_score: r.k_score, recipe: r.recipe_name || r.recipe_id }, { onResult: printHookResult });
+      } else {
+        // --json: still fire hooks but swallow their stdout narration so the
+        // result remains a single parseable JSON document.
+        await dispatchRun('PostRun', { command: 'run', cwd: process.cwd(), artifact: ap, latency_us: r.latency_us, k_score: r.k_score, recipe: r.recipe_name || r.recipe_id }, { onResult: () => {} });
+      }
     } catch (e) {
       const code = e.code || 'KOLM_E_RUN_FAILED';
       appendRunLog({ command: 'run', artifact: ap, ok: false, error: e.message, error_code: code });
       console.error(JSON.stringify({ error: e.message, code, tried: e.tried || null }, null, 2));
-      process.exit(3);
+      const err = new Error(e.message);
+      err.exitCode = EXIT.EXECUTION;
+      err.code = code;
+      throw err;
     }
   });
 }
 
 async function cmdEval(args) {
   if (maybeHelp('eval', args)) return;
-  const ap = resolveArtifact(args[0]);
-  if (!ap) { console.error('error: artifact not found:', args[0]); process.exit(1); }
+  // cmdEval already emits JSON unconditionally. Accept --json explicitly so
+  // it's documented in help + survives flag-validation when that lands.
+  const jsonOut = args.includes('--json'); // eslint-disable-line no-unused-vars
+  const positional = args.filter(a => a !== '--json');
+  const ap = resolveArtifact(positional[0]);
+  if (!ap) {
+    const err = new Error(`artifact not found: ${positional[0]}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
   await withRunner(async ({ evalArtifact }) => {
     const r = await evalArtifact(ap);
     console.log(JSON.stringify(r, null, 2));
@@ -1271,7 +1630,11 @@ async function cmdBenchmark(args) {
     return cmdBenchReproduce(args);
   }
   const ap = resolveArtifact(args[0]);
-  if (!ap) { console.error('error: artifact not found:', args[0]); process.exit(1); }
+  if (!ap) {
+    const err = new Error(`artifact not found: ${args[0]}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
 
   const value = (flag) => {
     const i = args.indexOf(flag);
@@ -1305,18 +1668,19 @@ async function cmdBenchmark(args) {
 
 // `kolm bench --reproduce <suite> [--seed N] [--n N] [--out path] [--dry-run]`
 // runs the published reproducer in a pinned Docker image. Suites:
-//   swebench-lite-n150  -- the +10.67pp Opus-4.7 lift, swebench 4.1.0 evaluator
+//   swebench-lite-n150  -- Opus-4.7 against swebench 4.1.0 evaluator
 //
 // Honesty pattern: the CLI verb is real, but the heavy harness is gated behind
 // the operator-published Docker image. If docker / ANTHROPIC_API_KEY / the image
 // are not available, exit 2 with a clear operator hint rather than silently
-// no-op'ing. This mirrors /v1/specialists/auto-distill's 503 behaviour.
+// no-op'ing. This mirrors /v1/specialists/auto-distill's 503 behaviour. No
+// point-estimate lift is shipped before the first end-to-end signed run.
 const REPRODUCE_SUITES = {
   'swebench-lite-n150': {
     image:        'kolmogorov/swebench-reproducer:1.0.0',
     default_n:    150,
     default_seed: 42,
-    headline:     '+10.67pp lift, 95% CI [+4.67, +16.67], p<0.05 (Opus-4.7, swebench 4.1.0)',
+    headline:     'Opus-4.7 vs baseline, swebench 4.1.0 evaluator (headline lift pending first signed run)',
     requires:     ['docker', 'ANTHROPIC_API_KEY'],
     est_minutes:  90,
     est_dollars:  30,
@@ -1455,7 +1819,11 @@ async function cmdBenchReproduce(args) {
 async function cmdScore(args) {
   if (maybeHelp('score', args)) return;
   const ap = resolveArtifact(args[0]);
-  if (!ap) { console.error('error: artifact not found:', args[0]); process.exit(1); }
+  if (!ap) {
+    const err = new Error(`artifact not found: ${args[0]}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
   await withRunner(async ({ inspectArtifact }) => {
     const m = inspectArtifact(ap);
     console.log(`task: ${m.task}`);
@@ -1466,11 +1834,152 @@ async function cmdScore(args) {
 async function cmdInspect(args) {
   if (maybeHelp('inspect', args)) return;
   const ap = resolveArtifact(args[0]);
-  if (!ap) { console.error('error: artifact not found:', args[0]); process.exit(1); }
+  if (!ap) {
+    const err = new Error(`artifact not found: ${args[0]}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
   await withRunner(async ({ inspectArtifact }) => {
     const m = inspectArtifact(ap);
     console.log(JSON.stringify(m, null, 2));
   });
+}
+
+async function cmdDiff(args) {
+  if (maybeHelp('diff', args)) return;
+  const positional = args.filter(a => !a.startsWith('--'));
+  const jsonFlag = args.includes('--json');
+  if (positional.length < 2) {
+    const err = new Error('usage: kolm diff <a.kolm> <b.kolm> [--json]');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  const aPath = resolveArtifact(positional[0]);
+  const bPath = resolveArtifact(positional[1]);
+  if (!aPath || !bPath) {
+    const err = new Error(`artifact not found: ${aPath ? positional[1] : positional[0]}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
+  await withRunner(async ({ inspectArtifact }) => {
+    const a = inspectArtifact(aPath);
+    const b = inspectArtifact(bPath);
+    const delta = {
+      a: { path: aPath, cid: a.cid, k_score: a.k_score?.composite ?? null, base_model: a.base_model || null },
+      b: { path: bPath, cid: b.cid, k_score: b.k_score?.composite ?? null, base_model: b.base_model || null },
+      changes: [],
+    };
+    const fields = [
+      ['cid', a.cid, b.cid],
+      ['base_model', a.base_model, b.base_model],
+      ['k_score', a.k_score?.composite, b.k_score?.composite],
+      ['recipe.task', a.recipe?.task, b.recipe?.task],
+      ['recipe.objective', a.recipe?.objective, b.recipe?.objective],
+      ['recipe.adapter', a.recipe?.adapter, b.recipe?.adapter],
+      ['compliance_pack', a.compliance_pack, b.compliance_pack],
+      ['kolm_version', a.kolm_version, b.kolm_version],
+    ];
+    for (const [field, av, bv] of fields) {
+      if (JSON.stringify(av) !== JSON.stringify(bv)) {
+        delta.changes.push({ field, before: av ?? null, after: bv ?? null });
+      }
+    }
+    if (jsonFlag) {
+      console.log(JSON.stringify(delta, null, 2));
+      return;
+    }
+    console.log(`--- ${aPath}`);
+    console.log(`+++ ${bPath}`);
+    console.log(`    cid:     ${a.cid}`);
+    console.log(`    cid:     ${b.cid}`);
+    console.log('');
+    if (delta.changes.length === 0) {
+      console.log('  (no manifest changes)');
+      return;
+    }
+    for (const c of delta.changes) {
+      console.log(`@ ${c.field}`);
+      console.log(`- ${JSON.stringify(c.before)}`);
+      console.log(`+ ${JSON.stringify(c.after)}`);
+    }
+    console.log('');
+    console.log(`${delta.changes.length} field${delta.changes.length === 1 ? '' : 's'} changed`);
+  });
+}
+
+async function cmdVerify(args) {
+  if (maybeHelp('verify', args)) return;
+  const positional = args.filter(a => !a.startsWith('--'));
+  const ap = resolveArtifact(positional[0]);
+  if (!ap) {
+    const err = new Error(`artifact not found: ${positional[0] || '(no artifact specified)'}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
+  const binderIdx = args.indexOf('--binder');
+  const jsonFlag = args.includes('--json');
+  const repoRoot = path.dirname(path.dirname(new URL(import.meta.url).pathname)).replace(/^\/([A-Z]):/, '$1:');
+  const { buildBinder, writeBinder } = await import(new URL('../src/binder.js', import.meta.url).href);
+
+  if (binderIdx >= 0) {
+    const outPath = args[binderIdx + 1];
+    if (!outPath || outPath.startsWith('--')) {
+      const err = new Error('--binder requires an output HTML path');
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    const result = await writeBinder(ap, outPath);
+    if (jsonFlag) {
+      console.log(JSON.stringify({
+        ok: result.verdict !== 'fail',
+        verdict: result.verdict,
+        out_path: result.out_path,
+        bytes: result.bytes,
+        checks: result.checks,
+      }, null, 2));
+    } else {
+      console.log(`binder written: ${result.out_path} (${result.bytes} bytes)`);
+      console.log(`verdict: ${result.verdict}`);
+      for (const c of result.checks) {
+        const tag = c.status === 'pass' ? 'ok  ' : c.status === 'warn' ? 'warn' : 'fail';
+        console.log(`  [${tag}] ${c.name}: ${c.detail}`);
+      }
+    }
+    if (result.verdict === 'fail') {
+      const err = new Error('verification failed; see binder for details');
+      err.exitCode = EXIT.EXECUTION;
+      throw err;
+    }
+    return;
+  }
+
+  // No --binder: print the verification summary as JSON or plaintext.
+  const result = await buildBinder(ap);
+  void repoRoot;
+  if (jsonFlag) {
+    console.log(JSON.stringify({
+      ok: result.verdict !== 'fail',
+      verdict: result.verdict,
+      checks: result.checks,
+      cid: result.manifest.cid,
+      k_score: result.manifest.k_score?.composite ?? null,
+    }, null, 2));
+  } else {
+    console.log(`verdict: ${result.verdict}`);
+    console.log(`cid:     ${result.manifest.cid}`);
+    console.log(`k_score: ${(result.manifest.k_score?.composite ?? 0).toFixed(4)}`);
+    for (const c of result.checks) {
+      const tag = c.status === 'pass' ? 'ok  ' : c.status === 'warn' ? 'warn' : 'fail';
+      console.log(`  [${tag}] ${c.name}: ${c.detail}`);
+    }
+    console.log('');
+    console.log('hint: add --binder out.html to emit a printable compliance report');
+  }
+  if (result.verdict === 'fail') {
+    const err = new Error('verification failed');
+    err.exitCode = EXIT.EXECUTION;
+    throw err;
+  }
 }
 
 async function cmdServe(args) {
@@ -1479,13 +1988,41 @@ async function cmdServe(args) {
   const useHttp = args.includes('--http');
   const portIdx = args.indexOf('--port');
   const port = portIdx >= 0 ? Number(args[portIdx + 1]) : 8765;
+  const hostIdx = args.indexOf('--host');
+  const host = hostIdx >= 0 ? args[hostIdx + 1] : '127.0.0.1';
 
-  if (!useMcp) {
-    console.error('error: only --mcp transport is implemented in Sprint 1. use: kolm serve --mcp');
-    process.exit(1);
+  if (useMcp) {
+    const { startMcpServer } = await import('../services/mcp/server.js');
+    await startMcpServer({ artifactsDir: ARTIFACTS_DIR, http: useHttp, port, projectCwd: process.cwd() });
+    return;
   }
-  const { startMcpServer } = await import('../services/mcp/server.js');
-  await startMcpServer({ artifactsDir: ARTIFACTS_DIR, http: useHttp, port, projectCwd: process.cwd() });
+
+  if (useHttp) {
+    // HTTP-serve a single generative .kolm artifact via apps/runtime/serve.py.
+    // First positional arg that's not a flag is the artifact path.
+    const artifact = args.find(a => !a.startsWith('--') && a !== 'serve');
+    if (!artifact) {
+      console.error('usage: kolm serve --http <artifact.kolm> [--port 8765] [--host 127.0.0.1]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const ap = path.isAbsolute(artifact) ? artifact : path.join(ARTIFACTS_DIR, artifact);
+    if (!fs.existsSync(ap)) {
+      console.error(`artifact not found: ${ap}`);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const py = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+    const repoRoot = path.dirname(path.dirname(new URL(import.meta.url).pathname));
+    console.log(`booting HTTP serve for ${path.basename(ap)} via ${py} apps/runtime/serve.py`);
+    const r = spawnSync(py, ['-m', 'apps.runtime.serve', '--artifact', ap, '--port', String(port), '--host', host], {
+      stdio: 'inherit',
+      cwd: repoRoot.replace(/^\/([A-Z]):/, '$1:'),
+    });
+    process.exit(r.status || 0);
+  }
+
+  console.error('usage: kolm serve --mcp                    (frontier-agent MCP transport)');
+  console.error('       kolm serve --http <artifact.kolm>   (OpenAI-compatible HTTP, vLLM/transformers)');
+  process.exit(EXIT.BAD_ARGS);
 }
 
 function cmdPublish(args) {
@@ -1528,6 +2065,45 @@ function cmdConfig(args) {
 async function cmdCapture(args) {
   if (maybeHelp('capture', args)) return;
   const sub = args[0];
+  if (sub === 'image') {
+    // kolm capture image <path-or-url> [--prompt "..."] [--response "..."] [--ocr] [--namespace n] [--label l]
+    const rest = args.slice(1);
+    const src = rest.find(a => !a.startsWith('-'));
+    if (!src) {
+      console.error('usage: kolm capture image <path|url|data-uri> [--prompt P] [--response R] [--ocr] [--namespace N] [--label L]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const prompt = pickFlag(rest, '--prompt') || '';
+    const response = pickFlag(rest, '--response') || '';
+    const label = pickFlag(rest, '--label') || null;
+    const namespace = pickFlag(rest, '--namespace') || pickFlag(rest, '-n') || 'default';
+    const ocr = rest.includes('--ocr');
+    const py = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+    const repoRoot = path.dirname(path.dirname(new URL(import.meta.url).pathname)).replace(/^\/([A-Z]):/, '$1:');
+    const script = [
+      'import sys, json',
+      'sys.path.insert(0, r"' + repoRoot + '")',
+      'from apps.capture.image import capture_image, as_example',
+      `img = capture_image(${JSON.stringify(src)}, ocr=${ocr ? 'True' : 'False'}, label=${label ? JSON.stringify(label) : 'None'})`,
+      `ex = as_example(img, ${JSON.stringify(prompt)}, ${JSON.stringify(response)})`,
+      'print(json.dumps(ex))',
+    ].join('\n');
+    const r = spawnSync(py, ['-c', script], { encoding: 'utf-8' });
+    if (r.status !== 0) {
+      console.error('image capture failed:', r.stderr || r.error || 'unknown');
+      console.error('(install Pillow: pip install pillow)');
+      process.exit(EXIT.EXECUTION);
+    }
+    const captureDir = path.join(KOLM_DIR, 'capture', 'images');
+    fs.mkdirSync(captureDir, { recursive: true });
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    const out = path.join(captureDir, `${namespace}-${ts}.jsonl`);
+    fs.appendFileSync(out, r.stdout.trim() + '\n');
+    console.log(`captured: ${out}`);
+    console.log(`namespace: ${namespace}`);
+    console.log('hint: kolm distill --namespace ' + namespace);
+    return;
+  }
   if (sub === 'status') {
     const c = loadConfig();
     if (!c.api_key) { console.error('not logged in. run: kolm login'); process.exit(1); }
@@ -1628,7 +2204,7 @@ async function cmdDistill(args) {
   const c = loadConfig();
   if (!c.api_key) { console.error('not logged in. run: kolm login'); process.exit(1); }
   const ns = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
-  const base_model = pickFlag(args, '--base-model') || 'qwen2.5-coder-7b-instruct';
+  const base_model = pickFlag(args, '--base-model') || 'Qwen/Qwen2.5-3B-Instruct';
   const target_size = pickFlag(args, '--target') || pickFlag(args, '--target-size') || 'phi-3-mini';
   const url = c.base.replace(/\/+$/, '') + '/v1/specialists/auto-distill';
   const res = await fetch(url, {
@@ -1808,6 +2384,7 @@ function renderHarnessSnippet(kind, { projectRoot, projectName }) {
 // "missing" (red), 0 if only "warn" (yellow) issues are present.
 async function cmdDoctor(args) {
   if (maybeHelp('doctor', args)) return;
+  const jsonOut = args.includes('--json');
   const checks = [];
   const c = loadConfig();
   // Config + auth
@@ -1844,18 +2421,33 @@ async function cmdDoctor(args) {
   const globalCount = fs.existsSync(ARTIFACTS_DIR) ? fs.readdirSync(ARTIFACTS_DIR).filter(f => f.endsWith('.kolm')).length : 0;
   checks.push({ name: 'global artifacts', status: 'ok', detail: `${globalCount} .kolm in ${ARTIFACTS_DIR}` });
 
-  // Render
-  const STATUS = { ok: '✓', warn: '!', missing: '✗' };
   let red = 0, yellow = 0;
   for (const ch of checks) {
     if (ch.status === 'missing') red++;
     else if (ch.status === 'warn') yellow++;
+  }
+
+  if (jsonOut) {
+    const result = {
+      ok: red === 0,
+      blockers: red,
+      warnings: yellow,
+      checks,
+    };
+    console.log(JSON.stringify(result, null, 2));
+    if (red > 0) process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+
+  // Render
+  const STATUS = { ok: '✓', warn: '!', missing: '✗' };
+  for (const ch of checks) {
     process.stdout.write(`${STATUS[ch.status] || '?'}  ${ch.name.padEnd(28)}  ${ch.detail || ''}\n`);
   }
   process.stdout.write('\n');
   if (red > 0) {
     process.stdout.write(`${red} blocker${red === 1 ? '' : 's'}, ${yellow} warning${yellow === 1 ? '' : 's'}. fix the ✗ rows above and re-run.\n`);
-    process.exit(1);
+    process.exit(EXIT.MISSING_PREREQ);
   }
   process.stdout.write(`all required checks pass (${yellow} warning${yellow === 1 ? '' : 's'}).\n`);
 }
@@ -2104,9 +2696,20 @@ async function cmdRag(args) {
   }
 }
 
+// ASCII brand mark for `kolm version`. Mono / restrained, no emoji, no color
+// (color() already respects NO_COLOR + TERM=dumb but the mark itself stays
+// pure ASCII so it reads identically in any terminal, CI log, or pipe).
+const KOLM_BRAND = [
+  '',
+  '  k o l m',
+  '  ─────── the private AI compiler',
+  '',
+].join('\n');
+
 async function cmdVersion(args) {
   if (maybeHelp('version', args)) return;
   const c = loadConfig();
+  console.log(KOLM_BRAND);
   console.log('kolm cli   v' + VERSION);
   console.log('spec       rs-1');
   try {
@@ -2185,6 +2788,806 @@ async function cmdAsk(args) {
   }
 }
 
+// ---------- kolm team ----------
+// Multi-tenant team management against /v1/teams/*.
+function flag(args, name) {
+  const i = args.indexOf(name);
+  return i >= 0 ? args[i + 1] : undefined;
+}
+function hasFlag(args, name) {
+  return args.includes(name);
+}
+
+// Reject unknown --flag-style args for a given subcommand. Cheap typo-guard
+// that uves/gh/wrangler all do. Prefix-match suggester finds the closest known
+// flag (first 4 chars, then middle 3) and prints "did you mean …?". Wire into
+// new commands as we go — proven first in cmdCompute. Stripped --name=value
+// down to --name before matching, so `--budget=10` still validates against the
+// `--budget` allowlist.
+// Levenshtein edit distance for command-name typo recovery. Pure JS, no deps.
+// O(m*n) DP with a rolling single-row buffer (O(min(m,n)) memory). Used in the
+// top-level dispatch default branch to surface "did you mean …?" for unknown
+// verbs like `kolm complie` → `kolm compile`.
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const prev = new Array(b.length + 1);
+  for (let j = 0; j <= b.length; j++) prev[j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    let prevDiag = prev[0];
+    prev[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = prev[j];
+      const cost = a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1;
+      prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, prevDiag + cost);
+      prevDiag = tmp;
+    }
+  }
+  return prev[b.length];
+}
+
+// Pick the single closest known verb for a mistyped command, but only when the
+// typo is genuinely close (≤ 2 edits, or ≤ 1/3 the verb length). Returns null
+// when nothing is close enough — we'd rather fall through to natural-language
+// `ask` than confidently misdirect the user.
+function suggestVerb(cmd, verbs) {
+  if (!cmd || typeof cmd !== 'string') return null;
+  const lower = cmd.toLowerCase();
+  let best = null;
+  let bestDist = Infinity;
+  for (const v of verbs) {
+    const d = levenshtein(lower, v);
+    if (d < bestDist) { bestDist = d; best = v; }
+  }
+  if (best == null) return null;
+  const threshold = Math.max(2, Math.floor(best.length / 3));
+  return bestDist <= threshold ? best : null;
+}
+
+function rejectUnknownFlags(args, allowed, ctx) {
+  const passed = args.filter(a => a.startsWith('--')).map(a => a.split('=')[0]);
+  const unknown = passed.filter(p => !allowed.includes(p));
+  if (unknown.length === 0) return;
+  const suggestions = unknown.map(u => {
+    const best = allowed.find(a => a.startsWith(u.slice(0, 4))) || allowed.find(a => a.includes(u.slice(2, 5)));
+    return best ? `${u} → did you mean ${best}?` : u;
+  });
+  const err = new Error(`unknown flag(s) for kolm ${ctx}: ${suggestions.join(', ')}\nallowed: ${allowed.join(' ')}`);
+  err.exitCode = EXIT.BAD_ARGS;
+  throw err;
+}
+
+async function cmdTeam(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  const c = loadConfig();
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm team <create|list|show|invite|accept|members|role|remove|transfer|delete>');
+    console.log('  kolm team create <name> [--seats N]');
+    console.log('  kolm team list');
+    console.log('  kolm team show <slug>');
+    console.log('  kolm team invite <slug> <email> [--role member|admin|viewer]');
+    console.log('  kolm team accept <token>');
+    console.log('  kolm team members <slug>');
+    console.log('  kolm team role <slug> <tenant_id> <role>');
+    console.log('  kolm team remove <slug> <tenant_id>');
+    console.log('  kolm team transfer <slug> <new_owner_tenant_id>');
+    console.log('  kolm team delete <slug>');
+    return;
+  }
+  if (sub === 'create') {
+    const name = rest[0];
+    if (!name) { console.error('error: team name required'); process.exit(1); }
+    const seats = parseInt(flag(rest, '--seats')) || undefined;
+    const r = await api(c, 'POST', '/v1/teams', { name, seats_max: seats });
+    console.log(JSON.stringify(r.team, null, 2));
+    console.log(`\nshare:  kolm team invite ${r.team.slug} <email>`);
+    return;
+  }
+  if (sub === 'list' || sub === 'ls') {
+    const r = await api(c, 'GET', '/v1/teams');
+    if (!r.teams || !r.teams.length) { console.log('(no teams; create one with `kolm team create <name>`)'); return; }
+    for (const t of r.teams) {
+      console.log(`${t.slug.padEnd(24)} ${(t.your_role || '').padEnd(8)} seats=${t.seats_used}/${t.seats_max}  ${t.name}`);
+    }
+    return;
+  }
+  if (sub === 'show') {
+    const slug = rest[0];
+    if (!slug) { console.error('error: slug required'); process.exit(1); }
+    const r = await api(c, 'GET', '/v1/teams/' + encodeURIComponent(slug));
+    console.log(JSON.stringify(r, null, 2));
+    return;
+  }
+  if (sub === 'invite') {
+    const slug = rest[0];
+    const email = rest[1];
+    const role = flag(rest, '--role') || 'member';
+    if (!slug || !email) { console.error('error: slug + email required'); process.exit(1); }
+    const r = await api(c, 'POST', `/v1/teams/${encodeURIComponent(slug)}/invite`, { email, role });
+    console.log(`invited ${email} as ${r.role}`);
+    console.log(`send this link:  ${r.accept_url}`);
+    console.log(`or token:        ${r.token}`);
+    console.log(`expires:         ${r.expires_at}`);
+    return;
+  }
+  if (sub === 'accept') {
+    const token = rest[0];
+    if (!token) { console.error('error: invite token required'); process.exit(1); }
+    const r = await api(c, 'POST', `/v1/teams/invites/${encodeURIComponent(token)}/accept`, {});
+    console.log(`joined ${r.team?.slug || '(unknown)'} as ${r.role}`);
+    return;
+  }
+  if (sub === 'members') {
+    const slug = rest[0];
+    if (!slug) { console.error('error: slug required'); process.exit(1); }
+    const r = await api(c, 'GET', '/v1/teams/' + encodeURIComponent(slug));
+    for (const m of r.members || []) {
+      console.log(`${(m.tenant_id || '').padEnd(28)} ${(m.role || '').padEnd(8)} joined ${m.joined_at || ''}`);
+    }
+    return;
+  }
+  if (sub === 'role') {
+    const [slug, tenantId, newRole] = rest;
+    if (!slug || !tenantId || !newRole) { console.error('error: slug + tenant_id + role required'); process.exit(1); }
+    await api(c, 'PATCH', `/v1/teams/${encodeURIComponent(slug)}/members/${encodeURIComponent(tenantId)}`, { role: newRole });
+    console.log(`role updated: ${tenantId} -> ${newRole}`);
+    return;
+  }
+  if (sub === 'remove') {
+    const [slug, tenantId] = rest;
+    if (!slug || !tenantId) { console.error('error: slug + tenant_id required'); process.exit(1); }
+    await api(c, 'DELETE', `/v1/teams/${encodeURIComponent(slug)}/members/${encodeURIComponent(tenantId)}`);
+    console.log(`removed: ${tenantId}`);
+    return;
+  }
+  if (sub === 'transfer') {
+    const [slug, newOwner] = rest;
+    if (!slug || !newOwner) { console.error('error: slug + new_owner_tenant_id required'); process.exit(1); }
+    await api(c, 'POST', `/v1/teams/${encodeURIComponent(slug)}/transfer`, { new_owner_tenant_id: newOwner });
+    console.log(`ownership transferred to ${newOwner}`);
+    return;
+  }
+  if (sub === 'delete') {
+    const slug = rest[0];
+    if (!slug) { console.error('error: slug required'); process.exit(1); }
+    await api(c, 'DELETE', '/v1/teams/' + encodeURIComponent(slug));
+    console.log(`deleted: ${slug}`);
+    return;
+  }
+  console.error('unknown team subcommand:', sub);
+  process.exit(1);
+}
+
+// ---------- kolm tunnel ----------
+// Remote-access tunnel: kolm.ai brokers requests, the local agent serves them
+// from a .kolm artifact. The model and data stay on this machine.
+async function cmdTunnel(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  const c = loadConfig();
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm tunnel <new|list|close|start>');
+    console.log('  kolm tunnel new [--name n] [--team <team_id>]');
+    console.log('  kolm tunnel list');
+    console.log('  kolm tunnel close <token>');
+    console.log('  kolm tunnel start --token <t> --artifact <p>');
+    console.log('');
+    console.log('Public URL: https://kolm.ai/r/<token>  (POST JSON, get JSON back)');
+    return;
+  }
+  if (sub === 'new' || sub === 'create' || sub === 'register') {
+    const body = {};
+    const name = flag(rest, '--name');
+    const team = flag(rest, '--team');
+    if (name) body.name = name;
+    if (team) body.team_id = team;
+    const r = await api(c, 'POST', '/v1/tunnel/register', body);
+    console.log(`token:       ${r.token}`);
+    console.log(`public URL:  ${r.public_url}`);
+    console.log(`expires:     ${r.expires_at}`);
+    console.log(``);
+    console.log(`start agent: kolm tunnel start --token ${r.token} --artifact <path-or-name>`);
+    return;
+  }
+  if (sub === 'list' || sub === 'ls') {
+    const r = await api(c, 'GET', '/v1/tunnels');
+    if (!r.tunnels || !r.tunnels.length) { console.log('(no tunnels)'); return; }
+    for (const t of r.tunnels) {
+      console.log(`${t.token.padEnd(36)} ${t.status.padEnd(8)} ${t.live ? 'LIVE ' : 'idle '} ${t.name || ''}`);
+      console.log(`  ${t.public_url}`);
+    }
+    return;
+  }
+  if (sub === 'close' || sub === 'stop' || sub === 'rm') {
+    const token = rest[0];
+    if (!token) { console.error('error: token required'); process.exit(1); }
+    await api(c, 'DELETE', '/v1/tunnels/' + encodeURIComponent(token));
+    console.log('closed');
+    return;
+  }
+  if (sub === 'start' || sub === 'agent') {
+    return cmdTunnelAgent(c, rest);
+  }
+  console.error('unknown tunnel subcommand:', sub);
+  process.exit(1);
+}
+
+async function cmdTunnelAgent(c, args) {
+  const token = flag(args, '--token') || process.env.KOLM_TUNNEL_TOKEN;
+  const artifactArg = flag(args, '--artifact');
+  if (!token) { console.error('error: --token required (or set KOLM_TUNNEL_TOKEN)'); process.exit(1); }
+  if (!artifactArg) {
+    const err = new Error('--artifact required');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  const ap = resolveArtifact(artifactArg);
+  if (!ap) {
+    const err = new Error(`artifact not found: ${artifactArg}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
+  const url = c.base.replace(/\/+$/, '') + '/v1/tunnel/agent/' + encodeURIComponent(token);
+  const stopOnSig = () => { console.log('\nagent: shutting down'); process.exit(0); };
+  process.on('SIGINT', stopOnSig);
+  process.on('SIGTERM', stopOnSig);
+
+  let attempt = 0;
+  while (true) {
+    attempt++;
+    let res;
+    try {
+      res = await fetch(url, { headers: { Accept: 'text/event-stream', ...authHeaders(c) } });
+    } catch (e) {
+      console.error(`agent: connect failed (${e.message}); retry in ${Math.min(30, attempt * 2)}s`);
+      await new Promise(r => setTimeout(r, Math.min(30, attempt * 2) * 1000));
+      continue;
+    }
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      console.error(`agent: attach ${res.status}: ${txt}`);
+      if (res.status === 404 || res.status === 410) process.exit(1);
+      await new Promise(r => setTimeout(r, Math.min(30, attempt * 2) * 1000));
+      continue;
+    }
+    attempt = 0;
+    console.log(`agent: connected (token ${token.slice(0, 12)}...); serving ${path.basename(ap)}`);
+    console.log(`public URL: ${c.base.replace(/\/+$/, '')}/r/${token}`);
+
+    let buf = '';
+    const decoder = new TextDecoder();
+    try {
+      for await (const chunk of res.body) {
+        buf += decoder.decode(chunk, { stream: true });
+        let idx;
+        while ((idx = buf.indexOf('\n\n')) >= 0) {
+          const frame = buf.slice(0, idx);
+          buf = buf.slice(idx + 2);
+          if (!frame || frame.startsWith(':')) continue;
+          const ev = (frame.match(/^event:\s*(.+)$/m) || [])[1];
+          const dataLine = (frame.match(/^data:\s*([\s\S]+)$/m) || [])[1];
+          if (!ev || !dataLine) continue;
+          if (ev === 'hello') {
+            try { console.log('agent: hello', JSON.parse(dataLine).tunnel_id || ''); } catch {}
+            continue;
+          }
+          if (ev === 'request') {
+            let req; try { req = JSON.parse(dataLine); } catch { continue; }
+            handleTunnelRequest(c, token, req, ap).catch(err => {
+              console.error('agent: request', req.request_id, 'failed:', err.message);
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.error('agent: stream ended:', e.message);
+    }
+    console.log('agent: reconnecting...');
+    await new Promise(r => setTimeout(r, 1500));
+  }
+}
+
+async function handleTunnelRequest(c, token, req, artifactPath) {
+  const { request_id, method, path: rPath, body } = req;
+  const t0 = Date.now();
+  let input = null;
+  if (body && body.length) {
+    try { input = JSON.parse(body); } catch { input = body; }
+    if (input && typeof input === 'object' && 'input' in input) input = input.input;
+  }
+  let response;
+  try {
+    const r = await withRunner(async ({ runArtifact }) => runArtifact(artifactPath, input));
+    response = {
+      request_id,
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        output: r.output,
+        recipe: r.recipe_name || r.recipe_id,
+        k_score: r.k_score?.composite,
+        latency_us: r.latency_us,
+        via: 'kolm-tunnel-agent',
+      }),
+    };
+    console.log(`agent: ${method} ${rPath} -> 200 (${Date.now() - t0}ms)`);
+  } catch (e) {
+    response = {
+      request_id,
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: e.message, code: e.code || 'agent_error' }),
+    };
+    console.log(`agent: ${method} ${rPath} -> 500 (${Date.now() - t0}ms): ${e.message}`);
+  }
+  await api(c, 'POST', `/v1/tunnel/agent/${encodeURIComponent(token)}/response`, response);
+}
+
+// ---------- kolm cloud (BYOC) ----------
+// Bring-your-own-cloud: deploy a .kolm artifact to your own Fly / AWS Nitro
+// / GCP CVM / Azure CVM / Docker host. kolm.ai issues the signed deploy
+// script and records the attestation. kolm.ai never runs the artifact.
+async function cmdCloud(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  const c = loadConfig();
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm cloud <targets|deploy|list|show|destroy>');
+    console.log('  kolm cloud targets');
+    console.log('  kolm cloud deploy --target <fly|aws-nitro|gcp-cvm|azure-cvm|docker> --artifact <id> [--region r] [--name n] [--team <team_id>] [--out <path>]');
+    console.log('  kolm cloud list');
+    console.log('  kolm cloud show <deployment_id>');
+    console.log('  kolm cloud destroy <deployment_id>');
+    return;
+  }
+  if (sub === 'targets') {
+    const r = await api(c, 'GET', '/v1/byoc/targets');
+    for (const t of r.targets || []) console.log(' - ' + t);
+    return;
+  }
+  if (sub === 'deploy') {
+    const target = flag(rest, '--target');
+    const artifactId = flag(rest, '--artifact');
+    if (!target || !artifactId) { console.error('error: --target and --artifact required'); process.exit(1); }
+    const body = { target, artifact_id: artifactId };
+    const region = flag(rest, '--region'); if (region) body.region = region;
+    const name = flag(rest, '--name'); if (name) body.name = name;
+    const team = flag(rest, '--team'); if (team) body.team_id = team;
+    const r = await api(c, 'POST', '/v1/byoc/deploy', body);
+    const out = flag(rest, '--out') || path.join(process.cwd(), `kolm-deploy-${r.deployment.id}.sh`);
+    fs.writeFileSync(out, r.deploy_script, { mode: 0o700 });
+    console.log(`deployment id:  ${r.deployment.id}`);
+    console.log(`target:         ${r.deployment.target}`);
+    console.log(`enroll_token:   ${r.deployment.enroll_token}`);
+    console.log(`deploy script:  ${out}  (executable; review then run)`);
+    console.log('');
+    console.log('On your cloud host:');
+    console.log(`  ./${path.basename(out)}`);
+    console.log('');
+    console.log('When the instance boots it will POST attestation to /v1/byoc/attestation;');
+    console.log('check it with:  kolm cloud show ' + r.deployment.id);
+    return;
+  }
+  if (sub === 'list' || sub === 'ls') {
+    const r = await api(c, 'GET', '/v1/byoc/deployments');
+    if (!r.deployments || !r.deployments.length) { console.log('(no deployments)'); return; }
+    for (const d of r.deployments) {
+      console.log(`${d.id.padEnd(20)} ${d.target.padEnd(10)} ${d.status.padEnd(10)} ${d.public_url || ''}`);
+    }
+    return;
+  }
+  if (sub === 'show') {
+    const id_ = rest[0];
+    if (!id_) { console.error('error: deployment_id required'); process.exit(1); }
+    const r = await api(c, 'GET', '/v1/byoc/deployments/' + encodeURIComponent(id_));
+    console.log(JSON.stringify(r.deployment, null, 2));
+    return;
+  }
+  if (sub === 'destroy' || sub === 'rm' || sub === 'delete') {
+    const id_ = rest[0];
+    if (!id_) { console.error('error: deployment_id required'); process.exit(1); }
+    await api(c, 'DELETE', '/v1/byoc/deployments/' + encodeURIComponent(id_));
+    console.log('destroyed');
+    return;
+  }
+  console.error('unknown cloud subcommand:', sub);
+  process.exit(1);
+}
+
+// ---------- kolm airgap ----------
+// Hard-offline mode. Sets transformers/HF offline env vars and verifies that
+// `inspect`, `run`, `eval`, and signature checks all work with zero network.
+async function cmdCompute(args) {
+  const sub = args[0] || 'status';
+  const rest = args.slice(1);
+  // Catch typos like `--budjet 10` early — beats running detect/pick with the
+  // flag silently dropped. Proves the rejectUnknownFlags pattern in one place
+  // before sweeping it across other commands (audit gap #10).
+  rejectUnknownFlags(rest, ['--json', '--force', '--airgap', '--budget', '--min-vram', '--infer-only', '--auto-provision', '--spec', '--backend', '--confirm', '--help', '-h'], 'compute ' + sub);
+  const flagJson = rest.includes('--json');
+  const flagAutoProvision = rest.includes('--auto-provision');
+  const { default: compute } = await import('../src/compute/index.js');
+
+  if (sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm compute - where training runs (CPU, GPU, MPS, MLX, Modal, RunPod, Together, Vast, your own box).\n');
+    console.log('USAGE');
+    console.log('  kolm compute list                      print every backend the CLI knows about');
+    console.log('  kolm compute detect [--force]          probe each backend on this machine');
+    console.log('  kolm compute pick [--airgap] [--budget USD] [--min-vram GB]   show the picker\'s choice + reason');
+    console.log('  kolm compute use <name> [--auto-provision]  set default backend in ~/.kolm/config.json');
+    console.log('  kolm compute info <name>               metadata for one backend');
+    console.log('  kolm compute test <name>               run the backend\'s smoke test');
+    console.log('  kolm compute status                    current pick + detection summary');
+    console.log('  kolm compute quote --spec FILE         estimate cost + duration per backend');
+    console.log('  kolm compute rent --spec FILE --backend N [--confirm]   one-shot rent → train → tear down');
+    console.log('');
+    console.log('EXAMPLES');
+    console.log('  kolm compute detect                    # what does my box actually have?');
+    console.log('  KOLM_MODAL_TOKEN=xx kolm compute pick  # confirm modal beats local-cpu');
+    console.log('  kolm compute use local-mps             # default to Apple Silicon');
+    console.log('  kolm compute use vast --auto-provision # rent an H100, train, tear down');
+    console.log('  kolm compute pick --airgap             # only on-box backends');
+    console.log('  kolm compute quote --spec spec.json    # how much would each backend cost?');
+    console.log('  kolm compute rent --spec spec.json --backend modal --confirm  # actually spend');
+    console.log('');
+    console.log('FLAGS');
+    console.log('  --json                                 emit machine-readable JSON');
+    console.log('  --force                                bypass detect cache (1hr default)');
+    console.log('  --airgap                               restrict to backends that work offline');
+    console.log('  --budget <usd>                         cap per-hour cost (or rent total cost)');
+    console.log('  --min-vram <gb>                        require >= N GB VRAM');
+    console.log('  --auto-provision                       (vast/lambda) rent + tear down per job; requires KOLM_VAST_TOKEN or KOLM_LAMBDA_TOKEN');
+    console.log('  --spec <file>                          spec file for quote / rent');
+    console.log('  --backend <name>                       backend name for quote / rent');
+    console.log('  --confirm                              actually spend money on rent (default: dry-run quote only)');
+    return;
+  }
+
+  if (sub === 'list') {
+    const backends = compute.list();
+    if (flagJson) { console.log(JSON.stringify(backends, null, 2)); return; }
+    console.log('NAME             KIND               TRAIN  AIRGAP  TIER  $/hr   COLD   FRAMEWORK');
+    for (const b of backends) {
+      const cost = b.cost_per_hour_usd == null ? '—' : ('$' + b.cost_per_hour_usd.toFixed(2));
+      const cold = (b.cold_start_seconds || 0) + 's';
+      const airgap = b.airgap === true ? 'yes' : b.airgap === 'depends' ? 'priv' : 'no';
+      console.log(
+        `${b.name.padEnd(16)} ${String(b.kind).padEnd(18)} ${(b.train ? 'yes' : 'no').padEnd(6)} ${airgap.padEnd(7)} ${String(b.tier).padEnd(5)} ${cost.padEnd(6)} ${cold.padEnd(6)} ${b.framework}`
+      );
+    }
+    return;
+  }
+
+  if (sub === 'detect') {
+    const force = rest.includes('--force');
+    const det = await compute.detect({ force });
+    if (flagJson) { console.log(JSON.stringify(det, null, 2)); return; }
+    console.log(`detection at ${det.at} ${force ? '(forced)' : '(cached)'}`);
+    for (const [name, r] of Object.entries(det.backends)) {
+      const tag = r.available ? '✓' : '×';
+      const detail = r.available ? (r.device || r.region || '') : (r.reason || '');
+      console.log(`  ${tag} ${name.padEnd(16)} ${detail}`);
+    }
+    return;
+  }
+
+  if (sub === 'pick') {
+    const constraints = {};
+    if (rest.includes('--airgap')) constraints.airgap = true;
+    const bIdx = rest.indexOf('--budget');
+    if (bIdx >= 0 && rest[bIdx + 1]) constraints.budget_usd = Number(rest[bIdx + 1]);
+    const vIdx = rest.indexOf('--min-vram');
+    if (vIdx >= 0 && rest[vIdx + 1]) constraints.min_vram_gb = Number(rest[vIdx + 1]);
+    if (rest.includes('--infer-only')) constraints.train_required = false;
+    const pick = await compute.pick(constraints);
+    if (flagJson) { console.log(JSON.stringify(pick, null, 2)); return; }
+    if (!pick.backend) { console.log('no backend matched the constraints.'); return; }
+    console.log(`pick:     ${pick.backend}`);
+    console.log(`device:   ${pick.device || '(adapter-resolved)'}`);
+    console.log(`score:    ${pick.score}`);
+    console.log(`reason:   ${pick.reason}`);
+    if (pick.alternatives && pick.alternatives.length) {
+      console.log('alternatives:');
+      for (const a of pick.alternatives) {
+        console.log(`  ${a.backend.padEnd(16)} score=${a.score} ${a.available ? '(available)' : ''}`);
+      }
+    }
+    return;
+  }
+
+  if (sub === 'use') {
+    // First positional arg that isn't a flag is the backend name.
+    const name = rest.find(a => !a.startsWith('-'));
+    if (!name) {
+      const err = new Error('usage: kolm compute use <backend-name> [--auto-provision]');
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    if (flagAutoProvision && !['vast', 'lambda'].includes(name)) {
+      const err = new Error(`--auto-provision is only supported for vast and lambda (got: ${name})\nhint: vast and lambda are the only backends that can rent + tear down per job`);
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    try {
+      const out = compute.use(name);
+      // Persist compute_options.auto_provision so the trainer job picks it up.
+      // We re-read the config the same way compute.use() wrote it.
+      const cfgPath = out.written_to;
+      let cfg = {};
+      try { cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf-8')); } catch { /* fresh file */ }
+      cfg.compute_options = cfg.compute_options || {};
+      if (flagAutoProvision) {
+        cfg.compute_options.auto_provision = true;
+      } else if (cfg.compute_options.auto_provision === true) {
+        // Explicit `kolm compute use <name>` (no flag) clears stale state so
+        // the user doesn't accidentally inherit auto-provision from a prior
+        // session pointed at a different backend.
+        delete cfg.compute_options.auto_provision;
+      }
+      fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+      console.log('default backend set to:', out.backend);
+      console.log('written to:', out.written_to);
+      if (flagAutoProvision) {
+        console.log('auto-provision:   on (kolm will rent + tear down ' + name + ' instances per job)');
+        const tokenVar = name === 'vast' ? 'KOLM_VAST_TOKEN' : 'KOLM_LAMBDA_TOKEN';
+        if (!process.env[tokenVar]) {
+          console.log('warning:          ' + tokenVar + ' is not set in this shell. Export it before training.');
+        }
+        if (name === 'lambda' && !process.env.KOLM_LAMBDA_SSH_KEY_NAME) {
+          console.log('warning:          KOLM_LAMBDA_SSH_KEY_NAME is not set. Upload an SSH key at https://cloud.lambdalabs.com/ssh-keys and export the name.');
+        }
+      }
+    } catch (origErr) {
+      const err = new Error(`${origErr.message}\nhint: try \`kolm compute list\` to see available names`);
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    return;
+  }
+
+  if (sub === 'info') {
+    const name = rest[0];
+    if (!name) {
+      const err = new Error('usage: kolm compute info <backend-name>');
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    const i = compute.info(name);
+    if (!i) {
+      const err = new Error(`unknown backend: ${name}`);
+      err.exitCode = EXIT.NOT_FOUND;
+      throw err;
+    }
+    if (flagJson) { console.log(JSON.stringify(i, null, 2)); return; }
+    for (const [k, v] of Object.entries(i)) {
+      console.log(`  ${k.padEnd(22)} ${typeof v === 'object' ? JSON.stringify(v) : v}`);
+    }
+    if (name === 'vast') {
+      console.log('');
+      console.log('  Pass `--auto-provision` to rent + tear down per job. Requires KOLM_VAST_TOKEN.');
+      console.log('  Tunables: KOLM_VAST_MIN_VRAM_GB (default 24), KOLM_VAST_MAX_DPH (default 1.50).');
+    } else if (name === 'lambda') {
+      console.log('');
+      console.log('  Pass `--auto-provision` to rent + tear down per job. Requires KOLM_LAMBDA_TOKEN.');
+      console.log('  Also set KOLM_LAMBDA_SSH_KEY_NAME (name of an SSH key you uploaded to Lambda).');
+    }
+    return;
+  }
+
+  if (sub === 'test') {
+    const name = rest[0];
+    if (!name) {
+      const err = new Error('usage: kolm compute test <backend-name>');
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    const out = await compute.test(name);
+    if (flagJson) {
+      console.log(JSON.stringify(out, null, 2));
+      if (!out.ok) process.exit(2);
+      return;
+    }
+    console.log(`${out.ok ? 'PASS' : 'FAIL'}  ${name}  ${out.latency_ms != null ? out.latency_ms + 'ms' : ''}`);
+    if (!out.ok && out.reason) console.log(`  reason: ${out.reason}`);
+    if (out.device) console.log(`  device: ${out.device}`);
+    if (!out.ok) process.exit(2);
+    return;
+  }
+
+  if (sub === 'status') {
+    const c = loadConfig();
+    const det = await compute.detect();
+    const pick = await compute.pick({});
+    const cfgDefault = c.default_compute_backend || '(unset — using picker)';
+    if (flagJson) { console.log(JSON.stringify({ default: cfgDefault, pick, detection: det }, null, 2)); return; }
+    console.log(`default backend:  ${cfgDefault}`);
+    console.log(`picker pick:      ${pick.backend} (score ${pick.score})`);
+    console.log(`reason:           ${pick.reason}`);
+    const avail = Object.entries(det.backends).filter(([, r]) => r.available);
+    console.log(`available:        ${avail.length}/${Object.keys(det.backends).length} backends`);
+    for (const [name, r] of avail) {
+      console.log(`  ✓ ${name.padEnd(16)} ${r.device || ''}`);
+    }
+    return;
+  }
+
+  if (sub === 'quote') {
+    const specIdx = rest.indexOf('--spec');
+    const specPath = specIdx >= 0 ? rest[specIdx + 1] : null;
+    if (!specPath) {
+      const err = new Error('usage: kolm compute quote --spec <file.json> [--backend <name>]');
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    let spec;
+    try { spec = JSON.parse(fs.readFileSync(specPath, 'utf-8')); }
+    catch (e) {
+      const err = new Error(`cannot read spec: ${e.message}`);
+      err.exitCode = EXIT.NOT_FOUND;
+      throw err;
+    }
+    const bIdx = rest.indexOf('--backend');
+    const onlyBackend = bIdx >= 0 ? rest[bIdx + 1] : null;
+    const { default: estimator } = await import('../src/compute/estimator.js');
+    const out = onlyBackend ? estimator.estimate(spec, onlyBackend) : estimator.estimateAll(spec);
+    if (flagJson) { console.log(JSON.stringify(out, null, 2)); return; }
+    const rows = Array.isArray(out) ? out : [out];
+    console.log('BACKEND          DURATION    COST       BASIS              SUPPORTED');
+    for (const r of rows) {
+      if (!r.supported) {
+        console.log(`${r.backend.padEnd(16)} ${'—'.padEnd(11)} ${'—'.padEnd(10)} ${(r.reason || '').padEnd(18)} no`);
+        continue;
+      }
+      const cost = r.cost_usd == null ? '(quote at run)' : `$${r.cost_usd.toFixed(2)}`;
+      console.log(`${r.backend.padEnd(16)} ${(r.duration_human || '').padEnd(11)} ${cost.padEnd(10)} ${(r.cost_basis || '').padEnd(18)} yes`);
+    }
+    if (!onlyBackend) {
+      console.log('');
+      console.log('hint: kolm compute rent --spec ' + specPath + ' --backend <name> --confirm');
+    }
+    return;
+  }
+
+  if (sub === 'rent') {
+    const specIdx = rest.indexOf('--spec');
+    const specPath = specIdx >= 0 ? rest[specIdx + 1] : null;
+    const bIdx = rest.indexOf('--backend');
+    const backend = bIdx >= 0 ? rest[bIdx + 1] : null;
+    if (!specPath || !backend) {
+      const err = new Error('usage: kolm compute rent --spec <file.json> --backend <name> [--confirm] [--budget USD]');
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    let spec;
+    try { spec = JSON.parse(fs.readFileSync(specPath, 'utf-8')); }
+    catch (e) {
+      const err = new Error(`cannot read spec: ${e.message}`);
+      err.exitCode = EXIT.NOT_FOUND;
+      throw err;
+    }
+    const budgetIdx = rest.indexOf('--budget');
+    const budget = budgetIdx >= 0 ? Number(rest[budgetIdx + 1]) : null;
+    const confirm = rest.includes('--confirm');
+    const { default: renter } = await import('../src/compute/rent.js');
+    const result = await renter.rent(spec, {
+      backend,
+      confirm,
+      budget_usd: Number.isFinite(budget) ? budget : null,
+      on_progress: ({ stage, pct }) => {
+        if (!flagJson) console.error(`  [${backend}] ${stage} ${pct != null ? pct + '%' : ''}`);
+      },
+    });
+    if (flagJson) { console.log(JSON.stringify(result, null, 2)); if (!result.ok) process.exit(EXIT.EXECUTION); return; }
+    if (result.dry_run) {
+      console.log(`quote for ${result.backend}:`);
+      console.log(`  duration:   ${result.estimate.duration_human}`);
+      console.log(`  cost:       ${result.estimate.cost_usd == null ? '(varies)' : '$' + result.estimate.cost_usd.toFixed(2)}`);
+      console.log(`  basis:      ${result.estimate.cost_basis}`);
+      console.log('');
+      console.log('pass --confirm to actually rent + run.');
+      return;
+    }
+    if (!result.ok) {
+      console.error(`rent failed: ${result.reason}`);
+      process.exit(EXIT.EXECUTION);
+    }
+    console.log(`rented ${result.backend}`);
+    console.log(`  started:   ${result.started_at}`);
+    console.log(`  finished:  ${result.finished_at}`);
+    console.log(`  quote:     ${result.estimate.duration_human} @ ${result.estimate.cost_usd == null ? '(varies)' : '$' + result.estimate.cost_usd.toFixed(2)}`);
+    console.log(`  teardown:  ${result.rental.teardown} (${result.rental.managed_by})`);
+    if (result.result && result.result.artifact_path) {
+      console.log(`  artifact:  ${result.result.artifact_path}`);
+    }
+    return;
+  }
+
+  // Throw (instead of process.exit) so withErrorContext can prefix the message
+  // with `[kolm compute]` and the global catch honors exitCode = BAD_ARGS.
+  throw Object.assign(new Error(`unknown subcommand: ${sub}. try: kolm compute --help`), { exitCode: EXIT.BAD_ARGS });
+}
+
+async function cmdAirgap(args) {
+  const sub = args[0] || 'status';
+  const rest = args.slice(1);
+  const airgapEnvPath = path.join(KOLM_DIR, 'airgap.env');
+  const vars = {
+    KOLM_AIRGAP: '1',
+    TRANSFORMERS_OFFLINE: '1',
+    HF_DATASETS_OFFLINE: '1',
+    HF_HUB_OFFLINE: '1',
+  };
+  if (sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm airgap <status|enable|disable|verify>');
+    console.log('  kolm airgap status            show env state + on-disk artifacts');
+    console.log('  kolm airgap enable            write ~/.kolm/airgap.env so all kolm verbs run offline');
+    console.log('  kolm airgap disable           remove ~/.kolm/airgap.env');
+    console.log('  kolm airgap verify <art.kolm> inspect + signature-check entirely offline');
+    return;
+  }
+  if (sub === 'status') {
+    const enabled = fs.existsSync(airgapEnvPath);
+    console.log(`airgap mode:         ${enabled ? 'enabled' : 'off'}`);
+    console.log(`env file:            ${airgapEnvPath}${enabled ? '' : ' (missing — run `kolm airgap enable`)'}`);
+    console.log(`runtime env vars:`);
+    for (const k of Object.keys(vars)) {
+      const live = process.env[k] || '(unset)';
+      console.log(`  ${k.padEnd(24)} ${live}`);
+    }
+    const arts = fs.existsSync(ARTIFACTS_DIR) ? fs.readdirSync(ARTIFACTS_DIR).filter(f => f.endsWith('.kolm')) : [];
+    console.log(`local .kolm artifacts: ${arts.length} in ${ARTIFACTS_DIR}`);
+    console.log(`receipt secret:        ${process.env.RECIPE_RECEIPT_SECRET ? 'set (signatures verifiable)' : 'unset — set RECIPE_RECEIPT_SECRET to verify HMAC chain'}`);
+    return;
+  }
+  if (sub === 'enable') {
+    ensureDir();
+    const lines = Object.entries(vars).map(([k, v]) => `export ${k}=${v}`).join('\n') + '\n';
+    fs.writeFileSync(airgapEnvPath, lines, { mode: 0o600 });
+    console.log('wrote ' + airgapEnvPath);
+    console.log('');
+    console.log('shell:    source ~/.kolm/airgap.env');
+    console.log('windows:  Get-Content $env:USERPROFILE\\.kolm\\airgap.env | ForEach-Object { if ($_ -match "export (\\w+)=(.+)") { [Environment]::SetEnvironmentVariable($matches[1], $matches[2], "Process") } }');
+    return;
+  }
+  if (sub === 'disable') {
+    if (fs.existsSync(airgapEnvPath)) {
+      fs.unlinkSync(airgapEnvPath);
+      console.log('removed ' + airgapEnvPath);
+    } else {
+      console.log('already disabled');
+    }
+    return;
+  }
+  if (sub === 'verify') {
+    const ap = resolveArtifact(rest[0]);
+    if (!ap) {
+      const err = new Error(`artifact not found: ${rest[0]}`);
+      err.exitCode = EXIT.NOT_FOUND;
+      throw err;
+    }
+    for (const [k, v] of Object.entries(vars)) process.env[k] = process.env[k] || v;
+    await withRunner(async ({ inspectArtifact, runArtifact }) => {
+      const info = inspectArtifact(ap);
+      console.log(JSON.stringify({
+        artifact: path.basename(ap),
+        manifest_job: info.manifest?.job_id,
+        signature: info.signature || info.manifest?.signature || '(none)',
+        recipes: (info.recipes?.recipes || []).map(r => ({ id: r.id, name: r.name })),
+        k_score: info.manifest?.k_score?.composite ?? null,
+        size_bytes: info.size_bytes,
+        offline_env: Object.fromEntries(Object.keys(vars).map(k => [k, process.env[k] || null])),
+      }, null, 2));
+      console.log('');
+      console.log('verified offline — no network calls made.');
+    });
+    return;
+  }
+  console.error('unknown airgap subcommand:', sub);
+  process.exit(1);
+}
+
 // Detect when the user typed a bare natural-language string instead of a
 // verb (e.g. `kolm "what's my status"` or `kolm refund the customer in 87421`).
 // We route through /v1/assistant the same way `kolm ask` does so non-technical
@@ -2199,6 +3602,856 @@ function looksLikeNaturalLanguage(cmd, rest) {
   // sentence-style: starts with a question word + more args
   if (rest.length && /^(what|how|where|when|why|who|show|tell|give|make|build|let|please|i|my)$/i.test(cmd)) return true;
   return false;
+}
+
+// ---------- kolm completion ----------
+// Single source of truth for the verb + subcommand tables the shell completion
+// scripts consume. Keep this in sync with the dispatch switch below.
+const COMPLETION_VERBS = [
+  'init', 'signup', 'login', 'new', 'compile', 'run', 'eval', 'benchmark', 'bench',
+  'score', 'inspect', 'diff', 'verify', 'serve', 'publish', 'capture', 'labels', 'distill',
+  'config', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
+  'compute', 'doctor', 'logs', 'ask', 'version', 'help', 'completion', 'upgrade', 'update',
+  'models', 'gpu',
+];
+const COMPLETION_SUBS = {
+  compute: ['list', 'detect', 'pick', 'use', 'info', 'test', 'status'],
+  airgap:  ['status', 'enable', 'disable', 'verify'],
+  team:    ['create', 'list', 'show', 'invite', 'accept', 'members', 'role', 'remove', 'transfer', 'delete'],
+  tunnel:  ['new', 'list', 'start', 'close'],
+  cloud:   ['targets', 'deploy', 'list', 'show', 'destroy'],
+  tune:    ['init', 'capture-on', 'capture-off', 'step', 'eval', 'promote', 'rollback', 'watch', 'status'],
+  rag:     ['index', 'query', 'attach', 'list'],
+  capture: ['status'],
+  install: ['claude-code', 'cursor', 'continue', 'cline'],
+  completion: ['bash', 'zsh', 'fish'],
+  models:  ['list', 'info', 'recommend', 'pin', 'devices'],
+  gpu:     ['detect', 'doctor', 'setup', 'stress'],
+};
+
+function emitBashCompletion() {
+    const verbs = COMPLETION_VERBS.join(' ');
+    const subLines = Object.entries(COMPLETION_SUBS)
+        .map(([v, subs]) => `            ${v}) COMPREPLY=( $(compgen -W "${subs.join(' ')}" -- "$cur") ) ;;`)
+        .join('\n');
+    return `# kolm bash completion. install with: kolm completion bash >> ~/.bashrc
+_kolm_complete() {
+    local cur prev verbs
+    COMPREPLY=()
+    cur="\${COMP_WORDS[COMP_CWORD]}"
+    prev="\${COMP_WORDS[COMP_CWORD-1]}"
+    verbs="${verbs}"
+    if [ "$COMP_CWORD" -eq 1 ]; then
+        COMPREPLY=( $(compgen -W "$verbs" -- "$cur") )
+        return 0
+    fi
+    if [ "$COMP_CWORD" -eq 2 ]; then
+        case "$prev" in
+${subLines}
+            *) COMPREPLY=() ;;
+        esac
+        return 0
+    fi
+    return 0
+}
+complete -F _kolm_complete kolm
+`;
+}
+
+function emitZshCompletion() {
+    const verbLines = COMPLETION_VERBS.map(v => `        '${v}:run the kolm ${v} subcommand'`).join(' \\\n');
+    const subBlocks = Object.entries(COMPLETION_SUBS).map(([v, subs]) => {
+        const args = subs.map(s => `'${s}:${v} ${s}'`).join(' \\\n                    ');
+        return `            ${v})
+                _values '${v} subcommands' \\
+                    ${args}
+                ;;`;
+    }).join('\n');
+    return `#compdef kolm
+# kolm zsh completion. install with: kolm completion zsh > ~/.zsh/completions/_kolm
+# Then ensure ~/.zsh/completions is on your fpath and run \`compinit\`.
+
+_kolm() {
+    local -a verbs
+    verbs=( \\
+${verbLines} \\
+    )
+    if (( CURRENT == 2 )); then
+        _describe -t commands 'kolm command' verbs
+        return 0
+    fi
+    if (( CURRENT == 3 )); then
+        case "\${words[2]}" in
+${subBlocks}
+        esac
+    fi
+}
+
+_kolm "$@"
+`;
+}
+
+function emitFishCompletion() {
+    const lines = [];
+    lines.push('# kolm fish completion. install with: kolm completion fish > ~/.config/fish/completions/kolm.fish');
+    lines.push('');
+    lines.push("# top-level verbs (only when no subcommand has been typed yet)");
+    for (const v of COMPLETION_VERBS) {
+        lines.push(`complete -c kolm -n "__fish_use_subcommand" -a "${v}" -d "kolm ${v}"`);
+    }
+    lines.push('');
+    lines.push('# second-level subcommands');
+    for (const [v, subs] of Object.entries(COMPLETION_SUBS)) {
+        for (const s of subs) {
+            lines.push(`complete -c kolm -n "__fish_seen_subcommand_from ${v}" -a "${s}" -d "${v} ${s}"`);
+        }
+    }
+    lines.push('');
+    return lines.join('\n');
+}
+
+// ---------- kolm models ----------
+async function cmdModels(args) {
+    if (maybeHelp('models', args)) return;
+    const sub = args[0];
+    const rest = args.slice(1);
+    const M = await import('../src/models.js');
+    const D = await import('../src/devices.js');
+    const jsonOut = rest.includes('--json');
+
+    switch (sub) {
+        case undefined:
+        case 'list': {
+            const filter = {};
+            const flag = (n) => rest[rest.indexOf(n) + 1];
+            if (rest.includes('--family'))     filter.family     = flag('--family');
+            if (rest.includes('--tier'))       filter.tier       = flag('--tier');
+            if (rest.includes('--license'))    filter.license    = flag('--license');
+            if (rest.includes('--permissive')) filter.permissive = true;
+            if (rest.includes('--max-vram'))   filter.max_vram_gb = Number(flag('--max-vram'));
+            const list = M.list(filter);
+            if (jsonOut) { console.log(JSON.stringify(list, null, 2)); return; }
+            const w = (s, n) => String(s).padEnd(n);
+            console.log(w('MODEL', 38), w('LICENSE', 18), w('PARAMS', 8), w('VRAM-4BIT', 10), 'NOTES');
+            for (const m of list) {
+                console.log(w(m.id, 38), w(m.license, 18), w(`${m.params_b}B`, 8), w(`${m.vram_gb_4bit}GB`, 10), m.notes || '');
+            }
+            return;
+        }
+        case 'info': {
+            const id = rest[0];
+            if (!id) {
+                const err = new Error('usage: kolm models info <model-id>');
+                err.exitCode = EXIT.BAD_ARGS; throw err;
+            }
+            const m = M.info(id);
+            if (!m) {
+                const err = new Error(`unknown model: ${id}`);
+                err.exitCode = EXIT.NOT_FOUND; throw err;
+            }
+            if (jsonOut) { console.log(JSON.stringify(m, null, 2)); return; }
+            for (const [k, v] of Object.entries(m)) console.log(`  ${k.padEnd(20)} ${Array.isArray(v) ? v.join(', ') : v}`);
+            return;
+        }
+        case 'recommend': {
+            const reqs = {};
+            const flag = (n) => rest[rest.indexOf(n) + 1];
+            if (rest.includes('--use'))         reqs.use            = flag('--use');
+            if (rest.includes('--vram'))        reqs.vram_gb        = Number(flag('--vram'));
+            if (rest.includes('--permissive'))  reqs.permissive     = true;
+            if (rest.includes('--english-only')) reqs.english_only  = true;
+            if (rest.includes('--tool-use'))    reqs.tool_use       = flag('--tool-use');
+            if (rest.includes('--device')) {
+                const did = flag('--device');
+                const d = D.info(did);
+                if (!d) {
+                    const err = new Error(`unknown device: ${did}. try: kolm models devices`);
+                    err.exitCode = EXIT.BAD_ARGS; throw err;
+                }
+                reqs.target_device = d;
+            }
+            if (rest.includes('--train-device')) {
+                const did = flag('--train-device');
+                const d = D.info(did);
+                if (!d) {
+                    const err = new Error(`unknown device: ${did}. try: kolm models devices`);
+                    err.exitCode = EXIT.BAD_ARGS; throw err;
+                }
+                reqs.train_device = d;
+            }
+            const out = M.recommend(reqs);
+            if (jsonOut) { console.log(JSON.stringify(out, null, 2)); return; }
+            console.log('pick:', out.pick);
+            if (out.device_fit !== null) console.log('device_fit:', out.device_fit);
+            if (out.device_train !== null) console.log('device_train:', out.device_train);
+            console.log('top:');
+            for (const t of out.top) console.log(`  ${t.score.toFixed(3)}  ${t.id}`);
+            return;
+        }
+        case 'pin': {
+            const tenant = rest[0];
+            const modelId = rest[1];
+            if (!tenant || !modelId) {
+                const err = new Error('usage: kolm models pin <tenant> <model-id>');
+                err.exitCode = EXIT.BAD_ARGS; throw err;
+            }
+            await M.setPin(tenant, modelId);
+            if (jsonOut) { console.log(JSON.stringify({ tenant, pinned: modelId })); return; }
+            console.log(`pinned ${tenant} -> ${modelId}`);
+            return;
+        }
+        case 'devices': {
+            const list = D.list();
+            if (jsonOut) { console.log(JSON.stringify(list, null, 2)); return; }
+            const w = (s, n) => String(s).padEnd(n);
+            console.log(w('DEVICE', 18), w('CLASS', 12), w('ARCH', 16), w('VRAM-GB', 10), 'NOTES');
+            for (const d of list) console.log(w(d.id, 18), w(d.class, 12), w(d.arch, 16), w(d.vram_gb ?? '-', 10), d.notes || '');
+            return;
+        }
+        default: {
+            const err = new Error(`unknown subcommand: ${sub}. try: list info recommend pin devices`);
+            err.exitCode = EXIT.BAD_ARGS; throw err;
+        }
+    }
+}
+
+// ---------- kolm gpu ----------
+async function cmdGpu(args) {
+    if (maybeHelp('gpu', args)) return;
+    const sub = args[0] || 'detect';
+    const rest = args.slice(1);
+    const D = await import('../src/devices.js');
+    const jsonOut = rest.includes('--json');
+
+    switch (sub) {
+        case 'detect': {
+            const det = await D.detectLocal();
+            const dev = D.info(det.id);
+            if (jsonOut) { console.log(JSON.stringify({ ...det, profile: dev }, null, 2)); return; }
+            console.log(`detected: ${det.id} (source=${det.source}, confidence=${det.confidence})`);
+            if (det.raw) console.log(`  raw: ${JSON.stringify(det.raw)}`);
+            if (dev) {
+                console.log(`  arch: ${dev.arch}, sm: ${dev.sm}, vram_gb: ${dev.vram_gb}`);
+                if (dev.cuda_min) console.log(`  requires cuda >= ${dev.cuda_min}, torch >= ${dev.torch_min}, flash_attn=${dev.flash_attn}`);
+            }
+            return;
+        }
+        case 'doctor': {
+            // Run a battery of checks: python, torch, cuda, flash-attn, bnb, unsloth.
+            const checks = [];
+            const py = spawnSync('python', ['--version'], { encoding: 'utf8' });
+            checks.push({ name: 'python', ok: py.status === 0, detail: (py.stdout || py.stderr).trim() });
+
+            const torchScript = `import json; out={};
+try: import torch; out['torch']=torch.__version__; out['cuda_avail']=torch.cuda.is_available(); out['cuda_version']=torch.version.cuda
+except Exception as e: out['torch']=None; out['err']=str(e)
+print(json.dumps(out))`;
+            const t = spawnSync('python', ['-c', torchScript], { encoding: 'utf8' });
+            let torchInfo = {};
+            try { torchInfo = JSON.parse(t.stdout || '{}'); } catch {}
+            checks.push({ name: 'torch', ok: !!torchInfo.torch, detail: JSON.stringify(torchInfo) });
+
+            const probe = (mod) => {
+                const r = spawnSync('python', ['-c', `import ${mod}; print(getattr(${mod}, '__version__', 'unknown'))`], { encoding: 'utf8' });
+                if (r.status === 0) return { name: mod, ok: true, detail: (r.stdout || '').trim() };
+                // On miss, just say "not installed" -- spare the user a traceback.
+                return { name: mod, ok: false, detail: 'not installed' };
+            };
+            for (const mod of ['transformers', 'peft', 'trl', 'bitsandbytes', 'unsloth', 'flash_attn', 'liger_kernel']) {
+                checks.push(probe(mod));
+            }
+
+            const det = await D.detectLocal();
+            const dev = D.info(det.id);
+            const minTorch = dev?.torch_min;
+            const torchOk = torchInfo.torch && minTorch ? compareVersions(torchInfo.torch.split('+')[0], minTorch) >= 0 : null;
+            const blockers = [];
+            if (dev?.class === 'training' && !torchInfo.cuda_avail) blockers.push('torch is not built with CUDA -- training will fail on this device');
+            if (dev?.class === 'training' && minTorch && torchOk === false) blockers.push(`torch ${torchInfo.torch} < required ${minTorch} for ${dev.id}`);
+            if (dev?.class === 'training' && !checks.find(c => c.name === 'flash_attn').ok) blockers.push('flash_attn not installed -- training will be 2-3x slower');
+            if (dev?.class === 'training' && !checks.find(c => c.name === 'unsloth').ok) blockers.push('unsloth not installed -- main training path unavailable');
+
+            if (jsonOut) { console.log(JSON.stringify({ device: det, checks, blockers, ok: blockers.length === 0 }, null, 2)); return; }
+            console.log(`device: ${det.id}`);
+            console.log('checks:');
+            for (const c of checks) console.log(`  ${c.ok ? 'OK  ' : 'MISS'}  ${c.name.padEnd(16)} ${c.detail || ''}`);
+            if (blockers.length) {
+                console.log('\nblockers:');
+                for (const b of blockers) console.log(`  -- ${b}`);
+                const err = new Error(`${blockers.length} blocker(s). run 'kolm gpu setup' to install.`);
+                err.exitCode = EXIT.RUNTIME; throw err;
+            } else {
+                console.log('\nall checks passed.');
+            }
+            return;
+        }
+        case 'setup': {
+            // Build the right pip install line for the detected device.
+            const det = await D.detectLocal();
+            const dev = D.info(det.id);
+            const dryRun = rest.includes('--dry-run');
+            if (!dev || dev.class !== 'training') {
+                const err = new Error(`device ${det.id} is not a training rig; nothing to set up`);
+                err.exitCode = EXIT.BAD_ARGS; throw err;
+            }
+            const cudaTag = (dev.cuda_min || '12.4').replace('.', '');
+            const torchSpec = `torch>=${dev.torch_min || '2.4'}`;
+            // sm_120 (Blackwell) requires cu128 wheels and a recent torch.
+            const torchIndex = dev.arch === 'blackwell'
+                ? 'https://download.pytorch.org/whl/cu128'
+                : `https://download.pytorch.org/whl/cu${cudaTag}`;
+            const lines = [
+                `# Detected: ${det.id} (${dev.arch}, sm ${dev.sm}, ${dev.vram_gb}GB)`,
+                `python -m pip install --upgrade pip`,
+                `python -m pip install --index-url ${torchIndex} ${torchSpec} torchvision torchaudio`,
+                `python -m pip install transformers peft trl datasets accelerate`,
+                `python -m pip install bitsandbytes`,
+                `python -m pip install unsloth`,
+                `python -m pip install liger-kernel`,
+            ];
+            if (dev.flash_attn === 'fa3') {
+                lines.push(`# Flash-Attention 3 (Blackwell/Hopper). Build from source if wheel unavailable.`);
+                lines.push(`python -m pip install flash-attn --no-build-isolation`);
+            } else if (dev.flash_attn === 'fa2') {
+                lines.push(`python -m pip install flash-attn --no-build-isolation`);
+            }
+            if (jsonOut) { console.log(JSON.stringify({ device: det.id, commands: lines, dry_run: dryRun }, null, 2)); return; }
+            console.log(lines.join('\n'));
+            if (!dryRun && !rest.includes('--yes')) {
+                console.log('\nthis will install the CUDA training stack. re-run with --yes to execute.');
+                return;
+            }
+            if (!dryRun && rest.includes('--yes')) {
+                for (const line of lines) {
+                    if (line.startsWith('#')) continue;
+                    console.log(`\n$ ${line}`);
+                    const r = spawnSync(process.platform === 'win32' ? 'cmd.exe' : 'sh',
+                        process.platform === 'win32' ? ['/c', line] : ['-c', line],
+                        { stdio: 'inherit' });
+                    if (r.status !== 0) {
+                        const err = new Error(`install step failed: ${line}`);
+                        err.exitCode = EXIT.RUNTIME; throw err;
+                    }
+                }
+                console.log('\nrun "kolm gpu doctor" to verify.');
+            }
+            return;
+        }
+        case 'stress': {
+            // 30s forward/backward loop on a small model to verify the stack works.
+            const det = await D.detectLocal();
+            const py = `
+import time, torch
+if not torch.cuda.is_available():
+    raise SystemExit('torch.cuda not available')
+print('device:', torch.cuda.get_device_name(0))
+print('vram:', round(torch.cuda.get_device_properties(0).total_memory/1024**3, 1), 'GB')
+x = torch.randn(2048, 2048, device='cuda', dtype=torch.bfloat16)
+w = torch.randn(2048, 2048, device='cuda', dtype=torch.bfloat16, requires_grad=True)
+t0 = time.time()
+steps = 0
+while time.time() - t0 < 5:
+    y = (x @ w).relu()
+    y.sum().backward()
+    w.grad = None
+    steps += 1
+elapsed = time.time() - t0
+tflops = (2*2048**3 * steps * 2) / elapsed / 1e12
+print(f'steps: {steps}, elapsed: {elapsed:.1f}s, tflops: {tflops:.1f}')
+print('OK')
+`;
+            const r = spawnSync('python', ['-c', py], { encoding: 'utf8' });
+            if (jsonOut) { console.log(JSON.stringify({ device: det.id, ok: r.status === 0, stdout: r.stdout, stderr: r.stderr }, null, 2)); return; }
+            if (r.stdout) process.stdout.write(r.stdout);
+            if (r.stderr) process.stderr.write(r.stderr);
+            if (r.status !== 0) {
+                const err = new Error('stress test failed');
+                err.exitCode = EXIT.RUNTIME; throw err;
+            }
+            return;
+        }
+        default: {
+            const err = new Error(`unknown subcommand: ${sub}. try: detect doctor setup stress`);
+            err.exitCode = EXIT.BAD_ARGS; throw err;
+        }
+    }
+}
+
+async function cmdCompletion(args) {
+    if (maybeHelp('completion', args)) return;
+    const shell = args[0];
+    if (!shell) {
+        console.error('usage: kolm completion <bash|zsh|fish>');
+        throw Object.assign(new Error('missing shell argument'), { exitCode: EXIT.BAD_ARGS });
+    }
+    switch (shell) {
+        case 'bash': process.stdout.write(emitBashCompletion()); return;
+        case 'zsh':  process.stdout.write(emitZshCompletion());  return;
+        case 'fish': process.stdout.write(emitFishCompletion()); return;
+        default:
+            console.error(`error: unknown shell '${shell}'. supported: bash, zsh, fish.`);
+            throw Object.assign(new Error(`unknown shell: ${shell}`), { exitCode: EXIT.BAD_ARGS });
+    }
+}
+
+// ---------- kolm upgrade ----------
+// Informational verb only — never auto-upgrades. Reads the current version from
+// the package.json that ships next to this CLI, then asks npm for the latest
+// published kolm version (5s timeout). If the network is down or npm is
+// unreachable, status is `unknown` and we fall back to the current version.
+function readPackageVersion() {
+    try {
+        const pkgPath = new URL('../package.json', import.meta.url);
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        return pkg.version || VERSION;
+    } catch {
+        return VERSION;
+    }
+}
+
+function fetchLatestNpmVersion(timeoutMs) {
+    return new Promise((resolve) => {
+        const cmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+        // spawnSync supports a timeout natively. Pass --silent so we get just the
+        // version string on stdout when the package exists.
+        const r = spawnSync(cmd, ['view', 'kolm', 'version', '--silent'], {
+            encoding: 'utf8',
+            timeout: timeoutMs,
+            windowsHide: true,
+        });
+        if (r.error || r.status !== 0) return resolve(null);
+        const v = (r.stdout || '').trim();
+        if (!v) return resolve(null);
+        // Strip any stray output like warnings; take the first non-empty line.
+        const first = v.split(/\r?\n/).find(l => l.trim().length > 0) || '';
+        resolve(first.trim() || null);
+    });
+}
+
+// Compare two semver-ish strings. Returns -1/0/1. Falls back to lexical compare
+// when both strings fail the simple x.y.z parse so we never throw on weird tags.
+function compareVersions(a, b) {
+    const parse = (s) => {
+        const m = /^(\d+)\.(\d+)\.(\d+)/.exec(String(s || ''));
+        return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+    };
+    const pa = parse(a), pb = parse(b);
+    if (!pa || !pb) return a < b ? -1 : a > b ? 1 : 0;
+    for (let i = 0; i < 3; i++) {
+        if (pa[i] !== pb[i]) return pa[i] < pb[i] ? -1 : 1;
+    }
+    return 0;
+}
+
+async function cmdUpgrade(args) {
+    if (maybeHelp('upgrade', args)) return;
+    const jsonOut = args.includes('--json');
+    const current = readPackageVersion();
+    const latest = await fetchLatestNpmVersion(5000);
+    let status;
+    if (!latest) status = 'unknown';
+    else if (compareVersions(latest, current) > 0) status = 'outdated';
+    else status = 'current';
+    if (jsonOut) {
+        console.log(JSON.stringify({ current, latest: latest || null, status }, null, 2));
+        return;
+    }
+    console.log(`current: ${current}`);
+    console.log(`latest:  ${latest || '(unknown. npm unreachable)'}`);
+    console.log('');
+    if (status === 'outdated') {
+        console.log(`a newer kolm release is available: ${latest}.`);
+        console.log('upgrade with:');
+        console.log('  npm install -g kolm@latest');
+        console.log('');
+        console.log('breaking changes for this release (if any) are listed at https://kolm.ai/changelog.');
+        return;
+    }
+    if (status === 'current') {
+        console.log('kolm is up to date.');
+        return;
+    }
+    console.log('could not reach npm to check for updates.');
+    console.log('to upgrade manually:');
+    console.log('  npm i -g github:sneaky-hippo/kolmogorov-stack');
+}
+
+// ---------- update ----------
+// `kolm update` self-installs the latest commit from the canonical github
+// source. This is the verb that actually does it (kolm upgrade only checks).
+// Honest path: spawn `npm i -g github:sneaky-hippo/kolmogorov-stack` and
+// stream npm's stdout/stderr through to the user. Exit code is whatever npm
+// returned. On Windows we shell through `cmd /c` so npm.cmd resolves.
+async function cmdUpdate(args) {
+    if (maybeHelp('update', args)) return;
+    const jsonOut = args.includes('--json');
+    const dryRun = args.includes('--dry-run');
+    const source = 'github:sneaky-hippo/kolmogorov-stack';
+    const before = readPackageVersion();
+
+    if (dryRun) {
+        if (jsonOut) {
+            console.log(JSON.stringify({ source, current: before, dry_run: true }, null, 2));
+        } else {
+            console.log(`would run: npm i -g ${source}`);
+            console.log(`current:   ${before}`);
+        }
+        return;
+    }
+
+    if (!jsonOut) {
+        console.log(`updating kolm from ${source} ...`);
+        console.log(`current:   ${before}`);
+        console.log('');
+    }
+
+    const { spawnSync } = await import('node:child_process');
+    const isWin = process.platform === 'win32';
+    const cmd = isWin ? 'cmd' : 'npm';
+    const argv = isWin
+        ? ['/c', 'npm', 'i', '-g', source]
+        : ['i', '-g', source];
+    const r = spawnSync(cmd, argv, { stdio: jsonOut ? 'pipe' : 'inherit', encoding: 'utf-8' });
+
+    if (r.error) {
+        const e = new Error(`could not invoke npm: ${r.error.message}`);
+        e.exitCode = EXIT.NOT_FOUND;
+        throw e;
+    }
+    if (r.status !== 0) {
+        if (jsonOut) {
+            console.log(JSON.stringify({ source, current: before, status: 'failed', exit_code: r.status, stderr: (r.stderr || '').slice(-2000) }, null, 2));
+        } else {
+            console.error('');
+            console.error(`npm exited with code ${r.status}. update did not complete.`);
+            console.error('common fixes:');
+            console.error('  - ensure node 20+ and npm 10+ are on PATH');
+            console.error('  - on macos/linux: try `sudo npm i -g github:sneaky-hippo/kolmogorov-stack`');
+            console.error('  - on windows: run an admin PowerShell, then re-run `kolm update`');
+        }
+        const e = new Error(`npm install failed (exit ${r.status})`);
+        e.exitCode = EXIT.UNKNOWN;
+        throw e;
+    }
+
+    const after = readPackageVersion();
+    if (jsonOut) {
+        console.log(JSON.stringify({ source, before, after, status: before === after ? 'reinstalled' : 'updated' }, null, 2));
+        return;
+    }
+    console.log('');
+    if (before === after) {
+        console.log(`kolm reinstalled at ${after} (already current).`);
+    } else {
+        console.log(`kolm updated: ${before} -> ${after}.`);
+    }
+    console.log('next: kolm version');
+}
+
+// ---------- export ----------
+// `kolm export <artifact.kolm> --backend <gguf|mlx|executorch|tensorrt|coreml|onnx>
+//                              [--out <dir>] [--quant <q4_k_m|q5_k_m|q8_0|f16>]
+//                              [--base-model <hf-id>]`
+//
+// Honest path: spawn `python -m apps.export` with the user's Python (3.10+ on
+// PATH). If python isn't there, or the backend's toolchain isn't installed,
+// we surface the install hint from the backend module instead of pretending.
+async function cmdExport(args) {
+  if (maybeHelp('export', args)) return;
+  const artifact = args.find(a => !a.startsWith('--'));
+  if (!artifact) {
+    const e = new Error('usage: kolm export <artifact.kolm> --backend <name>');
+    e.exitCode = EXIT.BAD_ARGS;
+    throw e;
+  }
+  const get = (flag) => {
+    const i = args.indexOf(flag);
+    return i >= 0 ? args[i + 1] : null;
+  };
+  const backend = get('--backend');
+  if (!backend) {
+    const e = new Error('--backend required. one of: gguf | mlx | executorch | tensorrt | coreml | onnx');
+    e.exitCode = EXIT.BAD_ARGS;
+    throw e;
+  }
+  const out = get('--out') || path.join(process.cwd(), 'exports');
+  const opts = {};
+  if (get('--quant')) opts.quant = get('--quant');
+  if (get('--base-model')) opts.base_model = get('--base-model');
+  if (get('--opset')) opts.opset = Number(get('--opset'));
+  if (args.includes('--quantize') || args.includes('--q4')) opts.quantize = true;
+
+  const ap = resolveArtifact(artifact);
+  if (!ap) {
+    const e = new Error(`artifact not found: ${artifact}`);
+    e.exitCode = EXIT.NOT_FOUND;
+    throw e;
+  }
+
+  const py = process.env.KOLM_PY || (process.platform === 'win32' ? 'python' : 'python3');
+  const { spawnSync } = await import('node:child_process');
+  const argsJson = JSON.stringify({ artifact: ap, backend, out, opts });
+  const script = [
+    'import json, sys, traceback',
+    'from pathlib import Path',
+    'from apps.export import get_exporter, ExportError, ExportNotApplicable',
+    'import zipfile, tempfile, os',
+    'cfg = json.loads(sys.stdin.read())',
+    'art = cfg["artifact"]',
+    'work = tempfile.mkdtemp(prefix="kolm-export-")',
+    'with zipfile.ZipFile(art) as z: z.extractall(work)',
+    'try:',
+    '    runner = get_exporter(cfg["backend"])',
+    '    result = runner(work, cfg["out"], **(cfg.get("opts") or {}))',
+    '    print(json.dumps({"ok": True, "result": result}))',
+    'except ExportNotApplicable as e:',
+    '    print(json.dumps({"ok": False, "kind": "not-applicable", "error": str(e)}))',
+    '    sys.exit(2)',
+    'except ExportError as e:',
+    '    print(json.dumps({"ok": False, "kind": "export-error", "error": str(e)}))',
+    '    sys.exit(1)',
+    'except Exception as e:',
+    '    print(json.dumps({"ok": False, "kind": "unexpected", "error": str(e), "trace": traceback.format_exc()}))',
+    '    sys.exit(1)',
+  ].join('\n');
+
+  const res = spawnSync(py, ['-c', script], { input: argsJson, encoding: 'utf8' });
+  if (res.error) {
+    const e = new Error(`failed to spawn python (${py}): ${res.error.message}\nset KOLM_PY to your python interpreter`);
+    e.exitCode = EXIT.EXECUTION;
+    throw e;
+  }
+  process.stderr.write(res.stderr || '');
+  process.stdout.write((res.stdout || '') + (res.stdout && !res.stdout.endsWith('\n') ? '\n' : ''));
+  if (res.status !== 0) {
+    const e = new Error(`export failed (exit ${res.status})`);
+    e.exitCode = EXIT.EXECUTION;
+    throw e;
+  }
+}
+
+// ---------- improve ----------
+// `kolm improve <artifact|job-id> [--epsilon 0.01] [--dry-run]`
+//
+// Walks recent receipts + audit log for the artifact, finds high-uncertainty
+// rows (teacher-fallback, low confidence), batches them, recompiles, and
+// only swaps the artifact if new_K > old_K + epsilon.
+async function cmdImprove(args) {
+  if (maybeHelp('improve', args)) return;
+  const id = args.find(a => !a.startsWith('--'));
+  if (!id) {
+    const e = new Error('usage: kolm improve <artifact-id> [--epsilon 0.01] [--dry-run]');
+    e.exitCode = EXIT.BAD_ARGS;
+    throw e;
+  }
+  const get = (flag) => {
+    const i = args.indexOf(flag);
+    return i >= 0 ? args[i + 1] : null;
+  };
+  const epsilon = Number(get('--epsilon')) || 0.01;
+  const dryRun = args.includes('--dry-run');
+
+  const base = process.env.KOLM_BASE_URL || 'https://kolm.ai';
+  const token = process.env.KOLM_API_KEY || (function () {
+    try { return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')).api_key || null; } catch { return null; }
+  })();
+  if (!token) {
+    const e = new Error('kolm improve needs an API key. run `kolm login` first.');
+    e.exitCode = EXIT.AUTH;
+    throw e;
+  }
+
+  // 1) Fetch the artifact's current K-score.
+  const jobRes = await fetch(`${base}/v1/compile/${encodeURIComponent(id)}`, {
+    headers: { 'authorization': `Bearer ${token}` },
+  });
+  if (!jobRes.ok) {
+    const e = new Error(`fetch artifact ${id}: ${jobRes.status}`);
+    e.exitCode = EXIT.NOT_FOUND;
+    throw e;
+  }
+  const job = await jobRes.json();
+  const oldK = Number(job.k_score) || 0;
+  console.log(`current K: ${oldK.toFixed(3)} on ${job.task ? String(job.task).slice(0, 60) : id}`);
+
+  // 2) Pull recent audit rows for failed verifications + fallbacks.
+  const auditRes = await fetch(`${base}/v1/audit/log?limit=500`, {
+    headers: { 'authorization': `Bearer ${token}` },
+  });
+  const audit = auditRes.ok ? await auditRes.json() : { events: [] };
+  const events = Array.isArray(audit.events || audit.items) ? (audit.events || audit.items) : [];
+  const candidates = events.filter(e => {
+    if (!e || !e.payload) return false;
+    if (e.payload.job_id && e.payload.job_id !== id) return false;
+    // Heuristic: pull anything tagged fallback OR low confidence.
+    return e.op && (
+      e.op.includes('fallback') || e.op.includes('fail') ||
+      (typeof e.payload.confidence === 'number' && e.payload.confidence < 0.7)
+    );
+  });
+  console.log(`found ${candidates.length} high-uncertainty event(s) since last compile`);
+
+  if (!candidates.length) {
+    console.log('nothing to improve. K-score gate already holding.');
+    return;
+  }
+  if (dryRun) {
+    console.log('--dry-run: not recompiling. Examples that would be added:');
+    candidates.slice(0, 10).forEach((e, i) => {
+      console.log(`  ${i + 1}. ${JSON.stringify(e.payload).slice(0, 120)}`);
+    });
+    return;
+  }
+
+  // 3) Recompile with the new examples appended.
+  const newExamples = candidates.map(e => ({
+    input: e.payload.input || '',
+    output: e.payload.expected || e.payload.output || '',
+  })).filter(x => x.input);
+  if (!newExamples.length) {
+    console.log('candidates had no usable input/output pairs. skipping.');
+    return;
+  }
+  const compileBody = {
+    task: job.task,
+    base_model: job.base_model,
+    preset: job.preset || 'lora-fast',
+    lora_rank: job.lora_rank || 16,
+    k_threshold: Math.max(oldK + epsilon, job.k_threshold || 0.85),
+    examples: newExamples,
+  };
+  const newRes = await fetch(`${base}/v1/compile?sync=1`, {
+    method: 'POST',
+    headers: { 'authorization': `Bearer ${token}`, 'content-type': 'application/json' },
+    body: JSON.stringify(compileBody),
+  });
+  const newJob = await newRes.json();
+  if (!newRes.ok || newJob.error) {
+    console.log(`recompile rejected: ${newJob.error || newRes.status}`);
+    console.log(`old artifact ${id} unchanged. K stayed at ${oldK.toFixed(3)}.`);
+    return;
+  }
+  const newK = Number(newJob.k_score) || 0;
+  console.log(`new K: ${newK.toFixed(3)} (threshold ${(oldK + epsilon).toFixed(3)})`);
+  if (newK <= oldK + epsilon) {
+    console.log(`improvement below epsilon. old artifact ${id} kept.`);
+  } else {
+    console.log(`new artifact ${newJob.job_id} replaces ${id} for K-score regression guard.`);
+  }
+}
+
+// ---------- instant ----------
+async function cmdInstant(args) {
+  if (maybeHelp('instant', args)) return;
+  // Usage: kolm instant "task description" [--n 64] [--teacher qwen-2.5-7b]
+  //        [--base-model Qwen/Qwen2.5-3B-Instruct] [--out task.kolm.json]
+  //        [--schema schema.json] [--k 0.85] [--compile]
+  const task = args.find(a => !a.startsWith('--'));
+  if (!task) {
+    const e = new Error('usage: kolm instant "describe the task" [--n 64] [--teacher MODEL] [--base-model HF_ID] [--schema schema.json] [--out FILE] [--k 0.85] [--compile]');
+    e.exitCode = EXIT.BAD_ARGS;
+    throw e;
+  }
+  const get = (flag) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : null; };
+  const n = Number(get('--n')) || 64;
+  const teacher = get('--teacher') || 'qwen-2.5-7b-instruct';
+  const baseModel = get('--base-model') || 'Qwen/Qwen2.5-3B-Instruct';
+  const schemaPath = get('--schema');
+  const out = get('--out') || 'instant-recipe.json';
+  const kThreshold = Number(get('--k')) || 0.85;
+  const compileAfter = args.includes('--compile');
+
+  let schemaHint = null;
+  if (schemaPath) {
+    try { schemaHint = JSON.parse(fs.readFileSync(schemaPath, 'utf8')); }
+    catch (err) {
+      const e = new Error(`could not parse schema ${schemaPath}: ${err.message}`);
+      e.exitCode = EXIT.BAD_ARGS;
+      throw e;
+    }
+  }
+
+  const cfgPayload = {
+    task, n, teacher, base_model: baseModel,
+    schema_hint: schemaHint, k_threshold: kThreshold,
+  };
+
+  const python = process.env.KOLM_PYTHON
+    || (process.platform === 'win32' ? 'python' : 'python3');
+  const script = `
+import json, sys
+cfg = json.loads(sys.stdin.read())
+from apps.trainer.instant import synthesize_recipe, InstantConfig
+recipe = synthesize_recipe(
+    task=cfg['task'],
+    n=cfg['n'],
+    teacher=cfg['teacher'],
+    schema_hint=cfg.get('schema_hint'),
+    config=InstantConfig(base_model=cfg['base_model'], k_threshold=cfg['k_threshold']),
+)
+print(json.dumps(recipe, ensure_ascii=False))
+`;
+  console.log(`synthesizing ${n} pairs via teacher=${teacher}...`);
+  const { spawnSync } = require('child_process');
+  const proc = spawnSync(python, ['-c', script], {
+    input: JSON.stringify(cfgPayload),
+    encoding: 'utf8',
+    cwd: process.cwd(),
+    env: { ...process.env, PYTHONPATH: process.cwd() },
+  });
+  if (proc.status !== 0) {
+    const e = new Error(`instant synth failed:\n${proc.stderr || proc.stdout || ''}`);
+    e.exitCode = EXIT.GENERIC;
+    throw e;
+  }
+  let recipe;
+  try { recipe = JSON.parse(proc.stdout.trim().split('\n').pop()); }
+  catch (err) {
+    const e = new Error(`could not parse recipe JSON: ${err.message}\n${proc.stdout}`);
+    e.exitCode = EXIT.GENERIC;
+    throw e;
+  }
+
+  fs.writeFileSync(out, JSON.stringify(recipe, null, 2), 'utf8');
+  const s = recipe.stats || {};
+  console.log(`status: ${recipe.status} kept=${s.kept}/${s.requested} reject_rate=${s.reject_rate} rounds=${s.rounds} elapsed=${s.elapsed_s}s`);
+  console.log(`wrote ${out}`);
+
+  if (recipe.status !== 'ready') {
+    console.log(`recipe not ready (${recipe.status}). configure a teacher with KOLM_TEACHER_BASE / KOLM_TEACHER_KEY and re-run.`);
+    return;
+  }
+  if (!compileAfter) {
+    console.log(`next: kolm compile --recipe ${out}`);
+    return;
+  }
+
+  const base = process.env.KOLM_BASE_URL || 'https://kolm.ai';
+  const token = process.env.KOLM_API_KEY || (function () {
+    try { return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')).api_key || null; } catch { return null; }
+  })();
+  if (!token) {
+    console.log('--compile needs a logged-in API key. run `kolm login` first.');
+    return;
+  }
+  const res = await fetch(`${base}/v1/compile?sync=1`, {
+    method: 'POST',
+    headers: { 'authorization': `Bearer ${token}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      task: recipe.task,
+      base_model: recipe.base_model,
+      preset: recipe.preset,
+      k_threshold: recipe.k_threshold,
+      examples: recipe.examples.map(p => ({ input: p.prompt, output: p.completion })),
+      verifier: recipe.verifier,
+    }),
+  });
+  const job = await res.json();
+  if (!res.ok || job.error) {
+    console.log(`compile rejected: ${job.error || res.status}`);
+    return;
+  }
+  console.log(`compiled. job=${job.job_id} K=${Number(job.k_score || 0).toFixed(3)}`);
 }
 
 // ---------- dispatch ----------
@@ -2222,49 +4475,71 @@ async function main() {
   const [, , cmd, ...rest] = process.argv;
   try {
     switch (cmd) {
-      case 'init':     await cmdInit(rest); break;
-      case 'login':    await cmdLogin(rest); break;
-      case 'new':      await cmdNew(rest); break;
-      case 'compile':  await cmdCompile(rest); break;
-      case 'run':      await cmdRun(rest); break;
-      case 'eval':     await cmdEval(rest); break;
+      case 'init':     await withErrorContext('init',     () => cmdInit(rest)); break;
+      case 'signup':   await withErrorContext('signup',   () => cmdSignup(rest)); break;
+      case 'login':    await withErrorContext('login',    () => cmdLogin(rest)); break;
+      case 'new':      await withErrorContext('new',      () => cmdNew(rest)); break;
+      case 'compile':  await withErrorContext('compile',  () => cmdCompile(rest)); break;
+      case 'run':      await withErrorContext('run',      () => cmdRun(rest)); break;
+      case 'eval':     await withErrorContext('eval',     () => cmdEval(rest)); break;
       case 'benchmark':
-      case 'bench':    await cmdBenchmark(rest); break;
-      case 'score':    await cmdScore(rest); break;
-      case 'inspect':  await cmdInspect(rest); break;
-      case 'serve':    await cmdServe(rest); break;
-      case 'publish':  cmdPublish(rest); break;
-      case 'capture':  await cmdCapture(rest); break;
-      case 'labels':   await cmdLabels(rest); break;
-      case 'distill':  await cmdDistill(rest); break;
-      case 'config':   cmdConfig(rest); break;
-      case 'install':  await cmdInstall(rest); break;
-      case 'tune':     await cmdTune(rest); break;
-      case 'rag':      await cmdRag(rest); break;
-      case 'doctor':   await cmdDoctor(rest); break;
-      case 'logs':     await cmdLogs(rest); break;
-      case 'ask':      await cmdAsk(rest); break;
+      case 'bench':    await withErrorContext('bench',    () => cmdBenchmark(rest)); break;
+      case 'score':    await withErrorContext('score',    () => cmdScore(rest)); break;
+      case 'inspect':  await withErrorContext('inspect',  () => cmdInspect(rest)); break;
+      case 'diff':     await withErrorContext('diff',     () => cmdDiff(rest)); break;
+      case 'verify':   await withErrorContext('verify',   () => cmdVerify(rest)); break;
+      case 'serve':    await withErrorContext('serve',    () => cmdServe(rest)); break;
+      case 'publish':  await withErrorContext('publish',  () => cmdPublish(rest)); break;
+      case 'capture':  await withErrorContext('capture',  () => cmdCapture(rest)); break;
+      case 'labels':   await withErrorContext('labels',   () => cmdLabels(rest)); break;
+      case 'distill':  await withErrorContext('distill',  () => cmdDistill(rest)); break;
+      case 'config':   await withErrorContext('config',   () => cmdConfig(rest)); break;
+      case 'install':  await withErrorContext('install',  () => cmdInstall(rest)); break;
+      case 'tune':     await withErrorContext('tune',     () => cmdTune(rest)); break;
+      case 'rag':      await withErrorContext('rag',      () => cmdRag(rest)); break;
+      case 'team':     await withErrorContext('team',     () => cmdTeam(rest)); break;
+      case 'tunnel':   await withErrorContext('tunnel',   () => cmdTunnel(rest)); break;
+      case 'cloud':    await withErrorContext('cloud',    () => cmdCloud(rest)); break;
+      case 'airgap':   await withErrorContext('airgap',   () => cmdAirgap(rest)); break;
+      case 'compute':  await withErrorContext('compute',  () => cmdCompute(rest)); break;
+      case 'doctor':   await withErrorContext('doctor',   () => cmdDoctor(rest)); break;
+      case 'logs':     await withErrorContext('logs',     () => cmdLogs(rest)); break;
+      case 'ask':      await withErrorContext('ask',      () => cmdAsk(rest)); break;
+      case 'completion': await withErrorContext('completion', () => cmdCompletion(rest)); break;
+      case 'upgrade':  await withErrorContext('upgrade',  () => cmdUpgrade(rest)); break;
+      case 'update':
+      case 'self-update': await withErrorContext('update', () => cmdUpdate(rest)); break;
+      case 'models':   await withErrorContext('models',   () => cmdModels(rest)); break;
+      case 'gpu':      await withErrorContext('gpu',      () => cmdGpu(rest)); break;
+      case 'export':   await withErrorContext('export',   () => cmdExport(rest)); break;
+      case 'improve':  await withErrorContext('improve',  () => cmdImprove(rest)); break;
+      case 'instant':  await withErrorContext('instant',  () => cmdInstant(rest)); break;
       case 'version':
       case '--version':
-      case '-v':       await cmdVersion(rest); break;
+      case '-v':       await withErrorContext('version',  () => cmdVersion(rest)); break;
       case 'help':
       case '--help':
       case '-h':
       case undefined:  usage(rest && rest[0]); break;
       default:
         if (looksLikeNaturalLanguage(cmd, rest)) {
-          await cmdAsk([cmd, ...rest]);
+          await withErrorContext('ask', () => cmdAsk([cmd, ...rest]));
         } else {
+          const guess = suggestVerb(cmd, COMPLETION_VERBS);
           console.error('unknown command:', cmd);
+          if (guess) console.error('did you mean: kolm ' + guess + ' ?');
           console.error('try: kolm ask "' + [cmd, ...rest].join(' ') + '"   (natural-language fallback)');
           usage();
-          process.exit(1);
+          process.exit(EXIT.BAD_ARGS);
         }
     }
   } catch (e) {
     console.error('error:', e.message);
     if (process.env.KOLM_DEBUG) console.error(e.stack);
-    process.exit(1);
+    // Honor exitCode set by withErrorContext / inner throws so EXIT.* semantics
+    // from wave 1 are preserved. Default to EXIT.EXECUTION as before.
+    const code = Number.isInteger(e && e.exitCode) ? e.exitCode : EXIT.EXECUTION;
+    process.exit(code);
   }
 }
 

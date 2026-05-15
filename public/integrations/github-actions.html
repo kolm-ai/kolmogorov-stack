@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>GitHub Actions reference &middot; kolm</title>
+<meta name="description" content="Reference workflows for kolm in CI. Compile, sign, verify, post receipts to PRs, gate merges on K-score floors.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/integrations/github-actions">
+<style>
+  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+  header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+  header.site nav a{color:inherit;text-decoration:none}
+  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+  .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
+  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
+  .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0}
+  .meta{display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing:0.04em;flex-wrap:wrap}
+  .meta span b{color:var(--accent);font-weight:500}
+  section.step{padding:36px 0;border-bottom:1px solid var(--line)}
+  section.step h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em;color:var(--ink)}
+  section.step .stepno{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+  section.step p{color:var(--ink-mute);margin:0 0 16px}
+  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
+  pre .c{color:var(--ink-faint)}
+  pre .g{color:var(--accent)}
+  pre .k{color:#ec7373}
+  .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(16,185,129,0.32);border-radius:8px;background:rgba(16,185,129,0.05);font-size:13.5px;color:var(--ink-mute);margin:0 0 8px}
+  .checkpoint b{color:var(--accent);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
+  .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn:hover{transform:translateY(-1px)}
+  footer{padding:32px 0;color:var(--ink-faint);font-size:13px}
+  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/quickstart">quickstart</a><a href="/docs">docs</a><a href="/integrations">integrations</a></nav></div></header>
+<main>
+<section class="hero">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/integrations">integrations</a> &nbsp;/&nbsp; GitHub Actions</p>
+    <h1>kolm in CI.</h1>
+    <p class="lede">Three reference workflows: compile-on-PR, verify-on-merge, and release-with-binder. Each one wires kolm into your existing GitHub repo, blocks merges on quality regression, posts receipts as PR comments, and ships signed artifacts to releases.</p>
+    <div class="meta"><span>Runner <b>ubuntu-22.04</b></span><span>Verifier <b>offline</b></span><span>Min minutes <b>2</b></span></div>
+  </div>
+</section>
+
+<section class="step">
+  <div class="wrap">
+    <p class="stepno">Workflow 1 . verify on PR</p>
+    <h2>Block merges on K-score regression.</h2>
+    <p>Drop this in `.github/workflows/kolm-verify.yml`. When someone opens a PR that touches a recipe, the workflow compiles, signs, verifies, and comments the receipt on the PR. The merge button is blocked if any artifact misses its K-score floor.</p>
+    <pre><span class="k">name</span>: kolm verify
+<span class="k">on</span>:
+  pull_request:
+    paths: [<span class="g">'recipes/**'</span>]
+
+<span class="k">jobs</span>:
+  verify:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: <span class="g">'20'</span> }
+      - run: npm install -g kolm
+      - <span class="k">name</span>: compile + verify
+        env:
+          KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
+        run: |
+          for r in recipes/*.recipe.json; do
+            kolm compile --from "$r" --out "artifacts/$(basename $r .recipe.json).kolm"
+            kolm verify "artifacts/$(basename $r .recipe.json).kolm"
+          done
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require(<span class="g">'fs'</span>);
+            const receipts = fs.readdirSync(<span class="g">'artifacts'</span>).filter(f => f.endsWith(<span class="g">'.receipt.json'</span>));
+            const body = receipts.map(r => {
+              const j = JSON.parse(fs.readFileSync(<span class="g">`artifacts/${r}`</span>));
+              return <span class="g">`**${r}** . K=${j.k_score} . CID \`${j.cid}\``</span>;
+            }).join(<span class="g">'\n'</span>);
+            github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });</pre>
+  </div>
+</section>
+
+<section class="step">
+  <div class="wrap">
+    <p class="stepno">Workflow 2 . release with binder</p>
+    <h2>Ship a one-page audit PDF with every release.</h2>
+    <p>On a GitHub release event, attach the .kolm, the receipt, and a single-page binder PDF that lists CID + recipe + base model + K-score. The PDF is the artifact your auditor signs.</p>
+    <pre><span class="k">name</span>: kolm release
+<span class="k">on</span>:
+  release:
+    types: [published]
+
+<span class="k">jobs</span>:
+  release:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install -g kolm
+      - <span class="k">name</span>: compile + sign + bind
+        env:
+          KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
+        run: |
+          mkdir -p out
+          for r in recipes/*.recipe.json; do
+            base=$(basename $r .recipe.json)
+            kolm compile --from "$r" --out "out/${base}.kolm"
+            kolm verify "out/${base}.kolm" --binder "out/${base}.binder.pdf"
+          done
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            out/*.kolm
+            out/*.receipt.json
+            out/*.binder.pdf</pre>
+  </div>
+</section>
+
+<section class="step">
+  <div class="wrap">
+    <p class="stepno">Workflow 3 . scheduled re-verify</p>
+    <h2>Re-verify last-quarter's artifacts on a schedule.</h2>
+    <p>Quarterly cron that re-runs `kolm verify` against every artifact in `releases/`. If a verifier-side change ever rejects an artifact you previously shipped, you find out before your auditor does.</p>
+    <pre><span class="k">name</span>: kolm reverify
+<span class="k">on</span>:
+  schedule: [{ cron: <span class="g">'0 4 1 */3 *'</span> }]
+  workflow_dispatch: {}
+
+<span class="k">jobs</span>:
+  reverify:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install -g kolm
+      - run: |
+          for art in releases/**/*.kolm; do
+            kolm verify "$art" || { echo "FAIL: $art" >&2; exit 1; }
+          done</pre>
+    <div class="checkpoint"><b>Checkpoint</b><span>If the verifier rejects an old artifact, that is the moment to investigate before the artifact ever reaches an auditor or a customer.</span></div>
+    <div class="actions"><a class="btn primary" href="/tutorials/ci-verify">Walkthrough tutorial &rarr;</a><a class="btn" href="/spec/rs-1">RS-1 spec &rarr;</a></div>
+  </div>
+</section>
+
+</main>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

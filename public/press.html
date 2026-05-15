@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Press kit · kolm</title>
 <meta name="description" content="kolm press kit: boilerplate, logo SVG, screenshots, benchmark numbers, and direct contact. Everything an editor or analyst needs to write about the AI compiler.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm press kit">
 <meta property="og:description" content="Boilerplate, logo, screenshots, benchmark numbers, and contact.">
@@ -41,13 +42,13 @@
   header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
   section.hero { padding: 88px 0 32px; }
@@ -57,7 +58,7 @@
   p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 56ch; }
 
   .group { margin: 48px 0 0; padding-top: 28px; border-top: 1px solid var(--line); }
-  .group h2 { margin: 0 0 12px; font-size: clamp(22px, 2.4vw, 26px); font-weight: 540; }
+  .group h2 { margin: 0 0 12px; font-size: clamp(22px, 2.4vw, 26px); font-weight: 500; }
   .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
 
   .grid { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); margin: 14px 0 0; }
@@ -65,7 +66,7 @@
 
   .asset { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); }
   .asset .label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 8px; }
-  .asset h3 { margin: 0 0 6px; font-size: 16px; font-weight: 540; color: var(--ink); }
+  .asset h3 { margin: 0 0 6px; font-size: 16px; font-weight: 500; color: var(--ink); }
   .asset p { margin: 0 0 12px; color: var(--ink-mute); font-size: 14px; line-height: 1.6; }
   .asset a { color: var(--accent); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
   .asset a:hover { color: var(--accent-strong); }
@@ -73,13 +74,13 @@
   .asset .preview img { max-width: 100%; max-height: 60px; }
 
   blockquote.boil { margin: 18px 0 0; padding: 22px 24px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; font-size: 15px; line-height: 1.7; color: var(--ink-mute); position: relative; }
-  blockquote.boil b { color: var(--ink); font-weight: 540; }
+  blockquote.boil b { color: var(--ink); font-weight: 500; }
   blockquote.boil .cite { display: block; margin-top: 12px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); text-transform: uppercase; }
 
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0 0; }
   @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } }
   .stat { padding: 18px 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
-  .stat .n { font-family: var(--mono); font-size: 26px; color: var(--ink); font-weight: 540; letter-spacing: -0.02em; }
+  .stat .n { font-family: var(--mono); font-size: 26px; color: var(--ink); font-weight: 500; letter-spacing: -0.02em; }
   .stat .l { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); margin-top: 4px; }
   .stat .src { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); margin-top: 8px; }
   .stat .src a { color: var(--accent); }
@@ -102,6 +103,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -155,7 +157,7 @@
         <div class="stat">
           <div class="n">~27&times;</div>
           <div class="l">cheaper at 100k MAU</div>
-          <div class="src"><a href="/pricing#roi">ROI calc &rarr;</a></div>
+          <div class="src"><a href="/roi">ROI calc &rarr;</a></div>
         </div>
         <div class="stat">
           <div class="n">&le;3 GB</div>
@@ -209,7 +211,7 @@
           <div class="label">hero</div>
           <h3>kolm wordmark + .kolm anatomy</h3>
           <p>Wordmark and seven-layer anatomy block. Use the live <a href="/anatomy" style="color:var(--accent);">/anatomy</a> render as the canonical screenshot.</p>
-          <div class="preview" style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);text-align:left;width:100%;line-height:1.6;">support-bot.kolm <span style="color:var(--ink-faint)">(target)</span><br>&nbsp;├─ model.gguf <span style="color:var(--ink-faint)">v0.1 · pointer</span><br>&nbsp;├─ lora.bin <span style="color:var(--ink-faint)">v0.1 · KOLMPACK</span><br>&nbsp;├─ recipes.json<br>&nbsp;├─ index.sqlite-vec <span style="color:var(--ink-faint)">v0.1 · KOLMIDX</span><br>&nbsp;├─ verifier.json<br>&nbsp;├─ manifest.json<br>&nbsp;└─ signature.sig</div>
+          <div class="preview" style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);text-align:left;width:100%;line-height:1.6;">support-bot.kolm <span style="color:var(--ink-faint)">(target)</span><br>&nbsp;?? model.gguf <span style="color:var(--ink-faint)">v0.1 · pointer</span><br>&nbsp;?? lora.bin <span style="color:var(--ink-faint)">v0.1 · KOLMPACK</span><br>&nbsp;?? recipes.json<br>&nbsp;?? index.sqlite-vec <span style="color:var(--ink-faint)">v0.1 · KOLMIDX</span><br>&nbsp;?? verifier.json<br>&nbsp;?? manifest.json<br>&nbsp;?? signature.sig</div>
           <a href="/anatomy">view live &rarr;</a>
         </div>
         <div class="asset">
@@ -251,9 +253,53 @@
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolm v0.1.0 - the AI compiler</span>
-    <span><a href="/manifesto">Manifesto</a> - <a href="/security">Security</a> - <a href="/privacy">Privacy</a> - <a href="/terms">Terms</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

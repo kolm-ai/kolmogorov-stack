@@ -1,0 +1,1166 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Kolm API",
+    "version": "1.0.0",
+    "description": "HTTP contract for the kolm compiler. Self-hosted (your own kolm server) and kolm.ai (managed) speak the exact same /v1 surface. JSON in, JSON out, bearer or X-Kolm-Key auth. Every successful run produces an HMAC-signed receipt over (cid, input, output, ts, k_score).",
+    "termsOfService": "https://kolm.ai/terms",
+    "contact": {
+      "name": "kolm",
+      "url": "https://kolm.ai",
+      "email": "hello@kolm.ai"
+    },
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.kolm.ai",
+      "description": "Managed production"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Local dev (kolm serve)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Sign-up, sign-in, token issue."
+    },
+    {
+      "name": "account",
+      "description": "Plan, quota, API key."
+    },
+    {
+      "name": "compile",
+      "description": "Submit a recipe + examples, get a signed .kolm."
+    },
+    {
+      "name": "run",
+      "description": "Run a compiled artifact against an input; emit a receipt."
+    },
+    {
+      "name": "verify",
+      "description": "Re-verify a CID against the manifest + receipt."
+    },
+    {
+      "name": "registry",
+      "description": "Search, fetch, submit artifacts."
+    },
+    {
+      "name": "usage",
+      "description": "Per-period compile, run, token, dollar counters."
+    },
+    {
+      "name": "health",
+      "description": "Liveness probe."
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Exchange email + password for a bearer token.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token issued.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/auth/signup": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Create a new account and issue a bearer token.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Account created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "description": "Email already registered.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/account": {
+      "get": {
+        "tags": [
+          "account"
+        ],
+        "summary": "Current account: plan, compile count, remaining quota, API key.",
+        "responses": {
+          "200": {
+            "description": "Account snapshot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/compile": {
+      "post": {
+        "tags": [
+          "compile"
+        ],
+        "summary": "Submit a compile job. Returns 202 with a compile_id and ETA.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Job accepted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompileJobAccepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "description": "Quota exhausted on this plan.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/compile/{id}": {
+      "get": {
+        "tags": [
+          "compile"
+        ],
+        "summary": "Poll job status and stream-log tail.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "compile_id returned by POST /v1/compile."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job snapshot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompileJob"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/run": {
+      "post": {
+        "tags": [
+          "run"
+        ],
+        "summary": "Run a compiled artifact against an input. Emits a signed receipt.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Run completed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/verify/{cid}": {
+      "get": {
+        "tags": [
+          "verify"
+        ],
+        "summary": "Re-verify an artifact CID against its manifest and signature.",
+        "parameters": [
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "CIDv1 string, e.g. cidv1:sha256:1bcf2323..."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verification result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/registry/search": {
+      "get": {
+        "tags": [
+          "registry"
+        ],
+        "summary": "Search the public registry for compiled artifacts.",
+        "parameters": [
+          {
+            "name": "task",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Free-text task filter, e.g. \"redact PHI\"."
+          },
+          {
+            "name": "size_max",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Max artifact size in bytes."
+          },
+          {
+            "name": "hardware",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cpu",
+                "cuda",
+                "mps",
+                "mlx",
+                "rocm",
+                "directml"
+              ]
+            }
+          },
+          {
+            "name": "license",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "SPDX identifier or 'any'."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching artifacts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "artifacts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RegistryEntry"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "artifacts",
+                    "total"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/registry/submit": {
+      "post": {
+        "tags": [
+          "registry"
+        ],
+        "summary": "Submit a hosted .kolm to the public registry.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Submission accepted; pending verification.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "submission_id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "verifying",
+                        "accepted",
+                        "rejected"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "submission_id",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/usage": {
+      "get": {
+        "tags": [
+          "usage"
+        ],
+        "summary": "Per-billing-period counters: compiles, runs, tokens, dollars.",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2026-05"
+            },
+            "description": "YYYY-MM. Defaults to current period."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usage snapshot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Usage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/healthz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Liveness probe. Returns 200 with {status:\"ok\"}.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Server is up.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Bearer token issued by /v1/auth/login or /v1/auth/signup."
+      },
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Kolm-Key",
+        "description": "Long-lived API key. Read from /v1/account. Use this for CI."
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "example": "usr_01HW..."
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "org_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "user_id",
+          "email"
+        ]
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "example": "usr_01HW..."
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "plan": {
+            "type": "string",
+            "enum": [
+              "free",
+              "pro",
+              "team",
+              "enterprise"
+            ]
+          },
+          "compiles_count": {
+            "type": "integer",
+            "description": "Compiles in current period."
+          },
+          "compiles_remaining": {
+            "type": "integer",
+            "description": "Compiles left before quota or hard cap."
+          },
+          "api_key": {
+            "type": "string",
+            "example": "kolm_live_01HW...",
+            "description": "Use with X-Kolm-Key header."
+          }
+        },
+        "required": [
+          "user_id",
+          "email",
+          "plan",
+          "compiles_count",
+          "compiles_remaining",
+          "api_key"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "SignupRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 8
+          },
+          "org_name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Bearer JWT, ~24h lifetime."
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "user_id"
+        ]
+      },
+      "CompileRequest": {
+        "type": "object",
+        "properties": {
+          "recipe": {
+            "type": "object",
+            "description": "Free-form recipe object: task, objective, adapter, evaluator. See /docs/manifest-v0.1.json for the canonical shape."
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Optional in-the-loop examples. Each is {input, expected}."
+          },
+          "base_model": {
+            "type": "string",
+            "example": "qwen2.5-7b-instruct",
+            "description": "Base model identifier. Defaults are picked by the compile planner if omitted."
+          },
+          "k_min": {
+            "type": "number",
+            "format": "float",
+            "example": 0.9,
+            "description": "Hard floor: compile fails if measured K-score is below this."
+          },
+          "compliance_pack": {
+            "type": "string",
+            "nullable": true,
+            "example": "hipaa-redact-v1",
+            "description": "Optional pre-baked compliance pack id (HIPAA, SR 11-7, NIST AI RMF, etc.)."
+          }
+        },
+        "required": [
+          "recipe"
+        ]
+      },
+      "CompileJobAccepted": {
+        "type": "object",
+        "properties": {
+          "compile_id": {
+            "type": "string",
+            "example": "cmp_01HW..."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "running"
+            ]
+          },
+          "eta_seconds": {
+            "type": "integer",
+            "description": "Estimated time-to-done."
+          }
+        },
+        "required": [
+          "compile_id",
+          "status",
+          "eta_seconds"
+        ]
+      },
+      "CompileJob": {
+        "type": "object",
+        "properties": {
+          "compile_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "running",
+              "done",
+              "failed"
+            ]
+          },
+          "logs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tail of compile-side log lines."
+          },
+          "k_score": {
+            "type": "number",
+            "format": "float",
+            "nullable": true,
+            "description": "Final K-score; null until status=done."
+          },
+          "artifact_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Signed pre-fetch URL for the .kolm. Null until status=done."
+          },
+          "cid": {
+            "type": "string",
+            "nullable": true,
+            "example": "cidv1:sha256:1bcf2323..."
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "compile_id",
+          "status",
+          "logs"
+        ]
+      },
+      "RunRequest": {
+        "type": "object",
+        "properties": {
+          "artifact_cid": {
+            "type": "string",
+            "nullable": true,
+            "example": "cidv1:sha256:1bcf2323..."
+          },
+          "artifact_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Either artifact_cid OR artifact_url, not both."
+          },
+          "input": {
+            "description": "Free-form. String for chat, object for structured tasks.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "required": [
+          "input"
+        ]
+      },
+      "RunResponse": {
+        "type": "object",
+        "properties": {
+          "output": {
+            "description": "Free-form. Shape mirrors the artifact's declared output schema.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/Receipt"
+          }
+        },
+        "required": [
+          "output",
+          "receipt"
+        ]
+      },
+      "Receipt": {
+        "type": "object",
+        "description": "HMAC-signed receipt over (cid, input_hash, output_hash, ts).",
+        "properties": {
+          "cid": {
+            "type": "string",
+            "example": "cidv1:sha256:1bcf2323..."
+          },
+          "hmac": {
+            "type": "string",
+            "example": "hmac-sha256:9af2..."
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-15T12:34:56Z"
+          },
+          "k_score": {
+            "type": "number",
+            "format": "float",
+            "example": 0.982
+          },
+          "input_hash": {
+            "type": "string",
+            "nullable": true,
+            "example": "sha256:8a3d..."
+          },
+          "output_hash": {
+            "type": "string",
+            "nullable": true,
+            "example": "sha256:1f2e..."
+          }
+        },
+        "required": [
+          "cid",
+          "hmac",
+          "ts",
+          "k_score"
+        ]
+      },
+      "Manifest": {
+        "type": "object",
+        "description": "Canonical kolm manifest. CID is sha256 of the canonical-JSON serialization of {hashes}.",
+        "properties": {
+          "version": {
+            "type": "string",
+            "example": "0.1"
+          },
+          "task": {
+            "type": "string"
+          },
+          "base_model": {
+            "type": "string"
+          },
+          "recipe": {
+            "type": "object"
+          },
+          "hashes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Map of {entry_path: sha256:...} for every file in the .kolm zip."
+          },
+          "k_score": {
+            "type": "number",
+            "format": "float"
+          },
+          "compliance_pack": {
+            "type": "string",
+            "nullable": true
+          },
+          "signed_by": {
+            "type": "string",
+            "nullable": true
+          },
+          "signed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "version",
+          "task",
+          "base_model",
+          "recipe",
+          "hashes",
+          "k_score"
+        ]
+      },
+      "VerifyResponse": {
+        "type": "object",
+        "properties": {
+          "cid": {
+            "type": "string"
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/Manifest"
+          },
+          "k_score": {
+            "type": "number",
+            "format": "float"
+          },
+          "signed_by": {
+            "type": "string",
+            "nullable": true
+          },
+          "signed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "cid",
+          "verified",
+          "k_score"
+        ]
+      },
+      "Artifact": {
+        "type": "object",
+        "properties": {
+          "cid": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "task": {
+            "type": "string"
+          },
+          "base_model": {
+            "type": "string"
+          },
+          "size_bytes": {
+            "type": "integer"
+          },
+          "k_score": {
+            "type": "number",
+            "format": "float"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "cid",
+          "name",
+          "task",
+          "base_model",
+          "size_bytes",
+          "k_score"
+        ]
+      },
+      "RegistryEntry": {
+        "type": "object",
+        "properties": {
+          "cid": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "task": {
+            "type": "string"
+          },
+          "base_model": {
+            "type": "string"
+          },
+          "size_bytes": {
+            "type": "integer"
+          },
+          "k_score": {
+            "type": "number",
+            "format": "float"
+          },
+          "license": {
+            "type": "string",
+            "example": "Apache-2.0"
+          },
+          "hardware": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "cpu",
+                "cuda",
+                "mps",
+                "mlx",
+                "rocm",
+                "directml"
+              ]
+            }
+          },
+          "downloads": {
+            "type": "integer"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "cid",
+          "name",
+          "task",
+          "base_model",
+          "size_bytes",
+          "k_score"
+        ]
+      },
+      "SubmitRequest": {
+        "type": "object",
+        "properties": {
+          "artifact_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public URL to a hosted .kolm."
+          },
+          "name": {
+            "type": "string",
+            "example": "phi-redactor"
+          },
+          "task": {
+            "type": "string",
+            "example": "redact PHI from clinical notes"
+          }
+        },
+        "required": [
+          "artifact_url",
+          "name",
+          "task"
+        ]
+      },
+      "Usage": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "example": "2026-05",
+            "description": "YYYY-MM."
+          },
+          "compiles": {
+            "type": "integer"
+          },
+          "runs": {
+            "type": "integer"
+          },
+          "tokens": {
+            "type": "integer",
+            "description": "Total token-count served."
+          },
+          "dollars": {
+            "type": "number",
+            "format": "float",
+            "description": "Total USD billed in the period."
+          }
+        },
+        "required": [
+          "period",
+          "compiles",
+          "runs",
+          "tokens",
+          "dollars"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Stable machine-readable error code, e.g. \"quota_exhausted\"."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable detail."
+          },
+          "trace_id": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "error",
+          "message"
+        ]
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Missing or invalid auth.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "No record for the given id or CID.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Payload failed validation.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Too many requests.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  }
+}

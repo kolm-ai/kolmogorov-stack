@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 // render-demo.mjs
 //
-// Render the SOTA kolm hero demo as 1920x1080 @ 30fps video.
-// Loads scripts/video/demo-page.html in headless Chromium, seeks
-// frame-by-frame via window.kolmSeek(t), screenshots each, then
-// encodes mp4 + webm + poster via ffmpeg.
+// Render the SOTA kolm hero demo as 2560x1440 (2K QHD) @ 30fps video.
+// Loads scripts/video/demo-page.html in headless Chromium at 1920x1080
+// CSS viewport with deviceScaleFactor=1.333 (supersampled to 2560x1440
+// device pixels), seeks frame-by-frame via window.kolmSeek(t),
+// screenshots each, then encodes mp4 + webm + poster via ffmpeg.
 //
 // Output:
-//   public/video/kolm-hero.mp4
-//   public/video/kolm-hero.webm
+//   public/video/kolm-hero.mp4     (2560x1440 @ 30fps, H.264 CRF 20)
+//   public/video/kolm-hero.webm    (2560x1440 @ 30fps, VP9)
 //   public/video/kolm-hero-poster.jpg
 
 import { chromium } from 'playwright';
@@ -22,8 +23,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO = path.resolve(__dirname, '..', '..');
 
-const WIDTH = 1920;
-const HEIGHT = 1080;
+// CSS-pixel stage (demo-page.html is hard-coded to 1920x1080).
+const CSS_WIDTH = 1920;
+const CSS_HEIGHT = 1080;
+// Target output dimensions (2K QHD).
+const OUT_WIDTH = 2560;
+const OUT_HEIGHT = 1440;
+// deviceScaleFactor that yields ~2560x1440 PNGs at screenshot time.
+const DSF = OUT_WIDTH / CSS_WIDTH; // 1.3333…
 const FPS = 30;
 const DURATION = 21.0;
 const FRAMES = Math.round(DURATION * FPS);
@@ -40,14 +47,14 @@ console.log(`[render] frames=${FRAMES} (${FPS}fps × ${DURATION}s)`);
 console.log(`[render] tmp=${FRAMES_DIR}`);
 
 const browser = await chromium.launch({ args: ['--font-render-hinting=none'] });
-const ctx = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1 });
+const ctx = await browser.newContext({ viewport: { width: CSS_WIDTH, height: CSS_HEIGHT }, deviceScaleFactor: DSF });
 const page = await ctx.newPage();
 
 const url = 'file://' + PAGE.replace(/\\/g, '/');
 await page.goto(url);
 await page.waitForFunction('window.kolmSeek !== undefined');
 
-console.log('[render] page loaded, starting frame capture');
+console.log(`[render] page loaded (css ${CSS_WIDTH}x${CSS_HEIGHT}, dsf=${DSF.toFixed(3)}, target ${OUT_WIDTH}x${OUT_HEIGHT}), starting frame capture`);
 
 const t0 = Date.now();
 for (let i = 0; i < FRAMES; i++) {
@@ -56,7 +63,7 @@ for (let i = 0; i < FRAMES; i++) {
   // small flush for layout
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
   const fp = path.join(FRAMES_DIR, `f${String(i).padStart(5, '0')}.png`);
-  await page.screenshot({ path: fp, type: 'png', omitBackground: false, clip: { x: 0, y: 0, width: WIDTH, height: HEIGHT } });
+  await page.screenshot({ path: fp, type: 'png', omitBackground: false, clip: { x: 0, y: 0, width: CSS_WIDTH, height: CSS_HEIGHT } });
   if (i % 30 === 0 || i === FRAMES - 1) {
     const pct = ((i + 1) / FRAMES * 100).toFixed(1);
     const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
@@ -84,22 +91,23 @@ function run(args) {
   }
 }
 
-// MP4 (H.264, high quality, web-optimized)
+// MP4 (H.264, high quality 2K, web-optimized)
 run([
   '-y', '-r', String(FPS), '-i', FRAMES_GLOB,
   '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
-  '-preset', 'slow', '-crf', '20',
+  '-preset', 'slow', '-crf', '22',
   '-movflags', '+faststart',
-  '-vf', `scale=${WIDTH}:${HEIGHT}:flags=lanczos`,
+  '-vf', `scale=${OUT_WIDTH}:${OUT_HEIGHT}:flags=lanczos`,
   MP4
 ]);
 
-// WebM (VP9)
+// WebM (VP9, 2K)
 run([
   '-y', '-r', String(FPS), '-i', FRAMES_GLOB,
   '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuv420p',
-  '-b:v', '0', '-crf', '32',
+  '-b:v', '0', '-crf', '34',
   '-deadline', 'good', '-cpu-used', '2',
+  '-vf', `scale=${OUT_WIDTH}:${OUT_HEIGHT}:flags=lanczos`,
   WEBM
 ]);
 

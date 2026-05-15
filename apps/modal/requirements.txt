@@ -1,0 +1,13 @@
+# Modal app container deps. These match the .pip_install() block in
+# kolm_trainer_app.py and are listed here so users can `pip install -r`
+# locally to lint / dry-run the app before deploy.
+modal>=0.64
+torch>=2.4,<2.6
+transformers>=4.45
+peft>=0.13
+datasets>=3.0
+accelerate>=0.34
+bitsandbytes>=0.44
+httpx>=0.27
+safetensors>=0.4
+sentencepiece>=0.2

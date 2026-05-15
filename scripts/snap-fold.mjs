@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+import { mkdir } from 'node:fs/promises';
+await mkdir('tmp/v717', { recursive: true });
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, colorScheme: 'dark' });
+const page = await ctx.newPage();
+await page.goto('http://localhost:8787/', { waitUntil: 'networkidle' });
+await page.waitForTimeout(1500);
+await page.screenshot({ path: 'tmp/v717/v717_1440_fold.png', fullPage: false });
+await browser.close();
+console.log('done');

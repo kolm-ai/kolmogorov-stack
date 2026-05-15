@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>ROI calculator · kolm</title>
 <meta name="description" content="Plug in your monthly call volume, token mix, and frontier price. Get the cloud-vs-kolm number with teacher cost honest. The compiler-cache math, no marketing math.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm ROI calculator">
 <meta property="og:description" content="Cloud-vs-kolm math, teacher cost honest.">
@@ -41,13 +42,13 @@
   header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
   section.hero { padding: 88px 0 28px; }
@@ -55,13 +56,13 @@
   h1 { margin: 22px 0 10px; font-size: clamp(34px, 4.6vw, 44px); font-weight: 500; letter-spacing: -0.02em; line-height: 1.05; }
   h1 .tone { color: var(--accent); }
   p.lede { margin: 0 0 8px; font-size: 16.5px; line-height: 1.6; color: var(--ink-mute); max-width: 64ch; }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
 
   .calc { display: grid; grid-template-columns: 5fr 7fr; gap: 22px; margin: 36px 0 0; }
   @media (max-width: 880px) { .calc { grid-template-columns: 1fr; } }
 
   .inputs { padding: 28px 28px 22px; border: 1px solid var(--line-strong); border-radius: 14px; background: var(--bg-elev); }
-  .inputs h2 { margin: 0 0 4px; font-size: 17px; font-weight: 540; color: var(--ink); }
+  .inputs h2 { margin: 0 0 4px; font-size: 17px; font-weight: 500; color: var(--ink); }
   .inputs p.hint { margin: 0 0 22px; color: var(--ink-mute); font-size: 13px; line-height: 1.55; }
 
   .field { margin: 0 0 18px; }
@@ -70,29 +71,29 @@
   .field input:focus, .field select:focus { border-color: var(--accent); }
   .field .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .field .helper { display: block; margin-top: 6px; font-size: 11.5px; color: var(--ink-faint); font-family: var(--mono); }
-  .field .helper b { color: var(--ink-mute); font-weight: 540; }
+  .field .helper b { color: var(--ink-mute); font-weight: 500; }
 
   .results { padding: 28px 28px 24px; border: 1px solid var(--accent); border-radius: 14px; background: linear-gradient(180deg, rgba(236,231,220, 0.06), transparent); }
-  .results h2 { margin: 0 0 4px; font-size: 17px; font-weight: 540; color: var(--ink); }
+  .results h2 { margin: 0 0 4px; font-size: 17px; font-weight: 500; color: var(--ink); }
   .results p.hint { margin: 0 0 18px; color: var(--ink-mute); font-size: 13px; }
 
   .res-row { display: grid; grid-template-columns: 1fr auto; align-items: baseline; padding: 12px 0; border-bottom: 1px dashed var(--line); }
   .res-row .l { color: var(--ink-mute); font-size: 14px; }
-  .res-row .l b { color: var(--ink); font-weight: 540; }
-  .res-row .v { color: var(--ink); font-family: var(--mono); font-size: 16px; font-weight: 540; }
+  .res-row .l b { color: var(--ink); font-weight: 500; }
+  .res-row .v { color: var(--ink); font-family: var(--mono); font-size: 16px; font-weight: 500; }
   .res-row.tot { padding-top: 18px; border-top: 1px solid var(--line-strong); border-bottom: none; margin-top: 6px; }
-  .res-row.tot .l { color: var(--ink); font-size: 15px; font-weight: 540; }
+  .res-row.tot .l { color: var(--ink); font-size: 15px; font-weight: 500; }
   .res-row.tot .v { font-size: 22px; color: var(--accent); }
   .res-row.cloud .v { color: var(--warn); }
   .res-row.kolm .v { color: var(--good); }
 
   .delta { margin: 22px 0 0; padding: 18px 22px; border-radius: 10px; background: var(--bg-card); border: 1px solid var(--line-strong); display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
-  .delta .big { font-family: var(--mono); font-size: 28px; color: var(--good); font-weight: 540; letter-spacing: -0.02em; }
+  .delta .big { font-family: var(--mono); font-size: 28px; color: var(--good); font-weight: 500; letter-spacing: -0.02em; }
   .delta .lab { color: var(--ink); font-size: 14px; line-height: 1.55; }
-  .delta .lab b { color: var(--good); font-weight: 540; }
+  .delta .lab b { color: var(--good); font-weight: 500; }
   .delta .small { color: var(--ink-mute); font-size: 12.5px; line-height: 1.55; flex: 1; min-width: 200px; }
 
-  /* Horizontal cumulative bars. Shows the relative 3-year TCO at a glance —
+  /* Horizontal cumulative bars. Shows the relative 3-year TCO at a glance ??
      the actual numbers go in .res-yrs below. Bars use the same color tokens
      as the per-row figures: warn for cloud, good for kolm. */
   .res-bar { margin: 0 0 22px; padding: 18px 0 4px; }
@@ -102,7 +103,7 @@
   .res-bar-fill { height: 100%; transition: width 220ms ease-out; }
   .res-bar-fill.cloud { background: linear-gradient(90deg, rgba(255,184,107,0.85), rgba(255,184,107,0.45)); }
   .res-bar-fill.kolm  { background: linear-gradient(90deg, rgba(126,240,210,0.85), rgba(126,240,210,0.45)); }
-  .res-bar-val { font-family: var(--mono); font-size: 13px; color: var(--ink); text-align: right; font-weight: 540; }
+  .res-bar-val { font-family: var(--mono); font-size: 13px; color: var(--ink); text-align: right; font-weight: 500; }
   .res-bar-cap { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin: 4px 0 0; padding-left: 68px; }
 
   /* Year-1 / Year-2 / Year-3 small TCO cards. */
@@ -116,7 +117,7 @@
   .res-yr-cloud { color: var(--warn); }
   .res-yr-kolm { color: var(--good); }
   .res-yr-d { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--line); font-family: var(--mono); font-size: 11.5px; color: var(--ink); text-align: right; }
-  .res-yr-d b { color: var(--accent); font-weight: 540; }
+  .res-yr-d b { color: var(--accent); font-weight: 500; }
 
   .res-detail { padding: 16px 0 0; border-top: 1px solid var(--line); }
 
@@ -125,20 +126,20 @@
   .share-btn:hover { background: rgba(126,240,210, 0.10); transform: translateY(-1px); }
 
   .honest { margin: 38px 0 0; padding: 22px 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-elev); }
-  .honest h3 { margin: 0 0 8px; font-size: 14px; font-weight: 540; color: var(--ink); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.04em; }
+  .honest h3 { margin: 0 0 8px; font-size: 14px; font-weight: 500; color: var(--ink); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.04em; }
   .honest p { margin: 0 0 6px; color: var(--ink-mute); font-size: 13.5px; line-height: 1.65; }
-  .honest p b { color: var(--ink); font-weight: 540; }
+  .honest p b { color: var(--ink); font-weight: 500; }
 
   .scenarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 22px 0 0; }
   @media (max-width: 880px) { .scenarios { grid-template-columns: 1fr; } }
   .scen { padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); cursor: pointer; transition: border 120ms, transform 120ms; }
   .scen:hover { border-color: var(--accent); transform: translateY(-1px); }
   .scen .h { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--accent); letter-spacing: 0.04em; margin-bottom: 6px; }
-  .scen .v { color: var(--ink); font-size: 14px; font-weight: 540; line-height: 1.45; }
+  .scen .v { color: var(--ink); font-size: 14px; font-weight: 500; line-height: 1.45; }
   .scen .p { color: var(--ink-faint); font-size: 12px; line-height: 1.55; margin-top: 6px; font-family: var(--mono); }
 
   section.next { padding: 56px 0 24px; border-top: 1px solid var(--line); margin-top: 56px; }
-  section.next h2 { margin: 0 0 8px; font-size: clamp(22px, 2.8vw, 28px); font-weight: 540; }
+  section.next h2 { margin: 0 0 8px; font-size: clamp(22px, 2.8vw, 28px); font-weight: 500; }
   section.next h2 .tone { color: var(--accent); }
   section.next p.lede { margin-bottom: 18px; }
   .next-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0 0; }
@@ -163,6 +164,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -174,9 +176,9 @@
   </div>
 </header>
 
-<section class="hero">
+<section class="hero frontier-bg">
   <div class="wrap">
-    <span class="pill">ROI calculator</span>
+    <div class="hero-eyebrow"><span class="he-dot"></span>ROI &middot; teacher cost honest &middot; year-2 marginal $0</div>
     <h1>The cloud-vs-kolm math,<br><span class="tone">teacher cost honest.</span></h1>
     <p class="lede"><b>kolm is a one-time compile cost, not a per-call cost.</b> Year one absorbs the teacher bill; year two and after, the same artifact runs at zero marginal token cost. Numbers unrounded, formulas below the calculator.</p>
   </div>
@@ -370,9 +372,53 @@
 </section>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolm - the AI compiler - <span style="color:var(--ink)">v0.1.0 - PREVIEW</span></span>
-    <span><a href="/manifesto">manifesto</a> &middot; <a href="/pricing">pricing</a> &middot; <a href="/security">security</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 
@@ -468,12 +514,12 @@
     const y1d = cloudY1 - kolmY1;
     const y2d = cloudY2 - kolmY2;
     const y3d = cloudY3 - kolmY3;
-    $('r-y1-cloud').textContent = ' ' + fmt(cloudY1);
-    $('r-y1-kolm').textContent  = ' ' + fmt(kolmY1);
-    $('r-y2-cloud').textContent = ' ' + fmt(cloudY2);
-    $('r-y2-kolm').textContent  = ' ' + fmt(kolmY2);
-    $('r-y3-cloud').textContent = ' ' + fmt(cloudY3);
-    $('r-y3-kolm').textContent  = ' ' + fmt(kolmY3);
+    $('r-y1-cloud').textContent = '?' + fmt(cloudY1);
+    $('r-y1-kolm').textContent  = '?' + fmt(kolmY1);
+    $('r-y2-cloud').textContent = '?' + fmt(cloudY2);
+    $('r-y2-kolm').textContent  = '?' + fmt(kolmY2);
+    $('r-y3-cloud').textContent = '?' + fmt(cloudY3);
+    $('r-y3-kolm').textContent  = '?' + fmt(kolmY3);
     $('r-y1-d').innerHTML = (y1d >= 0 ? 'save <b>' : 'spend <b>') + fmt(Math.abs(y1d)) + '</b>';
     $('r-y2-d').innerHTML = (y2d >= 0 ? 'save <b>' : 'spend <b>') + fmt(Math.abs(y2d)) + '</b>';
     $('r-y3-d').innerHTML = (y3d >= 0 ? 'save <b>' : 'spend <b>') + fmt(Math.abs(y3d)) + '</b>';

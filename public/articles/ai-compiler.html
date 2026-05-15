@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>How to Compile GPT-5 Into a 4GB Local Model · kolm</title>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>How to Compile GPT-5 Into a 4GB Local Model ·kolm</title>
 <meta name="description" content="An AI compiler is the missing build step between a frontier API and a local artifact. What it does, why it changes AI unit economics, and how to compile your first .kolm in five minutes.">
 <meta name="keywords" content="AI compiler, compile GPT-5 locally, local LLM, on-device AI, model distillation, frontier to edge, .kolm file, kolm compile, edge AI compiler">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta name="author" content="Kolmogorov">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
@@ -77,14 +78,14 @@
   header.site .brand .lyr { transition: transform 280ms cubic-bezier(.2,.6,.2,1), opacity 280ms; }
   header.site .brand:hover .lyr-1 { transform: translate(-1.4px,-1.4px); }
   header.site .brand:hover .lyr-3 { transform: translate(1.4px,1.4px); }
-  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: 0; }
+  header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
   header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; box-shadow: 0 1px 0 rgba(255,255,255,0.55) inset, 0 4px 14px -4px rgba(0,0,0,0.45); transition: background 120ms, transform 120ms; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; box-shadow: 0 1px 0 rgba(255,255,255,0.55) inset, 0 4px 14px -4px rgba(0,0,0,0.45); transition: background 120ms, transform 120ms; }
   header.site .right .cta:hover { background: #fff; transform: translateY(-1px); }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
@@ -96,24 +97,24 @@
   h1 { margin: 22px 0 18px; font-size: clamp(34px, 5.4vw, 54px); line-height: 1.05; font-weight: 500; letter-spacing: 0; max-width: 22ch; }
   h1 .tone { color: var(--accent); }
   p.lede { margin: 0 0 0; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
 
   .meta { display: flex; gap: 18px; margin-top: 22px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
   .meta b { color: var(--ink-mute); font-weight: 500; }
 
   article { padding: 36px 0 96px; }
-  article h2 { margin: 56px 0 14px; font-size: clamp(24px, 2.6vw, 30px); line-height: 1.2; font-weight: 540; letter-spacing: 0; color: var(--ink); }
+  article h2 { margin: 56px 0 14px; font-size: clamp(24px, 2.6vw, 30px); line-height: 1.2; font-weight: 500; letter-spacing: 0; color: var(--ink); }
   article h2 .tone { color: var(--accent); }
-  article h3 { margin: 36px 0 10px; font-size: 18px; font-weight: 540; letter-spacing: 0; color: var(--ink); }
+  article h3 { margin: 36px 0 10px; font-size: 18px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
   article p { margin: 0 0 16px; font-size: 16.5px; line-height: 1.7; color: var(--ink-mute); }
-  article p b { color: var(--ink); font-weight: 540; }
+  article p b { color: var(--ink); font-weight: 500; }
   article p code, article li code { font-family: var(--mono); font-size: 0.92em; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
   article blockquote { margin: 28px 0; padding: 16px 22px; border-left: 2px solid var(--accent); background: var(--bg-elev); border-radius: 0 8px 8px 0; font-size: 17px; line-height: 1.6; color: var(--ink); }
-  article blockquote p { color: var(--ink); margin: 0; font-weight: 480; }
+  article blockquote p { color: var(--ink); margin: 0; font-weight: 500; }
   article ul { padding-left: 0; list-style: none; margin: 16px 0 24px; }
   article ul li { padding: 8px 0 8px 22px; position: relative; font-size: 16px; line-height: 1.6; color: var(--ink-mute); }
-  article ul li::before { content: "-"; color: var(--accent); position: absolute; left: 6px; font-weight: 560; }
-  article ul li b { color: var(--ink); font-weight: 540; }
+  article ul li::before { content: "-"; color: var(--accent); position: absolute; left: 6px; font-weight: 500; }
+  article ul li b { color: var(--ink); font-weight: 500; }
 
   article pre { margin: 18px 0 24px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.75; color: var(--ink); box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
   article pre .com { color: var(--ink-faint); }
@@ -133,7 +134,7 @@
   .signpost a { display: flex; flex-direction: column; gap: 8px; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; transition: transform 220ms cubic-bezier(.2,.6,.2,1), border-color 220ms, box-shadow 220ms; box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 18px 40px -22px rgba(0,0,0,0.55); }
   .signpost a:hover { transform: translateY(-2px); border-color: var(--line-strong); box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 24px 50px -22px rgba(0,0,0,0.65), 0 8px 22px -8px rgba(236,231,220, 0.10); }
   .signpost a .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
-  .signpost a .v { color: var(--ink); font-weight: 540; font-size: 16px; letter-spacing: 0; }
+  .signpost a .v { color: var(--ink); font-weight: 500; font-size: 16px; letter-spacing: 0; }
   .signpost a .v .arrow { color: var(--accent); margin-left: 6px; }
   .signpost a p { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-mute); line-height: 1.5; }
 
@@ -161,10 +162,10 @@
   .plate .stamp{position:absolute;top:18px;left:20px;z-index:3;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute);border:1px solid rgba(236,231,220, 0.22);background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 11px;border-radius:4px}
   .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(236,231,220, 0.85)}
   .plate .cap{position:absolute;left:24px;right:24px;bottom:20px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
-  .plate .cap .title{font-family:var(--sans);font-size:clamp(17px,1.8vw,22px);font-weight:540;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:62%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
+  .plate .cap .title{font-family:var(--sans);font-size:clamp(17px,1.8vw,22px);font-weight: 500;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:62%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
   .plate .cap .title .tone{background:linear-gradient(170deg,#faf2e1 0%,#c9c2b2 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   .plate .cap .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);letter-spacing: 0;text-align:right;line-height:1.7}
-  .plate .cap .meta b{color:var(--ink);font-weight:520}
+  .plate .cap .meta b{color:var(--ink);font-weight: 500}
   @media(max-width:720px){.plate .cap{left:14px;right:14px;bottom:12px;flex-direction:column;align-items:flex-start;gap:8px}.plate .cap .title{font-size:14px;max-width:100%}.plate .cap .meta{text-align:left;font-size:10px}.plate .stamp{top:12px;left:12px;font-size:9px;padding:4px 9px}}
 </style>
 <link rel="stylesheet" href="/brand-refresh.css">
@@ -180,6 +181,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -209,7 +211,7 @@
         <li><a href="#what">What an AI compiler actually does</a></li>
         <li><a href="#stages">Four stages of <code>kolm compile</code></a></li>
         <li><a href="#size">Why the artifact is 4GB and not 70GB</a></li>
-        <li><a href="#five">Compile your first artifact in five minutes</a></li>
+        <li><a href="#five">Compile your first AI in five minutes</a></li>
         <li><a href="#k">The K-score, and why a number on the cover matters</a></li>
         <li><a href="#faq">FAQ</a></li>
       </ol>
@@ -261,7 +263,7 @@
     <p>A narrow artifact beats a generic prompt when it has a strong verifier, representative evals, and a runtime contract. The compiler enforces all three before the K-score gate signs.</p>
     <p>The compile step is the lever: frontier teacher behavior becomes a local artifact with a reproducible build hash and named-device measurements, distributable through the channels you already trust.</p>
 
-    <h2 id="five">Compile your first artifact in five minutes.</h2>
+    <h2 id="five">Compile your first AI in five minutes.</h2>
     <p>Install the CLI from the GitHub repo:</p>
     <pre><span class="com"># macOS, Linux, Windows</span>
 npm i -g <span class="arg">github:sneaky-hippo/kolmogorov-stack</span>
@@ -327,9 +329,53 @@ kolm run <span class="arg">support.kolm</span> <span class="arg">"customer cant 
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>&copy; 2026 Kolmogorov - the AI compiler - MIT spec</span>
-    <span><a href="/manifesto">Manifesto</a> - <a href="/security">Security</a> - <a href="/privacy">Privacy</a> - <a href="/terms">Terms</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

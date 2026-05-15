@@ -1,0 +1,31 @@
+[project]
+name = "kolm-trainer"
+version = "0.1.0"
+description = "Kolm Distill bridge — receives /v1/specialists/auto-distill jobs from kolm.ai and runs a Unsloth+PEFT QLoRA training pass, posts results back."
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "pydantic>=2.5",
+  "httpx>=0.27",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+# GPU-side dependencies. Only required if KOLM_TRAINER_MODE=real.
+gpu = [
+  "torch>=2.3",
+  "transformers>=4.45",
+  "peft>=0.13",
+  "accelerate>=0.34",
+  "datasets>=3.0",
+  "unsloth>=2025.10",
+  "bitsandbytes>=0.44",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"

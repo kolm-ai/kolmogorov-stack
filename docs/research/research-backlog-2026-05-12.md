@@ -181,6 +181,87 @@ This backlog keeps the research loop alive. The goal is to convert broad "keep r
 | RB-139 | How should local RAG indexes protect sensitive paths and previews? | Evaluate absolute path storage, previews, permissions, redaction, and optional encrypted local storage. | Local RAG privacy policy and flags. |
 | RB-140 | Which public pages need recall claim downgrades? | Review recall, API, docs, whitepaper, security, vs-rag, vs-openpipe, vs-predibase, and vs-ollama pages. | Recall claim cleanup queue. |
 
+## P0/P1: Cookbook Example Governance
+
+| ID | Question | Evidence Needed | Output |
+| --- | --- | --- | --- |
+| RB-179 | Which cookbook commands are executable today? | Extract visible snippets and JSON-LD HowTo commands, compare to `kolm --help`, and run non-network smoke cases. | Cookbook command contract test. |
+| RB-180 | What is the minimum proof bundle for a verified cookbook recipe? | Define required spec, examples, artifact, receipt, K-score schema, benchmark report, and source hashes. | `cookbook-proofs.json` schema. |
+| RB-181 | Which cookbook pages should be verified, seed, preview, or target? | Classify all 33 detail pages against existing files and fixture evidence. | Status matrix driving public labels. |
+| RB-182 | Which 8-12 recipes should become real launch proof? | Choose high-signal generic and vertical examples, then create specs, evals, artifacts, receipts, and benchmarks. | Verified launch cookbook pack. |
+| RB-183 | Should CLI support `--output`, `--input-file`, `--input-stdin`, and `spec --check`? | Decide whether docs adapt to CLI or CLI gains compatibility aliases. | CLI/docs compatibility decision and tests. |
+| RB-184 | What K-score scale should cookbook pages use? | Compare fixture manifest values, CLI `score`, public pages, and benchmark reports. | K-score schema migration and rendering policy. |
+| RB-185 | Which device benchmarks are real enough to publish? | Run verified artifacts on CI, local laptop, GPU server, phone/browser, and CPU server where available. | Device benchmark report set. |
+| RB-186 | How should JSON-LD HowTo stay truthful? | Parse structured data, verify referenced files and commands, and emit only for verified pages. | Structured-data CI gate. |
+| RB-187 | Which regulated examples need caveats or proof links? | Review healthcare, finance, legal, edge, and web3 pages for datasets, verifiers, compliance boundaries, and receipts. | Regulated recipe proof/copy queue. |
+| RB-188 | How should seed examples graduate to artifacts? | Compile selected `examples/*.json` into artifact specs, add evals, and attach receipts. | Seed-to-artifact promotion pipeline. |
+| RB-189 | What demo script should replace the stale runbook? | Rewrite the demo around current domain, current brand, current packages, and verified artifacts only. | Proof-based demo runbook. |
+| RB-190 | Which cookbook checks block launch? | Combine command extraction, file existence, artifact verification, receipt verification, and benchmark freshness. | Cookbook release gate. |
+
+## P0/P1: Project Hooks Governance
+
+| ID | Question | Evidence Needed | Output |
+| --- | --- | --- | --- |
+| RB-191 | Should `kolm.yaml` be schema-validated before runtime use? | Compare current hand-parser behavior with public schema examples and invalid fixtures. | Project config validation command and tests. |
+| RB-192 | What hook failure policy is launch-safe? | Decide advisory versus blocking defaults for PreCompile, PreRun, PreBench, and timeouts. | Hook fail-closed policy and migration note. |
+| RB-193 | Should hook stdout be allowed to modify events? | Design or remove `additionalContext` and `updatedInput`; test mutation and denial paths. | Hook mutation spec or schema cleanup. |
+| RB-194 | How should users inspect hook side effects? | Add `kolm hooks list` or `kolm doctor --hooks` showing discovered root, commands, timeout, and mode. | Hook inventory UX and tests. |
+| RB-195 | How should K-score gates compare scores? | Normalize fixture and future K-score values before applying `k_min` floors. | K-score gate migration and MCP tests. |
+| RB-196 | Should `sse` remain in the project schema? | Compare schema transport enum with implemented stdio and HTTP JSON-RPC server. | Schema transport correction or SSE implementation. |
+| RB-197 | How should `allowed-tools` be enforced? | Trace project config to SKILL.md, MCP metadata, and harness permissions. | Sidecar/MCP allowed-tool enforcement decision. |
+| RB-198 | What should `kolm doctor` actually certify? | Add harness config checks, MCP initialize/list smoke, project parser validation, hooks, sidecars, and artifacts. | Doctor certification matrix. |
+| RB-199 | Should project discovery execute ancestor hooks by default? | Test nested project behavior, untrusted checkout scenarios, and explicit bypass UX. | Project root and hook trust policy. |
+| RB-200 | How should hook execution be audited? | Capture hook command id, exit code, timeout, bypass state, and redacted stderr/stdout. | Local hook audit log schema. |
+| RB-201 | How should generated sidecars avoid overstating runtime guarantees? | Compare sidecar guarantee text with benchmark-scoped egress monitor and local run behavior. | Sidecar template rewrite and test. |
+| RB-202 | Which config/hook tests block launch? | Cover init, parser, schema, hooks, KOLM_HOOKS_OFF, k_min, doctor, sidecar, and MCP config. | Project automation CI gate. |
+
+## P0/P1: Tune Evolution Governance
+
+| ID | Question | Evidence Needed | Output |
+| --- | --- | --- | --- |
+| RB-203 | How should tune eval load real artifact eval cases? | Compare `evalRevision`, `inspectArtifact`, `evalArtifact`, fixture bundles, and current 0/0 probe behavior. | Fixed eval-case loader and regression test. |
+| RB-204 | What is the adapter-backed eval contract? | Decide how a revision adapter affects LM-backed recipes, deterministic recipes, or a separate model-eval harness. | Adapter eval design and launch labels. |
+| RB-205 | What should tune promotion actually modify? | Compare local `HEAD` flips, artifact bundle mutation, re-signing, registry revisions, and serve hot reload. | Promotion semantics decision and implementation plan. |
+| RB-206 | How should `require_improvement` and `k_min` be enforced? | Evaluate candidate and current head on the same eval set and read configured gates in CLI output. | Promotion gate tests and CLI output fix. |
+| RB-207 | What governance controls belong on local captures? | Define redaction, encryption, consent, retention, source labels, purge, and audit events for `captures.jsonl`. | Local capture governance schema. |
+| RB-208 | What airgap proof level is honest for tune? | Test env flags, local base paths, remote model ids, Python network APIs, and OS/process-level denial options. | Tune airgap threat model and smoke test. |
+| RB-209 | How should tune dependency failures surface? | Preserve trainer exit code 64, implement or remove `KOLM_TUNE_TRAINER`, and add dependency doctor checks. | Tune troubleshooting contract and tests. |
+| RB-210 | What watcher controls are needed before auto-promote? | Add locking, duplicate-run protection, backoff, sample-size behavior, process status, and manual approval mode. | Watcher safety policy and tests. |
+| RB-211 | Should RAG attachment be signed local state or runtime injection? | Compare sidecar behavior, `lib.rag` target architecture, runner integration, and artifact receipt semantics. | RAG attachment contract and copy cleanup. |
+| RB-212 | Can CI run a cheap tune loop? | Build a fake trainer or tiny local-model fixture for init, capture, step, eval, promote, rollback, and watch. | Deterministic tune CI fixture. |
+| RB-213 | Which evolve page claims must be proof-generated? | Generate terminal samples and K-score values from current CLI/eval fixtures. | Evolve static claim test. |
+| RB-214 | Which tune/evolution checks block launch? | Combine eval-case loading, adapter scope, promotion gates, capture governance, airgap, watcher, and RAG status. | Tune/evolution release gate. |
+
+## P0/P1: Homepage Claim Regression
+
+| ID | Question | Evidence Needed | Output |
+| --- | --- | --- | --- |
+| RB-215 | What homepage copy is safe for the current artifact tier? | Rewrite the homepage around verified fixture artifacts, HMAC receipt truth, and recipe-tier local execution. | Proof-backed homepage claim spec. |
+| RB-216 | How should metadata and JSON-LD be claim-gated? | Parse meta, OG, Twitter, FAQ schema, offer schema, and software feature arrays for forbidden claim families. | Structured-data claim linter. |
+| RB-217 | Which exact and fuzzy phrase families should block deployment? | Expand beyond exact phrases to model weights, phone runtime, VPC, airgap, regulated data, public-key receipts, and monotonic improvement. | Claim-family rule set and tests. |
+| RB-218 | How should live/local parity be verified before release? | Fetch live home, docs, pricing, healthcare, FAQ, API, device, benchmarks, and compare against local forbidden-claim scans. | Live claim smoke script. |
+| RB-219 | What public homepage proof block should replace handwritten demos? | Use sample, redactor, extractor, and classifier fixtures plus benchmark output to generate demo snippets. | Generated homepage proof partial. |
+| RB-220 | Which regulated homepage cards need labels or removal? | Review healthcare, legal, finance, device, edge, BAA, VPC, and audit-log wording against implemented controls. | Regulated card rewrite queue. |
+| RB-221 | How should README/package metadata align with implementation truth? | Compare README intro, package description, local homepage, and artifact code caveats. | Metadata cleanup patch list. |
+| RB-222 | Which live docs/install claims remain stale after the next deploy? | Compare live docs against route manifest, package availability, and current CLI/package names. | Post-deploy docs parity report. |
+| RB-223 | What is the minimum public proof link for model/phone/VPC/airgap claims? | Define acceptable proof artifacts, benchmarks, deployment diagrams, receipts, and owner sign-off. | Claim-proof policy. |
+| RB-224 | Which homepage checks block launch? | Combine static text, structured data, proof links, live parity, and fixture-generated examples. | Homepage release gate. |
+
+## P0/P1: Runtime Sandbox Threat
+
+| ID | Question | Evidence Needed | Output |
+| --- | --- | --- | --- |
+| RB-225 | What trust levels should govern recipe execution? | Define generated, customer-private, curated-public, and public-untrusted behavior across CLI, API, registry export, browser SDK, and MCP. | Runtime trust-level schema. |
+| RB-226 | Which malicious JS primitives are blocked today? | Add tests for process, require, module, globalThis, import, Function, eval, constructor, prototype, ArrayBuffer, SharedArrayBuffer, Atomics, fetch, Date, randomness, and async tasks. | `verifier-security.test.js`. |
+| RB-227 | How should CPU and memory be bounded? | Test infinite loops, long synchronous loops, recursion, allocation pressure, and worker/process termination behavior. | Killable execution design. |
+| RB-228 | Should benchmark egress become runtime egress policy? | Compare benchmark-only patching with `runArtifact`, `/v1/run`, MCP, browser SDK, and public run behavior. | Runtime egress policy and tests. |
+| RB-229 | How should public registry rows prove trust? | Add review state, publisher identity, source hash/signature envelope, revocation epoch, and trust tier to public exports. | Public recipe trust envelope. |
+| RB-230 | How should browser sandbox assets be verified? | Syntax-check SDK/worker assets, run worker smoke, and test malicious globals and main-thread fallback behavior. | Browser sandbox CI gate. |
+| RB-231 | Should main-thread browser fallback be disabled? | Test no-Worker runtimes, unsafeMode, public registry source, and explicit user consent. | Browser unsafe-mode policy. |
+| RB-232 | What is the first WASM/Wasmtime recipe fixture? | Convert one fixture recipe or a tiny DSL output to WASM and test explicit imports, memory bounds, and conformance. | WASM recipe proof of concept. |
+| RB-233 | How should compiled function cache respect trust and revocation? | Include trust tier, source hash, and registry revocation epoch in cache keys and invalidation. | Runtime cache invalidation plan. |
+| RB-234 | Which sandbox checks block launch? | Combine malicious JS tests, external asset syntax checks, public-run trust gating, egress policy, and fixture trust labels. | Runtime sandbox release gate. |
+
 ## P0/P1: Release Distribution Governance
 
 | ID | Question | Evidence Needed | Output |
@@ -197,6 +278,21 @@ This backlog keeps the research loop alive. The goal is to convert broad "keep r
 | RB-176 | What release workflow emits SLSA, Sigstore, and SBOM evidence? | Add tag workflow with id-token, package publish, Cosign, CycloneDX, checksums, and verification jobs. | Signed-release workflow. |
 | RB-177 | How should docs render shipped/preview labels? | Build a release-evidence JSON manifest and drive public integration badges from checks. | Generated integration status labels. |
 | RB-178 | Which package-manager tests block launch? | Add npm view, pip/PyPI ownership, tap URL, winget/Scoop, action smoke, package dry-run, and VSIX checks. | Release CI gate. |
+
+## P0/P1: Release Channel Live Refresh
+
+| ID | Question | Evidence Needed | Output |
+| --- | --- | --- | --- |
+| RB-235 | What single install command is truthful before package publication? | Compare live docs, local docs, npm registry state, source package dry-run, and public repo availability. | Preview install contract. |
+| RB-236 | How should the root package be curated? | Add allowlist or ignore policy, exclude `tmp/`, research docs, public bulk, tests, and verify lock/license decision. | Package-content policy and CI budget. |
+| RB-237 | What should replace the current GitHub Action contract? | Smoke action against current CLI commands or implement missing auth/verify/JSON output modes. | Action contract test and rewrite. |
+| RB-238 | Which package names are actually publishable? | Resolve npm CLI, Node SDK, Python name collision, script names, ownership, and namespace policy. | Package naming decision record. |
+| RB-239 | How should Homebrew, winget, Scoop, and Docker be labeled? | Verify tap, formula SHA, manifests, image digest, and install smoke. | Package-manager evidence manifest. |
+| RB-240 | How should live docs handle the old API/package page? | Compare live `/docs`, local docs, sitemap, redirects, and generated docs assets. | Legacy docs retirement or banner plan. |
+| RB-241 | What is the release evidence manifest schema? | Define channel, command, expected version, source URL, last check, status, and proof artifact fields. | `release-evidence.json` schema. |
+| RB-242 | Which docs labels should be generated from release evidence? | Map integrations/docs/quickstart/changelog package labels to release-evidence fields. | Generated label rendering plan. |
+| RB-243 | What release workflow should emit package proofs? | Design tag workflow for npm, Python, Docker, VS Code, checksums, signatures, SBOM, and provenance. | Tagged release workflow spec. |
+| RB-244 | Which stale SDK docs must be blocked from publication? | Review Python README, VS Code metadata, Node SDK README, live docs, and package descriptions. | SDK docs cleanup queue. |
 
 ## P0/P1: Device Offline Browser Governance
 
@@ -252,6 +348,56 @@ This backlog keeps the research loop alive. The goal is to convert broad "keep r
 | RB-013 | Which competitor evidence rows have a working Kolm import path? | Use `competitor-evidence-matrix-2026-05-12.csv` to pick one gateway, one eval platform, and one prompt registry, then build fixtures. | Importer proof matrix. |
 | RB-014 | Which competitor claims directly conflict with Kolm public copy? | Compare competitor matrix against `claim-audit-2026-05-12.csv` and current local pages. | Copy-risk diff and rewrite queue. |
 
+## P0/P1: Competitor Trace Import Wedge
+
+| ID | Question | Evidence Needed | Output |
+| --- | --- | --- | --- |
+| RB-245 | What is the `kolm-trace-1` interchange schema? | Map Langfuse, LangSmith, Braintrust, Helicone, Phoenix, Weave, OpenPipe, and local observations to one row shape. | Trace/eval schema spec. |
+| RB-246 | Which importer should ship first? | Compare API/export friction, self-host value, fixture availability, and buyer overlap for Langfuse, Helicone, LangSmith, Braintrust, and OpenPipe. | Importer priority decision. |
+| RB-247 | How should Langfuse traces become eval cases? | Pull traces, observations, scores, datasets, and tags via SDK/API and convert to a small Kolm spec. | Langfuse golden fixture. |
+| RB-248 | How should Helicone exports become compile candidates? | Use dataset export, request query, or export CLI rows with request/response bodies and metadata. | Helicone JSONL fixture. |
+| RB-249 | What LiteLLM hook shape feeds Kolm without blocking requests? | Prototype callback/logger payload, async post-success behavior, and error isolation. | LiteLLM callback package plan. |
+| RB-250 | What Vercel AI SDK middleware contract routes artifact-first? | Wrap model, try artifact, emit receipt, fall back to original model, and report avoided call. | Vercel middleware fixture. |
+| RB-251 | Can Cloudflare or Portkey route to Kolm as a custom/private provider? | Verify endpoint requirements, auth headers, OpenAI-compatible shape, and cache/rate-limit behavior. | Custom-provider route plan. |
+| RB-252 | How should external scores map into K-score? | Map Braintrust, Langfuse, Weave, Phoenix, and Helicone scores to pass/fail evals, coverage, and confidence. | Score-normalization memo. |
+| RB-253 | What privacy gates block trace imports? | Define redaction, consent, retention, user/session hashing, and source-system data residency requirements. | Import privacy policy. |
+| RB-254 | How should Kolm write results back to source systems? | Determine artifact ID, receipt ID, K-score, benchmark, fallback, and avoided-cost metadata per source. | Receipt write-back contract. |
+| RB-255 | What JSON schemas should validate `kolm-trace-1` and `kolm-evalcase-1`? | Convert the research spec into schema files plus valid and invalid fixtures. | Schema files and fixture test suite. |
+| RB-256 | Which fields must never embed inside `.kolm` evals? | Compare source IDs, raw payload refs, scores, user/session hashes, and consent metadata against portable artifact contents. | Eval embedding allowlist. |
+| RB-257 | How should source row checksums and import receipts work? | Define canonical JSON checksum, raw source checksum, importer manifest, and receipt IDs. | Import receipt spec. |
+| RB-258 | How should namespace drift be fixed before importers land? | Compare `namespace`, `corpus_namespace`, bridge observations, labels export, and inbox filters. | Namespace migration plan and regression tests. |
+| RB-259 | Which first fixture set proves field preservation? | Build Langfuse, Helicone, OpenPipe, LangSmith, Weave, and local observation fixtures with expected normalized output. | Golden fixture pack. |
+| RB-260 | What is the `kolm-score-1` normalized score object? | Convert external score normalization memo into JSON schema and examples. | Score schema and validation fixtures. |
+| RB-261 | How should score maps be configured per source/project? | Define numeric scale, direction, threshold, categorical maps, scorer trust, and eval_use fields. | Score-map config spec. |
+| RB-262 | Which source scores can select holdout evals? | Test Langfuse, LangSmith, Braintrust, Phoenix, and Weave score fixtures with missing/known directions and thresholds. | Eval selection policy. |
+| RB-263 | How should conflicting source scores be reported? | Create fixtures with human/user/LLM/code scorer disagreement. | Score conflict report. |
+| RB-264 | Which score aggregates are allowed only in manifests? | Compare Weave summaries, Langfuse analytics, LangSmith feedback_stats, and Braintrust experiment summaries. | Aggregate-score guard tests. |
+| RB-265 | What privacy modes should every importer support? | Specify hash-only, redacted, raw, and blocked semantics with fixture examples. | Import privacy mode schema. |
+| RB-266 | What should an import manifest contain for purge and audit? | Define privacy mode, retention, row checksums, source checksums, raw sidecar refs, loss report, and source delete refs. | Import manifest schema. |
+| RB-267 | How should redaction-before-persist work locally? | Define redactor hook interface, detector report, dropped-field behavior, and no-sample loss reports. | Redaction hook fixture. |
+| RB-268 | How should import purge/anonymize work? | Delete normalized rows, raw sidecars, loss reports, label exports, cache entries, jobs, and write-back state. | `kolm import purge` spec. |
+| RB-269 | Which importer privacy tests block launch? | Cover blocked mode, missing retention, raw allow flag, identity hashing, sidecar purge, artifact allowlist, and no-sample loss reports. | Import privacy CI gate. |
+| RB-270 | What should `kolm-import-manifest-1` contain? | Define manifest ID, source checksum, row refs, privacy block, counts, artifacts, loss reports, and purge state. | Manifest JSON schema. |
+| RB-271 | How should purge dry-run report targets? | Enumerate rows, scores, raw sidecars, labels, cache keys, writebacks, artifacts, blocked targets, and counts. | Dry-run output fixture. |
+| RB-272 | How should delete and anonymize differ? | Define delete target removal and anonymize patch allowlists for rows, scores, comments, identities, and raw refs. | Purge mode spec and tests. |
+| RB-273 | How should purge audit survive row deletion? | Add durable purge event or signed manifest update independent of deleted source rows. | Purge audit event design. |
+| RB-274 | What cache helpers are required for import purge? | Add delete-by-key and configured data-root alignment for cache entries listed in import manifests. | Cache purge helper plan. |
+| RB-275 | What exact Langfuse fixture pack should ship first? | Build traces observations scores datasets dataset items run items retention and expected-output files from the Langfuse importer spec. | Langfuse golden fixture directory. |
+| RB-276 | How should Langfuse score-map fixtures fail closed? | Cover numeric direction thresholds boolean evidence categorical map misses text scores scorer origin and attachment targets. | Langfuse score-map fixture suite. |
+| RB-277 | Which Langfuse dataset items become artifact eval cases? | Test expected output presence archived status schema validity source trace links dataset version timestamps and privacy boundaries. | Dataset-to-evalcase acceptance tests. |
+| RB-278 | What manifest and loss-report assertions prove Langfuse import completeness? | Compare source counts row checksums mode-specific outputs blocked rows loss rows dry-run purge targets and no-sample reports. | Manifest and loss-report fixture gate. |
+| RB-279 | When is Langfuse live API fetch safe to add? | Require fixture parity pagination coverage field-group preservation credential handling privacy modes and purge dry-run first. | Live connector readiness checklist. |
+| RB-280 | What exact fixture files implement the Langfuse support-v1 pack? | Materialize traces observations scores datasets retention score-map and expected output files from the blueprint. | Executable fixture pack. |
+| RB-281 | What semantic assertions should the fixture harness enforce? | Check pagination field groups structured IO scores loss rows manifest counts denylist and mode differences. | Importer fixture test harness. |
+| RB-282 | How should hash-only output differ from redacted output? | Compare checksums source refs loss classes counts and IO payload suppression. | Hash-only fixture snapshots. |
+| RB-283 | What purge dry-run output follows from the Langfuse manifest? | Enumerate rows scores loss reports sidecars caches writebacks non-purgeable artifacts and blocked targets. | Langfuse purge dry-run fixture. |
+| RB-284 | Which source fields need canonical checksum rules? | Define canonical JSON for trace observation score dataset and loss rows before fixture snapshots ship. | Canonical checksum rule memo. |
+| RB-285 | Which JCS implementation should Kolm use? | Compare dependency footprint test-vector support browser/server availability and security posture. | JCS implementation decision. |
+| RB-286 | What checksum test vectors should block fixture generation? | Use RFC 8785 vectors plus Kolm domain-envelope examples, byte checksums, JSONL ordering, and manifest state updates. | Checksum test-vector suite. |
+| RB-287 | How should import manifests display checksum provenance to operators? | Decide what source file row normalized evalcase score loss and state checksums are visible in CLI and APIs. | Manifest checksum UX contract. |
+| RB-288 | How should checksum migration work if rules change? | Define rule_id versioning, dual-write windows, old-manifest verification, and migration reports. | Checksum migration policy. |
+| RB-289 | How should checksum errors be reported without leaking data? | Create redacted diagnostics for malformed JSON, non-finite numbers, checksum mismatch, and missing row refs. | Checksum error taxonomy. |
+
 ## P1: Benchmarks And Runtime Targets
 
 | ID | Question | Evidence Needed | Output |
@@ -286,6 +432,18 @@ This backlog keeps the research loop alive. The goal is to convert broad "keep r
 | RB-051 | How should public/private registry SKUs work? | Enterprise package managers, model registries, compliance retention analogs. | Registry SKU spec. |
 | RB-052 | What is the first paid unit Kolm should test? | Price-sensitivity interviews around compile jobs, accepted artifacts, receipt retention, registry artifact-months, and org seats. | Pilot pricing scorecard. |
 | RB-053 | What proof is required before savings claims are priced? | Capture-to-artifact benchmark that measures avoided model calls and retained receipt evidence. | Savings claim proof protocol. |
+
+## P0: Venture Redline Follow-Ups
+
+| ID | Question | Evidence Needed | Output |
+| --- | --- | --- | --- |
+| RB-290 | Which runtime target matrix can be published without overclaiming? | Real device list, target runtime, artifact tier, support status, fallback behavior, and benchmark command. | Runtime target matrix and `/research` update. |
+| RB-291 | Which native baselines must be run before cross-platform claims expand? | Core ML, LiteRT, ONNX Runtime, ExecuTorch, llama.cpp, MLC, and server baselines where relevant. | Native benchmark pack with raw logs. |
+| RB-292 | What exactly does local personalization mean in v1? | Retrieval/training decision, storage, encryption, deletion, device limits, eval impact, and review risk. | Personalization mechanics spec. |
+| RB-293 | What does each artifact tier actually contain? | `kolm inspect --json` output for recipe, adapter, specialist, and bundle tiers. | Artifact contents proof fixtures. |
+| RB-294 | How should registry pages prove trust? | K-score history, target profile, source provenance, review status, receipt sample, license, and revocation policy. | Public artifact detail template. |
+| RB-295 | Which compliance claims can be said after legal/security review? | BAA/DPA posture, subprocessors, retention, audit logs, encryption, support access, limitations, and owner. | Compliance evidence map. |
+| RB-296 | Which single vertical should get the first 90-day pilot offer? | Healthcare, fintech, and enterprise mobile buyer interviews with sales objections and success metric. | ICP scorecard and design-partner offer. |
 
 ## Research Operating Cadence
 

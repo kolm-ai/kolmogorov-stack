@@ -1,19 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
   <title>On-device runtime · kolm</title>
   <meta name="description" content="The full kolm registry, running on your device. Type anything. Every recipe classifies it locally, in microseconds, offline, free. Add to home screen for an offline AI app." />
   <meta property="og:title" content="kolm. Running on this device, right now." />
   <meta property="og:description" content="Frontier-grade structured behavior, decomposed into recipes, deployed to any device with 1 MB of storage. No GPU. No network. No bill." />
-  <meta name="theme-color" content="#0b0d10" />
+  <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="canonical" href="https://kolm.ai/device" />
   <meta property="og:image" content="https://kolm.ai/img/brand-og.png" />
+<meta property="og:url" content="https://kolm.ai/device">
+<meta name="twitter:title" content="kolm. Running on this device, right now.">
+<meta name="twitter:description" content="Frontier-grade structured behavior, decomposed into recipes, deployed to any device with 1 MB of storage. No GPU. No network. No bill.">
+<meta name="twitter:image" content="https://kolm.ai/img/brand-og.png">
   <meta name="twitter:card" content="summary_large_image" />
   <meta property="twitter:image" content="https://kolm.ai/img/brand-og.png" />
   <link rel="manifest" href="/manifest.json" />
@@ -37,6 +43,7 @@
       <a href="/playground">Playground</a>
       <a href="/docs">Docs</a>
       <a href="/articles">Articles</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
       <a href="/account">Account</a>
       <a href="/signup">Get API key &rarr;</a>
@@ -447,5 +454,55 @@ window.addEventListener('beforeinstallprompt', (e) => {
   document.getElementById('status').appendChild(btn);
 });
 </script>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
 </body>
 </html>

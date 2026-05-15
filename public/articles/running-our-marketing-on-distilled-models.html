@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Our marketing runs on 4 distilled models · kolm</title>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Our marketing runs on 4 distilled models ·kolm</title>
 <meta name="description" content="The kolm marketing site is dogfood. Four Specialists power the most expensive AI features on this site, on a $99/mo GPU sliver. Here's which Specialists, what they cost, and what we kept on the frontier.">
 <meta name="keywords" content="dogfood AI, marketing AI cost, distilled model marketing stack, kolm specialists, .kolm production">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta name="author" content="Kolmogorov">
 <meta name="robots" content="index,follow,max-snippet:-1">
@@ -96,13 +97,13 @@
   header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
   header.site .left{display:flex;align-items:center;gap:36px}
   header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
-  header.site .brand span{font-weight:540;font-size:16px}
+  header.site .brand span{font-weight: 500;font-size:16px}
   header.site nav{display:flex;gap:22px}
   header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
   header.site nav a:hover{color:var(--ink)}
   header.site .right{display:flex;align-items:center;gap:14px}
   header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
-  header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:540}
+  header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
   @media(max-width:720px){header.site nav{display:none}}
 
   section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
@@ -113,23 +114,23 @@
   h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
   h1 .tone{color:var(--accent)}
   p.lede{margin:0 0 0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
-  p.lede b{color:var(--ink);font-weight:540}
+  p.lede b{color:var(--ink);font-weight: 500}
   .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
   .meta b{color:var(--ink-mute);font-weight:500}
 
   article{padding:36px 0 96px}
-  article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:540;color:var(--ink)}
+  article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight: 500;color:var(--ink)}
   article h2 .tone{color:var(--accent)}
-  article h3{margin:36px 0 10px;font-size:18px;font-weight:540;color:var(--ink)}
+  article h3{margin:36px 0 10px;font-size:18px;font-weight: 500;color:var(--ink)}
   article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
-  article p b{color:var(--ink);font-weight:540}
+  article p b{color:var(--ink);font-weight: 500}
   article p code,article li code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
   article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid var(--accent);background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
-  article blockquote p{color:var(--ink);margin:0;font-weight:480}
+  article blockquote p{color:var(--ink);margin:0;font-weight: 500}
   article ul{padding-left:0;list-style:none;margin:16px 0 24px}
   article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
-  article ul li::before{content:"-";color:var(--accent);position:absolute;left:6px;font-weight:560}
-  article ul li b{color:var(--ink);font-weight:540}
+  article ul li::before{content:"-";color:var(--accent);position:absolute;left:6px;font-weight: 500}
+  article ul li b{color:var(--ink);font-weight: 500}
   article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
   article pre .com{color:var(--ink-faint)}
   article pre .arg{color:var(--accent)}
@@ -155,7 +156,7 @@
   .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
   .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
   .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .signpost a .v{color:var(--ink);font-weight:540;font-size:16px}
+  .signpost a .v{color:var(--ink);font-weight: 500;font-size:16px}
   .signpost a .v .arrow{color:var(--accent);margin-left:6px}
   .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
 
@@ -173,6 +174,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -303,20 +305,20 @@ total                                     <span class="arg">$  339 / mo</span></
     --base qwen-2.5-3b-instruct \
     --gate K=88
 
-<span class="arg">→</span> verifier synthesized   schema + length-band + topic-overlap
-<span class="arg">→</span> k-sampled teacher       claude-opus-4-7 (k=4, n=200)
-<span class="arg">→</span> LoRA fit                12 min on H100, loss 0.21 → 0.06
-<span class="arg">→</span> K-score                 93.4 (T 95.1 / C 92.0 / L 92.8)
-<span class="arg">→</span> signed                  tldr-2.1.kolm  (1.4GB)
+<span class="arg"> - /span> verifier synthesized   schema + length-band + topic-overlap
+<span class="arg"> - /span> k-sampled teacher       claude-opus-4-7 (k=4, n=200)
+<span class="arg"> - /span> LoRA fit                12 min on H100, loss 0.21  - 0.06
+<span class="arg"> - /span> K-score                 93.4 (T 95.1 / C 92.0 / L 92.8)
+<span class="arg"> - /span> signed                  tldr-2.1.kolm  (1.4GB)
 
 <span class="kw">$</span> kolm compare ./tldr-2.0.kolm ./tldr-2.1.kolm
-<span class="arg">→</span> K-score          93.4 ↑ from 92.8 (+0.6)
-<span class="arg">→</span> regressions      0
-<span class="arg">→</span> recommended      promote new artifact
+<span class="arg"> - /span> K-score          93.4  - from 92.8 (+0.6)
+<span class="arg"> - /span> regressions      0
+<span class="arg"> - /span> recommended      promote new artifact
 
 <span class="kw">$</span> kolm publish ./tldr-2.1.kolm --to=marketing-prod
-<span class="arg">→</span> rolled out behind 5% traffic
-<span class="arg">→</span> hold for 24h, auto-promote on no K-score regression</pre>
+<span class="arg"> - /span> rolled out behind 5% traffic
+<span class="arg"> - /span> hold for 24h, auto-promote on no K-score regression</pre>
 
     <p>The whole pipeline is six commands. <b>One CI job, ten minutes a night.</b> Specialists that fail the gate stay at the prior version; Specialists that pass roll out behind a 5% canary. We have not had a regression incident since switching.</p>
 
@@ -361,9 +363,53 @@ total                                     <span class="arg">$  339 / mo</span></
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolmogorov &middot; 2026 &middot; engineering essays</span>
-    <span><a href="/articles">All articles</a> &middot; <a href="/articles/rss.xml">RSS</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

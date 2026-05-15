@@ -560,9 +560,9 @@ check "sitemap has /legal"        has "$SITEMAP" "/legal"
 check "sitemap has /edge"         has "$SITEMAP" "/edge"
 check "sitemap dated 2026-05-08"  has "$SITEMAP" "2026-05-08"
 
-# Homepage footer has 5 columns including new cookbook column
+# Homepage footer has 5 columns including industries (with cookbook)
 HOME=$(curl -s "$URL/")
-check "homepage footer cookbook col" has "$HOME" "all recipes"
+check "homepage footer industries col" has "$HOME" '<div class="col-h">industries</div>'
 
 # Changelog has v5.4 entry
 CHANGELOG=$(curl -s "$URL/changelog")
@@ -570,7 +570,7 @@ check "/changelog v5.4 entry" has "$CHANGELOG" "v5.4"
 
 echo ""
 echo "=== 27. v5.7 — comparators, why-now, threat model, RSS, packages ==="
-for p in vs-ollama vs-rag vs-fine-tune why-now threat-model trust integrations press; do
+for p in vs-ollama vs-rag vs-fine-tune why-now threat-model trust integrations/ press; do
   C=$(curl -s -o /dev/null -w "%{http_code}" "$URL/$p")
   check "GET /$p → 200" test "$C" = "200"
 done
@@ -641,13 +641,13 @@ check "/articles advertises RSS"       has "$AI" 'application/rss+xml'
 
 # Homepage hero thesis + GitHub star + ICP doors
 H2=$(curl -s "$URL/")
-check "homepage compile-anatomy thesis" has "$H2" 'Idea to application'
-check "homepage 2-CTA: Try kolm"       has "$H2" 'Try kolm &rarr;'
-check "homepage 2-CTA: Book a demo"    has "$H2" 'Book a demo &rarr;'
+check "homepage hero promise .exe vs .kolm" has "$H2" '.exe</b> is for software'
+check "homepage 2-CTA: Compile first AI" has "$H2" 'Compile your first AI &rarr;'
+check "homepage 2-CTA: View the registry" has "$H2" 'View the registry &rarr;'
 check "homepage demo mailto"           has "$H2" 'mailto:founders@kolm.ai'
 check "homepage registry counter"      has "$H2" 'js-registry-count'
 check "homepage registry endpoint"     has "$H2" "fetch('/v1/registry/public'"
-check "homepage intuitive lede"        has "$H2" 'A real AI that runs on your hardware'
+check "homepage hero promise .kolm is for AI" has "$H2" 'is for AI'
 check "homepage roi link"              has "$H2" '/roi'
 check "homepage nav: Solutions"        has "$H2" '>Solutions<'
 check "homepage nav: Developers"       has "$H2" '>Developers<'
@@ -702,14 +702,13 @@ check "/v1/plans teams"                has "$PLANS" '"id":"teams"'
 check "/v1/plans enterprise"           has "$PLANS" '"id":"enterprise"'
 
 # Homepage hero + system-map (the loop)
-check "homepage hero intuitive lede"   has "$H2" 'Compile your own AI'
+check "homepage hero H1 v7.21"         has "$H2" 'Compile your first AI'
 check "homepage cinematic close"       has "$H2" 'kolm-hero.mp4'
-check "homepage compile-anatomy step"  has "$H2" 'compile-anatomy'
 
 echo ""
 echo "=== 30. v7.0 day-1 — brand anchor + rent-vs-buy ==="
 B30_HOME=$(curl -s "$URL/")
-check "homepage H1 lock 'Compile your own AI.'" has "$B30_HOME" 'Compile your own AI.'
+check "homepage H1 lock v7.21 'Compile your first AI'" has "$B30_HOME" 'Compile your first AI'
 check "homepage compile-anatomy yours-forever"     has "$B30_HOME" 'Yours forever'
 # v7.11.4: trust-line removed; open-source posture now in footer only
 check "homepage footer github link"                has "$B30_HOME" 'github.com/sneaky-hippo/kolmogorov-stack'
@@ -735,12 +734,12 @@ B31_UC=$(curl -s "$URL/use-cases")
 check "use-cases hub NO bare SWE-bench claim"      lacks "$B31_UC" '\+15\.33'
 check "GET /articles/how-we-benchmark -> 200"      bash -c "[ \"\$(curl -s -o /dev/null -w '%{http_code}' '$URL/articles/how-we-benchmark')\" = '200' ]"
 B31_HWB=$(curl -s "$URL/articles/how-we-benchmark")
-check "how-we-benchmark cites +10.67pp"            has "$B31_HWB" '10\.67'
+check "how-we-benchmark NO fabricated +10.67"      lacks "$B31_HWB" '10\.67'
 check "how-we-benchmark cites n=150"               has "$B31_HWB" 'n=150'
 check "how-we-benchmark cites swebench 4.1.0"      has "$B31_HWB" 'swebench 4\.1\.0'
 check "how-we-benchmark cites seed=42"             has "$B31_HWB" 'seed.*42'
 check "how-we-benchmark has reproducer command"    has "$B31_HWB" 'kolm.*bench.*reproduce.*swebench-lite-n150'
-check "how-we-benchmark has diagnosis section"     has "$B31_HWB" 'disagrees with ours'
+check "how-we-benchmark frames pending signed run" has "$B31_HWB" 'signed run'
 check "how-we-benchmark has not-claimed section"   has "$B31_HWB" 'do not claim'
 B31_SITEMAP=$(curl -s "$URL/sitemap.xml")
 check "sitemap HAS how-we-benchmark"               has "$B31_SITEMAP" 'how-we-benchmark'
@@ -1145,7 +1144,7 @@ ART_IDX=$(curl -s "$URL/articles")
 check "/articles index lists rent-vs-buy"       has "$ART_IDX" "/articles/rent-vs-buy-compute"
 UC_IDX=$(curl -s "$URL/use-cases")
 check "/use-cases index lists capture+distill"  has "$UC_IDX" "/use-cases/capture-and-distill"
-check "/use-cases index three audiences"        has "$UC_IDX" "Built for three kinds of teams\|Three audiences"
+check "/use-cases broad teams strip"            has "$UC_IDX" "Every team has a few of these"
 
 # Sitemap entries for both new URLs.
 WE_SM=$(curl -s "$URL/sitemap.xml")
@@ -1276,7 +1275,7 @@ if [ -f "$KOLM_CLI" ]; then
   node "$KOLM_CLI" bench --reproduce >"$TMP43" 2>&1; NOSUITE_RC=$?
   set -e
   check "bench --reproduce no-suite exit 1"     eq "$NOSUITE_RC" 1
-  check "bench --reproduce no-suite headline"   grep -qF "+10.67pp" "$TMP43"
+  check "bench --reproduce no-suite headline"   grep -qF "swebench 4.1.0" "$TMP43"
 
   # 4. Bad --n (out of [1,300]) returns exit 1.
   set +e
@@ -1319,19 +1318,10 @@ echo "=== 45. homepage v7.9.5 consolidated surface ==="
 HOME=$(curl -s "$URL/")
 # v7.9.5: reg-strip, cred-band, vr 3-card grid, reg-tele all deleted as duplicates/clutter.
 # Consolidated to: hero · video · compile-anatomy · ROI-calc · uc-strip (4 cards incl. regulated) · trust-line · CTA
-check "/ compile-anatomy thesis"        has "$HOME" 'Idea to application'
-check "/ compile-anatomy step read"     has "$HOME" 'Read your task'
-check "/ compile-anatomy step train"    has "$HOME" 'Train a small model'
-check "/ compile-anatomy step ship"     has "$HOME" 'Prove and ship'
-check "/ compile-anatomy step ship gate" has "$HOME" 'Clears the'
-check "/ compile-anatomy no Score+sign" lacks "$HOME" 'Score and sign'
-check "/ ca-os macOS chip"              has "$HOME" '<b>macOS</b>'
-check "/ ca-os Linux chip"              has "$HOME" '<b>Linux</b>'
-check "/ ca-os Windows chip"            has "$HOME" '<b>Windows</b>'
-check "/ ca-os iOS chip"                has "$HOME" '<b>iOS</b>'
-check "/ ca-os Android chip"            has "$HOME" '<b>Android</b>'
-check "/ ac-where OS row"               has "$HOME" '<span>macOS</span><span>Linux</span><span>Windows</span><span>iOS</span><span>Android</span>'
-check "/ ac-where-ff form factor"       has "$HOME" 'class="ac-where ac-where-ff"'
+# v7.21: compile-anatomy + ca-os chips + ac-where rows removed in homepage simplification
+check "/ hero promise .exe vs .kolm"    has "$HOME" '.exe</b> is for software'
+check "/ hero CTA Compile your first"   has "$HOME" 'Compile your first AI'
+check "/ hero CTA View the registry"    has "$HOME" 'View the registry'
 check "/ uc-tabs everyday"              has "$HOME" 'data-tab="everyday"'
 check "/ uc-tabs regulated"             has "$HOME" 'data-tab="regulated"'
 check "/ uc-tabs device"                has "$HOME" 'data-tab="device"'
@@ -1339,11 +1329,11 @@ check "/ uc-card coding"                has "$HOME" 'Agents that don'
 check "/ uc-card capture"               has "$HOME" 'Cut the OpenAI bill'
 check "/ uc-card regulated"             has "$HOME" 'class="uc-card uc-card-reg"'
 check "/ uc-seal own inference"         has "$HOME" 'The inference belongs to you'
-check "/ uc-covers footnote"            has "$HOME" 'class="uc-covers"'
-check "/ uc-covers hc link"             has "$HOME" 'href="/healthcare">healthcare'
-check "/ uc-covers fi link"             has "$HOME" 'href="/finance">finance'
-check "/ uc-covers lg link"             has "$HOME" 'href="/legal">legal'
-check "/ uc-covers edge link"           has "$HOME" 'href="/edge">edge / on-device'
+# v7.21: uc-covers footnote consolidated into uc-strip cards
+check "/ vertical hc link"              has "$HOME" 'href="/healthcare"'
+check "/ vertical fi link"              has "$HOME" 'href="/finance"'
+check "/ vertical lg link"              has "$HOME" 'href="/legal"'
+check "/ vertical edge link"            has "$HOME" 'href="/edge"'
 # v7.11.4: trust-line removed from homepage (excessive; covered by hero chips + footer + dedicated pages)
 check "/ ROI calc interleaved between anatomy and after-compile" has "$HOME" 'class="vr vr-calc-only"'
 check "/ no trust-line on homepage"     hashno "$HOME" 'class="trust-line"'
@@ -1353,7 +1343,7 @@ check "/pricing H1 v7.11.4 new copy"    has "$PRICING114" 'Compile once'
 check "/pricing H1 second line"         has "$PRICING114" 'Run it forever'
 check "/pricing no old cache H1"        hashno "$PRICING114" 'You pay for the cache'
 USECASES114=$(curl -s "$URL/use-cases")
-check "/use-cases H1 v7.11.4"           has "$USECASES114" 'Built for three kinds of teams'
+check "/use-cases H1 v7.21.2"           has "$USECASES114" 'What you can build'
 check "/use-cases no old riddle H1"     hashno "$USECASES114" 'Which kolm are you'
 check "/brand-refresh.css has shadow tokens"   has "$(curl -s $URL/brand-refresh.css)" '\-\-shadow-2'
 check "/brand-refresh.css emerald on tab"      has "$(curl -s $URL/brand-refresh.css)" '.uc-strip .uc-tab.is-on'
@@ -1379,7 +1369,7 @@ echo ""
 echo "=== 46. K-score gate consistency — site-wide 0.85 ==="
 KSCORE=$(curl -s "$URL/k-score")
 check "/k-score gate header 0.85"      has "$KSCORE" '0.85 ships'
-check "/k-score big gate ≥ 0.85"       has "$KSCORE" '≥&nbsp;0.85'
+check "/k-score big gate ≥ 0.85"       has "$KSCORE" '&ge;&nbsp;0.85\|&ge; 0.85'
 check "/k-score legend gate ≥ 0.85"    has "$KSCORE" 'gate &ge; 0.85'
 check "/k-score override copy 0.85"    has "$KSCORE" 'like 0.85, override it'
 check "/k-score no orphan default 0.70" hashno "$KSCORE" 'Default ship gate.[^<]*K&nbsp;&lt;&nbsp;0.70'
@@ -1407,7 +1397,7 @@ check "/k-score kcalc 0.85 mark css"     has "$KSCORE" '0.85 gate'
 check "/k-score kcalc reduced-motion"    has "$KSCORE" 'prefers-reduced-motion'
 check "/k-score kcalc compute JS"        has "$KSCORE" "getElementById('kcalc')"
 check "/k-score kcalc weights JS"        has "$KSCORE" 'A: 0.40, S: 0.15, L: 0.15, C: 0.15, V: 0.15'
-check "/k-score eyebrow 04 renumbered"   has "$KSCORE" '<span class="num">04</span> · Why one number'
+check "/k-score eyebrow 04 renumbered"   has "$KSCORE" 'num">04</span> .*Why one number'
 
 echo ""
 echo "=== 48. /anatomy text-only walker prose (post-widget-removal) ==="
@@ -1485,7 +1475,7 @@ check "/security eyebrow middot fix"       has "$SEC" 'Architecture &middot; dat
 check "/security no eyebrow dash"          hashno "$SEC" 'Architecture - data flow'
 check "/security no data-go dash"          hashno "$SEC" 'where does our data go-'
 check "/security disclosure h3 question"   has "$SEC" 'Found a flaw?'
-check "/security footer middot fix"        has "$SEC" 'RS-1 &middot; RS-1-multimodal &middot; RS-1-receipts'
+check "/security footer canonical"         has "$SEC" 'MIT licensed runtime'
 check "/security no footer dash leak"      hashno "$SEC" 'RS-1 - RS-1-multimodal'
 
 echo ""
@@ -1501,9 +1491,9 @@ echo ""
 echo "=== 49f. footer brand-tag separator normalization ==="
 COMPILE=$(curl -s "$URL/compile")
 PRICE2=$(curl -s "$URL/pricing")
-check "/compile footer middot RS-1"        has "$COMPILE" 'RS-1 &middot; RS-1-multimodal &middot; RS-1-receipts'
+check "/compile footer canonical"          has "$COMPILE" 'MIT licensed runtime'
 check "/compile no footer dash leak"       hashno "$COMPILE" 'RS-1 - RS-1-multimodal'
-check "/pricing footer middot RS-1"        has "$PRICE2" 'RS-1 &middot; RS-1-multimodal &middot; RS-1-receipts'
+check "/pricing footer canonical"          has "$PRICE2" 'MIT licensed runtime'
 check "/pricing no footer dash leak"       hashno "$PRICE2" 'RS-1 - RS-1-multimodal'
 
 echo ""
@@ -1546,7 +1536,7 @@ check "/pricing no dash title leak"         hashno "$TIT_PRC" 'Pricing - kolm</t
 check "/faq no dash title leak"             hashno "$TIT_FAQ" 'FAQ - kolm</title>'
 check "/changelog no dash title leak"       hashno "$TIT_CHL" 'Changelog - kolm</title>'
 check "/cookbook no dash recipe title leak" hashno "$TIT_CB" 'recipe - kolm cookbook'
-check "/faq footer middot"                  has "$TIT_FAQ" 'kolmogorov &middot; 2026 &middot; faq'
+check "/faq footer canonical"               has "$TIT_FAQ" 'MIT licensed runtime'
 check "/faq no footer dash leak"            hashno "$TIT_FAQ" '>kolmogorov - 2026'
 check "/manifesto an audit row fix"         has "$TIT_MAN" 'an audit row'
 check "/manifesto no a-audit grammar bug"   hashno "$TIT_MAN" 'a audit row'

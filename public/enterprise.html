@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Enterprise &middot; kolm</title>
 <meta name="description" content="kolm for enterprise buyers: BAA &middot; DPA &middot; annual invoice &middot; founder-direct procurement. Talk to the people who built it.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm for enterprise">
 <meta property="og:description" content="Procurement-ready local AI: BAA, DPA, signed receipts, founder-direct contract. For health systems, funds, firms, primes.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/enterprise">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="kolm for enterprise">
+<meta name="twitter:description" content="Procurement-ready local AI: BAA, DPA, signed receipts, founder-direct contract. For health systems, funds, firms, primes.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/enterprise">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -28,6 +32,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -39,14 +44,14 @@
 </header>
 
 <main>
-  <section class="hero">
+  <section class="hero frontier-bg">
     <div class="wrap">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="pulse"></span>enterprise</div>
-        <h1>Procurement-ready local AI. Founder-direct contract.</h1>
+        <div class="hero-eyebrow"><span class="he-dot"></span>Enterprise &middot; founder-direct &middot; in-boundary AI</div>
+        <h1>Procurement-ready local AI. <span class="tone">Founder-direct contract.</span></h1>
         <p class="lede">If your CISO bans cloud LLMs on regulated data, kolm is the architecture that ends the argument: compile your model behavior into a single signed file, run it inside the boundary, keep the receipt. Below: the four motions we support, the paperwork your procurement team needs, the design-partner program, and a direct line to the founders.</p>
         <div class="actions">
-          <a href="mailto:founders@kolm.ai?subject=kolm%20enterprise%20%E2%80%94%20intro" class="btn primary">Talk to founders &rarr;</a>
+          <a href="mailto:founders@kolm.ai?subject=kolm%20enterprise%20%E2%80%94%20intro" class="btn primary electric">Talk to founders &rarr;</a>
           <a href="/baa" class="btn ghost">BAA / DPA template</a>
           <a href="/security" class="btn accent">Security posture</a>
         </div>
@@ -136,25 +141,53 @@
   </section>
 </main>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <div class="meta">kolm enterprise / <a href="/pricing">pricing</a> / <a href="/security">security</a> / <a href="/baa">BAA &amp; DPA</a></div>
-    <div class="links">
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
       <div>
-        <div class="col-h">verticals</div>
-        <a href="/healthcare">healthcare</a>
-        <a href="/finance">finance</a>
-        <a href="/legal">legal</a>
-        <a href="/defense">defense</a>
-        <a href="/edge">edge</a>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
       </div>
       <div>
-        <div class="col-h">product</div>
-        <a href="/compile">compile</a>
-        <a href="/run">run</a>
-        <a href="/serve">serve</a>
-        <a href="/docs">docs</a>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
       </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
     </div>
   </div>
 </footer>

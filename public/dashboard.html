@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Dashboard · kolm</title>
 <meta name="description" content="Your kolm compile jobs, signed artifacts, K-scores, and account usage.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <link rel="canonical" href="https://kolm.ai/dashboard">
 <meta name="robots" content="noindex,follow">
@@ -27,6 +28,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -39,15 +41,48 @@
 <main class="page-main">
   <section class="page-head">
     <div>
-      <div class="eyebrow"><span class="pulse"></span>artifact console</div>
-      <h1 id="hd-greet">Dashboard.</h1>
-      <p class="lede" id="hd-sub">Compile jobs, signed artifacts, K-scores, and account usage.</p>
+      <div class="eyebrow"><span class="pulse"></span>Live console</div>
+      <h1 id="hd-greet">Dashboard</h1>
+      <p class="lede" id="hd-sub">Your compiles, artifacts, and account at a glance.</p>
     </div>
     <div class="page-actions">
       <a class="btn ghost" href="/benchmarks">View benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
       <a class="btn primary" href="#dash-compile">Start compile</a>
     </div>
   </section>
+
+  <section id="welcome-banner" hidden style="margin:8px 0 18px;padding:16px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap">
+    <div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">first compile</div>
+      <p style="margin:4px 0 0;font-size:15px;line-height:1.4">Five steps from signup to a signed .kolm running locally. Average: under five minutes.</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a class="btn primary" href="/onboarding">Open walkthrough &rarr;</a>
+      <button class="btn ghost" type="button" id="welcome-dismiss">dismiss</button>
+    </div>
+  </section>
+
+  <script>
+  (function () {
+    var dismissed = false;
+    try { dismissed = localStorage.getItem('kolm-welcome-dismissed') === '1'; } catch (e) {}
+    function showWelcome() {
+      if (dismissed) return;
+      var el = document.getElementById('welcome-banner');
+      if (el) el.hidden = false;
+    }
+    function isEmpty(m) { return !m || m === '...' || m === '0' || m === 0; }
+    fetch('/v1/account', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(j => { if (j && isEmpty(j.compiles_count)) showWelcome(); })
+      .catch(() => {});
+    var btn = document.getElementById('welcome-dismiss');
+    if (btn) btn.addEventListener('click', function () {
+      try { localStorage.setItem('kolm-welcome-dismissed', '1'); } catch (e) {}
+      var el = document.getElementById('welcome-banner'); if (el) el.hidden = true;
+    });
+  })();
+  </script>
 
   <section class="dashboard-panel" id="dash-compile" aria-labelledby="dash-compile-h2" style="margin-top:8px">
     <div class="section-head">
@@ -67,7 +102,39 @@
             <option value="qwen2.5-7b">qwen2.5-7b · balanced</option>
             <option value="llama-3.1-8b">llama-3.1-8b · strong</option>
             <option value="mistral-7b">mistral-7b · light</option>
+            <option value="qwen2.5-vl-7b">qwen2.5-vl-7b · vision (use vlm preset)</option>
+            <option value="smollm2-1.7b">smollm2-1.7b · cpu-friendly</option>
           </select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Training preset</span>
+          <select id="dc-preset" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:10px 13px;font-family:var(--mono);font-size:13.5px">
+            <option value="lora-fast">lora-fast · default (Unsloth-style)</option>
+            <option value="sft">sft · plain supervised fine-tune</option>
+            <option value="long-context">long-context · YaRN / NTK / Linear PI</option>
+            <option value="vlm">vlm · frozen vision tower (Qwen2.5-VL)</option>
+            <option value="merge-adapters">merge-adapters · SLERP / TIES / DARE</option>
+            <option value="embed">embed · InfoNCE + Matryoshka</option>
+            <option value="fc-tools">fc-tools · function-calling (Hermes-FC)</option>
+            <option value="grpo-reasoning">grpo-reasoning · verifiable-reward RL</option>
+            <option value="instant">instant · zero-shot (no examples)</option>
+          </select>
+        </label>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">LoRA rank</span>
+          <select id="dc-rank" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:10px 13px;font-family:var(--mono);font-size:13.5px">
+            <option value="4">4 · tiny</option>
+            <option value="8">8 · small</option>
+            <option value="16" selected>16 · default</option>
+            <option value="32">32 · large</option>
+            <option value="64">64 · max</option>
+          </select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">K-score gate</span>
+          <input id="dc-kthresh" type="number" min="0.50" max="0.99" step="0.01" value="0.85" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px">
         </label>
         <label style="display:flex;flex-direction:column;gap:6px">
           <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Corpus namespace <em style="font-style:normal;color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">optional</em></span>
@@ -102,6 +169,19 @@
     <div class="job-list" id="job-list"></div>
   </section>
 
+  <section class="dashboard-panel" id="receipts-panel" style="margin-top:24px" aria-label="Receipt chain">
+    <div class="section-head">
+      <h2>Receipt chain</h2>
+      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Last 25 signed events · HMAC-chained</span>
+    </div>
+    <div id="rc-list" style="margin-top:12px;display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:12px;color:var(--ink-mute)">Loading.</div>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+      <a class="btn ghost" href="/audit-log">Full audit log &rarr;</a>
+      <a class="btn ghost" href="/v1/audit/log?format=jsonl" download>Download JSONL</a>
+      <a class="btn ghost" href="/v1/audit/verify" target="_blank" rel="noopener">Verify chain</a>
+    </div>
+  </section>
+
   <section class="dashboard-panel" id="assistant-panel" style="margin-top:24px" aria-label="Natural-language assistant">
     <div class="section-head">
       <h2>Ask kolm</h2>
@@ -132,6 +212,13 @@
     <a class="metric-card" href="/leaderboard" style="display:block;text-decoration:none;color:inherit"><div class="label">Leaderboard</div><div class="value" style="font-size:22px">Stand &rarr;</div><p>Public K-score rankings across tasks.</p></a>
   </section>
 
+  <section class="metric-grid" style="margin-top:24px" aria-label="Workspace + deploy">
+    <a class="metric-card" href="/teams" style="display:block;text-decoration:none;color:inherit"><div class="label">Teams</div><div class="value" style="font-size:22px">Workspace &rarr;</div><p>Share concepts, tunnels, deployments with co-workers. Roles + invites.</p></a>
+    <a class="metric-card" href="/tunnels" style="display:block;text-decoration:none;color:inherit"><div class="label">Remote access</div><div class="value" style="font-size:22px">Tunnel &rarr;</div><p>Reach your self-hosted .kolm anywhere. Model stays on your machine.</p></a>
+    <a class="metric-card" href="/byoc" style="display:block;text-decoration:none;color:inherit"><div class="label">BYOC</div><div class="value" style="font-size:22px">Deploy &rarr;</div><p>Your cloud, your TEE. Fly / Nitro / CVM. Payload-blind to provider.</p></a>
+    <a class="metric-card" href="/airgap" style="display:block;text-decoration:none;color:inherit"><div class="label">Airgap</div><div class="value" style="font-size:22px">Offline &rarr;</div><p>Zero outbound. Local compile, local run, local receipt verification.</p></a>
+  </section>
+
   <section class="card dashboard-key">
     <div>
       <h2>API key</h2>
@@ -147,7 +234,54 @@
 
 <footer class="site-footer">
   <div class="wrap">
-    <div class="meta">kolm dashboard / <a href="/security">security</a> / <a href="/docs">docs</a></div>
+    <div class="meta">
+      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+    </div>
+    <div class="links">
+      <div>
+        <div class="col-h">build</div>
+        <a href="/capture">capture</a>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/recall">recall</a>
+        <a href="/evolve">evolve</a>
+      </div>
+      <div>
+        <div class="col-h">deploy</div>
+        <a href="/teams">teams</a>
+        <a href="/tunnels">remote access</a>
+        <a href="/byoc">byoc cloud</a>
+        <a href="/airgap">airgap</a>
+        <a href="/enterprise">enterprise</a>
+      </div>
+      <div>
+        <div class="col-h">proof</div>
+        <a href="/benchmarks">benchmarks</a>
+        <a href="/research">research</a>
+        <a href="/k-score">k-score</a>
+        <a href="/leaderboard">registry</a>
+        <a href="/spec">rs-1 spec</a>
+      </div>
+      <div>
+        <div class="col-h">industries</div>
+        <a href="/healthcare">healthcare</a>
+        <a href="/finance">finance</a>
+        <a href="/legal">legal</a>
+        <a href="/edge">edge</a>
+        <a href="/cookbook">cookbook</a>
+      </div>
+      <div>
+        <div class="col-h">company</div>
+        <a href="/pricing">pricing</a>
+        <a href="/docs">docs</a>
+        <a href="/roadmap">roadmap</a>
+        <a href="/manifesto">manifesto</a>
+        <a href="/roi">roi</a>
+      </div>
+    </div>
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+    </small>
   </div>
 </footer>
 
@@ -405,8 +539,35 @@
   // First-load welcome.
   bubble('kolm', 'Hi. I can manage your builds, status, usage, and plan from here. Try a chip below or type a question.');
 
+  async function loadReceipts() {
+    var node = document.getElementById('rc-list');
+    if (!node) return;
+    try {
+      var body = await KS.api('/v1/audit/log?limit=25');
+      var events = (body && (body.events || body.items || body.audit || body)) || [];
+      if (!Array.isArray(events)) events = events.events || [];
+      if (!events.length) {
+        node.innerHTML = '<span style="color:var(--ink-faint)">No events yet. Run a compile or call /v1/run.</span>';
+        return;
+      }
+      node.innerHTML = events.slice(0, 25).map(function (e) {
+        var ts = e.at || e.created_at || '';
+        var op = e.op || e.kind || 'event';
+        var kid = e.payload && (e.payload.job_id || e.payload.cid || e.payload.k_score != null ? ('K=' + e.payload.k_score) : '');
+        return '<div style="display:flex;gap:10px;border-bottom:1px solid var(--line);padding:5px 0">' +
+          '<span style="color:var(--ink-faint);width:160px;flex-shrink:0">' + esc(ts.slice(0, 19).replace('T', ' ')) + '</span>' +
+          '<span style="color:var(--accent);width:180px;flex-shrink:0">' + esc(op) + '</span>' +
+          '<span style="color:var(--ink-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(kid || (e.payload && JSON.stringify(e.payload).slice(0, 80)) || '') + '</span>' +
+        '</div>';
+      }).join('');
+    } catch (e) {
+      node.innerHTML = '<span style="color:var(--ink-faint)">Audit log unavailable. Sign in with your API key.</span>';
+    }
+  }
+
   loadAccount();
   loadJobs();
+  loadReceipts();
 
   // In-app compile form. Posts to /v1/compile via the shared KS.api helper,
   // then polls status until the job completes. On success it refreshes the
@@ -428,10 +589,18 @@
         : ('deploy webhook · failed' + (snap.deploy_response_code ? ' (' + snap.deploy_response_code + ')' : ''));
       deployLine = '<div style="color:' + dcolor + '">' + dcEsc(dlabel) + '</div>';
     }
+    var presetLine = snap.preset ? '<div>preset: <code>' + dcEsc(snap.preset) + '</code> · rank=' + dcEsc(snap.lora_rank || 16) + ' · K&ge;' + dcEsc((snap.k_threshold || 0.85).toFixed(2)) + '</code></div>' : '';
+    var cidLine = snap.cid ? '<div>cid: <code style="font-size:11px">' + dcEsc(snap.cid) + '</code></div>' : '';
+    var kLine = '';
+    if (snap.k_score != null) {
+      var kColor = snap.status === 'failed' ? 'var(--bad)' : (snap.k_score >= (snap.k_threshold || 0.85) ? 'var(--good)' : 'var(--bad)');
+      kLine = '<div style="color:' + kColor + '">K-score: <code>' + dcEsc(snap.k_score) + '</code></div>';
+    }
+    var errLine = snap.status === 'failed' && snap.error ? '<div style="color:var(--bad)">error: ' + dcEsc(snap.error) + '</div>' : '';
     dcResult.innerHTML =
       '<div>job: <code>' + dcEsc(snap.id) + '</code></div>' +
       '<div>status: <code>' + dcEsc(snap.status) + '</code></div>' +
-      (snap.k_score != null ? '<div>K-score: <code>' + dcEsc(snap.k_score) + '</code></div>' : '') +
+      presetLine + kLine + cidLine + errLine +
       (snap.artifact_url ? '<div>artifact: <a href="' + dcEsc(snap.artifact_url) + '" download><code>' + dcEsc(snap.artifact_url) + '</code></a></div>' : '') +
       deployLine;
   }
@@ -451,6 +620,9 @@
       var task = document.getElementById('dc-task').value.trim();
       if (!task) { dcSetStatus('task is required', 'err'); return; }
       var base = document.getElementById('dc-base').value;
+      var preset = (document.getElementById('dc-preset') || {}).value || 'lora-fast';
+      var rank = parseInt((document.getElementById('dc-rank') || {}).value, 10) || 16;
+      var kthresh = parseFloat((document.getElementById('dc-kthresh') || {}).value) || 0.85;
       var corpus = document.getElementById('dc-corpus').value.trim();
       var hook = (document.getElementById('dc-hook') || {}).value || '';
       hook = hook.trim();
@@ -458,7 +630,7 @@
       dcSubmit.disabled = true;
       dcSetStatus('starting compile…');
       try {
-        var body = { task: task, base_model: base };
+        var body = { task: task, base_model: base, preset: preset, lora_rank: rank, k_threshold: kthresh };
         if (corpus) body.corpus_namespace = corpus;
         if (hook) body.deploy_hook = hook;
         var resp = await KS.api('/v1/compile', { method: 'POST', body: JSON.stringify(body) });
@@ -473,6 +645,7 @@
       }
     });
   }
+
 })();
 </script>
 <script src="/nav.js" defer></script>

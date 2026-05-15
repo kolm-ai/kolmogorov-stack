@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Legal · kolm</title>
-<meta name="description" content="kolm for legal teams: contract redline, document review, and discovery summarization compiled into signed local artifacts. No client data ever leaves the firm boundary at run time.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>On-prem AI for attorney work-product, privileged | kolm</title>
+<meta name="description" content="Contract redline, document review, and discovery summarization compiled into signed local artifacts. Client data stays inside the firm boundary.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm for legal">
 <meta property="og:description" content="Compile contract redline and discovery review into signed artifacts. Run inside the firm boundary. Privilege intact.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/legal">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="kolm for legal">
+<meta name="twitter:description" content="Compile contract redline and discovery review into signed artifacts. Run inside the firm boundary. Privilege intact.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/legal">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -39,6 +43,62 @@
   ]
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does running kolm on client documents waive privilege?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "That is a determination for the firm's GC and ethics counsel. The architecture is designed to avoid the third-party-disclosure event that most privilege-waiver analyses flag. The .kolm runs on firm-controlled hardware. No document text is transmitted to a third-party API at run time. The receipt is local. We provide the architecture and the audit trail. The privilege opinion is the firm's call."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can the firm use this for matters under a protective order?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Most protective orders restrict disclosure to third parties and require secure handling. A local artifact does not transmit document content to anyone. The firm should still review the specific order language with the GC. We provide a deployment that produces receipts the firm can attach to the matter record."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What about discovery review? Can opposing counsel demand the model?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The firm produces what was used. Because every run writes a receipt with the artifact's sha256, the firm can identify exactly which model state generated which output and provide that artifact for inspection if required. The model is not a remote service the firm cannot freeze in time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the firm need to train its own model?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Compile uses a base model the firm selects (Qwen, Llama, Mistral, or a frontier model via API key at compile time only). The firm's gold examples and playbook tune the artifact during specialization. The teacher model sees the training set during compile, not production matter at run time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does this fit conflict checks and matter walls?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Per-matter or per-practice-group artifacts are the default deployment pattern. A corporate redline artifact never sees litigation files; a litigation discovery artifact never sees corporate matter. Distribution is handled by the firm's MDM. The artifact has no cross-matter memory because it has no remote storage."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does the firm do when a frontier model deprecates?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nothing immediately. The artifact's behavior is frozen at the version compiled. Frontier deprecations affect future compiles, not in-flight artifacts. The firm decides when to recompile. Old artifacts remain re-verifiable indefinitely because the model state is inside the .kolm."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -48,6 +108,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -59,11 +120,11 @@
 </header>
 
 <main>
-  <section class="hero">
+  <section class="hero frontier-bg">
     <div class="wrap">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="pulse"></span>cookbook / legal</div>
-        <h1>Legal AI without the privilege risk.</h1>
+        <div class="hero-eyebrow"><span class="he-dot"></span>Legal &middot; privilege intact &middot; attorney-client preserved</div>
+        <h1>Legal AI without the <span class="tone">privilege risk.</span></h1>
         <p class="lede">Most law firms have banned cloud LLMs on client matter. The usual line is "every prompt is potentially discoverable." kolm flips the architecture: you compile the firm's redline policy and document-review patterns into a single signed file, then the firm runs that file locally. No client document touches a third-party API at run time. Privilege intact, audit defensible, model behavior frozen.</p>
         <div class="actions">
           <a href="/cookbook" class="btn primary">all cookbooks</a>
@@ -95,12 +156,14 @@
       <div class="eyebrow"><span class="num">02</span>compile</div>
       <h2>Redline recipe in five commands.</h2>
       <pre class="terminal">$ kolm init redline-policy
-$ kolm examples add ./examples/redlines/*.json   # 142 historical pairs
-$ kolm spec set ./schemas/markup.json            # JSON Schema for tracked-changes
+                                                 # writes kolm.yaml + .kolm/ at cwd
+$ # drop 142 historical pairs into ./examples/ and reference them from kolm.yaml
+$ # drop ./schemas/markup.json (JSON Schema for tracked-changes) and reference it from kolm.yaml
 $ kolm compile --base qwen2.5-7b-instruct --recall ./playbook/
                                                  # K-score 0.81 (ship floor 0.74)
-$ kolm sign --org="Firm LLP" redline-policy.kolm
-                                                 # signed sha256:7a4c1f2e&hellip; receipt anchored</pre>
+                                                 # HMAC-SHA256 chain sealed at compile, manifest hash sha256:7a4c1f2e&hellip;
+$ kolm inspect redline-policy.kolm
+                                                 # re-derives the chain locally and prints the manifest</pre>
     </div>
   </section>
 
@@ -148,26 +211,119 @@ runtime        14.2s on M3 Pro, 0 network calls</pre>
       </div>
     </div>
   </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">06</span>why legal AI is different</div>
+      <h2>Three problems cloud AI cannot solve for a firm.</h2>
+      <p class="sec-lede">The reason most firms have written cloud-LLM bans into their information security policy is not vendor friction. It is the structural mismatch between Model Rule 1.6 confidentiality and a third-party inference API that logs prompts.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>ABA Model Rule 1.6 confidentiality</td><td>A lawyer must not reveal information relating to representation. A cloud prompt is a disclosure to a third-party processor, and most firms cannot get the informed consent required for every matter touched. Architecture that keeps document text on firm hardware sidesteps the consent question entirely.</td></tr>
+          <tr><td>Work-product doctrine</td><td>Mental impressions, legal theories, and case strategy live in the prompts associates write. If those prompts persist on a vendor's logging plane, the firm has a discoverability problem that did not exist before the tool was adopted. A local artifact has no remote log.</td></tr>
+          <tr><td>Conflict and matter walls</td><td>Information barriers between matters are an ethical obligation, not a feature flag. Cloud inference does not respect firm walls by default. A compiled artifact per matter type runs only against the documents the lawyer hands it and writes its receipt to the firm's matter management system.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">07</span>how kolm helps</div>
+      <h2>Three things a signed artifact gives the firm.</h2>
+      <p class="sec-lede">Each is a property of the compile output, not a configuration setting an associate could turn off.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td>No document text leaves the firm at run time</td><td>The .kolm runs on the partner's laptop or the firm's secure compute. Counterparty drafts, deposition transcripts, and matter files stay on the device that opened them. There is no inference API to log, throttle, or subpoena.</td></tr>
+          <tr><td>Frozen model state, defensible at audit</td><td>The model weights, recall index, and recipe pack are pinned inside the artifact at compile time. The firm controls when the artifact updates. If an opposing counsel asks which model produced a memo, the answer is a sha256 hash with a date, not a vendor release note.</td></tr>
+          <tr><td>HMAC receipt per output</td><td>Every run writes a content-addressed receipt: input hash, output hash, recall sources, model identity. The receipt lives in the firm's matter management system. Re-verification is byte-exact on the same artifact.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">08</span>a matter walkthrough</div>
+      <h2>NDA redline, from intake to signed output.</h2>
+      <p class="sec-lede">Concrete example. A senior associate receives an inbound NDA from a counterparty on a corporate matter. The firm has a redline policy compiled as <code>nda-redline-v2026.02.kolm</code>. Here is the run.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td><b>01 intake</b></td><td>Associate opens the matter file in their document management system. The counterparty draft (12.4 KB .docx) is checked into the matter. Conflict check is already cleared by the firm's intake workflow. No documents have left the firm boundary.</td></tr>
+          <tr><td><b>02 compile</b></td><td>Already done at the firm level, last quarter. The redline policy was compiled from 142 historical NDAs reviewed and signed off by the corporate practice group. K-score 0.81 cleared the ship floor of 0.74. The artifact is pinned in the firm's MDM and distributed to every partner laptop.</td></tr>
+          <tr><td><b>03 review</b></td><td>Associate runs <code>kolm run nda-redline-v2026.02.kolm --in counterparty-draft.docx --out redlined.docx</code>. The artifact returns a tracked-changes file with 23 markup proposals: indemnity scope tightened, IP assignment carve-out added, MFN deleted, term capped at 24 months. Recall surfaces the playbook section behind each change. Runtime is 14.2 seconds on the partner's M3 Pro. Zero network calls.</td></tr>
+          <tr><td><b>04 ship</b></td><td>Partner reviews each tracked change, accepts or rejects as a human lawyer, and sends the redlined draft back to the counterparty under cover of the firm's letterhead. The receipt (receipt-9b110d56.json) attaches to the matter file. If the deal closes and the agreement is later challenged, the firm can re-verify which policy version produced which markup on which date.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">09</span>common questions</div>
+      <h2>What partners and GCs ask first.</h2>
+      <p class="sec-lede">Direct answers. If the answer is "depends on the firm's GC," we say that.</p>
+      <div class="kvtable">
+        <table>
+          <tr><td><b>Does running kolm on client documents waive privilege?</b></td><td>That is a determination for the firm's GC and ethics counsel. The architecture is designed to avoid the third-party-disclosure event that most privilege-waiver analyses flag. The .kolm runs on firm-controlled hardware. No document text is transmitted to a third-party API at run time. The receipt is local. We provide the architecture and the audit trail. The privilege opinion is the firm's call.</td></tr>
+          <tr><td><b>Can the firm use this for matters under a protective order?</b></td><td>Most protective orders restrict disclosure to third parties and require secure handling. A local artifact does not transmit document content to anyone. The firm should still review the specific order language with the GC. We provide a deployment that produces receipts the firm can attach to the matter record.</td></tr>
+          <tr><td><b>What about discovery review? Can opposing counsel demand the model?</b></td><td>The firm produces what was used. Because every run writes a receipt with the artifact's sha256, the firm can identify exactly which model state generated which output and provide that artifact for inspection if required. The model is not a remote service the firm cannot freeze in time.</td></tr>
+          <tr><td><b>Does the firm need to train its own model?</b></td><td>No. Compile uses a base model the firm selects (Qwen, Llama, Mistral, or a frontier model via API key at compile time only). The firm's gold examples and playbook tune the artifact during specialization. The teacher model sees the training set during compile, not production matter at run time.</td></tr>
+          <tr><td><b>How does this fit conflict checks and matter walls?</b></td><td>Per-matter or per-practice-group artifacts are the default deployment pattern. A corporate redline artifact never sees litigation files; a litigation discovery artifact never sees corporate matter. Distribution is handled by the firm's MDM. The artifact has no cross-matter memory because it has no remote storage.</td></tr>
+          <tr><td><b>What does the firm do when a frontier model deprecates?</b></td><td>Nothing immediately. The artifact's behavior is frozen at the version compiled. Frontier deprecations affect future compiles, not in-flight artifacts. The firm decides when to recompile. Old artifacts remain re-verifiable indefinitely because the model state is inside the .kolm.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
 </main>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <div class="meta">kolm cookbook / <a href="/cookbook">all recipes</a> / <a href="/security">security</a></div>
-    <div class="links">
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
       <div>
-        <div class="col-h">verticals</div>
-        <a href="/healthcare">healthcare</a>
-        <a href="/finance">finance</a>
-        <a href="/legal">legal</a>
-        <a href="/edge">edge</a>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
       </div>
       <div>
-        <div class="col-h">product</div>
-        <a href="/compile">compile</a>
-        <a href="/run">run</a>
-        <a href="/serve">serve</a>
-        <a href="/docs">docs</a>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
       </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
     </div>
   </div>
 </footer>

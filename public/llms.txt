@@ -46,9 +46,9 @@ are roadmap.
 - https://kolm.ai/api · endpoint reference
 - https://kolm.ai/docs · quickstart and SDK reference
 - https://kolm.ai/articles · long-form essays
-- https://kolm.ai/use-cases · six built-out wedges
+- https://kolm.ai/use-cases · six built-out patterns
 - https://kolm.ai/cookbook · recipe examples
-- https://kolm.ai/changelog · what shipped, version-by-version
+- https://kolm.ai/roadmap · what shipped and what is queued, version-by-version
 
 ## Cornerstone articles
 
@@ -60,7 +60,7 @@ are roadmap.
 
 ## Use-cases
 
-- https://kolm.ai/use-cases/agentic-coding · +15.33pp SWE-bench Lite, n=150
+- https://kolm.ai/use-cases/agentic-coding · captured-pair distillation for coding agents
 - https://kolm.ai/use-cases/capture-and-distill · rent-vs-buy compute loop
 - https://kolm.ai/use-cases/ai-saas · per-tenant LoRA, BYOK, gross margin
 - https://kolm.ai/use-cases/mobile · on-device, offline, signed
@@ -71,18 +71,21 @@ are roadmap.
 
 - `.kolm` (artifact) · the signed binary; one file you ship and run
 - RS-1 (specification) · the open spec; MIT for code, CC-BY for text
-- K-score (quality gate) · `K = round(100 · (0.60·T + 0.25·C + 0.15·L), 1)`
-- T (k-sample pass rate) · fraction of k frontier samples passing the verifier
-- C (recipe coverage) · fraction of intents resolved by the recipe registry
-- L (latency ratio) · local p50 / cloud p50, capped at 1
+- K-score (quality gate) · `K = 0.40·A + 0.15·S + 0.15·L + 0.15·C + 0.15·V`
+- A (accuracy) · pass rate on held-out positives
+- S (size score) · inverse of artifact bytes on disk
+- L (latency score) · inverse of p50 inference latency
+- C (cost score) · inverse of training + inference cost
+- V (coverage) · fraction of intents the recipe pack resolves
 - four-ring receipt chain · pre-image → derived → execution → seal, HMAC-SHA256
 
 ## Proof points (honest)
 
-- SWE-bench Lite: +15.33pp lift, n=150, seed=42, Opus-4.7, swebench 4.1.0
-  evaluator. Reproduce: `kolm bench --reproduce swebench-lite-n150`.
-  95% CI [+9.33, +22.00], p<0.05.
-- Smoke battery: 769/0+ tests, runs against any URL via
+- SWE-bench Lite harness: ships at `kolm bench --reproduce swebench-lite-n150`
+  against the official swebench 4.1.0 evaluator, seed=42, Opus-4.7. The
+  headline lift lands when the first end-to-end signed run completes; no
+  point estimate is published before then.
+- Smoke battery: 792/0 tests, runs against any URL via
   `URL=https://kolm.ai bash scripts/smoke-live.sh`.
 - Receipts: Sigstore Rekor anchoring is opt-in, off by default.
 
@@ -106,7 +109,7 @@ program that produces a given behavior? The compiler answers it for any task.
 ## Repository
 
 - https://github.com/sneaky-hippo/kolmogorov-stack · server + CLI + spec
-- npm: `@kolmogorov/kolm` · `npm i -g github:sneaky-hippo/kolmogorov-stack`
+- install: `npm i -g github:sneaky-hippo/kolmogorov-stack` (source-install; `kolm` lands on PATH)
 - license: MIT (code) · CC-BY-4.0 (text)
 
 ## Contact

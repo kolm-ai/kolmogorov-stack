@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Bring your own cloud · kolm</title>
+<meta name="description" content="Deploy a signed .kolm artifact to your own Fly, AWS Nitro, GCP Confidential VM, Azure Confidential VM, or Docker host. kolm.ai never runs the artifact.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="https://kolm.ai/byoc">
+<meta property="og:title" content="Bring your own cloud · kolm">
+<meta property="og:description" content="Deploy your AI to your own Fly / AWS Nitro / GCP CVM / Azure CVM. kolm.ai issues a signed deploy script and records the attestation.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/use-cases">Solutions</a>
+      <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
+      <a href="/pricing">Pricing</a>
+    </nav>
+    <div class="site-actions">
+      <a href="/dashboard">dashboard</a>
+      <a href="/account">account</a>
+    </div>
+  </div>
+</header>
+
+<main class="page-main">
+  <section class="page-head">
+    <div>
+      <div class="eyebrow"><span class="pulse"></span>Bring your own cloud · beta</div>
+      <h1>BYOC deploy</h1>
+      <p class="lede">Deploy a signed .kolm to your own infrastructure. kolm.ai mints the deploy manifest and records the attestation; you keep the keys and the network path. For payload-blind operation, pick a Trusted Execution Environment target. Business plan and up.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn ghost" href="/docs#deploy-modes">Read the docs</a>
+      <button class="btn primary" id="new-dep">New deployment</button>
+    </div>
+  </section>
+
+  <section class="dashboard-panel">
+    <div class="section-head">
+      <h2>What BYOC is</h2>
+    </div>
+    <div style="margin-top:14px;font-family:var(--sans);font-size:14.5px;line-height:1.65;color:var(--ink-mute);max-width:78ch">
+      <p style="margin:0 0 12px">Your <code style="font-family:var(--mono);font-size:12px">.kolm</code> artifact, running on cloud infrastructure you own. kolm.ai compiles the artifact, signs the deploy manifest, and pins the post-boot attestation. The artifact pulls down to your AWS, GCP, Azure, or Fly account and runs there. kolm.ai never holds the runtime, never sees request payloads on TEE targets, and never receives a copy of the artifact from your cloud.</p>
+      <p style="margin:0 0 12px">This is the deploy mode for teams who need data residency, who answer to a regulator that requires the inference path to stay inside their own VPC, or who want to keep cloud lock-in optional. The artifact format is identical across local, BYOC, and airgap; the same signed binary runs in all three places.</p>
+      <p style="margin:0">For deployments that should never leave a single machine, see <a href="/airgap" style="color:var(--ink);text-decoration:underline">/airgap</a>. For a hosted inference path that kolm.ai operates, see <a href="/cloud" style="color:var(--ink);text-decoration:underline">/cloud</a>.</p>
+    </div>
+  </section>
+
+  <section class="dashboard-panel">
+    <div class="section-head">
+      <h2>Five deploy modes</h2>
+      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Pick one when you issue a script</span>
+    </div>
+    <div style="margin-top:14px;font-family:var(--sans);font-size:13.5px;line-height:1.6">
+      <div style="overflow:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+          <thead>
+            <tr style="text-align:left;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em">
+              <th style="padding:10px 12px;border-bottom:1px solid var(--line-strong)">Mode</th>
+              <th style="padding:10px 12px;border-bottom:1px solid var(--line-strong)">Target</th>
+              <th style="padding:10px 12px;border-bottom:1px solid var(--line-strong)">TEE</th>
+              <th style="padding:10px 12px;border-bottom:1px solid var(--line-strong)">Attestation format</th>
+            </tr>
+          </thead>
+          <tbody style="color:var(--ink-mute)">
+            <tr>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)"><code style="font-family:var(--mono);font-size:12px;color:var(--ink)">fly</code></td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)">Fly Machines, your Fly org</td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)">No</td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px">Docker image <code>sha256:&hellip;</code></td>
+            </tr>
+            <tr>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)"><code style="font-family:var(--mono);font-size:12px;color:var(--ink)">aws-nitro</code></td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)">AWS Nitro Enclaves, your AWS account</td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)">Yes</td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px">COSE_Sign1 over CBOR &middot; PCR0 = SHA-384 of EIF</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)"><code style="font-family:var(--mono);font-size:12px;color:var(--ink)">gcp-cvm</code></td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)">GCP Confidential VM, your GCP project</td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)">Yes</td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px">SEV-SNP 1184-byte report or Intel TDX quote</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)"><code style="font-family:var(--mono);font-size:12px;color:var(--ink)">azure-cvm</code></td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)">Azure Confidential VM, your Azure subscription</td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line)">Yes</td>
+              <td style="padding:10px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px">Microsoft Azure Attestation JWT, or raw SEV-SNP / TDX</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 12px"><code style="font-family:var(--mono);font-size:12px;color:var(--ink)">docker</code></td>
+              <td style="padding:10px 12px">Any Docker host you operate</td>
+              <td style="padding:10px 12px">No</td>
+              <td style="padding:10px 12px;font-family:var(--mono);font-size:12px">Docker image <code>sha256:&hellip;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin:14px 0 0;font-size:13px;color:var(--ink-faint);max-width:78ch">TEE-backed targets keep request payloads encrypted in memory and produce a hardware-signed measurement of the running code. Non-TEE targets are still private from kolm.ai at the network level (we do not receive runtime traffic), but the host operator can read process memory.</p>
+    </div>
+  </section>
+
+  <section class="dashboard-panel">
+    <div class="section-head">
+      <h2>TOFU verification</h2>
+    </div>
+    <div style="margin-top:14px;font-family:var(--sans);font-size:14.5px;line-height:1.65;color:var(--ink-mute);max-width:78ch">
+      <p style="margin:0 0 12px">BYOC uses trust-on-first-use for attestation. The first attestation a deployment posts is pinned as the expected measurement; every later attestation must match or the deployment is flagged.</p>
+      <ul style="margin:0 0 0 22px;padding:0;color:var(--ink-mute)">
+        <li style="margin:6px 0">Parsers extract the workload measurement, the vendor claims, and the signing cert chain from the raw attestation payload.</li>
+        <li style="margin:6px 0">The first valid attestation is recorded as the pin for that deployment.</li>
+        <li style="margin:6px 0">A measurement mismatch on any later attestation surfaces in the dashboard and the receipt history. The runtime keeps serving; the operator decides whether to tear down or to accept the change.</li>
+        <li style="margin:6px 0">Cryptographic verification of the vendor signing chain (AWS Nitro root, AMD VCEK, Intel PCS, Azure MAA JWKS) is an open item. Parsers expose the chain claims so the verifier can plug in without an API change.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="dashboard-panel">
+    <div class="section-head">
+      <h2>CLI</h2>
+      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Same flow from a terminal</span>
+    </div>
+    <pre style="margin:14px 0 0;padding:16px 18px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:8px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--ink)"><span style="color:var(--ink-faint)"># list the targets the server supports today</span>
+kolm cloud targets
+
+<span style="color:var(--ink-faint)"># issue a deploy script for a compiled artifact</span>
+kolm cloud deploy --target aws-nitro --artifact job_2026... --region us-east-1 --name acme-prod
+
+<span style="color:var(--ink-faint)"># the CLI writes kolm-deploy-&lt;id&gt;.sh (mode 0700) and prints the enroll token</span>
+<span style="color:var(--ink-faint)"># review the script, then run it from your CI or your host</span>
+./kolm-deploy-&lt;id&gt;.sh
+
+<span style="color:var(--ink-faint)"># on first boot the instance POSTs attestation back to kolm.ai</span>
+kolm cloud show &lt;deployment_id&gt;
+
+<span style="color:var(--ink-faint)"># list every deployment, or tear one down</span>
+kolm cloud list
+kolm cloud destroy &lt;deployment_id&gt;</pre>
+    <p style="margin:10px 0 0;font-family:var(--sans);font-size:13.5px;color:var(--ink-mute)">Available target values: <code style="font-family:var(--mono);font-size:12px">fly</code>, <code style="font-family:var(--mono);font-size:12px">aws-nitro</code>, <code style="font-family:var(--mono);font-size:12px">gcp-cvm</code>, <code style="font-family:var(--mono);font-size:12px">azure-cvm</code>, <code style="font-family:var(--mono);font-size:12px">docker</code>. <code style="font-family:var(--mono);font-size:12px">kolm cloud destroy</code> removes the kolm.ai-side record; you still need to run your cloud teardown command to free the underlying resources.</p>
+  </section>
+
+  <section class="dashboard-panel">
+    <div class="section-head">
+      <h2>Why BYOC</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6">
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">data residency</div>
+        <p>Inference traffic stays inside the cloud region you picked. The deploy script reads from your VPC; nothing routes back through kolm.ai at run time.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">regulatory fit</div>
+        <p>HIPAA, GDPR, SR 11-7, EU AI Act, and similar regimes care about who can see the data and who can change the model. With BYOC and a TEE target, the runtime is auditable down to the PCR or SNP measurement.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">vendor-independence</div>
+        <p>You own the artifact and you own the host. If kolm.ai disappeared tomorrow, the deployment keeps running and the receipt chain stays verifiable with the tenant receipt secret you already hold.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">single artifact, many homes</div>
+        <p>The <code style="font-family:var(--mono);font-size:12px">.kolm</code> compiled for BYOC is the same file you would run locally or move into an airgapped network. One signed binary covers laptop, BYOC, and offline.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="dashboard-panel" id="create-panel" hidden>
+    <div class="section-head">
+      <h2>Issue a deploy script</h2>
+      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Signed manifest &middot; one-time enroll token &middot; attestation callback</span>
+    </div>
+    <form id="ct-form" autocomplete="off" style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
+      <label style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Target</span>
+        <select id="ct-target" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px;max-width:360px">
+          <option value="fly">fly &middot; Fly Machines (fast, no TEE)</option>
+          <option value="aws-nitro">aws-nitro &middot; AWS Nitro Enclave (TEE)</option>
+          <option value="gcp-cvm">gcp-cvm &middot; GCP Confidential VM (TEE)</option>
+          <option value="azure-cvm">azure-cvm &middot; Azure Confidential VM (TEE)</option>
+          <option value="docker">docker &middot; generic Docker host</option>
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Artifact id</span>
+        <input id="ct-art" type="text" required placeholder="job_2026..." style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px">
+      </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Region <em style="font-style:normal;color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">optional</em></span>
+          <input id="ct-region" type="text" placeholder="iad" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Name <em style="font-style:normal;color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">optional</em></span>
+          <input id="ct-name" type="text" maxlength="40" placeholder="acme-prod" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px">
+        </label>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Team <em style="font-style:normal;color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">optional · share with workspace</em></span>
+        <select id="ct-team" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px;max-width:360px">
+          <option value="">&middot; personal &middot;</option>
+        </select>
+      </label>
+      <div style="display:flex;gap:12px">
+        <button type="submit" class="btn primary">Issue script &rarr;</button>
+        <button type="button" class="btn ghost" id="ct-cancel">Cancel</button>
+      </div>
+      <div id="ct-status" aria-live="polite" style="font-family:var(--mono);font-size:12px;color:var(--ink-mute)"></div>
+    </form>
+  </section>
+
+  <section class="dashboard-panel" id="onboard-panel" hidden>
+    <div class="section-head">
+      <h2>Run on your cloud</h2>
+      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Review the script. Then run it from your own CI or host.</span>
+    </div>
+    <div style="margin-top:14px;font-family:var(--mono);font-size:13px;line-height:1.7">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div><span style="color:var(--ink-mute)">deployment</span><br><span id="ob-id"></span></div>
+        <div><span style="color:var(--ink-mute)">target</span><br><span id="ob-target"></span></div>
+      </div>
+      <div style="color:var(--ink-mute);margin-bottom:6px">Save and run this script (executable, mode 0700):</div>
+      <pre id="ob-script" style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;max-height:520px;font-size:12px;line-height:1.55"></pre>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn primary" id="ob-download">Download script</button>
+        <button class="btn ghost" id="ob-copy">Copy</button>
+      </div>
+      <p style="margin-top:14px;color:var(--ink-mute)">The instance will POST a measurement back to kolm.ai after first boot. Refresh the list below to see it flip to <span style="color:var(--good)">live</span>.</p>
+    </div>
+  </section>
+
+  <section class="dashboard-panel">
+    <div class="section-head">
+      <h2>Your deployments</h2>
+      <span id="list-sub" style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Loading</span>
+    </div>
+    <div id="dep-list" style="display:flex;flex-direction:column;gap:10px;margin-top:14px"></div>
+  </section>
+
+  <section class="dashboard-panel">
+    <div class="section-head">
+      <h2>Trust model</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6">
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">01 &middot; manifest</div>
+        <p>kolm.ai signs the deploy manifest (deploy_id + artifact_id + enroll_token + issued_at) with an HMAC anyone with the receipt secret can verify.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">02 &middot; deploy</div>
+        <p>You run the script. It pulls the artifact, builds a Docker image (or EIF for Nitro), and starts the runtime on your hardware.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">03 &middot; attest</div>
+        <p>On TEE targets the image POSTs the vendor-signed measurement (Nitro PCRs, GCP attestation token, Azure CVM SNP report). On non-TEE targets, an image SHA.</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">04 &middot; payload-blind</div>
+        <p>TEE targets keep request payloads encrypted in memory; kolm.ai cannot see them. Non-TEE targets are private from us at the network level only.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/app.js"></script>
+<script>
+(function () {
+  const KS = window.KS;
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c]);
+  let lastScript = '';
+  let lastId = '';
+
+  async function ensureAuth() {
+    let key = KS.apiKey();
+    if (!key) { try { key = await KS.hydrateSession(); } catch (_) {} }
+    if (!key) { window.location.href = '/signup?next=' + encodeURIComponent('/byoc'); return false; }
+    return true;
+  }
+
+  async function loadTeams() {
+    try {
+      const r = await KS.api('/v1/teams');
+      const sel = $('ct-team');
+      for (const t of (r.teams || [])) {
+        const opt = document.createElement('option');
+        opt.value = t.id; opt.textContent = t.name + ' (/' + t.slug + ')';
+        sel.appendChild(opt);
+      }
+    } catch (_) {}
+  }
+
+  async function refreshList() {
+    $('list-sub').textContent = 'Loading';
+    try {
+      const r = await KS.api('/v1/byoc/deployments');
+      const list = $('dep-list');
+      list.innerHTML = '';
+      if (!r.deployments || !r.deployments.length) {
+        list.innerHTML = '<p style="color:var(--ink-faint);font-family:var(--mono);font-size:13px">No deployments yet. Issue a script above to deploy a .kolm to your own cloud.</p>';
+        $('list-sub').textContent = '0 deployments';
+        return;
+      }
+      for (const d of r.deployments) {
+        const live = d.status === 'live';
+        const row = document.createElement('div');
+        row.style.cssText = 'background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:8px;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap';
+        row.innerHTML = `
+          <div style="min-width:0;flex:1">
+            <div style="font-weight:500;font-size:15px">${esc(d.name)} &middot; <span style="color:var(--ink-mute);font-weight:400">${esc(d.target)}</span></div>
+            <div style="font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);margin-top:3px">${esc(d.id)}</div>
+            ${d.public_url ? `<div style="font-family:var(--mono);font-size:12px;margin-top:8px;word-break:break-all"><a href="${esc(d.public_url)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">${esc(d.public_url)}</a></div>` : ''}
+            <div style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin-top:6px">
+              <span style="${live ? 'color:var(--good)' : ''}">${esc(d.status)}</span>
+              ${d.last_attested_at ? ' &middot; attested ' + esc(d.last_attested_at.slice(0,16)) : ' &middot; awaiting attestation'}
+              ${d.attestation?.measurement ? ' &middot; <code>' + esc(d.attestation.measurement.slice(0,20)) + '...</code>' : ''}
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn ghost" data-action="show" data-id="${esc(d.id)}" style="font-size:11px;padding:6px 10px">show</button>
+            <button class="btn ghost" data-action="destroy" data-id="${esc(d.id)}" style="font-size:11px;padding:6px 10px">destroy</button>
+          </div>`;
+        list.appendChild(row);
+      }
+      $('list-sub').textContent = r.deployments.length + ' deployment' + (r.deployments.length === 1 ? '' : 's');
+    } catch (e) {
+      $('list-sub').textContent = 'error';
+    }
+  }
+
+  $('new-dep').addEventListener('click', () => { $('create-panel').hidden = false; $('ct-art').focus(); });
+  $('ct-cancel').addEventListener('click', () => { $('create-panel').hidden = true; });
+
+  $('ct-form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const body = {
+      target: $('ct-target').value,
+      artifact_id: $('ct-art').value.trim(),
+    };
+    const region = $('ct-region').value.trim(); if (region) body.region = region;
+    const name = $('ct-name').value.trim(); if (name) body.name = name;
+    const team = $('ct-team').value; if (team) body.team_id = team;
+    $('ct-status').textContent = 'issuing...';
+    try {
+      const r = await KS.api('/v1/byoc/deploy', { method: 'POST', body: JSON.stringify(body) });
+      $('ct-status').textContent = '';
+      $('create-panel').hidden = true;
+      $('onboard-panel').hidden = false;
+      $('ob-id').textContent = r.deployment.id;
+      $('ob-target').textContent = r.deployment.target;
+      $('ob-script').textContent = r.deploy_script;
+      lastScript = r.deploy_script;
+      lastId = r.deployment.id;
+      $('onboard-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      await refreshList();
+    } catch (e) {
+      $('ct-status').textContent = 'failed: ' + (e.message || '');
+    }
+  });
+
+  $('ob-download').addEventListener('click', () => {
+    const blob = new Blob([lastScript], { type: 'text/x-shellscript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'kolm-deploy-' + lastId + '.sh';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  $('ob-copy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(lastScript); KS.toast('script copied'); }
+    catch { KS.toast('copy failed'); }
+  });
+
+  document.addEventListener('click', async (ev) => {
+    const t = ev.target;
+    if (!(t instanceof Element)) return;
+    const action = t.getAttribute('data-action');
+    if (!action) return;
+    if (action === 'show') {
+      try {
+        const r = await KS.api('/v1/byoc/deployments/' + encodeURIComponent(t.getAttribute('data-id')));
+        alert(JSON.stringify(r.deployment, null, 2));
+      } catch (e) { KS.toast('failed: ' + e.message); }
+    }
+    if (action === 'destroy') {
+      if (!confirm('Tear down this deployment? Your cloud resources are not deleted automatically. Run your cloud teardown command too.')) return;
+      try {
+        await KS.api('/v1/byoc/deployments/' + encodeURIComponent(t.getAttribute('data-id')), { method: 'DELETE' });
+        KS.toast('deployment torn down');
+        await refreshList();
+      } catch (e) { KS.toast('failed: ' + e.message); }
+    }
+  });
+
+  (async () => {
+    if (!(await ensureAuth())) return;
+    await loadTeams();
+    await refreshList();
+  })();
+})();
+</script>
+</body>
+</html>

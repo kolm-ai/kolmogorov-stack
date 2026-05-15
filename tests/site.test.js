@@ -157,6 +157,7 @@ const REQUIRED_SITEMAP_ROUTES = [
   '/k-score',
   '/benchmarks',
   '/compare',
+  '/research',
   '/pricing',
   '/docs',
   '/quickstart',

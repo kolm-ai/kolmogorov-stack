@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm vs everything else | matrix index</title>
+<meta name="description" content="Six axis-by-axis comparison matrices: kolm against OpenPipe, Together, Predibase, OpenAI fine-tune, RAG stacks, and Ollama. Each row links to proof.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/compare">
+<link rel="stylesheet" href="/styles/site.css">
+<style>
+  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+  body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  .hero{padding:96px 0 48px;border-bottom:1px solid var(--line)}
+  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  h1{font-size:46px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
+  .lede{font-size:18.5px;line-height:1.5;color:var(--ink-mute);max-width:640px;margin:0}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:48px 0}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .cmp{display:flex;flex-direction:column;gap:8px;padding:24px 26px;border:1px solid var(--line);border-radius:12px;background:var(--bg-elev);color:inherit;text-decoration:none;transition:border-color 160ms,transform 160ms}
+  .cmp:hover{border-color:rgba(16,185,129,0.32);transform:translateY(-1px)}
+  .cmp .vt{font-family:var(--mono);font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent)}
+  .cmp h3{margin:0;font-size:18.5px;font-weight:500;color:var(--ink);letter-spacing:-0.012em}
+  .cmp p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink-mute)}
+  .cmp .go{margin-top:6px;font-family:var(--mono);font-size:11.5px;color:var(--accent)}
+  footer{border-top:1px solid var(--line);margin-top:64px;padding:32px 0;color:var(--ink-faint);font-size:13px}
+  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap" style="padding-top:18px;padding-bottom:18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)">
+    <a href="/" style="font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none">k o l m</a>
+    <nav style="display:flex;gap:18px;font-family:var(--mono);font-size:12px"><a href="/quickstart" style="color:inherit;text-decoration:none">quickstart</a><a href="/pricing" style="color:inherit;text-decoration:none">pricing</a><a href="/docs" style="color:inherit;text-decoration:none">docs</a></nav>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; compare</p>
+    <h1>kolm vs everything else.</h1>
+    <p class="lede">Six matrices, axis by axis. No essays. Every row links to the proof: a benchmark number, a receipt, a config file, or a working artifact. If a competitor wins a row, we mark the row.</p>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="grid">
+      <a class="cmp" href="/compare/kolm-vs-openpipe"><span class="vt">01 . fine-tune SaaS</span><h3>kolm vs OpenPipe</h3><p>Hosted DPO/SFT versus a signed local artifact with a receipt chain.</p><span class="go">open matrix &rarr;</span></a>
+      <a class="cmp" href="/compare/kolm-vs-together"><span class="vt">02 . inference cloud</span><h3>kolm vs Together AI</h3><p>Per-token managed inference versus compile-once-run-anywhere.</p><span class="go">open matrix &rarr;</span></a>
+      <a class="cmp" href="/compare/kolm-vs-predibase"><span class="vt">03 . enterprise fine-tune</span><h3>kolm vs Predibase</h3><p>Multi-LoRA serving versus CID-keyed adapter pool with receipts.</p><span class="go">open matrix &rarr;</span></a>
+      <a class="cmp" href="/compare/kolm-vs-openai-fine-tune"><span class="vt">04 . frontier fine-tune</span><h3>kolm vs OpenAI fine-tune</h3><p>Closed-weight fine-tune versus open-weight signed artifact you own.</p><span class="go">open matrix &rarr;</span></a>
+      <a class="cmp" href="/compare/kolm-vs-rag"><span class="vt">05 . retrieval-augmented</span><h3>kolm vs a RAG stack</h3><p>Vector DB + frontier API versus retrieval with HMAC-signed receipts.</p><span class="go">open matrix &rarr;</span></a>
+      <a class="cmp" href="/compare/kolm-vs-ollama"><span class="vt">06 . local serving</span><h3>kolm vs Ollama</h3><p>Run-any-GGUF versus signed, gated, audit-shaped artifact.</p><span class="go">open matrix &rarr;</span></a>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

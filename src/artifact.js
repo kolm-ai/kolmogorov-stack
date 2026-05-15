@@ -35,6 +35,8 @@ import path from 'node:path';
 import os from 'node:os';
 import archiver from 'archiver';
 import { effectiveReceiptSecret, isProductionRuntime } from './env.js';
+import { cidFromManifestHashes } from './cid.js';
+import { buildArtifactCredential } from './provenance.js';
 
 const ARTIFACT_SPEC = 'kolm-1';
 const PACK_MAGIC = 'KOLMPACK\x01';
@@ -169,7 +171,7 @@ export function computeKScore({ size_bytes, accuracy, coverage, p50_latency_us, 
 // receipt binds (artifact_hash, eval_set_hash, eval_score, judge_id) via an
 // HMAC chain so any third party can re-verify offline without trusting the
 // runtime that produced the artifact.
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device }) {
   const secret = requireSignSecret();
   const recipes_json = JSON.stringify({
     spec: 'rs-1',
@@ -196,7 +198,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // model.gguf is a pointer record, not weights. `kolm run` resolves it.
   const model_pointer = JSON.stringify({
     spec: ARTIFACT_SPEC,
-    base_model: base_model || 'qwen2.5-coder-7b-instruct-q4_0',
+    base_model: base_model || 'Qwen/Qwen2.5-3B-Instruct',
     runtime: 'cloud',
     note: 'pointer-only artifact; weights resolved on `kolm run` first launch.',
   }, null, 2);
@@ -219,13 +221,27 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   const _judgeId = judge_id || process.env.KOLM_JUDGE_ID || 'kolm-pattern-synth-1';
   const _tier = tier || 'recipe';
 
+  const hashes = {
+    model_pointer: sha256(Buffer.from(model_pointer)),
+    recipes_json: sha256(Buffer.from(recipes_json)),
+    lora_bin: sha256(lora_bin),
+    index_bin: sha256(index_bin),
+    evals_json: eval_set_hash,
+  };
+  // Deterministic content-id over the per-file hashes — independent of the
+  // K-score, signature, or receipt. Same content always produces the same
+  // CID, even across signing key rotations.
+  const cid = cidFromManifestHashes(hashes);
+
   const manifest = {
     spec: ARTIFACT_SPEC,
     job_id,
     task,
     created_at: new Date().toISOString(),
     runtime: 'cloud',  // becomes 'on-device' once Sprint 3 LoRA bridge ships
-    base_model: base_model || 'qwen2.5-coder-7b-instruct-q4_0',
+    base_model: base_model || 'Qwen/Qwen2.5-3B-Instruct',
+    target_device: target_device || null,
+    train_device: train_device || null,
     tier: _tier,
     judge_id: _judgeId,
     eval_score: Number(Math.max(0, Math.min(1, _evalScore)).toFixed(4)),
@@ -238,13 +254,8 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     training: training_stats || { distilled_pairs: 0, accuracy: null },
     evals: { n: evals_obj.n || (evals_obj.cases?.length || 0), spec: evals_obj.spec, hash: eval_set_hash },
     k_score: k_score || null,  // patched after zipping for the size_bytes axis
-    hashes: {
-      model_pointer: sha256(Buffer.from(model_pointer)),
-      recipes_json: sha256(Buffer.from(recipes_json)),
-      lora_bin: sha256(lora_bin),
-      index_bin: sha256(index_bin),
-      evals_json: eval_set_hash,
-    },
+    cid,
+    hashes,
   };
   const manifest_json = JSON.stringify(manifest, null, 2);
   const manifest_hash = sha256(Buffer.from(manifest_json));
@@ -291,6 +302,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   const receiptBody = {
     kolm_version: '0.1',
     receipt_id,
+    cid,
     artifact_hash,
     eval_set_hash,
     eval_score: manifest.eval_score,
@@ -335,10 +347,29 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     issued_at,
   }, null, 2);
 
+  // Build an artifact-scoped provenance credential. Signed with the same
+  // secret as the receipt chain. Shipped as a sidecar `credential.json` in
+  // the zip (not embedded in receipt.json — receipt.json is already signed,
+  // and we don't want to invalidate that signature).
+  const credential = buildArtifactCredential({
+    secret,
+    artifact_hash,
+    cid,
+    k_score: manifest.k_score ?? null,
+    base_model,
+    signed_at: issued_at,
+    judge_id: _judgeId,
+    tier: _tier,
+    ingredients: [],
+  });
+  const credential_json = JSON.stringify(credential, null, 2);
+
   return {
     manifest,
     receipt: receiptBody,
+    credential,
     artifact_hash,
+    cid,
     eval_set_hash,
     files: [
       { filename: 'manifest.json',    content: Buffer.from(manifest_json) },
@@ -349,6 +380,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       { filename: 'evals.json',       content: Buffer.from(evals_json) },
       { filename: 'signature.sig',    content: Buffer.from(signature) },
       { filename: 'receipt.json',     content: Buffer.from(receipt_json) },
+      { filename: 'credential.json',  content: Buffer.from(credential_json) },
     ],
   };
 }
@@ -383,7 +415,7 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // with the size-aware K-score patched into the manifest. The double-zip is
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
 // axis includes the K-score bytes themselves.
-export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, judge_id, tier, pack, index }) {
+export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, judge_id, tier, pack, index, target_device, train_device }) {
   requireSignSecret();
   const dir = outDir || path.join(os.tmpdir(), 'kolm-artifacts');
   fs.mkdirSync(dir, { recursive: true });
@@ -399,7 +431,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
   const _judgeId = judge_id || process.env.KOLM_JUDGE_ID || 'kolm-pattern-synth-1';
 
   // Pass 1 — zip to measure size.
-  const probePayload = buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, judge_id: _judgeId, eval_score, tier: _tier, pack, index });
+  const probePayload = buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, judge_id: _judgeId, eval_score, tier: _tier, pack, index, target_device, train_device });
   const outPath = path.join(dir, `${job_id}.kolm`);
   await packageArtifact({ job_id, payload: probePayload, outPath });
   const probeBytes = fs.statSync(outPath).size;
@@ -424,7 +456,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
   // exactly what's inside the on-disk artifact, so a verifier recomputing
   // K-score from the artifact bytes will reproduce manifest.k_score
   // deterministically (size_bytes axis matches the embedded value).
-  const finalPayload = buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id: _judgeId, eval_score, tier: _tier, pack, index });
+  const finalPayload = buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id: _judgeId, eval_score, tier: _tier, pack, index, target_device, train_device });
   await packageArtifact({ job_id, payload: finalPayload, outPath });
   const stat = fs.statSync(outPath);
 
@@ -432,7 +464,9 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     outPath,
     manifest: finalPayload.manifest,
     receipt: finalPayload.receipt,
+    credential: finalPayload.credential,
     artifact_hash: finalPayload.artifact_hash,
+    cid: finalPayload.cid,
     eval_set_hash: finalPayload.eval_set_hash,
     bytes: stat.size,
     k_score: finalPayload.manifest.k_score,
@@ -482,4 +516,52 @@ function constantTimeEqualHex(a, b) {
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
+}
+
+// Device-fit verification. Given a manifest carrying target_device and the
+// current host's detected device, return {ok, reason}. Two failure modes:
+//   1. Hard fail: the model in this artifact cannot physically fit on the
+//      host (vram too small, arch wrong).
+//   2. Soft warn: the artifact was compiled for a different device of the
+//      same class; performance won't match the K-score baseline.
+export async function verifyDeviceFit(manifest, hostDeviceId) {
+  if (!manifest) return { ok: false, reason: 'no manifest' };
+  const target = manifest.target_device;
+  if (!target) {
+    return { ok: true, reason: 'no target_device pinned in manifest', soft: true };
+  }
+  if (!hostDeviceId) {
+    return { ok: false, reason: 'host device could not be detected' };
+  }
+  if (target === hostDeviceId) {
+    return { ok: true, reason: `exact match: ${target}` };
+  }
+  // Cross-device: load the device registry and check vram/arch.
+  const D = await import('./devices.js');
+  const tgtDev = D.info(target);
+  const hostDev = D.info(hostDeviceId);
+  if (!tgtDev || !hostDev) {
+    return { ok: false, reason: `unknown device: target=${target} host=${hostDeviceId}` };
+  }
+  // Same class + host has >= vram of target -> ok with soft warn.
+  if (hostDev.class === tgtDev.class &&
+      (hostDev.vram_gb || 0) >= (tgtDev.vram_gb || 0)) {
+    return {
+      ok: true,
+      reason: `host ${hostDeviceId} can run an artifact compiled for ${target} (same class, sufficient vram)`,
+      soft: true,
+    };
+  }
+  // Host has less vram than target -> hard fail.
+  if ((hostDev.vram_gb || 0) < (tgtDev.vram_gb || 0)) {
+    return {
+      ok: false,
+      reason: `host ${hostDeviceId} has ${hostDev.vram_gb}GB vram; artifact was compiled for ${target} (${tgtDev.vram_gb}GB)`,
+    };
+  }
+  return {
+    ok: true,
+    reason: `host ${hostDeviceId} differs from compile target ${target}; proceeding`,
+    soft: true,
+  };
 }

@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -24,6 +23,43 @@ export function effectiveReceiptSecret({ includeLegacyArtifactSecret = false } =
   return isProductionRuntime() ? null : DEV_RECEIPT_SECRET;
 }
 
+// Per-tenant receipt secret. If the tenant carries its own receipt_secret +
+// receipt_key_id, return those. Otherwise fall back to the global secret with
+// the implicit key_id "global". Callers should persist the key_id alongside
+// every signed row so future verification can dispatch on it after a tenant
+// rotates their key.
+//
+// Schema (tenants table): tenant.receipt_secret (string), tenant.receipt_key_id
+// (string, e.g. "tk_<tenant>_<short-hex>"), tenant.receipt_rotated_at (iso).
+// Rotation appends to tenant.previous_receipt_secrets[] so receipts signed
+// with the previous key still verify until the operator chooses to drop them.
+export function effectiveReceiptSecretForTenant(tenant, { includeLegacyArtifactSecret = false } = {}) {
+  if (tenant && typeof tenant.receipt_secret === 'string' && tenant.receipt_secret.length >= 32) {
+    return { secret: tenant.receipt_secret, key_id: tenant.receipt_key_id || `tk_${tenant.id || 'unknown'}_1` };
+  }
+  const globalSecret = effectiveReceiptSecret({ includeLegacyArtifactSecret });
+  return { secret: globalSecret, key_id: 'global' };
+}
+
+// All known verification keys for a tenant — current + previous (for rotation).
+// Verifiers walk this list and accept the first match.
+export function tenantReceiptVerificationKeys(tenant) {
+  const out = [];
+  if (tenant && typeof tenant.receipt_secret === 'string' && tenant.receipt_secret.length >= 32) {
+    out.push({ secret: tenant.receipt_secret, key_id: tenant.receipt_key_id || `tk_${tenant.id || 'unknown'}_1` });
+  }
+  if (tenant && Array.isArray(tenant.previous_receipt_secrets)) {
+    for (const prev of tenant.previous_receipt_secrets) {
+      if (prev && typeof prev.secret === 'string' && prev.secret.length >= 32) {
+        out.push({ secret: prev.secret, key_id: prev.key_id || 'previous' });
+      }
+    }
+  }
+  const globalSecret = effectiveReceiptSecret({ includeLegacyArtifactSecret: true });
+  if (globalSecret) out.push({ secret: globalSecret, key_id: 'global' });
+  return out;
+}
+
 export function runtimeReadiness() {
   const productionLike = isProductionRuntime();
   const receiptSecret = process.env.RECIPE_RECEIPT_SECRET || '';
@@ -34,12 +70,7 @@ export function runtimeReadiness() {
   const artifactDir = process.env.KOLM_ARTIFACT_DIR || '';
   const storeDriver = configuredStoreDriver();
   const dataDirOk = !productionLike || directoryWritable(dataDir);
-  // Artifact dir falls back to os.tmpdir()/kolm-artifacts inside artifact.js; ensure that
-  // fallback path exists and is writable so /ready never blocks on a non-critical staging dir.
-  const artifactFallback = path.join(os.tmpdir(), 'kolm-artifacts');
-  const artifactDirOk = !productionLike ||
-    directoryWritable(artifactDir) ||
-    ensureWritableDir(artifactFallback);
+  const artifactDirOk = !productionLike || directoryWritable(artifactDir);
   const sqliteDir = path.dirname(path.resolve(process.env.KOLM_DB_PATH || path.join(dataDir || '.', 'kolm.sqlite')));
   const sqliteAvailable = storeDriver !== 'sqlite' || nodeSqliteAvailable();
   const sqlitePathOk = storeDriver !== 'sqlite' || directoryWritable(sqliteDir);
@@ -111,7 +142,13 @@ export function runtimeReadiness() {
 }
 
 function configuredStoreDriver() {
-  return (process.env.KOLM_STORE_DRIVER || 'json').toLowerCase();
+  if (process.env.KOLM_STORE_DRIVER) {
+    return process.env.KOLM_STORE_DRIVER.toLowerCase();
+  }
+  // Mirror src/store.js auto-detection: in production-like environments
+  // SQLite is the default whenever node:sqlite is available.
+  if (isProductionRuntime() && nodeSqliteAvailable()) return 'sqlite';
+  return 'json';
 }
 
 function nodeSqliteAvailable() {
@@ -130,15 +167,6 @@ function directoryWritable(dir) {
     if (!stat.isDirectory()) return false;
     fs.accessSync(dir, fs.constants.R_OK | fs.constants.W_OK);
     return true;
-  } catch {
-    return false;
-  }
-}
-
-function ensureWritableDir(dir) {
-  try {
-    fs.mkdirSync(dir, { recursive: true });
-    return directoryWritable(dir);
   } catch {
     return false;
   }

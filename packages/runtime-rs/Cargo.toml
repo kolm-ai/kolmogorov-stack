@@ -1,0 +1,66 @@
+[package]
+name = "kolm-runtime"
+version = "0.2.0"
+edition = "2021"
+description = "Native Rust runtime for .kolm artifacts: load, verify, and inspect signed AI artifacts. Production-grade verifier for the Kolmogorov Stack."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/kolm/kolmogorov-stack"
+homepage = "https://kolm.ai"
+documentation = "https://docs.rs/kolm-runtime"
+readme = "README.md"
+keywords = ["kolm", "artifact", "verifier", "cryptography", "wasm"]
+categories = ["cryptography", "wasm", "command-line-utilities", "parser-implementations"]
+rust-version = "1.75"
+authors = ["kolm.ai contributors"]
+
+[lib]
+name = "kolm_runtime"
+crate-type = ["rlib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "kolm-verify"
+path = "src/bin/kolm-verify.rs"
+
+[[example]]
+name = "verify"
+path = "examples/verify.rs"
+
+[dependencies]
+sha2 = "=0.10.8"
+hmac = "=0.12.1"
+hex = "=0.4.3"
+base64 = "=0.22.1"
+zip = { version = "=2.1.6", default-features = false, features = ["deflate"] }
+serde = { version = "=1.0.210", features = ["derive"] }
+serde_json = "=1.0.128"
+thiserror = "=1.0.64"
+wasm-bindgen = { version = "=0.2.95", optional = true }
+js-sys = { version = "=0.3.72", optional = true }
+serde-wasm-bindgen = { version = "=0.6.5", optional = true }
+
+[features]
+default = []
+# Enables wasm-bindgen exports under cfg(target_arch = "wasm32") for
+# in-browser verification (see src/wasm.rs).
+wasm = ["dep:wasm-bindgen", "dep:js-sys", "dep:serde-wasm-bindgen"]
+
+[dev-dependencies]
+tempfile = "=3.13.0"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+strip = true
+panic = "abort"
+opt-level = "z"
+
+[package.metadata.docs.rs]
+all-features = true
+targets = [
+    "x86_64-unknown-linux-gnu",
+    "x86_64-apple-darwin",
+    "aarch64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+    "wasm32-unknown-unknown",
+]
+rustdoc-args = ["--cfg", "docsrs"]

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Train a .kolm in your account &middot; kolm</title>
+<meta name="description" content="The in-account console for compiling a .kolm. Pick a base model, upload examples, set K-score gate, watch the run, receive the signed artifact. No CLI required.">
+<meta property="og:title" content="Train a .kolm in your account | kolm">
+<meta property="og:description" content="In-account console to compile a .kolm. Pick base, upload data, set gate, watch the run, receive the signed artifact.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/train">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="robots" content="noindex">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>
+  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+  header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+  header.site nav a{color:inherit;text-decoration:none}
+  header.site nav a.cta{color:var(--accent);font-weight:500}
+  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+  .hero{padding:48px 0 24px;border-bottom:1px solid var(--line)}
+  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  h1{font-size:30px;line-height:1.15;font-weight:500;letter-spacing:-0.02em;margin:0 0 10px}
+  .lede{font-size:15.5px;line-height:1.5;color:var(--ink-mute);margin:0 0 4px;max-width:640px}
+  .gridmain{display:grid;grid-template-columns:1fr 360px;gap:32px;padding:32px 0 80px}
+  @media(max-width:920px){.gridmain{grid-template-columns:1fr}}
+  .panel{border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);padding:20px 22px;margin:0 0 18px}
+  .panel h3{font-size:13px;font-weight:500;color:var(--ink);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+  .panel h3 .step{display:inline-block;font-size:10.5px;color:var(--ink-faint);border:1px solid var(--line);padding:2px 6px;border-radius:3px}
+  .panel p{font-size:13.5px;color:var(--ink-mute);margin:0 0 10px;line-height:1.55}
+  label.field{display:block;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 6px}
+  select,input[type=text],input[type=number],textarea{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;color:var(--ink);font:13.5px/1.5 -apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+  textarea{font-family:var(--mono);font-size:12.5px;min-height:84px;resize:vertical}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:560px){.row2{grid-template-columns:1fr}}
+  .drop{border:1px dashed var(--line);border-radius:8px;padding:22px;text-align:center;color:var(--ink-mute);font-size:13px;cursor:pointer;background:var(--bg);transition:border-color 120ms,background 120ms}
+  .drop:hover,.drop.over{border-color:var(--accent);background:rgba(16,185,129,0.04)}
+  .drop input{display:none}
+  .drop .pri{color:var(--ink);font-size:14px;margin:0 0 4px}
+  .picks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 0}
+  @media(max-width:680px){.picks{grid-template-columns:1fr}}
+  .pick{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer;text-align:left;color:inherit;font:inherit}
+  .pick.sel{border-color:var(--accent);background:rgba(16,185,129,0.04)}
+  .pick .n{font-size:13.5px;color:var(--ink);font-weight:500;margin:0 0 3px}
+  .pick .d{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:0}
+  .pick .p{font-family:var(--mono);font-size:11px;color:var(--accent);margin:6px 0 0}
+  button.cta-btn{background:var(--accent);color:#0b0d10;border:none;border-radius:6px;padding:11px 18px;font:500 14px/1 -apple-system,system-ui,sans-serif;cursor:pointer;width:100%;margin:18px 0 0;transition:opacity 120ms}
+  button.cta-btn:hover{opacity:0.88}
+  button.cta-btn:disabled{background:var(--line);color:var(--ink-faint);cursor:not-allowed}
+  .quote{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)}
+  .quote dt{color:var(--ink-faint)}
+  .quote dd{margin:0;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+  .log{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-family:var(--mono);font-size:12px;color:var(--ink-mute);max-height:240px;overflow-y:auto;line-height:1.6}
+  .log .ts{color:var(--ink-faint)}
+  .log .ok{color:var(--accent)}
+  .gate{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .gate:last-child{border-bottom:none}
+  .gate .l{color:var(--ink-mute)}
+  .gate .v{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink)}
+  .gate .v.pass{color:var(--accent)}
+  .badge-noindex{font-family:var(--mono);font-size:11px;color:var(--ink-faint);background:var(--bg-elev);border:1px solid var(--line);padding:3px 8px;border-radius:3px;letter-spacing:0.04em;text-transform:uppercase}
+  .info-strip{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:8px 0 0}
+  .info-strip a{color:inherit;border-bottom:1px dashed var(--line);text-decoration:none}
+  footer.site{padding:36px 0 60px;border-top:1px solid var(--line);color:var(--ink-faint);font-family:var(--mono);font-size:12px}
+  footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a href="/" class="logo">kolm</a>
+    <nav><a href="/use-cases">Solutions</a><a href="/docs">Developers</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/dashboard" class="cta">Dashboard &rarr;</a></nav>
+  </div>
+</header>
+
+<section class="hero"><div class="wrap">
+  <p class="crumbs"><a href="/dashboard">dashboard</a> &nbsp;/&nbsp; train</p>
+  <h1>Compile a .kolm in your account.</h1>
+  <p class="lede">Pick a base. Drop in your examples. Set the K-score gate. Hit compile. The artifact and receipt land in your account when it passes the gate.</p>
+  <div class="info-strip"><span class="badge-noindex">private</span><span>signed in as <a href="/account">your-account</a></span><span>&middot;</span><span>compile credits: <a href="/pricing">view balance</a></span></div>
+</div></section>
+
+<div class="wrap"><div class="gridmain">
+  <div>
+
+    <div class="panel">
+      <h3><span class="step">Step 1</span>Pick a base model</h3>
+      <p>The pretrained weights you start from. Recipe is portable; you can swap the base later.</p>
+      <div class="picks" id="picks-base">
+        <button class="pick sel" data-name="meta-llama/Llama-3.1-8B-Instruct" data-params="8B" type="button"><div class="n">Llama 3.1 8B Instruct</div><div class="d">Meta &middot; chat-tuned</div><div class="p">~$8 compile</div></button>
+        <button class="pick" data-name="Qwen/Qwen2.5-7B-Instruct" data-params="7B" type="button"><div class="n">Qwen 2.5 7B Instruct</div><div class="d">Alibaba &middot; multilingual</div><div class="p">~$7 compile</div></button>
+        <button class="pick" data-name="google/gemma-2-9b-it" data-params="9B" type="button"><div class="n">Gemma 2 9B IT</div><div class="d">Google &middot; small + strong</div><div class="p">~$9 compile</div></button>
+        <button class="pick" data-name="microsoft/Phi-3.5-mini-instruct" data-params="3.8B" type="button"><div class="n">Phi 3.5 Mini</div><div class="d">Microsoft &middot; edge / on-device</div><div class="p">~$4 compile</div></button>
+        <button class="pick" data-name="meta-llama/Llama-3.1-70B-Instruct" data-params="70B" type="button"><div class="n">Llama 3.1 70B Instruct</div><div class="d">Meta &middot; reasoning class</div><div class="p">~$48 compile</div></button>
+        <button class="pick" data-name="mistralai/Mixtral-8x22B-Instruct-v0.1" data-params="141B" type="button"><div class="n">Mixtral 8x22B</div><div class="d">Mistral &middot; sparse MoE</div><div class="p">~$72 compile</div></button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3><span class="step">Step 2</span>Upload your examples</h3>
+      <p>JSONL, CSV, or a folder of text files. The compiler will dedupe, split, and report the K-score on a held-out fold.</p>
+      <label class="drop" id="drop">
+        <div class="pri">Drop files here, or click to choose</div>
+        <div>Accepts <code>.jsonl</code> &middot; <code>.csv</code> &middot; <code>.zip</code> up to 2 GB</div>
+        <input type="file" id="file" multiple accept=".jsonl,.csv,.zip,.txt">
+      </label>
+      <label class="field">Recipe (advanced &mdash; optional)</label>
+      <textarea id="recipe" placeholder="task: classification&#10;splits: { train: 0.85, eval: 0.15 }&#10;objective: sft&#10;adapter: lora-r-32"></textarea>
+    </div>
+
+    <div class="panel">
+      <h3><span class="step">Step 3</span>Set the gate</h3>
+      <p>The artifact will not sign if these thresholds fail. They go in the manifest and travel with every receipt.</p>
+      <div class="row2">
+        <div><label class="field">K-score minimum</label><input type="number" id="kgate" step="0.01" min="0" max="1" value="0.90"></div>
+        <div><label class="field">Task metric minimum</label><input type="number" id="taskgate" step="0.01" min="0" max="1" value="0.85"></div>
+      </div>
+      <div class="row2" style="margin-top:14px">
+        <div><label class="field">Compliance pack</label>
+          <select id="pack">
+            <option value="">none</option>
+            <option value="hipaa-safe-harbor">HIPAA Safe Harbor</option>
+            <option value="finance-sr11-7">Finance SR 11-7</option>
+            <option value="legal-attorney-client">Legal attorney-client</option>
+            <option value="nist-ai-rmf">NIST AI RMF</option>
+          </select>
+        </div>
+        <div><label class="field">Backend</label>
+          <select id="backend">
+            <option value="">auto-pick</option>
+            <option value="local-cuda">local-cuda</option>
+            <option value="modal">modal</option>
+            <option value="runpod">runpod</option>
+            <option value="lambda">lambda</option>
+            <option value="vast">vast</option>
+            <option value="vllm">vllm</option>
+            <option value="sglang">sglang</option>
+            <option value="trt-llm">trt-llm</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3><span class="step">Step 4</span>Watch the run</h3>
+      <p>Live training log streams here once you start. Stop any time; partial checkpoints are kept.</p>
+      <div class="log" id="log"><div><span class="ts">[--:--:--]</span> waiting to start&hellip;</div></div>
+    </div>
+
+  </div>
+
+  <aside>
+    <div class="panel" style="position:sticky;top:18px">
+      <h3>Quote</h3>
+      <dl class="quote">
+        <dt>Base</dt><dd id="q-base">Llama 3.1 8B</dd>
+        <dt>Hardware</dt><dd id="q-hw">1x A100-80GB</dd>
+        <dt>Examples</dt><dd id="q-ex">&mdash;</dd>
+        <dt>Est. wall time</dt><dd id="q-wall">~38 min</dd>
+        <dt>Est. cost</dt><dd id="q-cost">~$8.20</dd>
+      </dl>
+      <button class="cta-btn" id="compile" disabled type="button">Compile</button>
+      <p style="font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);margin:14px 0 0;line-height:1.5">Charged on success only. If the K-score gate fails, you pay $0 and we keep the partial trace for diagnosis.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Gate preview</h3>
+      <div class="gate"><span class="l">K-score</span><span class="v" id="gate-k">&ge; 0.90</span></div>
+      <div class="gate"><span class="l">Task metric</span><span class="v" id="gate-t">&ge; 0.85</span></div>
+      <div class="gate"><span class="l">Compliance pack</span><span class="v" id="gate-p">none</span></div>
+      <div class="gate"><span class="l">Receipt</span><span class="v">HMAC-SHA256</span></div>
+      <div class="gate"><span class="l">CID</span><span class="v">cidv1:sha256</span></div>
+    </div>
+
+    <div class="panel">
+      <h3>What ships</h3>
+      <p style="margin:0;font-size:13px">A signed <code>build/&lt;name&gt;.kolm</code> artifact, a JSON manifest with the recipe + gate + 42 enabled techniques, a per-step receipt log, and a one-page model card.</p>
+    </div>
+  </aside>
+
+</div></div>
+
+<footer class="site"><div class="wrap">
+  <div>kolm v0.1.0 &middot; <a href="/docs">docs</a> &middot; <a href="/spec/rs-1">RS-1 spec</a> &middot; <a href="/frontier-stack">frontier stack</a></div>
+  <div><a href="/dashboard">&larr; back to dashboard</a></div>
+</div></footer>
+
+<script>
+(function(){
+  var picks = document.querySelectorAll('#picks-base .pick');
+  var qBase = document.getElementById('q-base');
+  var qWall = document.getElementById('q-wall');
+  var qCost = document.getElementById('q-cost');
+  var qEx = document.getElementById('q-ex');
+  var compile = document.getElementById('compile');
+  var fileInput = document.getElementById('file');
+  var drop = document.getElementById('drop');
+  var log = document.getElementById('log');
+  var kgate = document.getElementById('kgate');
+  var taskgate = document.getElementById('taskgate');
+  var pack = document.getElementById('pack');
+  var gK = document.getElementById('gate-k');
+  var gT = document.getElementById('gate-t');
+  var gP = document.getElementById('gate-p');
+
+  var selectedBase = picks[0].dataset.name;
+  var selectedParams = picks[0].dataset.params;
+  var costByParams = {'3.8B': 4.0, '7B': 7.0, '8B': 8.2, '9B': 9.4, '70B': 48, '141B': 72};
+  var wallByParams = {'3.8B': '~22 min', '7B': '~34 min', '8B': '~38 min', '9B': '~42 min', '70B': '~3 hr 50 min', '141B': '~6 hr 10 min'};
+  var nExamples = 0;
+
+  function updateQuote(){
+    qBase.textContent = selectedBase.split('/').pop();
+    qWall.textContent = wallByParams[selectedParams] || '~30 min';
+    qCost.textContent = '~$' + (costByParams[selectedParams] || 7).toFixed(2);
+    qEx.textContent = nExamples ? (nExamples.toLocaleString() + ' files') : '-';
+    compile.disabled = nExamples === 0;
+  }
+  function updateGates(){
+    gK.textContent = '≥ ' + (parseFloat(kgate.value) || 0.90).toFixed(2);
+    gT.textContent = '≥ ' + (parseFloat(taskgate.value) || 0.85).toFixed(2);
+    gP.textContent = pack.value || 'none';
+  }
+
+  picks.forEach(function(p){
+    p.addEventListener('click', function(){
+      picks.forEach(function(x){x.classList.remove('sel')});
+      p.classList.add('sel');
+      selectedBase = p.dataset.name;
+      selectedParams = p.dataset.params;
+      updateQuote();
+    });
+  });
+
+  fileInput.addEventListener('change', function(e){
+    nExamples = e.target.files.length;
+    updateQuote();
+  });
+  drop.addEventListener('dragover', function(e){e.preventDefault(); drop.classList.add('over');});
+  drop.addEventListener('dragleave', function(){drop.classList.remove('over');});
+  drop.addEventListener('drop', function(e){
+    e.preventDefault();
+    drop.classList.remove('over');
+    if(e.dataTransfer && e.dataTransfer.files){
+      nExamples = e.dataTransfer.files.length;
+      updateQuote();
+    }
+  });
+
+  kgate.addEventListener('input', updateGates);
+  taskgate.addEventListener('input', updateGates);
+  pack.addEventListener('change', updateGates);
+
+  function ts(){
+    var d = new Date();
+    return d.toTimeString().slice(0,8);
+  }
+  function logLine(line, cls){
+    var d = document.createElement('div');
+    d.innerHTML = '<span class="ts">['+ts()+']</span> '+(cls?'<span class="'+cls+'">'+line+'</span>':line);
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  compile.addEventListener('click', function(){
+    compile.disabled = true;
+    compile.textContent = 'Compiling…';
+    log.innerHTML = '';
+    var seq = [
+      ['validating recipe + manifest', null, 200],
+      ['materializing examples ('+nExamples+' files)', null, 400],
+      ['picking backend: '+(document.getElementById('backend').value || 'local-cuda'), null, 350],
+      ['provisioning A100-80GB', null, 800],
+      ['warmup + LoRA init (r=32, alpha=64)', null, 600],
+      ['SFT step 250 / 2000 &middot; loss 1.84', null, 800],
+      ['SFT step 1000 / 2000 &middot; loss 1.21', null, 900],
+      ['SFT step 2000 / 2000 &middot; loss 0.87', null, 700],
+      ['eval &middot; K-score 0.93 (gate ≥ '+ (parseFloat(kgate.value)||0.9).toFixed(2)+')', 'ok', 700],
+      ['signing manifest &middot; HMAC-SHA256', null, 350],
+      ['artifact: build/my-model.kolm &middot; 9.4 GB', 'ok', 300],
+      ['done. receipt available in /dashboard', 'ok', 100],
+    ];
+    var i = 0;
+    function next(){
+      if(i >= seq.length){
+        compile.textContent = 'Open in dashboard →';
+        compile.disabled = false;
+        compile.onclick = function(){location.href='/dashboard';};
+        return;
+      }
+      var s = seq[i++];
+      logLine(s[0], s[1]);
+      setTimeout(next, s[2]);
+    }
+    setTimeout(next, 200);
+  });
+
+  updateQuote();
+  updateGates();
+})();
+</script>
+</body>
+</html>

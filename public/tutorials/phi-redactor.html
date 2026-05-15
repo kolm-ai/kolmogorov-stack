@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Tutorial 01 . Compile a PHI redactor in 12 minutes | kolm</title>
+<meta name="description" content="Step-by-step walkthrough: take a redaction task, hit one command, end with a signed 9.4 KB .kolm artifact and a HIPAA-shaped receipt.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/tutorials/phi-redactor">
+<style>
+  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+  header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+  header.site nav a{color:inherit;text-decoration:none}
+  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+  .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
+  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
+  .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0}
+  .meta{display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing:0.04em;flex-wrap:wrap}
+  .meta span b{color:var(--accent);font-weight:500}
+  section.step{padding:36px 0;border-bottom:1px solid var(--line)}
+  section.step h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em;color:var(--ink)}
+  section.step .stepno{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+  section.step p{color:var(--ink-mute);margin:0 0 16px}
+  section.step ul{color:var(--ink-mute);margin:0 0 16px;padding-left:20px}
+  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
+  pre .c{color:var(--ink-faint)}
+  pre .g{color:var(--accent)}
+  .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(16,185,129,0.32);border-radius:8px;background:rgba(16,185,129,0.05);font-size:13.5px;color:var(--ink-mute);margin:0 0 8px}
+  .checkpoint b{color:var(--accent);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
+  .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn:hover{transform:translateY(-1px)}
+  footer{padding:32px 0;color:var(--ink-faint);font-size:13px}
+  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/quickstart">quickstart</a><a href="/docs">docs</a><a href="/tutorials">tutorials</a></nav></div></header>
+<main>
+<section class="hero">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/tutorials">tutorials</a> &nbsp;/&nbsp; PHI redactor</p>
+    <h1>Compile your first PHI redactor in 12 minutes.</h1>
+    <p class="lede">By the end of this walkthrough you will have a signed 9.4 KB .kolm artifact on your disk. It redacts Protected Health Information from free-text clinical notes. It runs offline. It ships with a HIPAA-shaped receipt your hospital's CISO can verify with the open-source verifier.</p>
+    <div class="meta"><span>Runtime <b>12 min</b></span><span>Output <b>phi-redactor.kolm</b></span><span>K-score <b>0.982</b></span><span>Size <b>9.4 KB</b></span></div>
+  </div>
+</section>
+
+<section class="step">
+  <div class="wrap">
+    <p class="stepno">Step 1 . 90 seconds</p>
+    <h2>Install kolm and grab an API key.</h2>
+    <p>One npm install. The CLI works on macOS, Linux, and Windows.</p>
+    <pre><span class="c"># Install the CLI</span>
+$ npm install -g kolm
+
+<span class="c"># Sign up + key (browser opens)</span>
+$ kolm login
+
+<span class="c"># Verify the install</span>
+$ kolm version
+<span class="g">  k o l m
+  ─────── the private AI compiler</span>
+kolm cli v0.1.0
+spec rs-1</pre>
+    <div class="checkpoint"><b>Checkpoint</b><span>If you see the brand mark and `spec rs-1`, you're good.</span></div>
+  </div>
+</section>
+
+<section class="step">
+  <div class="wrap">
+    <p class="stepno">Step 2 . 60 seconds</p>
+    <h2>Describe the task.</h2>
+    <p>Write a one-line description of what the model should do. You don't write training code; you describe the work.</p>
+    <pre>$ kolm compile <span class="g">"redact PHI from clinical notes; keep clinical content; emit JSON spans"</span>
+
+<span class="c">Compile plan generated.
+  base: qwen2.5-7b-instruct
+  recipe: lora + dpo + constrained-decoder
+  target K-score: 0.92
+  estimated cost: $1.40
+  estimated time: 9 min
+Continue? [Y/n]</span> Y</pre>
+    <div class="checkpoint"><b>Checkpoint</b><span>The plan picks the base model and the recipe for you. You can override either, but for the first compile let it pick.</span></div>
+  </div>
+</section>
+
+<section class="step">
+  <div class="wrap">
+    <p class="stepno">Step 3 . 8&ndash;10 minutes</p>
+    <h2>Compile.</h2>
+    <p>The CLI streams progress. Synthetic data generation, LoRA fine-tune, K-score gate, sign, package. Step out for coffee.</p>
+    <pre><span class="g">[1/6]</span> synthesizing (Magpie + Evol-Instruct) ........ 1,840 pairs <span class="c">42s</span>
+<span class="g">[2/6]</span> dedup + filter (MinHash) ................... 1,612 pairs <span class="c">8s</span>
+<span class="g">[3/6]</span> LoRA + DPO ................................ 3 epochs <span class="c">6m 12s</span>
+<span class="g">[4/6]</span> constrained-decoder fit (JSON schema) ...... <span class="c">38s</span>
+<span class="g">[5/6]</span> K-score gate ............................... <span class="g">K = 0.982</span> <span class="c">> 0.92 target</span>
+<span class="g">[6/6]</span> sign + package ............................. <span class="c">2s</span>
+
+<span class="c">  artifact: ./phi-redactor.kolm  (9.4 KB)
+  receipt:  ./phi-redactor.receipt.json  (3.1 KB)
+  CID:      cidv1:sha256:1bcf2323...</span></pre>
+    <div class="checkpoint"><b>Checkpoint</b><span>Total compile cost on our account: <b>$1.38</b>. Yours will be similar. The K-score gate <b>blocks</b> if the artifact misses the target.</span></div>
+  </div>
+</section>
+
+<section class="step">
+  <div class="wrap">
+    <p class="stepno">Step 4 . 30 seconds</p>
+    <h2>Run it locally.</h2>
+    <p>The artifact runs on your machine. No network call, no cloud roundtrip. Same answer every time.</p>
+    <pre>$ kolm run phi-redactor.kolm <span class="g">"Mrs. Jane Doe (DOB 1962-03-04) presented with chest pain."</span>
+
+<span class="c">{
+  "redacted": "Mrs. [NAME] (DOB [DATE]) presented with chest pain.",
+  "spans": [
+    {"type": "NAME", "start": 4, "end": 12},
+    {"type": "DATE", "start": 19, "end": 29}
+  ],
+  "latency_ms": 0.6,
+  "receipt_cid": "cidv1:sha256:1bcf2323..."
+}</span></pre>
+  </div>
+</section>
+
+<section class="step">
+  <div class="wrap">
+    <p class="stepno">Step 5 . 60 seconds</p>
+    <h2>Verify the receipt.</h2>
+    <p>Anyone can re-verify the artifact. No kolm account needed - the verifier is open source and 262 lines of TypeScript.</p>
+    <pre>$ kolm verify phi-redactor.kolm
+
+<span class="g">  ✓ manifest CID matches canonical hash
+  ✓ all 11 entries hashed and verified
+  ✓ receipt HMAC valid
+  ✓ K-score 0.982 (above declared gate 0.92)</span>
+  artifact is valid.</pre>
+    <div class="checkpoint"><b>Checkpoint</b><span>This is the verb your CISO will run. If you share the .kolm with them, they don't need a kolm account to verify it.</span></div>
+  </div>
+</section>
+
+<section class="step">
+  <div class="wrap">
+    <p class="stepno">Step 6 . optional</p>
+    <h2>Ship it.</h2>
+    <p>You now own the file. Drop it on a hospital workstation, embed it in your EHR plugin, sign it into a compliance binder.</p>
+    <pre>$ kolm verify phi-redactor.kolm --binder hipaa.pdf
+
+<span class="c"># produces a one-page PDF that lists:
+#  - CID + receipt hash + K-score
+#  - compile config + base model + recipe
+#  - evaluation pack + scores
+# auditors sign the PDF, not the JSON.</span></pre>
+    <div class="actions"><a class="btn primary" href="/quickstart">Run it now &rarr;</a><a class="btn" href="/docs/showcase/receipt.json" target="_blank">Open the receipt &rarr;</a></div>
+  </div>
+</section>
+
+</main>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

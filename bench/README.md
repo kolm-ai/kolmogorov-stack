@@ -1,9 +1,10 @@
 # kolm bench reproducer
 
-Reproduces the headline number for `kolm bench --reproduce swebench-lite-n150`:
+Reproduces the kolm bench protocol for `kolm bench --reproduce swebench-lite-n150`:
 
-> **+10.67pp lift on SWE-bench Lite, 95% CI [+4.67, +16.67], p<0.05**
-> n=150, seed=42, Opus-4.7, swebench 4.1.0 evaluator.
+> **Opus-4.7 against baseline on SWE-bench Lite, swebench 4.1.0 evaluator.**
+> n=150, seed=42. The headline lift lands here when the first end-to-end
+> signed run completes; no point estimate is published before then.
 
 ## Two ways to run
 
@@ -44,11 +45,9 @@ The Dockerfile pins:
    - dollar spend (input + output tokens × pinned price card)
    - wall time
 
-## What the +10.67pp number means
+## What the protocol measures
 
-n=150 seed=42 Opus-4.7: pass 1 resolves 30.0%, pass 2 resolves 40.67%. The 19 recovered tasks vs 4 regressed tasks gives a 4.75:1 recovery ratio. Bootstrap 95% CI [+4.67pp, +16.67pp]. Two-tailed Wilcoxon signed-rank test on the per-task resolved deltas: p<0.05.
-
-The mechanism is **single-turn** — no agent loop, no second model, no tool-calling. The only difference between Pass 1 and Pass 2 is the prompt envelope. This makes the lift attributable to the context injection itself, not to harness ergonomics.
+The mechanism is **single-turn** — no agent loop, no second model, no tool-calling. The only difference between Pass 1 and Pass 2 is the prompt envelope. This makes the lift attributable to the context injection itself, not to harness ergonomics. The first end-to-end signed run will report `pass_1_pct`, `pass_2_pct`, `delta_pp`, the bootstrap 95% CI on the delta, and a two-tailed Wilcoxon signed-rank test p-value on the per-task resolved deltas. Until that run completes, no point estimate ships here.
 
 ## What we do not claim
 
@@ -58,7 +57,7 @@ The mechanism is **single-turn** — no agent loop, no second model, no tool-cal
 
 ## Reproducibility expectations
 
-A fresh run on a different machine with `--seed 42 --n 150` should land **within ±2pp** of +10.67pp. If your run lands more than ±2pp off, the most common causes (in order):
+Once the headline signed run lands here, a fresh run on a different machine with `--seed 42 --n 150` should land **within ±2pp** of it. If your run lands more than ±2pp off, the most common causes (in order):
 
 1. Anthropic provider returned a different mix of models for some tasks (lock with `anthropic-version: 2023-06-01` and the exact model id `claude-opus-4-7-20251225`).
 2. Docker image used pip cache that pulled a newer minor version of `swebench` (the `==4.1.0` pin is exact; if pip resolved 4.1.1, the evaluator differs).

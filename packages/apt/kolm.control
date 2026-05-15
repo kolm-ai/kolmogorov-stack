@@ -1,0 +1,14 @@
+Package: kolm
+Version: 0.1.0
+Section: utils
+Priority: optional
+Architecture: all
+Depends: nodejs (>= 20.0.0)
+Recommends: python3 (>= 3.10), python3-pip
+Maintainer: Kolmogorov <packages@kolm.ai>
+Homepage: https://kolm.ai
+Description: Compile, sign, and verify .kolm artifacts.
+ kolm compiles a base model plus your data plus a verifier into one signed
+ .kolm artifact. Every inference emits an HMAC-chained receipt carrying the
+ artifact CID, input hash, output hash, and K-score. The receipts replay
+ months later. Run on your hardware. License: Apache-2.0.

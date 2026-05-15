@@ -1,0 +1,17 @@
+import { chromium } from 'playwright';
+import { mkdir } from 'node:fs/promises';
+await mkdir('tmp/v717', { recursive: true });
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, colorScheme: 'dark' });
+const page = await ctx.newPage();
+await page.goto('http://localhost:8787/', { waitUntil: 'networkidle' });
+await page.waitForTimeout(1500);
+await page.screenshot({ path: 'tmp/v717/v717_1440_dark.png', fullPage: true });
+console.log('shot saved');
+const mb = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, colorScheme: 'dark' });
+const mp = await mb.newPage();
+await mp.goto('http://localhost:8787/', { waitUntil: 'networkidle' });
+await mp.waitForTimeout(1500);
+await mp.screenshot({ path: 'tmp/v717/v717_390_dark.png', fullPage: true });
+await browser.close();
+console.log('done');

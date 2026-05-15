@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>FAQ · kolm</title>
 <meta name="description" content="What kolm uses, what happens when K-score fails, how to debug a compile, what we do with your data, and the questions enterprise teams ask before they sign.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="FAQ &middot; kolm">
 <meta property="og:description" content="Direct answers to the questions developers and enterprise teams ask before they sign.">
@@ -43,14 +44,14 @@
   header.site .left { display: flex; align-items: center; gap: 36px; }
   header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
   header.site .brand img { height: 18px; width: 18px; }
-  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: 0; }
+  header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
   header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   header.site .right .cta:hover { background: #fff; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
@@ -59,7 +60,7 @@
   h1 { margin: 24px 0 16px; font-size: clamp(36px, 5vw, 56px); line-height: 1.05; font-weight: 500; letter-spacing: 0; }
   h1 .tone { color: var(--accent); }
   p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 56ch; }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
 
   .toc { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 0 0 12px; padding: 0; list-style: none; }
   .toc a { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; transition: color 120ms, border-color 120ms; }
@@ -68,13 +69,13 @@
   article { padding: 24px 0 80px; }
   .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
   .group:first-of-type { margin-top: 28px; padding-top: 28px; }
-  .group h2 { margin: 0 0 22px; font-size: clamp(20px, 2vw, 24px); font-weight: 540; color: var(--ink); letter-spacing: 0; }
+  .group h2 { margin: 0 0 22px; font-size: clamp(20px, 2vw, 24px); font-weight: 500; color: var(--ink); letter-spacing: 0; }
   .qa { padding: 22px 0; border-bottom: 1px solid var(--line); }
   .qa:last-child { border-bottom: none; }
-  .qa h3 { margin: 0 0 10px; font-size: 17px; font-weight: 540; color: var(--ink); letter-spacing: 0; line-height: 1.35; }
+  .qa h3 { margin: 0 0 10px; font-size: 17px; font-weight: 500; color: var(--ink); letter-spacing: 0; line-height: 1.35; }
   .qa p { margin: 0 0 10px; font-size: 15px; line-height: 1.65; color: var(--ink-mute); }
   .qa p:last-child { margin-bottom: 0; }
-  .qa p b { color: var(--ink); font-weight: 540; }
+  .qa p b { color: var(--ink); font-weight: 500; }
   .qa code { font-family: var(--mono); font-size: 0.92em; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
   .qa a { color: var(--accent); text-decoration: none; }
   .qa a:hover { color: var(--accent-strong); }
@@ -100,7 +101,7 @@
         },
         {
           "@type": "Question",
-          "name": "Isn't this just llama.cpp / MLC.ai / ExecuTorch?",
+          "name": "How is this different from llama.cpp / MLC.ai / ExecuTorch?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Those are runtimes. kolm is the compile step above the runtime. v0 .kolm artifacts carry recipes, evals, and a signed model pointer; the wrapper composes against a runtime of your choice. Runtimes give you a way to execute open-weight models locally; kolm gives you the way to teach a small model your task, ground it in your data, gate it on a quality score, and seal it as one portable file."
@@ -163,6 +164,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -174,8 +176,9 @@
   </div>
 </header>
 
-<section class="hero">
+<section class="hero frontier-bg">
   <div class="wrap">
+    <div class="hero-eyebrow"><span class="he-dot"></span>FAQ &middot; direct answers &middot; no marketing</div>
     <h1>The questions <span class="tone">we get asked.</span></h1>
     <p class="lede">No marketing. Direct answers to the questions developers, security teams, and procurement ask before they sign. If you have a question that isn't here, mail <a href="mailto:dev@kolm.ai" style="color:var(--accent);text-decoration:none;">dev@kolm.ai</a>.</p>
     <ul class="toc" aria-label="Section nav">
@@ -200,7 +203,7 @@
         <p>kolm is the build system for private AI. <code>kolm compile</code> takes a task description, your data, and a frontier model API key, and produces a single signed <code>.kolm</code> file: a recipe-tier artifact with a signed manifest, recipes, evals, and an HMAC receipt chain. Customer-controlled deployment is required for in-environment runtimes.</p>
       </div>
       <div class="qa">
-        <h3>Isn't this just llama.cpp / MLC.ai / ExecuTorch?</h3>
+        <h3>How is this different from llama.cpp / MLC.ai / ExecuTorch?</h3>
         <p>Those are <b>runtimes</b>. kolm is the <b>compile step</b> above the runtime. The artifact kolm produces runs on top of any of them. Runtimes give you a way to execute open-weight models locally; kolm gives you the way to teach a small model your task, ground it in your data, gate it on a quality score, and seal it as one portable file. <a href="/compare">Comparison table</a>.</p>
       </div>
       <div class="qa">
@@ -345,7 +348,7 @@
       </div>
       <div class="qa">
         <h3>What's closed?</h3>
-        <p>The compiler itself. That's the proprietary surface, because the compile flywheel (which task descriptions yield high K-scores against which bases) is the moat.</p>
+        <p>The compiler itself. The compile loop &middot; knowing which task descriptions produce high K-scores against which bases &middot; is where the engineering is. That's the paid service. Everything you compile is yours and ships under your own signature.</p>
       </div>
       <div class="qa">
         <h3>Can I host my own registry?</h3>
@@ -361,9 +364,53 @@
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolmogorov &middot; 2026 &middot; faq</span>
-    <span><a href="mailto:dev@kolm.ai" style="color:var(--ink-faint);">dev@kolm.ai</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

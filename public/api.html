@@ -1,51 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>API reference · kolm</title>
-<meta name="description" content="kolm HTTP API reference. The core /v1 endpoints with request schemas, response schemas, error codes, and authentication paths. Plain HTTP. Bearer auth. JSON in, JSON out.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>API reference for the kolm compiler | kolm</title>
+<meta name="description" content="HTTP reference for the kolm compiler. Core /v1 endpoints with request and response schemas, error codes, bearer auth. JSON in, JSON out.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm HTTP API reference">
 <meta property="og:description" content="The core kolm /v1 endpoints with request/response schemas. Plain HTTP, bearer auth, JSON.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/api">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="kolm HTTP API reference">
+<meta name="twitter:description" content="The core kolm /v1 endpoints with request/response schemas. Plain HTTP, bearer auth, JSON.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/api">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <style>
-  .api-hero { padding: 56px 0 24px; }
-  .api-hero h1 { font-size: clamp(28px, 4vw, 44px); margin: 12px 0 14px; font-weight: 540; letter-spacing: -0.01em; }
-  .api-hero p { max-width: 64ch; color: var(--ink-mute, #b5bdb1); font-size: 15px; line-height: 1.6; }
-  .api-grid { display: grid; grid-template-columns: 240px 1fr; gap: 36px; padding: 24px 0 96px; }
-  @media (max-width: 880px) { .api-grid { grid-template-columns: 1fr; gap: 18px; } }
+  .api-hero { padding: 88px 0 36px; position: relative; overflow: hidden; }
+  .api-hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.34; background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237dd3fc' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237dd3fc' stop-opacity='0.20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3C/g%3E%3C/svg%3E"); background-size: cover; background-position: center top; mask-image: linear-gradient(180deg,#000 0%,rgba(0,0,0,0.5) 50%,transparent 78%); -webkit-mask-image: linear-gradient(180deg,#000 0%,rgba(0,0,0,0.5) 50%,transparent 78%); z-index: 0; }
+  .api-hero .wrap { position: relative; z-index: 2; }
+  .api-hero h1 { font-size: clamp(44px, 6.4vw, 92px); margin: 22px 0 18px; font-weight: 500; letter-spacing: -0.035em; line-height: 0.96; max-width: 14ch; }
+  .api-hero h1 .tone { background: linear-gradient(170deg,#faf2e1 0%,#7dd3fc 50%,#faf2e1 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .api-hero p { max-width: 64ch; color: var(--ink-mute, #b5bdb1); font-size: clamp(15.5px,1.3vw,17.5px); line-height: 1.6; }
+  .api-hero .eyebrow,.api-hero .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .api-hero .eyebrow .pulse,.api-hero .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7dd3fc;box-shadow:0 0 10px #7dd3fc;animation:pulse-dot 2.4s ease-in-out infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+  .api-grid { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 36px; padding: 24px 0 96px; }
+  .api-grid > * { min-width: 0; }
+  @media (max-width: 880px) { .api-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; } }
   .api-toc { position: sticky; top: 88px; align-self: start; border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px; background: var(--bg-2, #11151b); font-family: var(--mono); font-size: 12px; }
-  .api-toc h4 { margin: 0 0 12px; font-size: 11px; text-transform: uppercase; color: var(--ink-faint, #737c73); letter-spacing: 0.05em; font-weight: 540; }
+  .api-toc h4 { margin: 0 0 12px; font-size: 11px; text-transform: uppercase; color: var(--ink-faint, #737c73); letter-spacing: 0.05em; font-weight: 500; }
   .api-toc a { display: block; color: var(--ink-mute, #b5bdb1); text-decoration: none; padding: 4px 0; border-radius: 4px; }
   .api-toc a:hover { color: var(--violet, #faf2e1); }
   .api-toc .grp { margin-top: 14px; }
-  .api-section { margin-bottom: 56px; }
-  .api-section h2 { margin: 0 0 14px; font-size: 22px; font-weight: 540; letter-spacing: -0.005em; }
+  .api-section { margin-bottom: 56px; max-width: 100%; min-width: 0; box-sizing: border-box; }
+  .api-section h2 { margin: 0 0 14px; font-size: 22px; font-weight: 500; letter-spacing: -0.005em; }
+  .api-section p, .api-section .lede { overflow-wrap: anywhere; word-break: break-word; }
   .api-section .lede { color: var(--ink-mute, #b5bdb1); font-size: 14px; line-height: 1.6; max-width: 70ch; margin: 0 0 22px; }
-  .endpoint { border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); margin-bottom: 22px; overflow: hidden; }
+  .endpoint { border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); margin-bottom: 22px; overflow: hidden; max-width: 100%; min-width: 0; box-sizing: border-box; }
+  .endpoint code { word-break: break-word; overflow-wrap: anywhere; }
+  .auth-block { max-width: 100%; min-width: 0; box-sizing: border-box; }
+  .auth-block pre { overflow-x: auto; max-width: 100%; }
+  @media (max-width: 520px) {
+    .api-section h2 { font-size: 19px; }
+    .endpoint pre, .auth-block pre { font-size: 11px; padding: 12px 14px; }
+    .endpoint .ep-head { flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
+    .endpoint .ep-body { padding: 14px; }
+    .endpoint .path { font-size: 12px; word-break: break-all; }
+    .api-section > div[style*="grid-template-columns:auto 1fr"] { grid-template-columns: 60px 1fr !important; padding: 14px !important; gap: 8px 12px !important; }
+  }
   .endpoint .ep-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.18); }
-  .endpoint .method { font-family: var(--mono); font-size: 11px; font-weight: 540; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .endpoint .method.get { background: rgba(236,231,220, 0.12); color: #faf2e1; }
-  .endpoint .method.post { background: rgba(126,240,210,0.12); color: #7ef0d2; }
-  .endpoint .method.delete { background: rgba(255,107,145,0.12); color: #ff6b91; }
+  .endpoint .method { font-family: var(--mono); font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .endpoint .method.get { background: rgba(126,189,240,0.16); color: #7ebdf0; }
+  .endpoint .method.post { background: rgba(126,240,210,0.16); color: #7ef0d2; }
+  .endpoint .method.delete { background: rgba(255,107,145,0.16); color: #ff6b91; }
   .endpoint .path { font-family: var(--mono); font-size: 13.5px; color: var(--ink, #faf2e1); }
-  .endpoint .auth-pill { margin-left: auto; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--line); color: var(--ink-faint, #737c73); }
-  .endpoint .auth-pill.bearer { color: #faf2e1; border-color: rgba(236,231,220, 0.32); }
-  .endpoint .auth-pill.public { color: #7ef0d2; border-color: rgba(126,240,210,0.28); }
+  .endpoint .auth-pill { margin-left: auto; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--line); color: var(--ink-faint, #737c73); background: rgba(236,231,220,0.06); }
+  .endpoint .auth-pill.bearer { color: #faf2e1; background: rgba(236,231,220,0.12); border-color: rgba(236,231,220, 0.32); }
+  .endpoint .auth-pill.public { color: #7ef0d2; background: rgba(126,240,210,0.12); border-color: rgba(126,240,210,0.28); }
+  [data-theme=light] .endpoint .method.get { background: rgba(76,125,255,0.12); color: #3b62cf; }
+  [data-theme=light] .endpoint .method.post { background: rgba(10,136,98,0.12); color: #0a8862; }
+  [data-theme=light] .endpoint .method.delete { background: rgba(200,40,80,0.10); color: #b8254a; }
+  [data-theme=light] .endpoint .auth-pill { color: #4b5158; background: rgba(12,14,16,0.04); border-color: rgba(12,14,16,0.12); }
+  [data-theme=light] .endpoint .auth-pill.bearer { color: #1f2429; background: rgba(10,136,98,0.10); border-color: rgba(10,136,98,0.28); }
+  [data-theme=light] .endpoint .auth-pill.public { color: #0a8862; background: rgba(10,136,98,0.10); border-color: rgba(10,136,98,0.28); }
   .endpoint .ep-body { padding: 18px 18px; }
   .endpoint .ep-body p { margin: 0 0 10px; font-size: 13.5px; color: var(--fg-2, #c9c2b2); line-height: 1.55; }
-  .endpoint h5 { margin: 14px 0 6px; font-size: 11px; text-transform: uppercase; color: var(--ink-faint, #737c73); letter-spacing: 0.05em; font-weight: 540; font-family: var(--mono); }
+  .endpoint h5 { margin: 14px 0 6px; font-size: 11px; text-transform: uppercase; color: var(--ink-faint, #737c73); letter-spacing: 0.05em; font-weight: 500; font-family: var(--mono); }
   .endpoint pre { margin: 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0,0,0,0.32); font-family: var(--mono); font-size: 12px; color: var(--ink, #faf2e1); line-height: 1.65; overflow-x: auto; }
   .endpoint pre.req { border-color: rgba(236,231,220, 0.20); }
   .endpoint pre.res { border-color: rgba(126,240,210,0.20); }
@@ -104,6 +133,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -117,8 +147,8 @@
 <main>
   <section class="hero api-hero">
     <div class="wrap">
-      <div class="eyebrow"><span class="pulse"></span>HTTP API reference</div>
-      <h1>The core endpoints. Plain HTTP.</h1>
+      <div class="hero-eyebrow"><span class="he-dot"></span>HTTP API reference . v1</div>
+      <h1>The core endpoints.<br><span class="tone">Plain HTTP.</span></h1>
       <p>Bearer auth on private endpoints. JSON in, JSON out. Versioned at <code>/v1</code>. The CLI and SDKs wrap this surface; you can hit it directly with <code>curl</code>. This page documents the buyer-facing core; the full route inventory (admin, preview, internal) is published with the OpenAPI manifest in <a href="/docs" style="color:var(--violet,#faf2e1)">/docs</a>.</p>
     </div>
   </section>
@@ -763,23 +793,53 @@ count_only  bool     "1" | "true"</pre>
   </div>
 </main>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <div class="meta">kolm API reference / <a href="/docs">docs</a> / <a href="/quickstart">quickstart</a></div>
-    <div class="links">
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
       <div>
-        <div class="col-h">surface</div>
-        <a href="/api">api reference</a>
-        <a href="/docs">docs</a>
-        <a href="/sdk.js">js sdk</a>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
       </div>
       <div>
-        <div class="col-h">trust</div>
-        <a href="/security">security</a>
-        <a href="/status">status</a>
-        <a href="/privacy">privacy</a>
-        <a href="/terms">terms</a>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
       </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
     </div>
   </div>
 </footer>

@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>The .kolm Specification (RS-1) · Whitepaper · kolm</title>
 <meta name="description" content="Formal technical specification of the .kolm artifact format, the K-score methodology, the 8-stage compile pipeline, and the HMAC-chained receipt protocol. Public, MIT-licensed, RS-1.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:site_name" content="kolm">
 <meta property="og:title" content="The .kolm Specification: RS-1 whitepaper">
@@ -16,6 +17,9 @@
 <meta property="og:url" content="https://kolm.ai/whitepaper">
 <link rel="canonical" href="https://kolm.ai/whitepaper">
 <meta property="og:image" content="https://kolm.ai/img/brand-og.png">
+<meta name="twitter:title" content="The .kolm Specification: RS-1 whitepaper">
+<meta name="twitter:description" content="The 14-section formal spec for the AI compiler: artifact format, compile pipeline, K-score, receipts, conformance.">
+<meta name="twitter:image" content="https://kolm.ai/img/brand-og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="twitter:image" content="https://kolm.ai/img/brand-og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -34,14 +38,14 @@
   header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
   header.site .left{display:flex;align-items:center;gap:36px}
   header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
-  header.site .brand span{font-weight:540;font-size:16px;letter-spacing:0}
+  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
   header.site nav{display:flex;gap:22px}
   header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
   header.site nav a:hover,header.site nav a.active{color:var(--ink)}
   header.site .right{display:flex;align-items:center;gap:14px}
   header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
   header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:540}
+  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
 
   section.cover{padding:88px 0 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
   section.cover::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 980px 480px at 24% 18%,rgba(236,231,220, 0.12),transparent 60%);pointer-events:none}
@@ -51,7 +55,7 @@
   h1.cover-title{margin:0 0 22px;font-size:clamp(36px,5vw,60px);line-height:1.04;font-weight:500;color:var(--ink);max-width:18ch}
   h1.cover-title .tone{color:var(--accent)}
   p.lede{font-size:clamp(17px,1.6vw,20px);line-height:1.55;color:var(--ink-mute);max-width:62ch;margin:0 0 20px}
-  p.lede b{color:var(--ink);font-weight:540}
+  p.lede b{color:var(--ink);font-weight: 500}
   p.lede code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
 
   .meta-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:36px 0 0}
@@ -61,30 +65,33 @@
   .meta-bar .cell .v{font-family:var(--mono);font-size:13px;color:var(--ink)}
   .meta-bar .cell .v.accent{color:var(--accent)}
 
-  .body-grid{display:grid;grid-template-columns:240px 1fr;gap:56px;align-items:start;padding:48px 0 64px}
-  @media(max-width:980px){.body-grid{grid-template-columns:1fr;gap:32px}}
+  .body-grid{display:grid;grid-template-columns:240px minmax(0,1fr);gap:56px;align-items:start;padding:48px 0 64px}
+  .body-grid > *{min-width:0}
+  @media(max-width:980px){.body-grid{grid-template-columns:minmax(0,1fr);gap:32px}}
 
   aside.toc{position:sticky;top:84px;border-left:1px solid var(--line);padding:4px 0 4px 18px;font-size:13px;line-height:1.7;max-height:calc(100vh - 120px);overflow:auto}
   @media(max-width:980px){aside.toc{position:static;border-left:none;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);padding:18px 22px}}
-  aside.toc h4{margin:0 0 10px;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;color:var(--ink-faint);font-weight:540;letter-spacing:0}
+  aside.toc h4{margin:0 0 10px;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;color:var(--ink-faint);font-weight: 500;letter-spacing:0}
   aside.toc ol{list-style:none;padding:0;margin:0}
   aside.toc li{margin:4px 0}
   aside.toc li a{color:var(--ink-mute);transition:color 120ms}
   aside.toc li a:hover{color:var(--ink)}
   aside.toc li .num{font-family:var(--mono);color:var(--ink-faint);font-size:11.5px;display:inline-block;width:24px}
 
-  article{max-width:760px}
-  article section{padding:0 0 36px;border-bottom:1px solid var(--line);margin:0 0 36px}
+  article{max-width:760px;min-width:0;width:100%;box-sizing:border-box}
+  article pre,article code{overflow-wrap:anywhere;word-break:break-word;max-width:100%;box-sizing:border-box}
+  article pre{overflow-x:auto}
+  article section{padding:0 0 36px;border-bottom:1px solid var(--line);margin:0 0 36px;min-width:0}
   article section:last-child{border-bottom:none}
-  article h2{margin:0 0 14px;font-size:clamp(22px,2.4vw,28px);line-height:1.2;font-weight:540;color:var(--ink);scroll-margin-top:80px}
+  article h2{margin:0 0 14px;font-size:clamp(22px,2.4vw,28px);line-height:1.2;font-weight: 500;color:var(--ink);scroll-margin-top:80px}
   article h2 .num{font-family:var(--mono);color:var(--accent);font-size:0.78em;font-weight:500;margin-right:14px;letter-spacing:0}
-  article h3{margin:24px 0 10px;font-size:16px;font-weight:540;color:var(--ink);letter-spacing:0}
-  article h4{margin:18px 0 8px;font-size:13px;font-weight:540;color:var(--ink-mute);font-family:var(--mono);text-transform:uppercase;letter-spacing:0}
+  article h3{margin:24px 0 10px;font-size:16px;font-weight: 500;color:var(--ink);letter-spacing:0}
+  article h4{margin:18px 0 8px;font-size:13px;font-weight: 500;color:var(--ink-mute);font-family:var(--mono);text-transform:uppercase;letter-spacing:0}
   article p{color:var(--ink-mute);margin:0 0 12px;max-width:62ch}
   article p code, article li code, article td code{font-family:var(--mono);font-size:0.9em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
   article ul, article ol{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
   article li{margin:4px 0}
-  article b{color:var(--ink);font-weight:540}
+  article b{color:var(--ink);font-weight: 500}
 
   pre{background:#0b0f10;border:1px solid var(--line);border-radius:8px;padding:18px 20px;overflow:auto;color:#e2e8f0;font-family:var(--mono);font-size:12.5px;line-height:1.7;margin:18px 0}
   pre .com{color:var(--ink-faint)}
@@ -94,16 +101,16 @@
   pre .num{color:var(--good)}
 
   table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:13.5px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-  thead th{text-align:left;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0;color:var(--ink-faint);font-weight:540;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--bg-elev)}
+  thead th{text-align:left;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0;color:var(--ink-faint);font-weight: 500;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--bg-elev)}
   tbody td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--ink-mute);vertical-align:top}
   tbody tr:last-child td{border-bottom:none}
   tbody tr:hover{background:var(--bg-card)}
   tbody td b{color:var(--ink)}
   tbody td code{white-space:nowrap}
 
-  .kw{font-family:var(--mono);font-size:0.86em;color:var(--accent);font-weight:540;letter-spacing:0}
+  .kw{font-family:var(--mono);font-size:0.86em;color:var(--accent);font-weight: 500;letter-spacing:0}
   .normative{padding:14px 18px;border-left:2px solid var(--accent);background:rgba(236,231,220, 0.06);border-radius:0 6px 6px 0;margin:14px 0;font-size:14px;color:var(--ink)}
-  .normative b{color:var(--ink);font-weight:540}
+  .normative b{color:var(--ink);font-weight: 500}
   .note{padding:12px 16px;border-left:2px solid var(--ink-faint);background:var(--bg-elev);border-radius:0 6px 6px 0;margin:14px 0;font-size:13.5px;color:var(--ink-mute)}
   .note b{color:var(--ink)}
 
@@ -114,7 +121,7 @@
   footer{border-top:1px solid var(--line);padding:48px 0 36px;color:var(--ink-faint);font-size:12.5px}
   footer .cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:24px}
   @media(max-width:720px){footer .cols{grid-template-columns:1fr 1fr;gap:24px}}
-  footer h4{font-size:11px;color:var(--ink-mute);letter-spacing:0;text-transform:uppercase;margin:0 0 10px;font-weight:540}
+  footer h4{font-size:11px;color:var(--ink-mute);letter-spacing:0;text-transform:uppercase;margin:0 0 10px;font-weight: 500}
   footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
   footer ul a{color:var(--ink-faint);transition:color 120ms}
   footer ul a:hover{color:var(--ink)}
@@ -143,6 +150,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -154,9 +162,9 @@
   </div></div>
 </header>
 
-<section class="cover">
+<section class="cover frontier-bg">
   <div class="wrap">
-    <div class="eyebrow"><span class="num">RS-1</span> · Whitepaper</div>
+    <div class="hero-eyebrow"><span class="he-dot"></span>RS-1 &middot; Whitepaper &middot; v1.0.0</div>
     <h1 class="cover-title">The <code style="font-family:var(--mono);font-size:0.78em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:0 12px">.kolm</code> <span class="tone">specification.</span></h1>
     <p class="lede">Formal description of the artifact format, 8-stage compile pipeline, K-score gate, and HMAC-chained receipt protocol anchored to a public registry. Conforming implementations MAY use <b>kolm</b> / <b>.kolm</b>.</p>
 
@@ -197,7 +205,7 @@
 
 <section id="abstract">
   <h2><span class="num">§0</span> Abstract</h2>
-  <p>This document specifies <b>RS-1</b>, the wire format and protocol for <code>.kolm</code> artifacts. A <code>.kolm</code> is a single-file, deterministic, signed bundle: base model, personal LoRA adapter, recipe pack of deterministic-token drafts, multimodal recall index, eval suite, manifest with cryptographic anchors to a public registry. The compiler is <b>kolm</b>; the pipeline has eight normative stages (gather → spec → synthesize → k-sample → verify → fit → observe → sign).</p>
+  <p>This document specifies <b>RS-1</b>, the wire format and protocol for <code>.kolm</code> artifacts. A <code>.kolm</code> is a single-file, deterministic, signed bundle: base model, personal LoRA adapter, recipe pack of deterministic-token drafts, multimodal recall index, eval suite, manifest with cryptographic anchors to a public registry. The compiler is <b>kolm</b>; the pipeline has eight normative stages (gather -spec -synthesize -k-sample -verify -fit -observe -sign).</p>
   <p>RS-1 satisfies three goals: <b>portability</b> (runs on commodity CPUs, consumer GPUs, mobile NPUs, no network),
     <b>verifiability</b> (third parties byte-reproduce from inputs; consumers verify output lineage offline),
     <b>compositionality</b> (artifacts import other artifacts; receipt chain survives).</p>
@@ -213,7 +221,7 @@
   <p>Implementations MAY add capabilities, but MUST NOT rename fields, change zip layer ordering, or break receipt verification against <code>registry.kolm.ai</code>.</p>
   <div class="normative">
     <b>Status of this memo.</b> RS-1 published under MIT (code) and CC-BY-4.0 (text). Errata, additions, test suite at
-    <code>github.com/sneaky-hippo/kolmogorov-stack</code>. Spec follows SemVer; backward-incompatible changes increment major (RS-1 → RS-2) and require a registry epoch transition.
+    <code>github.com/sneaky-hippo/kolmogorov-stack</code>. Spec follows SemVer; backward-incompatible changes increment major (RS-1 &rarr; RS-2) and require a registry epoch transition.
   </div>
 </section>
 
@@ -247,7 +255,7 @@
   <h2><span class="num">§3</span> Artifact format</h2>
   <p>A <code>.kolm</code> is a ZIP archive (PKZip 2.0 / DEFLATE) with fixed inner layout. Entries <span class="kw">MUST</span> appear in canonical order with deterministic options (mtime <code>2020-01-01T00:00:00Z</code>, no extra fields, UTF-8 names, no Zip64 unless a layer exceeds 4 GiB).</p>
 
-  <div class="normative" style="border-color:#5a6f5a"><b>v0.1 implementation status.</b> Today, <code>model.gguf</code> contains a signed JSON pointer to the resolved base model (runtime "cloud"), <code>lora.bin</code> contains an optional <code>KOLMPACK</code> behavior pack, and <code>index.sqlite-vec</code> contains an optional <code>KOLMIDX</code> JSON lookup container. Native quantized weights, GGUF-LoRA adapters, and sqlite-vec recall databases are roadmap tiers (rs-2 model-adapter, rs-3 native-runtime). The table below describes the rs-1 format contract — runtimes <span class="kw">MUST</span> accept either contents.</div>
+  <div class="normative" style="border-color:#5a6f5a"><b>v0.1 implementation status.</b> Today, <code>model.gguf</code> contains a signed JSON pointer to the resolved base model (runtime "cloud"), <code>lora.bin</code> contains an optional <code>KOLMPACK</code> behavior pack, and <code>index.sqlite-vec</code> contains an optional <code>KOLMIDX</code> JSON lookup container. Native quantized weights, GGUF-LoRA adapters, and sqlite-vec recall databases are roadmap tiers (rs-2 model-adapter, rs-3 native-runtime). The table below describes the rs-1 format contract. Runtimes <span class="kw">MUST</span> accept either contents.</div>
 
   <table>
     <thead><tr><th>#</th><th>Path</th><th>Required</th><th>Purpose</th></tr></thead>
@@ -336,7 +344,7 @@
   <p>Emit verifiers (§7). At least one <span class="kw">MUST</span> be deterministic (schema, regex, function); classifier verifiers <span class="kw">MAY</span> only appear in composite mode where a deterministic verifier dominates.</p>
 
   <h3>5.4 Stage 4: K-sample</h3>
-  <p>Query frontier <i>k</i> times per input (default <i>k</i>=5, range 1–32) and apply the verifier. First passing output becomes the label. If none pass, the example is <code>frontier.unverified</code> and excluded from training (FM-001, §10.3).</p>
+  <p>Query frontier <i>k</i> times per input (default <i>k</i>=5, range 1-12) and apply the verifier. First passing output becomes the label. If none pass, the example is <code>frontier.unverified</code> and excluded from training (FM-001, §10.3).</p>
 
   <h3>5.5 Stage 5: Verify</h3>
   <p>Independent verifier pass over accepted pairs detects label drift. Failing pairs dropped. Acceptance rate logged in <code>provenance/k-sample.log</code>.</p>
@@ -357,7 +365,7 @@
   <p>Composite quality metric. Single number in [0, 100], three subcomponents.</p>
 
   <h3>6.1 Definition</h3>
-  <p><code>T</code> = task accuracy (proportion of verifier-passing outputs). <code>C</code> = calibration: 1 − mean absolute deviation between stated confidence and observed accuracy on a 10-bucket reliability diagram. <code>L</code> = latency score: step function over p50 (<10 ms = 100, <50 ms = 95, <250 ms = 85, <1 s = 70, <5 s = 50, ≥5 s = 0). Then:</p>
+  <p><code>T</code> = task accuracy (proportion of verifier-passing outputs). <code>C</code> = calibration: 1 - mean absolute deviation between stated confidence and observed accuracy on a 10-bucket reliability diagram. <code>L</code> = latency score: step function over p50 (<10 ms = 100, <50 ms = 95, <250 ms = 85, <1 s = 70, <5 s = 50, - s = 0). Then:</p>
   <pre><span class="com">// composite K-score</span>
 K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
   <p>Weights (0.60, 0.25, 0.15) are normative for K-score 1.0; <span class="kw">MAY</span> be overridden by a task profile (latency-critical, calibration-critical) with name and weights in <code>manifest.k_score.profile</code>.</p>
@@ -366,9 +374,9 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
   <table>
     <thead><tr><th>Gate</th><th>Condition</th><th>Behavior</th></tr></thead>
     <tbody>
-      <tr><td><span class="pill">passed</span></td><td>K ≥ floor and T ≥ 0.85</td><td>Artifact emitted.</td></tr>
-      <tr><td><span class="pill warn">warned</span></td><td>floor &gt; K ≥ floor − 5 or 0.85 &gt; T ≥ 0.75</td><td>Emitted with warning. Operators should inspect the eval suite.</td></tr>
-      <tr><td><span class="pill bad">failed</span></td><td>K &lt; floor − 5 or T &lt; 0.75</td><td>Artifact <span class="kw">MUST NOT</span> be emitted. Compile exits non-zero. See FM-001.</td></tr>
+      <tr><td><span class="pill">passed</span></td><td>K &ge; floor and T &ge; 0.85</td><td>Artifact emitted.</td></tr>
+      <tr><td><span class="pill warn">warned</span></td><td>floor &gt; K &ge; floor - 0.05 or 0.85 &gt; T &ge; 0.75</td><td>Emitted with warning. Operators should inspect the eval suite.</td></tr>
+      <tr><td><span class="pill bad">failed</span></td><td>K &lt; floor - 0.05 or T &lt; 0.75</td><td>Artifact <span class="kw">MUST NOT</span> be emitted. Compile exits non-zero. See FM-001.</td></tr>
     </tbody>
   </table>
 
@@ -378,12 +386,12 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
     (2) run inference on each test input;
     (3) apply the verifier;
     (4) recompute T, C, L per §6.1.
-    Divergence beyond ±0.5 K-points <span class="kw">SHOULD</span> be reported as tampering.</p>
+    Divergence beyond &plusmn;0.5 K-points <span class="kw">SHOULD</span> be reported as tampering.</p>
 </section>
 
 <section id="verifiers">
   <h2><span class="num">§7</span> Verifier types</h2>
-  <p>A verifier is a deterministic decision procedure (input, candidate_output) → boolean. Five normative types:</p>
+  <p>A verifier is a deterministic decision procedure (input, candidate_output) &rarr; boolean. Five normative types:</p>
 
   <table>
     <thead><tr><th>Type</th><th>Form</th><th>Deterministic?</th><th>Use</th></tr></thead>
@@ -391,7 +399,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
       <tr><td><b>schema</b></td><td>JSON Schema 2020-12 over output</td><td>yes</td><td>Structured outputs (extraction, function-calls).</td></tr>
       <tr><td><b>regex</b></td><td>RE2 regex over output</td><td>yes</td><td>Format constraints (dates, IDs, labels).</td></tr>
       <tr><td><b>function</b></td><td>Pure JS/Python evaluator by SHA-256</td><td>yes</td><td>Computable predicates (parser, math, code-runs).</td></tr>
-      <tr><td><b>classifier</b></td><td>Bundled small model (≤200 MB), calibrated threshold</td><td>no, but stable</td><td>Subjective tasks (style, tone, harmlessness). <span class="kw">MUST</span> pair with a deterministic gate in a composite.</td></tr>
+      <tr><td><b>classifier</b></td><td>Bundled small model (&lt; 200 MB), calibrated threshold</td><td>no, but stable</td><td>Subjective tasks (style, tone, harmlessness). <span class="kw">MUST</span> pair with a deterministic gate in a composite.</td></tr>
       <tr><td><b>composite</b></td><td>Boolean combination of the above</td><td>follows leaves</td><td>Real tasks. AND/OR, documented short-circuit order.</td></tr>
     </tbody>
   </table>
@@ -427,7 +435,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
 
 <section id="repro">
   <h2><span class="num">§9</span> Reproducibility</h2>
-  <p><b>Byte-identical reproducibility.</b> Given the same <code>(task, examples, corpus, base_model, recipe_registry@epoch)</code>, two independent compiles <span class="kw">MUST</span> produce the identical zip, not just the same K-score.</p>
+  <p><b>Byte-identical reproducibility.</b> Given the same <code>(task, examples, corpus, base_model, recipe_registry@epoch)</code>, two independent compiles <span class="kw">MUST</span> produce the identical zip, not only the same K-score.</p>
 
   <p>Mechanism:</p>
   <ul>
@@ -540,10 +548,10 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
   <table>
     <thead><tr><th>Param</th><th>Default</th><th>Range</th></tr></thead>
     <tbody>
-      <tr><td><code>rank</code></td><td>16</td><td>4–64</td></tr>
+      <tr><td><code>rank</code></td><td>16</td><td>4-64</td></tr>
       <tr><td><code>alpha</code></td><td>32</td><td>= 2·rank</td></tr>
-      <tr><td><code>epochs</code></td><td>3</td><td>1–10</td></tr>
-      <tr><td><code>learning_rate</code></td><td>2e-4</td><td>1e-5–1e-3</td></tr>
+      <tr><td><code>epochs</code></td><td>3</td><td>1-0</td></tr>
+      <tr><td><code>learning_rate</code></td><td>2e-4</td><td>1e-5-e-3</td></tr>
       <tr><td><code>batch_size</code></td><td>auto</td><td>scaled to host VRAM</td></tr>
       <tr><td><code>quantization</code></td><td>INT4 + bf16</td><td>{INT4, INT8, fp16, bf16}</td></tr>
     </tbody>
@@ -575,38 +583,53 @@ offset  size  field
 </div>
 </div>
 
-<footer>
-  <div class="wrap">
-    <div class="cols">
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
       <div>
-        <a class="brand" href="/" style="display:inline-flex;align-items:center;gap:9px;color:var(--ink);margin-bottom:10px">
-          <span style="font-weight:540;font-size:15px">kolm</span>
-        </a>
-        <p style="font-size:12.5px;margin:0;max-width:36ch">The AI compiler. Compile any task into a signed Specialist you own.</p>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
       </div>
-      <div><h4>Product</h4><ul>
-        <li><a href="/compile">Compile</a></li>
-        <li><a href="/serve">Serve --mcp</a></li>
-        <li><a href="/anatomy">.kolm format</a></li>
-        <li><a href="/k-score">K-score</a></li>
-        <li><a href="/benchmarks">Benchmarks</a></li>
-        <li><a href="/compare">Compare</a></li>
-      </ul></div>
-      <div><h4>Develop</h4><ul>
-        <li><a href="/api">API reference</a></li>
-        <li><a href="/whitepaper">Whitepaper</a></li>
-        <li><a href="/how-it-works">How it works</a></li>
-        <li><a href="/articles">Articles</a></li>
-      </ul></div>
-      <div><h4>Trust</h4><ul>
-        <li><a href="/security">Security</a></li>
-        <li><a href="/trust">Trust</a></li>
-        <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a></li>
-      </ul></div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
     </div>
-    <div class="legal">
-      <span>© 2026 Kolmogorov, Inc. · the AI compiler</span>
-      <span>RS-1 spec: MIT (code) · CC-BY-4.0 (text)</span>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
     </div>
   </div>
 </footer>

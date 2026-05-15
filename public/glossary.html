@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Glossary · kolm</title>
 <meta name="description" content="The terms kolm uses, defined precisely. K-score, recipe, manifest, receipt, .kolm, distillation, k-sample, verifier, recall.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Glossary &middot; kolm">
 <meta property="og:description" content="The terms kolm uses, defined precisely.">
@@ -42,14 +43,14 @@
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
   header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
-  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: 0; }
+  header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
   header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   header.site .right .cta:hover { background: #fff; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
@@ -62,11 +63,11 @@
   article { padding: 24px 0 80px; }
   .term { padding: 26px 0; border-bottom: 1px solid var(--line); }
   .term:last-child { border-bottom: none; }
-  .term h3 { margin: 0 0 8px; font-family: var(--mono); font-size: 17px; font-weight: 540; color: var(--ink); letter-spacing: 0; line-height: 1.35; }
+  .term h3 { margin: 0 0 8px; font-family: var(--mono); font-size: 17px; font-weight: 500; color: var(--ink); letter-spacing: 0; line-height: 1.35; }
   .term h3 .alias { color: var(--ink-faint); font-weight: 400; font-size: 14px; }
   .term p { margin: 0 0 8px; font-size: 15px; line-height: 1.65; color: var(--ink-mute); }
   .term p:last-child { margin-bottom: 0; }
-  .term p b { color: var(--ink); font-weight: 540; }
+  .term p b { color: var(--ink); font-weight: 500; }
   .term code { font-family: var(--mono); font-size: 0.92em; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
   .term a { color: var(--accent); }
   .term a:hover { color: var(--accent-strong); }
@@ -120,6 +121,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -237,13 +239,132 @@
       <p>The capture-and-distill loop. <b>Shipped today:</b> every proxied call lands in the tenant corpus, and a tenant can hand a 1000-pair namespace to an external trainer bridge. <b>Target architecture:</b> closed-loop in-app distill, triage-bound exports (kept-only), and revocation. The thing you buy when you pay kolm is the rails, not the compute.</p>
     </div>
 
+    <div class="term">
+      <h3>airgap mode <span class="alias">noun &middot; hard offline</span></h3>
+      <p>Set <code>KOLM_AIRGAP=1</code> plus the Hugging Face offline switches (<code>TRANSFORMERS_OFFLINE=1</code>, <code>HF_DATASETS_OFFLINE=1</code>, <code>HF_HUB_OFFLINE=1</code>) and every kolm verb refuses network egress. Manage it with <code>kolm airgap status|enable|disable|verify</code>. Enable writes <code>~/.kolm/airgap.env</code>; verify inspects and signature-checks an artifact entirely offline. <a href="/airgap">/airgap</a>.</p>
+    </div>
+
+    <div class="term">
+      <h3>auto-pick <span class="alias">verb &middot; backend selection</span></h3>
+      <p><code>kolm compute pick</code> scores every detected backend and picks the highest. Score is <code>S = 0.35&middot;avail + 0.20&middot;cost_inv + 0.15&middot;latency_inv + 0.15&middot;repro + 0.15&middot;perf</code>. The perf term breaks ties between local-cpu and a present GPU; cost_inv favors free local hardware over paid cloud when capability is close.</p>
+    </div>
+
+    <div class="term">
+      <h3>BYOC <span class="alias">noun &middot; bring your own cloud</span></h3>
+      <p>Deploy a compiled <code>.kolm</code> artifact onto infrastructure you own. Targets: <code>fly</code>, <code>aws-nitro</code>, <code>gcp-cvm</code>, <code>azure-cvm</code>, <code>docker</code>. Driven by <code>kolm cloud deploy --target &lt;t&gt; --artifact &lt;id&gt;</code>. TEE attestation is captured per deploy mode where the target supports it. <a href="/byoc">/byoc</a>.</p>
+    </div>
+
+    <div class="term">
+      <h3>canonical JSON <span class="alias">noun &middot; deterministic serialization</span></h3>
+      <p>JSON written with sorted keys and recursive into arrays so two implementations produce byte-identical output. Used as input to CID hashing and to HMAC signing. Without it, a re-serialization in a different language would invalidate the chain.</p>
+    </div>
+
+    <div class="term">
+      <h3>CID <span class="alias">noun &middot; content identifier</span></h3>
+      <p>A self-describing hash over an artifact's manifest hashes. Form: <code>cidv1:sha256:&lt;64-hex&gt;</code> computed from canonical-JSON of <code>manifest.hashes</code>. Embedded in the manifest, the receipt, and the audit log. Look up an artifact by CID at <code>/v1/cid/:cid</code>.</p>
+    </div>
+
+    <div class="term">
+      <h3>compute backend <span class="alias">noun &middot; where training runs</span></h3>
+      <p>A named target for training or inference. Fourteen are registered: local accelerators (<code>local-cpu</code>, <code>local-cuda</code>, <code>local-mps</code>, <code>local-mlx</code>, <code>local-rocm</code>, <code>local-directml</code>), serverless cloud (<code>modal</code>, <code>runpod</code>, <code>replicate</code>, <code>fal</code>), managed (<code>together</code>), marketplace (<code>vast</code>, <code>lambda</code>), and self-hosted (<code>remote-ssh</code>). List them with <code>kolm compute list</code>; probe with <code>kolm compute detect</code>.</p>
+    </div>
+
+    <div class="term">
+      <h3>compute provenance <span class="alias">noun &middot; receipt subfield</span></h3>
+      <p>The block every backend writes into <code>receipt.compute</code>: <code>{ backend, device, cost_usd, started_at, finished_at, duration_seconds, provenance{...} }</code>. Third parties can read it and confirm which backend produced an artifact and at what reported cost.</p>
+    </div>
+
+    <div class="term">
+      <h3>HMAC chain <span class="alias">noun &middot; receipt integrity</span></h3>
+      <p>The integrity scheme on a receipt. Four ordered rings; each ring's HMAC includes the prior ring's signature as input. Tampering with any earlier field breaks every later ring. The Rust verifier re-derives the chain on load.</p>
+    </div>
+
+    <div class="term">
+      <h3>MLX <span class="alias">noun &middot; Apple array framework</span></h3>
+      <p>Apple's array framework for Silicon. The <code>local-mlx</code> backend uses <code>mlx-lm</code> directly. Lower memory footprint than torch-MPS on many shapes, native to M-series.</p>
+    </div>
+
+    <div class="term">
+      <h3>MPS <span class="alias">noun &middot; Metal Performance Shaders</span></h3>
+      <p>Apple Silicon GPU compute path used by the <code>local-mps</code> backend. PyTorch backend (<code>torch.backends.mps</code>). Default on every Mac dev box that has it.</p>
+    </div>
+
+    <div class="term">
+      <h3>Rust verifier <span class="alias">noun &middot; runtime crate</span></h3>
+      <p>The reference verifier at <code>packages/runtime-rs/</code>. <code>Artifact::load</code> plus <code>verify</code> over canonical-JSON, receipt-chain, and body signature. <code>forbid(unsafe)</code>. Built as <code>rlib</code>, <code>cdylib</code>, and <code>staticlib</code> so other runtimes can link against it.</p>
+    </div>
+
+    <div class="term">
+      <h3>TEE <span class="alias">noun &middot; trusted execution environment</span></h3>
+      <p>Hardware-isolated compute. Supported attestation paths: AWS Nitro (COSE_Sign1 + PCR0), AMD SEV-SNP (1184-byte binary), Intel TDX (quote), GCP CVM, Azure CVM. When a <code>.kolm</code> runs in a cloud TEE, kolm captures the attestation quote and writes it into the receipt. See also TOFU.</p>
+    </div>
+
+    <div class="term">
+      <h3>team workspace <span class="alias">noun &middot; multi-user namespace</span></h3>
+      <p>A shared tenant scope with roles (owner, admin, member) and seat limits. Artifacts written under a team namespace are readable by team members per <code>canRead(c, tenant, tenantId)</code>. Managed with <code>kolm team create|list|show|invite|accept|members|role|remove</code>. <a href="/teams">/teams</a>.</p>
+    </div>
+
+    <div class="term">
+      <h3>TOFU <span class="alias">noun &middot; trust on first use</span></h3>
+      <p>The attestation trust model. The first quote seen for an artifact is recorded and trusted; later quotes must match it or the verifier refuses. Standard pattern for unattended verification when no central PKI is available.</p>
+    </div>
+
+    <div class="term">
+      <h3>tunnel <span class="alias">noun &middot; remote access broker</span></h3>
+      <p>An SSE-brokered path from kolm.ai to a local <code>kolm</code> agent serving a <code>.kolm</code> artifact. Seven-day TTL; last-write-wins across multiple agents holding the same token. Lifecycle: <code>kolm tunnel new|list|start|close</code>. <a href="/tunnels">/tunnels</a>.</p>
+    </div>
+
   </div>
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolmogorov &middot; 2026 &middot; glossary</span>
-    <span><a href="mailto:dev@kolm.ai" style="color:var(--ink-faint);">dev@kolm.ai</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

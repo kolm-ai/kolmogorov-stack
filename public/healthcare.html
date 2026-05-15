@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Healthcare · kolm</title>
-<meta name="description" content="kolm's healthcare architecture direction: signed local AI artifacts, HMAC receipts, and Enterprise review paths for teams evaluating PHI-sensitive workflows.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>HIPAA-compliant AI on your hospital hardware | kolm</title>
+<meta name="description" content="PHI stays inside your BAA boundary. kolm compiles your task into a signed local artifact with HMAC receipts. No cloud calls at run time.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm &middot; healthcare AI without the egress">
 <meta property="og:description" content="Signed local artifact architecture for healthcare teams evaluating PHI-sensitive workflows.">
@@ -42,37 +43,39 @@
   header.site .left { display: flex; align-items: center; gap: 36px; }
   header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
   header.site .brand img { height: 18px; width: 18px; }
-  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: 0; }
+  header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
   header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   header.site .right .cta:hover { background: #fff; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
-  section.hero { padding: 88px 0 56px; position: relative; overflow: hidden; }
+  section.hero { padding: 104px 0 64px; position: relative; overflow: hidden; }
   section.hero::before {
     content: ""; position: absolute; inset: 0; pointer-events: none;
     background:
-      radial-gradient(ellipse 900px 460px at 22% 12%, rgba(236,231,220, 0.10), transparent 60%),
-      radial-gradient(ellipse 600px 360px at 88% 90%, rgba(236,231,220, 0.05), transparent 60%);
+      radial-gradient(ellipse 1100px 540px at 22% 10%, rgba(125,211,252, 0.07), transparent 60%),
+      radial-gradient(ellipse 700px 400px at 88% 90%, rgba(236,231,220, 0.04), transparent 60%);
   }
-  section.hero .wrap { position: relative; }
+  section.hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.36; background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237dd3fc' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237dd3fc' stop-opacity='0.18'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3C/g%3E%3C/svg%3E"); background-size: cover; background-position: center top; mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%); -webkit-mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%); }
+  section.hero .wrap { position: relative; z-index: 2; }
 
-  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
-  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
+  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 14px; background: rgba(8,9,8,0.62); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #7dd3fc; box-shadow: 0 0 10px #7dd3fc; animation: pulse-dot 2.4s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.3); } }
 
-  h1 { margin: 24px 0 22px; font-size: clamp(38px, 5.6vw, 64px); line-height: 1.05; font-weight: 500; letter-spacing: 0; max-width: 19ch; }
-  h1 .tone { color: var(--accent); }
+  h1 { margin: 26px 0 22px; font-size: clamp(48px, 7vw, 104px); line-height: 0.94; font-weight: 500; letter-spacing: -0.04em; max-width: 14ch; }
+  h1 .tone { background: linear-gradient(170deg, #faf2e1 0%, #7dd3fc 50%, #faf2e1 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   p.lede { margin: 0 0 32px; font-size: clamp(16px, 1.3vw, 18.5px); line-height: 1.55; color: var(--ink-mute); max-width: 56ch; }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
   p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
 
   .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 540; transition: background 120ms; }
+  a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 500; transition: background 120ms; }
   a.btn-primary:hover { background: #fff; }
   a.btn-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); padding: 11px 14px; font-size: 14px; font-weight: 500; transition: color 120ms; }
   a.btn-link:hover { color: var(--accent); }
@@ -81,7 +84,7 @@
   section + section { border-top: 1px solid var(--line); }
   .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px; }
   .eyebrow .num { color: var(--accent); }
-  h2 { margin: 0 0 18px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; font-weight: 540; letter-spacing: 0; max-width: 24ch; }
+  h2 { margin: 0 0 18px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; font-weight: 500; letter-spacing: 0; max-width: 24ch; }
   h2 .tone { color: var(--accent); }
   p.sec-lede { margin: 0 0 40px; font-size: 16px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
 
@@ -94,10 +97,10 @@
     display: flex; flex-direction: column; min-height: 184px;
   }
   .pain-card .lab { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
-  .pain-card .big { margin: 14px 0 10px; font-size: 36px; font-weight: 540; letter-spacing: 0; line-height: 1; color: var(--ink); }
+  .pain-card .big { margin: 14px 0 10px; font-size: 36px; font-weight: 500; letter-spacing: 0; line-height: 1; color: var(--ink); }
   .pain-card .big .u { font-size: 13px; font-weight: 400; color: var(--ink-mute); margin-left: 4px; letter-spacing: 0; }
   .pain-card p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
-  .pain-card p b { color: var(--accent); font-weight: 540; }
+  .pain-card p b { color: var(--accent); font-weight: 500; }
 
   /* THREE-COL features */
   .triplets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
@@ -109,10 +112,10 @@
   .trip .icn {
     display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center;
     border-radius: 6px; background: var(--accent-soft); color: var(--accent);
-    font-family: var(--mono); font-size: 14px; font-weight: 540;
+    font-family: var(--mono); font-size: 14px; font-weight: 500;
     margin-bottom: 16px;
   }
-  .trip h3 { margin: 0 0 10px; font-size: 17px; font-weight: 540; letter-spacing: 0; line-height: 1.3; color: var(--ink); }
+  .trip h3 { margin: 0 0 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; line-height: 1.3; color: var(--ink); }
   .trip p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
   .trip p b { color: var(--ink); font-weight: 500; }
 
@@ -126,7 +129,7 @@
   .uc .hd { padding: 14px 22px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--ink-mute); }
   .uc .hd .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
   .uc .body { padding: 30px 30px 26px; }
-  .uc .body h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: 0; font-weight: 540; color: var(--ink); }
+  .uc .body h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: 0; font-weight: 500; color: var(--ink); }
   .uc .body p.note { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.55; }
   .uc .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line); }
   @media (max-width: 720px) { .uc .steps { grid-template-columns: 1fr; } }
@@ -134,7 +137,7 @@
   .uc .step:last-child { border-right: none; }
   @media (max-width: 720px) { .uc .step { border-right: none; border-bottom: 1px solid var(--line); } .uc .step:last-child { border-bottom: none; } }
   .uc .step .n { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; color: var(--accent); }
-  .uc .step h4 { margin: 10px 0 8px; font-size: 14.5px; font-weight: 540; letter-spacing: 0; color: var(--ink); }
+  .uc .step h4 { margin: 10px 0 8px; font-size: 14.5px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
   .uc .step p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
 
   /* COMPLIANCE STRIP */
@@ -150,7 +153,7 @@
   .compl-row .item:last-child { border-right: none; }
   @media (max-width: 880px) { .compl-row .item:nth-child(2) { border-right: none; } .compl-row .item:nth-child(1), .compl-row .item:nth-child(2) { border-bottom: 1px solid var(--line); } }
   .compl-row .item .nm { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
-  .compl-row .item .v { margin-top: 10px; font-size: 17px; font-weight: 540; letter-spacing: 0; color: var(--ink); }
+  .compl-row .item .v { margin-top: 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
   .compl-row .item p { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
   .compl-row .item .v.acc { color: var(--accent); }
 
@@ -216,6 +219,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -230,13 +234,14 @@
 <main>
 <section class="hero">
   <div class="wrap">
+    <div class="hero-eyebrow"><span class="he-dot"></span>Healthcare . PHI stays in your control boundary</div>
     <h1>Healthcare AI as<br><span class="tone">a signed, local artifact.</span></h1>
     <p class="lede"><b>kolm</b> compiles approved clinical tasks into signed <code>.kolm</code> binaries that run inside the security boundary your team controls. PHI stays on hosts you control. Every output carries a manifest, an eval set, and an HMAC-bound receipt your auditor can re-verify with the tenant receipt secret you archived at compile time.</p>
     <div class="cta-row">
-      <a href="/signup?plan=enterprise" class="btn-primary">Start Enterprise</a>
+      <a href="mailto:founders@kolm.ai?subject=kolm%20healthcare%20compliance%20walkthrough" class="btn-primary">Book a compliance walkthrough</a>
       <a href="/security" class="btn-link">Security &amp; compliance posture <span aria-hidden="true">&rarr;</span></a>
     </div>
-    <div style="margin-top:14px"><a href="mailto:founders@kolm.ai?subject=kolm%20healthcare%20pilot" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">or talk to founders &rarr;</a></div>
+    <div style="margin-top:14px"><a href="/signup?plan=enterprise" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">or start an Enterprise trial &rarr;</a></div>
   </div>
 </section>
 
@@ -438,18 +443,53 @@
 </main>
 
 <footer class="site">
-  <div class="wrap row">
-    <span>kolmogorov · 2026</span>
-    <span>compile once · run anywhere</span>
-  </div>
-  <div class="wrap row" style="margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint)">
-    <a href="/manifesto" style="color:inherit">Manifesto</a>
-    <a href="/trust" style="color:inherit">Trust</a>
-    <a href="/security" style="color:inherit">Security</a>
-    <a href="/privacy" style="color:inherit">Privacy</a>
-    <a href="/terms" style="color:inherit">Terms</a>
-    <a href="/changelog" style="color:inherit">Changelog</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" style="color:inherit">GitHub</a>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

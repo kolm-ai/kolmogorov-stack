@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>kolm evolve - skeleton LoRA to a living local model</title>
 <meta name="description" content="kolm tune and kolm rag. Your local model evolves on captured runs and looks up local knowledge, all airgapped. Skeleton LoRA, K-score gated promotion, signed receipts, file-rename rollback.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm evolve - skeleton LoRA to a living local model">
 <meta property="og:description" content="kolm tune and kolm rag. Local fine-tune and local lookup, never phones home. K-score gated promotion.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/evolve">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="kolm evolve - skeleton LoRA to a living local model">
+<meta name="twitter:description" content="kolm tune and kolm rag. Local fine-tune and local lookup, never phones home. K-score gated promotion.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/evolve">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -49,7 +53,7 @@
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
   header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
-  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: 0; }
+  header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover, header.site nav a.active { color: var(--ink); }
@@ -59,7 +63,7 @@
   header.site .right .cta {
     display: inline-flex; align-items: center; gap: 6px;
     color: var(--bg); background: var(--ink); border-radius: 6px;
-    padding: 7px 14px; font-size: 13px; font-weight: 540; letter-spacing: 0;
+    padding: 7px 14px; font-size: 13px; font-weight: 500; letter-spacing: 0;
     transition: background 120ms;
   }
   header.site .right .cta:hover { background: #fff; }
@@ -98,7 +102,7 @@
     line-height: 1.55; color: var(--ink-mute);
     max-width: 60ch; letter-spacing: 0;
   }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
   p.lede code {
     font-family: var(--mono); font-size: 0.92em; color: var(--ink);
     background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px;
@@ -144,7 +148,7 @@
   h2 {
     margin: 0 0 18px;
     font-size: clamp(26px, 3.2vw, 38px);
-    line-height: 1.1; font-weight: 540; letter-spacing: 0;
+    line-height: 1.1; font-weight: 500; letter-spacing: 0;
     color: var(--ink); max-width: 24ch;
   }
   h2 .tone { color: var(--accent); }
@@ -166,7 +170,7 @@
     text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
   }
   .prop h4 {
-    margin: 0 0 8px; font-size: 15.5px; font-weight: 540;
+    margin: 0 0 8px; font-size: 15.5px; font-weight: 500;
     letter-spacing: 0; color: var(--ink); line-height: 1.35;
   }
   .prop p {
@@ -186,7 +190,7 @@
     color: var(--ink); white-space: pre; overflow-x: auto;
     color: var(--ink-mute);
   }
-  .arc b { color: var(--accent); font-weight: 540; }
+  .arc b { color: var(--accent); font-weight: 500; }
   .arc .good { color: var(--good); }
 
   /* step list */
@@ -202,7 +206,7 @@
     letter-spacing: 0; padding-top: 4px;
   }
   .step .what h4 {
-    margin: 0 0 6px; font-size: 15px; font-weight: 540;
+    margin: 0 0 6px; font-size: 15px; font-weight: 500;
     color: var(--ink); line-height: 1.3;
   }
   .step .what p {
@@ -253,7 +257,7 @@
   }
   .rag-card.out .head { color: var(--accent); }
   .rag-card h3 {
-    margin: 0 0 12px; font-size: 18px; font-weight: 540;
+    margin: 0 0 12px; font-size: 18px; font-weight: 500;
     letter-spacing: 0; color: var(--ink);
   }
   .rag-card p { margin: 0 0 14px; font-size: 13.5px; line-height: 1.6; color: var(--ink-mute); }
@@ -272,7 +276,7 @@
     display: inline-flex; align-items: center; gap: 8px;
     background: var(--ink); color: var(--bg);
     border-radius: 6px; padding: 11px 18px;
-    font-size: 14px; font-weight: 540; letter-spacing: 0;
+    font-size: 14px; font-weight: 500; letter-spacing: 0;
     transition: background 120ms;
   }
   a.btn-primary:hover { background: #fff; }
@@ -288,7 +292,7 @@
   footer.site .grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 36px; margin-bottom: 36px; }
   @media (max-width: 720px) { footer.site .grid { grid-template-columns: 1fr 1fr; } }
   footer.site .brandcol .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); margin-bottom: 14px; }
-  footer.site .brandcol .brand span { font-weight: 540; font-size: 15px; letter-spacing: 0; }
+  footer.site .brandcol .brand span { font-weight: 500; font-size: 15px; letter-spacing: 0; }
   footer.site .brandcol p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; max-width: 32ch; }
   footer.site h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
   footer.site ul { list-style: none; margin: 0; padding: 0; }
@@ -316,6 +320,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -601,49 +606,52 @@ var hits = lib.rag.query(q, 5).matches;
 </section>
 
 <footer class="site">
-  <div class="wrap">
-    <div class="grid">
-      <div class="brandcol">
-        <a href="/" class="brand" aria-label="kolm">
-          <span>kolm</span>
-        </a>
-        <p>The private AI compiler. RS-1 &middot; RS-1-multimodal &middot; RS-1-receipts. Open spec, MIT-licensed.</p>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
       </div>
       <div>
-        <h5>Product</h5>
-        <ul>
-          <li><a href="/compile">Compile</a></li>
-          <li><a href="/serve">Serve</a></li>
-          <li><a href="/evolve">Evolve</a></li>
-          <li><a href="/anatomy">.kolm anatomy</a></li>
-          <li><a href="/k-score">K-score</a></li>
-          <li><a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a></li>
-          <li><a href="/pricing">Pricing</a></li>
-        </ul>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
       </div>
       <div>
-        <h5>Develop</h5>
-        <ul>
-          <li><a href="/docs">Docs</a></li>
-          <li><a href="/articles">Articles</a></li>
-          <li><a href="/sdk.js">SDK</a></li>
-          <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a></li>
-        </ul>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
       </div>
       <div>
-        <h5>Trust</h5>
-        <ul>
-          <li><a href="/security">Security</a></li>
-          <li><a href="/status">Status</a></li>
-          <li><a href="/privacy">Privacy</a></li>
-          <li><a href="/terms">Terms</a></li>
-          <li><a href="mailto:dev@kolm.ai">dev@kolm.ai</a></li>
-        </ul>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
       </div>
     </div>
-    <div class="legal">
-      <span>kolmogorov &middot; 2026</span>
-      <span>compile once, evolve locally, never phone home</span>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
     </div>
   </div>
 </footer>

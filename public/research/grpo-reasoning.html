@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>GRPO with verifiable rewards &middot; reasoning RL without a value head | kolm research</title>
+<meta name="description" content="Group Relative Policy Optimization is the algorithm behind DeepSeek R1. No value head, no separate reward model. How kolm wires three verifiable reward families (code-exec, math-checker, schema-validator) into the K-score evaluator so the training signal and the release gate are the same code path.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="GRPO with verifiable rewards . kolm research">
+<meta property="og:description" content="Reasoning RL without a value head. Three reward families wired to the K-score evaluator.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-05-14">
+<meta property="article:author" content="Kolmogorov">
+<meta property="article:section" content="reasoning">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GRPO with verifiable rewards">
+<meta name="twitter:description" content="DeepSeek R1's algorithm, wired to kolm's evaluator surface.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/grpo-reasoning">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/grpo-reasoning">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="/escape.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "GRPO with verifiable rewards: reasoning RL without a value head",
+      "description": "Group Relative Policy Optimization (DeepSeek R1's algorithm) wired to programmatic reward functions that double as the K-score evaluator.",
+      "url": "https://kolm.ai/research/grpo-reasoning",
+      "author": {"@type": "Organization", "name": "Kolmogorov"},
+      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+      "datePublished": "2026-05-14",
+      "articleSection": "reasoning",
+      "keywords": "GRPO, DeepSeek R1, reasoning, reinforcement learning, verifiable rewards, RLVR, chain-of-thought",
+      "citation": [
+        "Shao et al, 2024, arXiv:2402.03300 (GRPO, DeepSeek-MATH)",
+        "DeepSeek-AI, 2025, arXiv:2501.12948 (DeepSeek R1)",
+        "Lambert et al, 2024, arXiv:2411.15124 (RLVR)"
+      ],
+      "license": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+        {"@type": "ListItem", "position": 3, "name": "GRPO with verifiable rewards", "item": "https://kolm.ai/research/grpo-reasoning"}
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+  a:hover{border-bottom-color:var(--ink)}
+  .nb{border:0}
+  ::selection{background:rgba(236,231,220,0.30)}
+
+  .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+  @media(max-width:720px){.wrap{padding:0 20px}}
+
+  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+  @media(max-width:720px){header.site .row{padding:0 20px}}
+  header.site .left{display:flex;align-items:center;gap:36px}
+  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
+  header.site nav{display:flex;gap:22px}
+  header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+  header.site .right{display:flex;align-items:center;gap:14px}
+  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+  header.site .right .ghost:hover{color:var(--ink)}
+  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
+
+  main{padding:80px 0 96px;flex:1}
+
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+
+  h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+  .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+  h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+  h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+  p{color:var(--ink-mute);margin:0 0 14px}
+  p strong{color:var(--ink);font-weight: 500}
+  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+  ul li{margin:6px 0}
+
+  .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+
+  .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+  .table tr:last-child td{border-bottom:0}
+
+  .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+  .citations a{color:var(--ink-mute)}
+
+  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+  footer a{color:var(--ink-mute);border:0}
+  footer a:hover{color:var(--ink)}
+  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+  .footer-row a{color:inherit}
+</style>
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="row">
+    <div class="left">
+      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+      <nav>
+        <a href="/use-cases">Solutions</a>
+        <a href="/docs">Developers</a>
+        <a href="/research" class="active">Research</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="hero-eyebrow"><span class="he-dot"></span>research . reasoning . 12 min read</div>
+    <h1>GRPO with verifiable rewards.</h1>
+    <p class="lede">The algorithm behind DeepSeek R1's chain-of-thought elicitation, with the boring engineering parts written down. No value head, no separate reward model, and the reward function shares code with the K-score evaluator so the training signal and the release gate score the same output the same way.</p>
+
+    <div class="meta-line">
+      <span>May 14, 2026</span>
+      <span>&middot;</span>
+      <span>Kolmogorov research</span>
+      <span>&middot;</span>
+      <span>apps/trainer/grpo.py</span>
+    </div>
+
+    <h2>What GRPO is, in one paragraph</h2>
+
+    <p>Group Relative Policy Optimization, introduced in Shao et al 2024 (DeepSeek-MATH) and made famous by DeepSeek R1 in 2025, is online RL for language models without a value head. For each prompt you sample <code>G</code> completions from the current policy, score each completion with a reward function, and the advantage for completion <em>i</em> is its score minus the group mean, divided by the group standard deviation. PPO's clipped surrogate then optimises the policy against those advantages with a KL penalty against a reference policy. The piece you drop relative to PPO is the value head; the piece you add is the requirement that the reward function is fast enough to run <code>G</code> times per prompt per step, which is fine if the reward is a deterministic check rather than a separate neural network.</p>
+
+    <h2>Why no value head matters</h2>
+
+    <p>The value head in PPO is the per-token estimate of expected future reward. It exists because rewards in classic RLHF are sparse (one scalar per generation) and the policy gradient needs a per-token baseline to have manageable variance. Training the value head well is its own problem: it needs the same KL-controlled trajectories, it adds 5-15&percnt; parameters depending on the architecture, and a badly trained value head silently corrupts the policy gradient.</p>
+
+    <p>GRPO sidesteps this. The baseline comes from the group: with <code>G=8</code> completions per prompt, the within-group standard deviation is enough signal to identify whether a given completion was better or worse than its peers, and that is all the policy gradient needs. The cost is sampling <code>G</code> completions instead of one, which is a wall-clock cost, not a parameter cost.</p>
+
+    <h2>The three reward families kolm ships</h2>
+
+    <p>GRPO is only as useful as the reward function. RLHF burned a generation of engineers on the realisation that a slightly-bad reward model produces a confidently-bad policy. The fix in RLVR (Reinforcement Learning from Verifiable Rewards, Lambert 2024) is to skip the reward model entirely: use deterministic checks where you have them, accept that you cannot RL the cases where you do not.</p>
+
+    <table class="table">
+      <thead><tr><th>Family</th><th>Reward function</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td><code>code_exec</code></td><td>Subprocess sandbox + unit tests; reward = passed / total</td><td>Code generation with unit tests, SQL with expected results, scripts with fixture inputs</td></tr>
+        <tr><td><code>math_checker</code></td><td>Numeric tolerance or symbolic equivalence vs gold</td><td>Math word problems, calculations with extractable final answers</td></tr>
+        <tr><td><code>schema_validator</code></td><td>JSON-schema validation or regex match</td><td>Structured extraction, tool-call emission, classifier outputs</td></tr>
+      </tbody>
+    </table>
+
+    <p>The buyer can register their own. Reward functions take <code>(prompts, completions, **kwargs)</code> and return <code>list[float]</code> in [0, 1]. trl averages multiple reward functions inside the trainer, which is the right shape for combining correctness with a structural reward (e.g., the completion must include a non-empty <code>&lt;think&gt;...&lt;/think&gt;</code> block).</p>
+
+    <h3>The reward-is-the-eval trick</h3>
+
+    <p>The reward function and the K-score evaluator look at the same model output and apply the same check. In kolm this is enforced by routing both through the same code path: the K-score evaluator suite calls <code>REWARD_FUNCTIONS[name](...)</code>; the GRPO trainer calls the same dict. If you change the math-equivalence tolerance, both move together. The buyer's auditor cannot get a high K-score and a low train-time reward because the gate that decided to ship is the same gate that drove the gradient.</p>
+
+    <h2>The minimal call</h2>
+
+    <pre>from apps.trainer.grpo import grpo_trainer, GRPOTrainConfig, REWARD_FUNCTIONS, make_format_reward
+from functools import partial
+
+# 1. Bind references for the reward functions (these are per-prompt gold answers)
+correctness = partial(REWARD_FUNCTIONS['math_checker'], references=gold_answers)
+structure   = make_format_reward('&lt;think&gt;', '&lt;/think&gt;')
+
+# 2. Build the trainer
+trainer = grpo_trainer(
+    model=peft_model,
+    tokenizer=tok,
+    train_dataset=prompts_only_dataset,
+    reward_funcs=[correctness, structure],
+    args=GRPOTrainConfig(
+        num_generations=8,
+        max_completion_length=1024,
+        temperature=0.7,
+        learning_rate=5e-6,
+        beta=0.04,
+    ),
+)
+trainer.train()</pre>
+
+    <p>The dataset is prompts-only; GRPO samples its own completions. <code>num_generations</code> is the <em>G</em> in the group; the published DeepSeek-MATH paper used 64, R1 used 16, and 8 is the right starting point for a 7B-class model on a single H100. <code>beta</code> is the KL coefficient against the reference policy; 0.04 is the trl default and matches the R1 recipe.</p>
+
+    <h2>What the receipt records</h2>
+
+    <p>Every GRPO stage lands in the artifact's receipt with the following block:</p>
+
+    <pre>"grpo": {
+  "method": "grpo",
+  "trl_version": "0.13.0",
+  "papers": ["arXiv:2402.03300", "arXiv:2501.12948"],
+  "num_generations": 8,
+  "max_completion_length": 1024,
+  "max_prompt_length": 512,
+  "temperature": 0.7,
+  "top_p": 0.95,
+  "learning_rate": 5e-6,
+  "beta": 0.04,
+  "epsilon": 0.2,
+  "num_train_epochs": 1,
+  "seed": 42,
+  "reward_funcs": ["math_checker", "structure"],
+  "train_examples": 4096,
+  "final_loss": 0.18,
+  "final_reward_mean": 0.74
+}</pre>
+
+    <p>The buyer's auditor can confirm which reward functions drove the gradient, with which hyperparameters, and what the terminal reward distribution looked like. The verifier ignores the block for signature validation, but the canonical-JSON manifest hash covers it, so a swap invalidates the receipt.</p>
+
+    <h2>Edge cases worth naming</h2>
+
+    <p><strong>Reward hacking is real.</strong> If <code>code_exec</code> is the only reward, the model will discover that printing the expected output literally (without computing it) passes the test. The fix is the same as in classical RL: add a structural reward (the <code>&lt;think&gt;</code> block must be non-empty), add a length penalty for trivially short completions, and inspect samples by hand at every checkpoint. The trainer logs ten random samples per save_steps interval for this reason.</p>
+
+    <p><strong>Wall-clock cost scales with G.</strong> Eight completions per prompt at 1024 tokens each on a 7B model is ~8 seconds per step on an H100 with vLLM as the rollout backend. <code>num_generations=16</code> doubles that. The published R1 recipe ran for tens of thousands of steps; a kolm GRPO stage on a buyer's distill is typically 200-2000 steps because the base is already on-distribution for the task.</p>
+
+    <p><strong>KL drift.</strong> If <code>beta</code> is too small, the policy drifts far from the reference and the buyer's other gates (HHEM grounding, K-score safety) collapse before the correctness reward saturates. The trainer evaluates the K-score every <code>save_steps</code> and refuses to commit a checkpoint whose K-score fell below the pre-GRPO baseline.</p>
+
+    <p><strong>Verifiable rewards are a privileged setting.</strong> Many tasks do not have a programmatic check. For those, GRPO is the wrong tool; preference optimization (DPO, ORPO, SimPO) on a paired-comparison dataset is. The router in <code>apps/trainer/preference.py</code> covers that branch. GRPO is for the cases where the buyer has, or can write, a checker.</p>
+
+    <h2>Where this fits in the kolm compile loop</h2>
+
+    <p>The standard pipeline is <code>SFT &rarr; preference (optional) &rarr; GRPO (optional) &rarr; K-score gate &rarr; sign &rarr; ship</code>. SFT teaches the format and the base capability; preference optimization aligns generic preferences; GRPO sharpens the reasoning trace and pushes correctness on tasks with verifiable answers. Each stage is opt-in via the spec; each stage lands in the receipt. The K-score gate at 0.85 binds across all three.</p>
+
+    <p>For most enterprise distill jobs, SFT alone hits 0.85. GRPO is the right add-on when (a) the base task has a verifiable check, (b) the SFT model still misses on edge cases, and (c) the buyer accepts a longer training run for higher accuracy. Reasoning-heavy verticals (medical diagnosis with guideline checks, legal-citation lookup with citation validity, code generation with test suites) hit all three.</p>
+
+    <div class="citations">
+      <p><strong>Citations</strong></p>
+      <p>Shao, Z. et al. <em>DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models</em>. arXiv:2402.03300, 2024.</p>
+      <p>DeepSeek-AI. <em>DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning</em>. arXiv:2501.12948, 2025.</p>
+      <p>Lambert, N. et al. <em>T&Uuml;LU 3: Pushing Frontiers in Open Language Model Post-Training</em>. arXiv:2411.15124, 2024 (RLVR formulation).</p>
+    </div>
+
+    <div class="meta-line" style="margin-top:36px">
+      <a class="nb" href="/research">&larr; Back to research</a>
+      <span>&middot;</span>
+      <a class="nb" href="/research#grpo">Frontier reference &middot; GRPO</a>
+      <span>&middot;</span>
+      <a class="nb" href="/spec">RS-1 spec</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+<script src="/nav.js"></script>
+</body>
+</html>

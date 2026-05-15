@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Quickstart: compile your first private AI artifact &middot; kolm</title>
 <meta name="description" content="Install the kolm CLI, authenticate, compile a task with examples, run the signed .kolm artifact locally, and verify its receipt.">
-<meta name="theme-color" content="#0b0d10">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/quickstart">
 <meta property="og:title" content="Quickstart: compile your first private AI artifact · kolm" />
 <meta property="og:description" content="Install kolm, authenticate, compile a task, run the signed .kolm artifact locally, verify the receipt." />
 <meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:url" content="https://kolm.ai/quickstart">
+<meta name="twitter:title" content="Quickstart: compile your first private AI artifact · kolm">
+<meta name="twitter:description" content="Install kolm, authenticate, compile a task, run the signed .kolm artifact locally, verify the receipt.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -76,6 +82,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -87,14 +94,14 @@
 </header>
 
 <main>
-  <section class="hero">
+  <section class="hero frontier-bg">
     <div class="wrap">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="pulse"></span>quickstart</div>
-        <h1>Compile your first artifact.</h1>
+        <div class="hero-eyebrow"><span class="he-dot"></span>Quickstart &middot; v0.7 &middot; 60 seconds</div>
+        <h1>Compile your <span class="tone">first AI.</span></h1>
         <p class="lede">Install <code>kolm</code> from GitHub, point it at <code>https://kolm.ai</code>, log in with your key, compile a task, run it on your laptop, and inspect the receipt. Five minutes, no servers to spin up, your data stays put.</p>
         <div class="actions">
-          <a href="/signup" class="btn primary">Get API key &rarr;</a>
+          <a href="/signup" class="btn primary electric">Get API key &rarr;</a>
           <a href="/docs" class="btn ghost">full docs</a>
         </div>
       </div>
@@ -106,7 +113,7 @@
       <h2>60-second path</h2>
       <ol class="qs-steps-fast" style="list-style:decimal;padding-left:24px;line-height:2;color:var(--ink-mute,#b5bdb1);max-width:62ch">
         <li><code>npm i -g github:sneaky-hippo/kolmogorov-stack</code></li>
-        <li><code>kolm login</code></li>
+        <li><code>kolm signup --email you@example.com</code> &nbsp;<span style="color:var(--ink-faint);font-size:12px">(or <code>kolm login --key ks_...</code> if you already have a key)</span></li>
         <li><code>kolm compile "your task" --examples ./examples.jsonl</code></li>
         <li><code>kolm run your-artifact.kolm "new input"</code></li>
       </ol>
@@ -126,10 +133,11 @@ kolm version</pre>
         <div class="step">
           <div class="num">02</div>
           <h4>Configure cloud auth.</h4>
-          <p>The CLI stores your kolm API key in <code>~/.kolm/config.json</code>. Environment variables still override local config.</p>
+          <p>The CLI stores your kolm API key in <code>~/.kolm/config.json</code>. Environment variables still override local config. Two paths in: provision a tenant from the CLI, or paste an existing key with one flag.</p>
           <pre class="demo">kolm config base https://kolm.ai
-kolm login
-# paste your ks_... API key</pre>
+kolm signup --email you@example.com    # provisions a tenant + API key in one call
+# or, if you already have a key from /signup:
+kolm login --key ks_...                 # paste-free; saves to ~/.kolm/config.json</pre>
         </div>
         <div class="step">
           <div class="num">03</div>
@@ -218,26 +226,54 @@ kolm login
   </section>
 </main>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <div class="meta">kolm quickstart / <a href="/docs">docs</a> / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a></div>
-    <div class="links">
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
       <div>
-        <div class="col-h">product</div>
-        <a href="/compile">compile</a>
-        <a href="/run">run</a>
-        <a href="/recall">recall</a>
-        <a href="/serve">serve</a>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
       </div>
       <div>
-        <div class="col-h">proof</div>
-        <a href="/benchmarks">benchmarks</a>
-        <a href="/compare">compare</a>
-        <a href="/k-score">k-score</a>
-        <a href="/security">security</a>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
       </div>
     </div>
-    <small class="footer-tag" style="display:block;margin-top:18px;padding-top:14px;border-top:1px solid var(--line,#1a1d24);font-family:var(--mono);font-size:11px;color:var(--ink-faint,#6b7280);letter-spacing:0;">kolm &middot; open spec &middot; MIT licensed runtime &middot; kolm.ai</small>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

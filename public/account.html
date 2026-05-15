@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Account · kolm</title>
 <meta name="description" content="Manage your kolm account, API key, compile defaults, and provider settings.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <link rel="canonical" href="https://kolm.ai/account">
 <meta property="og:title" content="Account · kolm" />
@@ -26,6 +27,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -40,7 +42,7 @@
     <div>
       <div class="eyebrow"><span class="pulse"></span>account control plane</div>
       <h1>Account.</h1>
-      <p class="lede">Plan, usage, API key, provider keys, and defaults. One consistent place, no fake auth, no broken buttons.</p>
+      <p class="lede">Plan, usage, API key, provider keys, and defaults. One page, every control wired up.</p>
     </div>
   </section>
 
@@ -50,7 +52,7 @@
     <div class="toolbar">
       <input id="acct-paste" class="grow mono" type="text" placeholder="ks_..." autocomplete="off" spellcheck="false">
       <button id="acct-paste-btn" class="btn primary" type="button">Sign in</button>
-      <a class="btn ghost" href="/signup#up">Create account</a>
+      <a class="btn ghost" href="/signup">Create account</a>
     </div>
   </section>
 
@@ -155,11 +157,11 @@
           <span class="lbl">Switch plan</span>
           <select id="plan-select">
             <option value="free">Developer (free)</option>
-            <option value="starter">Starter ($9 / mo)</option>
-            <option value="pro">Pro ($49 / mo)</option>
-            <option value="teams">Teams ($149 / mo)</option>
-            <option value="business">Business ($1,499 / mo)</option>
-            <option value="enterprise">Enterprise ($2,999 / mo)</option>
+            <option value="starter">Starter . $9 / mo . $90 / yr</option>
+            <option value="pro">Pro . $49 / mo . $490 / yr</option>
+            <option value="teams">Teams . from $149 / mo (2 seats) . $1,490 / yr</option>
+            <option value="business">Business . $1,499 / mo . $14,990 / yr</option>
+            <option value="enterprise">Enterprise . $2,999 / mo . $29,990 / yr</option>
           </select>
         </label>
         <div class="toolbar" style="flex-wrap:wrap;gap:8px">
@@ -184,7 +186,59 @@
 
 <footer class="site-footer">
   <div class="wrap">
-    <div class="meta">kolm account / <a href="/security">security</a> / <a href="/docs">docs</a></div>
+    <div class="meta">
+      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+    </div>
+    <div class="links">
+      <div>
+        <div class="col-h">build</div>
+        <a href="/capture">capture</a>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/recall">recall</a>
+        <a href="/evolve">evolve</a>
+        <a href="/sdks">sdks</a>
+        <a href="/openai">openai compat</a>
+        <a href="/agents">agents</a>
+      </div>
+      <div>
+        <div class="col-h">deploy</div>
+        <a href="/teams">teams</a>
+        <a href="/tunnels">remote access</a>
+        <a href="/byoc">byoc cloud</a>
+        <a href="/airgap">airgap</a>
+        <a href="/enterprise">enterprise</a>
+      </div>
+      <div>
+        <div class="col-h">proof</div>
+        <a href="/benchmarks">benchmarks</a>
+        <a href="/research">research</a>
+        <a href="/k-score">k-score</a>
+        <a href="/leaderboard">registry</a>
+        <a href="/spec">rs-1 spec</a>
+        <a href="/showcase">showcase</a>
+      </div>
+      <div>
+        <div class="col-h">industries</div>
+        <a href="/healthcare">healthcare</a>
+        <a href="/finance">finance</a>
+        <a href="/legal">legal</a>
+        <a href="/edge">edge</a>
+        <a href="/cookbook">cookbook</a>
+        <a href="/compliance-packs">compliance packs</a>
+      </div>
+      <div>
+        <div class="col-h">company</div>
+        <a href="/pricing">pricing</a>
+        <a href="/docs">docs</a>
+        <a href="/roadmap">roadmap</a>
+        <a href="/manifesto">manifesto</a>
+        <a href="/roi">roi</a>
+      </div>
+    </div>
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+    </small>
   </div>
 </footer>
 
@@ -254,7 +308,7 @@
       $('acct-quota').textContent = 'of ' + fmt(account.quota) + ' per month';
       $('acct-remaining').textContent = fmt(account.remaining == null ? Math.max(0, Number(account.quota || 0) - Number(account.used || 0)) : account.remaining);
       $('acct-pct').textContent = pct(account.used, account.quota) + '% used';
-      $('acct-key').value = key ? maskKey(key) : '(session — no key exposed)';
+      $('acct-key').value = key ? maskKey(key) : '(session . no key exposed)';
       renderBillingBanner(account);
       initSettings(account);
     } catch (e) {

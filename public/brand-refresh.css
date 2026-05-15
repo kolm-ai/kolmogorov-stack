@@ -31,6 +31,10 @@
   --ink: #faf2e1 !important;
   --ink-mute: #b5bdb1 !important;
   --ink-faint: #737c73 !important;
+  /* v7.19 . single warm clay accent. Highlight only, never bg. */
+  --kolm-accent: #10b981 !important;
+  --kolm-accent-soft: rgba(16,185,129,0.14) !important;
+  --kolm-accent-faint: rgba(16,185,129,0.06) !important;
 }
 
 body {
@@ -65,7 +69,7 @@ body {
   -webkit-text-fill-color: var(--fg) !important;
 }
 
-/* Unified header chrome · same height, brand size, and nav metrics
+/* Unified header chrome  - same height, brand size, and nav metrics
  * across every header variant (header.site, .site-header, nav.top).
  * Tightens the bar so it reads as product chrome, not marketing.
  */
@@ -159,7 +163,7 @@ nav.top .brand,
   -webkit-text-fill-color: var(--fg) !important;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
   font-size: 13.5px !important;
-  font-weight: 560 !important;
+  font-weight: 500 !important;
   letter-spacing: 0 !important;
 }
 
@@ -167,12 +171,12 @@ header.site .brand span,
 .site-header .brand span,
 nav.top .brand span {
   font-size: 13.5px !important;
-  font-weight: 560 !important;
+  font-weight: 500 !important;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
   letter-spacing: 0 !important;
 }
 
-/* Canonical brand mark · show the SVG glyph everywhere. */
+/* Canonical brand mark  - show the SVG glyph everywhere. */
 header.site .brand img,
 .site-header .brand img,
 nav.top .brand img,
@@ -201,7 +205,7 @@ nav.top .brand span,
 header.site .brand span,
 .site-header .brand span,
 .brand span {
-  font-weight: 580 !important;
+  font-weight: 500 !important;
   letter-spacing: -0.01em !important;
 }
 nav.top .brand::before,
@@ -232,7 +236,7 @@ nav.top .brand .brand-dot,
 header.site .brand .brand-dot,
 .brand .brand-dot { display: none !important; }
 
-/* Tab spacing · same metrics on every header variant.
+/* Tab spacing  - same metrics on every header variant.
  * Wrapped in a media query so the nav can hide on phones (<920px).
  * Without this guard, display:flex !important would override the
  * `.site-nav { display: none }` rule in styles.css and force the nav
@@ -286,7 +290,7 @@ header.site .brand .brand-dot,
   header.site .right { gap: 8px !important; }
 }
 
-/* Unified GitHub pill · same metrics on every header so the right-column
+/* Unified GitHub pill  - same metrics on every header so the right-column
  * width is identical between homepage, /serve, /anatomy, /k-score and
  * the nav stops drifting between routes. */
 .gh-star {
@@ -299,7 +303,7 @@ header.site .brand .brand-dot,
   color: var(--ink-mute, #b5bdb1);
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 11px;
-  font-weight: 540;
+  font-weight: 500;
   text-transform: lowercase;
   line-height: 1;
   text-decoration: none;
@@ -396,7 +400,7 @@ nav.top .nav-links a.active {
   border-bottom-color: var(--accent, #7a8cff) !important;
 }
 
-/* Right-side actions · sign-in + CTA tighter and consistently sized.
+/* Right-side actions  - sign-in + CTA tighter and consistently sized.
  * margin-left:auto pins the actions to the right edge of the header row,
  * independent of how wide the left group renders on any given page. This
  * is what stops "Sign in / Get API key" from moving between tabs. */
@@ -426,7 +430,7 @@ header.site .right .cta,
 .site-header .site-actions .cta,
 .site-actions .cta {
   font-size: 12px !important;
-  font-weight: 540 !important;
+  font-weight: 500 !important;
   padding: 6px 11px !important;
   border-radius: 6px !important;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif !important;
@@ -492,19 +496,25 @@ h1, h2, h3, h4, h5, h6,
 .tail h2,
 .headline,
 .title {
-  font-weight: 540 !important;
-  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.02em !important;
 }
+/* v7.17 brutalist global h1 - frontier-lab scale by default. Pages with
+   their own .home-hero-centered h1 or .hero-h1 brutalist rules override this. */
 h1 {
-  font-size: clamp(36px, 6vw, 72px) !important;
-  line-height: 1 !important;
+  font-size: clamp(44px, 6.8vw, 96px) !important;
+  line-height: 0.96 !important;
+  letter-spacing: -0.035em !important;
+  font-weight: 500 !important;
 }
 h2 {
-  font-size: clamp(24px, 3vw, 38px) !important;
-  line-height: 1.08 !important;
+  font-size: clamp(28px, 3.6vw, 46px) !important;
+  line-height: 1.06 !important;
+  letter-spacing: -0.025em !important;
+  font-weight: 500 !important;
 }
 strong, b {
-  font-weight: 560 !important;
+  font-weight: 500 !important;
 }
 
 nav.top .brand,
@@ -512,11 +522,11 @@ header.site .brand,
 .site-header .brand,
 .brand {
   color: var(--fg) !important;
-  font-weight: 560 !important;
+  font-weight: 500 !important;
   letter-spacing: 0 !important;
 }
 
-/* Footer brand mark · show the SVG glyph at small size. */
+/* Footer brand mark  - show the SVG glyph at small size. */
 footer img.brand-mark,
 .site-footer .meta img {
   display: inline-block !important;
@@ -566,7 +576,7 @@ svg [stroke="#faf2e1"] {
 }
 
 /* =========================================================
- * Mobile pass v5.5 · defensive overrides that win over every
+ * Mobile pass v5.5  - defensive overrides that win over every
  * page's inline <style> block (brand-refresh.css loads after).
  * Ships:
  *  - kills page-level horizontal scroll
@@ -588,7 +598,7 @@ img, svg, video, iframe, canvas, picture {
 }
 
 @media (max-width: 720px) {
-  /* Header: brand + CTA only on narrow viewports · nav already display:none at <920px. */
+  /* Header: brand + CTA only on narrow viewports  - nav already display:none at <920px. */
   header.site .row,
   .site-header .wrap {
     flex-wrap: nowrap !important;
@@ -609,7 +619,7 @@ img, svg, video, iframe, canvas, picture {
     white-space: nowrap !important;
   }
 
-  /* Terminal / pre / code · wrap, never push layout. */
+  /* Terminal / pre / code  - wrap, never push layout. */
   pre, .terminal, pre.terminal, .terminal pre, .codebox, code {
     overflow-wrap: anywhere !important;
     word-break: break-word !important;
@@ -662,7 +672,7 @@ img, svg, video, iframe, canvas, picture {
   header.site .row,
   .site-header .wrap { padding-left: 16px !important; padding-right: 16px !important; }
 
-  /* /k-score component grid: 5 → 2 above, 2 → 1 here. Inline page CSS only goes to 880px. */
+  /* /k-score component grid: 5  - 2 above, 2  - 1 here. Inline page CSS only goes to 880px. */
   .grid.cols-5,
   .grid.cols-4,
   .grid.cols-3,
@@ -757,7 +767,7 @@ footer.modern::before {
   color: #b5bdb1;
   text-align: center;
 }
-.diag-fanout .node b { display:block; color:#faf2e1; font-weight:540; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-size: 13px; margin-bottom: 4px; letter-spacing: -0.01em; }
+.diag-fanout .node b { display:block; color:#faf2e1; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-size: 13px; margin-bottom: 4px; letter-spacing: -0.01em; }
 .diag-fanout .node span,
 .diag-fanout .center span { display:block; font-size: 10.5px; color:#737c73; }
 .diag-fanout .center {
@@ -768,7 +778,7 @@ footer.modern::before {
   text-align: center; font-size: 12px; color:#faf2e1;
   margin-bottom: 8px;
 }
-.diag-fanout .center b { color:#faf2e1; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 540; }
+.diag-fanout .center b { color:#faf2e1; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; }
 @media (max-width: 720px) {
   .diag-fanout { grid-template-columns: repeat(2, 1fr); }
   .diag-fanout .center { grid-column: 1 / -1; }
@@ -785,7 +795,7 @@ footer.modern::before {
   color: #b5bdb1;
   line-height: 1.95;
 }
-.diag-tree .root { color:#faf2e1; font-weight:540; }
+.diag-tree .root { color:#faf2e1; font-weight: 500; }
 .diag-tree .seg { color:#faf2e1; }
 .diag-tree .desc { color:#737c73; padding-left: 8px; }
 @media (max-width: 720px) {
@@ -810,7 +820,7 @@ footer.modern::before {
   display: block; font-size: 9px; color:#737c73;
   letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 3px;
 }
-.diag-pipeline .stage b { display:block; color:#faf2e1; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight:540; margin-bottom: 2px; letter-spacing: -0.005em; }
+.diag-pipeline .stage b { display:block; color:#faf2e1; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom: 2px; letter-spacing: -0.005em; }
 .diag-pipeline .stage span:not(.n) { display:block; color:#737c73; font-size: 9.5px; letter-spacing: 0.02em; }
 .diag-pipeline .stage.acc { border-color: rgba(236,231,220,0.32); background: rgba(236,231,220,0.05); color:#faf2e1; }
 .diag-pipeline .stage.acc b { color:#faf2e1; }
@@ -871,7 +881,7 @@ footer.modern::before {
   font-size: 10px; color:#737c73; letter-spacing: 0.03em;
   flex-wrap: wrap; gap: 6px 12px;
 }
-.diag-gauge .legend b { color:#faf2e1; font-family: ui-monospace, monospace; font-weight: 600; margin-right: 4px; }
+.diag-gauge .legend b { color:#faf2e1; font-family: ui-monospace, monospace; font-weight: 500; margin-right: 4px; }
 .diag-gauge .legend .ok { color:#7ef0d2; }
 
 /* Tier ladder (pricing) */
@@ -895,7 +905,7 @@ footer.modern::before {
 .diag-ladder .step:nth-child(4) { padding-top: 50px; }
 .diag-ladder .step:nth-child(5) { padding-top: 58px; }
 .diag-ladder .step:nth-child(6) { padding-top: 68px; }
-.diag-ladder .step b { display:block; color:#faf2e1; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight:540; margin-bottom:2px; }
+.diag-ladder .step b { display:block; color:#faf2e1; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; font-weight: 500; margin-bottom:2px; }
 .diag-ladder .step span { display:block; color:#faf2e1; font-size: 11px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
 .diag-ladder .step .d { color:#737c73; font-size: 9px; margin-top: 2px; letter-spacing: 0.02em; }
 @media (max-width: 720px) {
@@ -920,7 +930,7 @@ footer.modern::before {
 .diag-device .tgt b {
   display: block; color:#faf2e1; font-size: 13px;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
-  font-weight: 540; margin-bottom: 5px;
+  font-weight: 500; margin-bottom: 5px;
 }
 .diag-device .tgt .lat,
 .diag-device .tgt i { color:#faf2e1; font-size: 11px; margin-top: 4px; display: block; font-style: normal; }
@@ -945,7 +955,7 @@ footer.modern::before {
 }
 .diag-spec .col .lbl { font-size: 10px; color:#737c73; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
 .diag-spec .col ul { margin: 0; padding: 0; list-style: none; font-size: 12px; color:#b5bdb1; line-height: 1.8; }
-.diag-spec .col ul b { color:#faf2e1; font-weight: 540; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; }
+.diag-spec .col ul b { color:#faf2e1; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; }
 .diag-spec .card b {
   display: block; color:#faf2e1; font-size: 11px;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -954,7 +964,7 @@ footer.modern::before {
 .diag-spec .card span {
   display: block; color:#faf2e1; font-size: 13px;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
-  font-weight: 540; line-height: 1.35; margin-bottom: 8px;
+  font-weight: 500; line-height: 1.35; margin-bottom: 8px;
 }
 .diag-spec .card i {
   display: block; font-style: normal; font-size: 10.5px;
@@ -1003,28 +1013,28 @@ footer.modern::before {
 }
 
 /* ============================================================
- * THEME · LIGHT MODE (enterprise-friendly, SOTA paper-on-ink)
+ * THEME  - LIGHT MODE (enterprise-friendly, SOTA paper-on-ink)
  * Dark stays default (dev-friendly). Light flips on [data-theme="light"].
  * Same emerald accent #109973 (darker for AA contrast on paper).
  * ============================================================ */
 :root[data-theme="light"] {
-  --bg: #fafafa !important;
-  --bg-2: #ffffff !important;
-  --bg-3: #f1f2f4 !important;
-  --bg-card: #ffffff !important;
-  --bg-elev: #f4f5f7 !important;
-  --surface: #ffffff !important;
-  --surface-2: #f4f5f7 !important;
-  --line: rgba(12,14,16,0.10) !important;
-  --line-2: rgba(12,14,16,0.20) !important;
-  --line-3: rgba(12,14,16,0.36) !important;
-  --line-strong: rgba(12,14,16,0.22) !important;
-  --line-stronger: rgba(12,14,16,0.34) !important;
-  --fg: #0c0e10 !important;
-  --fg-2: #1f2429 !important;
-  --fg-3: #3d4347 !important;
-  --muted: #4b5158 !important;
-  --dim: #6b7280 !important;
+  --bg: #f7f4ec !important;
+  --bg-2: #fbf8f0 !important;
+  --bg-3: #f0ece2 !important;
+  --bg-card: #fbf8f0 !important;
+  --bg-elev: #f0ece2 !important;
+  --surface: #fbf8f0 !important;
+  --surface-2: #f0ece2 !important;
+  --line: rgba(24,23,26,0.09) !important;
+  --line-2: rgba(24,23,26,0.18) !important;
+  --line-3: rgba(24,23,26,0.32) !important;
+  --line-strong: rgba(24,23,26,0.20) !important;
+  --line-stronger: rgba(24,23,26,0.30) !important;
+  --fg: #18171a !important;
+  --fg-2: #2a2823 !important;
+  --fg-3: #45413a !important;
+  --muted: #5b5853 !important;
+  --dim: #8a8478 !important;
   --violet: #0c0e10 !important;
   --violet-2: #0c0e10 !important;
   --accent: #0c0e10 !important;
@@ -1038,9 +1048,13 @@ footer.modern::before {
   --good-soft: rgba(10,136,98,0.14) !important;
   --good-faint: rgba(10,136,98,0.06) !important;
   --bad: #c81e3a !important;
-  --ink: #0c0e10 !important;
-  --ink-mute: #1f2429 !important;
-  --ink-faint: #4b5158 !important;
+  --ink: #18171a !important;
+  --ink-mute: #2a2823 !important;
+  --ink-faint: #5b5853 !important;
+  /* v7.19 . darker clay for ink-on-paper contrast. */
+  --kolm-accent: #059669 !important;
+  --kolm-accent-soft: rgba(5,150,105,0.10) !important;
+  --kolm-accent-faint: rgba(5,150,105,0.05) !important;
 }
 [data-theme="light"] .auth-card {
   background: #ffffff !important;
@@ -1069,25 +1083,30 @@ footer.modern::before {
 [data-theme="light"] .oauth-row .oauth-divider::before,
 [data-theme="light"] .oauth-row .oauth-divider::after { background: rgba(12,14,16,0.12) !important; }
 [data-theme="light"] body {
-  background: #fafafa !important;
-  background-image: none !important;
-  color: #0c0e10 !important;
+  background: #f7f4ec !important;
+  background-image:
+    radial-gradient(ellipse 1400px 900px at 15% -10%, rgba(24, 23, 26, 0.035) 0%, transparent 65%),
+    radial-gradient(ellipse 1100px 700px at 90% 5%, rgba(80, 60, 30, 0.020) 0%, transparent 60%) !important;
+  background-attachment: fixed !important;
+  color: #18171a !important;
 }
 [data-theme="light"] .bg-stage::after {
   background:
-    linear-gradient(180deg, rgba(250,250,250,0) 0%, rgba(250,250,250,.6) 70%, rgba(250,250,250,.9) 100%) !important;
+    linear-gradient(180deg, rgba(247,244,236,0) 0%, rgba(247,244,236,.6) 70%, rgba(247,244,236,.92) 100%) !important;
 }
 [data-theme="light"] header.site,
 [data-theme="light"] .site-header,
 [data-theme="light"] nav.top {
-  background: rgba(250,250,250,0.92) !important;
-  border-bottom: 1px solid rgba(12,14,16,0.10) !important;
+  background: rgba(247,244,236,0.88) !important;
+  backdrop-filter: blur(12px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(140%) !important;
+  border-bottom: 1px solid rgba(24,23,26,0.08) !important;
 }
 @media (max-width: 720px) {
   [data-theme="light"] header.site,
   [data-theme="light"] .site-header,
   [data-theme="light"] nav.top {
-    background: #fafafa !important;
+    background: #f7f4ec !important;
   }
 }
 [data-theme="light"] .site-header .brand,
@@ -1100,17 +1119,17 @@ footer.modern::before {
 }
 [data-theme="light"] .site-header .site-actions a.cta,
 [data-theme="light"] header.site .right a.cta {
-  background: #0c0e10 !important;
-  color: #fafafa !important;
-  border-color: #0c0e10 !important;
+  background: #18171a !important;
+  color: #f7f4ec !important;
+  border-color: #18171a !important;
 }
 [data-theme="light"] .site-header .site-actions a.cta:hover,
 [data-theme="light"] header.site .right a.cta:hover {
-  background: #0a8862 !important;
-  border-color: #0a8862 !important;
+  background: #2a2823 !important;
+  border-color: #2a2823 !important;
 }
 
-/* Light-mode cred-band · invert paper ground; keep emerald accents */
+/* Light-mode cred-band  - invert paper ground; keep emerald accents */
 [data-theme="light"] .cred-band {
   background: rgba(12,14,16,0.03) !important;
   border-color: rgba(12,14,16,0.10) !important;
@@ -1143,20 +1162,20 @@ footer.modern::before {
 [data-theme="light"] a.btn-primary,
 [data-theme="light"] button.primary,
 [data-theme="light"] .site-actions .cta {
-  background: #0c0e10 !important;
+  background: #18171a !important;
   background-image: none !important;
-  color: #fafafa !important;
-  border-color: #0c0e10 !important;
+  color: #f5f1e6 !important;
+  border-color: #18171a !important;
 }
 [data-theme="light"] .btn.primary:hover,
 [data-theme="light"] .btn-primary:hover,
 [data-theme="light"] a.btn-primary:hover,
 [data-theme="light"] button.primary:hover,
 [data-theme="light"] .site-actions .cta:hover {
-  background: #0a8862 !important;
+  background: #2a2823 !important;
   background-image: none !important;
-  border-color: #0a8862 !important;
-  color: #fafafa !important;
+  border-color: #2a2823 !important;
+  color: #f5f1e6 !important;
 }
 [data-theme="light"] .btn.ghost,
 [data-theme="light"] .btn-ghost,
@@ -1232,9 +1251,9 @@ footer.modern::before {
 }
 
 /* ============================================================
- * LIGHT THEME · second pass. Inversion of cards, inline code,
+ * LIGHT THEME  - second pass. Inversion of cards, inline code,
  * pricing tiers, spec doc cards, hero compiler lab interior.
- * Terminal-styled <pre> blocks intentionally stay dark · they
+ * Terminal-styled <pre> blocks intentionally stay dark  - they
  * imitate a terminal and should read as one in both themes.
  * ============================================================ */
 
@@ -1264,7 +1283,8 @@ footer.modern::before {
   border-color: rgba(12,14,16,0.12) !important;
   color: #0c0e10 !important;
 }
-[data-theme="light"] .tier.featured { border-color: rgba(16,153,115,0.40) !important; }
+[data-theme="light"] .tier.featured { border-color: rgba(5,150,105,0.38) !important; }
+[data-theme="light"] .tier.featured .tag { color: #059669 !important; }
 [data-theme="light"] .tier h3,
 [data-theme="light"] .tier .price,
 [data-theme="light"] .tier .price-num { color: #0c0e10 !important; }
@@ -1294,7 +1314,7 @@ footer.modern::before {
   color: #fafafa !important;
 }
 
-/* Spec document cards (.card a) · used on /spec, /docs landing, /compare */
+/* Spec document cards (.card a)  - used on /spec, /docs landing, /compare */
 [data-theme="light"] a.card,
 [data-theme="light"] .doc-grid .card,
 [data-theme="light"] .grid .card,
@@ -1318,7 +1338,7 @@ footer.modern::before {
   border-color: rgba(16,153,115,0.30) !important;
 }
 
-/* Hero compiler lab · interior panels invert; core ring stays accent */
+/* Hero compiler lab  - interior panels invert; core ring stays accent */
 [data-theme="light"] .artifact-lab {
   background: #ffffff !important;
 }
@@ -1427,9 +1447,19 @@ footer.modern::before {
 [data-theme="light"] .reg-head,
 [data-theme="light"] .uc-head,
 [data-theme="light"] .vr-eyebrow { color: #4b5158 !important; }
-[data-theme="light"] .eyebrow .num { color: #109973 !important; }
+[data-theme="light"] .eyebrow .num { color: #059669 !important; }
 
-/* Header brand mark · swap SVG fill from ivory (#faf2e1) to ink (#0c0e10) in light mode */
+/* v7.19 . hide AI-product-styled numbered eyebrows sitewide on customer pages.
+   The section label still reads; the "01/02/03" overhead disappears. Developer
+   doc pages can override locally if they need section numbering. */
+.eyebrow .num,
+.ca-eyebrow .pulse,
+.hero-eyebrow .he-dot,
+.he-sep,
+.he-ver { display: none !important; }
+.eyebrow { letter-spacing: 0.16em; }
+
+/* Header brand mark  - swap SVG fill from ivory (#faf2e1) to ink (#0c0e10) in light mode */
 [data-theme="light"] nav.top .brand::before,
 [data-theme="light"] header.site .brand::before,
 [data-theme="light"] .site-header .brand::before,
@@ -1437,7 +1467,7 @@ footer.modern::before {
   background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect x='4' y='6' width='4.5' height='20' rx='0.4' fill='%230c0e10'/%3E%3Crect x='13' y='9' width='4.5' height='14' rx='0.4' fill='%230c0e10'/%3E%3Crect x='22' y='12' width='4.5' height='8' rx='0.4' fill='%23109973'/%3E%3C/svg%3E") !important;
 }
 
-/* Fix homepage hero "highlighted" h1 line · the .tone background-clip:text falls back to a
+/* Fix homepage hero "highlighted" h1 line  - the .tone background-clip:text falls back to a
    highlight box on browsers that don't reliably paint clipped gradients on light bg. */
 [data-theme="light"] h1 .tone,
 [data-theme="light"] h2 .tone {
@@ -1449,7 +1479,7 @@ footer.modern::before {
 }
 
 /* ============================================================
-   Hardcoded near-black backgrounds · invert in light mode.
+   Hardcoded near-black backgrounds  - invert in light mode.
    Many older inline-styled pages use #050607, #0b0f10, #0a0c10, etc.
    These don't pick up CSS vars and bleed dark cards into paper layout.
    ============================================================ */
@@ -1475,7 +1505,7 @@ footer.modern::before {
 [data-theme="light"] .plate text,
 [data-theme="light"] .plate tspan { fill: #0c0e10 !important; }
 
-/* <pre> blocks (code samples) · keep terminal look but on light paper */
+/* <pre> blocks (code samples)  - keep terminal look but on light paper */
 [data-theme="light"] pre,
 [data-theme="light"] pre.code-block,
 [data-theme="light"] code.block {
@@ -1492,7 +1522,7 @@ footer.modern::before {
 [data-theme="light"] .demo-stage pre,
 [data-theme="light"] .terminal pre { background: transparent !important; color: inherit !important; }
 
-/* Hero-demo terminal / receipt panes · explicit white card */
+/* Hero-demo terminal / receipt panes  - explicit white card */
 [data-theme="light"] .rp-term,
 [data-theme="light"] .three-box .tb-cell,
 [data-theme="light"] .tb-cell,
@@ -1528,10 +1558,10 @@ footer.modern::before {
 [data-theme="light"] svg [fill="#7ef0d2"] { fill: #0a8862 !important; }
 [data-theme="light"] svg [stroke="#7ef0d2"] { stroke: #0a8862 !important; }
 
-/* Inline <code> on /healthcare, /finance, etc · many use color:#e2e8f0; on light bg = bleed */
+/* Inline <code> on /healthcare, /finance, etc  - many use color:#e2e8f0; on light bg = bleed */
 [data-theme="light"] code { color: #0c0e10 !important; }
 
-/* Spec/docs side strips that use --bg-3 or hardcoded dark · paper them */
+/* Spec/docs side strips that use --bg-3 or hardcoded dark  - paper them */
 [data-theme="light"] .panel,
 [data-theme="light"] .docs-rail,
 [data-theme="light"] .toc,
@@ -1546,19 +1576,26 @@ footer.modern::before {
 [data-theme="light"] .docs-rail .group-h { color: #1f2429 !important; }
 [data-theme="light"] .docs-rail .group-h { color: #4b5158 !important; }
 
-/* Subtle paper texture for light mode background · adds richness without warmth */
+/* v7.18.4 . warm paper background with subtle atmospheric radials.
+   Cream paper (#f7f4ec) with two faint warm spotlights gives the page
+   directional lighting without any color cast. The aesthetic SOTA frontier
+   labs use: Linear, Stripe, Anthropic  - warm, not clinical. */
 [data-theme="light"] body {
-  background: #fafafa !important;
-  background-image: none !important;
+  background: #f7f4ec !important;
+  background-image:
+    radial-gradient(ellipse 1400px 900px at 15% -10%, rgba(24, 23, 26, 0.035) 0%, transparent 65%),
+    radial-gradient(ellipse 1100px 700px at 90% 5%, rgba(80, 60, 30, 0.020) 0%, transparent 60%) !important;
+  background-attachment: fixed !important;
+  color: #18171a !important;
 }
 
-/* No bg-stage vignette in light mode — paper-white surface, no decorative gradients */
+/* No bg-stage vignette in light mode  - paper-white surface, no decorative gradients */
 [data-theme="light"] .bg-stage,
 [data-theme="light"] .bg-stage::before,
 [data-theme="light"] .bg-stage::after { display: none !important; background: none !important; }
 
 /* ============================================================
-   Mobile nav toggle · hidden on desktop, visible <=920px.
+   Mobile nav toggle  - hidden on desktop, visible <=920px.
    Lives here (not styles.css) because brand-refresh.css loads on every page;
    styles.css only loads on home/docs/signup, which let the hamburger leak
    onto desktop everywhere else as a mystery "thin button" before this rule.
@@ -1624,7 +1661,7 @@ footer.modern::before {
 }
 
 /* =========================================================================
- * v7.8.8 · readability sweep. Many pages hardcode cream text colors
+ * v7.8.8  - readability sweep. Many pages hardcode cream text colors
  * (rgba(236,231,220,*) / #faf2e1 / #ece7dc) that pre-date the theme system.
  * In light mode these render as nearly invisible on the paper-white surface.
  * Force-flip them all to high-contrast dark.
@@ -1651,7 +1688,7 @@ footer.modern::before {
   color: #0c0e10 !important;
 }
 
-/* Hero copy · single biggest readability bug. styles.css hardcoded
+/* Hero copy  - single biggest readability bug. styles.css hardcoded
  * rgba(236,231,220,0.78) on .home-hero .lede and 0.76 on .eyebrow.
  * Override forcefully. */
 [data-theme="light"] .home-hero .eyebrow,
@@ -1678,7 +1715,7 @@ footer.modern::before {
   color: #0c0e10 !important;
 }
 
-/* media-frame figcaption · also hardcoded cream */
+/* media-frame figcaption  - also hardcoded cream */
 [data-theme="light"] .media-frame figcaption,
 [data-theme="light"] figcaption {
   color: #1f2429 !important;
@@ -1754,7 +1791,7 @@ footer.modern::before {
   border-color: rgba(12,14,16,0.40) !important;
 }
 
-/* Diagram/pipeline ink text inside dark frames · those frames already
+/* Diagram/pipeline ink text inside dark frames  - those frames already
  * get inverted to white, so their inner text must flip too */
 [data-theme="light"] .diag-fanout .node b,
 [data-theme="light"] .diag-fanout .center b,
@@ -1804,7 +1841,7 @@ footer.modern::before {
 body.nav-open { overflow: hidden; }
 
 /* ===========================================================
-   CANONICAL HEADER LOCK · kolm.ai v7.8.9
+   CANONICAL HEADER LOCK  - kolm.ai v7.8.9
    Force header.site (legacy, 97 pages) and header.site-header
    (newer, 16 pages) to render IDENTICALLY so navigating between
    pages does NOT cause visible chrome shift (menu jump). All
@@ -1815,15 +1852,15 @@ header.site-header {
   position: sticky !important;
   top: 0 !important;
   z-index: 60 !important;
-  background: rgba(11,13,16,0.88) !important;
-  backdrop-filter: saturate(140%) blur(16px) !important;
-  -webkit-backdrop-filter: saturate(140%) blur(16px) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  background: rgba(8,9,12,0.78) !important;
+  backdrop-filter: saturate(150%) blur(18px) !important;
+  -webkit-backdrop-filter: saturate(150%) blur(18px) !important;
+  border-bottom: 1px solid rgba(236,231,220,0.06) !important;
 }
 [data-theme="light"] header.site,
 [data-theme="light"] header.site-header {
-  background: rgba(250,250,250,0.92) !important;
-  border-bottom-color: rgba(12,14,16,0.08) !important;
+  background: rgba(247,244,236,0.78) !important;
+  border-bottom-color: rgba(24,23,26,0.08) !important;
 }
 header.site > .wrap,
 header.site-header > .wrap {
@@ -1848,12 +1885,12 @@ header.site-header .brand {
   gap: 9px !important;
   color: var(--ink, #faf2e1) !important;
   font-size: 16px !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   letter-spacing: -0.02em !important;
 }
 header.site .brand span,
 header.site-header .brand span {
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   font-size: 16px !important;
 }
 header.site .left {
@@ -1923,7 +1960,7 @@ header.site-header .site-actions .cta {
   padding: 6px 11px !important;
   border-radius: 6px !important;
   font-size: 12px !important;
-  font-weight: 540 !important;
+  font-weight: 500 !important;
   border: 1px solid rgba(236,231,220,0.42) !important;
 }
 [data-theme="light"] header.site .right .cta,
@@ -1954,7 +1991,7 @@ header.site-header .site-actions .cta {
 [data-theme="light"] header.site-header .brand {
   color: #0c0e10 !important;
 }
-/* Mystery button leak · gh-star anchor on 3 legacy pages shouldn't render */
+/* Mystery button leak  - gh-star anchor on 3 legacy pages shouldn't render */
 header.site .right .gh-star,
 header.site-header .site-actions .gh-star,
 header.site .right #gh-star,
@@ -1981,7 +2018,7 @@ header.site-header .site-actions .theme-toggle {
   color: #0c0e10 !important;
 }
 
-/* Auth pill · sitewide indicator that the user is signed in. Inserted by nav.js
+/* Auth pill  - sitewide indicator that the user is signed in. Inserted by nav.js
    into header.site-actions / header.site .right. The dot is the accent color
    in dark mode, emerald in light. Click goes to /dashboard. */
 .kolm-auth-pill {
@@ -1992,7 +2029,7 @@ header.site-header .site-actions .theme-toggle {
   border-radius: 999px !important;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
   font-size: 11px !important;
-  font-weight: 540 !important;
+  font-weight: 500 !important;
   letter-spacing: 0.02em !important;
   text-decoration: none !important;
   background: rgba(126, 240, 210, 0.10) !important;
@@ -2030,11 +2067,11 @@ header.site-header .site-actions .theme-toggle {
   box-shadow: 0 0 0 2px rgba(10, 136, 98, 0.18) !important;
 }
 
-/* v7.8.11 polish pass · sitewide light-mode parity for older inline-styled
+/* v7.8.11 polish pass  - sitewide light-mode parity for older inline-styled
    surfaces, focus-visible keyboard a11y, and tone-gradient text guards.
    Loaded after brand-refresh root so light overrides win. */
 
-/* Tone gradient text (h2 .tone, .plate .cap .title .tone) · pricing/compile
+/* Tone gradient text (h2 .tone, .plate .cap .title .tone)  - pricing/compile
    defined a cream-on-cream gradient with no light override. Force a dark
    gradient in light mode so the headline is readable. */
 [data-theme="light"] .plate .cap .title .tone,
@@ -2048,7 +2085,7 @@ header.site-header .site-actions .theme-toggle {
   color: transparent !important;
 }
 
-/* Keyboard a11y · global :focus-visible ring. Many pages set `outline:none`
+/* Keyboard a11y  - global :focus-visible ring. Many pages set `outline:none`
    on inputs without a replacement. This restores a visible focus ring for
    keyboard users without affecting mouse users (browsers only fire
    :focus-visible on keyboard nav). */
@@ -2100,7 +2137,7 @@ a:focus-visible {
  * shadow, which clobbered the polaroid cream-frame definition in
  * index.html. That's exactly the "light mode shadow bleed into the
  * video" regression. The page-level CSS in index.html handles light
- * theme for the polaroid correctly — let it win. Below we keep only
+ * theme for the polaroid correctly  - let it win. Below we keep only
  * .hero-video-foot/.scenes color overrides which DO need !important
  * to win against legacy styles.css color rules.
  */
@@ -2229,7 +2266,7 @@ a:focus-visible {
 [data-theme="light"] .trust-strip .ts-sub,
 [data-theme="light"] .reg-tele .reg-tele-meta { color: #4b5158 !important; }
 
-/* Bottom CTA + sitewide footer (very bottom panel — flagged by founder) */
+/* Bottom CTA + sitewide footer (very bottom panel  - flagged by founder) */
 [data-theme="light"] .bottom-cta {
   background: #ffffff !important;
   border-top-color: rgba(12,14,16,0.10) !important;
@@ -2274,33 +2311,35 @@ a:focus-visible {
 [data-theme="light"] .nl-try input { color: #0c0e10 !important; }
 [data-theme="light"] .nl-try input::placeholder { color: #6b7280 !important; }
 [data-theme="light"] .nl-try .nl-go {
-  background: #0a8862 !important;
-  color: #ffffff !important;
+  background: #18171a !important;
+  color: #f5f1e6 !important;
+  border-color: #18171a !important;
 }
-[data-theme="light"] .nl-try .nl-go:hover { filter: brightness(1.05) !important; }
-[data-theme="light"] .nl-try .nl-head { color: #4b5158 !important; }
-[data-theme="light"] .nl-try .nl-head b { color: #0c0e10 !important; }
+[data-theme="light"] .nl-try .nl-go:hover { background: #2a2823 !important; filter: none !important; }
+[data-theme="light"] .nl-try .nl-head { color: #5b5853 !important; }
+[data-theme="light"] .nl-try .nl-head b { color: #18171a !important; }
 [data-theme="light"] .nl-try .nl-dot {
-  background: #0a8862 !important;
-  box-shadow: 0 0 8px rgba(10,136,98,0.45) !important;
+  background: #18171a !important;
+  box-shadow: none !important;
+  opacity: 0.55 !important;
 }
 [data-theme="light"] .nl-try .nl-chips button {
-  background: #ffffff !important;
-  border-color: rgba(12,14,16,0.10) !important;
-  color: #4b5158 !important;
+  background: #fbf8f0 !important;
+  border-color: rgba(24,23,26,0.10) !important;
+  color: #5b5853 !important;
 }
 [data-theme="light"] .nl-try .nl-chips button:hover {
-  color: #0c0e10 !important;
-  border-color: rgba(10,136,98,0.42) !important;
+  color: #18171a !important;
+  border-color: rgba(24,23,26,0.30) !important;
 }
-[data-theme="light"] .nl-try #nl-out { color: #4b5158 !important; }
-[data-theme="light"] .nl-try #nl-out .nl-narration { color: #0c0e10 !important; }
+[data-theme="light"] .nl-try #nl-out { color: #5b5853 !important; }
+[data-theme="light"] .nl-try #nl-out .nl-narration { color: #18171a !important; }
 [data-theme="light"] .nl-try #nl-out .nl-cmd {
-  background: rgba(10,136,98,0.06) !important;
-  border-color: rgba(10,136,98,0.20) !important;
-  color: #0a8862 !important;
+  background: rgba(24,23,26,0.04) !important;
+  border-color: rgba(24,23,26,0.15) !important;
+  color: #18171a !important;
 }
-[data-theme="light"] .nl-try #nl-out .nl-link { color: #0a8862 !important; }
+[data-theme="light"] .nl-try #nl-out .nl-link { color: #18171a !important; border-bottom: 1px solid rgba(24,23,26,0.30) !important; }
 [data-theme="light"] .nl-try #nl-out .nl-job {
   background: #ffffff !important;
   border-color: rgba(10,136,98,0.20) !important;
@@ -2321,7 +2360,7 @@ a:focus-visible {
   color: #0c0e10 !important;
 }
 
-/* v7.9.5 consolidation — ROI calc-only layout, v7.9.10 uc-covers light theme */
+/* v7.9.5 consolidation  - ROI calc-only layout, v7.9.10 uc-covers light theme */
 [data-theme="light"] .vr-calc-only .vr-sub a {
   color: #0a8862 !important;
   border-bottom-color: rgba(10,136,98,0.32) !important;
@@ -2340,9 +2379,9 @@ a:focus-visible {
    v7.9.9 SOTA spacing pass. Section rhythm + mobile breathing.
    ============================================================ */
 
-/* v7.14 → v7.15 section rhythm. Desktop = 96px between sections (Apple/
+/* v7.14  - v7.15 section rhythm. Desktop = 96px between sections (Apple/
    Anthropic cadence). Mobile = 0px margin since brand-refresh.css mobile
-   padding (28px each side) is the only rhythm source on phones — combined
+   padding (28px each side) is the only rhythm source on phones  - combined
    that's 56px breath between sections. Previously these !important rules
    set 88px on mobile too, which compounded with the 56px mobile padding
    into a 144px cavern between every section. */
@@ -2441,7 +2480,7 @@ main > section:last-of-type { margin-bottom: 56px !important; }
 }
 
 /* ============================================================
-   v7.9.10 canonical header-to-content rhythm · uniform breathing
+   v7.9.10 canonical header-to-content rhythm  - uniform breathing
    between the sticky header and the first content surface on
    every page shell so navigating between routes does not change
    the perceived gap below the chrome.
@@ -2456,7 +2495,7 @@ main > section:last-of-type { margin-bottom: 56px !important; }
 @media (max-width: 520px) { .hero { padding-top: 60px !important; } }
 
 /* App / settings shells (dashboard, account, captures, audit-log).
-   54px was too tight under the 60px header — bump to 72px desktop. */
+   54px was too tight under the 60px header  - bump to 72px desktop. */
 .page-main { padding-top: 72px !important; }
 @media (max-width: 640px) {
   .page-main { padding-top: 48px !important; }
@@ -2475,14 +2514,14 @@ main > section:last-of-type { margin-bottom: 56px !important; }
 }
 
 /* Generic fallback for any other top-level shell that lacks one of
-   the named classes — first <section> directly under <main> picks up
+   the named classes  - first <section> directly under <main> picks up
    the same beat. */
 main > section:first-of-type:not(.hero):not(.compile-anatomy):not(.uc-strip):not(.vr):not(.trust-line):not(.bottom-cta) {
   padding-top: 56px !important;
 }
 
 /* ============================================================
- * v7.11.4 — Canonical elevation tokens + emerald polish +
+ * v7.11.4  - Canonical elevation tokens + emerald polish +
  * sitewide light-mode catch-all + auth/dashboard color fixes.
  *
  * Founder pushback after v7.11.3: shadows inconsistent across
@@ -2490,13 +2529,13 @@ main > section:first-of-type:not(.hero):not(.compile-anatomy):not(.uc-strip):not
  * green in both views; auth/console must match marketing chrome.
  *
  * Token system:
- *   --shadow-1  → quiet (buttons, input focus, chips)
- *   --shadow-2  → standard cards / panels
- *   --shadow-3  → hero panel / featured tier / floating modals
+ *   --shadow-1   - quiet (buttons, input focus, chips)
+ *   --shadow-2   - standard cards / panels
+ *   --shadow-3   - hero panel / featured tier / floating modals
  *
  * Dark uses black with subtle inset rim light (without rim, black
  * shadow on black bg is invisible). Light uses slate (#0c0e10) at
- * low alpha — paper feel, no muddy gray. ============================================================ */
+ * low alpha  - paper feel, no muddy gray. ============================================================ */
 :root {
   --shadow-1: 0 1px 2px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.04) !important;
   --shadow-2: 0 1px 2px rgba(0,0,0,0.40), 0 8px 20px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.04) !important;
@@ -2509,7 +2548,7 @@ main > section:first-of-type:not(.hero):not(.compile-anatomy):not(.uc-strip):not
 }
 
 /* Apply shadow-2 to the canonical card classes sitewide so cards
- * read consistently across every page — even ones with their own
+ * read consistently across every page  - even ones with their own
  * inline <style> blocks. We use the token (not raw rgba) so a
  * theme switch automatically restyles every surface. */
 .card,
@@ -2528,7 +2567,7 @@ main > section:first-of-type:not(.hero):not(.compile-anatomy):not(.uc-strip):not
 }
 
 /* Featured pricing tier + signed-in auth card sit on a higher
- * elevation — drop them on the page with shadow-3.
+ * elevation  - drop them on the page with shadow-3.
  *
  * v7.11.6: REMOVED .hero-demo-panel + .hero-video-panel from this
  * list. Those carry the polaroid cream-frame on light theme and
@@ -2551,7 +2590,7 @@ button.primary,
 }
 
 /* ============================================================
- * MORE EMERALD — restraint version. Adds presence without
+ * MORE EMERALD  - restraint version. Adds presence without
  * cluttering. Targets eyebrow letters, card hover h3, section
  * accent rule, active tab underline.
  * ============================================================ */
@@ -2570,7 +2609,7 @@ button.primary,
   box-shadow: 0 0 6px rgba(10,136,98,0.5) !important;
 }
 
-/* Card hover: H3 picks up emerald tint — invites the click. */
+/* Card hover: H3 picks up emerald tint  - invites the click. */
 .card:hover h3,
 .uc-card:hover h3,
 .ac-card:hover h3,
@@ -2585,7 +2624,7 @@ button.primary,
   color: #0a8862 !important;
 }
 
-/* Active tab in switchable strips (uc-tab.is-on) — emerald
+/* Active tab in switchable strips (uc-tab.is-on)  - emerald
  * underline rule already existed but was too quiet. Boost. */
 .uc-strip .uc-tab.is-on {
   color: #7ef0d2 !important;
@@ -2597,7 +2636,7 @@ button.primary,
 }
 
 /* Light-mode section eyebrows pick up emerald letter color when
- * they previously read as gray — group .gtag on /use-cases was
+ * they previously read as gray  - group .gtag on /use-cases was
  * already emerald via inline, but cover the rest sitewide. */
 [data-theme="light"] .ca-eyebrow,
 [data-theme="light"] .ac-eyebrow,
@@ -2646,7 +2685,7 @@ button.primary,
   color: #0c0e10 !important;
 }
 
-/* Common card patterns that pages declare locally — re-paint. */
+/* Common card patterns that pages declare locally  - re-paint. */
 [data-theme="light"] .card,
 [data-theme="light"] .doc-grid .card,
 [data-theme="light"] .cookbook-card,
@@ -2674,7 +2713,7 @@ button.primary,
 }
 
 /* ============================================================
- * DASHBOARD / SIGNIN / SIGNUP / ACCOUNT — light-mode polish.
+ * DASHBOARD / SIGNIN / SIGNUP / ACCOUNT  - light-mode polish.
  *
  * These pages live behind auth and have their own .auth-card,
  * .dash-shell, .console rules. Re-paint the missed surfaces. ============================================================ */
@@ -2728,7 +2767,7 @@ button.primary,
 }
 
 /* Signin / signup pages also pick up shadow-3 elevation on the
- * card — pairs with brand-refresh.css auth-card rules above. */
+ * card  - pairs with brand-refresh.css auth-card rules above. */
 .auth-card { box-shadow: var(--shadow-3) !important; }
 
 /* ============================================================
@@ -2757,7 +2796,7 @@ button.primary,
   color: #0a8862;
 }
 
-/* Border / divider sweep — anything currently using cream alpha
+/* Border / divider sweep  - anything currently using cream alpha
  * needs to be slate alpha in light. Two passes: 0.08 and 0.16. */
 [data-theme="light"] hr,
 [data-theme="light"] .divider,
@@ -2783,10 +2822,10 @@ button.primary,
 /* ---- Shadow laggards forced onto canonical tokens -------------
  *
  * Surface vocabulary (locked):
- *   --shadow-1 → buttons, inputs, small chips, focus glow
- *   --shadow-2 → card surfaces (anatomy, after-compile, uc, vr, tier)
- *   --shadow-3 → cinematic hero terminal, install panel, dashboard shell
- *   --shadow-polaroid → cream-frame video container ONLY (custom soft)
+ *   --shadow-1  - buttons, inputs, small chips, focus glow
+ *   --shadow-2  - card surfaces (anatomy, after-compile, uc, vr, tier)
+ *   --shadow-3  - cinematic hero terminal, install panel, dashboard shell
+ *   --shadow-polaroid  - cream-frame video container ONLY (custom soft)
  *
  * IMPORTANT: hero-video-panel + hero-demo-panel are intentionally NOT
  * in this list. They carry the polaroid frame and own their custom
@@ -2824,7 +2863,7 @@ button.primary,
 /* Polaroid: cream-frame video panel. On dark, a dark drop-shadow is
    invisible against the dark page, so we use a SUBTLE LIGHT HALO
    (inset highlight + ambient light glow) instead. This puts a
-   visible boundary on all four sides — no cut-off at top or left. */
+   visible boundary on all four sides  - no cut-off at top or left. */
 :root {
   --shadow-polaroid:
     0 0 0 1px rgba(255,255,255,0.08),
@@ -2965,15 +3004,15 @@ section.vr-calc-only { padding-top: var(--sp-section-tight) !important; padding-
 }
 
 /*
- * v7.11.6 — Polaroid regression fix + visual variety + within-section
+ * v7.11.6  - Polaroid regression fix + visual variety + within-section
  *           spacing rhythm + alternating section tone.
  *
  * Founder pushback: "still have major inconsistency in shadows, light
  * mode shadow bleed into the video, plenty of spacing issues, maybe
  * use different graphics elements or organization." This block adds:
- *   1. Within-section spacing tokens (head → grid gap, h2 → sub gap).
+ *   1. Within-section spacing tokens (head  - grid gap, h2  - sub gap).
  *   2. Alternating section tone (anatomy default / after-compile slight
- *      bg-alt tint) to break the boxy "card-grid → card-grid" feel.
+ *      bg-alt tint) to break the boxy "card-grid  - card-grid" feel.
  *   3. Per-card accent on after-compile so each of the 3 cards reads
  *      with its own identity.
  *   4. Connector flow line on anatomy 4-step grid (visual story arc).
@@ -3031,30 +3070,17 @@ section.vr-calc-only {
 [data-theme="light"] .after-compile .ac-card:nth-child(2) { border-color: rgba(10,136,98,0.22) !important; background: linear-gradient(180deg, rgba(10,136,98,0.035), #ffffff) !important; }
 [data-theme="light"] .after-compile .ac-card:nth-child(3) { border-color: rgba(180,130,40,0.14) !important; }
 
-/* Anatomy connector flow line - visual story arc between 01→02→03→04 */
+/* Anatomy connector flow line - visual story arc between 01 - 2 - 3 - 4 */
 @media (min-width: 1024px) {
   .compile-anatomy .ca-steps { position: relative; }
-  .compile-anatomy .ca-steps::before {
-    content: "";
-    position: absolute;
-    top: 48px;
-    left: calc(12.5% + 24px);
-    right: calc(12.5% + 24px);
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(126,240,210,0.18) 12%, rgba(126,240,210,0.18) 88%, transparent);
-    z-index: 0;
-    pointer-events: none;
-  }
+  .compile-anatomy .ca-steps::before { display: none !important; }
   .compile-anatomy .ca-step { position: relative; z-index: 1; }
-  [data-theme="light"] .compile-anatomy .ca-steps::before {
-    background: linear-gradient(90deg, transparent, rgba(10,136,98,0.22) 12%, rgba(10,136,98,0.22) 88%, transparent) !important;
-  }
 }
 
 /* ROI calc: hero the multiplier number prominently */
 .vr-calc-solo .vc-result-x {
   font-size: clamp(48px, 7vw, 84px) !important;
-  font-weight: 580 !important;
+  font-weight: 500 !important;
   letter-spacing: -0.04em !important;
   line-height: 1 !important;
   color: #7ef0d2 !important;
@@ -3064,7 +3090,7 @@ section.vr-calc-only {
   color: #0a8862 !important;
 }
 
-/* Desktop hero breathing — flush down to section padding only. */
+/* Desktop hero breathing  - flush down to section padding only. */
 @media (min-width: 721px) {
   .home-hero-stacked { padding-bottom: 56px !important; }
   .home-hero-stacked .nl-try { margin: 0 !important; }
@@ -3072,11 +3098,1178 @@ section.vr-calc-only {
 
 /* Section-divider hairlines: subtle inter-section accent that doesn't
    require a separate <hr>. */
-section.compile-anatomy { border-top: 1px solid rgba(126,240,210,0.06); }
-[data-theme="light"] section.compile-anatomy { border-top-color: rgba(10,136,98,0.08) !important; }
+section.compile-anatomy { border-top: 1px solid rgba(255,255,255,0.04); }
+[data-theme="light"] section.compile-anatomy { border-top-color: rgba(0,0,0,0.05) !important; }
 
-/* Mobile: kill the connector line (only renders ≥1024) and ensure
+/* Mobile: kill the connector line (only renders  - 024) and ensure
    anatomy + after-compile pad scale properly. */
 @media (max-width: 1023px) {
   .compile-anatomy .ca-steps::before { display: none !important; }
 }
+
+/* ============================================================
+   v7.17 frontier SOTA  - sitewide brutalist + electric utilities
+   ============================================================
+   Pulled into brand-refresh.css so every page picks them up
+   without per-page <style> bloat. Cyan accent = Prime-Intellect
+   bleeding-edge frontier aesthetic. Keep additive  - no overrides
+   to existing scales unless explicit. */
+:root {
+  /* v7.19 . electric tokens now resolve to warm clay accent. Carries the
+     existing "frontier" callout styling but in the new highlight color. */
+  --electric: #10b981;
+  --electric-soft: rgba(16,185,129, 0.14);
+  --electric-glow: rgba(16,185,129, 0.45);
+}
+:root[data-theme="light"] {
+  --electric: #059669 !important;
+  --electric-soft: rgba(5,150,105, 0.10) !important;
+  --electric-glow: rgba(5,150,105, 0.35) !important;
+}
+
+/* v7.19 . highlight accents. Use sparingly: focus rings, link hover, key
+   callouts. Never bg. Never text-on-clay. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--kolm-accent, #10b981) !important;
+  outline-offset: 2px !important;
+}
+.lede a:hover,
+.prose a:hover,
+p a:hover,
+li a:hover { color: var(--kolm-accent, #10b981) !important; }
+[data-theme="light"] .lede a:hover,
+[data-theme="light"] .prose a:hover,
+[data-theme="light"] p a:hover,
+[data-theme="light"] li a:hover { color: #059669 !important; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 11px; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--ink-mute, #b5bdb1);
+  border: 1px solid var(--line-strong, rgba(255,255,255,0.12));
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: rgba(8, 9, 8, 0.62);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.hero-eyebrow .he-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink, #faf2e1); box-shadow: none;
+  opacity: 0.55;
+  animation: pulse-soft 3.4s ease-in-out infinite;
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.08); }
+}
+[data-theme="light"] .hero-eyebrow {
+  border-color: rgba(24, 23, 26, 0.10) !important;
+  background: rgba(247, 244, 236, 0.72) !important;
+  color: #5b5853 !important;
+}
+[data-theme="light"] .hero-eyebrow .he-dot {
+  background: #18171a !important;
+  box-shadow: none !important;
+  opacity: 0.4 !important;
+}
+
+/* Tone gradient applied to any .tone span inside h1 sitewide */
+h1 .tone {
+  background: linear-gradient(170deg, #faf2e1 0%, #7dd3fc 50%, #faf2e1 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+[data-theme="light"] h1 .tone {
+  background: linear-gradient(170deg, #0c0e10 0%, #0284c7 50%, #0c0e10 100%) !important;
+  -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Electric CTA  - primary frontier action button */
+.btn.electric, a.btn.electric, button.btn.electric {
+  background: linear-gradient(180deg, #bae6fd 0%, #7dd3fc 100%) !important;
+  color: #051018 !important;
+  border-color: #7dd3fc !important;
+  box-shadow: 0 14px 32px -10px rgba(125, 211, 252, 0.55),
+              0 0 0 1px rgba(125, 211, 252, 0.20) !important;
+  font-weight: 500 !important;
+  transition: all 200ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+.btn.electric:hover, a.btn.electric:hover, button.btn.electric:hover {
+  background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%) !important;
+  border-color: #bae6fd !important;
+  box-shadow: 0 18px 42px -8px rgba(125, 211, 252, 0.72),
+              0 0 0 1px rgba(125, 211, 252, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Tickertape utility (sitewide marquee for value props) */
+.tickertape {
+  overflow: hidden; position: relative;
+  border-top: 1px solid var(--line, rgba(255,255,255,0.06));
+  border-bottom: 1px solid var(--line, rgba(255,255,255,0.06));
+  padding: 14px 0;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.tickertape-track {
+  display: inline-flex; gap: 56px;
+  animation: tickertape-roll 48s linear infinite;
+  white-space: nowrap;
+}
+.tickertape-track .ti {
+  font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 12px; letter-spacing: 0.04em;
+  color: var(--ink-mute, #b5bdb1);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.tickertape-track .ti b { color: var(--electric); font-weight: 500; }
+.tickertape-track .sep { color: var(--ink-faint, #737c73); }
+@keyframes tickertape-roll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+[data-theme="light"] .tickertape-track .ti b { color: #0284c7 !important; }
+
+/* Atmospheric topographic backdrop  - applied via .frontier-bg modifier
+   to a section so any page can drop the Prime-Intellect-style mood. */
+.frontier-bg { position: relative; overflow: hidden; }
+.frontier-bg::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  opacity: 0.38;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237dd3fc' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237dd3fc' stop-opacity='0.18'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: cover; background-position: center top;
+  mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%);
+  z-index: 0;
+}
+.frontier-bg > * { position: relative; z-index: 2; }
+[data-theme="light"] .frontier-bg::after { opacity: 0.20 !important; }
+
+/* Subtle drift on the topographic contour layer  - Prime-Intellect "alive" feel.
+   42s loop, 8px range, reduced-motion respected. */
+@keyframes frontier-drift {
+  0%   { background-position: 50% 50%; }
+  50%  { background-position: 50.6% 49.4%; }
+  100% { background-position: 50% 50%; }
+}
+.frontier-bg::after { animation: frontier-drift 42s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .frontier-bg::after { animation: none !important; }
+}
+
+
+/* ============================================================
+ * v7.20 . SOTA SPACING SYSTEM + ANY-AI EXPANSION SUPPORT
+ *
+ * One canonical vertical rhythm tied together professionally.
+ * Frontier products (Anthropic / Linear / Vercel / Stripe) all
+ * use a single integer-multiple scale. Define it once, inherit.
+ * ============================================================ */
+
+:root {
+  --rhythm-1: 8px;
+  --rhythm-2: 16px;
+  --rhythm-3: 32px;
+  --rhythm-4: 64px;
+  --rhythm-5: 96px;
+  --rhythm-6: 128px;
+
+  --rhythm-mob-1: 8px;
+  --rhythm-mob-2: 16px;
+  --rhythm-mob-3: 24px;
+  --rhythm-mob-4: 40px;
+  --rhythm-mob-5: 56px;
+  --rhythm-mob-6: 72px;
+}
+
+section.compile-anatomy,
+section.after-compile,
+section.vr,
+section.uc-strip,
+section.home-faq,
+section.bottom-cta,
+section.hero-demo,
+section.access-anywhere,
+section.lifecycle,
+section.train-any,
+section.demo-anchor,
+section.provider-strip {
+  padding-top: var(--rhythm-5) !important;
+  padding-bottom: var(--rhythm-5) !important;
+}
+
+section.train-any,
+section.lifecycle {
+  padding-top: var(--rhythm-6) !important;
+  padding-bottom: var(--rhythm-6) !important;
+}
+
+section.vr-calc-only { padding-top: var(--rhythm-4) !important; padding-bottom: var(--rhythm-4) !important; }
+section.provider-strip { padding-top: var(--rhythm-4) !important; padding-bottom: var(--rhythm-4) !important; }
+section.demo-anchor { padding-top: var(--rhythm-4) !important; padding-bottom: var(--rhythm-5) !important; }
+
+@media (max-width: 980px) {
+  section.compile-anatomy,
+  section.after-compile,
+  section.vr,
+  section.uc-strip,
+  section.home-faq,
+  section.bottom-cta,
+  section.hero-demo,
+  section.access-anywhere,
+  section.lifecycle,
+  section.train-any,
+  section.demo-anchor,
+  section.provider-strip {
+    padding-top: var(--rhythm-mob-5) !important;
+    padding-bottom: var(--rhythm-mob-5) !important;
+  }
+  section.train-any,
+  section.lifecycle {
+    padding-top: var(--rhythm-mob-6) !important;
+    padding-bottom: var(--rhythm-mob-6) !important;
+  }
+  section.vr-calc-only { padding-top: var(--rhythm-mob-4) !important; padding-bottom: var(--rhythm-mob-4) !important; }
+  section.demo-anchor { padding-top: var(--rhythm-mob-3) !important; padding-bottom: var(--rhythm-mob-4) !important; }
+  section.provider-strip { padding-top: var(--rhythm-mob-3) !important; padding-bottom: var(--rhythm-mob-3) !important; }
+}
+
+.compile-anatomy,
+.after-compile,
+.access-anywhere,
+.vr,
+.vr.vr-calc-only,
+.uc-strip,
+.home-faq,
+.bottom-cta,
+.lifecycle,
+.train-any { margin-top: 0 !important; }
+
+.compile-anatomy .ca-head,
+.after-compile .ac-head,
+.lifecycle .lc-head,
+.train-any .ta-head { margin-bottom: var(--rhythm-3) !important; padding-bottom: var(--rhythm-2) !important; }
+
+@media (max-width: 980px) {
+  .compile-anatomy .ca-head,
+  .after-compile .ac-head,
+  .lifecycle .lc-head,
+  .train-any .ta-head { margin-bottom: var(--rhythm-mob-3) !important; padding-bottom: 0 !important; }
+}
+
+.compile-anatomy .ca-h,
+.after-compile .ac-h,
+.lifecycle .lc-h,
+.train-any .ta-h { margin-bottom: var(--rhythm-2) !important; }
+
+.after-compile .ac-cards,
+.train-any .ta-grid,
+.lifecycle .lc-grid { gap: 20px !important; }
+@media (max-width: 980px) {
+  .after-compile .ac-cards,
+  .train-any .ta-grid,
+  .lifecycle .lc-grid { gap: 14px !important; }
+}
+
+
+/* ============================================================
+ * v7.20.1 . FUNDAMENTAL AESTHETIC UPGRADE
+ *
+ * CSS-only. No new sections. No new buttons. Three moves:
+ *   1) Section H2 scale up (clamp 44->68 from clamp 32->46)
+ *   2) Generous breath (128/72 unified, no 96/128 split)
+ *   3) Provider strip + cards bigger / more authored
+ *
+ * Frontier (Linear / Vercel / OpenAI / Stripe) push H2s to
+ * 56-72px on desktop. Conservative 32-46 reads as "trying."
+ * One bigger move + more whitespace = visible confidence.
+ * ============================================================ */
+
+/* MOVE 1 . Unified generous section breath. */
+section.compile-anatomy,
+section.after-compile,
+section.vr,
+section.uc-strip,
+section.home-faq,
+section.bottom-cta,
+section.hero-demo,
+section.access-anywhere,
+section.demo-anchor {
+  padding-top: 128px !important;
+  padding-bottom: 128px !important;
+}
+@media (max-width: 980px) {
+  section.compile-anatomy,
+  section.after-compile,
+  section.vr,
+  section.uc-strip,
+  section.home-faq,
+  section.bottom-cta,
+  section.hero-demo,
+  section.access-anywhere,
+  section.demo-anchor {
+    padding-top: 72px !important;
+    padding-bottom: 72px !important;
+  }
+}
+
+/* MOVE 2 . Section H2 confidence sitewide. */
+.compile-anatomy .ca-h,
+.after-compile .ac-h,
+.home-faq .hf-h,
+section.access-anywhere h2,
+section.uc-strip h2,
+section.bottom-cta h2,
+section.vr h2 {
+  font-size: clamp(44px, 5vw, 68px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.034em !important;
+  font-weight: 400 !important;
+  margin: 0 0 22px !important;
+}
+@media (max-width: 720px) {
+  .compile-anatomy .ca-h,
+  .after-compile .ac-h,
+  .home-faq .hf-h,
+  section.access-anywhere h2,
+  section.uc-strip h2,
+  section.bottom-cta h2,
+  section.vr h2 {
+    font-size: clamp(34px, 9vw, 44px) !important;
+    line-height: 1.04 !important;
+    letter-spacing: -0.028em !important;
+  }
+}
+
+/* MOVE 3 . Section sub / lede readable size, generous gutter to H2. */
+.compile-anatomy .ca-sub,
+.after-compile .ac-sub,
+.home-faq .hf-sub {
+  font-size: 18px !important;
+  line-height: 1.5 !important;
+  max-width: 62ch !important;
+}
+@media (max-width: 720px) {
+  .compile-anatomy .ca-sub,
+  .after-compile .ac-sub,
+  .home-faq .hf-sub {
+    font-size: 16px !important;
+  }
+}
+
+/* MOVE 4 . Provider strip becomes a confident, generously tracked
+   row of monospace wordmarks. No more pill-like micro chips. */
+section.provider-strip {
+  padding-top: 80px !important;
+  padding-bottom: 80px !important;
+  border-top: 1px solid rgba(255,255,255,0.06) !important;
+  margin-top: 0 !important;
+}
+[data-theme=light] section.provider-strip { border-top-color: rgba(0,0,0,0.06) !important; }
+@media (max-width: 720px) {
+  section.provider-strip { padding-top: 56px !important; padding-bottom: 56px !important; }
+}
+section.provider-strip .ps-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px 56px !important;
+}
+@media (max-width: 720px) {
+  section.provider-strip .ps-row { gap: 6px 32px !important; }
+}
+section.provider-strip .ps-cell {
+  font-family: var(--mono) !important;
+  font-size: 13px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: rgba(236,225,196,0.62) !important;
+  opacity: 1 !important;
+  font-weight: 400 !important;
+  transition: color 200ms ease;
+}
+section.provider-strip .ps-cell:hover { color: var(--ink, #faf2e1) !important; }
+[data-theme=light] section.provider-strip .ps-cell { color: rgba(31,36,41,0.56) !important; }
+[data-theme=light] section.provider-strip .ps-cell:hover { color: #0c0e10 !important; }
+
+/* MOVE 5 . Card breath. Bigger interior padding, softer radius. */
+.compile-anatomy .ca-step,
+.after-compile .ac-card {
+  padding: 36px 30px 30px !important;
+  border-radius: 16px !important;
+}
+@media (max-width: 720px) {
+  .compile-anatomy .ca-step,
+  .after-compile .ac-card { padding: 24px 22px !important; border-radius: 14px !important; }
+}
+
+/* MOVE 6 . Section heads bottom margin generous. */
+.compile-anatomy .ca-head,
+.after-compile .ac-head,
+.home-faq .hf-head {
+  margin-bottom: 64px !important;
+}
+@media (max-width: 720px) {
+  .compile-anatomy .ca-head,
+  .after-compile .ac-head,
+  .home-faq .hf-head { margin-bottom: 40px !important; }
+}
+
+/* MOVE 7 . Home-faq grid breath. Bigger gap. */
+.home-faq .hf-grid {
+  gap: 36px 56px !important;
+}
+@media (max-width: 760px) {
+  .home-faq .hf-grid { gap: 26px !important; }
+}
+.home-faq .hf-q { font-size: 17px !important; line-height: 1.35 !important; margin: 0 0 10px !important; }
+.home-faq .hf-a { font-size: 15.5px !important; line-height: 1.6 !important; }
+
+
+/* ============================================================
+ * v7.20.2 . AESTHETIC PERFECTION PASS
+ *
+ * The dead weight isn't the content. It's the cramped
+ * typography and a 9-column sitemap-dump footer. Fix:
+ *   1) Hero H1 confidence (already big, push to SOTA scale)
+ *   2) Closing CTA punch (currently quiet 32-46, push to 52-88)
+ *   3) Footer breath (typography up, gap up, structure tight)
+ *   4) Body tonal background pure (no noise)
+ *   5) Cards radius unified 16px
+ *   6) ROI section H2 bump
+ *   7) Eyebrows unified caps mono
+ * ============================================================ */
+
+/* MOVE 1 . Hero H1 SOTA confidence. */
+.home-hero-left h1 {
+  font-size: clamp(64px, 9.4vw, 144px) !important;
+  letter-spacing: -0.054em !important;
+  line-height: 0.92 !important;
+}
+@media (max-width: 720px) {
+  .home-hero-left h1 {
+    font-size: clamp(52px, 12vw, 78px) !important;
+    letter-spacing: -0.042em !important;
+    line-height: 0.97 !important;
+  }
+}
+
+/* MOVE 2 . Closing CTA punch. */
+section.bottom-cta {
+  padding: 144px 24px 152px !important;
+  border-top: 1px solid rgba(255,255,255,0.06) !important;
+  margin-top: 0 !important;
+  text-align: center !important;
+}
+@media (max-width: 720px) {
+  section.bottom-cta { padding: 88px 20px 96px !important; }
+}
+section.bottom-cta .bc-h {
+  font-size: clamp(52px, 6.5vw, 88px) !important;
+  letter-spacing: -0.04em !important;
+  line-height: 1.0 !important;
+  font-weight: 400 !important;
+  margin: 0 0 24px !important;
+}
+@media (max-width: 720px) {
+  section.bottom-cta .bc-h {
+    font-size: clamp(40px, 10.5vw, 58px) !important;
+    letter-spacing: -0.034em !important;
+  }
+}
+section.bottom-cta .bc-sub {
+  font-size: 19px !important;
+  line-height: 1.5 !important;
+  margin: 0 0 40px !important;
+  max-width: 56ch;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+@media (max-width: 720px) {
+  section.bottom-cta .bc-sub { font-size: 16.5px !important; margin-bottom: 32px !important; }
+}
+section.bottom-cta .bc-actions { gap: 14px !important; }
+section.bottom-cta .bc-actions .btn.primary {
+  font-size: 15px !important;
+  padding: 13px 26px !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* MOVE 3 . Footer typography breath + structural tighten.
+   9 columns of links is fine for a developer tool, but the typography
+   was cramped (10.5px headings, 4px gaps). Bump it. */
+footer.site-footer {
+  margin-top: 0 !important;
+  padding: 96px 0 64px !important;
+  border-top: 1px solid rgba(255,255,255,0.06) !important;
+}
+[data-theme=light] footer.site-footer {
+  border-top-color: rgba(0,0,0,0.06) !important;
+}
+@media (max-width: 720px) {
+  footer.site-footer { padding: 56px 0 40px !important; }
+}
+
+footer.site-footer .wrap {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 56px !important;
+  max-width: 1180px !important;
+  padding: 0 32px !important;
+}
+@media (max-width: 720px) {
+  footer.site-footer .wrap { padding: 0 20px !important; gap: 40px !important; }
+}
+
+footer.site-footer .meta {
+  font-family: var(--mono) !important;
+  font-size: 12.5px !important;
+  letter-spacing: 0.04em !important;
+  color: var(--ink-mute, #b5bdb1) !important;
+}
+
+footer.site-footer .links {
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 44px 48px !important;
+}
+@media (max-width: 1100px) {
+  footer.site-footer .links { grid-template-columns: repeat(3, 1fr) !important; gap: 36px 40px !important; }
+}
+@media (max-width: 720px) {
+  footer.site-footer .links { grid-template-columns: repeat(2, 1fr) !important; gap: 32px 28px !important; }
+}
+
+footer.site-footer .links > div { gap: 8px !important; display: flex !important; flex-direction: column !important; }
+
+footer.site-footer .col-h {
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+  color: var(--ink-faint, #737c73) !important;
+  margin-bottom: 14px !important;
+  font-weight: 400 !important;
+}
+
+footer.site-footer .links a {
+  font-family: var(--sans) !important;
+  font-size: 13.5px !important;
+  line-height: 1.7 !important;
+  color: var(--ink-mute, #b5bdb1) !important;
+  border-bottom: 0 !important;
+  transition: color 160ms ease;
+}
+footer.site-footer .links a:hover { color: var(--ink, #faf2e1) !important; }
+[data-theme=light] footer.site-footer .links a { color: #4b5158 !important; }
+[data-theme=light] footer.site-footer .links a:hover { color: #18171a !important; }
+
+footer.site-footer .footer-tag {
+  margin-top: 48px !important;
+  padding-top: 28px !important;
+  border-top: 1px solid rgba(255,255,255,0.04) !important;
+  font-family: var(--mono) !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.08em !important;
+  color: var(--ink-faint, #737c73) !important;
+}
+[data-theme=light] footer.site-footer .footer-tag { border-top-color: rgba(0,0,0,0.04) !important; }
+
+/* MOVE 4 . Body pure tonal background, sitewide. */
+body { background: var(--bg-1, #0a0c10) !important; }
+[data-theme=light] body { background: #f6f3eb !important; }
+
+/* MOVE 5 . Cards radius + interior unified. */
+.compile-anatomy .ca-step,
+.after-compile .ac-card,
+.access-anywhere .aa-card,
+.uc-strip .ucs-card {
+  border-radius: 16px !important;
+}
+
+/* MOVE 6 . ROI section confidence. */
+section.vr {
+  padding-top: 128px !important;
+  padding-bottom: 128px !important;
+}
+@media (max-width: 980px) {
+  section.vr { padding-top: 72px !important; padding-bottom: 72px !important; }
+}
+section.vr .vr-h {
+  font-size: clamp(44px, 5vw, 68px) !important;
+  letter-spacing: -0.034em !important;
+  line-height: 1.02 !important;
+  font-weight: 400 !important;
+  margin: 0 0 22px !important;
+}
+@media (max-width: 720px) {
+  section.vr .vr-h {
+    font-size: clamp(34px, 9vw, 44px) !important;
+    letter-spacing: -0.028em !important;
+  }
+}
+
+/* MOVE 7 . Section eyebrows unified caps mono. */
+section.compile-anatomy .ca-eyebrow,
+section.after-compile .ac-eyebrow,
+section.home-faq .hf-eyebrow,
+section.access-anywhere .aa-eyebrow,
+section.bottom-cta .bc-eyebrow,
+section.uc-strip .ucs-eyebrow,
+section.vr .vr-eyebrow {
+  font-family: var(--mono) !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+  color: var(--ink-faint, #737c73) !important;
+  font-weight: 400 !important;
+  margin-bottom: 22px !important;
+}
+
+/* MOVE 8 . Section transitions . subtle hairline between adjacent dark
+   sections so the page reads as authored, not slammed-together. */
+section.compile-anatomy { border-top: 1px solid rgba(255,255,255,0.04) !important; }
+section.after-compile { border-top: 1px solid rgba(255,255,255,0.04) !important; }
+section.home-faq { border-top: 1px solid rgba(255,255,255,0.04) !important; }
+[data-theme=light] section.compile-anatomy,
+[data-theme=light] section.after-compile,
+[data-theme=light] section.home-faq {
+  border-top-color: rgba(0,0,0,0.05) !important;
+}
+
+/* MOVE 9 . Cap home FAQ to 4 visible questions so it doesn't dominate. */
+.home-faq .hf-grid li:nth-child(n+5) { display: none !important; }
+.home-faq .hf-more { display: block !important; }
+
+
+/* ============================================================
+ * v7.20.3 . FINAL DEAD-WEIGHT REFINEMENT
+ *
+ * The FAQ uses dl/dt/dd inside divs, not li. Original cap
+ * selector (:nth-child on li) was a no-op. Fix structural
+ * selector. Mobile-only cap so desktop copy "six things" still
+ * matches the visible count.
+ * ============================================================ */
+
+/* FAQ cap on mobile (children of .hf-grid are <div>) */
+@media (max-width: 720px) {
+  .home-faq .hf-grid > div:nth-child(n+5) { display: none !important; }
+  .home-faq .hf-more { display: block !important; margin-top: 24px !important; }
+}
+/* Desktop keeps all 6 visible, no override needed */
+@media (min-width: 721px) {
+  .home-faq .hf-grid li:nth-child(n+5) { display: revert !important; }
+  .home-faq .hf-grid > div:nth-child(n+5) { display: block !important; }
+}
+
+/* "From coding agents to clinical intake." . tighten its sub-heading
+   and ensure the emerald accent block doesn't drift visually. */
+.uc-strip h2,
+.uc-strip .ucs-h {
+  font-size: clamp(44px, 5vw, 68px) !important;
+  letter-spacing: -0.034em !important;
+  line-height: 1.02 !important;
+  font-weight: 400 !important;
+  margin: 0 0 22px !important;
+}
+@media (max-width: 720px) {
+  .uc-strip h2, .uc-strip .ucs-h {
+    font-size: clamp(34px, 9vw, 44px) !important;
+    letter-spacing: -0.028em !important;
+  }
+}
+
+/* Access-anywhere . upgrade the mesh moment so it's a clear visual,
+   not a tiny diagram. Increase scale + frame breath. */
+.access-anywhere h2 {
+  font-size: clamp(44px, 5vw, 68px) !important;
+  letter-spacing: -0.034em !important;
+  line-height: 1.02 !important;
+  font-weight: 400 !important;
+  margin: 0 0 22px !important;
+}
+@media (max-width: 720px) {
+  .access-anywhere h2 {
+    font-size: clamp(34px, 9vw, 44px) !important;
+    letter-spacing: -0.028em !important;
+  }
+}
+
+/* ROI . make the calc widget feel intentional, not stuffed in. */
+section.vr .vr-grid,
+section.vr .vr-card {
+  border-radius: 16px !important;
+}
+section.vr .vr-card { padding: 32px 30px !important; }
+@media (max-width: 720px) {
+  section.vr .vr-card { padding: 24px 22px !important; }
+}
+
+/* Hairlines . retire the v7.20.2 per-section border-tops on adjacent
+   sections that already have provider-strip / hairline above them.
+   Avoids double-border stutter between hero -> provider -> anatomy. */
+section.provider-strip + section.compile-anatomy { border-top: 0 !important; }
+section.compile-anatomy + section.vr { border-top: 1px solid rgba(255,255,255,0.04) !important; }
+[data-theme=light] section.compile-anatomy + section.vr { border-top-color: rgba(0,0,0,0.05) !important; }
+
+/* Cards . unify radius across all major card grids, never less than 14. */
+.compile-anatomy .ca-step,
+.after-compile .ac-card,
+.access-anywhere .aa-card,
+.uc-strip .ucs-card,
+section.vr .vr-card {
+  border-radius: 16px !important;
+}
+
+/* Closing CTA . make the secondary action quieter so primary owns the
+   moment. */
+section.bottom-cta .bc-actions .btn.ghost {
+  opacity: 0.7 !important;
+  font-size: 14px !important;
+}
+section.bottom-cta .bc-actions .btn.ghost:hover { opacity: 1 !important; }
+
+/* Hero . the H1 is set; ensure the lede directly under it gets enough
+   breath and stays at a confident scale. */
+.home-hero-left .lede {
+  font-size: clamp(18px, 1.5vw, 21px) !important;
+  line-height: 1.5 !important;
+  max-width: 56ch !important;
+  margin: 0 0 36px !important;
+  color: var(--ink-mute, #b5bdb1) !important;
+}
+@media (max-width: 720px) {
+  .home-hero-left .lede { font-size: 17px !important; margin: 0 0 28px !important; }
+}
+[data-theme=light] .home-hero-left .lede { color: #4b5158 !important; }
+
+
+/* ============================================================
+ * v7.21 . SOTA sitewide light-mode + mobile finish
+ *
+ * Three root causes, three surgical interventions.
+ *
+ *   ROOT 1 . MOBILE BLUR BLEED INTO DESKTOP
+ *   The header uses backdrop-filter: blur(16px) sitewide. On
+ *   Chrome/Safari that composites onto a GPU layer that is not
+ *   torn down when the viewport widens after a mobile visit.
+ *   49 max-width rules without min-width: 721px counterparts
+ *   compound the bug: the cascade caches mobile values until
+ *   forced reflow. Fix: kill backdrop-filter at >=721px, force
+ *   reflow with translateZ(0)+contain, reset all known mobile
+ *   font-size/padding declarations explicitly at min-width: 721.
+ *
+ *   ROOT 2 . CURSED FONTS IN /docs (Developers)
+ *   docs.html declares its own --mono and --sans inline (line
+ *   30-31 of styles.css uses Geist, but pages with inline
+ *   :root blocks shadow it). /use-cases/index.html ALSO redeclares
+ *   --sans WITHOUT Geist (line 47-48). So nav drops back to
+ *   system fonts on Solutions, and docs body fonts mix per-page.
+ *   Fix: force --sans/--mono via [data-theme] selector chain so
+ *   inline :root cannot shadow.
+ *
+ *   ROOT 3 . LIGHT MODE COLOR OFF ON /docs + /research
+ *   Both pages have local light overrides but the section
+ *   eyebrow / H2 / lede color falls back to dark vars on
+ *   light because the page-inline override forgot one selector.
+ *   Fix: catch-all [data-theme=light] block for canonical
+ *   eyebrow/h2/lede across solutions/research/docs.
+ * ============================================================ */
+
+/* ROOT 1.A . Mobile blur bleed kill switch.
+   At >=721px, eliminate header backdrop-filter so the GPU
+   composition layer is destroyed and the viewport repaints
+   without ghost blur. Header still has rgba bg from line 79. */
+@media (min-width: 721px) {
+  header.site,
+  .site-header,
+  nav.top {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    will-change: auto !important;
+  }
+  /* Force a fresh paint context so any cached blur from a previous
+     mobile-viewport visit is torn down. */
+  body { transform: translateZ(0); }
+}
+
+/* ROOT 1.B . Reset every mobile-only typography & padding
+   override at the desktop breakpoint. Browsers correctly drop
+   max-width rules, but vw-based clamp() values still ride the
+   viewport, so we restate desktop floors explicitly. */
+@media (min-width: 721px) {
+  .home-hero-left h1 {
+    font-size: clamp(64px, 9.4vw, 144px) !important;
+    letter-spacing: -0.054em !important;
+    line-height: 0.92 !important;
+  }
+  .home-hero-left .lede {
+    font-size: clamp(18px, 1.5vw, 21px) !important;
+    margin: 0 0 36px !important;
+  }
+  section.bottom-cta { padding: 144px 24px 152px !important; }
+  section.bottom-cta .bc-h {
+    font-size: clamp(52px, 6.5vw, 88px) !important;
+    letter-spacing: -0.04em !important;
+  }
+  section.bottom-cta .bc-sub { font-size: 19px !important; margin-bottom: 40px !important; }
+  section.provider-strip { padding-top: 88px !important; padding-bottom: 88px !important; }
+  footer.site-footer { padding: 96px 0 64px !important; }
+  footer.site-footer .wrap { padding: 0 32px !important; gap: 56px !important; }
+  .compile-anatomy .ca-step,
+  .after-compile .ac-card { padding: 36px 30px 30px !important; border-radius: 16px !important; }
+  .uc-strip h2, .uc-strip .ucs-h,
+  .access-anywhere h2,
+  section.vr .vr-h {
+    font-size: clamp(44px, 5vw, 68px) !important;
+    letter-spacing: -0.034em !important;
+  }
+  section.vr .vr-card { padding: 32px 30px !important; }
+  /* Header padding & wrap pinned to desktop floor */
+  header.site > .wrap,
+  .site-header > .wrap,
+  footer.site > .wrap,
+  .site-footer > .wrap { padding: 0 32px !important; }
+}
+
+/* ROOT 2 . Cursed fonts in Developers (docs) + Solutions.
+   Pages set inline :root with system --sans, shadowing Geist.
+   Hoist Geist via [data-theme] selector chain that beats inline. */
+html, html[data-theme], html[data-theme=light], html[data-theme=dark] {
+  --sans: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace !important;
+}
+body,
+.docs-shell,
+.docs-main,
+.docs-main p,
+.docs-rail,
+section.hero,
+section.hero h1,
+section.hero .lede,
+.research-page,
+.research-page h1,
+.research-page h2,
+.research-page h3,
+.research-page p {
+  font-family: var(--sans) !important;
+}
+.docs-main code:not(pre code),
+pre.code-block,
+pre,
+code,
+.kbd,
+.endpoint-tag,
+.endpoint-tag .verb,
+.endpoint-tag .path,
+.resp-label,
+.eyebrow,
+.gtag,
+.research-page .eyebrow {
+  font-family: var(--mono) !important;
+}
+
+/* ROOT 3.A . /docs (Developers) light-mode polish.
+   Page-inline overrides catch most surfaces but miss body text,
+   table cells, and section eyebrows that are not docs-prefixed. */
+[data-theme=light] body,
+[data-theme=light] .docs-main,
+[data-theme=light] .docs-main p,
+[data-theme=light] .docs-main li {
+  color: #1f2429 !important;
+}
+[data-theme=light] .docs-main h1,
+[data-theme=light] .docs-main h2,
+[data-theme=light] .docs-rail a.active,
+[data-theme=light] .research-page h1,
+[data-theme=light] .research-page h2,
+[data-theme=light] .research-page h3 {
+  color: #0c0e10 !important;
+}
+[data-theme=light] .docs-main a:not(.btn):not(.brand) { color: #059669 !important; }
+[data-theme=light] .docs-main a:not(.btn):not(.brand):hover { color: #047857 !important; }
+[data-theme=light] .docs-main .eyebrow,
+[data-theme=light] .docs-main h3,
+[data-theme=light] .research-page .eyebrow,
+[data-theme=light] .research-page .brief-row,
+[data-theme=light] .research-page .gtag {
+  color: #4b5158 !important;
+}
+
+/* ROOT 3.B . /research light-mode + spacing.
+   Cards, gates, sprints, source-grid all need explicit light
+   surfaces; default color-mix() over --panel collapsed to dark. */
+[data-theme=light] .research-page {
+  background: #fafafa !important;
+}
+[data-theme=light] .research-card,
+[data-theme=light] .redline-item,
+[data-theme=light] .research-gates > div,
+[data-theme=light] .research-sprints article,
+[data-theme=light] .research-brief,
+[data-theme=light] .research-table-wrap {
+  background: #ffffff !important;
+  border-color: rgba(12,14,16,0.08) !important;
+  box-shadow: 0 1px 2px rgba(12,14,16,0.04) !important;
+}
+[data-theme=light] .research-card p,
+[data-theme=light] .redline-item p,
+[data-theme=light] .research-gates p,
+[data-theme=light] .research-sprints p,
+[data-theme=light] .research-table td,
+[data-theme=light] .research-brief p { color: #4b5158 !important; }
+[data-theme=light] .source-grid a {
+  background: #ffffff !important;
+  border-color: rgba(12,14,16,0.08) !important;
+  color: #059669 !important;
+}
+[data-theme=light] .severity {
+  background: rgba(12,14,16,0.04) !important;
+  border-color: rgba(12,14,16,0.12) !important;
+  color: #0c0e10 !important;
+}
+[data-theme=light] .brief-top strong { color: #0c0e10 !important; }
+[data-theme=light] .research-table th { color: #737c73 !important; }
+[data-theme=light] .research-table a,
+[data-theme=light] .source-grid a { color: #059669 !important; }
+
+/* ROOT 3.C . Research spacing: section padding + content cap. */
+.research-page .section { padding: 96px 0 !important; }
+@media (min-width: 721px) {
+  .research-page .wrap { max-width: 1180px !important; padding: 0 32px !important; }
+  .research-cards { gap: 18px !important; margin-top: 36px !important; }
+  .research-card,
+  .redline-item,
+  .research-gates > div,
+  .research-sprints article { padding: 28px 24px !important; }
+}
+@media (max-width: 720px) {
+  .research-page .section { padding: 56px 0 !important; }
+  .research-card,
+  .redline-item,
+  .research-gates > div,
+  .research-sprints article { padding: 22px 18px !important; }
+}
+
+/* ROOT 3.D . Solutions (/use-cases) light theme + Geist parity.
+   Page already has good local theme but uses --sans without
+   Geist; the body var override above fixes it. Tighten cards. */
+[data-theme=light] body { background: #fafafa !important; }
+[data-theme=light] .group .gtag { color: #059669 !important; }
+[data-theme=light] .card .cfoot,
+[data-theme=light] .closer .btn.primary { color: #fafafa !important; background: #0c0e10 !important; }
+[data-theme=light] .card .cfoot { background: transparent !important; color: #059669 !important; }
+
+/* ROOT 4 . Universal mobile audit: no horizontal scroll,
+   minimum 14px body, 44px tap targets, tables scroll. */
+@media (max-width: 720px) {
+  html, body { overflow-x: hidden !important; max-width: 100vw !important; }
+  body { font-size: 15px !important; line-height: 1.55 !important; }
+  table { display: block !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; max-width: 100% !important; }
+  .btn, button, a.btn, .cta, header.site .right .cta { min-height: 44px !important; padding-top: 10px !important; padding-bottom: 10px !important; box-sizing: border-box !important; }
+  /* Force every grid to single-column unless explicitly multi */
+  .research-cards,
+  .research-gates,
+  .research-sprints,
+  .source-grid,
+  .redline-list { grid-template-columns: 1fr !important; }
+}
+
+/* ROOT 5 . Standardize Solutions / Developers / Research eyebrow
+   + H2 typography to match homepage scale. */
+.research-page h1,
+.docs-main h1 {
+  font-size: clamp(44px, 6.4vw, 92px) !important;
+  letter-spacing: -0.035em !important;
+  line-height: 0.96 !important;
+  font-weight: 500 !important;
+}
+.research-page h2,
+.docs-main h2 {
+  font-size: clamp(28px, 3.6vw, 40px) !important;
+  letter-spacing: -0.018em !important;
+  line-height: 1.08 !important;
+  font-weight: 500 !important;
+}
+@media (max-width: 720px) {
+  .research-page h1, .docs-main h1 {
+    font-size: clamp(36px, 9vw, 52px) !important;
+    letter-spacing: -0.028em !important;
+  }
+  .research-page h2, .docs-main h2 {
+    font-size: clamp(24px, 6.5vw, 30px) !important;
+  }
+}
+
+
+
+/* ============================================================
+ * v7.21 . SOTA finish (homepage intentional motifs + dead-space)
+ *
+ * Per founder: "the black backing feels a bit empty and deep.
+ * theres a lot of dead spacing but maybe its not dead it just
+ * doesnt feel intentional without appropriate design upgrades."
+ *
+ * Subtraction discipline: NO new graphics, NO canvas, NO heavy
+ * animations. The design upgrade IS the restraint + intentional
+ * typography rhythm + thin accent details.
+ *
+ * Five moves:
+ *   1) Hero-promise sub-headline (under CTAs, before NL widget)
+ *   2) Demo-frame watermark + intentional framing (warm shadow)
+ *   3) Section number motif (// 01-04) replacing eyebrow chip
+ *   4) Intentional dead-space (hairline rules + restrained dots)
+ *   5) Mobile blur bleed protection (min-width:721 reset)
+ * ============================================================ */
+
+/* MOVE 1 . Hero-promise: caps-mono kicker + plain-prose claim.
+   Anchors what kolm does in one beat without competing with H1. */
+.home-hero-left .hero-promise {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 18px !important;
+  margin: 32px 0 0 !important;
+  font-size: 15.5px !important;
+  line-height: 1.5 !important;
+  color: var(--ink-mute, #b5bdb1) !important;
+  max-width: 64ch !important;
+}
+.home-hero-left .hero-promise .hp-mono {
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.22em !important;
+  text-transform: uppercase !important;
+  color: var(--ink-faint, #737c73) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  padding: 4px 10px !important;
+  border-radius: 4px !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
+}
+.home-hero-left .hero-promise .hp-claim b {
+  color: var(--ink, #faf2e1) !important;
+  font-weight: 500 !important;
+}
+[data-theme=light] .home-hero-left .hero-promise { color: #4b5158 !important; }
+[data-theme=light] .home-hero-left .hero-promise .hp-mono {
+  border-color: rgba(0,0,0,0.10) !important;
+  color: #4b5158 !important;
+}
+[data-theme=light] .home-hero-left .hero-promise .hp-claim b { color: #0c0e10 !important; }
+@media (max-width: 720px) {
+  .home-hero-left .hero-promise {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: flex-start !important;
+    font-size: 14.5px !important;
+    margin-top: 24px !important;
+  }
+  .home-hero-left .hero-promise .hp-mono { font-size: 10.5px !important; }
+}
+
+/* MOVE 2 . Demo-frame intentional shadow + watermark label.
+   Frames the live demo as a deliberate artifact, not a video stuck
+   on a page. Restrained warm shadow + tiny mono "// LIVE DEMO". */
+section.demo-anchor .demo-frame {
+  position: relative !important;
+}
+section.demo-anchor .hero-demo-panel {
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 24px 80px -20px rgba(0,0,0,0.45),
+    0 4px 20px -8px rgba(0,0,0,0.35) !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+}
+[data-theme=light] section.demo-anchor .hero-demo-panel {
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.06),
+    0 24px 80px -20px rgba(31,36,41,0.18),
+    0 4px 20px -8px rgba(31,36,41,0.10) !important;
+}
+
+/* MOVE 3 . Intentional inter-section breath. Single hairline rule
+   between adjacent dark sections so the page reads as composed,
+   not slammed-together. Already partial in v7.20.2 . unify here. */
+section.hero + section.demo-anchor,
+section.demo-anchor + section.provider-strip,
+section.provider-strip + section.compile-anatomy,
+section.compile-anatomy + section.vr,
+section.vr + section.uc-strip,
+section.uc-strip + section.access-anywhere,
+section.access-anywhere + section.after-compile,
+section.after-compile + section.home-faq,
+section.home-faq + section.bottom-cta {
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+[data-theme=light] section.hero + section.demo-anchor,
+[data-theme=light] section.demo-anchor + section.provider-strip,
+[data-theme=light] section.provider-strip + section.compile-anatomy,
+[data-theme=light] section.compile-anatomy + section.vr,
+[data-theme=light] section.vr + section.uc-strip,
+[data-theme=light] section.uc-strip + section.access-anywhere,
+[data-theme=light] section.access-anywhere + section.after-compile,
+[data-theme=light] section.after-compile + section.home-faq,
+[data-theme=light] section.home-faq + section.bottom-cta {
+  border-top-color: rgba(0,0,0,0.05);
+}
+
+/* MOVE 4 . Mobile blur bleed protection. Reset mobile rules at
+   the desktop breakpoint so a mobile-viewport visit doesn't
+   stick blurry typography on the desktop window after resize.
+   The bleed comes from missing @media (min-width:721) on
+   some !important rules . force-reset the most common ones. */
+@media (min-width: 721px) {
+  .home-hero-left h1 {
+    font-size: clamp(64px, 9.4vw, 144px) !important;
+    letter-spacing: -0.054em !important;
+    line-height: 0.92 !important;
+  }
+  .home-hero-left .lede {
+    font-size: clamp(18px, 1.5vw, 21px) !important;
+    line-height: 1.5 !important;
+    max-width: 56ch !important;
+    margin: 0 0 36px !important;
+  }
+  section.bottom-cta .bc-h {
+    font-size: clamp(52px, 6.5vw, 88px) !important;
+    line-height: 1.0 !important;
+  }
+  section.bottom-cta { padding: 144px 24px 152px !important; }
+  section.compile-anatomy .ca-h,
+  section.after-compile .ac-h,
+  section.home-faq .hf-h,
+  section.access-anywhere h2,
+  section.uc-strip h2,
+  section.bottom-cta h2,
+  section.vr h2 {
+    font-size: clamp(44px, 5vw, 68px) !important;
+    line-height: 1.02 !important;
+    letter-spacing: -0.034em !important;
+  }
+}
+
+/* MOVE 5 . Intentional accent on hero left margin (desktop only).
+   1px vertical rule from H1 top to actions bottom, 4px to the
+   left of the H1. Reads as a "composition mark" without being
+   busy. Apple / Linear use this restrained trick. */
+/* v7.21.2: composition-mark rule removed (read as random white line, not Apple/Linear
+   restraint). Hero stands on its own typography. */
+
+/* MOVE 6 . Compile-anatomy: subtle step-number color refinement.
+   Replace ::before connector line (deleted earlier) with a small
+   numeric breath . the 01/02/03/04 numbers get more visual weight,
+   so the section reads as a four-beat composition. */
+.compile-anatomy .ca-num {
+  font-size: 13px !important;
+  letter-spacing: 0.16em !important;
+  color: var(--ink-mute, #b5bdb1) !important;
+  opacity: 0.7;
+}
+[data-theme=light] .compile-anatomy .ca-num { color: #4b5158 !important; }

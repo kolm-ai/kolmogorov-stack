@@ -1,0 +1,26 @@
+{
+  "name": "kolm-attestation",
+  "version": "0.1.0",
+  "description": "TEE attestation parsers and verifiers for kolm BYOC deployments.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./nitro": "./src/nitro.js",
+    "./sev-snp": "./src/sev-snp.js",
+    "./tdx": "./src/tdx.js",
+    "./gcp-cvm": "./src/gcp-cvm.js",
+    "./azure-cvm": "./src/azure-cvm.js"
+  },
+  "files": [
+    "src/",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test tests/"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0"
+}

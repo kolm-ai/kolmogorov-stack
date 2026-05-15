@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm tutorials | Golden Paths</title>
+<meta name="description" content="Six end-to-end walkthroughs. Each ends with a signed .kolm artifact in your hands. Healthcare, OpenAI-compat, CI, on-call triage, contract review, PR review.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/tutorials">
+<style>
+  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+  body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px}
+  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+  header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+  header.site nav a{color:inherit;text-decoration:none}
+  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+  .hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
+  h1{font-size:48px;line-height:1.06;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
+  .lede{font-size:18.5px;line-height:1.55;color:var(--ink-mute);max-width:640px;margin:0}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px;margin:48px 0}
+  .tut{display:grid;grid-template-columns:80px 1fr auto;gap:20px;align-items:center;padding:28px 32px;border:1px solid var(--line);border-radius:12px;background:var(--bg-elev);color:inherit;text-decoration:none;transition:border-color 160ms,transform 160ms}
+  .tut:hover{border-color:rgba(16,185,129,0.32);transform:translateY(-1px)}
+  .tut .n{font-family:var(--mono);font-size:34px;color:var(--ink-faint);letter-spacing:-0.02em}
+  .tut .body h3{margin:0 0 6px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
+  .tut .body p{margin:0;color:var(--ink-mute);font-size:14.5px;line-height:1.5}
+  .tut .meta{font-family:var(--mono);font-size:11.5px;color:var(--accent);letter-spacing:0.04em;white-space:nowrap}
+  .tut .meta .t{display:block;color:var(--ink-faint)}
+  @media(max-width:680px){.tut{grid-template-columns:1fr;gap:8px}.tut .n{font-size:24px}.tut .meta{text-align:left}}
+  footer{border-top:1px solid var(--line);margin-top:48px;padding:32px 0;color:var(--ink-faint);font-size:13px}
+  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/quickstart">quickstart</a><a href="/pricing">pricing</a><a href="/docs">docs</a><a href="/tutorials">tutorials</a></nav></div></header>
+<main>
+<section class="hero">
+  <div class="wrap">
+    <h1>Golden Path tutorials.</h1>
+    <p class="lede">Six end-to-end walkthroughs. Each ends with a signed .kolm artifact in your hands. Each tutorial publishes a verifiable receipt so the tutorial is its own proof.</p>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="grid">
+      <a class="tut" href="/tutorials/phi-redactor">
+        <span class="n">01</span>
+        <div class="body"><h3>Compile your first PHI redactor in 12 minutes.</h3><p>Take a redaction task description, hit one command, get a 9.4 KB signed artifact you can drop into a hospital's environment with a HIPAA-shaped receipt.</p></div>
+        <span class="meta">12 min<span class="t">/healthcare</span></span>
+      </a>
+      <a class="tut" href="/tutorials/openai-drop-in">
+        <span class="n">02</span>
+        <div class="body"><h3>Drop-in replace OpenAI in your codebase.</h3><p>Point chat.completions at a local kolm endpoint. Same request shape, same response shape, 11.6&times; cheaper, runs offline. We measure the delta as you go.</p></div>
+        <span class="meta">14 min<span class="t">/openai-compat</span></span>
+      </a>
+      <a class="tut" href="/tutorials/ci-verify">
+        <span class="n">03</span>
+        <div class="body"><h3>Sign and verify in CI.</h3><p>Set up GitHub Actions to compile, sign, and verify every model artifact your team produces. Verifies the binder. Posts the receipt as a comment on the PR.</p></div>
+        <span class="meta">11 min<span class="t">/ci-cd</span></span>
+      </a>
+      <a class="tut" href="/tutorials/support-triage">
+        <span class="n">04</span>
+        <div class="body"><h3>Triage PagerDuty alerts in 15 minutes.</h3><p>Compile a 4.8 KB .kolm that classifies incoming alerts into severity and routing team. Base Qwen 2.5 3B. K-target 0.88. Runs on a single CPU; alert text never leaves your VPC.</p></div>
+        <span class="meta">15 min<span class="t">/devops</span></span>
+      </a>
+      <a class="tut" href="/tutorials/contract-review">
+        <span class="n">05</span>
+        <div class="body"><h3>Extract clauses from a Master Services Agreement.</h3><p>Compile a 5.4 KB .kolm that pulls arbitration, IP, payment, and non-compete clauses with character spans. Base Mistral 7B. K-target 0.91.</p></div>
+        <span class="meta">20 min<span class="t">/legal</span></span>
+      </a>
+      <a class="tut" href="/tutorials/code-review">
+        <span class="n">06</span>
+        <div class="body"><h3>Compile a PR review bot.</h3><p>Three issue classes only: missing tests, unbounded recursion, hardcoded secrets. Base DeepSeek-Coder 6.7B. K-target 0.87. Posts inline review comments on GitHub PRs.</p></div>
+        <span class="meta">25 min<span class="t">/code</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

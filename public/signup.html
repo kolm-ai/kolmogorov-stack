@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Sign in · kolm</title>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Sign in ·kolm</title>
 <meta name="description" content="Sign in to kolm with Google or GitHub. Or create an account on any plan in under a minute. Fully self-serve, including Enterprise.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <link rel="canonical" href="https://kolm.ai/signin">
-<meta property="og:title" content="Sign in · kolm" />
+<meta property="og:title" content="Sign in ·kolm" />
 <meta property="og:description" content="Sign in with Google or GitHub. Or create an account on any plan in under a minute." />
 <meta property="og:image" content="https://kolm.ai/og-card.svg" />
 <meta property="og:type" content="website" />
@@ -21,17 +22,17 @@
 <style>
   [hidden]{display:none !important}
   .plan-banner{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--bg-elev);margin-bottom:20px}
-  .plan-banner .plan-name{font-weight:600;color:var(--ink)}
+  .plan-banner .plan-name{font-weight: 500;color:var(--ink)}
   .plan-banner .plan-price{font-family:var(--mono);color:var(--accent);font-size:13px}
   .plan-banner .plan-meta{color:var(--ink-mute);font-size:13px;margin-top:4px;line-height:1.5}
   .plan-banner .plan-switch{margin-left:auto;font-size:12px}
   .plan-banner .plan-switch a{color:var(--ink-faint);text-decoration:none}
   .plan-banner .plan-switch a:hover{color:var(--ink)}
-  .auth-brand{display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;color:var(--accent,#7ef0d2);font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:-0.01em}
+  .auth-brand{display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;color:var(--accent,#7ef0d2);font-family:var(--mono);font-size:13px;font-weight: 500;letter-spacing:-0.01em}
   [data-theme="light"] .auth-brand{color:var(--accent,#0a8862)}
   .auth-brand svg{display:block}
   .oauth-row{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
-  .oauth-row .oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;font-size:14px;font-weight:540;background:var(--bg-2,#0e1014) !important;background-image:none !important;color:var(--ink,#faf2e1) !important;border:1px solid var(--line-2,rgba(236,231,220,0.22)) !important;border-radius:10px;cursor:pointer;transition:border-color 140ms,background 140ms,transform 140ms}
+  .oauth-row .oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;font-size:14px;font-weight: 500;background:var(--bg-2,#0e1014) !important;background-image:none !important;color:var(--ink,#faf2e1) !important;border:1px solid var(--line-2,rgba(236,231,220,0.22)) !important;border-radius:10px;cursor:pointer;transition:border-color 140ms,background 140ms,transform 140ms}
   .oauth-row .oauth-btn:hover{border-color:var(--accent,#7ef0d2) !important;transform:translateY(-1px)}
   [data-theme="light"] .oauth-row .oauth-btn{background:#ffffff !important;color:#0c0e10 !important;border-color:rgba(12,14,16,0.18) !important}
   [data-theme="light"] .oauth-row .oauth-btn:hover{border-color:rgba(10,136,98,0.40) !important}
@@ -53,6 +54,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions"><a href="/">home</a></div>
@@ -130,6 +132,22 @@
         <a class="btn accent" href="/dashboard" id="continue-btn">Go to dashboard</a>
       </div>
       <p><strong>Save this key.</strong> It is shown once. You can rotate it from your dashboard or via <code>POST /v1/account/rotate-key</code>.</p>
+
+      <div id="cli-bridge" style="margin-top:18px;padding:14px 16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--bg-elev)">
+        <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Use it from the CLI</div>
+        <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:#0b0d10;border:1px solid var(--line);border-radius:8px;color:#7ef0d2;font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:sneaky-hippo/kolmogorov-stack
+kolm login --key ks_...
+kolm init
+kolm new my-skill --from classifier
+kolm compile --spec my-skill.spec.json</code></pre>
+        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn ghost" id="copy-cli" type="button">Copy commands</button>
+          <a class="btn ghost" href="/quickstart" rel="noopener">Quickstart &rarr;</a>
+          <a class="btn ghost" href="/cookbook" rel="noopener">Cookbook &rarr;</a>
+        </div>
+        <p style="margin:10px 0 0 0;color:var(--ink-mute);font-size:13px">The key above is already pasted into the snippet. Run the commands in any terminal; no further web step is needed.</p>
+      </div>
+
       <div id="billing-row" hidden style="margin-top:14px;padding:12px 14px;border:1px solid var(--accent);border-radius:10px;background:var(--bg-elev)">
         <strong style="color:var(--accent)">Payment required.</strong>
         <p style="margin:6px 0 10px 0;color:var(--ink-mute);font-size:13px">Your API key is on the free Developer tier until payment is confirmed. Redirecting to Stripe&hellip; If the redirect doesn&rsquo;t fire, click below.</p>
@@ -139,9 +157,54 @@
   </section>
 </main>
 
-<footer class="site-footer auth-footer">
-  <div class="wrap">
-    <div class="meta">kolm account / <a href="/security">security</a> / <a href="/docs">docs</a> / <a href="/pricing">pricing</a></div>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 
@@ -192,11 +255,11 @@
     if (isSignup) {
       if (t) t.textContent = 'Create your account.';
       if (s) s.textContent = 'One click with Google or GitHub. Every plan, including Enterprise, is fully self-serve.';
-      try { document.title = 'Sign up · kolm'; } catch (_) {}
+      try { document.title = 'Sign up ·kolm'; } catch (_) {}
     } else {
       if (t) t.textContent = 'Sign in to kolm.';
       if (s) s.textContent = 'Welcome back. One click with Google or GitHub, or paste your API key.';
-      try { document.title = 'Sign in · kolm'; } catch (_) {}
+      try { document.title = 'Sign in ·kolm'; } catch (_) {}
     }
   })();
 
@@ -208,7 +271,7 @@
     panel.hidden = expanded;
     $('advanced-toggle').setAttribute('aria-expanded', expanded ? 'false' : 'true');
     $('advanced-toggle').textContent = expanded
-      ? 'Already have an API key? →'
+      ? 'Already have an API key?'
       : 'Hide API-key sign-in';
     if (!expanded) {
       try { $('api_key').focus(); } catch (_) {}
@@ -231,7 +294,7 @@
       if (planParam && planParam !== 'free') qp += '&plan=' + encodeURIComponent(planParam);
       location.href = '/v1/oauth/' + provider + '/start' + qp;
     }
-    // Check provider availability once, gate the click. No HEAD probe race —
+    // Check provider availability once, gate the click. No HEAD probe race:
     // the /start endpoint sets state cookies, so HEAD-then-GET wrote them twice
     // and could leak a stale state on rapid clicks. One source of truth.
     var providerOk = { google: true, github: true };
@@ -257,13 +320,13 @@
       var pretty = decodeURIComponent(err).replace(/_/g, ' ');
       var hint = '';
       if (/state_mismatch/.test(err)) {
-        hint = ' (your browser dropped the state cookie — try in a fresh window without strict tracking protection)';
+        hint = ' (your browser dropped the state cookie. Try in a fresh window without strict tracking protection)';
       } else if (/no_email_returned/.test(err)) {
-        hint = ' (the provider did not return a verified email — make sure your account has one)';
+        hint = ' (the provider did not return a verified email. Make sure your account has one)';
       } else if (/token_exchange_failed/.test(err)) {
-        hint = ' (the provider rejected the code — usually means the consent step was cancelled or the redirect URI is not authorized in the provider console)';
+        hint = ' (the provider rejected the code. Usually means the consent step was cancelled or the redirect URI is not authorized in the provider console)';
       } else if (/access_denied/.test(err)) {
-        hint = ' (you cancelled at the consent screen — pick a different account or use email)';
+        hint = ' (you cancelled at the consent screen. Pick a different account or use email)';
       }
       show('err', 'Sign in failed: ' + pretty + '.' + hint + ' Use email below if it keeps failing.');
     }
@@ -320,6 +383,19 @@
       saveKey(key);
       $('key-value').textContent = key;
       $('key-display').hidden = false;
+      // Bridge to CLI: paste the real key into the snippet so it is one copy away
+      // from a working `kolm login`. HD got stuck here without this.
+      try {
+        var snippet = $('cli-snippet-code');
+        if (snippet) {
+          snippet.textContent =
+            'npm i -g github:sneaky-hippo/kolmogorov-stack\n' +
+            'kolm login --key ' + key + '\n' +
+            'kolm init\n' +
+            'kolm new my-skill --from classifier\n' +
+            'kolm compile --spec my-skill.spec.json';
+        }
+      } catch (_) {}
       var planLabel = (PLANS[plan] || PLANS.free).label;
       // Background sign-in so the dashboard recognizes the new key.
       fetch('/v1/signin', {
@@ -355,6 +431,18 @@
       setTimeout(function(){ $('copy-key').textContent = 'Copy key'; }, 1200);
     }).catch(function(){ show('err', 'Copy failed. Select the key manually.'); });
   });
+
+  var copyCli = $('copy-cli');
+  if (copyCli) {
+    copyCli.addEventListener('click', function(){
+      var snippet = $('cli-snippet-code');
+      if (!snippet) return;
+      navigator.clipboard.writeText(snippet.textContent).then(function(){
+        copyCli.textContent = 'Copied';
+        setTimeout(function(){ copyCli.textContent = 'Copy commands'; }, 1200);
+      }).catch(function(){ show('err', 'Copy failed. Select the commands manually.'); });
+    });
+  }
 })();
 </script>
 <script src="/nav.js" defer></script>

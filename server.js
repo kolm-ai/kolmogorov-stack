@@ -17,7 +17,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.disable('x-powered-by');
-app.set('trust proxy', isProductionRuntime() ? 1 : false);
+// Two-hop proxy chain in prod: Client → Vercel CDN → Railway edge → Express.
+// `trust proxy: 2` makes express read X-Forwarded-For from the right hop so
+// the rate-limit keyGenerator sees the real client IP, not Railway's edge IP.
+app.set('trust proxy', isProductionRuntime() ? 2 : false);
 
 // Security headers (S3, S4) — mounted BEFORE express.static so static
 // assets get HSTS, CSP, nosniff, etc. CSP allows 'unsafe-inline' for now
@@ -29,9 +32,9 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", 'https://js.stripe.com', 'https://*.vercel-insights.com'],
-      styleSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
-      fontSrc: ["'self'", 'data:'],
+      fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
       connectSrc: ["'self'", 'https://api.anthropic.com', 'https://kolm.ai', 'https://kolmogorov-stack-production.up.railway.app', 'https://*.vercel-insights.com', 'https://api.stripe.com'],
       frameSrc: ['https://js.stripe.com'],
       workerSrc: ["'self'", 'blob:'],
@@ -154,8 +157,13 @@ const ROUTE_ALIASES = {
   '/signin': 'signup',
   '/atlas': 'registry',
   '/spec/grammar': 'spec-grammar',
+  '/developers': 'build-your-own',
+  '/solutions': 'use-cases/index',
+  '/teams/accept': 'teams-accept',
+  '/signin': 'signup',
+  '/login': 'signup',
 };
-for (const route of ['/', '/dashboard', '/playground', '/docs', '/registry', '/atlas', '/signup', '/signin', '/why', '/pricing', '/status', '/account', '/how-it-works', '/device', '/compile', '/run', '/recall', '/cloud', '/k-score', '/benchmarks', '/compare', '/serve', '/evolve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/legal', '/edge', '/cookbook', '/defense', '/manifesto', '/faq', '/quickstart', '/changelog', '/trust', '/integrations', '/press', '/vs-ollama', '/vs-rag', '/vs-fine-tune', '/vs-predibase', '/vs-openpipe', '/vs-langsmith', '/vs-mem0', '/vs-hindsight', '/vs-openai-fine-tune', '/vs-together', '/why-now', '/threat-model', '/roi', '/api', '/whitepaper', '/customers', '/build-your-own', '/audit-log', '/baa', '/captures', '/capture', '/enterprise', '/glossary', '/leaderboard', '/spec', '/spec/grammar', '/troubleshooting']) {
+for (const route of ['/', '/dashboard', '/playground', '/docs', '/registry', '/atlas', '/signup', '/signin', '/login', '/why', '/pricing', '/status', '/account', '/how-it-works', '/device', '/compile', '/run', '/recall', '/cloud', '/k-score', '/benchmarks', '/compare', '/research', '/serve', '/evolve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/legal', '/edge', '/cookbook', '/defense', '/manifesto', '/faq', '/quickstart', '/trust', '/integrations', '/press', '/vs-ollama', '/vs-rag', '/vs-fine-tune', '/vs-predibase', '/vs-openpipe', '/vs-langsmith', '/vs-mem0', '/vs-hindsight', '/vs-openai-fine-tune', '/vs-together', '/why-now', '/threat-model', '/roi', '/api', '/whitepaper', '/build-your-own', '/developers', '/solutions', '/audit-log', '/baa', '/captures', '/capture', '/enterprise', '/glossary', '/leaderboard', '/spec', '/spec/grammar', '/models', '/compute', '/troubleshooting', '/teams', '/teams/accept', '/tunnels', '/byoc', '/airgap', '/showcase', '/sdks', '/compliance-packs']) {
   app.get(route, (_req, res) => {
     const name = route === '/' ? 'index' : (ROUTE_ALIASES[route] || route.slice(1));
     const file = path.join(__dirname, 'public', name + '.html');
@@ -173,11 +181,29 @@ app.get('/use-cases/:slug', (req, res, next) => {
   next();
 });
 
+// Extensionless integration URLs: /integrations/<slug> → public/integrations/<slug>.html
+app.get('/integrations/:slug', (req, res, next) => {
+  const slug = req.params.slug;
+  if (!/^[a-z0-9-]+$/.test(slug)) return next();
+  const file = path.join(__dirname, 'public', 'integrations', slug + '.html');
+  if (fs.existsSync(file)) return res.sendFile(file);
+  next();
+});
+
 // Extensionless article URLs: /articles/<slug> → public/articles/<slug>.html
 app.get('/articles/:slug', (req, res, next) => {
   const slug = req.params.slug;
   if (!/^[a-z0-9-]+$/.test(slug)) return next();
   const file = path.join(__dirname, 'public', 'articles', slug + '.html');
+  if (fs.existsSync(file)) return res.sendFile(file);
+  next();
+});
+
+// Extensionless research-article URLs: /research/<slug> → public/research/<slug>.html
+app.get('/research/:slug', (req, res, next) => {
+  const slug = req.params.slug;
+  if (!/^[a-z0-9-]+$/.test(slug)) return next();
+  const file = path.join(__dirname, 'public', 'research', slug + '.html');
   if (fs.existsSync(file)) return res.sendFile(file);
   next();
 });

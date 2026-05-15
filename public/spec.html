@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Spec · kolm</title>
-<meta name="description" content="The .kolm specification index. RS-1 normative text, BNF grammar, JSON schemas, receipt format, and the RFC process for RS-2 and beyond. MIT-licensed.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>RS-1 artifact specification | kolm</title>
+<meta name="description" content="RS-1 normative text, BNF grammar, JSON schemas, receipt format, and the RFC process for RS-2. MIT-licensed.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Spec · kolm">
 <meta property="og:description" content="RS-1 specification, grammar, and RFC process. Open, MIT-licensed.">
@@ -79,36 +80,40 @@
   @media(max-width:720px){header.site .row{padding:0 20px}}
   header.site .left{display:flex;align-items:center;gap:36px}
   header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
-  header.site .brand span{font-weight:540;font-size:16px;letter-spacing:0}
+  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
   header.site nav{display:flex;gap:22px}
   header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
   header.site nav a:hover,header.site nav a.active{color:var(--ink)}
   header.site .right{display:flex;align-items:center;gap:14px}
   header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
   header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:540}
+  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
 
-  main{padding:64px 0 96px;flex:1}
-  .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
-  .eyebrow .num{color:var(--accent)}
-  h1{font-weight:540;letter-spacing:0;line-height:1.05;font-size:40px;margin:0 0 12px}
-  .lede{color:var(--ink-mute);font-size:17px;margin:0 0 40px;max-width:64ch;line-height:1.5}
-  h2{font-weight:540;letter-spacing:0;font-size:24px;margin:48px 0 16px;border-top:1px solid var(--line);padding-top:32px}
-  h3{font-weight:540;letter-spacing:0;font-size:17px;margin:28px 0 8px}
+  main{padding:88px 0 96px;flex:1;position:relative;overflow:hidden}
+  main::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0.32;background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237dd3fc' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237dd3fc' stop-opacity='0.20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3Cpath d='M -200 360 Q 440 240 780 340 T 1480 320 T 1700 330'/%3E%3C/g%3E%3C/svg%3E");background-size:cover;background-position:center top;mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%);-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%)}
+  main > .wrap { position: relative; z-index: 2; }
+  .eyebrow,.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .eyebrow .num{color:#7dd3fc}
+  .eyebrow .he-dot,.hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7dd3fc;box-shadow:0 0 10px #7dd3fc;animation:pulse-dot 2.4s ease-in-out infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+  h1{font-weight: 500;letter-spacing:-0.035em;line-height:0.96;font-size:clamp(48px,6.4vw,92px);margin:0 0 22px;max-width:13ch}
+  .lede{color:var(--ink-mute);font-size:clamp(16px,1.3vw,18px);margin:0 0 48px;max-width:64ch;line-height:1.55}
+  h2{font-weight: 500;letter-spacing:0;font-size:24px;margin:48px 0 16px;border-top:1px solid var(--line);padding-top:32px}
+  h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:28px 0 8px}
   p{color:var(--ink-mute);margin:0 0 14px}
-  p strong{color:var(--ink);font-weight:540}
+  p strong{color:var(--ink);font-weight: 500}
   code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
   pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
   ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
   ul li{margin:6px 0}
-  ul li strong{color:var(--ink);font-weight:540}
+  ul li strong{color:var(--ink);font-weight: 500}
 
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:24px 0}
   @media(max-width:720px){.grid{grid-template-columns:1fr}}
   .card{display:block;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:20px 22px;transition:border-color 120ms,background 120ms;color:inherit}
   .card:hover{border-color:var(--line-strong);background:var(--bg-card)}
   .card .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
-  .card .name{font-size:15px;font-weight:540;color:var(--ink)}
+  .card .name{font-size:15px;font-weight: 500;color:var(--ink)}
   .card .tag{font-family:var(--mono);font-size:10.5px;color:var(--good);background:rgba(126,240,210,0.10);border:1px solid rgba(126,240,210,0.20);border-radius:4px;padding:2px 6px;letter-spacing:0}
   .card .tag.draft{color:#ffd479;background:rgba(255,212,121,0.08);border-color:rgba(255,212,121,0.20)}
   .card .tag.idea{color:var(--ink-faint);background:transparent;border-color:var(--line-strong)}
@@ -116,7 +121,7 @@
 
   .table{width:100%;border-collapse:collapse;margin:16px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13.5px}
   .table th,.table td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left}
-  .table th{font-weight:540;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+  .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
   .table tr:last-child td{border-bottom:0}
   .table td code{font-size:12px}
 
@@ -137,6 +142,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -150,8 +156,8 @@
 
 <main>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">00</span> Specifications</div>
-    <h1>The <code style="font-family:var(--mono);font-size:0.85em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:2px 8px">.kolm</code> spec</h1>
+    <div class="hero-eyebrow"><span class="he-dot"></span>The .kolm spec . v0.1</div>
+    <h1>The <code style="font-family:var(--mono);font-size:0.70em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:4px 14px;vertical-align:0.04em">.kolm</code> spec.</h1>
     <p class="lede">The contract that makes one <code>.kolm</code> byte-identical to another given the same inputs, signed end-to-end, and runnable on any device that can read the format. Open, MIT-licensed, small enough to read in one sitting.</p>
 
     <h2>Documents</h2>
@@ -180,6 +186,18 @@
         <div class="top"><span class="name">K-score formula</span><span class="tag">stable v0.1</span></div>
         <p class="desc">The composite score on the box: 0.40·accuracy + 0.15·size + 0.15·latency + 0.15·cost + 0.15·coverage.</p>
       </a>
+      <a class="card" href="/models">
+        <div class="top"><span class="name">Models &amp; devices</span><span class="tag">stable v0.1</span></div>
+        <p class="desc">The 16-model + 14-device registry kolm compiles against. Defaults per device, licenses, VRAM, device-fit contract.</p>
+      </a>
+      <a class="card" href="/compute">
+        <div class="top"><span class="name">Compute &amp; rental</span><span class="tag">stable v1.0</span></div>
+        <p class="desc">The 14-backend rental surface. Local + cloud + SSH. Quote-first, budget-gated, teardown contract, receipt provenance.</p>
+      </a>
+      <a class="card" href="/research#reference">
+        <div class="top"><span class="name">Frontier reference</span><span class="tag">research</span></div>
+        <p class="desc">The forty-two techniques kolm ships, grouped by training, decoding, serving, evaluation, data, and observability. Paper, file path, and gating condition for each.</p>
+      </a>
       <a class="card" href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/public/docs/rs-1.md" rel="noopener">
         <div class="top"><span class="name">Source on GitHub</span><span class="tag">MIT</span></div>
         <p class="desc">Read the spec on GitHub, propose changes via PR, raise issues against the language.</p>
@@ -192,10 +210,22 @@
       <tbody>
         <tr><td><code>rs-1</code></td><td>Stable v0.1</td><td>Manifest, recipes, receipt, reproducibility floor.</td></tr>
         <tr><td><code>rs-2</code></td><td>Draft (RFC open)</td><td>Multi-LoRA stacking, registry-pinned tokenizer, deterministic streaming.</td></tr>
-        <tr><td><code>rs-3</code></td><td>Idea</td><td>Future cryptographic anchoring (Sigstore Rekor → L2), per-tenant attestations.</td></tr>
+        <tr><td><code>rs-3</code></td><td>Idea</td><td>Future cryptographic anchoring (Sigstore Rekor + L2), per-tenant attestations.</td></tr>
         <tr><td><code>k-score-2</code></td><td>Idea</td><td>Vertical weight presets (healthcare, legal, finance), human-eval term.</td></tr>
       </tbody>
     </table>
+
+    <h2>Signature scheme</h2>
+    <p>RS-1 v0.1 is intentionally narrow on the cryptography. One scheme ships today; one is on the v0.2 roadmap.</p>
+    <table class="table">
+      <thead><tr><th>Version</th><th>Scheme</th><th>Coverage</th><th>Verification</th></tr></thead>
+      <tbody>
+        <tr><td><code>v0.1</code> · current</td><td>HMAC-SHA256 over canonical JSON</td><td>Receipt chain (4 rings) + manifest body signature</td><td>Issuer, or any party that holds the shared tenant receipt secret</td></tr>
+        <tr><td><code>v0.2</code> · roadmap</td><td>ed25519 over canonical JSON</td><td>Additional signature alongside HMAC, not a replacement</td><td>Anyone with the publisher's ed25519 public key. No shared secret required.</td></tr>
+      </tbody>
+    </table>
+    <p>The v0.1 chain is reproducible and tamper-evident under the issuer-or-shared-secret trust model that fits a single org or a contractually bound pair. ed25519 in v0.2 targets cross-org artifact distribution: a registry, a marketplace, or a partner network where the receiver should not have to hold the issuer's HMAC key to verify the signature.</p>
+    <p>Detached signatures, deterministic canonical-JSON encoding, and key rotation through the registry are open RFC items; track them under <code>rs-2</code> on the roadmap above.</p>
 
     <h2>RFC process</h2>
     <p>RS-1 is the floor; everything beyond gets a numbered RFC.</p>
@@ -208,7 +238,7 @@
     <p>If you ship a runtime that implements an RFC before it lands, that is fine. Flag the artifact with <code>"spec": "rs-N-rcM"</code> so legacy runtimes refuse it cleanly.</p>
 
     <h2>Why a spec at all</h2>
-    <p>A signed binary you cannot reproduce is just trust theater. The <code>.kolm</code> format earns its weight when a holder of the inputs and the shared tenant receipt secret can re-derive the chain, validate the manifest, and re-run the K-score to the same numbers. That is what RS-1 buys today: <strong>reproducibility plus issuer-or-shared-secret verifiability</strong>. Independent public-key (Ed25519) verification across organizations is on the rs-2/rs-3 roadmap.</p>
+    <p>A signed binary you cannot reproduce is trust theater. The <code>.kolm</code> format earns its weight when a holder of the inputs and the shared tenant receipt secret can re-derive the chain, validate the manifest, and re-run the K-score to the same numbers. That is what RS-1 buys today: <strong>reproducibility plus issuer-or-shared-secret verifiability</strong>. Independent public-key (Ed25519) verification across organizations is on the rs-2/rs-3 roadmap.</p>
     <p>Compare <code>.kolm</code> to other formats:</p>
     <table class="table">
       <thead><tr><th>Format</th><th>Spec</th><th>Reproducible</th><th>Signed</th></tr></thead>
@@ -225,16 +255,54 @@
   </div>
 </main>
 
-<footer>
-  <div>&copy; 2026 Kolmogorov · the AI compiler · <a href="/docs/rs-1.md">RS-1 spec</a> · <a href="/docs">Docs</a> · <a href="/articles">Articles</a> · <a href="/security">Security</a></div>
-  <div class="footer-row">
-    <a href="/manifesto">Manifesto</a>
-    <a href="/trust">Trust</a>
-    <a href="/security">Security</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/terms">Terms</a>
-    <a href="/changelog">Changelog</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

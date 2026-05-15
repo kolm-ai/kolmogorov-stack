@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>RS-1: A Reproducible Signed-artifact format for Machine Learning Inference | kolm</title>
+<meta name="description" content="The K-score formula, the .kolm artifact layout, the HMAC receipt chain, and the threat model. Citeable as kolm.ai/spec/rs-1.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/spec/rs-1">
+<style>
+  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+  body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
+  .wrap{max-width:720px;margin:0 auto;padding:0 24px}
+  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+  header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+  header.site nav a{color:inherit;text-decoration:none}
+  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+  .paper{padding:80px 0 64px}
+  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  h1{font-size:34px;line-height:1.15;font-weight:500;letter-spacing:-0.018em;margin:0 0 8px;max-width:680px}
+  .subtitle{font-size:16.5px;color:var(--ink-mute);margin:0 0 14px;font-style:italic;line-height:1.55}
+  .authors{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 6px;letter-spacing:0.04em}
+  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:6px 0 0;letter-spacing:0.04em}
+  .abstract{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:rgba(16,185,129,0.04);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
+  .abstract b{color:var(--ink);font-weight:500}
+  h2{font-size:22px;font-weight:500;letter-spacing:-0.012em;margin:48px 0 12px;color:var(--ink)}
+  h3{font-size:17px;font-weight:500;margin:24px 0 8px;color:var(--ink)}
+  p{color:var(--ink-mute);margin:0 0 16px}
+  ul,ol{color:var(--ink-mute);margin:0 0 16px;padding-left:24px}
+  li{margin:0 0 6px}
+  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
+  .eq{padding:16px 20px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:13.5px;letter-spacing:0.02em;margin:0 0 16px;color:var(--ink);text-align:center}
+  .eq i{color:var(--ink-faint);font-style:normal}
+  .cites{font-family:var(--mono);font-size:12px;color:var(--ink-mute);line-height:1.6}
+  .cites a{color:var(--accent);text-decoration:none;border-bottom:1px dashed rgba(16,185,129,0.32)}
+  .actions{display:flex;gap:12px;margin:36px 0 0;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn:hover{transform:translateY(-1px)}
+  footer{padding:32px 0;border-top:1px solid var(--line);color:var(--ink-faint);font-size:13px;margin-top:64px}
+  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/quickstart">quickstart</a><a href="/spec">spec</a><a href="/research">research</a><a href="/docs">docs</a></nav></div></header>
+<main>
+<section class="paper">
+<div class="wrap">
+
+<p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/spec">spec</a> &nbsp;/&nbsp; RS-1</p>
+
+<h1>RS-1: A Reproducible Signed-artifact format for ML inference.</h1>
+<p class="subtitle">Specification, threat model, and the K-score reproducibility criterion.</p>
+<p class="authors">kolm engineering . hello@kolm.ai</p>
+<p class="stamp">v1.0 . 2026-05-15 . citeable as <code>kolm.ai/spec/rs-1</code></p>
+
+<div class="abstract">
+<b>Abstract.</b> Modern ML inference is auditable in name only. A frontier API call returns text and a request ID; everything else is gone. We propose <b>RS-1</b>, a reproducible signed artifact format for machine learning inference. An RS-1 artifact is a deterministic ZIP file (<code>.kolm</code>) containing the model weights, the tokenizer, the inference graph, a canonical-JSON manifest, and an HMAC-SHA256 receipt chain. The artifact is identified by a content-addressable identifier (CID) computed by canonical-JSON hashing of the manifest hashes. Inference produces a receipt that binds (input hash, output hash, manifest CID, timestamp) under HMAC-SHA256. We define the <b>K-score</b>, a five-axis reproducibility criterion: <i>K = 0.40&middot;A + 0.15&middot;S + 0.15&middot;L + 0.15&middot;C + 0.15&middot;V</i>, where A is task accuracy, S is sampling determinism, L is latency stability, C is calibration, and V is verifier coverage. K-score gates compile time and is recorded in every receipt. The format is public; a 262-line reference verifier in TypeScript with zero third-party runtime dependencies is provided. RS-1 is intended as the audit primitive for regulated AI deployment.
+</div>
+
+<h2>1. Motivation</h2>
+<p>Three open problems in deployed machine learning motivate this work.</p>
+<p><b>Auditability.</b> A regulator asking "what did the model see and what did it return on this date" cannot be answered by current frontier APIs. The token bill is reproducible; the inference is not.</p>
+<p><b>Portability.</b> A signed artifact is the canonical handle for ML deployment in adversarial environments: air-gap networks, regulated zones, edge devices, multi-tenant clouds. There is no industry-wide format for such an artifact.</p>
+<p><b>Quality contract.</b> "The model is good enough" is the most common production deployment criterion. It is not a contract. A blocking, formula-defined quality gate is.</p>
+
+<h2>2. The artifact layout</h2>
+<p>An RS-1 artifact is a deterministic ZIP file with the extension <code>.kolm</code>. The contents are:</p>
+<pre>artifact.kolm/
+  manifest.json       # canonical-JSON manifest, root of trust
+  weights/            # quantized weight tensors (INT4 / INT8 / NVFP4)
+  tokenizer.json
+  graph/              # computation graph in ONNX / FlatBuffer
+  recipe.json         # how this artifact was compiled
+  eval.json           # K-score breakdown + eval pack results
+  credential.json     # signing identity (X.509 or sigstore)
+  receipt.json        # inference receipt template (optional)</pre>
+<p>The ZIP is built with deterministic mtimes (epoch 0) and store/deflate compression so byte-identical inputs produce byte-identical artifacts.</p>
+
+<h3>2.1 Manifest</h3>
+<p>The manifest binds every entry to a SHA-256 hash. The manifest itself has a CID computed as <code>cidv1:sha256:</code> followed by hex(SHA-256(canonical-JSON(manifest))).</p>
+<pre>{
+  "schema": "rs-1",
+  "name": "phi-redactor",
+  "base": "qwen2.5-7b-instruct",
+  "hashes": {
+    "weights/q4_0.bin":   "sha256:1bcf2323...",
+    "tokenizer.json":     "sha256:a91e02...",
+    "graph/decoder.onnx": "sha256:9c8e44..."
+  },
+  "k_score": 0.982,
+  "compiled_at": "2026-05-14T17:32:01Z"
+}</pre>
+
+<h3>2.2 Canonical JSON</h3>
+<p>Canonical JSON is the byte-identical serialization used for hashing. Rules: sorted keys recursively, no insignificant whitespace, UTF-8, integers as integers. The reference TypeScript verifier implements this in 14 lines (see <a href="/sdks">packages/sdk-ts</a>).</p>
+
+<h2>3. Receipt chain</h2>
+<p>Every inference produces a receipt:</p>
+<pre>{
+  "manifest_cid": "cidv1:sha256:1bcf2323...",
+  "input_sha":    "sha256:f3a9...",
+  "output_sha":   "sha256:b2d0...",
+  "ts":           "2026-05-15T09:14:22.413Z",
+  "seed":         42,
+  "k_score":      0.982,
+  "hmac":         "hex(HMAC-SHA256(secret, canonical_json(body)))"
+}</pre>
+<p>The HMAC is computed over the canonical-JSON of the body (everything except the <code>hmac</code> field). The reference verifier checks the hash with constant-time comparison (<code>crypto.timingSafeEqual</code>).</p>
+
+<h3>3.1 RAG receipt extension</h3>
+<p>For retrieval-augmented inference, the receipt body includes a <code>retrievals</code> array:</p>
+<pre>"retrievals": [
+  {
+    "source_uri":   "s3://corpus/policy-v3.pdf#page=4",
+    "content_sha":  "sha256:c1f0...",
+    "retrieved_at": "2026-05-15T09:14:22.001Z",
+    "score":        0.81
+  }, ...
+]</pre>
+<p>This is the load-bearing primitive: replay months later proves the model saw <i>exactly</i> that bundle, in that state.</p>
+
+<h2>4. The K-score</h2>
+<p>The K-score is a five-axis reproducibility criterion. Each axis maps to a measurable property of the artifact under a declared evaluation pack. The composite is:</p>
+<div class="eq">K = 0.40&middot;A + 0.15&middot;S + 0.15&middot;L + 0.15&middot;C + 0.15&middot;V</div>
+<p>Where:</p>
+<ul>
+<li><b>A . Accuracy</b> (0&ndash;1) - task-specific score on the evaluation pack. For PHI redaction, F1 over span detection. For classification, balanced accuracy.</li>
+<li><b>S . Sampling determinism</b> (0&ndash;1) - 1 if seeded inference produces byte-identical output across n runs; geometric decay otherwise.</li>
+<li><b>L . Latency stability</b> (0&ndash;1) - 1 if p99 latency &le; 1.5&middot;p50 over a 1k-sample bench; linear decay above.</li>
+<li><b>C . Calibration</b> (0&ndash;1) - 1 &minus; expected calibration error binned at 10 confidence buckets.</li>
+<li><b>V . Verifier coverage</b> (0&ndash;1) - fraction of receipt fields the reference verifier checks (currently 8/8 = 1.0 for RS-1.0).</li>
+</ul>
+<p>The compile-time K-score is recorded in <code>manifest.json</code> and in every inference receipt. A compile is <i>gated</i> by the recipe-declared <code>min_k</code>; the compile fails if K &lt; min_k.</p>
+
+<h2>5. Threat model</h2>
+<p>RS-1 defends against three attacker classes.</p>
+<p><b>T1. Tampered artifact.</b> Mitigated by manifest CID verification on load: the verifier recomputes the CID over canonical-JSON(hashes) and rejects on mismatch. Combined with per-entry SHA-256 verification, the artifact is hash-locked.</p>
+<p><b>T2. Forged receipt.</b> Mitigated by HMAC-SHA256 with constant-time comparison. The secret never leaves the compile environment in the standard deployment; in air-gap mode the secret is provisioned by the operator.</p>
+<p><b>T3. Drift attacker.</b> A retrieval source whose contents change after the receipt is issued. Mitigated by <code>content_sha</code> in retrieval receipts: replay verifies the source content matched at retrieval time. An attacker who can modify a source after the fact still cannot forge a receipt that reproduces.</p>
+<p>Out of scope: side-channel timing on the inference engine; weight extraction attacks against the underlying model; rubber-hose attacks against the operator. The format does not solve adversarial robustness of the underlying ML.</p>
+
+<h2>6. Reference implementations</h2>
+<p>Three reference verifiers exist, each pure-stdlib and free of network dependency:</p>
+<ul>
+<li><b>TypeScript</b> - <a href="/sdks">packages/sdk-ts</a>, 262 LOC, 12 public exports, uses <code>node:crypto</code>, <code>node:fs/promises</code>, <code>node:zlib</code>. No <code>jszip</code> dependency.</li>
+<li><b>Python</b> - <code>packages/sdk-python/kolm</code>, mirror surface, uses stdlib <code>hashlib</code>, <code>hmac</code>, <code>zipfile</code>.</li>
+<li><b>Rust</b> - <code>packages/sdk-rust</code>, the read-side library bundled with the CLI.</li>
+</ul>
+<p>All three produce byte-identical canonical-JSON serializations, byte-identical CIDs, and byte-identical receipt verification results. This is enforced by an interop test suite (<code>packages/interop</code>).</p>
+
+<h2>7. Adoption path</h2>
+<p>RS-1 is intended for industry-wide adoption. A working implementation, an open spec, and a reference verifier are the minimum bar. The next step is submission to a standards body. We are scoping <b>IETF</b> (CBOR receipt encoding) and <b>W3C Verifiable Credentials WG</b> (the credential.json envelope) as candidate venues in 2026.</p>
+
+<h2>8. Related work</h2>
+<p>The artifact-with-receipt pattern draws on <i>sigstore</i> for code signing, <i>SLSA</i> for build provenance, and the <i>SPIFFE</i> identity model. The reproducibility criterion is closer to the <i>MLPerf</i> evaluation philosophy than to ad-hoc accuracy reporting. The receipt chain mirrors <i>certificate transparency</i> log semantics applied to inference. Distillation is implemented after Hinton et al. (2015) and Gu et al. (MiniLLM, 2023); GRPO follows Shao et al. (DeepSeek-MATH, 2024); HMAC over canonical body follows Bellare et al. (1996).</p>
+
+<h2>9. Conclusion</h2>
+<p>An ML artifact you can hash, sign, and replay is the audit primitive the regulated AI economy is missing. RS-1 is one proposal for that primitive. The spec is public. The verifier is open source. The K-score formula is fixed and citeable. The cost of independent re-implementation in any language with stdlib hashing and ZIP handling is under one engineer-week.</p>
+
+<h2>10. Citations</h2>
+<p class="cites">
+[1] Hinton, Vinyals, Dean. <i>Distilling the Knowledge in a Neural Network.</i> <a href="https://arxiv.org/abs/1503.02531">arXiv:1503.02531</a> (2015).<br>
+[2] Bellare, Canetti, Krawczyk. <i>Keying Hash Functions for Message Authentication.</i> CRYPTO (1996).<br>
+[3] Shao et al. <i>DeepSeekMath: Pushing the Limits of Mathematical Reasoning.</i> <a href="https://arxiv.org/abs/2402.03300">arXiv:2402.03300</a> (2024).<br>
+[4] Gu et al. <i>MiniLLM: Knowledge Distillation of Large Language Models.</i> <a href="https://arxiv.org/abs/2306.08543">arXiv:2306.08543</a> (2023).<br>
+[5] Linux Foundation. <i>SLSA: Supply-chain Levels for Software Artifacts.</i> <a href="https://slsa.dev">slsa.dev</a>.<br>
+[6] sigstore project. <i>sigstore: Software signing for the rest of us.</i> <a href="https://sigstore.dev">sigstore.dev</a>.<br>
+[7] NIST AI 100-1. <i>AI Risk Management Framework v1.0.</i> NIST (2023).
+</p>
+
+<div class="actions"><a class="btn primary" href="/quickstart">Compile your first AI &rarr;</a><a class="btn" href="/docs/showcase/receipt.json" target="_blank">Open a receipt &rarr;</a><a class="btn" href="/sdks">verifier source &rarr;</a></div>
+
+</div>
+</section>
+</main>
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

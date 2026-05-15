@@ -1,19 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>The closed-API tax · kolm</title>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>The closed-API tax ·kolm</title>
 <meta name="description" content="Every AI feature shipped over a closed API is a variable cost you do not control. The closed-API tax is the gap between what you charge and what you keep. The exit is a compiled model.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="kolm · the closed-API tax">
+<meta property="og:title" content="kolm ·the closed-API tax">
 <meta property="og:description" content="Every AI feature you ship over a closed API is a tax. Compile your way out.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/manifesto">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="kolm ·the closed-API tax">
+<meta name="twitter:description" content="Every AI feature you ship over a closed API is a tax. Compile your way out.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/manifesto">
@@ -33,13 +36,13 @@
   header.site .left{display:flex;align-items:center;gap:36px}
   header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
   header.site .brand img{height:18px;width:18px}
-  header.site .brand span{font-weight:540;font-size:16px}
+  header.site .brand span{font-weight: 500;font-size:16px}
   header.site nav{display:flex;gap:22px}
   header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
   header.site nav a:hover{color:var(--ink)}
   header.site .right{display:flex;align-items:center;gap:14px}
   header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
-  header.site .right .cta{display:inline-flex;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:540}
+  header.site .right .cta{display:inline-flex;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
   @media(max-width:720px){header.site nav{display:none}}
 
   section.hero{padding:88px 0 56px;position:relative;overflow:hidden}
@@ -49,21 +52,21 @@
   h1{margin:24px 0 22px;font-size:clamp(40px,6vw,68px);line-height:1.02;font-weight:500;max-width:14ch}
   h1 .tone{color:var(--accent)}
   p.lede{margin:0 0 0;font-size:clamp(17px,1.4vw,21px);line-height:1.55;color:var(--ink-mute)}
-  p.lede b{color:var(--ink);font-weight:540}
+  p.lede b{color:var(--ink);font-weight: 500}
 
   article{padding:48px 0 96px}
-  article h2{margin:64px 0 18px;font-size:clamp(24px,2.6vw,30px);line-height:1.18;font-weight:540;color:var(--ink)}
+  article h2{margin:64px 0 18px;font-size:clamp(24px,2.6vw,30px);line-height:1.18;font-weight: 500;color:var(--ink)}
   article h2 .tone{color:var(--accent)}
-  article h3{margin:28px 0 10px;font-size:18px;font-weight:540;color:var(--ink)}
+  article h3{margin:28px 0 10px;font-size:18px;font-weight: 500;color:var(--ink)}
   article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
-  article p b{color:var(--ink);font-weight:540}
+  article p b{color:var(--ink);font-weight: 500}
   article p code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
   article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid var(--accent);background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
-  article blockquote p{color:var(--ink);margin:0;font-weight:480}
+  article blockquote p{color:var(--ink);margin:0;font-weight: 500}
   article ul{padding-left:0;list-style:none;margin:16px 0 24px}
   article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
-  article ul li::before{content:"-";color:var(--accent);position:absolute;left:6px;font-weight:560}
-  article ul li b{color:var(--ink);font-weight:540}
+  article ul li::before{content:"-";color:var(--accent);position:absolute;left:6px;font-weight: 500}
+  article ul li b{color:var(--ink);font-weight: 500}
 
   .tax-tbl{width:100%;border-collapse:collapse;margin:20px 0 8px;font-size:14px}
   .tax-tbl th{text-align:left;font-family:var(--mono);font-weight:500;font-size:10.5px;text-transform:uppercase;color:var(--ink-faint);padding:12px 14px;border-bottom:1px solid var(--line-strong);background:rgba(0,0,0,0.2)}
@@ -79,7 +82,7 @@
   .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
   .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
   .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .signpost a .v{color:var(--ink);font-weight:540;font-size:16px}
+  .signpost a .v{color:var(--ink);font-weight: 500;font-size:16px}
   .signpost a .v .arrow{color:var(--accent);margin-left:6px}
   .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
 
@@ -93,7 +96,7 @@
   "@graph": [
     {
       "@type": "WebPage",
-      "name": "Manifesto · kolm",
+      "name": "Manifesto ·kolm",
       "description": "We chose Kolmogorov because the question we are answering is the question Andrey Kolmogorov asked in 1965.",
       "url": "https://kolm.ai/manifesto",
       "publisher": {
@@ -132,6 +135,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -217,7 +221,7 @@
     <p>Same tax structure, different rate. <b>Vendor still deprecates models on 14-day notice</b> and owns your inference path. Switching Sonnet to Haiku is a discount on rent. Compiling is buying the building.</p>
 
     <h2>What the open contract looks like.</h2>
-    <p>Artifact format, receipt chain, K-score formula: open. The CLI is open in shape; the compiler is the proprietary service because the compile flywheel is the moat. <b>What you compile is yours.</b> If we vanish tomorrow, your shipped artifacts keep running. We are a dependency on the build step, not the runtime.</p>
+    <p>Artifact format, receipt chain, K-score formula: open. The CLI is open in shape. The compiler is the proprietary service because the compile loop is where the work is &middot; knowing which task descriptions produce high K-scores against which bases is a craft we keep building. <b>What you compile is yours.</b> If we vanish tomorrow, your shipped artifacts keep running. We are a dependency on the build step, not the runtime.</p>
 
     <p>Runtime is whatever fits: <code>llama.cpp</code> on a server, ExecuTorch on a phone, a browser adapter, a Jetson. Same artifact, same receipt, same verifier.</p>
 
@@ -260,21 +264,53 @@
 </main>
 
 <footer class="site">
-  <div class="wrap-wide">
-    <div class="row">
-      <span>kolmogorov &middot; 2026 &middot; manifesto v2 &middot; the closed-API tax</span>
-      <span>compile once &middot; run anywhere</span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
     </div>
-    <div class="row" style="margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint)">
-      <a href="/trust" style="color:inherit">Trust</a>
-      <a href="/security" style="color:inherit">Security</a>
-      <a href="/privacy" style="color:inherit">Privacy</a>
-      <a href="/terms" style="color:inherit">Terms</a>
-      <a href="/changelog" style="color:inherit">Changelog</a>
-      <a href="/whitepaper" style="color:inherit">Whitepaper (RS-1)</a>
-      <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" style="color:inherit">GitHub</a>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
     </div>
-    <small class="footer-tag" style="display:block;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--ink-faint,#6b7280);letter-spacing:0;">kolm &middot; open spec &middot; MIT licensed runtime &middot; kolm.ai</small>
   </div>
 </footer>
 

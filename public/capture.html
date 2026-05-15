@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>kolm capture &middot; turn your OpenAI bill into a local model</title>
 <meta name="description" content="Point your OpenAI / Anthropic calls at kolm capture. Every successful response becomes a training example. At threshold, kolm compiles them into a signed local artifact. The frontier API bill becomes a deposit account.">
 <meta name="keywords" content="OpenAI cost reduction, LoRA distillation, kolm capture, AI cost savings, local model, frontier API proxy, inference cost cutting">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta name="author" content="Kolmogorov">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm">
@@ -82,24 +83,24 @@
   .cap-hero h1 { margin: 0 0 18px; font-size: clamp(36px, 5.6vw, 64px); line-height: 1.04; font-weight: 500; max-width: 18ch; letter-spacing: -0.005em; color: var(--ink, #faf2e1); }
   .cap-hero h1 .swap { color: #7ef0d2; }
   .cap-hero p.lede { margin: 0 0 28px; font-size: clamp(16px, 1.3vw, 19px); line-height: 1.55; color: var(--ink-mute, #b5bdb1); max-width: 60ch; }
-  .cap-hero p.lede b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .cap-hero p.lede b { color: var(--ink, #faf2e1); font-weight: 500; }
   .cap-hero p.lede code { font-family: var(--mono); font-size: 0.9em; background: rgba(126,240,210, 0.08); border: 1px solid rgba(126,240,210, 0.20); border-radius: 4px; padding: 1px 6px; color: #c1f5e3; }
   .cap-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .cap-actions .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-size: 14.5px; font-weight: 540; font-family: var(--sans); transition: transform 120ms, background 120ms, border-color 120ms; }
+  .cap-actions .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-size: 14.5px; font-weight: 500; font-family: var(--sans); transition: transform 120ms, background 120ms, border-color 120ms; }
   .cap-actions .btn.primary { background: #7ef0d2; color: #051a14; }
   .cap-actions .btn.primary:hover { transform: translateY(-1px); background: #9af7df; }
   .cap-actions .btn.ghost { border: 1px solid var(--line); color: var(--ink, #faf2e1); }
   .cap-actions .btn.ghost:hover { border-color: rgba(236,231,220, 0.45); }
   .cap-microcopy { margin-top: 14px; font-family: var(--mono); font-size: 12px; color: var(--ink-faint, #737c73); letter-spacing: 0; max-width: 54ch; line-height: 1.55; }
-  .cap-microcopy b { color: var(--ink-mute, #b5bdb1); font-weight: 540; }
+  .cap-microcopy b { color: var(--ink-mute, #b5bdb1); font-weight: 500; }
 
   /* 3-up flow strip */
   .cap-flow { margin: 0 auto; max-width: 1180px; padding: 24px 32px 0; }
   .cap-flow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   @media (max-width: 880px) { .cap-flow-grid { grid-template-columns: 1fr; } }
   .cap-flow-cell { padding: 22px 24px 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); position: relative; }
-  .cap-flow-num { position: absolute; top: -10px; left: 18px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #051a14; background: #7ef0d2; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
-  .cap-flow-cell h3 { margin: 0 0 8px; font-size: 16px; font-weight: 540; color: var(--ink, #faf2e1); line-height: 1.3; }
+  .cap-flow-num { position: absolute; top: -10px; left: 18px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #051a14; background: #7ef0d2; padding: 3px 8px; border-radius: 4px; font-weight: 500; }
+  .cap-flow-cell h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink, #faf2e1); line-height: 1.3; }
   .cap-flow-cell p { margin: 0; font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; }
   .cap-flow-cell code { font-family: var(--mono); font-size: 11.5px; color: #c1f5e3; background: rgba(126,240,210, 0.06); padding: 1px 5px; border-radius: 3px; }
 
@@ -107,7 +108,7 @@
   .cap-math { margin: 64px auto 0; max-width: 1180px; padding: 0 32px; }
   .cap-math-card { padding: 32px 36px; border: 1px solid #7ef0d2; border-radius: 16px; background: linear-gradient(180deg, rgba(126,240,210, 0.04), rgba(0,0,0,0.18) 60%); }
   .cap-math-head { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #7ef0d2; margin-bottom: 6px; }
-  .cap-math h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; color: var(--ink, #faf2e1); }
+  .cap-math h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; color: var(--ink, #faf2e1); }
   .cap-math .lede { margin: 0 0 24px; font-size: 14px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; max-width: 60ch; }
   .cap-math-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 26px; align-items: stretch; }
   @media (max-width: 880px) { .cap-math-grid { grid-template-columns: 1fr; } }
@@ -118,16 +119,16 @@
   .cap-math-row input:focus { border-color: #7ef0d2; }
   .cap-math-row.row2 { grid-template-columns: 1fr 1fr; gap: 10px; }
   .cap-math-out { padding: 22px 26px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.28); display: flex; flex-direction: column; justify-content: center; gap: 10px; }
-  .cap-math-out .big { font-family: var(--mono); font-size: clamp(36px, 4.6vw, 52px); font-weight: 600; color: #7ef0d2; line-height: 1; letter-spacing: -0.01em; }
+  .cap-math-out .big { font-family: var(--mono); font-size: clamp(36px, 4.6vw, 52px); font-weight: 500; color: #7ef0d2; line-height: 1; letter-spacing: -0.01em; }
   .cap-math-out .big .unit { font-size: 0.45em; color: var(--ink-mute, #b5bdb1); margin-left: 6px; font-weight: 400; }
   .cap-math-out .sub { font-size: 13px; color: var(--ink-mute, #b5bdb1); line-height: 1.5; }
-  .cap-math-out .sub b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .cap-math-out .sub b { color: var(--ink, #faf2e1); font-weight: 500; }
   .cap-math-out .ann { margin-top: 8px; padding-top: 12px; border-top: 1px dashed var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); letter-spacing: 0; }
-  .cap-math-out .ann b { color: var(--ink-mute, #b5bdb1); font-weight: 540; }
+  .cap-math-out .ann b { color: var(--ink-mute, #b5bdb1); font-weight: 500; }
 
   /* 7-min steps */
   .cap-steps { margin: 64px auto 0; max-width: 1180px; padding: 0 32px; }
-  .cap-steps h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; color: var(--ink, #faf2e1); }
+  .cap-steps h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; color: var(--ink, #faf2e1); }
   .cap-steps .lede { margin: 0 0 26px; font-size: 14px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; max-width: 60ch; }
   .cap-steps pre { background: #0a0c10; border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; font-family: var(--mono); font-size: 13px; color: var(--ink, #faf2e1); line-height: 1.65; overflow-x: auto; margin: 0 0 16px; }
   .cap-steps pre .prompt { color: #7ef0d2; }
@@ -136,27 +137,27 @@
   .cap-steps pre .comment { color: var(--ink-faint, #737c73); }
   .cap-steps .step-grid { display: grid; grid-template-columns: 32px 1fr; gap: 14px; align-items: start; margin-bottom: 18px; }
   .cap-steps .step-num { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 50%; font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute, #b5bdb1); margin-top: 2px; }
-  .cap-steps .step-body h3 { margin: 0 0 4px; font-size: 15.5px; font-weight: 540; color: var(--ink, #faf2e1); line-height: 1.3; }
+  .cap-steps .step-body h3 { margin: 0 0 4px; font-size: 15.5px; font-weight: 500; color: var(--ink, #faf2e1); line-height: 1.3; }
   .cap-steps .step-body p { margin: 0 0 12px; font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.6; max-width: 64ch; }
 
-  /* honest scope · what ships today vs target */
+  /* honest scope ·what ships today vs target */
   .cap-honesty { margin: 64px auto 0; max-width: 1180px; padding: 0 32px; }
   .cap-honesty-head { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint, #737c73); margin-bottom: 12px; }
-  .cap-honesty h2 { margin: 0 0 22px; font-size: clamp(20px, 2.2vw, 24px); font-weight: 540; color: var(--ink, #faf2e1); }
+  .cap-honesty h2 { margin: 0 0 22px; font-size: clamp(20px, 2.2vw, 24px); font-weight: 500; color: var(--ink, #faf2e1); }
   .cap-honesty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 880px) { .cap-honesty-grid { grid-template-columns: 1fr; } }
   .cap-honesty-cell { padding: 20px 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); }
   .cap-honesty-cell .badge { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 12px; }
-  .cap-honesty-cell .badge.shipped { color: #051a14; background: #7ef0d2; font-weight: 600; }
+  .cap-honesty-cell .badge.shipped { color: #051a14; background: #7ef0d2; font-weight: 500; }
   .cap-honesty-cell .badge.target { color: var(--ink-faint, #737c73); background: transparent; border: 1px solid var(--line); }
   .cap-honesty-cell ul { margin: 0; padding-left: 18px; }
   .cap-honesty-cell li { font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.65; margin-bottom: 6px; }
-  .cap-honesty-cell li b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .cap-honesty-cell li b { color: var(--ink, #faf2e1); font-weight: 500; }
   .cap-honesty-cell li code { font-family: var(--mono); font-size: 11.5px; color: #c1f5e3; background: rgba(126,240,210, 0.06); padding: 1px 5px; border-radius: 3px; }
 
   /* CTA */
   .cap-cta { margin: 80px auto 88px; max-width: 1180px; padding: 56px 36px; text-align: center; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(180deg, rgba(126,240,210, 0.05), transparent 60%); }
-  .cap-cta h2 { margin: 0 0 8px; font-size: clamp(24px, 2.8vw, 32px); font-weight: 540; color: var(--ink, #faf2e1); }
+  .cap-cta h2 { margin: 0 0 8px; font-size: clamp(24px, 2.8vw, 32px); font-weight: 500; color: var(--ink, #faf2e1); }
   .cap-cta p { margin: 0 0 24px; font-size: 14.5px; color: var(--ink-mute, #b5bdb1); }
   .cap-cta .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 </style>
@@ -169,6 +170,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -289,8 +291,8 @@ client = OpenAI(base_url="https://kolm.ai/v1/capture/openai")</pre>
       <h3>Watch your inbox fill up.</h3>
       <p>Each successful call lands in <code>/captures</code> with the input, output, and a K-score floor estimate. Discard noise; keep the rest.</p>
       <pre><span class="prompt">$</span> kolm logs --tail
-<span class="dim">› captured: patient-intake (1247 pairs / 7 days)</span>
-<span class="dim">› captured: support-triage (488 pairs / 7 days)</span>
+<span class="dim"> - captured: patient-intake (1247 pairs / 7 days)</span>
+<span class="dim"> - captured: support-triage (488 pairs / 7 days)</span>
 <span class="ok">ok</span> threshold reached: patient-intake ready for distill</pre>
     </div>
   </div>
@@ -301,9 +303,9 @@ client = OpenAI(base_url="https://kolm.ai/v1/capture/openai")</pre>
       <h3>Hand the corpus to the trainer.</h3>
       <p>kolm packages the captured pairs and calls the trainer bridge. PEFT LoRA fit, K-score gate, HMAC-signed archive. The artifact lands back in your dashboard.</p>
       <pre><span class="prompt">$</span> kolm compile patient-intake --examples 1247 --receipt
-<span class="dim">› synthesizing verifier from 1247 examples ...</span>
-<span class="dim">› k=8 sample &middot; verify &middot; accept (Q=0.928) ...</span>
-<span class="dim">› stamping K-score &middot; signing artifact ...</span>
+<span class="dim"> - synthesizing verifier from 1247 examples ...</span>
+<span class="dim"> - k=8 sample &middot; verify &middot; accept (Q=0.928) ...</span>
+<span class="dim"> - stamping K-score &middot; signing artifact ...</span>
 <span class="ok">ok</span> wrote patient-intake.kolm  k_score=0.92  hmac-sha256</pre>
     </div>
   </div>
@@ -352,8 +354,8 @@ client = OpenAI(base_url="https://kolm.ai/v1/capture/openai")</pre>
   <h2>Stop renting. Start owning.</h2>
   <p>Free tier captures up to 1,000 pairs/month. No card. No vendor lock.</p>
   <div class="btn-row">
-    <a href="/signup" class="btn primary" style="padding:14px 24px;border-radius:8px;background:#7ef0d2;color:#051a14;font-weight:540;font-size:15px">Start capturing &rarr;</a>
-    <a href="/pricing" class="btn ghost" style="padding:14px 24px;border-radius:8px;border:1px solid var(--line);color:var(--ink);font-weight:540;font-size:15px">See pricing</a>
+    <a href="/signup" class="btn primary" style="padding:14px 24px;border-radius:8px;background:#7ef0d2;color:#051a14;font-weight: 500;font-size:15px">Start capturing &rarr;</a>
+    <a href="/pricing" class="btn ghost" style="padding:14px 24px;border-radius:8px;border:1px solid var(--line);color:var(--ink);font-weight: 500;font-size:15px">See pricing</a>
   </div>
 </section>
 
@@ -364,6 +366,56 @@ client = OpenAI(base_url="https://kolm.ai/v1/capture/openai")</pre>
     <div class="meta">
       kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
     </div>
+    <div class="links">
+      <div>
+        <div class="col-h">build</div>
+        <a href="/capture">capture</a>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/recall">recall</a>
+        <a href="/evolve">evolve</a>
+        <a href="/sdks">sdks</a>
+        <a href="/openai">openai compat</a>
+        <a href="/agents">agents</a>
+      </div>
+      <div>
+        <div class="col-h">deploy</div>
+        <a href="/teams">teams</a>
+        <a href="/tunnels">remote access</a>
+        <a href="/byoc">byoc cloud</a>
+        <a href="/airgap">airgap</a>
+        <a href="/enterprise">enterprise</a>
+      </div>
+      <div>
+        <div class="col-h">proof</div>
+        <a href="/benchmarks">benchmarks</a>
+        <a href="/research">research</a>
+        <a href="/k-score">k-score</a>
+        <a href="/leaderboard">registry</a>
+        <a href="/spec">rs-1 spec</a>
+        <a href="/showcase">showcase</a>
+      </div>
+      <div>
+        <div class="col-h">industries</div>
+        <a href="/healthcare">healthcare</a>
+        <a href="/finance">finance</a>
+        <a href="/legal">legal</a>
+        <a href="/edge">edge</a>
+        <a href="/cookbook">cookbook</a>
+        <a href="/compliance-packs">compliance packs</a>
+      </div>
+      <div>
+        <div class="col-h">company</div>
+        <a href="/pricing">pricing</a>
+        <a href="/docs">docs</a>
+        <a href="/roadmap">roadmap</a>
+        <a href="/manifesto">manifesto</a>
+        <a href="/roi">roi</a>
+      </div>
+    </div>
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+    </small>
   </div>
 </footer>
 

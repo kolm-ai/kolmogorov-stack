@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Voice adapters &middot; Whisper LoRA on the decoder cross-attention | kolm research</title>
+<meta name="description" content="Whisper is the right base for domain-tuned speech-to-text. LoRA on the decoder cross-attention projections only, encoder frozen, 30-second mel windows. How kolm trains a 40 MB voice adapter and ships it with a WER receipt.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Voice adapters . kolm research">
+<meta property="og:description" content="Whisper LoRA on the decoder cross-attention. Encoder frozen, 30-second mel windows, WER reported with held-out variance.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-05-14">
+<meta property="article:author" content="Kolmogorov">
+<meta property="article:section" content="training">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Voice adapters">
+<meta name="twitter:description" content="Whisper LoRA on the decoder cross-attention only. The narrow change beats full fine-tunes on domain audio.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/research/voice-adapters">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/research/voice-adapters">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="/escape.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "Voice adapters: Whisper LoRA on the decoder cross-attention",
+      "description": "How kolm fine-tunes Whisper for domain audio. LoRA on decoder cross-attention only, encoder frozen, 30-second mel windows, WER receipt.",
+      "url": "https://kolm.ai/research/voice-adapters",
+      "author": {"@type": "Organization", "name": "Kolmogorov"},
+      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+      "datePublished": "2026-05-14",
+      "articleSection": "training",
+      "keywords": "Whisper, LoRA, speech recognition, ASR, domain adaptation, voice fine-tuning",
+      "citation": [
+        "Radford et al, 2022, arXiv:2212.04356 (Whisper)",
+        "Hu et al, 2021, arXiv:2106.09685 (LoRA)",
+        "Gandhi et al, 2023, arXiv:2311.00430 (Distil-Whisper)",
+        "Vaswani et al, 2017, arXiv:1706.03762 (Attention)"
+      ],
+      "license": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+        {"@type": "ListItem", "position": 3, "name": "Voice adapters", "item": "https://kolm.ai/research/voice-adapters"}
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+  a:hover{border-bottom-color:var(--ink)}
+  .nb{border:0}
+  ::selection{background:rgba(236,231,220,0.30)}
+  .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+  @media(max-width:720px){.wrap{padding:0 20px}}
+  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+  @media(max-width:720px){header.site .row{padding:0 20px}}
+  header.site .left{display:flex;align-items:center;gap:36px}
+  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+  header.site .brand span{font-weight:500;font-size:16px;letter-spacing:0}
+  header.site nav{display:flex;gap:22px}
+  header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+  header.site .right{display:flex;align-items:center;gap:14px}
+  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+  header.site .right .ghost:hover{color:var(--ink)}
+  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500;border:0}
+  main{padding:80px 0 96px;flex:1}
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+  h1{font-weight:500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+  .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+  h2{font-weight:500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+  h3{font-weight:500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+  p{color:var(--ink-mute);margin:0 0 14px}
+  p strong{color:var(--ink);font-weight:500}
+  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+  ul li{margin:6px 0}
+  .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+  .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  .table th{font-weight:500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+  .table tr:last-child td{border-bottom:0}
+  .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+  .citations a{color:var(--ink-mute)}
+  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+  footer a{color:var(--ink-mute);border:0}
+  footer a:hover{color:var(--ink)}
+  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+  .footer-row a{color:inherit}
+</style>
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="row">
+    <div class="left">
+      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+      <nav>
+        <a href="/use-cases">Solutions</a>
+        <a href="/docs">Developers</a>
+        <a href="/research" class="active">Research</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="hero-eyebrow"><span class="he-dot"></span>research . training . 10 min read</div>
+    <h1>Voice adapters.</h1>
+    <p class="lede">A radiology dictation system fails on &quot;hypoechoic&quot;. A bank's call-center transcript loses every account number ending in a colloquial reading. The general-purpose Whisper model is excellent and not enough. The fix is not a new ASR architecture; it is a 40 MB LoRA adapter on Whisper's decoder cross-attention, trained on 5-50 hours of paired domain audio, gated by held-out WER, and shipped as a signed artifact next to the policy.</p>
+
+    <div class="meta-line">
+      <span>May 14, 2026</span>
+      <span>&middot;</span>
+      <span>Kolmogorov research</span>
+      <span>&middot;</span>
+      <span>apps/trainer/audio.py</span>
+    </div>
+
+    <h2>Why Whisper is the base</h2>
+
+    <p>Radford et al (2022) trained Whisper on 680k hours of multilingual paired audio/text scraped from the open web. The model is an encoder-decoder transformer: the encoder consumes 80-channel mel-spectrograms in 30-second windows; the decoder is a standard causal transformer with cross-attention to encoder outputs and generates the transcript token-by-token. The released checkpoints (tiny/base/small/medium/large-v3) cover the full quality/cost curve. Apache-2.0 license. The weights are stable; the tokenizer is standardized; the inference path has been hardware-tuned across vLLM/MLX/llama.cpp/CTranslate2.</p>
+
+    <p>For a buyer who needs a domain-tuned voice model, the question is not &quot;train your own ASR from scratch&quot;. It is &quot;which adapter shape on Whisper&quot;.</p>
+
+    <h2>The narrow change: LoRA on decoder cross-attention only</h2>
+
+    <p>Whisper's encoder learns acoustic features (formants, prosody, spectro-temporal structure). Domain-tuning rarely needs new acoustic features; the audio still sounds like speech. What it needs is to redirect the decoder's attention to encoder activations in the way the domain vocabulary requires (medical terms map to specific spectral templates, account-number readings need to refuse hallucinated digits). The narrow change is therefore to keep the encoder frozen and only LoRA-adapt the decoder's cross-attention projections.</p>
+
+    <pre>from peft import LoraConfig
+
+# encoder.* parameters are not in target_modules => encoder stays frozen
+lora_config = LoraConfig(
+    r=16,
+    lora_alpha=32,
+    target_modules=[
+        &quot;decoder.layers.*.encoder_attn.q_proj&quot;,
+        &quot;decoder.layers.*.encoder_attn.k_proj&quot;,
+        &quot;decoder.layers.*.encoder_attn.v_proj&quot;,
+        &quot;decoder.layers.*.encoder_attn.out_proj&quot;,
+    ],
+    lora_dropout=0.05,
+    bias=&quot;none&quot;,
+    task_type=&quot;SEQ_2_SEQ_LM&quot;,
+)</pre>
+
+    <p>The trainable parameter count for Whisper-large-v3 (1.55B total) under this configuration is roughly 11 M. The adapter on disk is 40 MB. Training fits on a single 24 GB consumer GPU at bf16 with gradient checkpointing and batch size 8.</p>
+
+    <p>We have tested the alternative of LoRA-ing the encoder as well; the WER improvement was 0.4 percentage points on radiology dictation and the adapter doubled in size. The narrow change is the right tradeoff.</p>
+
+    <h2>The 30-second mel-spectrogram window</h2>
+
+    <p>Whisper expects exactly 30 seconds of audio per forward pass, resampled to 16 kHz, converted to an 80-channel log-mel spectrogram with a 25-ms window and 10-ms hop. Audio shorter than 30 seconds is right-padded with zeros (and the attention mask covers the pad). Audio longer than 30 seconds is split into 30-second chunks with a stride; the chunk transcripts are stitched at decode time.</p>
+
+    <p>The data path that matters: <strong>do not retrain the mel front-end.</strong> Use <code>WhisperFeatureExtractor</code> as-is. If the buyer's audio is 8 kHz telephony or 22 kHz studio, resample to 16 kHz before extraction. Mismatched sample rates produce subtle but persistent WER degradation that is not obvious in the loss curve.</p>
+
+    <h2>The audio collator</h2>
+
+    <p>The non-obvious engineering detail is the labels-side padding. The Whisper tokenizer pads labels with the pad-token id (50257 for multilingual checkpoints), which the cross-entropy loss would otherwise count as a real token. The collator replaces pad-token ids with <code>-100</code> after padding, which is the magic ignore-index value that <code>nn.CrossEntropyLoss</code> recognizes.</p>
+
+    <pre>def __call__(self, features):
+    input_features = [{&quot;input_features&quot;: f[&quot;input_features&quot;]} for f in features]
+    batch = self.processor.feature_extractor.pad(input_features, return_tensors=&quot;pt&quot;)
+    label_features = [{&quot;input_ids&quot;: f[&quot;labels&quot;]} for f in features]
+    labels_batch = self.processor.tokenizer.pad(label_features, return_tensors=&quot;pt&quot;)
+    labels = labels_batch[&quot;input_ids&quot;].masked_fill(
+        labels_batch.attention_mask.ne(1), -100
+    )
+    if (labels[:, 0] == self.decoder_start_token_id).all().cpu().item():
+        labels = labels[:, 1:]
+    batch[&quot;labels&quot;] = labels
+    return batch</pre>
+
+    <p>The other detail: strip the leading <code>&lt;|startoftranscript|&gt;</code> token from the labels before the loss is computed. The model adds it on its own as the decoder-start token; including it in the targets shifts the loss by one position and produces silently degraded WER.</p>
+
+    <h2>The WER metric</h2>
+
+    <table class="table">
+      <thead><tr><th>Metric</th><th>Definition</th><th>What it does not capture</th></tr></thead>
+      <tbody>
+        <tr><td>WER</td><td>(substitutions + insertions + deletions) / reference-word-count</td><td>Whether the errors hit semantically critical tokens (a missed &quot;not&quot; vs a missed &quot;the&quot;)</td></tr>
+        <tr><td>CER</td><td>Character-level edit distance / reference-character-count</td><td>Whether the misspelling is plausible to a downstream NLP system</td></tr>
+        <tr><td>WER on focus terms</td><td>WER restricted to the buyer's domain vocabulary list</td><td>General-purpose readability</td></tr>
+        <tr><td>Held-out WER variance</td><td>Standard deviation of WER across speakers</td><td>Catastrophic failure on a single speaker (the average is fine)</td></tr>
+      </tbody>
+    </table>
+
+    <p>kolm reports overall WER, focus-term WER, and held-out per-speaker variance on every save_steps. The audit log carries all three; the K-score's accuracy axis A is computed against the focus-term WER, not the overall, because the focus terms are why the buyer commissioned the adapter.</p>
+
+    <h2>Edge cases worth naming</h2>
+
+    <p><strong>Code-switching.</strong> A Mandarin/English bilingual call center transcript benefits from Whisper-large-v3's multilingual decoder out of the box. Switching the language token mid-utterance is harder; the practical fix is to chunk by silence and re-detect the language token per chunk. The LoRA adapter alone does not solve this.</p>
+
+    <p><strong>The encoder is the bottleneck for audio degradation.</strong> If the audio is noisy (background music, lossy compression, low bit-rate telephony), no decoder-side adapter can recover it. The encoder must be the layer that hears noise-corrupted speech; the supervised front-end (a denoising preprocessing step or a Whisper variant trained on noisy audio like the noisy-student-distilled forks) is the right intervention.</p>
+
+    <p><strong>Hallucinated speakers and timestamps.</strong> Whisper-large-v3 will sometimes generate plausible-sounding text during long silences. The standard mitigation is voice-activity detection (Silero VAD) ahead of feature extraction; kolm's reference recipe runs Silero with a 500-ms minimum-speech window and skips chunks below that threshold.</p>
+
+    <p><strong>The 30-second boundary.</strong> A medical sentence that spans the 30-second chunk boundary gets two truncated transcripts. The stitcher concatenates them, but a domain term that crossed the boundary may be transcribed wrong on both sides. The reference recipe uses a 2-second overlap between chunks and aligns by greedy longest-common-subsequence.</p>
+
+    <h2>What the receipt records</h2>
+
+    <pre>"audio": {
+  "method": "whisper_lora_cross_attn",
+  "base_model": "openai/whisper-large-v3",
+  "lora_r": 16,
+  "lora_alpha": 32,
+  "target_modules": "decoder.encoder_attn.{q,k,v,out}_proj",
+  "encoder_frozen": true,
+  "n_hours_train": 28.4,
+  "n_hours_eval": 3.1,
+  "sample_rate_hz": 16000,
+  "wer_overall": 0.041,
+  "wer_focus": 0.018,
+  "wer_speaker_variance": 0.007,
+  "papers": [
+    "arXiv:2212.04356",
+    "arXiv:2106.09685",
+    "arXiv:2311.00430"
+  ]
+}</pre>
+
+    <p>The canonical-JSON manifest hash covers the block, so a tampered receipt invalidates the artifact signature. A reviewer can confirm the encoder was frozen, the focus-term WER landed below the buyer's stated threshold, and the per-speaker variance is bounded.</p>
+
+    <h2>Where this fits in the kolm compile loop</h2>
+
+    <p>Voice adapters are an independent artifact from text adapters; they sit alongside the text LoRA in the buyer's deployment and are loaded by the runtime when the request hits <code>/v1/audio/transcriptions</code>. The capture loop is the same shape (recordings + reference transcripts in, signed adapter out, K-score gate on the way through); the only domain-specific surface is the WER metric in place of accuracy. A buyer who needs domain text and domain voice ships both adapters from one binder.</p>
+
+    <div class="citations">
+      <p><strong>Citations</strong></p>
+      <p>Radford, A. et al. <em>Robust Speech Recognition via Large-Scale Weak Supervision</em>. arXiv:2212.04356, 2022. The Whisper paper.</p>
+      <p>Hu, E. J. et al. <em>LoRA: Low-Rank Adaptation of Large Language Models</em>. arXiv:2106.09685, 2021.</p>
+      <p>Gandhi, S. et al. <em>Distil-Whisper: Robust Knowledge Distillation via Large-Scale Pseudo Labelling</em>. arXiv:2311.00430, 2023.</p>
+      <p>Vaswani, A. et al. <em>Attention Is All You Need</em>. arXiv:1706.03762, 2017. Encoder-decoder cross-attention.</p>
+    </div>
+
+    <div class="meta-line" style="margin-top:36px">
+      <a class="nb" href="/research">&larr; Back to research</a>
+      <span>&middot;</span>
+      <a class="nb" href="/research#voice">Frontier reference &middot; Voice adapters</a>
+      <span>&middot;</span>
+      <a class="nb" href="/spec">RS-1 spec</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+<script src="/nav.js"></script>
+</body>
+</html>

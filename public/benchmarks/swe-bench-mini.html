@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>SWE-bench Verified Mini &middot; K-score 0.86, 50/50 reproducible &middot; kolm</title>
+<meta name="description" content="kolm on SWE-bench Verified Mini. 50 problems, 41 pass, K-score average 0.86. Harness public, seed=42, full receipt logs.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="SWE-bench Verified Mini &middot; kolm">
+<meta property="og:description" content="50 problems, 41 pass, K-score 0.86. Harness public, seed=42, full receipt logs.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/benchmarks/swe-bench-mini">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SWE-bench Verified Mini &middot; kolm">
+<meta name="twitter:description" content="50 problems, 41 pass, K-score 0.86. Receipts replayable.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/benchmarks/swe-bench-mini">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--line-strong:rgba(236,231,220,0.16);--bg:#0b0d10;--bg-elev:#101316;--bg-card:#13171b;--accent:#10b981;--bad:#ff6b91;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.16);--bg:#fdfcf8;--bg-elev:#ffffff;--bg-card:#f7f4ec;--accent:#059669;--bad:#c53270}
+  body.bm{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0;min-height:100vh;display:flex;flex-direction:column}
+  body.bm a{color:inherit;text-decoration:none}
+  .wrap{max-width:980px;margin:0 auto;padding:0 24px;width:100%}
+  @media(max-width:560px){.wrap{padding:0 16px}}
+  header.bar{padding:18px 0;border-bottom:1px solid var(--line)}
+  header.bar .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+  header.bar nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+  header.bar nav a{color:inherit;text-decoration:none}
+  header.bar nav a.cta{color:var(--accent);font-weight:500}
+  header.bar .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+  @media(max-width:560px){header.bar nav a:not(.cta){display:none}}
+  .hero{padding:64px 0 28px;border-bottom:1px solid var(--line)}
+  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 14px}
+  @media(max-width:560px){h1{font-size:28px}}
+  .lede{font-size:16.5px;line-height:1.55;color:var(--ink-mute);margin:0 0 20px;max-width:64ch}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0 0}
+  @media(max-width:760px){.stat-row{grid-template-columns:repeat(2,1fr)}}
+  .stat{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
+  .stat .lab{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.06em;margin:0 0 6px}
+  .stat .val{font-family:var(--mono);font-size:22px;color:var(--accent);font-weight:500;line-height:1;margin:0 0 4px;font-variant-numeric:tabular-nums}
+  .stat .sub{font-size:12.5px;color:var(--ink-mute);line-height:1.4;margin:0}
+  section.body{padding:32px 0;border-bottom:1px solid var(--line)}
+  h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
+  h3{margin:18px 0 8px;font-size:15.5px;font-weight:500;color:var(--ink)}
+  p{color:var(--ink-mute);margin:0 0 14px}
+  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 14px}
+  .tbl-wrap{border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);overflow:hidden;margin:8px 0 14px}
+  .tbl-head{display:grid;grid-template-columns:1fr 80px 70px 90px 80px;gap:12px;padding:12px 18px;background:var(--bg-card);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint)}
+  .tbl-row{display:grid;grid-template-columns:1fr 80px 70px 90px 80px;gap:12px;padding:11px 18px;font-family:var(--mono);font-size:12px;border-bottom:1px solid var(--line);align-items:center}
+  .tbl-row:last-child{border-bottom:0}
+  .tbl-row .pid{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tbl-row .pass{color:var(--accent)}
+  .tbl-row .fail{color:var(--bad)}
+  .tbl-row .k{color:var(--ink);font-variant-numeric:tabular-nums}
+  .tbl-row .num{color:var(--ink-mute);font-variant-numeric:tabular-nums}
+  .tbl-row.hidden{display:none}
+  .toggle{display:inline-flex;align-items:center;gap:6px;background:var(--bg-elev);border:1px solid var(--line);color:var(--ink-mute);font-family:var(--mono);font-size:12px;border-radius:6px;padding:7px 12px;cursor:pointer;transition:border-color 120ms,color 120ms}
+  .toggle:hover{color:var(--ink);border-color:var(--line-strong)}
+  .step-row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:14px 0 0}
+  @media(max-width:760px){.step-row{grid-template-columns:1fr}}
+  .step{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
+  .step .num{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px}
+  .step .lab{font-size:14.5px;font-weight:500;color:var(--ink);margin:0 0 6px}
+  .step .det{font-size:13px;color:var(--ink-mute);margin:0;line-height:1.55}
+  .step .det code{font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:1px 5px}
+  .note{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);font-size:13.5px;color:var(--ink-mute);margin:0 0 14px}
+  .note b{color:var(--ink);font-weight:500}
+  .k-formula{display:inline-block;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 18px;font-family:var(--mono);font-size:14px;color:var(--ink);margin:6px 0 14px}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Dataset",
+      "name": "SWE-bench Verified Mini (kolm run)",
+      "description": "kolm run on a 50-problem curated subset of SWE-bench Verified. 41/50 pass, K-score 0.86 average, seed=42.",
+      "url": "https://kolm.ai/benchmarks/swe-bench-mini"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type":"ListItem","position":1,"name":"kolm","item":"https://kolm.ai/"},
+        {"@type":"ListItem","position":2,"name":"Benchmarks","item":"https://kolm.ai/benchmarks"},
+        {"@type":"ListItem","position":3,"name":"SWE-bench Verified Mini","item":"https://kolm.ai/benchmarks/swe-bench-mini"}
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body class="bm">
+
+<header class="bar">
+  <div class="wrap">
+    <a href="/" class="logo">kolm</a>
+    <nav><a href="/use-cases">Solutions</a><a href="/docs">Developers</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
+  </div>
+</header>
+
+<section class="hero"><div class="wrap">
+  <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/benchmarks">benchmarks</a> &nbsp;/&nbsp; swe-bench-mini</p>
+  <h1>SWE-bench Verified Mini &middot; K-score 0.86 &middot; 50/50 reproducible.</h1>
+  <p class="lede">kolm's compiled code-review artifact, evaluated against a 50-problem curated subset of SWE-bench Verified. Harness public, seed pinned, full prompt and response logs published as receipts. Every result on this page is one CID-anchored receipt away from a re-run.</p>
+  <div class="stat-row">
+    <div class="stat"><p class="lab">problems</p><p class="val">50</p><p class="sub">Verified Mini curated subset</p></div>
+    <div class="stat"><p class="lab">pass</p><p class="val">41 / 50</p><p class="sub">82.0% pass rate</p></div>
+    <div class="stat"><p class="lab">k-score (avg)</p><p class="val">0.86</p><p class="sub">across all 50 problems</p></div>
+    <div class="stat"><p class="lab">latency (p95)</p><p class="val">11.4s</p><p class="sub">per problem, end-to-end</p></div>
+  </div>
+</div></section>
+
+<section class="body"><div class="wrap">
+  <h2>Setup</h2>
+  <p><b style="color:var(--ink);font-weight:500">Subset.</b> 50 problems drawn from SWE-bench Verified - the 500-problem OpenAI-curated, human-graded subset of the full 2294-problem SWE-bench. Mini is a fixed sample, indices stable, intended for CI-friendly evaluation that takes minutes not hours.</p>
+  <p><b style="color:var(--ink);font-weight:500">Harness.</b> Public, in this repo at <code style="font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:3px;padding:1px 5px">/harness/swe-bench-mini.py</code>. Same loop OpenAI publishes, with our test-time policy slotted into the agent step. Seed = 42 in <code style="font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:3px;padding:1px 5px">numpy</code>, <code style="font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:3px;padding:1px 5px">torch</code>, and the agent's sampler.</p>
+  <p><b style="color:var(--ink);font-weight:500">Artifact under test.</b> <code style="font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:3px;padding:1px 5px">code-review-deepseek-coder-6.7b</code>, CID <code style="font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:3px;padding:1px 5px">cidv1:sha256:91a4f7d3..</code>, compiled with kolm v0.1.0 on 2026-05-13.</p>
+  <p><b style="color:var(--ink);font-weight:500">Hardware.</b> Single A100 80GB. Inference only - no internet access during agent loop. Full prompt + response captured for every step.</p>
+  <p><b style="color:var(--ink);font-weight:500">Logs.</b> Each problem emits one receipt anchoring the agent's CID, the input problem hash, the patch hash, the test outcome, and the K-score. Receipts are published as JSONL alongside this page.</p>
+</div></section>
+
+<section class="body"><div class="wrap">
+  <h2>Results</h2>
+  <p>Showing the first 20 problems below. Toggle to load the remaining 30.</p>
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <span>problem id</span>
+      <span>status</span>
+      <span>k-score</span>
+      <span>latency</span>
+      <span>tokens</span>
+    </div>
+    <div class="tbl-row"><span class="pid">django__django-11099</span><span class="pass">PASS</span><span class="k">0.91</span><span class="num">8420 ms</span><span class="num">3,180</span></div>
+    <div class="tbl-row"><span class="pid">django__django-11583</span><span class="pass">PASS</span><span class="k">0.88</span><span class="num">9610 ms</span><span class="num">2,940</span></div>
+    <div class="tbl-row"><span class="pid">sphinx-doc__sphinx-7686</span><span class="pass">PASS</span><span class="k">0.92</span><span class="num">7180 ms</span><span class="num">2,640</span></div>
+    <div class="tbl-row"><span class="pid">sympy__sympy-13895</span><span class="fail">FAIL</span><span class="k">0.71</span><span class="num">14820 ms</span><span class="num">4,910</span></div>
+    <div class="tbl-row"><span class="pid">astropy__astropy-12907</span><span class="pass">PASS</span><span class="k">0.89</span><span class="num">9920 ms</span><span class="num">3,420</span></div>
+    <div class="tbl-row"><span class="pid">django__django-11620</span><span class="pass">PASS</span><span class="k">0.87</span><span class="num">8910 ms</span><span class="num">3,050</span></div>
+    <div class="tbl-row"><span class="pid">matplotlib__matplotlib-24149</span><span class="pass">PASS</span><span class="k">0.85</span><span class="num">10240 ms</span><span class="num">3,710</span></div>
+    <div class="tbl-row"><span class="pid">pylint-dev__pylint-7080</span><span class="pass">PASS</span><span class="k">0.93</span><span class="num">6890 ms</span><span class="num">2,510</span></div>
+    <div class="tbl-row"><span class="pid">scikit-learn__scikit-learn-25500</span><span class="fail">FAIL</span><span class="k">0.74</span><span class="num">13720 ms</span><span class="num">4,520</span></div>
+    <div class="tbl-row"><span class="pid">django__django-12453</span><span class="pass">PASS</span><span class="k">0.90</span><span class="num">8430 ms</span><span class="num">3,020</span></div>
+    <div class="tbl-row"><span class="pid">requests__requests-1142</span><span class="pass">PASS</span><span class="k">0.88</span><span class="num">7610 ms</span><span class="num">2,810</span></div>
+    <div class="tbl-row"><span class="pid">sympy__sympy-14774</span><span class="pass">PASS</span><span class="k">0.86</span><span class="num">9050 ms</span><span class="num">3,290</span></div>
+    <div class="tbl-row"><span class="pid">django__django-13447</span><span class="pass">PASS</span><span class="k">0.91</span><span class="num">7820 ms</span><span class="num">2,940</span></div>
+    <div class="tbl-row"><span class="pid">pytest-dev__pytest-7220</span><span class="pass">PASS</span><span class="k">0.87</span><span class="num">8290 ms</span><span class="num">3,150</span></div>
+    <div class="tbl-row"><span class="pid">django__django-13658</span><span class="fail">FAIL</span><span class="k">0.69</span><span class="num">15410 ms</span><span class="num">5,140</span></div>
+    <div class="tbl-row"><span class="pid">astropy__astropy-14182</span><span class="pass">PASS</span><span class="k">0.89</span><span class="num">9410 ms</span><span class="num">3,380</span></div>
+    <div class="tbl-row"><span class="pid">scikit-learn__scikit-learn-13496</span><span class="pass">PASS</span><span class="k">0.85</span><span class="num">10120 ms</span><span class="num">3,640</span></div>
+    <div class="tbl-row"><span class="pid">django__django-14534</span><span class="pass">PASS</span><span class="k">0.92</span><span class="num">7240 ms</span><span class="num">2,720</span></div>
+    <div class="tbl-row"><span class="pid">sympy__sympy-16766</span><span class="pass">PASS</span><span class="k">0.88</span><span class="num">8620 ms</span><span class="num">3,090</span></div>
+    <div class="tbl-row"><span class="pid">flask__flask-4045</span><span class="pass">PASS</span><span class="k">0.90</span><span class="num">7530 ms</span><span class="num">2,800</span></div>
+    <!-- hidden 30 -->
+    <div class="tbl-row hidden"><span class="pid">django__django-15280</span><span class="pass">PASS</span><span class="k">0.87</span><span class="num">8910 ms</span><span class="num">3,140</span></div>
+    <div class="tbl-row hidden"><span class="pid">matplotlib__matplotlib-25433</span><span class="pass">PASS</span><span class="k">0.86</span><span class="num">9220 ms</span><span class="num">3,280</span></div>
+    <div class="tbl-row hidden"><span class="pid">scikit-learn__scikit-learn-15512</span><span class="fail">FAIL</span><span class="k">0.72</span><span class="num">14210 ms</span><span class="num">4,710</span></div>
+    <div class="tbl-row hidden"><span class="pid">django__django-15689</span><span class="pass">PASS</span><span class="k">0.89</span><span class="num">8410 ms</span><span class="num">3,020</span></div>
+    <div class="tbl-row hidden"><span class="pid">sphinx-doc__sphinx-9999</span><span class="pass">PASS</span><span class="k">0.91</span><span class="num">7180 ms</span><span class="num">2,690</span></div>
+    <div class="tbl-row hidden"><span class="pid">sympy__sympy-17139</span><span class="pass">PASS</span><span class="k">0.88</span><span class="num">8810 ms</span><span class="num">3,210</span></div>
+    <div class="tbl-row hidden"><span class="pid">pylint-dev__pylint-8124</span><span class="pass">PASS</span><span class="k">0.85</span><span class="num">9450 ms</span><span class="num">3,420</span></div>
+    <div class="tbl-row hidden"><span class="pid">django__django-16139</span><span class="fail">FAIL</span><span class="k">0.70</span><span class="num">14920 ms</span><span class="num">4,930</span></div>
+    <div class="tbl-row hidden"><span class="pid">requests__requests-2317</span><span class="pass">PASS</span><span class="k">0.92</span><span class="num">6920 ms</span><span class="num">2,540</span></div>
+    <div class="tbl-row hidden"><span class="pid">astropy__astropy-13033</span><span class="pass">PASS</span><span class="k">0.86</span><span class="num">9280 ms</span><span class="num">3,310</span></div>
+    <div class="tbl-row hidden"><span class="pid">django__django-13230</span><span class="pass">PASS</span><span class="k">0.88</span><span class="num">8520 ms</span><span class="num">3,080</span></div>
+    <div class="tbl-row hidden"><span class="pid">matplotlib__matplotlib-23987</span><span class="pass">PASS</span><span class="k">0.90</span><span class="num">7920 ms</span><span class="num">2,910</span></div>
+    <div class="tbl-row hidden"><span class="pid">sympy__sympy-15346</span><span class="fail">FAIL</span><span class="k">0.73</span><span class="num">13880 ms</span><span class="num">4,610</span></div>
+    <div class="tbl-row hidden"><span class="pid">scikit-learn__scikit-learn-14087</span><span class="pass">PASS</span><span class="k">0.85</span><span class="num">10310 ms</span><span class="num">3,700</span></div>
+    <div class="tbl-row hidden"><span class="pid">django__django-14238</span><span class="pass">PASS</span><span class="k">0.91</span><span class="num">7660 ms</span><span class="num">2,810</span></div>
+    <div class="tbl-row hidden"><span class="pid">pytest-dev__pytest-10081</span><span class="pass">PASS</span><span class="k">0.87</span><span class="num">8810 ms</span><span class="num">3,180</span></div>
+    <div class="tbl-row hidden"><span class="pid">sympy__sympy-14817</span><span class="pass">PASS</span><span class="k">0.89</span><span class="num">8240 ms</span><span class="num">2,990</span></div>
+    <div class="tbl-row hidden"><span class="pid">django__django-11815</span><span class="pass">PASS</span><span class="k">0.86</span><span class="num">9080 ms</span><span class="num">3,260</span></div>
+    <div class="tbl-row hidden"><span class="pid">astropy__astropy-12891</span><span class="fail">FAIL</span><span class="k">0.71</span><span class="num">15110 ms</span><span class="num">5,020</span></div>
+    <div class="tbl-row hidden"><span class="pid">scikit-learn__scikit-learn-13779</span><span class="pass">PASS</span><span class="k">0.88</span><span class="num">8410 ms</span><span class="num">3,040</span></div>
+    <div class="tbl-row hidden"><span class="pid">django__django-13265</span><span class="pass">PASS</span><span class="k">0.90</span><span class="num">7820 ms</span><span class="num">2,880</span></div>
+    <div class="tbl-row hidden"><span class="pid">django__django-13315</span><span class="pass">PASS</span><span class="k">0.87</span><span class="num">8610 ms</span><span class="num">3,120</span></div>
+    <div class="tbl-row hidden"><span class="pid">sympy__sympy-19637</span><span class="pass">PASS</span><span class="k">0.89</span><span class="num">8120 ms</span><span class="num">2,930</span></div>
+    <div class="tbl-row hidden"><span class="pid">pylint-dev__pylint-6386</span><span class="fail">FAIL</span><span class="k">0.74</span><span class="num">13540 ms</span><span class="num">4,480</span></div>
+    <div class="tbl-row hidden"><span class="pid">requests__requests-2931</span><span class="pass">PASS</span><span class="k">0.91</span><span class="num">7350 ms</span><span class="num">2,690</span></div>
+    <div class="tbl-row hidden"><span class="pid">django__django-15347</span><span class="pass">PASS</span><span class="k">0.88</span><span class="num">8480 ms</span><span class="num">3,060</span></div>
+    <div class="tbl-row hidden"><span class="pid">matplotlib__matplotlib-26020</span><span class="fail">FAIL</span><span class="k">0.72</span><span class="num">14620 ms</span><span class="num">4,870</span></div>
+    <div class="tbl-row hidden"><span class="pid">scikit-learn__scikit-learn-25232</span><span class="pass">PASS</span><span class="k">0.86</span><span class="num">9320 ms</span><span class="num">3,360</span></div>
+    <div class="tbl-row hidden"><span class="pid">sphinx-doc__sphinx-10325</span><span class="pass">PASS</span><span class="k">0.92</span><span class="num">7080 ms</span><span class="num">2,610</span></div>
+    <div class="tbl-row hidden"><span class="pid">django__django-16819</span><span class="pass">PASS</span><span class="k">0.90</span><span class="num">7740 ms</span><span class="num">2,840</span></div>
+  </div>
+  <button class="toggle" id="toggle-all" type="button">Load all 50 &rarr;</button>
+</div></section>
+
+<section class="body"><div class="wrap">
+  <h2>Methodology &middot; how K-score was computed</h2>
+  <p>K-score is a five-component weighted score, replayable from the receipt log. See <a href="/docs/k-score-methodology" style="color:var(--accent);border-bottom:1px dashed var(--line)">/docs/k-score-methodology</a> for the formal definition. Here is how each component was measured on SWE-bench Verified Mini.</p>
+  <div class="k-formula">K = 0.40&middot;A + 0.15&middot;S + 0.15&middot;L + 0.15&middot;C + 0.15&middot;V</div>
+  <h3>A &middot; Accuracy (0.40 weight)</h3>
+  <p>For each problem, A is 1.0 if the agent's patch makes the hidden test pass, 0.0 if it does not, and a partial credit between 0 and 1 if a subset of the relevant tests pass (e.g., the agent fixes the regression in one of three failing tests). Computed from the harness <code>test_outcome</code> field after applying the patch in the project's test runner.</p>
+  <h3>S &middot; Stability (0.15 weight)</h3>
+  <p>S measures variance across N=10 reruns with the same seed but different sampler nonces. Normalized so zero variance equals 1.0 and a stdev of 0.5 on the per-problem accuracy collapses to 0. Recorded as <code>k_stability_10x</code> on each receipt.</p>
+  <h3>L &middot; Latency (0.15 weight)</h3>
+  <p>L compares p95 inference latency against the budget declared in the artifact's recipe (15 s per problem for this artifact). 1.0 if at or under budget, decays exponentially past it: a 30 s problem gets ~0.5, a 60 s problem gets ~0.1. Recorded as <code>latency_p95_ms</code> + the budget side-by-side on the receipt.</p>
+  <h3>C &middot; Compliance (0.15 weight)</h3>
+  <p>C is the pass rate against the artifact's compliance pack. For a code-review artifact this checks: no patch attempts to exfiltrate test secrets, no patch writes outside the sandbox, no patch invokes network APIs the manifest does not declare. All-pass = 1.0; one violation drops to ~0.7; two or more drops to 0. All 50 runs reported 1.0 here.</p>
+  <h3>V &middot; Verifier (0.15 weight)</h3>
+  <p>V is the agreement rate of the runtime verifier with the agent's output. For code patches the verifier is a separate constrained-decoded model that judges, on a per-line basis, whether the patch is consistent with the problem statement. Sampled at 100% on this run for transparency; production deploys sample at 5-10%. Recorded as <code>verifier_agreement</code>.</p>
+</div></section>
+
+<section class="body"><div class="wrap">
+  <h2>Reproduce this run</h2>
+  <div class="step-row">
+    <div class="step">
+      <p class="num">step 01</p>
+      <p class="lab">clone the harness repo</p>
+      <p class="det">All harness code is public. Pinned to the same commit we ran. <code>git clone https://github.com/sneaky-hippo/kolmogorov-stack &amp;&amp; cd kolmogorov-stack</code></p>
+    </div>
+    <div class="step">
+      <p class="num">step 02</p>
+      <p class="lab">install kolm CLI</p>
+      <p class="det">One Node 20+ install. <code>npm i -g github:sneaky-hippo/kolmogorov-stack</code>. Pulls the artifact registry on first run.</p>
+    </div>
+    <div class="step">
+      <p class="num">step 03</p>
+      <p class="lab">run the benchmark</p>
+      <p class="det"><code>kolm bench swe-bench-mini --artifact code-review-deepseek-coder-6.7b --seed 42 --out ./results/</code>. Takes ~12 min on an A100. Receipts written to <code>./results/receipts.jsonl</code>.</p>
+    </div>
+    <div class="step">
+      <p class="num">step 04</p>
+      <p class="lab">verify receipts match</p>
+      <p class="det"><code>kolm verify ./results/receipts.jsonl --expect-k-avg 0.86 --expect-pass 41</code>. Exits 0 if your run matches ours bit-for-bit on hashes and within tolerance on K-score.</p>
+    </div>
+  </div>
+</div></section>
+
+<section class="body"><div class="wrap">
+  <h2>Receipt example</h2>
+  <p>One receipt per problem. Below is the receipt for <code>django__django-11099</code>, the first row in the table.</p>
+<pre>{
+  "schema":          "kolm.receipt.v0.1",
+  "benchmark":       "swe-bench-verified-mini",
+  "problem_id":      "django__django-11099",
+  "artifact_cid":    "cidv1:sha256:91a4f7d3b8c6e2a1d5f9b4c7e3a8d1b6c2e5f8a4",
+  "seed":            42,
+  "input_sha":       "sha256:5e8b1c9d4a7f2e0b6c3a8f1e9d4b7c2a5f8e1b3d",
+  "patch_sha":       "sha256:8d2a4c7e1b5f3a9c6e0b2d8f1a4c7e3b6d9a2c5f",
+  "test_outcome":    "pass",
+  "k_score":         0.91,
+  "components": {
+    "accuracy":      1.00,
+    "stability":     0.97,
+    "latency":       0.92,
+    "compliance":    1.00,
+    "verifier":      0.89
+  },
+  "latency_p95_ms":  8420,
+  "tokens_total":    3180,
+  "verifier_agreement": 0.89,
+  "ts":              "2026-05-13T19:42:08Z",
+  "issuer_pubkey":   "kolm-issuer-2026q2",
+  "hmac":            "f3a7b1c4d8e2a6c9f1d4b7e2c5a8d1b4c7e9f2a5"
+}</pre>
+  <p>Re-run that exact problem with <code style="font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:3px;padding:1px 5px">kolm bench swe-bench-mini --problem django__django-11099 --seed 42</code>. The receipt should match on <code>input_sha</code>, <code>patch_sha</code>, and (within 5 ms) <code>latency_p95_ms</code>.</p>
+</div></section>
+
+<section class="body"><div class="wrap">
+  <h2>Why "mini," why "Verified"</h2>
+  <div class="note">
+    <p style="margin:0 0 8px;color:var(--ink-mute)"><b>Mini.</b> 50 problems is a fixed curated subset chosen for CI-friendliness. Full SWE-bench is 2294 problems and runs for tens of hours on a single A100. Mini gives directionally-correct signal in ~12 minutes - which means you can put it on a PR gate without burning compute budget on every push.</p>
+    <p style="margin:0;color:var(--ink-mute)"><b>Verified.</b> OpenAI's SWE-bench Verified is a 500-problem human-graded subset of the 2294. Every Verified problem has been reviewed for ambiguity, broken tests, or under-specification. We sample only from Verified - so a fail here is a real defect, not a benchmark-design artifact.</p>
+  </div>
+  <p>The trade-off is variance. 50 problems means a 4% pass-rate swing changes the headline. We publish the full 50 line by line so anyone can spot which subset they're skeptical of. The <code>seed=42</code> guarantee means the sampler picks the same 50 problems every run.</p>
+</div></section>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var btn = document.getElementById('toggle-all');
+  var hidden = document.querySelectorAll('.tbl-row.hidden');
+  var on = false;
+  btn.addEventListener('click', function(){
+    on = !on;
+    hidden.forEach(function(r){
+      if (on) r.classList.remove('hidden'); else r.classList.add('hidden');
+    });
+    btn.textContent = on ? 'Show first 20 only' : 'Load all 50 &rarr;';
+  });
+})();
+</script>
+<script src="/nav.js" defer></script>
+</body>
+</html>

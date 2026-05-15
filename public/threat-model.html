@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Threat model · kolm</title>
 <meta name="description" content="What kolm defends against and what it does not. HMAC chain, K-score gate, manifest signing, recall integrity. Honest scope.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm · threat model">
 <meta property="og:description" content="What the signed artifact actually defends against. What it does not. The full scope.">
@@ -41,13 +42,13 @@
   header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
   section.hero { padding: 88px 0 32px; }
@@ -57,7 +58,7 @@
   p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
 
   .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
-  .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; }
+  .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
   .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
 
   .threat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0 0; }
@@ -68,7 +69,7 @@
   .card .tag { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
   .card.defends .tag { color: var(--good); }
   .card.does-not .tag { color: var(--bad); }
-  .card h3 { margin: 0 0 8px; font-size: 15.5px; font-weight: 540; color: var(--ink); }
+  .card h3 { margin: 0 0 8px; font-size: 15.5px; font-weight: 500; color: var(--ink); }
   .card p { margin: 0; font-size: 13.5px; color: var(--ink-mute); line-height: 1.55; }
 
   pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 14px 0; white-space: pre; }
@@ -79,10 +80,10 @@
 
   table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; margin: 14px 0 0; }
   table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 12px 12px; text-align: left; vertical-align: top; }
-  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 540; }
+  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
   table.tbl td { color: var(--ink-mute); }
-  table.tbl td b { color: var(--ink); font-weight: 540; }
-  table.tbl td.row-h { color: var(--ink); font-weight: 540; font-family: var(--mono); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.02em; width: 28%; }
+  table.tbl td b { color: var(--ink); font-weight: 500; }
+  table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.02em; width: 28%; }
   @media (max-width: 720px) {
     table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
     table.tbl thead { display: none; }
@@ -94,10 +95,10 @@
   }
 
   .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
-  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 540; color: var(--ink); }
+  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
   .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
   .verdict p:last-child { margin-bottom: 0; }
-  .verdict b { color: var(--ink); font-weight: 540; }
+  .verdict b { color: var(--ink); font-weight: 500; }
 
   footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 80px; }
   footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
@@ -133,6 +134,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -173,7 +175,7 @@ output_receipt  = HMAC-SHA256(secret, artifact_root ||
                               SHA256(prompt) || SHA256(output) ||
                               timestamp || run_nonce)
 
-<span class="c">// verification (v0.1: shared-secret HMAC — issuer or shared-secret holder)</span>
+<span class="c">// verification (v0.1: shared-secret HMAC, issuer or shared-secret holder)</span>
 <span class="c">// public-key (Ed25519) verifier is a roadmap tier</span>
 verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <span style="color:var(--bad);">tampered</span></pre>
     </div>
@@ -209,7 +211,7 @@ verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <sp
         <div class="card defends">
           <div class="tag">defends · t5</div>
           <h3>Replay across artifacts</h3>
-          <p>A valid receipt from A copied to B fails: receipts embed artifact_root, A's root ≠ B's root.</p>
+          <p>A valid receipt from A copied to B fails: receipts embed artifact_root, A's root &ne; B's root.</p>
         </div>
 
         <div class="card defends">
@@ -297,7 +299,7 @@ verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <sp
 
     <div class="group">
       <h2>Reporting</h2>
-      <p>Found a way around any of T1–T6? Email <a href="mailto:security@kolm.ai" style="color:var(--accent);">security@kolm.ai</a> with repro steps. Bounty brackets on <a href="/trust" style="color:var(--accent);">trust</a>. Coordinated disclosure: 90 days standard, 14 days for actively exploited.</p>
+      <p>Found a way around any of T1?6? Email <a href="mailto:security@kolm.ai" style="color:var(--accent);">security@kolm.ai</a> with repro steps. Bounty brackets on <a href="/trust" style="color:var(--accent);">trust</a>. Coordinated disclosure: 90 days standard, 14 days for actively exploited.</p>
     </div>
 
     <div class="verdict">
@@ -311,9 +313,53 @@ verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <sp
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolm v0.1.0 · the AI compiler</span>
-    <span><a href="/manifesto">Manifesto</a> · <a href="/security">Security</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

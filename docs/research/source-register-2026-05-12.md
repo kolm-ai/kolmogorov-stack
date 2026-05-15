@@ -452,3 +452,276 @@ This register records primary sources used in the first knowledge-base pass. Sou
 | brew-stub-current | ../scripts/brew/kolm.rb | Homebrew preview status, placeholder SHA, and formula test review. |
 | winget-stub-current | ../scripts/winget/kolm.yaml | Windows package-manager preview status, missing companion manifests, and package claims review. |
 | tests-release-current | ../tests | Absence of package-manager, action, package dry-run, and release-signing tests review. |
+
+## Cookbook Example Governance Refresh 2026-05-12
+
+| Ref | URL | Used For |
+| --- | --- | --- |
+| kolm-live-cookbook-current | https://kolm.ai/cookbook | Live cookbook headline, recipe count, compileable pattern claims, K-score, artifact, offline, and proof wording review. |
+| kolm-live-cookbook-bug-current | https://kolm.ai/cookbook/bug-spotter | Live detail-page compile command, JSON-LD HowTo, K-score, size, compile time, offline, and signed receipt wording review. |
+| kolm-live-use-cases-current | https://kolm.ai/use-cases | Live shipped-shapes, worked-example, eval-set, artifact, offline, and K-score positioning review. |
+| public-cookbook-index-current | ../public/cookbook.html | Local cookbook index, 30-recipes headline, linked detail pages, build-your-own copy, and source of public claims. |
+| public-cookbook-pages-current | ../public/cookbook | Local cookbook detail pages, command snippets, JSON-LD HowTo blocks, K-score values, size claims, and latency tables. |
+| examples-public-current | ../examples | Public seed example JSON files, visibility, tags, positive/negative counts, and validity review. |
+| fixture-artifacts-current | ../test/fixtures | Verified `.kolm` fixture artifacts, sizes, hashes, sample bench file, and tenant params review. |
+| scripts-build-examples-current | ../scripts/build-all-examples.mjs | Public fixture builder scope, deterministic-builder comments, and four-fixture inventory review. |
+| scripts-build-fixtures-current | ../scripts/build-public-fixture.mjs | Sample uppercase fixture generation, evals, secret, and K-score output review. |
+| scripts-build-redactor-current | ../scripts/build-example-redactor.mjs | Redactor fixture recipes, pack, index, tenant params, evals, and artifact generation review. |
+| scripts-build-extractor-current | ../scripts/build-example-extractor.mjs | Extractor fixture recipes, rules, tenant params, evals, and artifact generation review. |
+| scripts-build-classifier-current | ../scripts/build-example-classifier.mjs | Classifier fixture categories, tenant params, evals, and artifact generation review. |
+| tests-artifact-fixture-current | ../tests/artifact-end-to-end.test.js | Four-fixture signature, eval, benchmark, tenant param, audit callback, input cap, and tamper tests. |
+| cli-cookbook-contract-current | ../cli/kolm.js | Current compile/run/new/score/spec/artifact command contract compared with cookbook snippets. |
+| demo-runbook-current | ../DEMO.md | Legacy demo runbook drift against current domain, brand, package, and verified artifact proof. |
+| tests-cookbook-current | ../tests | Absence of cookbook command, JSON-LD, proof manifest, and page-specific artifact tests. |
+
+## Project Hooks Governance Refresh 2026-05-12
+
+| Ref | URL | Used For |
+| --- | --- | --- |
+| kolm-live-build-your-own-hooks-current | https://kolm.ai/build-your-own | Live `kolm.yaml`, hooks, sidecar, doctor, install, local-only, and egress proof wording review. |
+| kolm-live-docs-hooks-current | https://kolm.ai/docs | Live hooks docs, install/doctor snippets, MCP serve wording, and init example review. |
+| kolm-live-yaml-schema-current | https://kolm.ai/docs/kolm-yaml-v0.1.json | Live project schema required fields, hook shape, `k_min`, MCP transport enum, and stdout mutation wording. |
+| local-yaml-schema-current | ../public/docs/kolm-yaml-v0.1.json | Local schema copy compared with runtime parsers. |
+| src-hooks-current | ../src/hooks.js | Hook discovery, hand parser, shell execution, timeout, exit-code blocking, stdout/stderr capture, and bypass behavior. |
+| src-project-current | ../src/project.js | Project-config parser, defaults, artifact glob resolution, MCP config parsing, `paths`, `allowed_tools`, and `k_min` review. |
+| services-mcp-project-current | ../services/mcp/server.js | Project artifact discovery, MCP tool naming, `k_min` filtering, metadata stripping, transport support, and config behavior. |
+| cli-project-current | ../cli/kolm.js | `kolm init`, duplicate project parser, skill sidecar emission, `kolm serve`, `kolm doctor`, hook dispatch, and docs snippets review. |
+| docs-hooks-current | ../docs/HOOKS.md | Hook contract docs, object hook examples, exit-code semantics, environment, and examples review. |
+| docs-authoring-hooks-current | ../docs/AUTHORING.md | Runtime egress, receipt, and local-run guarantee wording compared with hooks/project automation. |
+| docs-evolve-hooks-current | ../docs/EVOLVE.md | Tune, hooks, airgap, local capture, and watcher claims that depend on local automation governance. |
+| src-tune-hooks-current | ../src/tune.js | Local tune subprocess, airgap env, capture file append, and interaction with project automation review. |
+| tests-project-hooks-current | ../tests | Absence of focused tests for hooks, project parser, init, doctor, sidecar, and MCP project config. |
+
+## Tune Evolution Governance Refresh 2026-05-12
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| kolm-live-evolve-current | https://kolm.ai/evolve | Live tune/RAG metadata, hero, terminal sample, airgap, watcher, and honest-scope wording review. |
+| public-evolve-current | ../public/evolve.html | Local evolve page copy, sample K-score, airgap claims, RAG status, and watcher claims. |
+| docs-tune-current | ../docs/TUNE.md | Tune command reference, capture file schema, exit codes, gates, watcher behavior, and adapter caveats. |
+| docs-evolve-current | ../docs/EVOLVE.md | Conceptual evolve framing and local-loop positioning. |
+| src-tune-current | ../src/tune.js | Init, capture append, trainer spawn, airgap env, eval, promote, rollback, watch, and status behavior. |
+| scripts-tune-step-current | ../scripts/tune-step.py | PEFT/Transformers trainer, airgap base-model checks, dependency exits, and adapter save behavior. |
+| cli-tune-current | ../cli/kolm.js | Tune command dispatch, CLI output, exit behavior, gate display, and help text. |
+| src-artifact-runner-tune-current | ../src/artifact-runner.js | Artifact eval-case loading, inspect output shape, local run behavior, and adapter-blind execution. |
+| src-artifact-kscore-current | ../src/artifact.js | K-score formula, gate, no-eval behavior, and artifact eval packaging. |
+| src-rag-evolve-current | ../src/rag.js | Local BM25 index/query/attach sidecar behavior and RAG helper target surface. |
+| src-verifier-evolve-current | ../src/verifier.js | Sandbox library shape and absence of `lib.rag` injection. |
+| tests-tune-current | ../tests | Absence of focused tests for tune, capture, promotion, watch, airgap, trainer, and evolve public claims. |
+| tune-eval-probe-current | local `evalRevision` probe on `test/fixtures/sample.kolm` | Verified that current tune eval returns `pass: 0/0` and K-score `0.4415` through the `inspectArtifact` contract. |
+
+## Homepage Claim Regression Refresh 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| kolm-live-home-claim-current | https://kolm.ai/ | Live homepage model-artifact, offline, phone, signature, registry, and enterprise claim review. |
+| kolm-live-docs-claim-current | https://kolm.ai/docs | Live docs route count, package/install, hosted API, SDK, MCP, and old-positioning review. |
+| public-index-claim-current | ../public/index.html | Local homepage metadata, JSON-LD, FAQ, terminal demo, use-case cards, regulated copy, and on-device wording review. |
+| tests-site-claim-current | ../tests/site.test.js | Exact forbidden-pattern gate, legacy-token scan, inline-script parse, public route, sitemap, and asset coverage review. |
+| root-readme-claim-current | ../README.md | README intro versus implementation-note drift around model, phone, VPC, and artifact contents. |
+| root-package-claim-current | ../package.json | Package metadata description claim review. |
+| src-artifact-homepage-current | ../src/artifact.js | Artifact member truth, model pointer record, optional slots, HMAC receipt/signature implementation, and current K-score gate. |
+| src-compile-homepage-current | ../src/compile.js | Current cloud-runtime artifact and future LoRA/model training comments. |
+| src-router-homepage-current | ../src/router.js | Current receipt verification mode, public-key roadmap comments, runtime endpoints, and readiness behavior. |
+| tests-artifact-homepage-current | ../tests/artifact-end-to-end.test.js | Verified fixture artifacts, benchmark zero egress, tenant params, audit callback, input cap, and tamper rejection proof baseline. |
+| site-test-run-2026-05-13 | local `node --test .\tests\site.test.js` | Confirmed current claim-gate failure and six passing focused site checks after escalated rerun. |
+
+## Runtime Sandbox Threat Refresh 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| node-vm-current-2026-05-13 | https://nodejs.org/api/vm.html | Current official `node:vm` warning and VM context behavior. |
+| wasmtime-security-current-2026-05-13 | https://docs.wasmtime.dev/security.html | Wasmtime sandbox, explicit imports, checked memory, and WASI capability model. |
+| webassembly-security-current-2026-05-13 | https://webassembly.org/docs/security/ | WebAssembly sandbox, control-flow integrity, and memory isolation model. |
+| src-verifier-runtime-current | ../src/verifier.js | `compileJs`, denylist, source size cap, cooperative timeout, WASM stub, and verification behavior. |
+| src-artifact-runner-runtime-current | ../src/artifact-runner.js | Artifact load, signature verification, input cap, per-recipe timeout, local run receipt, audit preview, and eval behavior. |
+| src-runtime-current-2026-05-13 | ../src/runtime.js | Hosted registry execution path, compiled function cache, cache TTL, and lack of trust partition. |
+| src-router-runtime-current | ../src/router.js | `/v1/verify`, `/v1/publish`, `/v1/public/run`, registry export, receipt comments, and public execution surfaces. |
+| src-registry-runtime-current | ../src/registry.js | Concept/version storage, visibility, source storage, and absence of trust-level fields. |
+| src-benchmark-runtime-current | ../src/benchmark.js | Benchmark-only egress monitor, patched network APIs, and report privacy fields. |
+| src-synthesis-runtime-current | ../src/synthesis.js | Prompt-level pure-function contract and generated-source path into verifier. |
+| public-sdk-runtime-current | ../public/sdk.js | Browser worker intent, unsafeMode, main-thread fallback, receipt shape, and syntax failure. |
+| public-worker-runtime-current | ../public/recipe-worker.js | Intended browser worker lockdown, source compilation, timeout comments, and syntax failure. |
+| public-device-runtime-current | ../public/device.html | Device page copy, trust gate, source hash check, public registry execution, and inline script coverage gap. |
+| tests-artifact-runtime-current | ../tests/artifact-end-to-end.test.js | Fixture integrity, eval, benchmark egress, input cap, audit callback, and tamper tests. |
+| tests-site-runtime-current | ../tests/site.test.js | Inline script parse coverage and external asset syntax gap. |
+| compilejs-probe-2026-05-13 | local `compileJs` probe | Confirmed safe recipe accepts, blocked identifiers reject, and large source rejects. |
+| browser-asset-check-2026-05-13 | local `node --check public/sdk.js` and `public/recipe-worker.js` | Confirmed current browser SDK and worker syntax failures. |
+
+## Release Channel Live Refresh 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| kolm-live-docs-release-2026-05-13 | https://kolm.ai/docs | Live docs install, SDK, API host, MCP package, and brand-surface drift review. |
+| pypi-kolm-2026-05-13 | https://pypi.org/project/kolm/ | Confirmed PyPI `kolm` ownership, latest version, release date, maintainer, and unrelated project summary. |
+| npm-view-cli-2026-05-13 | local `npm view` for public CLI package | Confirmed documented public CLI npm package returns 404. |
+| npm-view-root-2026-05-13 | local `npm view` for root package | Confirmed root package is not public on npm. |
+| npm-view-node-sdk-2026-05-13 | local `npm view` for Node SDK package | Confirmed Node SDK package is not public on npm. |
+| github-repo-availability-2026-05-13 | https://github.com/sneaky-hippo/kolmogorov-stack | Confirmed public source repository URL returned 200. |
+| homebrew-tap-check-2026-05-13 | https://github.com/kolm/homebrew-kolm | Confirmed implied Homebrew tap returned 404. |
+| scoop-check-2026-05-13 | https://github.com/ScoopInstaller/Main/blob/master/bucket/kolm.json | Confirmed public Scoop manifest path returned 404. |
+| winget-check-2026-05-13 | https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/k/Kolmogorov/kolm/0.1.0 | Confirmed winget manifest path returned 404. |
+| docker-hub-kolm-2026-05-13 | https://hub.docker.com/v2/repositories/sneakyhippo/kolm | Confirmed likely Docker Hub repository returned 404. |
+| public-docs-release-current | ../public/docs.html | Local install tabs for npm, GitHub-source, Homebrew, source checkout, and current command snippets. |
+| public-integrations-release-current | ../public/integrations.html | Local shipped/preview labels for GitHub Actions, Node, Python, npm, Homebrew, Windows package managers, Docker, MCP, and VS Code. |
+| package-json-release-current | ../package.json | Root package name, private flag, bin entry, scripts, and CLI metadata. |
+| sdk-node-package-release-current | ../sdk/node/package.json | Node SDK package name, files allowlist, bin, exports, repository, and engines. |
+| sdk-python-package-release-current | ../sdk/python/pyproject.toml | Python package name, script entry, metadata, and package discovery. |
+| sdk-python-client-release-current | ../sdk/python/kolm/client.py | Python wrapper shell commands for compile, run, and verify compared with root CLI. |
+| sdk-python-readme-release-current | ../sdk/python/README.md | Python README package, brand, CLI, and host drift review. |
+| sdk-vscode-package-release-current | ../sdk/vscode/package.json | VS Code package name, display text, commands, config, publisher, and encoding drift. |
+| github-action-release-current | ../.github/actions/kolm-compile/action.yml | Composite action install, config, compile, upload, and verify command contract. |
+| github-workflows-release-search-2026-05-13 | ../.github/workflows | Search for npm publish, PyPI upload, Docker push, VS Code publish, SLSA, Cosign, SBOM, and release-asset steps. |
+| scripts-brew-release-current | ../scripts/brew/kolm.rb | Homebrew formula stub status, placeholder SHA, install command, and test block. |
+| scripts-winget-release-current | ../scripts/winget/kolm.yaml | winget manifest stub status, missing companion manifests, package metadata, and product-claim drift. |
+| dockerfile-release-current | ../Dockerfile | Local server container evidence compared with public image claims. |
+| root-pack-dry-run-2026-05-13 | local `npm pack --dry-run --json` | Escalated dry-run summary: 699 entries, 243,697,965 bytes packed, 263,769,399 bytes unpacked, 272 `tmp/` entries, 62 research docs, no lock, no root license. |
+| cli-help-release-2026-05-13 | local `node .\cli\kolm.js --help` | Confirmed root CLI command list and source CLI availability. |
+| cli-whoami-probe-2026-05-13 | local `node .\cli\kolm.js whoami` | Confirmed action auth command is unknown. |
+| cli-verify-probe-2026-05-13 | local `node .\cli\kolm.js verify test.kolm` | Confirmed action verify command is unknown. |
+| cli-compile-help-2026-05-13 | local `node .\cli\kolm.js compile --help` | Confirmed compile help does not document JSON output mode. |
+| root-test-run-release-2026-05-13 | local `cmd /c npm test` | Current full suite baseline during this slice: 53 pass, 1 pre-existing auth readiness failure. |
+
+## Competitor Trace Import Wedge 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| langfuse-public-api-2026-05-13 | https://langfuse.com/docs/api-and-data-platform/features/public-api | Public API, OpenAPI, trace retrieval, observations retrieval, metrics, UI export, and blob storage export review. |
+| langfuse-query-sdk-2026-05-13 | https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk | SDK trace, observation, score, dataset, metric, filter, and pagination review. |
+| langsmith-bulk-export-2026-05-13 | https://docs.langchain.com/langsmith/data-export | Bulk trace export to S3-compatible Parquet, export fields, scheduling, plan restrictions, and run data review. |
+| langsmith-query-sdk-2026-05-13 | https://docs.langchain.com/langsmith/export-traces | SDK/API trace query path and bulk-export recommendation review. |
+| braintrust-api-2026-05-13 | https://www.braintrust.dev/docs/api-reference | Projects, experiments, datasets, logs, prompts, scorers, BTQL, and export API review. |
+| helicone-datasets-2026-05-13 | https://docs.helicone.ai/features/datasets | Dataset creation from requests, export formats, fine-tuning/eval use cases, and API query review. |
+| helicone-export-2026-05-13 | https://docs.helicone.ai/guides/cookbooks/etl | Export CLI, JSONL/CSV, body inclusion, filters, and region options review. |
+| helicone-request-api-2026-05-13 | https://docs.helicone.ai/rest/request/post-v1requestquery-clickhouse | Request query API, large-dataset export path, filters, and response-body field review. |
+| phoenix-export-2026-05-13 | https://arize.com/docs/phoenix/tracing/how-to-tracing/save-and-load-traces | Phoenix trace import/export workflow review. |
+| phoenix-overview-2026-05-13 | https://arize.com/docs/phoenix | Phoenix tracing, evaluations, datasets, experiments, OTLP/OpenInference, and integrations review. |
+| weave-eval-export-2026-05-13 | https://docs.wandb.ai/weave/guides/evaluation/export_eval | Weave evaluation REST API, predictions, scores, resolved dataset inputs, scorer stats, and row digests review. |
+| openpipe-export-2026-05-13 | https://docs.openpipe.ai/features/datasets/exporting-data | OpenPipe JSONL export fields for messages, tools, tool choice, and split review. |
+| openpipe-overview-2026-05-13 | https://docs.openpipe.ai/overview | OpenPipe data capture, logs, upload/export, fine-tuning, hosting, caching, and evaluation positioning review. |
+| predibase-finetune-2026-05-13 | https://docs.predibase.com/fine-tuning/overview | Dataset upload, adapter creation, evaluation, and production deployment workflow review. |
+| predibase-inference-2026-05-13 | https://docs.predibase.com/inference/overview | Private/shared deployments, LoRA serving, custom models, batch inference, structured output, and OpenAI migration review. |
+| litellm-callbacks-2026-05-13 | https://docs.litellm.ai/docs/observability/custom_callback | Custom callbacks, logger hooks, input/success/failure callbacks, proxy-only hooks, and callback payload review. |
+| litellm-custom-provider-2026-05-13 | https://docs.litellm.ai/docs/providers/custom_llm_server | LiteLLM custom API server provider and provider integration surface review. |
+| vercel-wrap-language-model-2026-05-13 | https://ai-sdk.dev/docs/reference/ai-sdk-core/wrap-language-model | Vercel AI SDK middleware wrapping path for artifact-first routing review. |
+| cloudflare-custom-providers-2026-05-13 | https://developers.cloudflare.com/ai-gateway/configuration/custom-providers/ | AI Gateway custom provider, base URL, provider slug, OpenAI-compatible route, and provider-specific route review. |
+| portkey-virtual-keys-2026-05-13 | https://portkey.ai/docs/product/ai-gateway/virtual-keys | Portkey private/self-hosted provider route, provider key, custom host, and virtual key behavior review. |
+| cli-capture-import-current | ../cli/kolm.js | `kolm capture`, `kolm labels`, `kolm distill`, and absence of `kolm import` review. |
+| src-capture-import-current | ../src/capture.js | OpenAI/Anthropic capture prompt extraction, completion extraction, forwarding, model metadata, and prompt hashing review. |
+| src-router-import-current | ../src/router.js | Capture proxy endpoints, observation storage, suggestions, auto-synthesis, label export, auto-distill, and absence of external importers review. |
+| local-import-search-2026-05-13 | local source search | Confirmed no external trace importer commands or competitor-specific integration packages. |
+
+## Trace/Eval Schema Spec 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| trace-eval-schema-spec-2026-05-13 | trace-eval-schema-spec-2026-05-13.md | Proposed `kolm-trace-1` and `kolm-evalcase-1` row shape, privacy fields, eval derivation, source mapping, and fixture sequence. |
+| trace-eval-schema-mapping-2026-05-13 | trace-eval-schema-mapping-2026-05-13.csv | Row-level source-to-Kolm field mapping and loss analysis. |
+| src-router-trace-schema-current | ../src/router.js | Bridge observations, capture rows, label export, receipt verification, auto-synthesis, namespace drift, and source-table truth review. |
+| src-capture-trace-schema-current | ../src/capture.js | Provider prompt extraction, completion extraction, model extraction, prompt hashing, and capture proxy metadata review. |
+| src-compile-trace-schema-current | ../src/compile.js | `rs-1-evals` generation from positives and current compile-to-artifact eval shape. |
+| src-artifact-trace-schema-current | ../src/artifact.js | Artifact manifest, K-score, embedded evals, receipt hash fields, and eval-set hash review. |
+| src-benchmark-trace-schema-current | ../src/benchmark.js | Benchmark report fields, eval replay, latency, egress, integrity, and missing source-trace join review. |
+| data-observations-trace-schema-current | ../data/observations.json | Current local observation row examples and template-hash/latency/cost fields. |
+| langsmith-run-data-format-2026-05-13 | https://docs.langchain.com/langsmith/run-data-format | Run/span fields, trace hierarchy, inputs, outputs, tokens, costs, feedback, dataset references, and status mapping. |
+| trace-schema-web-refresh-2026-05-13 | official source pages opened during schema pass | Current Langfuse, LangSmith, Braintrust, Helicone, Phoenix, Weave, OpenPipe, LiteLLM, Vercel, Cloudflare, and Portkey field-surface refresh. |
+
+## External Score Normalization 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| external-score-normalization-audit-2026-05-13 | external-score-normalization-audit-2026-05-13.md | Policy for normalized `kolm-score-1`, score maps, K-score guardrails, and required score fixtures. |
+| external-score-normalization-matrix-2026-05-13 | external-score-normalization-matrix-2026-05-13.csv | Row-level external score/source mapping, risk, and implementation action matrix. |
+| src-artifact-score-current | ../src/artifact.js | K-score formula, eval_score binding, receipt fields, and no-direct-source-score guard review. |
+| src-compile-score-current | ../src/compile.js | Current `rs-1-evals` generation and coverage/pass-rate source review. |
+| src-artifact-runner-score-current | ../src/artifact-runner.js | Artifact eval replay, deep-equality pass/fail semantics, and current lack of rubric/partial-credit scoring. |
+| src-benchmark-score-current | ../src/benchmark.js | Benchmark K-score, eval accuracy, latency, egress, integrity, and missing source-score join review. |
+| src-router-score-current | ../src/router.js | Receipt verification, source observation, quality score, bridge, and public score surfaces review. |
+| langfuse-scores-overview-2026-05-13 | https://langfuse.com/docs/evaluation/scores/overview | Langfuse score purpose, attachment targets, numeric/categorical/boolean/text types, comments, and API queryability. |
+| langfuse-scores-sdk-2026-05-13 | https://langfuse.com/docs/evaluation/evaluation-methods/scores-via-sdk | Langfuse score creation, trace/observation attachment, data type, comment, and API/SDK use. |
+| langsmith-feedback-format-2026-05-13 | https://docs.langchain.com/langsmith/feedback-data-format | LangSmith feedback fields, score/value/comment, feedback source, run/session IDs, and scorer-origin mapping. |
+| phoenix-evals-sdk-2026-05-13 | https://arize.com/docs/phoenix/evaluation/how-to-evals | Phoenix Score object fields, evaluator kind, direction, score, label, explanation, and metadata mapping. |
+| weave-eval-export-2026-05-13 | https://docs.wandb.ai/weave/guides/evaluation/export_eval | Weave evaluation runs, predictions, scores, resolved rows, summaries, scorer stats, and row digests. |
+
+## Trace Import Privacy 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| trace-import-privacy-policy-2026-05-13 | trace-import-privacy-policy-2026-05-13.md | Hash-only/redacted/raw/blocked modes, required privacy fields, artifact boundary, purge contract, and implementation sequence. |
+| trace-import-privacy-matrix-2026-05-13 | trace-import-privacy-matrix-2026-05-13.csv | Row-level importer privacy, retention, deletion, raw-payload, source-system, and test policy. |
+| langfuse-retention-2026-05-13 | https://langfuse.com/docs/administration/data-retention | Langfuse project retention, default indefinite event storage, nightly deletion, entity timestamps, and self-hosted S3 deletion notes. |
+| langfuse-deletion-2026-05-13 | https://langfuse.com/docs/administration/data-deletion | Langfuse trace/project/org/user deletion paths and related observation/score deletion behavior. |
+| langsmith-purging-2026-05-13 | https://docs.langchain.com/langsmith/data-purging-compliance | LangSmith retention levels, trace delete APIs, delete-by-metadata, non-instant deletion timing, and example hard-delete notes. |
+| phoenix-retention-2026-05-13 | https://arize.com/docs/phoenix/settings/data-retention | Phoenix default indefinite retention, project retention policies, environment defaults, and scheduled cleanup behavior. |
+| phoenix-privacy-2026-05-13 | https://arize.com/docs/phoenix/self-hosting/security/privacy | Phoenix self-host privacy, telemetry opt-out, air-gapped external resource controls, and customer-controlled data boundary. |
+| braintrust-logs-delete-2026-05-13 | https://www.braintrust.dev/docs/observe/view-logs | Braintrust production logs, trace/span browsing, filters, and delete-by-UI/API behavior. |
+| compliance-security-import-privacy-current | compliance-security-posture-audit-2026-05-12.md | Existing Kolm compliance findings around retention, account deletion, capture privacy, audit logs, and regulated-data claims. |
+| tenant-data-import-privacy-current | tenant-data-lifecycle-audit-2026-05-12.md | Existing Kolm tenant delete, cache lifecycle, observation retention, and purge gaps. |
+| capture-governance-import-privacy-current | capture-distillation-governance-audit-2026-05-12.md | Existing Kolm capture namespace, triage, failed capture, labels export, and distill governance gaps. |
+
+## Trace Import Manifest And Purge 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| trace-import-manifest-purge-contract-2026-05-13 | trace-import-manifest-purge-contract-2026-05-13.md | `kolm-import-manifest-1` shape, row references, dry-run/delete/anonymize purge modes, non-purgeable artifact rule, and implementation sequence. |
+| trace-import-manifest-purge-matrix-2026-05-13 | trace-import-manifest-purge-matrix-2026-05-13.csv | Row-level manifest and purge feasibility, target, risk, and test matrix. |
+| src-store-purge-current | ../src/store.js | JSON and SQLite insert/update/remove primitives, transaction behavior, and row-level purge feasibility. |
+| src-cache-purge-current | ../src/cache.js | Cache key, disk path, invalidate-only API, and missing delete-by-key/data-root lifecycle review. |
+| src-router-audit-purge-current | ../src/router.js | Reconstructed audit log endpoint, source-table audit dependency, observation audit fields, and purge audit gap. |
+
+## Langfuse Importer Fixture 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| langfuse-importer-fixture-spec-2026-05-13 | langfuse-importer-fixture-spec-2026-05-13.md | First source-specific importer fixture spec, normalization targets, loss rules, and acceptance criteria. |
+| langfuse-importer-fixture-matrix-2026-05-13 | langfuse-importer-fixture-matrix-2026-05-13.csv | Row-level Langfuse fixture acceptance, risk, source truth, and recommended action matrix. |
+| langfuse-public-api-current-2026-05-13 | https://langfuse.com/docs/api-and-data-platform/features/public-api/ | Public API access model, SDK API property, project keys, data regions, trace listing and high-performance API context. |
+| langfuse-query-sdk-current-2026-05-13 | https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk | Trace observation score dataset and metric query paths, pagination behavior, and ingestion delay context. |
+| langfuse-observations-api-current-2026-05-13 | https://langfuse.com/docs/api-and-data-platform/features/observations-api | Observations API v2, cursor pagination, field groups, IO metadata model usage prompt metrics latency and cost fields. |
+| langfuse-datasets-current-2026-05-13 | https://langfuse.com/docs/evaluation/features/datasets | Dataset item input expected output metadata source trace links version timestamps and schema enforcement. |
+| langfuse-scores-overview-current-2026-05-13 | https://langfuse.com/docs/evaluation/scores/overview | Score attachment targets, numeric categorical boolean text types, score configs, comments, and queryability. |
+| langfuse-scores-sdk-current-2026-05-13 | https://langfuse.com/docs/evaluation/evaluation-methods/scores-via-sdk | SDK score creation and trace or observation score attachment details. |
+| langfuse-retention-current-2026-05-13 | https://langfuse.com/docs/administration/data-retention | Source-system retention expectations for imported traces and manifest lifecycle fields. |
+| langfuse-deletion-current-2026-05-13 | https://langfuse.com/docs/administration/data-deletion | Source trace project organization and user deletion behavior for purge source references. |
+| cli-langfuse-fixture-current | ../cli/kolm.js | Local CLI capture labels distill and absence of an import command. |
+| src-capture-langfuse-fixture-current | ../src/capture.js | Local capture prompt completion extraction and flattening behavior. |
+| src-router-langfuse-fixture-current | ../src/router.js | Local capture routes labels export observations bridge namespace drift and absence of external importers. |
+
+## Langfuse Fixture Pack Blueprint 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| langfuse-fixture-pack-blueprint-2026-05-13 | langfuse-fixture-pack-blueprint-2026-05-13.md | Concrete support-v1 fixture directory, source row samples, expected output contracts, and harness requirements. |
+| langfuse-fixture-file-matrix-2026-05-13 | langfuse-fixture-file-matrix-2026-05-13.csv | File-by-file fixture pack validation matrix and negative-case list. |
+| langfuse-observations-api-blueprint-2026-05-13 | https://langfuse.com/docs/api-and-data-platform/features/observations-api | Observation field groups, cursor pagination, input/output string behavior, limits, filters, and sample response fields. |
+| langfuse-datasets-blueprint-2026-05-13 | https://langfuse.com/docs/evaluation/features/datasets | Dataset inputs, expected outputs, version timestamps, schema enforcement, source trace links, source observation links, and archive behavior. |
+| langfuse-scores-blueprint-2026-05-13 | https://langfuse.com/docs/evaluation/scores/overview | Score data type, value, comment, trace observation session and dataset-run attachment targets. |
+| langfuse-public-api-blueprint-2026-05-13 | https://langfuse.com/docs/api-and-data-platform/features/public-api/ | API authentication and region context for later live connector gating. |
+
+## Import Canonical Checksums 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| import-canonical-checksum-rules-2026-05-13 | import-canonical-checksum-rules-2026-05-13.md | Canonical checksum policy, domain envelopes, source byte checksums, normalized row checksums, loss row checksums, and manifest checksums. |
+| import-canonical-checksum-matrix-2026-05-13 | import-canonical-checksum-matrix-2026-05-13.csv | Row-level checksum target, included/excluded field, validation, and risk matrix. |
+| rfc8785-json-canonicalization-2026-05-13 | https://www.rfc-editor.org/rfc/rfc8785 | JSON Canonicalization Scheme source for deterministic object sorting, UTF-8 generation, primitive serialization, and hashable JSON representation. |
+| langfuse-fixture-checksum-blueprint-2026-05-13 | langfuse-fixture-pack-blueprint-2026-05-13.md | Symbolic-checksum fixture blueprint that now needs executable source and row checksums. |
+
+## Venture Readiness Redline 2026-05-13
+
+| Ref | URL / File | Used For |
+| --- | --- | --- |
+| venture-readiness-redline-2026-05-13 | venture-readiness-redline-2026-05-13.md | Venture readiness memo, moat redlines, compiler-cache positioning, evidence gates, and 30-60-90 day plan. |
+| venture-readiness-source-matrix-2026-05-13 | venture-readiness-source-matrix-2026-05-13.csv | Row-level official-source matrix for runtime, regulatory, and edge AI consolidation signals. |
+| apple-core-ml-2026-05-13 | https://developer.apple.com/machine-learning/core-ml/ | Core ML on-device performance, conversion, compression, Xcode report, and Apple silicon positioning. |
+| apple-foundation-models-2026-05-13 | https://developer.apple.com/documentation/FoundationModels | Foundation Models on-device language model, generation, structured output, and tool-calling positioning. |
+| google-litert-2026-05-13 | https://ai.google.dev/edge/litert/ | LiteRT on-device AI framework, conversion, optimization, hardware acceleration, and multi-platform claims. |
+| google-mediapipe-2026-05-13 | https://ai.google.dev/edge/mediapipe/solutions | MediaPipe task libraries, ready-made models, customization, and evaluation tooling. |
+| onnx-runtime-mobile-2026-05-13 | https://onnxruntime.ai/docs/tutorials/mobile/ | ONNX Runtime mobile development flow, execution providers, binary size, model size, latency, power, and optimization categories. |
+| onnx-runtime-genai-2026-05-13 | https://onnxruntime.ai/docs/genai/ | ONNX Runtime generate API features, generation loop, chat templates, and structured output context. |
+| executorch-architecture-2026-05-13 | https://docs.pytorch.org/executorch/stable/getting-started-architecture | ExecuTorch mobile and edge architecture, program preparation, runtime preparation, execution, and backend modularity. |
+| llama-cpp-2026-05-13 | https://github.com/ggml-org/llama.cpp | Local LLM inference, hardware backend, quantization, and minimal setup positioning. |
+| mlc-webllm-2026-05-13 | https://llm.mlc.ai/docs/deploy/webllm.html | Browser-local LLM inference, WebGPU acceleration, and model-library compile context. |
+| eu-ai-act-timeline-2026-05-13 | https://ai-act-service-desk.ec.europa.eu/en/ai-act/eu-ai-act-implementation-timeline | AI Act progressive implementation timeline and governance context. |
+| hhs-hipaa-security-rule-2026-05-13 | https://www.hhs.gov/hipaa/for-professionals/security/index.html | HIPAA Security Rule safeguard requirements for electronic protected health information. |
+| qualcomm-edge-impulse-2026-05-13 | https://www.qualcomm.com/news/releases/2025/03/qualcomm-to-bolster-ai-and-iot-capabilities-with-edge-impulse-ac | Edge AI developer tooling consolidation and Qualcomm/Edge Impulse signal. |

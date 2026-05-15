@@ -17,7 +17,25 @@ const BUNDLED_DATA_DIR = path.resolve('data');
 const DATA_DIR = process.env.KOLM_DATA_DIR
   ? path.resolve(process.env.KOLM_DATA_DIR)
   : (ON_VERCEL ? '/tmp/data' : BUNDLED_DATA_DIR);
-const STORE_DRIVER = (process.env.KOLM_STORE_DRIVER || 'json').toLowerCase();
+
+function detectDefaultDriver() {
+  // Production-like environments default to SQLite when the runtime supports
+  // it; this gives us transactional writes without callers opting in. Local
+  // development keeps the dependency-free JSON files unless explicitly asked.
+  const productionLike = process.env.NODE_ENV === 'production'
+    || !!process.env.RAILWAY_ENVIRONMENT
+    || !!process.env.VERCEL
+    || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+  if (!productionLike) return 'json';
+  try {
+    require('node:sqlite');
+    return 'sqlite';
+  } catch {
+    return 'json';
+  }
+}
+
+const STORE_DRIVER = (process.env.KOLM_STORE_DRIVER || detectDefaultDriver()).toLowerCase();
 const SQLITE_PATH = process.env.KOLM_DB_PATH
   ? path.resolve(process.env.KOLM_DB_PATH)
   : path.join(DATA_DIR, 'kolm.sqlite');
@@ -377,4 +395,31 @@ export function close() {
   }
   jsonTables.clear();
   sqliteTables.clear();
+}
+
+// Wrap `fn` in a single transactional unit. In sqlite mode this is BEGIN
+// IMMEDIATE / COMMIT (auto-rollback on throw); in json mode the writes are
+// serial inside a single tick anyway, so the wrapper is a pass-through. Use
+// this for any multi-step write that must not interleave with a concurrent
+// request (entitlement charge + audit append, recipe publish + concept patch,
+// team invite accept + seat allocation).
+export function withTransaction(fn) {
+  if (STORE_DRIVER !== 'sqlite') return fn();
+  const db = getSqliteDb();
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    const out = fn();
+    if (out && typeof out.then === 'function') {
+      throw new Error('withTransaction(fn) requires a synchronous fn; async work must run before/after the transaction');
+    }
+    db.exec('COMMIT');
+    return out;
+  } catch (err) {
+    try { db.exec('ROLLBACK'); } catch {}
+    throw err;
+  }
+}
+
+export function storeDriver() {
+  return STORE_DRIVER;
 }

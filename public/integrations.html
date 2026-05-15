@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Integrations · kolm</title>
 <meta name="description" content="kolm ships first-class integrations for Claude Desktop (MCP), Cursor, VS Code, GitHub Actions, Python, Node, brew, npm. One CLI, ten surfaces.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm integrations">
 <meta property="og:description" content="MCP, VS Code, Cursor, GitHub Actions, Python SDK, brew, npm. Where kolm plugs in.">
@@ -41,13 +42,13 @@
   header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
   section.hero { padding: 88px 0 32px; }
@@ -63,7 +64,7 @@
   section.list { padding: 28px 0 80px; }
   .group { margin: 48px 0 0; padding-top: 28px; border-top: 1px solid var(--line); }
   .group:first-of-type { margin-top: 8px; padding-top: 0; border-top: 0; }
-  .group h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 26px); font-weight: 540; }
+  .group h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 26px); font-weight: 500; }
   .group p.kicker { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; max-width: 64ch; }
 
   .grid { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); }
@@ -72,7 +73,7 @@
   .ig { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); transition: border-color 200ms, transform 200ms; }
   .ig:hover { border-color: var(--line-strong); }
   .ig .top { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; }
-  .ig h3 { margin: 0; font-size: 16px; font-weight: 540; color: var(--ink); }
+  .ig h3 { margin: 0; font-size: 16px; font-weight: 500; color: var(--ink); }
   .ig .stat { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-faint); }
   .ig .stat.shipped { color: var(--good); border-color: rgba(126,240,210,0.18); }
   .ig .stat.preview { color: var(--warn); border-color: rgba(255,208,122,0.18); }
@@ -82,6 +83,16 @@
   .ig .links { display: flex; gap: 12px; margin: 12px 0 0; flex-wrap: wrap; }
   .ig .links a { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--accent); }
   .ig .links a:hover { color: var(--accent-strong); }
+
+  .deep-grid { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); margin: 14px 0 0; }
+  @media (max-width: 900px) { .deep-grid { grid-template-columns: 1fr; } }
+  .deep { display: block; border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px; background: var(--bg-elev); transition: border-color 200ms, transform 200ms; }
+  .deep:hover { border-color: var(--line-strong); }
+  .deep .lbl { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; letter-spacing: 0.04em; }
+  .deep h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
+  .deep p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.55; }
+  .deep .arrow { display: inline-block; margin: 12px 0 0; font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--accent); }
+  .deep:hover .arrow { color: var(--accent-strong); }
 
   footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
   footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
@@ -108,6 +119,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -136,6 +148,31 @@
 <section class="list">
   <div class="wrap">
 
+    <div class="group" id="one-command" style="margin-top:0;padding-top:0;border-top:0;">
+      <h2>One command. Three editors.</h2>
+      <p class="kicker">If you run one of these every day, you can have your compiled <code>.kolm</code> wired in under 60 seconds. Each landing page is a three-step install.</p>
+      <div class="deep-grid">
+        <a href="/integrations/cursor" class="deep">
+          <p class="lbl">Cursor</p>
+          <h3>Run your .kolm inside Cursor.</h3>
+          <p><code>kolm install cursor --apply</code> writes the MCP entry. Restart. Done.</p>
+          <span class="arrow">Walkthrough &rarr;</span>
+        </a>
+        <a href="/integrations/claude-code" class="deep">
+          <p class="lbl">Claude Code</p>
+          <h3>Compile your AI. Use it in Claude Code.</h3>
+          <p><code>kolm install claude-code --apply</code> merges into <code>~/.claude/settings.json</code>.</p>
+          <span class="arrow">Walkthrough &rarr;</span>
+        </a>
+        <a href="/integrations/continue" class="deep">
+          <p class="lbl">Continue (VS Code)</p>
+          <h3>Run task-compiled AI inside Continue.</h3>
+          <p><code>kolm install continue --apply</code> adds a model entry. Reload. It shows up in the picker.</p>
+          <span class="arrow">Walkthrough &rarr;</span>
+        </a>
+      </div>
+    </div>
+
     <div class="group" id="agents">
       <h2>Agents &amp; editors</h2>
       <p class="kicker">If your agent speaks MCP, it can drive kolm. If your editor speaks Cursor rules or Claude Code skills, it can drive kolm.</p>
@@ -146,20 +183,28 @@
           <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
 kolm install claude-code --apply
 # writes ~/.claude/settings.json mcpServers.kolm: { command: "kolm", args: ["serve","--mcp"] }</pre>
-          <div class="links"><a href="/serve">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack">source</a></div>
+          <div class="links"><a href="/integrations/claude-code">walkthrough</a><a href="/serve">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack">source</a></div>
         </div>
 
         <div class="ig">
           <div class="top"><h3>Cursor</h3><span class="stat shipped">shipped</span></div>
-          <p>Drop the <code>.cursorrules</code> template into your project. Cursor can call <code>kolm compile</code>, swap LLM-as-judge calls for deterministic recipes, and inspect <code>.kolm</code> manifests inline.</p>
-          <pre>curl -O https://kolm.ai/docs/cursor-rules.txt
-mv cursor-rules.txt .cursorrules</pre>
-          <div class="links"><a href="/docs/cursor-rules.txt">cursor-rules.txt</a><a href="/quickstart">quickstart</a></div>
+          <p>One command writes the MCP entry into <code>~/.cursor/mcp.json</code>. Cursor calls <code>kolm.run</code>, <code>kolm.compile</code>, and <code>kolm.inspect</code> as MCP tools over stdio. Drop the <code>.cursorrules</code> template if you want project-level rules too.</p>
+          <pre>kolm install cursor --apply
+# or: curl -O https://kolm.ai/docs/cursor-rules.txt &amp;&amp; mv cursor-rules.txt .cursorrules</pre>
+          <div class="links"><a href="/integrations/cursor">walkthrough</a><a href="/docs/cursor-rules.txt">cursor-rules.txt</a><a href="/quickstart">quickstart</a></div>
+        </div>
+
+        <div class="ig">
+          <div class="top"><h3>Continue (VS Code, JetBrains)</h3><span class="stat shipped">shipped</span></div>
+          <p>One command writes a kolm model entry plus an MCP server into <code>~/.continue/config.json</code>. The kolm recipe shows up in the Continue model picker. Continue agents can call the same MCP tools.</p>
+          <pre>kolm install continue --apply
+# kolm model appears in Continue's picker on reload</pre>
+          <div class="links"><a href="/integrations/continue">walkthrough</a><a href="/quickstart">quickstart</a></div>
         </div>
 
         <div class="ig">
           <div class="top"><h3>VS Code extension</h3><span class="stat preview">preview</span></div>
-          <p>Marketplace-publishable extension at <code>sdk/vscode/</code>. Selects an LLM-as-judge call, mints a kolm recipe, and swaps the call inline. Requires <code>KOLM_API_KEY</code>.</p>
+          <p>Marketplace-publishable extension at <code>sdk/vscode/</code>. Selects an LLM-as-judge call, mints a kolm recipe, and swaps the call inline. Requires <code>KOLM_API_KEY</code>. For everyday use, the Continue integration is the recommended path.</p>
           <pre>cd sdk/vscode &amp;&amp; npm install &amp;&amp; vsce package
 code --install-extension recipe-vscode-0.1.0.vsix</pre>
           <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/vscode">source</a></div>
@@ -278,12 +323,53 @@ npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
 </section>
 
 <footer class="site">
-  <div class="wrap-wide">
-    <div class="row">
-      <span>kolm v0.1.0 - the AI compiler</span>
-      <span><a href="/manifesto">Manifesto</a> - <a href="/security">Security</a> - <a href="/privacy">Privacy</a> - <a href="/terms">Terms</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
     </div>
-    <small class="footer-tag" style="display:block;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--ink-faint,#6b7280);letter-spacing:0;">kolm &middot; open spec &middot; MIT licensed runtime &middot; kolm.ai</small>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Audit log · kolm</title>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Audit log &middot; kolm</title>
 <meta name="description" content="kolm's per-tenant audit trail. Target architecture: every capture, label export, distill job, and artifact signing leaves a queryable JSON/CSV entry. Shipped today: opt-in beta endpoint + local runner audit hook.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm audit log">
-<meta property="og:description" content="Per-tenant audit trail design — capture, label-export, distill-job, artifact-signing. Beta endpoint shipped; durable per-tenant log is target architecture.">
+<meta property="og:description" content="Per-tenant audit trail design covering capture, label-export, distill-job, artifact-signing. Beta endpoint shipped; durable per-tenant log is target architecture.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/audit-log">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -40,14 +41,14 @@
   header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
   header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
 
   section.hero { padding: 88px 0 24px; }
   .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
@@ -55,17 +56,17 @@
   h1 { margin: 22px 0 16px; font-size: clamp(36px, 5.4vw, 56px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
   h1 .tone { color: var(--good); }
   p.lede { margin: 0 0 28px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
 
-  h2 { margin: 48px 0 12px; font-size: 22px; font-weight: 540; }
+  h2 { margin: 48px 0 12px; font-size: 22px; font-weight: 500; }
   p { margin: 0 0 14px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.65; }
   p code, li code, td code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
 
   table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0 0; }
   table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 12px 14px; text-align: left; vertical-align: top; }
-  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 540; }
+  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
   table.tbl td { color: var(--ink-mute); }
-  table.tbl td b { color: var(--ink); font-weight: 540; }
+  table.tbl td b { color: var(--ink); font-weight: 500; }
 
   pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 12px 0; white-space: pre; }
   @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
@@ -74,13 +75,13 @@
   pre.code .arg { color: var(--accent-strong); }
 
   .panel { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); margin: 16px 0; }
-  .panel h3 { margin: 0 0 8px; font-size: 16px; font-weight: 540; color: var(--ink); }
+  .panel h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink); }
   .panel p { font-size: 14px; }
   .panel.signed { border-left: 3px solid var(--good); }
 
   .live { display: none; padding: 24px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--bg-card); margin: 16px 0; }
   .live.on { display: block; }
-  .live h3 { margin: 0 0 14px; font-size: 16px; font-weight: 540; color: var(--ink); }
+  .live h3 { margin: 0 0 14px; font-size: 16px; font-weight: 500; color: var(--ink); }
   .live .row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
   .live .row:first-of-type { border-top: 0; }
   .live .row .k { font-family: var(--mono); color: var(--ink-faint); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -100,7 +101,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "Audit log · kolm",
+  "name": "Audit log &middot; kolm",
   "description": "Per-tenant audit trail: captures, label exports, distill jobs, signed artifacts.",
   "url": "https://kolm.ai/audit-log",
   "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
@@ -116,13 +117,14 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
     <div class="right">
       <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
+      <a href="/account" class="ghost">account</a>
+      <a href="/dashboard" class="cta">Dashboard &rarr;</a>
     </div>
   </div>
 </header>
@@ -209,22 +211,65 @@
     </ul>
 
     <h2>Honest disclosure</h2>
-    <p>The <code>/v1/audit/log</code> endpoint reconstructs entries on the fly from the source tables listed above. JSON, JSONL, and CSV export work today. The unified durable <code>audit_events</code> write path is target architecture: one normalised row per operation, signed in an HMAC chain so tamper detection happens in <code>O(1)</code> rather than via cross-table reconstruction. Subscribe to <a href="/changelog" style="color:var(--good)">the changelog</a> for ship dates on the durable path.</p>
+    <p>The <code>/v1/audit/log</code> endpoint reconstructs entries on the fly from the source tables listed above. JSON, JSONL, and CSV export work today. The unified durable <code>audit_events</code> write path is target architecture: one normalised row per operation, signed in an HMAC chain so tamper detection happens in <code>O(1)</code> rather than via cross-table reconstruction. Subscribe to <a href="/roadmap" style="color:var(--good)">the roadmap</a> for ship dates on the durable path.</p>
   </div>
 </section>
 
-<footer class="site">
-  <div class="wrap-wide row">
-    <span>Kolmogorov &middot; The AI compiler &middot; Open standard, MIT-licensed.</span>
-  </div>
-  <div class="wrap-wide row" style="margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint)">
-    <a href="/manifesto">Manifesto</a>
-    <a href="/trust">Trust</a>
-    <a href="/security">Security</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/terms">Terms</a>
-    <a href="/changelog">Changelog</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta">
+      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+    </div>
+    <div class="links">
+      <div>
+        <div class="col-h">build</div>
+        <a href="/capture">capture</a>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/recall">recall</a>
+        <a href="/evolve">evolve</a>
+        <a href="/sdks">sdks</a>
+        <a href="/openai">openai compat</a>
+        <a href="/agents">agents</a>
+      </div>
+      <div>
+        <div class="col-h">deploy</div>
+        <a href="/teams">teams</a>
+        <a href="/tunnels">remote access</a>
+        <a href="/byoc">byoc cloud</a>
+        <a href="/airgap">airgap</a>
+        <a href="/enterprise">enterprise</a>
+      </div>
+      <div>
+        <div class="col-h">proof</div>
+        <a href="/benchmarks">benchmarks</a>
+        <a href="/research">research</a>
+        <a href="/k-score">k-score</a>
+        <a href="/leaderboard">registry</a>
+        <a href="/spec">rs-1 spec</a>
+        <a href="/showcase">showcase</a>
+      </div>
+      <div>
+        <div class="col-h">industries</div>
+        <a href="/healthcare">healthcare</a>
+        <a href="/finance">finance</a>
+        <a href="/legal">legal</a>
+        <a href="/edge">edge</a>
+        <a href="/cookbook">cookbook</a>
+        <a href="/compliance-packs">compliance packs</a>
+      </div>
+      <div>
+        <div class="col-h">company</div>
+        <a href="/pricing">pricing</a>
+        <a href="/docs">docs</a>
+        <a href="/roadmap">roadmap</a>
+        <a href="/manifesto">manifesto</a>
+        <a href="/roi">roi</a>
+      </div>
+    </div>
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+    </small>
   </div>
 </footer>
 

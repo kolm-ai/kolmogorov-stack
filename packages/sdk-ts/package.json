@@ -1,0 +1,53 @@
+{
+  "name": "kolm",
+  "version": "0.1.0",
+  "description": "One-line embed for .kolm artifacts. TypeScript / JavaScript SDK.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test test"
+  },
+  "keywords": [
+    "kolm",
+    "ai-compiler",
+    "llm",
+    "lora",
+    "edge",
+    "inference",
+    "verifiable",
+    "receipt"
+  ],
+  "author": "Kolmogorov",
+  "homepage": "https://kolm.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sneaky-hippo/kolmogorov-stack",
+    "directory": "packages/sdk-ts"
+  },
+  "bugs": {
+    "url": "https://github.com/sneaky-hippo/kolmogorov-stack/issues"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  }
+}

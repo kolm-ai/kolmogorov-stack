@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>Dev.to article draft &middot; kolm community</title>
+<meta name="description" content="Draft article for Dev.to. How we ship verifiable AI: the .kolm artifact format. Markdown source, copy-paste ready.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+  .dv-wrap{max-width:880px;margin:0 auto;padding:0 32px}
+  .dv-hero{padding:64px 0 28px;border-bottom:1px solid var(--line)}
+  .dv-hero .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint,#737c73);margin:0 0 14px}
+  .dv-hero .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  .dv-hero h1{font-size:clamp(28px,3.6vw,40px);line-height:1.12;margin:0 0 12px;letter-spacing:-0.02em;font-weight:500;color:var(--fg,#faf2e1)}
+  .dv-hero .lede{font-size:15.5px;line-height:1.65;color:var(--ink-mute,#b5bdb1);max-width:70ch;margin:0}
+  .dv-section{padding:36px 0;border-bottom:1px solid var(--line)}
+  .dv-section h2{margin:0 0 12px;font-size:20px;font-weight:500;letter-spacing:-0.01em;color:var(--fg,#faf2e1)}
+  .dv-section p{margin:0 0 12px;color:var(--ink-mute,#b5bdb1);font-size:14.5px;line-height:1.7;max-width:70ch}
+  .dv-section code{font-family:var(--mono);font-size:12.5px;color:var(--fg,#faf2e1);background:rgba(255,255,255,0.04);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+  .dv-meta{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint,#737c73);margin:0 0 10px;text-transform:uppercase;letter-spacing:0.05em}
+  pre.dv-md{background:var(--bg-2,#11151b);border:1px solid var(--line);border-radius:12px;padding:24px 26px;margin:8px 0 0;font-family:var(--mono);font-size:13px;line-height:1.65;color:var(--fg,#faf2e1);white-space:pre-wrap;overflow-x:auto;tab-size:2}
+  .dv-fm{padding:16px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-2,#11151b);font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--ink-mute,#b5bdb1);margin:10px 0 0}
+  .dv-fm b{color:var(--fg,#faf2e1);font-weight:500}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="/">k o l m</a>
+    <nav class="primary">
+      <a href="/quickstart">quickstart</a>
+      <a href="/docs">docs</a>
+      <a href="/community">community</a>
+      <a href="/pricing">pricing</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="dv-hero">
+  <div class="dv-wrap">
+    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/community">community</a> &nbsp;/&nbsp; dev.to article - draft</p>
+    <h1>Dev.to article - draft.</h1>
+    <p class="lede">A ~800-word seed article for Dev.to. Markdown source below as a single pre block. Copy, paste into the Dev.to editor, tweak the example to match what you ship that week, set the canonical link to kolm.ai/articles/ai-compiler so reposts do not split SEO.</p>
+  </div>
+</section>
+
+<section class="dv-section">
+  <div class="dv-wrap">
+    <h2>Markdown source.</h2>
+    <p class="dv-meta">word count ~810 / paste into the editor</p>
+<pre class="dv-md"># How we ship verifiable AI: the .kolm artifact format
+
+When a hospital's compliance reviewer asks "what model produced this discharge summary on March 14 at 09:23," there are two answers an engineering team can give. The honest answer for a closed-API model is "the one the vendor was hosting under that name, until they updated it." That is not a receipt. The other answer is a single signed file you can hand them. That file is what we built kolm to produce.
+
+## Why receipts matter
+
+The standard regulatory question is some version of: prove what was running. SR 11-7 calls it model risk management. HIPAA calls it the audit trail. NIST AI RMF calls it traceability. The EU AI Act calls it record-keeping. The shape is the same. You need to be able to say, months later, with cryptographic certainty: this exact model, this exact prompt, this exact output, at this exact time.
+
+Closed-API AI cannot answer this. The vendor controls the weights. The vendor controls the version under a name. The vendor controls when an update ships. Your contract says they will tell you, but the artifact your auditor needs is not the contract. It is the manifest.
+
+## RS-1 manifest shape
+
+A .kolm is a zip. Inside the zip is a `manifest.json` with a canonical, sorted-key shape. Everything else in the zip (weights, evaluator, compliance pack, recipe) is referenced by hash inside that manifest.
+
+```json
+{
+  "version": "rs-1",
+  "kind": "kolm-artifact",
+  "base": "Qwen/Qwen3-32B",
+  "task": "phi-redactor-v3",
+  "compliance_pack": "hipaa-2024",
+  "k_score": 0.974,
+  "hashes": {
+    "weights": "sha256:8c4f2a...",
+    "evaluator": "sha256:1d29b6...",
+    "recipe": "sha256:f37290..."
+  },
+  "signature": "ed25519:..."
+}
+```
+
+The CID is computed as `cidv1:sha256:` + hex(sha256(canonical-JSON(manifest))). Canonical-JSON means recursively sorted keys, no whitespace, UTF-8. The hash is reproducible by any verifier. Our SDK's `canonicalJson` is 28 lines of pure stdlib.
+
+## HMAC chain over IO
+
+Compile produces the artifact. The audit story is on the runs. Every `kolm run` emits a receipt:
+
+```json
+{
+  "cid": "cidv1:sha256:c34a91...",
+  "input_sha": "sha256:bf21...",
+  "output_sha": "sha256:9c80...",
+  "ts": "2026-05-15T09:23:11Z",
+  "mac": "hmac-sha256:..."
+}
+```
+
+The MAC is computed with a key the operator owns. The verifier never needs the key to check the chain; it only needs the public manifest signature and the input/output bytes. The MAC binds the receipt to the operator's identity for accountability.
+
+This is the shape that makes replay work months later. Hand an auditor the .kolm, the input, and the receipt. They run `kolm verify` offline. The output matches or it does not. There is no ambiguity.
+
+## Verify in 30 seconds
+
+Install once:
+
+```bash
+npm install -g kolm
+# or: brew install kolm / winget install kolm
+```
+
+Verify any artifact:
+
+```bash
+kolm verify discharge-summarizer.kolm receipt-2026-03-14.json
+# checks signature, recomputes CID, recomputes input/output hashes,
+# checks HMAC chain, emits a single line: PASS or FAIL with reason.
+```
+
+That command is the shape your CI gates on, the shape your compliance reviewer runs at audit time, and the shape an attacker has to break to forge a receipt. The verifier SDK is MIT-licensed and pure-stdlib. The thing whose job is verifying supply chain has no supply chain.
+
+## What graduates you to kolm
+
+Three thresholds. If none of these are true for you, the closed-API frontier is fine. We say this on the marketing site too.
+
+1. Regulated industry. You are answering to a compliance team, an auditor, or a regulator. Receipts are not optional.
+2. Egress cost matters. You are shipping at a volume where 11.6x cheaper at sustained throughput is a real budget line.
+3. Air-gap or BYOC. Your customer's data cannot leave their network. You need an artifact that runs there with the same shape.
+
+When you hit one of these, the contract you signed with the closed-API vendor stops being a feature. It becomes a liability your engineering team has to defend at audit.
+
+## Try it
+
+Quickstart at kolm.ai/quickstart is 12 minutes from `npm install` to a verified .kolm on your disk. The PHI redactor tutorial at kolm.ai/tutorials/phi-redactor walks through one end-to-end. The RS-1 spec at kolm.ai/spec/rs-1 is the canonical reference. founders@kolm.ai is the direct line if you want to talk to the team.
+
+Receipts make AI defensible. That is the whole pitch.</pre>
+  </div>
+</section>
+
+<section class="dv-section">
+  <div class="dv-wrap">
+    <h2>Frontmatter suggestions.</h2>
+    <p>Dev.to's frontmatter is YAML at the top. Paste this above the title.</p>
+    <div class="dv-fm">
+      <b>title:</b> "How we ship verifiable AI: the .kolm artifact format"<br>
+      <b>published:</b> true<br>
+      <b>description:</b> "Receipts, canonical-JSON manifests, HMAC chains, and the engineering case for verifiable AI in regulated industries."<br>
+      <b>tags:</b> ai, machinelearning, devops, security<br>
+      <b>canonical_url:</b> https://kolm.ai/articles/ai-compiler<br>
+      <b>cover_image:</b> https://kolm.ai/og-card.svg
+    </div>
+  </div>
+</section>
+
+<section class="dv-section" style="border-bottom:0">
+  <div class="dv-wrap">
+    <h2>Post-publish checklist.</h2>
+    <p>Three things after the article goes live:</p>
+    <p><b>1.</b> Add the Dev.to URL to <a href="/articles" style="color:inherit;border-bottom:1px dashed var(--line)">/articles</a> as a syndication note on the canonical post. <b>2.</b> Cross-post to LinkedIn with a 2-sentence summary and the Dev.to link. <b>3.</b> Watch the comments for an hour. The Dev.to audience is friendlier than HN; reply to every comment in the first day.</p>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta">
+      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+    </div>
+    <div class="links">
+      <div>
+        <div class="col-h">community</div>
+        <a href="/community">overview</a>
+        <a href="/community/hn-launch">hn launch</a>
+        <a href="/community/twitter-thread">x thread</a>
+        <a href="/community/devto-article">dev.to article</a>
+        <a href="/community/discord-bootstrap">discord bootstrap</a>
+      </div>
+      <div>
+        <div class="col-h">proof</div>
+        <a href="/benchmarks">benchmarks</a>
+        <a href="/spec/rs-1">rs-1 spec</a>
+        <a href="/compliance">compliance</a>
+      </div>
+    </div>
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai
+    </small>
+  </div>
+</footer>
+</body>
+</html>

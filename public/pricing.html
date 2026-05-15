@@ -1,20 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>kolm pricing · BYO frontier key, signed receipts included</title>
-<meta name="description" content="kolm pricing: Developer free, Starter $9, Pro $49, Teams $149, Business $1,499, Enterprise $2,999. Bring your own frontier model key. Local CLI runtime is always free.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="description" content="kolm pricing: Developer free, Starter $9, Pro $49, Teams from $149, Business $1,499, Enterprise $2,999. Annual saves 17%. Local runtime always free.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm pricing · BYO frontier key, signed receipts included">
-<meta property="og:description" content="Pay for the compiler cache. Bring your own frontier model key. Run signed artifacts through the local CLI runtime.">
+<meta property="og:description" content="Pay to compile. Run forever, locally, for free. Bring your own frontier-model key. Six tiers from $0 Developer to $2,999/mo Enterprise.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/pricing">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm pricing · BYO frontier key, signed receipts included">
+<meta name="twitter:description" content="Pay to compile. Run forever, locally, for free. Bring your own frontier-model key. Six tiers from $0 Developer to $2,999/mo Enterprise.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/pricing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
@@ -33,7 +37,7 @@
         {"@type": "Offer", "name": "Developer", "price": "0",   "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=developer", "availability": "https://schema.org/InStock", "description": "Free tier: 3 compiles/mo, local-only."},
         {"@type": "Offer", "name": "Starter",   "price": "9",   "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=starter",   "availability": "https://schema.org/InStock", "description": "Solo developer plan: 50 compiles/mo."},
         {"@type": "Offer", "name": "Pro",       "price": "49",  "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=pro",       "availability": "https://schema.org/InStock", "description": "200k compile credits, private registry, 10M-vector recall pool."},
-        {"@type": "Offer", "name": "Teams",     "price": "149", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=teams",     "availability": "https://schema.org/InStock", "description": "5 seats, shared cache, SSO via Google Workspace, audit log, 30M-vector recall pool."},
+        {"@type": "Offer", "name": "Teams",     "price": "149", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=teams",     "availability": "https://schema.org/InStock", "description": "Teams plan: starts at 2 seats, up to 10 included, +$30/extra seat. Shared cache, SSO via Google Workspace, audit log, 30M-vector recall pool."},
         {"@type": "Offer", "name": "Business",  "price": "1499","priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=business",  "availability": "https://schema.org/InStock", "description": "25 seats, BAA on request, dedicated registry, priority compile queue."},
         {"@type": "Offer", "name": "Enterprise","price": "2999","priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=enterprise","availability": "https://schema.org/InStock", "description": "Self-serve enterprise: VPC peering on request, custom retention, signed pilots."}
       ]
@@ -51,7 +55,7 @@
         {"@type": "Question", "name": "Is there a free plan?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The Developer plan is free, gives you 3 compiles per month, and lets you run any local .kolm artifact at zero per-call cost. Local CLI runtime is always free."}},
         {"@type": "Question", "name": "What counts as a compile?", "acceptedAnswer": {"@type": "Answer", "text": "One billed compile equals one job that reaches the K-score gate, pass or fail. Re-runs from the same spec inside the same calendar day do not double-bill on Pro and Enterprise. Sub-gate failures are free."}},
         {"@type": "Question", "name": "Do I need to bring my own frontier-model key?", "acceptedAnswer": {"@type": "Answer", "text": "Yes for paid plans. kolm uses your frontier-model key (Anthropic, OpenAI, or compatible) during compile only. We do not relay your key or your data. After the compile finishes, the artifact runs locally with no per-call cost."}},
-        {"@type": "Question", "name": "Can I cancel anytime?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Plans are month-to-month. Cancel from /account and you drop to free immediately. Your compiled .kolm artifacts stay with you — they are local files you own."}},
+        {"@type": "Question", "name": "Can I cancel anytime?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Plans are month-to-month. Cancel from /account and you drop to free immediately. Your compiled .kolm artifacts stay with you. They are local files you own."}},
         {"@type": "Question", "name": "What is included in Enterprise?", "acceptedAnswer": {"@type": "Answer", "text": "Self-serve $2,999/mo Enterprise: 50 seats, optional VPC peering, custom audit retention, signed 30-day pilots, BAA, priority compile queue, and dedicated registry shard."}},
         {"@type": "Question", "name": "Is the Local CLI runtime always free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Compiling costs the plan + the teacher cost. Running the compiled artifact on your hardware is free. No per-call charge."}}
       ]
@@ -65,7 +69,7 @@
     --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
     --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
     --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
-    --good: #7ef0d2;
+    --good: #10b981;
     --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
   }
@@ -81,65 +85,86 @@
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
   @media (max-width: 720px) { .wrap { padding: 0 20px; } }
 
-  header.site {
-    position: sticky; top: 0; z-index: 60;
-    background: rgba(8,9,8,0.78);
-    backdrop-filter: saturate(160%) blur(14px);
-    -webkit-backdrop-filter: saturate(160%) blur(14px);
-    border-bottom: 1px solid var(--line);
-  }
-  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
-  header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
-  header.site .brand img { height: 18px; width: 18px; color: var(--ink); }
-  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: 0; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
-  header.site nav a:hover, header.site nav a.active { color: var(--ink); }
-  header.site .right { display: flex; align-items: center; gap: 14px; }
-  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
-  header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta {
-    display: inline-flex; align-items: center; gap: 6px;
-    color: var(--bg); background: var(--ink); border-radius: 6px;
-    padding: 7px 14px; font-size: 13px; font-weight: 540; letter-spacing: 0;
-    transition: background 120ms;
-  }
-  header.site .right .cta:hover { background: #fff; }
-  @media (max-width: 720px) { header.site nav { display: none; } }
+  /* header styles come from brand-refresh.css site-header tokens */
 
-  section.hero { position: relative; padding: 88px 0 56px; overflow: hidden; }
+  section.hero { position: relative; padding: 112px 0 72px; overflow: hidden; }
   section.hero::before {
     content: ""; position: absolute; inset: 0;
     background:
-      radial-gradient(ellipse 900px 480px at 22% 12%, rgba(236,231,220, 0.10), transparent 60%),
-      radial-gradient(ellipse 700px 400px at 88% 90%, rgba(236,231,220, 0.04), transparent 60%);
+      radial-gradient(ellipse 1200px 600px at 18% 8%, rgba(16, 185, 129, 0.06), transparent 60%),
+      radial-gradient(ellipse 800px 480px at 88% 90%, rgba(236,231,220, 0.04), transparent 60%);
     pointer-events: none;
   }
-  section.hero .wrap { position: relative; }
+  /* Atmospheric topographic SVG backdrop */
+  section.hero::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.42;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%2310b981' stop-opacity='0.0'/%3E%3Cstop offset='1' stop-color='%2310b981' stop-opacity='0.18'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3Cpath d='M -200 360 Q 440 240 780 340 T 1480 320 T 1700 330'/%3E%3Cpath d='M -200 300 Q 480 170 820 280 T 1520 260 T 1700 270'/%3E%3Cpath d='M -200 240 Q 520 100 860 220 T 1560 200 T 1700 210'/%3E%3Cpath d='M -200 180 Q 560 30 900 160 T 1600 140 T 1700 150'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: cover; background-position: center; mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%);
+    -webkit-mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%);
+  }
+  section.hero .wrap { position: relative; z-index: 2; }
 
-  .pill {
+  .pill, .hero-eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
     text-transform: uppercase; color: var(--ink-mute);
     border: 1px solid var(--line-strong); border-radius: 999px;
-    padding: 5px 12px; background: var(--bg-elev);
+    padding: 6px 14px; background: rgba(8,9,8,0.62);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   }
-  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
+  .pill .dot, .hero-eyebrow .he-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px rgba(16,185,129,0.55); animation: pulse-dot 2.4s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.3); } }
 
   h1.hero-h1 {
-    margin: 24px 0 22px;
-    font-size: clamp(36px, 5.4vw, 64px);
-    line-height: 1.05; font-weight: 500; letter-spacing: 0;
-    color: var(--ink); max-width: 18ch;
+    margin: 26px 0 22px;
+    font-size: clamp(54px, 8.2vw, 128px);
+    line-height: 0.94; font-weight: 500; letter-spacing: -0.04em;
+    color: var(--ink); max-width: 13ch;
+    font-feature-settings: "ss01", "ss02", "kern";
   }
-  h1.hero-h1 .tone { color: var(--accent); }
+  h1.hero-h1 .tone {
+    background: linear-gradient(170deg, #faf2e1 0%, #10b981 50%, #faf2e1 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
   p.lede {
-    margin: 0; font-size: clamp(15.5px, 1.3vw, 18px);
+    margin: 0; font-size: clamp(16px, 1.4vw, 19px);
     line-height: 1.55; color: var(--ink-mute);
-    max-width: 60ch; letter-spacing: 0;
+    max-width: 62ch; letter-spacing: 0;
   }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
+
+  /* Provider strip . frontier model lockup */
+  .provider-strip {
+    margin-top: 36px; padding: 18px 0; border-top: 1px solid var(--line);
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  }
+  .provider-strip .ps-label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .provider-strip .ps-num { color: #10b981; }
+  .provider-strip .ps-models {
+    display: flex; gap: 18px; flex-wrap: wrap; color: var(--ink-mute);
+    font-size: 13px; letter-spacing: 0;
+  }
+  .provider-strip .ps-models span:not(:last-child)::after { content: " /"; color: var(--ink-faint); margin-left: 18px; }
+  @media (max-width: 720px) { .provider-strip .ps-models span:not(:last-child)::after { display: none; } }
+
+  /* Hero tickertape . value props loop */
+  .ticker-bar {
+    margin-top: 28px; overflow: hidden; position: relative;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    padding: 14px 0; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .ticker-track { display: inline-flex; gap: 56px; animation: ticker 48s linear infinite; white-space: nowrap; }
+  .ticker-track .ti {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+    color: var(--ink-mute); display: inline-flex; align-items: center; gap: 10px;
+  }
+  .ticker-track .ti b { color: #10b981; font-weight: 500; }
+  .ticker-track .sep { color: var(--ink-faint); }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
   section { padding: 72px 0; position: relative; }
   section + section { border-top: 1px solid var(--line); }
@@ -152,7 +177,7 @@
   h2 {
     margin: 0 0 18px;
     font-size: clamp(26px, 3.2vw, 38px);
-    line-height: 1.1; font-weight: 540; letter-spacing: 0;
+    line-height: 1.1; font-weight: 500; letter-spacing: 0;
     color: var(--ink); max-width: 24ch;
   }
   h2 .tone { color: var(--accent); }
@@ -170,7 +195,7 @@
   .bill-toggle button {
     appearance: none; cursor: pointer; background: transparent;
     border: 0; color: var(--ink-mute);
-    font-family: var(--sans); font-size: 13px; font-weight: 540;
+    font-family: var(--sans); font-size: 13px; font-weight: 500;
     letter-spacing: 0;
     padding: 8px 16px; border-radius: 999px; transition: background 120ms, color 120ms;
   }
@@ -178,8 +203,10 @@
   .bill-toggle button:not(.on):hover { color: var(--ink); }
   .bill-toggle .save {
     font-family: var(--mono); font-size: 10.5px; letter-spacing: 0;
-    color: var(--accent); margin-left: 4px;
+    background: rgba(16,185,129,0.16); color: #10b981;
+    padding: 2px 8px; border-radius: 999px; margin-left: 6px;
   }
+  [data-theme=light] .bill-toggle .save { background: rgba(10,136,98,0.10); color: #0a8862; }
 
   .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   @media (max-width: 980px) { .tiers { grid-template-columns: repeat(2, 1fr); } }
@@ -190,18 +217,28 @@
     display: flex; flex-direction: column;
   }
   .tier.featured {
-    background: linear-gradient(180deg, rgba(236,231,220, 0.06), var(--bg-elev));
-    border-color: rgba(236,231,220, 0.22);
-    box-shadow: 0 30px 60px -30px rgba(236,231,220, 0.18);
+    background: linear-gradient(180deg, rgba(16,185,129, 0.06), var(--bg-elev));
+    border-color: rgba(16,185,129, 0.34);
+    box-shadow: 0 30px 80px -28px rgba(16,185,129, 0.22), 0 0 0 1px rgba(16,185,129, 0.16) inset;
+    position: relative;
+  }
+  .tier.featured::before {
+    content: ""; position: absolute; inset: -1px; border-radius: 10px; pointer-events: none;
+    background: linear-gradient(180deg, rgba(16,185,129, 0.40), transparent 30%);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude; -webkit-mask-composite: xor;
+    padding: 1px;
   }
   .tier .tag {
     font-family: var(--mono); font-size: 11px; letter-spacing: 0;
     text-transform: uppercase; color: var(--ink-faint);
   }
-  .tier.featured .tag { color: var(--accent); }
+  .tier.featured .tag { color: var(--kolm-accent, #10b981); }
+  .tier.featured .tag::after { content: " . most popular"; color: var(--ink-faint); font-weight: 500; letter-spacing: 0.04em; }
   .tier .name {
     margin: 6px 0 4px;
-    font-size: 22px; font-weight: 540; letter-spacing: 0; color: var(--ink);
+    font-size: 22px; font-weight: 500; letter-spacing: 0; color: var(--ink);
   }
   .tier .pitch {
     font-size: 13.5px; color: var(--ink-mute); line-height: 1.5;
@@ -209,27 +246,47 @@
   }
   .tier .num {
     margin: 18px 0 4px;
-    font-size: 36px; font-weight: 540; letter-spacing: 0; color: var(--ink);
+    font-size: 36px; font-weight: 500; letter-spacing: 0; color: var(--ink);
   }
   .tier .num .per { font-size: 13px; font-weight: 400; color: var(--ink-mute); margin-left: 4px; letter-spacing: 0; }
-  .tier .frontier { font-size: 12px; color: var(--ink-faint); margin-bottom: 22px; }
+  .tier .frontier { font-size: 12px; color: var(--ink-faint); margin-bottom: 6px; }
+  .tier .overage {
+    font-size: 12px; color: var(--ink-faint); margin: 0 0 22px;
+    line-height: 1.5;
+  }
+  .tier .overage b { color: var(--ink-mute); font-weight: 500; }
   .tier ul { list-style: none; margin: 0 0 22px; padding: 0; flex: 1; }
   .tier li {
     padding: 8px 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-mute);
     border-bottom: 1px solid var(--line);
   }
   .tier li:last-child { border-bottom: none; }
-  .tier li b { color: var(--ink); font-weight: 540; }
+  .tier li b { color: var(--ink); font-weight: 500; }
   .tier a.cta {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 11px 16px; border-radius: 6px;
-    font-size: 13.5px; font-weight: 540; letter-spacing: 0;
+    font-size: 13.5px; font-weight: 500; letter-spacing: 0;
     border: 1px solid var(--line-strong);
     color: var(--ink); transition: border-color 120ms, color 120ms, background 120ms;
   }
   .tier a.cta:hover { border-color: var(--accent); color: var(--accent); }
-  .tier.featured a.cta { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-  .tier.featured a.cta:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+  .tier.featured a.cta {
+    background: var(--ink, #ece7dc); color: #0a0a0d; border-color: var(--ink, #ece7dc);
+    box-shadow: 0 14px 32px -10px rgba(0,0,0, 0.30), 0 0 0 1px rgba(0,0,0, 0.10);
+    font-weight: 500;
+  }
+  .tier.featured a.cta:hover {
+    background: #ffffff; border-color: #ffffff;
+    box-shadow: 0 18px 42px -8px rgba(0,0,0, 0.36), 0 0 0 1px rgba(16,185,129, 0.30);
+    transform: translateY(-1px);
+  }
+  [data-theme=light] .tier.featured a.cta {
+    background: #18171a; color: #f5f1e6; border-color: #18171a;
+  }
+  [data-theme=light] .tier.featured a.cta:hover {
+    background: #2a2823; border-color: #2a2823;
+    box-shadow: 0 18px 42px -8px rgba(0,0,0, 0.20), 0 0 0 1px rgba(5,150,105, 0.30);
+  }
 
   .matrix {
     background: var(--bg-elev);
@@ -274,7 +331,7 @@
     border-radius: 8px; padding: 24px;
   }
   .faq-card h3, .faq-card h4 {
-    margin: 0 0 10px; font-size: 15px; font-weight: 540;
+    margin: 0 0 10px; font-size: 15px; font-weight: 500;
     letter-spacing: 0; color: var(--ink); line-height: 1.35;
   }
   .faq-card p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--ink-mute); }
@@ -294,7 +351,7 @@
     border-radius: 10px; padding: 28px;
   }
   .roi-card h3 {
-    margin: 0 0 14px; font-size: 18px; font-weight: 540;
+    margin: 0 0 14px; font-size: 18px; font-weight: 500;
     letter-spacing: 0; color: var(--ink); line-height: 1.3;
   }
   .roi-card h3 .tone { color: var(--accent); }
@@ -310,8 +367,8 @@
   .roi-row .lbl { color: var(--ink-mute); }
   .roi-row .val { color: var(--ink); font-family: var(--mono); font-size: 13px; }
   .roi-row.tot { padding-top: 14px; }
-  .roi-row.tot .lbl { color: var(--ink); font-weight: 540; }
-  .roi-row.tot .val { color: var(--accent); font-weight: 540; font-size: 14px; }
+  .roi-row.tot .lbl { color: var(--ink); font-weight: 500; }
+  .roi-row.tot .val { color: var(--accent); font-weight: 500; font-size: 14px; }
 
   .vs-tbl {
     background: var(--bg-elev); border: 1px solid var(--line);
@@ -338,7 +395,7 @@
   @media (max-width: 720px) { footer.site .grid { grid-template-columns: 1fr 1fr; } }
   footer.site .brandcol .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); margin-bottom: 14px; }
   footer.site .brandcol .brand img { height: 16px; width: 16px; }
-  footer.site .brandcol .brand span { font-weight: 540; font-size: 15px; letter-spacing: 0; }
+  footer.site .brandcol .brand span { font-weight: 500; font-size: 15px; letter-spacing: 0; }
   footer.site .brandcol p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; max-width: 32ch; }
   footer.site h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
   footer.site ul { list-style: none; margin: 0; padding: 0; }
@@ -352,6 +409,56 @@
     flex-wrap: wrap; gap: 12px;
   }
 
+  /* Closer CTA section */
+  section.closer { padding: 56px 0 88px; border-top: 1px solid var(--line); }
+  .closer-card {
+    position: relative; overflow: hidden;
+    background: linear-gradient(180deg, rgba(16,185,129,0.06), var(--bg-elev));
+    border: 1px solid rgba(16,185,129,0.24);
+    border-radius: 14px; padding: 56px 48px;
+    box-shadow: 0 30px 80px -36px rgba(16,185,129,0.20);
+  }
+  @media (max-width: 720px) { .closer-card { padding: 36px 24px; } }
+  .closer-eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0;
+    text-transform: uppercase; color: var(--ink-faint);
+    display: inline-flex; gap: 10px; margin: 0 0 18px;
+  }
+  .closer-eyebrow .num { color: #10b981; }
+  .closer-card h2 {
+    margin: 0 0 12px;
+    font-size: clamp(28px, 3.8vw, 44px);
+    line-height: 1.08; font-weight: 500; letter-spacing: -0.02em;
+    color: var(--ink); max-width: 22ch;
+  }
+  .closer-card p { margin: 0 0 28px; font-size: 16px; color: var(--ink-mute); max-width: 56ch; }
+  .closer-card p code {
+    font-family: var(--mono); font-size: 0.92em; color: var(--ink);
+    background: rgba(255,255,255,0.04); border: 1px solid var(--line);
+    border-radius: 4px; padding: 1px 6px;
+  }
+  .closer-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .closer-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 13px 22px; border-radius: 8px;
+    font-size: 14.5px; font-weight: 500; letter-spacing: 0;
+    background: var(--ink); color: var(--bg);
+    border: 1px solid var(--ink);
+    transition: background 120ms, transform 120ms;
+  }
+  .closer-cta:hover { background: #fff; transform: translateY(-1px); }
+  [data-theme=light] .closer-cta { background: #18171a; color: #f5f1e6; border-color: #18171a; }
+  [data-theme=light] .closer-cta:hover { background: #2a2823; }
+  .closer-ghost {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 13px 22px; border-radius: 8px;
+    font-size: 14.5px; font-weight: 500; letter-spacing: 0;
+    color: var(--ink-mute);
+    border: 1px solid var(--line-strong);
+    transition: color 120ms, border-color 120ms;
+  }
+  .closer-ghost:hover { color: var(--ink); border-color: rgba(16,185,129,0.4); }
+
   .plate{position:relative;margin:40px 0 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:#050607;isolation:isolate}
   .plate .img{position:relative;aspect-ratio:16/9;background-position:center;background-size:cover;background-repeat:no-repeat}
   .plate .img::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 50%,rgba(8,8,10,0.78) 100%),linear-gradient(90deg,rgba(8,8,10,0.55) 0%,transparent 30%,transparent 70%,rgba(8,8,10,0.55) 100%)}
@@ -359,31 +466,28 @@
   .plate .stamp{position:absolute;top:18px;left:20px;z-index:3;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute);border:1px solid rgba(236,231,220, 0.22);background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 11px;border-radius:4px}
   .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(236,231,220, 0.85)}
   .plate .cap{position:absolute;left:24px;right:24px;bottom:20px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
-  .plate .cap .title{font-family:var(--sans);font-size:clamp(18px,2vw,24px);font-weight:540;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:62%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
+  .plate .cap .title{font-family:var(--sans);font-size:clamp(18px,2vw,24px);font-weight: 500;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:62%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
   .plate .cap .title .tone{background:linear-gradient(170deg,#faf2e1 0%,#c9c2b2 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   .plate .cap .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);letter-spacing: 0;text-align:right;line-height:1.7}
-  .plate .cap .meta b{color:var(--ink);font-weight:520}
+  .plate .cap .meta b{color:var(--ink);font-weight: 500}
   @media(max-width:720px){.plate .cap{left:14px;right:14px;bottom:12px;flex-direction:column;align-items:flex-start;gap:8px}.plate .cap .title{font-size:14px;max-width:100%}.plate .cap .meta{text-align:left;font-size:10px}.plate .stamp{top:12px;left:12px;font-size:9px;padding:4px 9px}}
 </style>
 <link rel="stylesheet" href="/brand-refresh.css">
 </head>
 <body>
 
-<header class="site">
-  <div class="wrap row">
-    <div class="left">
-      <a href="/" class="brand" aria-label="kolm">
-        <span>kolm</span>
-      </a>
-      <nav>
-        <a href="/use-cases">Solutions</a>
-        <a href="/docs">Developers</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand"><span>kolm</span></a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/use-cases">Solutions</a>
+      <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
+      <a href="/pricing">Pricing</a>
+    </nav>
+    <div class="site-actions">
       <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signin">sign in</a>
       <a href="/signup" class="cta">Get API key &rarr;</a>
     </div>
   </div>
@@ -391,17 +495,60 @@
 
 <section class="hero">
   <div class="wrap">
+    <div class="hero-eyebrow"><span class="he-dot"></span>Pricing . v7 . pay for the compile</div>
     <h1 class="hero-h1">Compile once.<br><span class="tone">Run it forever.</span></h1>
-    <p class="lede">You pay kolm to compile. Your frontier bill stays with your frontier provider &mdash; we never resell tokens.</p>
+    <p class="lede">You pay kolm to compile. Your frontier bill stays with your frontier provider. We never resell tokens. The local runtime is always free.</p>
 
+    <div class="provider-strip">
+      <div class="ps-label"><span class="ps-num">01</span> &nbsp; Works with any frontier</div>
+      <div class="ps-models">
+        <span>Claude</span><span>GPT</span><span>Llama</span><span>Mistral</span><span>DeepSeek</span><span>Qwen</span><span>Gemini</span>
+      </div>
+    </div>
+
+    <div class="ticker-bar" aria-hidden="true">
+      <div class="ticker-track">
+        <span class="ti"><b>$0</b> per call after compile</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>HMAC</b>-signed receipts</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>K &ge; 0.85</b> quality gate</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>BYO</b> frontier key</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>Local</b> runtime forever</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>Month</b>-to-month</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>14-day</b> Pro trial</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>No</b> token resale</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>$0</b> per call after compile</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>HMAC</b>-signed receipts</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>K &ge; 0.85</b> quality gate</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>BYO</b> frontier key</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>Local</b> runtime forever</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>Month</b>-to-month</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>14-day</b> Pro trial</span>
+        <span class="sep">.</span>
+        <span class="ti"><b>No</b> token resale</span>
+      </div>
+    </div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
     <div class="bill-toggle" role="tablist" aria-label="Billing cycle">
-      <button class="on" data-bill="monthly" type="button" role="tab" aria-selected="true">Monthly</button>
-      <button data-bill="annual" type="button" role="tab" aria-selected="false">Annual<span class="save">SAVE 17%</span></button>
+      <button data-bill="monthly" type="button" role="tab" aria-selected="false">Monthly</button>
+      <button class="on" data-bill="annual" type="button" role="tab" aria-selected="true">Annual<span class="save">SAVE 17%</span></button>
     </div>
     <div class="tiers">
       <div class="tier">
@@ -410,7 +557,7 @@
         <div class="pitch">Solo builders and researchers. Public artifacts only.</div>
         <div class="num"><span data-mo="$0" data-yr="$0">$0</span><span class="per" data-mo="forever" data-yr="forever">forever</span></div>
         <div class="frontier">+ your frontier model bill</div>
-        <div class="frontier" style="margin-top:-14px"><b style="color:var(--ink-mute);font-weight:540">Overage</b> 429 until cycle resets.</div>
+        <div class="overage"><b>Overage</b> HTTP 429 until cycle resets.</div>
         <ul>
           <li><b>3</b> compiles per month</li>
           <li>Recipe-only artifacts (no specialized model)</li>
@@ -421,16 +568,16 @@
           <li>HMAC-chained receipts</li>
           <li>Community support</li>
         </ul>
-        <a href="/signup" class="cta">Get API key &rarr;</a>
+        <a href="/quickstart" class="cta">Install CLI &rarr;</a>
       </div>
 
       <div class="tier">
         <div class="tag">Starter</div>
         <div class="name">Validate.</div>
         <div class="pitch">Validate your first private .kolm workflow.</div>
-        <div class="num"><span data-mo="$9" data-yr="$90">$9</span><span class="per" data-mo="/ month" data-yr="/ year - 2 mo free">/ month</span></div>
+        <div class="num"><span data-mo="$9" data-yr="$90">$90</span><span class="per" data-mo="/ month" data-yr="/ year &middot; 2 mo free">/ year &middot; 2 mo free</span></div>
         <div class="frontier">+ your frontier model bill</div>
-        <div class="frontier" style="margin-top:-14px"><b style="color:var(--ink-mute);font-weight:540">Overage</b> $4 / extra compile, capped at next tier.</div>
+        <div class="overage"><b>Overage</b> $4 / extra compile, capped at next tier.</div>
         <ul>
           <li><b>3</b> private artifacts</li>
           <li>Signed <code>.kolm</code> artifacts</li>
@@ -440,16 +587,16 @@
           <li>Priority compile queue</li>
           <li>Email support</li>
         </ul>
-        <a href="/signup?plan=starter" class="cta">Start Starter</a>
+        <a href="/signup?plan=starter" class="cta">Start for $9 &rarr;</a>
       </div>
 
       <div class="tier featured">
         <div class="tag">Pro</div>
-        <div class="name">Team.</div>
-        <div class="pitch">Product teams shipping AI features at scale.</div>
-        <div class="num"><span data-mo="$49" data-yr="$490">$49</span><span class="per" data-mo="/ month" data-yr="/ year - 2 mo free">/ month</span></div>
+        <div class="name">Ship.</div>
+        <div class="pitch">Solo builders and pairs shipping AI features that pay for themselves.</div>
+        <div class="num"><span data-mo="$49" data-yr="$490">$490</span><span class="per" data-mo="/ month" data-yr="/ year &middot; 2 mo free">/ year &middot; 2 mo free</span></div>
         <div class="frontier">+ your frontier model bill</div>
-        <div class="frontier" style="margin-top:-14px"><b style="color:var(--ink-mute);font-weight:540">Overage</b> $3 / extra compile, capped at next tier.</div>
+        <div class="overage"><b>Overage</b> $3 / extra compile, capped at next tier.</div>
         <ul>
           <li><b>Higher</b> private artifact quota</li>
           <li>Open-weight base pointers</li>
@@ -461,36 +608,37 @@
           <li>14-day free trial - cancel any time</li>
           <li>Slack support - 24h SLA</li>
         </ul>
-        <a href="/signup?plan=pro" class="cta">Start Pro &rarr;</a>
+        <a href="/signup?plan=pro" class="cta">Start free trial &rarr;</a>
       </div>
 
       <div class="tier">
         <div class="tag">Teams</div>
-        <div class="name">Squad.</div>
-        <div class="pitch">5-seat teams sharing a private registry.</div>
-        <div class="num"><span data-mo="$149" data-yr="$1,490">$149</span><span class="per" data-mo="/ month" data-yr="/ year - 2 mo free">/ month</span></div>
+        <div class="name">Together.</div>
+        <div class="pitch">Starts at two seats. One registry. Audit log and SSO from day one.</div>
+        <div class="num"><span data-mo="$149" data-yr="$1,490">$1,490</span><span class="per" data-mo="/ month" data-yr="/ year &middot; 2 mo free">/ year &middot; 2 mo free</span></div>
         <div class="frontier">+ your frontier model bill</div>
-        <div class="frontier" style="margin-top:-14px"><b style="color:var(--ink-mute);font-weight:540">Overage</b> $2 / extra compile, pooled across team.</div>
+        <div class="overage"><b>Overage</b> $2 / extra compile, pooled across the team.</div>
         <ul>
-          <li><b>10</b> compiles per seat per month</li>
-          <li><b>5</b> seats included, +$29 / extra seat</li>
+          <li><b>2</b> seats minimum &middot; up to 10 included &middot; +$30 / extra seat</li>
+          <li><b>10</b> compiles per seat per month, pooled</li>
           <li>Private team registry namespace</li>
-          <li>Shared artifact cache + signed pulls</li>
+          <li>Shared artifact cache &middot; signed pulls</li>
           <li>SSO via Google Workspace</li>
           <li>Audit log of every compile and pull</li>
           <li>30M-vector recall pool</li>
-          <li>Slack support - 8h SLA</li>
+          <li>Role-based access &middot; per-seat usage view</li>
+          <li>Slack support &middot; 8h SLA</li>
         </ul>
-        <a href="/signup?plan=teams" class="cta">Start Teams &rarr;</a>
+        <a href="/signup?plan=teams&trial=14" class="cta">Start free trial &rarr;</a>
       </div>
 
       <div class="tier">
         <div class="tag">Business</div>
-        <div class="name">Department.</div>
-        <div class="pitch">25-seat orgs running artifacts across teams.</div>
-        <div class="num"><span data-mo="$1,499" data-yr="$14,990">$1,499</span><span class="per" data-mo="/ month" data-yr="/ year - 2 mo free">/ month</span></div>
+        <div class="name">Org.</div>
+        <div class="pitch">25-seat orgs with multi-team scopes, SCIM, and webhook bridges.</div>
+        <div class="num"><span data-mo="$1,499" data-yr="$14,990">$14,990</span><span class="per" data-mo="/ month" data-yr="/ year &middot; 2 mo free">/ year &middot; 2 mo free</span></div>
         <div class="frontier">+ your frontier model bill</div>
-        <div class="frontier" style="margin-top:-14px"><b style="color:var(--ink-mute);font-weight:540">Overage</b> $2 / extra compile, pooled org-wide.</div>
+        <div class="overage"><b>Overage</b> $2 / extra compile, pooled org-wide.</div>
         <ul>
           <li><b>25</b> seats included, +$49 / extra seat</li>
           <li><b>250</b> compiles per month pool</li>
@@ -502,16 +650,16 @@
           <li>Slack support &middot; 4h SLA</li>
           <li>Quarterly architecture review</li>
         </ul>
-        <a href="/signup?plan=business" class="cta">Start Business &rarr;</a>
+        <a href="mailto:founders@kolm.ai?subject=kolm%20business%20-%20book%20a%20demo" class="cta">Book a demo &rarr;</a>
       </div>
 
       <div class="tier">
         <div class="tag">Enterprise</div>
-        <div class="name">VPC.</div>
-        <div class="pitch">Regulated environments. Private networking, retention, compliance.</div>
-        <div class="num"><span data-mo="$2,999" data-yr="$29,990">$2,999</span><span class="per" data-mo="/ month" data-yr="/ year - 2 mo free">/ month</span></div>
+        <div class="name">Sovereign.</div>
+        <div class="pitch">Regulated environments. Private networking, retention, and compliance paths.</div>
+        <div class="num"><span data-mo="$2,999" data-yr="$29,990">$29,990</span><span class="per" data-mo="/ month" data-yr="/ year &middot; 2 mo free">/ year &middot; 2 mo free</span></div>
         <div class="frontier">hosted today; customer-hosted bridge by contract</div>
-        <div class="frontier" style="margin-top:-14px"><b style="color:var(--ink-mute);font-weight:540">Overage</b> per agreement; no surprise invoices.</div>
+        <div class="overage"><b>Overage</b> per agreement; no surprise invoices.</div>
         <ul>
           <li>Private registry namespace</li>
           <li>Customer-hosted compile bridge</li>
@@ -522,7 +670,7 @@
           <li>Dedicated support &middot; SLA by agreement</li>
           <li>Annual invoice &middot; PO billing &middot; Net 30 &middot; ACH/wire</li>
         </ul>
-        <a href="/signup?plan=enterprise" class="cta">Start Enterprise &rarr;</a>
+        <a href="mailto:founders@kolm.ai?subject=kolm%20enterprise%20-%20intro" class="cta">Talk to us &rarr;</a>
         <a href="/enterprise" style="display:block;margin-top:8px;text-align:center;color:var(--ink-mute);font-family:var(--mono);font-size:11.5px;text-decoration:none;letter-spacing:0.02em">enterprise overview &rarr;</a>
         <a href="mailto:founders@kolm.ai?subject=kolm%20enterprise%20%E2%80%94%20intro" style="display:block;margin-top:6px;text-align:center;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;text-decoration:none;letter-spacing:0.02em">or talk to founders &rarr;</a>
       </div>
@@ -532,14 +680,40 @@
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">-</span><span>What graduates you</span></div>
+    <div class="eyebrow"><span class="num">02</span><span>Usage-based add-ons</span></div>
+    <h2>If you need more,<br><span class="tone">pay for exactly that.</span></h2>
+    <p class="sec-lede">Three knobs above the tier inclusions. Pay only what you use. Stop any time. Add-ons are billed at the end of the cycle and shown on the same invoice.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:30px">
+      <div style="border:1px solid var(--line-strong);border-radius:14px;padding:22px 22px 20px;background:var(--bg-elev)">
+        <div style="font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.06em;margin-bottom:10px">Compile passes</div>
+        <div style="font-weight:500;color:var(--ink);font-size:22px;margin-bottom:6px;font-family:var(--mono)">$0.40<span style="font-size:13px;color:var(--ink-mute);margin-left:6px">/ pass</span></div>
+        <p style="margin:0;color:var(--ink-mute);font-size:13.5px;line-height:1.55">Charged only beyond the tier's monthly inclusion. Receipt logs whether a pass was billed.</p>
+      </div>
+      <div style="border:1px solid var(--line-strong);border-radius:14px;padding:22px 22px 20px;background:var(--bg-elev)">
+        <div style="font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.06em;margin-bottom:10px">Hosted inference</div>
+        <div style="font-weight:500;color:var(--ink);font-size:22px;margin-bottom:6px;font-family:var(--mono)">$0.0012<span style="font-size:13px;color:var(--ink-mute);margin-left:6px">/ 1K tok</span></div>
+        <p style="margin:0;color:var(--ink-mute);font-size:13.5px;line-height:1.55">Optional. Same artifact runs locally for free; pay this only when you want us to host it.</p>
+      </div>
+      <div style="border:1px solid var(--line-strong);border-radius:14px;padding:22px 22px 20px;background:var(--bg-elev)">
+        <div style="font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.06em;margin-bottom:10px">Artifact storage</div>
+        <div style="font-weight:500;color:var(--ink);font-size:22px;margin-bottom:6px;font-family:var(--mono)">$0.10<span style="font-size:13px;color:var(--ink-mute);margin-left:6px">/ GB / month</span></div>
+        <p style="margin:0;color:var(--ink-mute);font-size:13.5px;line-height:1.55">Tier inclusions are free. Add-on only kicks in past the cap. Receipt chain stays free forever.</p>
+      </div>
+    </div>
+    <p style="margin-top:22px;font-family:var(--mono);font-size:12px;color:var(--ink-faint)">All add-ons are off by default. Toggle them on per-org at <a href="/dashboard" style="color:var(--accent);text-decoration:none">/dashboard</a> &raquo; Billing.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">03</span><span>What graduates you</span></div>
     <h2>The reasons people move tiers<br><span class="tone">are small in number.</span></h2>
     <p class="sec-lede">Three thresholds: hobby to workflow, workflow to product, product to fleet.</p>
 
     <div class="grad-rows" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:36px">
       <div style="border:1px solid var(--line-strong);border-radius:14px;padding:22px 22px 18px;background:var(--bg-elev)">
         <div style="font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em;margin-bottom:10px">Developer &rarr; Starter</div>
-        <div style="font-weight:540;color:var(--ink);font-size:15px;margin-bottom:8px">Artifact stops being optional.</div>
+        <div style="font-weight: 500;color:var(--ink);font-size:15px;margin-bottom:8px">Artifact stops being optional.</div>
         <ul style="margin:0;padding:0;list-style:none;color:var(--ink-mute);font-size:13.5px;line-height:1.6">
           <li>Compiled the same task more than 3 times this month.</li>
           <li>Want a private namespace, not a public-atlas pull.</li>
@@ -548,7 +722,7 @@
       </div>
       <div style="border:1px solid var(--line-strong);border-radius:14px;padding:22px 22px 18px;background:var(--bg-elev)">
         <div style="font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em;margin-bottom:10px">Starter &rarr; Pro</div>
-        <div style="font-weight:540;color:var(--ink);font-size:15px;margin-bottom:8px">Users depend on the output.</div>
+        <div style="font-weight: 500;color:var(--ink);font-size:15px;margin-bottom:8px">Users depend on the output.</div>
         <ul style="margin:0;padding:0;list-style:none;color:var(--ink-mute);font-size:13.5px;line-height:1.6">
           <li>Shipping the artifact inside a customer-facing product.</li>
           <li>Want CI/CD compiles on every PR.</li>
@@ -557,7 +731,7 @@
       </div>
       <div style="border:1px solid var(--line-strong);border-radius:14px;padding:22px 22px 18px;background:var(--bg-elev)">
         <div style="font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em;margin-bottom:10px">Pro &rarr; Teams</div>
-        <div style="font-weight:540;color:var(--ink);font-size:15px;margin-bottom:8px">A second person needs to compile.</div>
+        <div style="font-weight: 500;color:var(--ink);font-size:15px;margin-bottom:8px">A second person needs to compile.</div>
         <ul style="margin:0;padding:0;list-style:none;color:var(--ink-mute);font-size:13.5px;line-height:1.6">
           <li>Two or more engineers sharing one key.</li>
           <li>Want SSO instead of a passed-around invite.</li>
@@ -566,7 +740,7 @@
       </div>
       <div style="border:1px solid var(--line-strong);border-radius:14px;padding:22px 22px 18px;background:var(--bg-elev)">
         <div style="font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em;margin-bottom:10px">Teams &rarr; Business</div>
-        <div style="font-weight:540;color:var(--ink);font-size:15px;margin-bottom:8px">More than one team compiles in one org.</div>
+        <div style="font-weight: 500;color:var(--ink);font-size:15px;margin-bottom:8px">More than one team compiles in one org.</div>
         <ul style="margin:0;padding:0;list-style:none;color:var(--ink-mute);font-size:13.5px;line-height:1.6">
           <li>Multiple product teams need their own registry scopes.</li>
           <li>Want SCIM and Okta, not Google SSO alone.</li>
@@ -575,7 +749,7 @@
       </div>
       <div style="border:1px solid var(--line-strong);border-radius:14px;padding:22px 22px 18px;background:var(--bg-elev)">
         <div style="font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em;margin-bottom:10px">Business &rarr; Enterprise</div>
-        <div style="font-weight:540;color:var(--ink);font-size:15px;margin-bottom:8px">Legal or auditor enters the conversation.</div>
+        <div style="font-weight: 500;color:var(--ink);font-size:15px;margin-bottom:8px">Legal or auditor enters the conversation.</div>
         <ul style="margin:0;padding:0;list-style:none;color:var(--ink-mute);font-size:13.5px;line-height:1.6">
           <li>BAA / DPA / DPIA are non-negotiable.</li>
           <li>Compile pipeline must run inside customer VPC.</li>
@@ -590,7 +764,7 @@
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">-</span><span>The math</span></div>
+    <div class="eyebrow"><span class="num">04</span><span>The math</span></div>
     <h2>What it actually costs<br><span class="tone">to ship one private AI feature.</span></h2>
     <p class="sec-lede">Pay the teacher once. Ship the artifact forever. Inference at zero marginal cost.</p>
 
@@ -634,7 +808,7 @@
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">-</span><span>Compare</span></div>
+    <div class="eyebrow"><span class="num">05</span><span>Compare</span></div>
     <p class="sec-lede">Local runtime free. Frontier bill yours.</p>
 
     <div class="matrix" role="table" aria-label="Plan comparison">
@@ -670,8 +844,8 @@
           <tr><td class="feat">Public atlas listing</td><td>Optional</td><td>Optional</td><td>Optional</td><td>Optional</td><td>Optional</td><td>Private only</td></tr>
 
           <tr class="section"><td colspan="7">Team</td></tr>
-          <tr><td class="feat">Seats included</td><td>1</td><td>1</td><td>1</td><td>5</td><td>25</td><td>By agreement</td></tr>
-          <tr><td class="feat">Extra seat price</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td>+$29 / mo</td><td>+$49 / mo</td><td>By agreement</td></tr>
+          <tr><td class="feat">Seats included</td><td>1</td><td>1</td><td>1</td><td>2&ndash;10</td><td>25</td><td>By agreement</td></tr>
+          <tr><td class="feat">Extra seat price</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td>+$30 / mo</td><td>+$49 / mo</td><td>By agreement</td></tr>
           <tr><td class="feat">Private team registry</td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="y">Yes</span></td><td><span class="y">Multi-team</span></td><td><span class="y">Yes</span></td></tr>
           <tr><td class="feat">SSO</td><td><span class="n">No</span></td><td><span class="n">No</span></td><td><span class="n">No</span></td><td>Google Workspace</td><td>Okta &middot; SAML</td><td>SAML / SCIM</td></tr>
           <tr><td class="feat">SCIM provisioning</td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="n">-</span></td><td><span class="y">Yes</span></td><td><span class="y">Yes</span></td></tr>
@@ -697,7 +871,7 @@
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">-</span><span>FAQ</span></div>
+    <div class="eyebrow"><span class="num">06</span><span>FAQ</span></div>
     <h2>Questions buyers ask.</h2>
     <p class="sec-lede">Not here? <a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions" style="color:var(--accent)">GitHub Discussions</a> or <a href="mailto:dev@kolm.ai" style="color:var(--accent)">dev@kolm.ai</a>.</p>
 
@@ -743,6 +917,14 @@
         <p>14 days of Pro, cancel any time. Trial artifacts stay yours, runnable forever.</p>
       </div>
       <div class="faq-card">
+        <h3>Do Teams really start at two seats?</h3>
+        <p>Yes. Teams is $149/mo flat for any team between 2 and 10 seats. Past 10, it's +$30/extra seat. No five-seat minimum, no pretending two-person teams are an edge case.</p>
+      </div>
+      <div class="faq-card">
+        <h3>Is annual billing cheaper?</h3>
+        <p>Yes. Annual is two months free on every paid tier (about 17% off). Switch any time from /account. Annual is the default toggle.</p>
+      </div>
+      <div class="faq-card">
         <h3>Can I export everything?</h3>
         <p>Artifact is a signed zip you own. Recall index exports as Parquet, receipts as JSONL. Nothing locked to our cloud.</p>
       </div>
@@ -754,53 +936,68 @@
   </div>
 </section>
 
-<footer class="site">
+<section class="closer">
   <div class="wrap">
-    <div class="grid">
-      <div class="brandcol">
-        <a href="/" class="brand" aria-label="kolm">
-          
-          <span>kolm</span>
-        </a>
-        <p>The private AI compiler. RS-1 &middot; RS-1-multimodal &middot; RS-1-receipts. Open spec, MIT-licensed.</p>
-      </div>
-      <div>
-        <h5>Product</h5>
-        <ul>
-          <li><a href="/compile">Compile</a></li>
-          <li><a href="/serve">Serve</a></li>
-          <li><a href="/anatomy">.kolm anatomy</a></li>
-          <li><a href="/k-score">K-score</a></li>
-          <li><a href="/benchmarks">Benchmarks</a></li>
-          <li><a href="/compare">Compare</a></li>
-          <li><a href="/atlas">Public atlas</a></li>
-          <li><a href="/pricing">Pricing</a></li>
-        </ul>
-      </div>
-      <div>
-        <h5>Develop</h5>
-        <ul>
-          <li><a href="/docs">Docs</a></li><li><a href="/articles">Articles</a></li>
-          <li><a href="/sdk.js">SDK</a></li>
-          <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack">GitHub</a></li>
-        </ul>
-      </div>
-      <div>
-        <h5>Trust</h5>
-        <ul>
-          <li><a href="/security">Security</a></li>
-          <li><a href="/status">Status</a></li>
-          <li><a href="/privacy">Privacy</a></li>
-          <li><a href="/terms">Terms</a></li>
-          <li><a href="mailto:dev@kolm.ai">dev@kolm.ai</a></li>
-        </ul>
+    <div class="closer-card">
+      <div class="closer-eyebrow"><span class="num">07</span><span>Start</span></div>
+      <h2>Pick a tier. Compile your first AI.</h2>
+      <p>14-day Pro trial. Cancel any time. Your <code>.kolm</code> artifacts stay yours forever.</p>
+      <div class="closer-actions">
+        <a href="/signup" class="closer-cta">Get API key &rarr;</a>
+        <a href="/quickstart" class="closer-ghost">View quickstart</a>
       </div>
     </div>
-    <div class="legal">
-      <span>kolmogorov · 2026</span>
-      <span>compile once - run anywhere</span>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
     </div>
-    <small class="footer-tag" style="display:block;margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--ink-faint,#6b7280);letter-spacing:0;">kolm &middot; open spec &middot; MIT licensed runtime &middot; kolm.ai</small>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 
@@ -824,6 +1021,10 @@
   btns.forEach(function (b) {
     b.addEventListener('click', function () { apply(b.getAttribute('data-bill')); });
   });
+  // Initialize to whichever button has .on at boot. Default is annual.
+  var initial = 'annual';
+  btns.forEach(function (b) { if (b.classList.contains('on')) initial = b.getAttribute('data-bill'); });
+  apply(initial);
 })();
 </script>
 

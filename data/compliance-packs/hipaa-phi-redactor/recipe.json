@@ -1,0 +1,53 @@
+{
+  "pack": "hipaa-phi-redactor",
+  "version": "0.1.0",
+  "task": "Redact Protected Health Information (PHI) per HIPAA Safe Harbor §164.514(b)(2) from clinical text. Replace each of the 18 identifier categories with a neutral tag in square brackets. Preserve clinical meaning and document structure.",
+  "preset": "lora-fast",
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "lora_rank": 16,
+  "k_threshold": 0.92,
+  "training": {
+    "max_steps": 800,
+    "learning_rate": 2e-4,
+    "warmup_ratio": 0.03,
+    "batch_size": 8,
+    "gradient_accumulation": 4,
+    "seed": 42
+  },
+  "verifier": {
+    "kind": "regex",
+    "params": {
+      "pattern": "^[\\s\\S]{1,16000}$",
+      "max_refusal": 0.0,
+      "must_not_contain": [
+        "\\b\\d{3}-\\d{2}-\\d{4}\\b",
+        "\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b",
+        "\\b\\d{3}[ -]?\\d{3}[ -]?\\d{4}\\b"
+      ]
+    }
+  },
+  "evaluation": {
+    "metrics": ["precision", "recall", "f1", "leak_rate"],
+    "primary": "leak_rate",
+    "target": 0.0,
+    "held_out_ratio": 0.15
+  },
+  "deployment": {
+    "default_runtime": "gguf",
+    "tee_supported": ["aws-nitro", "gcp-cvm", "azure-cvm"],
+    "egress_required": false
+  },
+  "policy": {
+    "refuses": [
+      "re-identification of redacted text",
+      "extraction of PHI rather than redaction",
+      "synthetic PHI generation"
+    ]
+  },
+  "compliance_metadata": {
+    "framework": "HIPAA",
+    "control": "§164.514(b)(2) Safe Harbor",
+    "data_classification": "PHI",
+    "geo_constraint": "US"
+  }
+}

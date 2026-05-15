@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>SDKs &middot; embed a .kolm in Python, Swift, Kotlin, React Native | kolm</title>
+<meta name="description" content="Four native SDKs that load a signed .kolm and run it on-device. One API surface, verified backends. Python pip, SwiftPM, Gradle, react-native-kolm.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="kolm SDKs &middot; Python, Swift, Kotlin, React Native">
+<meta property="og:description" content="One signed .kolm. Four native loaders. Receipts on every call. Verified backends per platform.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/sdks">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm SDKs &middot; native runtime in four languages">
+<meta name="twitter:description" content="One .kolm. Four loaders. Receipts on every call.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+
+<link rel="canonical" href="https://kolm.ai/sdks">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "kolm SDKs",
+      "description": "Native SDKs that load and run a signed .kolm artifact on Python, Swift, Kotlin, and React Native. CID verified, receipts emitted on every call.",
+      "url": "https://kolm.ai/sdks",
+      "author": {"@type": "Organization", "name": "Kolmogorov"},
+      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+      "datePublished": "2026-05-14",
+      "license": "https://opensource.org/licenses/MIT"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+        {"@type": "ListItem", "position": 2, "name": "SDKs", "item": "https://kolm.ai/sdks"}
+      ]
+    }
+  ]
+}
+</script>
+<style>
+  :root {
+    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+    --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10);
+    --good: #7ef0d2;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+  @media (max-width:720px){.wrap{padding:0 20px}}
+
+  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+  header.site .left{display:flex;align-items:center;gap:36px}
+  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+  header.site .brand img{height:18px;width:18px}
+  header.site .brand span{font-weight:500;font-size:16px}
+  header.site nav{display:flex;gap:22px}
+  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+  header.site nav a:hover{color:var(--ink)}
+  header.site .right{display:flex;align-items:center;gap:14px}
+  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+  header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+  @media (max-width:720px){header.site nav{display:none}}
+
+  section.hero{padding:104px 0 56px}
+  .eyebrow{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase}
+  h1{font-size:clamp(42px,5.4vw,68px);line-height:1.04;letter-spacing:-0.02em;margin:14px 0 24px;font-weight:500}
+  .hero-sub{font-size:20px;color:var(--ink-mute);max-width:720px;line-height:1.55}
+
+  .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:8px;margin:40px 0 0;font-family:var(--mono)}
+  .metrics .cell{padding:18px 16px;border-right:1px solid var(--line)}
+  .metrics .cell:last-child{border-right:none}
+  .metrics .k{font-size:11px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+  .metrics .v{font-size:18px;color:var(--ink)}
+  @media (max-width:720px){.metrics{grid-template-columns:1fr 1fr}.metrics .cell{border-right:none;border-bottom:1px solid var(--line)}}
+
+  section.lang{padding:56px 0;border-top:1px solid var(--line)}
+  .lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px}
+  @media (max-width:880px){.lang-grid{grid-template-columns:1fr}}
+  .lang-card{border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);padding:22px}
+  .lang-card .lbl{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between}
+  .lang-card .lbl .install{color:var(--ink-mute);text-transform:none;letter-spacing:0}
+  .lang-card h3{margin:0 0 6px;font-size:22px;font-weight:500;letter-spacing:-0.01em}
+  .lang-card p{margin:0 0 14px;color:var(--ink-mute);font-size:14px;line-height:1.55}
+  .lang-card pre{margin:0;padding:14px 16px;background:#080a0b;border:1px solid var(--line);border-radius:6px;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:#e6e6e6;overflow-x:auto;white-space:pre}
+  .lang-card .foot{margin-top:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)}
+  .lang-card .foot b{color:var(--ink-mute);font-weight:500}
+
+  section.contract{padding:56px 0;border-top:1px solid var(--line)}
+  .contract-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:24px}
+  @media (max-width:880px){.contract-grid{grid-template-columns:1fr}}
+  .contract-card{border:1px solid var(--line);border-radius:8px;padding:20px;background:var(--bg-elev)}
+  .contract-card .lbl{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+  .contract-card h4{margin:0 0 8px;font-size:17px;font-weight:500}
+  .contract-card p{margin:0;color:var(--ink-mute);font-size:14px;line-height:1.55}
+
+  section.matrix{padding:56px 0;border-top:1px solid var(--line)}
+  table.compat{width:100%;border-collapse:collapse;margin-top:24px;font-family:var(--mono);font-size:13px}
+  table.compat th, table.compat td{border-bottom:1px solid var(--line);padding:14px 12px;text-align:left}
+  table.compat th{color:var(--ink-faint);font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:500}
+  table.compat td{color:var(--ink-mute)}
+  table.compat td b{color:var(--ink);font-weight:500}
+
+  section.closer{padding:80px 0 96px;border-top:1px solid var(--line)}
+  .closer h2{font-size:32px;font-weight:500;margin:0 0 14px;letter-spacing:-0.01em}
+  .closer p{color:var(--ink-mute);max-width:660px}
+  .closer .row{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+  .closer a.cta{background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:6px;font-size:14px;font-weight:500}
+  .closer a.ghost{color:var(--ink-mute);padding:10px 18px;font-size:14px;border:1px solid var(--line);border-radius:6px}
+
+  footer.site-footer{padding:48px 0 32px;border-top:1px solid var(--line);background:var(--bg-elev)}
+  footer.site-footer .meta{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-bottom:24px}
+  footer.site-footer .links{display:grid;grid-template-columns:repeat(5,1fr);gap:32px;margin-bottom:24px}
+  @media (max-width:880px){footer.site-footer .links{grid-template-columns:1fr 1fr}}
+  footer.site-footer .col-h{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px}
+  footer.site-footer a{display:block;color:var(--ink-mute);font-size:13px;padding:3px 0}
+  footer.site-footer a:hover{color:var(--ink)}
+  footer.site-footer .footer-tag{display:block;color:var(--ink-faint);font-size:12px}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap row">
+    <div class="left">
+      <a class="brand" href="/"><img src="/favicon.svg" alt=""><span>kolm</span></a>
+      <nav>
+        <a href="/quickstart">quickstart</a>
+        <a href="/docs">docs</a>
+        <a href="/research">research</a>
+        <a href="/pricing">pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <a class="ghost" href="/signin">log in</a>
+      <a class="cta" href="/signup">sign up</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">SDKs &middot; native runtime, four platforms</div>
+      <h1>One artifact. Four loaders. Same receipt.</h1>
+      <p class="hero-sub">A <code>.kolm</code> is a signed zip plus a tiny manifest. The SDKs do nothing magical: unpack, verify signature and CID, dispatch to the local runtime your platform already has. The contract is the artifact, not the wrapper.</p>
+
+      <div class="metrics">
+        <div class="cell"><div class="k">Languages</div><div class="v">Python &middot; Swift &middot; Kotlin &middot; TS</div></div>
+        <div class="cell"><div class="k">Runtimes</div><div class="v">GGUF &middot; MLX &middot; CoreML &middot; ONNX &middot; ExecuTorch</div></div>
+        <div class="cell"><div class="k">Verify</div><div class="v">HMAC-SHA256 + CID round-trip</div></div>
+        <div class="cell"><div class="k">License</div><div class="v">MIT, no telemetry</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lang">
+    <div class="wrap">
+      <div class="eyebrow">Embed it</div>
+      <h2 style="font-size:28px;font-weight:500;margin:6px 0 0;letter-spacing:-0.01em">Pick a language. Three lines.</h2>
+
+      <div class="lang-grid">
+        <div class="lang-card" id="python">
+          <div class="lbl"><span>Python &middot; <code>kolm</code></span><span class="install">pip install kolm</span></div>
+          <h3>Python</h3>
+          <p>Backend autopick: GGUF (llama-cpp-python) &rarr; ONNX (onnxruntime) &rarr; remote (<code>KOLM_RUNTIME_URL</code>) &rarr; transformers + peft. Set <code>verify="strict"</code> to fail closed on signature mismatch.</p>
+<pre>from kolm import load
+
+model = load("phi-redactor.kolm", verify="on")
+out = model.predict("Patient John Doe, MRN 8847-21.")
+print(out.text)        # "Patient [NAME], MRN [MRN]."
+print(out.receipt.cid) # cidv1:sha256:1bcf2323...</pre>
+          <div class="foot"><b>min py</b> 3.10 &middot; <b>extras</b> [gguf, onnx, transformers]</div>
+        </div>
+
+        <div class="lang-card" id="swift">
+          <div class="lbl"><span>Swift &middot; <code>Kolm</code></span><span class="install">SwiftPM dep</span></div>
+          <h3>Swift</h3>
+          <p>Backend pick by extension: CoreML (<code>.mlpackage</code>) &rarr; MLX (<code>.mlx</code>) &rarr; GGUF (<code>.gguf</code>). The signed zip unpacks once into <code>Library/Caches/kolm/&lt;cid&gt;/</code> and reuses on subsequent loads.</p>
+<pre>import Kolm
+
+let model = try await Kolm.load(named: "phi-redactor")
+let out = try await model.predict("Patient John Doe...")
+print(out.text)</pre>
+          <div class="foot"><b>min</b> iOS 17 / macOS 14 &middot; <b>unzip</b> ditto on macOS, ZIPFoundation on iOS</div>
+        </div>
+
+        <div class="lang-card" id="kotlin">
+          <div class="lbl"><span>Kotlin &middot; <code>ai.kolm:kolm</code></span><span class="install">implementation()</span></div>
+          <h3>Kotlin / Android</h3>
+          <p>Bring your own runtime AAR (llama.cpp via jllama, ExecuTorch, or onnxruntime-android). The SDK prints crisp errors when the runtime is missing instead of failing silently at first inference.</p>
+<pre>import ai.kolm.Kolm
+
+val model = Kolm.load(context, "phi-redactor.kolm")
+val out = model.predict("Patient John Doe...")
+Log.d("kolm", out.text)</pre>
+          <div class="foot"><b>min</b> Android 8 (API 26) &middot; <b>verify</b> javax.crypto.Mac HmacSHA256</div>
+        </div>
+
+        <div class="lang-card" id="rn">
+          <div class="lbl"><span>React Native &middot; <code>react-native-kolm</code></span><span class="install">yarn add react-native-kolm</span></div>
+          <h3>React Native</h3>
+          <p>Thin TS wrapper around the Swift / Kotlin backends. HTTPS sources cache via <code>react-native-fs</code> under <code>CachesDirectoryPath</code>. One API surface, two native paths.</p>
+<pre>import Kolm from 'react-native-kolm';
+
+await Kolm.setConfig({ verify: 'on' });
+const model = await Kolm.load(require('./phi-redactor.kolm'));
+const out = await model.predict('Patient John Doe...');
+console.log(out.text);</pre>
+          <div class="foot"><b>min RN</b> 0.74 &middot; <b>deps</b> react-native-fs (optional for HTTPS sources)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contract">
+    <div class="wrap">
+      <div class="eyebrow">What every SDK guarantees</div>
+      <h2 style="font-size:28px;font-weight:500;margin:6px 0 0;letter-spacing:-0.01em">The contract isn&rsquo;t the wrapper, it&rsquo;s the artifact.</h2>
+      <div class="contract-grid">
+        <div class="contract-card">
+          <div class="lbl">load()</div>
+          <h4>Verify before run</h4>
+          <p>HMAC-SHA256 on the receipt body + CID round-trip on canonical hashes. <code>verify="strict"</code> raises on mismatch. <code>"on"</code> warns. <code>"off"</code> for trusted local artifacts.</p>
+        </div>
+        <div class="contract-card">
+          <div class="lbl">predict()</div>
+          <h4>Receipt per call</h4>
+          <p>Every output carries CID + credential_id + input_hash + output_hash + runtime_version + issued_at. Forward the credential to downstream systems; they can verify provenance without our infrastructure.</p>
+        </div>
+        <div class="contract-card">
+          <div class="lbl">dispose()</div>
+          <h4>Bounded lifetime</h4>
+          <p>Backends release memory on dispose. The cached unpack stays on disk for fast re-load; clear with <code>Kolm.clearCache()</code> when shipping a new artifact CID.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="matrix">
+    <div class="wrap">
+      <div class="eyebrow">Backend matrix</div>
+      <h2 style="font-size:28px;font-weight:500;margin:6px 0 0;letter-spacing:-0.01em">Which runtime each platform reaches for, in order.</h2>
+      <table class="compat">
+        <thead>
+          <tr><th>SDK</th><th>First</th><th>Second</th><th>Third</th><th>Fallback</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>Python</b></td><td>GGUF (llama.cpp)</td><td>ONNX Runtime</td><td>remote (<code>KOLM_RUNTIME_URL</code>)</td><td>transformers + peft</td></tr>
+          <tr><td><b>Swift</b></td><td>CoreML (<code>.mlpackage</code>)</td><td>MLX</td><td>GGUF</td><td>error with required dep</td></tr>
+          <tr><td><b>Kotlin</b></td><td>llama.cpp (jllama)</td><td>ExecuTorch</td><td>ONNX Runtime Mobile</td><td>error with required AAR</td></tr>
+          <tr><td><b>React Native</b></td><td>Swift backend (iOS)</td><td>Kotlin backend (Android)</td><td>WASM (web fallback)</td><td>error with required peer dep</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="closer">
+    <div class="wrap">
+      <h2>The signed artifact is the API.</h2>
+      <p>The SDKs are deliberately thin. Verify, dispatch, return a typed result. If we shipped a magical wrapper, the artifact would lose its meaning. The receipt would lose its meaning. So we ship the smallest possible loader and let the file do the talking.</p>
+      <div class="row">
+        <a class="cta" href="/quickstart">Compile your first .kolm</a>
+        <a class="ghost" href="/docs#sdks">SDK docs</a>
+        <a class="ghost" href="/showcase">Live showcase</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+<script src="/nav.js" defer></script>
+</body>
+</html>

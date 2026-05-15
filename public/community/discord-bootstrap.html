@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>Discord server bootstrap &middot; kolm community</title>
+<meta name="description" content="Internal bootstrap doc for the kolm Discord. Channels, roles, pinned message templates, moderation philosophy, bot config notes.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+  .dc-wrap{max-width:880px;margin:0 auto;padding:0 32px}
+  .dc-hero{padding:64px 0 28px;border-bottom:1px solid var(--line)}
+  .dc-hero .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint,#737c73);margin:0 0 14px}
+  .dc-hero .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  .dc-hero h1{font-size:clamp(28px,3.6vw,40px);line-height:1.12;margin:0 0 12px;letter-spacing:-0.02em;font-weight:500;color:var(--fg,#faf2e1)}
+  .dc-hero .lede{font-size:15.5px;line-height:1.65;color:var(--ink-mute,#b5bdb1);max-width:70ch;margin:0}
+  .dc-section{padding:36px 0;border-bottom:1px solid var(--line)}
+  .dc-section h2{margin:0 0 12px;font-size:20px;font-weight:500;letter-spacing:-0.01em;color:var(--fg,#faf2e1)}
+  .dc-section p{margin:0 0 12px;color:var(--ink-mute,#b5bdb1);font-size:14.5px;line-height:1.7;max-width:70ch}
+  .dc-section code{font-family:var(--mono);font-size:12.5px;color:var(--fg,#faf2e1);background:rgba(255,255,255,0.04);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+  .dc-list{margin:6px 0 0;padding-left:22px;color:var(--ink-mute,#b5bdb1);font-size:14.5px;line-height:1.7}
+  .dc-list li{margin:0 0 6px}
+  .dc-list li b{color:var(--fg,#faf2e1);font-weight:500}
+  pre.dc-block{background:var(--bg-2,#11151b);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:8px 0 0;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--fg,#faf2e1);white-space:pre-wrap;overflow-x:auto}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="/">k o l m</a>
+    <nav class="primary">
+      <a href="/quickstart">quickstart</a>
+      <a href="/docs">docs</a>
+      <a href="/community">community</a>
+      <a href="/pricing">pricing</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="dc-hero">
+  <div class="dc-wrap">
+    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/community">community</a> &nbsp;/&nbsp; discord server bootstrap</p>
+    <h1>Discord server bootstrap.</h1>
+    <p class="lede">Internal doc for setting up and running the kolm Discord. Five channels, three roles, light-touch moderation, no bots day one. Read top-to-bottom before opening invites.</p>
+  </div>
+</section>
+
+<section class="dc-section">
+  <div class="dc-wrap">
+    <h2>Invite.</h2>
+    <p>Placeholder URL: <code>https://discord.gg/kolm</code>. The vanity URL is reserved but the invite is gated for the first 90 days. Membership is "DM founders@kolm.ai with your GitHub handle or your work email." We approve manually until we hit 200 members; after that we open the gate.</p>
+    <p>The gating is not gatekeeping. It is a way to keep the early signal-to-noise high enough that the first 50 conversations set the tone of the server.</p>
+  </div>
+</section>
+
+<section class="dc-section">
+  <div class="dc-wrap">
+    <h2>Server structure.</h2>
+    <p>Five channels. No more, no fewer, for the first six months. A bigger channel list signals a bigger server; we are not that yet and pretending otherwise wastes attention.</p>
+    <ul class="dc-list">
+      <li><b>#welcome.</b> Pinned: read-only intro, link to /docs, link to /spec/rs-1, link to the CoC. New-member rule: post a one-liner about what you are building. No introductions = no other channel access (manual). This is the only read-only channel for non-staff.</li>
+      <li><b>#announcements.</b> Read-only for everyone except staff. New release notes, breaking changes, security advisories, the HN/X launch links. Posts are signed by a real human, not a bot.</li>
+      <li><b>#help.</b> The default channel for "I am stuck." Format hint in the topic: paste the recipe, paste the error, paste the kolm version. Threads opened liberally so long topics do not bury the channel.</li>
+      <li><b>#showcase.</b> What you compiled. CID welcomed; no need to share the artifact itself. Brag a little; that is the point of the channel. Staff occasionally reposts highlights to /showcase on the public site (with permission).</li>
+      <li><b>#compliance-q-and-a.</b> The narrowest channel by design. HIPAA, SR 11-7, NIST AI RMF, EU AI Act questions. Compliance officers and security engineers. Tone is "I am not your lawyer," because we are not.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="dc-section">
+  <div class="dc-wrap">
+    <h2>Roles.</h2>
+    <p>Three tiers. Permissions are deliberately flat.</p>
+    <ul class="dc-list">
+      <li><b>member.</b> Default for everyone who passes the welcome step. Read + write in #help, #showcase, #compliance-q-and-a. React-add in #announcements.</li>
+      <li><b>contributor.</b> Anyone with a merged PR on the public repo. Auto-granted by the verify-on-PR Action once we wire it (manual until then). Same channels as member plus the ability to start polls and pin messages in #showcase.</li>
+      <li><b>staff.</b> Founders and core maintainers. Send messages in #welcome and #announcements, kick/ban, edit pinned messages. Names visible. No anonymous moderation.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="dc-section">
+  <div class="dc-wrap">
+    <h2>Pinned message templates.</h2>
+    <p>The first pinned message in each channel sets the contract for the channel. Copy verbatim.</p>
+<pre class="dc-block"># #welcome
+Hi - this is the kolm Discord. Read these three things first:
+
+1. /docs is the canonical reference. Start there.
+2. /spec/rs-1 is the artifact spec. Read it before you ask about manifests.
+3. Code of Conduct: Contributor Covenant 2.1. See CODE_OF_CONDUCT.md in the repo.
+
+Then post a one-liner about what you are building. We open the rest of the server once you have introduced yourself.
+
+Direct line: founders@kolm.ai
+
+# #help
+Three lines that help us help you:
+1. Your kolm version: `kolm --version`
+2. The recipe you are running (paste it, not a screenshot).
+3. The exact error or the CID of the artifact that fails.
+
+For long async threads, GitHub Discussions is the better surface:
+github.com/sneaky-hippo/kolmogorov-stack/discussions
+
+# #compliance-q-and-a
+We are engineers, not your lawyers. Answers here are best-effort engineering interpretations of public frameworks. Use them as a starting point, not as legal advice. /compliance is the canonical mapping.
+
+Sensitive disclosures (potential PHI exposure, customer-data incidents) go to founders@kolm.ai directly. Do not paste private data here.</pre>
+  </div>
+</section>
+
+<section class="dc-section">
+  <div class="dc-wrap">
+    <h2>Moderation philosophy.</h2>
+    <p>Light touch. Three rules.</p>
+    <ul class="dc-list">
+      <li><b>No spam.</b> One warning, then ban. No tolerance. Crypto airdrops, "earn $5k a week," DM-trading lists: instant ban, no warning.</li>
+      <li><b>Disagreements stay technical.</b> If the conversation shifts from "your number is wrong" to "you are wrong," a staff member steps in. We use Contributor Covenant 2.1 wording for the warning.</li>
+      <li><b>Point long async to GitHub Discussions.</b> Discord is great for "here is my error, help me debug." It is terrible at "what should the v0.2 receipt shape be." For the second, we move the thread to GitHub Discussions and link it back from Discord.</li>
+    </ul>
+    <p>Public site moderation log lives at <code>github.com/sneaky-hippo/kolmogorov-stack/blob/main/COMMUNITY_LOG.md</code>. Bans are recorded with reason. Names are redacted to handles. Receipts on moderation are the same principle as receipts on AI.</p>
+  </div>
+</section>
+
+<section class="dc-section">
+  <div class="dc-wrap">
+    <h2>Bot config notes.</h2>
+    <p>None initially. We have seen too many Discord servers ruined by 14 bots that auto-respond to every keyword. The signal-to-noise drops the day the first bot lands.</p>
+    <p>We may add one bot later: <code>kolm-verify-bot</code>. Scope is narrow. A user pastes a CID in any channel and the bot replies with a lookup against /leaderboard: "CID found, base = Qwen3-32B, K-score = 0.974, last seen 2 days ago" or "CID not in public registry." That bot is on the v0.2 backlog, not v0.1.</p>
+    <p>No mod bots. Staff handles moderation manually for as long as the server fits in one human's head. Past that, we will reconsider, but not before.</p>
+  </div>
+</section>
+
+<section class="dc-section" style="border-bottom:0">
+  <div class="dc-wrap">
+    <h2>Day-one checklist.</h2>
+    <ul class="dc-list">
+      <li><b>1.</b> Create the server, set the icon (kolm logo), set the boost-tier description.</li>
+      <li><b>2.</b> Create the 5 channels in the order above.</li>
+      <li><b>3.</b> Set up 3 roles with the permissions described above.</li>
+      <li><b>4.</b> Paste the 3 pinned message templates.</li>
+      <li><b>5.</b> Create the vanity URL <code>discord.gg/kolm</code> and update the placeholder on <a href="/community" style="color:inherit;border-bottom:1px dashed var(--line)">/community</a>.</li>
+      <li><b>6.</b> Send the first 10 invites manually. Track the names in a spreadsheet so we can ask follow-up questions in the first week.</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta">
+      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+    </div>
+    <div class="links">
+      <div>
+        <div class="col-h">community</div>
+        <a href="/community">overview</a>
+        <a href="/community/hn-launch">hn launch</a>
+        <a href="/community/twitter-thread">x thread</a>
+        <a href="/community/devto-article">dev.to article</a>
+        <a href="/community/discord-bootstrap">discord bootstrap</a>
+      </div>
+      <div>
+        <div class="col-h">proof</div>
+        <a href="/benchmarks">benchmarks</a>
+        <a href="/spec/rs-1">rs-1 spec</a>
+        <a href="/compliance">compliance</a>
+      </div>
+    </div>
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai
+    </small>
+  </div>
+</footer>
+</body>
+</html>

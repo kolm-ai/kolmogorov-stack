@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "kolm Verify",
+  "short_name": "kolm-verify",
+  "version": "0.1.0",
+  "description": "Right-click a .kolm download to verify the artifact: recompute the CID, walk the HMAC receipt chain, check the K-score gate, confirm the issuer signature. Runs entirely in your browser; nothing leaves the page.",
+  "homepage_url": "https://kolm.ai/verify-prod",
+  "minimum_chrome_version": "121",
+  "icons": {
+    "16": "icons/kolm-16.png",
+    "48": "icons/kolm-48.png",
+    "128": "icons/kolm-128.png"
+  },
+  "action": {
+    "default_title": "kolm Verify",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "downloads",
+    "contextMenus",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://kolm.ai/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://kolm.ai"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["verifier.html", "verifier.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

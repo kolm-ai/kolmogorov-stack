@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <title>kolm &middot; compile your own AI.</title>
 <meta name="description" content="kolm compiles a task into a working AI you own. Model, examples, evaluator, signed receipts. One runnable artifact. Runs anywhere. Your data stays.">
 <meta name="keywords" content="AI compiler, on-device AI, private AI, local AI, .kolm artifact, artifact registry, k-score, signed receipts, HIPAA AI, EU AI Act AI, edge AI, auditable AI, regulated AI">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="author" content="Kolmogorov">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <meta property="og:site_name" content="kolm">
@@ -20,7 +21,7 @@
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="kolm brand image showing a signed private AI artifact and compiler-cache positioning.">
+<meta property="og:image:alt" content="kolm: a signed .kolm artifact, compiled from a task description, that runs locally on your hardware.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
 <meta name="twitter:title" content="kolm &middot; compile your own AI">
@@ -29,6 +30,10 @@
 <link rel="canonical" href="https://kolm.ai/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" as="style">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="preload" href="/styles.css" as="style">
 <link rel="preload" href="/brand-refresh.css" as="style">
 <link rel="preload" href="/logo-mark.svg" as="image" type="image/svg+xml">
@@ -39,31 +44,31 @@
   .anti-incumbent { display: inline-block; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--violet, #faf2e1); margin-bottom: 14px; padding: 4px 10px; border: 1px solid rgba(236,231,220, 0.32); border-radius: 999px; background: rgba(236,231,220, 0.06); }
 
   /* github star button */
-  .gh-star { display: inline-flex !important; align-items: center; gap: 6px; padding: 5px 10px !important; border: 1px solid var(--line) !important; border-radius: 6px !important; color: var(--ink-mute, #b5bdb1) !important; font-family: var(--mono) !important; font-size: 11px !important; font-weight: 540 !important; text-transform: lowercase; line-height: 1; transition: color 120ms, border-color 120ms; }
+  .gh-star { display: inline-flex !important; align-items: center; gap: 6px; padding: 5px 10px !important; border: 1px solid var(--line) !important; border-radius: 6px !important; color: var(--ink-mute, #b5bdb1) !important; font-family: var(--mono) !important; font-size: 11px !important; font-weight: 500 !important; text-transform: lowercase; line-height: 1; transition: color 120ms, border-color 120ms; }
   .gh-star:hover { color: var(--ink, #faf2e1) !important; border-color: var(--line-2) !important; }
   .gh-star svg { opacity: 0.9; }
 
   /* pain anchor */
   .pain-anchor { margin: 80px auto 0; padding: 36px 32px; max-width: 980px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg-2, #11151b); }
   .pain-anchor .pain-hd { font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
-  .pain-anchor h2 { margin: 0 0 16px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.2; }
+  .pain-anchor h2 { margin: 0 0 16px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.2; }
   .pain-anchor .pain-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 18px 0 0; }
   @media (max-width: 760px) { .pain-anchor .pain-grid { grid-template-columns: 1fr; } }
   .pain-anchor .pain-row { padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: rgba(0,0,0,0.18); }
   .pain-anchor .pain-row .lab { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint, #737c73); margin-bottom: 6px; }
   .pain-anchor .pain-row .val { font-size: 14.5px; color: var(--fg, #faf2e1); line-height: 1.5; }
-  .pain-anchor .pain-row .val b { color: var(--violet, #faf2e1); font-weight: 540; }
+  .pain-anchor .pain-row .val b { color: var(--violet, #faf2e1); font-weight: 500; }
 
   /* ICP doors */
   .icp-doors { margin: 80px auto 0; max-width: 1180px; padding: 0 32px; }
   .icp-doors .icp-head { font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
-  .icp-doors h2 { margin: 0 0 28px; font-size: clamp(22px, 2.4vw, 30px); font-weight: 540; color: var(--fg, #faf2e1); }
+  .icp-doors h2 { margin: 0 0 28px; font-size: clamp(22px, 2.4vw, 30px); font-weight: 500; color: var(--fg, #faf2e1); }
   .icp-doors .icp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   @media (max-width: 880px) { .icp-doors .icp-grid { grid-template-columns: 1fr; } }
   .icp-doors a.icp-card { display: block; padding: 28px 28px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg-2, #11151b); transition: border-color 160ms, transform 160ms; color: inherit; }
   .icp-doors a.icp-card:hover { border-color: rgba(236,231,220, 0.45); transform: translateY(-2px); }
   .icp-doors a.icp-card .who { font-family: var(--mono); font-size: 10.5px; color: var(--violet, #faf2e1); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
-  .icp-doors a.icp-card h3 { margin: 0 0 8px; font-size: 18px; font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.25; }
+  .icp-doors a.icp-card h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.25; }
   .icp-doors a.icp-card p { margin: 0 0 12px; font-size: 13.5px; color: var(--fg-2, #c9c2b2); line-height: 1.6; }
   .icp-doors a.icp-card .arrow { font-family: var(--mono); font-size: 12px; color: var(--violet, #faf2e1); }
 
@@ -76,10 +81,10 @@
   .reg-strip a.reg-card { display: block; padding: 22px 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); transition: border-color 160ms, transform 160ms; color: inherit; text-decoration: none; }
   .reg-strip a.reg-card:hover { border-color: rgba(236,231,220, 0.45); transform: translateY(-2px); }
   .reg-strip .reg-card .vert { font-family: var(--mono); font-size: 10.5px; color: var(--violet, #faf2e1); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-  .reg-strip .reg-card h3 { margin: 0 0 6px; font-size: 16px; font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.3; }
+  .reg-strip .reg-card h3 { margin: 0 0 6px; font-size: 16px; font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.3; }
   .reg-strip .reg-card p { margin: 0 0 10px; font-size: 13px; color: var(--fg-2, #c9c2b2); line-height: 1.55; }
   .reg-strip .reg-card .frames { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.04em; }
-  .reg-strip .reg-card .frames b { color: var(--ink-mute, #b5bdb1); font-weight: 540; }
+  .reg-strip .reg-card .frames b { color: var(--ink-mute, #b5bdb1); font-weight: 500; }
 
   /* triple-pillar */
   .triple { margin: 80px auto 0; max-width: 1180px; padding: 0 32px; }
@@ -89,44 +94,44 @@
   .triple .triple-cell:last-child { border-right: 0; }
   @media (max-width: 880px) { .triple .triple-cell { border-right: 0; border-bottom: 1px solid var(--line); } .triple .triple-cell:last-child { border-bottom: 0; } }
   .triple .triple-cell .lab { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--violet, #faf2e1); margin-bottom: 10px; }
-  .triple .triple-cell h3 { margin: 0 0 10px; font-size: 17px; font-weight: 540; color: var(--fg, #faf2e1); }
+  .triple .triple-cell h3 { margin: 0 0 10px; font-size: 17px; font-weight: 500; color: var(--fg, #faf2e1); }
   .triple .triple-cell p { margin: 0; font-size: 13.5px; color: var(--fg-2, #c9c2b2); line-height: 1.6; }
 
-  /* registry telemetry · NEO LAB band, replaces bare counter line */
+  /* registry telemetry - NEO LAB band, replaces bare counter line */
   .reg-tele { margin: 64px auto 0; padding: 0 32px; max-width: 1180px; }
   .reg-tele-inner { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 10px; overflow: hidden; background: var(--line, rgba(255,255,255,0.08)); position: relative; }
   .reg-tele-inner::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(236,231,220, 0.45), transparent); pointer-events: none; z-index: 2; }
   .reg-tele-cell { padding: 16px 20px; background: #0a0c10; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
   .reg-tele-id { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-faint, #737c73); display: inline-flex; align-items: center; gap: 7px; }
   .reg-tele-id .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--violet, #faf2e1); box-shadow: 0 0 8px rgba(236,231,220, 0.55); }
-  .reg-tele-val { font-family: var(--mono); font-size: 18px; font-weight: 540; color: var(--ink, #faf2e1); letter-spacing: 0; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .reg-tele-val { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--ink, #faf2e1); letter-spacing: 0; font-variant-numeric: tabular-nums; line-height: 1.1; }
   .reg-tele-val .unit { font-size: 11px; color: var(--ink-faint, #737c73); margin-left: 6px; font-weight: 400; }
   .reg-tele-val .accent { color: var(--violet, #faf2e1); }
   .reg-tele-meta { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint, #737c73); letter-spacing: 0; }
   @media (max-width: 880px) { .reg-tele-inner { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 480px) { .reg-tele-inner { grid-template-columns: 1fr; } }
 
-  /* brand anchor · Kolmogorov is the company, kolm is the binary */
+  /* brand anchor - Kolmogorov is the company, kolm is the binary */
   .brand-anchor { margin: 30px auto 0; max-width: 1180px; padding: 0 32px; }
   .brand-anchor-inner { display: flex; align-items: center; gap: 14px; padding: 12px 22px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-2, #11151b); width: fit-content; margin: 0 auto; }
   .brand-anchor .ba-tag { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint, #737c73); }
   .brand-anchor .ba-text { font-size: 13px; color: var(--ink-mute, #b5bdb1); }
-  .brand-anchor .ba-text b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .brand-anchor .ba-text b { color: var(--ink, #faf2e1); font-weight: 500; }
   .brand-anchor .ba-text code { font-family: var(--mono); font-size: 0.92em; color: #c1f5e3; background: rgba(126,240,210, 0.06); border: 1px solid rgba(126,240,210, 0.16); border-radius: 4px; padding: 1px 6px; }
   @media (max-width: 540px) { .brand-anchor-inner { flex-direction: column; gap: 6px; padding: 12px 18px; } }
 
   /* hero rent-vs-buy thesis line */
   .hero-thesis { margin: 18px 0 4px; font-size: 14.5px; color: var(--ink-mute, #a39e90); line-height: 1.55; max-width: 60ch; padding: 12px 16px; border-left: 2px solid #7ef0d2; background: linear-gradient(90deg, rgba(126,240,210,0.05), rgba(236,231,220,0.01) 60%, transparent); border-radius: 0 6px 6px 0; }
-  .hero-thesis b { color: #c1f5e3; font-weight: 540; }
+  .hero-thesis b { color: #c1f5e3; font-weight: 500; }
 
   /* artifact-guarantee credibility band */
   .cred-band { margin: 36px auto 0; max-width: 1180px; padding: 0 32px; }
   .cred-band a.cred-inner { display: grid; grid-template-columns: auto repeat(4, 1fr) auto; gap: 24px; align-items: center; padding: 18px 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); text-decoration: none; color: inherit; transition: border-color 160ms, box-shadow 160ms; }
   .cred-band a.cred-inner:hover { border-color: rgba(126,240,210,0.30); box-shadow: 0 0 0 1px rgba(126,240,210,0.10), 0 8px 28px -12px rgba(126,240,210,0.18); }
-  .cred-band a.cred-inner:hover .cred-arrow { color: #7ef0d2; }
+  .cred-band a.cred-inner:hover .cred-arrow { color: var(--kolm-accent, #10b981); }
   .cred-band .cred-tag { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint, #737c73); border: 1px solid var(--line); padding: 5px 10px; border-radius: 999px; white-space: nowrap; }
   .cred-band .cred-cell { font-family: var(--mono); font-size: 12px; color: var(--ink-mute, #b5bdb1); line-height: 1.45; }
-  .cred-band .cred-cell .num { display: block; color: var(--ink, #faf2e1); font-size: 15px; font-weight: 540; margin-bottom: 2px; }
+  .cred-band .cred-cell .num { display: block; color: var(--ink, #faf2e1); font-size: 15px; font-weight: 500; margin-bottom: 2px; }
   .cred-band .cred-cell .lab { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint, #737c73); }
   .cred-band .cred-arrow { font-family: var(--mono); font-size: 12px; color: var(--ink-mute, #b5bdb1); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
   @media (max-width: 880px) {
@@ -142,29 +147,29 @@
   /* vs-alternatives strip */
   .vs-strip { margin: 80px auto 0; max-width: 1180px; padding: 0 32px; }
   .vs-strip .vs-head { font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
-  .vs-strip h2 { margin: 0 0 22px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; color: var(--fg, #faf2e1); }
+  .vs-strip h2 { margin: 0 0 22px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; color: var(--fg, #faf2e1); }
   .vs-strip .vs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
   @media (max-width: 980px) { .vs-strip .vs-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 540px) { .vs-strip .vs-grid { grid-template-columns: 1fr; } }
   .vs-strip a.vs-card { display: block; padding: 20px 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); transition: border-color 160ms, transform 160ms; color: inherit; text-decoration: none; }
   .vs-strip a.vs-card:hover { border-color: rgba(236,231,220, 0.45); transform: translateY(-2px); }
   .vs-strip .vs-card .vs { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-  .vs-strip .vs-card h3 { margin: 0 0 6px; font-size: 15px; font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.35; }
+  .vs-strip .vs-card h3 { margin: 0 0 6px; font-size: 15px; font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.35; }
   .vs-strip .vs-card p { margin: 0; font-size: 12.5px; color: var(--ink-faint, #737c73); line-height: 1.5; }
 
   /* receipt proof */
   .receipt-proof { margin: 80px auto 0; max-width: 1180px; padding: 0 32px; }
   .receipt-proof .rp-head { font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
-  .receipt-proof h2 { margin: 0 0 22px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; color: var(--fg, #faf2e1); }
+  .receipt-proof h2 { margin: 0 0 22px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; color: var(--fg, #faf2e1); }
   .receipt-proof .rp-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: stretch; }
   @media (max-width: 880px) { .receipt-proof .rp-grid { grid-template-columns: 1fr; } }
   .receipt-proof pre.rp-term { margin: 0; padding: 22px 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); font-family: var(--mono); font-size: 12.5px; color: var(--ink, #faf2e1); line-height: 1.65; overflow-x: auto; }
-  .receipt-proof pre.rp-term .ok { color: #7ef0d2; }
+  .receipt-proof pre.rp-term .ok { color: var(--kolm-accent, #10b981); }
   .receipt-proof pre.rp-term .prompt { color: var(--violet, #faf2e1); }
   .receipt-proof pre.rp-term .dim { color: var(--ink-faint, #737c73); }
   .receipt-proof pre.rp-term .hash { color: #c9c2b2; }
   .receipt-proof .rp-aside { padding: 22px 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); }
-  .receipt-proof .rp-aside h3 { margin: 0 0 10px; font-size: 16px; font-weight: 540; color: var(--fg, #faf2e1); }
+  .receipt-proof .rp-aside h3 { margin: 0 0 10px; font-size: 16px; font-weight: 500; color: var(--fg, #faf2e1); }
   .receipt-proof .rp-aside p { margin: 0 0 12px; font-size: 13.5px; color: var(--fg-2, #c9c2b2); line-height: 1.6; }
   .receipt-proof .rp-aside ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink-mute, #b5bdb1); line-height: 1.7; }
   .receipt-proof .rp-aside ul li { margin-bottom: 4px; }
@@ -172,15 +177,15 @@
   /* three-box explainer */
   .three-box { margin: 56px auto 0; max-width: 1180px; padding: 0 32px; }
   .three-box .tb-head { font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
-  .three-box h2 { margin: 0 0 22px; font-size: clamp(20px, 2.2vw, 26px); font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.25; max-width: 50ch; }
+  .three-box h2 { margin: 0 0 22px; font-size: clamp(20px, 2.2vw, 26px); font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.25; max-width: 50ch; }
   .three-box .tb-grid { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 14px; align-items: stretch; }
   @media (max-width: 880px) { .three-box .tb-grid { grid-template-columns: 1fr; } .three-box .tb-arrow { transform: rotate(90deg); justify-self: center; } }
   .three-box .tb-cell { padding: 22px 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); display: flex; flex-direction: column; }
   .three-box .tb-cell .tb-tag { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--violet, #faf2e1); margin-bottom: 10px; }
-  .three-box .tb-cell h3 { margin: 0 0 8px; font-size: 17px; font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.25; }
+  .three-box .tb-cell h3 { margin: 0 0 8px; font-size: 17px; font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.25; }
   .three-box .tb-cell p { margin: 0 0 12px; font-size: 13px; color: var(--fg-2, #c9c2b2); line-height: 1.55; }
   .three-box .tb-cell ul { margin: 0; padding: 0; list-style: none; font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.85; }
-  .three-box .tb-cell ul li::before { content: "› "; color: var(--violet, #faf2e1); }
+  .three-box .tb-cell ul li::before { content: " - "; color: var(--violet, #faf2e1); }
   .three-box .tb-arrow { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 14px; color: var(--violet, #faf2e1); }
   .three-box .tb-arrow .lab { display: block; font-size: 9.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; text-align: center; }
   .three-box .tb-foot { margin: 16px 0 0; font-size: 12.5px; color: var(--ink-faint, #737c73); }
@@ -190,7 +195,7 @@
   .ent-cta .ent-inner { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; padding: 28px 32px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg-2, #11151b); }
   @media (max-width: 760px) { .ent-cta .ent-inner { grid-template-columns: 1fr; padding: 22px 22px; } }
   .ent-cta .ent-tag { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--violet, #faf2e1); margin-bottom: 8px; }
-  .ent-cta h2 { margin: 0 0 6px; font-size: 22px; font-weight: 540; color: var(--fg, #faf2e1); }
+  .ent-cta h2 { margin: 0 0 6px; font-size: 22px; font-weight: 500; color: var(--fg, #faf2e1); }
   .ent-cta p { margin: 0; font-size: 13.5px; color: var(--fg-2, #c9c2b2); line-height: 1.55; }
   .ent-cta .ent-actions { display: flex; gap: 10px; flex-wrap: wrap; }
   .ent-cta a.ent-btn { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 18px; border-radius: 8px; text-decoration: none; }
@@ -202,20 +207,20 @@
   /* format comparison */
   .fmt-cmp { margin: 72px auto 0; max-width: 1180px; padding: 0 32px; }
   .fmt-cmp .fc-head { font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
-  .fmt-cmp h2 { margin: 0 0 10px; font-size: clamp(20px, 2.2vw, 26px); font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.25; max-width: 56ch; }
+  .fmt-cmp h2 { margin: 0 0 10px; font-size: clamp(20px, 2.2vw, 26px); font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.25; max-width: 56ch; }
   .fmt-cmp p.lede { margin: 0 0 24px; font-size: 14.5px; color: var(--fg-2, #c9c2b2); line-height: 1.6; max-width: 62ch; }
-  .fmt-cmp p.lede b { color: var(--fg, #faf2e1); font-weight: 540; }
+  .fmt-cmp p.lede b { color: var(--fg, #faf2e1); font-weight: 500; }
   .fmt-cmp p.lede code { font-family: var(--mono); font-size: 0.92em; color: var(--fg, #faf2e1); background: var(--bg-2, #11151b); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
   .fmt-cmp .tbl-wrap { background: var(--bg-2, #11151b); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
   .fmt-cmp table { width: 100%; min-width: 720px; border-collapse: collapse; }
   .fmt-cmp th, .fmt-cmp td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--line); font-size: 13.5px; }
-  .fmt-cmp th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint, #737c73); font-weight: 540; background: rgba(0,0,0,0.18); }
+  .fmt-cmp th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint, #737c73); font-weight: 500; background: rgba(0,0,0,0.18); }
   .fmt-cmp th.col-kolm { color: var(--fg, #faf2e1); }
   .fmt-cmp td:first-child { color: var(--fg, #faf2e1); font-weight: 500; }
   .fmt-cmp td { color: var(--fg-2, #c9c2b2); }
   .fmt-cmp td.col-kolm { color: var(--fg, #faf2e1); }
   .fmt-cmp tbody tr:last-child td { border-bottom: none; }
-  .fmt-cmp .y { color: #7ef0d2; font-family: var(--mono); }
+  .fmt-cmp .y { color: var(--kolm-accent, #10b981); font-family: var(--mono); }
   .fmt-cmp .n { color: var(--ink-faint, #737c73); font-family: var(--mono); }
   .fmt-cmp .partial { color: #f6c177; font-family: var(--mono); }
   .fmt-cmp .fc-foot { margin: 16px 0 0; font-size: 12px; color: var(--ink-faint, #737c73); font-family: var(--mono); }
@@ -226,7 +231,7 @@
   .dp-bar .dp-row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
   .dp-bar .dp-tag { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.06em; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; white-space: nowrap; }
   .dp-bar .dp-copy { font-size: 13.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.55; flex: 1; min-width: 220px; }
-  .dp-bar .dp-copy b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .dp-bar .dp-copy b { color: var(--ink, #faf2e1); font-weight: 500; }
   .dp-bar .dp-link { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-mute, #b5bdb1); white-space: nowrap; }
   .dp-bar .dp-link:hover { text-decoration: underline; }
   .dp-bar .dp-slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 18px; }
@@ -234,11 +239,11 @@
   @media (max-width: 540px) { .dp-bar .dp-slots { grid-template-columns: 1fr; } }
   .dp-bar .dp-slot { padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0,0,0,0.18); }
   .dp-bar .dp-slot .vert { font-family: var(--mono); font-size: 10px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
-  .dp-bar .dp-slot .name { font-size: 13px; color: var(--ink, #faf2e1); font-weight: 540; line-height: 1.3; }
+  .dp-bar .dp-slot .name { font-size: 13px; color: var(--ink, #faf2e1); font-weight: 500; line-height: 1.3; }
   .dp-bar .dp-slot .status { font-family: var(--mono); font-size: 10px; color: var(--ink-faint, #737c73); margin-top: 4px; text-transform: lowercase; }
   .dp-bar .dp-slot.reserved .status { color: var(--ink-faint, #797466); }
   .dp-bar .dp-slot.open { border-color: rgba(126,240,210,0.30); background: linear-gradient(180deg, rgba(126,240,210,0.04), rgba(0,0,0,0.18)); }
-  .dp-bar .dp-slot.open .status { color: #7ef0d2; }
+  .dp-bar .dp-slot.open .status { color: var(--kolm-accent, #10b981); }
   .dp-bar .dp-slot.open::before { content: ""; position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210,0.55); animation: eyebrow-pulse 2.6s ease-in-out infinite; }
   .dp-bar .dp-slot { position: relative; }
 
@@ -248,60 +253,207 @@
   .lab-terminal[data-anim="done"] .cursor { display: none; }
   @media (prefers-reduced-motion: reduce) { .lab-terminal .cursor { animation: none; opacity: 0; } }
 
-  /* hero cassette · tier-1 shot-and-cut product demo */
+  /* hero cassette  - tier-1 shot-and-cut product demo */
   .cassette-frame { display: flex; flex-direction: column; gap: 10px; position: relative; }
   .cassette-progress { position: relative; height: 2px; border-radius: 1px; background: rgba(236,231,220, 0.08); overflow: hidden; }
   .cassette-progress-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, #7ef0d2, #c1f5e3); border-radius: 1px; transition: width 120ms linear; box-shadow: 0 0 8px rgba(126,240,210, 0.45); }
   .cassette-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint, #737c73); padding: 0 2px; min-height: 14px; }
-  .cassette-meta .rec { display: inline-flex; align-items: center; gap: 6px; color: #ff6b91; font-weight: 540; }
+  .cassette-meta .rec { display: inline-flex; align-items: center; gap: 6px; color: #ff6b91; font-weight: 500; }
   .cassette-meta .rec::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #ff6b91; box-shadow: 0 0 8px rgba(255,107,145, 0.55); animation: ls-blink 1.4s ease-in-out infinite; }
   .cassette-stage { transition: color 220ms ease-out; }
-  .cassette-stage.live { color: #7ef0d2; }
+  .cassette-stage.live { color: var(--kolm-accent, #10b981); }
   .cassette-dots { display: inline-flex; gap: 6px; align-items: center; }
   .cassette-dots .cdot { width: 6px; height: 6px; border-radius: 50%; background: rgba(236,231,220, 0.18); transition: background 220ms ease-out, box-shadow 220ms ease-out; }
   .cassette-dots .cdot.active { background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.55); }
 
-  /* scene crossfade · terminal contents fade between scenes */
+  /* scene crossfade  - terminal contents fade between scenes */
   .lab-terminal#hero-terminal { min-height: 220px; transition: opacity 280ms ease-out; }
   .cassette-frame.swapping .lab-terminal#hero-terminal { opacity: 0.18; }
 
-  /* scene caption · the "voiceover" line of the shot-and-cut */
+  /* scene caption  - the "voiceover" line of the shot-and-cut */
   .cassette-caption { display: flex; align-items: flex-start; gap: 10px; min-height: 38px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0,0,0, 0.32); transition: opacity 240ms ease-out, transform 240ms ease-out; opacity: 1; transform: translateY(0); }
   .cassette-frame.swapping .cassette-caption { opacity: 0; transform: translateY(4px); }
-  .cassette-caption .cap-num { font-family: var(--mono); font-size: 10px; color: #7ef0d2; letter-spacing: 0.06em; text-transform: uppercase; padding-top: 2px; min-width: 26px; }
+  .cassette-caption .cap-num { font-family: var(--mono); font-size: 10px; color: var(--kolm-accent, #10b981); letter-spacing: 0.06em; text-transform: uppercase; padding-top: 2px; min-width: 26px; }
   .cassette-caption .cap-text { font-size: 13px; color: var(--ink-mute, #b5bdb1); line-height: 1.5; }
-  .cassette-caption .cap-text b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .cassette-caption .cap-text b { color: var(--ink, #faf2e1); font-weight: 500; }
 
-  /* hero demo strip · product video + live cost calc */
+  /* hero demo strip  - product video + live cost calc */
   .hero-demo { margin: 36px auto 0; max-width: 1180px; padding: 0 32px; position: relative; z-index: 2; }
   .hero-demo-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 22px; align-items: stretch; }
   @media (max-width: 1080px) { .hero-demo-grid { grid-template-columns: 1fr; gap: 18px; } }
   .hero-demo-panel { border: 1px solid var(--line-strong, rgba(236,231,220, 0.22)); background: linear-gradient(180deg, rgba(21,26,33, 0.96), rgba(11,13,16, 0.98)); box-shadow: 0 28px 80px rgba(0,0,0, 0.32); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
   .hero-demo-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 18px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint, #737c73); }
-  .hero-demo-head .live-pulse { display: inline-flex; align-items: center; gap: 7px; color: #7ef0d2; }
+  .hero-demo-head .live-pulse { display: inline-flex; align-items: center; gap: 7px; color: var(--kolm-accent, #10b981); }
   .hero-demo-head .live-pulse::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.55); animation: eyebrow-pulse 2.6s ease-in-out infinite; }
   .hero-demo-body { padding: 18px 20px; flex: 1; min-height: 0; }
 
-  /* hero video · the actual product demo, autoplay muted loop */
-  .hero-video-panel { padding: 0; background: #050607; }
-  .hero-video-wrap { position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; background: #050607; }
-  .hero-video-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; background: #050607; }
-  .hero-video-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(255,255,255, 0.04), inset 0 -80px 60px -40px rgba(8,9,8, 0.55); }
-  .hero-video-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 18px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-mute, #b5bdb1); letter-spacing: 0.02em; }
-  .hero-video-foot .scenes { display: inline-flex; gap: 14px; flex-wrap: wrap; }
-  .hero-video-foot .scenes span { color: var(--ink-faint, #737c73); }
-  .hero-video-foot .scenes b { color: var(--fg, #faf2e1); font-weight: 540; margin-right: 4px; }
-  .hero-video-foot a { color: #7ef0d2; }
+  /* v11 wave 8 . cinematic 6-scene hero demo. Apple-grade product video
+     synthesized in pure HTML+SVG+CSS, no video file, no remote deps.
+     Story: problem -> compile -> K-score gate -> verify -> run race -> ship.
+     28-second loop, scrubbable, IntersectionObserver-gated. */
+  .hero-cine { padding: 0; background: #050607; position: relative; }
+  .hcn-head-left { display: inline-flex; align-items: center; gap: 8px; }
+  .hcn-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .hcn-dot-r { background: #ff6b6b; box-shadow: 0 0 0 1px rgba(0,0,0,0.18) inset; }
+  .hcn-dot-y { background: #ffd76b; box-shadow: 0 0 0 1px rgba(0,0,0,0.18) inset; }
+  .hcn-dot-g { background: #7ef0d2; box-shadow: 0 0 0 1px rgba(0,0,0,0.18) inset; }
+  .hcn-cap { margin-left: 10px; color: var(--ink-faint, #737c73); font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: lowercase; }
+  .hcn-cap b { color: var(--ink-mute, #b5bdb1); font-weight: 500; }
+  .hcn-stage-wrap { position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; background: radial-gradient(120% 90% at 50% 30%, rgba(126,240,210, 0.05), transparent 60%), #050607; border-top: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .hcn-stage-wrap::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 4; box-shadow: inset 0 0 0 1px rgba(255,255,255, 0.03), inset 0 -120px 80px -60px rgba(8,9,12, 0.65), inset 0 60px 60px -40px rgba(0,0,0, 0.30); }
+  .hcn-caption-bar { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 3; padding: 7px 14px; border: 1px solid rgba(126,240,210, 0.22); border-radius: 999px; background: rgba(8,9,12, 0.62); backdrop-filter: blur(4px); font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ink-mute, #b5bdb1); transition: opacity 280ms ease-out, transform 280ms ease-out; opacity: 0; max-width: 78%; text-align: center; }
+  .hcn-caption-bar.show { opacity: 1; }
+  .hcn-caption-bar b { color: var(--ink, #faf2e1); font-weight: 500; }
+  .hcn-scene { position: absolute; inset: 0; padding: 56px 36px 44px; opacity: 0; transform: translateY(10px) scale(0.992); filter: blur(2px); transition: opacity 460ms cubic-bezier(0.22, 1, 0.36, 1), transform 520ms cubic-bezier(0.22, 1, 0.36, 1), filter 380ms ease-out; pointer-events: none; will-change: opacity, transform, filter; }
+  .hcn-scene.active { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); pointer-events: auto; }
+  .hcn-cmd { color: #7ef0d2; }
+  .hcn-cmd::before { content: "$ "; color: var(--ink-faint, #737c73); }
+  .hcn-dim { color: var(--ink-faint, #737c73); }
+  .hcn-hl { color: var(--ink, #faf2e1); font-weight: 500; }
+
+  /* Scene 1 . problem - red strikethrough diff */
+  .hcn-s1 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  .hcn-s1 .hcn-col { display: flex; flex-direction: column; gap: 9px; }
+  .hcn-s1 .hcn-col-label { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint, #737c73); margin-bottom: 4px; }
+  .hcn-s1 .hcn-strike { font-family: var(--mono); font-size: 13px; color: #ff9eb4; text-decoration: line-through; opacity: 0; transform: translateX(-6px); transition: opacity 260ms, transform 260ms; padding: 1px 4px; border-radius: 2px; }
+  .hcn-s1.go .hcn-strike { opacity: 0.85; transform: translateX(0); animation: hcnPulseRed 1.6s ease-in-out 1.1s 2; }
+  .hcn-s1 .hcn-col:first-child .hcn-strike:nth-of-type(2) { transition-delay: 0ms; }
+  .hcn-s1 .hcn-col:first-child .hcn-strike:nth-of-type(3) { transition-delay: 140ms; }
+  .hcn-s1 .hcn-col:first-child .hcn-strike:nth-of-type(4) { transition-delay: 260ms; }
+  .hcn-s1 .hcn-col:first-child .hcn-strike:nth-of-type(5) { transition-delay: 380ms; }
+  .hcn-s1 .hcn-col:first-child .hcn-strike:nth-of-type(6) { transition-delay: 500ms; }
+  .hcn-s1 .hcn-empty { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint, #737c73); font-style: italic; }
+  @keyframes hcnPulseRed { 0%, 100% { background: transparent; } 50% { background: rgba(255,158,180, 0.10); } }
+
+  /* Scene 2 . compile log stream */
+  .hcn-s2 { display: flex; flex-direction: column; gap: 8px; padding-top: 44px; }
+  .hcn-s2 .hcn-cmdline { font-family: var(--mono); font-size: 13.5px; color: #7ef0d2; margin-bottom: 6px; }
+  .hcn-s2 .hcn-cmdline::before { content: "$ "; color: var(--ink-faint, #737c73); }
+  .hcn-s2 .hcn-log { font-family: var(--mono); font-size: 12.5px; color: var(--ink, #ece7dc); line-height: 1.55; opacity: 0; transform: translateY(4px); transition: opacity 220ms ease-out, transform 220ms ease-out; display: flex; align-items: baseline; gap: 8px; }
+  .hcn-s2 .hcn-log.show { opacity: 1; transform: translateY(0); }
+  .hcn-s2 .hcn-log .hcn-lstep { color: var(--ink-faint, #737c73); width: 54px; flex-shrink: 0; }
+  .hcn-s2 .hcn-log .hcn-llabel { color: var(--ink-mute, #b5bdb1); flex: 1; }
+  .hcn-s2 .hcn-log .hcn-lval { color: #7ef0d2; font-weight: 500; }
+  .hcn-s2 .hcn-buildok { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 5px 12px; border: 1px solid rgba(126,240,210, 0.42); border-radius: 999px; background: rgba(126,240,210, 0.08); font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; color: #7ef0d2; align-self: flex-start; opacity: 0; transform: scale(0.96); transition: opacity 280ms ease-out, transform 280ms ease-out; }
+  .hcn-s2 .hcn-buildok.show { opacity: 1; transform: scale(1); }
+  .hcn-s2 .hcn-buildok::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.65); }
+
+  /* Scene 3 . K-score gauge */
+  .hcn-s3 { display: flex; flex-direction: column; justify-content: center; gap: 14px; padding-top: 28px; }
+  .hcn-s3 .hcn-bar-row { display: grid; grid-template-columns: 110px 1fr 60px; gap: 14px; align-items: center; font-family: var(--mono); font-size: 12px; }
+  .hcn-s3 .hcn-bar-lab { color: var(--ink-mute, #b5bdb1); display: flex; align-items: baseline; gap: 6px; }
+  .hcn-s3 .hcn-bar-w { color: var(--ink-faint, #737c73); font-size: 10.5px; }
+  .hcn-s3 .hcn-bar-track { position: relative; height: 8px; background: rgba(236,231,220, 0.08); border-radius: 999px; overflow: visible; }
+  .hcn-s3 .hcn-bar-fill { position: absolute; top: 0; left: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, #7ef0d2, #b9f5e3); border-radius: 999px; transition: width 600ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .hcn-s3 .hcn-bar-track::after { content: ""; position: absolute; top: -4px; bottom: -4px; left: 85%; width: 0; border-left: 1px dashed rgba(255,206,125, 0.7); }
+  .hcn-s3 .hcn-bar-val { color: var(--ink, #faf2e1); font-weight: 500; text-align: right; opacity: 0; transition: opacity 200ms ease-out; font-variant-numeric: tabular-nums; }
+  .hcn-s3 .hcn-bar-val.show { opacity: 1; }
+  .hcn-s3 .hcn-k { display: flex; align-items: baseline; gap: 12px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(236,231,220, 0.08); }
+  .hcn-s3 .hcn-k-num { font-family: var(--mono); font-size: 36px; font-weight: 500; color: #7ef0d2; letter-spacing: -0.01em; opacity: 0; transition: opacity 300ms ease-out; line-height: 1; }
+  .hcn-s3 .hcn-k-num.show { opacity: 1; }
+  .hcn-s3 .hcn-k-thresh { font-family: var(--mono); font-size: 12px; color: var(--ink-faint, #737c73); }
+  .hcn-s3 .hcn-k-thresh b { color: #ffce7d; font-weight: 500; }
+
+  /* Scene 4 . verifier checks */
+  .hcn-s4 { display: grid; grid-template-columns: 200px 1fr; gap: 28px; align-items: center; padding-top: 36px; }
+  .hcn-s4 .hcn-file-zone { position: relative; }
+  .hcn-s4 .hcn-file { position: relative; width: 130px; height: 156px; margin: 0 auto; transition: transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .hcn-s4.go .hcn-file { transform: translateX(18px); }
+  .hcn-s4 .hcn-check { font-family: var(--mono); font-size: 13px; line-height: 1.6; color: var(--ink, #ece7dc); display: flex; align-items: baseline; gap: 10px; opacity: 0; transform: translateX(-6px); transition: opacity 220ms ease-out, transform 220ms ease-out; }
+  .hcn-s4 .hcn-check.show { opacity: 1; transform: translateX(0); }
+  .hcn-s4 .hcn-check .hcn-ok-tag { color: #7ef0d2; font-weight: 500; }
+  .hcn-s4 .hcn-check-list { display: flex; flex-direction: column; gap: 6px; }
+  .hcn-s4 .hcn-finalseal { position: absolute; right: 18px; bottom: -6px; width: 38px; height: 38px; border-radius: 50%; background: rgba(126,240,210, 0.18); border: 1.5px solid #7ef0d2; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0.6); transition: opacity 360ms ease-out, transform 360ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .hcn-s4.go .hcn-finalseal { opacity: 1; transform: scale(1); transition-delay: 1100ms; }
+
+  /* Scene 5 . dual run race */
+  .hcn-s5 { display: flex; flex-direction: column; gap: 14px; padding-top: 14px; }
+  .hcn-s5 .hcn-race-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .hcn-s5 .hcn-race-col { border: 1px solid var(--line, rgba(236,231,220, 0.12)); border-radius: 8px; padding: 12px 14px; background: rgba(0,0,0, 0.24); min-height: 142px; display: flex; flex-direction: column; gap: 6px; }
+  .hcn-s5 .hcn-race-head { display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint, #737c73); padding-bottom: 6px; border-bottom: 1px solid rgba(236,231,220, 0.06); margin-bottom: 4px; }
+  .hcn-s5 .hcn-race-pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 7px; border-radius: 999px; background: rgba(236,231,220, 0.06); font-family: var(--mono); font-size: 10px; color: var(--ink-mute, #b5bdb1); }
+  .hcn-s5 .hcn-race-pill.dim::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #ffce7d; }
+  .hcn-s5 .hcn-race-pill.ok::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 6px rgba(126,240,210, 0.55); }
+  .hcn-s5 .hcn-race-prompt { font-family: var(--mono); font-size: 12px; color: var(--ink-faint, #737c73); margin-bottom: 4px; line-height: 1.4; }
+  .hcn-s5 .hcn-race-stream { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; color: var(--ink, #ece7dc); min-height: 50px; }
+  .hcn-s5 .hcn-race-stream .hcn-cur { display: inline-block; width: 6px; height: 12px; background: #7ef0d2; margin-left: 1px; vertical-align: -1px; animation: hcnBlink 1s steps(2) infinite; }
+  @keyframes hcnBlink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+  .hcn-s5 .hcn-race-hud { display: flex; align-items: center; justify-content: space-between; padding-top: 6px; border-top: 1px solid rgba(236,231,220, 0.06); font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute, #b5bdb1); margin-top: auto; }
+  .hcn-s5 .hcn-race-hud .hcn-ms { color: var(--ink, #faf2e1); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .hcn-s5 .hcn-race-foot { display: flex; align-items: center; justify-content: center; gap: 18px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute, #b5bdb1); flex-wrap: wrap; }
+  .hcn-s5 .hcn-race-foot b { color: #7ef0d2; font-weight: 500; }
+  .hcn-s5 .hcn-race-col.is-kolm { border-color: rgba(126,240,210, 0.32); background: linear-gradient(180deg, rgba(126,240,210, 0.04), rgba(0,0,0, 0.28)); }
+
+  /* Scene 6 . ship lattice */
+  .hcn-s6 { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding-top: 28px; }
+  .hcn-s6 .hcn-lat { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .hcn-s6 .hcn-tile { position: relative; min-width: 120px; padding: 11px 14px 10px; border: 1px solid rgba(236,231,220, 0.14); border-radius: 9px; background: rgba(0,0,0, 0.34); font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute, #b5bdb1); text-align: center; transition: border-color 220ms, background 220ms, box-shadow 220ms, color 220ms, transform 220ms; }
+  .hcn-s6 .hcn-tile b { display: block; color: var(--ink, #faf2e1); font-weight: 500; margin-bottom: 6px; letter-spacing: -0.005em; }
+  .hcn-s6 .hcn-tile-meta { display: inline-flex; align-items: center; gap: 6px; }
+  .hcn-s6 .hcn-tile-size { font-size: 10.5px; color: var(--ink-mute, #b5bdb1); }
+  .hcn-s6 .hcn-tile-k { font-size: 10.5px; padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(126,240,210, 0.22); color: #7ef0d2; background: rgba(126,240,210, 0.04); letter-spacing: 0.01em; }
+  .hcn-s6 .hcn-tile.lit { border-color: rgba(126,240,210, 0.55); background: rgba(126,240,210, 0.08); color: #7ef0d2; box-shadow: 0 0 0 1px rgba(126,240,210, 0.25), 0 0 22px -4px rgba(126,240,210, 0.42); transform: translateY(-1px); }
+  .hcn-s6 .hcn-tile.lit b { color: #7ef0d2; }
+  .hcn-s6 .hcn-tile.lit .hcn-tile-k { border-color: rgba(126,240,210, 0.65); background: rgba(126,240,210, 0.12); }
+  .hcn-s6 .hcn-hero { font-family: var(--sans, system-ui); font-size: clamp(22px, 3vw, 30px); font-weight: 500; letter-spacing: -0.01em; color: var(--ink, #faf2e1); opacity: 0; transform: translateY(6px); transition: opacity 400ms ease-out, transform 400ms ease-out; text-align: center; }
+  .hcn-s6 .hcn-hero.show { opacity: 1; transform: translateY(0); }
+
+  /* Dock . chapter dots, play/pause, scrub, time HUD */
+  .hcn-dock { display: flex; align-items: center; gap: 14px; padding: 11px 18px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-mute, #b5bdb1); background: rgba(0,0,0, 0.22); }
+  .hcn-dots { display: inline-flex; gap: 7px; align-items: center; }
+  .hcn-d { width: 7px; height: 7px; border-radius: 50%; background: rgba(236,231,220,0.18); transition: background 220ms ease-out, box-shadow 220ms ease-out, transform 220ms ease-out; cursor: pointer; border: 0; padding: 0; }
+  .hcn-d:hover { background: rgba(236,231,220,0.42); }
+  .hcn-d.active { background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210,0.55); transform: scale(1.25); }
+  .hcn-d.played { background: rgba(126,240,210, 0.45); }
+  .hcn-pp { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: rgba(0,0,0, 0.32); color: var(--ink-mute, #b5bdb1); cursor: pointer; transition: border-color 140ms, color 140ms, background 140ms; padding: 0; }
+  .hcn-pp:hover { border-color: rgba(126,240,210, 0.42); color: var(--ink, #faf2e1); background: rgba(0,0,0, 0.5); }
+  .hcn-pp-ico { width: 9px; height: 9px; position: relative; display: inline-block; }
+  .hcn-pp-ico.play::before { content: ""; position: absolute; inset: 0; clip-path: polygon(15% 0, 100% 50%, 15% 100%); background: currentColor; }
+  .hcn-pp-ico.pause::before, .hcn-pp-ico.pause::after { content: ""; position: absolute; top: 0; bottom: 0; width: 2.5px; background: currentColor; }
+  .hcn-pp-ico.pause::before { left: 1px; }
+  .hcn-pp-ico.pause::after { right: 1px; }
+  .hcn-scrub { flex: 1; height: 3px; background: rgba(236,231,220, 0.10); border-radius: 999px; position: relative; overflow: hidden; cursor: pointer; }
+  .hcn-scrub-fill { position: absolute; top: 0; left: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, #7ef0d2, #b9f5e3); border-radius: 999px; box-shadow: 0 0 8px rgba(126,240,210, 0.45); transition: width 80ms linear; }
+  .hcn-time { font-variant-numeric: tabular-nums; color: var(--ink-mute, #b5bdb1); min-width: 102px; text-align: right; }
+  .hcn-time b { color: var(--ink, #faf2e1); font-weight: 500; }
+
+  @media (max-width: 720px) {
+    .hcn-stage-wrap { aspect-ratio: 4/3; }
+    .hcn-scene { padding: 48px 18px 24px; }
+    .hcn-caption-bar { font-size: 10px; padding: 6px 10px; top: 12px; max-width: 92%; }
+    .hcn-s1 { grid-template-columns: 1fr; gap: 12px; }
+    .hcn-s1 .hcn-strike { font-size: 11.5px; }
+    .hcn-s2 .hcn-cmdline { font-size: 11.5px; }
+    .hcn-s2 .hcn-log { font-size: 11px; }
+    .hcn-s2 .hcn-log .hcn-lstep { width: 44px; }
+    .hcn-s3 .hcn-bar-row { grid-template-columns: 80px 1fr 44px; font-size: 11px; gap: 10px; }
+    .hcn-s3 .hcn-k-num { font-size: 28px; }
+    .hcn-s4 { grid-template-columns: 90px 1fr; gap: 14px; padding-top: 22px; }
+    .hcn-s4 .hcn-file { width: 84px; height: 100px; }
+    .hcn-s4 .hcn-check { font-size: 11px; gap: 8px; }
+    .hcn-s5 .hcn-race-row { grid-template-columns: 1fr; gap: 10px; }
+    .hcn-s5 .hcn-race-col { min-height: 92px; padding: 9px 10px; }
+    .hcn-s5 .hcn-race-stream { font-size: 11px; }
+    .hcn-s6 .hcn-tile { min-width: 80px; font-size: 10.5px; padding: 8px 10px; }
+    .hcn-dock { gap: 10px; padding: 9px 12px; font-size: 10.5px; }
+    .hcn-time { min-width: 88px; }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .hero-video-wrap video { display: none; }
-    .hero-video-wrap { background-image: url('/video/kolm-hero-poster.jpg'); background-size: cover; background-position: center; }
+    .hcn-scene, .hcn-caption-bar, .hcn-s1 .hcn-strike, .hcn-s2 .hcn-log, .hcn-s2 .hcn-buildok, .hcn-s4 .hcn-check, .hcn-s4 .hcn-finalseal, .hcn-s6 .hcn-hero, .hcn-s3 .hcn-bar-val, .hcn-s3 .hcn-k-num { transition: none; animation: none; filter: none; }
+    .hcn-scene { transform: none; }
+    .hcn-scrub-fill { transition: none; }
+    .hcn-s5 .hcn-race-stream .hcn-cur { animation: none; opacity: 0; }
   }
 
-  /* v7.11.3 — light-mode hero video bleed root cause. Dark opaque video
-     bitmap + object-fit:cover hides any wrap background, so the only way
-     to remove the "white shadow" complaint is to wrap the video in a
-     visible cream frame (polaroid). 3-layer outer elevation makes the
-     panel feel placed on the page, not bolted to it. */
+  [data-theme=light] .hero-cine { background: #faf7f0; padding: 14px 14px 0; }
+  [data-theme=light] .hcn-stage-wrap { background: radial-gradient(120% 90% at 50% 30%, rgba(10,136,98, 0.05), transparent 60%), #0c0e10; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(12,14,16, 0.10), 0 6px 14px -4px rgba(12,14,16, 0.10); border-color: transparent; }
+  [data-theme=light] .hcn-cap { color: #4b5158; }
+  [data-theme=light] .hcn-dock { color: #4b5158; background: #ffffff; border-top-color: rgba(12,14,16, 0.06); margin-top: 14px; }
+  [data-theme=light] .hcn-time b { color: #0c0e10; }
+  [data-theme=light] .hcn-pp { background: rgba(255,255,255, 0.92); border-color: rgba(12,14,16, 0.10); color: #4b5158; }
+
+  /* Light-mode polaroid frame for the demo panel . retained because
+     .hero-cine still composes with .hero-demo-panel for outer elevation. */
   [data-theme=light] .hero-demo-panel {
     border-color: rgba(12,14,16, 0.08);
     background: #faf7f0;
@@ -311,59 +463,10 @@
       0 32px 60px -20px rgba(12,14,16, 0.10);
   }
   [data-theme=light] .hero-demo-head { color: #4b5158; border-bottom-color: rgba(12,14,16, 0.06); background: #ffffff; }
-  [data-theme=light] .hero-demo-head .live-pulse { color: #0a8862; }
+  [data-theme=light] .hero-demo-head .live-pulse { color: #059669; }
   [data-theme=light] .hero-demo-head .live-pulse::before { background: #0a8862; box-shadow: 0 0 6px rgba(10,136,98,0.4); }
-  /* Cream chrome around the video — fixes "white shadow bleeding through video" */
-  [data-theme=light] .hero-video-panel { background: #faf7f0; padding: 14px 14px 0; }
-  [data-theme=light] .hero-video-wrap { background: #0c0e10; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(12,14,16, 0.10), 0 6px 14px -4px rgba(12,14,16, 0.10); }
-  [data-theme=light] .hero-video-wrap video { background: #0c0e10; }
-  [data-theme=light] .hero-video-wrap::after { box-shadow: inset 0 0 0 1px rgba(255,255,255, 0.06), inset 0 -60px 40px -40px rgba(0,0,0, 0.20); }
-  [data-theme=light] .hero-video-foot { color: #4b5158; border-top-color: rgba(12,14,16, 0.06); background: #ffffff; margin-top: 14px; }
-  [data-theme=light] .hero-video-foot a { color: #0a8862; }
-  [data-theme=light] .hv-btn { color: #4b5158; background: rgba(255,255,255, 0.92); border-color: rgba(12,14,16, 0.10); }
-  [data-theme=light] .hv-btn:hover { color: #0c0e10; background: #ffffff; border-color: rgba(10,136,98, 0.32); }
 
-  /* v7.9.4 — wide video panel (full-bleed, video is the centerpiece) */
-  .hero-demo-wide { margin: 44px auto 0; max-width: 1320px; padding: 0 32px; transition: max-width 220ms cubic-bezier(.2,.7,.2,1); }
-  .hero-demo-wide.compact { max-width: 860px; }
-  .hero-video-panel-wide { width: 100%; }
-  .hero-video-panel-wide .hero-video-wrap { aspect-ratio: 16/9; }
-  .hero-video-panel-wide .hero-demo-head { padding: 16px 22px; font-size: 11.5px; }
-  .hero-video-panel-wide .hero-video-foot { padding: 13px 22px; font-size: 12px; }
-  .hero-video-panel-wide .hero-video-foot .scenes { gap: 22px; }
-  .hero-video-panel-wide .hero-video-foot .scenes span { font-size: 12px; }
-
-  /* v7.9.5 — video chrome buttons (play/pause, mute, size) */
-  .hero-video-actions { display: inline-flex; align-items: center; gap: 8px; }
-  .hv-btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border: 1px solid var(--line); border-radius: 999px; background: rgba(0,0,0,0.28); color: var(--ink-mute, #b5bdb1); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: border-color 140ms, color 140ms, background 140ms; }
-  .hv-btn:hover { border-color: rgba(126,240,210, 0.42); color: var(--ink, #faf2e1); background: rgba(0,0,0,0.42); }
-  .hv-btn .hv-ico { width: 9px; height: 9px; display: inline-block; position: relative; }
-  .hv-ico-play::before { content: ""; position: absolute; inset: 0; clip-path: polygon(0 0, 100% 50%, 0 100%); background: currentColor; }
-  .hv-ico-pause::before, .hv-ico-pause::after { content: ""; position: absolute; top: 0; bottom: 0; width: 3px; background: currentColor; }
-  .hv-ico-pause::before { left: 0; }
-  .hv-ico-pause::after { right: 0; }
-  .hv-ico-muted::before { content: ""; position: absolute; left: 0; top: 50%; width: 5px; height: 5px; transform: translateY(-50%); clip-path: polygon(0 30%, 60% 30%, 100% 0, 100% 100%, 60% 70%, 0 70%); background: currentColor; }
-  .hv-ico-muted::after { content: "/"; position: absolute; right: -3px; top: -3px; font-size: 11px; font-weight: 600; color: currentColor; line-height: 1; }
-  .hv-ico-sound::before { content: ""; position: absolute; left: 0; top: 50%; width: 5px; height: 5px; transform: translateY(-50%); clip-path: polygon(0 30%, 60% 30%, 100% 0, 100% 100%, 60% 70%, 0 70%); background: currentColor; }
-  .hv-ico-sound::after { content: ""; position: absolute; right: 0; top: 50%; width: 3px; height: 5px; transform: translateY(-50%); border-right: 1.5px solid currentColor; border-top: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; border-radius: 0 999px 999px 0; }
-  .hv-ico-shrink::before, .hv-ico-shrink::after { content: ""; position: absolute; width: 4px; height: 4px; border-style: solid; border-color: currentColor; }
-  .hv-ico-shrink::before { top: 0; left: 0; border-width: 1.5px 0 0 1.5px; }
-  .hv-ico-shrink::after { bottom: 0; right: 0; border-width: 0 1.5px 1.5px 0; }
-  .hv-ico-expand::before, .hv-ico-expand::after { content: ""; position: absolute; width: 4px; height: 4px; border-style: solid; border-color: currentColor; }
-  .hv-ico-expand::before { top: 0; right: 0; border-width: 1.5px 1.5px 0 0; }
-  .hv-ico-expand::after { bottom: 0; left: 0; border-width: 0 0 1.5px 1.5px; }
-  @media (max-width: 640px) {
-    .hero-video-actions { gap: 6px; }
-    .hv-btn .hv-lab { display: none; }
-    .hv-btn { padding: 5px 7px; }
-  }
-
-  /* v7.9.4 — calc moved below; same look but full-width container */
-  .hero-demo-calc { margin: 24px auto 0; max-width: 720px; padding: 0 32px; }
-  .hero-demo-calc .hero-demo-panel { width: 100%; }
-  .hero-demo-calc .hero-demo-body { padding: 22px 24px; }
-
-  /* v7.14 — unified section rhythm. Apple/Anthropic cadence: 96px between
+  /* v7.14 . unified section rhythm. Apple/Anthropic cadence: 96px between
      each major home section, 64px on mobile. Each section is its own breath. */
   .compile-anatomy,
   .after-compile,
@@ -382,45 +485,45 @@
   .compile-anatomy .ca-head { text-align: center; max-width: 880px; margin: 0 auto 40px; }
   .compile-anatomy .ca-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint, #737c73); margin-bottom: 18px; }
   .compile-anatomy .ca-eyebrow .pulse { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210,0.55); }
-  .compile-anatomy .ca-h { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 16px; font-weight: 600; }
+  .compile-anatomy .ca-h { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 16px; font-weight: 500; }
   .compile-anatomy .ca-sub { font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0; max-width: 56ch; margin-left: auto; margin-right: auto; }
-  .compile-anatomy .ca-sub b { color: var(--ink, #faf2e1); font-weight: 540; }
-  .compile-anatomy .ca-sub code { font-family: var(--mono); color: #7ef0d2; }
+  .compile-anatomy .ca-sub b { color: var(--ink, #faf2e1); font-weight: 500; }
+  .compile-anatomy .ca-sub code { font-family: var(--mono); color: var(--kolm-accent, #10b981); }
   .compile-anatomy .ca-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
   @media (max-width: 1080px) { .compile-anatomy .ca-steps { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 640px) { .compile-anatomy .ca-steps { grid-template-columns: 1fr; gap: 16px; } }
   .compile-anatomy .ca-step { position: relative; padding: 28px 24px 24px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: rgba(21,26,33,0.32); display: flex; flex-direction: column; gap: 12px; transition: border-color 160ms; min-height: 180px; }
   .compile-anatomy .ca-step:hover { border-color: rgba(255,255,255,0.16); }
   .compile-anatomy .ca-num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; color: var(--ink-faint, #737c73); }
-  .compile-anatomy .ca-step h3 { font-size: 22px; line-height: 1.18; letter-spacing: -0.018em; margin: 0; font-weight: 580; color: var(--ink, #faf2e1); }
+  .compile-anatomy .ca-step h3 { font-size: 22px; line-height: 1.18; letter-spacing: -0.018em; margin: 0; font-weight: 500; color: var(--ink, #faf2e1); }
   .compile-anatomy .ca-step p { font-size: 14.5px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0; }
   .compile-anatomy .ca-out { display: block; font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); letter-spacing: 0.02em; margin-top: auto; padding: 10px 12px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 7px; background: rgba(0,0,0,0.28); }
   .compile-anatomy .ca-foot { margin: 32px auto 0; max-width: 760px; text-align: center; font-family: var(--mono); font-size: 12px; color: var(--ink-faint, #737c73); letter-spacing: 0.04em; }
   .compile-anatomy .ca-foot a { color: var(--ink-mute, #b5bdb1); border-bottom: 1px solid rgba(255,255,255,0.12); }
   .compile-anatomy .ca-foot a:hover { color: var(--ink, #faf2e1); }
 
-  /* compact cost calc · hero variant */
+  /* compact cost calc  - hero variant */
   .hero-calc { display: flex; flex-direction: column; gap: 14px; height: 100%; }
   .hero-calc-row { display: grid; grid-template-columns: 1fr; gap: 6px; }
   .hero-calc-row.row2 { grid-template-columns: 1fr 1fr; gap: 10px; }
   .hero-calc-row label { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint, #737c73); }
   .hero-calc-row input { width: 100%; padding: 9px 12px; background: rgba(0,0,0, 0.32); border: 1px solid var(--line); color: var(--ink); border-radius: 7px; font-family: var(--mono); font-size: 13px; outline: none; transition: border-color 120ms; box-sizing: border-box; }
-  .hero-calc-row input:focus { border-color: #7ef0d2; }
+  .hero-calc-row input:focus { border-color: var(--kolm-accent, #10b981); }
   .hero-calc-out { margin-top: auto; padding: 14px 16px; border: 1px solid #7ef0d2; border-radius: 10px; background: linear-gradient(180deg, rgba(126,240,210, 0.06), rgba(0,0,0, 0.18)); }
-  .hero-calc-big { font-family: var(--mono); font-size: clamp(28px, 3.8vw, 38px); font-weight: 600; color: #7ef0d2; line-height: 1; letter-spacing: -0.01em; }
+  .hero-calc-big { font-family: var(--mono); font-size: clamp(28px, 3.8vw, 38px); font-weight: 500; color: var(--kolm-accent, #10b981); line-height: 1; letter-spacing: -0.01em; }
   .hero-calc-big .unit { font-size: 0.42em; color: var(--ink-mute, #b5bdb1); margin-left: 6px; font-weight: 400; }
   .hero-calc-sub { font-size: 12.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.5; margin-top: 4px; }
-  .hero-calc-sub b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .hero-calc-sub b { color: var(--ink, #faf2e1); font-weight: 500; }
   .hero-calc-foot { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint, #737c73); letter-spacing: 0; margin-top: 8px; }
-  .hero-calc-foot a { color: #7ef0d2; border-bottom: 1px solid rgba(126,240,210, 0.35); }
+  .hero-calc-foot a { color: var(--kolm-accent, #10b981); border-bottom: 1px solid rgba(126,240,210, 0.35); }
 
-  /* hero overflow guard · keep terminal from bleeding on narrow widths */
+  /* hero overflow guard  - keep terminal from bleeding on narrow widths */
   .lab-terminal { max-width: 100%; overflow-x: auto; white-space: pre; word-break: normal; }
   .artifact-lab { min-width: 0; overflow: hidden; }
   .hero-thesis { max-width: 100%; }
   @media (max-width: 720px) { .hero-microcopy { max-width: 100% !important; } }
 
-  /* system-map evolve guard · keep all 4 columns the same height; cap content; no box-escape */
+  /* system-map evolve guard  - keep all 4 columns the same height; cap content; no box-escape */
   .system-map { align-items: stretch; }
   .system-map .map-column { min-width: 0; max-width: 100%; overflow: hidden; word-wrap: break-word; overflow-wrap: anywhere; min-height: 200px; display: flex; flex-direction: column; }
   .system-map .map-column > span { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); letter-spacing: 0.06em; }
@@ -431,9 +534,9 @@
   .vr { margin: 24px auto 0; max-width: 1180px; padding: 0 32px; }
   .vr .vr-eyebrow { font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
   .vr .vr-eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.55); }
-  .vr h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.2; max-width: 50ch; }
+  .vr h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.2; max-width: 50ch; }
   .vr .vr-sub { color: var(--ink-mute, #b5bdb1); font-size: 14px; line-height: 1.6; margin: 0 0 22px; max-width: 60ch; }
-  .vr .vr-sub b { color: var(--fg, #faf2e1); font-weight: 540; }
+  .vr .vr-sub b { color: var(--fg, #faf2e1); font-weight: 500; }
   .vr-grid { display: grid; grid-template-columns: 7fr 5fr; gap: 22px; align-items: stretch; }
   @media (max-width: 920px) { .vr-grid { grid-template-columns: 1fr; gap: 18px; } }
 
@@ -441,48 +544,53 @@
   .vr-card { padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); display: grid; grid-template-columns: 36px 1fr; gap: 14px; align-items: start; }
   .vr-card .ic { width: 32px; height: 32px; border-radius: 8px; background: rgba(236,231,220, 0.06); border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .vr-card .ic svg { width: 16px; height: 16px; }
-  .vr-card h3 { margin: 0 0 4px; font-size: 14.5px; font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.3; }
+  .vr-card h3 { margin: 0 0 4px; font-size: 14.5px; font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.3; }
   .vr-card p { margin: 0; font-size: 13px; color: var(--ink-mute, #b5bdb1); line-height: 1.55; max-width: 56ch; }
-  .vr-card p b { color: var(--fg, #faf2e1); font-weight: 540; }
+  .vr-card p b { color: var(--fg, #faf2e1); font-weight: 500; }
 
   /* compact ROI calc */
   .vr-calc { padding: 22px 24px; border: 1px solid var(--accent, #faf2e1); border-radius: 14px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(126,240,210,0.02) 60%, transparent); display: flex; flex-direction: column; min-width: 0; }
   .vr-calc .lbl { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint, #737c73); margin-bottom: 4px; }
-  .vr-calc .ttl { font-size: 17px; font-weight: 540; color: var(--fg, #faf2e1); margin: 0 0 4px; }
+  .vr-calc .ttl { font-size: 17px; font-weight: 500; color: var(--fg, #faf2e1); margin: 0 0 4px; }
   .vr-calc .hint { font-size: 12.5px; color: var(--ink-mute, #b5bdb1); margin: 0 0 16px; line-height: 1.5; }
   .vr-calc .vc-row { margin: 0 0 12px; }
   .vr-calc .vc-row label { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--ink-faint, #737c73); letter-spacing: 0.04em; margin-bottom: 5px; }
   .vr-calc input, .vr-calc select { width: 100%; padding: 9px 12px; background: rgba(0,0,0,0.32); border: 1px solid var(--line); color: var(--ink); border-radius: 7px; font-family: var(--mono); font-size: 13px; outline: none; transition: border-color 120ms; box-sizing: border-box; }
   .vr-calc input:focus, .vr-calc select:focus { border-color: var(--accent, #faf2e1); }
   .vr-calc .out { margin-top: auto; padding-top: 14px; border-top: 1px dashed var(--line); display: grid; gap: 6px; }
-  .vr-calc .big { font-family: var(--mono); font-size: clamp(32px, 4vw, 44px); font-weight: 600; color: #7ef0d2; line-height: 1; letter-spacing: -0.01em; }
+  .vr-calc .big { font-family: var(--mono); font-size: clamp(32px, 4vw, 44px); font-weight: 500; color: var(--kolm-accent, #10b981); line-height: 1; letter-spacing: -0.01em; }
   .vr-calc .big.warn { color: #ffb86b; }
   .vr-calc .big-lab { font-size: 12.5px; color: var(--ink-mute, #b5bdb1); line-height: 1.4; }
-  .vr-calc .big-lab b { color: var(--fg); font-weight: 540; }
+  .vr-calc .big-lab b { color: var(--fg); font-weight: 500; }
   .vr-calc .deep { margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); letter-spacing: 0.04em; text-transform: uppercase; }
   .vr-calc .deep a { color: var(--ink-mute, #b5bdb1); border-bottom: 1px solid var(--line); }
   .vr-calc .deep a:hover { color: var(--accent); border-color: var(--accent); }
 
-  /* tighter cred-band 3-cell · override base 6-col layout */
+  /* tighter cred-band 3-cell  - override base 6-col layout */
   .cred-band a.cred-inner-3 { grid-template-columns: repeat(3, 1fr) auto !important; gap: 28px; }
   @media (max-width: 880px) { .cred-band a.cred-inner-3 { grid-template-columns: 1fr !important; gap: 14px; } }
 
-  /* use-case strip (non-regulated) · same visual weight as reg-strip, different framing */
+  /* use-case strip (non-regulated)  - same visual weight as reg-strip, different framing */
   .uc-strip { margin-left: auto; margin-right: auto; max-width: 1180px; padding: 0 32px; text-align: center; }
-  .uc-strip h2 { font-size: clamp(32px, 3.6vw, 46px); font-weight: 600; line-height: 1.06; letter-spacing: -0.028em; margin: 0 auto 14px; max-width: 24ch; }
+  .uc-strip h2 { font-size: clamp(32px, 3.6vw, 46px); font-weight: 500; line-height: 1.06; letter-spacing: -0.028em; margin: 0 auto 14px; max-width: 24ch; }
   .uc-strip .uc-sub { color: var(--ink-mute, #b5bdb1); font-size: 17px; line-height: 1.5; margin: 0 auto 32px; max-width: 60ch; }
-  .uc-strip .uc-sub b { color: var(--ink, #faf2e1); font-weight: 540; }
-  /* v7.11.2 — switchable industry tabs. SOTA restraint: tiny mono pills,
+  .uc-strip .uc-sub b { color: var(--ink, #faf2e1); font-weight: 500; }
+  /* v7.11.2 . switchable industry tabs. SOTA restraint: tiny mono pills,
      teal active fill on dark / emerald on light. Cards swap with crossfade. */
-  .uc-strip .uc-tabs { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 999px; margin: 0 0 18px; background: rgba(0,0,0, 0.18); flex-wrap: nowrap; max-width: 100%; }
-  .uc-strip .uc-tab { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.04em; padding: 8px 14px; border-radius: 999px; border: 0; background: transparent; color: var(--ink-mute, #b5bdb1); cursor: pointer; transition: color 160ms, background 160ms; text-transform: lowercase; white-space: nowrap; }
+  /* v7.23: opaque container + full-contrast inactive labels. Previous rgba(0,0,0,0.18)
+     made the pill nearly invisible and the inactive labels read as floating text
+     blending into the body. Now: solid card background, full ink on inactive,
+     active state retained. */
+  .uc-strip .uc-tabs { display: inline-flex; gap: 4px; padding: 5px; border: 1px solid var(--line); border-radius: 999px; margin: 0 0 18px; background: var(--bg-2, #11151b); flex-wrap: nowrap; max-width: 100%; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04); }
+  .uc-strip .uc-tab { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; padding: 9px 16px; border-radius: 999px; border: 0; background: transparent; color: var(--ink, #faf2e1); cursor: pointer; transition: color 160ms, background 160ms; text-transform: lowercase; white-space: nowrap; opacity: 0.92; }
+  .uc-strip .uc-tab + .uc-tab { box-shadow: none; }
   @media (max-width: 480px) {
-    .uc-strip .uc-tabs { gap: 2px; padding: 3px; }
+    .uc-strip .uc-tabs { gap: 4px; padding: 3px; }
     .uc-strip .uc-tab { font-size: 10.5px; padding: 7px 10px; }
   }
-  .uc-strip .uc-tab:hover { color: var(--ink, #faf2e1); }
-  .uc-strip .uc-tab.is-on { color: #0c0e10; background: #7ef0d2; }
-  .uc-strip .uc-tab:focus-visible { outline: 2px solid #7ef0d2; outline-offset: 2px; }
+  .uc-strip .uc-tab:hover { opacity: 1; }
+  .uc-strip .uc-tab.is-on { color: #0c0e10; background: var(--kolm-accent, #10b981); opacity: 1; }
+  .uc-strip .uc-tab:focus-visible { outline: 2px solid var(--kolm-accent, #10b981); outline-offset: 2px; opacity: 1; }
   .uc-strip .uc-panel { animation: ucFade 240ms ease-out; }
   .uc-strip .uc-panel[hidden] { display: none; }
   @keyframes ucFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -490,35 +598,36 @@
   @media (max-width: 860px) { .uc-strip .uc-grid { grid-template-columns: 1fr; } }
   .uc-strip .uc-card { display: flex; flex-direction: column; gap: 8px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); min-width: 0; min-height: 176px; text-decoration: none; color: inherit; transition: border-color 160ms, transform 160ms; text-align: left; }
   .uc-strip .uc-card:hover { border-color: rgba(126,240,210,0.32); transform: translateY(-2px); }
-  .uc-strip .uc-card .uc-vert { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #7ef0d2; }
-  .uc-strip .uc-card h3 { font-size: 16px; line-height: 1.32; margin: 0; color: var(--fg); font-weight: 540; }
+  .uc-strip .uc-card .uc-vert { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--kolm-accent, #10b981); }
+  .uc-strip .uc-card h3 { font-size: 16px; line-height: 1.32; margin: 0; color: var(--fg); font-weight: 500; }
   .uc-strip .uc-card p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; }
   .uc-strip .uc-card .uc-tag { margin-top: auto; font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); letter-spacing: 0.04em; }
-  /* v7.11.2 — own-inference seal: pinned line under cards reinforcing the
+  /* v7.11.2 . own-inference seal: pinned line under cards reinforcing the
      thing every panel has in common. The inference belongs to you. */
   .uc-strip .uc-seal { margin: 28px 0 0; padding: 14px 18px; border: 1px dashed var(--line); border-radius: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute, #b5bdb1); letter-spacing: 0.02em; background: rgba(126,240,210,0.03); text-align: left; }
-  .uc-strip .uc-seal b { color: #7ef0d2; font-weight: 580; }
+  .uc-strip .uc-seal b { color: var(--kolm-accent, #10b981); font-weight: 500; }
   .uc-strip .uc-seal .seal-sep { opacity: 0.5; }
   .uc-strip .uc-seal a { color: var(--ink, #faf2e1); border-bottom: 1px solid rgba(126,240,210, 0.32); margin-left: auto; padding-bottom: 1px; }
-  .uc-strip .uc-seal a:hover { color: #7ef0d2; }
+  .uc-strip .uc-seal a:hover { color: var(--kolm-accent, #10b981); }
   @media (max-width: 640px) {
     .uc-strip .uc-seal { flex-direction: column; align-items: flex-start; gap: 6px; }
     .uc-strip .uc-seal a { margin-left: 0; }
   }
-  [data-theme=light] .uc-strip .uc-tabs { background: rgba(0,0,0, 0.04); border-color: rgba(0,0,0, 0.10); }
-  [data-theme=light] .uc-strip .uc-tab { color: #4b5158; }
-  [data-theme=light] .uc-strip .uc-tab:hover { color: #0c0e10; }
-  [data-theme=light] .uc-strip .uc-tab.is-on { color: #ffffff; background: #0a8862; }
-  [data-theme=light] .uc-strip .uc-tab:focus-visible { outline-color: #0a8862; }
+  [data-theme=light] .uc-strip .uc-tabs { background: #ffffff; border-color: rgba(0,0,0, 0.14); box-shadow: 0 1px 2px rgba(0,0,0, 0.04); }
+  [data-theme=light] .uc-strip .uc-tab { color: #18171a; opacity: 0.85; }
+  [data-theme=light] .uc-strip .uc-tab:hover { opacity: 1; }
+  [data-theme=light] .uc-strip .uc-tab.is-on { color: #ffffff; background: #059669; opacity: 1; }
+  [data-theme=light] .uc-strip .uc-tab:focus-visible { outline-color: #059669; }
+  [data-theme=light] .uc-strip .uc-tab + .uc-tab { box-shadow: none; }
   [data-theme=light] .uc-strip .uc-card { background: #ffffff; border-color: rgba(0,0,0, 0.10); }
   [data-theme=light] .uc-strip .uc-card:hover { border-color: rgba(10,136,98, 0.32); }
-  [data-theme=light] .uc-strip .uc-card .uc-vert { color: #0a8862; }
+  [data-theme=light] .uc-strip .uc-card .uc-vert { color: #059669; }
   [data-theme=light] .uc-strip .uc-seal { background: rgba(10,136,98, 0.04); border-color: rgba(10,136,98, 0.22); color: #4b5158; }
-  [data-theme=light] .uc-strip .uc-seal b { color: #0a8862; }
+  [data-theme=light] .uc-strip .uc-seal b { color: #059669; }
   [data-theme=light] .uc-strip .uc-seal a { color: #0c0e10; border-color: rgba(10,136,98, 0.32); }
-  [data-theme=light] .uc-strip .uc-seal a:hover { color: #0a8862; }
+  [data-theme=light] .uc-strip .uc-seal a:hover { color: #059669; }
 
-  /* trust-strip - compact compliance & integrity row · honest claims only */
+  /* trust-strip - compact compliance & integrity row  - honest claims only */
   .trust-strip { margin: 36px auto 0; max-width: 1180px; padding: 24px 32px 0; border-top: 1px solid var(--line); }
   .trust-strip .ts-head { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
   .trust-strip .ts-head::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.55); }
@@ -529,10 +638,10 @@
   .trust-strip a.ts-card:hover { border-color: rgba(126,240,210, 0.32); }
   .trust-strip .ts-lab { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 8px; }
   .trust-strip .ts-state { font-family: var(--mono); font-size: 9.5px; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
-  .trust-strip .ts-state.live { color: #7ef0d2; border: 1px solid rgba(126,240,210, 0.32); }
+  .trust-strip .ts-state.live { color: var(--kolm-accent, #10b981); border: 1px solid rgba(126,240,210, 0.32); }
   .trust-strip .ts-state.wip { color: #ffce7d; border: 1px solid rgba(255,206,125, 0.34); }
   .trust-strip .ts-state.ask { color: var(--ink-mute, #b5bdb1); border: 1px solid var(--line); }
-  .trust-strip .ts-val { font-size: 15.5px; font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.3; margin-top: 2px; }
+  .trust-strip .ts-val { font-size: 15.5px; font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.3; margin-top: 2px; }
   .trust-strip .ts-sub { font-family: var(--mono); font-size: 11px; color: var(--ink-mute, #b5bdb1); margin-top: auto; line-height: 1.4; letter-spacing: 0.01em; }
 
   /* lab-strip - verifiable telemetry below hero, NEO LAB readout aesthetic.
@@ -555,14 +664,14 @@
   .lab-strip .ls-id { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint, #737c73); }
   .lab-strip .ls-pulse { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute, #b5bdb1); display: inline-flex; align-items: center; gap: 5px; }
   .lab-strip .ls-pulse > span { width: 5px; height: 5px; border-radius: 50%; background: var(--violet, #faf2e1); box-shadow: 0 0 6px rgba(236,231,220, 0.7); animation: ls-blink 1.4s ease-in-out infinite; animation-play-state: paused; }
-  .lab-strip .ls-ok { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: #7ef0d2; border: 1px solid rgba(126,240,210,0.28); padding: 2px 7px; border-radius: 4px; }
+  .lab-strip .ls-ok { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--kolm-accent, #10b981); border: 1px solid rgba(126,240,210,0.28); padding: 2px 7px; border-radius: 4px; }
   .lab-strip .ls-value { display: flex; align-items: baseline; gap: 6px; line-height: 1; min-height: 30px; }
-  .lab-strip .ls-cmd { display: block; font-family: var(--mono); font-size: 14px; font-weight: 540; color: var(--fg, #faf2e1); line-height: 1.3; letter-spacing: -0.005em; overflow-wrap: anywhere; }
+  .lab-strip .ls-cmd { display: block; font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--fg, #faf2e1); line-height: 1.3; letter-spacing: -0.005em; overflow-wrap: anywhere; }
   @media (max-width: 540px) { .lab-strip .ls-cmd { font-size: 12.5px; line-height: 1.35; } }
   @media (max-width: 380px) { .lab-strip .ls-cmd { font-size: 11.5px; } }
   .lab-strip .ls-cmd .arg { color: var(--violet, #faf2e1); }
-  .lab-strip .ls-num { font-family: var(--mono); font-size: 28px; font-weight: 540; color: var(--fg, #faf2e1); letter-spacing: -0.01em; }
-  .lab-strip .ls-num-frac { font-family: var(--mono); font-size: 14px; font-weight: 540; color: var(--ink-mute, #b5bdb1); margin-left: 2px; }
+  .lab-strip .ls-num { font-family: var(--mono); font-size: 28px; font-weight: 500; color: var(--fg, #faf2e1); letter-spacing: -0.01em; }
+  .lab-strip .ls-num-frac { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--ink-mute, #b5bdb1); margin-left: 2px; }
   .lab-strip .ls-unit { font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.06em; }
   .lab-strip .ls-gauge { position: relative; height: 6px; min-height: 6px; border-radius: 3px; background: rgba(236,231,220, 0.06); overflow: hidden; border: 1px solid rgba(236,231,220, 0.14); margin-top: 6px; }
   .lab-strip .ls-gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; width: var(--w, 0%); max-width: 100%; background: linear-gradient(90deg, rgba(236,231,220, 0.32), var(--violet, #faf2e1)); }
@@ -577,11 +686,11 @@
   @keyframes ls-tape { 0% { transform: translateX(0); } 100% { transform: translateX(28px); } }
   .lab-strip .ls-meta { display: flex; flex-direction: column; gap: 3px; font-family: var(--mono); font-size: 10.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin-top: auto; }
   .lab-strip .ls-meta-2 { color: var(--ink-faint, #737c73); }
-  .lab-strip .ls-meta-ok { color: #7ef0d2; font-weight: 540; }
+  .lab-strip .ls-meta-ok { color: var(--kolm-accent, #10b981); font-weight: 500; }
   .lab-strip .ls-cmd-copy { cursor: copy; user-select: none; transition: color 120ms; position: relative; padding-right: 22px; }
-  .lab-strip .ls-cmd-copy::after { content: "⧉"; position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--ink-faint, #737c73); transition: color 120ms, transform 120ms; }
-  .lab-strip .ls-cmd-copy:hover { color: #7ef0d2; }
-  .lab-strip .ls-cmd-copy:hover::after { color: #7ef0d2; transform: translateY(-50%) scale(1.05); }
+  .lab-strip .ls-cmd-copy::after { content: " - ; position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--ink-faint, #737c73); transition: color 120ms, transform 120ms; }
+  .lab-strip .ls-cmd-copy:hover { color: var(--kolm-accent, #10b981); }
+  .lab-strip .ls-cmd-copy:hover::after { color: var(--kolm-accent, #10b981); transform: translateY(-50%) scale(1.05); }
   .lab-strip .ls-cmd-copy:focus-visible { outline: 1px solid rgba(126,240,210,0.5); outline-offset: 2px; border-radius: 2px; }
   @media (prefers-reduced-motion: reduce) {
     .lab-strip .ls-dot, .lab-strip .ls-pulse > span, .lab-strip .ls-tape { animation: none !important; opacity: 0.85; }
@@ -602,7 +711,7 @@
         "https://twitter.com/kolm_ai"
       ],
       "foundingDate": "2026-04",
-      "description": "kolm is the compiler cache for intelligence: a private AI compiler for signed .kolm artifacts, local runtime, and verifiable receipts.",
+      "description": "kolm is a private AI compiler. Turn a task description and your data into a signed .kolm artifact that runs locally on your hardware with verifiable receipts.",
       "contactPoint": {
         "@type": "ContactPoint",
         "email": "founders@kolm.ai",
@@ -632,7 +741,7 @@
       "downloadUrl": "https://github.com/sneaky-hippo/kolmogorov-stack",
       "installUrl": "https://kolm.ai/quickstart",
       "softwareHelp": "https://kolm.ai/docs",
-      "releaseNotes": "https://kolm.ai/changelog",
+      "releaseNotes": "https://kolm.ai/roadmap",
       "description": "Kolmogorov Stack (kolm) is an AI compiler that turns a task, examples, and approved data into a signed .kolm artifact that runs on hardware you control. Every artifact ships with an HMAC-signed receipt and a K-score quality gate.",
       "publisher": { "@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai" },
       "featureList": [
@@ -700,7 +809,7 @@
         {
           "@type": "Question",
           "name": "Does my data leave the device at runtime?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Inference is local — the deterministic recipe runtime is in-process and the benchmark harness ships with a zero-egress monitor. Compilation runs against your approved data only; the threat model document spells out exactly what each compile step reads and writes." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Inference is local. The deterministic recipe runtime is in-process and the benchmark harness ships with a zero-egress monitor. Compilation runs against your approved data only; the threat model document spells out exactly what each compile step reads and writes." }
         },
         {
           "@type": "Question",
@@ -721,6 +830,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -733,15 +843,35 @@
 
 <main>
 
-<section class="hero home-hero home-hero-centered">
+<section class="hero home-hero home-hero-left">
+  <div class="hero-grid-bg" aria-hidden="true"></div>
   <div class="wrap">
-    <h1>Compile your own AI.</h1>
-    <p class="lede">Describe what your AI should do. kolm returns a small signed model that runs on your hardware forever &mdash; no cloud, no per-call bill, no vendor between you and your inference.</p>
+    <h1>Compile your own <span class="cycle-word"><span class="cw-ghost" aria-hidden="true">classifier</span><span class="cw-cur" data-words="AI,agent,model,classifier,assistant,vision,voice">AI</span></span></h1>
+    <p class="lede">Describe what your AI should do. kolm returns one small file that runs anywhere. Laptop, server, phone, edge. For any task, any team, any frontier model.</p>
 
     <div class="actions">
-      <a href="/quickstart" class="btn primary lg">Try kolm &rarr;</a>
-      <a href="mailto:founders@kolm.ai?subject=kolm%20demo" class="btn ghost lg">Book a demo &rarr;</a>
+      <a href="/quickstart" class="btn primary lg btn-electric">Compile your first AI &rarr;</a>
+      <a href="/docs/showcase/receipt.json" class="btn ghost lg" target="_blank" rel="noopener">Open a receipt &rarr;</a>
     </div>
+
+    <p class="hero-quant" aria-label="quantified proof">
+      <span><b>7.42&times;</b> faster than the frontier API</span>
+      <span class="hq-sep" aria-hidden="true">&middot;</span>
+      <span><b>11.6&times;</b> cheaper per million tokens</span>
+      <span class="hq-sep" aria-hidden="true">&middot;</span>
+      <span><b>CID-verified</b> end to end</span>
+      <span class="hq-sep" aria-hidden="true">&middot;</span>
+      <span><b>runs offline</b></span>
+      <a href="/benchmarks" class="hq-link">how we measure &rarr;</a>
+    </p>
+
+    <p class="hero-promise" aria-label="what kolm does">
+      <span class="hp-mono">.exe</span>
+      <span class="hp-claim"><b>.exe</b> is for software. <b>.kolm</b> is for AI. One command turns your task into a signed model. Runs offline. Yours forever.</span>
+    </p>
+
+    <!-- v7.18.2 . removed in-hero supported-by row. Provider-strip section
+         below the demo carries the same content in SOTA-clean form. -->
 
     <div class="nl-try" aria-label="natural-language try-it">
       <form id="nl-form" autocomplete="off">
@@ -760,75 +890,583 @@
 
 <section class="demo-anchor" aria-label="live product demo">
   <div class="demo-frame">
-    <div class="hero-demo-panel hero-video-panel" id="hero-video-panel">
+    <div class="hero-demo-panel hero-cine" id="hero-cine" role="region" aria-label="kolm demo: compile, gate, verify, run, ship">
       <div class="hero-demo-head">
-        <span>kolm in 17 seconds</span>
-        <span class="hero-video-actions">
-          <button type="button" class="hv-btn" id="hv-playpause" aria-label="play or pause demo" aria-pressed="true">
-            <span class="hv-ico hv-ico-pause" aria-hidden="true"></span>
-            <span class="hv-lab">pause</span>
-          </button>
+        <span class="hcn-head-left">
+          <span class="hcn-dot hcn-dot-r" aria-hidden="true"></span>
+          <span class="hcn-dot hcn-dot-y" aria-hidden="true"></span>
+          <span class="hcn-dot hcn-dot-g" aria-hidden="true"></span>
+          <span class="hcn-cap"><b>kolm-demo.live</b> &middot; rendered in-browser</span>
+        </span>
+        <span class="hcn-head-right" aria-hidden="true">
+          <span class="hcn-cap" id="hcn-title">scene 01 &middot; the problem</span>
         </span>
       </div>
-      <div class="hero-video-wrap">
-        <video
-          id="hero-video"
-          autoplay muted loop playsinline preload="metadata"
-          poster="/video/kolm-hero-poster.jpg"
-          aria-label="kolm demo. Write what your AI should do in plain English. Press compile. Get back one file that runs offline, gives the same answer every time, and is yours forever.">
-          <source src="/video/kolm-hero.webm" type="video/webm">
-          <source src="/video/kolm-hero.mp4" type="video/mp4">
-          <noscript><img src="/video/kolm-hero-poster.jpg" alt="describe your AI in english, kolm compiles it into one file you own."></noscript>
-        </video>
+      <div class="hcn-stage-wrap" id="hcn-stage">
+        <div class="hcn-caption-bar" id="hcn-caption" aria-live="polite"></div>
+
+        <!-- Scene 1 . the problem (every API call leaves your perimeter) -->
+        <div class="hcn-scene hcn-s1 active" id="hcn-scene-0" data-scene="0">
+          <div class="hcn-col">
+            <div class="hcn-col-label">your code today</div>
+            <div class="hcn-strike">OPENAI_API_KEY=sk-...QzN9</div>
+            <div class="hcn-strike">requests.post('api.openai.com/v1/chat')</div>
+            <div class="hcn-strike">payload = {"messages": user_data}</div>
+            <div class="hcn-strike">response.json()["choices"][0]</div>
+            <div class="hcn-strike">log_to_third_party_provider(...)</div>
+          </div>
+          <div class="hcn-col">
+            <div class="hcn-col-label">with kolm</div>
+            <div class="hcn-empty">// kolm answer arriving in 4 seconds.</div>
+          </div>
+        </div>
+
+        <!-- Scene 2 . compile -->
+        <div class="hcn-scene hcn-s2" id="hcn-scene-1" data-scene="1">
+          <div class="hcn-cmdline">kolm compile --task &quot;summarize support tickets&quot; --base llama-3.1-8b</div>
+          <div class="hcn-log" data-log="0"><span class="hcn-lstep">[1/9]</span><span class="hcn-llabel">loading base ...........</span><span class="hcn-lval">ok 4.7s</span></div>
+          <div class="hcn-log" data-log="1"><span class="hcn-lstep">[2/9]</span><span class="hcn-llabel">eval baseline .........</span><span class="hcn-lval">acc 0.61</span></div>
+          <div class="hcn-log" data-log="2"><span class="hcn-lstep">[3/9]</span><span class="hcn-llabel">generating examples ...</span><span class="hcn-lval">1200 ok</span></div>
+          <div class="hcn-log" data-log="3"><span class="hcn-lstep">[4/9]</span><span class="hcn-llabel">training adapter ......</span><span class="hcn-lval">loss 1.84 -&gt; 0.87</span></div>
+          <div class="hcn-log" data-log="4"><span class="hcn-lstep">[5/9]</span><span class="hcn-llabel">eval candidate ........</span><span class="hcn-lval">acc 0.93</span></div>
+          <div class="hcn-log" data-log="5"><span class="hcn-lstep">[6/9]</span><span class="hcn-llabel">computing K ...........</span><span class="hcn-lval">K=0.94</span></div>
+          <div class="hcn-log" data-log="6"><span class="hcn-lstep">[7/9]</span><span class="hcn-llabel">signing manifest ......</span><span class="hcn-lval">cidv1:sha256:7c0a3f...</span></div>
+          <div class="hcn-log" data-log="7"><span class="hcn-lstep">[8/9]</span><span class="hcn-llabel">packing artifact ......</span><span class="hcn-lval">82 MB</span></div>
+          <div class="hcn-log" data-log="8"><span class="hcn-lstep">[9/9]</span><span class="hcn-llabel">sealing receipt .......</span><span class="hcn-lval">HMAC-SHA256 ok</span></div>
+          <div class="hcn-buildok" id="hcn-buildok">BUILD OK</div>
+        </div>
+
+        <!-- Scene 3 . K-score gauge -->
+        <div class="hcn-scene hcn-s3" id="hcn-scene-2" data-scene="2">
+          <div class="hcn-bar-row">
+            <div class="hcn-bar-lab">Accuracy <span class="hcn-bar-w">0.40</span></div>
+            <div class="hcn-bar-track"><div class="hcn-bar-fill" data-bar="0" data-target="93"></div></div>
+            <div class="hcn-bar-val" data-bv="0">0.93</div>
+          </div>
+          <div class="hcn-bar-row">
+            <div class="hcn-bar-lab">Stability <span class="hcn-bar-w">0.15</span></div>
+            <div class="hcn-bar-track"><div class="hcn-bar-fill" data-bar="1" data-target="95"></div></div>
+            <div class="hcn-bar-val" data-bv="1">0.95</div>
+          </div>
+          <div class="hcn-bar-row">
+            <div class="hcn-bar-lab">Latency <span class="hcn-bar-w">0.15</span></div>
+            <div class="hcn-bar-track"><div class="hcn-bar-fill" data-bar="2" data-target="97"></div></div>
+            <div class="hcn-bar-val" data-bv="2">0.97</div>
+          </div>
+          <div class="hcn-bar-row">
+            <div class="hcn-bar-lab">Cost <span class="hcn-bar-w">0.15</span></div>
+            <div class="hcn-bar-track"><div class="hcn-bar-fill" data-bar="3" data-target="92"></div></div>
+            <div class="hcn-bar-val" data-bv="3">0.92</div>
+          </div>
+          <div class="hcn-bar-row">
+            <div class="hcn-bar-lab">Verifiability <span class="hcn-bar-w">0.15</span></div>
+            <div class="hcn-bar-track"><div class="hcn-bar-fill" data-bar="4" data-target="100"></div></div>
+            <div class="hcn-bar-val" data-bv="4">1.00</div>
+          </div>
+          <div class="hcn-k">
+            <span class="hcn-k-num" id="hcn-knum">K = 0.94</span>
+            <span class="hcn-k-thresh">threshold <b>0.85</b> &middot; gate passes</span>
+          </div>
+        </div>
+
+        <!-- Scene 4 . verify -->
+        <div class="hcn-scene hcn-s4" id="hcn-scene-3" data-scene="3">
+          <div class="hcn-file-zone">
+            <div class="hcn-file">
+              <svg viewBox="0 0 130 156" width="100%" height="100%" aria-hidden="true">
+                <defs>
+                  <linearGradient id="hcnFileGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#1a1f26"/>
+                    <stop offset="100%" stop-color="#0c0e10"/>
+                  </linearGradient>
+                </defs>
+                <rect x="6" y="4" width="118" height="148" rx="9" fill="url(#hcnFileGrad)" stroke="rgba(126,240,210,0.42)" stroke-width="1.2"/>
+                <path d="M 24 30 L 106 30" stroke="rgba(126,240,210,0.55)" stroke-width="1.2"/>
+                <text x="24" y="22" font-family="ui-monospace, monospace" font-size="9" fill="#7ef0d2" letter-spacing="0.6">phi-redactor.kolm</text>
+                <rect x="24" y="42" width="58" height="6" rx="2" fill="rgba(236,231,220,0.18)"/>
+                <rect x="24" y="56" width="76" height="6" rx="2" fill="rgba(236,231,220,0.14)"/>
+                <rect x="24" y="70" width="44" height="6" rx="2" fill="rgba(236,231,220,0.14)"/>
+                <rect x="24" y="84" width="68" height="6" rx="2" fill="rgba(236,231,220,0.10)"/>
+                <rect x="24" y="98" width="52" height="6" rx="2" fill="rgba(236,231,220,0.10)"/>
+                <circle cx="98" cy="128" r="14" fill="rgba(126,240,210,0.18)" stroke="#7ef0d2" stroke-width="1.5"/>
+                <text x="98" y="132" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" font-weight="600" fill="#7ef0d2">K</text>
+              </svg>
+            </div>
+            <div class="hcn-finalseal" aria-hidden="true">
+              <svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10 L8.5 14.5 L16.5 6" fill="none" stroke="#7ef0d2" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="hcn-check-list">
+            <div class="hcn-check" data-chk="0"><span class="hcn-ok-tag">[ok]</span> manifest schema RS-1</div>
+            <div class="hcn-check" data-chk="1"><span class="hcn-ok-tag">[ok]</span> CID matches sha256 of canonical-JSON</div>
+            <div class="hcn-check" data-chk="2"><span class="hcn-ok-tag">[ok]</span> HMAC receipt chain intact</div>
+            <div class="hcn-check" data-chk="3"><span class="hcn-ok-tag">[ok]</span> no DANGEROUS verbs</div>
+            <div class="hcn-check" data-chk="4"><span class="hcn-ok-tag">[ok]</span> base model attested</div>
+            <div class="hcn-check" data-chk="5"><span class="hcn-ok-tag">[ok]</span> K-score signed by harness</div>
+          </div>
+        </div>
+
+        <!-- Scene 5 . run race -->
+        <div class="hcn-scene hcn-s5" id="hcn-scene-4" data-scene="4">
+          <div class="hcn-race-row">
+            <div class="hcn-race-col">
+              <div class="hcn-race-head"><span>OpenAI API</span><span class="hcn-race-pill dim" id="hcn-pill-l">streaming</span></div>
+              <div class="hcn-race-prompt">summarize this ticket: customer cannot log in, password reset email never arrived...</div>
+              <div class="hcn-race-stream" id="hcn-stream-l"></div>
+              <div class="hcn-race-hud"><span>round trip</span><span class="hcn-ms" id="hcn-ms-l">0 ms</span></div>
+            </div>
+            <div class="hcn-race-col is-kolm">
+              <div class="hcn-race-head"><span>kolm local</span><span class="hcn-race-pill dim" id="hcn-pill-r">streaming</span></div>
+              <div class="hcn-race-prompt">summarize this ticket: customer cannot log in, password reset email never arrived...</div>
+              <div class="hcn-race-stream" id="hcn-stream-r"></div>
+              <div class="hcn-race-hud"><span>local inference</span><span class="hcn-ms" id="hcn-ms-r">0 ms</span></div>
+            </div>
+          </div>
+          <div class="hcn-race-foot"><span><b>7.42x</b> faster</span><span><b>11.6x</b> cheaper</span><span>same output</span></div>
+        </div>
+
+        <!-- Scene 6 . ship lattice -->
+        <div class="hcn-scene hcn-s6" id="hcn-scene-5" data-scene="5">
+          <div class="hcn-lat">
+            <div class="hcn-tile" data-tile="0"><b>phi-redactor.kolm</b><span class="hcn-tile-meta"><span class="hcn-tile-size">149 MB</span><span class="hcn-tile-k">K=0.98</span></span></div>
+            <div class="hcn-tile" data-tile="1"><b>triage.kolm</b><span class="hcn-tile-meta"><span class="hcn-tile-size">64 MB</span><span class="hcn-tile-k">K=0.91</span></span></div>
+            <div class="hcn-tile" data-tile="2"><b>contract.kolm</b><span class="hcn-tile-meta"><span class="hcn-tile-size">118 MB</span><span class="hcn-tile-k">K=0.93</span></span></div>
+            <div class="hcn-tile" data-tile="3"><b>code-review.kolm</b><span class="hcn-tile-meta"><span class="hcn-tile-size">96 MB</span><span class="hcn-tile-k">K=0.92</span></span></div>
+            <div class="hcn-tile" data-tile="4"><b>invoice.kolm</b><span class="hcn-tile-meta"><span class="hcn-tile-size">54 MB</span><span class="hcn-tile-k">K=0.95</span></span></div>
+          </div>
+          <div class="hcn-hero" id="hcn-hero-text">Ship signed AI.</div>
+        </div>
+
+        <noscript><img src="/video/kolm-hero-poster.jpg" alt="kolm: compile a task into one signed file that runs anywhere."></noscript>
       </div>
-      <div class="hero-video-foot">
-        <a href="/anatomy">anatomy of a .kolm &rarr;</a>
+      <div class="hcn-dock">
+        <button type="button" class="hcn-pp" id="hcn-pp" aria-label="pause demo" aria-pressed="true"><span class="hcn-pp-ico pause" id="hcn-pp-ico" aria-hidden="true"></span></button>
+        <span class="hcn-dots" id="hcn-dots">
+          <button type="button" class="hcn-d active" data-jump="0" aria-label="scene 1, the problem"></button>
+          <button type="button" class="hcn-d" data-jump="1" aria-label="scene 2, compile"></button>
+          <button type="button" class="hcn-d" data-jump="2" aria-label="scene 3, K-score gate"></button>
+          <button type="button" class="hcn-d" data-jump="3" aria-label="scene 4, verify"></button>
+          <button type="button" class="hcn-d" data-jump="4" aria-label="scene 5, run"></button>
+          <button type="button" class="hcn-d" data-jump="5" aria-label="scene 6, ship"></button>
+        </span>
+        <div class="hcn-scrub" id="hcn-scrub" role="slider" aria-label="demo progress" aria-valuemin="0" aria-valuemax="28" aria-valuenow="0"><div class="hcn-scrub-fill" id="hcn-scrub-fill"></div></div>
+        <span class="hcn-time"><b id="hcn-elapsed">00:00</b> / <span id="hcn-total">00:28</span></span>
       </div>
     </div>
 
     <p class="hero-proof">
       <span class="hp-dot" aria-hidden="true"></span>
-      <span><b>38 MB</b> artifact</span>
+      <span><b>38 MB</b> model</span>
       <span class="hp-sep" aria-hidden="true">&middot;</span>
-      <span><b>0.6 ms</b> median</span>
+      <span><b>0.6 ms</b> per answer</span>
       <span class="hp-sep" aria-hidden="true">&middot;</span>
-      <span><b>K = 0.917</b> on /spec eval set</span>
-      <a href="/spec" class="hp-link">verify &rarr;</a>
+      <span><b>K = 0.92</b> shipped</span>
+      <a href="/k-score" class="hp-link">what K-score is &rarr;</a>
     </p>
   </div>
 </section>
 
+<!-- v11 wave 12 . One quantified claim (hackGPT 9.2). Single bold line under
+     the demo, before any other prose. Four monospaced values separated by
+     middle-dots. Numbers come from phi-redactor.kolm in the public registry,
+     reproducible against the leak audit on /case-studies/healthcare-phi-redactor. -->
+<section class="quant-line" aria-label="kolm at a glance">
+  <div class="wrap">
+    <p class="ql-row">
+      <span class="ql-val">149 MB</span>
+      <span class="ql-dot">&middot;</span>
+      <span class="ql-val">142 ms</span>
+      <span class="ql-dot">&middot;</span>
+      <span class="ql-val">runs offline</span>
+      <span class="ql-dot">&middot;</span>
+      <span class="ql-val">K-score 0.98</span>
+    </p>
+    <p class="ql-sub">From phi-redactor.kolm, Mistral 7B base, M2 MacBook Air 8 GB. <a href="/case-studies/healthcare-phi-redactor">See the leak audit</a>.</p>
+  </div>
+</section>
+
+<!-- v11.8 . trust-strip social-proof. Built-on-open-standards + receipts +
+     license + spec, rendered as a single quiet row right under the hero
+     quant-ribbon. Mirrors provider-strip restraint - no cards, no logos. -->
+<section class="trust-strip" aria-label="trust signals">
+  <div class="wrap">
+    <p class="ts-caption">Open standards. Signed bytes. Apache-2.0.</p>
+    <div class="ts-row">
+      <a class="ts-cell" href="/spec/rs-1"><b>RS-1</b> open spec</a>
+      <a class="ts-cell" href="/openapi.json"><b>OpenAPI 3.0</b> contract</a>
+      <a class="ts-cell" href="/verify-prod"><b>HMAC-SHA256</b> receipts</a>
+      <a class="ts-cell" href="/sbom"><b>CycloneDX</b> SBOM</a>
+      <a class="ts-cell" href="/security"><b>SLSA L3</b> roadmap</a>
+      <a class="ts-cell" href="https://github.com/sneaky-hippo/kolmogorov-stack"><b>Apache-2.0</b> source</a>
+    </div>
+  </div>
+</section>
+
+<!-- v7.18.2 . provider strip, SOTA-clean. Anthropic / Apple / OpenAI all
+     credit upstream providers in a SINGLE quiet row: caption left, providers
+     right, no numbered eyebrow, no monospace, no separator slashes. Just a
+     restrained sentence and the names rendered in display weight matching
+     each provider's brand. -->
+<section class="provider-strip" aria-label="frontier models supported">
+  <div class="wrap">
+    <p class="ps-caption">Compile from any frontier.</p>
+    <div class="ps-row">
+      <span class="ps-cell">Claude</span>
+      <span class="ps-cell">GPT</span>
+      <span class="ps-cell">Llama</span>
+      <span class="ps-cell">Mistral</span>
+      <span class="ps-cell">DeepSeek</span>
+      <span class="ps-cell">Qwen</span>
+      <span class="ps-cell">Gemini</span>
+    </div>
+  </div>
+</section>
+
+<!-- v11 . frontier-inventory band. Surfaces the 42 SOTA techniques shipped in
+     /research. Mirrors provider-strip restraint: top hairline, caption, single
+     row of category counts in display weight. The numbers ARE the badge - no
+     pill, no card, no animation. Anthropic/Linear pattern: proof as typography. -->
+<section class="frontier-strip" aria-label="frontier techniques shipped">
+  <div class="wrap">
+    <p class="fs-caption">Forty-two frontier techniques, shipped and signed.</p>
+    <div class="fs-row">
+      <span class="fs-cell"><b>19</b> training</span>
+      <span class="fs-cell"><b>6</b> decoding</span>
+      <span class="fs-cell"><b>5</b> serving</span>
+      <span class="fs-cell"><b>6</b> evaluation</span>
+      <span class="fs-cell"><b>2</b> data</span>
+      <span class="fs-cell"><b>4</b> operational</span>
+    </div>
+    <p class="fs-foot"><a href="/frontier-stack" class="fs-link">See the full stack &rarr;</a> &nbsp;&middot;&nbsp; <a href="/research" class="fs-link">Read the research &rarr;</a></p>
+  </div>
+</section>
+
 <style>
-  /* v7.14 — centered hero. Frontier-AI-lab pattern (Apple/Anthropic): the
-     hero is one centered column carrying H1 + lede + 2 CTAs + NL try-it,
-     and the live product demo lives as its own framed section below.
-     The hero says what kolm IS. The demo section shows it. Two clean acts. */
-  .home-hero-centered { min-height: auto; padding-bottom: 12px; border-bottom: 0; text-align: center; }
-  .home-hero-centered .wrap { display: block; max-width: 980px; }
-  .home-hero-centered h1 {
-    font-size: clamp(48px, 6.4vw, 92px);
-    line-height: 1.0;
-    letter-spacing: -0.034em;
-    margin: 0 auto 22px;
-    max-width: 14ch;
-    font-weight: 620;
+  /* v7.18.2 . SOTA-clean hero backdrop. Single quiet layer: a very soft warm
+     top spotlight (neutral, NOT cyan  - so it doesn't fight the cyan H1
+     cycle-word) over a faint white dot-grid. Bottom edge masked so the
+     backdrop fades into the page. This is the entire hero atmosphere  - no
+     SVG, no canvas, no animation. Anthropic/OpenAI/Cursor all use a single
+     restrained backdrop layer; we match. */
+  .hero-grid-bg {
+    position: absolute; inset: -40px 0 0 0;
+    background-image:
+      radial-gradient(ellipse 1100px 520px at 22% -4%, rgba(236,231,220,0.055) 0%, transparent 62%),
+      linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+    background-size: 100% 100%, 56px 56px, 56px 56px;
+    background-position: 0 0, 0 0, 0 0;
+    mask-image: linear-gradient(180deg, black 0%, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, black 0%, black 70%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
   }
-  @media (max-width: 720px) { .home-hero-centered h1 { font-size: clamp(38px, 9vw, 56px); letter-spacing: -0.028em; } }
-  .home-hero-centered .lede {
-    margin: 0 auto 36px;
-    max-width: 60ch;
-    line-height: 1.45;
-    font-size: clamp(17px, 1.6vw, 21px);
-    color: var(--ink-mute, #b5bdb1);
+  /* v7.19 . the cycling word IS the highlight. One warm clay accent (#10b981)
+     against the otherwise monochrome cream/ink page. This is the signature
+     kolm color: warm, human, opposite of the cool cyan-saturated AI space.
+     The period stays in ink/cream so the accent doesn't pull punctuation
+     out of rhythm. Ghost reserves longest-word width so H1 never reflows. */
+  h1 .cycle-word {
+    display: inline-block;
+    position: relative;
+    vertical-align: baseline;
   }
-  .home-hero-centered .actions { margin: 0 0 40px; justify-content: center; display: flex; gap: 12px; flex-wrap: wrap; }
-  .home-hero-centered .nl-try { margin: 0 auto !important; max-width: 640px; text-align: left; }
-  @media (max-width: 520px) {
-    .home-hero-centered .lede { margin-bottom: 28px; }
-    .home-hero-centered .actions { margin-bottom: 32px; }
+  h1 .cw-ghost {
+    visibility: hidden;
+    display: inline-block;
+    pointer-events: none;
+  }
+  h1 .cw-cur {
+    position: absolute;
+    left: 0; top: 0;
+    white-space: nowrap;
+    color: var(--kolm-accent, #10b981);
+    opacity: 1;
+    transition: opacity 240ms cubic-bezier(.4,0,.2,1);
+    will-change: opacity;
+  }
+  h1 .cw-cur::after {
+    content: '.';
+    margin-left: -0.04em;
+    color: var(--ink, #ece7dc);
+  }
+  h1 .cw-cur.cw-dim { opacity: 0.30; }
+  [data-theme=light] h1 .cw-cur { color: #059669; }
+  [data-theme=light] h1 .cw-cur::after { color: #18171a; }
+  @media (prefers-reduced-motion: reduce) {
+    h1 .cw-cur { transition: none !important; }
+  }
+  /* v7.18.2 . SOTA-restrained hero backdrop. Single layer behind the H1  -      neutral dot grid + a very soft top spotlight. Critically: the spotlight
+     is NEUTRAL (warm-ink, low-alpha) not cyan, so the cyan H1 cycle-word
+     has tonal contrast against the background instead of fighting it. No
+     ::before topographic, no ::after starfield, no canvas, no beam, no
+     grain  - Anthropic/OpenAI/Cursor all keep their hero backdrops to a
+     single quiet layer. We do the same. */
+  .home-hero-left .wrap { position: relative; z-index: 2; }
+  [data-theme=light] .hero-grid-bg {
+    background-image:
+      radial-gradient(ellipse 1100px 460px at 20% 0%, rgba(12,14,16,0.04) 0%, transparent 65%),
+      linear-gradient(rgba(12,14,16,0.030) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(12,14,16,0.030) 1px, transparent 1px);
   }
 
-  /* Demo anchor — sits between the hero and compile-anatomy. Full-frame
+  /* v7.18.2 . provider strip, SOTA-restrained. Anthropic/Apple/OpenAI all
+     credit upstream providers in a single quiet line. No numbered eyebrow,
+     no monospace, no borders. Caption + row of provider names in display
+     weight  - the names ARE the badge. The cyan accent goes only on the
+     hairline rule above, just enough to anchor it. */
+  .provider-strip { padding: 72px 0 56px; border-top: 1px solid var(--line, rgba(255,255,255,0.06)); margin-top: 56px; }
+  .provider-strip .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; text-align: center; }
+  @media (max-width: 720px) { .provider-strip .wrap { padding: 0 20px; } .provider-strip { padding: 56px 0 40px; margin-top: 40px; } }
+  .ps-caption {
+    margin: 0 0 26px;
+    font-size: 13px;
+    color: var(--ink-faint, #737c73);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .ps-row {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 16px 44px;
+    align-items: baseline;
+  }
+  .ps-cell {
+    font-size: clamp(18px, 1.6vw, 22px);
+    color: var(--ink-mute, #b5bdb1);
+    font-weight: 500;
+    letter-spacing: -0.012em;
+    line-height: 1.2;
+    transition: color 200ms ease;
+  }
+  .ps-cell:hover { color: var(--ink, #faf2e1); }
+  [data-theme=light] .provider-strip { border-top-color: rgba(12,14,16,0.06); }
+  [data-theme=light] .ps-caption { color: #737c73; }
+  [data-theme=light] .ps-cell { color: #4b5158; }
+  [data-theme=light] .ps-cell:hover { color: #0c0e10; }
+  @media (max-width: 520px) {
+    .ps-row { gap: 12px 26px; }
+  }
+
+  /* v11 . frontier-strip mirrors provider-strip restraint. Top hairline,
+     centered caption, single row of 6 category counts with display-weight
+     digits + lowercase labels. No card, no border per cell - the number
+     IS the proof. Footer link routes the curious into /research. */
+  .frontier-strip { padding: 48px 0 56px; border-top: 1px solid var(--line, rgba(255,255,255,0.06)); margin-top: 0; }
+  .frontier-strip .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; text-align: center; }
+  .fs-caption {
+    margin: 0 0 22px;
+    font-size: 13px;
+    color: var(--ink-faint, #737c73);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .fs-row {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 14px 36px;
+    align-items: baseline;
+  }
+  .fs-cell {
+    font-size: 14px;
+    color: var(--ink-mute, #b5bdb1);
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+  }
+  .fs-cell b {
+    font-family: var(--mono, ui-monospace, SFMono-Regular, monospace);
+    font-size: clamp(18px, 1.5vw, 22px);
+    font-weight: 500;
+    color: var(--ink, #faf2e1);
+    margin-right: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .fs-foot { margin: 22px 0 0; font-size: 12.5px; }
+  .fs-link { color: var(--ink-mute, #b5bdb1); text-decoration: none; border-bottom: 1px solid rgba(236,231,220, 0.20); padding-bottom: 1px; transition: color 160ms, border-color 160ms; }
+  .fs-link:hover { color: var(--ink, #faf2e1); border-bottom-color: rgba(236,231,220, 0.6); }
+  [data-theme=light] .frontier-strip { border-top-color: rgba(12,14,16,0.06); }
+  [data-theme=light] .fs-caption { color: #737c73; }
+  [data-theme=light] .fs-cell { color: #4b5158; }
+  [data-theme=light] .fs-cell b { color: #0c0e10; }
+  [data-theme=light] .fs-link { color: #4b5158; border-bottom-color: rgba(12,14,16,0.18); }
+  [data-theme=light] .fs-link:hover { color: #0c0e10; border-bottom-color: rgba(12,14,16,0.6); }
+  @media (max-width: 720px) {
+    .frontier-strip { padding: 40px 0 44px; }
+    .frontier-strip .wrap { padding: 0 20px; }
+    .fs-row { gap: 12px 20px; }
+  }
+
+  /* v11 wave 8 . quant-line (hackGPT 9.2). Single bold quantified claim below
+     the demo. Each value mono, each separator a middle-dot. Numbers come from
+     registry support-triage.kolm artifact - do not change. */
+  .quant-line { padding: 32px 0 28px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 36px; text-align: center; }
+  .quant-line .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+  .quant-line .ql-row { font-family: var(--mono); font-size: 26px; letter-spacing: -0.01em; color: var(--fg); margin: 0 0 10px; line-height: 1.3; }
+  .quant-line .ql-val { display: inline-block; padding: 0 4px; }
+  .quant-line .ql-dot { color: var(--ink-faint, #737c73); padding: 0 8px; }
+  .quant-line .ql-sub { font-family: var(--mono); font-size: 12px; color: var(--ink-mute); margin: 0; }
+  .quant-line .ql-sub a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(126,240,210,0.3); }
+  .quant-line .ql-sub a:hover { border-bottom-color: var(--accent); }
+  @media (max-width: 720px) { .quant-line .ql-row { font-size: 18px; } .quant-line .ql-dot { padding: 0 4px; } .quant-line .wrap { padding: 0 20px; } }
+  @media (max-width: 480px) { .quant-line .ql-row { font-size: 16px; } }
+
+  /* v7.18.3 . left-anchored frontier hero. Replaces v7.14 centered hero with
+     a left-aligned column that pulls the eye to a single anchor point. This
+     is the Anthropic/Linear/Vercel/Cursor pattern: H1 + lede + CTAs sit
+     against the left rail with generous breathing room on the right. The
+     centered hero felt symmetrical-pretty but lacked direction; this one
+     points the reader at the install button. Typography is Geist Sans
+     (canonical kolm typeface) with tight optical kerning + tabular numerics
+     on proof metrics. NO right-side card, NO additional layers. Subtraction. */
+  .home-hero-left {
+    min-height: auto;
+    padding-top: 76px;
+    padding-bottom: 18px;
+    border-bottom: 0;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-hero-left .wrap {
+    display: block;
+    max-width: 1180px;
+    position: relative;
+    z-index: 2;
+    text-align: left;
+  }
+  @media (max-width: 720px) { .home-hero-left { padding-top: 48px; } }
+
+  /* H1 . tight Geist display weight, canonical -0.045em / lh 0.96 from
+     feedback_kolm_design.md. Capped at 920px so the line breaks at a
+     natural cadence (Compile your / own AI.) on a 1440 viewport. */
+  .home-hero-left h1 {
+    font-family: var(--sans) !important;
+    font-size: clamp(58px, 8.4vw, 128px) !important;
+    line-height: 0.94 !important;
+    letter-spacing: -0.052em !important;
+    margin: 0 0 32px !important;
+    max-width: 14ch;
+    font-weight: 400 !important;
+    font-feature-settings: "ss01","ss03","cv11","calt","kern";
+    color: var(--ink, #ece7dc);
+  }
+  @media (max-width: 720px) {
+    .home-hero-left h1 { font-size: clamp(46px, 11.5vw, 70px); letter-spacing: -0.04em; line-height: 0.98; }
+  }
+
+  /* Eyebrow . screaming small caps in Geist Mono. No chip border, no pill.
+     A single restrained line above H1 with a soft pulsing dot. Per the
+     feedback_kolm_design.md screaming-small-caps rule: 0.18em letter-spacing,
+     monospace, 11.5px, mute ink. Separator is a thin slash, version
+     gets its own monospace cell so the whole thing reads as instrumentation. */
+  .home-hero-left .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 12px;
+    margin: 0 0 28px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-mute, #b5bdb1);
+    line-height: 1.2;
+  }
+  .home-hero-left .hero-eyebrow .he-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--ink, #ece7dc);
+    opacity: 0.4;
+    animation: eyebrow-pulse-soft 3.4s ease-in-out infinite;
+    flex: 0 0 5px;
+  }
+  @keyframes eyebrow-pulse-soft {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.85; }
+  }
+  .home-hero-left .hero-eyebrow .he-sep {
+    color: var(--ink-faint, #737c73);
+    letter-spacing: 0;
+    opacity: 0.6;
+    font-weight: 400;
+  }
+  .home-hero-left .hero-eyebrow .he-ver {
+    color: var(--ink-faint, #737c73);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.14em;
+  }
+  [data-theme=light] .home-hero-left .hero-eyebrow { color: #5b5853; }
+  [data-theme=light] .home-hero-left .hero-eyebrow .he-dot { background: #18171a; opacity: 0.35; box-shadow: none; }
+  [data-theme=light] .home-hero-left .hero-eyebrow .he-sep,
+  [data-theme=light] .home-hero-left .hero-eyebrow .he-ver { color: #8a8478; }
+
+  /* Lede . canonical body typography from feedback_kolm_design.md:
+     -0.011em letter-spacing / 1.55 line-height. Width capped at 56ch
+     so the eye scans cleanly. Left-anchored, NO auto margin. Slightly
+     lighter weight (300) keeps the page airy and contrasts the larger H1. */
+  .home-hero-left .lede {
+    margin: 0 0 40px;
+    max-width: 56ch;
+    line-height: 1.55;
+    font-size: clamp(17.5px, 1.6vw, 21px);
+    letter-spacing: -0.013em;
+    color: var(--ink-mute, #b5bdb1);
+    font-weight: 300;
+  }
+  [data-theme=light] .home-hero-left .lede { color: #4a4842; }
+
+  /* Actions . left-aligned, rectangular  - px radius (per feedback_kolm_design.md
+     no-pill-CTAs rule). Generous tap target on mobile. */
+  .home-hero-left .actions {
+    margin: 0 0 36px;
+    justify-content: flex-start;
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+
+  /* NL try-it lives inline below CTAs, left-anchored, capped width. */
+  .home-hero-left .nl-try {
+    margin: 8px 0 0 !important;
+    max-width: 640px;
+    text-align: left;
+  }
+  @media (max-width: 520px) {
+    .home-hero-left .lede { margin-bottom: 28px; }
+    .home-hero-left .actions { margin-bottom: 32px; }
+  }
+
+  /* v7.18.2 . removed .hero-supported / .hs-* (in-hero slash-separated provider row).
+     Now lives as the SOTA-clean .provider-strip below the demo. */
+
+  /* v7.18.4 . monochrome inverted CTA. The primary "Try kolm" reads as the
+     inverse of the page  - cream on ink in dark mode, ink on warm paper in
+     light mode. No mint-green, no glow halo. The high contrast IS the
+     emphasis; the SOTA frontier-lab pattern (Anthropic, Linear, Stripe). */
+  .btn-electric.btn.primary {
+    background: var(--ink, #ece7dc);
+    color: #0a0a0d;
+    border-color: var(--ink, #ece7dc);
+    padding: 15px 28px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    box-shadow: none;
+    transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  }
+  .btn-electric.btn.primary:hover {
+    transform: translateY(-1px);
+    background: #ffffff;
+    border-color: #ffffff;
+    filter: none;
+  }
+  [data-theme=light] .btn-electric.btn.primary {
+    background: #18171a;
+    color: #f5f1e6;
+    border-color: #18171a;
+    box-shadow: none;
+  }
+  [data-theme=light] .btn-electric.btn.primary:hover {
+    background: #2a2823;
+    border-color: #2a2823;
+  }
+  /* Demo anchor . sits between the hero and compile-anatomy. Full-frame
      product visual, ~1180px max so the video stays large but doesn't fly
      edge-to-edge on a 1440 viewport. 56px gap to hero, 96px below to anatomy. */
   .demo-anchor { max-width: 1180px; margin: 56px auto 0; padding: 0 32px; }
@@ -837,10 +1475,10 @@
   .demo-anchor .hero-demo-panel { margin: 0; max-width: none; }
   .demo-anchor .hero-video-wrap { aspect-ratio: 16 / 9; }
 
-  /* Proof line — single mono caption under the video. NOT the "moustache"
+  /* Proof line . single mono caption under the video. NOT the "moustache"
      pattern: this is one inline row that ends with a verify link, anchored
      to the video as a caption rather than competing with H1 above the fold.
-     Pattern: dot · 38 MB artifact · 0.6 ms median · K = 0.917 on /spec → verify */
+     Pattern: dot  - 38 MB artifact  - 0.6 ms median  - K = 0.917 on /spec  - verify */
   .hero-proof {
     display: flex; align-items: center; gap: 10px 12px;
     margin: 20px 0 0;
@@ -850,23 +1488,24 @@
     color: var(--ink-mute, #b5bdb1);
     flex-wrap: wrap;
     letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
   }
-  .hero-proof b { color: var(--ink, #faf2e1); font-weight: 540; }
+  .hero-proof b { color: var(--ink, #faf2e1); font-weight: 500; }
   .hero-proof .hp-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: #7ef0d2;
-    box-shadow: 0 0 8px rgba(126, 240, 210, 0.55);
-    flex: 0 0 7px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink, #ece7dc);
+    opacity: 0.55;
+    flex: 0 0 6px;
   }
-  .hero-proof .hp-sep { color: var(--ink-faint, #737c73); opacity: 0.7; }
+  .hero-proof .hp-sep { color: var(--ink-faint, #737c73); opacity: 0.55; }
   .hero-proof .hp-link {
     margin-left: auto;
-    color: #7ef0d2;
-    border-bottom: 1px solid rgba(126, 240, 210, 0.32);
+    color: var(--ink, #ece7dc);
+    border-bottom: 1px solid rgba(236, 231, 220, 0.32);
     text-decoration: none;
-    transition: border-color 140ms;
+    transition: border-color 160ms ease;
   }
-  .hero-proof .hp-link:hover { border-bottom-color: rgba(126, 240, 210, 0.7); }
+  .hero-proof .hp-link:hover { border-bottom-color: rgba(236, 231, 220, 0.7); }
   @media (max-width: 720px) {
     .hero-proof {
       justify-content: center;
@@ -879,21 +1518,55 @@
     .hero-proof .hp-link { margin-left: 8px; }
     .hero-proof .hp-sep:nth-of-type(3) { display: none; }
   }
-  [data-theme=light] .hero-proof { color: #4b5158; }
-  [data-theme=light] .hero-proof b { color: #0c0e10; }
-  [data-theme=light] .hero-proof .hp-dot { background: #0a8862; box-shadow: 0 0 8px rgba(10, 136, 98, 0.45); }
-  [data-theme=light] .hero-proof .hp-sep { color: #9aa1a6; }
-  [data-theme=light] .hero-proof .hp-link { color: #0a8862; border-bottom-color: rgba(10, 136, 98, 0.32); }
-  [data-theme=light] .hero-proof .hp-link:hover { border-bottom-color: rgba(10, 136, 98, 0.7); }
+  [data-theme=light] .hero-proof { color: #5b5853; }
+  [data-theme=light] .hero-proof b { color: #18171a; }
+  [data-theme=light] .hero-proof .hp-dot { background: #18171a; opacity: 0.5; box-shadow: none; }
+  [data-theme=light] .hero-proof .hp-sep { color: #8a8478; opacity: 0.7; }
+  [data-theme=light] .hero-proof .hp-link { color: #18171a; border-bottom-color: rgba(24, 23, 26, 0.28); }
+  [data-theme=light] .hero-proof .hp-link:hover { border-bottom-color: rgba(24, 23, 26, 0.6); }
+
+  /* hero-quant . above-the-fold quantified ribbon directly below the H1+actions.
+     Pattern: 7.42x faster . 11.6x cheaper . CID-verified . runs offline . [how we measure] */
+  .hero-quant {
+    display: flex; align-items: center; gap: 8px 14px;
+    margin: 24px 0 0;
+    font-family: var(--mono, ui-monospace);
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink-mute, #b5bdb1);
+    flex-wrap: wrap;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-quant b { color: var(--ink, #faf2e1); font-weight: 500; }
+  .hero-quant .hq-sep { color: var(--ink-faint, #737c73); opacity: 0.55; }
+  .hero-quant .hq-link {
+    margin-left: auto;
+    color: var(--ink, #ece7dc);
+    border-bottom: 1px solid rgba(236, 231, 220, 0.32);
+    text-decoration: none;
+    transition: border-color 160ms ease;
+  }
+  .hero-quant .hq-link:hover { border-bottom-color: rgba(236, 231, 220, 0.7); }
+  @media (max-width: 720px) {
+    .hero-quant { justify-content: center; text-align: center; font-size: 11.5px; gap: 4px 8px; margin-top: 18px; line-height: 1.7; }
+    .hero-quant .hq-link { margin-left: 8px; }
+  }
+  [data-theme=light] .hero-quant { color: #5b5853; }
+  [data-theme=light] .hero-quant b { color: #18171a; }
+  [data-theme=light] .hero-quant .hq-sep { color: #8a8478; opacity: 0.7; }
+  [data-theme=light] .hero-quant .hq-link { color: #18171a; border-bottom-color: rgba(24, 23, 26, 0.28); }
+  [data-theme=light] .hero-quant .hq-link:hover { border-bottom-color: rgba(24, 23, 26, 0.6); }
 
   .nl-try { margin: 44px 0 0; max-width: 720px; }
   .nl-try .nl-head { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
-  .nl-try .nl-head b { color: var(--ink-mute, #b5bdb1); font-weight: 540; text-transform: none; letter-spacing: 0; }
-  .nl-try .nl-dot { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126, 240, 210, 0.6); display: inline-block; }
+  .nl-try .nl-head b { color: var(--ink-mute, #b5bdb1); font-weight: 500; text-transform: none; letter-spacing: 0; }
+  .nl-try .nl-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink, #ece7dc); opacity: 0.55; box-shadow: none; display: inline-block; }
   .nl-try form { display: flex; gap: 10px; align-items: stretch; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 11px; background: var(--bg-2, #11151b); padding: 7px; transition: border-color 160ms, box-shadow 160ms; }
-  .nl-try form:focus-within { border-color: rgba(126,240,210, 0.4); box-shadow: 0 0 0 3px rgba(126,240,210, 0.07); }
+  .nl-try form:focus-within { border-color: var(--kolm-accent, #10b981); box-shadow: 0 0 0 3px rgba(16,185,129, 0.10); }
+  [data-theme=light] .nl-try form:focus-within { border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105, 0.08); }
   /* font-size: 16px is the iOS Safari threshold below which focusing an
-     input zooms the viewport unexpectedly — feels broken on mobile. Hold the
+     input zooms the viewport unexpectedly . feels broken on mobile. Hold the
      line at exactly 16px so the bot is usable on phones. */
   .nl-try input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; padding: 11px 13px; color: var(--ink, #faf2e1); font-family: var(--sans, system-ui); font-size: 16px; letter-spacing: -0.005em; }
   @media (max-width: 520px) {
@@ -904,29 +1577,66 @@
     .nl-try .nl-chips button { padding: 7px 12px; font-size: 12.5px; }
   }
   .nl-try input::placeholder { color: var(--ink-faint, #737c73); }
-  .nl-try .nl-go { background: #7ef0d2; color: #0b0d10; border: 0; border-radius: 8px; padding: 10px 20px; font-family: var(--mono, ui-monospace); font-size: 13px; font-weight: 580; letter-spacing: 0.01em; cursor: pointer; transition: filter 120ms, transform 120ms; }
-  .nl-try .nl-go:hover { filter: brightness(1.07); transform: translateY(-1px); }
+  .nl-try .nl-go { background: var(--ink, #ece7dc); color: #0a0a0d; border: 0; border-radius: 8px; padding: 10px 20px; font-family: var(--mono, ui-monospace); font-size: 13px; font-weight: 500; letter-spacing: 0; cursor: pointer; transition: background-color 160ms ease, transform 160ms ease; }
+  .nl-try .nl-go:hover { background: #ffffff; transform: translateY(-1px); }
+  [data-theme=light] .nl-try .nl-go { background: #18171a; color: #f5f1e6; }
+  [data-theme=light] .nl-try .nl-go:hover { background: #2a2823; }
   .nl-try .nl-chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 12px 0 0; }
   .nl-try .nl-chips button { background: transparent; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 6px; padding: 5px 11px; font-family: var(--mono, ui-monospace); font-size: 11.5px; color: var(--ink-mute, #b5bdb1); cursor: pointer; letter-spacing: 0; transition: color 120ms, border-color 120ms; }
-  .nl-try .nl-chips button:hover { color: var(--ink, #faf2e1); border-color: rgba(126,240,210, 0.35); }
+  .nl-try .nl-chips button:hover { color: var(--ink, #faf2e1); border-color: rgba(236,231,220, 0.32); }
+  [data-theme=light] .nl-try .nl-chips button:hover { color: #18171a; border-color: rgba(24,23,26, 0.28); }
   .nl-try #nl-out { display: block; margin: 16px 0 0; font-family: var(--mono, ui-monospace); font-size: 13px; line-height: 1.6; color: var(--ink-mute, #b5bdb1); white-space: pre-wrap; }
   .nl-try #nl-out .nl-narration { color: var(--ink, #faf2e1); }
   .nl-try #nl-out .nl-cmd { display: block; margin: 10px 0; padding: 11px 13px; background: rgba(126,240,210,0.05); border: 1px solid rgba(126,240,210,0.18); border-radius: 7px; color: #c1f5e3; }
-  .nl-try #nl-out .nl-link { color: #7ef0d2; }
+  .nl-try #nl-out .nl-link { color: var(--kolm-accent, #10b981); }
   .nl-try #nl-out .nl-link:hover { border-bottom: 1px solid rgba(126,240,210, 0.4); }
   .nl-try #nl-out .nl-job { margin-top: 12px; padding: 12px 14px; border: 1px solid rgba(126,240,210, 0.2); border-radius: 8px; background: rgba(126,240,210, 0.03); }
   .nl-try #nl-out .nl-job .nl-jhead { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--ink-mute, #b5bdb1); letter-spacing: 0.08em; text-transform: uppercase; }
-  .nl-try #nl-out .nl-job .nl-jhead .nl-spin { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid rgba(126,240,210, 0.35); border-top-color: #7ef0d2; animation: nl-spin 1s linear infinite; }
+  .nl-try #nl-out .nl-job .nl-jhead .nl-spin { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid rgba(126,240,210, 0.35); border-top-color: var(--kolm-accent, #10b981); animation: nl-spin 1s linear infinite; }
   .nl-try #nl-out .nl-job .nl-jhead .nl-spin.done { animation: none; border: 0; background: #2cce8a; box-shadow: 0 0 8px rgba(44,206,138,0.55); }
   @keyframes nl-spin { to { transform: rotate(360deg); } }
   .nl-try #nl-out .nl-job .nl-bar { margin: 10px 0 8px; height: 4px; background: rgba(250,242,225,0.06); border-radius: 999px; overflow: hidden; }
   .nl-try #nl-out .nl-job .nl-bar .nl-fill { height: 100%; background: linear-gradient(90deg, #7ef0d2, #2cce8a); width: 0%; transition: width 320ms ease-out; }
   .nl-try #nl-out .nl-job .nl-jmeta { color: var(--ink-mute, #b5bdb1); font-size: 12px; }
-  .nl-try #nl-out .nl-job .nl-jmeta b { color: var(--ink, #faf2e1); font-weight: 540; }
-  .nl-try #nl-out .nl-job .nl-dl { display: inline-block; margin-top: 10px; padding: 6px 14px; background: rgba(126,240,210, 0.12); border: 1px solid rgba(126,240,210, 0.4); border-radius: 7px; color: #c1f5e3; font-size: 12px; font-weight: 540; text-decoration: none; }
+  .nl-try #nl-out .nl-job .nl-jmeta b { color: var(--ink, #faf2e1); font-weight: 500; }
+  .nl-try #nl-out .nl-job .nl-dl { display: inline-block; margin-top: 10px; padding: 6px 14px; background: rgba(126,240,210, 0.12); border: 1px solid rgba(126,240,210, 0.4); border-radius: 7px; color: #c1f5e3; font-size: 12px; font-weight: 500; text-decoration: none; }
   .nl-try #nl-out .nl-job .nl-dl:hover { background: rgba(126,240,210, 0.2); }
   @media (max-width: 640px) { .nl-try .nl-go { padding: 10px 16px; } }
 </style>
+<script>
+/* v7.18.1 . dim-and-swap word-cycle in the H1. A single .cw-cur span sits
+   over a hidden ghost (longest word) so wrapper width never reflows. Every
+   3.2s the word dims to 18% opacity (180ms), the text swaps at peak dim,
+   then brightens back. No overlap, no empty H1, no vertical motion. */
+(function () {
+  var wrap = document.querySelector('.home-hero-left h1 .cycle-word');
+  if (!wrap) return;
+  var ghost = wrap.querySelector('.cw-ghost');
+  var el = wrap.querySelector('.cw-cur');
+  if (!el) return;
+  var words = (el.getAttribute('data-words') || 'AI').split(',').map(function (w) { return w.trim(); }).filter(Boolean);
+  if (words.length < 2) return;
+  var longest = words.reduce(function (acc, w) { return w.length > acc.length ? w : acc; }, '');
+  if (ghost) ghost.textContent = longest;
+  var idx = 0;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function swap() {
+    if (reduce) { idx = (idx + 1) % words.length; el.textContent = words[idx]; return; }
+    el.classList.add('cw-dim');
+    setTimeout(function () {
+      idx = (idx + 1) % words.length;
+      el.textContent = words[idx];
+      el.classList.remove('cw-dim');
+    }, 200);
+  }
+  setTimeout(function () {
+    swap();
+    setInterval(swap, 3200);
+  }, 3200);
+})();
+</script>
+<!-- v7.18.2: removed orphan hero-constellation canvas JS. Hero backdrop is now CSS-only: radial spotlight + dot grid in .hero-grid-bg. -->
+
 <script>
 (function () {
   var form = document.getElementById('nl-form');
@@ -939,7 +1649,7 @@
     catch (_) { return ''; }
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
-  function fmtKB(n) { if (!n) return '—'; return n > 1024 * 1024 ? (n / 1024 / 1024).toFixed(2) + ' MB' : (n / 1024).toFixed(1) + ' KB'; }
+  function fmtKB(n) { if (!n) return '.'; return n > 1024 * 1024 ? (n / 1024 / 1024).toFixed(2) + ' MB' : (n / 1024).toFixed(1) + ' KB'; }
   function renderJobBox(j) {
     var done = j.status === 'completed';
     var failed = j.status === 'failed';
@@ -1034,8 +1744,8 @@
 
 <section class="compile-anatomy" aria-label="what compile means">
   <div class="ca-head">
-    <h2 class="ca-h">From idea to application.</h2>
-    <p class="ca-sub">Four passes. One signed file. Plain English in, a model you own out.</p>
+    <h2 class="ca-h">A small model for one job, instead of a giant model for everything.</h2>
+    <p class="ca-sub">Four passes. One signed file. Big enough to do the work, small enough to ship with your app.</p>
   </div>
 
   <ol class="ca-steps">
@@ -1053,23 +1763,100 @@
     </li>
     <li class="ca-step">
       <span class="ca-num">03</span>
-      <h3>Train a small model</h3>
-      <p>Shrinks the work to a tiny file. Microsecond latency.</p>
-      <code class="ca-out">38 MB &middot; 0.6 ms &middot; offline</code>
+      <h3>Shrink it to fit anywhere</h3>
+      <p>A small model for one job. Fits on a phone, runs on a laptop, scales on a server. No GPU required.</p>
+      <code class="ca-out">38 MB &middot; 0.6 ms &middot; runs offline</code>
     </li>
     <li class="ca-step">
       <span class="ca-num">04</span>
-      <h3>Prove and ship</h3>
-      <p>Clears the <b>K &ge; 0.85</b> gate. Signed, sealed, ready to run.</p>
-      <code class="ca-out">K = 0.917 &middot; sha256 7f3a&hellip;c81</code>
+      <h3>Grade it, then ship</h3>
+      <p>The <a href="/k-score">K-score</a> scores accuracy, size, latency, cost, and coverage on a held-out test set. Above 0.85 the model ships as one signed file. Below 0.85 it doesn&rsquo;t, and you see why.</p>
+      <code class="ca-out">K = 0.92 &middot; ships &middot; one signed .kolm</code>
     </li>
   </ol>
 
   <p class="ca-foot">4 minutes &middot; one .kolm file &middot; runs on macOS, Linux, Windows today; iOS and Android in RS-2 &middot; <a href="/anatomy">technical anatomy &rarr;</a></p>
 </section>
 
+<style>
+  /* v7.11 . "Then what?" 3-card section. Answers the journey after compile.
+     Same visual rhythm as compile-anatomy but only 3 cards, larger illustrations,
+     pointed at the post-compile lifecycle (run / improve / own). */
+  .after-compile { max-width: 1180px; margin-left: auto; margin-right: auto; padding: 0 32px; }
+  .after-compile .ac-head { text-align: center; max-width: 760px; margin: 0 auto 44px; }
+  .after-compile .ac-h { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 16px; font-weight: 500; }
+  .after-compile .ac-sub { font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0 auto; max-width: 60ch; }
+  .after-compile .ac-sub b { color: var(--ink, #faf2e1); font-weight: 500; }
+  .after-compile .ac-cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 980px) { .after-compile .ac-cards { grid-template-columns: 1fr; gap: 14px; } }
+  .after-compile .ac-card { position: relative; padding: 28px 24px 24px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: rgba(21,26,33,0.32); display: flex; flex-direction: column; gap: 12px; min-height: 180px; transition: border-color 160ms; }
+  .after-compile .ac-card:hover { border-color: rgba(255,255,255,0.16); }
+  .after-compile .ac-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--ink-soft, #ece1c4); }
+  .after-compile .ac-card h3 { font-size: 22px; line-height: 1.15; letter-spacing: -0.018em; margin: 0; font-weight: 500; color: var(--ink, #faf2e1); }
+  .after-compile .ac-card p { font-size: 14.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; }
+  .after-compile .ac-card p b { color: var(--ink, #faf2e1); font-weight: 500; }
+  .after-compile .ac-where { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; }
+  .after-compile .ac-where + .ac-where-ff { margin-top: 6px; }
+  .after-compile .ac-where span { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); border: 1px solid var(--line, rgba(255,255,255,0.10)); border-radius: 5px; padding: 4px 8px; letter-spacing: 0.02em; background: rgba(0,0,0,0.18); }
+  .after-compile .ac-where-ff span { font-size: 10.5px; color: var(--ink-mute, #b5bdb1); background: transparent; border-color: rgba(255,255,255,0.06); }
+  .after-compile .ac-loop { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin: 4px 0 0; font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); letter-spacing: 0.02em; }
+  .after-compile .ac-loop em { font-style: normal; padding: 4px 9px; border: 1px solid rgba(126,240,210,0.22); border-radius: 5px; background: rgba(126,240,210,0.05); }
+  .after-compile .ac-loop b { color: var(--kolm-accent, #10b981); font-weight: 500; }
+  .after-compile .ac-link { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 10px; font-family: var(--mono); font-size: 12.5px; color: var(--kolm-accent, #10b981); border-bottom: 0; }
+  .after-compile .ac-link:hover { color: #c1f5e3; }
+  [data-theme=light] .after-compile .ac-card { background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(250,250,250,0.55)); }
+  [data-theme=light] .after-compile .ac-icon { color: #059669; }
+  [data-theme=light] .after-compile .ac-where span { background: rgba(255,255,255,0.6); color: #1f2429; border-color: rgba(0,0,0,0.10); }
+  [data-theme=light] .after-compile .ac-where-ff span { background: transparent; color: #4b5158; border-color: rgba(0,0,0,0.06); }
+  [data-theme=light] .after-compile .ac-loop em { border-color: rgba(10,136,98,0.28); background: rgba(10,136,98,0.06); color: #1f2429; }
+  [data-theme=light] .after-compile .ac-loop b { color: #059669; }
+  [data-theme=light] .after-compile .ac-link { color: #059669; }
+</style>
+
+<section class="after-compile" aria-label="what happens after compile">
+  <div class="ac-head">
+    <h2 class="ac-h">After you compile.</h2>
+    <p class="ac-sub">One signed file that runs where you put it, gets better as you use it, and stays yours forever.</p>
+  </div>
+
+  <ol class="ac-cards">
+    <li class="ac-card">
+      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="1.5"/><path d="M2 17h20l-1.5 3H3.5z"/></svg></span>
+      <h3>Run it anywhere</h3>
+      <p>The same file gives the same answers and the same signed receipt on every target you ship to.</p>
+      <div class="ac-where">
+        <span>macOS</span><span>Linux</span><span>Windows</span><span>iOS</span><span>Android</span>
+      </div>
+      <div class="ac-where ac-where-ff">
+        <span>laptop</span><span>server</span><span>phone (RS-2)</span><span>edge (RS-2)</span>
+      </div>
+      <a href="/anatomy" class="ac-link">how it runs &rarr;</a>
+    </li>
+
+    <li class="ac-card">
+      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.3"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.3"/><path d="M3 20v-5h5"/></svg></span>
+      <h3>Improve it over time</h3>
+      <p>Capture real calls, recompile, and the K-score gate refuses to ship a regression. Each version meets or beats the last.</p>
+      <div class="ac-loop">
+        <em>use</em><b>&rarr;</b><em>capture</em><b>&rarr;</b><em>recompile</em><b>&rarr;</b><em>better</em>
+      </div>
+      <a href="/evolve" class="ac-link">improvement loop &rarr;</a>
+    </li>
+
+    <li class="ac-card">
+      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg></span>
+      <h3>Keep it forever</h3>
+      <p>Signed, portable, open spec. No kill switch, no per-call bill, no vendor lock. Run it next year, offline.</p>
+      <div class="ac-where">
+        <span>signed</span><span>portable</span><span>open spec</span>
+      </div>
+      <a href="/spec" class="ac-link">rs-1 open spec &rarr;</a>
+    </li>
+  </ol>
+</section>
+
 <section class="vr vr-calc-only" aria-label="ROI calculator">
-  <h2>What you save in year one.</h2>
+  <h2>And here is the money.</h2>
   <p class="vr-sub">Three inputs against your real frontier-API spend. Full math on <a href="/roi">/roi</a>.</p>
 
   <aside class="vr-calc vr-calc-solo" aria-label="cost calculator">
@@ -1096,98 +1883,22 @@
 <style>
   .vr-calc-only { padding: 32px 0 32px; max-width: 1180px; margin-left: auto; margin-right: auto; }
   .vr-calc-only h2, .vr-calc-only .vr-sub { text-align: center; }
-  .vr-calc-only h2 { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 14px; font-weight: 600; }
+  .vr-calc-only h2 { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 14px; font-weight: 500; }
   .vr-calc-only .vr-sub { margin-left: auto; margin-right: auto; max-width: 60ch; font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); }
   .vr-calc-only .vr-sub a { color: var(--cyan, #7ef0d2); border-bottom: 1px solid rgba(126,240,210,0.32); }
   .vr-calc-solo { max-width: 760px; margin: 32px auto 0; }
-  [data-theme=light] .vr-calc-only .vr-sub a { color: #0a8862; border-color: rgba(10,136,98,0.32); }
+  [data-theme=light] .vr-calc-only .vr-sub a { color: #059669; border-color: rgba(10,136,98,0.32); }
 </style>
 
-<style>
-  /* v7.11 — "Then what?" 3-card section. Answers the journey after compile.
-     Same visual rhythm as compile-anatomy but only 3 cards, larger illustrations,
-     pointed at the post-compile lifecycle (run / improve / own). */
-  .after-compile { max-width: 1180px; margin-left: auto; margin-right: auto; padding: 0 32px; }
-  .after-compile .ac-head { text-align: center; max-width: 760px; margin: 0 auto 44px; }
-  .after-compile .ac-h { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 16px; font-weight: 600; }
-  .after-compile .ac-sub { font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0 auto; max-width: 60ch; }
-  .after-compile .ac-sub b { color: var(--ink, #faf2e1); font-weight: 540; }
-  .after-compile .ac-cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  @media (max-width: 980px) { .after-compile .ac-cards { grid-template-columns: 1fr; gap: 14px; } }
-  .after-compile .ac-card { position: relative; padding: 28px 24px 24px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: rgba(21,26,33,0.32); display: flex; flex-direction: column; gap: 12px; min-height: 180px; transition: border-color 160ms; }
-  .after-compile .ac-card:hover { border-color: rgba(255,255,255,0.16); }
-  .after-compile .ac-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--ink-soft, #ece1c4); }
-  .after-compile .ac-card h3 { font-size: 22px; line-height: 1.15; letter-spacing: -0.018em; margin: 0; font-weight: 580; color: var(--ink, #faf2e1); }
-  .after-compile .ac-card p { font-size: 14.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; }
-  .after-compile .ac-card p b { color: var(--ink, #faf2e1); font-weight: 540; }
-  .after-compile .ac-where { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; }
-  .after-compile .ac-where + .ac-where-ff { margin-top: 6px; }
-  .after-compile .ac-where span { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); border: 1px solid var(--line, rgba(255,255,255,0.10)); border-radius: 5px; padding: 4px 8px; letter-spacing: 0.02em; background: rgba(0,0,0,0.18); }
-  .after-compile .ac-where-ff span { font-size: 10.5px; color: var(--ink-mute, #b5bdb1); background: transparent; border-color: rgba(255,255,255,0.06); }
-  .after-compile .ac-loop { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin: 4px 0 0; font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); letter-spacing: 0.02em; }
-  .after-compile .ac-loop em { font-style: normal; padding: 4px 9px; border: 1px solid rgba(126,240,210,0.22); border-radius: 5px; background: rgba(126,240,210,0.05); }
-  .after-compile .ac-loop b { color: #7ef0d2; font-weight: 540; }
-  .after-compile .ac-link { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 10px; font-family: var(--mono); font-size: 12.5px; color: #7ef0d2; border-bottom: 0; }
-  .after-compile .ac-link:hover { color: #c1f5e3; }
-  [data-theme=light] .after-compile .ac-card { background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(250,250,250,0.55)); }
-  [data-theme=light] .after-compile .ac-icon { color: #0a8862; }
-  [data-theme=light] .after-compile .ac-where span { background: rgba(255,255,255,0.6); color: #1f2429; border-color: rgba(0,0,0,0.10); }
-  [data-theme=light] .after-compile .ac-where-ff span { background: transparent; color: #4b5158; border-color: rgba(0,0,0,0.06); }
-  [data-theme=light] .after-compile .ac-loop em { border-color: rgba(10,136,98,0.28); background: rgba(10,136,98,0.06); color: #1f2429; }
-  [data-theme=light] .after-compile .ac-loop b { color: #0a8862; }
-  [data-theme=light] .after-compile .ac-link { color: #0a8862; }
-</style>
+<!-- v7.18.2: removed orphan electric-callout + kscore-viz CSS blocks (sections 02 + 03 deleted) -->
 
-<section class="after-compile" aria-label="what happens after compile">
-  <div class="ac-head">
-    <h2 class="ac-h">After you compile.</h2>
-    <p class="ac-sub">One signed file that runs where you put it, gets better as you use it, and stays yours forever.</p>
-  </div>
-
-  <ol class="ac-cards">
-    <li class="ac-card">
-      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="1.5"/><path d="M2 17h20l-1.5 3H3.5z"/></svg></span>
-      <h3>Run it anywhere</h3>
-      <p>The same file delivers the same K-score and the same signed receipt on every target you ship to.</p>
-      <div class="ac-where">
-        <span>macOS</span><span>Linux</span><span>Windows</span><span>iOS</span><span>Android</span>
-      </div>
-      <div class="ac-where ac-where-ff">
-        <span>laptop</span><span>server</span><span>phone (RS-2)</span><span>edge (RS-2)</span>
-      </div>
-      <a href="/anatomy" class="ac-link">how it runs &rarr;</a>
-    </li>
-
-    <li class="ac-card">
-      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.3"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.3"/><path d="M3 20v-5h5"/></svg></span>
-      <h3>Improve it over time</h3>
-      <p>Capture real calls, recompile, and the K-score gate refuses to ship a regression. Each version meets or beats the last.</p>
-      <div class="ac-loop">
-        <em>use</em><b>&rarr;</b><em>capture</em><b>&rarr;</b><em>recompile</em><b>&rarr;</b><em>K &uarr;</em>
-      </div>
-      <a href="/evolve" class="ac-link">improvement loop &rarr;</a>
-    </li>
-
-    <li class="ac-card">
-      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg></span>
-      <h3>Keep it forever</h3>
-      <p>Signed, portable, open spec. No kill switch, no per-call bill, no vendor lock. Run it next year, offline.</p>
-      <div class="ac-where">
-        <span>signed</span><span>portable</span><span>open spec</span>
-      </div>
-      <a href="/spec" class="ac-link">rs-1 open spec &rarr;</a>
-    </li>
-  </ol>
-</section>
-
-
-<!-- v7.15: "Access anywhere" — your AI lives on your hardware, reachable
-     from anywhere via a secure mesh. Same model, same K-score, anywhere you
-     are. Replaces the "ai on the cloud" pattern with private mesh access. -->
+<!-- v7.21: "Access anywhere" . local-first framing per Peyman: model runs on
+     your PC, we never see your data, optional TEE path for remote teams. No
+     encryption/mesh/servers jargon (we don't encrypt because traffic is local). -->
 <section class="access-anywhere" aria-label="access your AI from anywhere">
   <div class="aa-head">
-    <h2>Your AI lives with you. <span class="aa-h-soft">Reach it from anywhere.</span></h2>
-    <p class="aa-sub">One signed file on your machine. A private mesh between your devices. The same model answers your laptop, your phone, your server. Zero cloud in the middle.</p>
+    <h2>Your AI lives on your machine. <span class="aa-h-soft">Reach it from anywhere.</span></h2>
+    <p class="aa-sub">One signed file on your hardware. Your laptop, phone, or coding agent all hit the same model. We never see your data. There&rsquo;s nothing for us to leak.</p>
   </div>
   <div class="aa-diagram" aria-hidden="true">
     <div class="aa-mesh">
@@ -1235,43 +1946,49 @@
     </div>
     <div class="aa-flow-line">
       <span class="aa-flow-pulse"></span>
-      <span class="aa-flow-text">end-to-end encrypted &middot; never via our servers &middot; you control the mesh</span>
+      <span class="aa-flow-text">runs locally &middot; data stays with you &middot; no vendor round-trip</span>
     </div>
   </div>
   <ul class="aa-rows">
     <li class="aa-row">
       <div class="aa-row-num">01</div>
       <div class="aa-row-body">
-        <h3>Mesh, not cloud.</h3>
-        <p>kolm pairs with Tailscale, WireGuard, or any private mesh you trust. Your devices talk directly. Our servers never see a token, a prompt, or a response.</p>
+        <h3>Local first.</h3>
+        <p>kolm runs as an app on your PC. The model file lives on your disk. Your prompts and responses never touch our infrastructure. There isn&rsquo;t any to touch.</p>
       </div>
     </li>
     <li class="aa-row">
       <div class="aa-row-num">02</div>
       <div class="aa-row-body">
         <h3>Same answer, any device.</h3>
-        <p>The K-score on your laptop is the K-score on your phone. One signed model, identical inference, no &ldquo;cloud version&rdquo; vs &ldquo;local version&rdquo; drift.</p>
+        <p>The model on your laptop gives the same answer on your phone. One signed file, identical inference. No &ldquo;cloud version&rdquo; vs &ldquo;local version&rdquo; drift.</p>
       </div>
     </li>
     <li class="aa-row">
       <div class="aa-row-num">03</div>
       <div class="aa-row-body">
-        <h3>Offline by default, online by choice.</h3>
-        <p>Take the model on a flight. Run it in a Faraday cage. When you want remote access, open a single mesh port. Never a public API.</p>
+        <h3>Need remote access? Run it in a TEE.</h3>
+        <p>For teams that want hosted access without trusting a vendor, the same model runs in a Trusted Execution Environment. Sealed inside the enclave. Relatively secure, relatively private, even from the cloud provider.</p>
       </div>
     </li>
   </ul>
   <div class="aa-foot">
-    <code>kolm serve --mesh tailscale</code>
+    <code>kolm serve --local</code>
     <span class="aa-foot-sep">&middot;</span>
-    <a href="/docs/mesh" class="aa-foot-link">how the mesh works &rarr;</a>
+    <a href="/airgap" class="aa-foot-link">airgap</a>
+    <span class="aa-foot-sep">&middot;</span>
+    <a href="/tunnels" class="aa-foot-link">tunnels</a>
+    <span class="aa-foot-sep">&middot;</span>
+    <a href="/byoc" class="aa-foot-link">BYOC</a>
+    <span class="aa-foot-sep">&middot;</span>
+    <a href="/docs#remote" class="aa-foot-link">how it works &rarr;</a>
   </div>
 </section>
 
 <style>
   .access-anywhere { max-width: 1180px; margin: 96px auto 0; padding: 0 32px; }
   .access-anywhere .aa-head { text-align: center; max-width: 880px; margin: 0 auto 56px; }
-  .access-anywhere h2 { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 16px; font-weight: 600; }
+  .access-anywhere h2 { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 16px; font-weight: 500; }
   .access-anywhere .aa-h-soft { color: var(--ink-mute, #b5bdb1); display: block; }
   .access-anywhere .aa-sub { font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0 auto; max-width: 60ch; }
 
@@ -1294,8 +2011,8 @@
   .access-anywhere .aa-spokes { position: absolute; inset: 0; pointer-events: none; }
   .access-anywhere .aa-spoke {
     position: absolute; top: 50%; left: 50%; height: 1px; transform-origin: 0 50%;
-    background: linear-gradient(90deg, rgba(126,240,210,0.45), rgba(126,240,210,0.02));
-    width: 240px; opacity: 0.6;
+    background: linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0.02));
+    width: 240px; opacity: 0.55;
   }
   .access-anywhere .aa-spoke-1 { transform: translateY(-50%) rotate(-150deg); }
   .access-anywhere .aa-spoke-2 { transform: translateY(-50%) rotate(-30deg); }
@@ -1343,7 +2060,7 @@
     font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73);
     letter-spacing: 0.16em; margin-bottom: 10px;
   }
-  .access-anywhere .aa-row h3 { font-size: 18px; line-height: 1.25; letter-spacing: -0.014em; margin: 0 0 8px; font-weight: 580; color: var(--ink, #faf2e1); }
+  .access-anywhere .aa-row h3 { font-size: 18px; line-height: 1.25; letter-spacing: -0.014em; margin: 0 0 8px; font-weight: 500; color: var(--ink, #faf2e1); }
   .access-anywhere .aa-row p { font-size: 14.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; }
 
   /* Foot link line */
@@ -1356,11 +2073,11 @@
     padding: 6px 12px; border-radius: 8px;
     background: rgba(126,240,210,0.06);
     border: 1px solid rgba(126,240,210,0.20);
-    color: #7ef0d2; font-size: 12.5px;
+    color: var(--kolm-accent, #10b981); font-size: 12.5px;
   }
   .access-anywhere .aa-foot-sep { color: var(--ink-faint, #737c73); }
   .access-anywhere .aa-foot-link { color: var(--ink, #faf2e1); text-decoration: none; border-bottom: 1px solid var(--line, rgba(255,255,255,0.18)); padding-bottom: 1px; }
-  .access-anywhere .aa-foot-link:hover { color: #7ef0d2; border-bottom-color: rgba(126,240,210,0.4); }
+  .access-anywhere .aa-foot-link:hover { color: var(--kolm-accent, #10b981); border-bottom-color: rgba(126,240,210,0.4); }
 
   [data-theme="light"] .access-anywhere .aa-node-home {
     background: linear-gradient(180deg, rgba(10,136,98,0.10), rgba(10,136,98,0.04));
@@ -1369,11 +2086,11 @@
   }
   [data-theme="light"] .access-anywhere .aa-node-dot { background: #0a8862; box-shadow: 0 0 12px rgba(10,136,98,0.55); }
   [data-theme="light"] .access-anywhere .aa-spoke {
-    background: linear-gradient(90deg, rgba(10,136,98,0.45), rgba(10,136,98,0.02));
+    background: linear-gradient(90deg, rgba(31,36,41,0.22), rgba(31,36,41,0.02));
   }
   [data-theme="light"] .access-anywhere .aa-flow-pulse { background: #0a8862; box-shadow: 0 0 8px rgba(10,136,98,0.55); }
   [data-theme="light"] .access-anywhere .aa-foot code {
-    background: rgba(10,136,98,0.08); border-color: rgba(10,136,98,0.24); color: #0a8862;
+    background: rgba(10,136,98,0.08); border-color: rgba(10,136,98,0.24); color: #059669;
   }
 
   @media (max-width: 980px) {
@@ -1407,16 +2124,16 @@
 </style>
 
 <section class="uc-strip" aria-label="what teams build with kolm">
-  <h2>From coding agents to clinical intake.</h2>
-  <p class="uc-sub">Same idea every time: type a sentence, get an AI that runs where you choose &mdash; for <b>everyday features</b>, <b>regulated environments</b>, or <b>fully on-device</b>.</p>
+  <h2 id="uc-h2" data-default="From clinical intake to coding agents.">From clinical intake to coding agents.</h2>
+  <p class="uc-sub">Same idea every time: type a sentence, get an AI that runs where you choose. For regulated environments (healthcare first, then finance and legal), everyday product features, or fully on-device.</p>
 
   <div class="uc-tabs" role="tablist" aria-label="industry">
-    <button type="button" class="uc-tab is-on" data-tab="everyday" role="tab" aria-selected="true" aria-controls="uc-panel-everyday">everyday AI</button>
-    <button type="button" class="uc-tab" data-tab="regulated" role="tab" aria-selected="false" aria-controls="uc-panel-regulated">regulated</button>
-    <button type="button" class="uc-tab" data-tab="device" role="tab" aria-selected="false" aria-controls="uc-panel-device">on-device</button>
+    <button type="button" class="uc-tab is-on" data-tab="regulated" data-tagline="Clinical workflows first. PHI never leaves." role="tab" aria-selected="true" aria-controls="uc-panel-regulated">regulated</button>
+    <button type="button" class="uc-tab" data-tab="everyday" data-tagline="From coding agents to consumer apps." role="tab" aria-selected="false" aria-controls="uc-panel-everyday">everyday AI</button>
+    <button type="button" class="uc-tab" data-tab="device" data-tagline="From a phone in your pocket to a box on the factory floor." role="tab" aria-selected="false" aria-controls="uc-panel-device">on-device</button>
   </div>
 
-  <div class="uc-panel" id="uc-panel-everyday" data-panel="everyday" role="tabpanel" aria-labelledby="uc-tab-everyday">
+  <div class="uc-panel" id="uc-panel-everyday" data-panel="everyday" role="tabpanel" aria-labelledby="uc-tab-everyday" hidden>
     <div class="uc-grid">
       <a href="/cookbook" class="uc-card">
         <span class="uc-vert">coding agents</span>
@@ -1433,24 +2150,24 @@
       <a href="/use-cases" class="uc-card">
         <span class="uc-vert">consumer apps</span>
         <h3>Ship an AI feature you don&rsquo;t have to keep paying for.</h3>
-        <p>Compile once. Bundle the <code style="font-family:var(--mono);color:#7ef0d2">.kolm</code> in your release. Inference runs on the user&rsquo;s device. No per-call cost, no rate limits, no model server.</p>
+        <p>Compile once. Bundle the <code style="font-family:var(--mono);color: var(--kolm-accent, #10b981)">.kolm</code> in your release. Inference runs on the user&rsquo;s device. No per-call cost, no rate limits, no model server.</p>
         <span class="uc-tag">use cases &rarr;</span>
       </a>
     </div>
   </div>
 
-  <div class="uc-panel" id="uc-panel-regulated" data-panel="regulated" role="tabpanel" aria-labelledby="uc-tab-regulated" hidden>
+  <div class="uc-panel" id="uc-panel-regulated" data-panel="regulated" role="tabpanel" aria-labelledby="uc-tab-regulated">
     <div class="uc-grid">
       <a href="/healthcare" class="uc-card uc-card-reg">
         <span class="uc-vert">healthcare</span>
-        <h3>Healthcare data, your hardware.</h3>
-        <p>Compile against approved data on infrastructure your team controls. Sign every output. Audit-ready logs that prove which version answered which question.</p>
+        <h3>Triage prior-auth. Draft encounter notes. Code visits.</h3>
+        <p>Specific clinical workflows compiled into a signed artifact that runs inside the BAA-bounded environment your CISO already trusts. PHI never leaves your hosts at run time because the model is local. Every output carries a receipt your clinical informatics committee can re-verify.</p>
         <span class="uc-tag">healthcare &rarr;</span>
       </a>
       <a href="/finance" class="uc-card uc-card-reg">
         <span class="uc-vert">finance</span>
         <h3>Payment data, KYC, model risk.</h3>
-        <p>Reproducible model, K-score gate, signed receipt on every inference. Model-risk review gets one signed file instead of a vendor&rsquo;s black box.</p>
+        <p>Reproducible model, graded against a held-out test set, signed receipt on every inference. Model-risk review gets one signed file instead of a vendor&rsquo;s black box.</p>
         <span class="uc-tag">finance &rarr;</span>
       </a>
       <a href="/legal" class="uc-card uc-card-reg">
@@ -1467,7 +2184,7 @@
       <a href="/edge" class="uc-card">
         <span class="uc-vert">phones</span>
         <h3>An AI feature that ships in your app.</h3>
-        <p>Bundle the <code style="font-family:var(--mono);color:#7ef0d2">.kolm</code> in your build. Deterministic recipe runtime runs in your app sandbox today; on-device model inference is the RS-2 gate.</p>
+        <p>Bundle the <code style="font-family:var(--mono);color: var(--kolm-accent, #10b981)">.kolm</code> in your build. Deterministic recipe runtime runs in your app sandbox today; on-device model inference is the RS-2 gate.</p>
         <span class="uc-tag">edge &rarr;</span>
       </a>
       <a href="/edge" class="uc-card">
@@ -1478,7 +2195,7 @@
       </a>
       <a href="/anatomy" class="uc-card">
         <span class="uc-vert">your own inference</span>
-        <h3>The artifact and the runtime are yours.</h3>
+        <h3>The model and the runtime are yours.</h3>
         <p>One signed file, one open spec. Runs on a laptop or server today; on-device and offline targets ship in RS-2. The inference belongs to you, today and a decade from now.</p>
         <span class="uc-tag">anatomy &rarr;</span>
       </a>
@@ -1499,6 +2216,7 @@
   (function ucTabs() {
     var tabs = document.querySelectorAll('.uc-strip .uc-tab');
     var panels = document.querySelectorAll('.uc-strip .uc-panel');
+    var headline = document.getElementById('uc-h2');
     if (!tabs.length) return;
     function show(which) {
       tabs.forEach(function (t) {
@@ -1506,12 +2224,20 @@
         t.classList.toggle('is-on', on);
         t.setAttribute('aria-selected', on ? 'true' : 'false');
         t.tabIndex = on ? 0 : -1;
+        if (on && headline && t.dataset.tagline) {
+          headline.style.opacity = '0';
+          setTimeout(function () {
+            headline.textContent = t.dataset.tagline;
+            headline.style.opacity = '1';
+          }, 140);
+        }
       });
       panels.forEach(function (p) {
         var on = p.dataset.panel === which;
         p.hidden = !on;
       });
     }
+    if (headline) headline.style.transition = 'opacity 180ms ease';
     tabs.forEach(function (t) {
       t.addEventListener('click', function () { show(t.dataset.tab); });
       t.addEventListener('keydown', function (e) {
@@ -1524,38 +2250,52 @@
         show(list[next].dataset.tab);
       });
     });
+    // Idle auto-rotation: cycle every 6s if user hasn't interacted in the section.
+    var userInteracted = false;
+    var section = document.querySelector('.uc-strip');
+    if (section) {
+      section.addEventListener('click', function () { userInteracted = true; });
+      section.addEventListener('keydown', function () { userInteracted = true; });
+    }
+    var order = ['regulated', 'everyday', 'device'];
+    var idx = 0;
+    setInterval(function () {
+      if (userInteracted) return;
+      idx = (idx + 1) % order.length;
+      show(order[idx]);
+    }, 6000);
   })();
 </script>
 
 <!-- v7.11.4: trust-line section removed (excessive at this position; trust posture is already in hero chips + footer + dedicated /security /spec /baa pages) -->
 
 <style>
-  /* v7.11 — compact FAQ section answering the most-asked open questions
+  /* v7.11 . compact FAQ section answering the most-asked open questions
      inline on the homepage so a buyer doesn't have to navigate to /faq.
      4 Q&As, monospace question, plain-prose answer. SOTA restraint: no
-     accordions, no chevrons, no JS — just static text with anchors out
+     accordions, no chevrons, no JS . just static text with anchors out
      to deeper pages when curiosity grows. */
   .home-faq { max-width: 1080px; margin-left: auto; margin-right: auto; padding: 0 32px; }
   .home-faq .hf-head { text-align: center; max-width: 760px; margin: 0 auto 44px; }
-  .home-faq .hf-h { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 14px; font-weight: 600; }
+  .home-faq .hf-h { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 14px; font-weight: 500; }
   .home-faq .hf-sub { font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0; }
   .home-faq .hf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 40px; margin: 0; padding: 0; list-style: none; }
   @media (max-width: 760px) { .home-faq .hf-grid { grid-template-columns: 1fr; gap: 24px; } }
-  .home-faq .hf-q { font-size: 16px; line-height: 1.35; letter-spacing: -0.012em; color: var(--ink, #faf2e1); margin: 0 0 8px; font-weight: 580; }
-  .home-faq .hf-q code { font-family: var(--mono); font-size: 14px; color: #7ef0d2; background: rgba(126,240,210,0.05); border: 1px solid rgba(126,240,210,0.16); border-radius: 4px; padding: 1px 6px; font-weight: 540; }
+  .home-faq .hf-q { font-size: 16px; line-height: 1.35; letter-spacing: -0.012em; color: var(--ink, #faf2e1); margin: 0 0 8px; font-weight: 500; }
+  .home-faq .hf-q code { font-family: var(--mono); font-size: 14px; color: var(--kolm-accent, #10b981); background: rgba(126,240,210,0.05); border: 1px solid rgba(126,240,210,0.16); border-radius: 4px; padding: 1px 6px; font-weight: 500; }
   .home-faq .hf-a { font-size: 15.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; }
-  .home-faq .hf-a a { color: #7ef0d2; border-bottom: 1px solid rgba(126,240,210,0.32); }
+  .home-faq .hf-a a { color: var(--kolm-accent, #10b981); border-bottom: 1px solid rgba(126,240,210,0.32); }
   .home-faq .hf-a a:hover { color: #c1f5e3; }
-  .home-faq .hf-a code { font-family: var(--mono); font-size: 13px; color: #7ef0d2; background: rgba(126,240,210,0.05); border: 1px solid rgba(126,240,210,0.16); border-radius: 4px; padding: 1px 6px; }
+  .home-faq .hf-a code { font-family: var(--mono); font-size: 13px; color: var(--kolm-accent, #10b981); background: rgba(126,240,210,0.05); border: 1px solid rgba(126,240,210,0.16); border-radius: 4px; padding: 1px 6px; }
   .home-faq .hf-more { text-align: center; margin: 32px 0 0; font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint, #737c73); letter-spacing: 0.02em; }
-  .home-faq .hf-more a { color: #7ef0d2; }
+  .home-faq .hf-more a { color: var(--kolm-accent, #10b981); }
   [data-theme=light] .home-faq .hf-q { color: #0c0e10; }
-  [data-theme=light] .home-faq .hf-q code { color: #0a8862; background: rgba(10,136,98,0.06); border-color: rgba(10,136,98,0.22); }
+  [data-theme=light] .home-faq .hf-q code { color: #059669; background: rgba(10,136,98,0.06); border-color: rgba(10,136,98,0.22); }
   [data-theme=light] .home-faq .hf-sub { color: #4b5158; }
   [data-theme=light] .home-faq .hf-a { color: #4b5158; }
-  [data-theme=light] .home-faq .hf-a a { color: #0a8862; border-color: rgba(10,136,98,0.32); }
-  [data-theme=light] .home-faq .hf-a code { color: #0a8862; background: rgba(10,136,98,0.06); border-color: rgba(10,136,98,0.22); }
-  [data-theme=light] .home-faq .hf-more a { color: #0a8862; }
+  [data-theme=light] .home-faq .hf-a a { color: #059669; border-color: rgba(10,136,98,0.32); }
+  [data-theme=light] .home-faq .hf-a code { color: #059669; background: rgba(10,136,98,0.06); border-color: rgba(10,136,98,0.22); }
+  [data-theme=light] .home-faq .hf-more a { color: #059669; }
 </style>
 
 <section class="home-faq" aria-label="common questions">
@@ -1567,7 +2307,7 @@
   <dl class="hf-grid">
     <div>
       <dt class="hf-q">Can I improve my AI over time?</dt>
-      <dd class="hf-a">Yes. Capture real use (with consent), recompile with better examples. The K-score gate refuses to ship a regression, so each version meets or beats the last. <a href="/evolve">how the loop works &rarr;</a></dd>
+      <dd class="hf-a">Yes. Capture real use (with consent), recompile with better examples. kolm grades each candidate against a held-out test set and refuses to ship a regression, so each version meets or beats the last. <a href="/evolve">how the loop works &rarr;</a></dd>
     </div>
     <div>
       <dt class="hf-q">Does it work with Claude Code, Cursor, Continue?</dt>
@@ -1583,7 +2323,7 @@
     </div>
     <div>
       <dt class="hf-q">Does my data leave the device?</dt>
-      <dd class="hf-a">Inference is local &mdash; the deterministic recipe runtime is in-process and the benchmark harness ships a zero-egress monitor. Compilation happens against your approved data; we publish a threat model that spells out exactly what each step touches. <a href="/threat-model">threat model &rarr;</a></dd>
+      <dd class="hf-a">Inference is local. The deterministic recipe runtime is in-process and the benchmark harness ships a zero-egress monitor. Compilation happens against your approved data; we publish a threat model that spells out exactly what each step touches. <a href="/threat-model">threat model &rarr;</a></dd>
     </div>
     <div>
       <dt class="hf-q">What does it cost?</dt>
@@ -1597,7 +2337,7 @@
 
 <section class="bottom-cta" aria-label="get started">
   <div class="bc-inner">
-    <h2 class="bc-h">Compile your first artifact.</h2>
+    <h2 class="bc-h">Compile your first AI.</h2>
     <p class="bc-sub">Four minutes from a sentence to a signed model you own. Free CLI, free first compile, no credit card.</p>
     <div class="bc-actions">
       <a href="/quickstart" class="btn primary lg">Try kolm &rarr;</a>
@@ -1608,7 +2348,7 @@
 <style>
   .bottom-cta { padding: 96px 24px 104px; border-top: 1px solid var(--line); margin-top: 96px; text-align: center; }
   .bottom-cta .bc-inner { max-width: 720px; margin: 0 auto; }
-  .bottom-cta .bc-h { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 16px; font-weight: 600; }
+  .bottom-cta .bc-h { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 16px; font-weight: 500; }
   .bottom-cta .bc-sub { font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0 0 32px; }
   .bottom-cta .bc-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   @media (max-width: 720px) {
@@ -1620,92 +2360,54 @@
 
 </main>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <div class="meta">
-      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
-    </div>
-    <div class="links">
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
       <div>
-        <div class="col-h">product</div>
-        <a href="/capture">capture</a>
-        <a href="/compile">compile</a>
-        <a href="/run">run</a>
-        <a href="/recall">recall</a>
-        <a href="/serve">serve</a>
-        <a href="/evolve">evolve</a>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
       </div>
       <div>
-        <div class="col-h">proof</div>
-        <a href="/benchmarks">benchmarks</a>
-        <a href="/k-score">k-score</a>
-        <a href="/leaderboard">leaderboard</a>
-        <a href="/threat-model">threat model</a>
-        <a href="/anatomy">anatomy</a>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
       </div>
       <div>
-        <div class="col-h">compare</div>
-        <a href="/compare">all comparisons</a>
-        <a href="/vs-ollama">vs Ollama</a>
-        <a href="/vs-rag">vs RAG</a>
-        <a href="/vs-fine-tune">vs fine-tuning</a>
-        <a href="/vs-openpipe">vs OpenPipe</a>
-        <a href="/vs-predibase">vs Predibase</a>
-        <a href="/vs-langsmith">vs LangSmith</a>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
       </div>
       <div>
-        <div class="col-h">cookbook</div>
-        <a href="/cookbook">all recipes</a>
-        <a href="/healthcare">healthcare</a>
-        <a href="/finance">finance</a>
-        <a href="/legal">legal</a>
-        <a href="/edge">edge</a>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
       </div>
       <div>
-        <div class="col-h">trust</div>
-        <a href="/trust">trust center</a>
-        <a href="/security">security</a>
-        <a href="/privacy">privacy</a>
-        <a href="/terms">terms</a>
-        <a href="/.well-known/security.txt">security.txt</a>
-      </div>
-      <div>
-        <div class="col-h">docs</div>
-        <a href="/quickstart">quickstart</a>
-        <a href="/build-your-own">build your own</a>
-        <a href="/docs">docs</a>
-        <a href="/spec">rs-1 spec</a>
-        <a href="/spec/grammar">bnf grammar</a>
-        <a href="/integrations">integrations</a>
-        <a href="/glossary">glossary</a>
-        <a href="/troubleshooting">troubleshooting</a>
-      </div>
-      <div>
-        <div class="col-h">company</div>
-        <a href="/roi">roi calculator</a>
-        <a href="/pricing">pricing</a>
-        <a href="/articles">articles</a>
-        <a href="/changelog">changelog</a>
-        <a href="/press">press</a>
-      </div>
-      <div>
-        <div class="col-h">community</div>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">discussions</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues">file an issue</a>
-        <a href="/docs/rs-1.md">rs-1 spec (mit)</a>
-        <a href="/changelog.xml">atom feed</a>
-      </div>
-      <div>
-        <div class="col-h">account</div>
-        <a href="/signup">sign up</a>
-        <a href="/signin">sign in</a>
-        <a href="/manifesto">manifesto</a>
-        <a href="/faq">faq</a>
-        <a href="/status">status</a>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
       </div>
     </div>
-    <small class="footer-tag" style="display:block;margin-top:24px;padding-top:18px;border-top:1px solid var(--line,#1a1d24);font-family:var(--mono);font-size:11px;color:var(--ink-faint,#6b7280);letter-spacing:0;">kolm &middot; open spec &middot; MIT licensed runtime &middot; kolm.ai</small>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 
@@ -1718,7 +2420,7 @@
       const j = await r.json();
       if (typeof j.stargazers_count === 'number') {
         const el = document.getElementById('gh-star-count');
-        if (el) el.textContent = '★ ' + j.stargazers_count;
+        if (el) el.textContent = ' - ' + j.stargazers_count;
       }
     } catch (_) { /* keep label */ }
   })();
@@ -1736,7 +2438,7 @@
       if (n !== null) {
         const txt = n.toLocaleString();
         document.querySelectorAll('.js-registry-count').forEach((el) => { el.textContent = txt; });
-        // Latest artifact updated_at · feeds the lab-strip "synced" stamp
+        // Latest artifact updated_at  - feeds the lab-strip "synced" stamp
         const latest = (Array.isArray(j.artifacts) && j.artifacts[0] && j.artifacts[0].updated_at) || null;
         if (latest) {
           const stamps = document.querySelectorAll('.js-registry-stamp');
@@ -1791,7 +2493,7 @@
     io.observe(strip);
   })();
 
-  // Hero cassette · tier-1 shot-and-cut 3-scene product demo (capture · distill · run)
+  // Hero cassette  - tier-1 shot-and-cut 3-scene product demo (capture  - distill  - run)
   (() => {
     const frame = document.getElementById('cassette-frame');
     const term = document.getElementById('hero-terminal');
@@ -1806,32 +2508,32 @@
 
     const scenes = [
       {
-        label: '01 · capture',
+        label: '01  - capture',
         capNum: '01',
         capText: '<b>Drop-in proxy.</b> Point your existing OpenAI calls at kolm capture. Every successful pair is recorded.',
         lines: [
           '<span class="prompt">$</span> kolm capture --provider openai --namespace patient-intake',
-          '<span class="dim">› proxying api.openai.com → kolm capture (egress-bounded) ...</span>',
-          '<span class="dim">› observed: 1,247 calls past 24h · ready for distill at 1,000</span>',
+          '<span class="dim"> - proxying api.openai.com  - kolm capture (egress-bounded) ...</span>',
+          '<span class="dim"> - observed: 1,247 calls past 24h  - ready for distill at 1,000</span>',
           '<span class="ok">ok</span> captured. corpus_namespace=patient-intake size=1247'
         ],
         holdMs: 1900
       },
       {
-        label: '02 · distill',
+        label: '02  - distill',
         capNum: '02',
         capText: '<b>Threshold &rarr; bridge.</b> At 1,000 pairs kolm hands the corpus to the trainer. K-score gate. HMAC-signed artifact.',
         lines: [
           '<span class="prompt">$</span> kolm compile patient-intake --examples 1247 --receipt',
-          '<span class="dim">› synthesizing verifier from 1,247 examples ...</span>',
-          '<span class="dim">› k=8 sample · verify · accept  (Q=0.928) ...</span>',
-          '<span class="dim">› specializing model · stamping K-score · signing ...</span>',
+          '<span class="dim"> - synthesizing verifier from 1,247 examples ...</span>',
+          '<span class="dim"> - k=8 sample  - verify  - accept  (Q=0.928) ...</span>',
+          '<span class="dim"> - specializing model  - stamping K-score  - signing ...</span>',
           '<span class="ok">ok</span> wrote patient-intake.kolm  <span class="dim">k_score=0.92  hmac-sha256</span>'
         ],
         holdMs: 1900
       },
       {
-        label: '03 · run',
+        label: '03  - run',
         capNum: '03',
         capText: '<b>Local hardware. No bill.</b> Run the artifact on your laptop, in your VPC, or on a phone. Same task, your boundary.',
         lines: [
@@ -1984,7 +2686,7 @@
     }
   })();
 
-  // v7.9.5 — hero video chrome (play/pause, mute, size)
+  // v7.9.5 . hero video chrome (play/pause, mute, size)
   (function(){
     var v = document.getElementById('hero-video');
     var panel = document.getElementById('hero-video-panel');
@@ -2040,6 +2742,347 @@
         var ico = sz.querySelector('.hv-ico'); if (ico) ico.className = 'hv-ico hv-ico-expand';
         sz.setAttribute('aria-label', 'enter fullscreen');
       }
+    }
+  })();
+
+  // v11 wave 8 . cinematic 6-scene hero demo driver. Replaces v11.8 typewriter
+  // with HTML+SVG+CSS layered scenes on a master timeline. 28-second loop,
+  // intersection-gated, scrubbable, reduced-motion-aware. No video, no remote.
+  (function(){
+    if (typeof window === 'undefined') return;
+    var stage = document.getElementById('hcn-stage');
+    if (!stage) return;
+    var titleEl = document.getElementById('hcn-title');
+    var captionEl = document.getElementById('hcn-caption');
+    var ppBtn = document.getElementById('hcn-pp');
+    var ppIco = document.getElementById('hcn-pp-ico');
+    var scrubEl = document.getElementById('hcn-scrub');
+    var scrubFill = document.getElementById('hcn-scrub-fill');
+    var elapsedEl = document.getElementById('hcn-elapsed');
+    var totalEl = document.getElementById('hcn-total');
+    var dots = document.querySelectorAll('.hcn-d');
+    var scenes = Array.prototype.slice.call(document.querySelectorAll('.hcn-scene'));
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Timeline (ms). 28s total loop. Each scene is a window on the master clock.
+    var TL = [
+      { id: 0, start: 0,    end: 4000,  title: 'scene 01 . the problem',     caption: 'Every API call leaves your perimeter.' },
+      { id: 1, start: 4000, end: 9000,  title: 'scene 02 . compile',         caption: 'One command. Recipe, examples, training, gate, signed bytes.' },
+      { id: 2, start: 9000, end: 14000, title: 'scene 03 . K-score gate',    caption: 'Threshold 0.85. Gate passes. Ship.' },
+      { id: 3, start: 14000,end: 19000, title: 'scene 04 . verify',          caption: 'Anyone can replay. Months later. Offline.' },
+      { id: 4, start: 19000,end: 24000, title: 'scene 05 . run',             caption: '7.42x faster. 11.6x cheaper. Same output.' },
+      { id: 5, start: 24000,end: 28000, title: 'scene 06 . ship',            caption: 'Every artifact signed. Every output receipted.' }
+    ];
+    var TOTAL = TL[TL.length - 1].end;
+
+    // Run race tokens (pre-baked output, revealed char-by-char).
+    var RUN_LEFT  = 'User locked out after password-reset email failed to arrive. Asking for manual reset and a new MFA enrollment link. Urgency: medium.';
+    var RUN_RIGHT = 'User locked out after password-reset email failed to arrive. Asking for manual reset and a new MFA enrollment link. Urgency: medium.';
+
+    var state = {
+      t: 0,             // master elapsed ms
+      lastFrame: 0,
+      playing: false,
+      scene: -1,
+      raf: null,
+      visible: false,
+      booted: false,
+      sceneState: { logsShown: 0, barsAt: 0, checksShown: 0, tilesLit: 0, leftChars: 0, rightChars: 0 }
+    };
+
+    function fmtTime(ms) {
+      var s = Math.max(0, Math.floor(ms / 1000));
+      return '00:' + (s < 10 ? '0' : '') + s;
+    }
+    function setSceneClass(i) {
+      scenes.forEach(function(el, ei){ el.classList.toggle('active', ei === i); });
+      dots.forEach(function(d, di){
+        d.classList.toggle('active', di === i);
+        d.classList.toggle('played', di < i);
+      });
+      if (titleEl) titleEl.textContent = TL[i].title;
+    }
+    function setCaption(text) {
+      if (!captionEl) return;
+      if (text) {
+        if (captionEl.textContent !== text) captionEl.innerHTML = text;
+        captionEl.classList.add('show');
+      } else {
+        captionEl.classList.remove('show');
+      }
+    }
+    function setPP(p) {
+      if (!ppBtn) return;
+      ppBtn.setAttribute('aria-pressed', p ? 'true' : 'false');
+      ppBtn.setAttribute('aria-label', p ? 'pause demo' : 'play demo');
+      if (ppIco) ppIco.className = 'hcn-pp-ico ' + (p ? 'pause' : 'play');
+    }
+    function resetScene(i) {
+      // Reset DOM state for the scene about to be re-entered.
+      if (i === 0) {
+        var s1 = document.getElementById('hcn-scene-0');
+        if (s1) s1.classList.remove('go');
+      } else if (i === 1) {
+        document.querySelectorAll('#hcn-scene-1 .hcn-log').forEach(function(el){ el.classList.remove('show'); });
+        var bok = document.getElementById('hcn-buildok');
+        if (bok) bok.classList.remove('show');
+      } else if (i === 2) {
+        document.querySelectorAll('#hcn-scene-2 .hcn-bar-fill').forEach(function(el){ el.style.width = '0%'; });
+        document.querySelectorAll('#hcn-scene-2 .hcn-bar-val').forEach(function(el){ el.classList.remove('show'); });
+        var kn = document.getElementById('hcn-knum');
+        if (kn) kn.classList.remove('show');
+      } else if (i === 3) {
+        var s4 = document.getElementById('hcn-scene-3');
+        if (s4) s4.classList.remove('go');
+        document.querySelectorAll('#hcn-scene-3 .hcn-check').forEach(function(el){ el.classList.remove('show'); });
+      } else if (i === 4) {
+        var sl = document.getElementById('hcn-stream-l');
+        var sr = document.getElementById('hcn-stream-r');
+        if (sl) sl.innerHTML = '';
+        if (sr) sr.innerHTML = '';
+        var msl = document.getElementById('hcn-ms-l');
+        var msr = document.getElementById('hcn-ms-r');
+        if (msl) msl.textContent = '0 ms';
+        if (msr) msr.textContent = '0 ms';
+        var pl = document.getElementById('hcn-pill-l');
+        var pr = document.getElementById('hcn-pill-r');
+        if (pl) { pl.className = 'hcn-race-pill dim'; pl.textContent = 'streaming'; }
+        if (pr) { pr.className = 'hcn-race-pill dim'; pr.textContent = 'streaming'; }
+      } else if (i === 5) {
+        document.querySelectorAll('#hcn-scene-5 .hcn-tile').forEach(function(el){ el.classList.remove('lit'); });
+        var ht = document.getElementById('hcn-hero-text');
+        if (ht) ht.classList.remove('show');
+      }
+      state.sceneState = { logsShown: 0, barsAt: 0, checksShown: 0, tilesLit: 0, leftChars: 0, rightChars: 0 };
+    }
+
+    // Per-scene driver. Receives normalized elapsed within the scene (0..1).
+    function tickScene(i, sceneT, sceneDur) {
+      var p = Math.max(0, Math.min(1, sceneT / sceneDur));
+      if (i === 0) {
+        // Strikethroughs fade in 200..900ms.
+        var s1 = document.getElementById('hcn-scene-0');
+        if (s1 && sceneT > 200 && !s1.classList.contains('go')) s1.classList.add('go');
+        setCaption('<b>Every API call</b> leaves your perimeter.');
+      } else if (i === 1) {
+        // 9 log lines reveal one every ~340ms. BUILD OK at the end.
+        var n = Math.min(9, Math.floor(sceneT / 340));
+        if (n !== state.sceneState.logsShown) {
+          for (var k = 0; k < n; k++) {
+            var el = document.querySelector('#hcn-scene-1 .hcn-log[data-log="' + k + '"]');
+            if (el) el.classList.add('show');
+          }
+          state.sceneState.logsShown = n;
+        }
+        if (sceneT > 3300) {
+          var bok = document.getElementById('hcn-buildok');
+          if (bok) bok.classList.add('show');
+        }
+        setCaption('<b>Recipe -&gt; train -&gt; gate -&gt; sign.</b> One file out.');
+      } else if (i === 2) {
+        // Bars stagger 0/120/240/360/480ms after a 300ms intro.
+        var widths = [93, 95, 97, 92, 100];
+        for (var b = 0; b < 5; b++) {
+          var delay = 300 + b * 120;
+          if (sceneT > delay) {
+            var bar = document.querySelector('#hcn-scene-2 .hcn-bar-fill[data-bar="' + b + '"]');
+            var val = document.querySelector('#hcn-scene-2 .hcn-bar-val[data-bv="' + b + '"]');
+            if (bar && bar.style.width !== widths[b] + '%') bar.style.width = widths[b] + '%';
+            if (val && sceneT > delay + 500) val.classList.add('show');
+          }
+        }
+        if (sceneT > 1400) {
+          var kn = document.getElementById('hcn-knum');
+          if (kn) kn.classList.add('show');
+        }
+        setCaption('<b>Threshold 0.85.</b> Gate passes. Ship.');
+      } else if (i === 3) {
+        var s4 = document.getElementById('hcn-scene-3');
+        if (s4 && sceneT > 200 && !s4.classList.contains('go')) s4.classList.add('go');
+        var nc = Math.min(6, Math.floor((sceneT - 400) / 220));
+        if (nc < 0) nc = 0;
+        if (nc !== state.sceneState.checksShown) {
+          for (var c = 0; c < nc; c++) {
+            var chk = document.querySelector('#hcn-scene-3 .hcn-check[data-chk="' + c + '"]');
+            if (chk) chk.classList.add('show');
+          }
+          state.sceneState.checksShown = nc;
+        }
+        setCaption('Anyone can replay. <b>Months later. Offline.</b>');
+      } else if (i === 4) {
+        // OpenAI side: 1387ms total ramp. kolm side: starts 110ms later, finishes by ~187ms relative.
+        // Visually we stretch real-time so user perceives speed gap. kolm finishes near sceneT=900ms,
+        // OpenAI keeps streaming until sceneT~3500ms.
+        var totalChars = RUN_LEFT.length;
+        var leftStart = 0;
+        var leftEnd = 3500;
+        var rightStart = 240;
+        var rightEnd = 1050;
+        var leftN = sceneT < leftStart ? 0 : Math.min(totalChars, Math.floor(((sceneT - leftStart) / (leftEnd - leftStart)) * totalChars));
+        var rightN = sceneT < rightStart ? 0 : Math.min(totalChars, Math.floor(((sceneT - rightStart) / (rightEnd - rightStart)) * totalChars));
+        var sl = document.getElementById('hcn-stream-l');
+        var sr = document.getElementById('hcn-stream-r');
+        if (sl && leftN !== state.sceneState.leftChars) {
+          sl.innerHTML = escapeHtml(RUN_LEFT.slice(0, leftN)) + (leftN < totalChars ? '<span class="hcn-cur"></span>' : '');
+          state.sceneState.leftChars = leftN;
+        }
+        if (sr && rightN !== state.sceneState.rightChars) {
+          sr.innerHTML = escapeHtml(RUN_RIGHT.slice(0, rightN)) + (rightN < totalChars ? '<span class="hcn-cur"></span>' : '');
+          state.sceneState.rightChars = rightN;
+        }
+        // HUD: live-updating ms. Snap to 1387 / 187 once finished.
+        var msl = document.getElementById('hcn-ms-l');
+        var msr = document.getElementById('hcn-ms-r');
+        if (msl) {
+          var liveL = Math.min(1387, Math.round((sceneT / leftEnd) * 1387));
+          msl.textContent = (leftN >= totalChars ? 1387 : liveL) + ' ms';
+        }
+        if (msr) {
+          var liveR = Math.min(187, Math.round(((sceneT - rightStart) / (rightEnd - rightStart)) * 187));
+          if (liveR < 0) liveR = 0;
+          msr.textContent = (rightN >= totalChars ? 187 : liveR) + ' ms';
+        }
+        var pl = document.getElementById('hcn-pill-l');
+        var pr = document.getElementById('hcn-pill-r');
+        if (pr && rightN >= totalChars && pr.className.indexOf('ok') === -1) { pr.className = 'hcn-race-pill ok'; pr.textContent = 'done'; }
+        if (pl && leftN >= totalChars && pl.className.indexOf('ok') === -1) { pl.className = 'hcn-race-pill ok'; pl.textContent = 'done'; }
+        setCaption('<b>7.42x</b> faster. <b>11.6x</b> cheaper. Same output.');
+      } else if (i === 5) {
+        // Light 5 tiles, 80ms apart, after a 300ms intro. Hero text at ~2400ms.
+        var nt = Math.min(5, Math.floor((sceneT - 300) / 320));
+        if (nt < 0) nt = 0;
+        if (nt !== state.sceneState.tilesLit) {
+          for (var t = 0; t < nt; t++) {
+            var tl = document.querySelector('#hcn-scene-5 .hcn-tile[data-tile="' + t + '"]');
+            if (tl) tl.classList.add('lit');
+          }
+          state.sceneState.tilesLit = nt;
+        }
+        if (sceneT > 2300) {
+          var ht = document.getElementById('hcn-hero-text');
+          if (ht) ht.classList.add('show');
+        }
+        setCaption('Every artifact <b>signed</b>. Every output <b>receipted</b>. <b>Yours forever.</b>');
+      }
+    }
+
+    function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function loop(now) {
+      if (!state.playing) { state.raf = null; return; }
+      if (!state.lastFrame) state.lastFrame = now;
+      var dt = now - state.lastFrame;
+      state.lastFrame = now;
+      // Pause when off-screen.
+      if (!state.visible) { state.raf = requestAnimationFrame(loop); return; }
+      state.t += dt;
+      if (state.t >= TOTAL) {
+        // Loop restart.
+        state.t = 0;
+        for (var i = 0; i < 6; i++) resetScene(i);
+        state.scene = -1;
+      }
+      // Pick scene.
+      var s = TL.findIndex(function(x){ return state.t >= x.start && state.t < x.end; });
+      if (s < 0) s = 0;
+      if (s !== state.scene) {
+        // Entering a new scene; reset its DOM state.
+        resetScene(s);
+        setSceneClass(s);
+        state.scene = s;
+      }
+      var sceneT = state.t - TL[s].start;
+      var sceneDur = TL[s].end - TL[s].start;
+      tickScene(s, sceneT, sceneDur);
+      // HUD.
+      if (scrubFill) scrubFill.style.width = ((state.t / TOTAL) * 100) + '%';
+      if (scrubEl) scrubEl.setAttribute('aria-valuenow', Math.floor(state.t / 1000));
+      if (elapsedEl) elapsedEl.textContent = fmtTime(state.t);
+      state.raf = requestAnimationFrame(loop);
+    }
+    function play() {
+      if (state.playing) return;
+      state.playing = true;
+      state.lastFrame = 0;
+      setPP(true);
+      state.raf = requestAnimationFrame(loop);
+    }
+    function pause() {
+      state.playing = false;
+      setPP(false);
+      if (state.raf) cancelAnimationFrame(state.raf);
+      state.raf = null;
+    }
+    function seek(tMs) {
+      state.t = Math.max(0, Math.min(TOTAL - 1, tMs));
+      // Reset all and snap the active scene to its current frame.
+      for (var i = 0; i < 6; i++) resetScene(i);
+      var s = TL.findIndex(function(x){ return state.t >= x.start && state.t < x.end; });
+      if (s < 0) s = 0;
+      state.scene = s;
+      setSceneClass(s);
+      var sceneT = state.t - TL[s].start;
+      var sceneDur = TL[s].end - TL[s].start;
+      // Replay the scene a bit so the DOM catches up to the snapshot.
+      tickScene(s, sceneT, sceneDur);
+      if (scrubFill) scrubFill.style.width = ((state.t / TOTAL) * 100) + '%';
+      if (elapsedEl) elapsedEl.textContent = fmtTime(state.t);
+    }
+
+    // Reduced motion: snap to scene 6 final frame and exit early.
+    if (reduce) {
+      state.t = 27999;
+      for (var i = 0; i < 6; i++) resetScene(i);
+      setSceneClass(5);
+      // Force final state for scene 6.
+      document.querySelectorAll('#hcn-scene-5 .hcn-tile').forEach(function(el){ el.classList.add('lit'); });
+      var ht = document.getElementById('hcn-hero-text');
+      if (ht) ht.classList.add('show');
+      setCaption('Every artifact <b>signed</b>. Every output <b>receipted</b>. <b>Yours forever.</b>');
+      if (scrubFill) scrubFill.style.width = '100%';
+      if (elapsedEl) elapsedEl.textContent = '00:28';
+      setPP(false);
+      // Wire the play button so a reduced-motion user can still scrub manually.
+      if (ppBtn) ppBtn.addEventListener('click', function(){
+        // No-op: respect the user's preference.
+      });
+      dots.forEach(function(d, di){
+        d.addEventListener('click', function(){ seek(TL[di].start); });
+      });
+      return;
+    }
+
+    // Wire controls.
+    if (ppBtn) ppBtn.addEventListener('click', function(){ state.playing ? pause() : play(); });
+    dots.forEach(function(d, di){
+      d.addEventListener('click', function(){ seek(TL[di].start); if (!state.playing) play(); });
+    });
+    if (scrubEl) {
+      scrubEl.addEventListener('click', function(ev){
+        var r = scrubEl.getBoundingClientRect();
+        var x = (ev.clientX - r.left) / r.width;
+        seek(x * TOTAL);
+      });
+    }
+
+    // Intersection-gate autoplay/pause.
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          state.visible = e.isIntersecting;
+          if (e.isIntersecting && !state.booted) {
+            state.booted = true;
+            play();
+          } else if (!e.isIntersecting && state.playing) {
+            // We keep state.playing true but the loop checks visibility and
+            // skips dt accumulation, so off-screen tabs don't drain the clock.
+          }
+        });
+      }, { threshold: 0.18 });
+      io.observe(stage);
+    } else {
+      state.visible = true;
+      play();
     }
   })();
 
@@ -2109,7 +3152,7 @@
         tagEl.textContent = 'more expensive year one';
         subEl.textContent = 'your volume is sub-scale, see /roi for sub-scale tier';
       } else {
-        bigEl.textContent = '·';
+        bigEl.textContent = '-';
         tagEl.textContent = 'add a number';
         subEl.textContent = '';
       }

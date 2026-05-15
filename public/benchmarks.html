@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>kolm benchmarks · reproducible runs, public seeds</title>
 <meta name="description" content="kolm benchmarks: every .kolm artifact ships its own eval set. Offline-capable, in-process network-egress monitor, K-score signed into the manifest.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm">
@@ -43,13 +44,13 @@
   header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
   header.site nav a:hover, header.site nav a.active { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
   section.hero { padding: 88px 0 32px; }
@@ -59,7 +60,7 @@
   p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
 
   .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
-  .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 540; }
+  .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
   .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
   .group .footnote { font-size: 12.5px; color: var(--ink-faint); font-family: var(--mono); margin-top: 10px; }
 
@@ -72,10 +73,10 @@
 
   table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
   table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
-  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 540; }
+  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
   table.tbl td { color: var(--ink-mute); }
-  table.tbl td b { color: var(--ink); font-weight: 540; }
-  table.tbl td.row-h { color: var(--ink); font-weight: 540; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; }
+  table.tbl td b { color: var(--ink); font-weight: 500; }
+  table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; }
   table.tbl td.num { font-family: var(--mono); color: var(--ink); }
   table.tbl td.win { color: var(--good); font-family: var(--mono); }
   @media (max-width: 720px) {
@@ -95,16 +96,16 @@
   pre.code .k { color: var(--accent-strong); }
 
   .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 18px 0 0; }
-  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 540; line-height: 1; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 500; line-height: 1; }
   .btn.primary { background: var(--ink); color: var(--bg); }
   .btn.ghost { color: var(--ink-mute); border: 1px solid var(--line-strong); }
   .btn.ghost:hover { color: var(--ink); border-color: var(--ink-mute); }
 
   .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
-  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 540; color: var(--ink); }
+  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
   .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
   .verdict p:last-child { margin-bottom: 0; }
-  .verdict b { color: var(--ink); font-weight: 540; }
+  .verdict b { color: var(--ink); font-weight: 500; }
 
   .math { background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 22px; font-family: var(--mono); font-size: 14px; line-height: 1.7; color: var(--ink); margin: 14px 0; }
   .math .lab { font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 8px; }
@@ -137,6 +138,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -228,7 +230,7 @@
       <div class="math">
         <div class="lab">verifier quality_score</div>
         Q = 0.5·<span class="var">positive_pass_rate</span> + 0.4·<span class="var">negative_pass_rate</span> + 0.1·<span class="var">property_pass_rate</span><br>
-        gate: <span class="var">Q ≥ 0.85</span> AND <span class="var">positive_pass_rate ≥ 0.85</span>
+        gate: <span class="var">Q &ge; 0.85</span> AND <span class="var">positive_pass_rate &ge; 0.85</span>
       </div>
       <p>If the gate fails, the artifact is never written to disk. There is no "bad kolm" that ships and then fails in production. The build either produces a binary that passed its own evals, or it produces nothing.</p>
     </div>
@@ -238,21 +240,21 @@
       <p>For artifacts whose ground-truth labels come from a frontier model, kolm uses k-sample verified inference (<code>src/verified.js</code>). Given a stochastic generator with single-shot accuracy <i>p</i> on a verifiable task, and a sound verifier with single-shot accuracy <i>v</i>, drawing <i>k</i> independent samples and accepting the first that the verifier passes yields:</p>
       <div class="math">
         <div class="lab">verified-inference accuracy</div>
-        accuracy(k) = 1 − (1 − <span class="var">p</span>·<span class="var">v</span>)<sup>k</sup>
+        accuracy(k) = 1 -(1 -<span class="var">p</span>·<span class="var">v</span>)<sup>k</sup>
       </div>
-      <p>This is the SOTA-amplifier. It is not a claim; it is monotone in <i>k</i> by construction, and the verifier's soundness is what bounds it. Worked numbers for a verifiable coding task with <i>p</i>≈0.91 and <i>v</i>≈1.0:</p>
+      <p>This is the SOTA-amplifier. It is not a claim; it is monotone in <i>k</i> by construction, and the verifier's soundness is what bounds it. Worked numbers for a verifiable coding task with <i>p</i>-.91 and <i>v</i>-.0:</p>
       <table class="tbl">
         <thead>
           <tr><th>k</th><th>accuracy</th><th>cost (relative)</th><th>note</th></tr>
         </thead>
         <tbody>
-          <tr><td class="row-h" data-l="k">1</td><td class="num" data-l="acc">91.0%</td><td class="num" data-l="cost">1×</td><td data-l="note">cold inference</td></tr>
-          <tr><td class="row-h" data-l="k">2</td><td class="num" data-l="acc">99.2%</td><td class="num" data-l="cost">2×</td><td data-l="note">first amplification</td></tr>
-          <tr><td class="row-h" data-l="k">4</td><td class="num" data-l="acc">99.99%</td><td class="num" data-l="cost">4×</td><td data-l="note">production gate</td></tr>
-          <tr><td class="row-h" data-l="k">8</td><td class="win" data-l="acc">99.9999%</td><td class="num" data-l="cost">8×</td><td data-l="note">labels-corpus mode</td></tr>
+          <tr><td class="row-h" data-l="k">1</td><td class="num" data-l="acc">91.0%</td><td class="num" data-l="cost">1?</td><td data-l="note">cold inference</td></tr>
+          <tr><td class="row-h" data-l="k">2</td><td class="num" data-l="acc">99.2%</td><td class="num" data-l="cost">2?</td><td data-l="note">first amplification</td></tr>
+          <tr><td class="row-h" data-l="k">4</td><td class="num" data-l="acc">99.99%</td><td class="num" data-l="cost">4?</td><td data-l="note">production gate</td></tr>
+          <tr><td class="row-h" data-l="k">8</td><td class="win" data-l="acc">99.9999%</td><td class="num" data-l="cost">8?</td><td data-l="note">labels-corpus mode</td></tr>
         </tbody>
       </table>
-      <p class="footnote">The amplifier only fires when the verifier is sound (no false positives). For non-verifiable tasks (open-ended generation, judgment calls), <i>v</i> ≪ 1 and the amplifier collapses. We are explicit about which tasks fall in each bucket.</p>
+      <p class="footnote">The amplifier only fires when the verifier is sound (no false positives). For non-verifiable tasks (open-ended generation, judgment calls), <i>v</i> -1 and the amplifier collapses. We are explicit about which tasks fall in each bucket.</p>
     </div>
 
     <div class="group">
@@ -285,7 +287,7 @@ kolm bench support.kolm --runs 10 --out report.json
 <span class="c"># report.json conforms to spec kolm-benchmark-1 (real run against test/fixtures/sample.kolm)</span>
 {
   "spec": "kolm-benchmark-1",
-  "artifact_sha256": "sha256:b8344082…1089880e0",
+  "artifact_sha256": "sha256:b8344082&hellip;089880e0",
   "artifact_bytes": 3259,
   "k_score": 424.57,
   "evals": { "n": 4, "graded": 400, "passed": 400, "accuracy": 1.0 },
@@ -324,10 +326,10 @@ kolm bench support.kolm --runs 10 --out report.json
     </div>
 
     <div class="cta-row">
-      <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/src/benchmark.js" class="btn primary">harness source ↗</a>
-      <a href="/articles/how-we-benchmark" class="btn ghost">methodology →</a>
-      <a href="/k-score" class="btn ghost">how K-score is computed →</a>
-      <a href="/anatomy" class="btn ghost">.kolm anatomy →</a>
+      <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/src/benchmark.js" class="btn primary">harness source -/a>
+      <a href="/articles/how-we-benchmark" class="btn ghost">methodology -/a>
+      <a href="/k-score" class="btn ghost">how K-score is computed -/a>
+      <a href="/anatomy" class="btn ghost">.kolm anatomy -/a>
     </div>
 
     <div class="verdict">
@@ -340,9 +342,53 @@ kolm bench support.kolm --runs 10 --out report.json
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolm v0.1.0 · the AI compiler</span>
-    <span><a href="/manifesto">Manifesto</a> · <a href="/security">Security</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

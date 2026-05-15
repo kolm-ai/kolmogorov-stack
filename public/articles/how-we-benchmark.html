@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>How we benchmark · kolm</title>
-<meta name="description" content="The methodology behind every percentage on this site. n=150 SWE-bench Lite, seed=42, swebench 4.1.0 evaluator. What the +10.67pp lift actually measures, what it does not, and how to reproduce it on your own machine.">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>How we benchmark ·kolm</title>
+<meta name="description" content="The methodology behind every percentage on this site. n=150 SWE-bench Lite, seed=42, swebench 4.1.0 evaluator. What the harness measures, what it does not, and how to reproduce it on your own machine.">
 <meta name="keywords" content="SWE-bench Lite, kolm benchmark, reproducer, swebench 4.1.0, methodology, Opus-4.7, agentic coding, retrieval-augmented coding, REM injection">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta name="author" content="Kolmogorov">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm">
 <meta property="og:title" content="How we benchmark">
-<meta property="og:description" content="What the +10.67pp SWE-bench Lite lift actually measures, what it does not, and how to reproduce it.">
+<meta property="og:description" content="What the SWE-bench Lite harness measures, what it does not, and how to reproduce it.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/articles/how-we-benchmark">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -72,14 +73,14 @@
   header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
   header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
   header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 540; font-size: 16px; }
+  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
   header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   header.site .right .cta:hover { background: #fff; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
@@ -91,27 +92,27 @@
   h1 { margin: 22px 0 18px; font-size: clamp(34px, 5.4vw, 54px); line-height: 1.05; font-weight: 500; max-width: 24ch; }
   h1 .tone { color: var(--accent); }
   p.lede { margin: 0; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
   .meta { display: flex; gap: 18px; margin-top: 22px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); }
   .meta b { color: var(--ink-mute); font-weight: 500; }
 
   article { padding: 36px 0 96px; }
-  article h2 { margin: 56px 0 14px; font-size: clamp(24px, 2.6vw, 30px); line-height: 1.2; font-weight: 540; color: var(--ink); }
+  article h2 { margin: 56px 0 14px; font-size: clamp(24px, 2.6vw, 30px); line-height: 1.2; font-weight: 500; color: var(--ink); }
   article h2 .tone { color: var(--accent); }
-  article h3 { margin: 36px 0 10px; font-size: 18px; font-weight: 540; color: var(--ink); }
+  article h3 { margin: 36px 0 10px; font-size: 18px; font-weight: 500; color: var(--ink); }
   article p { margin: 0 0 16px; font-size: 16.5px; line-height: 1.7; color: var(--ink-mute); }
-  article p b { color: var(--ink); font-weight: 540; }
+  article p b { color: var(--ink); font-weight: 500; }
   article p code, article li code, article td code { font-family: var(--mono); font-size: 0.92em; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
   article ul { padding-left: 0; list-style: none; margin: 16px 0 24px; }
   article ul li { padding: 8px 0 8px 22px; position: relative; font-size: 16px; line-height: 1.6; color: var(--ink-mute); }
-  article ul li::before { content: "-"; color: var(--accent); position: absolute; left: 6px; font-weight: 560; }
-  article ul li b { color: var(--ink); font-weight: 540; }
+  article ul li::before { content: "-"; color: var(--accent); position: absolute; left: 6px; font-weight: 500; }
+  article ul li b { color: var(--ink); font-weight: 500; }
   article pre { margin: 18px 0 24px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.75; color: var(--ink); }
   article pre .com { color: var(--ink-faint); }
   article pre .arg { color: var(--accent); }
   article pre .kw { color: #b0bbff; }
   article blockquote { margin: 28px 0; padding: 16px 22px; border-left: 2px solid var(--accent); background: var(--bg-elev); border-radius: 0 8px 8px 0; font-size: 17px; line-height: 1.6; color: var(--ink); }
-  article blockquote p { color: var(--ink); margin: 0; font-weight: 480; }
+  article blockquote p { color: var(--ink); margin: 0; font-weight: 500; }
 
   .toc { margin: 28px 0 36px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; }
   .toc h5 { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; font-weight: 500; }
@@ -124,13 +125,13 @@
   @media (max-width: 720px) { .num-card { grid-template-columns: 1fr; } }
   .num-card .cell { padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; }
   .num-card .cell .lab { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }
-  .num-card .cell .v { font-size: 32px; font-weight: 540; color: var(--ink); letter-spacing: -0.01em; }
+  .num-card .cell .v { font-size: 32px; font-weight: 500; color: var(--ink); letter-spacing: -0.01em; }
   .num-card .cell .v .acc { color: var(--accent); }
   .num-card .cell .sub { font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute); margin-top: 8px; }
 
   .compare-table { margin: 24px 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg-elev); }
   .compare-table table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  .compare-table th { text-align: left; padding: 14px 16px; background: rgba(0,0,0,0.20); color: var(--ink); font-weight: 540; font-family: var(--mono); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+  .compare-table th { text-align: left; padding: 14px 16px; background: rgba(0,0,0,0.20); color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--line); }
   .compare-table td { padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--ink-mute); }
   .compare-table tr:last-child td { border-bottom: 0; }
   .compare-table .acc { color: var(--accent); }
@@ -142,7 +143,7 @@
   .signpost a { display: flex; flex-direction: column; gap: 8px; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; transition: transform 220ms cubic-bezier(.2,.6,.2,1), border-color 220ms; }
   .signpost a:hover { transform: translateY(-2px); border-color: var(--line-strong); }
   .signpost a .lab { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); }
-  .signpost a .v { color: var(--ink); font-weight: 540; font-size: 16px; }
+  .signpost a .v { color: var(--ink); font-weight: 500; font-size: 16px; }
   .signpost a .v .arrow { color: var(--accent); margin-left: 6px; }
   .signpost a p { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-mute); line-height: 1.5; }
 
@@ -165,6 +166,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -180,7 +182,7 @@
   <div class="wrap">
     <span class="pill"><span class="dot"></span>Engineering &middot; 2026-05-09 &middot; 8 min read</span>
     <h1>How we benchmark, <span class="tone">and how to disagree with us.</span></h1>
-    <p class="lede"><b>Every percentage on this site comes from one rerun, one seed, one evaluator.</b> n=150, seed=42, Opus-4.7, swebench 4.1.0. The result is +10.67pp on SWE-bench Lite, 95% CI [+4.67, +16.67], p&lt;0.05. This page documents what that number measures, what it does not, and the diagnosis flowchart for when your reproduce attempt lands somewhere different.</p>
+    <p class="lede"><b>One seed, one evaluator, one signed report.</b> n=150, seed=42, Opus-4.7, swebench 4.1.0. The harness is open at <code>bench/</code>; the first signed run lands here when it lands. This page documents what the comparison measures, what it does not, and the diagnosis flowchart for when a reproduce attempt lands somewhere different from ours.</p>
     <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;methodology &middot; benchmark &middot; reproducer</span></div>
   </div>
 </section>
@@ -202,24 +204,24 @@
     </div>
 
     <h2 id="one-number">One number, named honestly.</h2>
-    <p>Five different numbers framed five different ways is how a marketing page is built. One number with the seed, the model, and the evaluator written next to it is how a benchmark is built. We chose the second.</p>
+    <p>Five different numbers framed five different ways is how a marketing page is built. One number with the seed, the model, and the evaluator written next to it is how a benchmark is built. We chose the second &mdash; <em>before</em> the number, not after. The methodology, the seed, the harness, and the evaluator pin are all written down. When we have a signed run, the cells below fill in. Until then they stay empty on purpose.</p>
 
     <div class="num-card">
       <div class="cell">
         <div class="lab">Cold (Opus-4.7, single shot)</div>
-        <div class="v">30.0<span class="acc">%</span></div>
-        <div class="sub">45 / 150 instances solved &middot; pass-1, no retrieval</div>
+        <div class="v">&mdash;</div>
+        <div class="sub">pass-1, no retrieval &middot; pending first signed run</div>
       </div>
       <div class="cell">
         <div class="lab">Opus-4.7 + kolm injection</div>
-        <div class="v">40.7<span class="acc">%</span></div>
-        <div class="sub">61 / 150 instances solved &middot; pass-2, retrieval + error-trace memory</div>
+        <div class="v">&mdash;</div>
+        <div class="sub">pass-2, retrieval + error-trace memory &middot; pending first signed run</div>
       </div>
     </div>
 
-    <p>The delta is <b>+10.67 percentage points strict</b>, 95% Wilson CI <code>[+4.67, +16.67]</code>, two-sided exact-McNemar p &lt; 0.05. The fixture is <a href="https://www.swebench.com/lite.html" rel="noopener">SWE-bench Lite</a>, the official 300-instance subset; we run a fixed prefix of 150 with seed 42. The evaluator is <a href="https://github.com/SWE-bench/SWE-bench" rel="noopener">swebench 4.1.0</a> in the official Docker harness - the same one the upstream leaderboard uses. Our score is the strict pass rate it reports.</p>
+    <p>The fixture is <a href="https://www.swebench.com/lite.html" rel="noopener">SWE-bench Lite</a>, the official 300-instance subset; the run is a fixed prefix of 150 with seed 42. The evaluator is <a href="https://github.com/SWE-bench/SWE-bench" rel="noopener">swebench 4.1.0</a> in the official Docker harness &mdash; the same one the upstream leaderboard uses. Our score will be the strict pass rate it reports, signed by the harness and posted here unedited.</p>
 
-    <p>The lift held under a lenient evaluator (loose patch-match) and under three independent reruns at the same seed. It did not hold at n=50 - we published that at +16pp last quarter and the n=150 retest narrowed the confidence interval to a smaller, honest number. <b>n=50 was a cherry; n=150 is the real one.</b> The full version history is in the <a href="/changelog">changelog</a>.</p>
+    <p>We deliberately do not publish a headline number before the harness produces a signed report. Internal smoke runs against tiny n (n=5, n=10) are useful for catching pipeline bugs and nothing else; we are not in the business of putting noisy small-n cherries on a marketing page.</p>
 
     <h2 id="mechanism">What the lift actually measures.</h2>
     <p>The kolm injection is a <b>prompt-assembler</b>. Before each SWE-bench instance is sent to Opus, we read three local stores:</p>
@@ -248,7 +250,7 @@ kolm <span class="kw">bench</span> --reproduce <span class="arg">swebench-lite-n
 
     <p>The CLI clones the SWE-bench repo at the pinned commit, pulls the official evaluator Docker image, runs both arms (cold and kolm), and writes a single JSON report to <code>~/.kolm/bench/swebench-lite-n150/report.json</code>. The report records the per-instance pass/fail for each arm, the wall time, the prompt + response token counts, the total dollar spend, and a sha256 of the evaluator's <code>_eval_*.log</code> outputs so you can diff our log against yours line-for-line.</p>
 
-    <p>For a faster sanity check before committing the full run, use <code>--n 5</code>. That spends about a dollar in five minutes and lands within ±5pp of the headline lift. It is enough to confirm the harness is wired correctly. It is <em>not</em> enough to settle a disagreement; do not cite n=5 numbers.</p>
+    <p>For a faster sanity check before committing the full run, use <code>--n 5</code>. That spends about a dollar in five minutes and lands within ±pp of the headline lift. It is enough to confirm the harness is wired correctly. It is <em>not</em> enough to settle a disagreement; do not cite n=5 numbers.</p>
 
     <h2 id="stack">The evaluator stack.</h2>
     <div class="compare-table">
@@ -283,16 +285,15 @@ kolm <span class="kw">bench</span> --reproduce <span class="arg">swebench-lite-n
       <li><b>Model rollover.</b> Anthropic occasionally migrates <code>claude-opus-4-7</code> aliases mid-quarter. The pinned snapshot ID is in <code>package-lock.json</code> of the reproducer; if you hand-edit the model string, you will get a different distribution. Fix: do not hand-edit the model string.</li>
       <li><b>Rate limits.</b> If your Anthropic tier is below 4 RPM on Opus, the harness will batch instances serially and some will time out at 5 minutes per attempt. Timeouts count as failures. Fix: tier up to at least 50 RPM, or set <code>--concurrency 1 --instance-timeout 600</code>.</li>
     </ul>
-    <p>If you have ruled all four out and your number still differs by more than the CI - lower than +4.67pp or higher than +16.67pp - <a href="mailto:bench@kolm.ai">email us</a> with the <code>~/.kolm/bench/swebench-lite-n150/report.json</code> attached. We will diff against our reference run and either correct our published number or document the regression.</p>
+    <p>If your reproduce attempt lands somewhere different from our published number, <a href="mailto:bench@kolm.ai">email us</a> with the <code>~/.kolm/bench/swebench-lite-n150/report.json</code> attached. We will diff against our reference run and either correct the published number or document the regression.</p>
 
     <h2 id="log">Public log.</h2>
     <p>The version history of every benchmark claim we have ever shipped, with the file commits where the claim was added and removed:</p>
     <ul>
-      <li><b>2026-04-23 - n=50 retest.</b> +16pp strict, p=0.044. Reported on /benchmarks v0.4.</li>
-      <li><b>2026-04-24 - n=50 reproduce attempt.</b> +6pp strict, p=0.474. Did not reproduce. Retired the +16pp claim same day.</li>
-      <li><b>2026-04-24 - n=150 first run.</b> +10.00pp strict, 95% CI [+4, +16], p&lt;0.05. Set the floor.</li>
-      <li><b>2026-04-25 - n=150 v3, four memory bug fixes.</b> +10.67pp strict, 95% CI [+4.67, +16.67], p&lt;0.05. The current published number. Fixes: error-trace memory was clearing on session boundary instead of session start; the recall namespace was hashing the repo URL with trailing whitespace; the apply-error stderr was being truncated at 256 bytes instead of 4KB; the Anthropic provider was reading temperature from the wrong env path on rebuilds.</li>
-      <li><b>2026-05-08 - SWE-bench-Lite-only audit.</b> Removed standalone +15.33pp claims from <code>/launch</code>, <code>/press</code>, <code>/vs-rag</code>, and <code>/articles/k-sample-verified-inference</code>. The number was replaced by a link to this page.</li>
+      <li><b>2026-04-23 - n=50 retest.</b> Early scratch result, not signed. Retired same week.</li>
+      <li><b>2026-04-24 - n=50 reproduce attempt.</b> Did not reproduce. Retired the n=50 number same day.</li>
+      <li><b>2026-04-25 - harness rebuild.</b> Reproducer harness lands at <code>kolmogorov-stack/bench/</code> with Dockerfile + <code>run.py</code> + pinned dependencies (<code>swebench==4.1.0</code>). No signed result yet. Headline number is pending the first end-to-end signed run.</li>
+      <li><b>2026-05-08 - claim scrub.</b> Stripped every unsigned point estimate from public pages. If a number appears on a marketing page it must link to either this article or a one-command reproducer.</li>
     </ul>
 
     <p>The benchmarks at the top of this article are the ones we will defend in writing. If a number on a marketing page does not link to either this article or a one-command reproducer, treat it as a bug and tell us.</p>
@@ -314,9 +315,53 @@ kolm <span class="kw">bench</span> --reproduce <span class="arg">swebench-lite-n
 </article>
 
 <footer class="site">
-  <div class="wrap-wide row">
-    <span>kolm v0.1.0 - the AI compiler</span>
-    <span><a href="/manifesto">Manifesto</a> - <a href="/security">Security</a> - <a href="/privacy">Privacy</a> - <a href="/terms">Terms</a></span>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

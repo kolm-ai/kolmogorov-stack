@@ -1,6 +1,6 @@
 # Kolm Research Knowledge Repository
 
-Last updated: 2026-05-12
+Last updated: 2026-05-13
 
 This directory is the living research base for Kolm / the Kolmogorov stack. It is meant to be updated continuously as code, live site claims, competitors, buyer feedback, benchmarks, and regulatory facts change.
 
@@ -12,11 +12,31 @@ This directory is the living research base for Kolm / the Kolmogorov stack. It i
 | `competitor-landscape-2026-05-12.md` | Source-backed competitor and adjacent-market map. |
 | `competitor-evidence-matrix-2026-05-12.csv` | Row-level official-source evidence matrix for competitors, standards, implications, gaps, and recommended action. |
 | `competitor-positioning-gaps-2026-05-12.md` | Strategic synthesis from the competitor evidence matrix. |
+| `competitor-trace-import-wedge-audit-2026-05-13.md` | Deep dive on gateway, observability, eval, and fine-tuning import surfaces that can feed or route Kolm artifacts. |
+| `competitor-trace-import-wedge-matrix-2026-05-13.csv` | Row-level competitor trace/import and gateway-middleware wedge matrix. |
+| `trace-eval-schema-spec-2026-05-13.md` | Proposed `kolm-trace-1` and `kolm-evalcase-1` schema for trace import, eval mapping, privacy, provenance, and receipt write-back. |
+| `trace-eval-schema-mapping-2026-05-13.csv` | Row-level source-to-Kolm field mapping for local observations, Langfuse, LangSmith, Braintrust, Helicone, Phoenix, Weave, OpenPipe, and gateway hooks. |
+| `external-score-normalization-audit-2026-05-13.md` | Score-normalization policy for keeping source scores as evidence while recomputing Kolm K-score from artifact evals. |
+| `external-score-normalization-matrix-2026-05-13.csv` | Row-level mapping of Langfuse, LangSmith, Braintrust, Phoenix, Weave, Helicone, OpenPipe, and local score semantics into normalized score rules. |
+| `trace-import-privacy-policy-2026-05-13.md` | Import privacy policy for hash-only, redacted, raw, and blocked trace import modes, retention, sidecars, purge, and artifact boundaries. |
+| `trace-import-privacy-matrix-2026-05-13.csv` | Row-level privacy, retention, deletion, raw-payload, source-system, and test matrix for trace import. |
+| `trace-import-manifest-purge-contract-2026-05-13.md` | Operational contract for import manifests, dry-run/delete/anonymize purge modes, sidecars, cache, audit, and non-purgeable artifacts. |
+| `trace-import-manifest-purge-matrix-2026-05-13.csv` | Row-level manifest and purge feasibility matrix across local store, cache, audit, rows, sidecars, source deletion refs, and tests. |
+| `langfuse-importer-fixture-spec-2026-05-13.md` | First source-specific importer fixture spec for Langfuse traces, observations, scores, datasets, privacy modes, manifests, and loss reports. |
+| `langfuse-importer-fixture-matrix-2026-05-13.csv` | Row-level acceptance matrix for the Langfuse fixture-only importer before any live API connector. |
+| `langfuse-fixture-pack-blueprint-2026-05-13.md` | Concrete docs-only blueprint for Langfuse fixture files, sample source rows, expected outputs, loss report classes, and acceptance harness rules. |
+| `langfuse-fixture-file-matrix-2026-05-13.csv` | File-by-file Langfuse fixture pack matrix covering source files, expected outputs, negative cases, and validation rules. |
+| `import-canonical-checksum-rules-2026-05-13.md` | Canonical checksum policy for import source files, source rows, normalized rows, eval cases, loss rows, JSONL outputs, and manifest state. |
+| `import-canonical-checksum-matrix-2026-05-13.csv` | Row-level checksum target matrix covering RFC 8785 JCS, byte checksums, domain envelopes, privacy modes, manifests, and fixture gates. |
+| `venture-readiness-redline-2026-05-13.md` | Source-backed venture readiness memo, competitive redlines, proof gaps, and the compiler-cache strategy. |
+| `venture-readiness-source-matrix-2026-05-13.csv` | Official-source matrix for Apple, Google, Microsoft, PyTorch, local LLM, regulatory, and edge AI consolidation signals. |
 | `codebase-and-live-site-gap-review-2026-05-12.md` | Evidence-based comparison of the local repo, the live `kolm.ai` positioning, and the current implementation. |
 | `codebase-module-inventory-2026-05-12.md` | Module, route-group, test, SDK, and architecture inventory from local source evidence. |
 | `api-surface-inventory-2026-05-12.csv` | Route-group sheet for auth boundaries, maturity, risks, and follow-up research. |
 | `claim-governance-audit-2026-05-12.md` | Live/local public-claim audit for offline, mobile, LoRA, receipt, and compliance language. |
 | `claim-audit-2026-05-12.csv` | Claim-level sheet with evidence, risk, code truth, and recommended action. |
+| `homepage-claim-regression-audit-2026-05-13.md` | Current local homepage, live homepage, live docs, structured-data, and claim-gate regression audit. |
+| `homepage-claim-regression-matrix-2026-05-13.csv` | Row-level homepage and live/local claim-regression matrix. |
 | `artifact-truth-audit-2026-05-12.md` | Current `.kolm` artifact contents, fixture proof, and product-truth gaps. |
 | `artifact-fixture-inventory-2026-05-12.csv` | Row-level inventory of generated and fixture artifacts, hashes, contents, receipt mode, and K-score size drift. |
 | `receipt-verification-truth-2026-05-12.md` | HMAC receipt verification truth, unsafe public-verification wording, and public-key gaps. |
@@ -27,6 +47,8 @@ This directory is the living research base for Kolm / the Kolmogorov stack. It i
 | `pricing-competitor-matrix-2026-05-12.csv` | Source-backed pricing matrix for gateways, observability/evals, prompt ops, marketplaces, and fine-tuning providers. |
 | `sandbox-hardening-decision-2026-05-12.md` | Recipe sandbox decision memo for `node:vm`, isolated-vm, SES, Wasmtime, Deno, gVisor, and Firecracker options. |
 | `sandbox-option-matrix-2026-05-12.csv` | Source-backed sandbox option matrix and recommended use by trust level. |
+| `runtime-sandbox-threat-audit-2026-05-13.md` | Current runtime sandbox, public registry execution, benchmark egress, browser worker, and malicious-recipe coverage audit. |
+| `runtime-sandbox-threat-matrix-2026-05-13.csv` | Row-level runtime sandbox threat and proof matrix. |
 | `auth-boundary-audit-2026-05-12.md` | Auth, OAuth, route-boundary, anon-claim, public-run, and query-key security audit. |
 | `auth-boundary-matrix-2026-05-12.csv` | Row-level auth boundary matrix with public/protected status, risk, and recommended action. |
 | `tenant-data-lifecycle-audit-2026-05-12.md` | Tenant data isolation, account deletion, recall path, cache, capture, and aggregate telemetry audit. |
@@ -57,6 +79,14 @@ This directory is the living research base for Kolm / the Kolmogorov stack. It i
 | `device-offline-browser-governance-matrix-2026-05-12.csv` | Row-level device/offline/browser governance matrix. |
 | `release-distribution-governance-audit-2026-05-12.md` | Package publication, CLI install, GitHub Action, Docker, Homebrew, Windows package-manager, SDK release, and supply-chain proof audit. |
 | `release-distribution-governance-matrix-2026-05-12.csv` | Row-level release/distribution governance matrix. |
+| `release-channel-live-refresh-audit-2026-05-13.md` | Live docs, npm/PyPI/Docker/package-manager, root package dry-run, action contract, and release workflow refresh. |
+| `release-channel-live-refresh-matrix-2026-05-13.csv` | Row-level release-channel evidence and gap matrix. |
+| `cookbook-example-governance-audit-2026-05-12.md` | Public cookbook, examples, fixture artifacts, command snippets, K-score, benchmark, and proof-manifest audit. |
+| `cookbook-example-governance-matrix-2026-05-12.csv` | Row-level cookbook/example proof and command-governance matrix. |
+| `project-hooks-governance-audit-2026-05-12.md` | `kolm.yaml`, lifecycle hooks, project config, skill sidecar, doctor, MCP config, and local automation governance audit. |
+| `project-hooks-governance-matrix-2026-05-12.csv` | Row-level project config and hook governance matrix. |
+| `tune-evolution-governance-audit-2026-05-12.md` | Local tune, adapter training, capture files, K-score promotion, watcher, airgap, and RAG integration governance audit. |
+| `tune-evolution-governance-matrix-2026-05-12.csv` | Row-level tune/evolution proof and promotion-governance matrix. |
 | `source-register-2026-05-12.md` | Primary-source register for the first research pass. |
 | `research-backlog-2026-05-12.md` | Open research threads to keep this repository moving. |
 
@@ -79,4 +109,4 @@ Kolm should not compete as another gateway, observability tool, memory layer, RA
 - private/public registry and governance,
 - runtime targets that wrap existing local/server runtimes rather than replacing them.
 
-The most urgent work is making this claim true end to end: safe tenant/auth boundaries, real artifact contents, real receipt verification, durable storage/jobs, stronger sandboxing, governed public registry review and revocation, capture-to-distillation paths that respect triage and retention, artifact-bound recall that actually influences compile/run behavior, agent/MCP harnesses that match their public install and security contracts, a browser/offline runtime whose SDK, worker, PWA cache, and live device demo actually run before being used as proof, release/package channels whose public install labels match npm/PyPI/Homebrew/Windows/Docker/GitHub Action evidence, tenant-visible audit logs, accurate receipt metrics, status evidence backed by monitor history, seeded registry evidence, canonical benchmark reports, one K-score schema, CI/deploy gates that prevent regressions from shipping, compliance/security claims backed by implemented controls, and generated API/docs contracts that cannot drift silently.
+The most urgent work is making this claim true end to end: safe tenant/auth boundaries, real artifact contents, real receipt verification, durable storage/jobs, stronger sandboxing with explicit trust tiers for generated, curated, customer-private, and public-untrusted recipes, governed public registry review and revocation, homepage/live claim gates that block model, phone, VPC, airgap, regulated-data, public-key, on-chain, and automatic-improvement claims unless proof-backed, capture-to-distillation paths that respect triage and retention, artifact-bound recall that actually influences compile/run behavior, agent/MCP harnesses that match their public install and security contracts, project hooks/config that are validated, fail-closed when used for policy, and honest about local command execution, local tune/evolution loops whose capture, trainer, eval, promotion, watcher, and airgap claims match shipped behavior, a browser/offline runtime whose SDK, worker, PWA cache, and live device demo actually run before being used as proof, release/package channels whose public install labels match npm/PyPI/Homebrew/Windows/Docker/GitHub Action evidence, cookbook/examples whose commands, specs, artifacts, receipts, and benchmark numbers are generated from proof instead of handwritten HTML, tenant-visible audit logs, accurate receipt metrics, status evidence backed by monitor history, seeded registry evidence, canonical benchmark reports, one K-score schema, CI/deploy gates that prevent regressions from shipping, compliance/security claims backed by implemented controls, and generated API/docs contracts that cannot drift silently.

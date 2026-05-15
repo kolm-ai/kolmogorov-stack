@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Docs &middot; kolm</title>
-<meta name="description" content="kolm API and CLI reference. Code-first, copy-paste runnable, every example is real captured prod output. Authenticate, compile, run, evolve.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Documentation for the kolm AI compiler | kolm</title>
+<meta name="description" content="Build with kolm in 60 seconds. CLI and HTTP reference for compile, run, evolve. Every example is real captured prod output.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm docs">
 <meta property="og:description" content="Build with kolm in 60 seconds. Code-first reference. Every example is real captured prod output.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="kolm docs">
+<meta name="twitter:description" content="Build with kolm in 60 seconds. Code-first reference. Every example is real captured prod output.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/docs">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -31,15 +35,18 @@
   .docs-rail a:hover{color:var(--ink)}
   .docs-rail a.active{color:var(--ink);border-left-color:var(--accent)}
   .docs-main{min-width:0}
-  .docs-main h1{font-size:38px;line-height:1.1;margin:0 0 12px}
-  .docs-main h2{font-size:22px;line-height:1.2;margin:48px 0 8px;scroll-margin-top:80px;font-weight:540}
+  .docs-main h1{font-size:clamp(44px,6.4vw,92px);line-height:0.96;margin:0 0 18px;letter-spacing:-0.035em;font-weight: 500;max-width:14ch}
+  .docs-main h2{font-size:22px;line-height:1.2;margin:48px 0 8px;scroll-margin-top:80px;font-weight: 500}
   .docs-main h3{font-size:14px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);margin:28px 0 8px;font-weight:500;font-family:var(--mono)}
   .docs-main p{color:var(--ink-mute);margin:6px 0 14px;font-size:15px;line-height:1.65;max-width:62ch}
   .docs-main code:not(pre code){font-family:var(--mono);font-size:12.5px;color:var(--ink);background:rgba(255,255,255,0.04);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
-  .tabs{display:flex;gap:0;margin-top:14px;border-bottom:1px solid var(--line)}
-  .tabs button{background:transparent;border:0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase;padding:8px 14px;cursor:pointer;border-bottom:1px solid transparent;margin-bottom:-1px}
+  .tabs{display:flex;gap:6px;margin-top:14px;border-bottom:1px solid var(--line)}
+  .tabs button{background:transparent;border:0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase;padding:8px 14px;cursor:pointer;border-bottom:1px solid transparent;margin-bottom:-1px;position:relative}
   .tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
   .tabs button:hover{color:var(--ink)}
+  .tabs button + button{box-shadow:-1px 0 0 0 rgba(255,255,255,0.10)}
+  .tabs button.on,
+  .tabs button.on + button{box-shadow:none}
   .tabpane{display:none}
   .tabpane.on{display:block}
   pre.code-block{background:#0a0c0f;border:1px solid var(--line);border-radius:8px;padding:16px 18px;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:#e6e6e6;overflow-x:auto;margin:0;position:relative}
@@ -47,34 +54,59 @@
   pre.code-block .copy:hover{color:var(--ink);background:rgba(255,255,255,0.10)}
   pre.code-block .copy.done{color:var(--good,#7ef0d2)}
   .endpoint-tag{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;margin-top:24px}
-  .endpoint-tag .verb{font-weight:600;color:var(--ink);background:rgba(255,255,255,0.08);padding:3px 8px;border-radius:4px;font-size:11px}
+  .endpoint-tag .verb{font-weight: 500;color:var(--ink);background:rgba(255,255,255,0.08);padding:3px 8px;border-radius:4px;font-size:11px}
   .endpoint-tag .verb.post{background:rgba(126,240,210,0.16);color:#7ef0d2}
   .endpoint-tag .verb.get{background:rgba(76,125,255,0.20);color:#8aaaff}
   .endpoint-tag .path{color:var(--ink-mute)}
   .endpoint-tag .auth{color:var(--ink-faint);margin-left:8px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em}
   .resp-label{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 6px;display:flex;align-items:center;gap:10px}
   .resp-label::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--good,#7ef0d2)}
-  .resp-label.live::after{content:"live from kolm.ai · captured 2026-05-11";color:var(--ink-faint);font-size:10px;text-transform:none;letter-spacing:0;margin-left:auto}
+  .resp-label.live::after{content:"live from kolm.ai ·captured 2026-05-11";color:var(--ink-faint);font-size:10px;text-transform:none;letter-spacing:0;margin-left:auto}
   .kbd{font-family:var(--mono);font-size:11px;color:var(--ink-mute);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:rgba(0,0,0,0.4)}
   .note{border-left:2px solid var(--accent);padding:10px 14px;background:rgba(236,231,220,0.03);border-radius:0 6px 6px 0;font-size:14px;color:var(--ink-mute);margin:14px 0;max-width:62ch}
-  .note b{color:var(--ink);font-weight:540}
+  .note b{color:var(--ink);font-weight: 500}
   .docs-next{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:56px 0 0;max-width:62ch}
   @media (max-width:640px){.docs-next{grid-template-columns:1fr}}
   .docs-next a{display:block;border:1px solid var(--line);border-radius:8px;padding:14px 16px;text-decoration:none;transition:border-color .15s,background .15s;background:rgba(255,255,255,0.01)}
   .docs-next a:hover{border-color:var(--accent);background:rgba(236,231,220,0.04)}
   .docs-next .lbl{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
-  .docs-next .ttl{color:var(--ink);font-size:15px;font-weight:540}
+  .docs-next .ttl{color:var(--ink);font-size:15px;font-weight: 500}
   .docs-next .sub{color:var(--ink-mute);font-size:12.5px;margin-top:3px}
   .next-hint{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:22px 0 -8px;letter-spacing:0.04em}
   .next-hint a{color:var(--ink-mute);border-bottom:1px solid var(--line)}
   .next-hint a:hover{color:var(--accent);border-color:var(--accent)}
 
-  /* v7.11.3 docs hero re-frame — quiet, devs read code not marketing */
-  .docs-main h1{font-weight:560;letter-spacing:-0.02em;margin-bottom:14px}
-  .docs-main .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:18px}
-  .docs-main .eyebrow .pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 8px rgba(126,240,210,0.55)}
+  /* v7.11.3 docs hero re-frame  - quiet, devs read code not marketing */
+  .docs-main h1{font-weight: 500;letter-spacing:-0.035em;margin-bottom:22px}
+  .docs-main h1 .tone{background:linear-gradient(170deg,#faf2e1 0%,#7dd3fc 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .docs-main .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:24px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .docs-main .eyebrow .pulse{display:inline-block;width:6px;height:6px;border-radius:50%;background:#7dd3fc;box-shadow:0 0 10px #7dd3fc;animation:pulse-dot 2.4s ease-in-out infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
 
-  /* v7.11.3 light mode — make sure rail/code/notes/tabs all read cleanly */
+  /* v7.21 golden-path tutorial cards. Three full-bleed tutorials anchored above the API reference. */
+  .gp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:34px 0 18px;max-width:62ch}
+  @media(max-width:920px){.gp-grid{grid-template-columns:1fr;max-width:none}}
+  .gp-card{display:block;border:1px solid var(--line);border-radius:10px;padding:18px 18px;background:rgba(255,255,255,0.01);text-decoration:none;transition:border-color .15s,background .15s}
+  .gp-card:hover{border-color:var(--accent);background:rgba(236,231,220,0.04)}
+  .gp-card .gp-n{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+  .gp-card .gp-t{color:var(--ink);font-size:14.5px;font-weight:500;line-height:1.3;margin-bottom:4px}
+  .gp-card .gp-s{color:var(--ink-mute);font-size:12.5px;line-height:1.45}
+  .tut{margin:48px 0 0;padding-top:8px;scroll-margin-top:80px}
+  .tut h2{display:flex;align-items:baseline;gap:14px;margin-top:0}
+  .tut h2 .tut-n{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.08em;text-transform:uppercase;font-weight:500}
+  .tut .step{margin:24px 0 14px;display:flex;align-items:baseline;gap:10px}
+  .tut .step .step-n{font-family:var(--mono);font-size:11px;color:var(--accent);border:1px solid var(--line-strong);border-radius:3px;padding:1px 6px;line-height:1.4}
+  .tut .step .step-t{color:var(--ink);font-size:15px;font-weight:500}
+  [data-theme=light] .gp-card{background:#ffffff;border-color:rgba(12,14,16,0.08);box-shadow:0 1px 2px rgba(12,14,16,0.03)}
+  [data-theme=light] .gp-card:hover{background:#f9faf9;border-color:#0a8862}
+  [data-theme=light] .gp-card .gp-n{color:#737c73}
+  [data-theme=light] .gp-card .gp-t{color:#0c0e10}
+  [data-theme=light] .gp-card .gp-s{color:#4b5158}
+  [data-theme=light] .tut h2 .tut-n{color:#737c73}
+  [data-theme=light] .tut .step .step-n{color:#0a8862;border-color:rgba(10,136,98,0.32)}
+  [data-theme=light] .tut .step .step-t{color:#0c0e10}
+
+  /* v7.11.3 light mode  - make sure rail/code/notes/tabs all read cleanly */
   [data-theme=light] pre.code-block{background:#0c0e10;border-color:rgba(12,14,16,0.10);color:#e6e6e6}
   [data-theme=light] pre.code-block .copy{background:rgba(255,255,255,0.10);border-color:rgba(255,255,255,0.16);color:#c9c2b2}
   [data-theme=light] pre.code-block .copy:hover{background:rgba(255,255,255,0.16);color:#ffffff}
@@ -89,6 +121,9 @@
   [data-theme=light] .tabs button{color:#737c73}
   [data-theme=light] .tabs button.on{color:#0c0e10;border-bottom-color:#0a8862}
   [data-theme=light] .tabs button:hover{color:#0c0e10}
+  [data-theme=light] .tabs button + button{box-shadow:-1px 0 0 0 rgba(12,14,16,0.12)}
+  [data-theme=light] .tabs button.on,
+  [data-theme=light] .tabs button.on + button{box-shadow:none}
   [data-theme=light] .note{background:rgba(10,136,98,0.05);border-left-color:#0a8862;color:#4b5158}
   [data-theme=light] .note b{color:#0c0e10}
   [data-theme=light] .endpoint-tag .verb{background:rgba(12,14,16,0.06);color:#0c0e10}
@@ -138,6 +173,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="/use-cases">Solutions</a>
       <a href="/docs">Developers</a>
+      <a href="/research">Research</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="site-actions">
@@ -151,6 +187,12 @@
 <main class="docs-shell">
 
   <aside class="docs-rail" aria-label="Docs navigation">
+    <div class="group">
+      <div class="group-h">tutorials</div>
+      <a href="#tut-1">1. First .kolm in 5 min</a>
+      <a href="#tut-2">2. CI/CD K-score gate</a>
+      <a href="#tut-3">3. Run inside Cursor</a>
+    </div>
     <div class="group">
       <div class="group-h">getting started</div>
       <a href="#quickstart">Quickstart</a>
@@ -178,21 +220,194 @@
       <a href="#cli">CLI</a>
       <a href="#mcp">MCP serve</a>
       <a href="#hooks">Hooks</a>
+      <a href="#remote">Remote access</a>
+      <a href="#deploy-modes">Four ways to ship</a>
+      <a href="#openai-compat">OpenAI compat</a>
+      <a href="#agents-patterns">Agent patterns</a>
+    </div>
+    <div class="group">
+      <div class="group-h">training</div>
+      <a href="#training-presets">Nine presets</a>
+      <a href="#instant-adapter">Instant adapter</a>
+      <a href="#improve-loop">kolm improve loop</a>
+    </div>
+    <div class="group">
+      <div class="group-h">embed</div>
+      <a href="#sdks">SDKs &middot; 4 platforms</a>
+      <a href="#sdk-python">Python</a>
+      <a href="#sdk-swift">Swift</a>
+      <a href="#sdk-kotlin">Kotlin</a>
+      <a href="#sdk-rn">React Native</a>
+    </div>
+    <div class="group">
+      <div class="group-h">compliance</div>
+      <a href="#compliance-packs">Three packs</a>
+      <a href="#hipaa-onboarding">HIPAA: 2-hour path</a>
+      <a href="#pack-sr-11-7">SR 11-7</a>
+      <a href="#pack-sox-lite">SOX-lite</a>
+    </div>
+    <div class="group">
+      <div class="group-h">showcase</div>
+      <a href="#showcase-build">Healthcare end-to-end</a>
+      <a href="/showcase">Live demo &rarr;</a>
     </div>
     <div class="group">
       <div class="group-h">reference</div>
       <a href="/spec">RS-1 spec</a>
       <a href="/api">Endpoint index</a>
       <a href="/cookbook">Cookbook</a>
-      <a href="/changelog">Changelog</a>
+      <a href="/roadmap">Roadmap</a>
     </div>
   </aside>
 
   <article class="docs-main">
 
-    <div class="eyebrow"><span class="pulse"></span>docs &middot; v0.7.8</div>
-    <h1>Build with kolm in 60 seconds.</h1>
+    <div class="eyebrow"><span class="pulse"></span>docs . v0.7.8 . build kit</div>
+    <h1>Build with kolm in <span class="tone">60 seconds.</span></h1>
     <p>Every example on this page is a real captured response from <code>kolm.ai</code> on <span class="kbd">2026-05-11</span>. Copy any block and paste it into a terminal. If it ever stops working, file an issue.</p>
+
+    <p style="font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);margin:30px 0 0">Three golden paths</p>
+    <div class="gp-grid">
+      <a class="gp-card" href="#tut-1">
+        <div class="gp-n">tutorial 1 &middot; 5 min</div>
+        <div class="gp-t">First .kolm in 5 minutes</div>
+        <div class="gp-s">install . init . compile . inspect. Local-only.</div>
+      </a>
+      <a class="gp-card" href="#tut-2">
+        <div class="gp-n">tutorial 2 &middot; 10 min</div>
+        <div class="gp-t">Ship with CI/CD</div>
+        <div class="gp-s">GitHub Actions workflow that fails on K-score &lt; 0.85.</div>
+      </a>
+      <a class="gp-card" href="#tut-3">
+        <div class="gp-n">tutorial 3 &middot; 8 min</div>
+        <div class="gp-t">Run inside Cursor</div>
+        <div class="gp-s">MCP wire-up for Cursor or Claude Code. Local stdio.</div>
+      </a>
+    </div>
+
+    <section class="tut" id="tut-1">
+      <h2><span class="tut-n">tutorial 1</span>First .kolm in 5 minutes</h2>
+      <p>Install the CLI, scaffold a project, compile one recipe, look at what landed on disk. No keys required for the local path; add one if you want to push to the cloud registry.</p>
+
+      <div class="step"><span class="step-n">1</span><span class="step-t">Install the CLI</span></div>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>npm i -g github:sneaky-hippo/kolmogorov-stack
+kolm version</code></pre>
+
+      <div class="step"><span class="step-n">2</span><span class="step-t">Scaffold a project</span></div>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>mkdir my-redactor &amp;&amp; cd my-redactor
+kolm init
+# writes kolm.yaml + examples/ + .gitignore</code></pre>
+      <p>The generated <code>kolm.yaml</code> declares your task, your examples directory, and the K-score floor (default 0.85). Open it. Edit the task line. Drop two or three <code>(input, expected)</code> pairs into <code>examples/</code>.</p>
+
+      <div class="step"><span class="step-n">3</span><span class="step-t">Compile</span></div>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm compile
+# reads kolm.yaml, synthesizes a verifier, runs k-sample, signs, writes my-redactor.kolm</code></pre>
+      <p>Output looks like this:</p>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>compile     my-redactor
+synthesize  redact-secrets         pass_pos=1.000  reject_neg=1.000
+k-score     0.917                  floor=0.85  status=accepted
+sign        hmac-sha256            8f3e2a...
+write       my-redactor.kolm       size=14.2KB</code></pre>
+
+      <div class="step"><span class="step-n">4</span><span class="step-t">Inspect the artifact</span></div>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm inspect my-redactor.kolm</code></pre>
+      <p>You will see the manifest (spec/policy/verifier/receipt entries), the K-score breakdown by axis, the signature, and the deterministic source hash. The <code>.kolm</code> file is a signed zip; you can unzip it and read every byte. Full schema at <a href="/spec" style="color:var(--accent)">/spec</a>.</p>
+      <div class="note"><b>What you just shipped:</b> a single signed file that runs locally with <code>kolm run my-redactor.kolm</code>, emits a per-call receipt, and can be re-inspected forever without our servers.</div>
+      <div class="next-hint">next: <a href="#tut-2">Tutorial 2 . Ship with CI/CD</a> &rarr;</div>
+    </section>
+
+    <section class="tut" id="tut-2">
+      <h2><span class="tut-n">tutorial 2</span>Ship to production with CI/CD</h2>
+      <p>Wire <code>kolm compile</code> into a GitHub Actions workflow. The job fails if the K-score floor drops below 0.85. The compiled artifact uploads as a workflow artifact you can download or push to your registry.</p>
+
+      <div class="step"><span class="step-n">1</span><span class="step-t">Add your kolm key as a repo secret</span></div>
+      <p>In repo settings &rarr; Secrets and variables &rarr; Actions, add <code>KOLM_KEY</code>. Only needed if you push to the cloud registry; pure local compile + gate works without it.</p>
+
+      <div class="step"><span class="step-n">2</span><span class="step-t">Create the workflow file</span></div>
+      <p>Drop the following at <code>.github/workflows/kolm-gate.yml</code>:</p>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>name: kolm-gate
+
+on:
+  pull_request:
+    paths:
+      - 'kolm.yaml'
+      - 'examples/**'
+      - 'recipes/**'
+  push:
+    branches: [main]
+
+jobs:
+  compile-and-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install kolm CLI
+        run: npm i -g github:sneaky-hippo/kolmogorov-stack
+
+      - name: Compile and gate at K &gt;= 0.85
+        env:
+          KOLM_KEY: ${{ secrets.KOLM_KEY }}
+        run: |
+          kolm compile --json &gt; compile.json
+          K=$(node -e "console.log(require('./compile.json').k_score)")
+          echo "k-score: $K"
+          node -e "process.exit(require('./compile.json').k_score &gt;= 0.85 ? 0 : 1)"
+
+      - name: Upload .kolm artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kolm-build
+          path: '*.kolm'
+          retention-days: 30</code></pre>
+      <p>Push it. Open a PR that touches <code>examples/</code>. The job runs, prints the K-score, and either ships the green check or fails the merge.</p>
+
+      <div class="step"><span class="step-n">3</span><span class="step-t">Optional: push the artifact to your registry</span></div>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>      - name: Publish to kolm registry
+        if: github.ref == 'refs/heads/main'
+        env:
+          KOLM_KEY: ${{ secrets.KOLM_KEY }}
+        run: kolm publish *.kolm</code></pre>
+      <div class="note"><b>Why this gate is honest:</b> the K-score is computed by a deterministic verifier, not a model. Same inputs always produce the same score. CI is a fair judge.</div>
+      <div class="next-hint">next: <a href="#tut-3">Tutorial 3 . Run inside Cursor</a> &rarr;</div>
+    </section>
+
+    <section class="tut" id="tut-3">
+      <h2><span class="tut-n">tutorial 3</span>Run your model inside Cursor</h2>
+      <p>The kolm CLI exposes your compiled <code>.kolm</code> artifacts as MCP tools over stdio. Cursor, Claude Code, Continue, and Cline all support MCP. One command wires it up.</p>
+
+      <div class="step"><span class="step-n">1</span><span class="step-t">Pick your harness and install</span></div>
+      <p>For Cursor:</p>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm install cursor --apply
+# writes mcpServers.kolm into ~/.cursor/mcp.json</code></pre>
+      <p>For Claude Code:</p>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm install claude-code --apply
+# writes mcpServers.kolm into ~/.claude/settings.json</code></pre>
+      <p>Other supported harnesses: <code>continue</code>, <code>cline</code>. Drop <code>--apply</code> to dry-run and print the JSON block instead.</p>
+
+      <div class="step"><span class="step-n">2</span><span class="step-t">Restart the editor</span></div>
+      <p>Cursor and Claude Code spawn MCP servers as subprocesses at startup. Quit and relaunch to pick up the new <code>kolm</code> entry. You should see <code>kolm</code> in the tool list when you open the command palette or agent panel.</p>
+
+      <div class="step"><span class="step-n">3</span><span class="step-t">Verify the wiring</span></div>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm doctor
+# checks env, keys, port (if --http), MCP harness registration</code></pre>
+      <p>You can also run the MCP server by hand on a port for inspection:</p>
+      <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm serve --mcp --http
+# stdio + optional HTTP JSON-RPC on 127.0.0.1:8765
+curl -sX POST http://127.0.0.1:8765 \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'</code></pre>
+
+      <div class="step"><span class="step-n">4</span><span class="step-t">Use it from the agent</span></div>
+      <p>Open Cursor's agent. Ask: <i>"Use the kolm.run tool with my-redactor.kolm on this input: token=sk_live_test."</i> The agent invokes the local kolm server, which executes the artifact and returns the redacted output plus a signed receipt. The agent never sees your data; it sees the result of running your signed recipe on your machine.</p>
+      <div class="note"><b>What you just built:</b> a local tool the model can call. The recipe is deterministic. The signature proves the recipe didn't mutate. The receipt proves the call ran.</div>
+      <div class="next-hint">next: <a href="#quickstart">API reference</a> or <a href="/cookbook">22 working recipes</a> &rarr;</div>
+    </section>
 
     <h2 id="quickstart">Quickstart</h2>
     <p>Sign up, get a key, compile a redaction function from two examples, run it on real input. Six lines.</p>
@@ -423,7 +638,7 @@ console.log(expected === r.hmac ? "ok" : "tamper");</code></pre>
     <h2 id="cli">CLI</h2>
     <p>Eight verbs cover the loop. Same auth as the API; <code>kolm login</code> stores the key in <code>~/.kolm/config.json</code>.</p>
     <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm init              # scaffold kolm.yaml + examples/
-kolm compile           # synthesize → sign → write .kolm
+kolm compile           # synthesize  - sign  - write .kolm
 kolm run file.kolm     # execute, emit receipt
 kolm tune --airgap     # train a LoRA adapter from captured runs
 kolm rag attach docs/  # build BM25 sidecar
@@ -446,8 +661,167 @@ hooks:
   PreRun: ./scripts/redact-pii.sh
   PostRun: ./scripts/log-to-splunk.sh</code></pre>
 
+    <h2 id="remote">Remote access</h2>
+    <p>The default deployment is local. <code>kolm serve --local</code> binds the runtime to your machine; your laptop, phone, or coding agent reach it over your own network. Your prompts and outputs never touch our infrastructure because there isn&rsquo;t any to touch.</p>
+    <p>For teams that want hosted access without trusting a vendor, run the same <code>.kolm</code> inside a <b>TEE</b> (Trusted Execution Environment). Hardware enclaves (AWS Nitro, GCP Confidential, Azure SEV) seal the model, its weights, and the request data so neither kolm nor the cloud provider can read them. Relatively secure, relatively private. Not a cryptographic guarantee, but the strongest honest framing for cloud-hosted inference.</p>
+    <p>What kolm does <em>not</em> do: end-to-end encryption (traffic is local, so there&rsquo;s nothing to encrypt in flight); managed-mesh networking (use your own Tailscale / VPN / private network); or a kolm-operated SaaS that sees your data.</p>
+
+    <h3 id="deploy-modes">Four ways to ship</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:12px 0 22px">
+      <a href="/airgap" style="display:block;padding:14px 16px;border:1px solid var(--line-strong);border-radius:8px;text-decoration:none;color:inherit">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">01 &middot; local</div>
+        <div style="font-weight:500;margin-top:4px">Airgapped</div>
+        <div style="font-size:13.5px;color:var(--ink-mute);margin-top:4px">Zero outbound. Compile, run, verify on a machine that never touches the internet.</div>
+      </a>
+      <a href="/tunnels" style="display:block;padding:14px 16px;border:1px solid var(--line-strong);border-radius:8px;text-decoration:none;color:inherit">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">02 &middot; remote</div>
+        <div style="font-weight:500;margin-top:4px">Tunnels</div>
+        <div style="font-size:13.5px;color:var(--ink-mute);margin-top:4px">Public URL backed by your local <code>.kolm</code>. We relay; the model stays on your hardware.</div>
+      </a>
+      <a href="/byoc" style="display:block;padding:14px 16px;border:1px solid var(--line-strong);border-radius:8px;text-decoration:none;color:inherit">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">03 &middot; cloud</div>
+        <div style="font-weight:500;margin-top:4px">BYOC</div>
+        <div style="font-size:13.5px;color:var(--ink-mute);margin-top:4px">Your cloud, your TEE. Fly, AWS Nitro, GCP / Azure Confidential VM. Attested at deploy time.</div>
+      </a>
+      <a href="/teams" style="display:block;padding:14px 16px;border:1px solid var(--line-strong);border-radius:8px;text-decoration:none;color:inherit">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">04 &middot; share</div>
+        <div style="font-weight:500;margin-top:4px">Teams</div>
+        <div style="font-size:13.5px;color:var(--ink-mute);margin-top:4px">Workspace-scoped concepts, tunnels, deployments. Viewer / member / admin / owner roles.</div>
+      </a>
+    </div>
+
+    <h2 id="openai-compat">OpenAI compatibility</h2>
+    <p>The runtime exposes <code>/v1/chat/completions</code>, <code>/v1/models</code>, and <code>/v1/embeddings</code> at <code>localhost:8765</code>. Point any OpenAI-compatible client at it; tool calls and streaming work as documented. Every request emits a signed receipt. The migration walkthrough lives at <a href="/openai" style="color:var(--accent)">/openai</a>.</p>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code>export OPENAI_API_BASE=http://localhost:8765/v1
+export OPENAI_API_KEY=ks_local
+# any OpenAI client (python, node, curl) now talks to your local .kolm</code></pre>
+
+    <h2 id="agents-patterns">Agent patterns</h2>
+    <p>Wire signed <code>.kolm</code> artifacts into agent frameworks. MCP for Claude Code and Cursor (stdio). Structured outputs for LangGraph nodes. Tool calls for OpenAI Agents. Each step records a receipt; the orchestrator sees deterministic outputs and verifiable provenance. Five concrete patterns at <a href="/agents" style="color:var(--accent)">/agents</a>.</p>
+
+    <h2 id="training-presets">Training presets</h2>
+    <p>Nine named presets cover the training surface. Each one is a YAML block in <code>kolm.yaml</code>; the trainer reads them and dispatches to the right module under <code>apps/trainer/</code>. Most users never touch a hyperparameter.</p>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code># kolm.yaml
+training:
+  preset: lora-fast            # one of: sft, lora-fast, long-context, vlm,
+                               #         merge-adapters, embed, fc-tools,
+                               #         grpo-reasoning, instant
+  base_model: Qwen/Qwen2.5-3B-Instruct
+  k_threshold: 0.85</code></pre>
+    <p>What each preset does:</p>
+    <ul style="color:var(--ink-mute);font-size:14.5px;line-height:1.7;padding-left:18px;max-width:62ch">
+      <li><code>sft</code>. full supervised fine-tune. For when you own the data and want the strongest single-domain model. Slowest, highest VRAM.</li>
+      <li><code>lora-fast</code>. PEFT LoRA, rank 16. Default for most concepts. 5x faster than SFT, 20x smaller adapter.</li>
+      <li><code>long-context</code>. YaRN / Linear PI / NTK scaling. Push base context 4k &rarr; 32k+ with one knob.</li>
+      <li><code>vlm</code>. vision-language LoRA, Qwen2.5-VL family. Vision tower frozen by default.</li>
+      <li><code>merge-adapters</code>. linear / SLERP / DARE / TIES merges over two or more LoRA artifacts.</li>
+      <li><code>embed</code>. embedding model training. InfoNCE + Matryoshka heads.</li>
+      <li><code>fc-tools</code>. function-calling SFT, Hermes-FC schema + tolerant regex parser.</li>
+      <li><code>grpo-reasoning</code>. GRPO online RL with verifiable rewards. DeepSeek R1 pattern.</li>
+      <li><code>instant</code>. zero-data adapter. Synthesize examples via teacher LLM + verifier loop. Two minutes, no labels.</li>
+    </ul>
+    <p>Reference articles for each module live under <a href="/research" style="color:var(--accent)">/research</a>. The frontier-stack rail there cross-links to the implementation file and the paper.</p>
+
+    <h3 id="instant-adapter">Instant adapter</h3>
+    <p>The fastest path from "I have a task" to "I have a signed .kolm." No labeled data, no GPU. The CLI proposes a verifier from your task description, asks a teacher model for candidate pairs, accepts only the ones the verifier passes, and ships the result.</p>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm instant "redact patient names and phone numbers" \
+  --n 64 --teacher gpt-4o-mini --k 0.90 --out phi.kolm</code></pre>
+    <p>Status keys in the JSON output:</p>
+    <ul style="color:var(--ink-mute);font-size:14.5px;line-height:1.7;padding-left:18px;max-width:62ch">
+      <li><code>ready</code>. verifier converged at or above your K threshold. You can ship.</li>
+      <li><code>needs_teacher</code>. set <code>KOLM_TEACHER_BASE</code>, <code>KOLM_TEACHER_KEY</code>, <code>KOLM_TEACHER_MODEL</code> (OpenAI-compatible). Any vendor.</li>
+      <li><code>low_quality</code>. reject rate too high. Tighten the task description or lower <code>--n</code> for a faster iteration loop.</li>
+    </ul>
+    <p>The verifier is picked automatically by keyword (<code>regex</code> for redact / strip / mask, <code>json_schema</code> for extract / classify, <code>answer_key</code> for label / route). Pass <code>--schema schema.json</code> to override.</p>
+
+    <h3 id="improve-loop">kolm improve</h3>
+    <p>Continuous compounding. Run <code>kolm improve</code> on any existing <code>.kolm</code>: it captures the last N failed receipts from your runtime, distills them into new training pairs, recompiles, and only swaps the live artifact if the new K-score beats the old by at least <code>--margin</code>.</p>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code>kolm improve phi-redactor.kolm --window 24h --margin 0.01 --auto-swap</code></pre>
+    <p>The hot-swap is a symlink update plus <code>SIGHUP</code> to running servers. Zero downtime, fully reversible: the prior artifact stays on disk and <code>kolm rollback</code> restores it in one command.</p>
+
+    <h2 id="sdks">SDKs. embed in 4 platforms</h2>
+    <p>Each SDK is a thin wrapper around the runtime loader. <code>load()</code> returns a callable; <code>predict()</code> runs the artifact; receipts emit on every call. No vendor-specific glue; the artifact is the contract.</p>
+
+    <h3 id="sdk-python">Python. <code>pip install kolm</code></h3>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code>from kolm import load
+
+model = load("phi-redactor.kolm", verify="on")
+out = model.predict("Patient John Doe, MRN 8847-21, called from 555-201-8842.")
+print(out.text)        # "Patient [NAME], MRN [MRN], called from [PHONE]."
+print(out.receipt.cid) # "cidv1:sha256:..."</code></pre>
+    <p>Backend autopick order: <code>gguf</code> (llama-cpp-python) &rarr; <code>onnx</code> (onnxruntime) &rarr; <code>remote</code> (<code>KOLM_RUNTIME_URL</code>) &rarr; <code>transformers</code> + <code>peft</code>. <code>verify="strict"</code> raises on signature or CID mismatch; <code>verify="off"</code> skips for trusted local artifacts. Default is <code>"on"</code>. check signature, warn-and-continue on missing.</p>
+
+    <h3 id="sdk-swift">Swift. SwiftPM / iOS &amp; macOS</h3>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code>import Kolm
+
+let model = try await Kolm.load(named: "phi-redactor")
+let out = try await model.predict("Patient John Doe...")
+print(out.text)</code></pre>
+    <p>Bundles look for <code>.kolm</code> in the app bundle. Backend pick: CoreML (<code>.mlpackage</code>) &rarr; MLX (<code>.mlx</code>) &rarr; GGUF (<code>.gguf</code>). All three are unpacked from the signed zip at first load and cached under <code>Library/Caches/kolm/&lt;cid&gt;/</code>. <code>KolmConfiguration.shared.hmacSecret</code> binds your verification key.</p>
+
+    <h3 id="sdk-kotlin">Kotlin. Android / Gradle</h3>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code>import ai.kolm.Kolm
+
+val model = Kolm.load(context, "phi-redactor.kolm")
+val out = model.predict("Patient John Doe...")
+Log.d("kolm", out.text)</code></pre>
+    <p>The Kotlin SDK ships as an AAR with no runtime deps; bring your own llama.cpp / ExecuTorch / ONNX runtime AAR. The loader prints crisp errors when a backend is missing: <code>kolm: no runtime found. add net.java.jllama:jllama or org.pytorch:executorch-android to dependencies</code>.</p>
+
+    <h3 id="sdk-rn">React Native. <code>react-native-kolm</code></h3>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code>import Kolm from 'react-native-kolm';
+
+await Kolm.setConfig({ verify: 'on', hmacSecret: process.env.KOLM_SECRET });
+const model = await Kolm.load(require('./phi-redactor.kolm'));
+const out = await model.predict('Patient John Doe...');
+console.log(out.text);</code></pre>
+    <p>HTTPS sources cache via <code>react-native-fs</code> under <code>CachesDirectoryPath</code>. iOS dispatches to the Swift backend; Android to the Kotlin backend. One API surface, two native paths.</p>
+
+    <p style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin-top:18px"><a href="/sdks" style="color:var(--accent)">read the full SDK reference &rarr;</a></p>
+
+    <h2 id="compliance-packs">Compliance packs</h2>
+    <p>A compliance pack is a versioned bundle of (recipe.json + evidence.md + dpia.md + mrm.md + controls.md). It encodes the regulatory shape of a task. what redactions are mandatory, which fields must validate, what auditors will ask. so your engineering team builds against the same target your legal team signed off on.</p>
+    <p>Three packs ship today. Each lives under <code>data/compliance-packs/&lt;pack&gt;/</code>.</p>
+
+    <h3 id="hipaa-onboarding">HIPAA. 2-hour onboarding path</h3>
+    <p>Pack: <code>hipaa-phi-redactor</code>. K-threshold <code>0.92</code>. Preset <code>lora-fast</code>. Base <code>Qwen/Qwen2.5-3B-Instruct</code>. Verifier <code>kind="regex"</code> with <code>must_not_contain</code> SSN / email / phone post-redaction.</p>
+    <ol style="color:var(--ink-mute);font-size:14.5px;line-height:1.7;padding-left:20px;max-width:62ch">
+      <li><b>Minute 0&ndash;5:</b> <code>kolm init --pack hipaa-phi-redactor</code>. Scaffolds <code>kolm.yaml</code>, the synthetic seed corpus, the verifier, and the audit-log shape.</li>
+      <li><b>Minute 5&ndash;30:</b> drop your own labeled examples into <code>examples/</code> (or skip and use seeds). 18 HIPAA Safe Harbor categories pre-mapped.</li>
+      <li><b>Minute 30&ndash;90:</b> <code>kolm compile</code>. Pattern path runs in seconds; LoRA path takes ~45 min on a single A10. K-gate at 0.92.</li>
+      <li><b>Minute 90&ndash;110:</b> <code>kolm sign --credential</code>. Emits the <code>kolm-credential/0.1</code> provenance credential and signs the artifact.</li>
+      <li><b>Minute 110&ndash;120:</b> <code>kolm inspect dist/phi-redactor.kolm --verify on</code>. Receipt body verifies, CID round-trips, credential signature checks. Hand to security review.</li>
+    </ol>
+    <div class="note"><b>What the pack does NOT do:</b> it is not Expert Determination certification. The pack ships the Safe Harbor identifier path. Expert Determination requires a qualified statistician&rsquo;s sign-off. see <code>evidence.md</code> for scope language you can paste into your DPA.</div>
+
+    <h3 id="pack-sr-11-7">SR 11-7. Fed Model Risk Management</h3>
+    <p>Pack: <code>finance-sr11-7</code>. K-threshold <code>0.90</code>. Preset <code>fc-tools</code>, lora_rank <code>32</code>. Verifier <code>kind="json_schema"</code> requiring <code>category</code> / <code>amount</code> / <code>currency</code> / <code>confidence</code> on every classification output, with a fixed enum of flags (<code>aml</code>, <code>ofac</code>, <code>structuring</code>, <code>high-risk-geo</code>, <code>pep</code>, <code>fraud-likely</code>). The MRM doc walks the three SR 11-7 components: model development, validation, governance.</p>
+
+    <h3 id="pack-sox-lite">SOX-lite. ITGC for AI</h3>
+    <p>Pack: <code>sox-lite</code>. K-threshold <code>0.88</code>. Preset <code>lora-fast</code>, lora_rank <code>8</code>. Verifier <code>kind="answer_key"</code> with fixed keys (<code>forward_looking</code> / <code>historical</code> / <code>risk_factor</code>). The <code>controls.md</code> doc maps COSO ITGC test points to receipt fields: change management &rarr; <code>manifest.hashes</code>, access &rarr; <code>credential.signer</code>, ops &rarr; <code>receipt.chain</code>.</p>
+
+    <p style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin-top:18px"><a href="/compliance-packs" style="color:var(--accent)">browse all packs &rarr;</a></p>
+
+    <h2 id="showcase-build">Showcase. healthcare end-to-end</h2>
+    <p>A buildable proof. One command. Two minutes. Compiles a real signed <code>.kolm</code> from the HIPAA pack against synthetic seeds, then redacts arbitrary input through the artifact.</p>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code>node apps/showcase/healthcare/build.mjs
+
+# output:
+# k-score: 0.982 (threshold 0.92)
+# leak rate: 0 (zero raw PHI passed through)
+# coverage: 21/18 HIPAA Safe Harbor categories
+# wrote: dist/phi-redactor.kolm (9509 bytes)
+# cid:   cidv1:sha256:1bcf2323...</code></pre>
+    <pre class="code-block"><button class="copy" type="button">copy</button><code>node apps/showcase/healthcare/run.mjs \
+  "Patient John Doe, MRN 8847-21, called from 555-201-8842."
+
+# Patient [NAME], MRN [MRN], called from [PHONE].
+# cid: cidv1:sha256:1bcf2323...
+# credential: cred_...
+# K: 0.982  redactions: 3</code></pre>
+    <p>Source under <code>apps/showcase/healthcare/</code>. Hosted live demo at <a href="/showcase" style="color:var(--accent)">/showcase</a>. The <code>.kolm</code> in the repo is reproducible. rebuild it on your machine and confirm the CID byte-for-byte.</p>
+
     <h2 id="next">Next</h2>
-    <p style="max-width:62ch">Read one. Build one. You're done with the reference · pick the next bite.</p>
+    <p style="max-width:62ch">Read one. Build one. You're done with the reference ·pick the next bite.</p>
     <div class="docs-next">
       <a href="/quickstart">
         <div class="lbl">continue &rarr;</div>
@@ -459,10 +833,10 @@ hooks:
         <div class="ttl">RS-1 wire spec</div>
         <div class="sub">Every byte of the protocol. Signed, versioned, public.</div>
       </a>
-      <a href="/cookbook">
-        <div class="lbl">recipes &rarr;</div>
-        <div class="ttl">Cookbook</div>
-        <div class="sub">22 working examples. Copy, swap your data, ship.</div>
+      <a href="/showcase">
+        <div class="lbl">demo &rarr;</div>
+        <div class="ttl">Healthcare showcase</div>
+        <div class="sub">Buildable HIPAA redactor, K=0.982. Live in two minutes.</div>
       </a>
       <a href="/evolve">
         <div class="lbl">tune &rarr;</div>
@@ -474,24 +848,53 @@ hooks:
   </article>
 </main>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <div class="meta">kolm docs &middot; v0.7.8 &middot; <a href="/changelog">changelog</a> &middot; <a href="/spec">RS-1 spec</a></div>
-    <div class="links">
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
       <div>
-        <div class="col-h">product</div>
-        <a href="/compile">compile</a>
-        <a href="/run">run</a>
-        <a href="/serve">serve</a>
-        <a href="/evolve">evolve</a>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
       </div>
       <div>
-        <div class="col-h">build</div>
-        <a href="/cookbook">cookbook</a>
-        <a href="/api">endpoint index</a>
-        <a href="/spec">spec</a>
-        <a href="/dashboard">dashboard</a>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
       </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
     </div>
   </div>
 </footer>

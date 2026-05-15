@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Defense &amp; intel · kolm</title>
-<meta name="description" content="kolm's defense architecture direction: signed offline AI artifacts, HMAC provenance, local runtime, and customer-led compliance review for regulated deployments.">
-<meta name="theme-color" content="#0b0d10">
-<meta name="color-scheme" content="dark light">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Airgapped AI for classified and on-prem deployment | kolm</title>
+<meta name="description" content="Signed offline AI artifacts for airgapped and classified deployments. HMAC provenance, local runtime, customer-led compliance review.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm &middot; defense AI without the cloud">
 <meta property="og:description" content="Signed offline artifact provenance for regulated and disconnected environments.">
@@ -42,14 +43,14 @@
   header.site .left { display: flex; align-items: center; gap: 36px; }
   header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
   header.site .brand img { height: 18px; width: 18px; }
-  header.site .brand span { font-weight: 540; font-size: 16px; letter-spacing: 0; }
+  header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
   header.site nav { display: flex; gap: 22px; }
   header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
   header.site nav a:hover { color: var(--ink); }
   header.site .right { display: flex; align-items: center; gap: 14px; }
   header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
   header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 540; }
+  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
   header.site .right .cta:hover { background: #fff; }
   @media (max-width: 720px) { header.site nav { display: none; } }
 
@@ -68,11 +69,11 @@
   h1 { margin: 24px 0 22px; font-size: clamp(38px, 5.6vw, 64px); line-height: 1.05; font-weight: 500; letter-spacing: 0; max-width: 19ch; }
   h1 .tone { color: var(--accent); }
   p.lede { margin: 0 0 32px; font-size: clamp(16px, 1.3vw, 18.5px); line-height: 1.55; color: var(--ink-mute); max-width: 56ch; }
-  p.lede b { color: var(--ink); font-weight: 540; }
+  p.lede b { color: var(--ink); font-weight: 500; }
   p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
 
   .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 540; transition: background 120ms; }
+  a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 500; transition: background 120ms; }
   a.btn-primary:hover { background: #fff; }
   a.btn-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); padding: 11px 14px; font-size: 14px; font-weight: 500; transition: color 120ms; }
   a.btn-link:hover { color: var(--accent); }
@@ -81,7 +82,7 @@
   section + section { border-top: 1px solid var(--line); }
   .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px; }
   .eyebrow .num { color: var(--accent); }
-  h2 { margin: 0 0 18px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; font-weight: 540; letter-spacing: 0; max-width: 24ch; }
+  h2 { margin: 0 0 18px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; font-weight: 500; letter-spacing: 0; max-width: 24ch; }
   h2 .tone { color: var(--accent); }
   p.sec-lede { margin: 0 0 40px; font-size: 16px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
 
@@ -93,10 +94,10 @@
     display: flex; flex-direction: column; min-height: 184px;
   }
   .pain-card .lab { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
-  .pain-card .big { margin: 14px 0 10px; font-size: 36px; font-weight: 540; letter-spacing: 0; line-height: 1; color: var(--ink); }
+  .pain-card .big { margin: 14px 0 10px; font-size: 36px; font-weight: 500; letter-spacing: 0; line-height: 1; color: var(--ink); }
   .pain-card .big .u { font-size: 13px; font-weight: 400; color: var(--ink-mute); margin-left: 4px; letter-spacing: 0; }
   .pain-card p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
-  .pain-card p b { color: var(--accent); font-weight: 540; }
+  .pain-card p b { color: var(--accent); font-weight: 500; }
 
   .triplets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   @media (max-width: 880px) { .triplets { grid-template-columns: 1fr; } }
@@ -107,10 +108,10 @@
   .trip .icn {
     display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center;
     border-radius: 6px; background: var(--accent-soft); color: var(--accent);
-    font-family: var(--mono); font-size: 14px; font-weight: 540;
+    font-family: var(--mono); font-size: 14px; font-weight: 500;
     margin-bottom: 16px;
   }
-  .trip h3 { margin: 0 0 10px; font-size: 17px; font-weight: 540; letter-spacing: 0; line-height: 1.3; color: var(--ink); }
+  .trip h3 { margin: 0 0 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; line-height: 1.3; color: var(--ink); }
   .trip p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
   .trip p b { color: var(--ink); font-weight: 500; }
 
@@ -123,7 +124,7 @@
   .uc .hd { padding: 14px 22px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--ink-mute); }
   .uc .hd .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
   .uc .body { padding: 30px 30px 26px; }
-  .uc .body h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: 0; font-weight: 540; color: var(--ink); }
+  .uc .body h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: 0; font-weight: 500; color: var(--ink); }
   .uc .body p.note { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.55; }
   .uc .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line); }
   @media (max-width: 720px) { .uc .steps { grid-template-columns: 1fr; } }
@@ -131,7 +132,7 @@
   .uc .step:last-child { border-right: none; }
   @media (max-width: 720px) { .uc .step { border-right: none; border-bottom: 1px solid var(--line); } .uc .step:last-child { border-bottom: none; } }
   .uc .step .n { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; color: var(--accent); }
-  .uc .step h4 { margin: 10px 0 8px; font-size: 14.5px; font-weight: 540; letter-spacing: 0; color: var(--ink); }
+  .uc .step h4 { margin: 10px 0 8px; font-size: 14.5px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
   .uc .step p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
 
   .compl-row {
@@ -146,7 +147,7 @@
   .compl-row .item:last-child { border-right: none; }
   @media (max-width: 880px) { .compl-row .item:nth-child(2) { border-right: none; } .compl-row .item:nth-child(1), .compl-row .item:nth-child(2) { border-bottom: 1px solid var(--line); } }
   .compl-row .item .nm { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
-  .compl-row .item .v { margin-top: 10px; font-size: 17px; font-weight: 540; letter-spacing: 0; color: var(--ink); }
+  .compl-row .item .v { margin-top: 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
   .compl-row .item p { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
   .compl-row .item .v.acc { color: var(--accent); }
 
@@ -211,6 +212,7 @@
       <nav>
         <a href="/use-cases">Solutions</a>
         <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
         <a href="/pricing">Pricing</a>
       </nav>
     </div>
@@ -222,15 +224,16 @@
   </div>
 </header>
 
-<section class="hero">
+<section class="hero frontier-bg">
   <div class="wrap">
+    <div class="hero-eyebrow"><span class="he-dot"></span>Defense &middot; disconnected AI &middot; signed artifacts</div>
     <h1>Design for disconnected AI.<br><span class="tone">Prove every artifact.</span></h1>
     <p class="lede"><b>kolm</b> packages a task into a signed artifact with manifest hashes, evals, and HMAC-bound receipts. The current product can support architecture pilots for disconnected environments, but FedRAMP, CMMC, ITAR, and cross-domain deployment decisions remain customer-led compliance work, not public product certifications.</p>
     <div class="cta-row">
-      <a href="/signup?plan=enterprise" class="btn-primary">Start Enterprise</a>
+      <a href="mailto:founders@kolm.ai?subject=kolm%20classified%20deployment%20brief" class="btn-primary">Request a classified deployment brief</a>
       <a href="/security" class="btn-link">Security &amp; provenance posture <span aria-hidden="true">&rarr;</span></a>
     </div>
-    <div style="margin-top:14px"><a href="mailto:founders@kolm.ai?subject=kolm%20defense%20pilot" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">or talk to founders &rarr;</a></div>
+    <div style="margin-top:14px"><a href="/signup?plan=enterprise" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">or start an Enterprise trial &rarr;</a></div>
   </div>
 </section>
 
@@ -383,7 +386,7 @@
 <section class="closing">
   <div class="wrap">
     <h2>Ship operator-side AI<br><span class="tone">that runs without a link.</span></h2>
-    <p class="lede" style="max-width:60ch">Provision the Enterprise tier, install the CLI, compile your first artifact against your own examples, and verify the receipt offline. The full deployment is self-serve; the BAA and DPA live behind your dashboard the moment your tenant is created.</p>
+    <p class="lede" style="max-width:60ch">Provision the Enterprise tier, install the CLI, compile your first AI against your own examples, and verify the receipt offline. The full deployment is self-serve; the BAA and DPA live behind your dashboard the moment your tenant is created.</p>
     <div class="cta-row">
       <a href="/signup?plan=enterprise" class="btn-primary">Start Enterprise</a>
       <a href="/security" class="btn-link">Read the security page <span aria-hidden="true">&rarr;</span></a>
@@ -392,18 +395,53 @@
 </section>
 
 <footer class="site">
-  <div class="wrap row">
-    <span>kolmogorov · 2026</span>
-    <span>compile once · run anywhere</span>
-  </div>
-  <div class="wrap row" style="margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint)">
-    <a href="/manifesto" style="color:inherit">Manifesto</a>
-    <a href="/trust" style="color:inherit">Trust</a>
-    <a href="/security" style="color:inherit">Security</a>
-    <a href="/privacy" style="color:inherit">Privacy</a>
-    <a href="/terms" style="color:inherit">Terms</a>
-    <a href="/changelog" style="color:inherit">Changelog</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener" style="color:inherit">GitHub</a>
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
   </div>
 </footer>
 

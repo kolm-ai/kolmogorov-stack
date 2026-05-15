@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Models · the base-model and device registry | kolm</title>
+<meta name="description" content="Every base model and device kolm compiles against. Qwen 2.5, Llama 3.2, Gemma 3, Phi 3.5, SmolLM2. Defaults per device, license, VRAM, context. Override with kolm models pin.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="Models · kolm">
+<meta property="og:description" content="The base-model + device registry kolm compiles against. Defaults, licenses, VRAM, context.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Models · kolm">
+<meta name="twitter:description" content="The base-model + device registry kolm compiles against.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/models">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/models">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="/escape.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "kolm base-model and device registry",
+      "description": "The catalog of base models and devices kolm compiles for. Qwen 2.5 default, Llama 3.2 / Gemma 3 / Phi 3.5 / SmolLM2 alternates, RTX 5090 / 4090 / A100 / H100 / H200 / Apple Silicon / mobile.",
+      "url": "https://kolm.ai/models",
+      "author": {"@type": "Organization", "name": "Kolmogorov"},
+      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+      "datePublished": "2026-05-14",
+      "license": "https://opensource.org/licenses/MIT"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+        {"@type": "ListItem", "position": 2, "name": "Models", "item": "https://kolm.ai/models"}
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220,0.10);--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:rgba(236,231,220,0.30)}
+
+  .wrap{max-width:980px;margin:0 auto;padding:0 32px;width:100%}
+  @media(max-width:720px){.wrap{padding:0 20px}}
+
+  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+  @media(max-width:720px){header.site .row{padding:0 20px}}
+  header.site .left{display:flex;align-items:center;gap:36px}
+  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
+  header.site nav{display:flex;gap:22px}
+  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+  header.site .right{display:flex;align-items:center;gap:14px}
+  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+  header.site .right .ghost:hover{color:var(--ink)}
+  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
+
+  main{padding:88px 0 96px;flex:1;position:relative;overflow:hidden}
+  main::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0.32;background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237dd3fc' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237dd3fc' stop-opacity='0.20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3Cpath d='M -200 360 Q 440 240 780 340 T 1480 320 T 1700 330'/%3E%3C/g%3E%3C/svg%3E");background-size:cover;background-position:center top;mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%);-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%)}
+  main > .wrap { position: relative; z-index: 2; }
+
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7dd3fc;box-shadow:0 0 10px #7dd3fc;animation:pulse-dot 2.4s ease-in-out infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+
+  h1{font-weight: 500;letter-spacing:-0.035em;line-height:0.96;font-size:clamp(48px,6.4vw,92px);margin:0 0 22px;max-width:14ch}
+  .lede{color:var(--ink-mute);font-size:clamp(16px,1.3vw,18px);margin:0 0 48px;max-width:64ch;line-height:1.55}
+  h2{font-weight: 500;letter-spacing:0;font-size:24px;margin:48px 0 16px;border-top:1px solid var(--line);padding-top:32px}
+  h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:28px 0 8px}
+  p{color:var(--ink-mute);margin:0 0 14px}
+  p strong{color:var(--ink);font-weight: 500}
+  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+  ul li{margin:6px 0}
+  ul li strong{color:var(--ink);font-weight: 500}
+
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:24px 0}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .card{display:block;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:20px 22px;color:inherit}
+  .card .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+  .card .name{font-size:15px;font-weight: 500;color:var(--ink)}
+  .card .tag{font-family:var(--mono);font-size:10.5px;color:var(--good);background:rgba(126,240,210,0.10);border:1px solid rgba(126,240,210,0.20);border-radius:4px;padding:2px 6px;letter-spacing:0}
+  .card .tag.alt{color:var(--warn);background:rgba(255,212,121,0.08);border-color:rgba(255,212,121,0.20)}
+  .card .tag.mute{color:var(--ink-faint);background:transparent;border-color:var(--line-strong)}
+  .card .desc{color:var(--ink-mute);font-size:13.5px;line-height:1.55;margin:0}
+  .card .desc .pin{font-family:var(--mono);font-size:11.5px;color:var(--ink);}
+
+  .table{width:100%;border-collapse:collapse;margin:16px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+  .table tr:last-child td{border-bottom:0}
+  .table td code{font-size:12px}
+  .table td.num{font-family:var(--mono);color:var(--ink)}
+  .scroll-x{overflow-x:auto;margin:16px -4px}
+  .scroll-x .table{margin:0 4px;min-width:760px}
+
+  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+  footer a{color:var(--ink-mute)}
+  footer a:hover{color:var(--ink)}
+  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+  .footer-row a{color:inherit}
+</style>
+<link rel="stylesheet" href="/brand-refresh.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="row">
+    <div class="left">
+      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+      <nav>
+        <a href="/use-cases">Solutions</a>
+        <a href="/docs">Developers</a>
+        <a href="/research">Research</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="right">
+      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+      <a href="/signin" class="ghost">sign in</a>
+      <a href="/signup" class="cta">Get API key &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="hero-eyebrow"><span class="he-dot"></span>Models &amp; devices . v0.1</div>
+    <h1>Compile to your hardware.</h1>
+    <p class="lede">Every <code>.kolm</code> artifact is bound to a base model and a target device. The defaults pick themselves from what kolm detects on the box. Override either at the CLI; both ride the receipt chain so verification is reproducible.</p>
+
+    <h2>Defaults by device</h2>
+    <p>What <code>kolm compile</code> picks when you don't pass <code>--base-model</code> or <code>--target-device</code>. <code>kolm gpu detect</code> returns the device id; the picker walks the table below.</p>
+    <div class="scroll-x">
+    <table class="table">
+      <thead><tr><th>Device</th><th>Class</th><th>VRAM</th><th>Default train</th><th>Default infer</th></tr></thead>
+      <tbody>
+        <tr><td><code>rtx-5090</code></td><td>training</td><td class="num">32 GB</td><td><code>Qwen2.5-7B-Instruct</code></td><td><code>Qwen2.5-7B-Instruct</code></td></tr>
+        <tr><td><code>rtx-4090</code></td><td>training</td><td class="num">24 GB</td><td><code>Qwen2.5-3B-Instruct</code></td><td><code>Qwen2.5-3B-Instruct</code></td></tr>
+        <tr><td><code>rtx-3090</code></td><td>training</td><td class="num">24 GB</td><td><code>Qwen2.5-3B-Instruct</code></td><td><code>Qwen2.5-3B-Instruct</code></td></tr>
+        <tr><td><code>a100-40gb</code></td><td>training</td><td class="num">40 GB</td><td><code>Qwen2.5-7B-Instruct</code></td><td><code>Qwen2.5-7B-Instruct</code></td></tr>
+        <tr><td><code>a100-80gb</code></td><td>training</td><td class="num">80 GB</td><td><code>Qwen2.5-14B-Instruct</code></td><td><code>Qwen2.5-7B-Instruct</code></td></tr>
+        <tr><td><code>h100-80gb</code></td><td>training</td><td class="num">80 GB</td><td><code>Qwen2.5-14B-Instruct</code></td><td><code>Qwen2.5-7B-Instruct</code></td></tr>
+        <tr><td><code>h200-141gb</code></td><td>training</td><td class="num">141 GB</td><td><code>Qwen2.5-14B-Instruct</code></td><td><code>Qwen2.5-7B-Instruct</code></td></tr>
+        <tr><td><code>apple-m3-max</code></td><td>training</td><td class="num">64 GB</td><td><code>Qwen2.5-3B-Instruct</code></td><td><code>Qwen2.5-3B-Instruct</code></td></tr>
+        <tr><td><code>apple-m2-pro</code></td><td>inference</td><td class="num">16 GB</td><td>n/a</td><td><code>Qwen2.5-3B-Instruct</code> (MLX)</td></tr>
+        <tr><td><code>iphone-15-pro</code></td><td>inference</td><td class="num">4 GB</td><td>n/a</td><td><code>Qwen2.5-1.5B-Instruct</code> (4-bit)</td></tr>
+        <tr><td><code>pixel-8-pro</code></td><td>inference</td><td class="num">3 GB</td><td>n/a</td><td><code>gemma-3-1b-it</code> (4-bit)</td></tr>
+        <tr><td><code>laptop-igpu</code></td><td>inference</td><td class="num">2 GB</td><td>n/a</td><td><code>Qwen2.5-1.5B-Instruct</code></td></tr>
+        <tr><td><code>cpu-x86_64</code></td><td>inference</td><td class="num">n/a</td><td><code>SmolLM2-1.7B-Instruct</code></td><td><code>Qwen2.5-0.5B-Instruct</code></td></tr>
+        <tr><td><code>wasm</code></td><td>inference</td><td class="num">n/a</td><td>n/a</td><td><code>Qwen2.5-0.5B-Instruct</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>The default pick: Qwen 2.5 3B Instruct</h2>
+    <p>When no device is detected and no flag is passed, <code>kolm compile</code> resolves <code>base_model</code> to <code>Qwen/Qwen2.5-3B-Instruct</code>. Why:</p>
+    <ul>
+      <li><strong>Apache 2.0.</strong> Commercial-redistributable, no MAU clause, no acceptable-use policy that has to be re-read per buyer.</li>
+      <li><strong>Native tool use.</strong> Distillation targets that emit JSON tool-calls work zero-shot.</li>
+      <li><strong>32K context</strong> native, 128K with YaRN. Long enough for clinical notes, contracts, long support threads.</li>
+      <li><strong>29 languages.</strong> Healthcare, finance, legal callers frequently need non-English.</li>
+      <li><strong>3.09B params.</strong> Fits a single 24 GB consumer GPU at bf16 + LoRA r=16 with room for optimizer state. Drops to under 2 GB on disk for the LoRA adapter.</li>
+      <li><strong>Beats Llama-3.2-3B</strong> on MMLU, GSM8K, MATH, HumanEval, IFEval per the Qwen 2.5 tech report and the public Hugging Face Open LLM Leaderboard.</li>
+    </ul>
+
+    <h2>Full base-model registry</h2>
+    <p>16 models. <code>kolm models list</code> prints the same shape at the terminal.</p>
+    <div class="scroll-x">
+    <table class="table">
+      <thead><tr><th>Model</th><th>License</th><th>Params</th><th>Ctx</th><th>Tool use</th><th>Multilingual</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td><code>Qwen/Qwen2.5-0.5B-Instruct</code></td><td>Apache 2.0</td><td class="num">0.50 B</td><td class="num">32 K</td><td>yes</td><td>29 langs</td><td>edge / wasm</td></tr>
+        <tr><td><code>Qwen/Qwen2.5-1.5B-Instruct</code></td><td>Apache 2.0</td><td class="num">1.54 B</td><td class="num">32 K</td><td>yes</td><td>29 langs</td><td>mobile</td></tr>
+        <tr><td><code>Qwen/Qwen2.5-3B-Instruct</code> &larr; <strong>default</strong></td><td>Apache 2.0</td><td class="num">3.09 B</td><td class="num">32 K / 128 K YaRN</td><td>yes</td><td>29 langs</td><td>laptop / 4090</td></tr>
+        <tr><td><code>Qwen/Qwen2.5-7B-Instruct</code></td><td>Apache 2.0</td><td class="num">7.62 B</td><td class="num">128 K</td><td>yes</td><td>29 langs</td><td>5090 / A100</td></tr>
+        <tr><td><code>Qwen/Qwen2.5-Coder-7B-Instruct</code></td><td>Apache 2.0</td><td class="num">7.62 B</td><td class="num">128 K</td><td>yes</td><td>code-first</td><td>code distill</td></tr>
+        <tr><td><code>Qwen/Qwen2.5-14B-Instruct</code></td><td>Apache 2.0</td><td class="num">14.7 B</td><td class="num">128 K</td><td>yes</td><td>29 langs</td><td>A100 80 / H100</td></tr>
+        <tr><td><code>meta-llama/Llama-3.2-1B-Instruct</code></td><td>Llama 3.2 Community</td><td class="num">1.24 B</td><td class="num">128 K</td><td>yes</td><td>English-first</td><td>mobile alternate</td></tr>
+        <tr><td><code>meta-llama/Llama-3.2-3B-Instruct</code></td><td>Llama 3.2 Community</td><td class="num">3.21 B</td><td class="num">128 K</td><td>yes</td><td>English-first</td><td>3B alternate</td></tr>
+        <tr><td><code>meta-llama/Llama-3.1-8B-Instruct</code></td><td>Llama 3.1 Community</td><td class="num">8.03 B</td><td class="num">128 K</td><td>yes</td><td>English-first</td><td>8B alternate</td></tr>
+        <tr><td><code>microsoft/Phi-3.5-mini-instruct</code></td><td>MIT</td><td class="num">3.82 B</td><td class="num">128 K</td><td>no</td><td>multilingual</td><td>reasoning-first</td></tr>
+        <tr><td><code>google/gemma-3-1b-it</code></td><td>Gemma ToU</td><td class="num">1.00 B</td><td class="num">32 K</td><td>partial</td><td>140 langs</td><td>mobile (Pixel)</td></tr>
+        <tr><td><code>google/gemma-3-4b-it</code></td><td>Gemma ToU</td><td class="num">4.30 B</td><td class="num">128 K</td><td>partial</td><td>140 langs</td><td>vision target</td></tr>
+        <tr><td><code>google/gemma-3-12b-it</code></td><td>Gemma ToU</td><td class="num">12.2 B</td><td class="num">128 K</td><td>partial</td><td>140 langs</td><td>vision alternate</td></tr>
+        <tr><td><code>google/gemma-2-2b-it</code></td><td>Gemma ToU</td><td class="num">2.61 B</td><td class="num">8 K</td><td>no</td><td>English-first</td><td>tiny alt</td></tr>
+        <tr><td><code>mistralai/Ministral-3B-Instruct-2410</code></td><td>MRL (Mistral Research)</td><td class="num">3.00 B</td><td class="num">128 K</td><td>yes</td><td>multilingual</td><td>3B alternate</td></tr>
+        <tr><td><code>HuggingFaceTB/SmolLM2-1.7B-Instruct</code></td><td>Apache 2.0</td><td class="num">1.71 B</td><td class="num">8 K</td><td>no</td><td>English-first</td><td>CPU fallback</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p><strong>License posture.</strong> kolm defaults to Apache 2.0 because that's the license least likely to require legal review in regulated industries. Llama and Gemma stay in the registry as <em>opt-in</em>; pin them with <code>kolm models pin meta-llama/Llama-3.2-3B-Instruct</code> if your buyer accepts the terms.</p>
+
+    <h2>Device registry</h2>
+    <p>14 device profiles. <code>kolm gpu detect</code> picks a row by parsing <code>nvidia-smi</code> output (NVIDIA), Metal device id (Apple), or falling back to <code>cpu-x86_64</code> / <code>wasm</code>.</p>
+    <div class="scroll-x">
+    <table class="table">
+      <thead><tr><th>Device</th><th>Arch</th><th>VRAM</th><th>Attention</th><th>Min CUDA</th><th>Min torch</th><th>FP4 / FP8 / BF16</th></tr></thead>
+      <tbody>
+        <tr><td><code>rtx-5090</code></td><td>Blackwell sm_120</td><td class="num">32 GB</td><td><code>fa3</code></td><td class="num">12.8</td><td class="num">2.7</td><td>yes / yes / yes</td></tr>
+        <tr><td><code>rtx-4090</code></td><td>Ada sm_89</td><td class="num">24 GB</td><td><code>fa2</code></td><td class="num">12.1</td><td class="num">2.4</td><td>no / yes / yes</td></tr>
+        <tr><td><code>rtx-3090</code></td><td>Ampere sm_86</td><td class="num">24 GB</td><td><code>fa2</code></td><td class="num">11.8</td><td class="num">2.2</td><td>no / no / yes</td></tr>
+        <tr><td><code>a100-40gb</code></td><td>Ampere sm_80</td><td class="num">40 GB</td><td><code>fa2</code></td><td class="num">11.8</td><td class="num">2.2</td><td>no / no / yes</td></tr>
+        <tr><td><code>a100-80gb</code></td><td>Ampere sm_80</td><td class="num">80 GB</td><td><code>fa2</code></td><td class="num">11.8</td><td class="num">2.2</td><td>no / no / yes</td></tr>
+        <tr><td><code>h100-80gb</code></td><td>Hopper sm_90</td><td class="num">80 GB</td><td><code>fa3</code></td><td class="num">12.4</td><td class="num">2.4</td><td>no / yes / yes</td></tr>
+        <tr><td><code>h200-141gb</code></td><td>Hopper sm_90</td><td class="num">141 GB</td><td><code>fa3</code></td><td class="num">12.4</td><td class="num">2.4</td><td>no / yes / yes</td></tr>
+        <tr><td><code>apple-m3-max</code></td><td>Apple Silicon</td><td class="num">64 GB</td><td><code>mlx</code></td><td>n/a</td><td>n/a</td><td>no / no / yes</td></tr>
+        <tr><td><code>apple-m2-pro</code></td><td>Apple Silicon</td><td class="num">16 GB</td><td><code>mlx</code></td><td>n/a</td><td>n/a</td><td>no / no / yes</td></tr>
+        <tr><td><code>iphone-15-pro</code></td><td>A17 Pro</td><td class="num">4 GB</td><td><code>coreml</code></td><td>n/a</td><td>n/a</td><td>no / no / partial</td></tr>
+        <tr><td><code>pixel-8-pro</code></td><td>Tensor G3</td><td class="num">3 GB</td><td><code>mediapipe</code></td><td>n/a</td><td>n/a</td><td>no / no / partial</td></tr>
+        <tr><td><code>laptop-igpu</code></td><td>Intel Arc / Iris</td><td class="num">2 GB</td><td><code>directml</code></td><td>n/a</td><td>n/a</td><td>no / no / partial</td></tr>
+        <tr><td><code>cpu-x86_64</code></td><td>any x86_64</td><td class="num">n/a</td><td><code>sdpa</code></td><td>n/a</td><td>n/a</td><td>no / no / no</td></tr>
+        <tr><td><code>wasm</code></td><td>wasm32</td><td class="num">n/a</td><td><code>sdpa</code></td><td>n/a</td><td>n/a</td><td>no / no / no</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>Device-fit contract</h2>
+    <p>Every <code>.kolm</code> artifact carries <code>target_device</code> and <code>train_device</code> in the manifest. Before the runtime loads an adapter it calls <code>verifyDeviceFit(manifest, hostDeviceId)</code> and reads:</p>
+    <div class="scroll-x">
+    <table class="table">
+      <thead><tr><th>Compile target</th><th>Host device</th><th>Result</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td><code>rtx-5090</code></td><td><code>rtx-5090</code></td><td><code>ok:true</code></td><td>load and run</td></tr>
+        <tr><td><code>iphone-15-pro</code></td><td><code>rtx-5090</code></td><td><code>ok:true, soft:true</code></td><td>load with warning (cross-class)</td></tr>
+        <tr><td><em>null</em> (no target pinned)</td><td><code>rtx-5090</code></td><td><code>ok:true, soft:true</code></td><td>load with warning (untargeted)</td></tr>
+        <tr><td><code>rtx-5090</code></td><td><code>iphone-15-pro</code></td><td><code>ok:false</code></td><td>refuse (4 GB host can't hold 32 GB compile)</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>The runtime never lies about a mismatch: it either loads cleanly, loads with a structured warning, or refuses. Smoke at <code>scripts/smoke-device-bind.mjs</code> proves the four cases pass.</p>
+
+    <h2>CLI</h2>
+    <p>Three verbs cover the surface: <code>kolm models</code> for the catalog, <code>kolm gpu</code> for the box, <code>kolm compile</code> for the binding.</p>
+    <pre>$ kolm gpu detect
+rtx-5090 . Blackwell sm_120 . 32 GB . cuda 12.8 . torch 2.7+
+
+$ kolm models recommend --target-device rtx-5090
+Qwen/Qwen2.5-7B-Instruct       (apache-2.0, 7.6B, 128K ctx, tool-use)
+Qwen/Qwen2.5-3B-Instruct       (apache-2.0, 3.1B, 32K ctx, tool-use)
+meta-llama/Llama-3.1-8B-Instruct (llama-community, 8B, 128K ctx)
+
+$ kolm models pin Qwen/Qwen2.5-7B-Instruct
+pinned base model: Qwen/Qwen2.5-7B-Instruct
+
+$ kolm compile --task "classify support tickets" --target-device rtx-5090
+. resolves base model: Qwen/Qwen2.5-7B-Instruct
+. attention: fa3 . optimizer: paged_adamw_8bit . liger: on
+. compiling: 100% K=0.917 . signing receipt: HMAC-SHA256 . done.</pre>
+    <p>Full verb tables at <a href="/docs" style="color:var(--ink);text-decoration:underline">/docs</a>. The decision matrix that picks defaults is at <a href="/spec" style="color:var(--ink);text-decoration:underline">/spec</a> under "device-fit".</p>
+
+    <h2>Why we will revisit</h2>
+    <ul>
+      <li><strong>Qwen3.</strong> When Qwen3-3B-Instruct ships under Apache 2.0 with comparable tool-use, the default reranks. The bigger tokenizer is a code win and a tiny-model latency loss; we will measure both.</li>
+      <li><strong>Llama 4.</strong> If Meta drops the MAU clause, Llama moves up in the picker.</li>
+      <li><strong>Gemma 3 vision.</strong> Once <code>kolm capture &lt;image&gt;</code> ships, the mobile-inference default flips from text-only Qwen to Gemma 3 4B.</li>
+      <li><strong>NVFP4 training.</strong> Torch 2.8 + cuBLASLt 12.9 lands native NVFP4 training on Blackwell. When that wheel hits the index, the 5090 trainer flips bf16 LoRA &rarr; fp4 LoRA at the same VRAM.</li>
+    </ul>
+
+    <h2>Honesty notes</h2>
+    <p>Two things we are not claiming.</p>
+    <p><strong>We did not train these base models.</strong> The base-model field selects a foundation; <code>.kolm</code> is the LoRA adapter on top, plus the receipt chain. The base remains under its upstream license; you remain the licensee.</p>
+    <p><strong>Benchmark numbers in the picker come from public scorecards.</strong> MMLU / GSM8K / MATH / HumanEval / IFEval scores quoted in this page and in the Qwen 2.5 tech report are reproductions kolm has not independently rerun. The <a href="/leaderboard" style="color:var(--ink);text-decoration:underline">/leaderboard</a> page tracks reproductions we have run; everything else is cited.</p>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap" style="max-width: 1180px;">
+    <div class="footer-grid">
+      <div>
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/spec/rs-1">RS-1 spec</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/cli">CLI</a>
+      </div>
+      <div>
+        <h4>Deploy</h4>
+        <a href="/compute">Backends</a>
+        <a href="/airgap">Air-gap</a>
+        <a href="/integrations/cloudflare">Cloudflare</a>
+        <a href="/integrations/github-actions">GitHub Actions</a>
+        <a href="/integrations/gitlab-ci">GitLab CI</a>
+      </div>
+      <div>
+        <h4>Proof</h4>
+        <a href="/verify-prod">Verify a .kolm</a>
+        <a href="/badge">Embed badge</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/registry">Registry</a>
+        <a href="/case-studies">Case studies</a>
+      </div>
+      <div>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/compliance">Compliance</a>
+        <a href="/insure">Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/security">Security</a>
+        <a href="/community">Community</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-tag">
+      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

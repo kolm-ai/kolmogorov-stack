@@ -1,0 +1,31 @@
+PackageIdentifier: kolm.kolm
+PackageVersion: 0.1.0
+PackageLocale: en-US
+Publisher: Kolmogorov
+PublisherUrl: https://kolm.ai
+PublisherSupportUrl: https://kolm.ai/security
+PrivacyUrl: https://kolm.ai/privacy
+Author: Kolmogorov
+PackageName: kolm
+PackageUrl: https://kolm.ai
+License: Apache-2.0
+LicenseUrl: https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Kolmogorov
+ShortDescription: Compile, sign, and verify .kolm artifacts. A receipt for every inference.
+Description: |
+  kolm compiles a base model + your data + a verifier into a single signed
+  .kolm artifact. Every inference emits an HMAC-chained receipt with the
+  artifact CID, input hash, output hash, and K-score. Run on your hardware,
+  audit months later, replay anywhere.
+Moniker: kolm
+Tags:
+  - ai
+  - machine-learning
+  - fine-tuning
+  - distillation
+  - verifier
+  - hipaa
+  - sr-11-7
+  - air-gap
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0

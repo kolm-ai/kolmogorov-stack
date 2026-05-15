@@ -78,7 +78,8 @@ def pass_two_prompt(task: dict) -> str:
     The full body of the failing test is parsed from task['test_patch'] and
     appended to the prompt. The retrieve-query is rewritten from the issue
     title to focus on identifier-level keywords. These two additions are the
-    documented mechanism behind the +10.67pp lift.
+    documented mechanism we will compare against baseline when the first
+    end-to-end signed run completes.
     """
     base = pass_one_prompt(task)
     test_body = task.get("test_patch", "")
