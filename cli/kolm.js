@@ -1007,6 +1007,7 @@ EXAMPLES
 
 USAGE
   kolm seeds new <name>                                 scaffold a seeds.jsonl with starter rows
+  kolm seeds validate <file>                            shape + parseability check before compile
   kolm seeds generate --from <file> --count <N> [opts]  rule-based mutate seeds into N rows
   kolm seeds list                                       list files under ~/.kolm/seeds with counts
   kolm seeds bootstrap --task <name>                    install a public-domain starter dataset
@@ -1045,8 +1046,13 @@ Use to start the train loop, then add your own real examples for a higher K-scor
 LIST
   --json                   one-line JSON per file (name, rows, source-mix)
 
+VALIDATE
+  Reports row count, detected shape ({input,output} or {input,expected}), and any parse
+  errors with line numbers. Catches the CSV-as-JSONL trap before you hit it at compile.
+
 EXAMPLES
   kolm seeds new phi-redactor
+  kolm seeds validate ./seeds.jsonl
   kolm seeds generate --from seeds.jsonl --count 200 --strategy redact-pii-templated --seed-rng 42
   kolm seeds bootstrap --task phi-redactor
   kolm seeds list
@@ -1056,31 +1062,42 @@ HONESTY
   (except bootstrap which ships public-domain data). Provenance is recorded on every
   row. Determinism: same --from + --strategy + --seed-rng -> identical bytes.
 `,
-  anonymize: `kolm anonymize - shortcut for "seeds generate --strategy redact-pii-templated".
+  anonymize: `kolm anonymize - rule-based PII redaction. Default is 1:1 (N rows in -> N rows out).
 
 USAGE
-  kolm anonymize <file.jsonl> [--count <N>] [--out <path>] [--seed-rng <int>] [--json]
+  kolm anonymize <file.jsonl> [--expand <N>] [--out <path>] [--seed-rng <int>] [--json]
 
-Reads a jsonl of rows (each row at minimum has "input" / "output" fields the same
-way kolm seeds expects them), runs the rule-based PII permutation strategy over
-them, and writes the result to <basename>-anonymized.jsonl by default.
+Reads a jsonl of rows (each row at minimum has "input" / "output" fields), permutes
+PII (names, emails, MRNs, SSNs, phones, dates, addresses) in each row, and writes
+the result to <basename>-anonymized.jsonl by default.
+
+MODES
+  default (no flag)        1:1 redaction. N input rows -> N output rows, PII permuted.
+                           This is what the verb name suggests; no row expansion.
+  --expand <N>             opt in to row-mutation mode. Outputs N rows (>= input count)
+                           by mutating the input rows with the redact-pii-templated
+                           strategy. Useful when you also need synthetic variations
+                           for training-data expansion in one verb call.
 
 DEFAULTS
-  --count       50
-  --strategy    redact-pii-templated (locked; this is the verb you wanted)
-  --seed-rng    1
-  --out         <basename of input>-anonymized.jsonl in the current directory
+  --seed-rng    1                       (deterministic; same input + seed -> same bytes)
+  --out         <basename>-anonymized.jsonl in the current directory
 
-Every row in the output is tagged source="templated" with a from_seed pointer
-into the original file. No data is sent over the network. No LLM is consulted.
+Every row in the output is tagged source="redacted" (1:1 mode) or "templated" (expand
+mode) with a from_seed pointer into the original file. No data is sent over the
+network. No LLM is consulted.
 
-For more control (other strategies, different output dir, different counts,
-local-llm mode) call \`kolm seeds generate\` directly.
+For more control (other strategies, different output dir, local-llm mode) call
+\`kolm seeds generate\` directly.
+
+CSV INPUTS
+  Not supported. Convert to JSONL first (one JSON object per line). kolm anonymize
+  will tell you the exact awk one-liner if you pass a .csv file.
 
 EXAMPLES
-  kolm anonymize support-tickets.jsonl
-  kolm anonymize phi-rows.jsonl --count 200 --seed-rng 42
-  kolm anonymize raw.jsonl --out clean.jsonl
+  kolm anonymize support-tickets.jsonl                      # 1:1, default
+  kolm anonymize phi-rows.jsonl --expand 200 --seed-rng 42  # expand mode, 200 rows out
+  kolm anonymize raw.jsonl --out clean.jsonl                # 1:1, custom output path
 `,
   models: `kolm models - inspect the local model registry (license + size + recommendation).
 
@@ -1925,7 +1942,10 @@ async function cmdBuild(args) {
   }
 
   // Step 2: seeds scaffold (only if --examples not provided AND no seeds.jsonl exists)
+  // Track whether the seeds are placeholder (auto-scaffolded) so we can surface
+  // the K-score honestly after compile.
   console.log(`[2/4] seeds`);
+  let usedPlaceholderSeeds = false;
   if (examplesFlag) {
     if (!fs.existsSync(seedsPath)) {
       const err = new Error(`--examples ${examplesFlag} not found`);
@@ -1939,6 +1959,7 @@ async function cmdBuild(args) {
     // Scaffold seeds via the same alias resolution `kolm seeds new` uses.
     const seedName = SEED_TEMPLATE_ALIASES[fromFlag] || (SEED_TEMPLATES[fromFlag] ? fromFlag : 'generic');
     await cmdSeedsNew([seedName]);
+    usedPlaceholderSeeds = true;
   }
 
   // Step 3: compile (honest eval baked in)
@@ -1961,9 +1982,19 @@ async function cmdBuild(args) {
   } else {
     console.log(`done. ${path.relative(process.cwd(), artPath) || artPath}`);
   }
+  // K-score honesty: when seeds were auto-scaffolded, the K reflects the
+  // starter rows, not real training data. Make that loud so buyers don't
+  // ship a placeholder-trained artifact thinking the number is meaningful.
+  if (usedPlaceholderSeeds) {
+    console.log('');
+    console.log('** PLACEHOLDER SIGNAL: this K-score was computed on starter rows scaffolded');
+    console.log('   by kolm seeds new, not your real data. Replace the rows in seeds.jsonl');
+    console.log('   with YOUR examples (>= 5) and rebuild for an honest K-score.');
+  }
   console.log('');
   console.log('iterate:');
-  console.log(`  - replace placeholder examples in ${path.basename(seedsPath)} with YOUR data`);
+  console.log(`  - replace ${usedPlaceholderSeeds ? 'PLACEHOLDER' : 'low-K'} rows in ${path.basename(seedsPath)} with your real data (>= 5 recommended)`);
+  console.log(`  - validate first:  kolm seeds validate ${path.basename(seedsPath)}`);
   console.log(`  - tune recipes[0].source in ${path.basename(specPath)} (the regex / logic)`);
   console.log(`  - rerun:  kolm compile --spec ${path.basename(specPath)} --examples ${path.basename(seedsPath)} --out ${path.basename(artPath)}`);
   console.log('  - eval each failing case:  kolm eval ' + path.basename(artPath) + ' --trace');
@@ -4761,7 +4792,7 @@ function chatFunnelPromptFor(state) {
     return "got it. what should this model do? (e.g. 'redact PHI from doctor notes', 'classify support tickets by urgency', 'extract invoice fields'). type a sentence, or 'exit' to bail.";
   }
   if (state.phase === 'examples') {
-    return "any examples? options:\n  paste JSONL (one row per line, e.g. {\"input\":\"...\",\"expected\":\"...\"})\n  give a path (./seeds.jsonl)\n  type 'no' to bootstrap a starter pack\n  type 'exit' to bail";
+    return "any examples? options:\n  paste JSONL (one row per line, e.g. {\"input\":\"...\",\"output\":\"...\"}  output|expected both accepted)\n  give a path (./seeds.jsonl)\n  type 'no' to bootstrap a starter pack\n  type 'exit' to bail";
   }
   if (state.phase === 'confirm') {
     const label = 'kolm new ' + state.artifact_name + ' --from ' + state.template +
@@ -4830,16 +4861,53 @@ async function chatFunnelStep(state, input, opts) {
       state.phase = 'confirm';
       return { newState: state, narration: 'saved ' + count + ' example(s) to ' + color('1', outPath) + '.\n\n' + chatFunnelPromptFor(state), finished: false };
     }
-    // Branch B: file path
-    if (/\.(jsonl|json|csv)$/i.test(trimmed) || trimmed.startsWith('./') || trimmed.startsWith('/') || /^[A-Za-z]:[\\/]/.test(trimmed) || trimmed.indexOf('/') >= 0 || trimmed.indexOf('\\') >= 0) {
+    // Branch B: file path. Validate early so the user finds out about format
+    // problems here, not 3 verbs deeper at compile time.
+    if (/\.(jsonl|json|csv|txt)$/i.test(trimmed) || trimmed.startsWith('./') || trimmed.startsWith('/') || /^[A-Za-z]:[\\/]/.test(trimmed) || trimmed.indexOf('/') >= 0 || trimmed.indexOf('\\') >= 0) {
       const resolved = path.resolve(process.cwd(), trimmed);
       if (!fs.existsSync(resolved)) {
         return { newState: state, narration: "i don't see a file at " + trimmed + ". try a different path, paste JSONL, or type 'no'.", finished: false };
       }
+      // Hard reject CSV with the awk one-liner to fix it.
+      if (/\.csv$/i.test(trimmed)) {
+        return { newState: state, narration: "i read JSONL, not CSV. convert " + path.basename(trimmed) + " first (one JSON object per line):\n  awk -F, 'NR>1{printf \"{\\\"input\\\":\\\"%s\\\",\\\"output\\\":\\\"%s\\\"}\\n\",$1,$2}' " + path.basename(trimmed) + " > seeds.jsonl\nthen come back with the .jsonl path.", finished: false };
+      }
+      // Early parseability + shape check so problems surface here.
+      let validatedRows = 0;
+      let validatedShape = 'unknown';
+      try {
+        const raw = fs.readFileSync(resolved, 'utf8');
+        const lines = raw.split(/\r?\n/);
+        let inputCount = 0; let outputCount = 0; let expectedCount = 0;
+        for (let i = 0; i < lines.length; i++) {
+          const ln = lines[i].trim();
+          if (!ln || ln.startsWith('//') || ln.startsWith('#')) continue;
+          try {
+            const row = JSON.parse(ln);
+            if (row && typeof row === 'object') {
+              validatedRows++;
+              if ('input' in row) inputCount++;
+              if ('output' in row) outputCount++;
+              if ('expected' in row) expectedCount++;
+            }
+          } catch (e) {
+            return { newState: state, narration: "couldn't parse line " + (i + 1) + " of " + path.basename(trimmed) + ": " + e.message + ".\ntry: kolm seeds validate " + trimmed + "  to see all errors.", finished: false };
+          }
+        }
+        if (validatedRows === 0) {
+          return { newState: state, narration: "file " + path.basename(trimmed) + " has no usable rows. expected one JSON object per line.\ntry: kolm seeds validate " + trimmed, finished: false };
+        }
+        if (outputCount > 0 && expectedCount === 0) validatedShape = '{input, output}';
+        else if (expectedCount > 0 && outputCount === 0) validatedShape = '{input, expected}';
+        else if (outputCount > 0 && expectedCount > 0) validatedShape = '{input, output|expected} mixed';
+        else validatedShape = '{input only}';
+      } catch (e) {
+        return { newState: state, narration: "couldn't read " + path.basename(trimmed) + ": " + e.message, finished: false };
+      }
       state.examples_path = trimmed;
       state.examples_source = 'path';
       state.phase = 'confirm';
-      return { newState: state, narration: "using examples from " + color('1', trimmed) + ".\n\n" + chatFunnelPromptFor(state), finished: false };
+      return { newState: state, narration: "found " + validatedRows + " row(s) in " + color('1', trimmed) + " (shape: " + validatedShape + ").\n\n" + chatFunnelPromptFor(state), finished: false };
     }
     // Branch C: "no" / "none" / "skip"
     if (/^(no|n|none|skip|nothing|no examples)$/.test(lower) || /\b(no\s+examples|don\'?t\s+have)/.test(lower)) {
@@ -6337,7 +6405,7 @@ const COMPLETION_SUBS = {
   completion: ['bash', 'zsh', 'fish'],
   models:  ['list', 'info', 'recommend', 'pin', 'devices'],
   gpu:     ['detect', 'doctor', 'setup', 'stress'],
-  seeds:   ['new', 'generate', 'list', 'bootstrap'],
+  seeds:   ['new', 'generate', 'list', 'bootstrap', 'validate'],
 };
 
 function emitBashCompletion() {
@@ -7544,16 +7612,15 @@ async function cmdSeedsBootstrap(args) {
   console.log(`  kolm seeds generate --from ${path.relative(process.cwd(), outPath)} --count 200 --strategy redact-pii-templated`);
 }
 
-// `kolm anonymize <file>` - thin shortcut for `kolm seeds generate --strategy
-// redact-pii-templated`. Buyers asked for "anonymize my data" as a first-class
-// verb; the heavy lifting is the same rule-based PII permutation cmdSeedsGenerate
-// already implements. We dispatch to it with sensible defaults so the most
-// common path (here is my jsonl, give me anonymized rows) is one verb.
+// `kolm anonymize <file>` - rule-based PII redaction. Default is 1:1 (N input
+// rows -> N output rows with PII permuted, no expansion). Use --expand to opt
+// in to the multi-row mutation behavior (was the old default; renamed to make
+// the verb honest with its name).
 async function cmdAnonymize(args) {
   if (maybeHelp('anonymize', args)) return;
   const positional = args.find(a => !a.startsWith('--'));
   if (!positional) {
-    const err = new Error('kolm anonymize <file.jsonl> [--count <N>] [--out <path>] [--seed-rng <int>]');
+    const err = new Error('kolm anonymize <file.jsonl> [--expand <N>] [--out <path>] [--seed-rng <int>]');
     err.exitCode = EXIT.BAD_ARGS;
     throw err;
   }
@@ -7563,19 +7630,80 @@ async function cmdAnonymize(args) {
     err.exitCode = EXIT.NOT_FOUND;
     throw err;
   }
-  const countFlag = pickFlag(args, '--count') || pickFlag(args, '-n') || '50';
+  // CSV files are not supported. Reject early with an actionable hint.
+  if (/\.csv$/i.test(inputPath)) {
+    const err = new Error(`kolm anonymize reads JSONL, not CSV.\nconvert your CSV first (each row -> one JSON object on its own line):\n  awk -F, 'NR>1{printf "{\\"input\\":\\"%s\\",\\"output\\":\\"%s\\"}\\n",$1,$2}' ${path.basename(inputPath)} > seeds.jsonl`);
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  // --expand opts into the row-mutation mode that was the old default. Without
+  // it we run 1:1 (each input row -> one output row, PII permuted).
+  const expandArg = pickFlag(args, '--expand');
+  const wantsExpand = args.includes('--expand') || (expandArg && expandArg.length > 0);
+  // --count is the legacy spelling for --expand. Accept it but warn so users
+  // migrate. If --count is passed without --expand, treat as expand mode.
+  const countFlag = pickFlag(args, '--count') || pickFlag(args, '-n');
+  if (countFlag && !wantsExpand) {
+    console.error("note: --count <N> is the legacy spelling. use --expand <N> for explicit row-mutation mode.");
+  }
   const seedRngFlag = pickFlag(args, '--seed-rng') || '1';
   const outFlag = pickFlag(args, '--out');
   const jsonOut = args.includes('--json');
-  // Default output path is <basename>-anonymized.jsonl in the cwd.
   const inBase = path.basename(inputPath).replace(/\.jsonl?$/i, '');
   const defaultOut = path.resolve(process.cwd(), `${inBase}-anonymized.jsonl`);
   const outPath = outFlag ? path.resolve(process.cwd(), outFlag) : defaultOut;
-  // Dispatch through cmdSeedsGenerate with locked strategy. --yes because there
-  // is no remote endpoint to confirm: redact-pii-templated is fully local.
+
+  // 1:1 mode: read the file, permute PII in each row, write same count out.
+  if (!wantsExpand && !countFlag) {
+    const seeds = loadSeeds(inputPath);
+    if (seeds.length === 0) {
+      const err = new Error(`no rows found in ${path.basename(inputPath)}. expected one JSON object per line.`);
+      err.exitCode = EXIT.BAD_ARGS;
+      throw err;
+    }
+    const rngSeed = parseInt(seedRngFlag, 10) || 1;
+    const rng = seededRng(rngSeed);
+    const out = [];
+    for (let i = 0; i < seeds.length; i++) {
+      const permuted = mutatePIIRow(seeds[i], rng);
+      out.push({
+        input: permuted.input,
+        output: permuted.output,
+        source: 'redacted',
+        from_seed: i,
+      });
+    }
+    const bytes = writeJsonl(out, outPath);
+    if (jsonOut) {
+      console.log(JSON.stringify({
+        out: outPath,
+        bytes: bytes,
+        total: out.length,
+        input_rows: seeds.length,
+        output_rows: out.length,
+        mode: 'redact',
+        seed_rng: rngSeed,
+        deterministic: true,
+      }));
+      return;
+    }
+    console.log(`anonymized ${seeds.length} -> ${out.length} rows (1:1, no expansion).`);
+    console.log(`  written: ${outPath} (${Math.round(bytes / 1024)}KB)`);
+    console.log(`  PII permuted: names, emails, MRNs, SSNs, phones, dates, addresses.`);
+    console.log(`  determinism: --seed-rng ${rngSeed} (reproducible)`);
+    console.log(`  no network, no LLM, no third-party API.`);
+    console.log('');
+    console.log(`for row-mutation expansion (1 -> N synthetic variations), pass --expand <N>.`);
+    return;
+  }
+
+  // --expand mode: dispatch to cmdSeedsGenerate with the locked PII strategy.
+  // Determine target count: if --expand had a numeric value or --count was given.
+  let targetCount = countFlag || expandArg;
+  if (!targetCount || !/^\d+$/.test(String(targetCount))) targetCount = '50';
   const genArgs = [
     '--from', inputPath,
-    '--count', String(countFlag),
+    '--count', String(targetCount),
     '--strategy', 'redact-pii-templated',
     '--seed-rng', String(seedRngFlag),
     '--out', outPath,
@@ -7584,8 +7712,6 @@ async function cmdAnonymize(args) {
   if (jsonOut) genArgs.push('--json');
   await cmdSeedsGenerate(genArgs);
   if (!jsonOut) {
-    // Re-count what landed on disk so the summary reflects the real file, not
-    // the request. Skips blank/comment lines the same way loadSeeds does.
     let total = 0;
     try {
       const lines = fs.readFileSync(outPath, 'utf8').split(/\r?\n/);
@@ -7596,7 +7722,117 @@ async function cmdAnonymize(args) {
       }
     } catch (e) { /* keep total=0 if read fails */ }
     console.log('');
-    console.log(`wrote ${total} rows. all sources marked as 'seed' or 'templated' (rule-based PII redaction; no network, no LLM).`);
+    console.log(`wrote ${total} rows (expand mode). all sources marked 'seed' or 'templated'.`);
+  }
+}
+
+// `kolm seeds validate <file>` - shape + parseability check before compile.
+// Reports row count, detected shape ({input,output} or {input,expected}), and
+// any parse errors with line numbers. Catches the CSV-as-JSONL trap early.
+async function cmdSeedsValidate(args) {
+  const positional = args.find(a => !a.startsWith('--'));
+  if (!positional) {
+    const err = new Error('kolm seeds validate <file.jsonl> [--json]');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  const inputPath = path.resolve(process.cwd(), positional);
+  const jsonOut = args.includes('--json');
+  if (!fs.existsSync(inputPath)) {
+    const err = new Error(`file not found: ${inputPath}`);
+    err.exitCode = EXIT.NOT_FOUND;
+    throw err;
+  }
+  if (/\.csv$/i.test(inputPath)) {
+    const err = new Error(`kolm reads JSONL, not CSV.\nconvert your CSV first (each row -> one JSON object on its own line):\n  awk -F, 'NR>1{printf "{\\"input\\":\\"%s\\",\\"output\\":\\"%s\\"}\\n",$1,$2}' ${path.basename(inputPath)} > seeds.jsonl`);
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  const raw = fs.readFileSync(inputPath, 'utf8');
+  const lines = raw.split(/\r?\n/);
+  const errors = [];
+  let rows = 0;
+  let inputCount = 0;
+  let outputCount = 0;
+  let expectedCount = 0;
+  let bothShapes = 0;
+  const sampleErrors = [];
+  for (let i = 0; i < lines.length; i++) {
+    const ln = lines[i].trim();
+    if (!ln) continue;
+    if (ln.startsWith('//') || ln.startsWith('#')) continue;
+    try {
+      const row = JSON.parse(ln);
+      if (!row || typeof row !== 'object') {
+        if (sampleErrors.length < 5) sampleErrors.push({ line: i + 1, error: 'not a JSON object' });
+        errors.push(i + 1);
+        continue;
+      }
+      rows++;
+      if ('input' in row) inputCount++;
+      if ('output' in row) outputCount++;
+      if ('expected' in row) expectedCount++;
+      if ('output' in row && 'expected' in row) bothShapes++;
+    } catch (e) {
+      if (sampleErrors.length < 5) sampleErrors.push({ line: i + 1, error: e.message });
+      errors.push(i + 1);
+    }
+  }
+  // Determine the dominant shape so we can tell the user which one they have.
+  let shape = 'unknown';
+  if (rows > 0) {
+    if (outputCount >= rows * 0.8 && expectedCount === 0) shape = '{input, output}';
+    else if (expectedCount >= rows * 0.8 && outputCount === 0) shape = '{input, expected}';
+    else if (outputCount > 0 && expectedCount > 0) shape = '{input, output|expected} mixed';
+    else if (outputCount === 0 && expectedCount === 0) shape = 'no output|expected field';
+    else shape = '{input, output}';
+  }
+  if (jsonOut) {
+    console.log(JSON.stringify({
+      file: inputPath,
+      rows,
+      shape,
+      input_count: inputCount,
+      output_count: outputCount,
+      expected_count: expectedCount,
+      mixed: bothShapes > 0,
+      parse_errors: errors,
+      ok: errors.length === 0 && rows > 0 && inputCount === rows,
+    }, null, 2));
+    return;
+  }
+  console.log(`validating ${path.relative(process.cwd(), inputPath) || inputPath}`);
+  console.log('');
+  console.log(`  rows:     ${rows}`);
+  console.log(`  shape:    ${shape}`);
+  console.log(`  errors:   ${errors.length}`);
+  if (sampleErrors.length > 0) {
+    console.log('');
+    console.log('parse errors (first 5):');
+    for (const e of sampleErrors) console.log(`  line ${e.line}: ${e.error}`);
+  }
+  console.log('');
+  if (rows === 0) {
+    console.log('not usable: 0 rows. expected one JSON object per line.');
+    const err = new Error('no usable rows');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  if (errors.length > 0) {
+    console.log('not usable: some rows failed to parse. fix the lines above, or re-export.');
+    const err = new Error(`${errors.length} parse errors`);
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  if (inputCount < rows) {
+    console.log(`warning: only ${inputCount}/${rows} rows have an "input" field. compile will skip the rest.`);
+  }
+  if (shape === 'no output|expected field') {
+    console.log('warning: no "output" or "expected" field on any row. compile will treat all rows as ground-truth gaps.');
+  }
+  if (errors.length === 0 && rows > 0 && inputCount === rows) {
+    console.log(`ok. ${rows} rows, shape ${shape}. ready to use:`);
+    console.log(`  kolm compile --spec <name>.spec.json --examples ${path.relative(process.cwd(), inputPath) || inputPath}`);
   }
 }
 
@@ -7612,6 +7848,7 @@ async function cmdSeeds(args) {
   if (sub === 'generate')  return cmdSeedsGenerate(rest);
   if (sub === 'list')      return cmdSeedsList(rest);
   if (sub === 'bootstrap') return cmdSeedsBootstrap(rest);
+  if (sub === 'validate' || sub === 'check') return cmdSeedsValidate(rest);
   const err = new Error(`unknown subcommand: ${sub}\ntry: kolm seeds --help`);
   err.exitCode = EXIT.BAD_ARGS;
   throw err;
