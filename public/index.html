@@ -370,18 +370,20 @@
   .hcn-s3 .hcn-port-title-name { font-family: var(--mono); font-size: 16px; color: var(--ink, #faf2e1); font-weight: 500; letter-spacing: -0.005em; }
   .hcn-s3 .hcn-port-title-meta { font-family: var(--mono); font-size: 10.5px; color: var(--ink-mute, #b5bdb1); letter-spacing: 0.06em; }
   .hcn-s3 .hcn-port-title-meta b { color: #7ef0d2; font-weight: 500; }
-  .hcn-s3 .hcn-port-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 760px; width: 100%; margin: 0 auto; }
-  .hcn-s3 .hcn-port-dev { position: relative; padding: 16px 12px 14px; border: 1px solid rgba(236,231,220, 0.10); border-radius: 10px; background: rgba(0,0,0, 0.32); display: flex; flex-direction: column; gap: 8px; opacity: 0.36; transition: opacity 420ms cubic-bezier(0.22,1,0.36,1), border-color 420ms ease-out, box-shadow 420ms ease-out, background 420ms ease-out, transform 420ms cubic-bezier(0.22,1,0.36,1); }
+  .hcn-s3 .hcn-port-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; max-width: 820px; width: 100%; margin: 0 auto; }
+  .hcn-s3 .hcn-port-dev { position: relative; padding: 22px 16px 20px; border: 1px solid rgba(236,231,220, 0.10); border-radius: 12px; background: rgba(0,0,0, 0.32); display: flex; flex-direction: column; gap: 10px; opacity: 0.36; min-height: 152px; transition: opacity 420ms cubic-bezier(0.22,1,0.36,1), border-color 420ms ease-out, box-shadow 420ms ease-out, background 420ms ease-out, transform 420ms cubic-bezier(0.22,1,0.36,1); }
   .hcn-s3 .hcn-port-dev.lit { opacity: 1; border-color: rgba(126,240,210, 0.48); background: rgba(126,240,210, 0.06); box-shadow: 0 0 0 1px rgba(126,240,210, 0.22), 0 0 28px -6px rgba(126,240,210, 0.55); transform: translateY(-2px); }
-  .hcn-s3 .hcn-port-dev-tick { font-family: var(--mono); font-size: 9px; color: var(--ink-faint, #737c73); letter-spacing: 0.18em; text-transform: uppercase; transition: color 320ms ease-out; }
+  .hcn-s3 .hcn-port-dev-tick { font-family: var(--mono); font-size: 9.5px; color: var(--ink-faint, #737c73); letter-spacing: 0.18em; text-transform: uppercase; transition: color 320ms ease-out; }
   .hcn-s3 .hcn-port-dev.lit .hcn-port-dev-tick { color: #7ef0d2; }
   .hcn-s3 .hcn-port-dev-tick::before { content: "\00B7  "; opacity: 0.4; }
   .hcn-s3 .hcn-port-dev.lit .hcn-port-dev-tick::before { content: "\2713  "; opacity: 1; }
-  .hcn-s3 .hcn-port-dev-name { font-family: var(--mono); font-size: 13px; color: var(--ink, #faf2e1); font-weight: 500; letter-spacing: -0.005em; }
-  .hcn-s3 .hcn-port-dev-lat { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint, #737c73); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; transition: color 320ms ease-out; margin-top: auto; }
+  .hcn-s3 .hcn-port-dev-name { font-family: var(--mono); font-size: 14.5px; color: var(--ink, #faf2e1); font-weight: 500; letter-spacing: -0.005em; }
+  .hcn-s3 .hcn-port-dev-lat { font-family: var(--mono); font-size: 22px; color: var(--ink-faint, #737c73); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; font-weight: 500; transition: color 320ms ease-out; margin-top: auto; }
   .hcn-s3 .hcn-port-dev.lit .hcn-port-dev-lat { color: #7ef0d2; }
   .hcn-s3 .hcn-port-dev-lat b { color: var(--ink, #faf2e1); font-weight: 500; }
   .hcn-s3 .hcn-port-dev.lit .hcn-port-dev-lat b { color: #7ef0d2; }
+  .hcn-s3 .hcn-port-dev-lat-unit { font-size: 11px; color: var(--ink-faint, #737c73); margin-left: 3px; letter-spacing: 0.06em; font-weight: 400; }
+  .hcn-s3 .hcn-port-dev.lit .hcn-port-dev-lat-unit { color: var(--ink-mute, #b5bdb1); }
   .hcn-s3 .hcn-port-foot { font-family: var(--mono); font-size: 11px; color: var(--ink-mute, #b5bdb1); letter-spacing: 0.04em; text-align: center; }
   .hcn-s3 .hcn-port-foot b { color: #7ef0d2; font-weight: 500; }
   @keyframes hcnMeshPulse { 0%, 100% { box-shadow: 0 0 0 1px rgba(126,240,210, 0.10), 0 0 32px -8px rgba(126,240,210, 0.42); } 50% { box-shadow: 0 0 0 1px rgba(126,240,210, 0.22), 0 0 48px -4px rgba(126,240,210, 0.66); } }
@@ -491,10 +493,11 @@
     .hcn-s3 .hcn-port-title { padding: 11px 16px; }
     .hcn-s3 .hcn-port-title-name { font-size: 13px; }
     .hcn-s3 .hcn-port-title-meta { font-size: 9.5px; }
-    .hcn-s3 .hcn-port-strip { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .hcn-s3 .hcn-port-dev { padding: 11px 9px 10px; gap: 5px; }
-    .hcn-s3 .hcn-port-dev-name { font-size: 11px; }
-    .hcn-s3 .hcn-port-dev-lat { font-size: 10px; }
+    .hcn-s3 .hcn-port-strip { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .hcn-s3 .hcn-port-dev { padding: 14px 12px 13px; gap: 8px; min-height: 108px; }
+    .hcn-s3 .hcn-port-dev-name { font-size: 12.5px; }
+    .hcn-s3 .hcn-port-dev-lat { font-size: 17px; }
+    .hcn-s3 .hcn-port-dev-lat-unit { font-size: 9.5px; }
     .hcn-s3 .hcn-port-dev-tick { font-size: 8px; letter-spacing: 0.14em; }
     .hcn-s3 .hcn-port-foot { font-size: 9.5px; line-height: 1.4; padding: 0 4px; }
     .hcn-s4 { padding-top: 14px; padding-bottom: 12px; gap: 12px; }
@@ -539,10 +542,11 @@
     .hcn-s2 .hcn-proof-gate { max-width: 96%; }
     .hcn-s3 .hcn-port-title { padding: 9px 13px; }
     .hcn-s3 .hcn-port-title-name { font-size: 12px; }
-    .hcn-s3 .hcn-port-strip { grid-template-columns: repeat(2, 1fr); gap: 7px; }
-    .hcn-s3 .hcn-port-dev { padding: 9px 8px; }
-    .hcn-s3 .hcn-port-dev-name { font-size: 10.5px; }
-    .hcn-s3 .hcn-port-dev-lat { font-size: 9.5px; }
+    .hcn-s3 .hcn-port-strip { grid-template-columns: repeat(2, 1fr); gap: 9px; }
+    .hcn-s3 .hcn-port-dev { padding: 12px 10px; min-height: 96px; }
+    .hcn-s3 .hcn-port-dev-name { font-size: 11.5px; }
+    .hcn-s3 .hcn-port-dev-lat { font-size: 15px; }
+    .hcn-s3 .hcn-port-dev-lat-unit { font-size: 9px; }
     .hcn-s5 .hcn-receipt { padding: 16px 16px 14px; }
     .hcn-s5 .hcn-rec-row { grid-template-columns: 76px 1fr; gap: 8px; font-size: 10px; }
   }
@@ -1068,7 +1072,7 @@
         <!-- Scene 2 . PROOF . one giant K-score rises and crosses the ship-gate line -->
         <div class="hcn-scene hcn-s2" id="hcn-scene-1" data-scene="1">
           <div class="hcn-proof-head">
-            <span class="hcn-proof-cmd">kolm compile phi-redactor --base llama-3.1-8b</span>
+            <span class="hcn-proof-cmd">kolm compile phi-redactor</span>
             <span class="hcn-proof-rec">REC</span>
           </div>
           <div class="hcn-proof-stage">
@@ -1092,10 +1096,10 @@
             <span class="hcn-port-title-meta" id="hcn-port-kolm-meta"><b>82 MB</b> &middot; <b>94% accurate</b></span>
           </div>
           <div class="hcn-port-strip">
-            <div class="hcn-port-dev" data-port="0"><span class="hcn-port-dev-tick">pending</span><span class="hcn-port-dev-name">Mac</span><span class="hcn-port-dev-lat"><b>142</b> ms</span></div>
-            <div class="hcn-port-dev" data-port="1"><span class="hcn-port-dev-tick">pending</span><span class="hcn-port-dev-name">iPhone</span><span class="hcn-port-dev-lat"><b>218</b> ms</span></div>
-            <div class="hcn-port-dev" data-port="2"><span class="hcn-port-dev-tick">pending</span><span class="hcn-port-dev-name">Web browser</span><span class="hcn-port-dev-lat"><b>540</b> ms</span></div>
-            <div class="hcn-port-dev" data-port="3"><span class="hcn-port-dev-tick">pending</span><span class="hcn-port-dev-name">Your server</span><span class="hcn-port-dev-lat"><b>38</b> ms</span></div>
+            <div class="hcn-port-dev" data-port="0"><span class="hcn-port-dev-tick">pending</span><span class="hcn-port-dev-name">Mac</span><span class="hcn-port-dev-lat"><b>142</b><span class="hcn-port-dev-lat-unit">ms</span></span></div>
+            <div class="hcn-port-dev" data-port="1"><span class="hcn-port-dev-tick">pending</span><span class="hcn-port-dev-name">iPhone</span><span class="hcn-port-dev-lat"><b>218</b><span class="hcn-port-dev-lat-unit">ms</span></span></div>
+            <div class="hcn-port-dev" data-port="2"><span class="hcn-port-dev-tick">pending</span><span class="hcn-port-dev-name">Web browser</span><span class="hcn-port-dev-lat"><b>540</b><span class="hcn-port-dev-lat-unit">ms</span></span></div>
+            <div class="hcn-port-dev" data-port="3"><span class="hcn-port-dev-tick">pending</span><span class="hcn-port-dev-name">Your server</span><span class="hcn-port-dev-lat"><b>38</b><span class="hcn-port-dev-lat-unit">ms</span></span></div>
           </div>
           <div class="hcn-port-foot">Same file. Same answers. <b>Never leaves your hardware.</b></div>
         </div>
@@ -1117,7 +1121,7 @@
               <div class="hcn-race-hud"><span>on-device</span><span class="hcn-ms" id="hcn-ms-r">0 ms</span></div>
             </div>
           </div>
-          <div class="hcn-race-foot"><span><b>7.4x</b> faster</span><span><b>11.6x</b> cheaper</span><span><b>Same answer.</b></span></div>
+          <div class="hcn-race-foot"><span><b>7.4x</b> faster</span><span><b>Runs offline.</b></span><span><b>Same answer.</b></span></div>
         </div>
 
         <!-- Scene 5 . OUTCOME . the audit receipt . premium, no cheesy stamp -->
@@ -1130,7 +1134,7 @@
             <div class="hcn-rec-body">
               <div class="hcn-rec-row" data-rr="0"><span class="hcn-rec-key">model</span><span class="hcn-rec-val" id="hcn-rec-art"><b>phi-redactor.kolm</b></span></div>
               <div class="hcn-rec-row" data-rr="1"><span class="hcn-rec-key">accuracy</span><span class="hcn-rec-val is-k" id="hcn-rec-k">94% (target 85%)</span></div>
-              <div class="hcn-rec-row" data-rr="2"><span class="hcn-rec-key">fingerprint</span><span class="hcn-rec-val">7c0a3f9e2b4d8a1c5f6e9b2d4a7c0e3f1b8d5a2c4e7f9b1d3a5c7e9f1b3d5a7c</span></div>
+              <div class="hcn-rec-row" data-rr="2"><span class="hcn-rec-key">fingerprint</span><span class="hcn-rec-val">sha256:7c0a3f9e2b4d&hellip;5a7c</span></div>
               <div class="hcn-rec-row" data-rr="3"><span class="hcn-rec-key">signed by</span><span class="hcn-rec-val">kolm-registry &middot; ed25519:8f3a..b2d7</span></div>
               <div class="hcn-rec-chain">
                 <div class="hcn-rec-chain-lab">history</div>
@@ -2904,7 +2908,7 @@
       { id: 0, start: 0,    end: 4000,  title: 'scene 01 . describe',      caption: 'Describe what you want. One prompt in, one private file out.' },
       { id: 1, start: 4000, end: 8500,  title: 'scene 02 . train',         caption: 'Accuracy climbs past your target. Measured on your data.' },
       { id: 2, start: 8500, end: 12500, title: 'scene 03 . run anywhere',  caption: 'Same model. Mac, iPhone, browser, your server.' },
-      { id: 3, start: 12500,end: 21000, title: 'scene 04 . fast',          caption: '7.4x faster. 11.6x cheaper. Same answer.' },
+      { id: 3, start: 12500,end: 21000, title: 'scene 04 . fast',          caption: '7.4x faster. Runs offline. Same answer.' },
       { id: 4, start: 21000,end: 25000, title: 'scene 05 . ship',          caption: 'Your AI. Audit-ready. Forever.' }
     ];
     var TOTAL = TL[TL.length - 1].end;
@@ -3148,7 +3152,7 @@
         var pr = document.getElementById('hcn-pill-r');
         if (pr && rightN >= totalChars && pr.className.indexOf('ok') === -1) { pr.className = 'hcn-race-pill ok'; pr.textContent = 'done'; }
         if (pl && leftN >= totalChars && pl.className.indexOf('ok') === -1) { pl.className = 'hcn-race-pill ok'; pl.textContent = 'done'; }
-        setCaption('<b>7.4x</b> faster. <b>11.6x</b> cheaper. Same answer.');
+        setCaption('<b>7.4x</b> faster. <b>Runs offline.</b> Same answer.');
       } else if (i === 4) {
         // Scene 5 . OUTCOME: the signed receipt. Card materializes at 100ms,
         // then receipt rows stagger in (5 rows, 240ms each starting 400ms),

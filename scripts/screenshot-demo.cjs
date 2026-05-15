@@ -63,7 +63,7 @@ async function run() {
           const gb = document.getElementById('hcn-proof-gate-badge');
           if (gb) gb.textContent = 'beats target';
         } else if (sceneIndex === 2) {
-          // PORT: all 6 devices lit.
+          // PORT: all 4 devices lit.
           sEl.classList.add('go');
           sEl.querySelectorAll('.hcn-port-dev').forEach((d) => {
             d.classList.add('lit');
