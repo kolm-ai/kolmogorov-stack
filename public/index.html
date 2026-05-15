@@ -475,42 +475,88 @@
     .hcn-s2 .hcn-train-stats { grid-template-columns: repeat(3, 1fr); }
   }
   @media (max-width: 720px) {
-    .hcn-stage-wrap { aspect-ratio: 4/3; }
-    .hcn-scene { padding: 48px 18px 24px; }
-    .hcn-caption-bar { font-size: 10px; padding: 6px 10px; top: 12px; max-width: 92%; }
+    /* mobile: drop 16:9 aspect ratio. content-driven height with portrait min-height fits
+       stacked scene 2 (stats grid + curves + feed + kbars) without squashing or overflow. */
+    .hcn-stage-wrap { aspect-ratio: auto; min-height: 560px; }
+    .hcn-scene { padding: 38px 16px 18px; }
+    .hcn-caption-bar { font-size: 10px; padding: 5px 9px; top: 10px; max-width: 92%; }
+    .hcn-s1 { gap: 12px; padding-top: 18px; }
     .hcn-s1 .hcn-prompt-text { font-size: 13px; padding: 9px 10px; }
     .hcn-s1 .hcn-prompt-go { padding: 8px 12px; font-size: 11.5px; }
+    .hcn-s1 .hcn-prompt-chips { gap: 5px; }
+    .hcn-s1 .hcn-prompt-chips .hcn-chip { font-size: 10.5px; padding: 3px 8px; }
+    .hcn-s1 .hcn-seeds-chips { gap: 5px; }
+    .hcn-s1 .hcn-seed { font-size: 10.5px; padding: 3px 8px; }
     .hcn-s1 .hcn-art-card { padding: 11px 12px; }
     .hcn-s1 .hcn-art-name { font-size: 13px; }
     .hcn-s1 .hcn-art-meta { font-size: 10.5px; gap: 10px; }
-    .hcn-s2 { grid-template-columns: 1fr; gap: 14px; padding-top: 16px; }
+    .hcn-s2 { grid-template-columns: 1fr; gap: 12px; padding-top: 14px; }
     .hcn-s2 .hcn-train-cmd { font-size: 11.5px; }
-    .hcn-s2 .hcn-train-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .hcn-s2 .hcn-train-stat { padding: 8px 10px; }
-    .hcn-s2 .hcn-train-stat .hcn-stat-val { font-size: 17px; }
+    .hcn-s2 .hcn-train-stats { grid-template-columns: repeat(2, 1fr); gap: 7px; }
+    .hcn-s2 .hcn-train-stat { padding: 7px 9px; }
+    .hcn-s2 .hcn-train-stat .hcn-stat-val { font-size: 16px; }
     .hcn-s2 .hcn-train-stat .hcn-stat-val.hcn-stat-val-sm { font-size: 10.5px; }
-    .hcn-s2 .hcn-train-curve { min-height: 110px; }
-    .hcn-s2 .hcn-train-k-explain { font-size: 9.5px; }
-    .hcn-s2 .hcn-train-feed { padding: 8px 10px; }
-    .hcn-s2 .hcn-train-feed-list { min-height: 76px; }
-    .hcn-s2 .hcn-train-feed-row { font-size: 10px; }
+    /* sources cell loses real estate at this size; the formula caption tells the same story */
+    .hcn-s2 .hcn-train-stat.is-sources { display: none; }
+    .hcn-s2 .hcn-train-curve { min-height: 96px; padding: 8px 10px; }
+    .hcn-s2 .hcn-train-k-explain { font-size: 9.5px; line-height: 1.4; }
+    .hcn-s2 .hcn-train-feed { padding: 7px 9px; }
+    .hcn-s2 .hcn-train-feed-list { min-height: 56px; }
+    .hcn-s2 .hcn-train-feed-row { font-size: 10px; gap: 6px; }
     .hcn-s2 .hcn-train-feed-tag { font-size: 9px; padding: 1px 5px; }
-    .hcn-s2 .hcn-train-kbar-row { grid-template-columns: 64px 1fr 30px; font-size: 9.5px; }
-    .hcn-s3 .hcn-mesh { max-width: 100%; gap: 14px; }
-    .hcn-s3 .hcn-mesh-anchor { padding: 12px 14px; }
+    /* keep only the 3 most-honest k-component bars on phones (accuracy/safety/verifiability) */
+    .hcn-s2 .hcn-train-kbar-row { grid-template-columns: 64px 1fr 28px; font-size: 9.5px; gap: 7px; }
+    .hcn-s2 .hcn-train-kbar-wrap { gap: 4px; }
+    .hcn-s3 { padding-top: 6px; gap: 10px; }
+    .hcn-s3 .hcn-mesh { max-width: 100%; gap: 12px; }
+    .hcn-s3 .hcn-mesh-anchor { padding: 10px 14px; }
+    .hcn-s3 .hcn-mesh-anchor-dot { width: 7px; height: 7px; margin-bottom: 6px; }
     .hcn-s3 .hcn-mesh-anchor-name { font-size: 12.5px; }
-    .hcn-s3 .hcn-mesh-anchor-meta { font-size: 10px; }
-    .hcn-s3 .hcn-mesh-anchor-foot { font-size: 9.5px; }
-    .hcn-s3 .hcn-mesh-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .hcn-s3 .hcn-mesh-tile { padding: 10px 8px; }
+    .hcn-s3 .hcn-mesh-anchor-meta { font-size: 10px; margin-top: 4px; }
+    .hcn-s3 .hcn-mesh-anchor-foot { font-size: 9.5px; margin-top: 7px; }
+    .hcn-s3 .hcn-mesh-grid { grid-template-columns: repeat(2, 1fr); gap: 7px; }
+    .hcn-s3 .hcn-mesh-tile { padding: 9px 8px; }
     .hcn-s3 .hcn-mesh-tile-name { font-size: 11px; }
-    .hcn-s3 .hcn-mesh-tile-lat { font-size: 10px; }
-    .hcn-s4 .hcn-race-row { grid-template-columns: 1fr; gap: 10px; }
-    .hcn-s4 .hcn-race-col { min-height: 92px; padding: 9px 10px; }
-    .hcn-s4 .hcn-race-stream { font-size: 11px; }
-    .hcn-s5 .hcn-tile { min-width: 80px; font-size: 10.5px; padding: 8px 10px; }
-    .hcn-dock { gap: 10px; padding: 9px 12px; font-size: 10.5px; }
-    .hcn-time { min-width: 88px; }
+    .hcn-s3 .hcn-mesh-tile-lat { font-size: 10px; margin-top: 3px; }
+    .hcn-s3 .hcn-mesh-foot { font-size: 10px; line-height: 1.4; padding: 0 4px; }
+    .hcn-s4 { padding-top: 8px; gap: 10px; }
+    .hcn-s4 .hcn-race-row { grid-template-columns: 1fr; gap: 8px; }
+    .hcn-s4 .hcn-race-col { min-height: 88px; padding: 9px 10px; gap: 4px; }
+    .hcn-s4 .hcn-race-stream { font-size: 11px; min-height: 42px; }
+    .hcn-s4 .hcn-race-prompt { font-size: 11px; margin-bottom: 2px; }
+    .hcn-s4 .hcn-race-foot { font-size: 10.5px; gap: 10px; }
+    .hcn-s5 { gap: 14px; padding-top: 16px; }
+    .hcn-s5 .hcn-hero { font-size: clamp(18px, 5.2vw, 22px); }
+    .hcn-s5 .hcn-lat { gap: 8px; }
+    .hcn-s5 .hcn-tile { min-width: 0; flex: 1 1 calc(50% - 6px); font-size: 10.5px; padding: 8px 9px; }
+    .hcn-s5 .hcn-tile b { margin-bottom: 4px; font-size: 11.5px; }
+    .hcn-s5 .hcn-tile-meta { gap: 5px; flex-wrap: wrap; justify-content: center; }
+    .hcn-s5 .hcn-tile-size, .hcn-s5 .hcn-tile-k { font-size: 9.5px; }
+    .hcn-dock { gap: 8px; padding: 8px 11px; font-size: 10px; }
+    .hcn-dots { gap: 6px; }
+    .hcn-d { width: 6px; height: 6px; }
+    .hcn-time { min-width: 78px; font-size: 9.5px; }
+  }
+  /* very small phones (iPhone SE etc.). content-driven heights and stronger collapse. */
+  @media (max-width: 480px) {
+    .hcn-stage-wrap { min-height: 600px; }
+    .hcn-scene { padding: 34px 12px 14px; }
+    .hcn-caption-bar { font-size: 9.5px; max-width: 94%; }
+    .hcn-s1 .hcn-prompt-text { font-size: 12.5px; padding: 8px 9px; }
+    .hcn-s1 .hcn-prompt-head, .hcn-s1 .hcn-seeds-lab { font-size: 9.5px; }
+    .hcn-s2 .hcn-train-stats { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .hcn-s2 .hcn-train-stat .hcn-stat-val { font-size: 15px; }
+    .hcn-s2 .hcn-train-feed-list { min-height: 48px; }
+    .hcn-s2 .hcn-train-feed-pair { font-size: 9.5px; }
+    .hcn-s2 .hcn-train-curve { min-height: 84px; }
+    /* drop the cost + latency bars; ship-gate honesty reads on accuracy/safety/verifiability */
+    .hcn-s2 .hcn-train-kbar-row[data-kbar="latency"],
+    .hcn-s2 .hcn-train-kbar-row[data-kbar="cost"] { display: none; }
+    .hcn-s3 .hcn-mesh-grid { gap: 6px; }
+    .hcn-s3 .hcn-mesh-tile { padding: 8px 6px; }
+    .hcn-s3 .hcn-mesh-tile-name { font-size: 10.5px; }
+    .hcn-s3 .hcn-mesh-tile-lat { font-size: 9.5px; }
+    .hcn-s5 .hcn-tile { flex: 1 1 calc(50% - 5px); padding: 7px 8px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .hcn-scene, .hcn-caption-bar, .hcn-s1 .hcn-art-card, .hcn-s1 .hcn-prompt-box, .hcn-s1 .hcn-seed, .hcn-s2 .hcn-train-progress-fill, .hcn-s2 .hcn-train-curve .hcn-curve-loss, .hcn-s2 .hcn-train-curve .hcn-curve-k, .hcn-s2 .hcn-train-k-explain, .hcn-s2 .hcn-train-feed-row, .hcn-s2 .hcn-train-kbar-fill, .hcn-s3 .hcn-mesh-tile, .hcn-s3 .hcn-mesh-anchor-dot, .hcn-s5 .hcn-hero { transition: none; animation: none; filter: none; }
