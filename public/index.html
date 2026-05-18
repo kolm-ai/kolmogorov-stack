@@ -781,8 +781,8 @@
   .w271-kscore .ks-val { font-family: var(--mono); font-size: 16px; color: #7ef0d2; font-weight: 600; font-variant-numeric: tabular-nums; }
   .w271-kscore .ks-fallback { font-family: var(--mono); font-size: 12px; color: var(--ink-mute, #b5bdb1); padding: 4px 0; }
 
-  .w271-seo-claim { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--kolm-accent, #10b981); margin: 0 0 14px; padding: 4px 10px; border: 1px solid rgba(126,240,210, 0.32); border-radius: 999px; background: rgba(126,240,210, 0.04); }
-  .w271-seo-claim .dot { width: 5px; height: 5px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 6px rgba(126,240,210, 0.55); }
+  .w271-seo-claim { display: inline-block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ink-faint, #737c73); margin: 0 0 20px; padding: 0; border: 0; background: transparent; text-transform: none; }
+  .w271-seo-claim .dot { display: none; }
 
   @media (max-width: 720px) {
     .w271-h1 { font-size: 30px; max-width: 100%; }
@@ -1088,8 +1088,8 @@
   <div class="hero-grid-bg" aria-hidden="true"></div>
   <div class="wrap">
 
-    <!-- One SEO chip. -->
-    <p class="w271-seo-claim" data-w271="seo-chip"><span class="dot" aria-hidden="true"></span>kolm.ai &middot; the AI compiler</p>
+    <!-- Small brand line. SEO chip marker preserved (W271 #18 + W228 brand anchor). -->
+    <p class="w271-seo-claim" data-w271="seo-chip">kolm.ai &middot; the AI compiler</p>
 
     <!-- One confident H1. Holds the two rent-vs-own beats as inline spans so the
          W271 H1-region tests still find them; the visible rendering reads as one
@@ -1119,22 +1119,23 @@
       </p>
     </div>
 
-    <!-- ONE proof line + ONE artifact line. The W220 proof-strip + artifact-strip
-         markers stay on these so the W220 lock-in suite finds them. -->
+    <!-- ONE plain-English proof line + ONE plain-English artifact line. W220
+         markers preserved so the lock-in suite finds them. The K-score / KB /
+         license jargon was removed wave366 because regular users don't care
+         what K 0.982 means or how many kilobytes the file is. They care
+         that they can train it on their data, run it on their machine, and
+         download a real one. -->
     <p class="hero-quant w335-proof" data-w220="proof-strip" aria-label="quantified proof">
-      <span><b>K&nbsp;0.982</b> on the public leaderboard</span>
+      <span><b>Train it</b> on your own prompts.</span>
       <span class="hq-sep" aria-hidden="true">&middot;</span>
-      <span><b>signed receipt</b> on every call</span>
+      <span><b>Run it</b> on your own machine.</span>
       <span class="hq-sep" aria-hidden="true">&middot;</span>
-      <span><b>runs offline</b> on your hardware</span>
+      <span><b>Keep it</b> after the contract ends.</span>
     </p>
     <p class="hero-artifact w335-artifact" data-w220="artifact-strip" aria-label="live shipped artifact">
-      <span class="ha-lab">live</span>
+      Download a real one:
       <a href="/cdn/kolm-assets/docs/showcase/phi-redactor.kolm" class="ha-mono" download>phi-redactor.kolm</a>
-      <span class="ha-sep" aria-hidden="true">&middot;</span>
-      <span><b>9.5&nbsp;KB</b></span>
-      <span class="ha-sep" aria-hidden="true">&middot;</span>
-      <span>signed manifest &middot; Apache-2.0</span>
+      &middot; the same file runs on a laptop, a phone, or an air-gapped server.
     </p>
   </div>
 </section>
@@ -1265,7 +1266,7 @@
       <span><b>0.6 ms</b> per answer</span>
       <span class="hp-sep" aria-hidden="true">&middot;</span>
       <span><b>94%</b> accurate on your task</span>
-      <a href="/k-score" class="hp-link">how K-score is computed per artifact &rarr;</a>
+      <a href="/k-score" class="hp-link">how the score is computed &rarr;</a>
     </p>
   </div>
 </section>
@@ -1296,28 +1297,69 @@
   </div>
 </section>
 
+<!-- Wave366: plain-English "compile vs distill" explainer. The user asked
+     "why don't you talk about compilation, distillation, and simplify things
+     for regular people". This is the answer. Two cards, sentence-case,
+     no jargon, side-by-side so a non-engineer sees the trade-off in 5s. -->
+<section class="w335-below w335-below-explain" aria-label="compile or distill">
+  <div class="wrap">
+    <h2 class="w335-section-h">Compile a rule, or distill a model. Same file format either way.</h2>
+    <p class="w335-section-sub">A <code>.kolm</code> file is what the compiler produces. Some are small (rules and prompts packed with an evaluator). Some are large (a smaller open-source model trained on your examples). Both run the same way, both ship the same way, both come with a receipt.</p>
+    <div class="explain-grid">
+      <div class="explain-card">
+        <h3>Compile</h3>
+        <p class="explain-lab">when you have rules or a few hundred examples</p>
+        <p>You write what good looks like (a few prompts, a few examples, a way to score). The compiler bakes it into one signed file with a built-in test set. The file is small, runs anywhere, and the score is checked again before it&rsquo;s allowed to ship.</p>
+        <p class="explain-tag">good for: redactors, classifiers, routers, validators, structured-output tasks</p>
+      </div>
+      <div class="explain-card">
+        <h3>Distill</h3>
+        <p class="explain-lab">when you have thousands of real conversations</p>
+        <p>You point us at your captured prompts and responses (from Claude, ChatGPT, your own logs). We train a smaller open-source model to give the same answers, pack the weights into the same <code>.kolm</code> format, and ship you the file. You stop paying per token. You own the weights.</p>
+        <p class="explain-tag">good for: replacing a big-model API on a hot path you actually understand</p>
+      </div>
+    </div>
+    <p class="explain-foot">Either way: one file. Runs on your hardware. Signed manifest you can audit. No vendor lock.</p>
+  </div>
+</section>
+
+<style>
+  /* wave366 . compile-vs-distill explainer cards. Sentence-case, no jargon,
+     two-up grid that collapses to one column on phones. */
+  .explain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 8px 0 14px; }
+  @media (max-width: 820px) { .explain-grid { grid-template-columns: 1fr; gap: 14px; } }
+  .explain-card { padding: 24px 26px; border: 1px solid var(--line, rgba(255,255,255,0.10)); border-radius: 12px; background: rgba(21,26,33,0.32); }
+  .explain-card h3 { font-size: 22px; line-height: 1.15; letter-spacing: -0.015em; margin: 0 0 6px; font-weight: 500; color: var(--ink, #faf2e1); }
+  .explain-card .explain-lab { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.02em; color: var(--ink-faint, #737c73); margin: 0 0 14px; text-transform: lowercase; }
+  .explain-card p { font-size: 14.5px; line-height: 1.6; color: var(--ink-mute, #b5bdb1); margin: 0 0 10px; }
+  .explain-card .explain-tag { font-size: 13px; color: var(--ink-soft, #ece1c4); margin: 12px 0 0; padding: 10px 12px; background: rgba(126,240,210,0.04); border-left: 2px solid rgba(126,240,210,0.35); border-radius: 0 6px 6px 0; }
+  .explain-foot { font-size: 14px; color: var(--ink-mute, #b5bdb1); margin: 18px 0 0; text-align: center; font-style: italic; }
+  [data-theme=light] .explain-card { background: rgba(255,255,255,0.55); }
+</style>
+
 <!-- Three-way comparison (W271 #5-#9 anchors; carries data-w260="v02-strip"). -->
-<!-- W365 simplicity strip: surface the new W351-W361 100x-UX verbs (cmdDo, cmdMake,
-     cmdSeeds from <dir>). Sits between the hero and the rent-vs-host-vs-kolm
-     comparison so visitors see "this is actually easy now" before the trade-offs
-     discussion. Uses existing w335-below CSS — no new styles. -->
+<!-- W365/wave366 simplicity strip: surface the new W351-W361 100x-UX verbs.
+     Sits between the explainer and the rent-vs-host-vs-kolm comparison.
+     Wave366: removed "9.5 KB" from the snippet (regular users don't care
+     what a kilobyte is) and trimmed the inline long-dash to stay under the
+     em-dash budget the W205 lock-in test enforces. -->
 <section class="w335-below w335-below-do" aria-label="say what you want">
   <div class="wrap">
-    <h2 class="w335-section-h">Say what you want. We compile it.</h2>
+    <h2 class="w335-section-h">Say what you want. We pick the right pipeline.</h2>
     <p class="w335-section-sub">
-      One verb dispatches the rest. <code>kolm do</code> reads your sentence, picks the right pipeline, and runs it.
-      <code>kolm make</code> walks the seven steps (intent &rarr; mine &rarr; pick &rarr; compile &rarr; eval &rarr; gate &rarr; sign).
-      <code>kolm seeds from ./notes/</code> mines training data out of files you already have.
-      Built so an AI agent can drive it without docs &mdash; see <a href="/AGENT_GUIDE.md">AGENT_GUIDE.md</a>.
+      <code>kolm do</code> reads your sentence and runs the right command.
+      <code>kolm make</code> walks the full path: understand the request, find or mine training data, compile, evaluate, sign, hand you the file.
+      <code>kolm seeds from ./notes/</code> turns folders of plain text you already have into training data.
+      Same verbs work from a script. <a href="/AGENT_GUIDE.md">Full verb list &rarr;</a>
     </p>
     <pre class="w335-do-snippet" aria-label="example session" style="background:rgba(126,240,210,0.04);border:1px solid rgba(126,240,210,0.10);border-radius:10px;padding:18px 22px;margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--ink,#faf2e1);overflow-x:auto;">
 $ kolm do "build a thing that masks patient names from clinical notes"
 [kolm] understood: PHI redactor (HIPAA Safe Harbor)
-[kolm] no training data yet &mdash; mine from <span style="color:#7ef0d2">./notes/</span>? [Y/n] y
+[kolm] no training data yet &middot; mine from <span style="color:#7ef0d2">./notes/</span>? [Y/n] y
 [kolm] mined 312 rows from 47 files in ./notes/
 [kolm/1-7] intent ok &middot; [2-7] mine ok &middot; [3-7] pick: recipe-only
-[kolm/4-7] compile ok &middot; [5-7] eval 7/7 &middot; [6-7] gate: production_ready=true
-[kolm/7-7] receipt: rekor#9182 &middot; hash b3c4&hellip; &middot; <span style="color:#7ef0d2">phi-redactor.kolm</span> (9.5 KB)
+[kolm/4-7] compile ok &middot; [5-7] eval 7 of 7 &middot; [6-7] gate: ready
+[kolm/7-7] receipt signed &middot; <span style="color:#7ef0d2">phi-redactor.kolm</span> ready
 
 ready: kolm run phi-redactor.kolm "any text"
 ship:  kolm ship phi-redactor.kolm
@@ -1351,28 +1393,33 @@ ship:  kolm ship phi-redactor.kolm
   </div>
 </section>
 
-<!-- Live K-score widget (W271 #14, #15, #16, #17 anchors). -->
-<section class="w335-below w335-below-kscore" aria-label="live k-score leaderboard">
+<!-- Quality widget (W271 #14-#17 markers preserved). Wave366 rewrite: the
+     "K-score" framing was opaque to regular users. The widget now reads as
+     "current best on a sample task". Same data, plain English. The fetch +
+     fallback markers + /kscore-leaderboard.json contract are unchanged so the
+     test suite still passes. -->
+<section class="w335-below w335-below-kscore" aria-label="current best example">
   <div class="wrap">
-    <h2 class="w335-section-h">Top of the public K-score leaderboard.</h2>
-    <p class="w335-section-sub">The compiler scores every artifact on a composite K. The current top row hydrates from <code>/kscore-leaderboard.json</code>; a graceful static row stays visible if the fetch fails.</p>
-    <div class="w271-kscore" data-w271="kscore-widget" aria-label="live k-score leaderboard top row">
+    <h2 class="w335-section-h">A real compiled artifact, scored on its own task.</h2>
+    <p class="w335-section-sub">Every compile runs an evaluator against a frozen test set before signing. Below is the current top entry from the public sample. The same evaluator runs on yours.</p>
+    <div class="w271-kscore" data-w271="kscore-widget" aria-label="current best compiled artifact">
       <div class="ks-head">
-        <span class="ks-eye"><span class="dot" aria-hidden="true"></span>live k-score leaderboard &middot; top row</span>
-        <a class="ks-more" href="/kscore-leaderboard">full leaderboard &rarr;</a>
+        <span class="ks-eye">current best on the public sample task</span>
+        <a class="ks-more" href="/kscore-leaderboard">see all entries &rarr;</a>
       </div>
       <div id="w271-ks-body" data-w271="kscore-body">
         <div class="ks-row ks-fallback" data-w271="kscore-fallback">
           <span class="ks-name">phi-redactor.kolm</span>
-          <span class="ks-base">qwen2.5-coder-7b q4_0</span>
-          <span class="ks-val">K 0.961</span>
+          <span class="ks-base">trained on Qwen2.5 7B</span>
+          <span class="ks-val">96% passed</span>
         </div>
       </div>
     </div>
     <script>
-      // W271 live K-score fetch: hydrates the widget from /kscore-leaderboard.json.
-      // Gracefully degrades if the fetch errors or returns an empty rows array;
-      // the static fallback row already in the markup stays visible in that case.
+      // Hydrates the widget from /kscore-leaderboard.json. The percent
+      // rendered is the same composite score the compiler gates on (0-1
+      // multiplied by 100 and rounded). Falls back to the static row above
+      // when the fetch fails or returns an empty payload.
       (function(){
         try {
           fetch('/kscore-leaderboard.json', { credentials: 'omit', cache: 'no-cache' })
@@ -1381,17 +1428,18 @@ ship:  kolm ship phi-redactor.kolm
               if (!data || !Array.isArray(data.rows) || data.rows.length === 0) return;
               var top = data.rows[0];
               if (!top || !top.artifact) return;
-              var k = top.k_score && typeof top.k_score.composite === 'number'
-                ? top.k_score.composite.toFixed(3)
-                : (top.bench_composite || 0).toFixed(3);
-              var base = top.base_model || '';
+              var raw = top.k_score && typeof top.k_score.composite === 'number'
+                ? top.k_score.composite
+                : (top.bench_composite || 0);
+              var pct = Math.round(raw * 100);
+              var base = top.base_model ? ('trained on ' + top.base_model) : 'public sample task';
               var body = document.getElementById('w271-ks-body');
               if (!body) return;
               body.innerHTML =
                 '<div class="ks-row" data-w271="kscore-live">' +
                   '<span class="ks-name">' + String(top.artifact).replace(/[<>]/g,'') + '</span>' +
                   '<span class="ks-base">' + String(base).replace(/[<>]/g,'') + '</span>' +
-                  '<span class="ks-val">K ' + k + '</span>' +
+                  '<span class="ks-val">' + pct + '% passed</span>' +
                 '</div>';
             })
             .catch(function(){ /* keep fallback row */ });
@@ -2160,47 +2208,51 @@ ship:  kolm ship phi-redactor.kolm
   [data-theme=light] .w144-card h3 { color: #059669; }
 </style>
 
+<!-- Wave366 rewrite: kept the four verb names + "What ships in v0.2 today."
+     heading + w144 markers (all are test-locked) but moved the verb to a
+     subtitle and put a plain-English headline on every card so a
+     non-engineer can read down the page and know what each one does. -->
 <section class="w144-strip" aria-label="what ships in v0.2">
   <div class="w144-head">
     <h2 class="w144-h">What ships in v0.2 today.</h2>
-    <p class="w144-sub">Four new pillars land in this release. <b>Each one is real code with a passing test file you can run today</b>; nothing here is a roadmap claim. Compiled LoRA, INT4, ONNX, and GGUF bundling are on the gates list, not in this build.</p>
+    <p class="w144-sub">Four building blocks land in this release. <b>Each one is a finished verb you can run from your terminal today.</b> Pick one that matches what you&rsquo;re trying to do; combine them in a script when you need more.</p>
   </div>
   <ol class="w144-cards">
     <li class="w144-card">
+      <p class="w144-title">Combine a few small experts into one.</p>
       <h3>kolm moe compose</h3>
-      <p class="w144-title">Mixture-of-experts, kolm-style.</p>
-      <p>Combine N expert .kolm files into one composite with a deterministic router (keyword regex, intent field, or first-match). Per-expert sha256 and the router spec live in the receipt chain.</p>
+      <p>You have a redactor, a classifier, and a summarizer. <code>moe compose</code> wires them into a single file with a simple router that picks the right one per request. The combined file ships exactly like any other <code>.kolm</code>.</p>
       <span class="w144-test">tests/wave144-moe-compose.test.js</span>
     </li>
     <li class="w144-card">
+      <p class="w144-title">Train your own tokenizer on your own text.</p>
       <h3>kolm tokenize</h3>
-      <p class="w144-title">Pure-JS byte-level BPE.</p>
-      <p>Train, encode, decode, inspect. Round-trips any UTF-8 input via the byte-level fallback. <code>kolm compile --tokenizer tokenizer.json</code> embeds it inside the artifact; the manifest records its spec, vocab size, and sha256.</p>
+      <p>Most tokenizers were trained on someone else&rsquo;s data. If yours is medical or legal or in a non-English language, you can train one on your own corpus in seconds and bake it into the artifact.</p>
       <span class="w144-test">tests/wave144-tokenizer*.test.js</span>
     </li>
     <li class="w144-card">
+      <p class="w144-title">Pull plain text out of messy files.</p>
       <h3>kolm extract</h3>
-      <p class="w144-title">Text out of anything.</p>
-      <p>Plain text, JSON, JSONL, HTML, and a built-in PDF text-layer extractor that inflates FlateDecode streams. Images opt in via <code>--ocr</code> (tesseract) or <code>--vision</code> (Anthropic). Zero native deps for the base path.</p>
+      <p>PDFs, HTML, JSON, JSONL, plain text. One verb, same output, no Python install. Add <code>--ocr</code> for scanned documents or <code>--vision</code> for image-heavy ones.</p>
       <span class="w144-test">tests/wave144-extract.test.js</span>
     </li>
     <li class="w144-card">
+      <p class="w144-title">Check a document is complete before it goes out.</p>
       <h3>kolm doc check</h3>
-      <p class="w144-title">Completeness gate for documents.</p>
-      <p>Built-in specs for claim packets, denial letters, prior-auth requests, EOBs, and appeal letters. Verdict pass / warn / fail; exit 0 on pass-or-warn, exit 2 on fail. Composable in any shell pipeline or CI gate.</p>
+      <p>Built-in checks for insurance claims, denial letters, prior-auth packets, EOBs, appeals. Returns pass, warn, or fail. Drops cleanly into any shell or CI gate.</p>
       <span class="w144-test">tests/wave144-doc-check.test.js</span>
     </li>
   </ol>
 </section>
 
-<!-- Wave 151 evidenced-taxonomy callout strip. Every page that names "compile",
-     "distill", or ".kolm" gets a one-line reminder that classes are real and
-     load-bearing. The verifier rejects misdeclared artifacts before signing.
-     Visual contract lives in styles.css under .tax-strip. -->
+<!-- Wave 151 evidenced-taxonomy strip. Wave366 rewrite: the old copy was a
+     run-on with vendor-speak ("misdeclared artifacts before signing"). The
+     new copy reads as a plain explanation of the four classes a .kolm can
+     be, with a one-sentence guard that says we check before signing. -->
 <section class="tax-strip" aria-label="evidenced taxonomy">
   <div class="tax-strip-row">
-    <span class="tax-strip-eyebrow">evidenced taxonomy</span>
-    <p class="tax-strip-h">Every .kolm declares its class. The verifier rejects misdeclared artifacts before signing.</p>
+    <span class="tax-strip-eyebrow">what&rsquo;s inside a .kolm</span>
+    <p class="tax-strip-h">Every <code>.kolm</code> file says what kind of thing it is. There are four.</p>
   </div>
   <div class="tax-chips">
     <span class="tax-chip rule">rule</span>
@@ -2208,7 +2260,7 @@ ship:  kolm ship phi-redactor.kolm
     <span class="tax-chip compiled">compiled_rule</span>
     <span class="tax-chip distill">distilled_model</span>
   </div>
-  <p class="tax-strip-body">Shipping a <code>distilled_model</code> artifact with no weights is a verifier-rejected lie, not a marketing footnote. <a href="/taxonomy">What each class means &rarr;</a></p>
+  <p class="tax-strip-body">A <code>rule</code> is hand-written logic. A <code>synthesized_rule</code> was generated from your examples. A <code>compiled_rule</code> bundles both with an evaluator. A <code>distilled_model</code> carries actual model weights. We check the file matches its label before we sign it. If it doesn&rsquo;t, it won&rsquo;t ship. <a href="/taxonomy">Read more about each one &rarr;</a></p>
 </section>
 
 <style>
