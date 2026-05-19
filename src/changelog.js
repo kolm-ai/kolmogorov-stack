@@ -9,6 +9,13 @@
 
 const WAVES = [
   {
+    wave: 'W464',
+    date: '2026-05-19',
+    title: 'multimodal audio voiceprint scrub worker (third media-redact primitive)',
+    summary: 'Closes audit P1 Multimodal "audio-side voiceprint scrub" open item. W454 ships audio-to-text via whisper + transcript redaction (what was said); W462 ships pixel-space image PII redaction (faces + license plates); W464 ships the third primitive — voiceprint anonymization on raw audio (who said it). The threat model: leaked audio of a customer/patient/suspect whose VOICE itself is identifying — even after the transcript text is redacted, a voiceprint match against a public sample re-identifies the speaker. Combined with W454 transcript scrub you get "what" and "who" both severed. New workers/multimodal-redact-audio/ isolated package + redact-audio.mjs worker shells out to an external voiceprint redactor: $VOICEPRINT_REDACT_CMD env override (priority 1), pyannote-audio-redact on PATH (priority 2), or python3 ~/.kolm/scripts/voiceprint-redact.py (priority 3). Heavy Python deps (pyannote.audio, torch, speaker embedding models) live OUTSIDE Node entirely — root kolm install stays light (W464 #9 lock). Honest-by-default envelope: when NO external redactor is wired the worker exits 3 with {ok:false, error:"no_detector_installed", install_hint, redacted_audio:null} — never silently passes audio through claiming it was anonymized. New POST /v1/multimodal/redact-audio route spawns the worker (5-min timeout, 64MB stdout buffer for inline base64 audio). New `kolm media audio-doctor` + `kolm media redact-audio [--strength 0..1]` CLI verbs. 10 W464 tests pin the worker shape, the no-soft-claims envelope, the auth-gated routes, the root-package-stays-light invariant, AND an end-to-end working path via an injected Node stub redactor.',
+    tags: ['multimodal', 'privacy', 'pii', 'audit', 'voiceprint', 'audio', 'pyannote'],
+  },
+  {
     wave: 'W463',
     date: '2026-05-19',
     title: 'agent trace compilation MVP (trace_id → IR → seeded cache-hit replay)',

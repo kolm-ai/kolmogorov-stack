@@ -2016,6 +2016,8 @@ USAGE
   kolm media redact-job --remote <file:URI> [--kind ...] [--mime ...]
   kolm media image-doctor [--remote]
   kolm media redact-image <file:URI | --path <local>> [--output <png>] [--mode blur|mask] [--threshold 0.35]
+  kolm media audio-doctor [--remote]
+  kolm media redact-audio <file:URI | --path <local>> [--output <wav>] [--strength 0..1]
 
 SUBCOMMANDS
   doctor        Report which extractors are wired (tesseract.js / pdf-parse /
@@ -2038,6 +2040,18 @@ SUBCOMMANDS
                 {ok:false, error:'no_detector_installed', install_hint:...}
                 when onnxruntime-node, sharp, or model files are missing —
                 NEVER claims it redacted PII it could not see.
+  audio-doctor  W464 — report whether the multimodal audio voiceprint scrub
+                worker has its external voiceprint redactor wired
+                (pyannote-audio-redact on PATH, $VOICEPRINT_REDACT_CMD env
+                override, or ~/.kolm/scripts/voiceprint-redact.py).
+  redact-audio  W464 — voiceprint anonymization. Scrambles the speaker's
+                voiceprint (pitch + formant + prosody) while preserving
+                content. Returns {ok, redactor, strength, duration_ms,
+                output_path|output_b64, redacted_audio_sha256} on success.
+                Honest envelope with {ok:false, error:'no_detector_installed',
+                install_hint:..., redacted_audio:null} when no external
+                redactor is wired — NEVER passes audio through claiming it
+                was anonymized.
 
 OPTIONS
   --remote          POST to /v1/media/* (server runs the worker)
@@ -2051,6 +2065,7 @@ OPTIONS
   --threshold <0-1> (redact-image) detection score threshold (default 0.35)
   --face-model <p>  (redact-image) override default ~/.kolm/models/yolov8n-face.onnx
   --plate-model <p> (redact-image) override default ~/.kolm/models/license-plate-detector.onnx
+  --strength <0-1>  (redact-audio) anonymization strength (default 0.7)
   --json            JSON envelope output (default for --remote)
 
 EXAMPLES
@@ -2062,6 +2077,9 @@ EXAMPLES
   kolm media image-doctor
   kolm media redact-image --path ./photo.jpg --output ./redacted.png
   kolm media redact-image --remote file:abc123.png --mode mask
+  kolm media audio-doctor
+  kolm media redact-audio --path ./call.wav --output ./redacted.wav --strength 0.8
+  kolm media redact-audio --remote file:abc123.wav
 
 EXTRACTORS (text)
   image   tesseract.js (WASM OCR, no native deps)
@@ -2073,6 +2091,11 @@ DETECTORS (pixel-space, W462)
   face    yolov8n-face.onnx in ~/.kolm/models/ (any YOLOv8 face variant)
   plate   license-plate-detector.onnx in ~/.kolm/models/
   runtime onnxruntime-node + sharp (optional; cd workers/multimodal-redact-image && npm install)
+
+VOICEPRINT REDACTOR (W464)
+  cmd1    $VOICEPRINT_REDACT_CMD env override
+  cmd2    pyannote-audio-redact on PATH (pip install pyannote.audio + wrapper)
+  cmd3    python3 ~/.kolm/scripts/voiceprint-redact.py
 
 The worker is OPTIONAL — root install does not pull tesseract.js or
 pdf-parse. Install in the isolated worker package:
@@ -20179,6 +20202,80 @@ async function cmdMedia(args) {
     if (faceModel)   { wargs.push('--face-model', faceModel); }
     if (plateModel)  { wargs.push('--plate-model', plateModel); }
     if (maxBytes)    { wargs.push('--max-bytes', maxBytes); }
+    wargs.push('--json');
+    const r2 = spawnSync(process.execPath, [workerPath, ...wargs], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 5 * 60 * 1000,
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    process.stdout.write(String(r2.stdout || ''));
+    if (r2.stderr && String(r2.stderr).length) process.stderr.write(String(r2.stderr));
+    process.exit(r2.status || 0);
+    return;
+  }
+  // W464 — audio-doctor: report whether the multimodal-redact-audio
+  // worker has its external voiceprint redactor wired. No audio input.
+  if (sub === 'audio-doctor') {
+    if (remote) {
+      const c = loadConfig();
+      if (!c.api_key) {
+        console.error('not logged in. run: kolm login (or drop --remote)');
+        process.exit(EXIT.MISSING_PREREQ);
+      }
+      const data = await api(c, 'GET', '/v1/multimodal/redact-audio/doctor');
+      console.log(JSON.stringify(data, null, 2));
+      return;
+    }
+    const urlMod = await import('node:url');
+    const __filename = urlMod.fileURLToPath(import.meta.url);
+    const __dirname  = path.dirname(__filename);
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'multimodal-redact-audio', 'redact-audio.mjs');
+    const r2 = spawnSync(process.execPath, [workerPath, '--doctor'], { stdio: 'pipe' });
+    process.stdout.write(String(r2.stdout || ''));
+    if (r2.status !== 0 && r2.stderr) process.stderr.write(String(r2.stderr));
+    process.exit(r2.status || 0);
+    return;
+  }
+  // W464 — audio voiceprint scrub. Anonymizes the speaker's voiceprint
+  // while preserving content. Honest envelope when no redactor wired.
+  if (sub === 'redact-audio') {
+    const positional = rest.find(a => !a.startsWith('--'));
+    const uri = positional || pickFlag(rest, '--uri');
+    const localPath = pickFlag(rest, '--path');
+    if (!uri && !localPath) {
+      console.error('usage: kolm media redact-audio <file:URI | --path <local>> [--output <wav>] [--strength 0..1]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const output = pickFlag(rest, '--output');
+    const strength = pickFlag(rest, '--strength');
+    const maxBytes = pickFlag(rest, '--max-bytes');
+    if (remote) {
+      const c = loadConfig();
+      if (!c.api_key) {
+        console.error('not logged in. run: kolm login (or drop --remote)');
+        process.exit(EXIT.MISSING_PREREQ);
+      }
+      const body = {};
+      if (uri)        body.media_uri = uri;
+      if (localPath)  body.path = localPath;
+      if (output)     body.output_path = output;
+      if (strength)   body.strength = Number(strength);
+      if (maxBytes)   body.max_bytes = Number(maxBytes);
+      const data = await api(c, 'POST', '/v1/multimodal/redact-audio', body);
+      console.log(JSON.stringify(data, null, 2));
+      if (data && data.ok === false) process.exit(1);
+      return;
+    }
+    const urlMod = await import('node:url');
+    const __filename = urlMod.fileURLToPath(import.meta.url);
+    const __dirname  = path.dirname(__filename);
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'multimodal-redact-audio', 'redact-audio.mjs');
+    const wargs = [];
+    if (uri)        { wargs.push('--uri', uri); }
+    if (localPath)  { wargs.push('--path', localPath); }
+    if (output)     { wargs.push('--output', output); }
+    if (strength)   { wargs.push('--strength', strength); }
+    if (maxBytes)   { wargs.push('--max-bytes', maxBytes); }
     wargs.push('--json');
     const r2 = spawnSync(process.execPath, [workerPath, ...wargs], {
       stdio: ['ignore', 'pipe', 'pipe'],

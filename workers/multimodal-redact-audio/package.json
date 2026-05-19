@@ -1,0 +1,26 @@
+{
+  "name": "@kolmogorov/multimodal-redact-audio-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated kolm multimodal AUDIO voiceprint scrub. Spawns an external voiceprint-anonymizer command (default: pyannote-audio-redact on PATH or VOICEPRINT_REDACT_CMD env override) to anonymize the speaker's voiceprint while preserving content. Heavy Python deps (pyannote.audio, torch, speaker embedding models) live OUTSIDE this Node package — root kolm install stays light. When the external redactor is missing the worker emits an honest install_hint envelope; never silently claims it scrubbed a voiceprint it could not modify.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "redact-audio.mjs",
+  "bin": {
+    "kolm-multimodal-redact-audio-worker": "redact-audio.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "doctor": "node redact-audio.mjs --doctor"
+  },
+  "dependencies": {},
+  "optionalDependencies": {},
+  "external": {
+    "python_redactor": {
+      "note": "Production voiceprint anonymization requires an external command. Default search: $VOICEPRINT_REDACT_CMD env override, then `pyannote-audio-redact` on PATH, then `~/.kolm/scripts/voiceprint-redact.py` (invoked via python3). The command MUST accept --input <wav> --output <wav> [--strength 0..1] and emit one JSON line on stdout. Without one the worker returns {ok:false, install_hint, redacted_audio:null} so the caller knows what's missing."
+    },
+    "python_requirements": "pyannote.audio>=3.1.0, torch>=2.0.0 (CPU or CUDA), soundfile, scipy"
+  }
+}

@@ -40,9 +40,10 @@ test('W456 #1 src/changelog.js exports WAVES + helpers, latest is the current wa
   // the top of WAVES, this test continues to pass without churning. Same
   // family-pattern relaxation pattern as W456 #8 (sw.js CACHE slug).
   const latest = mod.latestWave();
-  const latestFamily = ['W456', 'W457', 'W458', 'W459', 'W460', 'W461', 'W462', 'W463'];
-  assert.ok(latestFamily.includes(latest.wave),
-    `latestWave() must be in the W456+ family, got: ${latest.wave}`);
+  const lm = String(latest.wave || '').match(/^W(\d{3,4})$/);
+  assert.ok(lm, `latestWave().wave must match W<number>, got: ${latest.wave}`);
+  const ln = parseInt(lm[1], 10);
+  assert.ok(ln >= 456, `latestWave() must be in the W456+ family, got: ${latest.wave}`);
 });
 
 test('W456 #2 listWaves respects --limit, --since, --tag filters', async () => {

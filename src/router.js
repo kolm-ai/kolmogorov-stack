@@ -4170,6 +4170,78 @@ export function buildRouter() {
     return res.status(200).json(env);
   });
 
+  // W464 — multimodal audio voiceprint scrub. Anonymizes the speaker's
+  // voiceprint while preserving content. Complementary to W462 image
+  // redact (faces/plates) and W454 audio transcript redact (text).
+  // Body: { media_uri | path, output_path?, strength?, max_bytes? }
+  r.post('/v1/multimodal/redact-audio', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const mediaUri = typeof body.media_uri === 'string' ? body.media_uri : null;
+    const localPath = typeof body.path === 'string' ? body.path : null;
+    if (!mediaUri && !localPath) {
+      return res.status(400).json({ error: 'media_uri_or_path_required' });
+    }
+    const { spawnSync } = await import('node:child_process');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'multimodal-redact-audio', 'redact-audio.mjs');
+    const wargs = [];
+    if (mediaUri) wargs.push('--uri', mediaUri);
+    if (localPath) wargs.push('--path', localPath);
+    if (body.output_path) wargs.push('--output', String(body.output_path));
+    if (body.strength !== undefined) wargs.push('--strength', String(body.strength));
+    if (body.max_bytes) wargs.push('--max-bytes', String(body.max_bytes));
+    wargs.push('--json');
+    const r2 = spawnSync(process.execPath, [workerPath, ...wargs], {
+      stdio: 'pipe',
+      timeout: 5 * 60 * 1000,
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    let env = null;
+    try { env = JSON.parse(String(r2.stdout || '').trim().split('\n').pop() || '{}'); }
+    catch (_) { env = null; }
+    if (!env) {
+      return res.status(500).json({
+        error: 'worker_no_output',
+        exit_code: r2.status,
+        stderr: String(r2.stderr || '').slice(0, 500),
+      });
+    }
+    if (r2.status === 3)  return res.status(200).json(env);
+    if (r2.status === 4)  return res.status(404).json(env);
+    if (r2.status === 2)  return res.status(400).json(env);
+    if (r2.status === 5)  return res.status(422).json(env);
+    if (r2.status === 6)  return res.status(500).json(env);
+    return res.status(200).json(env);
+  });
+
+  // W464 — audio-redact worker self-doctor.
+  r.get('/v1/multimodal/redact-audio/doctor', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const { spawnSync } = await import('node:child_process');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'multimodal-redact-audio', 'redact-audio.mjs');
+    const r2 = spawnSync(process.execPath, [workerPath, '--doctor'], {
+      stdio: 'pipe',
+      timeout: 30 * 1000,
+    });
+    let env = null;
+    try { env = JSON.parse(String(r2.stdout || '').trim()); }
+    catch (_) { env = null; }
+    if (!env) {
+      return res.status(500).json({
+        error: 'worker_no_output',
+        exit_code: r2.status,
+        stderr: String(r2.stderr || '').slice(0, 500),
+      });
+    }
+    return res.json(env);
+  });
+
   // W462 — image-redact worker self-doctor, proxied so the CLI's
   // `kolm media image-doctor --remote` can ask the server.
   r.get('/v1/multimodal/redact-image/doctor', async (req, res) => {
