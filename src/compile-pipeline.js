@@ -736,7 +736,21 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   // exercised by tests/wave438-rented-distill.test.js (env-gated).
   let synthesizedRecipes = null;
   let synthEvalResult = null;
-  const wantSynth = !!opts.synthesize_recipe
+  // W451 — synth path defaults ON when no teacher API is wired AND the caller
+  // didn't pass explicit recipes. Without this default, a tenant with real
+  // captures who runs `kolm pipeline make --namespace foo` (no --allow-stub,
+  // no teacher env-var) gets a hard error from the bundle phase ("stub-only
+  // recipes require --allow-stub"). Auto-enabling the rule-class synth path
+  // means the same invocation produces a real .kolm artifact whose K-score
+  // verdict reflects the honest holdout pass rate. Callers who want to skip
+  // synth (running collect/full distill against a teacher) can pass
+  // opts.synthesize_recipe:false explicitly.
+  const teacherWired = !!(process.env.KOLM_DISTILL_TEACHER
+    || process.env.ANTHROPIC_API_KEY
+    || process.env.OPENAI_API_KEY);
+  const synthDefault = !teacherWired && !opts.recipes;
+  const synthOpt = opts.synthesize_recipe === undefined ? synthDefault : !!opts.synthesize_recipe;
+  const wantSynth = synthOpt
     && !opts.recipes
     && trainPairs.length >= 2
     && holdoutPairs.length >= 1;

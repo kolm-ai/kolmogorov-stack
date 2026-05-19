@@ -1912,6 +1912,8 @@ NOTES
 
 USAGE
   kolm redact [--input <path>] [--output <path>] [--map <path>] [--classes <list>] [--names <list>] [--ids <CLASS=value,...>] [--json]
+  kolm redact --remote [--input <path>] [--output <path>] [--json]
+  kolm redact --media <file:URI> [--mime <mime>] [--output <path>] [--json]
 
 INPUT  defaults to stdin
 OUTPUT defaults to stdout
@@ -1923,11 +1925,20 @@ OPTIONS
                         VEH DEV URL IP BIO OTHER NPI DEA MEDICAID
   --names    CSV of tenant-supplied names to redact (beats the regex names)
   --ids      CSV of "CLASS=value" pairs to force-redact (e.g., MRN=ABC123)
+  --remote   POST text to /v1/redact instead of redacting locally (uses
+             redaction_strictness from /v1/account/settings)
+  --media    POST a stored media-uri to /v1/media/redact. Text-extractable
+             mimes (text/*, application/json, application/yaml) return
+             redacted text. Image/audio/video/pdf return a deferred envelope
+             with a worker hint (OCR / whisper.cpp / pdftotext)
+  --mime     explicit mime-type override for --media (defaults to server sniff)
   --json     append a one-line JSON summary {redacted_bytes, tokens, map_hash}
 
 EXAMPLES
   echo "Hi Maria, MRN: 12345, ana@x.co" | kolm redact --map /tmp/m.json
   kolm redact --input claim.txt --output claim.redacted.txt --map claim.map.json
+  kolm redact --remote --input note.txt
+  kolm redact --media file:/home/u/.kolm/events/raw/abc123.txt --json
 
 PIPELINE
   Run redact -> send the redacted text to a teacher API (Anthropic / OpenAI /
@@ -19302,6 +19313,45 @@ async function cmdRedact(args) {
   const classesStr = pickFlag(args, '--classes');
   const namesStr = pickFlag(args, '--names');
   const idsStr = pickFlag(args, '--ids'); // CSV of CLASS=value pairs
+
+  // W452 — remote routes. --remote hits /v1/redact; --media <uri> hits
+  // /v1/media/redact (server resolves the blob, runs the redactor on
+  // text-extractable kinds, returns a deferred envelope otherwise).
+  const remote = args.includes('--remote');
+  const mediaUri = pickFlag(args, '--media') || pickFlagEq(args, '--media');
+  const mediaMime = pickFlag(args, '--mime') || pickFlagEq(args, '--mime');
+  if (remote || mediaUri) {
+    const c = loadConfig();
+    if (!c.api_key) {
+      console.error('not logged in. run: kolm login (or drop --remote/--media for local redaction)');
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    if (mediaUri) {
+      const body = { media_uri: mediaUri };
+      if (mediaMime) body.mime = mediaMime;
+      const data = await api(c, 'POST', '/v1/media/redact', body);
+      if (jsonOut) { console.log(JSON.stringify(data, null, 2)); return; }
+      if (data && data.deferred) {
+        console.error(`# deferred — ${data.deferral && data.deferral.hint || 'not text-extractable'}`);
+        console.log(JSON.stringify({ deferred: true, mime: data.mime, deferral: data.deferral }, null, 2));
+        return;
+      }
+      if (outputPath) fs.writeFileSync(path.resolve(process.cwd(), outputPath), data.redacted || '');
+      else process.stdout.write((data && data.redacted) || '');
+      if (!outputPath) process.stdout.write('\n');
+      return;
+    }
+    // --remote text path.
+    const input = inputPath
+      ? fs.readFileSync(path.resolve(process.cwd(), inputPath), 'utf8')
+      : await readStdinAll();
+    const data = await api(c, 'POST', '/v1/redact', { text: input });
+    if (jsonOut) { console.log(JSON.stringify(data, null, 2)); return; }
+    if (outputPath) fs.writeFileSync(path.resolve(process.cwd(), outputPath), data.redacted || '');
+    else process.stdout.write((data && data.redacted) || '');
+    if (!outputPath) process.stdout.write('\n');
+    return;
+  }
 
   const opts = {};
   if (classesStr) opts.classes = classesStr.split(',').map(s => s.trim()).filter(Boolean);

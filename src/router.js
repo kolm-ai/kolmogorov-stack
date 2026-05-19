@@ -3826,6 +3826,188 @@ export function buildRouter() {
     }
   });
 
+  // W452 — multimodal redactor surface. The 17-class fail-closed redactor in
+  // src/privacy-membrane.js + src/phi-redactor.js has shipped since the v7
+  // refactor, but it was only reachable via the connector proxy's implicit
+  // redact-on-capture hook. There was no first-class /v1/redact route for
+  // explicit redaction of an arbitrary buffer — which meant the redactor was
+  // invisible to anyone not using the connector path (CLI users on a fresh
+  // shell, agents that capture-then-redact, the /v1/capture/media multimodal
+  // pipeline).
+  //
+  // The two routes here close that gap:
+  //
+  //   POST /v1/redact          — text-only canonical. {text} -> {redacted, ...}
+  //   POST /v1/media/redact    — multimodal. Accepts {media_uri, mime} OR
+  //                              {text, mime}. Text-extractable kinds run
+  //                              through the redactor; image/audio/video
+  //                              return a deferred envelope with a clear
+  //                              extract_uri hint (callers wire their own
+  //                              OCR/whisper worker — heavy ML deps stay out
+  //                              of the default install per W195/W212 rule).
+  //
+  // Both routes are auth-gated (req.tenant_record). The redactor is pure-JS
+  // regex, so the work happens inline; no job queue. Cap text at 256 KiB per
+  // request (the connector proxy uses the same cap upstream).
+  const _REDACT_TEXT_LIMIT = 256 * 1024;
+  // Mime prefixes the redactor can extract text from directly. application/json
+  // and application/yaml get JSON.stringify'd before redaction so embedded PHI
+  // in keys/values is caught. Other text/* kinds (html, csv, markdown) get
+  // redacted as-is — the regex set is content-agnostic.
+  function _isTextRedactable(mime) {
+    if (!mime) return false;
+    const m = String(mime).toLowerCase().split(';')[0].trim();
+    if (m.startsWith('text/')) return true;
+    if (m === 'application/json') return true;
+    if (m === 'application/jsonl') return true;
+    if (m === 'application/x-ndjson') return true;
+    if (m === 'application/yaml' || m === 'text/x-yaml') return true;
+    if (m === 'application/xml') return true;
+    return false;
+  }
+  function _deferralReason(mime) {
+    const m = String(mime || '').toLowerCase().split(';')[0].trim();
+    if (m.startsWith('image/')) return { kind: 'image', worker: 'ocr', hint: 'run OCR (tesseract / paddleocr) over the blob, then POST the extracted text to /v1/redact' };
+    if (m.startsWith('audio/')) return { kind: 'audio', worker: 'transcription', hint: 'run a whisper.cpp transcribe pass, then POST the transcript to /v1/redact' };
+    if (m.startsWith('video/')) return { kind: 'video', worker: 'transcription', hint: 'extract audio via ffmpeg, then run whisper.cpp + POST transcript to /v1/redact' };
+    if (m === 'application/pdf') return { kind: 'pdf', worker: 'pdf-text', hint: 'extract text via pdfplumber/pdftotext, then POST the extracted text to /v1/redact' };
+    return { kind: 'binary', worker: null, hint: 'binary content; redactor only operates on extracted text' };
+  }
+  r.post('/v1/redact', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const text = typeof body.text === 'string' ? body.text : null;
+    if (text == null) return res.status(400).json({ error: 'text_required' });
+    if (text.length > _REDACT_TEXT_LIMIT) {
+      return res.status(413).json({
+        error: 'text_too_large',
+        limit_bytes: _REDACT_TEXT_LIMIT,
+        got_bytes: text.length,
+      });
+    }
+    try {
+      const r2 = privacyRedactWithPolicy(text, { dryRun: !!body.dry_run });
+      const counters = {};
+      for (const cls of (r2.classes_seen || [])) counters[cls] = (counters[cls] || 0) + 1;
+      // Hash the map (not the values) so callers can pin reinjection to a
+      // specific redaction map without exposing PHI in the response.
+      const mapHash = 'sha256:' + crypto.createHash('sha256').update(JSON.stringify(r2.map || {})).digest('hex');
+      res.json({
+        ok: true,
+        redacted: r2.redacted_text || r2.redacted || '',
+        classes_seen: r2.classes_seen || [],
+        blocked_classes: r2.blocked_classes || [],
+        allowed_classes: r2.allowed_classes || [],
+        overridden_classes: r2.overridden_classes || [],
+        count_by_class: counters,
+        map_hash: mapHash,
+        detector_version: r2.detector_version || null,
+      });
+    } catch (e) {
+      if (e && e.name === 'PolicyBlockError') {
+        return res.status(409).json({
+          error: 'policy_block',
+          blocked_class: e.blocked_class || (e.blocked_classes && e.blocked_classes[0]) || null,
+          blocked_classes: e.blocked_classes || [],
+          hint: 'redaction_strictness=minimal or update class policy to redact/allow/override',
+        });
+      }
+      res.status(500).json({ error: 'redact_error', detail: String(e && e.message || e) });
+    }
+  });
+  r.post('/v1/media/redact', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const mime = typeof body.mime === 'string' ? body.mime : null;
+    const mediaUri = typeof body.media_uri === 'string' ? body.media_uri : null;
+    const inlineText = typeof body.text === 'string' ? body.text : null;
+    if (!mediaUri && inlineText == null) {
+      return res.status(400).json({ error: 'media_uri_or_text_required' });
+    }
+    // Resolve to text we can redact.
+    let text = null;
+    let resolvedMime = mime;
+    if (inlineText != null) {
+      text = inlineText;
+    } else {
+      // Defer non-text-extractable kinds before reading bytes — we don't want
+      // to load a 50MB video file just to refuse it.
+      if (resolvedMime && !_isTextRedactable(resolvedMime)) {
+        const d = _deferralReason(resolvedMime);
+        return res.json({
+          ok: true,
+          deferred: true,
+          media_uri: mediaUri,
+          mime: resolvedMime,
+          deferral: d,
+        });
+      }
+      try {
+        const ms = await import('./media-store.js');
+        const buf = await ms.loadBlob(mediaUri);
+        // Sniff mime from the blob list if the caller didn't pass one.
+        if (!resolvedMime) {
+          const all = await ms.listBlobs();
+          const hit = all.find(b => b.uri === mediaUri);
+          if (hit) resolvedMime = hit.mime;
+        }
+        if (resolvedMime && !_isTextRedactable(resolvedMime)) {
+          const d = _deferralReason(resolvedMime);
+          return res.json({
+            ok: true,
+            deferred: true,
+            media_uri: mediaUri,
+            mime: resolvedMime,
+            deferral: d,
+          });
+        }
+        text = buf.toString('utf8');
+      } catch (e) {
+        if (e && e.code === 'ENOENT') {
+          return res.status(404).json({ error: 'media_not_found', media_uri: mediaUri });
+        }
+        return res.status(500).json({ error: 'media_load_error', detail: String(e && e.message || e) });
+      }
+    }
+    if (text == null) return res.status(400).json({ error: 'no_extractable_text' });
+    if (text.length > _REDACT_TEXT_LIMIT) {
+      return res.status(413).json({
+        error: 'text_too_large',
+        limit_bytes: _REDACT_TEXT_LIMIT,
+        got_bytes: text.length,
+      });
+    }
+    try {
+      const r2 = privacyRedactWithPolicy(text, { dryRun: !!body.dry_run });
+      const counters = {};
+      for (const cls of (r2.classes_seen || [])) counters[cls] = (counters[cls] || 0) + 1;
+      const mapHash = 'sha256:' + crypto.createHash('sha256').update(JSON.stringify(r2.map || {})).digest('hex');
+      res.json({
+        ok: true,
+        deferred: false,
+        media_uri: mediaUri,
+        mime: resolvedMime || 'text/plain',
+        redacted: r2.redacted_text || r2.redacted || '',
+        classes_seen: r2.classes_seen || [],
+        blocked_classes: r2.blocked_classes || [],
+        allowed_classes: r2.allowed_classes || [],
+        overridden_classes: r2.overridden_classes || [],
+        count_by_class: counters,
+        map_hash: mapHash,
+        detector_version: r2.detector_version || null,
+      });
+    } catch (e) {
+      if (e && e.name === 'PolicyBlockError') {
+        return res.status(409).json({
+          error: 'policy_block',
+          blocked_class: e.blocked_class || (e.blocked_classes && e.blocked_classes[0]) || null,
+          blocked_classes: e.blocked_classes || [],
+        });
+      }
+      res.status(500).json({ error: 'redact_error', detail: String(e && e.message || e) });
+    }
+  });
+
   // Rotate the per-tenant receipt-signing secret. Previous secret is
   // preserved so older signed artifacts and audit rows still verify.
   r.post('/v1/account/rotate-receipt-secret', (req, res) => {
