@@ -251,24 +251,70 @@ function synthRegexExtract(_positives, spec) {
 }
 
 function synthClassifier(positives) {
+  // W443 — TF-IDF-style class-specific token weighting. Previously every token
+  // (shared + class-unique) got weight 1 and substring-matched, which meant on
+  // prompts like "support ticket N regarding our <cls> workflow needs attention"
+  // (a) shared boilerplate dominated, (b) numeric sample-IDs (e.g. token "1"
+  // from training row N=1) leaked into other classes via substring (input "13"
+  // contains "1"). Fixes:
+  //   - drop pure-numeric tokens (they're row IDs, not class signal)
+  //   - drop single-character tokens (too noisy)
+  //   - score by IDF (unique-to-class tokens get higher weight)
+  //   - match by word-boundary (split input the same way we split samples)
+  //   so "1" no longer substring-matches "13"
+  const TOKEN_RE = /[^a-z0-9]+/;
+  const isNumeric = (t) => /^\d+$/.test(t);
+  const tokenize = (s) => String(s).toLowerCase().split(TOKEN_RE).filter(Boolean)
+    .filter((t) => t.length >= 2 && !isNumeric(t));
   const classes = new Map();
   for (const p of positives) {
     const cls = p.expected;
     if (!classes.has(cls)) classes.set(cls, []);
-    classes.get(cls).push(String(p.input).toLowerCase());
+    classes.get(cls).push(tokenize(p.input));
   }
-  const rules = [...classes.entries()].map(([cls, samples]) => {
-    const tokens = new Set();
-    for (const s of samples) for (const t of s.split(/[^a-z0-9]+/).filter(Boolean)) tokens.add(t);
-    return { cls, tokens: [...tokens].slice(0, 20) };
+  const classCount = classes.size || 1;
+  // Token doc-frequency: how many classes a token appears in.
+  const tokenDocFreq = new Map();
+  for (const [, sampleSets] of classes) {
+    const seenInClass = new Set();
+    for (const toks of sampleSets) {
+      for (const t of toks) seenInClass.add(t);
+    }
+    for (const t of seenInClass) {
+      tokenDocFreq.set(t, (tokenDocFreq.get(t) || 0) + 1);
+    }
+  }
+  const rules = [...classes.entries()].map(([cls, sampleSets]) => {
+    const tokenWeights = new Map();
+    for (const toks of sampleSets) {
+      for (const t of toks) {
+        if (tokenWeights.has(t)) continue;
+        const df = tokenDocFreq.get(t) || 1;
+        // IDF curve: unique-to-class tokens get weight (classCount-1)/classCount,
+        // shared-across-N-classes tokens get (classCount-N)/classCount. Tokens
+        // present in every class get weight 0. Smooth-add 0.01 floor so the
+        // fallback tiebreaker still has something to count.
+        const idf = (classCount - df) / classCount;
+        tokenWeights.set(t, Math.max(0.01, idf));
+      }
+    }
+    // Cap at 60 highest-weighted tokens so the embedded JSON stays bounded.
+    const tokens = [...tokenWeights.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 60);
+    return { cls, tokens };
   });
   return `function generate(input, lib) {
   const rules = ${JSON.stringify(rules)};
-  const inp = String(input).toLowerCase();
-  let bestCls = null, bestN = -1;
+  const inp = String(input).toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  const inpSet = new Set(inp);
+  let bestCls = null, bestScore = -1;
   for (const r of rules) {
-    const n = r.tokens.filter(t => inp.includes(t)).length;
-    if (n > bestN) { bestN = n; bestCls = r.cls; }
+    let score = 0;
+    for (const [tok, w] of r.tokens) {
+      if (inpSet.has(tok)) score += w;
+    }
+    if (score > bestScore) { bestScore = score; bestCls = r.cls; }
   }
   return bestCls;
 }`;

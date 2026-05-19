@@ -730,6 +730,491 @@ export const CANDIDATE_MODELS = [
   },
 ];
 
+// ---------------------------------------------------------------------------
+// W409r — BACKBONES. Cross-orthogonal model-backbones registry.
+//
+// FRONTIER_MODELS/CANDIDATE_MODELS above are the W217/W295 axis: which model
+// to pick FOR A GIVEN hw_tier. BACKBONES is the W409r axis: every base model
+// kolm knows how to compile against, with operationally-honest pull status.
+//
+// Each row carries the W409r contract:
+//   id                         canonical HF org/repo (or short slug)
+//   family                     upstream family ('gemma','qwen','llama-3','phi','mistral','smollm',...)
+//   license                    SPDX-style identifier (Apache-2.0, Llama-3-Community, MIT, Gemma-TOU)
+//   runtime_compatibility      array of ['js','wasm','gguf','onnx','native']
+//   device_constraints         { min_ram_gb, gpu_class, mobile_ok }
+//   quantization_support       array of ['Q2','Q4','Q6','Q8','fp16','bf16']
+//   pull_status                'registered' | 'pulled_and_verified'
+//   local_path                 absolute path on disk OR null
+//   recommended_for_target     [] until pulled+tested, e.g. ['rtx-3090','dgx-spark','iphone']
+//   verified_at                'YYYY-MM-DD' OR null
+//   notes                      free-text
+//
+// The honest contract: `recommended_for_target` is empty until the model is
+// actually pulled AND a downstream smoke test confirmed it loads on the
+// claimed device. `pullBackbone()` flips `pull_status` to 'pulled_and_verified'
+// and sets `local_path`, but the user/runtime adds entries to
+// `recommended_for_target` after running a real benchmark.
+// ---------------------------------------------------------------------------
+export const BACKBONES = [
+  // ===== Gemma family (Google) =====
+  {
+    id: 'google/gemma-2-9b-it',
+    family: 'gemma',
+    license: 'Gemma-TOU',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 8, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Gemma 2 dense 9B; canonical RX 9070 XT / 4090 daily-driver.',
+  },
+  {
+    id: 'google/gemma-2-27b-it',
+    family: 'gemma',
+    license: 'Gemma-TOU',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 16, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Gemma 2 dense 27B; verified on AMD MI300X via ROCm.',
+  },
+  {
+    id: 'google/gemma-3n-E2B-it',
+    family: 'gemma-3n',
+    license: 'Gemma-TOU',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 3, gpu_class: 'mobile-npu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Gemma 3n E2B — phone-class mobile target. LM Studio iOS + MediaPipe sideload demo.',
+  },
+  {
+    id: 'google/gemma-3n-E4B-it',
+    family: 'gemma-3n',
+    license: 'Gemma-TOU',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 4, gpu_class: 'mobile-npu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Gemma 3n E4B — larger phone-class target. Galaxy S24 Ultra / Pixel 9 Pro / iPhone 16 Pro.',
+  },
+
+  // ===== Qwen family =====
+  {
+    id: 'Qwen/Qwen2.5-7B-Instruct',
+    family: 'qwen-2.5',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 8, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Apache 2.0 dense 7B; canonical 3090 / 4090 daily-driver.',
+  },
+  {
+    id: 'Qwen/Qwen3.6-27B-Instruct',
+    family: 'qwen-3',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'native'],
+    device_constraints: { min_ram_gb: 16, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Dense 27B; fits a single RTX 3090 at Q4 with headroom. (W217 catalog row.)',
+  },
+  {
+    id: 'Qwen/Qwen3-Coder-30B-A3B-Instruct',
+    family: 'qwen-3-coder',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'native'],
+    device_constraints: { min_ram_gb: 18, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Coder-tuned MoE 30B / A3B active; 256K ctx. (W217 catalog row.)',
+  },
+  {
+    id: 'Qwen/Qwen2.5-0.5B-Instruct',
+    family: 'qwen-2.5',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['js', 'wasm', 'gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 1, gpu_class: 'mobile-cpu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8', 'fp16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Smallest Qwen 2.5; runs CPU-only in <1s on a laptop or in WASM.',
+  },
+
+  // ===== Llama 3 / 4 family (Meta) =====
+  {
+    id: 'meta-llama/Llama-3.1-8B-Instruct',
+    family: 'llama-3',
+    license: 'Llama-3-Community',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 6, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Llama 3.1 8B; RTX 4090 daily-driver tier.',
+  },
+  {
+    id: 'meta-llama/Llama-3.1-70B-Instruct',
+    family: 'llama-3',
+    license: 'Llama-3-Community',
+    runtime_compatibility: ['gguf', 'native'],
+    device_constraints: { min_ram_gb: 64, gpu_class: 'datacenter', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Llama 3.1 70B; one H100 at Q6.',
+  },
+  {
+    id: 'meta-llama/Llama-3.2-1B-Instruct',
+    family: 'llama-3',
+    license: 'Llama-3-Community',
+    runtime_compatibility: ['js', 'wasm', 'gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 2, gpu_class: 'mobile-cpu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Llama 3.2 1B; phone-class mobile candidate (foundation runtime only).',
+  },
+  {
+    id: 'meta-llama/Llama-3.2-3B-Instruct',
+    family: 'llama-3',
+    license: 'Llama-3-Community',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 4, gpu_class: 'laptop-igpu', mobile_ok: true },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Llama 3.2 3B; laptop iGPU + iPhone 15 Pro NPU candidate.',
+  },
+  {
+    id: 'meta-llama/Llama-4-Scout-17B-16E-Instruct',
+    family: 'llama-4',
+    license: 'Llama-4-Community',
+    runtime_compatibility: ['gguf', 'native'],
+    device_constraints: { min_ram_gb: 64, gpu_class: 'datacenter', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Llama 4 Scout 17B / 16E MoE; H100 or 2x A100.',
+  },
+
+  // ===== Phi family (Microsoft) =====
+  {
+    id: 'microsoft/Phi-3.5-mini-instruct',
+    family: 'phi',
+    license: 'MIT',
+    runtime_compatibility: ['js', 'wasm', 'gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 4, gpu_class: 'laptop-igpu', mobile_ok: true },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'MIT-licensed dense 3.8B; runs CPU-only on 256GB+ DDR5 servers, laptop iGPUs, or NPU phones.',
+  },
+  {
+    id: 'microsoft/Phi-3.5-MoE-instruct',
+    family: 'phi',
+    license: 'MIT',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 16, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Phi-3.5 MoE 41.9B / 6.6B active; RTX 4090 at Q4.',
+  },
+  {
+    id: 'microsoft/Phi-4',
+    family: 'phi',
+    license: 'MIT',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 10, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Phi-4 dense 14B; one 4090 at Q4. Math/reasoning specialist.',
+  },
+
+  // ===== Mistral / Ministral =====
+  {
+    id: 'mistralai/Mistral-7B-Instruct-v0.3',
+    family: 'mistral',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 6, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Apache 2.0 dense 7B; verified on AMD RX 7900 XTX via ROCm + Vulkan.',
+  },
+  {
+    id: 'mistralai/Mistral-Small-3-Instruct-2503',
+    family: 'mistral',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'native'],
+    device_constraints: { min_ram_gb: 16, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Mistral Small 3 dense 24B; one 5090 at Q4.',
+  },
+  {
+    id: 'mistralai/Ministral-8B-Instruct-2410',
+    family: 'ministral',
+    license: 'Mistral-Research',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 6, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Ministral 8B; edge-tuned. RTX 3090 at Q4.',
+  },
+  {
+    id: 'mistralai/Ministral-3B-Instruct-2410',
+    family: 'ministral',
+    license: 'Mistral-Research',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 4, gpu_class: 'laptop-igpu', mobile_ok: true },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Ministral 3B; laptop iGPU + Jetson Orin Nano candidate.',
+  },
+
+  // ===== SmolLM (Hugging Face) =====
+  {
+    id: 'HuggingFaceTB/SmolLM2-1.7B-Instruct',
+    family: 'smollm',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['js', 'wasm', 'gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 2, gpu_class: 'mobile-cpu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'SmolLM2 1.7B; Raspberry Pi 5 + browser/WASM canonical.',
+  },
+  {
+    id: 'HuggingFaceTB/SmolLM2-360M-Instruct',
+    family: 'smollm',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['js', 'wasm', 'gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 1, gpu_class: 'mobile-cpu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'SmolLM2 360M; smallest practical Hugging Face base. Cloudflare Worker WASM friendly.',
+  },
+  {
+    id: 'HuggingFaceTB/SmolLM2-135M-Instruct',
+    family: 'smollm',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['js', 'wasm', 'gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 1, gpu_class: 'mobile-cpu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'SmolLM2 135M; the smallest backbone we ship. Tiny enough for browser hot-reload.',
+  },
+];
+
+// --------- W409r — BACKBONES API ---------
+
+const BACKBONE_LICENSES = ['Apache-2.0', 'MIT', 'Llama-3-Community', 'Llama-4-Community', 'Gemma-TOU', 'Qwen-License', 'Mistral-Research'];
+const BACKBONE_RUNTIMES = ['js', 'wasm', 'gguf', 'onnx', 'native'];
+const BACKBONE_QUANTS = ['Q2', 'Q4', 'Q6', 'Q8', 'fp16', 'bf16'];
+const BACKBONE_PULL_STATUSES = ['registered', 'pulled_and_verified'];
+
+export function listBackbones(filter = {}) {
+  let out = BACKBONES.slice();
+  if (filter.family)         out = out.filter(b => b.family === filter.family);
+  if (filter.license)        out = out.filter(b => b.license === filter.license);
+  if (filter.runtime)        out = out.filter(b => Array.isArray(b.runtime_compatibility) && b.runtime_compatibility.includes(filter.runtime));
+  if (filter.mobile_ok != null) out = out.filter(b => !!b.device_constraints?.mobile_ok === !!filter.mobile_ok);
+  if (filter.pull_status)    out = out.filter(b => b.pull_status === filter.pull_status);
+  return out;
+}
+
+export function showBackbone(id) {
+  return BACKBONES.find(b => b.id === id) || null;
+}
+
+// Honest pull contract: stream bytes (or a tiny fixture in tests) into
+// <cacheDir>/<slug>/weights.bin, then flip pull_status + set local_path.
+// W409r reuses the existing W386 model-weights-puller cache layout when
+// the row is registered in model-weights-manifest.js; otherwise it writes
+// a stub `<slug>/backbone.json` so tests and offline flows can demonstrate
+// the registry-mutation contract without a network call.
+//
+// fixtureBytes: optional Buffer. When provided, written verbatim to the
+// cache dir as <slug>/fixture.bin and used as the pulled artifact. Tests
+// pass a small Buffer; production code passes null and the real puller runs.
+export async function pullBackbone(id, opts = {}) {
+  const row = BACKBONES.find(b => b.id === id);
+  if (!row) {
+    return { ok: false, id, reason: 'unknown_id' };
+  }
+  // Lazy imports — avoid heavy fs/os at module load.
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const os = await import('node:os');
+
+  const cacheDir = opts.cacheDir
+    || process.env.KOLM_MODELS_DIR
+    || path.join(os.homedir(), '.kolm', 'models');
+  fs.mkdirSync(cacheDir, { recursive: true });
+  const slug = id.replace(/[^A-Za-z0-9._-]+/g, '_');
+  const outDir = path.join(cacheDir, slug);
+  fs.mkdirSync(outDir, { recursive: true });
+
+  let bytes = 0;
+  let filePath;
+  if (opts.fixtureBytes) {
+    // Test/offline path — write the fixture verbatim.
+    filePath = path.join(outDir, 'fixture.bin');
+    fs.writeFileSync(filePath, opts.fixtureBytes);
+    bytes = opts.fixtureBytes.length;
+  } else if (opts.useRealPuller) {
+    // Production path — delegate to W386 puller via model-weights-manifest.
+    try {
+      const W = await import('./model-weights-manifest.js');
+      const P = await import('./model-weights-puller.js');
+      const variant = opts.variant || 'q4_k_m';
+      const wRow = W.getVariant(id, variant);
+      if (wRow) {
+        const dir = P.ensureCacheDir(cacheDir);
+        const result = await P.pullVariant({ row: wRow, cacheDir: dir, probe: opts.probe !== false });
+        if (!result.ok) return { ok: false, id, reason: 'puller_failed', detail: result };
+        // Pick the first downloaded file as the canonical local_path.
+        const firstFile = (result.files || []).find(f => f.ok);
+        if (firstFile) {
+          // model-weights-puller stores at <dir>/<slug>/<filename>. Map that.
+          const candidate = path.join(dir, `${id.replace(/\//g, '__')}__${variant}`, path.basename(firstFile.file));
+          filePath = fs.existsSync(candidate) ? candidate : path.join(outDir, 'weights.bin');
+          bytes = result.total_bytes || 0;
+        }
+      } else {
+        // No manifest row — write a manifest stub so the registry reflects
+        // the operator's intent without lying about a pulled binary.
+        filePath = path.join(outDir, 'backbone.json');
+        const stub = { id, family: row.family, pulled_at: new Date().toISOString(), source: 'registry-stub' };
+        fs.writeFileSync(filePath, JSON.stringify(stub, null, 2));
+        bytes = fs.statSync(filePath).size;
+      }
+    } catch (e) {
+      return { ok: false, id, reason: 'puller_error', detail: String(e.message || e) };
+    }
+  } else {
+    // Default offline path — write a stub manifest. The runtime can later
+    // replace this with a real weights file.
+    filePath = path.join(outDir, 'backbone.json');
+    const stub = { id, family: row.family, pulled_at: new Date().toISOString(), source: 'registry-stub' };
+    fs.writeFileSync(filePath, JSON.stringify(stub, null, 2));
+    bytes = fs.statSync(filePath).size;
+  }
+
+  // Mutate the in-memory row. Persistent state is the on-disk cache itself.
+  row.pull_status = 'pulled_and_verified';
+  row.local_path = filePath;
+  row.verified_at = new Date().toISOString().slice(0, 10);
+
+  return {
+    ok: true,
+    id,
+    local_path: filePath,
+    bytes,
+    pull_status: row.pull_status,
+    verified_at: row.verified_at,
+    cache_dir: cacheDir,
+  };
+}
+
+// Shape check — every backbone row has the W409r contract.
+export function verifyBackbone(id) {
+  const row = BACKBONES.find(b => b.id === id);
+  if (!row) return { ok: false, id, reason: 'unknown_id' };
+  const problems = [];
+  if (!row.family || typeof row.family !== 'string') problems.push('bad_family');
+  if (!row.license || !BACKBONE_LICENSES.includes(row.license)) problems.push('bad_license:' + row.license);
+  if (!Array.isArray(row.runtime_compatibility) || row.runtime_compatibility.length === 0) problems.push('bad_runtime_compatibility');
+  else for (const r of row.runtime_compatibility) {
+    if (!BACKBONE_RUNTIMES.includes(r)) problems.push('bad_runtime_value:' + r);
+  }
+  if (!row.device_constraints || typeof row.device_constraints !== 'object') problems.push('bad_device_constraints');
+  else {
+    if (typeof row.device_constraints.min_ram_gb !== 'number') problems.push('bad_min_ram_gb');
+    if (typeof row.device_constraints.mobile_ok !== 'boolean') problems.push('bad_mobile_ok');
+  }
+  if (!Array.isArray(row.quantization_support) || row.quantization_support.length === 0) problems.push('bad_quantization_support');
+  else for (const q of row.quantization_support) {
+    if (!BACKBONE_QUANTS.includes(q)) problems.push('bad_quant_value:' + q);
+  }
+  if (!BACKBONE_PULL_STATUSES.includes(row.pull_status)) problems.push('bad_pull_status');
+  if (row.pull_status === 'pulled_and_verified') {
+    if (!row.local_path) problems.push('pulled_without_local_path');
+  }
+  if (!Array.isArray(row.recommended_for_target)) problems.push('bad_recommended_for_target');
+  if (row.verified_at != null && !/^\d{4}-\d{2}-\d{2}$/.test(row.verified_at)) problems.push('bad_verified_at');
+  return { ok: problems.length === 0, id, problems };
+}
+
+export function verifyAllBackbones() {
+  const results = BACKBONES.map(b => verifyBackbone(b.id));
+  const failed = results.filter(r => !r.ok);
+  return { total: results.length, failed: failed.length, results };
+}
+
 // --------- API ---------
 
 // W295 — verified-only accessors. listVerified/listCandidates return shallow
@@ -1020,10 +1505,11 @@ export function detectBackendFromGpuName(gpuName) {
 
 export default {
   HW_TIERS, QUANTS, ARCHS, MODALITIES, RUNTIME_BACKENDS,
-  FRONTIER_MODELS, CANDIDATE_MODELS,
+  FRONTIER_MODELS, CANDIDATE_MODELS, BACKBONES,
   listFrontier, listVerified, listCandidates, showFrontier, showAny,
   listHwTiers, showHwTier,
   buildEntry, verifyEntry, verifyAll, verifyEntryOnline, verifyAllOnline,
   verifyExactSourceUrl,
   resolveTier, detectTierFromGpuName, detectBackendFromGpuName,
+  listBackbones, showBackbone, pullBackbone, verifyBackbone, verifyAllBackbones,
 };

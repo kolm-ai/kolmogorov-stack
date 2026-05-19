@@ -66,12 +66,14 @@ test('W220 #4 - new lede is the 3-sec value prop, not the dense pre-W220 lede', 
     'pre-W220 dense lede must be replaced');
 });
 
-test('W220 #5 - primary CTA targets /captures (W213 dashboard)', () => {
+test('W220 #5 - primary CTA targets /captures (W213 dashboard) [W387: copy relaxed]', () => {
   // Hero must surface /captures as a primary action — the observe→optimize→compile
-  // ladder entry point per the plan ("See it on your captures →").
+  // ladder entry point. W387 (2026-05-18) relaxed the exact label match because
+  // the W387 hero rewrite changed "See it on your captures" → "See your duplicate
+  // API calls" for empathy. The structural requirement (anchor to /captures with
+  // primary class) is preserved.
   assert.match(HERO, /<a[^>]*href=["']\/captures["'][^>]*class=["'][^"']*\bbtn\b[^"']*primary/i,
     'primary CTA must link to /captures');
-  assert.match(HERO, /See it on your captures/i);
 });
 
 test('W220 #6 - em-dash budget on index.html still <= 1 (W205 lock)', () => {
@@ -96,14 +98,20 @@ test('W220 #7 - hero collapses 5+ moat strips into ONE proof + ONE artifact', ()
     'hero-stack strip must be removed (collapsed into footer/about elsewhere)');
 });
 
-test('W220 #8 - phi-redactor.kolm kept as the single concrete artifact proof', () => {
+test('W220 #8 - hero keeps a concrete .kolm artifact proof [W405: artifact-agnostic]', () => {
   // W334 dropped "0 PHI leaks" + "HIPAA Safe Harbor" from the hero proof strip
-  // because PHI/HIPAA framing was too narrow for the home page (user feedback).
-  // The artifact reference and the K=0.982 leaderboard metric remain as the
-  // concrete proof signals; HIPAA/PHI now live on /healthcare and /security
-  // where they belong.
-  assert.match(HERO, /phi-redactor\.kolm/, 'phi-redactor.kolm artifact must remain');
-  assert.match(HERO, /K\s*(0\.982|&nbsp;0\.982)/, 'K=0.982 metric must remain');
+  // because PHI/HIPAA framing was too narrow. W366 dropped the K=0.982 jargon
+  // from the visible proof strip because regular users don't decode K-score.
+  // W387 finished the cleanup: the K-score widget below the hero still ships
+  // the K=0.982 leaderboard, but the hero region itself surfaces plain-English
+  // proof + the .kolm artifact.
+  // W405 (2026-05-19) relaxed from `phi-redactor.kolm` to any *.kolm artifact:
+  // user feedback "we are not an insurance tech company get this shit out of
+  // the hero. people care about frontier distilled models." Hero artifact now
+  // references a frontier-distilled student (e.g., qwen3.6-27b.kolm). The
+  // behavior assertion is: hero has ≥1 anchor to a concrete .kolm artifact.
+  assert.match(HERO, /<a[^>]*>[^<]*\.kolm[^<]*<\/a>/i,
+    'hero must carry an anchor to a concrete .kolm artifact');
 });
 
 test('W220 #9 - persona signal (W205 lock) still present in hero', () => {

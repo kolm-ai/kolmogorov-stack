@@ -36,7 +36,11 @@ test('W258-BE-1 #1 — router.js imports insertCapture from capture-store.js', (
 test('W258-BE-1 #2 — recordCapture is async and awaits insertCapture', () => {
   const idx = ROUTER_SRC.indexOf('async function recordCapture(');
   assert.ok(idx > 0, 'recordCapture must be declared async');
-  const body = ROUTER_SRC.slice(idx, idx + 2500);
+  // W411 expanded the obs literal — slice to next `async function ` boundary
+  // (capped at 8000) so the await still lives inside the body we scan.
+  const nextFn = ROUTER_SRC.indexOf('async function ', idx + 30);
+  const end = nextFn > 0 ? Math.min(nextFn, idx + 8000) : idx + 8000;
+  const body = ROUTER_SRC.slice(idx, end);
   assert.match(body, /await\s+insertCapture\s*\(/);
 });
 
@@ -44,7 +48,11 @@ test('W258-BE-1 #3 — recordCapture does NOT swallow insertCapture failure', ()
   // The function may have other try/catch blocks (publishCapture, threshold
   // counts) but the insertCapture await must NOT be inside a swallow.
   const idx = ROUTER_SRC.indexOf('async function recordCapture(');
-  const body = ROUTER_SRC.slice(idx, idx + 2500);
+  // W411 expanded the obs literal — slice to next `async function ` boundary
+  // (capped at 8000) so the await still lives inside the body we scan.
+  const nextFn = ROUTER_SRC.indexOf('async function ', idx + 30);
+  const end = nextFn > 0 ? Math.min(nextFn, idx + 8000) : idx + 8000;
+  const body = ROUTER_SRC.slice(idx, end);
   // Match patterns like `try { ... await insertCapture(...) ... } catch ... {}`
   // where the body between the catch and the closing brace is empty/whitespace.
   const silentSwallow = /try\s*\{[\s\S]*?await\s+insertCapture[\s\S]*?\}\s*catch\s*\([^)]*\)\s*\{\s*\}/;
@@ -97,7 +105,11 @@ test('W258-BE-2 #1 — router.js imports subscribeCapture + publishCapture', () 
 
 test('W258-BE-2 #2 — recordCapture publishes to the broker after a successful insert', () => {
   const idx = ROUTER_SRC.indexOf('async function recordCapture(');
-  const body = ROUTER_SRC.slice(idx, idx + 2500);
+  // W411 expanded the obs literal — slice to next `async function ` boundary
+  // (capped at 8000) so publishCapture still lives inside the body we scan.
+  const nextFn = ROUTER_SRC.indexOf('async function ', idx + 30);
+  const end = nextFn > 0 ? Math.min(nextFn, idx + 8000) : idx + 8000;
+  const body = ROUTER_SRC.slice(idx, end);
   // Order matters: publishCapture must come AFTER await insertCapture.
   const insertIdx = body.indexOf('await insertCapture(');
   const publishIdx = body.indexOf('publishCapture(');
@@ -135,7 +147,11 @@ test('W258-BE-3 #1 — router.js imports the notifications surface', () => {
 
 test('W258-BE-3 #2 — recordCapture calls thresholdCrossedBy + tryAdvanceThresholdState + fireThresholdAlert', () => {
   const idx = ROUTER_SRC.indexOf('async function recordCapture(');
-  const body = ROUTER_SRC.slice(idx, idx + 2500);
+  // W411 expanded the obs literal — slice to next `async function ` boundary
+  // (capped at 8000) so the notif* calls still live inside the body we scan.
+  const nextFn = ROUTER_SRC.indexOf('async function ', idx + 30);
+  const end = nextFn > 0 ? Math.min(nextFn, idx + 8000) : idx + 8000;
+  const body = ROUTER_SRC.slice(idx, end);
   assert.match(body, /notifThresholdCrossedBy\(/);
   assert.match(body, /notifTryAdvanceThresholdState\(/);
   assert.match(body, /notifFireThresholdAlert\(/);

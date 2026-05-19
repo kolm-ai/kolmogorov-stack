@@ -394,11 +394,16 @@ export async function compileSpec(spec, opts = {}) {
     // KOLM_COMPILE_WASM=1 OR KOLM_COMPILE_WASM_ONLY=1). Either native or
     // WASM intent triggers compileNativeTargets; the function internally
     // gates which kinds run via its own toggles.
+    // Wave 409q — `opts.target` is the canonical CLI surface; it implies
+    // compileNative/compileWasm without the tenant having to set two flags.
+    const targetLc = (opts.target || '').toLowerCase();
     const wantNative = opts.compileNative === true
-      || process.env.KOLM_COMPILE_NATIVE === '1';
+      || process.env.KOLM_COMPILE_NATIVE === '1'
+      || targetLc === 'c' || targetLc === 'rust';
     const wantWasm = opts.compileWasm === true
       || process.env.KOLM_COMPILE_WASM === '1'
-      || process.env.KOLM_COMPILE_WASM_ONLY === '1';
+      || process.env.KOLM_COMPILE_WASM_ONLY === '1'
+      || targetLc === 'wasm';
     if (wantNative || wantWasm) {
       const { compileNativeTargets } = await import('./native-compile.js');
       const native = compileNativeTargets(compiled_targets, {
@@ -410,12 +415,36 @@ export async function compileSpec(spec, opts = {}) {
       });
       compiled_targets.native = native;
     }
+    // Wave 409q — generated source ALSO ships under canonical `src/main.*`
+    // names so a tenant can compile it on a host that DOES have a toolchain.
+    // Existing `native.c` / `native.rs` aliases stay (wave144 tests + verifier
+    // re-build path read those). The src/ aliases are additive; they ride
+    // along inside the .kolm as extra_files so the receipt chain still binds
+    // their bytes via extra_files_hash. Source generation already happened in
+    // emitCompiledTargets above — if it had failed, validateSpec would have
+    // thrown. The flag opts.target controls whether the wasm-text stub also
+    // ships.
+    const { getSourceFileEntries } = await import('./native-compile.js');
+    const wantWasmText = wantWasm || opts.target === 'wasm' || opts.target === 'WASM';
+    const srcEntries = getSourceFileEntries(compiled_targets, { includeWasmText: wantWasmText });
+    if (srcEntries.length > 0) {
+      // We splice into extra_files below (after the early extra_files
+      // initialization). Stash for now.
+      compiled_targets._src_entries = srcEntries;
+    }
   }
 
   // Wave 144 — optional extra files (e.g. a tokenizer.json) ride inside the
   // .kolm zip. The bytes hash into manifest.hashes.extra_files and
   // artifact_hash so the receipt chain covers them.
   let extraFiles = opts.extra_files || null;
+  // Wave 409q — `src/main.c`, `src/main.rs`, `src/main.wat` aliases for the
+  // canonical compiled-source bundle. Stashed on compiled_targets above; pull
+  // them out and append to extraFiles so they ride the zip + receipt chain.
+  if (compiled_targets && compiled_targets._src_entries) {
+    extraFiles = [...(extraFiles || []), ...compiled_targets._src_entries];
+    delete compiled_targets._src_entries; // keep the bundle clean for downstream consumers
+  }
   let trainingStatsForBuild = training_stats;
   if (opts.tokenizerPath) {
     const tokBuf = fs.readFileSync(opts.tokenizerPath);
@@ -755,6 +784,37 @@ export async function compileSpec(spec, opts = {}) {
     }
   }
 
+  // Wave 409q — honest binaries[] block + compiled_binary verdict. Computed
+  // once here and shipped to buildAndZip so the manifest can carry the
+  // top-level truth: which targets ACTUALLY produced a binary.
+  //
+  // Rules:
+  //   - target requested AND toolchain present AND compile succeeded  → binary entry
+  //   - target requested AND (no toolchain OR compile failed)         → NO entry
+  //   - any target requested but no binary produced  → compiled_binary=false
+  //   - this drives production_ready_native: a tenant who asks for native
+  //     gets an honest answer ("no, source-only") instead of a vague success.
+  let honestBinaries = [];
+  let compiledBinary = null; // null = no target requested; true/false otherwise
+  let nativeSkipReasons = null;
+  if (artifactClass === 'compiled_rule' && compiled_targets) {
+    const { buildBinariesArray } = await import('./native-compile.js');
+    honestBinaries = buildBinariesArray(compiled_targets.native);
+    const wantedAnyTarget = (opts.compileNative === true
+      || process.env.KOLM_COMPILE_NATIVE === '1'
+      || opts.compileWasm === true
+      || process.env.KOLM_COMPILE_WASM === '1'
+      || process.env.KOLM_COMPILE_WASM_ONLY === '1'
+      || opts.target === 'c' || opts.target === 'rust' || opts.target === 'wasm'
+      || opts.target === 'C' || opts.target === 'Rust' || opts.target === 'WASM');
+    if (wantedAnyTarget) {
+      compiledBinary = honestBinaries.length > 0;
+      if (compiled_targets.native && compiled_targets.native.bundle && compiled_targets.native.bundle.skipped) {
+        nativeSkipReasons = compiled_targets.native.bundle.skipped;
+      }
+    }
+  }
+
   const built = await buildAndZip({
     job_id: spec.job_id,
     task: spec.task,
@@ -769,6 +829,9 @@ export async function compileSpec(spec, opts = {}) {
     artifact_class: artifactClass,
     seed_provenance,
     compiled_targets,
+    binaries: honestBinaries,
+    compiled_binary: compiledBinary,
+    native_skip_reasons: nativeSkipReasons,
     extra_files: extraFiles,
     lineage: lineageBlock,
     export: exportProvenance ? exportProvenance.export_block : null,

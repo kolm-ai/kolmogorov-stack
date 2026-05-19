@@ -90,7 +90,12 @@ test('W213 #5 — failing sink is dropped (no retry storm)', async () => {
 test('W213 #6 — recordCapture in router.js calls publishCapture after insert', () => {
   const idx = ROUTER_SRC.indexOf('async function recordCapture(');
   assert.ok(idx > 0);
-  const body = ROUTER_SRC.slice(idx, idx + 2000);
+  // W411 expanded the obs literal — slice to next `async function ` boundary
+  // (capped at 8000) so the publishCapture call still lives inside the body
+  // we scan. Same fix as W212 #3.
+  const nextFn = ROUTER_SRC.indexOf('async function ', idx + 30);
+  const end = nextFn > 0 ? Math.min(nextFn, idx + 8000) : idx + 8000;
+  const body = ROUTER_SRC.slice(idx, end);
   // Must happen AFTER the durable insert (so a failed insert doesn't fan
   // out a row that didn't land).
   const insertAt = body.indexOf('await insertCapture(');

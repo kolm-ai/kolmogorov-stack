@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>kolm vs OpenAI fine-tune · kolm.ai</title>
+<meta name="description" content="OpenAI fine-tuning produces a custom model that lives inside the OpenAI API. kolm produces a signed file you own and run on your own hardware. Cost, latency, privacy, ownership compared honestly.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<meta property="og:title" content="kolm vs OpenAI fine-tune">
+<meta property="og:description" content="OpenAI keeps the weights. kolm gives you the file. Honest comparison of cost, latency, privacy, ownership, lock-in, residency.">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://kolm.ai/how-vs-openai-fine-tune">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--warn:#f0b86b;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+  header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1180px}
+  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+  header.site nav a{color:inherit;text-decoration:none}
+  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+  .hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
+  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
+  .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);max-width:720px;margin:0 0 14px}
+  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:20px 0 0;letter-spacing:0.04em}
+  .section{padding:56px 0;border-bottom:1px solid var(--line)}
+  .section h2{font-size:26px;font-weight:500;letter-spacing:-0.018em;margin:0 0 14px}
+  .section h3{font-size:18px;font-weight:500;margin:24px 0 8px;color:var(--ink)}
+  .section p{color:var(--ink-mute);margin:0 0 14px;max-width:720px}
+  .section ul{color:var(--ink-mute);padding-left:18px;margin:0 0 14px}
+  .section ul li{margin-bottom:8px}
+  .section code{font-family:var(--mono);font-size:13px;background:var(--bg-elev);padding:1px 6px;border-radius:3px;border:1px solid var(--line);color:var(--ink)}
+  table.matrix{width:100%;border-collapse:collapse;margin:20px 0;font-size:13.5px}
+  table.matrix th{font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-weight:400}
+  table.matrix td{padding:14px 10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5;color:var(--ink-mute)}
+  table.matrix td.axis{font-weight:500;color:var(--ink);min-width:160px}
+  table.matrix td.kolm{color:var(--ink);background:var(--accent-soft)}
+  table.matrix td.kolm b{color:var(--accent);font-weight:500;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase}
+  table.matrix td .sub{display:block;color:var(--ink-faint);font-size:12px;margin-top:4px;line-height:1.45}
+  .actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:8px;font-family:var(--mono);font-size:12.5px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn:hover{transform:translateY(-1px)}
+  .callout{padding:18px 22px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);margin:24px 0;font-size:14px;color:var(--ink-mute)}
+  .callout b{color:var(--ink)}
+  .callout.warn{border-color:rgba(240,184,107,0.32);background:rgba(240,184,107,0.04)}
+  .callout.warn b{color:var(--warn)}
+  footer.site{padding:36px 0;color:var(--ink-faint);font-size:13px}
+  footer.site .wrap{max-width:1180px}
+  footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+  .ft-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:1px solid var(--line);padding-top:20px;font-family:var(--mono);font-size:11.5px}
+</style>
+  <meta property="og:image" content="https://kolm.ai/og/how-vs-openai-fine-tune.svg">
+  <meta property="og:url" content="https://kolm.ai/how-vs-openai-fine-tune">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "kolm vs OpenAI fine-tune",
+  "description": "Honest comparison of OpenAI fine-tuning (managed, hosted, vendor-bound) against kolm (file you own, ships to your hardware). Cost, latency, privacy, ownership, lock-in, residency.",
+  "url": "https://kolm.ai/how-vs-openai-fine-tune",
+  "author": {"@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org"},
+  "publisher": {"@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org"},
+  "datePublished": "2026-05-18",
+  "dateModified": "2026-05-18",
+  "mainEntityOfPage": "https://kolm.ai/how-vs-openai-fine-tune"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/"},
+    {"@type": "ListItem", "position": 2, "name": "Compare", "item": "https://kolm.ai/compare"},
+    {"@type": "ListItem", "position": 3, "name": "kolm vs OpenAI fine-tune", "item": "https://kolm.ai/how-vs-openai-fine-tune"}
+  ]
+}
+</script>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+
+<header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/product">product</a><a href="/models">models</a><a href="/docs">docs</a><a href="/pricing">pricing</a><a href="/enterprise">enterprise</a></nav></div></header>
+<main>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; how kolm relates to OpenAI fine-tune</p>
+    <h1>kolm vs OpenAI fine-tune</h1>
+    <p class="lede">OpenAI's fine-tuning service is the shortest path from a JSONL of examples to a working custom model. You upload your data, OpenAI manages the GPU, the eval UX, and the serving infrastructure, and you call the tuned model through the standard chat-completions API with a custom model ID. For teams whose only deploy target is the OpenAI API and whose data has no residency constraints, it is the right call. It removes ML infrastructure entirely.</p>
+    <p class="lede">kolm.ai is the AI compiler for the opposite shape of problem. Where OpenAI keeps the weights and bills you per token forever, kolm captures your real production traffic, distills a small student model on your hardware (or a one-line cloud worker), and hands you a portable signed file you can run on a laptop, a phone, an edge box, or an air-gapped VPC. The trade is real on both sides and this page lays it out without bashing either tool.</p>
+    <p class="stamp">Wave 401 &middot; reviewed 2026-05-18 &middot; hosted custom model vs portable signed file</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2>At a glance.</h2>
+    <p>The same six dimensions the pricing matrix on <a href="/pricing" style="color:var(--accent)">/pricing</a> uses, expanded to honest sub-lines per cell. OpenAI's row is rated against published 2026 pricing for fine-tuned GPT-4.1 mini and the o4-mini-tune SKU; kolm's row assumes a Qwen 3.6 or Llama 3.3 student on a single 3090 or H100.</p>
+    <table class="matrix">
+      <thead><tr><th>Dimension</th><th>OpenAI fine-tune</th><th>kolm</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="axis">Cost / 1M tokens</td>
+          <td>$2.50 to $12 at inference<span class="sub">Tuned-model token rate is a markup on the base. Training pass adds a one-time fee.</span></td>
+          <td class="kolm"><b>~$0.30</b> amortized on your GPU<span class="sub">Power + depreciation of a 3090 or H100 across a year of throughput. The teacher tokens at compile are one-time.</span></td>
+        </tr>
+        <tr>
+          <td class="axis">Latency (p50)</td>
+          <td>400 ms to 2 s<span class="sub">Network roundtrip plus shared serving queue. Spikes during peak hours.</span></td>
+          <td class="kolm"><b>~80 ms</b> on-box<span class="sub">No network. Predictable. INT4 quant on a 3090 hits well under 100 ms for a 7B student.</span></td>
+        </tr>
+        <tr>
+          <td class="axis">Privacy</td>
+          <td>Vendor logs + BAA on Enterprise tier<span class="sub">Data leaves your perimeter unless ZDR is in your contract. PHI requires the Healthcare BAA.</span></td>
+          <td class="kolm"><b>Local or BAA</b><span class="sub">Inference runs in your VPC or on the device. PHI redactor (W157, 18 HIPAA Safe Harbor classes) gates teacher traffic at compile time.</span></td>
+        </tr>
+        <tr>
+          <td class="axis">Ownership</td>
+          <td>Rental<span class="sub">The custom model ID exists inside OpenAI's account namespace. You cannot export the weights.</span></td>
+          <td class="kolm"><b>You own .kolm</b><span class="sub">A signed file on your disk. RS-1 v2.1 Apache-2.0 spec. Runs without kolm.ai existing.</span></td>
+        </tr>
+        <tr>
+          <td class="axis">Lock-in</td>
+          <td>Proprietary API<span class="sub">Switching providers means re-training from scratch. The fine-tune contract is the API.</span></td>
+          <td class="kolm"><b>Portable artifact</b><span class="sub">Ed25519 signature (W161) + Sigstore entry (W162). The file is the contract.</span></td>
+        </tr>
+        <tr>
+          <td class="axis">Data residency</td>
+          <td>OpenAI regions menu<span class="sub">US, EU available on Enterprise. APAC and on-prem are not on the menu.</span></td>
+          <td class="kolm"><b>Your filesystem</b><span class="sub">Literally anywhere. Tenant shadow corpus stays on-prem (W165). Air-gap supported.</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2>Where they actually differ.</h2>
+    <p>The matrix above is the executive summary. The five sections below are the substance: why a buyer with a regulated workload, repetitive prompts, or an edge requirement ends up at kolm, and why a buyer with hosted-only constraints and no residency concern ends up at OpenAI.</p>
+
+    <h2 style="margin-top:32px">Cost per inference at scale.</h2>
+    <p>OpenAI's fine-tune SKU prices inference at a markup over the base model. A tuned GPT-4.1 mini lands around $3 per 1M input tokens and $12 per 1M output tokens in 2026 pricing. That is excellent for a few thousand requests per day. At a few million requests per day, the same workload running on a 7B INT4 student on a 3090 amortizes to roughly $0.30 per 1M tokens once you account for power and depreciation. The crossover happens around 50k to 200k requests per day depending on prompt length and output length. Below that crossover, OpenAI is cheaper than running your own GPU; above it, kolm is cheaper by an order of magnitude. The decision is workload volume and the duty cycle of the hardware you would buy.</p>
+
+    <h2 style="margin-top:32px">Data exfiltration boundary.</h2>
+    <p>OpenAI's standard tier logs request and response data for safety review for 30 days; the Enterprise tier with ZDR (zero data retention) plus the Healthcare BAA pulls that boundary in. Even with ZDR, the data crossed OpenAI's network and was processed in their infrastructure. For tenants whose regulator or auditor reads the contract literally, that is a different posture from "the inference happened inside our VPC and the bytes never left." kolm's compile step calls a teacher (which may be OpenAI), but the teacher is called only on the tenant's seed corpus and only with the PHI redactor applied; the resulting student runs locally and never calls out again. The exfiltration surface shrinks from "every production request" to "a one-time, redacted compile traffic" and that is what your auditor will read.</p>
+
+    <h2 style="margin-top:32px">Frozen-eval semantics.</h2>
+    <p>OpenAI's fine-tune console gives you an eval UX: dashboards, metrics, the ability to compare runs. There is no compile-time block that prevents a regressed tune from being served. The eval is informational. kolm makes the eval the gate: K-score V2 with A/T/R/F/E/Z axes (W164 to W167) is computed at compile, the result is signed into the artifact's receipt chain, and the ship verb refuses to emit the .kolm file if the score is below the threshold the spec declared. The artifact you carry off the build machine is one that passed. That semantic is what compliance teams call a frozen eval, and it is structurally different from a dashboard.</p>
+
+    <h2 style="margin-top:32px">Cancellation surface (your model on your hardware).</h2>
+    <p>If OpenAI deprecates the base model your fine-tune was built on, your tuned model goes with it. If OpenAI raises the fine-tune token price, your unit economics change overnight. If OpenAI terminates your account for any reason, your tuned model is gone. None of these are theoretical: every major API vendor has done at least two of them in the last 24 months. A .kolm file on your disk is not subject to any of these. The vendor relationship at the teacher step is real and ongoing, but once the artifact is signed and sitting on your filesystem it runs without kolm.ai or OpenAI existing. That is the cancellation surface buyers care about for production loads they cannot let blink.</p>
+
+    <h2 style="margin-top:32px">What you get back.</h2>
+    <p>OpenAI gives you a custom model ID. That is a sufficient artifact for a hosted-only deploy and a deep convenience for teams that have zero ML infrastructure. kolm gives you a signed file with a 14-step receipt chain (spec, seeds, split, train, recipes, evals, external holdout, tenant shadow, auditor, supersession, drift, sigs, rekor), an Ed25519 signature, a Sigstore entry, and a manifest that names every input. The file is what your auditor reads; the receipt chain is what the auditor verifies; the .kolm extension is what your runtime consumes. Two different artifacts for two different deployment shapes.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2>What to use kolm for.</h2>
+    <ul>
+      <li><b>Regulated data.</b> HIPAA PHI, KYC, privileged legal traffic, classified or export-controlled workflows. The PHI redactor (W157) plus the local inference boundary plus the cryptographic receipt chain is the artifact your compliance team can attest to.</li>
+      <li><b>Edge or on-prem deploy.</b> Air-gapped VPC, ship-borne, factory-floor, retail-store, or phone deploy. The .kolm file ships through any pipe that ships a binary; no runtime network is required.</li>
+      <li><b>Repetitive prompts that justify distillation.</b> If 60% of your traffic asks the same shape of question (form normalization, denial-code classification, retrieval reranking, schema-aware extraction), the distilled student matches the teacher on that distribution at a fraction of the cost per call.</li>
+      <li><b>Auditor-readable provenance.</b> A regulator or buyer who asks "what teacher trained this, on what data, with what eval, signed by whom" gets a single signed file plus a receipt chain instead of a console screenshot.</li>
+      <li><b>Cost ceiling at high volume.</b> Once you cross roughly 50k to 200k requests per day on a stable task, your own GPU plus a kolm artifact is cheaper than any token-based tuned-model SKU and the savings compound monthly.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2>What to use OpenAI fine-tune for.</h2>
+    <ul>
+      <li><b>Hosted-only deploy with no residency constraint.</b> Your production target is the OpenAI API and your buyers do not ask where the inference happened. The fine-tune SKU is the cleanest path from JSONL to working tuned model. Skip the rest.</li>
+      <li><b>Zero ML operations capacity.</b> You have no GPU, no MLOps person, no appetite to operate a model in production. The managed UX from upload to deploy is what you are paying for and it is genuinely good.</li>
+      <li><b>Low or moderate request volume.</b> Below the cost crossover (roughly 50k requests per day), token-based pricing on a managed tune is cheaper than the all-in cost of owning a GPU plus the labor to keep it running.</li>
+      <li><b>Frontier-base behaviors that do not distill cleanly.</b> If your task requires the full GPT-4.1 or o-series capability and a 7B student plateaus below your quality bar, the right answer is the frontier-base tune, not a forced distillation.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2>The layered pattern (when you use both).</h2>
+    <p>The honest middle of the market is teams that use OpenAI as the teacher inside a kolm compile. You keep the frontier-grade capability where it earns its cost (the few percent of requests that genuinely need it) and you ship a kolm artifact for the 90%+ of traffic that is repetitive. OpenAI's API becomes the teacher SKU on the build side; kolm's signed file becomes the runtime artifact on the serve side. The bill drops by an order of magnitude and the auditor reads a receipt chain instead of a console.</p>
+    <div class="callout">
+      <b>Licensing note.</b> OpenAI's API terms restrict using outputs to develop "competing" general-purpose models. A narrow-task kolm artifact (form normalizer, denial-code classifier, single-vertical extractor) is not a competing general model; the legal status of the narrow-task carve-out is unsettled. The always-safe option is <code>--teacher=local:&lt;open-weight-model&gt;</code> on your own GPU. See <a href="/spec/rs-1#section-7-7" style="color:var(--accent)">RS-1 &sect;7.7</a> for the posture.
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="/pricing">/pricing matrix &rarr;</a>
+      <a class="btn" href="/captures">/captures inbox &rarr;</a>
+      <a class="btn" href="/how-vs-lorax">vs LoRAX (serving) &rarr;</a>
+      <a class="btn" href="/how-vs-hyperscaler">vs hyperscaler (broader) &rarr;</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="ft-row">
+      <span>kolm.ai &middot; Apache-2.0 &middot; RS-1 v2.1</span>
+      <span><a href="/compare">/compare</a> &middot; <a href="/how-vs-anthropic">vs Anthropic</a> &middot; <a href="/how-vs-hyperscaler">vs hyperscaler</a> &middot; <a href="/how-vs-openpipe">vs OpenPipe</a> &middot; <a href="/how-vs-lorax">vs LoRAX</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

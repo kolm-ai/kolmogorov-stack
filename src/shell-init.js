@@ -19,7 +19,11 @@ import path from 'node:path';
 
 import { INSTALL_BASE_URL_DEFAULT } from './dev-agent-install.js';
 
-const SUPPORTED_SHELLS = new Set(['sh', 'bash', 'zsh', 'fish', 'pwsh', 'cmd', 'auto']);
+const SUPPORTED_SHELLS = new Set(['sh', 'bash', 'zsh', 'fish', 'pwsh', 'powershell', 'cmd', 'auto']);
+
+// W392: `powershell` is an alias of `pwsh` (the canonical PowerShell emitter).
+// We accept either spelling, then normalize to `pwsh` for the internal switch.
+const SHELL_ALIASES = { powershell: 'pwsh' };
 
 const DEFAULT_PROVIDERS = ['openai', 'anthropic', 'openrouter', 'gemini'];
 
@@ -61,7 +65,7 @@ function _resolveShell(shell) {
   if (!SUPPORTED_SHELLS.has(shell)) {
     throw new Error(`unsupported shell: ${shell} (supported: ${[...SUPPORTED_SHELLS].join(', ')})`);
   }
-  return shell;
+  return SHELL_ALIASES[shell] || shell;
 }
 
 function _resolveProviders(providers) {

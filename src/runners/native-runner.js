@@ -59,12 +59,22 @@ export async function runNativeTarget(bundle, input, opts = {}) {
     try { fs.chmodSync(binPath, 0o755); } catch {}
 
     const t0 = process.hrtime.bigint();
-    const child = spawn(binPath, [], {
-      cwd: workdir,
-      env: {},
-      stdio: ['pipe', 'pipe', 'pipe'],
-      windowsHide: true,
-    });
+    let child;
+    try {
+      child = spawn(binPath, [], {
+        cwd: workdir,
+        env: {},
+        stdio: ['pipe', 'pipe', 'pipe'],
+        windowsHide: true,
+      });
+    } catch (spawnErr) {
+      // Node's spawn() can throw synchronously on Windows when the OS
+      // refuses to launch the image (e.g. non-PE bytes for a .exe path),
+      // with errors like { code: 'UNKNOWN', errno: -4094, syscall: 'spawn' }.
+      // The contract expects a single KOLM_E_NATIVE_RUNTIME failure mode.
+      const sysCode = spawnErr && spawnErr.code ? ` (${spawnErr.code})` : '';
+      throw kolmError('KOLM_E_NATIVE_RUNTIME', `native spawn failed${sysCode}: ${spawnErr.message}`);
+    }
 
     let stdout = '';
     let stderr = '';

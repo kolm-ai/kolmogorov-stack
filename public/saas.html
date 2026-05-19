@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>B2B SaaS · kolm.ai</title>
+<meta name="description" content="Embed your own model. Stop renting per-token. kolm compiles approved B2B SaaS tasks into signed local artifacts that ship per-customer compile namespaces, BYO base models, multi-tenant isolation, and per-tenant audit logs.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+
+<meta property="og:title" content="kolm &middot; embed your own model in your SaaS">
+<meta property="og:description" content="Per-customer compile namespaces, BYO base model, multi-tenant isolation, and per-tenant audit logs. Distinct from /enterprise.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="kolm &middot; embed your own model in your SaaS" />
+<meta name="twitter:description" content="Stop renting per-token. Compile a signed model per tenant." />
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:url" content="https://kolm.ai/saas">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<link rel="canonical" href="https://kolm.ai/saas">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<style>
+  :root {
+    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+    --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+    --good: #7ef0d2; --bad: #ff6b91;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 720px) { .wrap { padding: 0 20px; } }
+  section.hero { padding: 96px 0 56px; position: relative; overflow: hidden; }
+  section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 1100px 540px at 22% 10%, rgba(126,240,210, 0.06), transparent 60%); }
+  section.hero .wrap { position: relative; z-index: 2; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 14px; background: rgba(8,9,8,0.62); }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 10px #7ef0d2; }
+  h1 { margin: 26px 0 22px; font-size: clamp(40px, 6vw, 76px); line-height: 0.98; font-weight: 500; letter-spacing: -0.03em; max-width: 18ch; }
+  h1 .tone { background: linear-gradient(170deg, #faf2e1 0%, #7ef0d2 50%, #faf2e1 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  p.lede { margin: 0 0 32px; font-size: clamp(16px, 1.3vw, 18.5px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+  p.lede b { color: var(--ink); font-weight: 500; }
+  p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
+  .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 500; }
+  a.btn-primary:hover { background: #fff; }
+  a.btn-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); padding: 11px 14px; font-size: 14px; font-weight: 500; }
+  a.btn-link:hover { color: var(--accent); }
+  section { padding: 72px 0; }
+  section + section { border-top: 1px solid var(--line); }
+  .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px; }
+  .eyebrow .num { color: var(--accent); }
+  h2 { margin: 0 0 18px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.12; font-weight: 500; max-width: 24ch; }
+  h2 .tone { color: var(--accent); }
+  p.sec-lede { margin: 0 0 36px; font-size: 16px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+  .triplets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 880px) { .triplets { grid-template-columns: 1fr; } }
+  .trip { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; padding: 22px; }
+  .trip h3 { margin: 0 0 10px; font-size: 17px; font-weight: 500; color: var(--ink); }
+  .trip p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
+  .quad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  @media (max-width: 880px) { .quad { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .quad { grid-template-columns: 1fr; } }
+  .quad .item { padding: 22px 24px; border-right: 1px solid var(--line); background: var(--bg-elev); }
+  .quad .item:last-child { border-right: none; }
+  .quad .item .nm { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); }
+  .quad .item .v { margin-top: 10px; font-size: 17px; font-weight: 500; color: var(--ink); }
+  .quad .item .v.acc { color: var(--good); }
+  .quad .item p { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
+  .uc-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .uc-cards { grid-template-columns: 1fr; } }
+  .uc-card { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; padding: 24px; }
+  .uc-card h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
+  .uc-card p { margin: 0 0 16px; font-size: 14px; line-height: 1.55; color: var(--ink-mute); }
+  .uc-card a { color: var(--good); font-family: var(--mono); font-size: 12px; }
+  .artifact { background: var(--bg-elev); border: 1px solid var(--line-strong); border-radius: 10px; padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .artifact .left { display: flex; align-items: center; gap: 16px; }
+  .artifact .nm { font-family: var(--mono); font-size: 17px; color: var(--ink); }
+  .artifact .badge { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--ink-mute); background: rgba(0,0,0,0.25); }
+  .artifact .badge.dev { color: #ffd07a; border-color: rgba(255,208,122,0.4); }
+  .artifact .badge.k { color: var(--good); border-color: rgba(126,240,210,0.4); }
+  .artifact p { margin: 0; font-size: 14px; color: var(--ink-mute); max-width: 56ch; }
+  .arch { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; padding: 26px; font-family: var(--mono); font-size: 13px; color: var(--ink-mute); white-space: pre; overflow-x: auto; line-height: 1.5; }
+  .closing { padding: 92px 0; }
+  .closing h2 { font-size: clamp(30px, 4.2vw, 48px); line-height: 1.08; max-width: 22ch; margin: 0 0 24px; }
+  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "name": "kolm for B2B SaaS",
+      "description": "Embed your own model in your SaaS. Per-customer compile namespaces, BYO base model, multi-tenant isolation, and per-tenant audit logs.",
+      "url": "https://kolm.ai/saas",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "kolm.ai",
+        "url": "https://kolm.ai/"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+        { "@type": "ListItem", "position": 2, "name": "B2B SaaS", "item": "https://kolm.ai/saas" }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &middot; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+
+<header class="site-header">
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <span class="pill"><span class="dot"></span>B2B SaaS &middot; embed AI in your product</span>
+    <h1>Embed your own model. <span class="tone">Stop renting per-token.</span></h1>
+    <p class="lede"><b>kolm.ai</b> compiles your AI features into signed <code>.kolm</code> binaries you ship with your SaaS. One signed artifact per customer namespace. Bring your own base model. Multi-tenant isolation is enforced at compile time, not at the prompt layer. Every output is a receipt your enterprise customer&apos;s security review can verify.</p>
+    <p class="lede" style="margin-top:-16px;font-size:14.5px;color:var(--ink-faint)">Distinct from <a href="/enterprise" style="color:var(--good)">/enterprise</a>: that&apos;s how enterprises buy kolm. This page is for SaaS companies <i>embedding</i> kolm so their own customers stop demanding "we need to use our own model."</p>
+    <div class="cta-row">
+      <a href="/enterprise#contact" class="btn-primary">Talk to the SaaS team</a>
+      <a href="mailto:saas@kolm.ai?subject=kolm%20saas%20embed%20pilot" class="btn-link">saas@kolm.ai <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:14px;flex-wrap:wrap">
+      <a href="/pricing" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px">Pricing &rarr;</a>
+      <a href="/quickstart" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px">Quickstart &rarr;</a>
+      <a href="/cookbook" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px">Cookbook &rarr;</a>
+      <a href="/marketplace" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px">Marketplace &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">01</span><span>Embed framing</span></div>
+    <h2>Controls your <span class="tone">enterprise customer&apos;s security review reads.</span></h2>
+    <p class="sec-lede">Each control below is described as the kolm posture today. Where the work is in flight we name the Wave marker so your customer&apos;s vendor-risk team can cite the path, not a promise.</p>
+
+    <div class="quad">
+      <div class="item">
+        <div class="nm">Per-customer compile namespace</div>
+        <div class="v acc">tenant-scoped</div>
+        <p>Each customer gets their own compile namespace. Their captures, their evals, their signed artifact. Tampering with another tenant&apos;s receipt chain breaks verification at the namespace boundary.</p>
+      </div>
+      <div class="item">
+        <div class="nm">BYO base model</div>
+        <div class="v acc">open-weight roster</div>
+        <p>Customer chooses the base from the kolm model registry (Qwen, GLM, Gemma, DeepSeek, Step, Kimi K2.5, and more). Locked into the artifact at compile time. No surprise upgrade breaks downstream.</p>
+      </div>
+      <div class="item">
+        <div class="nm">Multi-tenant isolation</div>
+        <div class="v acc">enforced at compile</div>
+        <p>One tenant&apos;s training data cannot leak into another tenant&apos;s artifact because each artifact is a separate signed binary. Compile receipts attest to the exact corpus hash that produced the weights.</p>
+      </div>
+      <div class="item">
+        <div class="nm">Audit log per tenant</div>
+        <div class="v acc">receipt chain</div>
+        <p>Every inference is a structured receipt. Tenants can stream their slice into their SIEM via webhook. SOC 2 evidence is byte-identical re-verification of any output.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">02</span><span>Use cases</span></div>
+    <h2>Four reference workloads for <span class="tone">SaaS companies embedding AI.</span></h2>
+    <p class="sec-lede">Each is a signed <code>.kolm</code> artifact you ship per customer. Recompile when the customer&apos;s corpus drifts. The token bill stops being your largest variable cost.</p>
+
+    <div class="uc-cards">
+      <div class="uc-card">
+        <h3>Customer support reply suggestions.</h3>
+        <p>Drafts reply candidates from the customer&apos;s help-center articles and prior tickets. Tone matches their brand voice because the artifact was compiled on their text, not generic frontier output.</p>
+        <a href="/cookbook/support-reply">cookbook / support-reply &rarr;</a>
+      </div>
+      <div class="uc-card">
+        <h3>Onboarding flow personalization.</h3>
+        <p>Per-customer onboarding adapts to the role, segment, and prior usage. Compiled artifact knows the customer&apos;s feature surface. No prompt-injection attack vector because there is no prompt template at runtime.</p>
+        <a href="/cookbook/recipe-from-observations">cookbook / recipe-from-observations &rarr;</a>
+      </div>
+      <div class="uc-card">
+        <h3>Analytics summarization.</h3>
+        <p>Weekly digest of the customer&apos;s product analytics. Trained on their KPI names, their dashboard semantics, their internal vocabulary. The summary cites the metric, not a hallucinated proxy.</p>
+        <a href="/cookbook/daily-recap">cookbook / daily-recap &rarr;</a>
+      </div>
+      <div class="uc-card">
+        <h3>Voice-of-customer extraction.</h3>
+        <p>Pulls structured themes from the customer&apos;s NPS responses, support tickets, and sales-call transcripts. Per-tenant namespace means competitors&apos; signal never bleeds into a tenant&apos;s output.</p>
+        <a href="/cookbook/nps-classifier">cookbook / nps-classifier &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">03</span><span>Reference artifact</span></div>
+    <h2>One signed <span class="tone">starting point.</span></h2>
+    <p class="sec-lede">A reference artifact your team can fork and recompile per customer.</p>
+    <div class="artifact">
+      <div class="left">
+        <span class="nm">support-reply.kolm</span>
+        <span class="badge dev">in development</span>
+        <span class="badge k">K 0.88 target</span>
+      </div>
+      <p>Per-tenant customer-support reply generator: classifier head routes to a templated draft, language-model head handles long-form cases. Recipe at <a href="/cookbook/support-reply" style="color:var(--good)">support-reply</a> &middot; recompile per customer corpus.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">04</span><span>Architecture</span></div>
+    <h2>One compile bridge, <span class="tone">one artifact per tenant.</span></h2>
+    <p class="sec-lede">The compile bridge runs in your SaaS infrastructure. Customer captures, evals, and labels live in their tenant namespace. The output is a signed binary file you ship as part of their deployment.</p>
+
+    <div class="arch">
++--------------------+        +--------------------+        +--------------------+
+| tenant A captures  |  --&gt;   | kolm compile       |  --&gt;   | tenant-A.kolm      |
+| tenant A evals     |        | (your SaaS infra,  |        | (signed, isolated, |
+|                    |        |  namespace-scoped) |        |  shipped with app) |
++--------------------+        +--------------------+        +--------------------+
+                                      |                              |
+| tenant B captures  |                v                              v
+| tenant B evals     |        +---------------+              +---------------+
++--------------------+        | per-tenant    |              | tenant-B.kolm |
+        ^                     | receipt chain |              | (signed,      |
+        |                     | + SOC 2 evid. |              |  separate)    |
+        +---------------------+---------------+              +---------------+
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">05</span><span>Why embed</span></div>
+    <h2>Three things <span class="tone">change at the contract table.</span></h2>
+    <p class="sec-lede">When you embed kolm instead of renting tokens, three line items in your enterprise contract move in your favor.</p>
+    <div class="triplets">
+      <div class="trip">
+        <h3>Margin survives growth.</h3>
+        <p>Per-token cost stops being linear in usage. Compile is a fixed cost per tenant; runtime is your own hardware. Gross margin compounds as the customer ramps.</p>
+      </div>
+      <div class="trip">
+        <h3>Security review shrinks.</h3>
+        <p>Customer security reviews stop asking "does data leave our boundary." The answer is the signed artifact running on hosts they already own or you already operate inside their VPC.</p>
+      </div>
+      <div class="trip">
+        <h3>Procurement gets shorter.</h3>
+        <p>"Bring your own model" is now a checkbox you can offer. Enterprise procurement teams that block frontier-API products approve a signed dependency under change control.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="wrap">
+    <h2>Embed signed AI in your SaaS, <span class="tone">stop renting per-token.</span></h2>
+    <p class="lede" style="max-width:60ch">Provision Enterprise self-serve, then schedule the SaaS-embed walkthrough. The per-tenant compile pattern, the SOC 2 evidence pack, and the BYO-base-model checklist arrive in your inbox the same hour your first API key is issued.</p>
+    <div class="cta-row">
+      <a href="/signup?plan=enterprise" class="btn-primary">Start Enterprise</a>
+      <a href="/enterprise" class="btn-link">Enterprise overview <span aria-hidden="true">&rarr;</span></a>
+      <a href="mailto:saas@kolm.ai?subject=kolm%20saas%20embed%20pilot" class="btn-link">saas@kolm.ai <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div style="margin-top:14px"><a href="/enterprise#contact" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px">or talk to founders &rarr;</a></div>
+  </div>
+</section>
+</main>
+
+<footer class="site">
+  <div class="wrap row">
+    <span>kolm.ai &middot; Made with .kolm &middot; Apache-2.0</span>
+    <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" style="color:var(--ink-mute)">/verify-prod</a>.</span>
+  </div>
+</footer>
+
+<script src="/nav.js" defer></script>
+</body>
+</html>

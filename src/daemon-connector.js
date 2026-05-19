@@ -38,6 +38,12 @@ import { estimateCost, extractUsage } from './cost-estimator.js';
 import { newEvent, hashContent } from './event-schema.js';
 import { scan as privacyScan, redact as privacyRedact, reinsert as privacyReinsert } from './privacy-membrane.js';
 import { insertCapture, isDurable as captureIsDurable, driverName as captureDriverName, health as captureStoreHealth } from './capture-store.js';
+// W409a — event-store is the canonical telemetry plane. Every capture row we
+// write to capture-store is ALSO appended here so the lake / opportunity
+// engine / dataset workbench / label queue / training planner all see it.
+// appendEvent is INSERT OR REPLACE keyed on event_id → idempotent against a
+// later bridge call from capture-store.insertCapture for the same row.
+import { appendEvent as eventStoreAppend } from './event-store.js';
 
 const HOME = os.homedir();
 const KOLM_DIR = path.join(HOME, '.kolm');
@@ -45,6 +51,18 @@ const PID_PATH = path.join(KOLM_DIR, 'daemon.pid');
 const CONFIG_PATH = path.join(KOLM_DIR, 'config.json');
 const EVENTS_DIR = path.join(KOLM_DIR, 'events');
 const RAW_DIR = path.join(EVENTS_DIR, 'raw');
+
+// W411 — local daemon sentinel tenant_id. Captures from an unauthenticated
+// local proxy still carry a tenant so the lake / opportunities / datasets
+// path has something queryable. Falls back to 'local:host' if hostname()
+// blows up for whatever reason.
+const LOCAL_SENTINEL_TENANT = (function () {
+  try {
+    return 'local:' + ((os.hostname && os.hostname()) || 'host');
+  } catch (_e) {
+    return 'local:host';
+  }
+})();
 
 const DAEMON_VERSION = '0.2.6';
 const DEFAULT_PORT = 8787;
@@ -100,12 +118,47 @@ export function resolveUpstreamKey(provider, req) {
   return null;
 }
 
-// Read privacy policy from ~/.kolm/config.json. Defaults to 'allow'.
+// W407b — Read privacy policy from ~/.kolm/config.json. Defaults to 'redact'
+// (fail-safe: never let raw PII reach the lake unless the user opts in via
+// `kolm connect config --set privacy_policy=allow` or KOLM_PRIVACY_POLICY=allow).
 function loadPolicy() {
   const cfg = loadDaemonConfig();
-  const p = String((cfg && cfg.privacy_policy) || process.env.KOLM_PRIVACY_POLICY || 'allow').toLowerCase();
-  if (p === 'redact' || p === 'block' || p === 'allow') return p;
-  return 'allow';
+  const p = String((cfg && cfg.privacy_policy) || process.env.KOLM_PRIVACY_POLICY || 'redact').toLowerCase();
+  if (p === 'redact' || p === 'block' || p === 'allow' || p === 'review_required') return p;
+  return 'redact';
+}
+
+// W409b — raw opt-in resolver. Returns true ONLY when the operator explicitly
+// authorizes raw bytes to land on disk. Two opt-in vectors:
+//   1. env KOLM_ALLOW_RAW=true (global, persists across the daemon's lifetime)
+//   2. per-request header x-kolm-raw: true (caller-scoped, audit-friendly)
+// Anything else (missing, 'false', '0', random string) → fail-closed false.
+function isRawAllowed(req) {
+  const env = String(process.env.KOLM_ALLOW_RAW || '').toLowerCase();
+  if (env === 'true' || env === '1' || env === 'yes') return true;
+  const hdr = req && req.headers ? String(req.headers['x-kolm-raw'] || '').toLowerCase() : '';
+  if (hdr === 'true' || hdr === '1' || hdr === 'yes') return true;
+  return false;
+}
+
+// W409b — sidecar raw store. When raw is explicitly authorized, the bytes go to
+// ~/.kolm/events/raw/<sha256>.txt and the event row carries a pointer +
+// content hash. The lake table itself NEVER stores inline raw text; consumers
+// that want the raw payload must read the sidecar file (gated behind the same
+// KOLM_ALLOW_RAW boolean at read time).
+function writeRawSidecar(text, kind /* 'prompt'|'response' */) {
+  const s = String(text == null ? '' : text);
+  if (s.length === 0) return { hash: null, path: null };
+  ensureDirs();
+  const hash = crypto.createHash('sha256').update(s, 'utf8').digest('hex');
+  const ext = '.txt';
+  const filename = `${hash}_${kind}${ext}`;
+  const fp = path.join(RAW_DIR, filename);
+  try {
+    if (!fs.existsSync(fp)) fs.writeFileSync(fp, s, 'utf8');
+    try { fs.chmodSync(fp, 0o600); } catch (_) {}
+  } catch (_) {}
+  return { hash, path: fp };
 }
 
 // Fire an HTTPS request to the upstream. Native node:http(s) so we don't
@@ -192,6 +245,65 @@ function extractCompletionText(json, provider) {
   return String(first.text || '');
 }
 
+// W409k — fixture mode for the local daemon. When the operator points an SDK
+// at the daemon with no upstream key set AND opts into KOLM_CONNECTOR_FIXTURE=1,
+// we return a deterministic mock shaped like the upstream's real response so
+// integration tests + offline-dev sessions can still exercise the full
+// observe→event flow (events are still appended with source_type:'simulated').
+function isFixtureMode() {
+  const v = String(process.env.KOLM_CONNECTOR_FIXTURE || '').toLowerCase();
+  return v === '1' || v === 'true' || v === 'yes';
+}
+function fixtureBody(provider, upstreamPath, body, promptText) {
+  const created = Math.floor(Date.now() / 1000);
+  const model = String((body && body.model) || 'kolm-fixture-model');
+  const echo = String(promptText || '').slice(0, 120);
+  if (provider === 'anthropic') {
+    return {
+      id: 'msg_fixture_' + created.toString(36),
+      type: 'message',
+      role: 'assistant',
+      model,
+      content: [{ type: 'text', text: `[kolm fixture] ${echo}` }],
+      stop_reason: 'end_turn',
+      usage: { input_tokens: 4, output_tokens: 6 },
+    };
+  }
+  if (upstreamPath === '/v1/embeddings') {
+    const dim = 8;
+    const vec = Array.from({ length: dim }, (_, i) => Math.round(Math.sin(i + 1) * 1000) / 1000);
+    return { object: 'list', data: [{ object: 'embedding', index: 0, embedding: vec }], model, usage: { prompt_tokens: 4, total_tokens: 4 } };
+  }
+  if (upstreamPath === '/v1/audio/transcriptions' || upstreamPath === '/v1/audio/translations') {
+    return { text: '[kolm fixture transcription]' };
+  }
+  if (upstreamPath === '/v1/audio/speech') {
+    return { object: 'audio.speech', model, format: (body && body.response_format) || 'mp3', bytes_b64: 'a29sbS1maXh0dXJl' };
+  }
+  if (upstreamPath === '/v1/moderations') {
+    return { id: 'modr_fixture_' + created.toString(36), model, results: [{ flagged: false, categories: {}, category_scores: {} }] };
+  }
+  if (upstreamPath === '/v1/responses') {
+    return {
+      id: 'resp_fixture_' + created.toString(36),
+      object: 'response',
+      created_at: created,
+      model,
+      status: 'completed',
+      output: [{ type: 'message', role: 'assistant', content: [{ type: 'output_text', text: `[kolm fixture] ${echo}` }] }],
+      usage: { input_tokens: 4, output_tokens: 6, total_tokens: 10 },
+    };
+  }
+  return {
+    id: 'chatcmpl_fixture_' + created.toString(36),
+    object: 'chat.completion',
+    created,
+    model,
+    choices: [{ index: 0, message: { role: 'assistant', content: `[kolm fixture] ${echo}` }, finish_reason: 'stop' }],
+    usage: { prompt_tokens: 4, completion_tokens: 6, total_tokens: 10 },
+  };
+}
+
 // The HEAVY lifting: read the inbound request, redact, forward upstream,
 // extract usage/cost, write the event to the capture store. Returns
 // {status, headers, body, event} or {status, body, event:null} on error.
@@ -199,7 +311,8 @@ async function proxyOne({ provider, upstreamPath, req }) {
   const pcfg = PROVIDERS[provider];
   if (!pcfg) return { status: 400, body: { error: { type: 'unknown_provider', message: provider } }, event: null };
   const upstreamKey = resolveUpstreamKey(provider, req);
-  if (!upstreamKey) {
+  const fixtureMode = isFixtureMode();
+  if (!upstreamKey && !fixtureMode) {
     return {
       status: 401,
       body: {
@@ -214,8 +327,15 @@ async function proxyOne({ provider, upstreamPath, req }) {
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   const model = String(body.model || '').slice(0, 128);
   const policy = loadPolicy();
+  const rawAllowed = isRawAllowed(req);
   const promptText = extractPromptText(body, provider);
   const scan = privacyScan(promptText);
+  // W409b — surface "noncompliant identifier detected" so the warning is not
+  // swallowed. malformed_ssn = regex matched 9 digits but the SSA format check
+  // failed (000-area, 666-area, 9xx-area, 00-group, 0000-serial). The class
+  // flows through as a normal sensitive_class AND lights up the dedicated tag
+  // so dashboards can call out broken-but-not-validated identifiers.
+  const noncompliantIds = Array.from(new Set((scan.classes || []).filter((c) => c === 'malformed_ssn')));
   if (policy === 'block' && scan.sensitive && req.headers['x-kolm-privacy-override'] !== 'true') {
     return {
       status: 451,
@@ -231,20 +351,68 @@ async function proxyOne({ provider, upstreamPath, req }) {
   }
   let forwardBody = body;
   let placeholderMap = null;
-  if (policy === 'redact' && scan.sensitive) {
+  let redactedPromptText = null;
+  // W409b — fail-closed: pre-compute the redacted prompt up front whenever
+  // sensitive data is present, regardless of policy. The success and error
+  // paths both reach for `redactedPromptText`, so a 5xx from upstream can
+  // never smuggle raw PII into the lake (the historical bug at the old
+  // line 300 where `promptText` was persisted raw on the error path).
+  if (scan.sensitive) {
     const r = privacyRedact(promptText);
-    placeholderMap = r.map;
-    // Best-effort: replace the prompt text in messages[].content with redacted text.
-    if (Array.isArray(forwardBody.messages)) {
+    redactedPromptText = r.redacted_text || r.redacted || '';
+    if (policy === 'redact') {
+      placeholderMap = r.map;
+      // Best-effort: replace the prompt text everywhere we know how to find it.
       forwardBody = JSON.parse(JSON.stringify(body));
-      for (const m of forwardBody.messages) {
-        if (typeof m.content === 'string') {
-          for (const [ph, val] of Object.entries(placeholderMap)) {
-            m.content = m.content.split(val).join(ph);
+      function swap(str) {
+        let s = String(str);
+        for (const [ph, val] of Object.entries(placeholderMap)) {
+          if (typeof val === 'string' && val.length > 0) s = s.split(val).join(ph);
+        }
+        return s;
+      }
+      if (Array.isArray(forwardBody.messages)) {
+        for (const m of forwardBody.messages) {
+          if (typeof m.content === 'string') m.content = swap(m.content);
+          else if (Array.isArray(m.content)) {
+            for (const part of m.content) {
+              if (part && typeof part.text === 'string') part.text = swap(part.text);
+            }
           }
         }
       }
+      if (typeof forwardBody.system === 'string') forwardBody.system = swap(forwardBody.system);
+      if (typeof forwardBody.input === 'string') forwardBody.input = swap(forwardBody.input);
+      if (typeof forwardBody.prompt === 'string') forwardBody.prompt = swap(forwardBody.prompt);
     }
+  }
+  // W409b — derive the canonical lake-form prompt up front. The default is
+  // redacted regardless of policy: only the operator's explicit raw opt-in
+  // (KOLM_ALLOW_RAW=true / x-kolm-raw header) lets raw bytes reach the lake
+  // table, and even then only if policy=allow. Otherwise the redacted form is
+  // the single source of truth.
+  function deriveLakePrompt() {
+    if (policy === 'allow' && rawAllowed) return promptText;
+    if (redactedPromptText != null) return redactedPromptText;
+    if (!scan.sensitive) return promptText;
+    return privacyRedact(promptText || '').redacted_text || '';
+  }
+  function deriveLakeResponse(respText) {
+    if (policy === 'allow' && rawAllowed) return respText;
+    try {
+      const rs = privacyRedact(respText || '');
+      return rs.redacted_text || rs.redacted || '';
+    } catch (_) { return ''; }
+  }
+  // W409b — sidecar raw persistence (only when explicitly opted in).
+  let rawPromptHash = null;
+  let rawResponseHash = null;
+  let rawPromptPath = null;
+  let rawResponsePath = null;
+  if (rawAllowed && promptText) {
+    const sc = writeRawSidecar(promptText, 'prompt');
+    rawPromptHash = sc.hash;
+    rawPromptPath = sc.path;
   }
   const upstreamUrl = pcfg.upstream.replace(/\/+$/, '') + upstreamPath;
   const headers = { 'content-type': 'application/json' };
@@ -260,18 +428,32 @@ async function proxyOne({ provider, upstreamPath, req }) {
     headers['x-title'] = req.headers['x-title'] || 'kolm.ai';
   }
   let upstreamResp;
-  try {
+  if (fixtureMode && !upstreamKey) {
+    // W409k — local fixture mode: skip the network entirely and return a
+    // deterministic mock so tests can exercise the connector surface without
+    // configuring real upstream keys. The event still flows through the
+    // canonical pipeline tagged source_type:'simulated'.
+    upstreamResp = { status: 200, body: fixtureBody(provider, upstreamPath, forwardBody, promptText), headers: {}, elapsed_us: 0 };
+  } else try {
     upstreamResp = await forwardRaw({ url: upstreamUrl, method: 'POST', headers, body: forwardBody });
   } catch (e) {
+    // W409b — FAIL-CLOSED error path. The old code stuffed raw `promptText`
+    // into the observation row when forwardRaw threw; that meant any 5xx
+    // from upstream leaked PII to the lake. We now persist the redacted
+    // form (via deriveLakePrompt()) on this path, identical to success.
+    const lakePromptOnError = deriveLakePrompt();
+    const promptRedactedField = scan.sensitive
+      ? (redactedPromptText != null ? redactedPromptText : (privacyRedact(promptText).redacted_text || null))
+      : null;
     const ev = newEvent({
-      tenant_id: 'local',
+      tenant_id: LOCAL_SENTINEL_TENANT,
       namespace: 'default',
       provider,
       model,
       upstream_url: upstreamUrl,
       request_hash: hashContent(promptText + '|' + model),
       response_hash: null,
-      prompt_redacted: policy === 'redact' && placeholderMap ? privacyRedact(promptText).redacted_text : null,
+      prompt_redacted: promptRedactedField,
       response_redacted: null,
       latency_ms: 0,
       status: 'error',
@@ -280,9 +462,20 @@ async function proxyOne({ provider, upstreamPath, req }) {
       sensitive_classes: scan.classes,
       redaction_policy: policy,
       source_type: 'real',
+      raw_available: rawAllowed && !!rawPromptHash,
+      raw_prompt_hash: rawPromptHash,
+      raw_response_hash: null,
+      noncompliant_identifiers: noncompliantIds,
     });
     let durable = true;
-    try { await insertCapture(eventToObservationRow(ev, promptText, '')); } catch (_) { durable = false; }
+    try {
+      await insertCapture(eventToObservationRow(ev, lakePromptOnError, ''));
+    } catch (_) { durable = false; }
+    // W409a — canonical event-store write (additional to capture-store). The
+    // ev built above already carries every canonical field; appendEvent is
+    // idempotent (INSERT OR REPLACE) so the bridge inside insertCapture and
+    // this explicit append collapse to one row.
+    try { await eventStoreAppend(ev); } catch (_) {}
     return {
       status: 502,
       body: { error: { type: 'upstream_error', message: String(e.message || e) } },
@@ -292,10 +485,36 @@ async function proxyOne({ provider, upstreamPath, req }) {
     };
   }
   let respText = extractCompletionText(upstreamResp.body, provider);
-  // If we redacted on the way out, reinsert placeholders in the response.
-  if (placeholderMap && respText) {
-    respText = privacyReinsert(respText, placeholderMap);
+  // W407b: if we redacted on the way out, the upstream body contains
+  // placeholder strings. We reinsert into the body returned to the caller so
+  // their SDK sees the original values, but the lake-visible text stays
+  // redacted (placeholders + any echoed-PII rescanned).
+  let bodyForCaller = upstreamResp.body;
+  if (placeholderMap) {
+    try {
+      // Deep clone + walk strings, reinserting placeholders -> original values.
+      bodyForCaller = JSON.parse(JSON.stringify(upstreamResp.body));
+      const walk = (n) => {
+        if (n == null) return n;
+        if (typeof n === 'string') return privacyReinsert(n, placeholderMap);
+        if (Array.isArray(n)) return n.map(walk);
+        if (typeof n === 'object') {
+          for (const k of Object.keys(n)) n[k] = walk(n[k]);
+          return n;
+        }
+        return n;
+      };
+      bodyForCaller = walk(bodyForCaller);
+    } catch (_) { bodyForCaller = upstreamResp.body; }
   }
+  // W409b — sidecar raw response only when opt-in. Off by default.
+  if (rawAllowed && respText) {
+    const sc = writeRawSidecar(respText, 'response');
+    rawResponseHash = sc.hash;
+    rawResponsePath = sc.path;
+  }
+  // Lake form: rescan the response text under the fail-closed default.
+  const respTextForLake = deriveLakeResponse(respText);
   const usage = extractUsage(upstreamResp.body, provider);
   const cost = estimateCost({ provider, model, prompt_tokens: usage.prompt_tokens, completion_tokens: usage.completion_tokens });
   const httpStatus = upstreamResp.status;
@@ -303,16 +522,25 @@ async function proxyOne({ provider, upstreamPath, req }) {
   if (httpStatus === 429) canonStatus = 'rate_limited';
   else if (httpStatus === 408 || httpStatus === 504) canonStatus = 'timeout';
   else if (httpStatus >= 400) canonStatus = 'error';
+  // W409b — fail-closed prompt_redacted/response_redacted: always populated
+  // when sensitive data was detected, regardless of policy, so the lake row
+  // always carries a sanitized version even on the allow path.
+  const promptRedactedField = scan.sensitive
+    ? (redactedPromptText != null ? redactedPromptText : (privacyRedact(promptText).redacted_text || null))
+    : null;
+  const responseRedactedField = respText
+    ? ((policy === 'allow' && rawAllowed) ? null : (privacyRedact(respText).redacted_text || null))
+    : null;
   const ev = newEvent({
-    tenant_id: 'local',
+    tenant_id: LOCAL_SENTINEL_TENANT,
     namespace: 'default',
     provider,
     model,
     upstream_url: upstreamUrl,
     request_hash: hashContent(promptText + '|' + model),
     response_hash: hashContent(respText),
-    prompt_redacted: policy === 'redact' && placeholderMap ? privacyRedact(promptText).redacted_text : null,
-    response_redacted: policy === 'redact' && placeholderMap ? privacyRedact(respText).redacted_text : null,
+    prompt_redacted: promptRedactedField,
+    response_redacted: responseRedactedField,
     prompt_tokens: usage.prompt_tokens,
     completion_tokens: usage.completion_tokens,
     estimated_cost_usd: cost,
@@ -323,23 +551,45 @@ async function proxyOne({ provider, upstreamPath, req }) {
     sensitive_classes: scan.classes,
     redaction_count: placeholderMap ? Object.keys(placeholderMap).length : 0,
     redaction_policy: policy,
-    source_type: 'real',
+    // W409k — simulated source when the daemon synthesized the response.
+    source_type: (fixtureMode && !upstreamKey) ? 'simulated' : 'real',
+    raw_available: rawAllowed && (!!rawPromptHash || !!rawResponseHash),
+    raw_prompt_hash: rawPromptHash,
+    raw_response_hash: rawResponseHash,
+    raw_prompt_path: rawPromptPath,
+    raw_response_path: rawResponsePath,
+    noncompliant_identifiers: noncompliantIds,
   });
   // Persist via the capture store. Failure → still return the upstream result
   // to the app, but mark the event as undurable; this preserves end-user UX
   // (their LLM call succeeded) while making the storage problem visible via
   // x-kolm-event-durable: false header.
   let durable = true;
+  // W409b — derive lake-form text via the helpers so policy + raw opt-in are
+  // honored uniformly. The raw bytes only land in the sidecar (if at all).
+  const lakePrompt = deriveLakePrompt();
+  const lakeResponse = respTextForLake;
   try {
-    await insertCapture(eventToObservationRow(ev, promptText, respText));
+    await insertCapture(eventToObservationRow(ev, lakePrompt, lakeResponse));
   } catch (_) {
     durable = false;
   }
+  // W409a — canonical event-store write (additional to capture-store). We pass
+  // the lake-redacted prompt/response so the event row's prompt_redacted /
+  // response_redacted columns carry the post-policy text. Idempotent: same
+  // event_id collapses with the bridge fired from insertCapture above.
+  try {
+    await eventStoreAppend({
+      ...ev,
+      prompt_redacted: ev.prompt_redacted != null ? ev.prompt_redacted : (lakePrompt || null),
+      response_redacted: ev.response_redacted != null ? ev.response_redacted : (lakeResponse || null),
+    });
+  } catch (_) {}
   return {
     status: httpStatus,
     http_status: httpStatus,
     headers: upstreamResp.headers,
-    body: upstreamResp.body,
+    body: bodyForCaller,
     event: ev,
     durable,
   };
@@ -348,6 +598,11 @@ async function proxyOne({ provider, upstreamPath, req }) {
 // Adapt the canonical event row to the legacy 'observations' shape used by
 // src/capture-store.js insertCapture. Keeps the dashboard + distill paths
 // reading the same store.
+//
+// W409b — every persisted row now carries the redaction_policy + raw_available
+// + noncompliant_identifiers tags so a downstream auditor can sweep the lake
+// and answer "did any row land here under the wrong policy?" without
+// re-running detection.
 function eventToObservationRow(ev, promptText, respText) {
   return {
     id: ev.event_id,
@@ -368,7 +623,76 @@ function eventToObservationRow(ev, promptText, respText) {
     redaction_count: ev.redaction_count,
     event_id: ev.event_id,
     created_at: ev.created_at,
+    // W409b privacy provenance — persisted alongside every capture row.
+    redaction_policy: ev.redaction_policy || 'redact',
+    raw_available: ev.raw_available === true,
+    raw_prompt_hash: ev.raw_prompt_hash || null,
+    raw_response_hash: ev.raw_response_hash || null,
+    noncompliant_identifiers: Array.isArray(ev.noncompliant_identifiers) ? ev.noncompliant_identifiers : [],
   };
+}
+
+// W393: per-provider reachability probe. Returns
+// { network_reachable, authenticated } both booleans, never throws.
+// Bounded by REACH_TIMEOUT_MS so a slow/unreachable upstream cannot hang
+// /v1/health. `authenticated` requires key_set AND an authenticated GET that
+// returns 2xx; with no key it stays false even if DNS resolves.
+const REACH_TIMEOUT_MS = 1500;
+const PROVIDER_AUTH_PROBE = {
+  openai:     { path: '/v1/models',     auth: 'bearer' },
+  anthropic:  { path: '/v1/models',     auth: 'x-api-key' },
+  openrouter: { path: '/api/v1/models', auth: 'bearer' },
+  gemini:     { path: '/v1beta/models', auth: 'key-param' },
+};
+async function probeProviderReach(id, cfg) {
+  const out = { network_reachable: false, authenticated: false };
+  let url;
+  try { url = new URL(cfg.upstream); } catch (_) { return out; }
+  const lib = url.protocol === 'https:' ? https : http;
+  const port = url.port || (url.protocol === 'https:' ? 443 : 80);
+  // 1. Plain HEAD probe: DNS + TCP + TLS reach only.
+  out.network_reachable = await new Promise((resolve) => {
+    let done = false;
+    const t = setTimeout(() => { if (done) return; done = true; try { r.destroy(); } catch (_) {} resolve(false); }, REACH_TIMEOUT_MS);
+    const r = lib.request({
+      hostname: url.hostname, port, path: '/', method: 'HEAD', timeout: REACH_TIMEOUT_MS,
+    }, (resp) => {
+      if (done) return; done = true; clearTimeout(t);
+      const code = resp.statusCode || 0;
+      // Any HTTP response (including 401/404) means the host is reachable.
+      resolve(code >= 200 && code < 600);
+      try { resp.resume(); } catch (_) {}
+    });
+    r.on('error', () => { if (done) return; done = true; clearTimeout(t); resolve(false); });
+    r.on('timeout', () => { if (done) return; done = true; clearTimeout(t); try { r.destroy(); } catch (_) {} resolve(false); });
+    r.end();
+  });
+  // 2. Authenticated GET: only if a key is set; else stay false.
+  const key = process.env[cfg.env_key];
+  if (!key) return out;
+  const probe = PROVIDER_AUTH_PROBE[id];
+  if (!probe || !out.network_reachable) return out;
+  const headers = {};
+  let probePath = probe.path;
+  if (probe.auth === 'bearer') headers['authorization'] = 'Bearer ' + key;
+  else if (probe.auth === 'x-api-key') { headers['x-api-key'] = key; headers['anthropic-version'] = '2023-06-01'; }
+  else if (probe.auth === 'key-param') probePath = probePath + '?key=' + encodeURIComponent(key);
+  out.authenticated = await new Promise((resolve) => {
+    let done = false;
+    const t = setTimeout(() => { if (done) return; done = true; try { r.destroy(); } catch (_) {} resolve(false); }, REACH_TIMEOUT_MS);
+    const r = lib.request({
+      hostname: url.hostname, port, path: probePath, method: 'GET', headers, timeout: REACH_TIMEOUT_MS,
+    }, (resp) => {
+      if (done) return; done = true; clearTimeout(t);
+      const code = resp.statusCode || 0;
+      resolve(code >= 200 && code < 300);
+      try { resp.resume(); } catch (_) {}
+    });
+    r.on('error', () => { if (done) return; done = true; clearTimeout(t); resolve(false); });
+    r.on('timeout', () => { if (done) return; done = true; clearTimeout(t); try { r.destroy(); } catch (_) {} resolve(false); });
+    r.end();
+  });
+  return out;
 }
 
 // Build the express app the daemon listens on.
@@ -386,7 +710,7 @@ export function buildDaemonApp({ dataDir } = {}) {
   // points window.OPENAI_BASE_URL at the local daemon).
   app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key, X-Upstream-Api-Key, anthropic-version, x-kolm-privacy-override');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key, X-Upstream-Api-Key, anthropic-version, x-kolm-privacy-override, x-kolm-raw');
     res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     if (req.method === 'OPTIONS') return res.status(204).end();
     next();
@@ -399,6 +723,15 @@ export function buildDaemonApp({ dataDir } = {}) {
       res.set('x-kolm-provider', out.event.provider || provider);
       res.set('x-kolm-model', String(out.event.model || ''));
       res.set('x-kolm-event-durable', String(out.durable !== false));
+      // W409b — surface privacy provenance on the response so SDK callers can
+      // assert fail-closed behavior without reading the lake.
+      res.set('x-kolm-redaction-policy', String(out.event.redaction_policy || 'redact'));
+      res.set('x-kolm-raw-available', String(out.event.raw_available === true));
+      // W409k — fixture marker (simulated source) for SDK callers + tests.
+      if (out.event.source_type === 'simulated') res.set('x-kolm-fixture', 'true');
+      if (Array.isArray(out.event.noncompliant_identifiers) && out.event.noncompliant_identifiers.length) {
+        res.set('x-kolm-noncompliant-identifiers', out.event.noncompliant_identifiers.join(','));
+      }
       if (out.event.sensitive_data_detected) {
         res.set('x-kolm-sensitive-classes', (out.event.sensitive_classes || []).join(','));
       }
@@ -434,25 +767,20 @@ export function buildDaemonApp({ dataDir } = {}) {
     try { storageHealth = await captureStoreHealth(); } catch (_) {}
     const providers = summarizeProviders();
     const reach = await Promise.all(Object.entries(PROVIDERS).map(async ([id, cfg]) => {
-      try {
-        const url = new URL(cfg.upstream);
-        const lib = url.protocol === 'https:' ? https : http;
-        return await new Promise((resolve) => {
-          const t = setTimeout(() => resolve([id, false]), 2000);
-          const r = lib.request({
-            hostname: url.hostname,
-            port: url.port || (url.protocol === 'https:' ? 443 : 80),
-            path: '/',
-            method: 'HEAD',
-            timeout: 2000,
-          }, (resp) => { clearTimeout(t); resolve([id, !!resp.statusCode]); resp.resume(); });
-          r.on('error', () => { clearTimeout(t); resolve([id, false]); });
-          r.end();
-        });
-      } catch (_) { return [id, false]; }
+      const out = await probeProviderReach(id, cfg);
+      return [id, out];
     }));
-    for (const [id, ok] of reach) {
-      providers[id].upstream_reachable = !!ok;
+    for (const [id, info] of reach) {
+      // W393: replace single upstream_reachable boolean with 4 explicit fields.
+      // - configured       : provider is in the daemon's known PROVIDERS list
+      // - key_set          : the env var for this provider is populated
+      // - network_reachable: HEAD/GET probe to upstream host returned 2xx/3xx
+      // - authenticated    : authenticated GET to a real endpoint returned 2xx
+      //   (only true when key_set AND probe succeeds with credentials)
+      providers[id].configured = true;
+      providers[id].key_set = !!providers[id].env_key_set;
+      providers[id].network_reachable = !!info.network_reachable;
+      providers[id].authenticated = !!info.authenticated;
     }
     res.json({
       ok: true,
@@ -473,6 +801,78 @@ export function buildDaemonApp({ dataDir } = {}) {
 
   // /health — public lightweight probe, no secrets, matches `kolm health` shape.
   app.get('/health', (_req, res) => res.json({ status: 'ok', version: DAEMON_VERSION, kind: 'connector_daemon' }));
+
+  // W407b — GET /v1/models. OpenAI-shaped {object:'list', data:[...]} listing
+  // every model the daemon knows about across all configured providers (read
+  // from PROVIDERS[*].cost_per_1k, the declared static lists). Does NOT call
+  // any upstream; this is local metadata so SDKs that auto-discover models
+  // (langchain, llamaindex, OpenAI client `.models.list()`) get a 200.
+  app.get('/v1/models', async (_req, res) => {
+    const created = Math.floor(Date.now() / 1000);
+    const data = [];
+    for (const [provId, cfg] of Object.entries(PROVIDERS)) {
+      const models = Object.keys((cfg && cfg.cost_per_1k) || {});
+      for (const id of models) {
+        data.push({
+          id,
+          object: 'model',
+          created,
+          owned_by: provId,
+        });
+        // W409k — Anthropic-compat alias. The hosted server emits prefixed
+        // `anthropic:<id>` rows so the Anthropic SDK can list Claude models
+        // without colliding with their canonical OpenAI-shaped ids. The
+        // daemon must be a SUPERSET of the server surface so SDKs auto-
+        // discovering models against the daemon (which dev tunnels expose)
+        // see the same ids and don't break on a missing alias.
+        if (/^anthropic/i.test(provId)) {
+          data.push({
+            id: `anthropic:${id}`,
+            object: 'model',
+            created,
+            owned_by: 'anthropic-compat',
+            alias_of: id,
+          });
+        }
+      }
+    }
+    // W409k — also surface FRONTIER_MODELS (the kolm-teacher catalogue) so
+    // the daemon's /v1/models is a SUPERSET of the hosted server's. SDKs
+    // that auto-discover models via the daemon (dev tunnels, byoc) see the
+    // same teacher catalogue as the hosted surface.
+    try {
+      const reg = await import('./model-registry.js');
+      const rows = Array.isArray(reg.FRONTIER_MODELS) ? reg.FRONTIER_MODELS : [];
+      for (const row of rows) {
+        if (!row || typeof row.id !== 'string') continue;
+        data.push({
+          id: row.id,
+          object: 'model',
+          created,
+          owned_by: 'kolm-teachers',
+          kolm: {
+            family: row.family || null,
+            params: row.params || null,
+            arch: row.arch || null,
+            modality: row.modality || null,
+            hw_tier: row.hw_tier || null,
+            license: row.license || null,
+            source_url: row.source_url || null,
+          },
+        });
+        if (typeof row.family === 'string' && /^(claude|anthropic)/i.test(row.family)) {
+          data.push({
+            id: `anthropic:${row.id}`,
+            object: 'model',
+            created,
+            owned_by: 'anthropic-compat',
+            alias_of: row.id,
+          });
+        }
+      }
+    } catch (_e) { /* registry import optional */ }
+    res.json({ object: 'list', data });
+  });
 
   return { app, getTotal: () => totalEvents };
 }
@@ -541,8 +941,13 @@ export const _internals = {
   PID_PATH,
   CONFIG_PATH,
   EVENTS_DIR,
+  RAW_DIR,
+  LOCAL_SENTINEL_TENANT,
   proxyOne,
   eventToObservationRow,
   resolveUpstreamKey,
   loadPolicy,
+  probeProviderReach,
+  isRawAllowed,
+  writeRawSidecar,
 };

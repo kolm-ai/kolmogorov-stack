@@ -304,14 +304,16 @@ test('15. spot-check: account.html paste input has aria-label after fix', () => 
     'account.html acct-paste input still missing aria-label');
 });
 
-test('16. spot-check: index.html ROI inputs gained aria-label', () => {
-  const html = read(path.join(PUBLIC, 'index.html'));
-  for (const id of ['vrc-calls', 'vrc-tin', 'vrc-tout', 'vrc-pin', 'vrc-pout']) {
+// W405: homepage ROI calculator section was deleted in Apple-style restraint
+// pass. The full calculator lives on /roi with aria-labeled inputs.
+test('16. spot-check: ROI inputs are accessibly labeled [W405: moved to /roi]', () => {
+  const html = read(path.join(PUBLIC, 'roi.html'));
+  for (const id of ['i-calls', 'i-in', 'i-out', 'i-pin', 'i-pout']) {
     const re = new RegExp(`<input[^>]*id=["']${id}["'][^>]*>`, 'i');
     const m = html.match(re);
-    assert.ok(m, `index.html input #${id} not found`);
+    assert.ok(m, `roi.html input #${id} not found`);
     assert.match(m[0], /aria-label\s*=/i,
-      `index.html #${id} still missing aria-label`);
+      `roi.html #${id} still missing aria-label`);
   }
 });
 

@@ -71,15 +71,16 @@ header.site .wrap{display:flex;align-items:center;justify-content:space-between;
 header.site .logo{font-family:var(--mono);font-weight:600;letter-spacing:1.2px;color:var(--ink);font-size:18px}
 header.site nav a{margin-left:24px;color:var(--ink-mute);font-size:14px}
 header.site nav a:hover{color:var(--ink)}
-main{max-width:980px;margin:0 auto;padding:56px 24px 96px}
-h1{font-size:48px;line-height:1.1;letter-spacing:-1.4px;font-weight:680;margin:0 0 14px}
-h2{font-size:26px;line-height:1.25;letter-spacing:-0.4px;font-weight:640;margin:48px 0 14px}
-h3{font-size:19px;line-height:1.35;font-weight:600;margin:24px 0 10px}
-p{margin:0 0 16px}.lede{font-size:20px;color:var(--ink-mute);margin:0 0 28px;max-width:760px}
+main{max-width:980px;margin:0 auto;padding:120px 24px 160px}
+h1{font-size:clamp(48px,6.4vw,80px);line-height:1.02;letter-spacing:-0.025em;font-weight:680;margin:0 0 22px;max-width:18ch}
+h2{font-size:clamp(36px,4.2vw,56px);line-height:1.06;letter-spacing:-0.02em;font-weight:640;margin:120px 0 22px;max-width:20ch}
+h3{font-size:22px;line-height:1.3;font-weight:600;margin:32px 0 12px}
+p{margin:0 0 18px}.lede{font-size:clamp(17px,1.4vw,21px);line-height:1.5;color:var(--ink-mute);margin:0 0 36px;max-width:60ch}
+@media (max-width:720px){main{padding:64px 18px 80px}h2{margin:64px 0 16px}}
 ul,ol{padding-left:22px;margin:0 0 16px}li{margin:6px 0}
 code{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:2px 6px;border-radius:4px}
 pre{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:16px 20px;border-radius:8px;overflow-x:auto;line-height:1.55}
-.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin:24px 0 40px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0 40px}
 @media (max-width:920px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:560px){.grid{grid-template-columns:1fr}}
 .card{background:var(--bg-elev);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:18px}
@@ -114,7 +115,7 @@ html[data-theme="light"] .status-badge{border:1px solid rgba(0,0,0,.08)}
 .try-status[data-state="err"]{color:#ff6b91}
 #try-result{margin:0;padding:12px 14px;background:#0b0d10;border:1px solid rgba(255,255,255,.06);border-radius:8px;color:var(--ink);font:12px/1.5 var(--mono,ui-monospace,SFMono-Regular,Menlo,monospace);white-space:pre-wrap;word-break:break-word;max-height:280px;overflow:auto}
 footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
-@media (max-width:560px){main{padding:32px 18px 64px}h1{font-size:32px}h2{font-size:22px}.matrix{font-size:12px}.matrix th,.matrix td{padding:8px 6px}}
+@media (max-width:560px){main{padding:48px 18px 64px}h1{font-size:36px}h2{font-size:28px;margin:48px 0 14px}.matrix{font-size:12px}.matrix th,.matrix td{padding:8px 6px}}
 </style>
 </head>
 <body>
@@ -128,14 +129,15 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
   <span class="label" id="loop-status-label">checking</span>
   <span class="meta" id="loop-status-meta">probing kolm.ai/health</span>
 </div>
-<p class="lede">kolm.ai turns your captured prompts into a compiled recipe in five rungs. Capture persists durably with a receipt. Health verifies the storage driver. Bridges reads your captures back, namespaced and tenant-scoped. Distill synthesizes a recipe from the largest template cluster. Replay runs the new artifact against your captured prompts and diffs against upstream. Run all five end-to-end with <code>kolm loop</code>.</p>
+<p class="lede">kolm.ai turns your captured prompts into a compiled recipe in six rungs. Capture persists durably with a receipt. Health verifies the storage driver. Bridges reads your captures back, namespaced and tenant-scoped. Distill synthesizes a recipe from the largest template cluster. Replay runs the new artifact against your captured prompts and diffs against upstream. Audit walks the receipt chain back to source. Run all six end-to-end with <code>kolm loop</code>.</p>
 
-<div class="grid">
+<div class="grid" data-w400g="rungs-grid">
   <div class="card"><div class="rung">Rung 1</div><h3><a href="#capture">Capture</a></h3><p>Persist prompt/response pairs with a durable receipt header.</p><a href="#capture">Read &rarr;</a></div>
   <div class="card"><div class="rung">Rung 2</div><h3><a href="#health">Health</a></h3><p>Probe the storage driver, durability flag, and thresholds.</p><a href="#health">Read &rarr;</a></div>
   <div class="card"><div class="rung">Rung 3</div><h3><a href="#bridges">Bridges</a></h3><p>Read captures back, indexed by namespace and tenant.</p><a href="#bridges">Read &rarr;</a></div>
   <div class="card"><div class="rung">Rung 4</div><h3><a href="#distill">Distill</a></h3><p>Synthesize a recipe from the largest template-hash cluster.</p><a href="#distill">Read &rarr;</a></div>
   <div class="card"><div class="rung">Rung 5</div><h3><a href="#replay">Replay</a></h3><p>Run captured prompts through the new artifact, diff against upstream.</p><a href="#replay">Read &rarr;</a></div>
+  <div class="card" data-w400g="rung-audit"><div class="rung">Rung 6</div><h3><a href="#audit">Audit &middot; receipts</a></h3><p>Every call carries a verifiable receipt. Walk the chain back to source, SLSA provenance and SBOM in tow.</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><a href="/security" style="font-size:11px;padding:2px 8px;background:rgba(16,185,129,.1);border-radius:999px">/security</a><a href="/spec/rs-1" style="font-size:11px;padding:2px 8px;background:rgba(16,185,129,.1);border-radius:999px">RS-1</a><a href="/sbom" style="font-size:11px;padding:2px 8px;background:rgba(16,185,129,.1);border-radius:999px">/sbom</a></div></div>
 </div>
 
 <h2>Run the whole loop</h2>
@@ -152,7 +154,7 @@ value loop green (6 rungs).</pre>
 <p><code>kolm loop --json</code> emits a structured report keyed by rung name. Exit code is 0 on full green, 1 if any rung fails. Equivalent to <code>kolm doctor --loop</code>. <a href="/quickstart/cli">Install the CLI and run it yourself &rarr;</a></p>
 
 <h2 id="try-it">Try it now</h2>
-<p>Post a prompt + response to the public <code>/v1/loop/try</code> demo endpoint. No key. No write — the receipt body shows <code>demo:true</code> and the <code>x-kolm-capture-durable: false</code> header so it cannot lie about persistence. The shape matches what a real authenticated <code>POST /v1/bridges/observe</code> emits.</p>
+<p>Post a prompt + response to the public <code>/v1/loop/try</code> demo endpoint. No key. No write. The receipt body shows <code>demo:true</code> and the <code>x-kolm-capture-durable: false</code> header so it cannot lie about persistence. The shape matches what a real authenticated <code>POST /v1/bridges/observe</code> emits.</p>
 <form id="try-form" class="try-form" autocomplete="off">
   <label for="try-prompt">prompt</label>
   <textarea id="try-prompt" rows="2" maxlength="2000" placeholder="What model: gpt-4o-mini · summarise this support ticket in 1 sentence ...">summarise this support ticket in 1 sentence</textarea>
@@ -177,6 +179,7 @@ value loop green (6 rungs).</pre>
 <tr><td id="bridges"><strong>3. Bridges</strong></td><td><code>GET /v1/bridges/observations?namespace=</code></td><td><code>tenant-scoped indexed read</code></td><td><code>kolm capture status</code></td></tr>
 <tr><td id="distill"><strong>4. Distill</strong></td><td><code>POST /v1/distill/from-captures</code></td><td><code>mode=recipe | specialist</code></td><td><code>kolm distill --from-captures ns</code></td></tr>
 <tr><td id="replay"><strong>5. Replay</strong></td><td><code>POST /v1/replay</code></td><td><code>k_score + latency_delta + cost_delta</code></td><td><code>kolm replay ns artifact</code></td></tr>
+<tr data-w400g="audit-row"><td><strong>6. Audit</strong></td><td><code>GET /v1/artifacts/:id/receipts</code></td><td><code>RS-1 chain + SLSA + SBOM</code></td><td><code>kolm verify &lt;artifact&gt;</code></td></tr>
 </tbody>
 </table>
 
@@ -226,7 +229,16 @@ value loop green (6 rungs).</pre>
 # 400 (no concept/version): {"error": "concept_id_or_version_id_required"}
 # 404 (artifact missing):   {"error": "artifact_not_found", "concept_id": "..."}</pre>
 
-<div class="warn">Rungs 1 through 3 are tenant-isolated by primary key in <code>src/store.js</code>. Rungs 4 and 5 inherit that isolation through <code>findByTenant</code>. Cross-tenant leakage is asserted as a unit test in <code>tests/wave297-value-loop-happy-path.test.js</code> and as a CLI smoke in <code>tests/wave298-doctor-loop.test.js</code>.</div>
+<h2 id="audit" data-w400g="rung-audit-section">Rung 6: audit &middot; receipts</h2>
+<p>Every rung above emits a receipt. Capture returns <code>x-kolm-capture-durable: true</code>. Distill, replay, and compile each chain into the same RS-1 receipt format with parent hash, signer, and SLSA provenance attestation. The artifact ships with its SBOM. Walking the chain backward from the deployed <code>&lt;recipe&gt;.kolm</code> to the first captured pair is a one-liner: <code>kolm verify &lt;artifact&gt;</code>. There is no silent step. <a href="/spec/rs-1">RS-1 spec</a>, <a href="/security">/security</a>, and <a href="/sbom">/sbom</a> document the chain end to end.</p>
+<pre>curl -H "authorization: Bearer $KOLM_API_KEY" \
+  "https://kolm.ai/v1/artifacts/art_abc123/receipts"
+# 200: {"chain": [{"id": "...", "kind": "capture", "parent": null, ...},
+#                 {"id": "...", "kind": "distill", "parent": "rcpt_...", ...},
+#                 {"id": "...", "kind": "compile", "parent": "rcpt_...", "slsa": {...}},
+#                 {"id": "...", "kind": "ship",    "parent": "rcpt_...", "sbom_url": "..."}]}</pre>
+
+<div class="warn">Rungs 1 through 3 are tenant-isolated by primary key in <code>src/store.js</code>. Rungs 4 and 5 inherit that isolation through <code>findByTenant</code>. Rung 6 inherits it through the receipt-chain join, so an audit query against another tenant's chain returns 404. Cross-tenant leakage is asserted as a unit test in <code>tests/wave297-value-loop-happy-path.test.js</code> and as a CLI smoke in <code>tests/wave298-doctor-loop.test.js</code>.</div>
 
 <p style="margin:32px 0;text-align:center"><a href="/captures" style="display:inline-block;padding:14px 24px;background:#7ef0d2;color:#08090c;text-decoration:none;border-radius:6px;font-weight:600;font-family:var(--mono,monospace);font-size:14px;letter-spacing:0.02em">Start capturing for free &rarr;</a></p>
 

@@ -76,7 +76,7 @@ test('W301 #8 — vercel.json rewrites /value-loop to /value-loop.html', () => {
 
 test('W301 #9 — sw.js cache bumped to wave301 slug', () => {
   const sw = fs.readFileSync(SW, 'utf8');
-  const m = sw.match(/const CACHE = 'kolm-v7-2026-05-18-wave(\d+)-/);
+  const m = sw.match(/const CACHE = 'kolm-v7-2026-\d{2}-\d{2}-wave(\d+)-/);
   assert.ok(m, 'sw.js must declare a versioned CACHE constant');
   assert.ok(Number(m[1]) >= 301, `sw.js CACHE wave must be >= 301; got ${m[1]}`);
 });

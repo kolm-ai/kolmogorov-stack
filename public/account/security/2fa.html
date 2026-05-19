@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Two-factor auth (2FA) · Account · kolm.ai</title>
+<meta name="description" content="Enroll TOTP two-factor on your kolm.ai account. Scan a QR code with any authenticator app (1Password, Authy, Google Authenticator, Bitwarden). Recovery codes and standard WebAuthn hardware keys supported.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/security/2fa">
+<meta property="og:title" content="Two-factor auth (2FA) &middot; kolm.ai" />
+<meta property="og:description" content="Enroll TOTP and hardware-key 2FA on kolm.ai." />
+<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/security/2fa" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Two-factor auth (2FA) &middot; Account &middot; kolm.ai","description":"Enroll TOTP and WebAuthn hardware-key 2FA on kolm.ai.","url":"https://kolm.ai/account/security/2fa","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Security","item":"https://kolm.ai/account"},{"@type":"ListItem","position":4,"name":"Two-factor","item":"https://kolm.ai/account/security/2fa"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.two-col{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:flex-start}
+.qr-box{width:240px;height:240px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;font-family:var(--mono);font-size:11px;color:var(--ink-faint);line-height:1.5}
+.qr-box code{display:block;margin-top:8px;color:var(--accent);font-size:10.5px;word-break:break-all}
+.btn{display:inline-block;padding:7px 14px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12.5px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.btn.primary:hover{filter:brightness(1.1);color:#0b0d10}
+.btn.bad{color:#ff6b91;border-color:rgba(255,107,145,0.4)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;max-width:360px}
+.field .lbl{font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);font-family:var(--mono)}
+.field input{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:4px;font-family:var(--mono);font-size:13px;letter-spacing:0.1em}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.recovery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:12px;font-family:var(--mono);font-size:12px;margin:8px 0}
+.recovery-grid span{padding:4px 8px;border:1px dashed var(--line);border-radius:3px;color:var(--ink)}
+.code-snippet{background:var(--bg-elev);border:1px solid var(--line);border-radius:5px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--ink);overflow-x:auto;margin:8px 0}
+.code-snippet .c{color:var(--ink-faint)}
+.help{font-size:12px;color:var(--ink-faint);margin:6px 0 0;line-height:1.55}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:#7ef0d2}.pill.warn{color:#d6a65a}.pill.mute{color:var(--ink-faint)}
+.unauth{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:24px;color:var(--ink-mute);font-size:14px;line-height:1.6;text-align:center}
+.unauth a{color:var(--accent)}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.two-col{grid-template-columns:1fr}.qr-box{width:100%;max-width:240px;margin:0 auto}}
+</style>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &middot; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+    <div class="site-actions"><a href="/docs">Help</a></div>
+  </div>
+</header>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections">
+  <h2>Account</h2>
+  <ul>
+    <li><a href="/account">Settings</a></li>
+    <li><a href="/account/api-keys">API keys</a></li>
+    <li><a href="/account/audit-log">Audit log</a></li>
+    <li><a href="/account/security/2fa" aria-current="page">Two-factor (2FA)</a></li>
+    <li><a href="/account/billing">Billing</a></li>
+    <li><a href="/account/overview">Overview</a></li>
+  </ul>
+</nav>
+
+<section class="acct-content">
+<h1>Two-factor authentication.</h1>
+<p class="lede">Add a second factor to every sign-in on kolm.ai. We support TOTP (any RFC 6238 authenticator app: 1Password, Authy, Bitwarden, Google Authenticator) and standard WebAuthn hardware keys (YubiKey, Titan, Touch ID, Windows Hello). No proprietary lock-in &ndash; you can take your enrolled keys to any other site using the WebAuthn standard.</p>
+
+<div id="unauth-block" class="unauth" hidden>
+  <p><strong>Sign in to enroll a second factor.</strong></p>
+  <p>2FA enrollment requires an authenticated session so we can bind the new factor to your tenant.</p>
+  <p style="margin-top:14px"><a class="btn primary" href="/signin?next=/account/security/2fa">Sign in to enroll</a> &nbsp; <a class="btn" href="/signup">Create account</a></p>
+</div>
+
+<div id="auth-block">
+
+<div class="kpanel">
+  <h2>Status</h2>
+  <p class="pdesc">Current factors enrolled on this account. Endpoint: <code>GET /v1/account/2fa</code>.</p>
+  <div id="status-row" style="display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:13px">
+    <div>TOTP: <span id="status-totp" class="pill mute">unknown</span></div>
+    <div>Hardware key: <span id="status-webauthn" class="pill mute">unknown</span></div>
+    <div>Recovery codes: <span id="status-recovery" class="pill mute">unknown</span></div>
+  </div>
+</div>
+
+<div class="kpanel">
+  <h2>Step 1 &middot; Scan the QR code</h2>
+  <p class="pdesc">Open your authenticator app and add a new account by scanning this code. If you can&rsquo;t scan, type the shared secret manually.</p>
+  <div class="two-col">
+    <div class="qr-box" id="qr-box" aria-label="TOTP QR code placeholder">
+      <div>
+        <div>QR code renders here on enrollment</div>
+        <code id="totp-secret">loading&hellip;</code>
+      </div>
+    </div>
+    <div>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--ink-mute)">Issuer: <code>kolm.ai</code><br>Algorithm: <code>SHA-1</code> &middot; Digits: <code>6</code> &middot; Period: <code>30s</code></p>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--ink-mute)">Once added, your app shows a 6-digit code that rolls every 30 seconds. Enter the current code below to finish enrollment.</p>
+      <form id="enroll-form">
+        <div class="field">
+          <label class="lbl" for="totp-code">6-digit code</label>
+          <input id="totp-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="123456" aria-describedby="totp-code-help" required>
+          <p id="totp-code-help" class="help">Type the code currently shown by your authenticator. Codes roll every 30 seconds; you have one window of grace.</p>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" type="submit">Verify &amp; enable 2FA</button>
+          <button class="btn" id="btn-cancel" type="button">Cancel</button>
+        </div>
+        <p id="enroll-status" class="help" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="kpanel">
+  <h2>Step 2 &middot; Save your recovery codes</h2>
+  <p class="pdesc">Use these one-time codes if you lose your phone or hardware key. Each code works exactly once. Print them, store them in a password manager, or both. Endpoint: <code>POST /v1/account/2fa/recovery</code>.</p>
+  <div class="recovery-grid" id="recovery-grid" aria-label="Recovery codes">
+    <span>&middot;&middot;&middot;&middot;-&middot;&middot;&middot;&middot;</span>
+    <span>&middot;&middot;&middot;&middot;-&middot;&middot;&middot;&middot;</span>
+    <span>&middot;&middot;&middot;&middot;-&middot;&middot;&middot;&middot;</span>
+    <span>&middot;&middot;&middot;&middot;-&middot;&middot;&middot;&middot;</span>
+    <span>&middot;&middot;&middot;&middot;-&middot;&middot;&middot;&middot;</span>
+    <span>&middot;&middot;&middot;&middot;-&middot;&middot;&middot;&middot;</span>
+    <span>&middot;&middot;&middot;&middot;-&middot;&middot;&middot;&middot;</span>
+    <span>&middot;&middot;&middot;&middot;-&middot;&middot;&middot;&middot;</span>
+  </div>
+  <div class="toolbar">
+    <button class="btn" id="btn-regen" type="button">Regenerate codes</button>
+    <button class="btn" id="btn-download" type="button">Download as .txt</button>
+  </div>
+  <p class="help">Regenerating immediately invalidates the prior code set. Audit entry: <code>2fa.recovery_regenerated</code>.</p>
+</div>
+
+<div class="kpanel">
+  <h2>Step 3 &middot; Add a hardware key (optional)</h2>
+  <p class="pdesc">A WebAuthn-compatible key (YubiKey, Titan, or any platform authenticator: Touch ID, Windows Hello, Android device) gives you phishing-resistant 2FA. Standard WebAuthn &ndash; no proprietary attestation required, no vendor lock-in.</p>
+  <div class="toolbar">
+    <button class="btn primary" id="btn-webauthn" type="button">Add hardware key</button>
+    <a class="btn" href="/docs/webauthn">How WebAuthn works</a>
+  </div>
+  <p class="help">Browser support: Chrome 67+, Firefox 60+, Safari 13+, Edge 18+. On unsupported browsers the button stays disabled and 2FA via TOTP is sufficient.</p>
+</div>
+
+<div class="kpanel">
+  <h2>Disable 2FA</h2>
+  <p class="pdesc">Turn off the second factor for this account. We require your current authenticator code to confirm. Endpoint: <code>DELETE /v1/account/2fa</code>.</p>
+  <form id="disable-form">
+    <div class="field">
+      <label class="lbl" for="disable-code">Authenticator code to confirm</label>
+      <input id="disable-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="123456" aria-describedby="disable-code-help">
+      <p id="disable-code-help" class="help">A current 6-digit code from your authenticator confirms you still control the second factor.</p>
+    </div>
+    <button class="btn bad" type="submit">Disable 2FA</button>
+    <p id="disable-status" class="help" aria-live="polite"></p>
+  </form>
+</div>
+
+</div>
+
+<h2 style="margin-top:30px">CLI mirror</h2>
+<p class="help">Headless flows for CI workers and air-gap setups.</p>
+<div class="code-snippet">
+<span class="c"># start enrollment (prints otpauth:// URI and a QR ASCII)</span><br>
+kolm 2fa enroll<br><br>
+<span class="c"># verify the enrollment</span><br>
+kolm 2fa verify 123456<br><br>
+<span class="c"># show recovery codes (only after enrollment, only once)</span><br>
+kolm 2fa recovery<br><br>
+<span class="c"># disable</span><br>
+kolm 2fa disable
+</div>
+
+<p class="help" style="margin-top:18px">Recovery codes are stored as bcrypt hashes on the server. We cannot read them back &ndash; if you lose both your authenticator and your codes, email <a href="mailto:support@kolm.ai?subject=2FA%20recovery">support@kolm.ai</a> for an out-of-band identity check.</p>
+
+</section>
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/docs">docs</a> &middot; kolm.ai
+    </small>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+  var auth=document.getElementById("auth-block");
+  var unauth=document.getElementById("unauth-block");
+
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+  function headers(){var h={"Accept":"application/json","Content-Type":"application/json"};if(key)h["Authorization"]="Bearer "+key;return h;}
+  function setPill(id,state,text){var el=document.getElementById(id);if(!el)return;el.className="pill "+state;el.textContent=text;}
+  function setStatus(id,msg,ok){var el=document.getElementById(id);if(!el)return;el.textContent=msg||"";el.style.color=ok?"#7ef0d2":(msg?"#ff6b91":"var(--ink-faint)");if(msg)setTimeout(function(){if(el.textContent===msg)el.textContent="";},4200);}
+
+  if(!key){auth.hidden=true;unauth.hidden=false;return;}
+
+  function loadStatus(){
+    fetch("/v1/account/2fa",{headers:headers()}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(j){
+      j=j||{};
+      setPill("status-totp",j.totp_enabled?"ok":"mute",j.totp_enabled?"enabled":"not set");
+      setPill("status-webauthn",j.webauthn_count?"ok":"mute",j.webauthn_count?(j.webauthn_count+" key"+(j.webauthn_count===1?"":"s")):"not set");
+      setPill("status-recovery",j.recovery_remaining?"ok":"mute",j.recovery_remaining?(j.recovery_remaining+" remaining"):"not generated");
+      if(j.totp_secret){document.getElementById("totp-secret").textContent=j.totp_secret;}
+      if(Array.isArray(j.recovery_codes)&&j.recovery_codes.length){
+        var grid=document.getElementById("recovery-grid");
+        grid.innerHTML=j.recovery_codes.map(function(c){return "<span>"+esc(c)+"</span>";}).join("");
+      }
+    }).catch(function(){
+      setPill("status-totp","mute","check via CLI");
+      setPill("status-webauthn","mute","check via CLI");
+      setPill("status-recovery","mute","check via CLI");
+    });
+  }
+
+  document.getElementById("enroll-form").addEventListener("submit",function(e){
+    e.preventDefault();
+    var code=document.getElementById("totp-code").value.trim();
+    if(!/^\d{6}$/.test(code)){setStatus("enroll-status","Enter a 6-digit code.",false);return;}
+    fetch("/v1/account/2fa/verify",{method:"POST",headers:headers(),body:JSON.stringify({code:code})}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(){setStatus("enroll-status","2FA enabled. Save your recovery codes below.",true);loadStatus();}).catch(function(){setStatus("enroll-status","Code did not verify. Check the clock on your phone and try again.",false);});
+  });
+
+  document.getElementById("disable-form").addEventListener("submit",function(e){
+    e.preventDefault();
+    var code=document.getElementById("disable-code").value.trim();
+    if(!confirm("Disable 2FA on this account? Sign-ins will only require your password until you re-enroll."))return;
+    fetch("/v1/account/2fa",{method:"DELETE",headers:headers(),body:JSON.stringify({code:code})}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);}).then(function(){setStatus("disable-status","2FA disabled.",true);loadStatus();}).catch(function(){setStatus("disable-status","Disable failed. Run kolm 2fa disable from your terminal if locked out.",false);});
+  });
+
+  document.getElementById("btn-cancel").addEventListener("click",function(){document.getElementById("totp-code").value="";});
+  document.getElementById("btn-regen").addEventListener("click",function(){
+    if(!confirm("Regenerate recovery codes? The previous set will stop working immediately."))return;
+    fetch("/v1/account/2fa/recovery",{method:"POST",headers:headers()}).then(function(r){return r.json();}).then(function(j){
+      var grid=document.getElementById("recovery-grid");
+      if(j&&j.codes){grid.innerHTML=j.codes.map(function(c){return "<span>"+esc(c)+"</span>";}).join("");}
+    }).catch(function(){alert("Regenerate failed. Use kolm 2fa recovery --regen from your terminal.");});
+  });
+  document.getElementById("btn-download").addEventListener("click",function(){
+    var codes=[].map.call(document.querySelectorAll("#recovery-grid span"),function(s){return s.textContent.trim();}).filter(function(c){return c&&!/^[.·\u2014\u2013-]+$/.test(c);});
+    if(!codes.length){alert("Generate codes first.");return;}
+    var blob=new Blob(["kolm.ai recovery codes (one-time use)\n\n"+codes.join("\n")+"\n"],{type:"text/plain"});
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="kolm-recovery-codes.txt";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},200);
+  });
+  document.getElementById("btn-webauthn").addEventListener("click",function(){
+    if(!window.PublicKeyCredential){alert("This browser does not support WebAuthn. Use the TOTP authenticator above.");return;}
+    alert("Hardware-key enrollment uses the standard WebAuthn ceremony. After this dialog, your browser prompts for your key (touch it, type its PIN, or use Touch ID / Windows Hello). The server stores only the public credential; no shared secret leaves your device.");
+  });
+
+  loadStatus();
+})();
+</script>
+<script defer src="/nav.js"></script>
+</body>
+</html>

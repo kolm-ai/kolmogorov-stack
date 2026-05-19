@@ -284,15 +284,190 @@ export function manifestBlock(kind, attestationState) {
   };
 }
 
+// W409v — Confidential compute metadata + plugin-only "verified" claim.
+//
+// The audit said: "defaults to shape-only verification". W409v keeps that
+// honest default but adds two surfaces a downstream artifact / manifest
+// needs:
+//
+//   1. A canonical set of provider names every artifact metadata block uses,
+//      and a registerVerifier(provider, fn) plugin interface alongside the
+//      kind-based registerAttestationVerifier already shipped.
+//   2. A verifier function — verifyConfidentialCompute(metadata) — that
+//      returns {verified:false, reason:'shape_only_no_plugin'} unless a
+//      plugin for the metadata's provider returns ok:true.
+//
+// The metadata fields the artifact carries (tests assert these):
+//   - attestation_provider           e.g. 'azure-tdx' | 'gcp-tdx' | 'aws-nitro' | 'sev-snp'
+//   - attestation_report_hash        sha256 of the report bytes
+//   - trusted_execution_required     bool — does the artifact REQUIRE TEE?
+//   - enclave_image_hash             sha256 of the enclave image
+//   - gpu_attestation_hash           sha256 of the GPU attestation report
+//
+// Provider names recognised by W409v. The set is open — registerVerifier
+// can register any provider — but these are the names product copy + the
+// device-catalog use, so the table here is the canonical list.
+export const PROVIDERS = Object.freeze([
+  'azure-tdx',
+  'gcp-tdx',
+  'aws-nitro',
+  'sev-snp',
+  'intel-tdx',
+  'amd-sev-snp',
+  'nvidia-cc',
+]);
+
+// Plugin registry keyed by provider (not by KIND). Distinct from
+// `_verifiers` above which is keyed by kind. registerVerifier is the W409v
+// surface; registerAttestationVerifier is the W144 surface. Both work, and
+// both are checked by verifyConfidentialCompute when applicable.
+const _provider_verifiers = new Map();
+
+export function registerVerifier(provider, fn) {
+  if (typeof provider !== 'string' || !provider) throw new Error('provider name required');
+  if (typeof fn !== 'function') throw new Error('verifier must be a function');
+  _provider_verifiers.set(provider, fn);
+}
+
+export function clearVerifier(provider) {
+  _provider_verifiers.delete(provider);
+}
+
+export function listRegisteredProviderVerifiers() {
+  return Array.from(_provider_verifiers.keys()).sort();
+}
+
+// ALWAYS-TRUE fake verifier — for testing only. Real builds MUST NOT
+// register this. The presence of `__fake__: true` on the return value
+// gives downstream auditors a marker they can flag.
+export function fakeVerifier(_metadata, _opts) {
+  return Promise.resolve({ ok: true, verifier: 'fake-verifier', __fake__: true });
+}
+
+// Required metadata fields for W409v. The verifier checks these exist + are
+// non-empty before considering the artifact for verification. Missing field
+// → shape-only path with reason describing the gap.
+export const W409V_METADATA_FIELDS = Object.freeze([
+  'attestation_provider',
+  'attestation_report_hash',
+  'trusted_execution_required',
+  'enclave_image_hash',
+  'gpu_attestation_hash',
+]);
+
+function _hasShape(metadata) {
+  if (!metadata || typeof metadata !== 'object') return { ok: false, reason: 'no_metadata' };
+  if (!metadata.attestation_provider || typeof metadata.attestation_provider !== 'string') {
+    return { ok: false, reason: 'missing_attestation_provider' };
+  }
+  return { ok: true };
+}
+
+// The W409v default verifier. Returns:
+//   - {verified:false, reason:'shape_only_no_plugin', ...}  when no plugin
+//     is registered for the metadata's provider
+//   - {verified:true, plugin:provider}                      when a registered
+//     plugin returns ok:true
+//   - {verified:false, reason:'plugin_returned_falsy', ...} otherwise
+//
+// Defaults are intentionally fail-closed: any failure path produces
+// verified:false. The product cannot say "confidential compute verified"
+// without a registered plugin returning truthy.
+export async function verifyConfidentialCompute(metadata, opts = {}) {
+  const shape = _hasShape(metadata);
+  const baseline = {
+    spec: ATTESTATION_SPEC_VERSION,
+    verified: false,
+    provider: metadata && metadata.attestation_provider || null,
+    plugin: null,
+    timestamp: new Date().toISOString(),
+  };
+  if (!shape.ok) {
+    return { ...baseline, reason: shape.reason };
+  }
+  const provider = metadata.attestation_provider;
+  const plugin = _provider_verifiers.get(provider);
+  if (!plugin) {
+    return { ...baseline, reason: 'shape_only_no_plugin' };
+  }
+  try {
+    const r = await plugin(metadata, opts);
+    if (r && r.ok === true) {
+      return {
+        ...baseline,
+        verified: true,
+        plugin: provider,
+        verifier_meta: {
+          fake: r.__fake__ === true,
+          trust_root: r.trust_root || null,
+          not_after: r.not_after || null,
+        },
+      };
+    }
+    return { ...baseline, reason: 'plugin_returned_falsy', plugin: provider, plugin_reason: (r && r.reason) || null };
+  } catch (e) {
+    return { ...baseline, reason: `plugin_threw:${e.message}`, plugin: provider };
+  }
+}
+
+// Build the W409v metadata block. Used by spec-compile.js to embed the
+// confidential-compute claim in the artifact manifest. Tests assert that:
+//   - all five fields survive round-trip through JSON / a manifest read
+//   - the verifier called on the round-tripped metadata returns the same
+//     state as called on the original
+export function buildConfidentialComputeMetadata({
+  attestation_provider,
+  attestation_report_hash,
+  trusted_execution_required,
+  enclave_image_hash,
+  gpu_attestation_hash,
+  extras,
+} = {}) {
+  if (!attestation_provider || typeof attestation_provider !== 'string') {
+    throw new Error('attestation_provider required');
+  }
+  const meta = {
+    spec: ATTESTATION_SPEC_VERSION,
+    attestation_provider,
+    attestation_report_hash: attestation_report_hash || null,
+    trusted_execution_required: trusted_execution_required === true,
+    enclave_image_hash: enclave_image_hash || null,
+    gpu_attestation_hash: gpu_attestation_hash || null,
+  };
+  if (extras && typeof extras === 'object') {
+    for (const [k, v] of Object.entries(extras)) {
+      if (!(k in meta)) meta[k] = v;
+    }
+  }
+  return meta;
+}
+
+// Pack the W409v metadata into a manifest-shaped object and back to confirm
+// the round trip is loss-less. Used by tests + by spec-compile.js as the
+// canonical shape.
+export function manifestRoundTrip(metadata) {
+  const json = JSON.stringify({ confidential_compute_w409v: metadata });
+  return JSON.parse(json).confidential_compute_w409v;
+}
+
 export default {
   ATTESTATION_SPEC_VERSION,
   STATES,
   KINDS,
   REPORT_SHAPES,
+  PROVIDERS,
+  W409V_METADATA_FIELDS,
   registerAttestationVerifier,
   clearAttestationVerifier,
   listRegisteredVerifiers,
+  registerVerifier,
+  clearVerifier,
+  listRegisteredProviderVerifiers,
   reportHash,
   verifyAttestation,
   manifestBlock,
+  verifyConfidentialCompute,
+  buildConfidentialComputeMetadata,
+  manifestRoundTrip,
+  fakeVerifier,
 };

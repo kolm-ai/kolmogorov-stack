@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Builds · Account · kolm.ai</title>
-<meta name="description" content="Build history on kolm.ai: started_at, status, K-score, production-ready badge, artifact_hash. Backed by src/production-ready.js.">
+<meta name="description" content="Build history on kolm.ai: started_at, status, held-out pass rate, production-ready badge, artifact_hash. Backed by src/production-ready.js.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/builds">
 <meta property="og:title" content="Builds &middot; Account &middot; kolm.ai" />
-<meta property="og:description" content="Build history on kolm.ai: started_at, status, K-score, production-ready badge, artifact_hash. Backed by src/production-ready.js." />
+<meta property="og:description" content="Build history on kolm.ai: started_at, status, held-out pass rate, production-ready badge, artifact_hash. Backed by src/production-ready.js." />
 <meta property="og:image" content="https://kolm.ai/og-card.svg" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://kolm.ai/account/builds" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Builds · Account · kolm.ai","description":"Build history on kolm.ai: started_at, status, K-score, production-ready badge, artifact_hash. Backed by src/production-ready.js.","url":"https://kolm.ai/account/builds","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Builds","item":"https://kolm.ai/account/builds"}]}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Builds · Account · kolm.ai","description":"Build history on kolm.ai: started_at, status, held-out pass rate, production-ready badge, artifact_hash. Backed by src/production-ready.js.","url":"https://kolm.ai/account/builds","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Builds","item":"https://kolm.ai/account/builds"}]}}</script>
 <style>
 .acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
 #account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
@@ -70,11 +70,152 @@
     <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
-      <a href="/product">Product</a>
-      <a href="/models">Models</a>
-      <a href="/docs">Docs</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/enterprise">Enterprise</a>
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
     <div class="site-actions"><a href="/docs">Help</a></div>
@@ -86,13 +227,13 @@
 <nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/agent-telemetry">Agent telemetry</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds" aria-current="page">Builds</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
 <section class="acct-content">
 <h1>Builds.</h1>
-<p class="lede">Every compile job, in order. Status, K-score, whether it passed the production-ready gate, the artifact hash you can pin.</p>
+<p class="lede">Every build, in order. Capture &rarr; dataset &rarr; bakeoff &rarr; build &rarr; verify. Status, held-out pass rate, whether it passed the production-ready gate, the artifact hash you can pin.</p>
 <div class="toolbar">
   <a class="btn primary" href="/builder">New build</a>
   <a class="btn" href="/account/artifacts">Installed artifacts</a>
 </div>
 <table class="ktable">
-  <thead><tr><th>Started</th><th>Recipe</th><th>Status</th><th>K-score</th><th>Production ready</th><th>Artifact</th></tr></thead>
+  <thead><tr><th>Started</th><th>Recipe</th><th>Status</th><th>% passed</th><th>Production ready</th><th>Artifact</th></tr></thead>
   <tbody id="bl-rows"><tr><td colspan="6"><div class="skel" style="width:260px"></div></td></tr></tbody>
 </table>
 <div id="empty-state" class="empty" hidden data-empty-state>
@@ -127,7 +268,7 @@ window.kfetch("/v1/builds").catch(function(){
       "<td>"+window.kesc((b.started_at||b.created_at||"").slice(0,16).replace("T"," "))+"</td>"+
       "<td><code>"+window.kesc(b.recipe||b.spec_name||b.name||"-")+"</code></td>"+
       "<td>"+statusPill(b.status)+"</td>"+
-      "<td>"+(b.k_score!=null?b.k_score.toFixed(3):"-")+"</td>"+
+      "<td>"+(b.k_score!=null?(Math.round(b.k_score*100)+"% passed"):(b.pass_rate!=null?(Math.round(b.pass_rate*100)+"% passed"):"-"))+"</td>"+
       "<td>"+readyPill(b.production_ready)+"</td>"+
       "<td><code>"+window.kesc((b.artifact_hash||b.cid||b.id||"-").slice(0,16))+"</code></td>"+
     "</tr>";

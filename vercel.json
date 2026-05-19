@@ -77,11 +77,6 @@
       "permanent": true
     },
     {
-      "source": "/distill",
-      "destination": "/quickstart",
-      "permanent": true
-    },
-    {
       "source": "/edge",
       "destination": "/device",
       "permanent": true
@@ -177,6 +172,10 @@
       "destination": "/account/captured.html"
     },
     {
+      "source": "/account/lake",
+      "destination": "/account/lake.html"
+    },
+    {
       "source": "/account/privacy-events",
       "destination": "/account/privacy-events.html"
     },
@@ -249,6 +248,10 @@
       "destination": "/train.html"
     },
     {
+      "source": "/datasets",
+      "destination": "/docs/datasets.html"
+    },
+    {
       "source": "/frontier-stack",
       "destination": "/frontier-stack.html"
     },
@@ -263,6 +266,10 @@
     {
       "source": "/value-loop",
       "destination": "/value-loop.html"
+    },
+    {
+      "source": "/distill",
+      "destination": "/distill.html"
     },
     {
       "source": "/foundations/tailscale",
@@ -1297,6 +1304,42 @@
       "destination": "/integrations/zed.html"
     },
     {
+      "source": "/integrations/openai-sdk",
+      "destination": "/integrations/openai-sdk.html"
+    },
+    {
+      "source": "/integrations/anthropic-sdk",
+      "destination": "/integrations/anthropic-sdk.html"
+    },
+    {
+      "source": "/integrations/openrouter",
+      "destination": "/integrations/openrouter.html"
+    },
+    {
+      "source": "/integrations/langchain",
+      "destination": "/integrations/langchain.html"
+    },
+    {
+      "source": "/integrations/vercel-ai-sdk",
+      "destination": "/integrations/vercel-ai-sdk.html"
+    },
+    {
+      "source": "/integrations/litellm",
+      "destination": "/integrations/litellm.html"
+    },
+    {
+      "source": "/integrations/cursor-claude-code",
+      "destination": "/integrations/cursor-claude-code.html"
+    },
+    {
+      "source": "/integrations/docker-compose",
+      "destination": "/integrations/docker-compose.html"
+    },
+    {
+      "source": "/integrations/env-vars",
+      "destination": "/integrations/env-vars.html"
+    },
+    {
       "source": "/insurance",
       "destination": "/health-insurance.html"
     },
@@ -1561,11 +1604,6 @@
     }
   ],
   "functions": {
-    "api/index.js": {
-      "memory": 1024,
-      "maxDuration": 60,
-      "includeFiles": "{public/**,data/**,examples/**,src/**}"
-    },
     "api/r2.js": {
       "memory": 512,
       "maxDuration": 60,

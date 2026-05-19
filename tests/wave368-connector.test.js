@@ -246,8 +246,17 @@ test('W368 #4 — capture-store row written with all canonical event fields popu
       assert.ok(evid);
       // Read store directly through the same module the daemon uses.
       const csMod = await import(pathToFileURLOnce('../src/capture-store.js'));
-      const rows = await csMod.listCaptures('local', 'default', 1000);
-      const match = rows.find((row) => row.id === evid || row.event_id === evid);
+      // W411 local-daemon mode stamps tenant_id = `local:<hostname>` sentinel
+      // (not the bare 'local' literal). The store may have accumulated rows
+      // across dev runs (./data/kolm.sqlite persists), so use a high limit
+      // and try both tenants to find the row by event_id.
+      const sentinelTenant = 'local:' + (os.hostname() || 'host');
+      let rows = await csMod.listCaptures(sentinelTenant, 'default', 100000);
+      let match = rows.find((row) => row.id === evid || row.event_id === evid);
+      if (!match) {
+        rows = await csMod.listCaptures('local', 'default', 100000);
+        match = rows.find((row) => row.id === evid || row.event_id === evid);
+      }
       assert.ok(match, 'expected to find captured row for event_id=' + evid + ' (have ' + rows.length + ' rows)');
       // Spot-check canonical fields present in the persisted row.
       assert.equal(match.provider, 'openai');
@@ -415,4 +424,102 @@ test('W368 #10 — kolm connect config --show emits sanitized key fingerprints',
   // Sanitized: should show prefix + "..." + suffix, NOT the full key.
   assert.match(r.stdout, /sk-abc.*wxyz/);
   assert.ok(!r.stdout.includes('sk-abcdef1234567890wxyz'), 'config --show leaked full key');
+});
+
+// W393: connector health field clarification — replace single misleading
+// `upstream_reachable` boolean with four explicit booleans per provider.
+
+test('W393 #1 - /v1/health exposes 4-field connector health per provider (booleans)', async () => {
+  const HOME = isolatedHome();
+  const prev = { HOME: process.env.HOME, KEY: process.env.OPENAI_API_KEY };
+  process.env.HOME = HOME; process.env.USERPROFILE = HOME; delete process.env.OPENAI_API_KEY;
+  try {
+    const up = await spinMockUpstream();
+    const t = await startTestDaemon({
+      KOLM_UPSTREAM_OPENAI_BASE: up.base,
+      KOLM_UPSTREAM_ANTHROPIC_BASE: up.base,
+    });
+    try {
+      const h = await getJson(t.base + '/v1/health');
+      assert.equal(h.status, 200);
+      const provs = h.body.providers || {};
+      assert.ok(provs.openai, 'expected openai in providers');
+      for (const id of Object.keys(provs)) {
+        const p = provs[id];
+        // Behavior: each provider object carries 4 explicit booleans.
+        assert.equal(typeof p.configured, 'boolean', id + '.configured must be boolean');
+        assert.equal(typeof p.key_set, 'boolean', id + '.key_set must be boolean');
+        assert.equal(typeof p.network_reachable, 'boolean', id + '.network_reachable must be boolean');
+        assert.equal(typeof p.authenticated, 'boolean', id + '.authenticated must be boolean');
+        // configured is true for every provider in the registry.
+        assert.equal(p.configured, true, id + '.configured must be true');
+      }
+    } finally {
+      await new Promise((r) => t.server.close(() => r()));
+      await new Promise((r) => up.server.close(() => r()));
+    }
+  } finally {
+    process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
+    if (prev.KEY) process.env.OPENAI_API_KEY = prev.KEY;
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
+test('W393 #2 - no API key set means authenticated is false even when host is reachable', async () => {
+  const HOME = isolatedHome();
+  const prev = { HOME: process.env.HOME, K1: process.env.OPENAI_API_KEY, K2: process.env.ANTHROPIC_API_KEY, K3: process.env.OPENROUTER_API_KEY, K4: process.env.GEMINI_API_KEY };
+  process.env.HOME = HOME; process.env.USERPROFILE = HOME;
+  delete process.env.OPENAI_API_KEY; delete process.env.ANTHROPIC_API_KEY;
+  delete process.env.OPENROUTER_API_KEY; delete process.env.GEMINI_API_KEY;
+  try {
+    const up = await spinMockUpstream();
+    const t = await startTestDaemon({
+      KOLM_UPSTREAM_OPENAI_BASE: up.base,
+      KOLM_UPSTREAM_ANTHROPIC_BASE: up.base,
+    });
+    try {
+      const h = await getJson(t.base + '/v1/health');
+      assert.equal(h.status, 200);
+      const provs = h.body.providers || {};
+      for (const [id, p] of Object.entries(provs)) {
+        // Core bug from W393: must NOT report "reachable" success when no key.
+        assert.equal(p.key_set, false, id + '.key_set must be false when env unset');
+        assert.equal(p.authenticated, false, id + '.authenticated must be false without a key');
+      }
+    } finally {
+      await new Promise((r) => t.server.close(() => r()));
+      await new Promise((r) => up.server.close(() => r()));
+    }
+  } finally {
+    process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
+    if (prev.K1) process.env.OPENAI_API_KEY = prev.K1;
+    if (prev.K2) process.env.ANTHROPIC_API_KEY = prev.K2;
+    if (prev.K3) process.env.OPENROUTER_API_KEY = prev.K3;
+    if (prev.K4) process.env.GEMINI_API_KEY = prev.K4;
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
+test('W393 #3 - probeProviderReach returns 2 booleans and is bounded (does not hang)', async () => {
+  const HOME = isolatedHome();
+  const prev = { HOME: process.env.HOME, KEY: process.env.OPENAI_API_KEY };
+  process.env.HOME = HOME; process.env.USERPROFILE = HOME; delete process.env.OPENAI_API_KEY;
+  try {
+    const mod = await import(pathToFileURLOnce('../src/daemon-connector.js'));
+    assert.equal(typeof mod._internals.probeProviderReach, 'function', 'probeProviderReach must be exported');
+    // Point at a deliberately unroutable upstream so we exercise the timeout path.
+    const cfg = { upstream: 'http://127.0.0.1:1', env_key: 'OPENAI_API_KEY' };
+    const t0 = Date.now();
+    const out = await mod._internals.probeProviderReach('openai', cfg);
+    const elapsed = Date.now() - t0;
+    assert.equal(typeof out.network_reachable, 'boolean');
+    assert.equal(typeof out.authenticated, 'boolean');
+    assert.equal(out.authenticated, false, 'no key set must yield authenticated=false');
+    // Bounded: should not exceed 5s even on an unreachable host.
+    assert.ok(elapsed < 5000, 'probe must be timeout-bound, took ' + elapsed + 'ms');
+  } finally {
+    process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
+    if (prev.KEY) process.env.OPENAI_API_KEY = prev.KEY;
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+  }
 });

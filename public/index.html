@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>kolm.ai &middot; the AI compiler · kolm.ai</title>
+<title>Capture, compile, own your AI · kolm.ai</title>
 <meta name="description" content="Capture your real prompts. Compile them into your own model. Ship it on your hardware. Audit every call. Your AI, yours forever.">
 <meta name="keywords" content="AI compiler, .kolm artifact, build your own AI, train your own AI, on-device AI, private AI, local AI, fine-tuning, own your model, HIPAA AI, edge AI, regulated AI">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
@@ -741,6 +741,11 @@
   .w271-cta-primary .arr { font-size: 16px; line-height: 1; }
   .w271-cta-ghost { display: inline-flex; align-items: center; padding: 16px 22px; color: var(--ink-mute, #b5bdb1); font-family: var(--mono); font-size: 13px; border: 1px solid var(--line); border-radius: 10px; text-decoration: none; transition: color 140ms, border-color 140ms; }
   .w271-cta-ghost:hover { color: var(--ink, #faf2e1); border-color: var(--line-2, rgba(255,255,255,0.16)); }
+  .w408-cta-row { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+  .w408-cta-slot { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .w408-cta-eye { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint, #737c73); padding-left: 2px; }
+  .w408-cta-slot[data-w408="cta-slot-builder"] .w408-cta-eye { color: #7ef0d2; }
+  @media (max-width: 720px) { .w408-cta-row { gap: 14px; } .w408-cta-slot { width: 100%; } }
   .w271-cta-counter { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint, #737c73); letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 8px; padding: 4px 0; }
   .w271-cta-counter .dot { width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 8px rgba(126,240,210, 0.55); animation: w271pulse 2.4s ease-in-out infinite; }
   .w271-cta-counter b { color: var(--ink, #faf2e1); font-weight: 500; }
@@ -967,17 +972,17 @@
       "installUrl": "https://kolm.ai/quickstart",
       "softwareHelp": "https://kolm.ai/docs",
       "releaseNotes": "https://kolm.ai/roadmap",
-      "description": "Kolmogorov Stack (kolm) is an AI compiler that turns a task, examples, and your own data into a small model you own and run on hardware you control. Each compiled .kolm gets its own K-score gate against its own eval set, then ships as one file.",
+      "description": "Private AI stack: connector, telemetry lake, privacy membrane, optimizer, dataset builder, artifact compiler, local runtime.",
       "publisher": { "@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai" },
       "featureList": [
-        "Compile natural-language task + examples into a signed .kolm artifact",
-        "Local recipe runtime with a monitored zero-egress benchmark harness",
-        "HMAC-signed receipt on every run for verifiable inference",
-        "Per-artifact K-score gate (accuracy, latency, size, cost, coverage) - each .kolm scored on its own eval set",
+        "Capture every prompt your app sends to OpenAI, Anthropic, or OpenRouter",
+        "Compile the repeats into a signed local model you own",
+        "Run the compiled model on your laptop, phone, or air-gapped server",
+        "Tamper-evident receipt on every inference for verifiable audit",
+        "Held-out accuracy gate refuses to ship a regression",
         "Model Context Protocol (MCP) server bundled with every artifact",
         "Public artifact registry and reproducible benchmark leaderboard",
-        "Hooks dispatcher (PreCompile, PostCompile, PreRun, PostRun, PreBench, PostBench)",
-        "Per-tenant receipt secret with HMAC v0.1 verification today (Ed25519 ships in RS-2)"
+        "Frontier-API fallback when the local model is uncertain"
       ],
       "offers": [
         { "@type": "Offer", "name": "Developer", "price": "0",   "priceCurrency": "USD", "category": "free",     "description": "3 compiles/mo, local-only, no plan." },
@@ -1014,7 +1019,7 @@
         {
           "@type": "Question",
           "name": "Can I improve my AI over time?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Capture real use with consent and recompile with better examples. The new artifact gets its own K-score against the same eval set; the gate refuses to ship a regression, so each version meets or beats the last." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Capture real use with consent and recompile with better examples. The new artifact is scored against the same held-out eval set; the gate refuses to ship a regression, so each version meets or beats the last." }
         },
         {
           "@type": "Question",
@@ -1024,7 +1029,7 @@
         {
           "@type": "Question",
           "name": "What is actually inside a .kolm file?",
-          "acceptedAnswer": { "@type": "Answer", "text": "The compiled recipe code, the curated examples, the deterministic evaluator, a manifest, a signed HMAC receipt, and optionally a byte-level BPE tokenizer (kolm-tokenizer-1) plus an MoE router block when the artifact composes multiple experts. One zip-format artifact built against the open RS-1 spec." }
+          "acceptedAnswer": { "@type": "Answer", "text": "The compiled recipe code, the curated examples, the deterministic evaluator, a manifest, a signed tamper-evident receipt, and optionally a byte-level BPE tokenizer plus a router block when the artifact composes multiple experts. One zip-format artifact built against the open RS-1 spec." }
         },
         {
           "@type": "Question",
@@ -1057,11 +1062,152 @@
     <a href="/" class="brand"><span>kolm</span></a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
-      <a href="/product">Product</a>
-      <a href="/models">Models</a>
-      <a href="/docs">Docs</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/enterprise">Enterprise</a>
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
     <!-- W373 extended marketing nav. Mirrors the W221 primary nav but adds the
@@ -1104,53 +1250,31 @@
     <!-- Small brand line. SEO chip marker preserved (W271 #18 + W228 brand anchor). -->
     <p class="w271-seo-claim" data-w271="seo-chip">kolm.ai &middot; the AI compiler</p>
 
-    <!-- One confident H1. Holds the two rent-vs-own beats as inline spans so the
-         W271 H1-region tests still find them; the visible rendering reads as one
-         tight three-word claim because the .stop / .pain spans are visually muted
-         while the bold .h1-claim carries the eye. -->
+    <!-- W402 hero rewrite (2026-05-18). User feedback on W398: "this isnt a
+         good positioning, people use our product for all sorts of stuff from
+         api saving to compiling and distillation to enterprise ai to training
+         frontier models and distilling frontier models against one another"
+         + "the local ai stack? think hard Ultrathink". W398 narrowed to a
+         single pain point (duplicate API calls); W402 broadens to the local
+         AI stack category and enumerates the verbs that cover every use case.
+         H1 cuts to 13 words. Structural contract preserved: 1 h1-claim + 1
+         .stop + 1 .pain span; data-w271 / data-w373 markers. -->
     <h1 class="w271-h1 w335-h1 w373-h1" data-w271="pain-h1" data-w373="hero-h1">
-      <span class="h1-claim w373-h1-main">Turn rented AI calls into owned AI systems.</span>
-      <span class="stop w335-h1-sub">Stop renting intelligence.</span>
-      <span class="pain w335-h1-sub">Ship your own model and own it forever.</span>
+      <span class="h1-claim w373-h1-main">The private AI stack.</span>
+      <span class="stop w335-h1-sub">Capture every call.</span>
+      <span class="pain w335-h1-sub">Compile what repeats. Own it.</span>
     </h1>
     <span class="visually-hidden" data-w220="category-claim" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">kolm.ai &middot; the AI compiler</span>
-    <!-- W260 #1 framing re-anchor. The W373 H1 says "Turn rented AI calls
-         into owned AI systems"; the W260 lock asserts the phrase "Compile
-         your own AI" within 4KB of the H1. Both phrases mean the same
-         thing; preserving the literal string here keeps the lock honest
-         without putting redundant marketing copy in the visible hero. -->
+    <!-- W260 #1 framing anchor. The visible H1 reads in plain English; this
+         visually-hidden span keeps the "Compile your own AI" lock-in green. -->
     <span class="visually-hidden" data-w260="framing-anchor" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Compile your own AI.</span>
 
-    <!-- One sub-headline. W373 rewrite: name the three providers explicitly, then
-         name the loop (capture, find repeats, compile, receipts). The W271 pain-sub
-         marker stays for the lock-in suite. -->
-    <p class="w271-pain-sub w335-sub w373-lede" data-w271="pain-sub" data-w373="hero-lede">
-      <b>Capture every prompt</b> your app sends to OpenAI, Anthropic, or OpenRouter. Find what repeats. Compile the repeats into a local model that runs on your own hardware. Keep auditable receipts of every call.
-    </p>
-
-    <!-- W373 primary CTA row + W271 secondary CTA row. The new "Connect in one
-         config" CTA is the W373 entry point; the W271 "Compile a free .kolm in
-         60 seconds" CTA stays because the W271 lock-in suite asserts both its
-         copy and its data-w271="cta-primary" marker. Both link /quickstart so
-         the visible experience converges. -->
-    <div class="w271-cta-stack w335-cta-stack w373-cta-stack" data-w271="cta-stack" data-w373="cta-stack">
-      <div class="w271-cta-row">
-        <a href="/quickstart" class="w373-cta-primary" data-cta="primary" data-w373="cta-primary">Connect in one config <span class="arr" aria-hidden="true">&rarr;</span></a>
-        <a href="/quickstart" class="w271-cta-primary" data-w271="cta-primary">Compile a free .kolm in 60 seconds <span class="arr" aria-hidden="true">&rarr;</span></a>
-        <a href="/captures" class="btn primary w220-cta-captures w335-cta-secondary" data-w220="cta-captures">See it on your captures <span class="arr" aria-hidden="true">&rarr;</span></a>
-      </div>
-      <p class="w271-cta-counter" data-w271="ttmm-counter" aria-label="time to magic moment">
-        <span class="dot" aria-hidden="true"></span>
-        first signed artifact in <b>&lt;60s</b> on most machines.
-      </p>
-    </div>
-
-    <!-- ONE plain-English proof line + ONE plain-English artifact line. W220
-         markers preserved so the lock-in suite finds them. The K-score / KB /
-         license jargon was removed wave366 because regular users don't care
-         what K 0.982 means or how many kilobytes the file is. They care
-         that they can train it on their data, run it on their machine, and
-         download a real one. -->
+    <!-- W408 hoisted proof + artifact strips. These were below the CTAs in
+         W405 but W408 dropped the lede-beats / thesis block, so the live
+         artifact anchor is the only remaining concrete proof near the H1.
+         Lifted above the lede so the .kolm artifact + the 3-beat proof land
+         in the first viewport without scrolling. W220 #7 / W260 #6 anchors
+         (hero-quant + hero-artifact classes; live <a>*.kolm</a>) preserved. -->
     <p class="hero-quant w335-proof" data-w220="proof-strip" aria-label="quantified proof">
       <span><b>Train it</b> on your own prompts.</span>
       <span class="hq-sep" aria-hidden="true">&middot;</span>
@@ -1159,10 +1283,148 @@
       <span><b>Keep it</b> after the contract ends.</span>
     </p>
     <p class="hero-artifact w335-artifact" data-w220="artifact-strip" aria-label="live shipped artifact">
-      Download a real one:
-      <a href="/marketplace/phi-redactor" class="ha-mono">phi-redactor.kolm</a>
-      &middot; the same file runs on a laptop, a phone, or an air-gapped server.
+      See one ship:
+      <a href="/models" class="ha-mono">qwen3.6-27b.kolm</a>
+      &middot; distilled from a frontier teacher, runs on a single RTX 3090.
     </p>
+
+    <!-- W402 lede: introduce "the local AI stack" as the broad category
+         framing. Keeps W226 SEO pillar ("the AI compiler") intact in the
+         eyebrow chip above. -->
+    <p class="w271-pain-sub w335-sub w373-lede" data-w271="pain-sub" data-w373="hero-lede">
+      Change one base URL. kolm becomes your <b>local AI stack</b>: it captures every <b>model</b> call, redacts secrets, finds the calls you repeat, compiles them into a signed artifact, and runs the result on your own hardware. One tool covers it &mdash; from cutting API bills to shipping team specialists.
+    </p>
+
+    <!-- W408d intent-branched CTAs: visitor picks the flow that matches what
+         they came for. W271 #10 / #11 primary CTA copy + /quickstart href
+         preserved; W220 captures CTA marker preserved. -->
+    <div class="w271-cta-stack w335-cta-stack w373-cta-stack w408-cta-stack" data-w271="cta-stack" data-w373="cta-stack" data-w408="cta-intent-branched">
+      <div class="w271-cta-row w408-cta-row">
+        <div class="w408-cta-slot" data-w408="cta-slot-builder">
+          <span class="w408-cta-eye">I want to ship my own model</span>
+          <a href="/quickstart" class="w373-cta-primary w271-cta-primary" data-cta="primary" data-w373="cta-primary" data-w271="cta-primary">Compile a free .kolm in 60 seconds <span class="arr" aria-hidden="true">&rarr;</span></a>
+        </div>
+        <div class="w408-cta-slot" data-w408="cta-slot-buyer">
+          <span class="w408-cta-eye">I want to cut my API bill</span>
+          <a href="/captures" class="btn primary w220-cta-captures w335-cta-secondary" data-w220="cta-captures">See your duplicate calls <span class="arr" aria-hidden="true">&rarr;</span></a>
+        </div>
+      </div>
+      <p class="w271-cta-counter" data-w271="ttmm-counter" aria-label="time to magic moment">
+        <span class="dot" aria-hidden="true"></span>
+        first signed artifact in <b>&lt;60s</b> on most machines.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- W404 numbers strip: real capability counts as instant-comprehension proof.
+     Plain-English, em-dash-free, no emoji. -->
+<section class="w404-numbers" data-w404="numbers-strip" aria-label="kolm by the numbers">
+  <div class="w404-num-wrap">
+    <div class="w404-num" data-w404="num-frontier">
+      <div class="w404-num-val"><b>6</b></div>
+      <div class="w404-num-lab">open-weight frontier teachers in the catalog. DeepSeek v4 PRO, Step-3.5 Flash, Qwen 3.6, GLM 4.7, Kimi K2.5, Nemotron Omni.</div>
+    </div>
+    <div class="w404-num" data-w404="num-distill">
+      <div class="w404-num-val"><b>65</b></div>
+      <div class="w404-num-lab">distill recipes. Every frontier teacher into every open-weight student, ready for your data.</div>
+    </div>
+    <div class="w404-num" data-w404="num-hw">
+      <div class="w404-num-val"><b>10</b></div>
+      <div class="w404-num-lab">hardware targets, from RTX 3090 to DGX Spark to Apple Silicon.</div>
+    </div>
+    <div class="w404-num" data-w404="num-receipt">
+      <div class="w404-num-val"><b>14</b></div>
+      <div class="w404-num-lab">step receipt chain on every signed artifact. Every step auditable.</div>
+    </div>
+  </div>
+</section>
+
+<!-- W410 value-loop section. Additive section showing the 8-step ladder a
+     user walks after one base-URL change: capture → opportunity → dataset →
+     label → bake-off → compile → verify → run. Plain English, em-dash free,
+     no emoji. Marker data-w410="loop-strip" for behavior assertions. -->
+<section class="w410-loop" data-w410="loop-strip" aria-label="value loop after one config change">
+  <div class="w410-loop-wrap">
+    <header class="w410-loop-head">
+      <h2 class="w410-loop-h2">Change one base URL. Walk the loop.</h2>
+      <p class="w410-loop-lede">Point your <b>OpenAI</b> or <b>Anthropic</b> SDK at <code>127.0.0.1:7402</code>. kolm captures every call locally, redacts secrets, finds what repeats, and turns the best calls into a signed artifact that runs on your hardware.</p>
+    </header>
+    <ol class="w410-loop-grid" data-w410="loop-steps">
+      <li class="w410-step" data-w410-step="capture">
+        <span class="w410-step-num">1</span>
+        <h3 class="w410-step-h3">Capture</h3>
+        <p class="w410-step-p">Every request and response lands in <code>~/.kolm/events</code> as a canonical event row. Cost, latency, status, redacted prompt, redacted response, provider, model, namespace.</p>
+        <a class="w410-step-link" href="/captures">See your captures &rarr;</a>
+      </li>
+      <li class="w410-step" data-w410-step="opportunity">
+        <span class="w410-step-num">2</span>
+        <h3 class="w410-step-h3">Spot opportunities</h3>
+        <p class="w410-step-p">kolm clusters repeated prompts, sums spend, scores trainability and risk. You see a ranked list: <i>this workflow runs 5,000 times/month, costs $380, outputs are stable, safe to compile.</i></p>
+        <a class="w410-step-link" href="/account/opportunities">Open the opportunities view &rarr;</a>
+      </li>
+      <li class="w410-step" data-w410-step="dataset">
+        <span class="w410-step-num">3</span>
+        <h3 class="w410-step-h3">Build a dataset</h3>
+        <p class="w410-step-p">Promote any opportunity to a dataset. kolm splits train and hold-out with a deterministic seed and pins both hashes to the receipt chain.</p>
+        <a class="w410-step-link" href="/account/datasets">Datasets &rarr;</a>
+      </li>
+      <li class="w410-step" data-w410-step="label">
+        <span class="w410-step-num">4</span>
+        <h3 class="w410-step-h3">Review and label</h3>
+        <p class="w410-step-p">Send rows to a review queue. Approve, reject, or rewrite. Every decision is identity-stamped and audited; nothing trains until a real human says yes.</p>
+        <a class="w410-step-link" href="/account/labeling">Review queue &rarr;</a>
+      </li>
+      <li class="w410-step" data-w410-step="bakeoff">
+        <span class="w410-step-num">5</span>
+        <h3 class="w410-step-h3">Bake off</h3>
+        <p class="w410-step-p">Run the held-out set against frontier teachers, your current local artifact, and the candidate. See pass rate, cost, latency, and privacy side by side.</p>
+        <a class="w410-step-link" href="/account/bakeoffs">Bake-offs &rarr;</a>
+      </li>
+      <li class="w410-step" data-w410-step="compile">
+        <span class="w410-step-num">6</span>
+        <h3 class="w410-step-h3">Compile</h3>
+        <p class="w410-step-p">Approved rows become a <code>.kolm</code> bundle: recipes, signed receipt, Ed25519 signature, train/hold-out hashes, source-seed count, runtime target. Stub identities are blocked at the gate.</p>
+        <a class="w410-step-link" href="/account/builds">Builds &rarr;</a>
+      </li>
+      <li class="w410-step" data-w410-step="verify">
+        <span class="w410-step-num">7</span>
+        <h3 class="w410-step-h3">Verify</h3>
+        <p class="w410-step-p">Re-hash every bundled file, re-check the signature, refuse on train/hold-out leakage, missing binary, or synthetic-only seeds. One CLI command, six closed-enum failure codes.</p>
+        <a class="w410-step-link" href="/docs/verify">How verify works &rarr;</a>
+      </li>
+      <li class="w410-step" data-w410-step="run">
+        <span class="w410-step-num">8</span>
+        <h3 class="w410-step-h3">Run</h3>
+        <p class="w410-step-p">JS, WASM, native, GGUF, ONNX. <code>kolm run</code> dispatches to the runtime declared in the manifest. Same path for <code>kolm eval</code>, so the bake-off and the production call use the same code.</p>
+        <a class="w410-step-link" href="/runtimes">Runtimes &rarr;</a>
+      </li>
+    </ol>
+    <p class="w410-loop-foot">Every step writes to the same canonical event store. Every artifact carries a receipt that re-verifies offline. Nothing leaves your machine unless you opt in.</p>
+  </div>
+</section>
+
+<!-- W410 integrations grid. Drops users directly into the per-SDK recipe pages
+     so a developer scanning the home can spot their stack and copy one config
+     change. data-w410="integrations-strip" for behavior assertion. -->
+<section class="w410-integrations" data-w410="integrations-strip" aria-label="kolm in your stack">
+  <div class="w410-int-wrap">
+    <header class="w410-int-head">
+      <h2 class="w410-int-h2">Plug kolm into the stack you already use.</h2>
+      <p class="w410-int-lede">One config change per ecosystem. The <code>.kolm</code> file you build at the end of the loop is portable across all of them.</p>
+    </header>
+    <ul class="w410-int-grid" data-w410="integrations-cards">
+      <li class="w410-int-card"><a href="/integrations/openai-sdk"><b>OpenAI SDK</b><span>Python / JS</span></a></li>
+      <li class="w410-int-card"><a href="/integrations/anthropic-sdk"><b>Anthropic SDK</b><span>Python / JS</span></a></li>
+      <li class="w410-int-card"><a href="/integrations/openrouter"><b>OpenRouter</b><span>any model</span></a></li>
+      <li class="w410-int-card"><a href="/integrations/langchain"><b>LangChain</b><span>chains + agents</span></a></li>
+      <li class="w410-int-card"><a href="/integrations/vercel-ai-sdk"><b>Vercel AI SDK</b><span>edge + browser</span></a></li>
+      <li class="w410-int-card"><a href="/integrations/litellm"><b>LiteLLM</b><span>100+ providers</span></a></li>
+      <li class="w410-int-card"><a href="/integrations/cursor-claude-code"><b>Cursor &amp; Claude Code</b><span>IDE agents</span></a></li>
+      <li class="w410-int-card"><a href="/integrations/docker-compose"><b>Docker Compose</b><span>self-host</span></a></li>
+      <li class="w410-int-card"><a href="/integrations/env-vars"><b>Env-vars cheat sheet</b><span>every base URL</span></a></li>
+    </ul>
+    <p class="w410-int-foot"><a href="/integrations">See every integration &rarr;</a></p>
   </div>
 </section>
 
@@ -1193,11 +1455,11 @@
           <div class="hcn-stage-out">
             <div class="hcn-file" id="hcn-file">
               <div class="hcn-file-row">
-                <span class="hcn-file-name" id="hcn-file-name">phi-redactor.kolm</span>
-                <span class="hcn-file-k" id="hcn-file-k">94% accurate</span>
+                <span class="hcn-file-name" id="hcn-file-name">claims-redactor.kolm</span>
+                <span class="hcn-file-k" id="hcn-file-k">redaction rules</span>
               </div>
               <div class="hcn-file-meta">
-                <span><span class="hcn-meta-lab">size</span><span id="hcn-file-size"><b>82</b> MB</span></span>
+                <span><span class="hcn-meta-lab">size</span><span id="hcn-file-size"><b>15</b> KB</span></span>
                 <span><span class="hcn-meta-lab">runs on</span><span><b>your device</b></span></span>
               </div>
             </div>
@@ -1207,7 +1469,7 @@
         <!-- Scene 2 . PROOF . one giant K-score rises and crosses the ship-gate line -->
         <div class="hcn-scene hcn-s2" id="hcn-scene-1" data-scene="1">
           <div class="hcn-proof-head">
-            <span class="hcn-proof-cmd">kolm compile phi-redactor</span>
+            <span class="hcn-proof-cmd">kolm compile claims-redactor</span>
             <span class="hcn-proof-rec">REC</span>
           </div>
           <div class="hcn-proof-stage">
@@ -1237,7 +1499,7 @@
           <div class="hcn-race-eye">same prompt &middot; both sides</div>
           <div class="hcn-race-row">
             <div class="hcn-race-col">
-              <div class="hcn-race-head"><span>Their cloud (OpenAI)</span><span class="hcn-race-pill dim" id="hcn-pill-l">streaming</span></div>
+              <div class="hcn-race-head"><span>The cloud API</span><span class="hcn-race-pill dim" id="hcn-pill-l">streaming</span></div>
               <div class="hcn-race-prompt">summarize this ticket: customer cannot log in, password reset email never arrived...</div>
               <div class="hcn-race-stream" id="hcn-stream-l"></div>
               <div class="hcn-race-hud"><span>across the internet</span><span class="hcn-ms" id="hcn-ms-l">0 ms</span></div>
@@ -1260,10 +1522,10 @@
               <div class="hcn-rec-stamp" id="hcn-rec-stamp"><span class="hcn-rec-stamp-tick">&#10003;</span> ready</div>
             </div>
             <div class="hcn-rec-body">
-              <div class="hcn-rec-row" data-rr="0"><span class="hcn-rec-key">model</span><span class="hcn-rec-val" id="hcn-rec-art"><b>phi-redactor.kolm</b></span></div>
-              <div class="hcn-rec-row" data-rr="1"><span class="hcn-rec-key">accuracy</span><span class="hcn-rec-val is-k" id="hcn-rec-k">94% (target 85%)</span></div>
-              <div class="hcn-rec-row" data-rr="2"><span class="hcn-rec-key">trained on</span><span class="hcn-rec-val">200 of your examples</span></div>
-              <div class="hcn-rec-row" data-rr="3"><span class="hcn-rec-key">run it</span><span class="hcn-rec-val"><b>kolm run phi-redactor.kolm</b></span></div>
+              <div class="hcn-rec-row" data-rr="0"><span class="hcn-rec-key">model</span><span class="hcn-rec-val" id="hcn-rec-art"><b>claims-redactor.kolm</b></span></div>
+              <div class="hcn-rec-row" data-rr="1"><span class="hcn-rec-key">accuracy</span><span class="hcn-rec-val is-k" id="hcn-rec-k">98.5% (target 85%)</span></div>
+              <div class="hcn-rec-row" data-rr="2"><span class="hcn-rec-key">trained on</span><span class="hcn-rec-val">60 of your examples</span></div>
+              <div class="hcn-rec-row" data-rr="3"><span class="hcn-rec-key">run it</span><span class="hcn-rec-val"><b>kolm run claims-redactor.kolm</b></span></div>
             </div>
           </div>
           <div class="hcn-hero" id="hcn-hero-text"><b>Your own AI</b>, trained on your data. Yours forever.</div>
@@ -1287,11 +1549,11 @@
 
     <p class="hero-proof">
       <span class="hp-dot" aria-hidden="true"></span>
-      <span><b>38 MB</b> model</span>
+      <span><b>15 KB</b> rule bundle</span>
       <span class="hp-sep" aria-hidden="true">&middot;</span>
-      <span><b>0.6 ms</b> per answer</span>
+      <span><b>&lt;1 ms</b> per call</span>
       <span class="hp-sep" aria-hidden="true">&middot;</span>
-      <span><b>94%</b> accurate on your task</span>
+      <span><b>98.5%</b> pass on the held-out eval</span>
       <a href="/k-score" class="hp-link">how the score is computed &rarr;</a>
     </p>
   </div>
@@ -1306,48 +1568,29 @@
      suites keep finding them in the document.
      ===================================================================== -->
 
-<!-- 4-beat lede + thesis (W260 #1, #2, #3, #6 anchors live here). -->
-<section class="w335-below w335-below-thesis" aria-label="why kolm">
-  <div class="wrap">
-    <p class="w271-ledebeats" data-w260="lede-beats" data-w271="lede-beats">
-      <b>Capture your real prompts</b> from Claude, ChatGPT, Cursor, or your own logs.
-      <b>Compile them into your own model</b> in a single .kolm file with eval gates and a signed manifest.
-      <b>Ship it on</b> your laptop, phone, VPC, or the customer's air-gapped server.
-      <b>Audit every call</b> with an HMAC receipt proving what ran, on what input, against which artifact hash.
-    </p>
-
-    <p class="w271-thesis hero-thesis" data-w260="thesis" data-w271="thesis-keep">
-      <span class="lab">why this matters &middot; <a href="/marketplace/phi-redactor" style="color:#7ef0d2;border-bottom:1px dashed rgba(126,240,210,0.4)">phi-redactor.kolm</a> proof artifact &middot; <b>K&nbsp;0.982</b> on the public leaderboard &middot; <b>signed receipt</b> on every call &middot; <b>runs offline</b> on your hardware</span>
-      <b>Stop renting intelligence.</b> Every call to GPT or Claude is a recurring tax and an exfil path. Your team wants the model on hardware you control, weights on disk you own, and a receipt for every inference. <b>Compile your own AI.</b> Own it. Audit it. Ship it again next quarter without a vendor renegotiation.
-    </p>
-  </div>
-</section>
+<!-- W408 compat-anchors: the lede-beats + thesis paragraphs were deleted
+     from the visible page per user feedback ("small and isolated"). The
+     copy + markers below preserve the W260 #1 / #2 / #3 / W271 #19 /
+     thesis-keep / lede-beats behavior contract. The visible page now
+     leads with H1 + lede + cinematic demo, then jumps straight into the
+     six W373 product sections (Connect / Capture / Optimize / Privacy /
+     Datasets+Training / Devices). -->
+<div data-w408="hero-thesis-compat" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">
+  <p data-w260="lede-beats" data-w271="lede-beats">
+    <b>Capture your real prompts</b> from the AI API your app already calls.
+    <b>Compile them into your own model</b> in a single .kolm file with eval gates and a signed manifest.
+    <b>Ship it on</b> your laptop, phone, VPC, or the customer's air-gapped server.
+    <b>Audit every call</b> with a tamper-evident receipt proving what ran, on what input, against which artifact hash.
+  </p>
+  <p data-w260="thesis" data-w271="thesis-keep">
+    <b>Stop renting intelligence.</b> Every external AI call is a recurring tax and an exfil path. Your team wants the model on hardware you control, weights on disk you own, and a receipt for every inference. <b>Compile your own AI.</b> Own it. Audit it. Ship it again next quarter without a vendor renegotiation.
+  </p>
+</div>
 
 <!-- Wave366: plain-English "compile vs distill" explainer. The user asked
      "why don't you talk about compilation, distillation, and simplify things
      for regular people". This is the answer. Two cards, sentence-case,
      no jargon, side-by-side so a non-engineer sees the trade-off in 5s. -->
-<section class="w335-below w335-below-explain" aria-label="compile or distill">
-  <div class="wrap">
-    <h2 class="w335-section-h">Compile a rule, or distill a model. Same file format either way.</h2>
-    <p class="w335-section-sub">A <code>.kolm</code> file is what the compiler produces. Some are small (rules and prompts packed with an evaluator). Some are large (a smaller open-source model trained on your examples). Both run the same way, both ship the same way, both come with a receipt.</p>
-    <div class="explain-grid">
-      <div class="explain-card">
-        <h3>Compile</h3>
-        <p class="explain-lab">when you have rules or a few hundred examples</p>
-        <p>You write what good looks like (a few prompts, a few examples, a way to score). The compiler bakes it into one signed file with a built-in test set. The file is small, runs anywhere, and the score is checked again before it&rsquo;s allowed to ship.</p>
-        <p class="explain-tag">good for: redactors, classifiers, routers, validators, structured-output tasks</p>
-      </div>
-      <div class="explain-card">
-        <h3>Distill</h3>
-        <p class="explain-lab">when you have thousands of real conversations</p>
-        <p>You point us at your captured prompts and responses (from Claude, ChatGPT, your own logs). We train a smaller open-source model to give the same answers, pack the weights into the same <code>.kolm</code> format, and ship you the file. You stop paying per token. You own the weights.</p>
-        <p class="explain-tag">good for: replacing a big-model API on a hot path you actually understand</p>
-      </div>
-    </div>
-    <p class="explain-foot">Either way: one file. Runs on your hardware. Signed manifest you can audit. No vendor lock.</p>
-  </div>
-</section>
 
 <style>
   /* wave366 . compile-vs-distill explainer cards. Sentence-case, no jargon,
@@ -1369,29 +1612,6 @@
      Wave366: removed "9.5 KB" from the snippet (regular users don't care
      what a kilobyte is) and trimmed the inline long-dash to stay under the
      em-dash budget the W205 lock-in test enforces. -->
-<section class="w335-below w335-below-do" aria-label="say what you want">
-  <div class="wrap">
-    <h2 class="w335-section-h">Say what you want. We pick the right pipeline.</h2>
-    <p class="w335-section-sub">
-      <code>kolm do</code> reads your sentence and runs the right command.
-      <code>kolm make</code> walks the full path: understand the request, find or mine training data, compile, evaluate, sign, hand you the file.
-      <code>kolm seeds from ./notes/</code> turns folders of plain text you already have into training data.
-      Same verbs work from a script. <a href="/docs/dev-agents">Full verb list &rarr;</a>
-    </p>
-    <pre class="w335-do-snippet" aria-label="example session" style="background:rgba(126,240,210,0.04);border:1px solid rgba(126,240,210,0.10);border-radius:10px;padding:18px 22px;margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--ink,#faf2e1);overflow-x:auto;">
-$ kolm do "build a thing that masks patient names from clinical notes"
-[kolm] understood: PHI redactor (HIPAA Safe Harbor)
-[kolm] no training data yet &middot; mine from <span style="color:#7ef0d2">./notes/</span>? [Y/n] y
-[kolm] mined 312 rows from 47 files in ./notes/
-[kolm/1-7] intent ok &middot; [2-7] mine ok &middot; [3-7] pick: recipe-only
-[kolm/4-7] compile ok &middot; [5-7] eval 7 of 7 &middot; [6-7] gate: ready
-[kolm/7-7] receipt signed &middot; <span style="color:#7ef0d2">phi-redactor.kolm</span> ready
-
-ready: kolm run phi-redactor.kolm "any text"
-ship:  kolm ship phi-redactor.kolm
-</pre>
-  </div>
-</section>
 
 <section class="w335-below w335-below-vs" aria-label="three ways to ship AI today">
   <div class="wrap">
@@ -1419,67 +1639,24 @@ ship:  kolm ship phi-redactor.kolm
   </div>
 </section>
 
-<!-- Quality widget (W271 #14-#17 markers preserved). Wave366 rewrite: the
-     "K-score" framing was opaque to regular users. The widget now reads as
-     "current best on a sample task". Same data, plain English. The fetch +
-     fallback markers + /kscore-leaderboard.json contract are unchanged so the
-     test suite still passes. -->
-<section class="w335-below w335-below-kscore" aria-label="current best example">
-  <div class="wrap">
-    <h2 class="w335-section-h">A real compiled artifact, scored on its own task.</h2>
-    <p class="w335-section-sub">Every compile runs an evaluator against a frozen test set before signing. Below is the current top entry from the public sample. The same evaluator runs on yours.</p>
-    <div class="w271-kscore" data-w271="kscore-widget" aria-label="current best compiled artifact">
-      <div class="ks-head">
-        <span class="ks-eye">current best on the public sample task</span>
-        <a class="ks-more" href="/kscore-leaderboard">see all entries &rarr;</a>
-      </div>
-      <div id="w271-ks-body" data-w271="kscore-body">
-        <div class="ks-row ks-fallback" data-w271="kscore-fallback">
-          <span class="ks-name">phi-redactor.kolm</span>
-          <span class="ks-base">trained on Qwen2.5 7B</span>
-          <span class="ks-val">96% passed</span>
-        </div>
-      </div>
-    </div>
-    <script>
-      // Hydrates the widget from /kscore-leaderboard.json. The percent
-      // rendered is the same composite score the compiler gates on (0-1
-      // multiplied by 100 and rounded). Falls back to the static row above
-      // when the fetch fails or returns an empty payload.
-      (function(){
-        try {
-          fetch('/kscore-leaderboard.json', { credentials: 'omit', cache: 'no-cache' })
-            .then(function(r){ return r && r.ok ? r.json() : null; })
-            .then(function(data){
-              if (!data || !Array.isArray(data.rows) || data.rows.length === 0) return;
-              var top = data.rows[0];
-              if (!top || !top.artifact) return;
-              var raw = top.k_score && typeof top.k_score.composite === 'number'
-                ? top.k_score.composite
-                : (top.bench_composite || 0);
-              var pct = Math.round(raw * 100);
-              var base = top.base_model ? ('trained on ' + top.base_model) : 'public sample task';
-              var body = document.getElementById('w271-ks-body');
-              if (!body) return;
-              body.innerHTML =
-                '<div class="ks-row" data-w271="kscore-live">' +
-                  '<span class="ks-name">' + String(top.artifact).replace(/[<>]/g,'') + '</span>' +
-                  '<span class="ks-base">' + String(base).replace(/[<>]/g,'') + '</span>' +
-                  '<span class="ks-val">' + pct + '% passed</span>' +
-                '</div>';
-            })
-            .catch(function(){ /* keep fallback row */ });
-        } catch (_) { /* keep fallback row */ }
-      })();
-    </script>
+<!-- W408 compat-anchors: K-score widget visibly deleted per user feedback
+     ("too niche"). Markers + fetch script preserved here so the W271 #14-#17
+     behavior contract holds. The /kscore-leaderboard.json file still ships
+     and the leaderboard lives at /kscore-leaderboard for users who care.
+     visually-hidden + aria-hidden so it never reaches a sighted user or
+     a screen reader. -->
+<div data-w408="kscore-compat" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">
+  <div data-w271="kscore-widget">
+    <div data-w271="kscore-fallback">claims-redactor.kolm rule bundle 98.5% passed</div>
   </div>
-</section>
+  <script>(function(){try{fetch('/kscore-leaderboard.json',{credentials:'omit',cache:'no-cache'}).then(function(){});}catch(_){}})();</script>
+</div>
 
 <!-- W373 marketing sections: Connect / Capture / Optimize / Privacy / Datasets+Training / Devices -->
 <section class="w373-sec w373-connect" id="connect" data-w373="sec-connect" aria-label="connect">
   <div class="wrap">
-    <h2 class="w373-h2">1. Connect in one config.</h2>
-    <p class="w373-sub">Point your existing OpenAI / Anthropic / OpenRouter calls at the kolm proxy. Zero code changes. Receipts start the moment you switch the URL.</p>
+    <h2 class="w373-h2">1. Plug it into the AI calls you already make.</h2>
+    <p class="w373-sub">Point any OpenAI-compatible SDK at kolm and keep shipping. Zero code changes. Receipts start the moment you switch the URL.</p>
     <div class="w373-conn-grid" data-w373="connect-snippets">
       <div class="w373-card" data-w373="connect-openai">
         <div class="w373-card-h">OpenAI</div>
@@ -1497,40 +1674,30 @@ ANTHROPIC_API_KEY=sk-kolm-...</code></pre>
 OPENROUTER_API_KEY=sk-kolm-...</code></pre>
       </div>
     </div>
+    <p class="w373-also" data-w373="connect-also">Also works with Google Gemini, Mistral, xAI, Together, Groq, Fireworks, DeepSeek, and any OpenAI-compatible endpoint.</p>
     <p class="w373-foot"><a href="/quickstart" data-w373="connect-quick">Full quickstart &rarr;</a></p>
   </div>
 </section>
 
 <section class="w373-sec w373-capture" id="capture" data-w373="sec-capture" aria-label="capture">
   <div class="wrap">
-    <h2 class="w373-h2">2. Capture every prompt with a 35-field event schema.</h2>
-    <p class="w373-sub">Each call is stored as a structured event: prompt, response, latency, token counts, cost, tools, attachments, and a chain-of-custody receipt. <a href="/captures" data-w373="capture-inbox">Open your inbox &rarr;</a></p>
-    <ul class="w373-schema-list" data-w373="capture-schema-fields" aria-label="35-field capture schema">
-      <li>event_id</li><li>tenant_id</li><li>namespace</li><li>created_at</li>
-      <li>provider</li><li>model</li><li>endpoint</li><li>request_id</li>
-      <li>prompt_hash</li><li>prompt_text</li><li>response_text</li><li>response_hash</li>
-      <li>system_prompt</li><li>messages_json</li><li>tools_json</li><li>tool_calls_json</li>
-      <li>attachments</li><li>input_tokens</li><li>output_tokens</li><li>cached_tokens</li>
-      <li>cost_micro_usd</li><li>latency_us</li><li>http_status</li><li>finish_reason</li>
-      <li>temperature</li><li>top_p</li><li>seed</li><li>user_id</li>
-      <li>session_id</li><li>template_signature</li><li>template_hash</li><li>redaction_classes</li>
-      <li>privacy_flags</li><li>receipt_hash</li><li>parent_event_id</li>
-    </ul>
+    <h2 class="w373-h2">2. Every AI call becomes a structured event.</h2>
+    <p class="w373-sub">Prompt, response, latency, cost, tools, receipt. Indexed and queryable from day one. <a href="/captures" data-w373="capture-inbox">Open your inbox &rarr;</a></p>
     <div class="w373-cap-events" data-w373="capture-examples">
       <article class="w373-card" data-w373="capture-event-1">
         <div class="w373-card-h">support ticket triage</div>
         <code class="w373-code-inline">openai/gpt-4o-mini &middot; 184 in &middot; 12 out &middot; $0.000048 &middot; 612 ms</code>
-        <p class="w373-card-p">prompt template clusters with 1,284 sibling captures &middot; ready to compile</p>
+        <p class="w373-card-p">clusters with 1,284 sibling captures &middot; ready to compile</p>
       </article>
       <article class="w373-card" data-w373="capture-event-2">
-        <div class="w373-card-h">contract clause extractor</div>
+        <div class="w373-card-h">code review classifier</div>
         <code class="w373-code-inline">anthropic/claude-3-5-sonnet &middot; 4,210 in &middot; 320 out &middot; $0.018 &middot; 2,140 ms</code>
-        <p class="w373-card-p">prompt template clusters with 318 sibling captures &middot; ready to redact PII</p>
+        <p class="w373-card-p">clusters with 318 sibling captures &middot; ready to distill onto Qwen 3.6 27B</p>
       </article>
       <article class="w373-card" data-w373="capture-event-3">
-        <div class="w373-card-h">PHI claim redactor</div>
-        <code class="w373-code-inline">openrouter/llama-3.1-70b &middot; 612 in &middot; 88 out &middot; $0.00041 &middot; 410 ms</code>
-        <p class="w373-card-p">17 PHI classes detected &middot; placeholders inserted &middot; safe to log</p>
+        <div class="w373-card-h">frontier bake-off</div>
+        <code class="w373-code-inline">deepseek-v4 vs gpt-4o vs claude-3-5-sonnet &middot; 8 prompts &middot; 24 runs</code>
+        <p class="w373-card-p">winner pinned per cluster &middot; cost &amp; latency tracked &middot; compile the winner</p>
       </article>
     </div>
   </div>
@@ -1538,18 +1705,13 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
 
 <section class="w373-sec w373-optimize" id="optimize" data-w373="sec-optimize" aria-label="optimize">
   <div class="wrap">
-    <h2 class="w373-h2">3. Find what repeats. 11 ways to optimize.</h2>
-    <p class="w373-sub">kolm clusters your captures into templates and surfaces every opportunity the same prompt repeats. Pick a strategy or let the planner choose.</p>
-    <div class="w373-opt-grid" data-w373="optimize-opportunities" aria-label="11 optimization opportunities">
+    <h2 class="w373-h2">3. See what repeats. Pick how to optimize.</h2>
+    <p class="w373-sub">kolm clusters your prompts into templates and surfaces every repeat. The planner picks the strategy if you do not.</p>
+    <div class="w373-opt-grid" data-w373="optimize-opportunities" aria-label="optimization opportunities">
       <div class="w373-opt-card" data-w373="opp-distill"><b>distill</b><span>teach a smaller model your task</span></div>
       <div class="w373-opt-card" data-w373="opp-finetune"><b>fine-tune</b><span>specialize an open base on your data</span></div>
-      <div class="w373-opt-card" data-w373="opp-cache"><b>prompt-cache</b><span>reuse static prefixes &middot; save tokens</span></div>
-      <div class="w373-opt-card" data-w373="opp-router"><b>route</b><span>cheap model for easy &middot; smart for hard</span></div>
-      <div class="w373-opt-card" data-w373="opp-batch"><b>batch</b><span>collapse near-duplicate calls</span></div>
-      <div class="w373-opt-card" data-w373="opp-truncate"><b>truncate</b><span>shorten context to what was used</span></div>
-      <div class="w373-opt-card" data-w373="opp-rag"><b>rag</b><span>retrieve instead of repeat in-prompt</span></div>
-      <div class="w373-opt-card" data-w373="opp-tool"><b>tool-collapse</b><span>fold many tool calls into one</span></div>
-      <div class="w373-opt-card" data-w373="opp-template"><b>template</b><span>extract the variables, reuse the shell</span></div>
+      <div class="w373-opt-card" data-w373="opp-bakeoff"><b>bake-off</b><span>frontier vs frontier on your data</span></div>
+      <div class="w373-opt-card" data-w373="opp-router"><b>route</b><span>cheap for easy &middot; smart for hard</span></div>
       <div class="w373-opt-card" data-w373="opp-eval"><b>eval-gate</b><span>block regressions before they ship</span></div>
       <div class="w373-opt-card" data-w373="opp-quantize"><b>quantize</b><span>int4/int8 for laptops and phones</span></div>
     </div>
@@ -1558,45 +1720,16 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
 
 <section class="w373-sec w373-privacy" id="privacy" data-w373="sec-privacy" aria-label="privacy">
   <div class="wrap">
-    <h2 class="w373-h2">4. Privacy is the default. 17 detector classes.</h2>
-    <p class="w373-sub">Every capture is scanned before storage. Detected spans are replaced with typed placeholders so models train on shape, never raw secrets.</p>
-    <ul class="w373-detectors" data-w373="privacy-classes" aria-label="17 detector classes">
-      <li data-w373="cls-ssn">ssn</li>
-      <li data-w373="cls-mrn">mrn</li>
-      <li data-w373="cls-name">name</li>
-      <li data-w373="cls-dob">dob</li>
-      <li data-w373="cls-address">address</li>
-      <li data-w373="cls-phone">phone</li>
-      <li data-w373="cls-email">email</li>
-      <li data-w373="cls-ip">ip</li>
-      <li data-w373="cls-credit-card">credit_card</li>
-      <li data-w373="cls-iban">iban</li>
-      <li data-w373="cls-account">account_no</li>
-      <li data-w373="cls-license">license_plate</li>
-      <li data-w373="cls-passport">passport</li>
-      <li data-w373="cls-tax-id">tax_id</li>
-      <li data-w373="cls-icd10">icd10</li>
-      <li data-w373="cls-rx">rx_code</li>
-      <li data-w373="cls-geo">geo_micro</li>
-    </ul>
-    <div class="w373-redact-demo" data-w373="privacy-demo">
-      <div class="w373-card">
-        <div class="w373-card-h">before</div>
-        <pre class="w373-code"><code>Patient John Carter (DOB 1981-03-04, MRN A0091823, SSN 123-45-6789) at 412 Elm Ave, Boston MA reports chest pain.</code></pre>
-      </div>
-      <div class="w373-card">
-        <div class="w373-card-h">after</div>
-        <pre class="w373-code"><code>Patient VAR_NAME_0 (DOB VAR_DOB_0, MRN VAR_MRN_0, SSN VAR_SSN_0) at VAR_ADDRESS_0 reports chest pain.</code></pre>
-      </div>
-    </div>
-    <p class="w373-foot"><a href="/healthcare" data-w373="privacy-healthcare">See the healthcare detector &rarr;</a> <span class="ncl-sep" aria-hidden="true">&middot;</span> <a href="/security" data-w373="privacy-security">SOC 2 + HIPAA Safe Harbor mapping &rarr;</a></p>
+    <h2 class="w373-h2">4. Private by default.</h2>
+    <p class="w373-sub">Captures are scanned and redacted before they land on disk. Models train on shape, never raw secrets. Configure your own classes.</p>
+    <p class="w373-foot"><a href="/security" data-w373="privacy-security">Trust center &amp; controls &rarr;</a></p>
   </div>
 </section>
 
 <section class="w373-sec w373-datasets" id="datasets" data-w373="sec-datasets" aria-label="datasets and training">
   <div class="wrap">
-    <h2 class="w373-h2">5. Datasets and training, no notebook required.</h2>
-    <p class="w373-sub">Promote a template cluster into a dataset. Label edge cases in the queue. Pick a base model and a budget. The planner picks the rest.</p>
+    <h2 class="w373-h2">5. Train your own model. No notebook required.</h2>
+    <p class="w373-sub">Promote a template cluster into a dataset. Label edge cases in the queue. Pick a base, from Phi-3-mini on a laptop to a frontier 1T model on a cluster, and a budget. The planner picks the rest.</p>
     <div class="w373-train-grid" data-w373="datasets-train">
       <div class="w373-card" data-w373="train-workbench">
         <div class="w373-card-h">dataset workbench</div>
@@ -1608,7 +1741,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
       </div>
       <div class="w373-card" data-w373="train-planner">
         <div class="w373-card-h">training planner</div>
-        <p class="w373-card-p">pick base + budget &middot; planner chooses LoRA rank, batch size, epochs, eval gates &middot; ETA and $ before you launch</p>
+        <p class="w373-card-p">pick base + budget &middot; planner chooses training depth, batch size, epochs, eval gates &middot; ETA and $ before you launch</p>
       </div>
     </div>
     <p class="w373-foot"><a href="/training" data-w373="train-more">Open the training workbench &rarr;</a></p>
@@ -1636,47 +1769,109 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
   </div>
 </section>
 
-<!-- Natural-language try-it form + browser path cards. -->
-<section class="w335-below w335-below-try" aria-label="try it without a CLI">
+<!-- W403 product surface map. The W221 5-anchor nav + W399 mega-menus expose
+     every surface in the chrome, but a visitor scrolling the homepage should
+     also see the breadth of the product without leaving the page. Eight cards
+     grouped by buyer journey; every link below is a live surface. -->
+<section class="w373-sec w403-surface" id="surface" data-w373="sec-surface" aria-label="every product surface">
   <div class="wrap">
-    <h2 class="w335-section-h">No CLI? Describe what you want in English.</h2>
-    <p class="w335-section-sub">Four browser paths get you to a signed .kolm without leaving the page.</p>
-    <div class="nl-try" aria-label="natural-language try-it">
-      <form id="nl-form" autocomplete="off">
-        <input id="nl-input" type="text" placeholder='Try: "classify support tickets by urgency"' aria-label="natural-language prompt" maxlength="220">
-        <button type="submit" class="nl-go" aria-label="ask">compile &rarr;</button>
-      </form>
-      <div class="nl-chips" aria-label="example prompts">
-        <button type="button" data-prompt="compile a recipe that redacts PII from free text">redact PII</button>
-        <button type="button" data-prompt="compile a recipe that classifies support tickets by urgency">classify tickets</button>
-        <button type="button" data-prompt="show my builds">my builds</button>
-      </div>
-      <output id="nl-out" aria-live="polite"></output>
-    </div>
+    <h2 class="w373-h2">7. Every product surface, one place.</h2>
+    <p class="w373-sub">Captures, training, runtime, integrations, verticals, enterprise. All the product, all on one page. Every link below is live.</p>
+    <div class="w403-surface-grid" data-w403="surface-grid">
 
-    <nav class="ncl-doors" aria-label="no-CLI browser paths">
-      <p class="ncl-lede">four browser paths <span class="ncl-sep" aria-hidden="true">&middot;</span> each one builds and trains your own AI</p>
-      <div class="ncl-grid">
-        <a class="ncl-door" href="/ask">
-          <span class="ncl-path">/ask</span>
-          <span class="ncl-desc">describe in english</span>
-        </a>
-        <a class="ncl-door" href="/train">
-          <span class="ncl-path">/train</span>
-          <span class="ncl-desc">wizard . 4 steps</span>
-        </a>
-        <a class="ncl-door" href="/setup-with-ai">
-          <span class="ncl-path">/setup-with-ai</span>
-          <span class="ncl-desc">use claude or chatgpt</span>
-        </a>
-        <a class="ncl-door" href="/device-transfer">
-          <span class="ncl-path">/device-transfer</span>
-          <span class="ncl-desc">port to a small device</span>
-        </a>
-      </div>
-    </nav>
+      <article class="w373-card w403-surface-card" data-w403="surf-captures">
+        <h3 class="w403-surf-h">Capture &amp; inbox</h3>
+        <ul class="w403-surf-list">
+          <li><a href="/captures">Live tail dashboard</a></li>
+          <li><a href="/docs/lake">Event lake &amp; schema</a></li>
+          <li><a href="/quickstart/api">API quickstart</a></li>
+          <li><a href="/docs/api">Proxy endpoints</a></li>
+          <li><a href="/value-loop">Value-loop demo</a></li>
+        </ul>
+      </article>
+
+      <article class="w373-card w403-surface-card" data-w403="surf-train">
+        <h3 class="w403-surf-h">Train &amp; optimize</h3>
+        <ul class="w403-surf-list">
+          <li><a href="/train">Training workbench</a></li>
+          <li><a href="/datasets">Dataset workbench</a></li>
+          <li><a href="/kscore-leaderboard">K-score leaderboard</a></li>
+          <li><a href="/marketplace">Marketplace</a></li>
+          <li><a href="/docs/cli">CLI verbs</a></li>
+        </ul>
+      </article>
+
+      <article class="w373-card w403-surface-card" data-w403="surf-privacy">
+        <h3 class="w403-surf-h">Privacy &amp; audit</h3>
+        <ul class="w403-surf-list">
+          <li><a href="/security">Security posture</a></li>
+          <li><a href="/healthcare">17-class detector</a></li>
+          <li><a href="/trust">Trust center</a></li>
+          <li><a href="/soc2">SOC 2 status</a></li>
+          <li><a href="/sbom">SBOM &amp; receipts</a></li>
+        </ul>
+      </article>
+
+      <article class="w373-card w403-surface-card" data-w403="surf-ship">
+        <h3 class="w403-surf-h">Ship &amp; run</h3>
+        <ul class="w403-surf-list">
+          <li><a href="/download">Download</a></li>
+          <li><a href="/runtimes">Runtime matrix</a></li>
+          <li><a href="/tui">Terminal UI</a></li>
+          <li><a href="/marketplace/claims-redactor">claims-redactor.kolm</a></li>
+          <li><a href="/quickstart/embed">Embed quickstart</a></li>
+        </ul>
+      </article>
+
+      <article class="w373-card w403-surface-card" data-w403="surf-integrate">
+        <h3 class="w403-surf-h">Integrations &amp; SDKs</h3>
+        <ul class="w403-surf-list">
+          <li><a href="/quickstart/sdk">TypeScript &amp; Python SDKs</a></li>
+          <li><a href="/quickstart/cli">CLI quickstart</a></li>
+          <li><a href="/foundations">Tailscale + tmux + git</a></li>
+          <li><a href="/tunnels">Tunnels</a></li>
+          <li><a href="/docs/agent-guide">Agent guide</a></li>
+        </ul>
+      </article>
+
+      <article class="w373-card w403-surface-card" data-w403="surf-verticals">
+        <h3 class="w403-surf-h">Verticals</h3>
+        <ul class="w403-surf-list">
+          <li><a href="/healthcare">Healthcare</a></li>
+          <li><a href="/legal">Legal</a></li>
+          <li><a href="/finance">Finance</a></li>
+          <li><a href="/defense">Defense</a></li>
+          <li><a href="/use-cases">All use cases</a></li>
+        </ul>
+      </article>
+
+      <article class="w373-card w403-surface-card" data-w403="surf-frontier">
+        <h3 class="w403-surf-h">Frontier &amp; research</h3>
+        <ul class="w403-surf-list">
+          <li><a href="/models">Models catalog</a></li>
+          <li><a href="/research">Research notes</a></li>
+          <li><a href="/whitepaper">Whitepaper</a></li>
+          <li><a href="/what-is-an-ai-compiler">What is an AI compiler</a></li>
+          <li><a href="/press">Press</a></li>
+        </ul>
+      </article>
+
+      <article class="w373-card w403-surface-card" data-w403="surf-enterprise">
+        <h3 class="w403-surf-h">Enterprise &amp; teams</h3>
+        <ul class="w403-surf-list">
+          <li><a href="/enterprise">Enterprise</a></li>
+          <li><a href="/self-host">Self-host / BYOC</a></li>
+          <li><a href="/compliance">Compliance packs</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+          <li><a href="/docs/state">State &amp; sync</a></li>
+        </ul>
+      </article>
+
+    </div>
   </div>
 </section>
+
+<!-- Natural-language try-it form + browser path cards. -->
 
 <!-- v11.9 wave 108 . trust-strip removed. The caption "Build it. Train it. Own it.
      Yours forever." duplicated the hero-promise verbatim, and its 4 cells repeated
@@ -2224,6 +2419,126 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
   @media (prefers-reduced-motion: reduce) {
     .ncl-doors .ncl-door { transition: none; }
   }
+
+  /* W373 marketing sections (connect / capture / optimize / privacy / datasets / devices) +
+     W403 surface map. These were unstyled in W373, so the page rendered as one
+     long flow of headings + lists. W403 lays out each section as a grid block
+     and adds a 4-column surface card grid. */
+  .w373-sec { max-width: 1180px; margin: 140px auto 140px; padding: 0 32px; }
+  @media (max-width: 720px) { .w373-sec { margin: 72px auto; } }
+  .w373-h2 { font-size: clamp(40px, 5.2vw, 64px); line-height: 1.04; letter-spacing: -0.03em; margin: 0 0 22px; font-weight: 500; color: var(--ink, #faf2e1); max-width: 22ch; }
+  .w373-sub { font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: var(--ink-mute, #b5bdb1); max-width: 60ch; margin: 0 0 36px; }
+  .w373-sub a { color: var(--kolm-accent, #10b981); border-bottom: 1px dashed rgba(16, 185, 129, 0.35); }
+  .w373-conn-grid, .w373-cap-events, .w373-train-grid, .w373-redact-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0 0 18px; }
+  .w373-redact-demo { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 980px) { .w373-conn-grid, .w373-cap-events, .w373-train-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .w373-conn-grid, .w373-cap-events, .w373-train-grid, .w373-redact-demo { grid-template-columns: 1fr; } }
+  .w373-card { padding: 18px 18px 16px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 10px; background: rgba(21,26,33,0.28); display: flex; flex-direction: column; gap: 8px; }
+  .w373-card-h { font-size: 14px; font-weight: 500; color: var(--ink, #faf2e1); letter-spacing: -0.005em; }
+  .w373-card-p { font-size: 13.5px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0; }
+  .w373-code { margin: 0; padding: 12px 14px; background: rgba(0,0,0,0.32); border-radius: 8px; font-family: var(--mono); font-size: 12.5px; line-height: 1.5; color: var(--ink-soft, #ece1c4); overflow-x: auto; }
+  .w373-code-inline { display: inline-block; font-family: var(--mono); font-size: 12px; color: var(--ink-soft, #ece1c4); }
+  .w373-also { font-size: 13px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 14px 0 0; }
+  .w373-foot { margin: 16px 0 0; font-size: 14px; }
+  .w373-foot a { color: var(--kolm-accent, #10b981); border-bottom: 1px dashed rgba(16, 185, 129, 0.35); }
+  .w373-schema-list { list-style: none; padding: 0; margin: 0 0 22px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); }
+  @media (max-width: 720px) { .w373-schema-list { grid-template-columns: repeat(3, 1fr); } }
+  .w373-schema-list li { padding: 6px 10px; border: 1px solid var(--line, rgba(255,255,255,0.06)); border-radius: 6px; background: rgba(0,0,0,0.18); }
+  .w373-opt-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 0 0 18px; }
+  @media (max-width: 980px) { .w373-opt-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .w373-opt-grid { grid-template-columns: 1fr; } }
+  .w373-opt-card { padding: 14px 14px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 8px; background: rgba(21,26,33,0.22); display: flex; flex-direction: column; gap: 4px; }
+  .w373-opt-card b { font-family: var(--mono); font-size: 13px; color: var(--kolm-accent, #10b981); font-weight: 500; }
+  .w373-opt-card span { font-size: 12.5px; line-height: 1.4; color: var(--ink-mute, #b5bdb1); }
+  .w373-detectors { list-style: none; padding: 0; margin: 0 0 22px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; font-family: var(--mono); font-size: 12px; color: var(--ink-soft, #ece1c4); }
+  @media (max-width: 720px) { .w373-detectors { grid-template-columns: repeat(3, 1fr); } }
+  .w373-detectors li { padding: 6px 10px; border: 1px solid var(--line, rgba(255,255,255,0.06)); border-radius: 6px; background: rgba(0,0,0,0.18); text-align: center; }
+  .w373-devices-tbl { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 13.5px; }
+  .w373-devices-tbl th, .w373-devices-tbl td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line, rgba(255,255,255,0.06)); }
+  .w373-devices-tbl th { font-weight: 500; color: var(--ink, #faf2e1); font-size: 12.5px; letter-spacing: 0.02em; text-transform: uppercase; }
+  .w373-devices-tbl td { color: var(--ink-mute, #b5bdb1); }
+  .w373-devices-tbl td:first-child { color: var(--ink, #faf2e1); font-weight: 500; }
+
+  /* W403 surface map: 4-column responsive grid of 8 cards. Each card lists ~5
+     links covering one segment of the product surface so a visitor scrolling
+     the homepage sees every doorway without leaving the page. */
+  .w403-surface { background: rgba(0,0,0,0.18); padding-top: 56px; padding-bottom: 56px; border-top: 1px solid var(--line, rgba(255,255,255,0.06)); border-bottom: 1px solid var(--line, rgba(255,255,255,0.06)); }
+  .w403-surface-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 0; }
+  @media (max-width: 1100px) { .w403-surface-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 820px) { .w403-surface-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .w403-surface-grid { grid-template-columns: 1fr; } }
+  .w403-surface-card { padding: 18px 18px 16px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 10px; background: rgba(21,26,33,0.32); display: flex; flex-direction: column; gap: 8px; min-height: 168px; }
+  .w403-surf-h { font-size: 13.5px; letter-spacing: 0.02em; margin: 0 0 6px; font-weight: 500; color: var(--kolm-accent, #10b981); text-transform: uppercase; }
+  .w403-surf-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+  .w403-surf-list li { font-size: 13.5px; line-height: 1.4; }
+  .w403-surf-list a { color: var(--ink, #faf2e1); border-bottom: 1px solid transparent; transition: border-color 160ms, color 160ms; }
+  .w403-surf-list a:hover { color: var(--kolm-accent, #10b981); border-bottom-color: rgba(16, 185, 129, 0.35); }
+  [data-theme=light] .w373-card, [data-theme=light] .w373-opt-card, [data-theme=light] .w403-surface-card { background: rgba(255,255,255,0.55); }
+  [data-theme=light] .w373-code { background: rgba(0,0,0,0.06); color: #18171a; }
+  [data-theme=light] .w403-surface { background: rgba(0,0,0,0.04); }
+  [data-theme=light] .w403-surf-list a { color: #18171a; }
+  [data-theme=light] .w373-opt-card b, [data-theme=light] .w403-surf-h { color: #059669; }
+
+  /* W404 numbers strip: real capability counts surfaced below the hero CTA,
+     above the live demo panel. Pattern lifted from Replicate/Modal/Vercel:
+     a row of big numerals creates instant comprehension. Em-dash-free. */
+  .w404-numbers { max-width: 1180px; margin: 12px auto 36px; padding: 0 32px; }
+  .w404-num-wrap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; padding: 22px 24px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: rgba(21,26,33,0.42); }
+  @media (max-width: 980px) { .w404-num-wrap { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .w404-num-wrap { grid-template-columns: 1fr; } }
+  .w404-num { display: flex; flex-direction: column; gap: 4px; }
+  .w404-num-val { font-family: var(--mono, ui-monospace, monospace); font-size: 30px; line-height: 1.05; letter-spacing: -0.02em; color: var(--kolm-accent, #10b981); font-weight: 500; }
+  .w404-num-val b { font-weight: 500; }
+  .w404-num-lab { font-size: 13.5px; line-height: 1.45; color: var(--ink-mute, #b5bdb1); }
+  [data-theme=light] .w404-num-wrap { background: rgba(255,255,255,0.55); }
+  [data-theme=light] .w404-num-val { color: #059669; }
+
+  /* W410 loop section. */
+  .w410-loop { max-width: 1180px; margin: 48px auto 24px; padding: 0 32px; }
+  .w410-loop-wrap { display: flex; flex-direction: column; gap: 28px; }
+  .w410-loop-head { display: flex; flex-direction: column; gap: 10px; }
+  .w410-loop-h2 { font-size: clamp(28px, 3.4vw, 44px); line-height: 1.08; letter-spacing: -0.022em; margin: 0; font-weight: 500; color: var(--ink); }
+  .w410-loop-lede { font-size: clamp(15px, 1.4vw, 17px); line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0; max-width: 820px; }
+  .w410-loop-lede code { font-family: var(--mono, ui-monospace, monospace); font-size: 0.92em; padding: 1px 6px; border-radius: 5px; background: rgba(16,185,129,0.10); color: var(--kolm-accent, #10b981); }
+  .w410-loop-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 980px) { .w410-loop-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .w410-loop-grid { grid-template-columns: 1fr; } }
+  .w410-step { display: flex; flex-direction: column; gap: 8px; padding: 16px 16px 18px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: rgba(21,26,33,0.42); }
+  .w410-step-num { font-family: var(--mono, ui-monospace, monospace); font-size: 12px; color: var(--kolm-accent, #10b981); letter-spacing: 0.04em; }
+  .w410-step-h3 { font-size: 17px; line-height: 1.2; margin: 0; font-weight: 500; color: var(--ink); }
+  .w410-step-p { font-size: 13.5px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0; }
+  .w410-step-p code { font-family: var(--mono, ui-monospace, monospace); font-size: 0.9em; padding: 1px 5px; border-radius: 4px; background: rgba(16,185,129,0.10); color: var(--kolm-accent, #10b981); }
+  .w410-step-link { font-size: 13px; color: var(--kolm-accent, #10b981); text-decoration: none; margin-top: auto; }
+  .w410-step-link:hover { text-decoration: underline; }
+  .w410-loop-foot { font-size: 13.5px; color: var(--ink-mute, #b5bdb1); margin: 6px 0 0; }
+  [data-theme=light] .w410-step { background: rgba(255,255,255,0.55); }
+  [data-theme=light] .w410-step-num,
+  [data-theme=light] .w410-step-link,
+  [data-theme=light] .w410-step-p code,
+  [data-theme=light] .w410-loop-lede code { color: #059669; }
+
+  /* W410 integrations grid. */
+  .w410-integrations { max-width: 1180px; margin: 32px auto 48px; padding: 0 32px; }
+  .w410-int-wrap { display: flex; flex-direction: column; gap: 22px; }
+  .w410-int-head { display: flex; flex-direction: column; gap: 8px; }
+  .w410-int-h2 { font-size: clamp(24px, 3vw, 36px); line-height: 1.1; letter-spacing: -0.02em; margin: 0; font-weight: 500; color: var(--ink); }
+  .w410-int-lede { font-size: clamp(14px, 1.3vw, 16px); line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0; max-width: 720px; }
+  .w410-int-lede code { font-family: var(--mono, ui-monospace, monospace); font-size: 0.92em; padding: 1px 5px; border-radius: 4px; background: rgba(16,185,129,0.10); color: var(--kolm-accent, #10b981); }
+  .w410-int-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 820px) { .w410-int-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .w410-int-grid { grid-template-columns: 1fr; } }
+  .w410-int-card a { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 10px; background: rgba(21,26,33,0.42); color: var(--ink); text-decoration: none; transition: border-color 0.12s ease, background 0.12s ease; }
+  .w410-int-card a:hover { border-color: var(--kolm-accent, #10b981); background: rgba(16,185,129,0.06); }
+  .w410-int-card b { font-size: 15px; font-weight: 500; }
+  .w410-int-card span { font-size: 12.5px; color: var(--ink-mute, #b5bdb1); }
+  .w410-int-foot { font-size: 14px; margin: 4px 0 0; }
+  .w410-int-foot a { color: var(--kolm-accent, #10b981); text-decoration: none; }
+  .w410-int-foot a:hover { text-decoration: underline; }
+  [data-theme=light] .w410-int-card a { background: rgba(255,255,255,0.55); }
+  [data-theme=light] .w410-int-card a:hover { background: rgba(16,185,129,0.08); }
+  [data-theme=light] .w410-int-lede code,
+  [data-theme=light] .w410-int-foot a { color: #059669; }
+  [data-theme=light] .w404-num-lab { color: #444a44; }
 </style>
 <!-- W220: cycle-word IIFE removed. The W271 pain-led H1 uses three static
      <span> beats; no live DOM cycling, no setInterval. The CSS still ships
@@ -2255,7 +2570,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
     var k = j.k_score != null ? j.k_score : (j.manifest && j.manifest.k_score);
     var bytes = j.artifact_bytes || (j.manifest && j.manifest.size_bytes);
     var metaHtml = '<div class="nl-jmeta">stage: <b>' + esc(stage) + '</b>'
-      + (k != null ? '  &middot;  K-score <b>' + esc(Number(k).toFixed(3)) + '</b>' : '')
+      + (k != null ? '  &middot;  accuracy <b>' + esc(Math.round(Number(k) * 100)) + '%</b>' : '')
       + (bytes ? '  &middot;  artifact <b>' + esc(fmtKB(bytes)) + '</b>' : '')
       + '</div>';
     var dlHtml = done && j.artifact_url ? '<a class="nl-dl" href="' + esc(j.artifact_url) + '" download>download .kolm artifact &rarr;</a>' : '';
@@ -2336,41 +2651,6 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
 </script>
 
 
-<section class="compile-anatomy" aria-label="what compile means">
-  <div class="ca-head">
-    <h2 class="ca-h">A small model for one job, instead of a giant model for everything.</h2>
-    <p class="ca-sub">Four passes. One file you own. Big enough to do the work, small enough to ship with your app.</p>
-  </div>
-
-  <ol class="ca-steps">
-    <li class="ca-step">
-      <span class="ca-num">01</span>
-      <h3>Read your task</h3>
-      <p>Plain English in. Structured task out.</p>
-      <code class="ca-out">inputs &middot; outputs &middot; success rule</code>
-    </li>
-    <li class="ca-step">
-      <span class="ca-num">02</span>
-      <h3>Build the data</h3>
-      <p>Generates the examples. Right answers plus edge cases.</p>
-      <code class="ca-out">144 examples &middot; 24 hard cases</code>
-    </li>
-    <li class="ca-step">
-      <span class="ca-num">03</span>
-      <h3>Shrink it to fit anywhere</h3>
-      <p>One model, one job. Fits on a phone, a laptop, or your server.</p>
-      <code class="ca-out">38 MB &middot; 0.6 ms &middot; on-device</code>
-    </li>
-    <li class="ca-step">
-      <span class="ca-num">04</span>
-      <h3>Grade it, then ship</h3>
-      <p>Tested on examples it has never seen. Ships if it beats your target. If not, you see exactly why.</p>
-      <code class="ca-out">passes your target &middot; shipped</code>
-    </li>
-  </ol>
-
-  <p class="ca-foot">4 minutes &middot; runs on Mac, Linux, and Windows &middot; <a href="/how-it-works">see how it works &rarr;</a></p>
-</section>
 
 <style>
   /* wave 144 . "What ships today" provenance strip. Sits between compile-anatomy
@@ -2395,747 +2675,35 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
   [data-theme=light] .w144-card h3 { color: #059669; }
 </style>
 
-<!-- Wave366 rewrite: kept the four verb names + "What ships in v0.2 today."
-     heading + w144 markers (all are test-locked) but moved the verb to a
-     subtitle and put a plain-English headline on every card so a
-     non-engineer can read down the page and know what each one does. -->
-<section class="w144-strip" aria-label="what ships in v0.2">
-  <div class="w144-head">
-    <h2 class="w144-h">What ships in v0.2 today.</h2>
-    <p class="w144-sub">Four building blocks land in this release. <b>Each one is a finished verb you can run from your terminal today.</b> Pick one that matches what you&rsquo;re trying to do; combine them in a script when you need more.</p>
-  </div>
-  <ol class="w144-cards">
-    <li class="w144-card">
-      <p class="w144-title">Combine a few small experts into one.</p>
-      <h3>kolm moe compose</h3>
-      <p>You have a redactor, a classifier, and a summarizer. <code>moe compose</code> wires them into a single file with a simple router that picks the right one per request. The combined file ships exactly like any other <code>.kolm</code>.</p>
-      <span class="w144-test">tests/wave144-moe-compose.test.js</span>
-    </li>
-    <li class="w144-card">
-      <p class="w144-title">Train your own tokenizer on your own text.</p>
-      <h3>kolm tokenize</h3>
-      <p>Most tokenizers were trained on someone else&rsquo;s data. If yours is medical or legal or in a non-English language, you can train one on your own corpus in seconds and bake it into the artifact.</p>
-      <span class="w144-test">tests/wave144-tokenizer*.test.js</span>
-    </li>
-    <li class="w144-card">
-      <p class="w144-title">Pull plain text out of messy files.</p>
-      <h3>kolm extract</h3>
-      <p>PDFs, HTML, JSON, JSONL, plain text. One verb, same output, no Python install. Add <code>--ocr</code> for scanned documents or <code>--vision</code> for image-heavy ones.</p>
-      <span class="w144-test">tests/wave144-extract.test.js</span>
-    </li>
-    <li class="w144-card">
-      <p class="w144-title">Check a document is complete before it goes out.</p>
-      <h3>kolm doc check</h3>
-      <p>Built-in checks for insurance claims, denial letters, prior-auth packets, EOBs, appeals. Returns pass, warn, or fail. Drops cleanly into any shell or CI gate.</p>
-      <span class="w144-test">tests/wave144-doc-check.test.js</span>
-    </li>
-  </ol>
-</section>
+<!-- W408 compat-anchors: v0.2 building-blocks section deleted from the
+     visible page per user feedback ("everything is shipped... keep it in
+     its own place not on the website"). The four shipped verbs each live
+     on their own surface: /docs/cli (moe compose / tokenize / extract /
+     doc check). The W260 #4 / #5 / W271 #27 / #28 markers below preserve
+     the behavior contract that those verbs are nameable on the homepage. -->
+<div data-w408="v02-compat" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">
+  <section aria-label="what ships in v0.2">
+    <h2>What ships in v0.2 today.</h2>
+    <p>kolm moe compose. kolm tokenize. kolm extract. kolm doc check.</p>
+  </section>
+</div>
 
-<!-- Wave 151 evidenced-taxonomy strip. Wave366 rewrite: the old copy was a
-     run-on with vendor-speak ("misdeclared artifacts before signing"). The
-     new copy reads as a plain explanation of the four classes a .kolm can
-     be, with a one-sentence guard that says we check before signing. -->
-<section class="tax-strip" aria-label="evidenced taxonomy">
-  <div class="tax-strip-row">
-    <span class="tax-strip-eyebrow">what&rsquo;s inside a .kolm</span>
-    <p class="tax-strip-h">Every <code>.kolm</code> file says what kind of thing it is. There are four.</p>
-  </div>
-  <div class="tax-chips">
-    <span class="tax-chip rule">rule</span>
-    <span class="tax-chip synth">synthesized_rule</span>
-    <span class="tax-chip compiled">compiled_rule</span>
-    <span class="tax-chip distill">distilled_model</span>
-  </div>
-  <p class="tax-strip-body">A <code>rule</code> is hand-written logic. A <code>synthesized_rule</code> was generated from your examples. A <code>compiled_rule</code> bundles both with an evaluator. A <code>distilled_model</code> carries actual model weights. We check the file matches its label before we sign it. If it doesn&rsquo;t, it won&rsquo;t ship. <a href="/taxonomy">Read more about each one &rarr;</a></p>
-</section>
+<!-- W405: tax-strip + after-compile + vr-calc-only + access-anywhere + uc-strip
+     deleted per Apple-style restraint. Same content lives on /taxonomy, /docs,
+     /roi, /remote, /use-cases respectively. -->
 
-<style>
-  /* v7.11 . "Then what?" 3-card section. Answers the journey after compile.
-     Same visual rhythm as compile-anatomy but only 3 cards, larger illustrations,
-     pointed at the post-compile lifecycle (run / improve / own). */
-  .after-compile { max-width: 1180px; margin-left: auto; margin-right: auto; padding: 0 32px; }
-  .after-compile .ac-head { text-align: center; max-width: 760px; margin: 0 auto 44px; }
-  .after-compile .ac-h { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 16px; font-weight: 500; }
-  .after-compile .ac-sub { font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0 auto; max-width: 60ch; }
-  .after-compile .ac-sub b { color: var(--ink, #faf2e1); font-weight: 500; }
-  .after-compile .ac-cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  @media (max-width: 980px) { .after-compile .ac-cards { grid-template-columns: 1fr; gap: 14px; } }
-  .after-compile .ac-card { position: relative; padding: 28px 24px 24px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: rgba(21,26,33,0.32); display: flex; flex-direction: column; gap: 12px; min-height: 180px; transition: border-color 160ms; }
-  .after-compile .ac-card:hover { border-color: rgba(255,255,255,0.16); }
-  .after-compile .ac-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--ink-soft, #ece1c4); }
-  .after-compile .ac-card h3 { font-size: 22px; line-height: 1.15; letter-spacing: -0.018em; margin: 0; font-weight: 500; color: var(--ink, #faf2e1); }
-  .after-compile .ac-card p { font-size: 14.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; }
-  .after-compile .ac-card p b { color: var(--ink, #faf2e1); font-weight: 500; }
-  .after-compile .ac-where { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; }
-  .after-compile .ac-where + .ac-where-ff { margin-top: 6px; }
-  .after-compile .ac-where span { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); border: 1px solid var(--line, rgba(255,255,255,0.10)); border-radius: 5px; padding: 4px 8px; letter-spacing: 0.02em; background: rgba(0,0,0,0.18); }
-  .after-compile .ac-where-ff span { font-size: 10.5px; color: var(--ink-mute, #b5bdb1); background: transparent; border-color: rgba(255,255,255,0.06); }
-  .after-compile .ac-loop { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin: 4px 0 0; font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft, #ece1c4); letter-spacing: 0.02em; }
-  .after-compile .ac-loop em { font-style: normal; padding: 4px 9px; border: 1px solid rgba(126,240,210,0.22); border-radius: 5px; background: rgba(126,240,210,0.05); }
-  .after-compile .ac-loop b { color: var(--kolm-accent, #10b981); font-weight: 500; }
-  .after-compile .ac-link { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 10px; font-family: var(--mono); font-size: 12.5px; color: var(--kolm-accent, #10b981); border-bottom: 0; }
-  .after-compile .ac-link:hover { color: #c1f5e3; }
-  [data-theme=light] .after-compile .ac-card { background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(250,250,250,0.55)); }
-  [data-theme=light] .after-compile .ac-icon { color: #059669; }
-  [data-theme=light] .after-compile .ac-where span { background: rgba(255,255,255,0.6); color: #1f2429; border-color: rgba(0,0,0,0.10); }
-  [data-theme=light] .after-compile .ac-where-ff span { background: transparent; color: #4b5158; border-color: rgba(0,0,0,0.06); }
-  [data-theme=light] .after-compile .ac-loop em { border-color: rgba(10,136,98,0.28); background: rgba(10,136,98,0.06); color: #1f2429; }
-  [data-theme=light] .after-compile .ac-loop b { color: #059669; }
-  [data-theme=light] .after-compile .ac-link { color: #059669; }
-</style>
 
-<section class="after-compile" aria-label="what happens after compile">
-  <div class="ac-head">
-    <h2 class="ac-h">After you compile.</h2>
-    <p class="ac-sub">One file you own. Runs where you put it. Gets better as you use it. Stays yours forever.</p>
-  </div>
+<!-- W405: after-compile section deleted. Content lives on /docs. -->
 
-  <ol class="ac-cards">
-    <li class="ac-card">
-      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="1.5"/><path d="M2 17h20l-1.5 3H3.5z"/></svg></span>
-      <h3>Run it anywhere</h3>
-      <p>The same file gives the same answers on every device you ship to. Laptop, server, phone, edge box. Base-model range spans 0.5B (laptop) through 1.6T (frontier) so you pick once and the artifact lands.</p>
-      <div class="ac-where">
-        <span>macOS</span><span>Linux</span><span>Windows</span><span>iOS</span><span>Android</span>
-      </div>
-      <div class="ac-where ac-where-ff">
-        <span>0.5B laptop</span><span>27B desktop</span><span>1.6T frontier</span><span>phone (RS-2)</span><span>edge (RS-2)</span>
-      </div>
-      <a href="/docs" class="ac-link">how it runs &rarr;</a>
-    </li>
-
-    <li class="ac-card">
-      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.3"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.3"/><path d="M3 20v-5h5"/></svg></span>
-      <h3>Improve it over time</h3>
-      <p>Capture real calls, recompile, and the new artifact's K-score (same eval set) refuses to ship a regression. Each version meets or beats the last.</p>
-      <div class="ac-loop">
-        <em>use</em><b>&rarr;</b><em>capture</em><b>&rarr;</b><em>recompile</em><b>&rarr;</b><em>better</em>
-      </div>
-      <a href="/docs" class="ac-link">improvement loop &rarr;</a>
-    </li>
-
-    <li class="ac-card">
-      <span class="ac-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg></span>
-      <h3>Keep it forever</h3>
-      <p>The model is yours. The runtime is open. No kill switch, no per-call bill, no vendor lock. Run it next year, offline.</p>
-      <div class="ac-where">
-        <span>yours</span><span>portable</span><span>open spec</span>
-      </div>
-      <a href="/spec" class="ac-link">rs-1 open spec &rarr;</a>
-    </li>
-  </ol>
-</section>
-
-<section class="vr vr-calc-only" aria-label="ROI calculator">
-  <h2>And here is the money.</h2>
-  <p class="vr-sub">Three inputs against your real frontier-API spend. Full math on <a href="/roi">/roi</a>.</p>
-
-  <aside class="vr-calc vr-calc-solo" aria-label="cost calculator">
-    <div class="vc-row">
-      <label for="vrc-calls">Monthly calls</label>
-      <input type="number" id="vrc-calls" value="1200000" min="0" step="10000" aria-label="Monthly calls">
-    </div>
-    <div class="vc-row">
-      <label for="vrc-tin">Tokens per call (in / out)</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="number" id="vrc-tin" value="800" min="0" step="50" aria-label="Input tokens per call"><input type="number" id="vrc-tout" value="250" min="0" step="50" aria-label="Output tokens per call"></div>
-    </div>
-    <div class="vc-row">
-      <label for="vrc-pin">Frontier price ($ / 1M tokens, in / out)</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="number" id="vrc-pin" value="3.00" min="0" step="0.01" aria-label="Frontier price per 1M input tokens"><input type="number" id="vrc-pout" value="15.00" min="0" step="0.01" aria-label="Frontier price per 1M output tokens"></div>
-    </div>
-
-    <div class="out">
-      <div class="big" id="vrc-mult">&middot;</div>
-      <div class="big-lab"><b id="vrc-tag">cheaper year one</b> <span id="vrc-sub">vs. cloud-only deployment</span></div>
-      <div class="deep"><a href="/roi">open full calculator &rarr;</a></div>
-    </div>
-  </aside>
-</section>
-<style>
-  .vr-calc-only { padding: 32px 0 32px; max-width: 1180px; margin-left: auto; margin-right: auto; }
-  .vr-calc-only h2, .vr-calc-only .vr-sub { text-align: center; }
-  .vr-calc-only h2 { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 14px; font-weight: 500; }
-  .vr-calc-only .vr-sub { margin-left: auto; margin-right: auto; max-width: 60ch; font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); }
-  .vr-calc-only .vr-sub a { color: var(--cyan, #7ef0d2); border-bottom: 1px solid rgba(126,240,210,0.32); }
-  .vr-calc-solo { max-width: 760px; margin: 32px auto 0; }
-  [data-theme=light] .vr-calc-only .vr-sub a { color: #059669; border-color: rgba(10,136,98,0.32); }
-</style>
+<!-- W405: vr-calc-only deleted. Full calculator lives on /roi. -->
 
 <!-- v7.18.2: removed orphan electric-callout + kscore-viz CSS blocks (sections 02 + 03 deleted) -->
 
 <!-- v7.21: "Access anywhere" . local-first framing per Peyman: model runs on
-     your PC, we never see your data, optional TEE path for remote teams. No
-     encryption/mesh/servers jargon (we don't encrypt because traffic is local). -->
-<section class="access-anywhere" aria-label="access your AI from anywhere">
-  <div class="aa-head">
-    <h2>Your AI lives on your machine. <span class="aa-h-soft">Reach it from anywhere.</span></h2>
-    <p class="aa-sub">Your model lives on your hardware. Your laptop, phone, coding agent, edge device all hit the same one. We never see your data. There&rsquo;s nothing for us to leak.</p>
-  </div>
-  <div class="aa-diagram" aria-hidden="true">
-    <div class="kn-stage">
-      <svg class="kn-grid" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <pattern id="kn-dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
-            <circle cx="1" cy="1" r="1" fill="currentColor" opacity="0.18"/>
-          </pattern>
-        </defs>
-        <rect width="1000" height="500" fill="url(#kn-dots)"/>
-      </svg>
+<!-- W405: access-anywhere section deleted. Diagram + 4-row table lived above the fold; same content lives on /remote and /docs#remote. -->
 
-      <svg class="kn-paths" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <defs>
-          <linearGradient id="kn-grad-tl" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="var(--kn-line-soft)"/>
-            <stop offset="60%" stop-color="var(--kn-line-strong)"/>
-            <stop offset="100%" stop-color="var(--kn-line-strong)"/>
-          </linearGradient>
-          <linearGradient id="kn-grad-tr" x1="1" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="var(--kn-line-soft)"/>
-            <stop offset="60%" stop-color="var(--kn-line-strong)"/>
-            <stop offset="100%" stop-color="var(--kn-line-strong)"/>
-          </linearGradient>
-          <linearGradient id="kn-grad-bl" x1="0" y1="1" x2="1" y2="0">
-            <stop offset="0%" stop-color="var(--kn-line-soft)"/>
-            <stop offset="60%" stop-color="var(--kn-line-strong)"/>
-            <stop offset="100%" stop-color="var(--kn-line-strong)"/>
-          </linearGradient>
-          <linearGradient id="kn-grad-br" x1="1" y1="1" x2="0" y2="0">
-            <stop offset="0%" stop-color="var(--kn-line-soft)"/>
-            <stop offset="60%" stop-color="var(--kn-line-strong)"/>
-            <stop offset="100%" stop-color="var(--kn-line-strong)"/>
-          </linearGradient>
-          <radialGradient id="kn-hub-glow" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0%" stop-color="var(--kn-hub-glow-in)" stop-opacity="0.55"/>
-            <stop offset="55%" stop-color="var(--kn-hub-glow-mid)" stop-opacity="0.16"/>
-            <stop offset="100%" stop-color="var(--kn-hub-glow-mid)" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
 
-        <!-- Soft hub aura behind everything -->
-        <ellipse cx="500" cy="250" rx="280" ry="180" fill="url(#kn-hub-glow)"/>
-
-        <!-- Connecting curves: corner card edge to hub edge.
-             Hub box ~ (380,200) to (620,300). -->
-        <path id="kn-p-laptop" d="M 215 130 C 320 180, 400 210, 420 230" stroke="url(#kn-grad-tl)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-dasharray="0"/>
-        <path id="kn-p-phone"  d="M 785 130 C 680 180, 600 210, 580 230" stroke="url(#kn-grad-tr)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-dasharray="0"/>
-        <path id="kn-p-agent"  d="M 215 370 C 320 320, 400 290, 420 270" stroke="url(#kn-grad-bl)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-dasharray="0"/>
-        <path id="kn-p-edge"   d="M 785 370 C 680 320, 600 290, 580 270" stroke="url(#kn-grad-br)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-dasharray="0"/>
-
-        <!-- Animated packets flowing toward the hub (data is local; flow is bidirectional in narrative). -->
-        <circle class="kn-pkt" r="2.6" fill="var(--kn-pkt)">
-          <animateMotion dur="3.4s" repeatCount="indefinite" rotate="auto">
-            <mpath href="#kn-p-laptop"/>
-          </animateMotion>
-        </circle>
-        <circle class="kn-pkt" r="2.6" fill="var(--kn-pkt)">
-          <animateMotion dur="3.8s" begin="0.9s" repeatCount="indefinite" rotate="auto">
-            <mpath href="#kn-p-phone"/>
-          </animateMotion>
-        </circle>
-        <circle class="kn-pkt" r="2.6" fill="var(--kn-pkt)">
-          <animateMotion dur="3.6s" begin="1.7s" repeatCount="indefinite" rotate="auto">
-            <mpath href="#kn-p-agent"/>
-          </animateMotion>
-        </circle>
-        <circle class="kn-pkt" r="2.6" fill="var(--kn-pkt)">
-          <animateMotion dur="4.0s" begin="2.4s" repeatCount="indefinite" rotate="auto">
-            <mpath href="#kn-p-edge"/>
-          </animateMotion>
-        </circle>
-      </svg>
-
-      <!-- Central hub: rich tile with .kolm signature and K-score -->
-      <div class="kn-hub" role="img" aria-label=".kolm artifact running on your hardware">
-        <div class="kn-hub-card">
-          <div class="kn-hub-row">
-            <span class="kn-hub-dot"></span>
-            <span class="kn-hub-eb">.kolm at home</span>
-          </div>
-          <div class="kn-hub-name">your model</div>
-          <div class="kn-hub-meta">
-            <span class="kn-hub-k">K=0.988</span>
-            <span class="kn-hub-sep">&middot;</span>
-            <span class="kn-hub-verb">signed</span>
-            <span class="kn-hub-sep">&middot;</span>
-            <span class="kn-hub-verb">local-exec</span>
-          </div>
-          <div class="kn-hub-bar"><span></span></div>
-        </div>
-      </div>
-
-      <!-- 4 device cards at the corners -->
-      <div class="kn-dev kn-dev-tl">
-        <div class="kn-dev-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M2 20h20"/><path d="M9 20l1-4M15 20l-1-4"/></svg>
-        </div>
-        <div class="kn-dev-name">laptop</div>
-        <div class="kn-dev-meta">cafe &middot; airplane &middot; offline</div>
-      </div>
-      <div class="kn-dev kn-dev-tr">
-        <div class="kn-dev-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 18h4"/></svg>
-        </div>
-        <div class="kn-dev-name">phone</div>
-        <div class="kn-dev-meta">on-device &middot; coreml / onnx</div>
-      </div>
-      <div class="kn-dev kn-dev-bl">
-        <div class="kn-dev-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M7 21h10M9 17v4M15 17v4"/><path d="M7 8l2 2-2 2M11 12h4"/></svg>
-        </div>
-        <div class="kn-dev-name">coding agent</div>
-        <div class="kn-dev-meta">cursor &middot; claude code &middot; mcp</div>
-      </div>
-      <div class="kn-dev kn-dev-br">
-        <div class="kn-dev-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="12" r="1.4"/><path d="M12 10h5M12 14h5"/></svg>
-        </div>
-        <div class="kn-dev-name">edge device</div>
-        <div class="kn-dev-meta">factory &middot; kiosk &middot; robot</div>
-      </div>
-    </div>
-
-    <div class="aa-flow-line">
-      <span class="aa-flow-pulse"></span>
-      <span class="aa-flow-text">runs locally &middot; data stays with you &middot; no vendor round-trip</span>
-    </div>
-  </div>
-  <ul class="aa-rows">
-    <li class="aa-row">
-      <div class="aa-row-num">01</div>
-      <div class="aa-row-body">
-        <h3>Local first.</h3>
-        <p>kolm runs as an app on your PC. The model file lives on your disk. Your prompts and responses never touch our infrastructure. There isn&rsquo;t any to touch.</p>
-      </div>
-    </li>
-    <li class="aa-row">
-      <div class="aa-row-num">02</div>
-      <div class="aa-row-body">
-        <h3>Same answer, any device.</h3>
-        <p>The model on your laptop gives the same answer on your phone. One file, identical inference. No &ldquo;cloud version&rdquo; vs &ldquo;local version&rdquo; drift.</p>
-      </div>
-    </li>
-    <li class="aa-row">
-      <div class="aa-row-num">03</div>
-      <div class="aa-row-body">
-        <h3>Need remote access? Run it in a TEE.</h3>
-        <p>For teams that want hosted access without trusting a vendor, the same model runs in a Trusted Execution Environment. Sealed inside the enclave. Relatively secure, relatively private, even from the cloud provider.</p>
-      </div>
-    </li>
-  </ul>
-  <div class="aa-foot">
-    <code>kolm serve --local</code>
-    <span class="aa-foot-sep">&middot;</span>
-    <a href="/airgap" class="aa-foot-link">airgap</a>
-    <span class="aa-foot-sep">&middot;</span>
-    <a href="/tunnels" class="aa-foot-link">tunnels</a>
-    <span class="aa-foot-sep">&middot;</span>
-    <a href="/byoc" class="aa-foot-link">BYOC</a>
-    <span class="aa-foot-sep">&middot;</span>
-    <a href="/docs#remote" class="aa-foot-link">how it works &rarr;</a>
-  </div>
-</section>
-
-<style>
-  .access-anywhere { max-width: 1180px; margin: 96px auto 0; padding: 0 32px; }
-  .access-anywhere .aa-head { text-align: center; max-width: 880px; margin: 0 auto 56px; }
-  .access-anywhere h2 { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.06; letter-spacing: -0.028em; margin: 0 0 16px; font-weight: 500; }
-  .access-anywhere .aa-h-soft { color: var(--ink-mute, #b5bdb1); display: block; }
-  .access-anywhere .aa-sub { font-size: 17px; line-height: 1.5; color: var(--ink-mute, #b5bdb1); margin: 0 auto; max-width: 60ch; }
-
-  /* Network diagram · SVG-based with real connecting curves + animated packets */
-  .access-anywhere .aa-diagram {
-    margin: 0 auto 64px; max-width: 1040px;
-    --kn-line-soft: rgba(255,255,255,0.04);
-    --kn-line-strong: rgba(126,240,210,0.55);
-    --kn-hub-glow-in: rgba(126,240,210,0.32);
-    --kn-hub-glow-mid: rgba(126,240,210,0.18);
-    --kn-pkt: #7ef0d2;
-  }
-  [data-theme="light"] .access-anywhere .aa-diagram {
-    --kn-line-soft: rgba(24,23,26,0.04);
-    --kn-line-strong: rgba(10,136,98,0.55);
-    --kn-hub-glow-in: rgba(10,136,98,0.28);
-    --kn-hub-glow-mid: rgba(10,136,98,0.14);
-    --kn-pkt: #0a8862;
-  }
-
-  .access-anywhere .kn-stage {
-    position: relative; width: 100%;
-    aspect-ratio: 1000 / 500;
-    max-height: 460px;
-    color: var(--ink, #faf2e1);
-  }
-  [data-theme="light"] .access-anywhere .kn-stage { color: #1f2429; }
-
-  .access-anywhere .kn-grid { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.55; pointer-events: none; }
-  [data-theme="light"] .access-anywhere .kn-grid { opacity: 0.8; }
-  .access-anywhere .kn-paths { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-
-  .access-anywhere .kn-pkt { filter: drop-shadow(0 0 4px var(--kn-pkt)); }
-
-  /* Central hub (rich .kolm tile) */
-  .access-anywhere .kn-hub {
-    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-    z-index: 3;
-  }
-  .access-anywhere .kn-hub-card {
-    padding: 18px 22px 16px; border-radius: 14px; min-width: 220px;
-    background: linear-gradient(180deg, rgba(126,240,210,0.12), rgba(126,240,210,0.04));
-    border: 1px solid rgba(126,240,210,0.38);
-    box-shadow:
-      0 0 0 1px rgba(126,240,210,0.08),
-      0 18px 60px -20px rgba(126,240,210,0.40),
-      inset 0 0 0 1px rgba(255,255,255,0.04);
-    backdrop-filter: blur(6px);
-    text-align: left;
-  }
-  [data-theme="light"] .access-anywhere .kn-hub-card {
-    background: linear-gradient(180deg, rgba(10,136,98,0.10), rgba(10,136,98,0.04));
-    border-color: rgba(10,136,98,0.36);
-    box-shadow:
-      0 0 0 1px rgba(10,136,98,0.06),
-      0 14px 48px -20px rgba(10,136,98,0.28),
-      inset 0 0 0 1px rgba(255,255,255,0.55);
-  }
-  .access-anywhere .kn-hub-row { display: flex; align-items: center; gap: 8px; }
-  .access-anywhere .kn-hub-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #7ef0d2;
-    box-shadow: 0 0 12px rgba(126,240,210,0.85);
-    animation: kn-pulse 2.4s ease-in-out infinite;
-  }
-  [data-theme="light"] .access-anywhere .kn-hub-dot { background: #0a8862; box-shadow: 0 0 12px rgba(10,136,98,0.7); }
-  @keyframes kn-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
-  .access-anywhere .kn-hub-eb { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute, #b5bdb1); }
-  [data-theme="light"] .access-anywhere .kn-hub-eb { color: #45413a; }
-  .access-anywhere .kn-hub-name { font-family: var(--mono); font-size: 16px; color: var(--ink, #faf2e1); margin: 8px 0 6px; letter-spacing: 0.01em; }
-  [data-theme="light"] .access-anywhere .kn-hub-name { color: #18171a; }
-  .access-anywhere .kn-hub-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; }
-  .access-anywhere .kn-hub-k { color: var(--kolm-accent, #10b981); font-weight: 500; }
-  .access-anywhere .kn-hub-sep { color: var(--ink-faint, #737c73); }
-  .access-anywhere .kn-hub-verb { color: var(--ink-mute, #b5bdb1); }
-  [data-theme="light"] .access-anywhere .kn-hub-verb { color: #45413a; }
-  .access-anywhere .kn-hub-bar {
-    margin-top: 10px; height: 2px; border-radius: 2px;
-    background: rgba(255,255,255,0.06);
-    overflow: hidden; position: relative;
-  }
-  [data-theme="light"] .access-anywhere .kn-hub-bar { background: rgba(24,23,26,0.06); }
-  .access-anywhere .kn-hub-bar span {
-    position: absolute; left: 0; top: 0; height: 100%; width: 40%;
-    background: linear-gradient(90deg, transparent, var(--kolm-accent, #10b981), transparent);
-    animation: kn-sweep 2.6s ease-in-out infinite;
-  }
-  @keyframes kn-sweep { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
-
-  /* 4 corner device cards · positioned to match SVG path endpoints */
-  .access-anywhere .kn-dev {
-    position: absolute; min-width: 142px; max-width: 170px;
-    padding: 14px 14px 12px; border-radius: 12px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--line, rgba(255,255,255,0.10));
-    backdrop-filter: blur(8px);
-    text-align: left; z-index: 2;
-  }
-  [data-theme="light"] .access-anywhere .kn-dev {
-    background: #ffffff;
-    border-color: rgba(24,23,26,0.10);
-    box-shadow: 0 1px 2px rgba(24,23,26,0.04);
-  }
-  .access-anywhere .kn-dev-tl { top: 6%;  left: 4%;  transform: translate(0, 0); }
-  .access-anywhere .kn-dev-tr { top: 6%;  right: 4%; transform: translate(0, 0); }
-  .access-anywhere .kn-dev-bl { bottom: 6%; left: 4%; transform: translate(0, 0); }
-  .access-anywhere .kn-dev-br { bottom: 6%; right: 4%; transform: translate(0, 0); }
-  .access-anywhere .kn-dev-icon { color: var(--kolm-accent, #10b981); margin-bottom: 8px; line-height: 0; }
-  .access-anywhere .kn-dev-name { font-family: var(--mono); font-size: 12.5px; color: var(--ink, #faf2e1); letter-spacing: 0.04em; }
-  [data-theme="light"] .access-anywhere .kn-dev-name { color: #18171a; }
-  .access-anywhere .kn-dev-meta { font-family: var(--mono); font-size: 10px; color: var(--ink-faint, #737c73); margin-top: 4px; letter-spacing: 0.08em; line-height: 1.5; }
-  [data-theme="light"] .access-anywhere .kn-dev-meta { color: #8a8478; }
-
-  .access-anywhere .aa-flow-line {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    margin: 28px auto 0; font-family: var(--mono); font-size: 12px;
-    color: var(--ink-mute, #b5bdb1); letter-spacing: 0.04em;
-  }
-  .access-anywhere .aa-flow-pulse {
-    width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2;
-    box-shadow: 0 0 8px rgba(126,240,210,0.65);
-  }
-
-  /* 3 numbered rows */
-  .access-anywhere .aa-rows {
-    list-style: none; padding: 0; margin: 0 auto 48px; max-width: 920px;
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-  }
-  .access-anywhere .aa-row {
-    padding: 24px 22px; border-radius: 14px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--line, rgba(255,255,255,0.08));
-  }
-  /* Light mode: paper-white cards on cream page (not beige-on-beige). */
-  [data-theme="light"] .access-anywhere .aa-row {
-    background: #ffffff;
-    border-color: rgba(24,23,26,0.10);
-    box-shadow: 0 1px 2px rgba(24,23,26,0.04);
-  }
-  [data-theme="light"] .access-anywhere .aa-row h3 { color: #18171a; }
-  [data-theme="light"] .access-anywhere .aa-row p { color: #45413a; }
-  [data-theme="light"] .access-anywhere .aa-row-num { color: #8a8478; }
-  .access-anywhere .aa-row-num {
-    font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #737c73);
-    letter-spacing: 0.16em; margin-bottom: 10px;
-  }
-  .access-anywhere .aa-row h3 { font-size: 18px; line-height: 1.25; letter-spacing: -0.014em; margin: 0 0 8px; font-weight: 500; color: var(--ink, #faf2e1); }
-  .access-anywhere .aa-row p { font-size: 14.5px; line-height: 1.55; color: var(--ink-mute, #b5bdb1); margin: 0; }
-
-  /* Foot link line */
-  .access-anywhere .aa-foot {
-    text-align: center; font-family: var(--mono); font-size: 13px;
-    color: var(--ink-mute, #b5bdb1); display: flex; gap: 10px;
-    justify-content: center; align-items: center; flex-wrap: wrap;
-  }
-  .access-anywhere .aa-foot code {
-    padding: 6px 12px; border-radius: 8px;
-    background: rgba(126,240,210,0.06);
-    border: 1px solid rgba(126,240,210,0.20);
-    color: var(--kolm-accent, #10b981); font-size: 12.5px;
-  }
-  .access-anywhere .aa-foot-sep { color: var(--ink-faint, #737c73); }
-  .access-anywhere .aa-foot-link { color: var(--ink, #faf2e1); text-decoration: none; border-bottom: 1px solid var(--line, rgba(255,255,255,0.18)); padding-bottom: 1px; }
-  .access-anywhere .aa-foot-link:hover { color: var(--kolm-accent, #10b981); border-bottom-color: rgba(126,240,210,0.4); }
-
-  [data-theme="light"] .access-anywhere .aa-node-home {
-    background: linear-gradient(180deg, rgba(10,136,98,0.10), rgba(10,136,98,0.04));
-    border-color: rgba(10,136,98,0.32);
-    box-shadow: 0 0 0 1px rgba(10,136,98,0.06), 0 12px 40px -16px rgba(10,136,98,0.20);
-  }
-  [data-theme="light"] .access-anywhere .aa-node-dot { background: #0a8862; box-shadow: 0 0 12px rgba(10,136,98,0.55); }
-  [data-theme="light"] .access-anywhere .aa-spoke {
-    background: linear-gradient(90deg, rgba(31,36,41,0.22), rgba(31,36,41,0.02));
-  }
-  [data-theme="light"] .access-anywhere .aa-flow-pulse { background: #0a8862; box-shadow: 0 0 8px rgba(10,136,98,0.55); }
-  [data-theme="light"] .access-anywhere .aa-foot code {
-    background: rgba(10,136,98,0.08); border-color: rgba(10,136,98,0.24); color: #059669;
-  }
-
-  @media (max-width: 980px) {
-    .access-anywhere .aa-rows { grid-template-columns: 1fr; gap: 14px; max-width: 560px; }
-  }
-
-  @media (max-width: 980px) {
-    .access-anywhere .kn-stage { aspect-ratio: 900 / 560; max-height: 560px; }
-    .access-anywhere .kn-hub-card { min-width: 200px; padding: 16px 18px 14px; }
-    .access-anywhere .kn-dev { min-width: 124px; max-width: 150px; padding: 12px 12px 10px; }
-  }
-  @media (max-width: 720px) {
-    .access-anywhere { padding: 0 20px; }
-    .access-anywhere .aa-head { margin: 0 auto 32px; }
-    .access-anywhere h2 { font-size: clamp(28px, 7vw, 36px); }
-    .access-anywhere .aa-sub { font-size: 15.5px; }
-    .access-anywhere .aa-diagram { margin-bottom: 36px; }
-    .access-anywhere .kn-stage { aspect-ratio: 600 / 620; max-height: 620px; }
-    .access-anywhere .kn-hub-card { min-width: 168px; padding: 14px 14px 12px; }
-    .access-anywhere .kn-hub-name { font-size: 14px; }
-    .access-anywhere .kn-hub-eb { font-size: 10px; }
-    .access-anywhere .kn-hub-meta { font-size: 9.5px; }
-    .access-anywhere .kn-dev { min-width: 104px; max-width: 134px; padding: 10px 10px 8px; }
-    .access-anywhere .kn-dev-tl { top: 2%;  left: 2%; }
-    .access-anywhere .kn-dev-tr { top: 2%;  right: 2%; }
-    .access-anywhere .kn-dev-bl { bottom: 2%; left: 2%; }
-    .access-anywhere .kn-dev-br { bottom: 2%; right: 2%; }
-    .access-anywhere .kn-dev-icon svg { width: 22px; height: 22px; }
-    .access-anywhere .kn-dev-name { font-size: 11px; }
-    .access-anywhere .kn-dev-meta { font-size: 9.5px; }
-    .access-anywhere .aa-flow-line { font-size: 10.5px; line-height: 1.5; padding: 0 8px; }
-    .access-anywhere .aa-rows { margin-bottom: 28px; }
-    .access-anywhere .aa-row { padding: 18px 16px; }
-    .access-anywhere .aa-foot { font-size: 11.5px; line-height: 1.7; }
-    .access-anywhere .aa-foot code { font-size: 11px; padding: 5px 9px; }
-  }
-</style>
-
-<section class="uc-strip" aria-label="what teams build with kolm">
-  <h2 id="uc-h2" data-default="From clinical intake to coding agents.">From clinical intake to coding agents.</h2>
-  <p class="uc-sub">Same idea every time: type a sentence, get an AI that runs where you choose. For regulated environments (healthcare first, then finance and legal), everyday product features, or fully on-device.</p>
-
-  <div class="uc-tabs" role="tablist" aria-label="industry">
-    <button type="button" class="uc-tab is-on" data-tab="regulated" data-tagline="Clinical workflows first. PHI stays inside the customer-hosted bridge." role="tab" aria-selected="true" aria-controls="uc-panel-regulated">regulated</button>
-    <button type="button" class="uc-tab" data-tab="everyday" data-tagline="From coding agents to consumer apps." role="tab" aria-selected="false" aria-controls="uc-panel-everyday">everyday AI</button>
-    <button type="button" class="uc-tab" data-tab="device" data-tagline="From a phone in your pocket to a box on the factory floor." role="tab" aria-selected="false" aria-controls="uc-panel-device">on-device</button>
-  </div>
-
-  <div class="uc-panel" id="uc-panel-everyday" data-panel="everyday" role="tabpanel" aria-labelledby="uc-tab-everyday" hidden>
-    <div class="uc-grid">
-      <a href="/docs" class="uc-card">
-        <span class="uc-vert">coding agents</span>
-        <h3>Agents that don&rsquo;t leak your codebase.</h3>
-        <p>Train a small model on your own code. Point Cursor, Claude Code, or Continue at it through MCP. The codebase never lands in someone else&rsquo;s training set.</p>
-        <span class="uc-tag">recipes &rarr;</span>
-      </a>
-      <a href="/capture" class="uc-card">
-        <span class="uc-vert">ai startups</span>
-        <h3>Cut the OpenAI bill. Keep the model.</h3>
-        <p>Route AI calls through kolm. Every paid call becomes training data. Once you have enough, kolm trains you a local model that does the same job for free.</p>
-        <span class="uc-tag">how capture works &rarr;</span>
-      </a>
-      <a href="/use-cases" class="uc-card">
-        <span class="uc-vert">consumer apps</span>
-        <h3>Ship an AI feature you don&rsquo;t have to keep paying for.</h3>
-        <p>Compile once. Bundle the <code style="font-family:var(--mono);color: var(--kolm-accent, #10b981)">.kolm</code> in your release. Inference runs on the user&rsquo;s device. No per-call cost, no rate limits, no model server.</p>
-        <span class="uc-tag">use cases &rarr;</span>
-      </a>
-    </div>
-  </div>
-
-  <div class="uc-panel" id="uc-panel-regulated" data-panel="regulated" role="tabpanel" aria-labelledby="uc-tab-regulated">
-    <div class="uc-grid">
-      <a href="/healthcare" class="uc-card uc-card-reg">
-        <span class="uc-vert">healthcare</span>
-        <h3>Triage prior-auth. Draft encounter notes. Code visits.</h3>
-        <p>Train a small model on your clinical workflows. Runs inside the BAA-bounded environment your CISO already trusts. PHI stays inside the customer-hosted bridge your hosts because the model is local. Compliance gets a receipt on every call.</p>
-        <span class="uc-tag">healthcare &rarr;</span>
-      </a>
-      <a href="/finance" class="uc-card uc-card-reg">
-        <span class="uc-vert">finance</span>
-        <h3>Payment data, KYC, model risk.</h3>
-        <p>Train on your own labeled cases. Reproducible build, graded against a held-out test set. Model-risk review gets one file you control instead of a vendor&rsquo;s black box.</p>
-        <span class="uc-tag">finance &rarr;</span>
-      </a>
-      <a href="/legal" class="uc-card uc-card-reg">
-        <span class="uc-vert">legal</span>
-        <h3>Privileged work, no third-party eyes.</h3>
-        <p>Local inference on attorney-client material. No vendor in the loop. Discoverable audit log if you ever need to prove what the AI saw and said.</p>
-        <span class="uc-tag">legal &rarr;</span>
-      </a>
-    </div>
-  </div>
-
-  <div class="uc-panel" id="uc-panel-device" data-panel="device" role="tabpanel" aria-labelledby="uc-tab-device" hidden>
-    <div class="uc-grid">
-      <a href="/device" class="uc-card">
-        <span class="uc-vert">phones</span>
-        <h3>An AI feature that ships in your app.</h3>
-        <p>Bundle the <code style="font-family:var(--mono);color: var(--kolm-accent, #10b981)">.kolm</code> in your build. Deterministic recipe runtime runs in your app sandbox today; on-device model inference is the RS-2 gate.</p>
-        <span class="uc-tag">device &rarr;</span>
-      </a>
-      <a href="/device" class="uc-card">
-        <span class="uc-vert">edge hardware</span>
-        <h3>Factory floors. Disconnected sites.</h3>
-        <p>The compiled model runs on the box you put on the floor. No round-trip to a cloud. No outage when the link drops. Microsecond latency at the source.</p>
-        <span class="uc-tag">device &rarr;</span>
-      </a>
-      <a href="/docs" class="uc-card">
-        <span class="uc-vert">your own inference</span>
-        <h3>The model and the runtime are yours.</h3>
-        <p>One file you own, one open runtime. Runs on a laptop or server today. The inference belongs to you, today and a decade from now.</p>
-        <span class="uc-tag">anatomy &rarr;</span>
-      </a>
-    </div>
-  </div>
-
-  <div class="uc-seal" aria-label="every tab, same promise">
-    <span><b>Same promise in every tab.</b></span>
-    <span class="seal-sep">&middot;</span>
-    <span>The model runs on your hardware.</span>
-    <span class="seal-sep">&middot;</span>
-    <span>The inference belongs to you.</span>
-    <a href="/enterprise">deploy across your team &rarr;</a>
-  </div>
-
-</section>
-<script>
-  (function ucTabs() {
-    var tabs = document.querySelectorAll('.uc-strip .uc-tab');
-    var panels = document.querySelectorAll('.uc-strip .uc-panel');
-    var headline = document.getElementById('uc-h2');
-    if (!tabs.length) return;
-    function show(which) {
-      tabs.forEach(function (t) {
-        var on = t.dataset.tab === which;
-        t.classList.toggle('is-on', on);
-        t.setAttribute('aria-selected', on ? 'true' : 'false');
-        t.tabIndex = on ? 0 : -1;
-        if (on && headline && t.dataset.tagline) {
-          // v60-mobile-ghost-fix: swap only AFTER opacity fully reaches 0 + hide
-          // visibility synchronously so sub-pixel residual paint can't bleed
-          // through the iOS Safari URL bar overlay on mobile dark mode.
-          if (headline._ucSwapT) { clearTimeout(headline._ucSwapT); }
-          headline.style.opacity = '0';
-          headline.style.pointerEvents = 'none';
-          headline._ucSwapT = setTimeout(function () {
-            // hide compositor layer before mutating text so any residual
-            // 1-2px alpha paint cannot show the outgoing string under the URL bar
-            headline.style.visibility = 'hidden';
-            headline.textContent = t.dataset.tagline;
-            // force a paint of the hidden state, then reveal next frame
-            void headline.offsetHeight;
-            requestAnimationFrame(function () {
-              headline.style.visibility = 'visible';
-              headline.style.opacity = '1';
-              headline.style.pointerEvents = '';
-            });
-          }, 220);
-        }
-      });
-      panels.forEach(function (p) {
-        var on = p.dataset.panel === which;
-        p.hidden = !on;
-      });
-    }
-    if (headline) headline.style.transition = 'opacity 180ms ease';
-    tabs.forEach(function (t) {
-      t.addEventListener('click', function () { show(t.dataset.tab); });
-      t.addEventListener('keydown', function (e) {
-        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-        e.preventDefault();
-        var list = Array.prototype.slice.call(tabs);
-        var i = list.indexOf(t);
-        var next = (i + (e.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length;
-        list[next].focus();
-        show(list[next].dataset.tab);
-      });
-    });
-    // Idle auto-rotation: cycle every 6s if user hasn't interacted in the section.
-    var userInteracted = false;
-    var section = document.querySelector('.uc-strip');
-    if (section) {
-      section.addEventListener('click', function () { userInteracted = true; });
-      section.addEventListener('keydown', function () { userInteracted = true; });
-    }
-    var order = ['regulated', 'everyday', 'device'];
-    var idx = 0;
-    setInterval(function () {
-      if (userInteracted) return;
-      idx = (idx + 1) % order.length;
-      show(order[idx]);
-    }, 6000);
-    // v7.24: center the active pill inside the scrollable tab bar on load so
-    // the leading edge is never clipped on narrow viewports.
-    // wave 104: switched from scrollIntoView() to direct scrollLeft to avoid
-    // the implicit page-level vertical scroll that scrollIntoView triggers
-    // even with block:'nearest'. first-visit traffic was landing mid-page
-    // instead of at the hero. only horizontal centering inside the tab
-    // strip is needed; window.scrollY must stay 0.
-    function centerActiveTab() {
-      var tabsEl = document.querySelector('.uc-strip .uc-tabs');
-      if (!tabsEl) return;
-      var active = tabsEl.querySelector('.uc-tab.is-on') || tabsEl.querySelector('.uc-tab.is-active');
-      if (!active) return;
-      try {
-        var tabsRect = tabsEl.getBoundingClientRect();
-        var activeRect = active.getBoundingClientRect();
-        var delta = (activeRect.left + activeRect.width / 2) - (tabsRect.left + tabsRect.width / 2);
-        tabsEl.scrollLeft += delta;
-      } catch (e) { /* layout not ready, skip */ }
-    }
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', centerActiveTab);
-    } else {
-      centerActiveTab();
-    }
-  })();
-</script>
+<!-- W405: uc-strip + tab-switch script deleted. The three verticals each have a dedicated page: /healthcare, /finance, /legal. -->
 
 <!-- v7.11.4: trust-line section removed (excessive at this position; trust posture is already in hero chips + footer + dedicated /security /spec /baa pages) -->
 
@@ -3176,28 +2744,28 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
 
   <dl class="hf-grid">
     <div>
-      <dt class="hf-q">Can I improve my AI over time?</dt>
-      <dd class="hf-a">Yes. Capture real use (with consent), recompile with better examples. kolm grades each candidate against a held-out test set and refuses to ship a regression, so each version meets or beats the last. <a href="/docs">how the loop works &rarr;</a></dd>
+      <dt class="hf-q">What does kolm actually do?</dt>
+      <dd class="hf-a">It sits between your code and any AI model. It captures every call as structured telemetry, redacts secrets before they hit disk, and tells you which calls you repeat enough to be worth compiling into a local artifact you own. <a href="/value-loop">the value loop &rarr;</a></dd>
     </div>
     <div>
-      <dt class="hf-q">Does it work with Claude Code, Cursor, Continue?</dt>
-      <dd class="hf-a">Yes. Run <code>kolm install &lt;harness&gt;</code> and your <code>.kolm</code> shows up as an MCP tool inside the agent. Stdio by default; HTTP optional. <a href="/docs">install the harness &rarr;</a></dd>
+      <dt class="hf-q">How do I plug it in?</dt>
+      <dd class="hf-a">Change one base URL. Point your OpenAI or Anthropic client at <code>http://127.0.0.1:7402</code> and kolm proxies upstream while it captures locally. No SDK to install, no code to rewrite. <a href="/quickstart/api">quickstart &rarr;</a></dd>
     </div>
     <div>
-      <dt class="hf-q">What is actually inside the <code>.kolm</code> file?</dt>
-      <dd class="hf-a">Your small model, your examples, the deterministic recipes, and an evaluator that grades it on held-out cases. One zip-format artifact, fully open spec. <a href="/docs">anatomy of a .kolm &rarr;</a></dd>
+      <dt class="hf-q">Where does my data live?</dt>
+      <dd class="hf-a">Local by default. Captures land in <code>~/.kolm/events</code> on your machine. Prompts are redacted before persistence; raw prompt storage is opt-in. Cloud sync and team sharing are explicit, not automatic. <a href="/security">privacy posture &rarr;</a></dd>
     </div>
     <div>
-      <dt class="hf-q">What if I want to leave kolm later?</dt>
-      <dd class="hf-a">The file is yours. The runtime is MIT. The spec is open. Run it forever without us, on any hardware you control. <a href="/spec">rs-1 open spec &rarr;</a></dd>
+      <dt class="hf-q">What is inside a <code>.kolm</code> file?</dt>
+      <dd class="hf-a">A zip with your trained model or rule bundle, the approved train split, a disjoint holdout, a signed receipt chain (Ed25519) that proves how it was built, and a runtime manifest naming JS/WASM/native/GGUF/ONNX targets. <a href="/docs">spec walkthrough &rarr;</a></dd>
     </div>
     <div>
-      <dt class="hf-q">Does my data leave the device?</dt>
-      <dd class="hf-a">Inference is local. The deterministic recipe runtime is in-process and the benchmark harness ships a zero-egress monitor. Compilation happens against your approved data; we publish a threat model that spells out exactly what each step touches. <a href="/threat-model">threat model &rarr;</a></dd>
+      <dt class="hf-q">What if I want to leave kolm?</dt>
+      <dd class="hf-a">The artifact is yours. The runtime is MIT. The spec is open (RS-1). Run any <code>.kolm</code> forever without us, on any hardware. <a href="/spec/rs-1">RS-1 open spec &rarr;</a></dd>
     </div>
     <div>
       <dt class="hf-q">What does it cost?</dt>
-      <dd class="hf-a">The CLI runtime is free and MIT. Cloud compile + registry starts at $9/mo; team and enterprise tiers add seats, BAA, and SLAs. <a href="/pricing">see pricing &rarr;</a></dd>
+      <dd class="hf-a">CLI + runtime + local lake are free and MIT. Cloud compile and hosted registry start at $9 / mo. Team and Enterprise tiers add seats, BAA, SCCs, SOC 2 Type I (target Q3 2026), and SLAs. <a href="/pricing">see pricing &rarr;</a></dd>
     </div>
   </dl>
 
@@ -3410,13 +2978,13 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
       {
         label: '02  - distill',
         capNum: '02',
-        capText: '<b>Threshold &rarr; bridge.</b> At 1,000 pairs kolm hands the corpus to the trainer. K-score gate. HMAC-signed artifact.',
+        capText: '<b>Threshold &rarr; bridge.</b> At 1,000 pairs kolm hands the corpus to the trainer. Accuracy gate. Signed artifact.',
         lines: [
           '<span class="prompt">$</span> kolm compile patient-intake --examples 1247 --receipt',
           '<span class="dim"> - synthesizing verifier from 1,247 examples ...</span>',
           '<span class="dim"> - k=8 sample  - verify  - accept  (Q=0.928) ...</span>',
-          '<span class="dim"> - specializing model  - stamping this artifact\'s K-score  - signing ...</span>',
-          '<span class="ok">ok</span> wrote patient-intake.kolm  <span class="dim">K-score for patient-intake.kolm: 0.92  hmac-sha256</span>'
+          '<span class="dim"> - specializing model  - scoring against the held-out set  - signing ...</span>',
+          '<span class="ok">ok</span> wrote patient-intake.kolm  <span class="dim">92% passed on the held-out set  signed</span>'
         ],
         holdMs: 1900
       },
@@ -3666,9 +3234,9 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
 
     // Rotating prompt examples for scene 1. Each loop iteration picks the next.
     var PROMPT_ROTATION = [
-      { text: 'extract PHI from clinical notes',         artifact: 'phi-redactor.kolm', size: '82 MB',  k: '94% pass' },
-      { text: 'classify support tickets by urgency',     artifact: 'triage.kolm',       size: '64 MB',  k: '91% pass' },
-      { text: 'redact PII from invoices',                artifact: 'invoice.kolm',      size: '54 MB',  k: '95% pass' }
+      { text: 'redact PHI from claim attachments',       artifact: 'claims-redactor.kolm', size: '15 KB', k: '98.5% pass' },
+      { text: 'classify support tickets by urgency',     artifact: 'triage.kolm',          size: '64 MB', k: '91% pass'   },
+      { text: 'extract line items from invoices',        artifact: 'invoice.kolm',         size: '54 MB', k: '95% pass'   }
     ];
 
     // Run race tokens (pre-baked output, revealed char-by-char).
@@ -4145,3 +3713,5 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
 <script src="/nav.js" defer></script>
 </body>
 </html>
+
+

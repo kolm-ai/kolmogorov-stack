@@ -2919,12 +2919,14 @@ the .kolm zip.
   lake: `kolm lake - data-plane analytics for the local event store. (W369)
 
 USAGE
-  kolm lake stats   [--namespace <n>] [--since <iso>] [--until <iso>] [--json]
-  kolm lake tail    [--namespace <n>] [--limit <N>] [--since <iso>] [--json]
-  kolm lake inspect <event-id>                                       [--json]
-  kolm lake export  [--namespace <n>] [--out <file.jsonl>]           [--json]
-  kolm lake purge   [--namespace <n>] [--older-than <days>] [--yes]  [--json]
-  kolm lake sync                                                     [--json]
+  kolm lake stats     [--namespace <n>] [--since <iso>] [--until <iso>] [--json]
+  kolm lake tail      [--namespace <n>] [--limit <N>] [--since <iso>] [--json]
+  kolm lake inspect   <event-id>                                       [--json]
+  kolm lake export    [--namespace <n>] [--out <file.jsonl>]           [--json]
+  kolm lake purge     [--namespace <n>] [--older-than <days>] [--yes]  [--json]
+  kolm lake sync                                                       [--json]
+  kolm lake storage                                                    [--json]
+  kolm lake retention show | set --days <N> | apply [--yes]            [--json]
 
 FLAGS
   --namespace, -n <n>   restrict to one namespace (default: all)
@@ -8934,7 +8936,86 @@ async function cmdLake(args) {
     console.error('usage: kolm lake sync status|enable|disable'); process.exit(EXIT.BAD_ARGS);
   }
 
-  console.error('usage: kolm lake [stats|tail|inspect <id>|export|purge|sync] [--namespace n] [--since 7d] [--json]');
+  // W444 — first-class `storage` verb. Same data as stats.storage but the only
+  // thing returned, so ops scripts don't have to grep through stats JSON.
+  if (sub === 'storage') {
+    const store = await import('../src/event-store.js');
+    const info = store.storeInfo();
+    const path = info.db_path || info.jsonl_path;
+    let disk_used_bytes = 0;
+    try { disk_used_bytes = path ? fs.statSync(path).size : 0; } catch {}
+    const cnt = await store.countEvents({});
+    const c = loadConfig();
+    const out = {
+      driver: info.driver,
+      path,
+      events_dir: info.events_dir,
+      disk_used_bytes,
+      event_count: cnt,
+      retention_days: typeof c.lake_retention_days === 'number' ? c.lake_retention_days : null,
+      cloud_sync: !!c.cloud_sync,
+    };
+    if (jsonOut) { console.log(JSON.stringify(out, null, 2)); return; }
+    console.log('# kolm lake storage');
+    console.log('-'.repeat(72));
+    console.log('driver              ' + out.driver);
+    console.log('path                ' + (out.path || '-'));
+    console.log('events_dir          ' + (out.events_dir || '-'));
+    console.log('disk_used_bytes     ' + out.disk_used_bytes.toLocaleString());
+    console.log('event_count         ' + out.event_count.toLocaleString());
+    console.log('retention_days      ' + (out.retention_days == null ? 'unset (no auto-purge)' : out.retention_days));
+    console.log('cloud_sync          ' + (out.cloud_sync ? 'enabled' : 'disabled'));
+    return;
+  }
+
+  // W444 — retention controls. Stored in ~/.kolm/config.json as
+  // `lake_retention_days`. `show` reads, `set --days N` writes, `apply`
+  // actually deletes (with --dry-run gate; without --yes it dry-runs by default
+  // to avoid stomping). When unset, no automatic purge happens — the local
+  // lake is yours; we don't mass-delete behind your back.
+  if (sub === 'retention') {
+    const sub2 = (rest[0] || 'show').toLowerCase();
+    const c = loadConfig();
+    if (sub2 === 'show') {
+      const days = typeof c.lake_retention_days === 'number' ? c.lake_retention_days : null;
+      if (jsonOut) { console.log(JSON.stringify({ lake_retention_days: days })); return; }
+      console.log('lake_retention_days  ' + (days == null ? 'unset (no auto-purge)' : days));
+      return;
+    }
+    if (sub2 === 'set') {
+      const days = Number(pickL('--days'));
+      if (!Number.isFinite(days) || days < 0) {
+        console.error('usage: kolm lake retention set --days <N>  (N is a positive integer, 0 to clear)');
+        process.exit(EXIT.BAD_ARGS);
+      }
+      if (days === 0) delete c.lake_retention_days;
+      else c.lake_retention_days = Math.floor(days);
+      saveConfig(c);
+      if (jsonOut) { console.log(JSON.stringify({ ok: true, lake_retention_days: c.lake_retention_days || null })); return; }
+      console.log('ok  lake_retention_days=' + (c.lake_retention_days == null ? 'unset' : c.lake_retention_days));
+      return;
+    }
+    if (sub2 === 'apply') {
+      const days = typeof c.lake_retention_days === 'number' ? c.lake_retention_days : null;
+      if (days == null) {
+        console.error('lake_retention_days is unset — run `kolm lake retention set --days N` first.');
+        process.exit(EXIT.BAD_ARGS);
+      }
+      const store = await import('../src/event-store.js');
+      const before = new Date(Date.now() - days * 86400e3).toISOString();
+      const dryRun = !rest.includes('--yes'); // default-safe: must opt in to destructive
+      const r = await store.purgeEvents({ before, dryRun });
+      const result = { lake_retention_days: days, cutoff: before, dry_run: dryRun, ...r };
+      if (jsonOut) { console.log(JSON.stringify(result)); return; }
+      console.log((dryRun ? 'dry-run: would delete ' : 'deleted ') + (dryRun ? r.would_delete : r.deleted) + ' events older than ' + before);
+      if (dryRun) console.log('(pass --yes to actually delete)');
+      return;
+    }
+    console.error('usage: kolm lake retention [show|set --days N|apply [--yes]] [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  console.error('usage: kolm lake [stats|tail|inspect <id>|export|purge|sync|storage|retention] [--namespace n] [--since 7d] [--json]');
   console.error('storage: ~/.kolm/events/events.sqlite (default) — local-first; cloud sync off unless `kolm lake sync enable`.');
   console.error('         honors KOLM_DATA_DIR (sets ~/.kolm root) and KOLM_EVENT_STORE_PATH (event-store file).');
   process.exit(EXIT.USAGE);
@@ -12161,6 +12242,26 @@ function pickFlag(args, name) {
   const v = args[i + 1];
   if (v === undefined || v.startsWith('-')) return '';
   return v;
+}
+
+// W439 — resolve the created_at of the newest .kolm matching a namespace in
+// the artifact dir. Reads recipes.json from each zip and matches on
+// manifest.task.id or filename containing the namespace token. Returns ISO
+// string of the artifact mtime (the proxy for "last compile") or null when
+// no matching artifact exists. Used by `kolm compile --since-last-compile`.
+function _newestArtifactForNamespace(dir, namespace) {
+  try {
+    if (!fs.existsSync(dir)) return null;
+    const files = fs.readdirSync(dir)
+      .filter((f) => f.endsWith('.kolm'))
+      .filter((f) => f.includes(namespace))
+      .map((f) => ({ f, m: fs.statSync(path.join(dir, f)).mtimeMs }))
+      .sort((a, b) => b.m - a.m);
+    if (!files.length) return null;
+    return new Date(files[0].m).toISOString();
+  } catch {
+    return null;
+  }
 }
 
 // Read a JSONL or JSON-array file of eval rows. Tolerant of both shapes the
@@ -17024,6 +17125,35 @@ async function cmdPipeline(args) {
       console.error('usage: kolm pipeline ' + sub + ' --namespace <n> [--strict] [--force] [--no-sign] [--no-install] [--install-target <id>]');
       process.exit(EXIT.BAD_ARGS);
     }
+    // W439 — incremental retrain. --since-last-compile resolves to the
+    // created_at of the most recent .kolm in ~/.kolm/artifacts/ matching the
+    // namespace. --since=<iso> takes a user-supplied lower bound. The opt is
+    // forwarded to compileFull which forwards to prepareDistillCorpus.
+    let sinceIso = null;
+    const sinceFlag = pickFlag(rest, '--since') || pickFlagEq(rest, '--since');
+    if (sinceFlag) sinceIso = String(sinceFlag);
+    if (args.includes('--since-last-compile')) {
+      try {
+        const artDir = path.join(process.env.HOME || process.env.USERPROFILE || os.homedir(), '.kolm', 'artifacts');
+        if (process.env.KOLM_DATA_DIR) {
+          // Honor isolated data dirs (tests, sandboxes).
+          const alt = path.join(process.env.KOLM_DATA_DIR, 'artifacts');
+          if (fs.existsSync(alt)) {
+            const newest = _newestArtifactForNamespace(alt, namespace);
+            if (newest) sinceIso = newest;
+          } else if (fs.existsSync(artDir)) {
+            const newest = _newestArtifactForNamespace(artDir, namespace);
+            if (newest) sinceIso = newest;
+          }
+        } else if (fs.existsSync(artDir)) {
+          const newest = _newestArtifactForNamespace(artDir, namespace);
+          if (newest) sinceIso = newest;
+        }
+      } catch {}
+      if (!sinceIso && !wantJson) {
+        console.log('--since-last-compile: no prior artifact found for namespace ' + namespace + '; running full compile');
+      }
+    }
     const opts = {
       strict: args.includes('--strict'),
       force: args.includes('--force'),
@@ -17036,6 +17166,8 @@ async function cmdPipeline(args) {
       vocab_size: parseInt(pickFlag(rest, '--vocab-size') || pickFlagEq(rest, '--vocab-size') || '4000', 10) || 4000,
       k_target: parseFloat(pickFlag(rest, '--k-target') || pickFlagEq(rest, '--k-target') || '0.85'),
       max_steps: parseInt(pickFlag(rest, '--max-steps') || pickFlagEq(rest, '--max-steps') || '200', 10) || 200,
+      // W439 — incremental retrain window (null = full namespace).
+      since: sinceIso,
     };
     const phases = [];
     let done = null;

@@ -8909,6 +8909,32 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'device_uninstall_error')); }
   });
 
+  // W445 — P3-17 device recommender. Resolves the best device profile for an
+  // optional artifact's runtime + quant + memory profile. Mirrors the CLI
+  // `kolm devices recommend` path so callers (web UI, agents, automation) can
+  // ask "what should I run this artifact on?" without writing the heuristic
+  // themselves. Returns the recommendForProfile envelope verbatim so the
+  // refusal codes (no_profile / no_compatible_target / artifact_exceeds_device
+  // _memory / offline_required_but_device_not_offline_capable) survive across
+  // the API boundary — they're the actionable bit.
+  r.post('/v1/devices/recommend', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const opts = {};
+      if (body.profile) opts.profile = body.profile;
+      if (body.hints) opts.hints = body.hints;
+      if (body.artifact) opts.artifact = body.artifact;
+      const result = await devRecommendForProfile(opts);
+      res.json(result);
+    } catch (e) { res.status(400).json(_w384Err(e, 'device_recommend_error')); }
+  });
+  r.get('/v1/devices/recommend', async (req, res) => {
+    try {
+      const result = await devRecommendForProfile({});
+      res.json(result);
+    } catch (e) { res.status(400).json(_w384Err(e, 'device_recommend_error')); }
+  });
+
   // ============== W384: capture/media (multipart/form-data) ==============
   // Hand-rolled minimal multipart/form-data parser. No npm dep allowed,
   // and this is the only multipart endpoint we ship, so we keep the

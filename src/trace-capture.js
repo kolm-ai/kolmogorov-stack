@@ -89,13 +89,22 @@ function _traceFile(trace_id) {
 }
 
 // Append a span to the trace's log. Chain hash links to prior span.
+//
+// W425 — tenant ownership: every span stamps `tenant_id` from the caller
+// (span.tenant_id) so downstream readers can filter cross-tenant access.
+// If a prior span exists with a different tenant_id the append refuses —
+// trace ownership is established by the first span and cannot be hijacked.
 export async function appendSpan(span) {
   _validateSpan(span);
   const file = _traceFile(span.trace_id);
   await fs.mkdir(path.dirname(file), { recursive: true });
 
+  const tenant_id = (span.tenant_id != null && span.tenant_id !== '')
+    ? String(span.tenant_id) : null;
+
   let prev_hash = 'genesis';
   let seq = 0;
+  let prior_tenant_id = null;
   try {
     const buf = await fs.readFile(file, 'utf8');
     const lines = buf.split('\n').filter(l => l.trim().length > 0);
@@ -103,10 +112,21 @@ export async function appendSpan(span) {
       const last = JSON.parse(lines[lines.length - 1]);
       prev_hash = last.hash;
       seq = (last.seq || 0) + 1;
+      // Pick up tenant ownership from the first appended span. If any prior
+      // span carries a non-null tenant_id, fix that as the trace's owner.
+      for (const ln of lines) {
+        const parsed = JSON.parse(ln);
+        if (parsed.tenant_id != null) { prior_tenant_id = String(parsed.tenant_id); break; }
+      }
     }
   } catch (e) {
     if (e.code !== 'ENOENT') throw e;
   }
+
+  if (prior_tenant_id != null && tenant_id != null && prior_tenant_id !== tenant_id) {
+    throw new Error(`tenant_id mismatch for trace ${span.trace_id}: owner=${prior_tenant_id} caller=${tenant_id}`);
+  }
+  const effective_tenant_id = tenant_id != null ? tenant_id : prior_tenant_id;
 
   const enriched = {
     spec: TRACE_SPEC_VERSION,
@@ -118,6 +138,7 @@ export async function appendSpan(span) {
     started_at: span.started_at,
     ended_at: span.ended_at || null,
     duration_ms: span.duration_ms != null ? span.duration_ms : null,
+    tenant_id: effective_tenant_id,
     payload: span.payload,
     attributes: span.attributes || {},
     status: span.status || 'ok',
@@ -131,19 +152,44 @@ export async function appendSpan(span) {
 
 // Read all spans for a trace, ordered by seq. Returns [] if the file does
 // not exist.
-export async function readTrace(trace_id) {
+//
+// W425 — tenant ownership: when `tenant_id` is passed (non-null), the read
+// returns [] unless every span in the trace either matches or carries a
+// null tenant_id (legacy, pre-W425). Cross-tenant access returns [] so the
+// caller cannot distinguish "doesn't exist" from "not yours".
+export async function readTrace(trace_id, tenant_id = null) {
   if (!/^[0-9a-f]{32}$/.test(trace_id)) throw new Error('bad trace_id');
   const file = _traceFile(trace_id);
   let buf;
   try { buf = await fs.readFile(file, 'utf8'); }
   catch (e) { if (e.code === 'ENOENT') return []; throw e; }
-  return buf.split('\n').filter(Boolean).map(JSON.parse).sort((a, b) => a.seq - b.seq);
+  const spans = buf.split('\n').filter(Boolean).map(JSON.parse).sort((a, b) => a.seq - b.seq);
+  if (tenant_id == null) return spans;
+  const want = String(tenant_id);
+  for (const s of spans) {
+    if (s.tenant_id != null && String(s.tenant_id) !== want) {
+      return [];
+    }
+  }
+  return spans;
 }
 
 // Walk the chain. Returns ok=true if every span's prev_hash + recomputed
 // hash matches; otherwise reports the first break.
-export async function chain(trace_id) {
-  const spans = await readTrace(trace_id);
+//
+// W425 — tenant ownership: `tenant_id`, when supplied, scopes the read; a
+// foreign-tenant trace returns ok=false with reason='tenant_mismatch'.
+export async function chain(trace_id, tenant_id = null) {
+  const spans = await readTrace(trace_id, tenant_id);
+  if (tenant_id != null && spans.length === 0) {
+    // Distinguish empty-or-foreign from genuinely empty by re-reading without
+    // a filter and checking if the file actually had content for another
+    // tenant. The fence still returns ok=false so cross-tenant probes fail.
+    const rawSpans = await readTrace(trace_id);
+    if (rawSpans.length > 0) {
+      return { ok: false, broke_at: -1, reason: 'tenant_mismatch' };
+    }
+  }
   let prev = 'genesis';
   for (let i = 0; i < spans.length; i++) {
     const s = spans[i];
@@ -243,8 +289,29 @@ export function redactForExport(spans, redactor) {
 }
 
 // Summary statistics — used by the CLI `kolm trace stats` command.
-export async function stats(trace_id) {
-  const spans = await readTrace(trace_id);
+//
+// W425 — tenant ownership: when `tenant_id` is supplied, the stats return
+// a zeroed envelope (with reason: 'tenant_mismatch') for foreign-tenant
+// traces. Local stats on the caller's own traces are unchanged.
+export async function stats(trace_id, tenant_id = null) {
+  const spans = await readTrace(trace_id, tenant_id);
+  if (tenant_id != null && spans.length === 0) {
+    const rawSpans = await readTrace(trace_id);
+    if (rawSpans.length > 0) {
+      return {
+        trace_id,
+        total_spans: 0,
+        by_kind: {},
+        llm_calls: 0,
+        total_llm_ms: 0,
+        total_tool_ms: 0,
+        total_cost_usd: 0,
+        started_at: null,
+        finished_at: null,
+        reason: 'tenant_mismatch',
+      };
+    }
+  }
   const by_kind = {};
   let total_llm_ms = 0;
   let total_tool_ms = 0;

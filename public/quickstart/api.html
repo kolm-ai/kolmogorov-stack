@@ -162,6 +162,24 @@ x-kolm-capture-id: cap_018a3e...</span>
 </div></section>
 
 <section class="section"><div class="wrap">
+  <h2>One-config-change for existing SDKs</h2>
+  <p class="lede">Point your existing OpenAI / Anthropic / OpenRouter SDK at <code>kolm.ai</code> (or the local daemon) and every call gets captured, redacted, costed, and event-store&shy;d &mdash; no code changes. Drop these two env vars into your shell and your SDK keeps working.</p>
+  <pre class="terminal"><span class="mute"># Hosted (cloud capture, signed receipts):</span>
+<b>$</b> export OPENAI_BASE_URL=https://kolm.ai/v1
+<b>$</b> export ANTHROPIC_BASE_URL=https://kolm.ai
+
+<span class="mute"># Local daemon (offline, your own machine):</span>
+<b>$</b> kolm connect start --detach
+<b>$</b> export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
+<b>$</b> export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
+<b>$</b> export OPENROUTER_BASE_URL=http://127.0.0.1:8787/v1
+
+<span class="mute"># Now your existing OpenAI / Anthropic / OpenRouter code just works:</span>
+<b>$</b> python -c &quot;from openai import OpenAI; print(OpenAI().chat.completions.create(model='gpt-4o-mini', messages=[{'role':'user','content':'hi'}]).choices[0].message.content)&quot;</pre>
+  <p class="lede" style="margin-top:18px">Surface covered (server <em>and</em> daemon, same envelope): <code>/v1/chat/completions</code>, <code>/v1/responses</code>, <code>/v1/embeddings</code>, <code>/v1/audio/transcriptions</code>, <code>/v1/audio/speech</code>, <code>/v1/messages</code> (Anthropic), <code>/v1/openrouter/v1/chat/completions</code> (with <code>HTTP-Referer</code> + <code>X-Title</code>), <code>GET /v1/models</code>. Every call emits a canonical event row in your lake.</p>
+</div></section>
+
+<section class="section"><div class="wrap">
   <h2>The other quickstarts</h2>
   <p class="lede">Same five-step value loop, different surface.</p>
   <div class="related">

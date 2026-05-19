@@ -472,7 +472,13 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
 
   // 1. plan ----------------------------------------------------------------
   // Pull a sample of events from the namespace and run the training planner.
-  const { pairs: corpusPairs, stats: corpusStats } = await prepareDistillCorpus({ namespace, split: 'all', tenant_id: tenantScope });
+  // W439 — opts.since filters the corpus to events created strictly AFTER the
+  // given timestamp. Used by `kolm compile --since-last-compile` to drive
+  // incremental retrain over only the new approvals since the previous
+  // artifact's created_at. cmdCompile resolves last-compile to the artifact
+  // mtime before invoking compileFull.
+  const sinceFilter = opts.since != null ? opts.since : null;
+  const { pairs: corpusPairs, stats: corpusStats } = await prepareDistillCorpus({ namespace, split: 'all', tenant_id: tenantScope, since: sinceFilter });
   const planRows = corpusPairs.map((p) => ({ input: p.prompt, output: p.response }));
   const plan = await plannerPlan('inline', { rows: planRows });
   _writePhaseLog(jobId, 'plan', { plan_id: plan.plan_id, task: plan.task, backbone: plan.backbone, examples: planRows.length });
@@ -517,6 +523,10 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     job_id: jobId,
     pair_count: corpusPairs.length,
     stats: corpusStats,
+    // W439 — surface incremental-retrain window on the phase event so
+    // watchers / logs can confirm the --since filter was applied.
+    since: corpusStats && corpusStats.since ? corpusStats.since : null,
+    dropped_since: corpusStats && corpusStats.dropped_since ? corpusStats.dropped_since : 0,
   };
 
   // 4. dataset_split -------------------------------------------------------
@@ -713,6 +723,74 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     ml_pipeline_run: !!quantizeInfo.ml_pipeline_run,
   };
 
+  // 6.5. recipe_synthesis (W438) — opt-in via opts.synthesize_recipe. Builds a
+  // real JS classifier/regex recipe from trainPairs via src/synthesis.js
+  // (pattern strategy, CPU-only, no GPU/teacher needed) and scores it against
+  // holdoutPairs via src/verifier.js. Produces real eval_result so the
+  // resulting artifact passes productionReady() without allow_stub. This is
+  // the rule-class real-compile lane the W437 audit asked for.
+  //
+  // Distill-class real compile (rented teacher inference, GPU/cloud) uses the
+  // existing _resolveWorkerMode() path: KOLM_DISTILL_TEACHER or
+  // ANTHROPIC_API_KEY wired ⇒ worker_mode='collect'/'full'. That path is
+  // exercised by tests/wave438-rented-distill.test.js (env-gated).
+  let synthesizedRecipes = null;
+  let synthEvalResult = null;
+  const wantSynth = !!opts.synthesize_recipe
+    && !opts.recipes
+    && trainPairs.length >= 2
+    && holdoutPairs.length >= 1;
+  if (wantSynth) {
+    try {
+      const { synthesize } = await import('./synthesis.js');
+      const { compileJs, verify } = await import('./verifier.js');
+      const positives = trainPairs.map((p) => ({ input: p.prompt, expected: p.response }));
+      const outputSpec = opts.output_spec || { type: 'enum' };
+      const synth = await synthesize({ positives, negatives: [], output_spec: outputSpec, priors: {} });
+      const source = synth.accepted ? synth.source : (synth.best_source || null);
+      if (source) {
+        const compiled = compileJs(source);
+        const holdoutCases = holdoutPairs.map((p) => ({ input: p.prompt, expected: p.response }));
+        const holdoutVerify = verify(compiled, { positives: holdoutCases });
+        synthesizedRecipes = [{
+          id: 'rcp_wave438_synth_' + jobId,
+          name: 'wave438 synthesized rule',
+          schema: { input: {}, output: {} },
+          source,
+          class: 'rule',
+        }];
+        synthEvalResult = {
+          pass_rate: holdoutVerify.pass_rate_positive,
+          cases: holdoutVerify.trace.slice(0, 50),
+          // K-score V (eval coverage) is "cases covered / cases declared",
+          // NOT "holdout fraction of corpus". We declared holdoutCases.length
+          // eval cases and verified all of them, so V = 1.0. The previous
+          // formula (holdoutCases / total_corpus) penalized real-eval coverage
+          // for being a proper train/holdout split — exactly backwards.
+          coverage: holdoutCases.length > 0 ? 1.0 : 0,
+        };
+        _writePhaseLog(jobId, 'recipe_synthesis', {
+          accepted: !!synth.accepted,
+          source_bytes: Buffer.byteLength(source, 'utf8'),
+          holdout_pass_rate: holdoutVerify.pass_rate_positive,
+          holdout_n: holdoutCases.length,
+        });
+        yield {
+          phase: 'recipe_synthesis',
+          job_id: jobId,
+          accepted: !!synth.accepted,
+          source_bytes: Buffer.byteLength(source, 'utf8'),
+          holdout_pass_rate: holdoutVerify.pass_rate_positive,
+          holdout_n: holdoutCases.length,
+        };
+      } else {
+        _writePhaseLog(jobId, 'recipe_synthesis', { error: 'no candidate compiled', reason: synth.reason || null });
+      }
+    } catch (e) {
+      _writePhaseLog(jobId, 'recipe_synthesis', { error: String(e.message || e) });
+    }
+  }
+
   // 7. bundle --------------------------------------------------------------
   // Wave 409c — compute honest source-type stats from corpusPairs metadata.
   // Pairs that came from the event store carry an event_id; explicit
@@ -745,8 +823,25 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   if (sourceSeedCount > 0 && syntheticCount === sourceSeedCount && !allowSynthetic && !force) {
     throw new Error('compileFull: synthetic-only seeds (' + syntheticCount + '/' + sourceSeedCount + '); pass opts.allow_synthetic or opts.force to override');
   }
+  // W438 — fold synthesized recipe + eval_result into bundle opts so the
+  // existing _bundlePhase contract (opts.recipes, opts.eval_result) picks
+  // them up. Caller-supplied opts.recipes / opts.eval_result still win.
+  // allow_below_gate defaults to true on the synth path because the
+  // pattern-strategy synthClassifier is bursty on small holdouts (n<20) and
+  // we want the artifact to materialize so productionReady() can record the
+  // honest low-K verdict — the verdict gate is the load-bearing reject path,
+  // not the buildPayload throw. Caller can still pass allow_below_gate:false
+  // to force the throw (release pipelines).
+  const bundleOpts = (synthesizedRecipes || synthEvalResult)
+    ? {
+        ...opts,
+        recipes: opts.recipes || synthesizedRecipes,
+        eval_result: opts.eval_result || synthEvalResult,
+        allow_below_gate: (opts.allow_below_gate === false) ? false : true,
+      }
+    : opts;
   const artifactResult = await _bundlePhase({
-    jobId, namespace, distillResult, plan, tokenizerInfo, datasetId: trainId, splitInfo, trainPairs, holdoutPairs, sourceTypeStats, opts,
+    jobId, namespace, distillResult, plan, tokenizerInfo, datasetId: trainId, splitInfo, trainPairs, holdoutPairs, sourceTypeStats, opts: bundleOpts,
   });
   _writePhaseLog(jobId, 'bundle', {
     out_path: artifactResult.outPath,

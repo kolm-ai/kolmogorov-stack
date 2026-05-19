@@ -50,15 +50,16 @@
   header.site .right .ghost:hover { color: var(--ink); }
   header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
 
-  section.hero { padding: 88px 0 24px; }
+  section.hero { padding: 120px 0 24px; }
   .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
   .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
-  h1 { margin: 22px 0 16px; font-size: clamp(36px, 5.4vw, 56px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
+  h1 { margin: 22px 0 22px; font-size: clamp(48px, 6.4vw, 80px); line-height: 1.02; font-weight: 500; max-width: 16ch; letter-spacing: -0.025em; }
   h1 .tone { color: var(--good); }
-  p.lede { margin: 0 0 28px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
+  p.lede { margin: 0 0 36px; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: var(--ink-mute); max-width: 58ch; }
   p.lede b { color: var(--ink); font-weight: 500; }
 
-  h2 { margin: 48px 0 12px; font-size: 22px; font-weight: 500; }
+  h2 { margin: 120px 0 22px; font-size: clamp(36px, 4.2vw, 56px); line-height: 1.05; font-weight: 500; letter-spacing: -0.02em; max-width: 20ch; }
+  h2 + p { font-size: clamp(16px, 1.3vw, 18px); max-width: 58ch; margin-bottom: 32px; }
   p { margin: 0 0 14px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.65; }
   p code, li code, td code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
 
@@ -170,8 +171,8 @@
 
 <section class="hero">
   <div class="wrap-wide">
-    <h1>Every inference, <span class="tone">triaged.</span></h1>
-    <p class="lede"><b>Point your provider client at kolm. Every call is captured, hashed, and dropped into this inbox.</b> Keep what matters, discard what's noise, promote a winner into a recipe. At 1,000 pairs the inbox hands the namespace to the distill bridge, which returns a signed <code>.kolm</code> Specialist you can serve on your own hardware.</p>
+    <h1>Your <span class="tone">captures inbox.</span></h1>
+    <p class="lede"><b>Point your provider client at kolm. Every prompt &amp; response lands here.</b> Keep what matters, discard the noise, promote a winner into a recipe. At 1,000 pairs the inbox hands the namespace to the distill bridge, which returns a signed <code>.kolm</code> Specialist you can run on your own hardware.</p>
 
     <div id="signedout" class="panel" style="border-color:var(--accent-strong);background:rgba(126,240,210,0.04)">
       <h3 style="margin:0 0 8px;color:var(--ink)">Sign in or create an account to see your captures stream live</h3>
@@ -268,19 +269,17 @@
       </div>
     </div>
 
-    <h2>How the loop closes</h2>
-    <table class="tbl">
-      <thead><tr><th>Step</th><th>What happens</th></tr></thead>
-      <tbody>
-        <tr><td><b>1. Capture</b></td><td>Your client hits <code>kolm.ai/v1/capture/{openai,anthropic}</code>. We forward upstream, return the response, and record <code>(model, prompt, output, status, latency, ts, namespace)</code> under your tenant. Send the namespace via <code>x-kolm-namespace</code>; the inbox surface and the distill counter share the same namespace field.</td></tr>
-        <tr><td><b>2. Triage</b></td><td><b>Keep:</b> mark for export. <b>Discard:</b> hide from the inbox and exclude from <code>/v1/labels/synthesize-corpus</code> and <code>/v1/specialists/auto-distill</code>. <b>Promote:</b> deep-link into the recipe playground to lift one observation into a reusable spec.</td></tr>
-        <tr><td><b>3. Distill</b></td><td>At 1,000 kept captures in a namespace, the namespace flips to <i>ready</i>. One click fires <code>POST /v1/specialists/auto-distill</code>; the route hands the job to the configured trainer bridge that owns the fit, scoring, and signing, then returns a signed <code>.kolm</code> Specialist back to your account.</td></tr>
-        <tr><td><b>4. Switch</b></td><td>Re-point the client at your own <code>kolm serve</code>. Per-call cost drops to electricity. Each <code>.kolm</code> artifact carries an HMAC-SHA256 signature over its archive; each invocation returns a <code>_kolm</code> run metadata block the issuer or any holder of the shared tenant secret can re-verify.</td></tr>
-      </tbody>
-    </table>
+    <h2>How the loop closes.</h2>
+    <p>Four steps. One screen. Every transition is auditable from the inbox.</p>
+    <ol style="padding-left:24px;margin:0 0 8px;color:var(--ink-mute);font-size:15px;line-height:1.7">
+      <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Capture.</b> Your client hits <code>kolm.ai/v1/capture/{openai,anthropic}</code>. We forward upstream, return the response, and record the pair under your tenant + namespace.</li>
+      <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Triage.</b> Keep, discard, or promote each row. Discards are excluded from <code>/v1/specialists/auto-distill</code>.</li>
+      <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Distill.</b> At 1,000 kept captures the namespace flips <i>ready</i>. One click hands the job to the trainer bridge and returns a signed <code>.kolm</code> Specialist.</li>
+      <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Switch.</b> Re-point the client at your own <code>kolm serve</code>. Per-call cost drops to electricity. Each invocation returns a <code>_kolm</code> block any holder of the tenant secret can re-verify.</li>
+    </ol>
 
-    <h2>What we never persist</h2>
-    <p>Your upstream provider key (forwarded in <code>x-upstream-api-key</code>, dropped after the call). Cross-tenant data: the inbox is scoped to your tenant id by your API key. Captured prompts and responses are stored on the tenant row until you delete them via the inbox or your account is soft-deleted.</p>
+    <h2>What we never keep.</h2>
+    <p>Your upstream key is forwarded in <code>x-upstream-api-key</code> and dropped after the call. The inbox is scoped by your API key; cross-tenant rows are never returned. Captured pairs live on your tenant row until you delete them.</p>
   </div>
 </section>
 
@@ -290,63 +289,12 @@
 
 <footer class="site-footer">
   <div class="wrap">
-    <div class="meta">
-      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
-    </div>
-    <div class="links">
-      <div>
-        <div class="col-h">build</div>
-        <a href="/captures">captures</a>
-        <a href="/compile">compile</a>
-        <a href="/run">run</a>
-        <a href="/docs">recall</a>
-        <a href="/builder">builder</a>
-        <a href="/sdks">sdks</a>
-        <a href="/quickstart">quickstart</a>
-        <a href="/cli">cli</a>
-      </div>
-      <div>
-        <div class="col-h">deploy</div>
-        <a href="/teams">teams</a>
-        <a href="/tunnels">remote access</a>
-        <a href="/byoc">byoc cloud</a>
-        <a href="/airgap">airgap</a>
-        <a href="/enterprise">enterprise</a>
-      </div>
-      <div>
-        <div class="col-h">proof</div>
-        <a href="/benchmarks">benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/research">research</a>
-        <a href="/k-score">k-score</a>
-        <a href="/leaderboard">registry</a>
-        <a href="/spec">rs-1 spec</a>
-        <a href="/case-studies">case studies</a>
-      </div>
-      <div>
-        <div class="col-h">industries</div>
-        <a href="/healthcare">healthcare</a>
-        <a href="/finance">finance</a>
-        <a href="/legal">legal</a>
-        <a href="/device">device</a>
-        <a href="/docs">cookbook</a>
-        <a href="/compliance-packs">compliance packs</a>
-      </div>
-      <div>
-        <div class="col-h">company</div>
-        <a href="/pricing">pricing</a>
-        <a href="/docs">docs</a>
-        <a href="/roadmap">roadmap</a>
-        <a href="/manifesto">manifesto</a>
-        <a href="/roi">roi</a>
-      </div>
-    </div>
-    <small class="footer-tag">
-      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
-    </small>
-    <nav aria-label="kolm.ai marketing" class="footer-nav-marketing" style="margin-top:14px;font-size:11.5px;letter-spacing:0.04em;color:var(--ink-faint)">
-      explore: <a href="/product">Product</a> &middot; <a href="/models">Models</a> &middot; <a href="/docs">Docs</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/enterprise">Enterprise</a>
+    <nav aria-label="kolm.ai marketing" class="footer-nav-marketing" style="margin-top:0;font-size:12px;letter-spacing:0.04em;color:var(--ink-faint);text-align:center">
+      <a href="/product">Product</a> &middot; <a href="/models">Models</a> &middot; <a href="/docs">Docs</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/enterprise">Enterprise</a>
     </nav>
+    <small class="footer-tag" style="display:block;margin-top:14px;text-align:center;color:var(--ink-faint);font-size:11.5px">
+      kolm.ai &middot; <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/status">status</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a>
+    </small>
   </div>
 </footer>
 

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>API keys · Account · kolm.ai</title>
+<meta name="description" content="List, rotate, and revoke kolm.ai API keys. Real keys are never shown in full &ndash; only the prefix and last 4 characters. CLI mirror: kolm keys list / rotate / revoke.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/api-keys">
+<meta property="og:title" content="API keys &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="List, rotate, and revoke kolm.ai API keys. Real keys never shown in full." />
+<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/api-keys" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"API keys &middot; Account &middot; kolm.ai","description":"List, rotate, and revoke kolm.ai API keys.","url":"https://kolm.ai/account/api-keys","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"API keys","item":"https://kolm.ai/account/api-keys"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line);color:var(--ink);vertical-align:top}
+.ktable tr:hover td{background:var(--bg-elev)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:#7ef0d2}.pill.warn{color:#d6a65a}.pill.bad{color:#ff6b91}.pill.mute{color:var(--ink-faint)}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.btn.primary:hover{filter:brightness(1.1);color:#0b0d10}
+.btn.bad{color:#ff6b91;border-color:rgba(255,107,145,0.4)}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.toolbar input[type=text],.toolbar select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.code-snippet{background:var(--bg-elev);border:1px solid var(--line);border-radius:5px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--ink);overflow-x:auto;margin:8px 0}
+.code-snippet .c{color:var(--ink-faint)}
+.kbd{font-family:var(--mono);font-size:11px;background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--ink-mute);border:1px solid var(--line)}
+.help{font-size:12px;color:var(--ink-faint);margin:6px 0 0;line-height:1.55}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
+</style>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &middot; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+    <div class="site-actions"><a href="/docs">Help</a></div>
+  </div>
+</header>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections">
+  <h2>Account</h2>
+  <ul>
+    <li><a href="/account">Settings</a></li>
+    <li><a href="/account/api-keys" aria-current="page">API keys</a></li>
+    <li><a href="/account/audit-log">Audit log</a></li>
+    <li><a href="/account/security/2fa">Two-factor (2FA)</a></li>
+    <li><a href="/account/billing">Billing</a></li>
+    <li><a href="/account/overview">Overview</a></li>
+  </ul>
+</nav>
+
+<section class="acct-content">
+<h1>API keys.</h1>
+<p class="lede">Every kolm.ai API key for this tenant. You can rotate or revoke individual keys; the full secret is never shown again after creation &ndash; only the prefix and last 4 characters. Compromised a key? Revoke it now and create a fresh one. Plain language: this page is the source of truth for what can call your account.</p>
+
+<div class="kpanel" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+  <div>
+    <h2 style="margin:0">Active keys</h2>
+    <p class="pdesc" style="margin:4px 0 0">Endpoint: <code>GET /v1/account/keys</code>. Rotate creates a new key and immediately invalidates the old one.</p>
+  </div>
+  <div class="toolbar" style="margin:0">
+    <button id="btn-create" class="btn primary" type="button">Create new key</button>
+    <button id="btn-rotate-all" class="btn" type="button">Rotate current</button>
+  </div>
+</div>
+
+<table class="ktable" aria-label="API keys">
+  <thead>
+    <tr>
+      <th scope="col">Prefix &middot; last 4</th>
+      <th scope="col">Label</th>
+      <th scope="col">Scopes</th>
+      <th scope="col">Created</th>
+      <th scope="col">Last used</th>
+      <th scope="col">Status</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody id="keys-rows">
+    <tr><td colspan="7" style="text-align:center;color:var(--ink-faint);padding:18px">Loading keys&hellip;</td></tr>
+  </tbody>
+</table>
+
+<div id="empty-state" class="empty" hidden data-empty-state>
+  <strong>No API keys yet.</strong> Create your first key with <code>kolm signup</code> in a terminal or click <em>Create new key</em> above. The full secret is shown exactly once at creation; copy it into your secrets manager immediately.
+</div>
+
+<h2 style="margin-top:30px">CLI mirror</h2>
+<p class="help">Everything on this page is available as a kolm CLI command. Pipe-friendly, scriptable, no browser required.</p>
+<div class="code-snippet">
+<span class="c"># list every key on the tenant (table)</span><br>
+kolm keys list<br><br>
+<span class="c"># rotate the current key (old key invalidates immediately)</span><br>
+kolm keys rotate<br><br>
+<span class="c"># revoke a specific key by prefix</span><br>
+kolm keys revoke ks_a3f1<br><br>
+<span class="c"># JSON output for scripting</span><br>
+kolm keys list --format json
+</div>
+
+<h2 style="margin-top:30px">What rotation does</h2>
+<ul style="color:var(--ink-mute);font-size:14px;line-height:1.7;max-width:64ch">
+  <li><strong>New secret returned exactly once.</strong> Stored as a salted SHA-256 hash on the server; the cleartext is not retrievable.</li>
+  <li><strong>Old key stops working immediately.</strong> In-flight requests using the old key get a 401 within the next round-trip.</li>
+  <li><strong>Webhooks keep their signing secrets</strong> &ndash; webhook signing is separate from API key auth (see <a href="/docs/webhooks">/docs/webhooks</a>).</li>
+  <li><strong>Audit entry written.</strong> A row lands on <a href="/account/audit-log">/account/audit-log</a> with <code>action=key.rotated</code>, your IP, and the new key prefix.</li>
+</ul>
+
+<h2 style="margin-top:30px">Scope reference</h2>
+<table class="ktable" aria-label="Scope reference">
+  <thead><tr><th>Scope</th><th>Grants</th></tr></thead>
+  <tbody>
+    <tr><td><code>read</code></td><td>GET endpoints on /v1/* (account, artifacts, captures, billing).</td></tr>
+    <tr><td><code>write</code></td><td>POST/PATCH/DELETE on /v1/* except billing &amp; account mutations.</td></tr>
+    <tr><td><code>compile</code></td><td>Submit compile jobs and read their artifacts. Required for <code>kolm compile</code>.</td></tr>
+    <tr><td><code>capture</code></td><td>Post observations to /v1/captures and read your tenant&rsquo;s capture stream.</td></tr>
+    <tr><td><code>admin</code></td><td>Member management, plan changes, BAA signing. Owner-only.</td></tr>
+  </tbody>
+</table>
+
+<p class="help" style="margin-top:18px">See <a href="/docs/api">/docs/api</a> for the full endpoint table and rate-limit headers (<code>X-RateLimit-Remaining</code>).</p>
+</section>
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/docs">docs</a> &middot; kolm.ai
+    </small>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+  var rows=document.getElementById("keys-rows");
+  var empty=document.getElementById("empty-state");
+
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+  function fmtDate(t){if(!t)return "&ndash;";try{var d=new Date(t);return d.toISOString().slice(0,10)+" "+d.toTimeString().slice(0,5);}catch(_){return esc(String(t));}}
+  function maskPrefix(k){if(!k)return "&ndash;";k=String(k);if(k.length<=8)return esc(k);return esc(k.slice(0,6))+"&hellip;"+esc(k.slice(-4));}
+
+  function render(keys){
+    if(!keys||!keys.length){rows.innerHTML="";empty.hidden=false;return;}
+    empty.hidden=true;
+    rows.innerHTML=keys.map(function(k){
+      var status=k.revoked_at?'<span class="pill bad">revoked</span>':(k.last_used_at?'<span class="pill ok">active</span>':'<span class="pill mute">unused</span>');
+      var action=k.revoked_at?'<span class="pill mute">&ndash;</span>':'<button class="btn bad" type="button" data-revoke="'+esc(k.prefix||k.id||"")+'" aria-label="Revoke key '+esc(k.label||k.prefix||"")+'">Revoke</button>';
+      return "<tr>"+
+        "<td><code>"+maskPrefix(k.display||k.prefix||k.id)+"</code></td>"+
+        "<td>"+esc(k.label||"&ndash;")+"</td>"+
+        "<td>"+esc((k.scopes||["read"]).join(", "))+"</td>"+
+        "<td>"+fmtDate(k.created_at)+"</td>"+
+        "<td>"+(k.last_used_at?fmtDate(k.last_used_at):'<span style="color:var(--ink-faint)">never</span>')+"</td>"+
+        "<td>"+status+"</td>"+
+        "<td>"+action+"</td>"+
+        "</tr>";
+    }).join("");
+    rows.querySelectorAll("button[data-revoke]").forEach(function(b){
+      b.addEventListener("click",function(){
+        var p=b.getAttribute("data-revoke");
+        if(!confirm("Revoke key "+p+"? Any client using it will receive 401 on the next request. This cannot be undone."))return;
+        fetch("/v1/account/keys/"+encodeURIComponent(p),{method:"DELETE",headers:headers()}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);load();}).catch(function(){alert("Revoke failed. Use kolm keys revoke "+p+" from your terminal.");});
+      });
+    });
+  }
+
+  function headers(){var h={"Accept":"application/json"};if(key)h["Authorization"]="Bearer "+key;return h;}
+
+  function load(){
+    if(!key){
+      rows.innerHTML='<tr><td colspan="7" style="text-align:center;padding:18px"><a href="/signin?next='+encodeURIComponent(location.pathname)+'">Sign in</a> to view your API keys.</td></tr>';
+      return;
+    }
+    fetch("/v1/account/keys",{headers:headers()}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(j){render((j&&j.keys)||j||[]);}).catch(function(){
+      // Fallback: show one row built from the current key in localStorage
+      var prefix=(key||"").slice(0,8);
+      render([{prefix:prefix,display:key,label:"this browser",scopes:["read","write","compile","capture"],created_at:null,last_used_at:new Date().toISOString()}]);
+    });
+  }
+
+  document.getElementById("btn-create").addEventListener("click",function(){
+    if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+    var label=prompt("Label for the new key (e.g. ci-runner, laptop-2026):");
+    if(!label)return;
+    fetch("/v1/account/keys",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},headers()),body:JSON.stringify({label:label})}).then(function(r){return r.json();}).then(function(j){
+      if(j&&j.api_key){alert("New key (copy now, shown once):\n\n"+j.api_key);load();}
+      else{alert("Create failed. Use kolm keys create from your terminal.");}
+    }).catch(function(){alert("Create failed. Use kolm keys create from your terminal.");});
+  });
+
+  document.getElementById("btn-rotate-all").addEventListener("click",function(){
+    if(!confirm("Rotate the current key? The old key stops working immediately."))return;
+    fetch("/v1/account/rotate-key",{method:"POST",headers:headers()}).then(function(r){return r.json();}).then(function(j){
+      if(j&&j.api_key){try{localStorage.setItem("kolm-key",j.api_key);}catch(_){}alert("Rotated. New key (copy now):\n\n"+j.api_key);location.reload();}
+      else{alert("Rotate failed.");}
+    }).catch(function(){alert("Rotate failed.");});
+  });
+
+  load();
+})();
+</script>
+<script defer src="/nav.js"></script>
+</body>
+</html>

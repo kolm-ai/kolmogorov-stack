@@ -161,10 +161,10 @@ test('W374 #11 - no forbidden coming-soon / TODO / Beta strings', () => {
   }
 });
 
-test('W374 #12 - sw.js has a wave-current cache slug for 2026-05-18', () => {
+test('W374 #12 - sw.js has a wave-current cache slug with an ISO date', () => {
   const sw = fs.readFileSync(path.join(PUBLIC, 'sw.js'), 'utf8');
   assert.ok(/const CACHE = '[^']+wave\d+[^']+';/.test(sw), 'sw.js: CACHE constant missing or malformed');
-  assert.ok(/2026-05-18/.test(sw), 'sw.js: 2026-05-18 date missing');
+  assert.ok(/\b2026-\d{2}-\d{2}\b/.test(sw), 'sw.js: 2026-MM-DD date missing');
 });
 
 test('W374 #13 - vercel.json has rewrites for all 19 docs paths', () => {

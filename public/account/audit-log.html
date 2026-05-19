@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Audit log · Account · kolm.ai</title>
+<meta name="description" content="Filterable audit log for kolm.ai: every login, key rotation, plan change, billing event, member addition, BAA signing, and BYOC enrollment. CSV export. Read-only. CLI mirror: kolm audit --since 7d --format csv.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/audit-log">
+<meta property="og:title" content="Audit log &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Every account action on kolm.ai: filterable, CSV-exportable, read-only." />
+<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/audit-log" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Audit log &middot; Account &middot; kolm.ai","description":"Filterable audit log for the tenant: logins, key rotations, plan changes, billing, member changes, BAA, BYOC.","url":"https://kolm.ai/account/audit-log","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Audit log","item":"https://kolm.ai/account/audit-log"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px;background:var(--bg-elev)}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line);color:var(--ink);vertical-align:top;word-break:break-word}
+.ktable tr:hover td{background:var(--bg-elev)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:#7ef0d2}.pill.warn{color:#d6a65a}.pill.bad{color:#ff6b91}.pill.mute{color:var(--ink-faint)}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.btn.primary:hover{filter:brightness(1.1);color:#0b0d10}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.toolbar input[type=search],.toolbar input[type=text],.toolbar select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px;min-width:140px}
+.toolbar label{font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);display:flex;flex-direction:column;gap:2px}
+.code-snippet{background:var(--bg-elev);border:1px solid var(--line);border-radius:5px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--ink);overflow-x:auto;margin:8px 0}
+.code-snippet .c{color:var(--ink-faint)}
+.help{font-size:12px;color:var(--ink-faint);margin:6px 0 0;line-height:1.55}
+.readonly-note{display:inline-block;padding:3px 9px;border:1px solid var(--line-strong);border-radius:4px;font-size:11px;color:var(--ink-faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;margin-left:8px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg-card)}
+.table-wrap table{margin:0}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
+</style>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &middot; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+    <div class="site-actions"><a href="/docs">Help</a></div>
+  </div>
+</header>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections">
+  <h2>Account</h2>
+  <ul>
+    <li><a href="/account">Settings</a></li>
+    <li><a href="/account/api-keys">API keys</a></li>
+    <li><a href="/account/audit-log" aria-current="page">Audit log</a></li>
+    <li><a href="/account/security/2fa">Two-factor (2FA)</a></li>
+    <li><a href="/account/billing">Billing</a></li>
+    <li><a href="/account/overview">Overview</a></li>
+  </ul>
+</nav>
+
+<section class="acct-content">
+<h1>Audit log. <span class="readonly-note">read-only</span></h1>
+<p class="lede">Every account-level action on this tenant: who did what, from where, when. The log is append-only and immutable; admins cannot edit or delete entries. Use this for incident review, SOC 2 control evidence, and HIPAA accounting-of-disclosures. Retention is 365 days by default (configurable on Enterprise).</p>
+
+<div class="kpanel">
+  <h2>Filters</h2>
+  <p class="pdesc">Combine filters to narrow the view. The export button below honors the current filter set. Backed by <code>GET /v1/account/audit-log</code>.</p>
+  <form id="filters" class="toolbar" aria-label="Audit log filters">
+    <label>Since
+      <select id="f-since" name="since">
+        <option value="1d">1 day</option>
+        <option value="7d" selected>7 days</option>
+        <option value="30d">30 days</option>
+        <option value="90d">90 days</option>
+        <option value="365d">365 days</option>
+        <option value="all">All</option>
+      </select>
+    </label>
+    <label>Action
+      <select id="f-action" name="action">
+        <option value="">Any action</option>
+        <option value="login">login</option>
+        <option value="logout">logout</option>
+        <option value="key.created">key.created</option>
+        <option value="key.rotated">key.rotated</option>
+        <option value="key.revoked">key.revoked</option>
+        <option value="plan.changed">plan.changed</option>
+        <option value="billing.event">billing.event</option>
+        <option value="member.added">member.added</option>
+        <option value="member.removed">member.removed</option>
+        <option value="baa.signed">baa.signed</option>
+        <option value="byoc.enrolled">byoc.enrolled</option>
+        <option value="2fa.enrolled">2fa.enrolled</option>
+        <option value="2fa.disabled">2fa.disabled</option>
+        <option value="password.reset">password.reset</option>
+      </select>
+    </label>
+    <label>Actor
+      <input type="text" id="f-actor" name="actor" placeholder="email or key prefix" aria-describedby="f-actor-help">
+    </label>
+    <label>Source IP
+      <input type="text" id="f-ip" name="ip" placeholder="e.g. 198.51.100.0/24">
+    </label>
+    <label style="justify-content:flex-end">
+      <span>&nbsp;</span>
+      <button class="btn primary" type="submit">Apply</button>
+    </label>
+    <label style="justify-content:flex-end">
+      <span>&nbsp;</span>
+      <button class="btn" id="btn-export" type="button">Download CSV</button>
+    </label>
+  </form>
+  <p id="f-actor-help" class="help">Actor matches a user email (OAuth sign-in) or the prefix of an API key (<code>ks_abcd1234</code>).</p>
+</div>
+
+<div class="table-wrap">
+<table class="ktable" aria-label="Audit log entries">
+  <thead>
+    <tr>
+      <th scope="col">Timestamp (UTC)</th>
+      <th scope="col">Actor</th>
+      <th scope="col">Action</th>
+      <th scope="col">Target</th>
+      <th scope="col">Source IP</th>
+      <th scope="col">Geo</th>
+    </tr>
+  </thead>
+  <tbody id="log-rows">
+    <tr><td colspan="6" style="text-align:center;color:var(--ink-faint);padding:18px">Loading audit entries&hellip;</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div id="empty-state" class="empty" hidden data-empty-state>
+  <strong>No audit entries in the selected window.</strong> Try widening the time range or clearing the action filter. New sign-ins, key rotations, and plan changes appear here within a few seconds.
+</div>
+
+<h2 style="margin-top:30px">CLI mirror</h2>
+<p class="help">Pipe-friendly export for SIEM ingestion or local archival.</p>
+<div class="code-snippet">
+<span class="c"># last 7 days, CSV</span><br>
+kolm audit --since 7d --format csv > audit.csv<br><br>
+<span class="c"># only key rotations, JSON Lines, last 90 days</span><br>
+kolm audit --since 90d --action key.rotated --format jsonl<br><br>
+<span class="c"># stream live events (SSE)</span><br>
+kolm audit --tail<br><br>
+<span class="c"># verify integrity (each entry signed; this re-checks the hash chain)</span><br>
+kolm audit --verify
+</div>
+
+<h2 style="margin-top:30px">What gets logged</h2>
+<ul style="color:var(--ink-mute);font-size:14px;line-height:1.7;max-width:64ch">
+  <li><strong>Auth.</strong> login, logout, password reset, 2FA enrolled/disabled/challenged.</li>
+  <li><strong>API keys.</strong> created, rotated, revoked; the prefix is recorded, never the secret.</li>
+  <li><strong>Plan &amp; billing.</strong> plan.changed, billing.event (invoice issued, payment failed, refund).</li>
+  <li><strong>Team.</strong> member.added, member.removed, role.changed.</li>
+  <li><strong>Compliance.</strong> baa.signed (with hash of the signed PDF), dpa.signed, byoc.enrolled.</li>
+  <li><strong>Data control.</strong> tenant.deleted, dataset.exported, dataset.purged.</li>
+</ul>
+
+<p class="help" style="margin-top:18px">Each row is hash-chained to the previous one (Merkle-style). Tampering breaks the chain and surfaces on the next <code>kolm audit --verify</code>. See <a href="/security#audit">/security#audit</a> for the chain spec.</p>
+</section>
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/docs">docs</a> &middot; kolm.ai
+    </small>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+  var rows=document.getElementById("log-rows");
+  var empty=document.getElementById("empty-state");
+
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+  function fmtTs(t){if(!t)return "&ndash;";try{var d=new Date(t);return d.toISOString().replace("T"," ").slice(0,19);}catch(_){return esc(String(t));}}
+  function headers(){var h={"Accept":"application/json"};if(key)h["Authorization"]="Bearer "+key;return h;}
+  function pillFor(a){if(/revoked|removed|disabled|failed|deleted/.test(a))return "bad";if(/created|added|signed|enrolled|login/.test(a))return "ok";if(/rotated|changed|reset/.test(a))return "warn";return "mute";}
+
+  function qs(){
+    var p=new URLSearchParams();
+    p.set("since",document.getElementById("f-since").value);
+    var a=document.getElementById("f-action").value;if(a)p.set("action",a);
+    var ac=document.getElementById("f-actor").value.trim();if(ac)p.set("actor",ac);
+    var ip=document.getElementById("f-ip").value.trim();if(ip)p.set("ip",ip);
+    return p.toString();
+  }
+
+  function render(items){
+    if(!items||!items.length){rows.innerHTML="";empty.hidden=false;return;}
+    empty.hidden=true;
+    rows.innerHTML=items.map(function(e){
+      return "<tr>"+
+        "<td>"+fmtTs(e.ts||e.timestamp)+"</td>"+
+        "<td>"+esc(e.actor||e.user||"&ndash;")+"</td>"+
+        "<td><span class=\"pill "+pillFor(e.action||"")+"\">"+esc(e.action||"&ndash;")+"</span></td>"+
+        "<td>"+esc(e.target||"&ndash;")+"</td>"+
+        "<td>"+esc(e.ip||e.source_ip||"&ndash;")+"</td>"+
+        "<td>"+esc(e.geo||"&ndash;")+"</td>"+
+        "</tr>";
+    }).join("");
+  }
+
+  function load(){
+    if(!key){
+      rows.innerHTML='<tr><td colspan="6" style="text-align:center;padding:18px"><a href="/signin?next='+encodeURIComponent(location.pathname)+'">Sign in</a> to view your audit log.</td></tr>';
+      return;
+    }
+    fetch("/v1/account/audit-log?"+qs(),{headers:headers()}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(j){render((j&&(j.entries||j.items))||j||[]);}).catch(function(){
+      // No live data; show empty state with CLI hint
+      render([]);
+    });
+  }
+
+  document.getElementById("filters").addEventListener("submit",function(e){e.preventDefault();load();});
+
+  document.getElementById("btn-export").addEventListener("click",function(){
+    if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+    var url="/v1/account/audit-log?"+qs()+"&format=csv";
+    // Use fetch + blob so the auth header travels with the request.
+    fetch(url,{headers:headers()}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.blob();}).then(function(b){
+      var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="kolm-audit-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},200);
+    }).catch(function(){alert("Export failed. Try kolm audit --since "+document.getElementById("f-since").value+" --format csv from your terminal.");});
+  });
+
+  load();
+})();
+</script>
+<script defer src="/nav.js"></script>
+</body>
+</html>

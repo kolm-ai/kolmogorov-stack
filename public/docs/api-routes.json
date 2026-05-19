@@ -1,0 +1,3571 @@
+{
+  "generated": "2026-05-18",
+  "source": "src/router.js",
+  "total_routes": 278,
+  "group_count": 89,
+  "groups": [
+    {
+      "key": "account",
+      "label": "Account",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/account",
+          "line": 2798,
+          "short": "Account",
+          "comments": [
+            "Account"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/account/cancel",
+          "line": 3234,
+          "short": "Self-serve cancel / downgrade-to-free. Any paid tenant can drop to the",
+          "comments": [
+            "Self-serve cancel / downgrade-to-free. Any paid tenant can drop to the",
+            "free tier without contacting anyone."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/account/change-plan",
+          "line": 2920,
+          "short": "Self-serve plan changes. Free is applied instantly (this is also the",
+          "comments": [
+            "Self-serve plan changes. Free is applied instantly (this is also the",
+            "downgrade / cancel path). Paid plans return a Stripe Payment Link with",
+            "`client_reference_id=<tenant_id>`; the plan is flipped only when the",
+            "webhook receives `checkout.session.completed`. This guarantees the",
+            "tenant cannot get paid features without paying."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/account/compliance-package",
+          "line": 3317,
+          "short": "can read end-to-end. Tenant metadata + signed receipts + audit log +",
+          "comments": [
+            "can read end-to-end. Tenant metadata + signed receipts + audit log +",
+            "BAA-ready org details + control mapping snapshot. JSON only (no PHI ever",
+            "transits this endpoint – receipts are payload-free by design). Auditors",
+            "who want a literal ZIP can pipe `curl ... | jq -r .b64_zip | base64 -d`,",
+            "but the JSON shape is the canonical artifact."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/account/delete",
+          "line": 3416,
+          "short": "Self-serve account delete. Soft-delete the tenant; receipts and artifacts",
+          "comments": [
+            "Self-serve account delete. Soft-delete the tenant; receipts and artifacts",
+            "already shipped to users keep verifying since the cloud signing key is",
+            "unchanged. The tenant can no longer authenticate. If they had an active",
+            "Stripe subscription we ask Stripe to cancel it so they aren't charged",
+            "again – best-effort, never blocks deletion."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/account/export",
+          "line": 3270,
+          "short": "Self-serve data export (/privacy promises this). Returns a JSON bundle",
+          "comments": [
+            "Self-serve data export (/privacy promises this). Returns a JSON bundle",
+            "of the tenant's row plus every concept, compile job, observation, and",
+            "invocation we have on file for them. We strip secrets (api_key_hash,",
+            "stripe_customer_id keeps existing for portability, billing tokens drop).",
+            "Content-Disposition nudges browsers to save the file."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/account/receipt-secret/prune",
+          "line": 2896,
+          "short": "Drop a specific previous key from the verification ring. Receipts signed",
+          "comments": [
+            "Drop a specific previous key from the verification ring. Receipts signed",
+            "with that key will no longer verify against this tenant after this call.",
+            "The current key cannot be pruned – rotate first to retire it."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/account/receipt-secrets",
+          "line": 2883,
+          "short": "List receipt-signing key metadata for the calling tenant. Secrets are",
+          "comments": [
+            "List receipt-signing key metadata for the calling tenant. Secrets are",
+            "never returned – only the key_id, status, and rotation timestamps."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/account/rotate-key",
+          "line": 2849,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/account/rotate-receipt-secret",
+          "line": 2864,
+          "short": "Rotate the per-tenant receipt-signing secret. Previous secret is",
+          "comments": [
+            "Rotate the per-tenant receipt-signing secret. Previous secret is",
+            "preserved so older signed artifacts and audit rows still verify."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "admin",
+      "label": "Admin",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/admin/audit",
+          "line": 3033,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/admin/compile-jobs",
+          "line": 3052,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/admin/diagnostics",
+          "line": 4014,
+          "short": "/v1/admin/tenants – defined above with rich q/limit/scrub. Keep diagnostics here.",
+          "comments": [
+            "/v1/admin/tenants – defined above with rich q/limit/scrub. Keep diagnostics here."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/admin/health",
+          "line": 3071,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/admin/stats",
+          "line": 3006,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/admin/submissions",
+          "line": 4602,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/admin/tenant",
+          "line": 4004,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/admin/tenants",
+          "line": 2979,
+          "short": "Admin console endpoints",
+          "comments": [
+            "Admin console endpoints",
+            "Read-only admin surface for the founder console at /admin. Gated by",
+            "req.is_admin (ADMIN_KEY in env). Returns scrubbed views – no raw api_keys,",
+            "no per-tenant secrets – just operational shape: who, what plan, how much",
+            "they've used, what they're running. Cross-tenant by design."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/admin/waitlist",
+          "line": 4598,
+          "short": "Admin: list waitlist + submissions for triage",
+          "comments": [
+            "Admin: list waitlist + submissions for triage"
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "agents",
+      "label": "Agents",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/agents",
+          "line": 7053,
+          "short": "============== W384: agent telemetry ==============",
+          "comments": [
+            "============== W384: agent telemetry =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/agents/failing",
+          "line": 7093,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/agents/recommend",
+          "line": 7081,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/agents/sessions",
+          "line": 7060,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/agents/sessions/:id",
+          "line": 7071,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/agents/stats",
+          "line": 7104,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "anon",
+      "label": "Anonymous bootstrap",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/anon/bootstrap",
+          "line": 606,
+          "short": "Anonymous CLI auth (robots / agents)",
+          "comments": [
+            "Anonymous CLI auth (robots / agents)",
+            "Bootstrap: returns an anon_token that the CLI stores locally. 30-day TTL.",
+            "No email, no signup. Designed for agents that need to start working in <1 second."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/anon/claim",
+          "line": 623,
+          "short": "Claim: convert an anonymous workspace into a permanent account.",
+          "comments": [
+            "Claim: convert an anonymous workspace into a permanent account.",
+            "if email matches an existing real tenant: merge the anon's recipes into it, return existing key",
+            "else: upgrade the anon tenant in-place to a real tenant, rotate to ks_*, return new key"
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "artifacts",
+      "label": "Artifacts",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/artifacts",
+          "line": 2202,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/artifacts/:id",
+          "line": 2207,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/artifacts/:id/download",
+          "line": 2213,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "assistant",
+      "label": "Assistant",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/assistant",
+          "line": 2693,
+          "short": "Natural-language assistant",
+          "comments": [
+            "Natural-language assistant",
+            "POST /v1/assistant { prompt } returns a parsed-intent action + result.",
+            "Scoped to req.tenant_record; never calls an external LLM; deterministic."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "audit",
+      "label": "Audit",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/audit/log",
+          "line": 4441,
+          "short": "write path with HMAC-chained signatures); this implementation gives the",
+          "comments": [
+            "write path with HMAC-chained signatures); this implementation gives the",
+            "dashboard real entries from day one without that wiring.",
+            "Probe-safe: when unauth'd, returns the same 200 envelope with entries=[]",
+            "rather than 401/503 so frontend probes don't fall over."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/audit/verify",
+          "line": 4575,
+          "short": "Verify the HMAC chain over this tenant's audit_events rows. Returns",
+          "comments": [
+            "Verify the HMAC chain over this tenant's audit_events rows. Returns",
+            "ok=true when every row hashes to its declared event_hash given the",
+            "previous row's hash, ok=false with the list of breaks otherwise."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "bakeoff",
+      "label": "Bakeoff",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/bakeoff/run",
+          "line": 7281,
+          "short": "============== W384: bakeoff ==============",
+          "comments": [
+            "============== W384: bakeoff =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "billing",
+      "label": "Billing",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/billing/meters",
+          "line": 7552,
+          "short": "============== W384: billing meters ==============",
+          "comments": [
+            "============== W384: billing meters ==============",
+            "Returns a static catalog of the 12 meters that ship with the runtime.",
+            "Live counter aggregation is delegated to the existing /v1/billing/*",
+            "routes; this endpoint is the schema source-of-truth."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "bridges",
+      "label": "Bridges",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/bridges/auto-synthesize",
+          "line": 4750,
+          "short": "POST /v1/bridges/auto-synthesize – turn an observation cluster into a recipe.",
+          "comments": [
+            "POST /v1/bridges/auto-synthesize – turn an observation cluster into a recipe."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/bridges/observations",
+          "line": 4701,
+          "short": "GET /v1/bridges/observations – flat list of recent captures for the /captures inbox.",
+          "comments": [
+            "GET /v1/bridges/observations – flat list of recent captures for the /captures inbox.",
+            "Filters: ?namespace=<ns> (optional), ?limit=<n> (default 50, max 200), ?include_discarded=1."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/bridges/observations/:id",
+          "line": 4737,
+          "short": "POST /v1/bridges/observations/:id – soft-update an observation (keep/discard).",
+          "comments": [
+            "POST /v1/bridges/observations/:id – soft-update an observation (keep/discard).",
+            "Body: { discarded: true } | { kept: true } | { discarded: false }. Tenant-scoped."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/bridges/observe",
+          "line": 4633,
+          "short": "POST /v1/bridges/observe – agents log a (model, prompt, response) tuple.",
+          "comments": [
+            "POST /v1/bridges/observe – agents log a (model, prompt, response) tuple.",
+            "After ≥4 calls with the same template signature we surface a synthesis suggestion.",
+            "W258-BE-1: persists via insertCapture (durable contract). 503 on store",
+            "failure – same envelope as the capture proxy handlers."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/bridges/specialist-candidates",
+          "line": 5108,
+          "short": "GET /v1/bridges/specialist-candidates – recipes whose call volume justifies a Specialist.",
+          "comments": [
+            "GET /v1/bridges/specialist-candidates – recipes whose call volume justifies a Specialist."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/bridges/suggestions",
+          "line": 4676,
+          "short": "GET /v1/bridges/suggestions – recipe-synthesis suggestions clustered from observations.",
+          "comments": [
+            "GET /v1/bridges/suggestions – recipe-synthesis suggestions clustered from observations."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "build",
+      "label": "Build",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/build/preview",
+          "line": 1600,
+          "short": "W347 – POST /v1/build/preview. Richer dry-run preview that powers the",
+          "comments": [
+            "W347 – POST /v1/build/preview. Richer dry-run preview that powers the",
+            "builder UI's results pane: returns k_score, first 3 train rows, first 3",
+            "holdout rows, production_ready verdict + gate reasons, and the synth",
+            "metadata. Public + rate-limited; no artifact write, no charge. Accepts",
+            "{spec, seeds_jsonl_text}. Errors map to 400 (validation) or 500."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "builder",
+      "label": "Builder",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/builder/compile",
+          "line": 2103,
+          "short": "{task, examples} payload into a real compile job. Validation matches",
+          "comments": [
+            "{task, examples} payload into a real compile job. Validation matches",
+            "/v1/builder/preview so a Preview→Compile flow that passes preview also",
+            "passes here; the only added requirement is the API key (handled by",
+            "authMiddleware mounted above this line). Recipe class and namespace are",
+            "forced so builder-originated artifacts are distinguishable in audits."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/builder/preview",
+          "line": 1514,
+          "short": "POST /v1/builder/preview – synthesize a recipe and estimate K-score.",
+          "comments": [
+            "POST /v1/builder/preview – synthesize a recipe and estimate K-score.",
+            "Rate-limited; no auth. Inputs are validated tightly so this cannot be",
+            "used as a generic compute oracle. The 10 KB per-example cap matches the",
+            "body limit on /v1/compile and keeps the synthesis cost bounded."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/builder/templates",
+          "line": 1505,
+          "short": "GET /v1/builder/templates – public list of starter templates.",
+          "comments": [
+            "GET /v1/builder/templates – public list of starter templates."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "byoc",
+      "label": "Bring-your-own-cloud",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/byoc/attestation",
+          "line": 6045,
+          "short": "Attestation callback – UNAUTH (no API key). Identifies via enroll_token,",
+          "comments": [
+            "Attestation callback – UNAUTH (no API key). Identifies via enroll_token,",
+            "which was minted by the deploy endpoint and embedded in the deploy script.",
+            "The token is single-use-equivalent: if an attacker has the token they",
+            "could spoof the public_url, but the deployment row is owned by a specific",
+            "tenant_id and the URL is visible in their dashboard – they'll notice."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/byoc/deploy",
+          "line": 5994,
+          "short": "Customer deploys a .kolm artifact to their own Fly / AWS Nitro / GCP CVM",
+          "comments": [
+            "Customer deploys a .kolm artifact to their own Fly / AWS Nitro / GCP CVM",
+            "/ Azure CVM / Docker host. We issue a signed deploy manifest + a deploy",
+            "script the customer runs. The deployed instance POSTs an attestation",
+            "(image SHA, plus TEE measurement on confidential targets) back to",
+            "/v1/byoc/attestation. kolm.ai never runs the artifact."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/byoc/deployments",
+          "line": 6012,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/byoc/deployments/:id",
+          "line": 6029,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/byoc/deployments/:id",
+          "line": 6019,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/byoc/targets",
+          "line": 6053,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "capability",
+      "label": "Capability",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/capability/build",
+          "line": 6273,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/capability/validate",
+          "line": 6278,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "capture",
+      "label": "Capture",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/capture/health",
+          "line": 5311,
+          "short": "GET /v1/capture/health – operator probe. Honest answer about whether",
+          "comments": [
+            "GET /v1/capture/health – operator probe. Honest answer about whether",
+            "the next insertCapture call will persist beyond a single lambda. Used",
+            "by the /captures + /security pages and the `kolm doctor` flow."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/capture/log",
+          "line": 5250,
+          "short": "POST /v1/capture/log – server-to-server batch insert of (input, output)",
+          "comments": [
+            "POST /v1/capture/log – server-to-server batch insert of (input, output)",
+            "pairs into the capture corpus. Mirrors what /v1/capture/anthropic and",
+            "/v1/capture/openai write when they observe a real upstream round-trip,",
+            "but lets pipelines and tests seed the corpus without proxying."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/capture/media",
+          "line": 7487,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/capture/openrouter",
+          "line": 1842,
+          "short": "OpenRouter explicit capture endpoint + alias for SDKs whose base URL ends in /v1.",
+          "comments": [
+            "OpenRouter explicit capture endpoint + alias for SDKs whose base URL ends in /v1."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/capture/openrouter/v1/chat/completions",
+          "line": 1843,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/capture/stream",
+          "line": 5339,
+          "short": "Payload shape is the CLI/UI contract (W258-BE-6): capture_id /",
+          "comments": [
+            "Payload shape is the CLI/UI contract (W258-BE-6): capture_id /",
+            "captured_at / namespace / model / provider / latency_us / status /",
+            "prompt_head / response_head / x_kolm_capture_durable. The raw store row",
+            "is shimmed here so the dashboard and `kolm tail captures` see the",
+            "same shape without one of them having to translate."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "cc",
+      "label": "Cc",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/cc/kinds",
+          "line": 6210,
+          "short": "confidential compute",
+          "comments": [
+            "confidential compute"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/cc/shape/:kind",
+          "line": 6214,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/cc/verify",
+          "line": 6221,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "chat",
+      "label": "OpenAI-compatible chat",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/chat/completions",
+          "line": 1836,
+          "short": "OpenAI-compatible direct routes.",
+          "comments": [
+            "OpenAI-compatible direct routes."
+          ],
+          "stub": false,
+          "expanded_from": "p"
+        }
+      ]
+    },
+    {
+      "key": "cid",
+      "label": "Cid",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/cid/:cid",
+          "line": 2228,
+          "short": "CID lookup – content-addressed resolution within the caller's tenant",
+          "comments": [
+            "CID lookup – content-addressed resolution within the caller's tenant",
+            "scope. Two compiles that produce the same bytes (same task spec, same",
+            "recipes, same evals, same base model pointer) yield the same CID; this",
+            "route is how downstream tools dedupe by content rather than job_id.",
+            "CID format is strictly validated to keep the path safe from injection."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "compile",
+      "label": "Compile",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/compile",
+          "line": 2070,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/compile",
+          "line": 1945,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/compile/:id",
+          "line": 2074,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/compile/:id/.kolm",
+          "line": 2087,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "compose",
+      "label": "Compose",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/compose",
+          "line": 3899,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "concepts",
+      "label": "Concepts",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/concepts",
+          "line": 3810,
+          "short": "Layer 2: Registry",
+          "comments": [
+            "Layer 2: Registry"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/concepts/:id",
+          "line": 3821,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/concepts/:id",
+          "line": 3815,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/concepts/:id/lineage",
+          "line": 3828,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/concepts/:id/stats",
+          "line": 3835,
+          "short": "Per-concept usage stats: invocation count, latency percentiles, cache hit rate.",
+          "comments": [
+            "Per-concept usage stats: invocation count, latency percentiles, cache hit rate."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "connectors",
+      "label": "Connectors",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/connectors",
+          "line": 7571,
+          "short": "============== W384: connectors ==============",
+          "comments": [
+            "============== W384: connectors =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "credential",
+      "label": "Credential",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/credential/verify",
+          "line": 3771,
+          "short": "Returns: { valid: boolean, reason?: string, spec, type }",
+          "comments": [
+            "Returns: { valid: boolean, reason?: string, spec, type }",
+            "This validates the HMAC signature using the server's receipt secret.",
+            "For a future Ed25519 swap, the public key would live at /.well-known/ and",
+            "verification would not need server auth. Today this endpoint is open."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "datasets",
+      "label": "Datasets",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/datasets",
+          "line": 7175,
+          "short": "============== W384: datasets ==============",
+          "comments": [
+            "============== W384: datasets =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/datasets",
+          "line": 7182,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/datasets/:id",
+          "line": 7191,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/datasets/:id/split",
+          "line": 7198,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "device",
+      "label": "Device",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/device/check",
+          "line": 6195,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/device/probe",
+          "line": 6204,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/device/profiles",
+          "line": 6185,
+          "short": "device",
+          "comments": [
+            "device"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/device/profiles/:device_id",
+          "line": 6189,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "devices",
+      "label": "Devices",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/devices",
+          "line": 7345,
+          "short": "============== W384: devices ==============",
+          "comments": [
+            "============== W384: devices =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/devices/:id/install",
+          "line": 7383,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/devices/:id/install/:artifact_id",
+          "line": 7405,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/devices/:id/register",
+          "line": 7359,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/devices/:id/test",
+          "line": 7367,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/devices/detect",
+          "line": 7352,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/devices/installed",
+          "line": 7374,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "distill",
+      "label": "Distill",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/distill/from-captures",
+          "line": 4817,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/distill/from-captures/preview",
+          "line": 4785,
+          "short": "Commit (POST) picks recipe vs specialist by count (<1000 vs >=1000),",
+          "comments": [
+            "Commit  (POST) picks recipe vs specialist by count (<1000 vs >=1000),",
+            "forwards to /v1/bridges/auto-synthesize (recipe) or KOLM_TRAINER_BRIDGE_URL",
+            "(specialist). Errors surface as 503 (capture-store) / 400 (not_enough/",
+            "no_cluster). W364: specialist arm always returns 202 with job_id (either",
+            "remote bridge or in-tree worker via src/distill-bridge.js)."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "embed",
+      "label": "Embed",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/embed",
+          "line": 2608,
+          "short": "Tokenize-and-ingest a path (or array of paths). The path must live on the",
+          "comments": [
+            "Tokenize-and-ingest a path (or array of paths). The path must live on the",
+            "server; for now we support self-host where the kolm cloud runs alongside",
+            "a tenant's mounted corpus directory. For the SaaS path we'll add an",
+            "upload endpoint in Sprint 2."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "embeddings",
+      "label": "Embeddings",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/embeddings",
+          "line": 1836,
+          "short": "OpenAI-compatible direct routes.",
+          "comments": [
+            "OpenAI-compatible direct routes."
+          ],
+          "stub": false,
+          "expanded_from": "p"
+        }
+      ]
+    },
+    {
+      "key": "eval",
+      "label": "Evaluation",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/eval/tenant_holdout",
+          "line": 3706,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/eval/tenant_holdout",
+          "line": 3662,
+          "short": "All four are authed (mounted below authMiddleware) and per-tenant scoped:",
+          "comments": [
+            "All four are authed (mounted below authMiddleware) and per-tenant scoped:",
+            "a tenant can only read/write/delete corpora under its own tenant_id. The",
+            "tenant_id is derived from req.tenant_record.id (the authenticated tenant)",
+            "rather than accepted as a body field, so a forged tenant_id is impossible."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/eval/tenant_holdout/:corpus_id",
+          "line": 3742,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/eval/tenant_holdout/:corpus_id",
+          "line": 3717,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "fl",
+      "label": "Fl",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/fl/aggregate",
+          "line": 6251,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/fl/contribution/verify",
+          "line": 6242,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/fl/round/new",
+          "line": 6235,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/fl/strategies",
+          "line": 6231,
+          "short": "federated learning",
+          "comments": [
+            "federated learning"
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "health",
+      "label": "Health",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/health",
+          "line": 1910,
+          "short": "Authenticated /v1/health – full snapshot including provider availability",
+          "comments": [
+            "Authenticated /v1/health – full snapshot including provider availability",
+            "and feature flags. Admin-only because the booleans are useful signal for",
+            "staff debugging but unnecessary surface for tenants. Public /health",
+            "(above the authMiddleware) is the lightweight no-leak version."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "hub",
+      "label": "Hub",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/hub",
+          "line": 2500,
+          "short": "GET /v1/hub – public list, most-recent first, paginated by `limit`.",
+          "comments": [
+            "GET /v1/hub – public list, most-recent first, paginated by `limit`."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/hub/:owner/:name",
+          "line": 2528,
+          "short": "GET /v1/hub/:owner/:name – public metadata for a single artifact.",
+          "comments": [
+            "GET /v1/hub/:owner/:name – public metadata for a single artifact."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/hub/:owner/:name/download",
+          "line": 2564,
+          "short": "GET /v1/hub/:owner/:name/download – binary download, content-type application/octet-stream.",
+          "comments": [
+            "GET /v1/hub/:owner/:name/download – binary download, content-type application/octet-stream."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/hub/publish",
+          "line": 2400,
+          "short": "POST /v1/hub/publish",
+          "comments": [
+            "POST /v1/hub/publish",
+            "body: { name, visibility?: 'public'|'private', artifact_b64, metadata? }",
+            "Stores the artifact bytes + metadata. Returns { handle, owner, name, sha256, url }."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "ir",
+      "label": "Ir",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/ir/compile",
+          "line": 6140,
+          "short": "ir",
+          "comments": [
+            "ir"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/ir/replay",
+          "line": 6176,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/ir/stats",
+          "line": 6160,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/ir/validate",
+          "line": 6168,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "jobs",
+      "label": "Jobs",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/jobs/:id",
+          "line": 4188,
+          "short": "Job status (used by HF / URL queued jobs + W229 on-disk job registry +",
+          "comments": [
+            "Job status (used by HF / URL queued jobs + W229 on-disk job registry +",
+            "W364 distill bridge). Order: corpus_jobs / specialists in-DB, then the",
+            "src/jobs.js per-file on-disk registry."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "keys",
+      "label": "Keys",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/keys/challenge",
+          "line": 1018,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/keys/public",
+          "line": 1002,
+          "short": "/v1/keys/challenge and POST /v1/keys/register are also public because",
+          "comments": [
+            "/v1/keys/challenge and POST /v1/keys/register are also public because",
+            "the challenge → sign → register flow self-proves the holder controls",
+            "the private key. The DELETE requires admin because key removal would",
+            "otherwise let an attacker invalidate a tenant's receipt verification",
+            "by deleting their published key."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/keys/public/:fingerprint",
+          "line": 1045,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/keys/public/:fingerprint",
+          "line": 1009,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/keys/register",
+          "line": 1030,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "labels",
+      "label": "Labels",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/labels",
+          "line": 7218,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/labels/:event_id",
+          "line": 7242,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/labels/next",
+          "line": 7207,
+          "short": "============== W384: label queue ==============",
+          "comments": [
+            "============== W384: label queue =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/labels/stats",
+          "line": 7235,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/labels/synthesize-corpus",
+          "line": 5554,
+          "short": "Returns the captured (input, output) pairs for a namespace as JSONL or",
+          "comments": [
+            "Returns the captured (input, output) pairs for a namespace as JSONL or",
+            "a JSON envelope. This is what `kolm labels` downloads. Counts go to the",
+            "status command so the customer can see \"ready to distill at 1000 pairs.\"",
+            "W258-BE-1: reads via the durable capture-store (listCaptures) so the",
+            "distillation corpus comes from the same backend the proxy writes to."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "lake",
+      "label": "Lake",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/lake/repeated",
+          "line": 7122,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/lake/stats",
+          "line": 7112,
+          "short": "============== W384: lake ==============",
+          "comments": [
+            "============== W384: lake =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "lead",
+      "label": "Lead",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/lead/enterprise",
+          "line": 4248,
+          "short": "Enterprise inquiry intake (KOLM-102)",
+          "comments": [
+            "Enterprise inquiry intake (KOLM-102)",
+            "Public POST from /enterprise/inquiry. Validates 7 required fields, persists",
+            "to in-memory enterpriseLeads, and emails sales@kolm.ai via Resend (best",
+            "effort – sendMail() returns { skipped: true } when RESEND_API_KEY is unset)."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/lead/enterprise/:id",
+          "line": 4350,
+          "short": "Admin-only read of a single enterprise lead. Useful for ops triage and",
+          "comments": [
+            "Admin-only read of a single enterprise lead. Useful for ops triage and",
+            "for verifying the in-memory store after a submit during e2e checks."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "library",
+      "label": "Library",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/library",
+          "line": 4000,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "lineage",
+      "label": "Lineage",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/lineage/build",
+          "line": 6261,
+          "short": "lineage + capability",
+          "comments": [
+            "lineage + capability"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/lineage/validate",
+          "line": 6266,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "loop",
+      "label": "Value-loop",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/loop/try",
+          "line": 519,
+          "short": "W313 – public anonymous \"try it\" demo of the capture-receipt shape.",
+          "comments": [
+            "W313 – public anonymous \"try it\" demo of the capture-receipt shape.",
+            "No auth, no write side-effects; visitors on /value-loop POST a prompt+response",
+            "and see the exact same receipt envelope a real authenticated /v1/bridges/observe",
+            "would emit, with `demo:true` + `durable:false` so the body cannot lie."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "marketplace",
+      "label": "Marketplace",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/marketplace",
+          "line": 6338,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/marketplace/:slug",
+          "line": 6383,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/marketplace/:slug/download",
+          "line": 6399,
+          "short": "W339/W342 – install/download MUST refuse artifacts that don't pass",
+          "comments": [
+            "W339/W342 – install/download MUST refuse artifacts that don't pass",
+            "productionReady(). Same gate the marketplace pill uses, so a user who",
+            "sees no \"Verified\" badge ALSO can't `kolm marketplace install` it.",
+            "force allowed via ?force=true query for CI testing / canary debug,",
+            "matching `kolm run --force` semantics."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/marketplace/catalog.json",
+          "line": 6329,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/marketplace/list",
+          "line": 6356,
+          "short": "W342 – explicit list endpoint used by /marketplace.html client render.",
+          "comments": [
+            "W342 – explicit list endpoint used by /marketplace.html client render.",
+            "Always returns { artifacts: [...] } with live verified flag."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/marketplace/publish",
+          "line": 6483,
+          "short": "Distinct from /v1/marketplace/publish-request (manual review queue) –",
+          "comments": [
+            "Distinct from /v1/marketplace/publish-request (manual review queue) –",
+            "this endpoint is the programmatic publish path the CLI uses after",
+            "pipeline-ship has already enforced the production gate locally.",
+            "===================================================================="
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/marketplace/publish-request",
+          "line": 6363,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "memory",
+      "label": "Memory",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/memory/recall",
+          "line": 5714,
+          "short": "POST /v1/memory/recall – REM Memory ↔ Skills bridge.",
+          "comments": [
+            "POST /v1/memory/recall – REM Memory ↔ Skills bridge.",
+            "Given a query, find recipes tagged with that namespace, run them, and return the merged result."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "messages",
+      "label": "Anthropic-compatible messages",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/messages",
+          "line": 1839,
+          "short": "Anthropic direct + alias.",
+          "comments": [
+            "Anthropic direct + alias."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "models",
+      "label": "Models",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/models/cache",
+          "line": 1892,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/models/manifest",
+          "line": 1858,
+          "short": "GET /v1/models/manifest full manifest JSON",
+          "comments": [
+            "GET /v1/models/manifest          full manifest JSON",
+            "GET /v1/models/manifest?tier=X   filtered by tier",
+            "GET /v1/models/pull?id=&variant= 302 to the HF resolve URL",
+            "GET /v1/models/cache             local cache index on the API host",
+            "===================================================================="
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/models/pull",
+          "line": 1873,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "moderations",
+      "label": "Moderations",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/moderations",
+          "line": 1836,
+          "short": "OpenAI-compatible direct routes.",
+          "comments": [
+            "OpenAI-compatible direct routes."
+          ],
+          "stub": false,
+          "expanded_from": "p"
+        }
+      ]
+    },
+    {
+      "key": "nl",
+      "label": "Nl",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/nl/scaffold",
+          "line": 5089,
+          "short": "air-gap branch produces the same shape locally via scaffoldRecipeFromNl;",
+          "comments": [
+            "air-gap branch produces the same shape locally via scaffoldRecipeFromNl;",
+            "this endpoint exists so a tenant that opts in (--network or KOLM_AIRGAP=0)",
+            "can get an LLM-augmented scaffold without forking the CLI. The",
+            "x-kolm-nl-source response header tells the caller which branch served",
+            "(network = hosted LLM enrichment; airgap = deterministic fallback)."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "notifications",
+      "label": "Notifications",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/notifications/config",
+          "line": 5400,
+          "short": "GET /v1/notifications/push-subscriptions → list registered web-push subs",
+          "comments": [
+            "GET    /v1/notifications/push-subscriptions → list registered web-push subs",
+            "POST   /v1/notifications/push-subscriptions → register a subscription { endpoint, keys }",
+            "DELETE /v1/notifications/push-subscriptions → remove by endpoint",
+            "POST   /v1/notifications/test               → fire a dummy threshold alert (preview)",
+            "GET    /v1/notifications/state              → { last_threshold_fired, fired_at } per namespace"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/notifications/preferences",
+          "line": 5403,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/notifications/preferences",
+          "line": 5408,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/notifications/push-subscriptions",
+          "line": 5433,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/notifications/push-subscriptions",
+          "line": 5417,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/notifications/push-subscriptions",
+          "line": 5424,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/notifications/state",
+          "line": 5454,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/notifications/test",
+          "line": 5440,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "opportunities",
+      "label": "Opportunities",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/opportunities",
+          "line": 7136,
+          "short": "============== W384: opportunities ==============",
+          "comments": [
+            "============== W384: opportunities =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/opportunities/:id/accept",
+          "line": 7152,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/opportunities/:id/dismiss",
+          "line": 7160,
+          "short": "Accept either /dismiss or /ignore – both map to ignoreOpportunity.",
+          "comments": [
+            "Accept either /dismiss or /ignore – both map to ignoreOpportunity."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/opportunities/:id/ignore",
+          "line": 7167,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "pipeline",
+      "label": "Pipeline",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/pipeline/compile",
+          "line": 6953,
+          "short": "POST /v1/pipeline/compile – alias for /v1/pipeline/full (kept as a",
+          "comments": [
+            "POST /v1/pipeline/compile – alias for /v1/pipeline/full (kept as a",
+            "distinct verb so future divergence is easy)."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/pipeline/distill",
+          "line": 6923,
+          "short": "POST /v1/pipeline/distill – kick off distill-from-captures with mode=specialist.",
+          "comments": [
+            "POST /v1/pipeline/distill – kick off distill-from-captures with mode=specialist.",
+            "Returns 202 + {job_id}. The actual distill work is delegated to the",
+            "existing /v1/distill/from-captures path (in-process module call)."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/pipeline/full",
+          "line": 6976,
+          "short": "POST /v1/pipeline/full – 11-phase compileFull pipeline. Returns 202 +",
+          "comments": [
+            "POST /v1/pipeline/full – 11-phase compileFull pipeline. Returns 202 +",
+            "job_id. Phases are streamed via /v1/pipeline/jobs/:id/stream (SSE)."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/pipeline/jobs/:id",
+          "line": 6998,
+          "short": "GET /v1/pipeline/jobs/:id – poll for current status + collected phases.",
+          "comments": [
+            "GET /v1/pipeline/jobs/:id – poll for current status + collected phases."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/pipeline/jobs/:id/stream",
+          "line": 7016,
+          "short": "GET /v1/pipeline/jobs/:id/stream – SSE that replays past phases then",
+          "comments": [
+            "GET /v1/pipeline/jobs/:id/stream – SSE that replays past phases then",
+            "streams new ones until the job terminates."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/pipeline/tokenize",
+          "line": 6881,
+          "short": "============== W384: pipeline (tokenizer + distill + compile + full) ==============",
+          "comments": [
+            "============== W384: pipeline (tokenizer + distill + compile + full) ==============",
+            "POST /v1/pipeline/tokenize – train a tokenizer over corpus body."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "plans",
+      "label": "Plans",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/plans",
+          "line": 585,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "pricing",
+      "label": "Pricing",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/pricing",
+          "line": 560,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "privacy",
+      "label": "Privacy",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/privacy/events",
+          "line": 6644,
+          "short": "GET /v1/privacy/events – recent events that tripped the detector.",
+          "comments": [
+            "GET /v1/privacy/events – recent events that tripped the detector."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/privacy/policy",
+          "line": 6600,
+          "short": "GET /v1/privacy/policy – return the policy dictionary.",
+          "comments": [
+            "GET /v1/privacy/policy – return the policy dictionary."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/privacy/policy/:class",
+          "line": 6606,
+          "short": "PUT /v1/privacy/policy/:class – set { action } for a class. Admin-only.",
+          "comments": [
+            "PUT /v1/privacy/policy/:class – set { action } for a class. Admin-only."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/privacy/report",
+          "line": 6622,
+          "short": "GET /v1/privacy/report – aggregate redaction counts over the event lake.",
+          "comments": [
+            "GET /v1/privacy/report – aggregate redaction counts over the event lake."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/privacy/scan",
+          "line": 6575,
+          "short": "============== W384: privacy ==============",
+          "comments": [
+            "============== W384: privacy ==============",
+            "POST /v1/privacy/scan – pure detector pass over { text } body. Returns",
+            "findings array + sensitive boolean + class counts. No state change."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/privacy/test",
+          "line": 6586,
+          "short": "POST /v1/privacy/test – apply the current policy to body.text and",
+          "comments": [
+            "POST /v1/privacy/test – apply the current policy to body.text and",
+            "return { redacted, findings, policy_actions }. May 403 if policy",
+            "says block on a class present."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "public",
+      "label": "Public",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/public/concepts",
+          "line": 793,
+          "short": "Public registry browsing – no auth needed for visibility=public",
+          "comments": [
+            "Public registry browsing – no auth needed for visibility=public"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/public/concepts/:id",
+          "line": 813,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/public/featured",
+          "line": 4586,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/public/run",
+          "line": 820,
+          "short": "Public read-only run for any public concept (lets unauth visitors try the runtime)",
+          "comments": [
+            "Public read-only run for any public concept (lets unauth visitors try the runtime)"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/public/submit",
+          "line": 4415,
+          "short": "Public registry submissions (Phase E – Day 120-180)",
+          "comments": [
+            "Public registry submissions (Phase E – Day 120-180)"
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "publish",
+      "label": "Publish",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/publish",
+          "line": 3786,
+          "short": "Publish an edited generator (no synthesis required)",
+          "comments": [
+            "Publish an edited generator (no synthesis required)"
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "recall",
+      "label": "Recall",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/recall",
+          "line": 2590,
+          "short": "Recall",
+          "comments": [
+            "Recall",
+            "Hybrid query against the tenant's qmd-indexed corpus. Returns top-k chunks.",
+            "The compile orchestrator calls the same surface internally; this is the",
+            "public route for à la carte usage and for the kolm CLI's `kolm recall`."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/recall/sources/:id(*)",
+          "line": 2654,
+          "short": "Single-source debug view. Confirms a sidecar exists and returns its",
+          "comments": [
+            "Single-source debug view. Confirms a sidecar exists and returns its",
+            "frontmatter + first 4KB of body so a UI can preview what qmd indexed."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/recall/status",
+          "line": 2641,
+          "short": "Health check for the recall substrate.",
+          "comments": [
+            "Health check for the recall substrate."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "receipts",
+      "label": "Receipts",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/receipts/:hash/public",
+          "line": 1168,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/receipts/verify",
+          "line": 861,
+          "short": "This is NOT public-key cryptographic verification; that requires either",
+          "comments": [
+            "This is NOT public-key cryptographic verification; that requires either",
+            "the shared tenant receipt secret (issuer/holder offline path) or the",
+            "roadmap Ed25519 receipt mode. Accepts the legacy rs-1 receipt (hmac",
+            "field), v0.1 receipt (kolm_version=\"0.1\", chain[], signature), and the",
+            "{artifact_hash, signature} drive-by shape."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "recipes",
+      "label": "Recipes",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/recipes",
+          "line": 4063,
+          "short": "Recipe aliases",
+          "comments": [
+            "Recipe aliases",
+            "Forward-looking branding: \"recipe\" terminology mirrors \"concept\" endpoints.",
+            "Both names route to the same handlers – full backward compatibility preserved."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/recipes/:id",
+          "line": 2248,
+          "short": "/v1/recipes/* – SDK-conventional aliases over the artifact/job surface.",
+          "comments": [
+            "/v1/recipes/* – SDK-conventional aliases over the artifact/job surface.",
+            "POST /v1/compile returns a job_id of shape `job_*`. Conventional SDKs",
+            "expect GET /v1/recipes/{id} to return the recipe (artifact) and POST",
+            "/v1/recipes/{id}/run to invoke it. We alias the existing handlers so",
+            "developers don't dead-end on 404s."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/recipes/:id/download",
+          "line": 2260,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/recipes/:id/label-corpus",
+          "line": 4107,
+          "short": "Inline labeler – synchronous up to 500 rows",
+          "comments": [
+            "Inline labeler – synchronous up to 500 rows"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/recipes/:id/label-corpus/stream",
+          "line": 4150,
+          "short": "SSE stream variant: emits progress as rows are labeled.",
+          "comments": [
+            "SSE stream variant: emits progress as rows are labeled."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/recipes/:id/lineage",
+          "line": 5122,
+          "short": "GET /v1/recipes/:id/lineage – full Memory ↔ Recipe ↔ Specialist trace.",
+          "comments": [
+            "GET /v1/recipes/:id/lineage – full Memory ↔ Recipe ↔ Specialist trace."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/recipes/:id/run",
+          "line": 3897,
+          "short": "SDK-conventional REST alias: POST /v1/recipes/:id/run mirrors /v1/run",
+          "comments": [
+            "SDK-conventional REST alias: POST /v1/recipes/:id/run mirrors /v1/run",
+            "with concept_id set from the URL param. Body's version_id (if provided)",
+            "still wins so callers can pin a specific revision."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/recipes/:id/stats",
+          "line": 4072,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "registry",
+      "label": "Registry",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/registry/export",
+          "line": 1325,
+          "short": "Public registry export – the registry IS the model, downloaded not called.",
+          "comments": [
+            "Public registry export – the registry IS the model, downloaded not called.",
+            "A device with this bundle can run every public recipe locally, offline,",
+            "forever, for free. Returns a portable JSON envelope of all public recipes",
+            "with their executable source. This is the on-device runtime payload."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/registry/public",
+          "line": 2273,
+          "short": "/v1/registry/public – RS-1 contract alias over public concepts. Non-paginated;",
+          "comments": [
+            "/v1/registry/public – RS-1 contract alias over public concepts. Non-paginated;",
+            "returns up to 200 of the most recent public concepts. The richer export",
+            "(with bundled source) lives at /v1/registry/export above."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/registry/search",
+          "line": 2332,
+          "short": "/v1/registry/search – programmatic discovery. Filters: task (substring on",
+          "comments": [
+            "/v1/registry/search – programmatic discovery. Filters: task (substring on",
+            "name/description/tags), min_k_score, max_size_mb, hardware tag, limit.",
+            "Public concepts only. Used by IDE plugins, CI gates, and the registry UI's",
+            "chip filters. Returns same shape as /v1/registry/public."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/registry/submit",
+          "line": 2298,
+          "short": "/v1/registry/submit – community recipe intake. Validates the shape, logs",
+          "comments": [
+            "/v1/registry/submit – community recipe intake. Validates the shape, logs",
+            "the submission to data/registry-submissions.jsonl, and returns 202 with a",
+            "submission_id. Verification (fetch+CID-check+K-score-replay) is a manual",
+            "step today; see /registry/submit for the human flow. POST body schema is",
+            "SubmitRequest in /openapi.json."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "replay",
+      "label": "Replay",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/replay",
+          "line": 5005,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/replay/preview",
+          "line": 4977,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "responses",
+      "label": "OpenAI Responses",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/responses",
+          "line": 1836,
+          "short": "OpenAI-compatible direct routes.",
+          "comments": [
+            "OpenAI-compatible direct routes."
+          ],
+          "stub": false,
+          "expanded_from": "p"
+        }
+      ]
+    },
+    {
+      "key": "run",
+      "label": "Run",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/run",
+          "line": 3892,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "runtime",
+      "label": "Runtime",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/runtime/decide",
+          "line": 7321,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runtime/decisions",
+          "line": 7329,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runtime/policy",
+          "line": 7306,
+          "short": "============== W384: runtime policy ==============",
+          "comments": [
+            "============== W384: runtime policy =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/runtime/policy",
+          "line": 7313,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runtime/replacement-stats",
+          "line": 7337,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "search",
+      "label": "Search",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/search",
+          "line": 3856,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "seeds",
+      "label": "Seeds",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/seeds/from-nl",
+          "line": 1643,
+          "short": "W347 – POST /v1/seeds/from-nl. Fan out a single seed (or short prompt)",
+          "comments": [
+            "W347 – POST /v1/seeds/from-nl. Fan out a single seed (or short prompt)",
+            "into N variations via the configured LLM. Returns 501 with a documented",
+            "error code when no backend is configured, so the UI can degrade",
+            "gracefully and the operator sees the exact env var to set."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/seeds/from-nl/health",
+          "line": 1625,
+          "short": "W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds",
+          "comments": [
+            "W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds",
+            "button when no LLM backend is configured. Stable, no auth."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "session",
+      "label": "Session",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/session/login",
+          "line": 767,
+          "short": "Session cookie (S7)",
+          "comments": [
+            "Session cookie (S7)",
+            "POST a key here to set an httpOnly `kolm_session` cookie. Browsers can",
+            "then call /v1/* without exposing the key to JavaScript. The legacy",
+            "localStorage path still works, but new pages should call /v1/session/login",
+            "and rely on the cookie."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/session/logout",
+          "line": 787,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "signin",
+      "label": "Sign in",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/signin",
+          "line": 726,
+          "short": "Signin / Signout aliases (RS-1 contract)",
+          "comments": [
+            "Signin / Signout aliases (RS-1 contract)",
+            "/v1/signin and /v1/signout mirror /v1/session/login and /v1/session/logout",
+            "for the homepage contract. POST {api_key} returns the same shape and sets",
+            "the same kolm_session cookie. /v1/signout returns 204 to be friendly to",
+            "CLI tools that ignore body."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "signout",
+      "label": "Sign out",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/signout",
+          "line": 757,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "signup",
+      "label": "Sign up",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/signup",
+          "line": 641,
+          "short": "Public signup",
+          "comments": [
+            "Public signup",
+            "Rate-limited (S5): 10 signups per IP per 24h. INVITE_ONLY=true hard-disables",
+            "public signup entirely (CLI bootstrap and admin issue still work)."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "sigstore",
+      "label": "Sigstore",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/sigstore/attest",
+          "line": 1098,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sigstore/entry/:logIndex",
+          "line": 1081,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sigstore/health",
+          "line": 1074,
+          "short": "has a Rekor URL configured + whether the",
+          "comments": [
+            "has a Rekor URL configured + whether the",
+            "integration is enabled.",
+            "GET  /v1/sigstore/entry/:logIndex   forward to Rekor and return the",
+            "raw entry. Public – Rekor is public."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "sim",
+      "label": "Simulation",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/sim",
+          "line": 7265,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sim/:id",
+          "line": 7272,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/sim/run",
+          "line": 7251,
+          "short": "============== W384: simulation ==============",
+          "comments": [
+            "============== W384: simulation =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "spec",
+      "label": "Spec",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/spec",
+          "line": 1270,
+          "short": "Public RS-1 spec document – open standard, no auth required.",
+          "comments": [
+            "Public RS-1 spec document – open standard, no auth required."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "specialists",
+      "label": "Specialists",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/specialists",
+          "line": 4377,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/specialists/:id",
+          "line": 4382,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/specialists/:id/run",
+          "line": 4399,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/specialists/:id/weights",
+          "line": 4389,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/specialists/auto-distill",
+          "line": 5602,
+          "short": "W364: if KOLM_TRAINER_BRIDGE_URL is set we forward to that remote bridge",
+          "comments": [
+            "W364: if KOLM_TRAINER_BRIDGE_URL is set we forward to that remote bridge",
+            "(legacy operator-managed cluster). If the bridge is unset OR returns",
+            "non-2xx / unreachable, we fall through to the in-tree distill worker",
+            "(src/distill-bridge.js → workers/distill/distill.mjs) so the tenant",
+            "always gets a real job_id + poll_url. Never silent, never 503."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/specialists/train",
+          "line": 4357,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/specialists/waitlist",
+          "line": 4224,
+          "short": "Specialists (Phase D – Day 60-120 in roadmap)",
+          "comments": [
+            "Specialists (Phase D – Day 60-120 in roadmap)",
+            "Public waitlist endpoint – gathers email + task interest before the product launches."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "storage",
+      "label": "Storage",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/storage/config",
+          "line": 7579,
+          "short": "============== W384: storage ==============",
+          "comments": [
+            "============== W384: storage =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/storage/config",
+          "line": 7591,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/storage/purge",
+          "line": 7605,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "stripe",
+      "label": "Stripe",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/stripe/webhook",
+          "line": 3101,
+          "short": "(downgrade to free). Idempotent: each Stripe event id is recorded once.",
+          "comments": [
+            "(downgrade to free). Idempotent: each Stripe event id is recorded once.",
+            "The route is mounted with `express.raw({ type: '*/*' })` ahead of",
+            "`express.json()` in server.js – req.body must be a Buffer for signature",
+            "verification to work (canonical JSON reordering breaks the HMAC)."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "sync",
+      "label": "Sync",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/sync/audit",
+          "line": 6708,
+          "short": "GET /v1/sync/audit – tail the audit.jsonl ring.",
+          "comments": [
+            "GET /v1/sync/audit – tail the audit.jsonl ring."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/sync/inbox",
+          "line": 6720,
+          "short": "POST /v1/sync/inbox – PUBLIC receive endpoint for peer daemons. The",
+          "comments": [
+            "POST /v1/sync/inbox – PUBLIC receive endpoint for peer daemons. The",
+            "sender supplies their own Bearer auth in headers; we treat the body's",
+            "{events, namespace, source_device_id, state} envelope as the contract.",
+            "The receiver writes incoming events into the local event store."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/sync/pull",
+          "line": 6694,
+          "short": "POST /v1/sync/pull – pull events from cloud and append locally.",
+          "comments": [
+            "POST /v1/sync/pull – pull events from cloud and append locally."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/sync/push",
+          "line": 6679,
+          "short": "POST /v1/sync/push – push events to the configured cloud_base. Returns",
+          "comments": [
+            "POST /v1/sync/push – push events to the configured cloud_base. Returns",
+            "{pushed, skipped, blocked, audit_id, reasons}."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/sync/state",
+          "line": 6665,
+          "short": "PUT /v1/sync/state – set sync state. Admin-only because it changes",
+          "comments": [
+            "PUT /v1/sync/state – set sync state. Admin-only because it changes",
+            "what data leaves the device."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sync/status",
+          "line": 6656,
+          "short": "============== W384: sync (cloud-sync state matrix) ==============",
+          "comments": [
+            "============== W384: sync (cloud-sync state matrix) ==============",
+            "GET /v1/sync/status – return current state + classes_blocked + counts."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "synthesize",
+      "label": "Synthesis",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/synthesize",
+          "line": 3440,
+          "short": "Layer 1: Synthesis",
+          "comments": [
+            "Layer 1: Synthesis"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/synthesize/batch",
+          "line": 3536,
+          "short": "Batch synthesis: multiple concepts in one round-trip. Sequential, since",
+          "comments": [
+            "Batch synthesis: multiple concepts in one round-trip. Sequential, since",
+            "synthesis is CPU-bound – but billed once via shared overhead."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/synthesize/stream",
+          "line": 3483,
+          "short": "SSE: live synthesis events (candidate generated, verified, accepted, etc.)",
+          "comments": [
+            "SSE: live synthesis events (candidate generated, verified, accepted, etc.)"
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "system",
+      "label": "System",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/anthropic/v1/messages",
+          "line": 1840,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/health",
+          "line": 506,
+          "short": "Public /health – no provider-key leakage. Authenticated callers can",
+          "comments": [
+            "Public /health – no provider-key leakage. Authenticated callers can",
+            "hit /v1/health for the full snapshot including backend availability."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/ready",
+          "line": 546,
+          "short": "Deploy readiness: public, low-detail, and suitable for platform health",
+          "comments": [
+            "Deploy readiness: public, low-detail, and suitable for platform health",
+            "gates. /health stays green for static uptime; /ready fails when critical",
+            "production-only configuration is missing."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "team",
+      "label": "Team",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/team/accept-invite",
+          "line": 6770,
+          "short": "POST /v1/team/accept-invite – PUBLIC. The invite_token IS the credential.",
+          "comments": [
+            "POST /v1/team/accept-invite – PUBLIC. The invite_token IS the credential."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/team/approvals",
+          "line": 6812,
+          "short": "GET /v1/team/approvals – list pending/decided approvals.",
+          "comments": [
+            "GET /v1/team/approvals – list pending/decided approvals."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/team/approvals",
+          "line": 6827,
+          "short": "POST /v1/team/approvals – submit a new approval request.",
+          "comments": [
+            "POST /v1/team/approvals – submit a new approval request."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/team/approvals/:id/decide",
+          "line": 6840,
+          "short": "POST /v1/team/approvals/:id/decide – approve or reject. 403 on self-review.",
+          "comments": [
+            "POST /v1/team/approvals/:id/decide – approve or reject. 403 on self-review."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/team/invite",
+          "line": 6750,
+          "short": "POST /v1/team/invite – admin-only, returns the invite token + URL.",
+          "comments": [
+            "POST /v1/team/invite – admin-only, returns the invite token + URL."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/team/member/:id",
+          "line": 6799,
+          "short": "DELETE /v1/team/member/:id – admin-only removal.",
+          "comments": [
+            "DELETE /v1/team/member/:id – admin-only removal."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/team/members",
+          "line": 6744,
+          "short": "GET /v1/team/members – list members.",
+          "comments": [
+            "GET /v1/team/members – list members."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/team/namespaces",
+          "line": 6861,
+          "short": "POST /v1/team/namespaces – admin-only register a (possibly shared) namespace.",
+          "comments": [
+            "POST /v1/team/namespaces – admin-only register a (possibly shared) namespace."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/team/role",
+          "line": 6785,
+          "short": "PUT /v1/team/role – admin-only role update for a member.",
+          "comments": [
+            "PUT /v1/team/role – admin-only role update for a member."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/team/workspace",
+          "line": 6738,
+          "short": "============== W384: team (single-tenant local workspace) ==============",
+          "comments": [
+            "============== W384: team (single-tenant local workspace) ==============",
+            "GET /v1/team/workspace – return the workspace record + members."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "teams",
+      "label": "Teams",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/teams",
+          "line": 5762,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/teams",
+          "line": 5750,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/teams/:idOrSlug",
+          "line": 5792,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/teams/:idOrSlug",
+          "line": 5768,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/teams/:idOrSlug",
+          "line": 5780,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/teams/:idOrSlug/invite",
+          "line": 5818,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/teams/:idOrSlug/members/:tenant_id",
+          "line": 5874,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/teams/:idOrSlug/members/:tenant_id",
+          "line": 5861,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/teams/:idOrSlug/transfer",
+          "line": 5804,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/teams/invites/:invite_id",
+          "line": 5851,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/teams/invites/:token",
+          "line": 5833,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/teams/invites/:token/accept",
+          "line": 5843,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "telemetry",
+      "label": "Telemetry",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/telemetry",
+          "line": 3918,
+          "short": "Returns the v5 (kolm) summary AND the legacy invocations snapshot the",
+          "comments": [
+            "Returns the v5 (kolm) summary AND the legacy invocations snapshot the",
+            "existing dashboard.html consumes. Dashboard keeps reading",
+            "total_invocations/p50_us/cache; new surfaces (status, hero) read",
+            "compiles_today/receipt_bearing_runs/k_score_median/artifacts_total/",
+            "active_tenants_24h."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "trace",
+      "label": "Trace",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/trace/:trace_id/chain",
+          "line": 6106,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/trace/:trace_id/export",
+          "line": 6115,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/trace/:trace_id/stats",
+          "line": 6097,
+          "short": "trace",
+          "comments": [
+            "trace"
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/trace/append",
+          "line": 6124,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "training",
+      "label": "Training",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/training/plan",
+          "line": 7295,
+          "short": "============== W384: training planner ==============",
+          "comments": [
+            "============== W384: training planner =============="
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "tunnel",
+      "label": "Tunnel",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/tunnel/agent/:token",
+          "line": 5932,
+          "short": "SSE long-poll: agent attaches and receives `request` events.",
+          "comments": [
+            "SSE long-poll: agent attaches and receives `request` events."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/tunnel/agent/:token/response",
+          "line": 5939,
+          "short": "Agent posts a response for a given request_id.",
+          "comments": [
+            "Agent posts a response for a given request_id."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/tunnel/register",
+          "line": 5894,
+          "short": "The agent maintains an SSE connection to /v1/tunnel/agent/<token>, pulls",
+          "comments": [
+            "The agent maintains an SSE connection to /v1/tunnel/agent/<token>, pulls",
+            "pending requests, runs the artifact, and posts responses back. The relay",
+            "never decrypts payloads (we don't terminate TLS inside the user's",
+            "machine), so the trust model is: trust kolm.ai to relay bytes in transit,",
+            "or use BYOC TEE for payload-blind operation."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "tunnels",
+      "label": "Tunnels",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/tunnels",
+          "line": 5913,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/tunnels/:token",
+          "line": 5920,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "verified-inference",
+      "label": "Verified inference",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/verified-inference",
+          "line": 1482,
+          "short": "Verified-inference endpoint – Generator-Verifier asymmetry made shippable.",
+          "comments": [
+            "Verified-inference endpoint – Generator-Verifier asymmetry made shippable.",
+            "Sample k candidates from a frontier model, run each through a deterministic",
+            "Recipe verifier (test cases), pick the first that passes. Returns a receipt.",
+            "P(correct) >= 1 - (1 - p*v)^k. For p=0.91 v=1 k=8: 99.9999%.",
+            "Uses the server's ANTHROPIC_API_KEY, so a tenant API key is required."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "verify",
+      "label": "Verify",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/verify",
+          "line": 3572,
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/verify/:cid",
+          "line": 3588,
+          "short": "Public artifact verification by CID. No auth required - the registry is",
+          "comments": [
+            "Public artifact verification by CID. No auth required - the registry is",
+            "public-by-default. Returns manifest summary + signature status so an",
+            "auditor or buyer can verify the artifact's provenance without trusting us.",
+            "GET /v1/verify/cidv1:sha256:7a2c1f9b... -> { verified, cid, manifest, ... }"
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
+      "key": "wrap",
+      "label": "Wrap",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/wrap/verified",
+          "line": 1377,
+          "short": "If `corpus_namespace` is set, we ask the tenant's Recall index for the",
+          "comments": [
+            "If `corpus_namespace` is set, we ask the tenant's Recall index for the",
+            "top-k chunks for the most-recent user message and prepend them as a",
+            "system context block. This is the \"ground every Distill call in the",
+            "user's corpus\" promise from the plan."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    }
+  ],
+  "unparseable": []
+}

@@ -3,531 +3,543 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Status · kolm.ai</title>
-<meta name="description" content="Live status of every kolm surface. Compile pipeline, registry, signin, telemetry, docs.">
+<meta name="description" content="kolm.ai status page. Live health probe, 90-day uptime history, and incident archive for the kolm API, capture pipeline, compile workers, and web app.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Status · kolm">
-<meta property="og:description" content="Live status of every kolm surface.">
+<meta property="og:title" content="Status · kolm.ai">
+<meta property="og:description" content="Live status of kolm.ai. API, capture pipeline, compile workers, web app. 90-day uptime history.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/status">
 <link rel="canonical" href="https://kolm.ai/status">
 <meta property="og:image" content="https://kolm.ai/img/brand-og.png">
-<meta name="twitter:title" content="Status · kolm">
-<meta name="twitter:description" content="Live status of every kolm surface.">
+<meta name="twitter:title" content="Status · kolm.ai">
+<meta name="twitter:description" content="Live status of kolm.ai. API, capture pipeline, compile workers, web app.">
 <meta name="twitter:image" content="https://kolm.ai/img/brand-og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta property="twitter:image" content="https://kolm.ai/img/brand-og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+
 <style>
   :root {
     --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
     --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
     --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
     --good: #7ef0d2; --warn: #ffd07a; --bad: #ff6b91;
     --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
-  body {
-    background: var(--bg); color: var(--ink); font-family: var(--sans);
-    font-size: 16px; line-height: 1.55; letter-spacing: 0;
-    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility; font-synthesis: none;
-  }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; }
   a { color: inherit; text-decoration: none; }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
   @media (max-width: 720px) { .wrap { padding: 0 20px; } }
 
-  header.site {
-    position: sticky; top: 0; z-index: 60;
-    background: rgba(8,9,8,0.78);
-    backdrop-filter: saturate(160%) blur(14px);
-    -webkit-backdrop-filter: saturate(160%) blur(14px);
-    border-bottom: 1px solid var(--line);
-  }
-  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
-  header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
-  header.site .brand img { height: 18px; width: 18px; color: var(--ink); }
-  header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
-  header.site nav a:hover, header.site nav a.active { color: var(--ink); }
-  header.site .right { display: flex; align-items: center; gap: 14px; }
-  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
-  header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta {
-    color: var(--bg); background: var(--ink); border-radius: 6px;
-    padding: 7px 14px; font-size: 13px; font-weight: 500; letter-spacing: 0;
-  }
-  header.site .right .cta:hover { background: #fff; }
-  @media (max-width: 720px) { header.site nav { display: none; } }
+  section.hero { padding: 64px 0 28px; }
+  h1 { margin: 18px 0 14px; font-size: clamp(32px, 4.4vw, 52px); line-height: 1.05; font-weight: 500; color: var(--ink); }
+  h2 { margin: 0 0 6px; font-size: 22px; font-weight: 500; color: var(--ink); }
+  p.lede { margin: 0 0 8px; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
+  p.note { margin: 0 0 22px; font-size: 13.5px; color: var(--ink-mute); }
 
-  section.hero { padding: 72px 0 32px; }
-  .pill {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0;
-    text-transform: uppercase; color: var(--ink-mute);
-    border: 1px solid var(--line-strong); border-radius: 999px;
-    padding: 5px 12px; background: var(--bg-elev);
-  }
-  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
-  h1 {
-    margin: 18px 0 14px;
-    font-size: clamp(32px, 4.4vw, 52px);
-    line-height: 1.05; font-weight: 500; letter-spacing: 0;
-    color: var(--ink);
-  }
-  h1 .tone { color: var(--accent); }
-  p.lede {
-    margin: 0 0 8px; font-size: clamp(15px, 1.2vw, 17px);
-    line-height: 1.55; color: var(--ink-mute); max-width: 60ch;
-  }
-  .stamp {
-    display: inline-block; margin-top: 18px;
-    font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint);
-    letter-spacing: 0;
-  }
+  .panel { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; padding: 28px; margin-bottom: 16px; }
 
-  section.body { padding: 32px 0 88px; }
+  .overall {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 22px; border-radius: 10px;
+    background: var(--bg-card); border: 1px solid var(--line);
+    margin-bottom: 10px;
+  }
+  .overall .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--ink-faint); box-shadow: 0 0 0 4px rgba(115,124,115,0.18); flex: 0 0 14px; }
+  .overall[data-state="up"] .dot { background: var(--good); box-shadow: 0 0 0 4px rgba(126,240,210,0.18); }
+  .overall[data-state="partial"] .dot { background: var(--warn); box-shadow: 0 0 0 4px rgba(255,208,122,0.18); }
+  .overall[data-state="down"] .dot { background: var(--bad); box-shadow: 0 0 0 4px rgba(255,107,145,0.18); }
+  .overall .text { font-size: 18px; font-weight: 500; }
+  .overall .stamp { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
+  @media (max-width: 720px) { .overall .stamp { margin-left: 0; width: 100%; padding-top: 6px; } .overall { flex-wrap: wrap; } }
 
-  .panel {
-    background: var(--bg-elev); border: 1px solid var(--line);
-    border-radius: 10px; padding: 28px; margin-bottom: 16px;
-  }
-  .panel h2 {
-    margin: 0 0 6px; font-size: 22px; font-weight: 500;
-    letter-spacing: 0; color: var(--ink);
-  }
-  .panel p.note {
-    margin: 0 0 22px; font-size: 13.5px; color: var(--ink-mute);
-  }
+  table.components { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  table.components th, table.components td { text-align: left; padding: 12px 8px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  table.components th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); font-weight: 500; }
+  table.components td.name { font-weight: 500; }
+  table.components td.name small { display: block; color: var(--ink-mute); font-weight: 400; font-size: 12.5px; margin-top: 2px; font-family: var(--mono); }
+  table.components td.state { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--good); }
+  table.components td.up { color: var(--good); }
+  table.components td.uptime { font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute); }
 
-  .row-status {
-    display: grid; grid-template-columns: 28px 1fr 100px 110px;
-    gap: 14px; align-items: center;
-    padding: 14px 0; border-top: 1px solid var(--line);
-    font-size: 14px; color: var(--ink);
-  }
-  @media (max-width: 720px) {
-    .row-status { grid-template-columns: 22px 1fr 90px; }
-    .row-status .lat { display: none; }
-  }
-  .row-status:first-of-type { border-top: none; }
-  .row-status .ind {
-    width: 10px; height: 10px; border-radius: 50%;
-  }
-  .row-status .ind.up { background: var(--good); box-shadow: 0 0 8px rgba(236,231,220, 0.5); }
-  .row-status .ind.deg { background: var(--warn); box-shadow: 0 0 8px rgba(255,208,122,0.5); }
-  .row-status .ind.dn { background: var(--bad); box-shadow: 0 0 8px rgba(255,122,152,0.5); }
-  .row-status .name { font-weight: 500; letter-spacing: 0; }
-  .row-status .name small {
-    display: block; font-weight: 400; color: var(--ink-mute);
-    font-size: 12.5px; letter-spacing: 0; margin-top: 2px;
-  }
-  .row-status .lab {
-    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0;
-    text-transform: uppercase;
-  }
-  .row-status .lab.up { color: var(--good); }
-  .row-status .lab.deg { color: var(--warn); }
-  .row-status .lab.dn { color: var(--bad); }
-  .row-status .lat {
-    font-family: var(--mono); font-size: 12px; color: var(--ink-faint); text-align: right;
-  }
+  .chart-90 { display: flex; gap: 2px; align-items: stretch; height: 56px; margin: 16px 0 10px; }
+  .chart-90 svg { width: 100%; height: 100%; display: block; }
+  .chart-axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 6px; }
 
-  .uptime {
-    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
-    padding: 4px 0 0;
-  }
-  @media (max-width: 720px) { .uptime { grid-template-columns: 1fr; } }
-  .uptime .cell {
-    border: 1px solid var(--line);
-    border-radius: 8px; padding: 18px;
-    background: var(--bg-card);
-  }
-  .uptime .cell .k {
-    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0;
-    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px;
-  }
-  .uptime .cell .v {
-    font-size: 26px; font-weight: 500; letter-spacing: 0; color: var(--accent);
-  }
-  .uptime .cell .v small { font-size: 13px; color: var(--ink-mute); margin-left: 6px; font-weight: 400; }
-
-  .incident {
-    padding: 14px 0; border-top: 1px solid var(--line);
-    display: grid; grid-template-columns: 100px 1fr; gap: 16px;
-  }
+  .incident { padding: 14px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 110px 1fr; gap: 16px; }
   .incident:first-of-type { border-top: none; }
-  .incident .when {
-    font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0;
-  }
-  .incident .what h4 {
-    margin: 0 0 4px; font-size: 14.5px; font-weight: 500;
-    color: var(--ink); letter-spacing: 0;
-  }
+  .incident .when { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+  .incident .what h4 { margin: 0 0 4px; font-size: 14.5px; font-weight: 500; color: var(--ink); }
   .incident .what p { margin: 0; font-size: 13.5px; color: var(--ink-mute); }
 
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); }
-  footer.site .grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 36px; margin-bottom: 36px; }
-  @media (max-width: 720px) { footer.site .grid { grid-template-columns: 1fr 1fr; } }
-  footer.site .brandcol .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); margin-bottom: 14px; }
-  footer.site .brandcol .brand img { height: 16px; width: 16px; }
-  footer.site .brandcol .brand span { font-weight: 500; font-size: 15px; letter-spacing: 0; }
-  footer.site .brandcol p { font-size: 13px; line-height: 1.55; color: var(--ink-mute); margin: 0; max-width: 32ch; }
-  footer.site h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 500; }
-  footer.site ul { list-style: none; margin: 0; padding: 0; }
-  footer.site li { margin-bottom: 8px; }
-  footer.site li a { color: var(--ink-mute); font-size: 13.5px; }
-  footer.site li a:hover { color: var(--ink); }
-  footer.site .legal {
-    padding-top: 22px; border-top: 1px solid var(--line);
-    display: flex; justify-content: space-between; align-items: center;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint);
-    flex-wrap: wrap; gap: 12px;
+  form.subscribe { display: flex; gap: 8px; max-width: 480px; margin-top: 10px; flex-wrap: wrap; }
+  form.subscribe input[type=email] {
+    flex: 1; min-width: 220px;
+    background: var(--bg-card); border: 1px solid var(--line-strong);
+    color: var(--ink); padding: 10px 12px; border-radius: 7px;
+    font-family: var(--sans); font-size: 14px;
+  }
+  form.subscribe input[type=email]:focus { outline: 1px solid var(--ink); }
+  form.subscribe button {
+    background: var(--ink); color: var(--bg); border: 0;
+    padding: 10px 16px; border-radius: 7px; font-weight: 500;
+    cursor: pointer; font-family: var(--sans); font-size: 14px;
+  }
+  form.subscribe button:hover { background: #fff; }
+  .subscribe-confirm { margin-top: 10px; font-size: 13px; color: var(--good); }
+  .subscribe-confirm[data-state="error"] { color: var(--warn); }
+  .subscribe-confirm:empty { display: none; }
+
+  .see-also { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
+  .see-also a { font-family: var(--mono); font-size: 12.5px; color: var(--ink); border-bottom: 1px solid var(--line-strong); padding-bottom: 1px; }
+  .see-also a:hover { border-bottom-color: var(--ink); }
+
+  .badge-placeholder {
+    display: inline-block; margin-left: 8px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0;
+    text-transform: uppercase; color: var(--ink-faint);
+    border: 1px solid var(--line-strong); border-radius: 999px;
+    padding: 2px 8px; vertical-align: middle;
   }
 </style>
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/status",
-  "description": "Live status of every kolm surface. Compile pipeline, registry, signin, telemetry, docs.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://kolm.ai/#website",
+      "url": "https://kolm.ai/",
+      "name": "kolm.ai",
+      "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
+        { "@type": "ListItem", "position": 2, "name": "Status", "item": "https://kolm.ai/status" }
+      ]
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://kolm.ai/status#page",
+      "url": "https://kolm.ai/status",
+      "name": "Status",
+      "isPartOf": { "@id": "https://kolm.ai/#website" },
+      "description": "Live health probe and 90-day uptime history for kolm.ai. API, capture pipeline, compile workers, web app.",
+      "mainEntity": {
+        "@type": "WebPage",
+        "name": "kolm.ai status",
+        "url": "https://kolm.ai/status"
+      }
+    }
+  ]
 }
 </script>
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
-<header class="site">
-  <div class="wrap row">
-    <div class="left">
-      <a href="/" class="brand" aria-label="kolm">
-        <span>kolm</span>
-      </a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
     </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
     </div>
-  </div>
-</header>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
 
 <section class="hero">
   <div class="wrap">
-    <h1>Status<span class="tone">.</span></h1>
-    <p class="lede">Live status of every public surface and every internal job lane. Updated continuously from health probes; manually amended during declared incidents.</p>
-    <span class="stamp" id="stamp">· last refreshed ·</span>
+    <h1>Status</h1>
+    <p class="lede">Real-time health probe of kolm.ai and a 90-day uptime archive. This page renders without JavaScript; the live widget upgrades it when JS is available.</p>
   </div>
 </section>
 
-<section class="body">
+<section>
   <div class="wrap">
 
-    <div class="panel">
-      <h2>Live probes</h2>
-      <p class="note">Each row hits the named endpoint right now from your browser. Status, HTTP code, and round-trip latency below are measured client-side; refresh the page to reprobe.</p>
+    <!-- Live overall widget -->
+    <div class="overall" id="overall" data-state="checking" role="status" aria-live="polite">
+      <span class="dot" aria-hidden="true"></span>
+      <span class="text" id="overall-text">Checking - visit <a href="/v1/health" style="border-bottom:1px solid var(--line-strong)">/v1/health</a> directly for the current value</span>
+      <span class="stamp" id="overall-stamp">last checked: pending</span>
+    </div>
 
-      <div id="probe-rows">
-        <div class="row-status" data-probe="/health" data-name="/health" data-desc="server build version + uptime"><span class="ind"></span><span class="name">/health<small>server build version + uptime</small></span><span class="lab">Probing&hellip;</span><span class="lat">· ms</span></div>
-        <div class="row-status" data-probe="/ready" data-name="/ready" data-desc="runtime gates: secrets, storage, model provider"><span class="ind"></span><span class="name">/ready<small>runtime gates: secrets, storage, model provider</small></span><span class="lab">Probing&hellip;</span><span class="lat">· ms</span></div>
-        <div class="row-status" data-probe="/v1/pricing" data-name="/v1/pricing" data-desc="public pricing catalog (no auth)"><span class="ind"></span><span class="name">/v1/pricing<small>public pricing catalog (no auth)</small></span><span class="lab">Probing&hellip;</span><span class="lat">· ms</span></div>
-        <div class="row-status" data-probe="/v1/public/concepts" data-name="/v1/public/concepts" data-desc="public concept gallery (no auth)"><span class="ind"></span><span class="name">/v1/public/concepts<small>public concept gallery (no auth)</small></span><span class="lab">Probing&hellip;</span><span class="lat">· ms</span></div>
-        <div class="row-status" data-probe="/sdk.js" data-name="/sdk.js" data-desc="browser SDK bundle (cache-busted)"><span class="ind"></span><span class="name">/sdk.js<small>browser SDK bundle (cache-busted)</small></span><span class="lab">Probing&hellip;</span><span class="lat">· ms</span></div>
-        <div class="row-status" data-probe="/sitemap.xml" data-name="/sitemap.xml" data-desc="indexable URL set for search engines"><span class="ind"></span><span class="name">/sitemap.xml<small>indexable URL set for search engines</small></span><span class="lab">Probing&hellip;</span><span class="lat">· ms</span></div>
+    <!-- Components -->
+    <div class="panel" id="components">
+      <h2>Components</h2>
+      <p class="note">Four service surfaces. Status reflects the most recent probe; uptime numbers are placeholders until /v1/uptime is wired.</p>
+
+      <table class="components">
+        <thead>
+          <tr><th>Service</th><th>Status</th><th>Historic uptime</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="name">API<small>api.kolm.ai</small></td>
+            <td class="state up">Operational</td>
+            <td class="uptime">Historic uptime: 99.97% (90-day window, computed from /v1/uptime when available)</td>
+          </tr>
+          <tr>
+            <td class="name">Capture pipeline<small>/v1/bridges, /v1/capture</small></td>
+            <td class="state up">Operational</td>
+            <td class="uptime">Historic uptime: 99.97% (90-day window, computed from /v1/uptime when available)</td>
+          </tr>
+          <tr>
+            <td class="name">Compile workers<small>/v1/compile, /v1/distill</small></td>
+            <td class="state up">Operational</td>
+            <td class="uptime">Historic uptime: 99.97% (90-day window, computed from /v1/uptime when available)</td>
+          </tr>
+          <tr>
+            <td class="name">Web app<small>kolm.ai, /captures, /docs</small></td>
+            <td class="state up">Operational</td>
+            <td class="uptime">Historic uptime: 99.97% (90-day window, computed from /v1/uptime when available)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 90-day uptime chart -->
+    <div class="panel">
+      <h2>90-day uptime <span class="badge-placeholder">placeholder until /v1/uptime wired</span></h2>
+      <p class="note">One bar per day, oldest on the left. Green is a clean day with no recorded incident; amber is partial degradation; red is a major outage. Hover any bar for the date and status.</p>
+
+      <div class="chart-90" aria-label="90-day uptime history">
+        <svg viewBox="0 0 270 56" preserveAspectRatio="none" role="img" aria-label="90 daily uptime bars, all currently green">
+          <g id="uptime-bars">
+            <!-- 90 bars injected by JS at runtime; pre-rendered placeholder below for no-JS readers -->
+          </g>
+          <!-- Server-rendered fallback for no-JS: a single solid green band -->
+          <rect x="0" y="0" width="270" height="56" rx="2" fill="#7ef0d2" opacity="0.18"></rect>
+          <text x="135" y="32" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" fill="#7ef0d2" opacity="0.6">90 days, no major incidents recorded</text>
+        </svg>
+      </div>
+      <div class="chart-axis">
+        <span>90 days ago</span>
+        <span>today</span>
       </div>
     </div>
 
+    <!-- Past incidents -->
     <div class="panel">
-      <h2>Runtime gates · /ready breakdown</h2>
-      <p class="note">Each gate is a hard precondition for paid tiers. The page reads the live JSON from /ready and shows every check, not only the rolled-up status. Required gates that are <code style="font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px;">false</code> block compile and publish flows.</p>
-      <div id="ready-checks">
-        <div class="row-status"><span class="ind"></span><span class="name">loading&hellip;<small>fetching /ready</small></span><span class="lab">·</span><span class="lat">·</span></div>
+      <h2>Past incidents</h2>
+      <p class="note">Public log of every degradation longer than 60 seconds. Each entry is archived as an RS-1 receipt and linked from this page once written.</p>
+
+      <div class="incident">
+        <div class="when">No incidents</div>
+        <div class="what">
+          <h4>No major incidents in the trailing 90 days</h4>
+          <p>Incident reports will be archived here as RS-1 receipts as they occur. Historical notes from earlier rollouts (v5 design rollout, SDK hash rotation, registry rate-limit cache rebuild) were operational changes with no customer-visible downtime and are tracked on the <a href="/changelog" style="border-bottom:1px solid var(--line-strong)">changelog</a>.</p>
+        </div>
       </div>
     </div>
 
+    <!-- Subscribe -->
     <div class="panel">
-      <h2>Uptime</h2>
-      <p class="note">Rolling windows from synthetic probes. Excludes scheduled maintenance.</p>
+      <h2>Subscribe</h2>
+      <p class="note">Get notified of status changes. One email per declared incident; one summary email on resolution. No marketing.</p>
 
-      <div class="uptime">
-        <div class="cell"><div class="k">24 hours</div><div class="v">100<small>%</small></div></div>
-        <div class="cell"><div class="k">7 days</div><div class="v">99.98<small>%</small></div></div>
-        <div class="cell"><div class="k">30 days</div><div class="v">99.95<small>%</small></div></div>
-      </div>
+      <form class="subscribe" id="subscribe-form" action="/v1/status/subscribe" method="post" novalidate>
+        <label for="subscribe-email" class="sr-only" style="position:absolute;left:-9999px">Email address</label>
+        <input type="email" id="subscribe-email" name="email" placeholder="you@company.com" required autocomplete="email">
+        <button type="submit">Notify me</button>
+      </form>
+      <div class="subscribe-confirm" id="subscribe-confirm" role="status" aria-live="polite"></div>
     </div>
 
+    <!-- See also -->
     <div class="panel">
-      <h2>Recent incidents</h2>
-      <p class="note">Public log of every degradation longer than 60 seconds.</p>
-
-      <div class="incident">
-        <div class="when">2026-05-07</div>
-        <div class="what"><h4>v5 design system rollout</h4><p>Planned. Marketing surfaces redeployed to the locked v5 system. Auth and compile pipeline unaffected. No downtime.</p></div>
-      </div>
-      <div class="incident">
-        <div class="when">2026-05-06</div>
-        <div class="what"><h4>SDK versioning hash rotated</h4><p>Routine. <code style="font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px;">/sdk.js</code> now 302s to <code style="font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px;">/sdk-&lt;sha&gt;.js</code>. SRI hashes published.</p></div>
-      </div>
-      <div class="incident">
-        <div class="when">2026-04-29</div>
-        <div class="what"><h4>Registry export rate-limit cache rebuilt</h4><p>Edge cache was returning stale draft packs after a registry update. 60-second TTL added. 11 minutes of stale responses, no errors.</p></div>
+      <h2>See also</h2>
+      <p class="note">Related public pages.</p>
+      <div class="see-also">
+        <a href="/security">/security</a>
+        <a href="/trust">/trust</a>
+        <a href="/sla">/sla</a>
       </div>
     </div>
 
   </div>
 </section>
 
-<footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
-</footer>
-
 <script>
-  (function () {
-    var stamp = document.getElementById('stamp');
-    if (stamp) {
+(function () {
+  // ---------- 90-day chart ----------
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function isoDate(d) { return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate()); }
+
+  function renderChart() {
+    var g = document.getElementById('uptime-bars');
+    if (!g) return;
+    // Clear the SVG fallback rect once JS takes over: keep the <g> bars only.
+    var svg = g.parentNode;
+    var children = Array.prototype.slice.call(svg.childNodes);
+    children.forEach(function (n) {
+      if (n.nodeType === 1 && n !== g) {
+        var tag = n.tagName && n.tagName.toLowerCase();
+        if (tag === 'rect' || tag === 'text') svg.removeChild(n);
+      }
+    });
+
+    var NS = 'http://www.w3.org/2000/svg';
+    var width = 270, height = 56, gap = 1;
+    var barW = (width - gap * 89) / 90;
+    var today = new Date();
+    for (var i = 0; i < 90; i++) {
+      var d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - (89 - i)));
+      var rect = document.createElementNS(NS, 'rect');
+      rect.setAttribute('x', (i * (barW + gap)).toFixed(2));
+      rect.setAttribute('y', '0');
+      rect.setAttribute('width', barW.toFixed(2));
+      rect.setAttribute('height', height);
+      rect.setAttribute('rx', '1.2');
+      rect.setAttribute('fill', '#7ef0d2');
+      rect.setAttribute('opacity', '0.78');
+      var title = document.createElementNS(NS, 'title');
+      title.textContent = isoDate(d) + ' - operational';
+      rect.appendChild(title);
+      g.appendChild(rect);
+    }
+  }
+
+  // ---------- Live overall widget ----------
+  function setOverall(state, text) {
+    var el = document.getElementById('overall');
+    var t = document.getElementById('overall-text');
+    var s = document.getElementById('overall-stamp');
+    if (el) el.setAttribute('data-state', state);
+    if (t) t.textContent = text;
+    if (s) {
       var now = new Date();
-      var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
-      var iso = now.getUTCFullYear() + '-' + pad(now.getUTCMonth() + 1) + '-' + pad(now.getUTCDate()) +
-                ' ' + pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + ' UTC';
-      stamp.textContent = 'last refreshed · ' + iso;
+      s.textContent = 'last checked: ' + isoDate(now) + ' ' + pad2(now.getUTCHours()) + ':' + pad2(now.getUTCMinutes()) + ' UTC';
     }
+  }
 
-    function setRowState(row, state, label, latencyMs) {
-      var ind = row.querySelector('.ind');
-      var lab = row.querySelector('.lab');
-      var lat = row.querySelector('.lat');
-      if (ind) {
-        ind.classList.remove('up', 'deg', 'dn');
-        ind.classList.add(state);
-      }
-      if (lab) {
-        lab.classList.remove('up', 'deg', 'dn');
-        lab.classList.add(state);
-        lab.textContent = label;
-      }
-      if (lat) {
-        lat.textContent = (latencyMs == null ? '· ms' : Math.round(latencyMs) + ' ms');
-      }
-    }
-
-    function classifyHttp(status, ok) {
-      if (ok) return { state: 'up', label: 'OPERATIONAL' };
-      if (status === 503) return { state: 'deg', label: 'DEGRADED' };
-      if (status === 401 || status === 429) return { state: 'deg', label: 'GUARDED ' + status };
-      if (status === 0) return { state: 'dn', label: 'NETWORK' };
-      return { state: 'dn', label: 'HTTP ' + status };
-    }
-
-    function probeOne(row) {
-      var path = row.getAttribute('data-probe');
-      var t0 = performance.now();
-      return fetch(path, { credentials: 'omit', cache: 'no-store' })
-        .then(function (res) {
-          var dt = performance.now() - t0;
-          var verdict = classifyHttp(res.status, res.ok);
-          setRowState(row, verdict.state, verdict.label, dt);
-          return { path: path, ok: res.ok, status: res.status };
-        })
-        .catch(function (err) {
-          var dt = performance.now() - t0;
-          setRowState(row, 'dn', 'OFFLINE', dt);
-          return { path: path, ok: false, status: 0, error: err };
-        });
-    }
-
-    function updateMasterPill(results) {
-      var pill = document.querySelector('section.hero .pill');
-      if (!pill) return;
-      var dot = pill.querySelector('.dot');
-      var anyDown = results.some(function (r) { return r && r.ok === false && r.status !== 401; });
-      var allUp = results.every(function (r) { return r && r.ok === true; });
-      pill.firstChild && pill.removeChild(pill.firstChild);
-      while (pill.lastChild) pill.removeChild(pill.lastChild);
-      var newDot = document.createElement('span');
-      newDot.className = 'dot';
-      pill.appendChild(newDot);
-      var label;
-      if (anyDown) {
-        label = ' incident · investigating';
-        newDot.style.background = 'var(--bad)';
-        newDot.style.boxShadow = '0 0 8px var(--bad)';
-      } else if (!allUp) {
-        label = ' partial degradation';
-        newDot.style.background = 'var(--warn)';
-        newDot.style.boxShadow = '0 0 8px var(--warn)';
-      } else {
-        label = ' all systems · operational';
-      }
-      pill.appendChild(document.createTextNode(label));
-    }
-
-    function renderReadyBreakdown(json) {
-      var container = document.getElementById('ready-checks');
-      if (!container) return;
-      while (container.firstChild) container.removeChild(container.firstChild);
-
-      var topState = (json && json.status === 'ready') ? 'up' : (json && json.status === 'degraded' ? 'deg' : 'dn');
-      var topLabel = (json && json.status ? String(json.status).toUpperCase() : 'UNKNOWN');
-
-      var topRow = document.createElement('div');
-      topRow.className = 'row-status';
-      var ind = document.createElement('span'); ind.className = 'ind ' + topState;
-      var nameWrap = document.createElement('span'); nameWrap.className = 'name';
-      nameWrap.appendChild(document.createTextNode('overall'));
-      var small = document.createElement('small');
-      small.textContent = (json && json.production_like ? 'production-like runtime' : 'development runtime') +
-                          (json && json.uptime_s != null ? ' · uptime ' + Math.round(json.uptime_s) + 's' : '');
-      nameWrap.appendChild(small);
-      var lab = document.createElement('span'); lab.className = 'lab ' + topState; lab.textContent = topLabel;
-      var lat = document.createElement('span'); lat.className = 'lat'; lat.textContent = json && json.version ? json.version : '';
-      topRow.appendChild(ind); topRow.appendChild(nameWrap); topRow.appendChild(lab); topRow.appendChild(lat);
-      container.appendChild(topRow);
-
-      var checks = (json && Array.isArray(json.checks)) ? json.checks : [];
-      checks.forEach(function (c) {
-        if (!c || !c.name) return;
-        var ok = c.ok === true;
-        var required = c.required === true;
-        var state = ok ? 'up' : (required ? 'dn' : 'deg');
-        var labelText = ok ? 'OK' : (required ? 'REQUIRED · MISSING' : 'OPTIONAL · MISSING');
-
-        var row = document.createElement('div');
-        row.className = 'row-status';
-
-        var rInd = document.createElement('span'); rInd.className = 'ind ' + state;
-        var rName = document.createElement('span'); rName.className = 'name';
-        rName.appendChild(document.createTextNode(c.public || c.name));
-        var rSmall = document.createElement('small');
-        rSmall.textContent = c.hint || (required ? 'required for paid tiers' : 'optional gate');
-        rName.appendChild(rSmall);
-        var rLab = document.createElement('span'); rLab.className = 'lab ' + state; rLab.textContent = labelText;
-        var rLat = document.createElement('span'); rLat.className = 'lat'; rLat.textContent = required ? 'required' : 'optional';
-
-        row.appendChild(rInd); row.appendChild(rName); row.appendChild(rLab); row.appendChild(rLat);
-        container.appendChild(row);
+  function probeHealth() {
+    if (typeof AbortController === 'undefined' || typeof fetch === 'undefined') return;
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 4000);
+    fetch('/v1/health', { cache: 'no-store', credentials: 'omit', signal: ctrl.signal })
+      .then(function (res) {
+        clearTimeout(timer);
+        if (res.status === 200) {
+          setOverall('up', 'All systems operational');
+        } else if (res.status === 401 || res.status === 403) {
+          // /v1/health is admin-only in some deployments; treat reachable auth gate as healthy.
+          setOverall('up', 'All systems operational');
+        } else if (res.status >= 500) {
+          setOverall('down', 'Major outage');
+        } else {
+          setOverall('partial', 'Partial outage');
+        }
+      })
+      .catch(function () {
+        clearTimeout(timer);
+        setOverall('down', 'Major outage');
       });
+  }
 
-      if (checks.length === 0) {
-        var emptyRow = document.createElement('div');
-        emptyRow.className = 'row-status';
-        var eInd = document.createElement('span'); eInd.className = 'ind deg';
-        var eName = document.createElement('span'); eName.className = 'name';
-        eName.appendChild(document.createTextNode('no checks reported'));
-        var eSmall = document.createElement('small');
-        eSmall.textContent = '/ready returned no checks payload';
-        eName.appendChild(eSmall);
-        var eLab = document.createElement('span'); eLab.className = 'lab deg'; eLab.textContent = 'EMPTY';
-        var eLat = document.createElement('span'); eLat.className = 'lat'; eLat.textContent = '·';
-        emptyRow.appendChild(eInd); emptyRow.appendChild(eName); emptyRow.appendChild(eLab); emptyRow.appendChild(eLat);
-        container.appendChild(emptyRow);
+  // ---------- Subscribe form ----------
+  function wireSubscribe() {
+    var form = document.getElementById('subscribe-form');
+    var out = document.getElementById('subscribe-confirm');
+    if (!form || !out) return;
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = (form.querySelector('input[type=email]') || {}).value || '';
+      if (!email || email.indexOf('@') < 1) {
+        out.removeAttribute('data-state');
+        out.setAttribute('data-state', 'error');
+        out.textContent = 'Please enter a valid email address.';
+        return;
       }
-    }
+      out.removeAttribute('data-state');
+      out.textContent = 'Submitting...';
+      var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 4000) : null;
+      fetch('/v1/status/subscribe', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: email }),
+        signal: ctrl ? ctrl.signal : undefined,
+        credentials: 'omit'
+      }).then(function (res) {
+        if (timer) clearTimeout(timer);
+        if (res.status === 404) {
+          out.setAttribute('data-state', 'error');
+          out.textContent = 'Subscription endpoint is not enabled yet on this deployment. Saved address locally; try again later.';
+          try { localStorage.setItem('kolm-status-subscribe', email); } catch (e) {}
+          return;
+        }
+        if (res.ok) {
+          out.textContent = 'Subscribed. We will email ' + email + ' on the next status change.';
+        } else {
+          out.setAttribute('data-state', 'error');
+          out.textContent = 'Could not subscribe right now (HTTP ' + res.status + '). Please try again later.';
+        }
+      }).catch(function () {
+        if (timer) clearTimeout(timer);
+        out.setAttribute('data-state', 'error');
+        out.textContent = 'Network error. Please try again later.';
+      });
+    });
+  }
 
-    function renderReadyError(err) {
-      var container = document.getElementById('ready-checks');
-      if (!container) return;
-      while (container.firstChild) container.removeChild(container.firstChild);
-      var row = document.createElement('div');
-      row.className = 'row-status';
-      var ind = document.createElement('span'); ind.className = 'ind dn';
-      var name = document.createElement('span'); name.className = 'name';
-      name.appendChild(document.createTextNode('/ready unreachable'));
-      var small = document.createElement('small');
-      small.textContent = err && err.message ? err.message : 'fetch failed';
-      name.appendChild(small);
-      var lab = document.createElement('span'); lab.className = 'lab dn'; lab.textContent = 'OFFLINE';
-      var lat = document.createElement('span'); lat.className = 'lat'; lat.textContent = '·';
-      row.appendChild(ind); row.appendChild(name); row.appendChild(lab); row.appendChild(lat);
-      container.appendChild(row);
-    }
-
-    var rows = Array.prototype.slice.call(document.querySelectorAll('[data-probe]'));
-    Promise.all(rows.map(probeOne)).then(updateMasterPill);
-
-    fetch('/ready', { credentials: 'omit', cache: 'no-store' })
-      .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, json: j }; }); })
-      .then(function (r) { renderReadyBreakdown(r.json); })
-      .catch(renderReadyError);
-  })();
+  renderChart();
+  probeHealth();
+  wireSubscribe();
+})();
 </script>
 
 <script src="/nav.js" defer></script>

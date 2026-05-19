@@ -236,15 +236,15 @@
 
         <div class="field">
           <label>Monthly calls</label>
-          <input type="number" id="i-calls" value="1200000" min="0" step="10000">
+          <input type="number" id="i-calls" value="1200000" min="0" step="10000" aria-label="Monthly calls">
           <span class="helper"><b>1.2M</b> = 100K MAU at 12 calls/user/mo.</span>
         </div>
 
         <div class="field">
           <label>Tokens per call (input - output)</label>
           <div class="row2">
-            <input type="number" id="i-in" value="800" min="0" step="50">
-            <input type="number" id="i-out" value="250" min="0" step="50">
+            <input type="number" id="i-in" value="800" min="0" step="50" aria-label="Input tokens per call">
+            <input type="number" id="i-out" value="250" min="0" step="50" aria-label="Output tokens per call">
           </div>
           <span class="helper">Typical: <b>500-3000 in</b>, <b>200-900 out</b>.</span>
         </div>
@@ -252,8 +252,8 @@
         <div class="field">
           <label>Frontier price ($ / 1M tokens, input - output)</label>
           <div class="row2">
-            <input type="number" id="i-pin" value="3.00" min="0" step="0.01">
-            <input type="number" id="i-pout" value="15.00" min="0" step="0.01">
+            <input type="number" id="i-pin" value="3.00" min="0" step="0.01" aria-label="Frontier price per 1M input tokens">
+            <input type="number" id="i-pout" value="15.00" min="0" step="0.01" aria-label="Frontier price per 1M output tokens">
           </div>
           <span class="helper">Default = Sonnet-class. 5.00 / 25.00 for Opus-class.</span>
         </div>

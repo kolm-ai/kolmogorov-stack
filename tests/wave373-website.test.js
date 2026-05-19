@@ -99,14 +99,20 @@ test('W373 #5 - download.html surfaces CLI, Mac, Windows, Linux install options'
   assert.ok(!/@kolmogorov\//.test(DOWNLOAD), '@kolmogorov npm scope must not appear on /download');
 });
 
-test('W373 #6 - homepage H1 carries the W373 main claim', () => {
+test('W373 #6 - homepage H1 carries a structured value-prop claim (W387: relaxed phrasing)', () => {
+  // W387 (2026-05-18): user feedback "this wording positioning and structure
+  // has 0 user empathy and is fucking garbage. 0/10" — the previous H1 claim
+  // ("Turn rented AI calls into owned AI systems") relied on a metaphor an
+  // unwarmed visitor doesn't decode. The new H1 leads with concrete pain
+  // (paying OpenAI for the same prompt over and over) per the empathy mandate.
+  // We assert STRUCTURE here (main claim span + 1 .stop + 1 .pain beats),
+  // not the exact phrasing.
   const h1Match = INDEX.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
   assert.ok(h1Match, 'h1 present');
-  // The new W373 claim text must be inside the H1 region.
-  assert.match(h1Match[1], /Turn rented AI calls into owned AI systems/i,
-    'H1 must carry the W373 claim');
-  // Per W271 #3, the .stop and .pain spans (one of each, exactly 2 total)
-  // are still present.
+  // Main claim must exist as a w373-h1-main or h1-claim span (the eye-line beat).
+  assert.match(h1Match[1], /class=["'][^"']*\b(w373-h1-main|h1-claim)\b/,
+    'H1 must carry a main eye-line claim span (w373-h1-main or h1-claim)');
+  // The .stop and .pain spans (one of each, exactly 2 total) remain per W271 #3.
   const stopCount = (h1Match[1].match(/class=["'][^"']*\bstop\b/g) || []).length;
   const painCount = (h1Match[1].match(/class=["'][^"']*\bpain\b/g) || []).length;
   assert.equal(stopCount, 1, 'exactly one .stop span (W271 lock)');
@@ -126,9 +132,12 @@ test('W373 #7 - homepage exposes 6-item marketing nav (Product/Use Cases/Pricing
   }
 });
 
-test('W373 #8 - phi-redactor.kolm artifact preserved on homepage (W220 lock)', () => {
-  // The W220 #8 artifact reference must still exist after the W373 rewrite.
-  assert.match(INDEX, /phi-redactor\.kolm/, 'phi-redactor.kolm artifact reference must remain');
+test('W373 #8 - a concrete .kolm artifact preserved on homepage (W220 lock) [W405: artifact-agnostic]', () => {
+  // W405 (2026-05-19): relaxed from `phi-redactor.kolm` to any *.kolm filename
+  // anchor — user mandate dropped PHI hero framing, hero now ships a
+  // frontier-distilled student artifact (qwen3.6-27b.kolm) instead.
+  assert.match(INDEX, /<a[^>]*>[^<]*\.kolm[^<]*<\/a>/i,
+    'homepage must reference at least one concrete .kolm artifact');
 });
 
 test('W373 #9 - W271/W220/W260 data markers preserved (no regression)', () => {

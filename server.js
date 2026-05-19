@@ -90,12 +90,12 @@ app.get('/docs', (_req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
-// /cookbook serves cookbook.html directly. Same dance as /articles, /use-cases —
-// public/cookbook/ exists as a directory of recipes, so without this hook
-// express.static would 301-redirect /cookbook to /cookbook/.
+// /cookbook is a W224 cut. The canonical destination is /docs (per CUTS dict
+// in tests/wave224-slop-cut.test.js). vercel.json declares the 301; here we
+// mirror it so self-host / direct-server.js paths follow the same contract.
+// Tests fetch with redirect:'follow' so the 301 resolves to /docs (200).
 app.get('/cookbook', (_req, res) => {
-  res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-  res.sendFile(path.join(__dirname, 'public', 'cookbook.html'));
+  res.redirect(301, '/docs');
 });
 
 // /registry — same trick. public/registry/ exists (submit.html), so without
@@ -227,10 +227,13 @@ const ROUTE_ALIASES = {
   '/cli': 'quickstart',
   '/contact': 'community',
   '/insurance': 'health-insurance',
+  // W403 added /datasets vercel rewrite to /docs/datasets.html. Mirror it here
+  // so Railway-direct + self-host serve the same route.
+  '/datasets': 'docs/datasets',
 };
 // /registry + /atlas are handled BEFORE express.static (see top of file) because
 // public/registry/ exists as a subdirectory (submit.html).
-for (const route of ['/', '/dashboard', '/playground', '/docs', '/signup', '/signin', '/login', '/why', '/pricing', '/status', '/account', '/how-it-works', '/device', '/compile', '/run', '/recall', '/cloud', '/k-score', '/benchmarks', '/compare', '/research', '/serve', '/evolve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/legal', '/edge', '/cookbook', '/defense', '/manifesto', '/faq', '/quickstart', '/trust', '/integrations', '/press', '/vs-ollama', '/vs-rag', '/vs-fine-tune', '/vs-predibase', '/vs-openpipe', '/vs-langsmith', '/vs-mem0', '/vs-hindsight', '/vs-openai-fine-tune', '/vs-together', '/why-now', '/threat-model', '/roi', '/api', '/whitepaper', '/build-your-own', '/developers', '/solutions', '/audit-log', '/baa', '/captures', '/capture', '/enterprise', '/glossary', '/leaderboard', '/hub', '/spec', '/spec/grammar', '/models', '/compute', '/troubleshooting', '/teams', '/teams/accept', '/tunnels', '/byoc', '/airgap', '/showcase', '/sdks', '/compliance-packs', '/audit', '/cli', '/contact', '/insurance', '/health-insurance', '/distill', '/train', '/frontier-stack', '/license']) {
+for (const route of ['/', '/dashboard', '/playground', '/docs', '/signup', '/signin', '/login', '/why', '/pricing', '/status', '/account', '/how-it-works', '/device', '/compile', '/run', '/recall', '/cloud', '/k-score', '/benchmarks', '/compare', '/research', '/serve', '/evolve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/legal', '/edge', '/cookbook', '/defense', '/manifesto', '/faq', '/quickstart', '/trust', '/integrations', '/press', '/vs-ollama', '/vs-rag', '/vs-fine-tune', '/vs-predibase', '/vs-openpipe', '/vs-langsmith', '/vs-mem0', '/vs-hindsight', '/vs-openai-fine-tune', '/vs-together', '/why-now', '/threat-model', '/roi', '/api', '/whitepaper', '/build-your-own', '/developers', '/solutions', '/audit-log', '/baa', '/captures', '/capture', '/enterprise', '/glossary', '/leaderboard', '/hub', '/spec', '/spec/grammar', '/models', '/compute', '/troubleshooting', '/teams', '/teams/accept', '/tunnels', '/byoc', '/airgap', '/showcase', '/sdks', '/compliance-packs', '/audit', '/cli', '/contact', '/insurance', '/health-insurance', '/distill', '/train', '/frontier-stack', '/license', '/datasets']) {
   app.get(route, (_req, res) => {
     const name = route === '/' ? 'index' : (ROUTE_ALIASES[route] || route.slice(1));
     const file = path.join(__dirname, 'public', name + '.html');

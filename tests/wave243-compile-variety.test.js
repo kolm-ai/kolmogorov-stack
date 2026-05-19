@@ -154,11 +154,16 @@ test('W244 /pricing surfaces distillation as a product category', () => {
 
 // ─────────────────────────────────────────────────────────────────────
 // public/index.html — hero copy reflects all-model framing.
+// W405: relaxed from byte-marker (0.5B / 1.6T / every device) to behavior
+// assertion — the homepage links to /models (where the scale range lives)
+// and to a multi-target compile/distill surface. Apple-style restraint cut
+// the wall-of-text after-compile + access-anywhere sections that carried
+// those literal markers; the information lives one click away.
 // ─────────────────────────────────────────────────────────────────────
 test('W245 /index hero reflects all-model framing', () => {
   const html = readFile('public/index.html');
-  assert.ok(/0\.5B/.test(html), 'homepage must mention 0.5B (laptop scale)');
-  assert.ok(/1\.6T/.test(html), 'homepage must mention 1.6T (frontier scale)');
-  assert.ok(/every device/i.test(html) || /multi-device/i.test(html),
-    'homepage must reflect multi-device shipping story');
+  assert.ok(/href="\/models"/i.test(html),
+    'homepage must link to /models (scale range surface)');
+  assert.ok(/\bdistill\b/i.test(html) || /\bcompile\b/i.test(html),
+    'homepage must reflect compile/distill story for any-target shipping');
 });

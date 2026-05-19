@@ -171,7 +171,7 @@ const REQUIRED_SITEMAP_ROUTES = [
 const FORBIDDEN_SITEMAP_ROUTES = [
   '/run', '/recall', '/serve', '/anatomy',
   '/agents', '/defense', '/evolve', '/bounty', '/bounties',
-  '/cloud', '/distill', '/edge', '/cookbook', '/playground',
+  '/cloud', '/edge', '/cookbook', '/playground',
   '/onboarding', '/showcase', '/openai',
 ];
 

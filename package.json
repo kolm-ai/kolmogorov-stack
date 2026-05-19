@@ -19,7 +19,8 @@
     "qa:shots": "node scripts/qa-screenshots.mjs",
     "qa:shots:quick": "node scripts/qa-screenshots.mjs --quick",
     "qa:shots:local": "node scripts/qa-screenshots.mjs --base http://localhost:8787",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test --test-concurrency=1 tests/*.test.js",
+    "test:parallel": "node --test tests/*.test.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

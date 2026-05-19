@@ -352,7 +352,20 @@ test('W381 #8 — distill final yield carries artifact_path', async () => {
     assert.equal(typeof doneEvent.artifact_path, 'string', 'done event must have artifact_path');
     assert.ok(doneEvent.artifact_path.length > 0, 'artifact_path must not be empty');
     assert.equal(typeof doneEvent.distill_log_path, 'string', 'done event must have distill_log_path');
-    assert.ok(['stub', 'collect', 'full'].includes(doneEvent.worker_mode), 'worker_mode must be a known value');
+    // W409bb tightening — production runs use 'full' only when
+    // KOLM_DISTILL_FULL=true. With that env unset (deleted on line 337),
+    // 'full' here would mean the worker silently ran a real teacher path,
+    // which is a contract violation: full-mode must be a separate gated
+    // test, not the default. The default suite asserts the test SETUP
+    // (stub/collect only) actually held.
+    if (process.env.KOLM_DISTILL_FULL === 'true' || process.env.KOLM_DISTILL_FULL === '1') {
+      assert.equal(doneEvent.worker_mode, 'full',
+        'KOLM_DISTILL_FULL set -> worker_mode must be full');
+    } else {
+      assert.ok(['stub', 'collect'].includes(doneEvent.worker_mode),
+        `worker_mode must be stub or collect when KOLM_DISTILL_FULL is unset (got ${doneEvent.worker_mode}); ` +
+        `if full mode is the new default, gate it on KOLM_DISTILL_FULL=true or add a dedicated full-mode test`);
+    }
     assert.equal(doneEvent.pipeline_mode, 'kd_softmax', 'default pipeline_mode is kd_softmax');
   } finally {
     _restoreEnv(saved);
@@ -458,16 +471,16 @@ test('W381 #11 — compileFull --strict with failing gate aborts before install'
       if (ev.phase === 'done') abortedDone = ev;
     }
     assert.ok(abortedDone, 'must yield a done event');
-    // If the verdict passed we can't assert abort — but strict-mode with a
-    // synthetic-shim recipe almost always fails the executable_bundle or
-    // k_score gate. Tolerate either outcome but verify the *contract*: if
-    // verdict failed and strict was set, install was skipped + aborted=true.
-    if (abortedDone.production_ready === false) {
-      assert.equal(abortedDone.aborted, true, 'strict + failing gate must set aborted:true');
-      assert.equal(abortedDone.reason, 'strict_gate_failure');
-      assert.ok(installEv, 'install phase event must still emit (skipped)');
-      assert.equal(installEv.skipped, true, 'install must be skipped on strict-abort');
-    }
+    // Wave 409c — stub-only synthetic-shim recipes with no real eval must
+    // produce production_ready:false. The auditor's mandate: a stub artifact
+    // is never production-ready unless task is explicitly 'echo' + --allow-stub.
+    // Strict mode WITHOUT --force must abort with the failing-gate reason.
+    assert.equal(abortedDone.production_ready, false,
+      'W409c — stub-only pipeline must not claim production_ready');
+    assert.equal(abortedDone.aborted, true, 'strict + failing gate must set aborted:true');
+    assert.equal(abortedDone.reason, 'strict_gate_failure');
+    assert.ok(installEv, 'install phase event must still emit (skipped)');
+    assert.equal(installEv.skipped, true, 'install must be skipped on strict-abort');
   } finally {
     _restoreEnv(saved);
   }
@@ -497,11 +510,12 @@ test('W381 #12 — compileFull --force overrides gate failure and proceeds', asy
       if (ev.phase === 'done') doneEv = ev;
     }
     assert.ok(doneEv, 'must yield a done event');
-    // With force=true, even if verdict failed, aborted is NOT set (pipeline
-    // proceeds past install).
-    if (doneEv.production_ready === false) {
-      assert.notEqual(doneEv.aborted, true, 'force must not set aborted=true');
-    }
+    // Wave 409c — with force=true, the pipeline proceeds past install BUT the
+    // honest production_ready verdict still reflects the stub status. force is
+    // an install override, not a verdict override.
+    assert.equal(doneEv.production_ready, false,
+      'W409c — force lets install proceed but production_ready stays false for stub pipelines');
+    assert.notEqual(doneEv.aborted, true, 'force must not set aborted=true');
     // Either way, the artifact_path must be present on done.
     assert.ok(doneEv.artifact_path, 'done must carry artifact_path');
   } finally {
@@ -607,6 +621,54 @@ test('W381 #15 — compileFull defaults to collect/stub mode when KOLM_DISTILL_F
     assert.notEqual(doneEv.worker_mode, 'full', 'must NOT be full mode when KOLM_DISTILL_FULL is unset');
     assert.ok(['stub', 'collect'].includes(doneEv.worker_mode),
       `worker_mode must be stub or collect, got ${doneEv.worker_mode}`);
+  } finally {
+    _restoreEnv(saved);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// #15b — W409bb hardening: dedicated full-mode test, gated on
+// KOLM_DISTILL_FULL=true. CI run with the env set must report
+// worker_mode='full' AND have real seeds (not the stub corpus). This test is
+// intentionally skipped when the env is unset — it never silently substitutes
+// a stub run for a full-mode regression.
+test('W381 #15b — KOLM_DISTILL_FULL=true triggers full-mode with real seeds (gated)', async (t) => {
+  if (process.env.KOLM_DISTILL_FULL !== 'true' && process.env.KOLM_DISTILL_FULL !== '1') {
+    t.skip('KOLM_DISTILL_FULL not set; full-mode test is opt-in (set env to run)');
+    return;
+  }
+  const tmp = _mkTmp('w381-15b');
+  const saved = _snapEnv();
+  try {
+    _setEnv(tmp);
+    process.env.KOLM_DISTILL_FULL = 'true';
+    // Full mode requires a teacher key. The test fails cleanly if neither
+    // upstream is configured rather than silently downgrading.
+    if (!process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
+      assert.fail(
+        'KOLM_DISTILL_FULL=true but no teacher key in env. ' +
+        'Set ANTHROPIC_API_KEY or OPENAI_API_KEY to run the full-mode regression.',
+      );
+    }
+    // Seed REAL captures (40 is the W409bb minimum for a full-mode run —
+    // anything less and the planner falls back to stub).
+    await _seedNamespace('w381-full-mode', 40);
+    const { distill } = await import('../src/distill-pipeline.js');
+    let doneEv = null;
+    for await (const ev of distill({
+      teacher_namespace: 'w381-full-mode',
+      student_base: 'qwen-0.5b',
+      max_steps: 3,
+      emit_progress_every: 0,
+    })) {
+      if (ev.done) { doneEv = ev; break; }
+    }
+    assert.ok(doneEv, 'full-mode must yield done');
+    assert.equal(doneEv.worker_mode, 'full',
+      `KOLM_DISTILL_FULL=true must produce worker_mode=full (got ${doneEv.worker_mode}); ` +
+      'silent downgrade to stub/collect is a regression');
+    assert.ok(doneEv.pairs_used >= 30 || doneEv.train_pairs >= 30 || doneEv.examples >= 30,
+      'full-mode must train on the real seeded corpus (≥30 pairs)');
   } finally {
     _restoreEnv(saved);
   }

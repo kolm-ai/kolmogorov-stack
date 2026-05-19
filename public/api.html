@@ -133,11 +133,152 @@
     <a href="/" class="brand"><span>kolm</span></a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
-      <a href="/product">Product</a>
-      <a href="/models">Models</a>
-      <a href="/docs">Docs</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/enterprise">Enterprise</a>
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
     <div class="site-actions">
@@ -154,6 +295,7 @@
       <div class="hero-eyebrow"><span class="he-dot"></span>HTTP API reference . v1</div>
       <h1>The core endpoints.<br><span class="tone">Plain HTTP.</span></h1>
       <p>Bearer auth on private endpoints. JSON in, JSON out. Versioned at <code>/v1</code>. The CLI and SDKs wrap this surface; you can hit it directly with <code>curl</code>. This page documents the buyer-facing core; the full route inventory (admin, preview, internal) is published with the OpenAPI manifest in <a href="/docs" style="color:var(--violet,#faf2e1)">/docs</a>.</p>
+      <p data-w409j="loop-vocab" style="margin-top:14px;color:var(--ink-mute);font-size:14px;line-height:1.55;max-width:74ch">The endpoints below trace the loop: <code>capture</code> a real call &rarr; surface an <code>opportunity</code> &rarr; promote rows into a <code>dataset</code> &rarr; <code>label</code> the holdout &rarr; run a <code>bakeoff</code> &rarr; <code>build</code> a signed artifact &rarr; <code>verify</code> the receipts &rarr; <code>run</code> on your hardware. Every artifact carries an Ed25519 signature anyone can re-check offline against the embedded public key.</p>
     </div>
   </section>
 
@@ -444,7 +586,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
   "k_score":      0.913,
   "size_mb":      142,
   "manifest":     "sha256:...",
-  "signature":    "hmac-sha256:...",
+  "signature":    "ed25519:...",
   "artifact_url": "/v1/compile/cmp_8f2a.../.kolm"
 }</pre>
             </div>
@@ -472,7 +614,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
           <div class="endpoint" id="run">
             <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/run</span><span class="auth-pill bearer">bearer</span></div>
             <div class="ep-body">
-              <p>Execute a registered version (or concept) against an input. Returns the output, latency, cache flag, and an optional HMAC-bound receipt.</p>
+              <p>Execute a registered version (or concept) against an input. Returns the output, latency, cache flag, and an optional Ed25519-signed receipt.</p>
               <h5>Request</h5>
               <pre class="req">{
   "concept_id": "cpt_8f2a...",   // or "version_id": "ver_..."
@@ -686,12 +828,12 @@ count_only  bool     "1" | "true"</pre>
 
         <section class="api-section">
           <h2>Receipts</h2>
-          <p class="lede">Every <code>/v1/run</code> output ships with an HMAC-bound receipt. In v0.1, the issuer or any holder of the shared tenant receipt secret can re-verify offline; Ed25519 public-key receipts are a roadmap tier. This endpoint is the server-side recompute for convenience.</p>
+          <p class="lede">Every <code>/v1/run</code> output ships with an Ed25519 public-key receipt anyone can verify offline against the embedded public key. A layered HMAC integrity check is retained for legacy v0.1 receipts so historical archives still verify. This endpoint is the server-side recompute for convenience.</p>
 
           <div class="endpoint" id="verify">
             <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/receipts/verify</span><span class="auth-pill public">public</span></div>
             <div class="ep-body">
-              <p>Public endpoint that recomputes the receipt HMAC server-side using the service's receipt secret. Unauthenticated convenience verifier &middot; not the same as independent public-key verification (Ed25519 receipts are roadmap).</p>
+              <p>Public endpoint that recomputes the Ed25519 signature server-side. Independent public-key verification needs no shared secret &middot; the embedded public key and key fingerprint are enough.</p>
               <h5>Request</h5>
               <pre class="req">{ "receipt": { "kolm_version": "0.1", "artifact_hash": "...", "chain": [...], "signature": "..." } }</pre>
               <h5>Response</h5>

@@ -299,7 +299,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons }) {
   const secret = requireSignSecret();
   // W252 — K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -655,6 +655,19 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // which row-metadata key was used to define a "group" so two rows
     // about the same member / claim / case never straddle the split.
     group_key: typeof seed_provenance.group_key === 'string' ? seed_provenance.group_key : null,
+    // Wave 409c — auditor mandate. Honest counts of where seeds came from,
+    // and an explicit "eval_provenance" flag distinguishing a real eval-run
+    // verifier output from a placeholder (synthetic / hard-coded number).
+    //   eval_provenance ∈ { 'real_eval' | 'placeholder' | 'unknown' }
+    // The productionReady() gate rejects 'placeholder' unconditionally so a
+    // pipeline that never actually ran the eval loop cannot ship an artifact
+    // with production_ready:true. source_seed_count / approved_count /
+    // synthetic_count let a downstream auditor reconstruct the data lineage
+    // without re-reading the on-disk dataset record.
+    source_seed_count: typeof seed_provenance.source_seed_count === 'number' ? seed_provenance.source_seed_count : null,
+    approved_count: typeof seed_provenance.approved_count === 'number' ? seed_provenance.approved_count : null,
+    synthetic_count: typeof seed_provenance.synthetic_count === 'number' ? seed_provenance.synthetic_count : null,
+    eval_provenance: typeof seed_provenance.eval_provenance === 'string' ? seed_provenance.eval_provenance : 'unknown',
   } : {
     seeds_hash: null,
     split_seed: null,
@@ -677,6 +690,11 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     grouped_overlap_count: null,
     synthesis_input_hash: null,
     group_key: null,
+    // Wave 409c — see above.
+    source_seed_count: null,
+    approved_count: null,
+    synthetic_count: null,
+    eval_provenance: 'unknown',
   };
 
   // Compiled-targets manifest block. Only present for compiled_rule artifacts.
@@ -757,6 +775,15 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     base_model: base_model || 'Qwen/Qwen2.5-3B-Instruct',
     target_device: target_device || null,
     train_device: train_device || null,
+    // W409s — device-fit hints carried at the top level. memory_requirement_mb
+    // is the artifact's working-set; offline_capable says "this artifact can
+    // run without network egress". Both are read by devices.recommendForProfile()
+    // to gate target/quant picks. Default to honest minimums (5 MB / true) when
+    // a caller doesn't set them; both can be overridden via target_device.
+    memory_requirement_mb: (target_device && typeof target_device.memory_requirement_mb === 'number')
+      ? target_device.memory_requirement_mb : 5,
+    offline_capable: (target_device && target_device.offline_capable != null)
+      ? !!target_device.offline_capable : true,
     tier: _tier,
     judge_id: _judgeId,
     eval_score: Number(Math.max(0, Math.min(1, _evalScore)).toFixed(4)),
@@ -790,6 +817,41 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     })(),
     evals: { n: evals_obj.n || (evals_obj.cases?.length || 0), spec: evals_obj.spec, hash: eval_set_hash },
     seed_provenance: seed_provenance_block,
+    // Wave 409q — honest top-level binaries[] manifest. Always present (empty
+    // array when no target was requested). Each entry pins a target
+    // ('native' | 'wasm'), kind (c | rust), filename, sha256, size, and
+    // compiler identity for an ACTUALLY produced binary. The verifier
+    // (binder check #binaries-integrity) re-opens the zip, finds each
+    // entry's filename, re-hashes the bytes, and confirms the match —
+    // surfacing `native_binary_missing` when the file is absent and
+    // `native_binary_hash_mismatch` (or wasm_*) when the sha256 drifts.
+    //
+    // The honest auditor signal: when a tenant asked for target=c/rust/wasm
+    // but no toolchain was present, this array is [] AND compiled_binary
+    // is false AND production_ready is false — the manifest never claims a
+    // compile happened that did not.
+    binaries: Array.isArray(binaries) ? binaries : [],
+    // Wave 409q — top-level compiled_binary verdict. null = no native/wasm
+    // target was requested (the rule-only path); true = at least one binary
+    // was produced; false = a target was requested but toolchain or compile
+    // failed and the artifact ships source-only. The matching CLI/UI copy
+    // says "source generated" not "compiled" when this is false.
+    compiled_binary: typeof compiled_binary === 'boolean' ? compiled_binary : null,
+    // Wave 409q — top-level production_ready. ANDs the seed_provenance.
+    // production_ready signal (already computed earlier) with the
+    // compiled_binary signal: if the tenant asked for native/wasm and the
+    // build did NOT produce a binary, production_ready is false even when
+    // the seeds split was clean.
+    production_ready: (() => {
+      const seedReady = seed_provenance_block.production_ready === true;
+      if (compiled_binary === false) return false;
+      return seedReady;
+    })(),
+    // Wave 409q — surface toolchain skip reasons at the top level so a
+    // tenant reading the manifest sees "no clang on host: source-only" with
+    // no need to walk compiled_targets.native_skipped. Empty/null when no
+    // skips occurred OR no target was requested.
+    native_skip_reasons: native_skip_reasons || null,
     compiled_targets: compiled_targets_block,
     capability: capability_block,
     lineage: lineage_block,
@@ -877,6 +939,18 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   };
   if (compiled_targets_block) {
     artifact_hash_input.compiled_targets_hash = sha256(canonicalJson(compiled_targets_block));
+  }
+  // Wave 409q — bind honest binaries[] into artifact_hash. Empty array hashes
+  // to a stable canonical "[]" so the chain is byte-stable for non-compiled
+  // artifacts; any post-build mutation (added entry, dropped one, swapped
+  // sha256, swapped filename) breaks the receipt chain.
+  if (Array.isArray(binaries) && binaries.length > 0) {
+    artifact_hash_input.binaries_hash = sha256(canonicalJson(
+      binaries.map(b => ({
+        target: b.target, kind: b.kind, recipe_id: b.recipe_id,
+        filename: b.filename, sha256: b.sha256, size: b.size,
+      }))
+    ));
   }
   // Wave V — bind capability/lineage/IR/attestation into the artifact hash so
   // tampering with any of them after seal-time breaks the receipt chain.
@@ -1007,6 +1081,64 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // signature_alg value. Verifiers re-check both the chain and the body HMAC.
   const issued_at = new Date().toISOString();
   const receipt_id = crypto.randomUUID();
+
+  // Wave 409aa — auditor mandate: receipts MUST surface the dataset/holdout
+  // hashes + split seed + the source-event hashes the dataset rolled up from
+  // + a build-toolchain block. These fields ride INSIDE the receipt body so
+  // the HMAC + Ed25519 + Sigstore signatures all cover them — tampering with
+  // any one breaks every signature down the chain.
+  //
+  //   event_source_hashes[] : per-source-event sha256 the seed split rolled up
+  //                           from. When seed_provenance supplies the array we
+  //                           use it as-is; otherwise we surface an empty array
+  //                           (the legacy/no-seeds path).
+  //   dataset_hash          : alias of seed_provenance.seeds_hash. Auditors
+  //                           reading the receipt expect the dataset's own hash
+  //                           at the receipt top-level.
+  //   train_hash            : alias of seed_provenance.train_hash.
+  //   holdout_hash          : alias of seed_provenance.holdout_hash.
+  //   split_seed            : alias of seed_provenance.split_seed.
+  //   runtime_target        : echoes manifest.runtime_target so a verifier can
+  //                           cross-check that the receipt was issued for the
+  //                           SAME runtime the dispatcher will pick.
+  //   artifact_files[]      : canonical-sorted [{filename, sha256}] over every
+  //                           file the .kolm bundles. Lets a verifier diff the
+  //                           opened zip against the receipt without re-parsing
+  //                           manifest.hashes (which has a mixed object shape).
+  //   build_toolchain       : {node_version, platform, arch, kolm_version,
+  //                           runtime_target, signed_at}. Identifies the
+  //                           machine that signed the artifact. Reproducibility
+  //                           audits compare this to their own toolchain.
+  const eventSourceHashes = Array.isArray(seed_provenance?.event_source_hashes)
+    ? seed_provenance.event_source_hashes.map((h) => String(h))
+    : [];
+  const artifactFiles = (() => {
+    const rows = [];
+    // Flat hash slots first (model_pointer, recipes_json, lora_bin, index_bin,
+    // evals_json, recipe_bundle_mjs, workflow_ir, attestation_report).
+    for (const k of Object.keys(hashes).sort()) {
+      if (k === 'extra_files') continue;
+      const v = hashes[k];
+      if (typeof v === 'string') rows.push({ filename: k, sha256: v });
+    }
+    // Extra files (sorted by filename for canonical order).
+    if (hashes.extra_files && typeof hashes.extra_files === 'object') {
+      for (const fn of Object.keys(hashes.extra_files).sort()) {
+        rows.push({ filename: fn, sha256: hashes.extra_files[fn] });
+      }
+    }
+    return rows;
+  })();
+  const _runtime_target = manifest.runtime_target || 'js';
+  const build_toolchain = {
+    node_version: process.version,
+    platform: process.platform,
+    arch: process.arch,
+    kolm_version: '0.1',
+    runtime_target: _runtime_target,
+    signed_at: issued_at,
+  };
+
   const receiptBody = {
     kolm_version: '0.1',
     receipt_id,
@@ -1018,6 +1150,17 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     tier: _tier,
     chain,
     anchors: [],
+    // W409aa receipt-hardening fields. Added INSIDE the receipt body so every
+    // signature scheme (HMAC, Ed25519, Sigstore) covers them; mutation breaks
+    // verification.
+    event_source_hashes: eventSourceHashes,
+    dataset_hash: seed_provenance?.seeds_hash || null,
+    train_hash: seed_provenance?.train_hash || null,
+    holdout_hash: seed_provenance?.holdout_hash || null,
+    split_seed: seed_provenance?.split_seed || null,
+    runtime_target: _runtime_target,
+    artifact_files: artifactFiles,
+    build_toolchain,
   };
 
   // Wave 149 — Ed25519 is now the DEFAULT signature alg.
@@ -1228,7 +1371,7 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // with the size-aware K-score patched into the manifest. The double-zip is
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
 // axis includes the K-score bytes themselves.
-export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate }) {
+export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons }) {
   requireSignSecret();
   const dir = outDir || path.join(os.tmpdir(), 'kolm-artifacts');
   fs.mkdirSync(dir, { recursive: true });
@@ -1257,7 +1400,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     confidential_compute = await verifyAttestation(kind, attestation_report);
   }
 
-  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate };
+  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons };
 
   // W350 — temp-file cleanup registry. The two-pass build writes a probe zip
   // to measure its size before the K-score is embedded; on success the probe

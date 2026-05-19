@@ -25,13 +25,17 @@ const SW = fs.readFileSync(path.join(PUBLIC, 'sw.js'), 'utf8');
 // vertical microsite. The W272 #13 test now requires public/defense.html
 // to exist with canonical pointing at /defense, so it has been removed
 // from the W224 CUTS list and from the vercel.json redirect set.
+// W400G note: '/distill' was previously cut (W224 dup-of-/quickstart) but
+// has been un-cut as a real concept page (distillation is a load-bearing
+// concept distinct from compilation; deserves its own surface). The CUTS
+// dict and assertions below were updated accordingly. /edge and /cookbook
+// remain cut.
 const CUTS = {
   '/agents':      '/product',
   '/evolve':      '/product',
   '/bounty':      '/community',
   '/bounties':    '/community',
   '/cloud':       '/enterprise',
-  '/distill':     '/quickstart',
   '/edge':        '/device',
   '/cookbook':    '/docs',
   '/serve':       '/runtimes',
@@ -43,9 +47,12 @@ const CUTS = {
   '/openai':      '/compare/kolm-vs-openai-fine-tune',
 };
 
-test('W224 #1 - at least 15 pages cut from public/ (plan floor)', () => {
-  assert.ok(Object.keys(CUTS).length >= 15,
-    `cut list has ${Object.keys(CUTS).length} entries; plan floor is 15`);
+test('W224 #1 - at least 14 pages cut from public/ (plan floor)', () => {
+  // W400G note: /distill was un-cut (real concept page), dropping the count
+  // from 15 to 14. The plan floor was originally 15; we lowered to 14 because
+  // a reinstated page is more valuable than maintaining an arbitrary cut count.
+  assert.ok(Object.keys(CUTS).length >= 14,
+    `cut list has ${Object.keys(CUTS).length} entries; floor is 14 post-W400G`);
 });
 
 test('W224 #2 - cut .html files no longer exist in public/', () => {
@@ -139,13 +146,13 @@ test('W224 #8 - W211+ tests follow the behavior-assertion pattern (sample audit)
   }
 });
 
-test('W224 #9 - cuts include the plan-named dup pairs', () => {
-  // /distill (dup of /quickstart), /edge (dup of /device), /cookbook
-  // (subsumed by /docs) — these three were explicit plan candidates.
-  // Failure here means the cut list drifted from the plan.
-  assert.equal(CUTS['/distill'], '/quickstart');
+test('W224 #9 - cuts include the plan-named dup pairs (post-W400G)', () => {
+  // /edge (dup of /device), /cookbook (subsumed by /docs) remain cut.
+  // /distill was reinstated by W400G (distillation is a real concept page).
   assert.equal(CUTS['/edge'], '/device');
   assert.equal(CUTS['/cookbook'], '/docs');
+  assert.equal(CUTS['/distill'], undefined,
+    '/distill must not be in CUTS post-W400G (it is now a real page)');
 });
 
 test('W224 #10 - vercel.json is still valid JSON after the cut + redirect surgery', () => {

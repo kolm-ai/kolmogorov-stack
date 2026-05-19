@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>kolm inspection · CLI reference · kolm.ai</title>
+<meta name="description" content="Reference for the kolm inspection CLI verb: usage, flags, examples, and links to related docs.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/inspection">
+<meta property="og:title" content="kolm inspection · CLI reference · kolm.ai">
+<meta property="og:description" content="Reference for the kolm inspection CLI verb: usage, flags, examples, and links to related docs.">
+<meta property="og:url" content="https://kolm.ai/docs/cli/inspection">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm inspection","description":"Reference for the kolm inspection CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/inspection","mainEntityOfPage":"https://kolm.ai/docs/cli/inspection","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+<main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="inspection">
+<nav aria-label="Breadcrumb" class="crumbs">
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>inspection</span>
+</nav>
+<h1>kolm inspection verbs</h1>
+<p>The five read-only CLI verbs you reach for when something is wrong, when a teammate asks &quot;is it actually working?&quot;, or when you need to file a support ticket. None of them mutate state.</p>
+<p>| Verb | Use it when | |------|-------------| | <code>kolm status</code> | One-line oneliner: am I logged in, what tenant, what base URL | | <code>kolm health</code> | Is the cloud up + how fresh is my key + how many ms is the round trip | | <code>kolm metrics</code> | Aggregate counters for captures / artifacts / jobs in the last 24h | | <code>kolm artifacts</code> | List + show + diff compiled artifacts in your tenant | | <code>kolm support-bundle</code> | Dump env + recent logs + redacted config into a tarball you can attach to a ticket |</p>
+<h2>kolm status</h2>
+<pre><code>
+kolm status                  oneliner: tenant + plan + base
+kolm status --json           machine-readable
+</code></pre>
+<p>Exits 0 if logged in and the cloud answers, 3 if not logged in, 1 on network error. Reads only; never mutates config.</p>
+<h2>kolm health</h2>
+<pre><code>
+kolm health                  pings /health and prints the rtt
+kolm health --json           {ok, rtt_ms, build_id, sw_cache}
+</code></pre>
+<p>The same probe <code>/value-loop</code> uses for its live status badge (W312). Useful to script in CI as a precheck.</p>
+<h2>kolm metrics</h2>
+<pre><code>
+kolm metrics                 24h summary (captures, jobs, artifacts)
+kolm metrics --since 1h      window override
+kolm metrics --json          machine-readable rollup
+</code></pre>
+<p>Aggregates by status (<code>running</code> / <code>done</code> / <code>failed</code>) for jobs and by namespace for captures. Mirrors the rollup at <code>/dashboard</code>.</p>
+<h2>kolm artifacts</h2>
+<pre><code>
+kolm artifacts list                       all artifacts visible to your key
+kolm artifacts list --namespace eng       filter by capture namespace
+kolm artifacts list --json                machine-readable
+kolm artifacts show &lt;hash&gt;                full manifest + receipt chain
+kolm artifacts show &lt;hash&gt; --json
+kolm artifacts diff &lt;hash-a&gt; &lt;hash-b&gt;     side-by-side manifest diff
+</code></pre>
+<p>The <code>diff</code> view suppresses noisy fields (signatures, timestamps) and highlights changes in <code>recipe_class</code>, <code>base_model</code>, <code>eval_score</code>, and <code>k_score.composite</code>. Pair with <code>kolm verify &lt;hash&gt;</code> if you need the full receipt-chain audit.</p>
+<h2>kolm support-bundle</h2>
+<pre><code>
+kolm support-bundle                       writes ./kolm-support-&lt;ts&gt;.tgz
+kolm support-bundle --out ~/Desktop       custom directory
+kolm support-bundle --redact-extra &lt;re&gt;   add a regex to the redactor
+</code></pre>
+<p>Bundles:</p>
+<ul>
+<li>redacted <code>~/.kolm/config.json</code> (api_key replaced with its W310 fingerprint)</li>
+<li>last 200 lines of CLI logs from <code>~/.kolm/logs/</code></li>
+<li>output of <code>kolm status --json</code> + <code>kolm health --json</code> + <code>kolm metrics --json</code></li>
+<li><code>kolm doctor --loop --json</code> if the loop completes within 10s</li>
+</ul>
+<p>The redactor strips every value that looks like an API key, JWT, or email domain before the archive is written. Verify with <code>tar -tzf</code> before sending.</p>
+<h2>See also</h2>
+<ul>
+<li><code>/value-loop</code> and <code>kolm loop</code> (W298/W300) - the in-process end-to-end smoke</li>
+<p>the support bundle includes.</p>
+<li><code>/dashboard</code> - the visual analog of <code>kolm metrics</code>.</li>
+<li><code>kolm verify</code> - the receipt-chain audit that completes the picture for</li>
+<p><code>kolm artifacts show</code>.</p>
+<li><code>/spec/rs-1</code> - the receipt-chain contract these verbs surface.</li>
+</ul>
+<section class="see-also" aria-labelledby="see-also-h">
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
+</section>
+</main>
+</body>
+</html>

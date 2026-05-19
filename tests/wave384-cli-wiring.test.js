@@ -128,8 +128,10 @@ test('W384 #6 — HELP._root mentions the 8 W384 verbs', () => {
 // privacy {scan,test,policy,report}
 // =============================================================================
 
-test('W384 #7 — kolm privacy test --json returns smoke-test envelope', () => {
-  const r = runCli(['privacy', 'test', '--json']);
+test('W384 #7 — kolm privacy test --smoke --json returns smoke-test envelope', () => {
+  // W391: bare `privacy test` now requires either a <text> positional or the
+  // --smoke flag (the canned 17-class fixture). Pass --smoke explicitly here.
+  const r = runCli(['privacy', 'test', '--smoke', '--json']);
   assert.equal(r.code, 0, `expected exit 0, got ${r.code}: ${r.stderr}`);
   const env = parseJson(r.stdout);
   assert.equal(env.ok, true);

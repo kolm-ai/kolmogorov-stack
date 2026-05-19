@@ -23,8 +23,9 @@ const PUBLIC = path.join(ROOT, 'public');
 const OUT = path.join(PUBLIC, 'sitemap.xml');
 
 const CUT_PATHS = new Set([
+  // W400G: /distill un-cut as a real concept page; keep /edge + /cookbook cut.
   '/agents', '/defense', '/evolve', '/bounty', '/bounties', '/cloud',
-  '/distill', '/edge', '/cookbook', '/serve', '/playground', '/onboarding',
+  '/edge', '/cookbook', '/serve', '/playground', '/onboarding',
   '/recall', '/anatomy', '/showcase', '/openai',
   // W248: cut bloat — duplicate compare pages, thin translation stubs,
   // synonym pages superseded by canonical surfaces.

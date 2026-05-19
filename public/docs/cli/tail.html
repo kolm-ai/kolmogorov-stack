@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>kolm tail · CLI reference · kolm.ai</title>
+<meta name="description" content="Reference for the kolm tail CLI verb: usage, flags, examples, and links to related docs.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/tail">
+<meta property="og:title" content="kolm tail · CLI reference · kolm.ai">
+<meta property="og:description" content="Reference for the kolm tail CLI verb: usage, flags, examples, and links to related docs.">
+<meta property="og:url" content="https://kolm.ai/docs/cli/tail">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm tail","description":"Reference for the kolm tail CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/tail","mainEntityOfPage":"https://kolm.ai/docs/cli/tail","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+<main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="tail">
+<nav aria-label="Breadcrumb" class="crumbs">
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>tail</span>
+</nav>
+<h1>kolm tail</h1>
+<p>Stream live capture rows from your kolm cloud over Server-Sent Events. The CLI mirror of the live-tail strip on <code>/captures</code> (W213). Reads from the same durable capture store (W212) so what you see in <code>kolm tail</code> is what is auditable on the dashboard.</p>
+<h2>Usage</h2>
+<pre><code>
+kolm tail captures [--namespace &lt;name&gt;|*] [--limit N] [--json]
+</code></pre>
+<p><code>captures</code> is currently the only sub-verb. <code>--namespace *</code> (default) streams every namespace your key is scoped to; pass an exact namespace name to filter. <code>--limit N</code> exits cleanly after N rows. <code>--json</code> emits raw JSONL frames instead of the default human-readable line format.</p>
+<h2>Examples</h2>
+<pre><code>
+kolm tail captures                                live tail, all namespaces
+kolm tail captures --namespace eng                only namespace=eng
+kolm tail captures --limit 50                     first 50 rows then exit
+kolm tail captures --json | jq &#39;.template_hash&#39;   pipe SSE JSONL into jq
+</code></pre>
+<h2>Output format</h2>
+<p>Default (human-readable):</p>
+<pre><code>
+2026-05-18T14:02:11Z [eng] gpt-4o-mini 142ms | summarize this incident report...
+</code></pre>
+<p><code>--json</code> (one row per line):</p>
+<pre><code>
+{&quot;ts&quot;:&quot;...&quot;,&quot;tenant&quot;:&quot;...&quot;,&quot;corpus_namespace&quot;:&quot;eng&quot;,&quot;model&quot;:&quot;...&quot;,&quot;latency_us&quot;:142000,&quot;prompt&quot;:&quot;...&quot;,&quot;response&quot;:&quot;...&quot;}
+</code></pre>
+<h2>Headers (when the stream opens)</h2>
+<p>The <code>event: hello</code> frame includes:</p>
+<ul>
+<li><code>driver</code> - which capture store backend served the request</li>
+<p>(<code>vercel_postgres</code> / <code>vercel_kv</code> / <code>legacy</code>).</p>
+<li><code>durable</code> - whether the backend survives lambda recycling.</li>
+<li><code>subscriber_count</code> - how many live tails are open for your tenant.</li>
+</ul>
+<p>The same metadata is surfaced as response headers (<code>x-kolm-capture-driver</code>, <code>x-kolm-capture-durable</code>) on every capture write.</p>
+<h2>See also</h2>
+<ul>
+<li><code>/captures</code> - the dashboard&#39;s live-tail strip + drift-aware durability matrix.</li>
+<li><code>kolm distill --from-captures --namespace &lt;n&gt;</code> to promote captured pairs into</li>
+<p>a recipe (W214). Use <code>--preview</code> first to see which mode (recipe vs Specialist   LoRA) would fire.</p>
+<li><code>/spec/rs-1</code> for the receipt-chain contract that captures feed into.</li>
+<li><code>kolm capture</code> for the request-time capture verb.</li>
+</ul>
+<section class="see-also" aria-labelledby="see-also-h">
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
+</section>
+</main>
+</body>
+</html>

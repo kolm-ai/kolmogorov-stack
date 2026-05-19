@@ -42,15 +42,22 @@ function _loadApprovals() {
   return out;
 }
 
-// nextToLabel({reviewer, workflowId, namespace, n}): up to N events that
-// have no decision. Prioritises events whose template-signature matches an
-// accepted opportunity.
+// nextToLabel({reviewer, workflowId, namespace, n, tenant}): up to N events
+// that have no decision. Prioritises events whose template-signature matches
+// an accepted opportunity.
+//
+// W411 — tenant scope: when `tenant` / `tenant_id` is supplied, the underlying
+// listEvents() is restricted to the caller's rows and approval rows for events
+// owned by a different tenant are ignored. This prevents tenantA's reviewer
+// from ever seeing tenantB's pending events.
 export async function nextToLabel(opts = {}) {
   const n = opts.n == null ? 1 : Math.max(1, Math.min(200, Math.trunc(opts.n)));
   const namespace = opts.namespace || opts.workflowId || null;
   const workflowId = opts.workflowId || null;
+  const tenantScope = opts.tenant_id || opts.tenant || null;
   const events = await listEvents({
     namespace,
+    tenant_id: tenantScope,
     workflow_id: workflowId,
     limit: 1000,
     order: 'desc',
@@ -78,16 +85,35 @@ export async function nextToLabel(opts = {}) {
   return head.concat(tail).slice(0, n);
 }
 
-// submitLabel(eventId, {verdict, fixedOutput, sensitive, holdoutOnly, workflow, reviewer})
+// submitLabel(eventId, {verdict, fixedOutput, sensitive, holdoutOnly, workflow,
+//   reviewer, teamApproval, coReviewers})
 // verdict: 'good' | 'bad' | 'edit'. 'edit' requires fixedOutput.
+//
+// W409o additions:
+//   - teamApproval / coReviewers : multi-reviewer mode. The label persisted
+//     on disk records every reviewer that touched it (not just last-write).
+//   - audit trail flows through dataset-workbench.approveEvent which writes
+//     {audit: {prior_decision, prior_reviewer, before_output, after_output}}
+//     to approvals.jsonl, the append-only log of the decision history.
 export async function submitLabel(eventId, opts = {}) {
   if (!eventId) throw new Error('submitLabel requires an event_id');
   const verdict = (opts.verdict || 'good').toLowerCase();
   if (!['good', 'bad', 'edit'].includes(verdict)) throw new Error('verdict must be good|bad|edit');
   const ev = await getEvent(eventId);
   if (!ev) throw new Error('event not found: ' + eventId);
+  // W411 — cross-tenant gate. When the caller supplies `tenant`/`tenant_id`,
+  // the event's owner MUST match. The deeper approveEvent/rejectEvent enforces
+  // the same check, but bailing here returns a cleaner error to the route.
+  const callerTenant = opts.tenant_id || opts.tenant || null;
+  if (callerTenant && ev.tenant_id && callerTenant !== ev.tenant_id) {
+    const err = new Error('cross_tenant_label: caller=' + callerTenant + ' event_owner=' + ev.tenant_id);
+    err.code = 'CROSS_TENANT_LABEL';
+    throw err;
+  }
   const reviewer = opts.reviewer || 'local-user';
   const ts = new Date().toISOString();
+  const teamApproval = opts.teamApproval === true;
+  const coReviewers = Array.isArray(opts.coReviewers) ? opts.coReviewers : [];
 
   let approvalRow;
   if (verdict === 'good') {
@@ -96,9 +122,18 @@ export async function submitLabel(eventId, opts = {}) {
       holdoutOnly: opts.holdoutOnly,
       workflow: opts.workflow,
       reviewer,
+      teamApproval,
+      coReviewers,
+      tenant_id: callerTenant,
     });
   } else if (verdict === 'bad') {
-    approvalRow = await rejectEvent(eventId, { reason: opts.reason, reviewer });
+    approvalRow = await rejectEvent(eventId, {
+      reason: opts.reason,
+      reviewer,
+      teamApproval,
+      coReviewers,
+      tenant_id: callerTenant,
+    });
   } else {
     if (opts.fixedOutput == null) throw new Error('verdict=edit requires fixedOutput');
     approvalRow = await editEvent(eventId, String(opts.fixedOutput), {
@@ -106,9 +141,17 @@ export async function submitLabel(eventId, opts = {}) {
       holdoutOnly: opts.holdoutOnly,
       workflow: opts.workflow,
       reviewer,
+      teamApproval,
+      coReviewers,
+      tenant_id: callerTenant,
     });
   }
 
+  // Merge any pre-existing label so multi-reviewer mode preserves the
+  // earlier reviewer's verdict in `co_reviewers_seen`.
+  const prior = getLabel(eventId);
+  const priorReviewers = (prior && Array.isArray(prior.co_reviewers_seen) ? prior.co_reviewers_seen : []);
+  const seen = new Set([...priorReviewers, ...(prior && prior.reviewer ? [prior.reviewer] : []), ...coReviewers, reviewer]);
   const label = {
     event_id: eventId,
     verdict,
@@ -118,20 +161,39 @@ export async function submitLabel(eventId, opts = {}) {
     workflow: opts.workflow || null,
     reviewer,
     labeled_at: ts,
+    team_approval: teamApproval,
+    co_reviewers: coReviewers,
+    co_reviewers_seen: Array.from(seen),
+    prior_verdict: prior ? prior.verdict : null,
+    prior_reviewer: prior ? prior.reviewer : null,
   };
   fs.writeFileSync(_labelFile(eventId), JSON.stringify(label, null, 2));
   return { label, approval: approvalRow };
 }
 
-// labelStats(): pending / approved / rejected / edited counts, plus per-
-// reviewer and per-workflow rollups. Computes pending by reading all
+// labelStats({tenant?}): pending / approved / rejected / edited counts, plus
+// per-reviewer and per-workflow rollups. Computes pending by reading all
 // events in the store and subtracting decided ones.
-export async function labelStats() {
+//
+// W411 — tenant scope: when `tenant`/`tenant_id` is supplied, both the event
+// total and the approvals are restricted to rows owned by that tenant. The
+// stats a caller sees never mix tenantA's pending with tenantB's approved.
+export async function labelStats(opts = {}) {
+  const tenantScope = (opts && (opts.tenant_id || opts.tenant)) || null;
   const approvals = _loadApprovals();
   let approved = 0, rejected = 0, edited = 0;
   const byReviewer = {};
   const byWorkflow = {};
-  for (const a of Object.values(approvals)) {
+  // When a tenant filter is set, drop approvals for events that don't belong
+  // to that tenant. Legacy approvals (pre-W411) without a tenant_id stamp are
+  // also dropped — fail-closed.
+  const filteredApprovals = {};
+  for (const [eid, a] of Object.entries(approvals)) {
+    if (tenantScope) {
+      if (!a.tenant_id) continue;
+      if (a.tenant_id !== tenantScope) continue;
+    }
+    filteredApprovals[eid] = a;
     if (a.decision === 'reject') rejected++;
     else if (a.fixed_output) edited++;
     else approved++;
@@ -140,8 +202,8 @@ export async function labelStats() {
     const w = a.workflow || '_none';
     byWorkflow[w] = (byWorkflow[w] || 0) + 1;
   }
-  const total = await listEvents({ limit: 0 });
-  const decided = new Set(Object.keys(approvals));
+  const total = await listEvents({ limit: 0, tenant_id: tenantScope });
+  const decided = new Set(Object.keys(filteredApprovals));
   let pending = 0;
   for (const e of total) {
     if (!decided.has(e.event_id)) pending++;

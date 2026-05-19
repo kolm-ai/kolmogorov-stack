@@ -89,20 +89,103 @@ export function selectStudentBackbone({ task_type, hw_tier } = {}) {
 // training pairs. status filter: accept 'success' (spec request) and 'ok'
 // (canonical event-schema value), so events from both legacy connectors and
 // the W369 daemon-connector flow through. Drops rows missing either side.
-export async function prepareDistillCorpus({ namespace, split = 'train', limit = 100000 } = {}) {
+//
+// W411 — `tenant` / `tenant_id` scope: when supplied, the corpus is filtered
+// to the caller's tenant before any cross-tenant rows can leak. Route handlers
+// in router.js and compile-pipeline.js pass req.tenant_record.id down here;
+// admin / local-only daemon bypass by leaving the field unset (null).
+// W439 — `since` parameter: when supplied (ISO string, Date, or epoch ms),
+// only events with created_at strictly greater than `since` are returned.
+// Used by --since-last-compile to retrain on the delta of new approvals
+// since the previous artifact's created_at.
+export async function prepareDistillCorpus({ namespace, split = 'train', limit = 100000, approvedOnly = false, tenant = null, tenant_id = null, since = null } = {}) {
   if (!namespace) throw new Error('prepareDistillCorpus requires {namespace}');
-  const events = await listEvents({ namespace, limit, order: 'asc' });
+  const tenantScope = tenant_id || tenant || null;
+  let sinceMs = null;
+  if (since != null) {
+    const d = (since instanceof Date) ? since.getTime()
+      : (typeof since === 'number' ? since : Date.parse(String(since)));
+    if (Number.isFinite(d)) sinceMs = d;
+  }
+  const events = await listEvents({ namespace, tenant_id: tenantScope, limit, order: 'asc' });
+  // W409n/W409o — approved-only mode: build the approval lookup once and
+  // gate every event on having a non-reject decision (or being an edit row
+  // with fixed_output, which counts as approved with a correction).
+  let approvalsLookup = null;
+  if (approvedOnly) {
+    try {
+      const { _loadApprovalsForRead } = await import('./dataset-workbench.js').catch(() => ({}));
+      if (_loadApprovalsForRead) {
+        approvalsLookup = _loadApprovalsForRead();
+      } else {
+        // Fallback: inline-load approvals.jsonl ourselves.
+        const home = process.env.HOME || process.env.USERPROFILE || os.homedir();
+        const base = process.env.KOLM_DATA_DIR ? path.resolve(process.env.KOLM_DATA_DIR) : path.join(home, '.kolm');
+        const af = path.join(base, 'labels', 'approvals.jsonl');
+        approvalsLookup = {};
+        if (fs.existsSync(af)) {
+          const text = fs.readFileSync(af, 'utf8');
+          for (const line of text.split('\n')) {
+            if (!line.trim()) continue;
+            try {
+              const e = JSON.parse(line);
+              if (e && e.event_id) approvalsLookup[e.event_id] = e;
+            } catch {}
+          }
+        }
+      }
+    } catch {
+      approvalsLookup = {};
+    }
+  }
   const pairs = [];
   let dropped_no_prompt = 0;
   let dropped_no_response = 0;
   let dropped_status = 0;
+  let dropped_unapproved = 0;
+  let dropped_since = 0;
   for (const ev of events) {
     if (ev.status && ev.status !== 'success' && ev.status !== 'ok') { dropped_status += 1; continue; }
+    if (sinceMs != null) {
+      const t = Date.parse(ev.created_at || '');
+      if (!Number.isFinite(t) || t <= sinceMs) { dropped_since += 1; continue; }
+    }
+    if (approvedOnly) {
+      const a = approvalsLookup && approvalsLookup[ev.event_id];
+      if (!a) { dropped_unapproved += 1; continue; }
+      if (a.decision === 'reject') { dropped_unapproved += 1; continue; }
+    }
     const prompt = ev.prompt_redacted || ev.input || ev.prompt;
-    const response = ev.response_redacted || ev.output || ev.response;
+    // In approved-only mode the fixed_output from review overrides the raw
+    // response, so corrected examples enter the corpus with the corrected
+    // text rather than the original.
+    let response = ev.response_redacted || ev.output || ev.response;
+    if (approvedOnly && approvalsLookup && approvalsLookup[ev.event_id] && approvalsLookup[ev.event_id].fixed_output) {
+      response = approvalsLookup[ev.event_id].fixed_output;
+    }
     if (!prompt) { dropped_no_prompt += 1; continue; }
     if (!response) { dropped_no_response += 1; continue; }
-    pairs.push({ prompt: String(prompt), response: String(response), event_id: ev.event_id });
+    // W411 P0 #2 — preserve metadata downstream consumers need: source_type
+    // (compile-pipeline.js:685 synthetic-vs-real seed counter), tenant_id
+    // (cross-tenant training gate), approved/fixed_output/redaction_policy
+    // (audit chain), holdout_only (forbids row from train split).
+    // W411 P0 #8 — fold approval-row holdout_only into the pair flag so a
+    // reviewer-set holdout flag (the workbench `holdoutOnly:true` on
+    // approveEvent) propagates through corpus → split → distill. Either the
+    // event flag OR the approval flag triggers holdout-only handling.
+    const approvalRow = approvalsLookup && approvalsLookup[ev.event_id];
+    const holdoutOnly = !!ev.holdout_only || !!(approvalRow && approvalRow.holdout_only);
+    pairs.push({
+      prompt: String(prompt),
+      response: String(response),
+      event_id: ev.event_id,
+      source_type: ev.source_type || 'capture',
+      tenant_id: ev.tenant_id || null,
+      approved: approvedOnly ? true : (ev.approved == null ? null : !!ev.approved),
+      redaction_policy: ev.redaction_policy || null,
+      fixed_output: (approvedOnly && approvalRow && approvalRow.fixed_output) ? approvalRow.fixed_output : null,
+      holdout_only: holdoutOnly,
+    });
   }
   // Optional split filter — when split='holdout', pull every nth row.
   let filtered = pairs;
@@ -110,6 +193,20 @@ export async function prepareDistillCorpus({ namespace, split = 'train', limit =
     filtered = pairs.filter((_, i) => i % 5 === 0);
   } else if (split === 'train') {
     filtered = pairs.filter((_, i) => i % 5 !== 0);
+  }
+  // W411 P0 #8 — fail-closed holdout enforcement. A pair flagged
+  // `holdout_only=true` (either by event metadata or approval row) MUST NEVER
+  // enter the train split. The workbench split assigner already routes such
+  // rows to the holdout bucket, but a stale event flag on a re-imported event
+  // or a 5-bucket modulo collision could still slip a holdout_only pair into
+  // train. We strip them here at the consumer boundary so the entire
+  // downstream chain (distill seeds.jsonl, compile bundle, recipe-eval) sees
+  // a guaranteed-clean train set.
+  let holdout_excluded_from_train = 0;
+  if (split === 'train') {
+    const before = filtered.length;
+    filtered = filtered.filter((p) => !p.holdout_only);
+    holdout_excluded_from_train = before - filtered.length;
   }
   return {
     pairs: filtered,
@@ -121,6 +218,10 @@ export async function prepareDistillCorpus({ namespace, split = 'train', limit =
       dropped_no_prompt,
       dropped_no_response,
       dropped_status,
+      dropped_unapproved,
+      dropped_since,
+      holdout_excluded_from_train,
+      since: sinceMs != null ? new Date(sinceMs).toISOString() : null,
     },
   };
 }
@@ -176,6 +277,24 @@ function _writeWorkerInputs({ runDir, namespace, pairs, baseModel, jobId }) {
 // final {done:true, ...} envelope. For stub/collect modes the iterator
 // synthesizes a handful of progress events from the worker manifest;
 // for full mode it tails the worker's stdout log.
+// W422 P0-4 — pure-helper that resolves the tenant scope for distill().
+// Accepts `tenant_id` (canonical) or `tenant` (shorthand alias used by route
+// handlers that pass req.tenant_record.id directly). When neither is supplied
+// we default to `'local'` so the existing local CLI / dev-loop callers keep
+// working without invasive call-site changes — this matches the rest of the
+// codebase's local-default convention (auth.js anon tenant, store.js DEFAULT
+// _TENANT, intent.js classifyIntent). Hosted route handlers are expected to
+// pass req.tenant_record.id explicitly; if they forget, the local default
+// fences the call to the local namespace rather than leaking cross-tenant.
+//
+// Pure: no I/O, no side-effects, exported under the `_` prefix so tests can
+// assert the alias-and-default logic without spinning up the full pipeline.
+export function _resolveDistillTenant(opts = {}) {
+  const t = (opts && (opts.tenant_id || opts.tenant)) || null;
+  if (t) return String(t);
+  return 'local';
+}
+
 export async function* distill({
   teacher_namespace,
   student_base,
@@ -187,22 +306,39 @@ export async function* distill({
   pairs_override = null,           // tests can inject pairs directly
   worker_cmd = null,
   emit_progress_every = 100,
+  tenant_id = null,                // W422 P0-4 — canonical tenant scope
+  tenant = null,                   // W422 P0-4 — shorthand alias for tenant_id
 } = {}) {
   if (!MODES.includes(pipeline_mode)) {
     throw new Error(`pipeline_mode must be one of [${MODES.join(', ')}]`);
   }
   if (!student_base) throw new Error('distill requires {student_base}');
   const jobId = 'distill_' + Date.now().toString(36) + '_' + crypto.randomBytes(3).toString('hex');
+  // W422 P0-4 — resolve the tenant scope BEFORE any corpus read. The audit
+  // (2026-05-19) flagged that direct distill({teacher_namespace, ...}) calls
+  // hit prepareDistillCorpus with no tenant filter, which lets a multi-tenant
+  // event-store leak cross-tenant rows into the seeds.jsonl. Default to the
+  // local tenant so CLI dev-loop callers are not broken; hosted routes pass
+  // req.tenant_record.id explicitly.
+  const resolvedTenant = _resolveDistillTenant({ tenant_id, tenant });
   // 1. Resolve corpus.
   let pairs;
   if (Array.isArray(pairs_override) && pairs_override.length > 0) {
     pairs = pairs_override.slice();
   } else if (teacher_namespace) {
-    const prep = await prepareDistillCorpus({ namespace: teacher_namespace, split: 'train' });
+    const prep = await prepareDistillCorpus({ namespace: teacher_namespace, split: 'train', tenant_id: resolvedTenant });
     pairs = prep.pairs;
   } else {
     pairs = [];
   }
+  // W411 P0 #8 — fail-closed holdout enforcement at the distill() boundary.
+  // Even if the caller hand-built pairs_override and slipped a holdout_only
+  // row in (test fixture mistake, recipe-gen include, re-augmentation), we
+  // refuse to feed it to the worker. This is the LAST chokepoint before the
+  // seeds.jsonl write; nothing downstream re-checks.
+  const _holdoutBefore = pairs.length;
+  pairs = pairs.filter((p) => !(p && p.holdout_only));
+  const holdout_excluded_count = _holdoutBefore - pairs.length;
   // 2. Resolve mode + teacher.
   const { mode: workerMode, teacher } = _resolveWorkerMode();
   // 3. Stage worker inputs.
@@ -292,10 +428,15 @@ export async function* distill({
     pipeline_mode,
     teacher,
     pair_count: pairs.length,
+    // W411 P0 #8 — how many pairs the distill() boundary refused as
+    // holdout_only. Compile-pipeline forwards this into the seed_provenance
+    // block of the .kolm receipt so a verifier can confirm the chokepoint
+    // fired.
+    holdout_excluded_count,
     exit: exitInfo,
     manifest: workerManifest,
     duration_ms: Date.now() - start,
   };
 }
 
-export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES };
+export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant };

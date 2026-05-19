@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Service-level agreement · kolm.ai</title>
+<meta name="description" content="The kolm.ai cloud SLA: 99.95% monthly uptime for the hosted plane, 12-month rolling history, credit schedule, and how to file a claim.">
+<link rel="canonical" href="https://kolm.ai/sla">
+<meta property="og:title" content="Service-level agreement · kolm.ai">
+<meta property="og:description" content="99.95% monthly uptime, transparent history, credit schedule, claim process.">
+<meta property="og:url" content="https://kolm.ai/sla">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/sla.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm.ai SLA","description":"99.95% monthly uptime for the hosted plane.","url":"https://kolm.ai/sla","mainEntityOfPage":"https://kolm.ai/sla","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a class="skip-link" href="#main">Skip to content</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+<main id="main" class="sla-page" data-w401g="sla">
+<header class="page-h">
+  <p class="eyebrow">kolm.ai · service-level agreement</p>
+  <h1>99.95% monthly uptime for the hosted plane.</h1>
+  <p class="lede">If we miss it, you get service credits. Your compiled artifacts run on your hardware, so an SLA breach never blocks inference — only the hosted control plane and managed compile/distill jobs.</p>
+</header>
+
+<section>
+  <h2>What is covered</h2>
+  <ul>
+    <li>The hosted API at <code>https://kolm.ai/v1/*</code> (capture, distill, compile, replay, registry, signin).</li>
+    <li>The hosted dashboard at <code>https://kolm.ai</code> and account surfaces.</li>
+    <li>Managed compile and distill workers when the cloud target is selected.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>What is not covered</h2>
+  <ul>
+    <li>Self-hosted runtime: by design, your <code>.kolm</code> artifact has no runtime dependency on our cloud.</li>
+    <li>Third-party model providers (OpenAI, Anthropic, etc.) when you proxy through us. Their SLAs apply.</li>
+    <li>Scheduled maintenance windows announced at least 48 hours in advance.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Credit schedule</h2>
+  <table class="comparison-matrix">
+    <thead><tr><th>Monthly uptime</th><th>Credit (% of monthly fee)</th></tr></thead>
+    <tbody>
+      <tr><td>&lt; 99.95%</td><td>10%</td></tr>
+      <tr><td>&lt; 99.9%</td><td>25%</td></tr>
+      <tr><td>&lt; 99.0%</td><td>50%</td></tr>
+      <tr><td>&lt; 95.0%</td><td>100%</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>How to file a claim</h2>
+  <ol>
+    <li>Within 30 days of the incident, email <a href="mailto:sla@kolm.ai">sla@kolm.ai</a>.</li>
+    <li>Include your workspace ID, the time window, and any affected request IDs.</li>
+    <li>We confirm against the 90-day public history on <a href="/status">/status</a>. Credits post to the next invoice.</li>
+  </ol>
+</section>
+
+<section class="see-also" aria-labelledby="see-also-h">
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/status">Live status</a>: current health and 90-day history.</li>
+    <li><a href="/security">Security &amp; trust</a>: encryption, RBAC, SOC 2 progress.</li>
+    <li><a href="/pricing">Pricing</a>: plans, included usage, BAA availability.</li>
+    <li><a href="/enterprise">Enterprise</a>: custom SLA, MSA, dedicated support.</li>
+  </ul>
+</section>
+</main>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>kolm bench · CLI reference · kolm.ai</title>
+<meta name="description" content="Reference for the kolm bench CLI verb: usage, flags, examples, and links to related docs.">
+<link rel="canonical" href="https://kolm.ai/docs/cli/bench">
+<meta property="og:title" content="kolm bench · CLI reference · kolm.ai">
+<meta property="og:description" content="Reference for the kolm bench CLI verb: usage, flags, examples, and links to related docs.">
+<meta property="og:url" content="https://kolm.ai/docs/cli/bench">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<script src="/nav.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm bench","description":"Reference for the kolm bench CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/bench","mainEntityOfPage":"https://kolm.ai/docs/cli/bench","author":{"@type":"Organization","name":"kolm.ai"}}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+<main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="bench">
+<nav aria-label="Breadcrumb" class="crumbs">
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>bench</span>
+</nav>
+<p>--- title: kolm bench · kolm.ai description: Reproducible benchmark for a .kolm artifact or a public reproducer suite. ---</p>
+<h1>kolm bench</h1>
+<p>&gt; Reproducible artifact benchmark. Alias: <code>kolm benchmark</code>. Three modes: artifact-local, public reproducer, head-to-head vs an LLM.</p>
+<h2>Usage</h2>
+<pre><code>
+kolm bench &lt;artifact.kolm&gt; [flags]                  # artifact-local benchmark JSON
+kolm bench --reproduce &lt;suite&gt; [flags]              # public-reproducer suite (Docker)
+kolm bench --compare &lt;artifact.kolm&gt; [flags]        # head-to-head: kolm vs LLM
+</code></pre>
+<h2>Flags</h2>
+<h3>Artifact mode</h3>
+<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--runs &lt;n&gt;</code> | <code>1</code> | runs per embedded eval case | | <code>--input &#39;&lt;json|string&gt;&#39;</code> | none | fallback input when the artifact has no evals | | <code>--target &lt;name&gt;</code> | none | target label for the report | | <code>--device &lt;name&gt;</code> | none | device label for the report | | <code>--out &lt;file&gt;</code> | stdout | also write the JSON report to a file | | <code>--json</code> | on | emit JSON to stdout |</p>
+<h3>Compare mode</h3>
+<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--corpus &lt;jsonl&gt;</code> | none | external corpus, one <code>{input,output}</code> per line (<code>{prompt,completion}</code> legacy accepted) | | <code>--runs &lt;n&gt;</code> | <code>5</code> | runs per case | | <code>--llm-sample &lt;n&gt;</code> | <code>min(20, |corpus|)</code> | cap LLM paths to first N cases | | <code>--md &lt;file&gt;</code> | none | write Markdown report | | <code>--json &lt;file&gt;</code> | none | write JSON report | | <code>--input &#39;&lt;json|string&gt;&#39;</code> | none | single ad-hoc input when no <code>--corpus</code> and no embedded evals |</p>
+<p>Environment for compare mode: <code>ANTHROPIC_API_KEY</code> (required for llm-api path), <code>KOLM_BENCH_LLM_MODEL</code> (default <code>claude-haiku-4-5</code>), <code>KOLM_BENCH_LLM_INPUT_RATE</code>, <code>KOLM_BENCH_LLM_OUTPUT_RATE</code>, <code>KOLM_BENCH_LOCAL_LLM_URL</code> (default <code>http://127.0.0.1:11434</code>), <code>KOLM_BENCH_LOCAL_LLM_MODEL</code> (default <code>llama3.2:1b</code>).</p>
+<h3>Reproduce mode</h3>
+<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--reproduce &lt;suite&gt;</code> | none | public reproducer. Available: <code>swebench-lite-n150</code> | | <code>--seed &lt;n&gt;</code> | per-suite (e.g. 42) | seed | | <code>--n &lt;n&gt;</code> | per-suite (e.g. 150) | sample size | | <code>--out &lt;file&gt;</code> | <code>~/.kolm/bench/&lt;suite&gt;/report.json</code> | report path | | <code>--dry-run</code> | off | print the plan; do not pull or run docker | | <code>--api-key &lt;key&gt;</code> | none | override <code>ANTHROPIC_API_KEY</code> for the spawned container |</p>
+<h2>Examples</h2>
+<pre><code>
+kolm bench redactor.kolm --runs 5 --out report.json
+kolm bench --compare redactor.kolm --corpus holdout.jsonl --md report.md
+kolm bench --reproduce swebench-lite-n150 --api-key $ANTHROPIC_API_KEY
+</code></pre>
+<h2>Notes</h2>
+<p>The artifact-mode report follows the <code>kolm-benchmark-1</code> spec. It includes <code>k_score</code>, <code>evals.accuracy</code>, <code>latency_us.p50</code>, <code>latency_us.p95</code>, <code>privacy.runtime_egress_attempts</code>, <code>integrity.signature_valid</code>. The harness patches <code>fetch / http / https / net / tls / dns</code> at the process boundary - egress attempts are recorded and blocked.</p>
+<p>Reproducer mode runs in a pinned Docker image so the evaluator and dataset versions are byte-identical to the published numbers. You bring your own <code>ANTHROPIC_API_KEY</code>; the harness mounts it into the container only.</p>
+<p>Exit codes (reproduce mode): <code>0</code> succeeded, <code>1</code> bad args, <code>2</code> prerequisite missing.</p>
+<h2>See also</h2>
+<ul>
+<li><a href="/articles/how-we-benchmark">Methodology</a></li>
+<li><a href="/quickstart">Quickstart</a></li>
+<li><a href="/docs/api">API reference</a></li>
+</ul>
+<section class="see-also" aria-labelledby="see-also-h">
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
+</section>
+</main>
+</body>
+</html>

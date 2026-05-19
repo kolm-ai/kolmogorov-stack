@@ -52,7 +52,8 @@ test('W221 #2 - injector is idempotent on re-run (0 new touches second pass)', (
 
 test('W221 #3 - canonical nav block is written into every page with a marker', () => {
   // Every page that carries the BEGIN/END markers must contain the canonical
-  // 5 anchors in the right order. Hard guarantee against drift.
+  // 5 TOP-LEVEL anchors in the right order. W399 mega-menus may add deep links
+  // beneath each top item — those are not constrained by this test.
   const pubDir = path.join(ROOT, 'public');
   const stack = [pubDir];
   let checked = 0;
@@ -69,23 +70,27 @@ test('W221 #3 - canonical nav block is written into every page with a marker', (
       const endIdx = s.indexOf(END_MARK, beginIdx);
       assert.ok(endIdx > beginIdx, `${entry.name}: END marker after BEGIN`);
       const block = s.slice(beginIdx, endIdx);
+      // Extract the top-level labels (anchors tagged with class="nav-top").
+      const topRe = /<a class="nav-top"[^>]*>([^<]+)<\/a>/g;
+      const topLabels = [...block.matchAll(topRe)].map(m => m[1].trim());
       for (const label of NAV_ITEMS) {
-        assert.match(block, new RegExp(`>${label}</a>`), `${entry.name}: ${label} link missing`);
+        assert.ok(topLabels.includes(label), `${entry.name}: top-level ${label} link missing`);
       }
-      // Order: indices must be monotonically increasing.
-      const positions = NAV_ITEMS.map(l => block.indexOf(`>${l}</a>`));
+      // Order: top labels must appear in canonical order.
+      const positions = NAV_ITEMS.map(l => topLabels.indexOf(l));
       const sorted = [...positions].sort((a, b) => a - b);
-      assert.deepEqual(positions, sorted, `${entry.name}: nav items must be in canonical order`);
+      assert.deepEqual(positions, sorted, `${entry.name}: top-level nav items must be in canonical order`);
       checked++;
     }
   }
   assert.ok(checked >= 50, `expected ≥50 marked pages, saw ${checked}`);
 });
 
-test('W221 #4 - removed nav items (Use cases / Research / Training) no longer appear as anchors in marked blocks', () => {
-  // Use cases, Research, Training must NOT appear as top-level anchors inside
-  // the marked block (they may appear in page body content; only the marked
-  // block is constrained).
+test('W221 #4 - removed nav items (Use cases / Research / Training) no longer appear as TOP-LEVEL anchors', () => {
+  // W399 mega-menu expansion: Use cases, Research, Training may now appear
+  // INSIDE a mega-menu (as deep links beneath Product / Docs), but they must
+  // NOT be one of the five top-level <a class="nav-top"> anchors directly under
+  // <nav class="site-nav">. The contract is "5 top items only"; depth is fine.
   const pubDir = path.join(ROOT, 'public');
   const stack = [pubDir];
   let checked = 0;
@@ -101,9 +106,15 @@ test('W221 #4 - removed nav items (Use cases / Research / Training) no longer ap
       if (b < 0) continue;
       const e = s.indexOf(END_MARK, b);
       const block = s.slice(b, e);
-      assert.ok(!/>Use cases</.test(block), `${entry.name}: "Use cases" must be removed from marked nav`);
-      assert.ok(!/>Research</.test(block), `${entry.name}: "Research" must be removed from marked nav`);
-      assert.ok(!/>Training</.test(block), `${entry.name}: "Training" must be removed from marked nav`);
+      // Extract top-level anchors only — pattern is <a class="nav-top" ...>Label</a>
+      const topLabels = [];
+      const re = /<a class="nav-top"[^>]*>([^<]+)<\/a>/g;
+      let m;
+      while ((m = re.exec(block))) topLabels.push(m[1].trim());
+      // The 5 top-level labels are the only ones constrained here.
+      assert.ok(!topLabels.includes('Use cases'), `${entry.name}: "Use cases" must not be a top-level item`);
+      assert.ok(!topLabels.includes('Research'), `${entry.name}: "Research" must not be a top-level item`);
+      assert.ok(!topLabels.includes('Training'), `${entry.name}: "Training" must not be a top-level item`);
       checked++;
     }
   }

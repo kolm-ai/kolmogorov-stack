@@ -2628,3 +2628,118 @@ textarea {
 [data-theme=light] .tax-strip-eyebrow { color: #059669; background: rgba(10,136,98,0.10); }
 [data-theme=light] .tax-strip-body { color: #4b5158; }
 [data-theme=light] .tax-strip-body a { color: #059669; }
+
+/* ============================================================
+   W399 mega-menu nav.
+   Five top labels (Product / Models / Docs / Pricing / Enterprise)
+   each open a grouped column dropdown on :hover and :focus-within.
+   Mobile (<=920px) stacks the menus inline inside the hamburger panel.
+   ============================================================ */
+.site-nav { align-items: center; }
+.site-nav .nav-item { position: relative; display: flex; align-items: center; }
+.site-nav .nav-item > a.nav-top {
+  display: inline-block;
+  color: var(--ink-mute);
+  font-size: 12.5px;
+  font-family: var(--sans);
+  font-weight: 500;
+  padding-bottom: 3px;
+  border-bottom: 1px solid transparent;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.site-nav .nav-item > a.nav-top:hover,
+.site-nav .nav-item > a.nav-top.active { color: var(--ink); }
+.site-nav .nav-item > a.nav-top.active { border-bottom-color: var(--accent); }
+.site-nav .mega-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: 320px;
+  max-width: 940px;
+  padding: 18px 22px 20px;
+  background: var(--bg-2, #11151b);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.42);
+  display: none;
+  z-index: 60;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 18px 26px;
+}
+.site-nav .nav-item:hover > .mega-menu,
+.site-nav .nav-item:focus-within > .mega-menu,
+.site-nav .nav-item.is-open > .mega-menu {
+  display: grid;
+}
+.site-nav .mega-col { min-width: 0; }
+.site-nav .mega-h {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-mute);
+  margin: 0 0 6px;
+  padding: 0;
+}
+.site-nav .mega-menu a {
+  display: block;
+  padding: 5px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mute);
+  border-bottom: 0;
+  letter-spacing: 0;
+}
+.site-nav .mega-menu a:hover,
+.site-nav .mega-menu a:focus-visible {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 0;
+}
+.site-nav .nav-item--product .mega-menu { min-width: 720px; }
+.site-nav .nav-item--docs .mega-menu { min-width: 740px; }
+.site-nav .nav-item--enterprise .mega-menu { min-width: 560px; }
+.site-nav .nav-item--models .mega-menu { min-width: 540px; }
+.site-nav .nav-item--pricing .mega-menu { min-width: 260px; }
+.site-nav .nav-item--pricing .mega-menu,
+.site-nav .nav-item--enterprise .mega-menu {
+  left: auto;
+  right: 0;
+}
+[data-theme=light] .site-nav .mega-menu {
+  background: #ffffff;
+  border-color: rgba(10,20,40,0.10);
+  box-shadow: 0 18px 40px rgba(10,20,40,0.10);
+}
+[data-theme=light] .site-nav .mega-h { color: rgba(10,20,40,0.55); }
+[data-theme=light] .site-nav .mega-menu a { color: rgba(10,20,40,0.78); }
+[data-theme=light] .site-nav .mega-menu a:hover,
+[data-theme=light] .site-nav .mega-menu a:focus-visible { color: #059669; }
+
+@media (max-width: 920px) {
+  .site-nav .nav-item { display: block; width: 100%; }
+  .site-nav .mega-menu {
+    position: static;
+    display: none;
+    min-width: 0 !important;
+    max-width: none;
+    padding: 6px 0 8px 14px;
+    margin: 0 0 6px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .site-nav.is-open .nav-item .mega-menu { display: block; }
+  .site-nav .mega-h { font-size: 10px; margin-top: 6px; }
+  .site-nav .mega-menu a {
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .site-nav .mega-menu a:last-child { border-bottom: 0; }
+  .site-nav .nav-item--pricing .mega-menu,
+  .site-nav .nav-item--enterprise .mega-menu { right: auto; left: auto; }
+}

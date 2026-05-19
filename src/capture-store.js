@@ -17,8 +17,18 @@
 //   2. KOLM_STORE_DRIVER if set to vercel_postgres / vercel_kv
 //   3. Legacy synchronous store (./store.js) — durable when KOLM_DATA_DIR
 //      points outside /tmp, ephemeral otherwise (e.g. default Vercel /tmp).
+//
+// W409a — the canonical telemetry plane is src/event-store.js (queryable by
+// the lake, opportunity engine, dataset workbench, label queue, and training
+// planner). For every observation we accept here we ALSO bridge the row into
+// the event-store via observationToCanonicalEvent() so the optimization /
+// training loop sees the traffic. The two stores are kept in sync per insert
+// and the event-store insert is idempotent (INSERT OR REPLACE keyed on
+// event_id) so multiple bridge calls for the same row do not duplicate.
 
 import * as store from './store.js';
+import { appendEvent } from './event-store.js';
+import { hashContent, normalizeVendor } from './event-schema.js';
 
 const ON_VERCEL = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 
@@ -83,6 +93,117 @@ export function isDurable() {
   return true;
 }
 
+// W409a — translate a capture-store observation row into the canonical
+// event-store shape. Pure function; safe to call without side effects. The
+// `provenance` arg (default 'capture-store') stamps the source on every
+// canonical event for auditability of the bridge. Used by both the live
+// insertCapture path (provenance='capture-store') and the one-shot migration
+// (provenance='capture-store-migration'). Returns a partial event suitable
+// for appendEvent(); appendEvent will canonicalize + validate.
+export function observationToCanonicalEvent(row, opts = {}) {
+  if (!row || typeof row !== 'object') return null;
+  const provenance = String(opts.provenance || 'capture-store');
+  const event_id = String(row.event_id || row.id || ('evt_' + Date.now().toString(36)));
+  const tenant_id = String(row.tenant_id || row.tenant || 'local');
+  const namespace = String(row.corpus_namespace || row.namespace || 'default');
+  const created_at = row.created_at || new Date().toISOString();
+  const promptText = row.prompt != null ? String(row.prompt) : '';
+  const responseText = row.response != null
+    ? (typeof row.response === 'string' ? row.response : JSON.stringify(row.response))
+    : '';
+  const request_hash = row.template_hash
+    || row.request_hash
+    || (promptText ? hashContent(promptText + '|' + (row.model || '')) : null);
+  const response_hash = row.response_hash
+    || (responseText ? hashContent(responseText) : null);
+  // status: the capture row sometimes carries the upstream HTTP int (200, 429,
+  // etc.) and sometimes a canonical string ('ok'/'error'). Map ints back to
+  // canonical so the event schema validator accepts the row.
+  let canonStatus = 'ok';
+  const s = row.status;
+  if (typeof s === 'string') {
+    canonStatus = s;
+  } else if (typeof s === 'number') {
+    if (s === 429) canonStatus = 'rate_limited';
+    else if (s === 408 || s === 504) canonStatus = 'timeout';
+    else if (s >= 400) canonStatus = 'error';
+    else canonStatus = 'ok';
+  }
+  const sensitiveClasses = Array.isArray(row.sensitive_classes) ? row.sensitive_classes : [];
+  return {
+    event_id,
+    tenant_id,
+    namespace,
+    workspace_id: namespace,
+    created_at,
+    provider: row.provider || null,
+    model: row.model || null,
+    request_hash,
+    response_hash,
+    // The capture-store rows are post-redaction (the daemon-connector lake
+    // path writes redactedPromptText/respTextForLake). Treat the row's prompt/
+    // response as the redacted variant the event lake should see.
+    prompt_redacted: promptText.slice(0, 16384) || null,
+    response_redacted: responseText.slice(0, 16384) || null,
+    prompt_tokens: Number(row.prompt_tokens) || 0,
+    completion_tokens: Number(row.completion_tokens) || 0,
+    estimated_cost_usd: Number(row.cost_usd != null ? row.cost_usd : row.estimated_cost_usd) || 0,
+    latency_ms: Number(row.latency_ms) || (Number(row.latency_us) ? Math.round(row.latency_us / 1000) : 0),
+    status: canonStatus,
+    error_type: row.error_type || null,
+    sensitive_data_detected: !!(row.sensitive_data_detected || sensitiveClasses.length > 0),
+    sensitive_classes: sensitiveClasses,
+    redaction_count: Number(row.redaction_count) || 0,
+    redaction_policy: row.redaction_policy || 'redact',
+    // W409b — propagate privacy provenance through the bridge so the canonical
+    // event row carries the same raw_available / hash / noncompliant_identifiers
+    // tags the capture row recorded. Fail-closed: missing → false / null / [].
+    raw_available: row.raw_available === true,
+    raw_prompt_hash: row.raw_prompt_hash || null,
+    raw_response_hash: row.raw_response_hash || null,
+    noncompliant_identifiers: Array.isArray(row.noncompliant_identifiers) ? row.noncompliant_identifiers : [],
+    source_type: row.source_type || 'real',
+    // W411 — vendor normalization + parity field names. The canonical event
+    // lake must report `vendor` (closed enum) so OpenAI / Anthropic /
+    // OpenRouter / Ollama / vLLM / llama.cpp all collapse into one switch
+    // target downstream. tokens_in/out + cost_micro_usd + latency_us mirror
+    // the legacy prompt_tokens/completion_tokens/cost_usd/latency_ms fields
+    // with the units the auditor wants on the wire. files carries multimodal
+    // attachment metadata (parallel to tool_calls).
+    vendor: normalizeVendor(row.vendor || row.provider),
+    tokens_in: Number(row.tokens_in != null ? row.tokens_in : row.prompt_tokens) || 0,
+    tokens_out: Number(row.tokens_out != null ? row.tokens_out : row.completion_tokens) || 0,
+    cost_micro_usd: row.cost_micro_usd != null
+      ? Number(row.cost_micro_usd)
+      : Math.round((Number(row.cost_usd != null ? row.cost_usd : row.estimated_cost_usd) || 0) * 1_000_000),
+    latency_us: row.latency_us != null
+      ? Number(row.latency_us)
+      : (Number(row.latency_ms) || 0) * 1000,
+    files: Array.isArray(row.files) ? row.files : [],
+    tool_calls: Array.isArray(row.tool_calls) ? row.tool_calls : [],
+    error: row.error == null ? null : String(row.error),
+    // W409a — provenance tag so audit can trace each canonical event back to
+    // its bridge origin. Stored in feedback for now to avoid widening the
+    // schema; opportunity engine + dataset workbench ignore unknown fields.
+    feedback: provenance ? ('migrated_from:' + provenance) : null,
+  };
+}
+
+// W409a — best-effort bridge into the canonical event-store. Never throws.
+// Idempotent: appendEvent uses INSERT OR REPLACE keyed on event_id so a
+// double-bridge of the same row (e.g. router proxy + migration backfill)
+// collapses into one canonical row. Failure to bridge does NOT block the
+// capture-store insert (the customer's app already got its upstream answer).
+export async function bridgeToEventStore(row, opts = {}) {
+  try {
+    const ev = observationToCanonicalEvent(row, opts);
+    if (!ev) return null;
+    return await appendEvent(ev);
+  } catch (_) {
+    return null;
+  }
+}
+
 // Throws on write failure so the caller returns 503. The Pablo W211
 // silent-swallow pattern is structurally impossible from here.
 export async function insertCapture(row) {
@@ -92,6 +213,9 @@ export async function insertCapture(row) {
   const driver = await loadDriver();
   if (driver) {
     await driver.insert('observations', row);
+    // W409a — mirror into the canonical event-store so the lake + optimizer
+    // see it. Best-effort, post-insert.
+    await bridgeToEventStore(row);
     return row;
   }
   // Legacy path: refuse to silently lose data when the deploy is on
@@ -108,6 +232,8 @@ export async function insertCapture(row) {
   // Synchronous insert may throw (disk full, permission, JSON parse) —
   // we propagate instead of swallowing.
   store.insert('observations', row);
+  // W409a — same bridge for the legacy synchronous path.
+  await bridgeToEventStore(row);
   return row;
 }
 

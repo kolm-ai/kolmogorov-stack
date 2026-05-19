@@ -32,7 +32,8 @@
 .acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
 .skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
 .skip-link:focus{left:0}
-.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+@media (min-width:1280px){.metric-grid{grid-template-columns:repeat(3,1fr)}}
 .metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px}
 .metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
 .metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
@@ -70,11 +71,152 @@
     <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
-      <a href="/product">Product</a>
-      <a href="/models">Models</a>
-      <a href="/docs">Docs</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/enterprise">Enterprise</a>
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
     <div class="site-actions"><a href="/docs">Help</a></div>
@@ -87,11 +229,50 @@
 <section class="acct-content">
 <h1>Overview.</h1>
 <p class="lede">Workspace summary. Live spend, captured events, active artifacts, top opportunities. Real numbers from your tenant.</p>
-<div class="metric-grid" id="metric-grid" aria-busy="true">
-  <div class="metric-card"><div class="label">Spend (30d)</div><div class="value" id="m-spend">...</div><div class="delta" id="m-spend-d">&nbsp;</div></div>
-  <div class="metric-card"><div class="label">Captured events</div><div class="value" id="m-events">...</div><div class="delta" id="m-events-d">&nbsp;</div></div>
-  <div class="metric-card"><div class="label">Active artifacts</div><div class="value" id="m-artifacts">...</div><div class="delta" id="m-artifacts-d">&nbsp;</div></div>
-  <div class="metric-card"><div class="label">Open opportunities</div><div class="value" id="m-opps">...</div><div class="delta" id="m-opps-d">&nbsp;</div></div>
+<!-- W413: Next actions panel. Fetches /v1/intent/next (the post-auth mirror
+     of the `kolm next` CLI verb, ranked by the W412 recommender). Renders
+     top 3 ranked actions as primary CTAs so a newly-arrived user always has
+     a concrete next step in their line of sight. -->
+<div id="next-actions" class="kpanel" data-w413="next-actions" aria-busy="true" style="margin-bottom:18px">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px">
+    <h2 style="margin:0;font-size:15px">Next actions</h2>
+    <span class="pill mute" style="font-size:10px">kolm next</span>
+  </div>
+  <div id="next-actions-body">
+    <div class="skel" style="width:340px;height:14px"></div>
+    <div class="skel" style="width:240px;height:11px;margin-top:6px"></div>
+  </div>
+</div>
+<!-- W415: Ask kolm. Mirrors `kolm do "..."` on the web. POSTs to
+     /v1/intent/ask with {question:<text>}, renders the classifier's matched
+     verb + the exact CLI command + a one-line explanation + up to 3
+     alternatives. Same source as the CLI verb so the UI and the terminal
+     give the same answer. -->
+<div id="ask-kolm" class="kpanel" data-w415="ask-form" style="margin-bottom:18px">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px">
+    <h2 style="margin:0;font-size:15px">Ask kolm</h2>
+    <span class="pill mute" style="font-size:10px">kolm do "..."</span>
+  </div>
+  <form id="ask-form" data-w415="ask-form-el" autocomplete="off" style="display:flex;gap:8px;align-items:stretch">
+    <input id="ask-input" type="text" name="question" placeholder='try: "what should i do next?" or "show captures from claude-code"' style="flex:1;min-width:0;padding:8px 10px;font:13px var(--mono,ui-monospace,Menlo,Consolas,monospace);background:var(--bg-elev,#101316);color:var(--ink,#ece7dc);border:1px solid var(--line,rgba(236,231,220,0.12));border-radius:8px" aria-label="Ask kolm a natural-language question" />
+    <button type="submit" id="ask-submit" style="padding:8px 14px;font:12px var(--mono);background:var(--accent,#10b981);color:#0b0d10;border:0;border-radius:8px;cursor:pointer">Ask</button>
+  </form>
+  <div id="ask-answer" data-w415="ask-answer" style="margin-top:10px;min-height:0"></div>
+</div>
+<!-- W409i: nine canonical counters on the post-auth dashboard. Each card maps
+     1:1 to a CLI verb (kolm tail captures, kolm opportunities, kolm dataset list,
+     kolm label next, kolm jobs, kolm artifacts, kolm devices, kolm team queue,
+     kolm billing usage) so what you see here matches what the terminal shows. -->
+<div class="metric-grid" id="metric-grid" aria-busy="true" data-counter-count="9">
+  <div class="metric-card" data-counter="captured-traffic"><div class="label">Captured traffic</div><div class="value" id="m-events">...</div><div class="delta" id="m-events-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="savings-opportunities"><div class="label">Savings opportunities</div><div class="value" id="m-opps">...</div><div class="delta" id="m-opps-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="datasets"><div class="label">Datasets</div><div class="value" id="m-datasets">...</div><div class="delta" id="m-datasets-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="review-queue"><div class="label">Review queue</div><div class="value" id="m-queue">...</div><div class="delta" id="m-queue-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="builds-in-progress"><div class="label">Builds in-progress</div><div class="value" id="m-builds">...</div><div class="delta" id="m-builds-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="artifacts"><div class="label">Active artifacts</div><div class="value" id="m-artifacts">...</div><div class="delta" id="m-artifacts-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="devices"><div class="label">Devices</div><div class="value" id="m-devices">...</div><div class="delta" id="m-devices-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="team-approvals"><div class="label">Team approvals</div><div class="value" id="m-approvals">...</div><div class="delta" id="m-approvals-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="usage-billing"><div class="label">Usage / billing (30d)</div><div class="value" id="m-spend">...</div><div class="delta" id="m-spend-d">&nbsp;</div></div>
 </div>
 <h2>Top opportunities</h2>
 <div id="opp-list">
@@ -118,22 +299,53 @@
   window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
   window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
 })();
+// W409i: fetch all 9 counter sources in parallel. Each is wrapped in a
+// catch() so a missing / 404 endpoint just leaves that counter at 0 rather
+// than breaking the whole grid.
+function _len(x){return Array.isArray(x)?x.length:(x&&Array.isArray(x.items)?x.items.length:(x&&typeof x.n==='number'?x.n:(x&&typeof x.total==='number'?x.total:0)));}
 Promise.allSettled([
   window.kfetch("/v1/account").catch(function(){return {};}),
   window.kfetch("/v1/artifacts").catch(function(){return [];}),
   window.kfetch("/v1/opportunities?limit=3").catch(function(){return {opportunities:[]};}),
+  window.kfetch("/v1/datasets").catch(function(){return {datasets:[]};}),
+  window.kfetch("/v1/label-queue/stats").catch(function(){return {items:[]};}),
+  window.kfetch("/v1/builds").catch(function(){return {items:[]};}),
+  window.kfetch("/v1/devices").catch(function(){return {items:[]};}),
+  window.kfetch("/v1/team/approvals?state=pending").catch(function(){return {items:[]};}),
+  window.kfetch("/v1/billing/usage").catch(function(){return {};}),
 ]).then(function(rs){
   var acct=rs[0].value||{}, arts=rs[1].value||[], opps=rs[2].value||{opportunities:[]};
+  var datasets=rs[3].value||{}, queue=rs[4].value||{}, builds=rs[5].value||{};
+  var devices=rs[6].value||{}, approvals=rs[7].value||{}, billing=rs[8].value||{};
   var artList=Array.isArray(arts)?arts:(arts.artifacts||[]);
   var oppList=Array.isArray(opps)?opps:(opps.opportunities||[]);
-  document.getElementById("m-spend").textContent=window.kusd(acct.spend_30d_usd!=null?acct.spend_30d_usd:(acct.used&&acct.used.spend_usd));
-  document.getElementById("m-events").textContent=window.knum(acct.events_total||(acct.used&&acct.used.captured_events));
-  document.getElementById("m-artifacts").textContent=window.knum(artList.length);
+  var datasetN=_len(datasets.datasets||datasets);
+  var queueN=_len(queue.items||queue.queue||queue);
+  var buildsList=builds.builds||builds.items||builds;
+  var buildsInProgress=Array.isArray(buildsList)?buildsList.filter(function(b){return b&&(b.status==='running'||b.status==='queued'||b.status==='in_progress');}).length:(builds.in_progress||0);
+  var deviceN=_len(devices.devices||devices.items||devices);
+  var approvalsN=_len(approvals.items||approvals.approvals||approvals);
+  var spendUsd=billing.spend_usd!=null?billing.spend_usd:(billing.used&&billing.used.spend_usd!=null?billing.used.spend_usd:(acct.spend_30d_usd!=null?acct.spend_30d_usd:(acct.used&&acct.used.spend_usd)));
+
+  document.getElementById("m-events").textContent=window.knum(acct.events_total||(acct.used&&acct.used.captured_events)||0);
+  document.getElementById("m-events-d").textContent=acct.events_namespaces?(acct.events_namespaces+" namespaces"):"all namespaces";
   document.getElementById("m-opps").textContent=window.knum(oppList.length);
-  document.getElementById("m-spend-d").textContent=acct.plan?("plan: "+acct.plan):"";
-  document.getElementById("m-events-d").textContent=acct.events_namespaces?(acct.events_namespaces+" namespaces"):"";
-  document.getElementById("m-artifacts-d").textContent=artList.length?(artList[0].artifact_id||artList[0].id||"latest"):"";
-  document.getElementById("m-opps-d").textContent=oppList.length?"oldest "+(oppList[0].type||""):"";
+  document.getElementById("m-opps-d").textContent=oppList.length?"oldest "+(oppList[0].type||""):"none open";
+  document.getElementById("m-datasets").textContent=window.knum(datasetN);
+  document.getElementById("m-datasets-d").textContent=datasetN?"approved + draft":"none yet";
+  document.getElementById("m-queue").textContent=window.knum(queueN);
+  document.getElementById("m-queue-d").textContent=queueN?"awaiting review":"empty";
+  document.getElementById("m-builds").textContent=window.knum(buildsInProgress);
+  document.getElementById("m-builds-d").textContent=buildsInProgress?"running":"none in progress";
+  document.getElementById("m-artifacts").textContent=window.knum(artList.length);
+  document.getElementById("m-artifacts-d").textContent=artList.length?(artList[0].artifact_id||artList[0].id||"latest"):"none yet";
+  document.getElementById("m-devices").textContent=window.knum(deviceN);
+  document.getElementById("m-devices-d").textContent=deviceN?"registered":"none registered";
+  document.getElementById("m-approvals").textContent=window.knum(approvalsN);
+  document.getElementById("m-approvals-d").textContent=approvalsN?"pending":"all clear";
+  document.getElementById("m-spend").textContent=window.kusd(spendUsd);
+  document.getElementById("m-spend-d").textContent=acct.plan?("plan: "+acct.plan):"current period";
+
   document.getElementById("metric-grid").removeAttribute("aria-busy");
   var box=document.getElementById("opp-list");
   if(!oppList.length){box.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
@@ -145,6 +357,137 @@ Promise.allSettled([
     "</div>";
   }).join("");
 });
+
+// W413: Next-actions panel. Mirrors `kolm next` CLI verb. Each recommendation
+// is rendered as a card with the command (copy-on-click) and the why (plain
+// English). If the endpoint 404s on an older backend the panel reveals an
+// empty-state hint instead of hanging on the skeleton.
+window.kfetch("/v1/intent/next").then(function(payload){
+  var panel=document.getElementById("next-actions");
+  var body=document.getElementById("next-actions-body");
+  panel.removeAttribute("aria-busy");
+  var recs=(payload&&payload.recommendations)||[];
+  if(!recs.length){
+    body.innerHTML="<div style=\"color:var(--ink-mute);font-size:13px\">You're all caught up. Run <code style=\"background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--accent)\">kolm what</code> for a full snapshot.</div>";
+    return;
+  }
+  body.innerHTML=recs.slice(0,3).map(function(r){
+    return "<div data-w413=\"next-action\" data-action=\""+window.kesc(r.action||"")+"\" style=\"padding:10px 0;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));display:flex;justify-content:space-between;align-items:flex-start;gap:14px\">"+
+      "<div style=\"flex:1\">"+
+        "<div style=\"font-family:var(--mono);font-size:12.5px;color:var(--accent)\">$ "+window.kesc(r.command||"")+"</div>"+
+        "<div style=\"font-size:12.5px;color:var(--ink-mute);margin-top:4px;line-height:1.5\">"+window.kesc(r.why||"")+"</div>"+
+      "</div>"+
+      "<button type=\"button\" class=\"btn\" data-copy=\""+window.kesc(r.command||"")+"\" style=\"font-size:11px;padding:4px 10px;flex-shrink:0\">copy</button>"+
+    "</div>";
+  }).join("");
+  body.querySelectorAll("button[data-copy]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var cmd=btn.getAttribute("data-copy")||"";
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(cmd).then(function(){
+          var prev=btn.textContent;btn.textContent="copied";setTimeout(function(){btn.textContent=prev;},1200);
+        }).catch(function(){});
+      }
+    });
+  });
+}).catch(function(){
+  var panel=document.getElementById("next-actions");
+  panel.removeAttribute("aria-busy");
+  document.getElementById("next-actions-body").innerHTML="<div style=\"color:var(--ink-mute);font-size:13px\">Next-action recommender is offline. Try <code style=\"background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--accent)\">kolm next</code> on the CLI instead.</div>";
+});
+// W415: Ask kolm. NL question → /v1/intent/ask → render classified verb +
+// exact CLI command + one-line explanation + up to 3 alternatives. Same
+// source as `kolm do` so the web and the terminal give the same answer.
+(function wireAskForm(){
+  var form=document.getElementById("ask-form");
+  var input=document.getElementById("ask-input");
+  var submit=document.getElementById("ask-submit");
+  var answer=document.getElementById("ask-answer");
+  if(!form||!input||!answer) return;
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+  function pillColor(conf){
+    if(conf==null) return "#888";
+    if(conf>=0.85) return "#10b981";
+    if(conf>=0.6)  return "#eab308";
+    return "#ef4444";
+  }
+  function copyBtn(text){
+    return '<button type="button" data-w415="copy" data-copy="'+esc(text)+'" style="padding:3px 8px;font:10px var(--mono);background:transparent;color:var(--ink-mute);border:1px solid var(--line);border-radius:5px;cursor:pointer">copy</button>';
+  }
+  form.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var q = input.value.trim();
+    if(!q) return;
+    submit.disabled = true;
+    answer.innerHTML = '<div style="color:var(--ink-mute);font-size:12px">classifying…</div>';
+    var ac = (typeof AbortController!=="undefined") ? new AbortController() : null;
+    var timer = setTimeout(function(){ if(ac) ac.abort(); }, 8000);
+    fetch("/v1/intent/ask", {
+      method: "POST",
+      headers: {"content-type":"application/json"},
+      body: JSON.stringify({question:q}),
+      credentials: "include",
+      signal: ac ? ac.signal : undefined,
+    }).then(function(r){ return r.json().then(function(j){return {ok:r.ok, status:r.status, body:j};}); })
+      .then(function(out){
+        clearTimeout(timer);
+        submit.disabled = false;
+        var b = out.body || {};
+        if(!out.ok || b.ok!==true){
+          var msg = (b && (b.message||b.error)) || ("HTTP "+out.status);
+          answer.innerHTML = '<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:6px">classify failed: '+esc(msg)+'</div>';
+          return;
+        }
+        var html = '';
+        html += '<div data-w415="answer-row" style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">';
+        html += '<code style="font:12px var(--mono);background:var(--bg-elev);padding:3px 8px;border-radius:5px;color:var(--accent)">'+esc(b.command||("kolm "+b.verb))+'</code>';
+        html += copyBtn(b.command||("kolm "+b.verb));
+        if(typeof b.confidence==="number"){
+          html += '<span class="pill" data-w415="confidence" style="background:'+pillColor(b.confidence)+';color:#0b0d10;font-size:10px;padding:2px 7px;border-radius:99px">conf '+b.confidence.toFixed(2)+'</span>';
+        }
+        if(b.source){
+          html += '<span class="pill mute" style="font-size:10px">source: '+esc(b.source)+'</span>';
+        }
+        html += '</div>';
+        if(b.why){
+          html += '<div style="color:var(--ink-mute);font-size:11px;margin-top:4px">'+esc(b.why)+'</div>';
+        }
+        if(b.alternatives && b.alternatives.length){
+          html += '<div data-w415="alternatives" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line)"><div style="color:var(--ink-mute);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">alternatives</div>';
+          for(var i=0;i<b.alternatives.length;i++){
+            var a = b.alternatives[i];
+            html += '<div data-w415="alt-row" style="display:flex;align-items:center;gap:6px;margin-top:3px">';
+            html += '<code style="font:11px var(--mono);background:var(--bg-elev);padding:2px 6px;border-radius:4px;color:var(--ink-mute)">'+esc(a.command||("kolm "+a.verb))+'</code>';
+            html += copyBtn(a.command||("kolm "+a.verb));
+            if(typeof a.confidence==="number"){
+              html += '<span style="color:var(--ink-mute);font-size:10px">'+a.confidence.toFixed(2)+'</span>';
+            }
+            html += '</div>';
+          }
+          html += '</div>';
+        }
+        answer.innerHTML = html;
+        var btns = answer.querySelectorAll('[data-w415="copy"]');
+        for(var k=0;k<btns.length;k++){
+          btns[k].addEventListener("click", function(e){
+            var t = e.currentTarget.getAttribute("data-copy")||"";
+            if(navigator.clipboard && navigator.clipboard.writeText){
+              navigator.clipboard.writeText(t).then(function(){
+                e.currentTarget.textContent="copied";
+                setTimeout(function(){ try{ e.currentTarget.textContent="copy"; }catch(_){} }, 1200);
+              }).catch(function(){});
+            }
+          });
+        }
+      })
+      .catch(function(e){
+        clearTimeout(timer);
+        submit.disabled = false;
+        var msg = (e && e.name==="AbortError") ? "request timed out (8s)" : (e && e.message) || "network error";
+        answer.innerHTML = '<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:6px">'+esc(msg)+'</div>';
+      });
+  });
+})();
 </script>
 </body>
 </html>

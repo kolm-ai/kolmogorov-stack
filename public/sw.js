@@ -1,5 +1,5 @@
 // Recipe service worker · keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-19-wave437-suite-green';
+const CACHE = 'kolm-v7-2026-05-19-wave443-445-dod-honest-verify-hardened';
 const PRECACHE = [
   '/device',
   '/styles.css',

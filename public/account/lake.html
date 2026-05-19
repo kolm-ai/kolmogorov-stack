@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Telemetry lake &middot; Account &middot; kolm.ai</title>
+<meta name="description" content="Telemetry lake on kolm.ai: canonical event store totals, spend, tokens, redactions, providers, models, repeated clusters. Reads /v1/lake/stats, tails /v1/lake/tail, exports /v1/lake/export.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/lake">
+<meta property="og:title" content="Telemetry lake &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Telemetry lake on kolm.ai: canonical event store totals, spend, tokens, redactions, providers, models, repeated clusters. Reads /v1/lake/stats, tails /v1/lake/tail, exports /v1/lake/export." />
+<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/lake" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Telemetry lake · Account · kolm.ai","description":"Telemetry lake on kolm.ai: canonical event store totals, spend, tokens, redactions, providers, models, repeated clusters.","url":"https://kolm.ai/account/lake","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Telemetry lake","item":"https://kolm.ai/account/lake"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content h3{font-size:14px;margin:16px 0 8px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px}
+.metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
+.metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
+.metric-card .delta{font-size:11.5px;color:var(--ink-mute);margin-top:4px}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable tr:hover td{background:var(--bg-elev)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.btn.primary:hover{filter:brightness(1.1);color:#0b0d10}
+.skel{background:linear-gradient(90deg,var(--bg-elev) 0%,var(--bg-card) 50%,var(--bg-elev) 100%);background-size:200% 100%;animation:skel 1.4s linear infinite;border-radius:4px;height:12px}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.toolbar input[type=search],.toolbar select,.toolbar input[type=text]{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.kbd{font-family:var(--mono);font-size:11px;background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--ink-mute);border:1px solid var(--line)}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+    <div class="site-actions"><a href="/docs">Help</a></div>
+  </div>
+</header>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/lake" aria-current="page">Telemetry lake</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Builds</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<section class="acct-content">
+<h1>Telemetry lake.</h1>
+<p class="lede">The canonical event store on this device. Every captured request lives at <code>~/.kolm/events/</code> first; cloud sync is explicit opt-in. This page reads <code>/v1/lake/stats</code>, tails <code>/v1/lake/tail</code>, and exports through <code>/v1/lake/export</code>.</p>
+
+<div class="metric-grid" id="lake-metrics">
+  <div class="metric-card"><div class="label">Total events</div><div class="value" id="m-total"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-total-d">last 30d</div></div>
+  <div class="metric-card"><div class="label">Total spend</div><div class="value" id="m-spend"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-spend-d">last 30d</div></div>
+  <div class="metric-card"><div class="label">Total tokens</div><div class="value" id="m-tokens"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-tokens-d">prompt + completion</div></div>
+  <div class="metric-card"><div class="label">Sensitive events</div><div class="value" id="m-sensitive"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-sensitive-d">redactions fired</div></div>
+</div>
+
+<div class="kpanel">
+  <h2>Local storage</h2>
+  <p class="pdesc">The event-store lives on this device. Cloud sync is off unless you opt in via <code>kolm config set cloud_sync=on</code>.</p>
+  <div id="lake-storage" data-storage-root>
+    <div class="skel" style="width:60%;height:14px"></div>
+  </div>
+</div>
+
+<div class="kpanel" data-lake-providers>
+  <h2>Providers</h2>
+  <p class="pdesc">Calls + spend + avg latency by upstream provider. Reads canonical events.</p>
+  <table class="ktable"><thead><tr><th>Provider</th><th>Calls</th><th>Spend</th><th>Avg latency</th></tr></thead><tbody id="prov-rows"><tr><td colspan="4"><div class="skel" style="width:180px"></div></td></tr></tbody></table>
+</div>
+
+<div class="kpanel" data-lake-models>
+  <h2>Models</h2>
+  <p class="pdesc">Per-model totals, sorted by spend.</p>
+  <table class="ktable"><thead><tr><th>Model</th><th>Calls</th><th>Spend</th><th>Avg latency</th></tr></thead><tbody id="model-rows"><tr><td colspan="4"><div class="skel" style="width:180px"></div></td></tr></tbody></table>
+</div>
+
+<div class="kpanel" data-lake-clusters>
+  <h2>Repeated clusters</h2>
+  <p class="pdesc">Templated prompts that recur most often. These feed the opportunity engine and the dataset workbench.</p>
+  <table class="ktable"><thead><tr><th>Template</th><th>Count</th><th>Providers</th><th>Avg cost</th></tr></thead><tbody id="cluster-rows"><tr><td colspan="4"><div class="skel" style="width:180px"></div></td></tr></tbody></table>
+</div>
+
+<div class="kpanel" data-lake-tail>
+  <h2>Recent events</h2>
+  <p class="pdesc">Most recent 50 canonical events. Each row links to its full envelope for inspection.</p>
+  <div class="toolbar">
+    <input id="tail-search" type="search" placeholder="Filter by namespace, model, prompt..." aria-label="Filter events" style="min-width:260px;flex:1">
+    <a id="export-jsonl" class="btn" href="/v1/lake/export?format=jsonl">Export JSONL</a>
+    <a id="export-csv" class="btn" href="/v1/lake/export?format=csv">Export CSV</a>
+  </div>
+  <table class="ktable"><thead><tr><th>When</th><th>Namespace</th><th>Model</th><th>Status</th><th>Latency</th><th>Cost</th></tr></thead><tbody id="tail-rows" data-tail-rows><tr><td colspan="6"><div class="skel" style="width:200px"></div></td></tr></tbody></table>
+  <div id="tail-empty" class="empty" hidden data-empty-state>
+    <strong>No events yet.</strong> Point a connector at <code>http://127.0.0.1:8787/v1</code> or run <code>kolm capture --once</code> to seed the lake. Storage path: <code>~/.kolm/events/</code>.
+  </div>
+</div>
+
+</section>
+</div>
+</main>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
+  window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
+  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+})();
+
+function paintStats(stats){
+  document.getElementById("m-total").textContent=window.knum(stats.total_calls||0);
+  document.getElementById("m-spend").textContent=window.kusd(stats.total_spend_usd||0);
+  document.getElementById("m-tokens").textContent=window.knum(stats.total_tokens||0);
+  document.getElementById("m-sensitive").textContent=window.knum(stats.sensitive_events||0);
+  // providers
+  var provs=stats.providers||{};
+  var pkeys=Object.keys(provs).sort(function(a,b){return (provs[b].spend||0)-(provs[a].spend||0);});
+  var provRows=document.getElementById("prov-rows");
+  if(!pkeys.length){provRows.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--ink-faint)\">No providers yet</td></tr>";}
+  else{provRows.innerHTML=pkeys.map(function(p){var r=provs[p]||{};return "<tr><td><b>"+window.kesc(p)+"</b></td><td>"+window.knum(r.calls)+"</td><td>"+window.kusd(r.spend)+"</td><td>"+window.knum(r.avg_latency)+"&thinsp;ms</td></tr>";}).join("");}
+  // models
+  var mods=stats.models||{};
+  var mkeys=Object.keys(mods).sort(function(a,b){return (mods[b].spend||0)-(mods[a].spend||0);});
+  var modRows=document.getElementById("model-rows");
+  if(!mkeys.length){modRows.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--ink-faint)\">No models yet</td></tr>";}
+  else{modRows.innerHTML=mkeys.map(function(m){var r=mods[m]||{};return "<tr><td><b>"+window.kesc(m)+"</b></td><td>"+window.knum(r.calls)+"</td><td>"+window.kusd(r.spend)+"</td><td>"+window.knum(r.avg_latency)+"&thinsp;ms</td></tr>";}).join("");}
+  // clusters
+  var clusters=stats.repeated_clusters||[];
+  var cRows=document.getElementById("cluster-rows");
+  if(!clusters.length){cRows.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--ink-faint)\">No repeated templates yet</td></tr>";}
+  else{cRows.innerHTML=clusters.slice(0,10).map(function(c){return "<tr><td><code style=\"max-width:340px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+window.kesc((c.normalized||"").slice(0,80))+"</code></td><td><b>"+window.knum(c.count)+"</b></td><td>"+window.kesc((c.providers||[]).join(", "))+"</td><td>"+window.kusd(c.avg_cost)+"</td></tr>";}).join("");}
+}
+
+function paintStorage(s){
+  if(!s)return;
+  var el=document.getElementById("lake-storage");
+  var bytes=s.size_bytes!=null?s.size_bytes:(s.bytes||0);
+  el.innerHTML="<table class=\"ktable\"><tr><td>Driver</td><td><b>"+window.kesc(s.driver||"jsonl")+"</b></td></tr>"+
+    "<tr><td>Path</td><td><code>"+window.kesc(s.path||s.file||"~/.kolm/events/")+"</code></td></tr>"+
+    "<tr><td>Total events</td><td>"+window.knum(s.total_events||s.rows||0)+"</td></tr>"+
+    "<tr><td>Size</td><td>"+window.kbytes(bytes)+"</td></tr>"+
+    "<tr><td>Cloud sync</td><td>"+(s.cloud_sync?"<span class=\"pill ok\">on</span>":"<span class=\"pill mute\">off</span>")+"</td></tr>"+
+    "</table>";
+}
+
+function paintTail(events){
+  var rows=document.getElementById("tail-rows");
+  var q=(document.getElementById("tail-search").value||"").toLowerCase();
+  var filtered=(events||[]).filter(function(e){
+    if(!q)return true;
+    var hay=((e.namespace||"")+" "+(e.model||"")+" "+(e.provider||"")+" "+(e.prompt_redacted||"")).toLowerCase();
+    return hay.indexOf(q)>=0;
+  });
+  if(!filtered.length){
+    rows.innerHTML="";
+    document.getElementById("tail-empty").hidden=false;
+    return;
+  }
+  document.getElementById("tail-empty").hidden=true;
+  rows.innerHTML=filtered.slice(0,50).map(function(e){
+    var when=(e.created_at||"").slice(11,19)||"-";
+    var statusClass=e.status==="ok"?"ok":e.status==="error"||e.status==="timeout"?"bad":"warn";
+    return "<tr>"+
+      "<td>"+window.kesc(when)+"</td>"+
+      "<td><code>"+window.kesc(e.namespace||"default")+"</code></td>"+
+      "<td><b>"+window.kesc(e.model||"-")+"</b></td>"+
+      "<td><span class=\"pill "+statusClass+"\">"+window.kesc(e.status||"ok")+"</span></td>"+
+      "<td>"+window.knum(e.latency_ms)+"&thinsp;ms</td>"+
+      "<td>"+window.kusd(e.estimated_cost_usd)+"</td>"+
+    "</tr>";
+  }).join("");
+}
+
+(function load(){
+  // /v1/lake/stats — required for the canonical totals
+  window.kfetch("/v1/lake/stats").catch(function(){return null;}).then(function(j){
+    if(j)paintStats(j);
+  });
+  // /v1/lake/storage — driver + path
+  window.kfetch("/v1/lake/storage").catch(function(){return null;}).then(function(j){
+    if(j)paintStorage(j);
+  });
+  // /v1/lake/tail — recent events
+  var allEvents=[];
+  window.kfetch("/v1/lake/tail?limit=50").catch(function(){return null;}).then(function(j){
+    if(!j)return;
+    allEvents=(j&&j.events)||[];
+    paintTail(allEvents);
+  });
+  document.getElementById("tail-search").addEventListener("input",function(){paintTail(allEvents);});
+})();
+</script>
+</body>
+</html>
+</content>
+</invoke>

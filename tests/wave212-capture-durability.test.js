@@ -58,10 +58,16 @@ test('W212 #2 — recordCapture is async', () => {
 });
 
 test('W212 #3 — recordCapture uses insertCapture (durable path), not insert()', () => {
-  // The function body must contain await insertCapture(...)
+  // The function body must contain await insertCapture(...). W411 expanded the
+  // obs literal substantially (vendor/tokens_in/out/files/tool_calls, multi-
+  // line comments), so the 2000-char window we used pre-W411 no longer reaches
+  // the call. Slice to the next `async function ` boundary (or 8000 chars,
+  // whichever is smaller) — captures the whole body, no false positives.
   const fnIdx = ROUTER_SRC.indexOf('async function recordCapture(');
   assert.ok(fnIdx > 0);
-  const fnBody = ROUTER_SRC.slice(fnIdx, fnIdx + 2000);
+  const nextFn = ROUTER_SRC.indexOf('async function ', fnIdx + 30);
+  const end = nextFn > 0 ? Math.min(nextFn, fnIdx + 8000) : fnIdx + 8000;
+  const fnBody = ROUTER_SRC.slice(fnIdx, end);
   assert.match(fnBody, /await insertCapture\(/);
 });
 

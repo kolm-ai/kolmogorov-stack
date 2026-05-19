@@ -45,7 +45,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { loadArtifact, isArtifactPathCloudTrusted } from './artifact-runner.js';
+import { loadArtifact, isArtifactPathCloudTrusted, SUPPORTED_RUNTIME_TARGETS } from './artifact-runner.js';
 import { cidFromManifestHashes, parseCid, shortCid } from './cid.js';
 import { verifyCredential } from './provenance.js';
 import { effectiveReceiptSecret } from './env.js';
@@ -235,6 +235,77 @@ async function verifyArtifact(bundle) {
     detail: classCheck.ok
       ? `artifact_class='${declaredClass}' matches contents — ${classBadge(declaredClass)}`
       : classCheck.reason,
+  });
+
+  // 3b. Runtime target consistency (W409d). The manifest.runtime_target
+  // declares which runner the dispatcher will pick (js | wasm | native | gguf
+  // | onnx). The verifier confirms:
+  //   (a) declared target is in SUPPORTED_RUNTIME_TARGETS
+  //   (b) the bundle ships the bytes the dispatcher will need:
+  //       - js:     manifest.recipes[].source non-empty for at least one row
+  //       - wasm:   target.wasm entry present with non-zero length
+  //       - native: manifest.entrypoint.binary set + matching zip entry present
+  //                (on Windows the binary must end in .exe)
+  //       - gguf:   manifest.runtime_target_config.gguf_path set + bytes present
+  //       - onnx:   manifest.runtime_target_config.onnx_path set + bytes present
+  // Failing this is a fail (not a warn) — a manifest declaring native but
+  // missing the binary is misleading metadata and a buyer pulling the
+  // artifact would catch the failure at first run, not at verify time.
+  const declaredTarget = manifest.runtime_target || 'js';
+  const rtBundleEntries = bundle.entries || {};
+  let rtCheck;
+  if (!SUPPORTED_RUNTIME_TARGETS.includes(declaredTarget)) {
+    rtCheck = { ok: false, reason: `runtime_target=${JSON.stringify(declaredTarget)} not in [${SUPPORTED_RUNTIME_TARGETS.join(', ')}]` };
+  } else if (declaredTarget === 'js') {
+    const recipes = bundle.recipes?.recipes || [];
+    const hasSource = recipes.some((r) => r && typeof r.source === 'string' && r.source.length > 0);
+    rtCheck = hasSource
+      ? { ok: true, reason: `runtime_target=js with ${recipes.length} recipe${recipes.length === 1 ? '' : 's'}` }
+      : { ok: false, reason: 'runtime_target=js but no recipe carries a source body' };
+  } else if (declaredTarget === 'wasm') {
+    const wasmBuf = rtBundleEntries['target.wasm'];
+    rtCheck = (wasmBuf && wasmBuf.length > 0)
+      ? { ok: true, reason: `runtime_target=wasm with target.wasm (${wasmBuf.length}B)` }
+      : { ok: false, reason: 'runtime_target=wasm but bundle ships no target.wasm entry (or it is empty)' };
+  } else if (declaredTarget === 'native') {
+    const ep = manifest.entrypoint || {};
+    if (!ep.binary || typeof ep.binary !== 'string') {
+      rtCheck = { ok: false, reason: 'runtime_target=native requires manifest.entrypoint.binary' };
+    } else if (process.platform === 'win32' && !ep.binary.endsWith('.exe')) {
+      rtCheck = { ok: false, reason: `on Windows, manifest.entrypoint.binary must end in .exe (got ${ep.binary})` };
+    } else {
+      const binBuf = rtBundleEntries[ep.binary];
+      rtCheck = (binBuf && binBuf.length > 0)
+        ? { ok: true, reason: `runtime_target=native with ${ep.binary} (${binBuf.length}B)` }
+        : { ok: false, reason: `runtime_target=native references entrypoint.binary=${ep.binary} but that entry is missing from the .kolm bundle` };
+    }
+  } else if (declaredTarget === 'gguf') {
+    const cfg = manifest.runtime_target_config || {};
+    if (!cfg.gguf_path) {
+      rtCheck = { ok: false, reason: 'runtime_target=gguf requires manifest.runtime_target_config.gguf_path' };
+    } else {
+      const ggBuf = rtBundleEntries[cfg.gguf_path];
+      rtCheck = (ggBuf && ggBuf.length > 0)
+        ? { ok: true, reason: `runtime_target=gguf with ${cfg.gguf_path} (${ggBuf.length}B)` }
+        : { ok: false, reason: `runtime_target=gguf references gguf_path=${cfg.gguf_path} but that entry is missing from the .kolm bundle` };
+    }
+  } else if (declaredTarget === 'onnx') {
+    const cfg = manifest.runtime_target_config || {};
+    if (!cfg.onnx_path) {
+      rtCheck = { ok: false, reason: 'runtime_target=onnx requires manifest.runtime_target_config.onnx_path' };
+    } else {
+      const oxBuf = rtBundleEntries[cfg.onnx_path];
+      rtCheck = (oxBuf && oxBuf.length > 0)
+        ? { ok: true, reason: `runtime_target=onnx with ${cfg.onnx_path} (${oxBuf.length}B)` }
+        : { ok: false, reason: `runtime_target=onnx references onnx_path=${cfg.onnx_path} but that entry is missing from the .kolm bundle` };
+    }
+  } else {
+    rtCheck = { ok: false, reason: `unhandled runtime_target ${JSON.stringify(declaredTarget)}` };
+  }
+  checks.push({
+    name: 'Runtime target consistency',
+    status: rtCheck.ok ? 'pass' : 'fail',
+    detail: rtCheck.reason,
   });
 
   // 4. Receipt chain — every step's HMAC verifies under the same secret.
@@ -787,6 +858,65 @@ async function verifyArtifact(bundle) {
           detail: `${passed.length} native binary(ies) re-hashed and bound to manifest: ${passed.join(', ')} on ${ct.host_triple || 'unspecified host'}`,
         });
       }
+    }
+  }
+
+  // Wave 409q — top-level binaries[] integrity check. The honest manifest
+  // surfaces a `binaries` array that pins every (target, kind, recipe) tuple
+  // the build actually produced. The verifier opens the zip, finds each
+  // entry's filename, re-hashes the bytes, and confirms the match. Failure
+  // codes are stable so a CI / procurement gate can branch on them:
+  //   - native_binary_missing       : entry filename absent from the zip
+  //   - native_binary_hash_mismatch : entry present but sha256 drifts
+  //   - wasm_binary_missing         : same shape, target='wasm'
+  //   - wasm_binary_hash_mismatch   : same shape, target='wasm'
+  //
+  // An empty binaries[] is a no-op pass (no claims to check). A binaries[]
+  // claim with a missing file is the auditor signal: the artifact claims a
+  // compiled binary the .kolm doesn't actually ship.
+  const honestBinaries = Array.isArray(manifest.binaries) ? manifest.binaries : [];
+  if (honestBinaries.length > 0) {
+    const AdmZip = (await import('adm-zip')).default;
+    const zip = new AdmZip(bundle.artifact_path);
+    const entriesByName = new Map();
+    for (const e of zip.getEntries()) entriesByName.set(e.entryName, e);
+    const failures = [];
+    const passed = [];
+    for (const b of honestBinaries) {
+      const filename = b.filename;
+      const expected = b.sha256;
+      const isWasm = b.target === 'wasm';
+      const entry = entriesByName.get(filename);
+      if (!entry) {
+        const code = isWasm ? 'wasm_binary_missing' : 'native_binary_missing';
+        failures.push({ code, detail: `${b.target}/${b.kind}/${b.recipe_id}: ${filename} not bundled` });
+        continue;
+      }
+      const data = entry.getData();
+      const actual = crypto.createHash('sha256').update(data).digest('hex');
+      if (actual !== expected) {
+        const code = isWasm ? 'wasm_binary_hash_mismatch' : 'native_binary_hash_mismatch';
+        failures.push({ code, detail: `${b.target}/${b.kind}/${b.recipe_id}: ${filename} hash mismatch (claim=${expected.slice(0, 12)}…, actual=${actual.slice(0, 12)}…)` });
+      } else {
+        passed.push(`${b.target}/${b.kind}/${b.recipe_id}=${(b.size || data.length)}B`);
+      }
+    }
+    if (failures.length > 0) {
+      checks.push({
+        name: 'binaries integrity',
+        status: 'fail',
+        // The first failure's code becomes the canonical reason a verifier
+        // branches on; the detail string lists all of them.
+        reason: failures[0].code,
+        codes: failures.map(f => f.code),
+        detail: `binaries[] claims ${honestBinaries.length}; ${failures.length} failed: ${failures.map(f => f.detail).join('; ')}`,
+      });
+    } else {
+      checks.push({
+        name: 'binaries integrity',
+        status: 'pass',
+        detail: `${passed.length} binary entry(ies) re-hashed against manifest: ${passed.join(', ')}`,
+      });
     }
   }
 
@@ -2185,6 +2315,283 @@ export async function writeBinder(artifactPath, outPath) {
   fs.mkdirSync(path.dirname(path.resolve(outPath)), { recursive: true });
   fs.writeFileSync(outPath, result.html, 'utf8');
   return { ...result, out_path: outPath, bytes: Buffer.byteLength(result.html, 'utf8') };
+}
+
+// ---------------------------------------------------------------------------
+// Wave 409aa — Structured verifier helper.
+//
+// `verifyArtifactStructured(artifactPath)` wraps `loadArtifact` + `verifyArtifact`
+// and TRANSLATES the first failing check (or the loadArtifact throw) into a
+// stable structured result the auditor toolchain can branch on:
+//
+//   { ok: true,  manifest, receipt, checks }
+//   { ok: false, reason: '<enum>', detail: '<human>', failing_field: '<path>',
+//                manifest?, receipt?, checks? }
+//
+// Stable `reason` enum (Wave 409aa contract — DO NOT rename without bumping
+// the binder spec):
+//
+//   'signature_invalid'                  - signature.sig HMAC failed; Ed25519
+//                                          mismatch; sigstore bundle bad
+//   'manifest_hash_mismatch'             - CID round-trip diverges from the
+//                                          embedded manifest.cid; or a file
+//                                          inside the zip no longer hashes to
+//                                          its manifest.hashes claim
+//   'train_holdout_leakage'              - seed_provenance overlap counts > 0,
+//                                          train_hash == holdout_hash, or
+//                                          grouped_overlap_count > 0 with
+//                                          production_ready
+//   'synthetic_only_in_production'       - production_ready=true AND
+//                                          synthetic_count>0 AND
+//                                          source_seed_count==0
+//   'native_binary_missing'              - runtime_target=native but the
+//                                          entrypoint binary is missing /
+//                                          empty / wrong extension
+//   'production_check_failed_on_install' - any of the productionReady() gates
+//                                          fails on an artifact whose seed
+//                                          provenance claims production_ready
+//
+// Implementation note: the structured verifier prefers loud `loadArtifact`
+// throws (KOLM_E_SIGNATURE_INVALID becomes `signature_invalid`) over the
+// finer-grained check rows; if loadArtifact succeeds, the first failing
+// `checks[]` row is translated by name; if no rows fail but productionReady
+// rejects, `production_check_failed_on_install` fires.
+const STRUCTURED_CHECK_MAP = [
+  // Order matters: most-specific failure first. Each tuple is
+  //   [check name substring or regex, enum, failing_field]
+  [/^Manifest signature/i,                 'signature_invalid',          'signature.sig'],
+  [/^Receipt signature \(Ed25519/i,        'signature_invalid',          'receipt.signature_ed25519'],
+  [/^Receipt signature \(Sigstore/i,       'signature_invalid',          'receipt.signature_sigstore'],
+  [/^Audit chain/i,                        'signature_invalid',          'receipt.chain'],
+  [/^Content identifier \(CID\)/i,         'manifest_hash_mismatch',     'manifest.cid'],
+  [/^Manifest hashes/i,                    'manifest_hash_mismatch',     'manifest.hashes'],
+  [/^Artifact class consistency/i,         'manifest_hash_mismatch',     'manifest.artifact_class'],
+  [/^Runtime target/i,                     'native_binary_missing',      'manifest.runtime_target'],
+  [/^Native binary/i,                      'native_binary_missing',      'manifest.entrypoint.binary'],
+  [/^Seed gate/i,                          'train_holdout_leakage',      'manifest.seed_provenance'],
+  [/^Credential/i,                         'signature_invalid',          'credential.json'],
+];
+
+function translateCheck(check) {
+  for (const [pat, reason, failing_field] of STRUCTURED_CHECK_MAP) {
+    if (pat.test(check.name)) {
+      return { reason, failing_field, detail: check.detail || check.name };
+    }
+  }
+  // Fallback: any unmapped failure is a manifest_hash_mismatch (something
+  // about the artifact didn't reconcile). Keeps the enum closed.
+  return {
+    reason: 'manifest_hash_mismatch',
+    failing_field: check.name,
+    detail: check.detail || check.name,
+  };
+}
+
+/**
+ * Structured verifier — Wave 409aa contract.
+ *
+ * @param {string} artifactPath - path to a .kolm file
+ * @param {object} [opts]
+ * @param {boolean} [opts.runProductionCheck=true] - run productionReady()
+ *        translation for the `production_check_failed_on_install` case
+ * @returns {Promise<object>} {ok, reason?, detail?, failing_field?,
+ *        manifest?, receipt?, checks?}
+ */
+export async function verifyArtifactStructured(artifactPath, opts = {}) {
+  const runProductionCheck = opts.runProductionCheck !== false;
+  // Step 1 — load. loadArtifact throws KOLM_E_SIGNATURE_INVALID for HMAC
+  // mismatch; translate that immediately so the caller doesn't have to.
+  let bundle;
+  try {
+    bundle = loadArtifact(artifactPath);
+  } catch (e) {
+    const code = (e && (e.code || e.KOLM_CODE)) || '';
+    const msg = String(e && e.message || e);
+    if (code === 'KOLM_E_SIGNATURE_INVALID' || /signature invalid/i.test(msg)) {
+      return {
+        ok: false,
+        reason: 'signature_invalid',
+        detail: msg,
+        failing_field: 'signature.sig',
+      };
+    }
+    // CID round-trip is computed AFTER load; a load-time throw that is not
+    // a signature failure (zip corrupt, file missing) maps to a manifest
+    // hash mismatch — the artifact bytes can no longer be reconciled.
+    return {
+      ok: false,
+      reason: 'manifest_hash_mismatch',
+      detail: msg,
+      failing_field: 'manifest.json',
+    };
+  }
+
+  // Step 2 — manifest-file-hash gate. Re-hash every file in the zip and
+  // compare against manifest.hashes. The CID-round-trip check (#2) covers
+  // the rolled-up CID, but the auditor mandate is more specific: a verifier
+  // must reject a SINGLE file mutation even when the manifest itself is
+  // also tampered to recompute a fresh CID. We re-hash here so the mutate-
+  // a-zip-entry test deterministically returns `manifest_hash_mismatch`
+  // regardless of whether the tamperer also rewrote the CID.
+  const manifest = bundle.manifest;
+  if (manifest && manifest.hashes) {
+    const fileCheck = recheckBundledFileHashes(bundle, manifest.hashes);
+    if (!fileCheck.ok) {
+      return {
+        ok: false,
+        reason: 'manifest_hash_mismatch',
+        detail: fileCheck.reason,
+        failing_field: fileCheck.failing_field,
+        manifest,
+        receipt: bundle.receipt,
+      };
+    }
+  }
+
+  // Step 3 — run the full verifyArtifact() check matrix.
+  const { checks, credential } = await verifyArtifact(bundle);
+  const failed = checks.find((c) => c.status === 'fail');
+  if (failed) {
+    const tx = translateCheck(failed);
+    // Promote the seed-gate row to `synthetic_only_in_production` when the
+    // seed_provenance row is what failed AND the seed signature matches the
+    // explicit synthetic-only case.
+    const sp = manifest && manifest.seed_provenance;
+    if (tx.reason === 'train_holdout_leakage' && sp
+        && sp.production_ready === true
+        && (sp.synthetic_count || 0) > 0
+        && (sp.source_seed_count || 0) === 0) {
+      tx.reason = 'synthetic_only_in_production';
+      tx.failing_field = 'manifest.seed_provenance.synthetic_count';
+    }
+    return {
+      ok: false,
+      reason: tx.reason,
+      detail: tx.detail,
+      failing_field: tx.failing_field,
+      manifest,
+      receipt: bundle.receipt,
+      checks,
+    };
+  }
+
+  // Step 4 — productionReady() cross-check. An artifact whose seed_provenance
+  // claims production_ready=true MUST also pass the runtime gates (eval
+  // parity, durability, executable bundle). If any one fails we surface
+  // `production_check_failed_on_install` — the marketplace-install path
+  // refuses to ship the artifact in that case.
+  if (runProductionCheck && manifest && manifest.seed_provenance && manifest.seed_provenance.production_ready === true) {
+    let verdict = null;
+    try {
+      const mod = await import('./production-ready.js');
+      verdict = await mod.productionReady(artifactPath);
+    } catch (_e) {
+      // production-ready module not importable in this context; skip.
+    }
+    if (verdict && verdict.ok === false) {
+      // Identify the failing gate. Promote `synthetic_only_in_production`
+      // when seed_provenance gate fired with that explicit `kind`.
+      const sp = verdict.gates && verdict.gates.seed_provenance;
+      if (sp && sp.ok === false && sp.kind === 'synthetic_only_in_production') {
+        return {
+          ok: false,
+          reason: 'synthetic_only_in_production',
+          detail: sp.reason,
+          failing_field: 'manifest.seed_provenance.synthetic_count',
+          manifest,
+          receipt: bundle.receipt,
+          checks,
+          verdict,
+        };
+      }
+      const failingGate = Object.entries(verdict.gates || {}).find(([, g]) => g && g.ok === false);
+      return {
+        ok: false,
+        reason: 'production_check_failed_on_install',
+        detail: failingGate
+          ? `${failingGate[0]}: ${failingGate[1].reason || 'gate failed'}`
+          : (verdict.reasons || []).join('; ') || 'productionReady() rejected',
+        failing_field: failingGate ? `gates.${failingGate[0]}` : 'gates',
+        manifest,
+        receipt: bundle.receipt,
+        checks,
+        verdict,
+      };
+    }
+  }
+
+  return {
+    ok: true,
+    manifest,
+    receipt: bundle.receipt,
+    credential,
+    checks,
+  };
+}
+
+// Re-hash every file inside the .kolm bundle against the manifest.hashes
+// claim. Returns {ok:true} when every slot matches its declared sha256, or
+// {ok:false, reason, failing_field} on first mismatch. Skips the slots that
+// the manifest deliberately leaves empty (EMPTY_SHA — recognised by being
+// the sha256 of a zero-byte buffer).
+function recheckBundledFileHashes(bundle, hashes) {
+  const entries = bundle.entries || {};
+  const sha = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
+  const EMPTY = crypto.createHash('sha256').update(Buffer.alloc(0)).digest('hex');
+  // Map manifest.hashes keys to the zip entry name.
+  const slotMap = {
+    model_pointer: 'model.gguf',
+    recipes_json: 'recipes.json',
+    lora_bin: 'lora.bin',
+    index_bin: 'index.sqlite-vec',
+    evals_json: 'evals.json',
+    recipe_bundle_mjs: 'recipe.bundle.mjs',
+    workflow_ir: 'workflow_ir.json',
+    attestation_report: 'attestation_report.json',
+  };
+  for (const k of Object.keys(slotMap)) {
+    const declared = hashes[k];
+    if (typeof declared !== 'string' || declared.length < 32) continue;
+    if (declared === EMPTY) continue; // empty slot — file may be absent
+    const entry = entries[slotMap[k]];
+    if (!entry) {
+      return {
+        ok: false,
+        reason: `manifest.hashes.${k}=${declared.slice(0, 16)}… but ${slotMap[k]} is missing from the zip`,
+        failing_field: `manifest.hashes.${k}`,
+      };
+    }
+    const actual = sha(entry);
+    if (actual !== declared) {
+      return {
+        ok: false,
+        reason: `manifest.hashes.${k} mismatch: declared ${declared.slice(0, 16)}…, actual ${actual.slice(0, 16)}…`,
+        failing_field: `manifest.hashes.${k}`,
+      };
+    }
+  }
+  // Extra files (sorted object).
+  if (hashes.extra_files && typeof hashes.extra_files === 'object') {
+    for (const [fn, declared] of Object.entries(hashes.extra_files)) {
+      const entry = entries[fn];
+      if (!entry) {
+        return {
+          ok: false,
+          reason: `manifest.hashes.extra_files['${fn}']=${String(declared).slice(0, 16)}… but ${fn} is missing from the zip`,
+          failing_field: `manifest.hashes.extra_files.${fn}`,
+        };
+      }
+      const actual = sha(entry);
+      if (actual !== declared) {
+        return {
+          ok: false,
+          reason: `manifest.hashes.extra_files['${fn}'] mismatch: declared ${String(declared).slice(0, 16)}…, actual ${actual.slice(0, 16)}…`,
+          failing_field: `manifest.hashes.extra_files.${fn}`,
+        };
+      }
+    }
+  }
+  return { ok: true };
 }
 
 export const BINDER = { spec: BINDER_SPEC };

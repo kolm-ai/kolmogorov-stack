@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>HIPAA-compliant AI on your hospital hardware · kolm.ai</title>
-<meta name="description" content="PHI stays inside your BAA scope. kolm compiles your task into a signed local artifact with HMAC receipts. No cloud calls at run time.">
+<meta name="description" content="kolm compiles approved clinical tasks into signed .kolm artifacts that run inside the BAA-scoped hosts your team controls, and every inference returns an Ed25519-signed receipt for audit.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
@@ -180,7 +180,7 @@
     {
       "@type": "Service",
       "name": "kolm for Healthcare · signed local AI artifact architecture",
-      "description": "Architecture for healthcare teams evaluating PHI-sensitive AI workflows: signed .kolm artifacts, HMAC receipts, and Enterprise BAA review path. Customer-controlled deployment required for PHI.",
+      "description": "Architecture for healthcare teams evaluating PHI-sensitive AI workflows: signed .kolm artifacts, tamper-evident receipts, and Enterprise BAA review path. Customer-controlled deployment required for PHI.",
       "provider": {
         "@type": "Organization",
         "name": "Kolmogorov",
@@ -218,13 +218,156 @@
     <div class="left">
       <a href="/" class="brand" aria-label="kolm"><span>kolm</span>
       </a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
     </div>
     <div class="right">
       <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
@@ -239,12 +382,12 @@
   <div class="wrap">
     <div class="hero-eyebrow"><span class="he-dot"></span>Healthcare . PHI stays in your control boundary</div>
     <h1>Healthcare AI as<br><span class="tone">a signed, local artifact.</span></h1>
-    <p class="lede"><b>kolm</b> compiles approved clinical tasks into signed <code>.kolm</code> binaries that run inside the security boundary your team controls. PHI stays on hosts you control. Every output carries a manifest, an eval set, and an HMAC-bound receipt your auditor can re-verify with the tenant receipt secret you archived at compile time.</p>
+    <p class="lede"><b>kolm</b> compiles approved clinical tasks into signed <code>.kolm</code> binaries that run inside the security boundary your team controls. PHI stays on hosts you control. Every output carries a manifest, an eval set, and a tamper-evident receipt your auditor can re-verify with the tenant receipt secret you archived at compile time.</p>
     <div class="cta-row">
       <a href="/healthcare/assessment" class="btn-primary">60-second HIPAA readiness check</a>
       <a href="mailto:founders@kolm.ai?subject=kolm%20healthcare%20compliance%20walkthrough" class="btn-link">Book a compliance walkthrough <span aria-hidden="true">&rarr;</span></a>
     </div>
-    <div style="margin-top:14px;display:flex;gap:14px;flex-wrap:wrap"><a href="/baa" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">BAA &amp; PHI Schedule &rarr;</a><a href="/subprocessors" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">Subprocessors &rarr;</a><a href="/health-insurance" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">For payers &rarr;</a><a href="/cookbook/soap-redactor" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">SOAP redactor recipe &rarr;</a><a href="/k-score" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">K-score gate &rarr;</a></div>
+    <div style="margin-top:14px;display:flex;gap:14px;flex-wrap:wrap"><a href="/baa" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">BAA &amp; PHI Schedule &rarr;</a><a href="/subprocessors" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">Subprocessors &rarr;</a><a href="/health-insurance" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">For payers &rarr;</a><a href="/cookbook/soap-redactor" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">SOAP redactor recipe &rarr;</a><a href="/k-score" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">Accuracy gate &rarr;</a></div>
   </div>
 </section>
 
@@ -293,7 +436,7 @@
       </div>
       <div class="trip">
         <div class="icn">-</div>
-        <h3>HMAC-chained receipts.</h3>
+        <h3>Tamper-evident receipts.</h3>
         <p>Every output is reproducible. Every layer is content-addressed. Tampering with any layer breaks the chain. Useful at audit, defensible at deposition.</p>
       </div>
     </div>
@@ -310,7 +453,7 @@
       <div class="hd"><span class="dot"></span><span>compile pilot &middot; customer-controlled environment &middot; signed artifact</span></div>
       <div class="body">
         <h3>From institutional examples to a signed binary on the tablet.</h3>
-        <p class="note">Compile happens once per quarter against the institution's de-identified gold set. The artifact is signed, K-scored, and pushed to the MDM for distribution. Deployment is a single signed file, not a service.</p>
+        <p class="note">Compile happens once per quarter against the institution's de-identified gold set. The artifact is signed, scored against the held-out set, and pushed to the MDM for distribution. Deployment is a single signed file, not a service.</p>
         <div class="steps">
           <div class="step">
             <div class="n">01 - gather</div>
@@ -320,12 +463,12 @@
           <div class="step">
             <div class="n">02 - compile</div>
             <h4>kolm compile</h4>
-            <p>Synthesize a verifier from your examples. Specialize a small model on your data. Index your private context. Sign. K-score gate enforces the ship floor.</p>
+            <p>Synthesize a verifier from your examples. Specialize a small model on your data. Index your private context. Sign. An accuracy gate enforces the ship floor.</p>
           </div>
           <div class="step">
             <div class="n">03 - review</div>
             <h4>Clinical sign-off</h4>
-            <p>Hold-out evaluation report goes to the clinical informatics committee. K-score breakdown is part of the artifact, defensible at audit.</p>
+            <p>Hold-out evaluation report goes to the clinical informatics committee. The accuracy breakdown is part of the artifact, defensible at audit.</p>
           </div>
           <div class="step">
             <div class="n">04 - ship</div>
@@ -342,21 +485,21 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">04</span><span>Reference artifacts</span></div>
     <h2>Three signed <span class="tone">.kolm</span> starting points.</h2>
-    <p class="sec-lede">Pre-built example artifacts you can fork, recompile against your own gold set, and ship. Each is a signed file with a public K-score and a matching cookbook recipe.</p>
+    <p class="sec-lede">Pre-built example artifacts you can fork, recompile against your own gold set, and ship. Each is a signed file with a public accuracy score and a matching cookbook recipe.</p>
     <div class="compl-row">
       <div class="item">
         <div class="nm" style="font-family:var(--mono)">hipaa-summarizer.kolm</div>
-        <div class="v acc">K-score 0.86 &middot; 84&thinsp;MB</div>
+        <div class="v acc">86% on the gold set &middot; 84&thinsp;MB</div>
         <p>Drafts SOAP summaries from de-identified clinical notes. Verifier penalizes any token that looks like a phone, MRN, or DOB. <a href="/cookbook/hipaa-summarizer" style="color:var(--accent)">Recipe &rarr;</a></p>
       </div>
       <div class="item">
         <div class="nm" style="font-family:var(--mono)">intake-triage.kolm</div>
-        <div class="v acc">K-score 0.82 &middot; 91&thinsp;MB</div>
+        <div class="v acc">82% on the gold set &middot; 91&thinsp;MB</div>
         <p>Routes intake forms by urgency band. Compiled against held-out triage outcomes. Runs offline on the front-desk tablet. <a href="/cookbook/intake-triage" style="color:var(--accent)">Recipe &rarr;</a></p>
       </div>
       <div class="item">
         <div class="nm" style="font-family:var(--mono)">drug-name-redact.kolm</div>
-        <div class="v acc">K-score 0.91 &middot; 38&thinsp;MB</div>
+        <div class="v acc">91% on the gold set &middot; 38&thinsp;MB</div>
         <p>Strips proprietary drug names from patient-facing copy while preserving generic equivalents. Local-only. <a href="/cookbook/drug-name-redact" style="color:var(--accent)">Recipe &rarr;</a></p>
       </div>
     </div>
@@ -367,7 +510,7 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">05</span><span>Payer use-cases</span></div>
     <h2>Production patterns for<br><span class="tone">health insurance.</span></h2>
-    <p class="sec-lede">Each workflow below is a signed <code>.kolm</code> artifact that runs in your environment or on the workstation. PHI, claims data, and benefit-plan docs stay inside the auditor's boundary. Every output ships with a receipt that ties the model version, the input hash, and the K-score to the determination.</p>
+    <p class="sec-lede">Each workflow below is a signed <code>.kolm</code> artifact that runs in your environment or on the workstation. PHI, claims data, and benefit-plan docs stay inside the auditor's boundary. Every output ships with a receipt that ties the model version, the input hash, and the accuracy score to the determination.</p>
 
     <div class="triplets" style="margin-top:8px">
       <div class="trip">
@@ -388,7 +531,7 @@
       <div class="trip">
         <div class="icn">-</div>
         <h3>Member services AI.</h3>
-        <p>Answers benefit questions from your SBC/EOC documents on the rep's workstation. Never sends member PHI to a frontier API. K-score gate enforces a deflection-rate floor before the artifact reaches a member-facing channel.</p>
+        <p>Answers benefit questions from your SBC/EOC documents on the rep's workstation. Never sends member PHI to a frontier API. An accuracy gate enforces a deflection-rate floor before the artifact reaches a member-facing channel.</p>
       </div>
       <div class="trip">
         <div class="icn">-</div>
@@ -420,13 +563,13 @@
       </div>
       <div class="item">
         <div class="nm">EU AI Act</div>
-        <div class="v">documentation path 2027 Q2</div>
-        <p>Artifact logs, verifier gates, and receipts support technical documentation. Risk tier remains use-case-specific.</p>
+        <div class="v">documentation path</div>
+        <p>Artifact logs, verifier gates, and receipts support technical documentation. Risk tier remains use-case-specific. Attestation timeline tracked on <a href="/security#roadmap" style="color:var(--accent);text-decoration:none;">/security</a>.</p>
       </div>
       <div class="item">
         <div class="nm">GDPR - UK GDPR</div>
         <div class="v acc">DPA path</div>
-        <p>EU-resident compile region planned for Pro and Enterprise. DPA and DPIA templates prepared for review.</p>
+        <p>DPA and DPIA templates prepared for review. EU-resident compile region tracked on <a href="/security#roadmap" style="color:var(--accent);text-decoration:none;">/security</a>.</p>
       </div>
     </div>
   </div>
@@ -474,7 +617,7 @@
     <div class="w373-hc-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:22px">
       <div class="trip" data-w373="hc-audit-log">
         <h3>Audit log + receipt chain.</h3>
-        <p>Every redaction emits a typed event into your audit log: span offsets, detector class, placeholder, model version, K-score. Events are HMAC-chained so tampering breaks verification.</p>
+        <p>Every redaction emits a typed event into your audit log: span offsets, detector class, placeholder, model version, accuracy score. Events are hash-chained so tampering breaks verification.</p>
       </div>
       <div class="trip" data-w373="hc-safe-harbor">
         <h3>HIPAA Safe Harbor mapping.</h3>
@@ -482,7 +625,7 @@
       </div>
       <div class="trip" data-w373="hc-claims-redactor">
         <h3 style="font-family:var(--mono);font-size:15px"><code>claims-redactor.kolm</code></h3>
-        <p>Production reference artifact, K=0.985 on a 60-seed gold set with 21 PHI examples. Signed, K-scored, and verifiable. <a href="/cookbook/phi-redactor" style="color:var(--accent)">Recipe &rarr;</a></p>
+        <p>Production reference artifact, 98.5% on a 60-seed gold set with 21 PHI examples. Signed, scored on the held-out set, and verifiable. <a href="/cookbook/phi-redactor" style="color:var(--accent)">Recipe &rarr;</a></p>
       </div>
     </div>
   </div>

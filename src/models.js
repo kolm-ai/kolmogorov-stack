@@ -21,6 +21,7 @@
 
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { isMobileDevice } from './devices.js';
 
 export const MODELS = [
   // ----- Qwen 2.5 family (DEFAULT FAMILY) -----
@@ -564,6 +565,12 @@ export function recommend(reqs = {}) {
     vram = reqs.target_device.vram_gb;
   }
 
+  // W390: detect a mobile target device. When the recommender sees a phone
+  // profile we treat use==='mobile' as implied even if the caller didn't pass
+  // --use. This keeps `kolm models recommend --device iphone-15-pro` honest:
+  // a phone is a phone whether or not the user spelled out the use case.
+  const targetIsMobile = isMobileDevice(reqs.target_device);
+
   // Score every candidate; pick max.
   const scored = MODELS.map(m => {
     let s = 0;
@@ -576,8 +583,15 @@ export function recommend(reqs = {}) {
     if (requirePermissive && !PERMISSIVE_LICENSES.has(m.license)) s -= 1.0;
 
     // vram fit (4-bit): hard fail if doesn't fit; soft prefer larger.
+    // W390: on a mobile target_device, use the device-aware fitsOn() instead
+    // of the naive vram_gb compare. fitsOn() applies the sliding-window KV
+    // headroom (0.25-0.5GB) that phone engines actually consume, rather than
+    // the desktop 2GB paged-attention assumption.
     if (vram != null) {
-      if (m.vram_gb_4bit > vram) s -= 1.0;
+      const deviceFitsHere = reqs.target_device
+        ? fitsOn(m.id, reqs.target_device)
+        : (m.vram_gb_4bit <= vram);
+      if (!deviceFitsHere) s -= 1.0;
       else s += 0.20 * (1 - (vram - m.vram_gb_4bit) / Math.max(vram, 1));
     } else {
       // No vram constraint: prefer 3B class.
@@ -604,11 +618,15 @@ export function recommend(reqs = {}) {
     // MLC, llama.cpp arm64) before it gets set. Bonus is large enough
     // (+0.40) to overcome Apache-vs-Gemma license delta (0.30 vs 0.15).
     if (use === 'mobile' && m.mobile_friendly === true) s += 0.40;
+    // W390: same boost when target_device is mobile-class, regardless of
+    // whether --use mobile was passed. Catches `--device iphone-15-pro` w/o
+    // an explicit use flag.
+    if (targetIsMobile && m.mobile_friendly === true) s += 0.40;
 
-    // device fit gating: hard-fail if won't fit on target_device.
-    if (reqs.target_device) {
-      if (!fitsOn(m.id, reqs.target_device)) s -= 1.0;
-    }
+    // device fit gating handled above when vram is derived. When the caller
+    // passed a target_device but no vram (already resolved above), the
+    // fitsOn check is already part of the vram block. Train gating is a
+    // separate hard rule.
     if (reqs.train_device) {
       if (!trainOn(m.id, reqs.train_device)) s -= 1.0;
     }
@@ -621,25 +639,50 @@ export function recommend(reqs = {}) {
   const fallback = scored[0];
   const pickRow = viable[0] || fallback;
 
+  const fitExplain = reqs.target_device
+    ? explainFit(pickRow.model.id, reqs.target_device)
+    : explainFit(pickRow.model.id, null);
+
+  const summaryParts = [
+    `memory_required_gb: ${fitExplain.memory_required_gb != null ? fitExplain.memory_required_gb.toFixed(2) : 'n/a'}`,
+  ];
+  if (reqs.target_device) {
+    summaryParts.push(`device_budget_gb: ${fitExplain.device_budget_gb}`);
+    if (fitExplain.device_effective_gb != null) {
+      summaryParts.push(`device_effective_gb: ${fitExplain.device_effective_gb}`);
+    }
+  }
+  summaryParts.push(`picked: ${pickRow.model.id}`);
+  summaryParts.push(fitExplain.ok ? 'fit_ok' : 'fit_FAILED');
+  const summary = summaryParts.join(' / ');
+
   return {
     pick: pickRow.model.id,
     explicit_tier_pick: explicit || null,
     top: scored.slice(0, 5).map(s => ({ id: s.model.id, score: s.score })),
     device_fit: reqs.target_device ? fitsOn(pickRow.model.id, reqs.target_device) : null,
     device_train: reqs.train_device ? trainOn(pickRow.model.id, reqs.train_device) : null,
+    device_fit_explanation: fitExplain.reason,
+    fit: fitExplain,
+    summary,
   };
 }
 
 // Does a model fit on a given device at 4-bit (inference)?
 // Headroom for KV cache + activations is tier-dependent:
 //   - desktop / server / training: +2.0GB (paged-attention KV at full ctx)
-//   - mobile (iOS Metal, Android MediaPipe, MLC, llama.cpp arm64): +0.5GB
-//     mobile engines use sliding-window KV (typ. 2-4k window) — far smaller
-//     than the desktop assumption. An iPhone 15 Pro with 4GB usable VRAM
-//     can host Gemma 3n E2B (2.5GB) with this rule.
+//   - mobile (iOS Metal, Android MediaPipe, MLC, AICore, llama.cpp arm64):
+//     +0.5GB. Mobile engines use sliding-window KV (typ. 2-4k window) which
+//     is far smaller than the desktop assumption. An iPhone 15 Pro with 6GB
+//     usable VRAM can host Gemma 3n E2B (2.5GB) with this rule.
 //   - mobile + mobile_friendly:true: +0.25GB. These models are explicitly
 //     designed for tight envelopes (Per-Layer Embeddings, selective
 //     activation) and ship with quantized KV configs.
+//
+// W390: detect mobile by runtime/mobile_profile (isMobileDevice). The W211
+// device-class taxonomy uses 'inference' for both laptops and phones, so the
+// previous `device.class === 'mobile'` check never fired on real iphone /
+// pixel rows, leaving Gemma 3n E2B stranded outside the fit gate.
 export function fitsOn(modelId, device) {
   const m = info(modelId);
   if (!m || !device) return false;
@@ -650,10 +693,55 @@ export function fitsOn(modelId, device) {
     return need <= (device.cpu_ram_gb_min || 8);
   }
   let headroom = 2;
-  if (device.class === 'mobile') {
+  if (isMobileDevice(device)) {
     headroom = m.mobile_friendly === true ? 0.25 : 0.5;
   }
-  return m.vram_gb_4bit + headroom <= device.vram_gb;
+  // W390: on mobile devices, the realistic working set is effective_ram_gb
+  // (post-iOS / post-Android overhead, typically ~3-4GB on 8GB phones). The
+  // vram_gb budget is the optimistic headline number; effective_ram_gb is
+  // what an LLM actually gets. If effective_ram_gb is set we gate on it.
+  // Outside mobile, vram_gb is already physical-VRAM-accurate.
+  const budget = (isMobileDevice(device) && device.effective_ram_gb != null)
+    ? device.effective_ram_gb
+    : device.vram_gb;
+  return m.vram_gb_4bit + headroom <= budget;
+}
+
+// Compute the per-pick fit reasoning: required memory, available headroom,
+// and a 1-line human-readable explanation. Used by recommend() to surface the
+// "why" of every choice in CLI + JSON output.
+export function explainFit(modelId, device) {
+  const m = info(modelId);
+  if (!m) return { ok: false, reason: `unknown model ${modelId}` };
+  if (!device) {
+    return {
+      ok: true,
+      memory_required_gb: m.vram_gb_4bit,
+      reason: `${m.id} needs ${m.vram_gb_4bit.toFixed(1)}GB at q4; no device constraint applied`,
+    };
+  }
+  const isMobile = isMobileDevice(device);
+  const headroom = isMobile
+    ? (m.mobile_friendly === true ? 0.25 : 0.5)
+    : 2;
+  const required = m.vram_gb_4bit + headroom;
+  const headline = device.vram_gb;
+  const effective = device.effective_ram_gb != null ? device.effective_ram_gb : null;
+  const available = (isMobile && effective != null) ? effective : headline;
+  const ok = required <= available;
+  const budgetLabel = (isMobile && effective != null) ? `${available}GB effective` : `${available}GB`;
+  const fitsBecause = ok
+    ? `fits because ${m.id} q4 + ${headroom}GB KV headroom (${isMobile ? 'mobile sliding-window' : 'desktop paged-attention'}) = ${required.toFixed(2)}GB <= ${budgetLabel} device budget`
+    : `does NOT fit: ${m.id} q4 + ${headroom}GB KV headroom = ${required.toFixed(2)}GB > ${budgetLabel} device budget`;
+  return {
+    ok,
+    memory_required_gb: Number(required.toFixed(2)),
+    device_budget_gb: available,
+    device_effective_gb: effective,
+    headroom_gb: headroom,
+    mobile_path: isMobile,
+    reason: fitsBecause,
+  };
 }
 
 // Can we TRAIN this model on the given device at QLoRA?

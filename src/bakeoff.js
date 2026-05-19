@@ -12,9 +12,19 @@
 //   - <artifact>  : routed via src/artifact-runner.js (path ends .kolm)
 //
 // Returns ranked array {name, pass_rate, avg_latency_ms, avg_cost_usd,
-// score_per_dollar, recommended}. We pick `recommended` as the highest
-// score_per_dollar (with a small bias toward >=90% pass rate so a 1% pass
-// rate doesn't win on cost alone).
+// score_per_dollar, recommended, privacy_class, deterministic}. We pick
+// `recommended` as the highest score_per_dollar (with a small bias toward
+// >=90% pass rate so a 1% pass rate doesn't win on cost alone).
+//
+// W409p — adds privacy_class + deterministic columns + a recommendation
+// verdict from a closed enum {keep_frontier, distill, compile_rule,
+// use_local_backbone, needs_human} computed from the four columns:
+//
+//   keep_frontier      -> recommended is a frontier model (best q/$ at scale)
+//   distill            -> a smaller model passes >= 0.85 — distill candidate
+//   compile_rule       -> the synthesized rule alone passes >= 0.85
+//   use_local_backbone -> the local backbone (gemma/qwen/phi) passes >= 0.85
+//   needs_human        -> nothing clears the 0.85 gate — escalate to labeling
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -53,6 +63,75 @@ export const DEFAULT_CONTESTANTS = [
   'gpt-4o-mini',
 ];
 
+// W409p — privacy class lookup per contestant. local-* contestants are
+// 'local' (PHI stays on device). Frontier API calls leak to the vendor.
+// 'public' = no data leaves device (cache / rule). 'frontier' = leaks to
+// vendor over public internet. 'byo-vendor' = leaks only to vendor under
+// customer's BAA/DPA.
+export const PRIVACY_CLASSES = {
+  cache: 'public',
+  rule: 'public',
+  prompt_only: 'frontier',
+  'gemma-3n-e2b': 'local',
+  'qwen-0.5b': 'local',
+  'phi-mini': 'local',
+  'claude-haiku-4-5': 'frontier',
+  'gpt-4o-mini': 'frontier',
+  'gpt-4o': 'frontier',
+  'claude-opus-4-7': 'frontier',
+};
+
+// W409p — deterministic flag per contestant family. cache + rule + sampled
+// local artifacts are deterministic. Frontier API calls aren't (temperature
+// 0 helps but the vendor still mutates models without notice).
+export const DETERMINISM_TABLE = {
+  cache: true,
+  rule: true,
+  prompt_only: false,
+  'gemma-3n-e2b': true,    // local + seeded inference
+  'qwen-0.5b': true,
+  'phi-mini': true,
+  'claude-haiku-4-5': false,
+  'gpt-4o-mini': false,
+  'gpt-4o': false,
+  'claude-opus-4-7': false,
+};
+
+// W409p — closed enum of recommendation verdicts. Tests assert the verdict
+// is one of these labels (never a free-text string).
+export const RECOMMENDATION_VERDICTS = [
+  'keep_frontier',
+  'distill',
+  'compile_rule',
+  'use_local_backbone',
+  'needs_human',
+];
+
+// Classify a contestant name into one of {public, local, frontier, byo-vendor,
+// artifact, unknown}. Used both for privacy_class on the row and the
+// recommendation enum decision.
+export function classifyPrivacy(name) {
+  if (!name) return 'unknown';
+  if (PRIVACY_CLASSES[name]) return PRIVACY_CLASSES[name];
+  if (typeof name === 'string') {
+    if (name.endsWith('.kolm') || name.startsWith('artifact:')) return 'local';
+    if (name.startsWith('local-')) return 'local';
+    if (/^(claude|gpt|gemini|mistral|anthropic|openai)/i.test(name)) return 'frontier';
+    if (/^(gemma|qwen|phi|llama|deepseek|mixtral)/i.test(name)) return 'local';
+  }
+  return 'unknown';
+}
+
+export function classifyDeterminism(name) {
+  if (!name) return false;
+  if (Object.prototype.hasOwnProperty.call(DETERMINISM_TABLE, name)) return DETERMINISM_TABLE[name];
+  if (typeof name === 'string') {
+    if (name.endsWith('.kolm') || name.startsWith('artifact:')) return true;
+    if (name.startsWith('local-')) return true;
+  }
+  return false;
+}
+
 function sha(s) { return crypto.createHash('sha256').update(String(s)).digest('hex'); }
 
 function tokenize(s) {
@@ -68,7 +147,25 @@ function jaccard(a, b) {
   return inter / (A.size + B.size - inter);
 }
 
-function loadDatasetRows(datasetId, opts) {
+// W397 - hydrate ~/.kolm/datasets/ds_*.json (event-ids only) into inline
+// {input, output} rows by reading the event-store. This closes the gap that
+// W396 worked around via curated-template fallback in cli/kolm.js cmdBakeoff.
+//
+// Resolution order:
+//   1. opts.rows array        -> use directly
+//   2. datasetId is array     -> use directly
+//   3. datasetId is file path -> parse JSON / JSONL / single-object record
+//   4. datasetId is ds_*      -> ~/.kolm/datasets/<id>.json (W369 dataset-workbench)
+//                                with event-store hydration, falling back to
+//                                ~/.kolm/simulations/<id>.json (legacy sim layout)
+//   5. datasetId is namespace -> most-recent ds_*.json in ~/.kolm/datasets/
+//                                whose record.namespace === datasetId, then
+//                                hydrate as above
+//
+// Hydration policy: prefer holdout_ids (so bakeoff evals on a real held-out
+// split), fall back to source_event_ids when holdout is empty (a fresh dataset
+// before splitDataset() ran, or train_ratio=1).
+async function loadDatasetRows(datasetId, opts) {
   if (Array.isArray(opts && opts.rows) && opts.rows.length) return opts.rows;
   if (Array.isArray(datasetId)) return datasetId;
   if (typeof datasetId === 'string' && fs.existsSync(datasetId)) {
@@ -81,6 +178,9 @@ function loadDatasetRows(datasetId, opts) {
         const j = JSON.parse(text);
         if (Array.isArray(j.holdout) && j.holdout.length) return j.holdout;
         if (Array.isArray(j.rows)) return j.rows;
+        // W397: file is a dataset-workbench record -> hydrate via event-store.
+        const hydrated = await _hydrateFromRecord(j);
+        if (hydrated && hydrated.length) return hydrated;
       } catch { /* fall through to jsonl */ }
     }
     // JSONL: one JSON object per line.
@@ -89,14 +189,86 @@ function loadDatasetRows(datasetId, opts) {
     }).filter(Boolean);
   }
   if (typeof datasetId === 'string' && datasetId.startsWith('ds_')) {
-    const p = path.join(os.homedir(), '.kolm', 'simulations', datasetId + '.json');
-    if (fs.existsSync(p)) {
-      const j = JSON.parse(fs.readFileSync(p, 'utf8'));
-      if (Array.isArray(j.holdout) && j.holdout.length) return j.holdout;
-      if (Array.isArray(j.rows)) return j.rows;
+    // W369 dataset-workbench location (event-id record).
+    const wb = path.join(_kolmBase(), 'datasets', datasetId + '.json');
+    if (fs.existsSync(wb)) {
+      try {
+        const j = JSON.parse(fs.readFileSync(wb, 'utf8'));
+        const hydrated = await _hydrateFromRecord(j);
+        if (hydrated && hydrated.length) return hydrated;
+      } catch { /* fall through */ }
+    }
+    // Legacy ~/.kolm/simulations layout (inline-rows record).
+    const sim = path.join(_kolmBase(), 'simulations', datasetId + '.json');
+    if (fs.existsSync(sim)) {
+      try {
+        const j = JSON.parse(fs.readFileSync(sim, 'utf8'));
+        if (Array.isArray(j.holdout) && j.holdout.length) return j.holdout;
+        if (Array.isArray(j.rows)) return j.rows;
+      } catch { /* fall through */ }
+    }
+    return [];
+  }
+  // Namespace string -> most-recent dataset for that namespace.
+  if (typeof datasetId === 'string') {
+    const dir = path.join(_kolmBase(), 'datasets');
+    if (fs.existsSync(dir)) {
+      const records = fs.readdirSync(dir)
+        .filter((f) => f.startsWith('ds_') && f.endsWith('.json'))
+        .map((f) => {
+          try {
+            const obj = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+            const st = fs.statSync(path.join(dir, f));
+            return { file: f, obj, mtime: st.mtimeMs };
+          } catch { return null; }
+        })
+        .filter(Boolean)
+        .filter((x) => x.obj && x.obj.namespace === datasetId)
+        .sort((a, b) => b.mtime - a.mtime);
+      if (records.length) {
+        const hydrated = await _hydrateFromRecord(records[0].obj);
+        if (hydrated && hydrated.length) return hydrated;
+      }
     }
   }
   return [];
+}
+
+function _kolmBase() {
+  return process.env.KOLM_DATA_DIR
+    ? path.resolve(process.env.KOLM_DATA_DIR)
+    : path.join(os.homedir(), '.kolm');
+}
+
+// _hydrateFromRecord: given a dataset record from the workbench
+// ({dataset_id, namespace, source_event_ids[], train_ids[], holdout_ids[]}),
+// pull the event objects from the event-store and shape them as
+// {input, output} rows that the bakeoff contestants understand.
+async function _hydrateFromRecord(record) {
+  if (!record || typeof record !== 'object') return null;
+  const ids = (Array.isArray(record.holdout_ids) && record.holdout_ids.length)
+    ? record.holdout_ids
+    : (Array.isArray(record.source_event_ids) && record.source_event_ids.length)
+      ? record.source_event_ids
+      : null;
+  if (!ids) return null;
+  let getEvent;
+  try {
+    ({ getEvent } = await import('./event-store.js'));
+  } catch {
+    return null;
+  }
+  const out = [];
+  for (const id of ids) {
+    let ev = null;
+    try { ev = await getEvent(id); } catch { ev = null; }
+    if (!ev) continue;
+    const input = ev.prompt_redacted || ev.prompt || ev.input || '';
+    const output = ev.response_redacted || ev.response || ev.output || '';
+    if (!input) continue;
+    out.push({ input: String(input), output: String(output), event_id: id });
+  }
+  return out;
 }
 
 // ---------------- per-contestant runners ----------------
@@ -256,7 +428,11 @@ async function runContestant(name, rows, opts) {
 }
 
 function summarize(name, calls) {
-  if (!calls.length) return { name, pass_rate: 0, avg_latency_ms: 0, avg_cost_usd: 0, calls: 0, score_per_dollar: 0 };
+  if (!calls.length) return {
+    name, pass_rate: 0, avg_latency_ms: 0, avg_cost_usd: 0, calls: 0, score_per_dollar: 0,
+    privacy_class: classifyPrivacy(name), deterministic: classifyDeterminism(name),
+    quality: 0,
+  };
   const pass = calls.filter((c) => c.pass).length;
   const passRate = pass / calls.length;
   const avgLatencyMs = calls.reduce((s, c) => s + (c.latency_us || 0), 0) / calls.length / 1000;
@@ -267,15 +443,41 @@ function summarize(name, calls) {
   return {
     name,
     pass_rate: passRate,
+    quality: passRate,          // W409p — alias the bakeoffs UI reads.
     avg_latency_ms: Math.round(avgLatencyMs * 10) / 10,
     avg_cost_usd: avgCostUsd,
     score_per_dollar,
+    privacy_class: classifyPrivacy(name),
+    deterministic: classifyDeterminism(name),
     calls: calls.length,
   };
 }
 
+// W409p — produce a recommendation verdict from the closed enum. Inputs:
+// the ranked contestant array + the recommended name. The verdict tells the
+// caller what to do next, not just who passed first.
+export function recommendationVerdict(results, recommendedName) {
+  if (!Array.isArray(results) || !results.length) return 'needs_human';
+  const rec = results.find(r => r.name === recommendedName);
+  // Nothing cleared the gate -> escalate to human review.
+  if (!rec || rec.pass_rate < 0.85) return 'needs_human';
+  // The synthesized keyword rule wins -> compile a rule, no model needed.
+  if (rec.name === 'rule') return 'compile_rule';
+  // A local backbone won the gate.
+  if (rec.privacy_class === 'local') {
+    // If the local came in via prompt_only-tier quality the upstream is also
+    // viable -> distill it instead of just running the small local.
+    return 'use_local_backbone';
+  }
+  // Recommended is a frontier model. Check whether any local cleared the gate
+  // close to the frontier -> distill candidate.
+  const closeLocal = results.find(r => r.privacy_class === 'local' && r.pass_rate >= 0.7);
+  if (closeLocal) return 'distill';
+  return 'keep_frontier';
+}
+
 export async function bakeoff(datasetId, { contestants, opts = {} } = {}) {
-  const rows = loadDatasetRows(datasetId, opts);
+  const rows = await loadDatasetRows(datasetId, opts);
   if (!rows.length) throw new Error('bakeoff: dataset empty (passed: ' + (typeof datasetId === 'string' ? datasetId.slice(0, 80) : '<rows>') + ')');
   const list = (contestants && contestants.length ? contestants : DEFAULT_CONTESTANTS);
   const results = [];
@@ -302,11 +504,18 @@ export async function bakeoff(datasetId, { contestants, opts = {} } = {}) {
   for (const r of results) r.recommended = (r.name === recommended);
   // Sort: pass_rate desc, then score_per_dollar desc.
   results.sort((a, b) => (b.pass_rate - a.pass_rate) || (b.score_per_dollar - a.score_per_dollar));
+  // W409p — verdict from the closed enum.
+  const verdict = recommendationVerdict(results, recommended);
   return {
     dataset_id: typeof datasetId === 'string' ? datasetId : 'inline',
     rows_used: rows.length,
     contestants: results,
     recommended,
+    recommendation: verdict,        // W409p — closed-enum verdict.
+    recommendation_verdict: verdict, // explicit alias so downstream readers
+                                     // don't have to guess at the key name.
+    columns: ['name', 'pass_rate', 'avg_latency_ms', 'avg_cost_usd', 'privacy_class', 'deterministic'],
+    created_at: new Date().toISOString(),
   };
 }
 
@@ -335,4 +544,9 @@ export function bakeoffReport(result, opts = {}) {
   return lines.join('\n');
 }
 
-export default { bakeoff, bakeoffReport, DEFAULT_CONTESTANTS };
+export default {
+  bakeoff, bakeoffReport,
+  DEFAULT_CONTESTANTS,
+  PRIVACY_CLASSES, DETERMINISM_TABLE, RECOMMENDATION_VERDICTS,
+  classifyPrivacy, classifyDeterminism, recommendationVerdict,
+};

@@ -136,14 +136,80 @@
 
 <section class="hero">
   <div class="wrap">
-    <h1>Where <span class="tone">kolm</span> plugs in.</h1>
-    <p class="lede">One CLI. Ten surfaces. <code>kolm compile</code> works the same way from Claude Desktop, Cursor, VS Code, your CI pipeline, your Python REPL, and the bare terminal. The artifact it produces is the same byte-exact <code>.kolm</code> in every case.</p>
+    <h1>kolm in your stack. <span class="tone">One config change.</span></h1>
+    <p class="lede">Point your existing SDK at <code>https://kolm.ai/v1</code>. The OpenAI client, the Anthropic client, LangChain, Vercel AI, LiteLLM, your editor proxies &ndash; one line each. Captures, redaction, and signed receipts come along for free.</p>
     <div class="kind-row">
+      <span class="kind">SDK base URL</span>
       <span class="kind">Editors</span>
       <span class="kind">Agents</span>
       <span class="kind">CI / CD</span>
-      <span class="kind">SDKs</span>
       <span class="kind">Package managers</span>
+    </div>
+  </div>
+</section>
+
+<section class="list">
+  <div class="wrap">
+    <div class="group" id="copy-paste" style="margin-top:0;padding-top:0;border-top:0;">
+      <h2>The nine copy-paste recipes.</h2>
+      <p class="kicker">One line of config per ecosystem. Each card links to a focused recipe page with a Python + JS snippet you can paste into your app today.</p>
+      <div class="grid">
+
+        <a class="ig" href="/integrations/openai-sdk" style="text-decoration:none;color:inherit;display:block;">
+          <div class="top"><h3>OpenAI SDK</h3><span class="stat shipped">one line</span></div>
+          <p>Python <code>OpenAI(base_url=...)</code> or JS <code>new OpenAI({ baseURL: ... })</code>. Streaming, tool calling, vision &ndash; all work unchanged.</p>
+          <pre>OpenAI(base_url="https://kolm.ai/v1", api_key="ks_...")</pre>
+        </a>
+
+        <a class="ig" href="/integrations/anthropic-sdk" style="text-decoration:none;color:inherit;display:block;">
+          <div class="top"><h3>Anthropic SDK</h3><span class="stat shipped">one line</span></div>
+          <p>Python <code>Anthropic(base_url=...)</code> or JS <code>new Anthropic({ baseURL: ... })</code>. The Messages API behaves the same.</p>
+          <pre>Anthropic(base_url="https://kolm.ai/v1/anthropic", api_key="ks_...")</pre>
+        </a>
+
+        <a class="ig" href="/integrations/openrouter" style="text-decoration:none;color:inherit;display:block;">
+          <div class="top"><h3>OpenRouter</h3><span class="stat shipped">routing preserved</span></div>
+          <p>HTTP-Referer + X-Title headers travel end to end and stamp the receipt so app attribution stays correct.</p>
+          <pre>default_headers={"HTTP-Referer": ..., "X-Title": ...}</pre>
+        </a>
+
+        <a class="ig" href="/integrations/langchain" style="text-decoration:none;color:inherit;display:block;">
+          <div class="top"><h3>LangChain</h3><span class="stat shipped">drop-in</span></div>
+          <p><code>ChatOpenAI(base_url=...)</code> in Python, <code>ChatOpenAI({ configuration: { baseURL } })</code> in JS. LangGraph + LangServe work too.</p>
+          <pre>ChatOpenAI(base_url="https://kolm.ai/v1", api_key="ks_...")</pre>
+        </a>
+
+        <a class="ig" href="/integrations/vercel-ai-sdk" style="text-decoration:none;color:inherit;display:block;">
+          <div class="top"><h3>Vercel AI SDK</h3><span class="stat shipped">next.js</span></div>
+          <p><code>createOpenAI({ baseURL })</code> from <code>@ai-sdk/openai</code>. Streaming, server actions, edge runtime &ndash; all preserved.</p>
+          <pre>createOpenAI({ baseURL: "https://kolm.ai/v1", apiKey })</pre>
+        </a>
+
+        <a class="ig" href="/integrations/litellm" style="text-decoration:none;color:inherit;display:block;">
+          <div class="top"><h3>LiteLLM</h3><span class="stat shipped">router</span></div>
+          <p>One <code>config.yaml</code> entry. Fallbacks, retries, budgets work the same. Each model alias becomes a kolm destination.</p>
+          <pre>api_base: https://kolm.ai/v1</pre>
+        </a>
+
+        <a class="ig" href="/integrations/cursor-claude-code" style="text-decoration:none;color:inherit;display:block;">
+          <div class="top"><h3>Cursor + Claude Code</h3><span class="stat shipped">local proxy</span></div>
+          <p>The W403 dogfood pattern. kolm boots on <code>127.0.0.1:7403</code>. Cursor + Claude Code mirror every request without any app-side change.</p>
+          <pre>ANTHROPIC_BASE_URL=http://127.0.0.1:7403</pre>
+        </a>
+
+        <a class="ig" href="/integrations/docker-compose" style="text-decoration:none;color:inherit;display:block;">
+          <div class="top"><h3>docker-compose</h3><span class="stat shipped">one yaml</span></div>
+          <p>The kolm daemon, in your existing stack. Peer services talk to <code>http://kolm:7403/v1</code>. SQLite-backed captures land in a volume.</p>
+          <pre>image: ghcr.io/sneaky-hippo/kolm:latest</pre>
+        </a>
+
+        <a class="ig" href="/integrations/env-vars" style="text-decoration:none;color:inherit;display:block;">
+          <div class="top"><h3>Environment variables</h3><span class="stat shipped">reference</span></div>
+          <p>Full table of every <code>KOLM_*</code> variable. <code>KOLM_BASE_URL</code>, <code>KOLM_API_KEY</code>, <code>KOLM_STORE_DRIVER</code>, redaction policy, and friends.</p>
+          <pre>export KOLM_BASE_URL=https://kolm.ai</pre>
+        </a>
+
+      </div>
     </div>
   </div>
 </section>

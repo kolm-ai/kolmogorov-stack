@@ -51,20 +51,32 @@ function countEmdash(html) {
 // Pain-led H1
 // =====================================================================
 
-test('W271 #1 - hero H1 leads with "Stop renting intelligence" pain beat', () => {
+test('W271 #1 - hero H1 leads with a concrete pain beat (W387: relaxed from literal "Stop renting intelligence" to behavior)', () => {
+  // W387 (2026-05-18): user feedback "0 user empathy. wording positioning has
+  // 0 user empathy and is fucking garbage." The previous H1 leaned on the
+  // "rented vs owned intelligence" metaphor that an unwarmed visitor doesn't
+  // decode in 3 seconds. The new H1 leads with concrete pain (paying for the
+  // same prompt over and over). Per the feedback-tests-assert-behavior-not-
+  // page-copy memory, we assert that the H1 region carries SOME pain beat
+  // (a "Stop X" verb-led sentence) rather than locking the exact phrasing.
   const HERO = heroSlice(2000);
-  assert.match(HERO, /Stop renting intelligence/i,
-    'H1 region must include "Stop renting intelligence" pain beat');
+  const h1Match = HERO.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  assert.ok(h1Match, 'H1 must exist');
+  // Pain beat = a Stop|Cut|Quit|Drop verb anywhere in H1 region.
+  assert.match(h1Match[1], /\b(Stop|Cut|Quit|Drop)\s+\w+/i,
+    'H1 region must carry an action-verb-led pain beat (any phrasing — copy is editorial after W387)');
 });
 
-test('W271 #2 - hero H1 includes an ownership pain beat (W334: PHI dropped as niche)', () => {
-  // W334 dropped "Stop leaking PHI" — user said PHI is too niche for the hero.
-  // The H1 now leads with the rent-vs-own framing; the second beat names the
-  // ownership outcome ("Ship your own model and own it forever") which keeps
-  // the two-beat rhythm without the PHI niche.
+test('W271 #2 - hero H1 includes an ownership outcome beat (W387: relaxed phrasing)', () => {
+  // W387: relaxed from "Ship your own model|own it forever" to any ownership
+  // outcome phrasing. The new H1 says "Compile the repeats into a local model
+  // you own forever" — the "you own" phrasing carries the ownership beat.
+  // Memory pattern: feedback-tests-assert-behavior-not-page-copy.
   const HERO = heroSlice(2000);
-  assert.match(HERO, /Ship your own model|own it forever/i,
-    'H1 region must carry the ownership pain beat after the W334 rescue');
+  const h1Match = HERO.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  assert.ok(h1Match, 'H1 must exist');
+  assert.match(h1Match[1], /\b(you own|own forever|own it|your own|local model|your hardware)\b/i,
+    'H1 region must carry an ownership / local-control outcome beat');
 });
 
 test('W271 #3 - hero H1 is a two-beat rent-vs-own pair (W334: 3rd GPT-5 beat dropped; W335: spans may carry additional classes)', () => {
@@ -227,12 +239,13 @@ test('W271 #20 - data-w260="v02-strip" marker preserved by W271 rewrite', () => 
 // phi-redactor.kolm proof still visible
 // =====================================================================
 
-test('W271 #21 - phi-redactor.kolm proof artifact still visible somewhere in the hero', () => {
-  // The proof appears both in the hero thesis (as the proof anchor) and lower
-  // in the existing hero-artifact strip. Both keep working as proof signals.
+test('W271 #21 - a concrete .kolm proof artifact still visible in the hero [W405: artifact-agnostic]', () => {
+  // W405 (2026-05-19) relaxed from `phi-redactor.kolm` to any *.kolm filename:
+  // user mandate dropped PHI framing from hero. Behavior assertion: an anchor
+  // to a concrete .kolm artifact is visible in the 8KB hero slice.
   const HERO = heroSlice(8000);
-  assert.match(HERO, /phi-redactor\.kolm/,
-    'phi-redactor.kolm must remain a visible proof artifact in the hero region');
+  assert.match(HERO, /<a[^>]*>[^<]*\.kolm[^<]*<\/a>/i,
+    'hero must keep an anchor to a concrete .kolm artifact');
 });
 
 // =====================================================================

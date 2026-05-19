@@ -1,0 +1,75 @@
+{
+  "job_id": "job_demo_log_triage_v1",
+  "task": "Demo log-triage classifier — the canonical close-the-loop demo. Takes a single log/error/exception line and returns one of 6 categories (db / network / auth / deploy / app-bug / infra) plus the keyword signals that matched. Deterministic regex matrix in examples/demo-log-triage/recipe.js. Seeds (40 rows) cover every category and the unknown fallback. Comparator: json_subset on { category, signals }. K-score gate: 0.85. This recipe is the target of `kolm demo seed-log-triage` (seeds ~150 events to the lake so optimize/dataset/bakeoff/build/run/what all have something real to chew on).",
+  "base_model": "none",
+  "target_device": "any",
+  "comparator": "json_subset",
+  "kolmogorov_score": {
+    "threshold": 0.85,
+    "comparator": "json_subset"
+  },
+  "recipes": [
+    {
+      "id": "rcp_demo_log_triage_v1",
+      "name": "demo-log-triage (6-category keyword matrix)",
+      "tags": [
+        "demo",
+        "log",
+        "triage",
+        "classifier",
+        "deterministic"
+      ],
+      "schema": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "log": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "log"
+          ]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "enum": [
+                "db",
+                "network",
+                "auth",
+                "deploy",
+                "app-bug",
+                "infra",
+                "unknown"
+              ]
+            },
+            "signals": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "confidence": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "category"
+          ]
+        }
+      },
+      "source_file": "C:\\Users\\user\\Desktop\\kolmogorov-stack\\examples\\demo-log-triage\\recipe.js"
+    }
+  ],
+  "training_stats": {
+    "approach": "deterministic keyword-matrix classifier. 6 categories + unknown fallback. ~40 regex rules total. Categories ordered by precedence (db before network because timeout overlaps; auth before app-bug because forbidden vs ReferenceError overlap; deploy before infra because oom-on-pod vs oom overlap). Same input -> same output. Comparator json_subset on { category, signals }.",
+    "categories_covered": 6,
+    "regex_count": 41,
+    "verifier_accepted": true,
+    "latency_p50_us": 90,
+    "cost_usd_per_call": 0
+  }
+}

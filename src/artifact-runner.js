@@ -448,20 +448,29 @@ async function runJsTarget(bundle, input, opts = {}) {
 
 // Run the artifact against a single input. Returns { output, recipe_id, latency_us, receipt, audit }.
 //
-// Recipe dispatch: try each recipe in order, return the first one that
-// compiles + executes within the timeout without throwing. The artifact
+// W409d — runArtifact now routes ALL targets (js + wasm + native + gguf + onnx)
+// through dispatchRuntime(). The JS path goes through the same dispatcher as
+// non-JS targets, so the runtime_target manifest field is honored end-to-end
+// at the primary run/eval entry. Previously runArtifact had its own embedded
+// JS recipe loop that bypassed dispatchRuntime, which meant `kolm run
+// foo.kolm` always executed the JS recipes even when manifest.runtime_target
+// declared native/wasm/gguf/onnx. evalArtifact inherited the bug because it
+// calls runArtifact() per case.
+//
+// Recipe dispatch (JS target): try each recipe in order, return the first
+// that compiles + executes within the timeout without throwing. The artifact
 // author orders recipes by specificity (most-specific first); the runner
-// trusts that order.
+// trusts that order. Non-JS targets have no recipe loop — their entrypoint
+// is whatever the manifest declares (entrypoint.binary, target.wasm,
+// runtime_target_config.{gguf,onnx}_path).
 //
 // opts.timeoutMs   - per-recipe timeout (default 1000ms)
 // opts.maxBytes    - input size cap (default 1 MiB)
 // opts.audit       - optional audit-sink callback({ artifact_job_id, recipe_id, input_sha256, input_bytes, latency_us, ok })
 export async function runArtifact(artifactPath, input, opts = {}) {
   const bundle = loadArtifact(artifactPath);
-  const { recipes, manifest, pack, index } = bundle;
-  if (!recipes.recipes || !recipes.recipes.length) {
-    throw kolmError('KOLM_E_NO_RECIPES', 'artifact has no executable recipes');
-  }
+  const { manifest } = bundle;
+  const target = manifest.runtime_target || 'js';
 
   const maxBytes = opts.maxBytes || MAX_INPUT_BYTES;
   const timeout = opts.timeoutMs || DEFAULT_TIMEOUT_MS;
@@ -478,77 +487,74 @@ export async function runArtifact(artifactPath, input, opts = {}) {
 
   const inputSha = sha256Hex(Buffer.from(typeof input === 'string' ? input : JSON.stringify(input ?? null), 'utf8')).slice(0, 16);
   const t0 = process.hrtime.bigint();
-  const tried = [];
-  let lastError = null;
 
-  for (const r of recipes.recipes) {
-    if (!r.source) continue;
-    let fn;
-    try {
-      fn = compileJs(r.source);
-    } catch (e) {
-      tried.push({ id: r.id, stage: 'compile', error: e.message });
-      lastError = `compile ${r.id}: ${e.message}`;
-      continue;
-    }
-    try {
-      const output = fn(input, { timeout, pack, index, params });
-      const us = Number(process.hrtime.bigint() - t0) / 1000;
-      const audit = {
-        spec: 'kolm-audit-1',
-        artifact_job_id: manifest.job_id,
-        recipe_id: r.id,
-        recipe_name: r.name,
-        input_sha256_prefix: inputSha,
-        input_bytes: bytes,
-        input_preview: previewInput(input),
-        latency_us: Math.round(us),
-        ran_at: new Date().toISOString(),
-        ok: true,
-      };
-      if (typeof opts.audit === 'function') { try { opts.audit(audit); } catch {} }
-      return {
-        output,
-        recipe_id: r.id,
-        recipe_name: r.name,
-        latency_us: Math.round(us),
-        k_score: manifest.k_score || null,
-        receipt: {
-          spec: 'rs-1-run',
+  // For the JS target we still want the "tried" trace on KOLM_E_NO_RECIPES /
+  // KOLM_E_NO_RECIPE_HANDLED for back-compat (audit-sink callers branch on it).
+  // We let dispatchRuntime do the routing, and the JS runner (runJsTarget)
+  // throws an Error with `.tried` attached on no-recipe-handled.
+  let dispatched;
+  try {
+    dispatched = await dispatchRuntime(bundle, input, { timeoutMs: timeout, params });
+  } catch (e) {
+    const us = Number(process.hrtime.bigint() - t0) / 1000;
+    if (typeof opts.audit === 'function') {
+      try {
+        opts.audit({
+          spec: 'kolm-audit-1',
           artifact_job_id: manifest.job_id,
-          recipe_id: r.id,
-          version_id: r.version_id,
+          input_sha256_prefix: inputSha,
+          input_bytes: bytes,
+          input_preview: previewInput(input),
+          latency_us: Math.round(us),
           ran_at: new Date().toISOString(),
-        },
-        audit,
-      };
-    } catch (e) {
-      const code = /exceeded \d+ms/.test(e.message || '') ? 'KOLM_E_RECIPE_TIMEOUT' : null;
-      tried.push({ id: r.id, stage: 'run', error: e.message, code });
-      lastError = `run ${r.id}: ${e.message}`;
-      continue;
+          ok: false,
+          error_code: e.code || 'KOLM_E_RUN_FAILED',
+          runtime: target,
+          tried: e.tried || null,
+        });
+      } catch {}
     }
+    throw e;
   }
 
-  const err = kolmError('KOLM_E_NO_RECIPE_HANDLED', `no recipe in artifact handled the input. tried ${tried.length}; last: ${lastError}`);
-  err.tried = tried;
-  if (typeof opts.audit === 'function') {
-    try {
-      opts.audit({
-        spec: 'kolm-audit-1',
-        artifact_job_id: manifest.job_id,
-        input_sha256_prefix: inputSha,
-        input_bytes: bytes,
-        input_preview: previewInput(input),
-        latency_us: Math.round(Number(process.hrtime.bigint() - t0) / 1000),
-        ran_at: new Date().toISOString(),
-        ok: false,
-        error_code: 'KOLM_E_NO_RECIPE_HANDLED',
-        tried,
-      });
-    } catch {}
-  }
-  throw err;
+  // Normalize the dispatcher result into the historical runArtifact return
+  // shape. JS path carries recipe_id/recipe_name; non-JS paths set them to
+  // null because there is no recipe — the entrypoint is the manifest's
+  // declared binary/wasm/gguf/onnx target.
+  const us = Number(process.hrtime.bigint() - t0) / 1000;
+  const recipe_id = dispatched.recipe_id || null;
+  const recipe_name = dispatched.recipe_name || null;
+  const audit = {
+    spec: 'kolm-audit-1',
+    artifact_job_id: manifest.job_id,
+    recipe_id,
+    recipe_name,
+    input_sha256_prefix: inputSha,
+    input_bytes: bytes,
+    input_preview: previewInput(input),
+    latency_us: Math.round(us),
+    ran_at: new Date().toISOString(),
+    ok: true,
+    runtime: dispatched.runtime || target,
+  };
+  if (typeof opts.audit === 'function') { try { opts.audit(audit); } catch {} }
+  return {
+    output: dispatched.output,
+    recipe_id,
+    recipe_name,
+    latency_us: Math.round(us),
+    k_score: manifest.k_score || null,
+    runtime: dispatched.runtime || target,
+    receipt: {
+      spec: 'rs-1-run',
+      artifact_job_id: manifest.job_id,
+      recipe_id,
+      version_id: recipe_id ? (bundle.recipes?.recipes?.find(r => r.id === recipe_id)?.version_id ?? null) : null,
+      runtime: dispatched.runtime || target,
+      ran_at: new Date().toISOString(),
+    },
+    audit,
+  };
 }
 
 // Re-run the embedded eval suite against the artifact's recipes. This is

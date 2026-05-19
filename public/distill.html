@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Distillation · kolm.ai</title>
+<meta name="description" content="Distillation in kolm.ai: compress captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from fine-tuning and from compilation. One CLI verb runs the 7-step pipeline.">
+<meta name="keywords" content="distillation, model distillation, ai distillation, kolm distill, knowledge distillation, specialist model, teacher student, captured prompts">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:title" content="Distillation &middot; kolm.ai">
+<meta property="og:description" content="Compress captured prompts into a smaller specialist, frozen at a K-score threshold. One command runs the 7-step pipeline.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/distill">
+<meta property="og:image" content="https://kolm.ai/og/distill.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Distillation &middot; kolm.ai">
+<meta name="twitter:description" content="Compress captured prompts into a smaller specialist, frozen at a K-score threshold.">
+<meta name="twitter:image" content="https://kolm.ai/og/distill.svg">
+<link rel="canonical" href="https://kolm.ai/distill">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script defer src="/nav.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Distillation: compress captured prompts into a smaller specialist model",
+  "description": "Distillation in kolm.ai compresses captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from fine-tuning and from compilation.",
+  "datePublished": "2026-05-18",
+  "dateModified": "2026-05-18",
+  "author": { "@type": "Organization", "name": "kolm.ai" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai" },
+  "image": "https://kolm.ai/og/distill.svg",
+  "url": "https://kolm.ai/distill",
+  "mainEntityOfPage": "https://kolm.ai/distill"
+}
+</script>
+<style>
+:root{--ink:#ece7dc;--ink-mute:#a8b0bb;--ink-faint:#5a6471;--bg:#0b0d10;--bg-elev:#11151b;--accent:#10b981;--warn:#f0b86b;--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif}
+html[data-theme="light"]{--ink:#1a1d22;--ink-mute:#4b5260;--ink-faint:#7a818c;--bg:#f7f4ec;--bg-elev:#fff}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:56px 24px 96px}
+h1{font-size:48px;line-height:1.1;letter-spacing:-1.4px;font-weight:680;margin:0 0 14px}
+h2{font-size:26px;line-height:1.25;letter-spacing:-0.4px;font-weight:640;margin:48px 0 14px}
+h3{font-size:19px;line-height:1.35;font-weight:600;margin:24px 0 10px}
+p{margin:0 0 16px}.lede{font-size:20px;color:var(--ink-mute);margin:0 0 28px;max-width:760px}
+ul,ol{padding-left:22px;margin:0 0 16px}li{margin:6px 0}
+code{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:2px 6px;border-radius:4px}
+pre{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:16px 20px;border-radius:8px;overflow-x:auto;line-height:1.55}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0 40px}
+@media (max-width:920px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+.card{background:var(--bg-elev);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:18px}
+.card h3{margin:0 0 6px;font-size:16px}.card p{font-size:13px;color:var(--ink-mute);margin:0 0 10px}
+.card a{font-size:13px;color:var(--accent)}
+.step-num{font-family:var(--mono);color:var(--ink-faint);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.muted{color:var(--ink-faint);font-size:14px}
+.matrix{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+.matrix th,.matrix td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top}
+.matrix th{color:var(--ink-mute);font-weight:600;background:var(--bg-elev)}
+.warn{background:rgba(240,184,107,.08);border-left:3px solid var(--warn);padding:14px 18px;border-radius:6px;font-size:14px;color:var(--ink-mute);margin:20px 0}
+footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
+@media (max-width:560px){main{padding:32px 18px 64px}h1{font-size:32px}h2{font-size:22px}.matrix{font-size:12px}.matrix th,.matrix td{padding:8px 6px}}
+.pipeline{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:18px 0 32px;font-size:12px}
+@media (max-width:920px){.pipeline{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.pipeline{grid-template-columns:repeat(2,1fr)}}
+.pipeline .step{background:var(--bg-elev);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px 12px}
+.pipeline .step b{display:block;color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.pipeline .step span{color:var(--ink-mute)}
+</style>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand">kolm</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+    <div class="site-actions">
+      <a href="/signin">Sign in</a>
+      <a class="cta-btn" href="/train">Compile &rarr;</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<h1>Distillation</h1>
+<p class="lede">In kolm.ai, distillation compresses captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. It is one pass inside the broader compile pipeline, not a synonym for it. This page explains what it is, when to reach for it, what the 7-step pipeline does, and the one command that runs it end to end.</p>
+
+<h2 id="what-it-is">What it is</h2>
+<p>Distillation in kolm.ai is the act of compressing a population of captured prompt and response pairs from a larger upstream model into a smaller specialist model that produces matching outputs on the prompts you actually see. The smaller model is "frozen" at the point where its K-score on a held-out slice of your captures crosses the configured threshold (default 0.85). Until that threshold is met, the artifact is not promotable; once met, it ships as a signed <code>.kolm</code> with a receipt chain back to the original captures.</p>
+<p>Distillation is not the same as fine-tuning. Fine-tuning re-weights an existing base model on new labels and keeps the same architecture and parameter count. Distillation is also not the same as compilation. Compilation is the umbrella verb that includes distillation as one of its passes, alongside quantization, gating, signing, and packaging. A kolm compile run on a 1000-pair namespace will typically include a distillation pass; a compile on a 50-pair recipe-template namespace typically will not.</p>
+
+<h2 id="when-to-distill">When to distill (vs. just compile a recipe)</h2>
+<ul>
+<li>You have at least 1,000 captured pairs in one namespace. Below that floor, a recipe template is cheaper, ships faster, and holds about as well. The threshold is a heuristic, not a wall; adjust with <code>--min-pairs</code> if your prompts are unusually narrow.</li>
+<li>The upstream model's cost or latency exceeds the K-score gain you actually need. If you are paying gpt-4o-class rates for a job a 7B specialist can match within 2 K-score points, distillation pays back inside a week of traffic.</li>
+<li>You need to ship to a smaller device. A 3090, an M3 Ultra, an NVIDIA Spark, or an air-gapped server cannot host a frontier upstream; a distilled specialist fits in 8 to 24 GB of VRAM.</li>
+<li>The prompts are repetitive enough that a specialist will hold. The mining step in the pipeline groups captures by template hash; if the largest cluster is under 200 rows, the specialist generalizes worse than the upstream and the K-score gate will not let it ship.</li>
+</ul>
+
+<h2 id="pipeline">The 7-step pipeline</h2>
+<div class="pipeline">
+  <div class="step"><b>1. Mining</b><span>Cluster captures by template hash, pick the dominant cluster as the training spine.</span></div>
+  <div class="step"><b>2. Augment</b><span>Generate paraphrases and edge cases to widen the cluster without changing its semantics.</span></div>
+  <div class="step"><b>3. Active select</b><span>Down-sample to the rows that best cover the cluster's decision surface.</span></div>
+  <div class="step"><b>4. Sanitize</b><span>Strip PHI, secrets, and other class-banned tokens via the configured redactor.</span></div>
+  <div class="step"><b>5. Seeds</b><span>Materialize the sanitized rows as a deterministic <code>seeds.jsonl</code>.</span></div>
+  <div class="step"><b>6. Train</b><span>Run the trainer bridge (LoRA or full fine-tune) against the base model on the seeds.</span></div>
+  <div class="step"><b>7. Score</b><span>Evaluate the trained specialist on a frozen holdout. Ship only if K-score crosses the threshold.</span></div>
+</div>
+<p>See <a href="/docs/distill">/docs/distill</a> for the per-step CLI flags, the trainer-bridge contract, and the failure modes for each step. The seeds format is documented at <a href="/docs/datasets">/docs/datasets</a>; the K-score gate at <a href="/k-score">/k-score</a>.</p>
+
+<h2 id="one-command">One command</h2>
+<p>Distillation does not require seven separate CLI invocations. One verb walks every step and ships the artifact if the gate clears.</p>
+<pre><code class="lang-bash">kolm distill --from-captures &lt;namespace&gt; --min-pairs 1000</code></pre>
+<p>The verb reads captures from the named namespace, runs the 7-step pipeline above, and writes the resulting artifact under <code>~/.kolm/artifacts/</code> with its receipt chain. Below the <code>--min-pairs</code> floor (default 1000) the verb refuses with an exit code of 2, so you cannot accidentally distill on a thin namespace.</p>
+<p>To preview without writing anything, use the dry-run flag.</p>
+<pre><code class="lang-bash">kolm distill --preview &lt;namespace&gt;</code></pre>
+<p>The preview flag prints the cluster size, the template hash, the projected base model, the projected holdout K-score, and the estimated training time, then exits 0 without invoking the trainer. Use it to size a job before paying for the GPU hours.</p>
+
+<h2 id="outputs">Outputs</h2>
+<p>A successful distill run produces four artifacts. Each links to the spec or surface where it is documented.</p>
+<table class="matrix">
+<thead><tr><th>Output</th><th>What it is</th><th>Where documented</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;your-recipe&gt;.kolm</code></td><td>The signed artifact. Single file, runnable on the target device with <code>kolm run</code>.</td><td><a href="/spec/rs-1">RS-1 spec</a></td></tr>
+<tr><td><code>seeds.jsonl</code></td><td>The deterministic seed dataset the trainer saw. Re-runnable; hash-pinned in the receipt.</td><td><a href="/captures">/captures</a></td></tr>
+<tr><td>Receipt chain</td><td>Every step (mine, augment, sanitize, train, score) writes a receipt. Walking the chain from the artifact gets you back to the source captures.</td><td><a href="/spec/rs-1">RS-1 spec</a></td></tr>
+<tr><td>K-score holdout report</td><td>A JSON report of the artifact's K-score on the frozen holdout, broken out per-axis (quality, latency, cost, safety, drift).</td><td><a href="/k-score">/k-score</a></td></tr>
+</tbody>
+</table>
+
+<div class="warn">The receipt chain is the audit trail the compile pipeline gives you. If you ship a distilled artifact and the model later misbehaves, the chain points at the exact training rows, the exact upstream model, and the exact K-score gate that let it through. See <a href="/security">/security</a> for the verification path.</div>
+
+<h2 id="see-also">See also</h2>
+<div class="grid">
+  <div class="card"><div class="step-num">Start here</div><h3><a href="/quickstart">Quickstart</a></h3><p>Three paths to your first <code>.kolm</code> artifact: try one live, download one, or compile your own.</p><a href="/quickstart">Read &rarr;</a></div>
+  <div class="card"><div class="step-num">Source data</div><h3><a href="/captures">Captures</a></h3><p>The dashboard for the captured prompts you will distill from. Filter by namespace, search, promote to recipe.</p><a href="/captures">Read &rarr;</a></div>
+  <div class="card"><div class="step-num">The gate</div><h3><a href="/k-score">K-score</a></h3><p>The 5-axis quality metric that decides whether a distilled artifact is allowed to ship. Frozen-holdout methodology.</p><a href="/k-score">Read &rarr;</a></div>
+</div>
+
+</main>
+<footer>kolm.ai &middot; the AI compiler &middot; <a href="/what-is-an-ai-compiler">what is an AI compiler?</a> &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">brand disambiguation</a></footer>
+</body>
+</html>
