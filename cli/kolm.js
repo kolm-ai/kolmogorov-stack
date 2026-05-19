@@ -471,19 +471,31 @@ natural-language assistant (no LLM round-trip). Useful when you don't remember
 the exact verb-noun grammar.
 
 USAGE
-  kolm ask "<your question>"
-  kolm "<your question>"             (also works — auto-detected)
+  kolm ask "<your question>"             (general Q&A via /v1/assistant)
+  kolm ask --intent "<your question>"    (preview ONLY — prints the proposed
+                                          kolm command + confidence +
+                                          alternatives; never executes)
+  kolm "<your question>"                 (also works — auto-detected)
+
+FLAGS
+  --intent, --preview   Use /v1/intent/ask (same classifier as the web
+                        ask-bar). Returns the proposed command and waits —
+                        never triggers a compile, capture, or job. Pair
+                        with --json for machine-readable envelope.
+  --airgap, --offline   Force local parser (no network).
+  --json                Machine-readable response envelope.
 
 EXAMPLES
   kolm ask "what's my status"
+  kolm ask --intent "compile my billing namespace"
+  kolm ask --intent --json "show me the top opportunities"
   kolm ask "show my builds"
-  kolm ask "compile a recipe that redacts secrets"
-  kolm ask "install claude-code"
-  kolm ask "how much have i used this month"
   kolm ask "upgrade to pro"
 
 The server-side intent parser is deterministic and rule-based (never an LLM,
 never your data leaving) and returns a narration + concrete next steps.
+With --intent the response is preview-only: paste the printed command (or
+run kolm do "<question>") when you're ready to execute.
 `,
   chat: `kolm chat - interactive natural-language session that EXECUTES commands.
 
@@ -13838,9 +13850,52 @@ async function cmdAsk(args) {
   const wantOffline = args.includes('--airgap') || args.includes('--offline')
     || process.env.KOLM_AIRGAP === '1'
     || fs.existsSync(path.join(KOLM_DIR, 'airgap.env'));
-  const promptArgs = args.filter(a => !['--json', '--airgap', '--offline'].includes(a));
+  // W453 — --intent (alias --preview) routes to the deterministic
+  // /v1/intent/ask classifier (same path as the W415 web ask-bar). This is
+  // the audit P1 "NL → command preview, no exec" surface: returns the
+  // proposed `kolm ...` verb + confidence + alternatives WITHOUT triggering
+  // any side-effects. Default (no flag) keeps the existing /v1/assistant
+  // path for general Q&A (can trigger compiles + recall queries server-side).
+  const wantIntent = args.includes('--intent') || args.includes('--preview');
+  const promptArgs = args.filter(a => !['--json', '--airgap', '--offline', '--intent', '--preview'].includes(a));
   const prompt = promptArgs.join(' ').replace(/^["']|["']$/g, '');
   const c = loadConfig();
+  if (wantIntent) {
+    if (!c.api_key) {
+      const err = new Error('--intent requires a logged-in session. run `kolm login` or drop --intent for local parse.');
+      err.exitCode = EXIT.MISSING_PREREQ;
+      throw err;
+    }
+    try {
+      const r = await api(c, 'POST', '/v1/intent/ask', { question: prompt });
+      if (wantJson) { console.log(JSON.stringify(r, null, 2)); return; }
+      // Render preview-only envelope. No execution side-effect.
+      console.log('');
+      console.log('  ' + (r.command || ('kolm ' + (r.verb || ''))));
+      console.log('');
+      if (typeof r.confidence === 'number') {
+        console.log('  confidence: ' + (r.confidence * 100).toFixed(0) + '%  (source: ' + (r.source || 'classifier') + ')');
+      }
+      if (r.why) console.log('  why: ' + r.why);
+      console.log('');
+      if (Array.isArray(r.alternatives) && r.alternatives.length) {
+        console.log('alternatives:');
+        for (const a of r.alternatives) {
+          console.log('  ' + (a.command || ('kolm ' + a.verb)) + '  (' + (a.confidence * 100).toFixed(0) + '%)');
+        }
+        console.log('');
+      }
+      console.log('to run the proposed command, paste it (or re-run with `kolm do "' + prompt.replace(/"/g, '\\"') + '"`).');
+      return;
+    } catch (e) {
+      if (e.status === 401) {
+        const err = new Error('auth_required. run `kolm login` or set KOLM_API_KEY.');
+        err.exitCode = EXIT.MISSING_PREREQ;
+        throw err;
+      }
+      throw e;
+    }
+  }
   // Local-first fallback mirrors `kolm chat` so the verb is useful without an
   // api key OR on a fully air-gapped box. Online path stays primary when a key
   // is configured and --offline is not set (deterministic intent parser, no LLM).
