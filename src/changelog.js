@@ -9,6 +9,13 @@
 
 const WAVES = [
   {
+    wave: 'W461',
+    date: '2026-05-19',
+    title: 'federated approval-row sharing (hash-only cross-org decisions)',
+    summary: 'Closes audit P1 Federated Foundations cluster open item ("approval-row sharing (decisions, not data); cross-org demo with 2+ tenants; opt-in policy + audit chain"). New src/federated-approvals.js ships a decision-aggregation primitive distinct from src/federated-learning.js (gradient-aggregation foundation). approval_hash = sha256(namespace + ":" + sha256(input) + ":" + decision_kind); only the hash, not the input/output text, crosses tenant boundaries. Opt-in is per-tenant and durable; opt-out is default. shareApprovalRows() reads the local approvals store, filters to the caller\'s tenant_id + namespace scope, and emits one hash-only row per approval (approval_hash + input_hash + decision_kind + decided_at — no input/output text, no reviewer). aggregateApprovals() adds Laplace noise (ε=1.0 default, sensitivity=1, scale=1.0) to peer counts so cross-tenant histograms preserve privacy. AUDIT_OPS gains FEDERATED_OPTIN / FEDERATED_OPTOUT / FEDERATED_SHARE; every action lands in the local audit chain. Routes POST /v1/federated/{opt-in,opt-out,share-approvals,aggregate} + GET /v1/federated/{peers,audit}. CLI `kolm federated {opt-in,opt-out,peers,share,aggregate,audit}`. 13 W461 tests pin the cross-org demo, the no-raw-text invariant, the cross-tenant fence, and the Laplace noise envelope.',
+    tags: ['federated', 'privacy', 'audit', 'differential-privacy', 'cross-org'],
+  },
+  {
     wave: 'W460',
     date: '2026-05-19',
     title: 'confidential compute attestation embed in .kolm RS-1 receipt',

@@ -58,6 +58,10 @@ export const AUDIT_OPS = Object.freeze({
   // Eval surface (Wave 165 N+5 tenant shadow corpus + future N+7 auditor)
   EVAL_TENANT_HOLDOUT_SAVE: 'eval.tenant_holdout.save',
   EVAL_TENANT_HOLDOUT_DELETE: 'eval.tenant_holdout.delete',
+  // W461 — federated approval-row sharing (hash-only cross-org decisions)
+  FEDERATED_OPTIN: 'federated.optin',
+  FEDERATED_OPTOUT: 'federated.optout',
+  FEDERATED_SHARE: 'federated.share',
   // Admin / system
   ADMIN_ACTION: 'admin.action',
 });

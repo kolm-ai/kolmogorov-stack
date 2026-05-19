@@ -21074,6 +21074,103 @@ async function cmdFl(args) {
   throw _badArgs(`unknown fl subcommand: ${sub}`);
 }
 
+// W461 — federated approval-row sharing (hash-only cross-org decisions, DP).
+async function cmdFederated(args) {
+  const sub = args && args[0];
+  const rest = (args || []).slice(1);
+  const jsonOut = rest.includes('--json');
+  const fa = await import('../src/federated-approvals.js');
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm federated - hash-only approval-row sharing across tenants\n\n' +
+      'USAGE\n' +
+      '  kolm federated opt-in --scope=<ns> [--scope=<ns>...] [--peer=<id>] [--note=<text>]\n' +
+      '  kolm federated opt-out [--reason=<text>]\n' +
+      '  kolm federated peers\n' +
+      '  kolm federated share --namespace=<ns> [--since=<iso>]\n' +
+      '  kolm federated aggregate --local=<rows.json> --peers=<rows.json> [--epsilon=1.0]\n' +
+      '  kolm federated audit [--limit=N]\n\n' +
+      'Honest scope: hash-only sharing + Laplace-DP-noised aggregates. Network\n' +
+      'transport + peer authentication are the caller responsibility.');
+    return;
+  }
+  const tenant_id = process.env.KOLM_TENANT_ID || process.env.KOLM_TENANT || 'local';
+  function flag(name) {
+    const direct = rest.find(a => a === '--' + name);
+    if (direct) return true;
+    const eq = rest.find(a => a.startsWith('--' + name + '='));
+    return eq ? eq.split('=').slice(1).join('=') : null;
+  }
+  function flagMulti(name) {
+    return rest.filter(a => a.startsWith('--' + name + '='))
+      .map(a => a.split('=').slice(1).join('='));
+  }
+  if (sub === 'opt-in') {
+    const scope = flagMulti('scope');
+    const peers = flagMulti('peer');
+    const note = flag('note') || null;
+    const entry = fa.optIn({ tenant_id, scope, peers, note });
+    if (jsonOut) return _printJson(entry);
+    console.log(`opted in: tenant=${entry.tenant_id} scope=${JSON.stringify(entry.namespaces)} peers=${entry.peers.length}`);
+    return;
+  }
+  if (sub === 'opt-out') {
+    const reason = flag('reason') || null;
+    const out = fa.optOut({ tenant_id, reason });
+    if (jsonOut) return _printJson(out);
+    console.log(`opted out: tenant=${out.tenant_id}` + (out.prior_opted_in_at ? ` (was opted in at ${out.prior_opted_in_at})` : ''));
+    return;
+  }
+  if (sub === 'peers') {
+    const peers = fa.listPeers({ tenant_id });
+    if (jsonOut) return _printJson({ total: peers.length, peers });
+    if (!peers.length) { console.log('no opted-in peers'); return; }
+    for (const p of peers) {
+      console.log(`${p.tenant_id}  scope=${JSON.stringify(p.namespaces)}  opted_in=${p.opted_in_at}`);
+    }
+    return;
+  }
+  if (sub === 'share') {
+    const namespace = flag('namespace');
+    const since = flag('since') || null;
+    if (!namespace) throw _badArgs('kolm federated share requires --namespace=<ns>');
+    const result = await fa.shareApprovalRows({ tenant_id, namespace, since });
+    if (jsonOut) return _printJson(result);
+    console.log(`shared ${result.envelope.rows_count} hash-only approval rows for namespace=${namespace}`);
+    return;
+  }
+  if (sub === 'aggregate') {
+    const localPath = flag('local');
+    const peersPath = flag('peers');
+    const epsilon = flag('epsilon') ? Number(flag('epsilon')) : undefined;
+    if (!localPath || !peersPath) throw _badArgs('kolm federated aggregate requires --local=<rows.json> --peers=<rows.json>');
+    const local_rows = await _readJsonArg(localPath);
+    const peer_rows = await _readJsonArg(peersPath);
+    const result = fa.aggregateApprovals({
+      local_rows: Array.isArray(local_rows) ? local_rows : (local_rows && local_rows.rows) || [],
+      peer_rows: Array.isArray(peer_rows) ? peer_rows : (peer_rows && peer_rows.rows) || [],
+      epsilon,
+    });
+    if (jsonOut) return _printJson(result);
+    console.log(`epsilon=${result.epsilon} sensitivity=${result.sensitivity} laplace_scale=${result.laplace_scale}`);
+    console.log(`${result.rows_count} aggregate rows`);
+    for (const row of result.rows.slice(0, 10)) {
+      console.log(`  ${row.approval_hash.slice(0, 12)}…  local=${row.local_count}  peer~=${row.peer_count_noised}`);
+    }
+    return;
+  }
+  if (sub === 'audit') {
+    const limit = flag('limit') ? Number(flag('limit')) : 50;
+    const out = fa.auditTrail({ tenant_id, limit });
+    if (jsonOut) return _printJson(out);
+    console.log(`audit: ${out.total} share events for tenant=${tenant_id}`);
+    for (const s of out.shares) {
+      console.log(`  ${s.shared_at}  namespace=${s.namespace}  rows=${s.rows_count}`);
+    }
+    return;
+  }
+  throw _badArgs(`unknown federated subcommand: ${sub}`);
+}
+
 function _badArgs(msg) { const e = new Error(msg); e.exitCode = EXIT.BAD_ARGS; return e; }
 
 // ---------- update ----------
@@ -23214,6 +23311,7 @@ async function main() {
       case 'device':   await withErrorContext('device',   () => cmdDevice(rest)); break;
       case 'cc':       await withErrorContext('cc',       () => cmdCc(rest)); break;
       case 'fl':       await withErrorContext('fl',       () => cmdFl(rest)); break;
+      case 'federated': await withErrorContext('federated', () => cmdFederated(rest)); break;
       case 'anonymize':await withErrorContext('anonymize',() => cmdAnonymize(rest)); break;
       case 'redact':   await withErrorContext('redact',   () => cmdRedact(rest)); break;
       // W454 — multimodal redaction worker (OCR / pdf-parse / whisper).

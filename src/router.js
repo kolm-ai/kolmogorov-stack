@@ -48,6 +48,7 @@ import * as compileIr from './compile-ir.js';
 import * as deviceCaps from './device-capabilities.js';
 import * as confidentialCompute from './confidential-compute.js';
 import * as federatedLearning from './federated-learning.js';
+import * as federatedApprovals from './federated-approvals.js';
 import * as artifactLineage from './artifact-lineage.js';
 import { AUDIT_OPS, tryAppendAudit, listAuditEvents, verifyAuditChain } from './audit.js';
 import { verifyCredential, PROVENANCE_SPEC } from './provenance.js';
@@ -8417,6 +8418,94 @@ export function buildRouter() {
     } catch (e) {
       res.status(500).json(_w384Err(e, 'team_sync_error'));
     }
+  });
+
+  // ============== W461: federated approval-row sharing (hash-only, DP-noised) ==============
+  // POST /v1/federated/opt-in    {scope:[ns...], peers:[...], note}
+  // POST /v1/federated/opt-out   {reason}
+  // POST /v1/federated/share-approvals {namespace, since}
+  // POST /v1/federated/aggregate {local_rows, peer_rows, epsilon}
+  // GET  /v1/federated/peers
+  // GET  /v1/federated/audit?limit=N
+  //
+  // Tenant scope is required on every route. Raw input/output bytes never
+  // leave the tenant; only sha256(namespace+input_hash+decision_kind) crosses
+  // the wire. Aggregation noises peer counts with Laplace ε=1.0 by default.
+  r.post('/v1/federated/opt-in', (req, res) => {
+    try {
+      const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
+      if (!tenant_id) return res.status(401).json({ error: 'auth_required' });
+      const body = req.body || {};
+      const entry = federatedApprovals.optIn({
+        tenant_id,
+        scope: body.scope,
+        peers: body.peers,
+        note: body.note,
+      });
+      res.json({ ok: true, opt_in: entry });
+    } catch (e) { res.status(400).json(_w384Err(e, 'federated_optin_error')); }
+  });
+
+  r.post('/v1/federated/opt-out', (req, res) => {
+    try {
+      const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
+      if (!tenant_id) return res.status(401).json({ error: 'auth_required' });
+      const body = req.body || {};
+      const out = federatedApprovals.optOut({ tenant_id, reason: body.reason });
+      res.json({ ok: true, ...out });
+    } catch (e) { res.status(400).json(_w384Err(e, 'federated_optout_error')); }
+  });
+
+  r.post('/v1/federated/share-approvals', async (req, res) => {
+    try {
+      const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
+      if (!tenant_id) return res.status(401).json({ error: 'auth_required' });
+      const body = req.body || {};
+      const result = await federatedApprovals.shareApprovalRows({
+        tenant_id,
+        namespace: body.namespace,
+        since: body.since,
+      });
+      res.json({ ok: true, ...result });
+    } catch (e) {
+      if (e && (e.code === 'NOT_OPTED_IN' || e.code === 'OUT_OF_SCOPE')) {
+        return res.status(409).json({ error: e.code.toLowerCase(), detail: e.message });
+      }
+      res.status(400).json(_w384Err(e, 'federated_share_error'));
+    }
+  });
+
+  r.post('/v1/federated/aggregate', (req, res) => {
+    try {
+      const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
+      if (!tenant_id) return res.status(401).json({ error: 'auth_required' });
+      const body = req.body || {};
+      const result = federatedApprovals.aggregateApprovals({
+        local_rows: body.local_rows || [],
+        peer_rows: body.peer_rows || [],
+        epsilon: body.epsilon,
+      });
+      res.json({ ok: true, ...result });
+    } catch (e) { res.status(400).json(_w384Err(e, 'federated_aggregate_error')); }
+  });
+
+  r.get('/v1/federated/peers', (req, res) => {
+    try {
+      const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
+      if (!tenant_id) return res.status(401).json({ error: 'auth_required' });
+      const peers = federatedApprovals.listPeers({ tenant_id });
+      res.json({ ok: true, total: peers.length, peers, feature_state: federatedApprovals.FEATURE_STATE });
+    } catch (e) { res.status(500).json(_w384Err(e, 'federated_peers_error')); }
+  });
+
+  r.get('/v1/federated/audit', (req, res) => {
+    try {
+      const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
+      if (!tenant_id) return res.status(401).json({ error: 'auth_required' });
+      const limit = req.query.limit ? Number(req.query.limit) : 50;
+      const out = federatedApprovals.auditTrail({ tenant_id, limit });
+      res.json({ ok: true, ...out });
+    } catch (e) { res.status(400).json(_w384Err(e, 'federated_audit_error')); }
   });
 
   // ============== W384: pipeline (tokenizer + distill + compile + full) ==============
