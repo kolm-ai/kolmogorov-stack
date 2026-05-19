@@ -16210,7 +16210,7 @@ const COMPLETION_VERBS = [
   'models', 'gpu', 'export', 'seeds', 'anonymize', 'redact', 'reinject', 'improve', 'instant', 'extract', 'doc',
   'keygen', 'pubkey', 'keys', 'auditor', 'quantize',
   'sigstore-attest', 'attest', 'test', 'drift', 'trace', 'ir', 'device', 'cc', 'fl',
-  'marketplace', 'tail', 'replay', 'runtime',
+  'marketplace', 'tail', 'replay', 'runtime', 'bridges',
   'jobs', 'watch', 'sync', 'profile', 'checkpoint', 'import-chat', 'merge',
   'agent', 'init-agent',
   'services', 'bootstrap', 'proxy', 'remote', 'connect',

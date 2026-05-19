@@ -21,25 +21,32 @@ const FILES = [
   path.join(REPO, 'src', 'agent-telemetry.js'),
 ];
 
+// Sentinel characters are constructed via String.fromCharCode so this test
+// file itself stays free of mojibake glyphs — site.test.js's encoding scan
+// walks tests/* and would flag any U+FFFD literal in source.
+const SENTINEL_FFFD = String.fromCharCode(0xfffd);
+// cp1252-double-encoded em-dash prefix: C3 A2 E2 80 84 = "â€”"
+// when decoded as UTF-8. Build via charCodes so the literal does not appear.
+const SENTINEL_CP1252 = String.fromCharCode(0x00e2, 0x20ac);
+
 function findMojibake(text) {
   const lines = text.split('\n');
   const hits = [];
   for (let i = 0; i < lines.length; i++) {
     const ln = lines[i];
     // U+FFFD REPLACEMENT CHARACTER — the canonical mojibake sentinel.
-    if (/�/.test(ln)) {
+    if (ln.indexOf(SENTINEL_FFFD) !== -1) {
       hits.push({ line: i + 1, kind: 'U+FFFD', text: ln.slice(0, 100) });
       continue;
     }
     // cp1252-double-encoded sequences. Real em-dash is U+2014.
-    // The double-encoded form shows up as "â€" prefix (C3 A2 E2 80).
-    if (/â€/.test(ln)) {
+    if (ln.indexOf(SENTINEL_CP1252) !== -1) {
       hits.push({ line: i + 1, kind: 'cp1252-double', text: ln.slice(0, 100) });
       continue;
     }
-    // Bare "??" inside a single-line comment (// ... ??) is the visible
-    // form mojibake takes in some terminals. Excludes JS nullish-coalescing
-    // (which appears in code, not in `//`-prefixed lines).
+    // Bare "??" inside a single-line comment is the visible form mojibake
+    // takes in some terminals. Excludes JS nullish-coalescing (which appears
+    // in code, not in `//`-prefixed lines).
     if (/^\s*\/\//.test(ln) && /\?\?/.test(ln)) {
       hits.push({ line: i + 1, kind: 'bare-?? in comment', text: ln.slice(0, 100) });
     }

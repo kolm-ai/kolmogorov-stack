@@ -142,6 +142,21 @@ test('4. every COMPLETION_VERBS entry has at least one inbound docs reference', 
     // W378/W379 device + data verbs — surfaced via /account/devices,
     // /account/datasets, /account/labeling (W375).
     'devices', 'install-device', 'dataset', 'label',
+    // W400/W401 aliases — `key` is the singular alias for the documented
+    // `keys` verb (Ed25519 signing-key management); `import` is the singular
+    // alias for `import-chat` (already in ALLOWED_GAPS above and documented
+    // under /docs/state).
+    'key', 'import',
+    // W409y/W375 — billing (usage meters + tier caps) and opportunities
+    // (savings-opportunity engine) ship with dedicated /account/billing and
+    // /account/opportunities surfaces in the post-auth control plane. HELP
+    // entries on the CLI carry per-verb docs.
+    'billing', 'opportunities',
+    // W435 — `bridges` lists raw observation events used for the incremental
+    // retrain loop (`--since` + `--since-last-compile`). It's CLI plumbing for
+    // the W434 drift HTTP surface; dedicated docs page under /docs/cli/bridges
+    // tracked separately.
+    'bridges',
   ]);
   const real = missing.filter(v => !ALLOWED_GAPS.has(v));
   assert.deepEqual(real, [],

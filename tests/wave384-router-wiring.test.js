@@ -57,7 +57,17 @@ async function makeAppAndTenant({ admin = false } = {}) {
   app.use(express.json({ limit: '4mb' }));
   app.use(buildRouter());
   const t = provisionAnonTenant({ ttl_days: 1, quota: 5000 });
-  return { app, apiKey: t.api_key, adminKey: admin ? process.env.ADMIN_KEY : null, dataDir: dir };
+  return {
+    app,
+    apiKey: t.api_key,
+    adminKey: admin ? process.env.ADMIN_KEY : null,
+    dataDir: dir,
+    // W411 — tests that seed events directly through appendEvent() must stamp
+    // the canonical tenant_id so the read-side fence in createDataset() etc.
+    // can see them. Caller passes this via `tenant_id: tenantId`.
+    tenantId: t.id || t.tenant_id || t.tenant?.id,
+    tenantName: t.name || t.tenant_name,
+  };
 }
 
 function withServer(app, fn) {
@@ -367,11 +377,43 @@ test('W384 #13 — GET /v1/opportunities returns ok + opportunities array', asyn
 
 // =====================================================================
 // W384 #14 — opportunities accept then dismiss flips the persisted status.
+// W437 — pre-W419 this test posted a synthetic opp_synthetic_test_id_<hex>
+// because the route was a write-through stub that didn't enforce ownership.
+// After W419 the route 404s through _assertOppOwnership() for any ID that
+// doesn't actually belong to the tenant. Fix: seed events, find a real
+// opportunity from /v1/opportunities, then accept/dismiss that one.
 // =====================================================================
 test('W384 #14 — POST /v1/opportunities/:id/accept then /dismiss updates persisted state', async () => {
-  const { app, apiKey } = await makeAppAndTenant();
+  const { app, apiKey, tenantId } = await makeAppAndTenant();
+  // Seed enough repeated events under the authenticated tenant to surface
+  // an opportunity. opportunity-engine clusters by (model, template) and
+  // requires minCallCount=10 by default.
+  const eventStore = await import('../src/event-store.js');
+  const ns = 'w384_14_' + crypto.randomBytes(4).toString('hex');
+  for (let i = 0; i < 20; i++) {
+    await eventStore.appendEvent({
+      tenant_id: tenantId,
+      namespace: ns,
+      provider: 'openai',
+      model: 'gpt-4o',
+      prompt_redacted: 'classify support ticket #' + i,
+      response_redacted: 'category-A',
+      prompt_tokens: 500,
+      completion_tokens: 30,
+      estimated_cost_usd: 0.03,
+      latency_ms: 1200,
+      status: 'ok',
+      source_type: 'real',
+    });
+  }
   await withServer(app, async (base) => {
-    const id = 'opp_synthetic_test_id_' + crypto.randomBytes(4).toString('hex');
+    // Discover a real opportunity through the same route the test exercises.
+    const list = await api(base, '/v1/opportunities?namespace=' + encodeURIComponent(ns), { apiKey });
+    assert.equal(list.status, 200, '/v1/opportunities must list');
+    const lb = await list.json();
+    assert.ok(lb.total >= 1, 'seeded events must surface at least one opportunity: got ' + lb.total);
+    const target = lb.opportunities.find(o => o.type !== 'privacy_leak') || lb.opportunities[0];
+    const id = target.id;
     const accept = await api(base, `/v1/opportunities/${id}/accept`, {
       apiKey, method: 'POST', body: { reason: 'test' },
     });
@@ -409,7 +451,7 @@ test('W384 #15 — POST /v1/datasets without namespace returns 400', async () =>
 // W384 #16 — dataset split produces train + holdout disjoint id sets.
 // =====================================================================
 test('W384 #16 — POST /v1/datasets/:id/split produces disjoint train + holdout', async () => {
-  const { app, apiKey } = await makeAppAndTenant();
+  const { app, apiKey, tenantId } = await makeAppAndTenant();
   await withServer(app, async (base) => {
     // Seed events directly through the event-store import so the dataset
     // builder has rows to work with.
@@ -418,8 +460,9 @@ test('W384 #16 — POST /v1/datasets/:id/split produces disjoint train + holdout
     for (let i = 0; i < 20; i++) {
       await appendEvent({
         namespace: ns,
-        input: `input-${i}`,
-        output: `output-${i}`,
+        tenant_id: tenantId,
+        prompt_redacted: `input-${i}-${crypto.randomBytes(4).toString('hex')}`,
+        response_redacted: `output-${i}-${crypto.randomBytes(4).toString('hex')}`,
         model: 'gpt-test',
         provider: 'test',
       });
@@ -496,7 +539,7 @@ test('W384 #18 — POST /v1/sim/run returns sim_id + status + events', async () 
 // W384 #19 — bakeoff returns a recommended contestant or honest null.
 // =====================================================================
 test('W384 #19 — POST /v1/bakeoff/run returns recommendation or honest empty', async () => {
-  const { app, apiKey } = await makeAppAndTenant();
+  const { app, apiKey, tenantId } = await makeAppAndTenant();
   await withServer(app, async (base) => {
     // No dataset_id -> 400.
     const noBody = await api(base, '/v1/bakeoff/run', {
@@ -512,8 +555,9 @@ test('W384 #19 — POST /v1/bakeoff/run returns recommendation or honest empty',
     for (let i = 0; i < 4; i++) {
       await appendEvent({
         namespace: ns,
-        input: `bake-q-${i}`,
-        output: `bake-a-${i}`,
+        tenant_id: tenantId,
+        prompt_redacted: `bake-q-${i}-${crypto.randomBytes(4).toString('hex')}`,
+        response_redacted: `bake-a-${i}-${crypto.randomBytes(4).toString('hex')}`,
         model: 'gpt-test', provider: 'test',
       });
     }
@@ -650,8 +694,18 @@ test('W384 #23 — GET /v1/billing/meters returns the 12-entry meter catalog', a
     assert.equal(r.status, 200);
     const body = await r.json();
     assert.equal(body.ok, true);
-    assert.equal(body.total, 12, 'exactly 12 meters must be exposed');
+    // W409y appended tier-aware billing_units to the legacy 12-meter catalog,
+    // so total is now legacy(12) + billing_units(N). Assert the legacy 12 are
+    // present and that the union is at least 12.
+    assert.ok(body.total >= 12, 'at least 12 meters must be exposed (got ' + body.total + ')');
     assert.ok(Array.isArray(body.meters));
+    const legacyExpected = ['capture_count','distill_synth_count','compile_jobs','replay_runs',
+      'bakeoff_runs','sim_events','tokens_in','tokens_out','spend_usd','storage_bytes',
+      'sync_push_count','privacy_redactions'];
+    const ids = new Set(body.meters.map((m) => m.id));
+    for (const need of legacyExpected) {
+      assert.ok(ids.has(need), 'legacy meter id missing from catalog: ' + need);
+    }
     for (const m of body.meters) {
       assert.ok(typeof m.id === 'string' && m.id.length, 'every meter must have an id');
       assert.ok(typeof m.label === 'string', 'every meter must have a label');
