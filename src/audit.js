@@ -44,6 +44,8 @@ export const AUDIT_OPS = Object.freeze({
   PLAN_CHANGED: 'billing.plan_changed',
   PLAN_CANCELED: 'billing.plan_canceled',
   STRIPE_EVENT: 'billing.stripe_event',
+  // W450 — account settings updates (per-tenant user-settings surface)
+  SETTINGS_UPDATED: 'settings.updated',
   // Teams + tunnels + BYOC
   TEAM_CREATED: 'teams.created',
   TEAM_MEMBER_INVITED: 'teams.member_invited',

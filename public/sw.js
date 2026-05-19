@@ -1,5 +1,5 @@
 // Recipe service worker · keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-19-wave448-audit-log-triangle';
+const CACHE = 'kolm-v7-2026-05-19-wave450-billing-settings-triangle';
 const PRECACHE = [
   '/device',
   '/styles.css',

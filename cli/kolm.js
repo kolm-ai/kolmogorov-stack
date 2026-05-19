@@ -425,6 +425,30 @@ Continue) can auto-attach the project's .kolm artifacts via 'kolm serve --mcp'.
 SCHEMA
   https://kolm.ai/docs/kolm-yaml-v0.1.json
 `,
+  settings: `kolm settings - per-tenant account settings. Same surface as
+/account/settings.html + the TUI settings view (key F).
+
+USAGE
+  kolm settings                                # show current settings
+  kolm settings show --json                    # raw JSON envelope
+  kolm settings set k=v [k=v ...]              # upsert one or more fields
+
+FIELDS
+  default_namespace=<string>
+  notifications_email=true|false
+  notifications_webpush=true|false
+  redaction_strictness=strict|balanced|minimal
+  sync_push_enabled=true|false
+  capture_default_durable=true|false
+  key_rotation_warning_days=<int>
+  locale=<string>          # IETF tag (e.g. en-US, ja-JP)
+  timezone=<string>        # IANA tz (e.g. UTC, America/New_York)
+
+EXAMPLES
+  kolm settings show
+  kolm settings set redaction_strictness=balanced sync_push_enabled=false
+  kolm settings set default_namespace=prod
+`,
   audit: `kolm audit - read-only per-tenant audit ledger. Same view the web
 account/audit-log page renders; CSV export honors the same filters.
 
@@ -10941,6 +10965,77 @@ async function cmdAudit(args) {
   }
 }
 
+// W450 — `kolm settings` is the per-tenant user-settings CLI mirror of
+// /account/settings.html + the TUI settings view. One source of truth
+// (/v1/account/settings) feeds all three.
+//
+// Examples:
+//   kolm settings                       # show current settings (table)
+//   kolm settings show --json           # raw JSON envelope
+//   kolm settings set redaction_strictness=strict
+//   kolm settings set notifications_email=false sync_push_enabled=true
+async function cmdSettings(args) {
+  if (maybeHelp('settings', args)) return;
+  const c = loadConfig();
+  if (!c.api_key) {
+    console.error('not logged in. run: kolm login');
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  const asJson = args.includes('--json');
+  const positional = args.find(a => !a.startsWith('--') && !a.includes('='));
+  const sub = positional || 'show';
+  if (sub === 'show' || sub === 'list' || sub === 'get') {
+    const data = await api(c, 'GET', '/v1/account/settings');
+    if (asJson) { console.log(JSON.stringify(data, null, 2)); return; }
+    const s = (data && data.settings) || {};
+    console.error('# /v1/account/settings (defaults merged)');
+    for (const k of Object.keys(s).sort()) {
+      if (k === 'tenant_id') continue;
+      console.log(`${k.padEnd(28)} = ${JSON.stringify(s[k])}`);
+    }
+    return;
+  }
+  if (sub === 'set' || sub === 'put' || sub === 'update') {
+    // Parse key=value pairs from the remaining args.
+    const pairs = args.filter(a => a.includes('=') && !a.startsWith('--'));
+    if (!pairs.length) {
+      console.error('usage: kolm settings set key=value [key=value ...]');
+      console.error('  redaction_strictness=strict|balanced|minimal');
+      console.error('  notifications_email=true|false');
+      console.error('  notifications_webpush=true|false');
+      console.error('  sync_push_enabled=true|false');
+      console.error('  capture_default_durable=true|false');
+      console.error('  default_namespace=<string>');
+      console.error('  key_rotation_warning_days=<int>');
+      console.error('  locale=<string>');
+      console.error('  timezone=<string>');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const patch = {};
+    for (const p of pairs) {
+      const eq = p.indexOf('=');
+      const k = p.slice(0, eq);
+      const raw = p.slice(eq + 1);
+      let v = raw;
+      if (raw === 'true') v = true;
+      else if (raw === 'false') v = false;
+      else if (/^-?\d+$/.test(raw)) v = Number(raw);
+      patch[k] = v;
+    }
+    const data = await api(c, 'PUT', '/v1/account/settings', patch);
+    if (asJson) { console.log(JSON.stringify(data, null, 2)); return; }
+    console.error('# updated: ' + (data && data.updated_fields || []).join(', '));
+    const s = (data && data.settings) || {};
+    for (const k of Object.keys(patch)) {
+      console.log(`${k.padEnd(28)} = ${JSON.stringify(s[k])}`);
+    }
+    return;
+  }
+  console.error('unknown subcommand: ' + sub);
+  console.error('try: kolm settings show | set key=value');
+  process.exit(EXIT.BAD_ARGS);
+}
+
 async function cmdAuditor(args) {
   if (maybeHelp('auditor', args)) return;
   const sub = args[0];
@@ -16389,7 +16484,7 @@ const COMPLETION_VERBS = [
   'config', 'hmac', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'loop', 'logs', 'ask', 'nl', 'chat', 'chat-tui', 'version', 'help', 'completion', 'upgrade', 'update', 'self-update',
   'models', 'gpu', 'export', 'seeds', 'anonymize', 'redact', 'reinject', 'improve', 'instant', 'extract', 'doc',
-  'keygen', 'pubkey', 'keys', 'auditor', 'audit', 'quantize',
+  'keygen', 'pubkey', 'keys', 'auditor', 'audit', 'settings', 'quantize',
   'sigstore-attest', 'attest', 'test', 'drift', 'trace', 'ir', 'device', 'cc', 'fl',
   'marketplace', 'tail', 'replay', 'runtime', 'bridges',
   'jobs', 'watch', 'sync', 'profile', 'checkpoint', 'import-chat', 'merge',
@@ -21045,6 +21140,14 @@ async function cmdTui(args) {
     // W448 — Audit-log view. Mirrors /account/audit-log + `kolm audit` CLI via
     // the same /v1/account/audit-log route. Triangle complete (CLI + TUI + web).
     { id: 'audit-log',          key: 'E', endpoint: '/v1/account/audit-log',     kind: 'get',   label: 'audit log (read-only)' },
+    // W449 — Billing view. Closes the /account/billing triangle: the page
+    // (public/account/billing.html), the CLI verb (`kolm billing usage`),
+    // and now the TUI all read /v1/billing/usage. Same tier_soft/tier_hard
+    // surface; over_soft + over_hard pills render from the same envelope.
+    { id: 'billing',            key: 'I', endpoint: '/v1/billing/usage',         kind: 'get',   label: 'billing (usage + tier caps)' },
+    // W450 — Settings view. Closes the new /account/settings triangle: page,
+    // CLI (`kolm settings show / set k=v`), and TUI all read /v1/account/settings.
+    { id: 'settings',           key: 'F', endpoint: '/v1/account/settings',      kind: 'get',   label: 'account settings (read-only)' },
   ];
   // Also expose simulations under view 'simulations' (alias for one of the
   // workflow rows so the W384 14-view test grep finds the literal). We list
@@ -21384,6 +21487,14 @@ async function cmdTui(args) {
       'audit':         'audit-log',
       'audit-log':     'audit-log',
       'auditlog':      'audit-log',
+      // W449 — billing view aliases (CLI `kolm billing` + TUI `:billing` + web).
+      'billing':       'billing',
+      'usage':         'billing',
+      'plan':          'billing',
+      // W450 — settings view aliases (CLI `kolm settings` + TUI `:settings` + web).
+      'settings':      'settings',
+      'preferences':   'settings',
+      'prefs':         'settings',
     };
     if (VIEW_ALIAS[verb]) {
       const id = VIEW_ALIAS[verb];
@@ -22282,6 +22393,9 @@ async function main() {
       // /account/audit-log.html. Distinct from `kolm auditor` (third-party
       // signing tool); kept as separate verbs to match muscle memory.
       case 'audit':    await withErrorContext('audit',    () => cmdAudit(rest)); break;
+      // W450 — `kolm settings` is the per-tenant settings CLI mirror of
+      // /account/settings.html + the TUI settings view (key F).
+      case 'settings': await withErrorContext('settings', () => cmdSettings(rest)); break;
       case 'quantize': await withErrorContext('quantize', () => cmdQuantize(rest)); break;
       case 'runtime':  await withErrorContext('runtime',  () => cmdRuntime(rest)); break;
       case 'jobs':     await withErrorContext('jobs',     () => cmdJobs(rest)); break;

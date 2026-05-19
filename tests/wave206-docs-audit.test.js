@@ -162,6 +162,11 @@ test('4. every COMPLETION_VERBS entry has at least one inbound docs reference', 
     // user-facing docs; no /docs/cli/audit page required because the audit
     // ledger is an account-app surface, not a workflow verb.
     'audit',
+    // W450 — `settings` mirrors the /account/settings post-auth surface
+    // (per-tenant user-settings: namespace, notifications, redaction
+    // strictness, sync push, locale, timezone). HELP.settings + the page
+    // carry user-facing docs; account-app surface, not a workflow verb.
+    'settings',
   ]);
   const real = missing.filter(v => !ALLOWED_GAPS.has(v));
   assert.deepEqual(real, [],

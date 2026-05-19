@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Settings · Account · kolm.ai</title>
+<meta name="description" content="Per-tenant account settings on kolm.ai: default namespace, notification channels, redaction strictness, sync push, key-rotation reminders, locale, timezone. One source of truth across web + CLI + TUI.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/settings">
+<meta property="og:title" content="Settings &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Per-tenant account settings on kolm.ai: default namespace, notification channels, redaction strictness, sync push, key-rotation reminders, locale, timezone. One source of truth across web + CLI + TUI." />
+<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/settings" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Settings · Account · kolm.ai","description":"Per-tenant account settings on kolm.ai: default namespace, notification channels, redaction strictness, sync push, key-rotation reminders, locale, timezone.","url":"https://kolm.ai/account/settings","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Settings","item":"https://kolm.ai/account/settings"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content h3{font-size:14px;margin:16px 0 8px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px}
+.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink);vertical-align:top}
+.field-name{color:var(--accent);font-weight:600}
+.field-help{color:var(--ink-faint);font-size:11.5px;margin-top:2px;font-family:var(--mono)}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.btn.primary:hover{filter:brightness(1.1);color:#0b0d10}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+input[type=text],input[type=number],select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px;min-width:200px}
+input[type=checkbox]{accent-color:var(--accent)}
+#save-status{font-size:12px;color:var(--ink-mute);margin-left:8px}
+.kbd{font-family:var(--mono);font-size:11px;background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--ink-mute);border:1px solid var(--line)}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
+</style>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+    <div class="site-actions"><a href="/docs">Help</a></div>
+  </div>
+</header>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/agent-telemetry">Agent telemetry</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Builds</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li><li><a href="/account/audit-log">Audit log</a></li><li><a href="/account/settings" aria-current="page">Settings</a></li></ul></nav>
+<section class="acct-content">
+<h1>Settings.</h1>
+<p class="lede">Per-tenant account settings. Same source of truth as <code>kolm settings</code> (CLI) and the TUI settings view (<span class="kbd">F</span>). Updates are audited; defaults are returned alongside current values so you can always see what the platform ships out of the box.</p>
+
+<div class="kpanel">
+<h2>Capture &amp; sync</h2>
+<table class="ktable">
+<thead><tr><th>Field</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><span class="field-name">default_namespace</span><div class="field-help">Namespace assigned to new captures when the client doesn't set one.</div></td><td><input type="text" id="f-default_namespace" name="default_namespace"></td></tr>
+<tr><td><span class="field-name">capture_default_durable</span><div class="field-help">If on, captures require <code>x-kolm-capture-durable</code> to consider the row landed.</div></td><td><input type="checkbox" id="f-capture_default_durable" name="capture_default_durable"></td></tr>
+<tr><td><span class="field-name">sync_push_enabled</span><div class="field-help">Per-tenant kill-switch for outbound sync push from kolm runners.</div></td><td><input type="checkbox" id="f-sync_push_enabled" name="sync_push_enabled"></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="kpanel">
+<h2>Privacy</h2>
+<table class="ktable">
+<thead><tr><th>Field</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><span class="field-name">redaction_strictness</span><div class="field-help">strict: 17-class PHI+PII+secrets. balanced: PHI+secrets only. minimal: secrets only.</div></td><td>
+  <select id="f-redaction_strictness" name="redaction_strictness">
+    <option value="strict">strict (17-class PHI+PII+secrets)</option>
+    <option value="balanced">balanced (PHI+secrets only)</option>
+    <option value="minimal">minimal (secrets only)</option>
+  </select>
+</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="kpanel">
+<h2>Notifications</h2>
+<table class="ktable">
+<thead><tr><th>Field</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><span class="field-name">notifications_email</span><div class="field-help">Email for threshold alerts (W215) + drift alerts.</div></td><td><input type="checkbox" id="f-notifications_email" name="notifications_email"></td></tr>
+<tr><td><span class="field-name">notifications_webpush</span><div class="field-help">WebPush for live threshold alerts in the browser.</div></td><td><input type="checkbox" id="f-notifications_webpush" name="notifications_webpush"></td></tr>
+<tr><td><span class="field-name">key_rotation_warning_days</span><div class="field-help">Show a banner this many days before signing-key expiry.</div></td><td><input type="number" id="f-key_rotation_warning_days" name="key_rotation_warning_days" min="1" max="365"></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="kpanel">
+<h2>Locale</h2>
+<table class="ktable">
+<thead><tr><th>Field</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><span class="field-name">locale</span><div class="field-help">IETF tag (e.g. en-US, ja-JP). Currently affects date format only.</div></td><td><input type="text" id="f-locale" name="locale"></td></tr>
+<tr><td><span class="field-name">timezone</span><div class="field-help">IANA tz database name (e.g. UTC, America/New_York).</div></td><td><input type="text" id="f-timezone" name="timezone"></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="kpanel">
+<button class="btn primary" id="save-btn">Save settings</button>
+<span id="save-status"></span>
+</div>
+
+<div id="empty-state" class="empty" hidden data-empty-state>
+  <strong>No settings yet.</strong> Sign in to save your tenant settings. Defaults shown above will apply until you save.
+</div>
+</section>
+</div>
+</main>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json","Content-Type":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+})();
+
+// W450 — /v1/account/settings is the read+write source of truth. Page hydrates
+// the form on load, PUT on save. Same shape as `kolm settings show/set` and TUI.
+function loadForm(s){
+  for (var k in s){ if(!s.hasOwnProperty(k)) continue;
+    var el = document.getElementById('f-'+k); if(!el) continue;
+    if (el.type === 'checkbox') el.checked = !!s[k]; else el.value = (s[k] == null ? '' : String(s[k]));
+  }
+}
+function readForm(){
+  var out = {};
+  var fields = ['default_namespace','notifications_email','notifications_webpush','redaction_strictness','sync_push_enabled','key_rotation_warning_days','locale','timezone','capture_default_durable'];
+  for (var i=0;i<fields.length;i++){
+    var k = fields[i]; var el = document.getElementById('f-'+k); if(!el) continue;
+    if (el.type === 'checkbox') out[k] = !!el.checked;
+    else if (el.type === 'number') out[k] = Number(el.value || 0);
+    else out[k] = el.value;
+  }
+  return out;
+}
+window.kfetch('/v1/account/settings').then(function(j){
+  if (j && j.settings) loadForm(j.settings);
+}).catch(function(){ document.getElementById('empty-state').hidden=false; });
+
+document.getElementById('save-btn').addEventListener('click', function(){
+  var patch = readForm();
+  document.getElementById('save-status').textContent = 'saving...';
+  window.kfetch('/v1/account/settings', { method: 'PUT', body: JSON.stringify(patch) })
+    .then(function(j){
+      document.getElementById('save-status').textContent = 'saved ' + new Date().toLocaleTimeString();
+      if (j && j.settings) loadForm(j.settings);
+    })
+    .catch(function(e){
+      document.getElementById('save-status').textContent = 'error: ' + (e && e.message || e);
+    });
+});
+</script>
+</body>
+</html>

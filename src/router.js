@@ -3750,6 +3750,82 @@ export function buildRouter() {
     }
   });
 
+  // W450 — /v1/account/settings is the per-tenant user-settings surface.
+  // Three readers: the /account/settings web page, `kolm settings` CLI, and
+  // the TUI settings view. One table (`account_settings`) keyed by tenant_id,
+  // one upsert per PUT. The schema is intentionally small and flat (no nested
+  // policy DSLs) so it can be hand-edited in the web form, the CLI, and the
+  // TUI :set command without round-trip class loaders.
+  const SETTINGS_DEFAULTS = Object.freeze({
+    default_namespace: 'default',
+    notifications_email: true,
+    notifications_webpush: false,
+    redaction_strictness: 'strict',           // strict | balanced | minimal
+    sync_push_enabled: true,
+    key_rotation_warning_days: 90,
+    locale: 'en-US',
+    timezone: 'UTC',
+    capture_default_durable: true,
+  });
+  const SETTINGS_ENUMS = Object.freeze({
+    redaction_strictness: new Set(['strict', 'balanced', 'minimal']),
+  });
+  function _loadSettings(tenantId) {
+    const row = findOne('account_settings', (r) => r.tenant_id === tenantId);
+    if (!row) return { tenant_id: tenantId, ...SETTINGS_DEFAULTS };
+    // Merge stored row over defaults so newly-added fields surface without
+    // a backfill migration.
+    return { ...SETTINGS_DEFAULTS, ...row, tenant_id: tenantId };
+  }
+  r.get('/v1/account/settings', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    try {
+      const s = _loadSettings(req.tenant_record.id);
+      res.json({ ok: true, settings: s, defaults: SETTINGS_DEFAULTS });
+    } catch (e) {
+      res.status(500).json({ error: 'settings_read_error', detail: String(e && e.message || e) });
+    }
+  });
+  r.put('/v1/account/settings', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const tenantId = req.tenant_record.id;
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    // Whitelist only documented fields — never let a PUT spray arbitrary keys
+    // into the settings row.
+    const patch = {};
+    for (const k of Object.keys(SETTINGS_DEFAULTS)) {
+      if (!Object.prototype.hasOwnProperty.call(body, k)) continue;
+      const v = body[k];
+      if (SETTINGS_ENUMS[k] && !SETTINGS_ENUMS[k].has(String(v))) {
+        return res.status(400).json({
+          error: 'invalid_value',
+          field: k,
+          allowed: Array.from(SETTINGS_ENUMS[k]),
+        });
+      }
+      patch[k] = v;
+    }
+    try {
+      const existing = findOne('account_settings', (r) => r.tenant_id === tenantId);
+      if (existing) {
+        update('account_settings', (r) => r.tenant_id === tenantId, { ...patch, updated_at: new Date().toISOString() });
+      } else {
+        insert('account_settings', { tenant_id: tenantId, ...SETTINGS_DEFAULTS, ...patch, created_at: new Date().toISOString() });
+      }
+      tryAppendAudit({
+        tenant_id: tenantId,
+        tenant_name: req.tenant_record.name || null,
+        actor: 'tenant',
+        op: AUDIT_OPS.SETTINGS_UPDATED || 'settings.updated',
+        payload: { fields: Object.keys(patch) },
+      });
+      const merged = _loadSettings(tenantId);
+      res.json({ ok: true, settings: merged, updated_fields: Object.keys(patch) });
+    } catch (e) {
+      res.status(500).json({ error: 'settings_write_error', detail: String(e && e.message || e) });
+    }
+  });
+
   // Rotate the per-tenant receipt-signing secret. Previous secret is
   // preserved so older signed artifacts and audit rows still verify.
   r.post('/v1/account/rotate-receipt-secret', (req, res) => {

@@ -252,6 +252,7 @@ test('W446 #5 — sw.js cache slug is current (audit-finish marker)', () => {
     'sw.js CACHE slug must start with kolm-v7-2026-05-19-wave*, got: ' + slug);
   assert.ok(
     slug.includes('wave443') || slug.includes('wave445') || slug.includes('wave446') ||
-    slug.includes('wave447') || slug.includes('wave448'),
-    'sw.js CACHE slug must reference the W443-W448 audit-finish/follow-up batch, got: ' + slug);
+    slug.includes('wave447') || slug.includes('wave448') || slug.includes('wave449') ||
+    slug.includes('wave450'),
+    'sw.js CACHE slug must reference the W443-W450 audit-finish/follow-up batch, got: ' + slug);
 });
