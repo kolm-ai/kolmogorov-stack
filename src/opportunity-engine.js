@@ -69,6 +69,44 @@ export async function findOpportunities(opts = {}) {
   const minCallCount = opts.minCallCount == null ? 50 : opts.minCallCount;
   const minMonthlySpend = opts.minMonthlySpend == null ? 10 : opts.minMonthlySpend;
   const tenant_id = opts.tenant_id || opts.tenant || null;
+
+  // P0-5 fix: when no namespace filter is given, dispatch per-namespace
+  // and union the results. Without this the pre-fix code would label every
+  // global opportunity with `events[0].namespace`, lumping clusters from
+  // unrelated namespaces under whatever the most-recent event happens to be
+  // (e.g. a single `media-test` row would brand 7 globally-derived opps as
+  // "namespace: media-test"). Each opp now carries the namespace of the
+  // events that actually generated it.
+  if (!opts.namespace) {
+    const scanEvents = await listEvents({
+      tenant_id,
+      since: opts.since,
+      limit: opts.limit == null ? 10000 : opts.limit,
+      order: 'desc',
+    });
+    const namespaces = new Set();
+    for (const ev of scanEvents) {
+      if (ev && ev.namespace) namespaces.add(ev.namespace);
+    }
+    if (namespaces.size <= 1) {
+      // Single namespace (or zero events): fall through to the inner scan
+      // with that namespace pinned, avoiding the recursion overhead.
+      const ns = scanEvents.length ? (scanEvents[0].namespace || 'default') : 'default';
+      return findOpportunities({ ...opts, namespace: ns });
+    }
+    const all = [];
+    for (const ns of namespaces) {
+      const sub = await findOpportunities({ ...opts, namespace: ns });
+      for (const o of sub) all.push(o);
+    }
+    all.sort((a, b) => {
+      if (a.type === 'privacy_leak' && b.type !== 'privacy_leak') return -1;
+      if (b.type === 'privacy_leak' && a.type !== 'privacy_leak') return 1;
+      return (b.estimated_savings_usd || 0) - (a.estimated_savings_usd || 0);
+    });
+    return all;
+  }
+
   const events = await listEvents({
     namespace: opts.namespace,
     tenant_id,

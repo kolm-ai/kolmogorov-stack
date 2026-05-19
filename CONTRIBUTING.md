@@ -42,7 +42,7 @@ Style:
 
 ## Code of conduct
 
-We follow the [Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). Be useful, be specific, be patient with reviewers, and don't make it weird. Direct any concerns to founders@kolm.ai.
+We follow the [Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). Be useful, be specific, be patient with reviewers, and don't make it weird. Direct any concerns to dev@kolm.ai.
 
 ## License
 

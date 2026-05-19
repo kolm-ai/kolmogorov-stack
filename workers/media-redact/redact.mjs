@@ -67,6 +67,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 const ROOT       = path.resolve(__dirname, '..', '..');
 
+// tesseract.js Worker thread re-throws decoder errors via process.nextTick AFTER
+// the recognize() promise rejects — that crashes Node with exit 1 unless we trap
+// it here. Treat the late throw as extract_failed (exit 5) and emit an honest
+// JSON envelope first so JSON-parsing callers get the same shape as the
+// synchronous failure path.
+let _extractFailedEmitted = false;
+process.on('uncaughtException', (err) => {
+  const msg = String(err && err.message || err).slice(0, 200);
+  try { process.stderr.write('[media-redact] uncaughtException trapped: ' + msg + '\n'); } catch (_) {}
+  if (!_extractFailedEmitted) {
+    try { process.stdout.write(JSON.stringify({ ok: false, error: 'extract_failed', detail: msg }) + '\n'); } catch (_) {}
+  }
+  process.exit(5);
+});
+
 const args = parseArgs(process.argv.slice(2));
 
 if (args.doctor) {
@@ -113,7 +128,20 @@ try {
   process.exit(5);
 }
 if (!extraction || extraction.ok === false) {
-  // Extractor not installed — honest envelope so the caller knows what to do.
+  // Two failure modes: extractor missing (exit 3 + install_hint) vs extractor
+  // present but extraction blew up on bad bytes (exit 5 + detail). Differentiate
+  // so the caller can tell "install something" from "fix your input".
+  if (extraction && extraction.error === 'extract_failed') {
+    emit({
+      ok: false,
+      error: 'extract_failed',
+      kind,
+      media_uri: args.uri || args.path,
+      extractor: extraction.extractor || null,
+      detail: extraction.detail || null,
+    });
+    process.exit(5);
+  }
   emit({
     ok: false,
     error: 'extractor_not_installed',
@@ -232,8 +260,12 @@ async function extractText(kind, bytes, args) {
     if (!recognize) {
       return { ok: false, extractor: 'tesseract.js', install_hint: installHintForKind(kind) };
     }
-    const { data } = await recognize(bytes, args.lang || 'eng');
-    return { ok: true, extractor: 'tesseract.js', text: String(data && data.text || '') };
+    try {
+      const { data } = await recognize(bytes, args.lang || 'eng');
+      return { ok: true, extractor: 'tesseract.js', text: String(data && data.text || '') };
+    } catch (e) {
+      return { ok: false, extractor: 'tesseract.js', error: 'extract_failed', detail: String(e && e.message || e).slice(0, 200) };
+    }
   }
   if (kind === 'audio' || kind === 'video') {
     const whisper = findOnPath(['whisper-cli', 'whisper-cpp', 'whisper']);

@@ -357,8 +357,8 @@ function renderRouteSection(route) {
   const shortDesc = shortDescriptionFor(route);
   const fullDesc = fullDescriptionFor(route);
   const stubBadge = route.stub
-    ? ' <span class="route-stub">auto-extracted</span>'
-    : '';
+    ? ' <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span>'
+    : ' <span class="route-live" title="Has inline documentation in router.js.">live</span>';
   const expandedNote = route.expandedFrom
     ? ' <span class="route-stub">array-literal expansion</span>'
     : '';
@@ -427,6 +427,17 @@ function renderGroupIntro(key, routes) {
 
 function renderPage(grouped, totalCount, unparseable) {
   const groupKeys = Array.from(grouped.keys()).sort();
+  // P0-7 partition counts — surface live vs preview at the top of the page so
+  // the docs surface tells the truth about which routes are documented vs.
+  // auto-extracted without inline docs. Both counts are real, wired routes.
+  let liveCount = 0;
+  let previewCount = 0;
+  for (const k of groupKeys) {
+    for (const r of grouped.get(k)) {
+      if (r.stub) previewCount++;
+      else liveCount++;
+    }
+  }
   const tocBody = groupKeys
     .map((k) => {
       const arr = grouped.get(k);
@@ -547,6 +558,11 @@ li{margin:4px 0}
 .m-patch{background:#c89fdc}
 .m-delete{background:#dc8a8a}
 .route-stub{display:inline-block;padding:2px 8px;border-radius:4px;background:rgba(236,231,220,0.06);color:var(--ink-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;text-transform:uppercase}
+.route-live{display:inline-block;padding:2px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;text-transform:uppercase}
+.partition-toolbar{display:flex;gap:14px;align-items:center;margin:10px 0 22px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)}
+.partition-toolbar label{cursor:pointer;display:flex;gap:6px;align-items:center}
+body[data-api-filter="live"] .api-route:has(.route-stub){display:none}
+body[data-api-filter="live"] .api-group:not(:has(.route-live)){display:none}
 .group-count,.toc-count{color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;font-weight:400;margin-left:6px}
 .toc-grid{column-count:3;column-gap:24px;list-style:none;padding:0;margin:18px 0 32px;font-size:13.5px;font-family:var(--mono)}
 @media(max-width:820px){.toc-grid{column-count:1}}
@@ -576,7 +592,9 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h1>API reference</h1>
 <p class="lede">The kolm.ai REST surface. ${totalCount} documented routes across ${groupKeys.length} groups, auto-extracted from <code>src/router.js</code> and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
 
-<p class="totals"><strong>${totalCount} documented routes</strong> &middot; ${groupKeys.length} groups &middot; generated ${TODAY} &middot; source <code>src/router.js</code></p>
+<p class="totals"><strong>${totalCount} documented routes</strong> &middot; <span class="route-live">${liveCount} live</span> &middot; <span class="route-stub">${previewCount} preview</span> &middot; ${groupKeys.length} groups &middot; generated ${TODAY} &middot; source <code>src/router.js</code></p>
+
+<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview" onclick="document.body.setAttribute('data-api-filter', this.checked ? 'live' : 'all')"> Hide preview routes (show only routes with inline documentation)</label></div>
 
 ${unparseableNote}
 

@@ -1,7 +1,7 @@
 // Wave 363 — billing upgrade resolves a real URL on every path.
 //
 // Closes the W199-W363 gap where the upgrade case in src/assistant.js returned
-// "not yet wired in. Mail founders@kolm.ai". The new resolveUpgradeUrl chain:
+// "not yet wired in. Mail dev@kolm.ai". The new resolveUpgradeUrl chain:
 //   1. existing Stripe Payment Link (operator-pre-configured)
 //   2. Stripe Checkout Session via plain fetch (KOLM_STRIPE_KEY + price env)
 //   3. self-hosted KOLM_BILLING_URL with ?plan=... appended

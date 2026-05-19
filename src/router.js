@@ -250,6 +250,14 @@ import {
 // W466 — multimodal bake-off harness (image/audio/video).
 import { runMultimodalBakeoff } from './multimodal-bakeoff.js';
 
+// W467 — cross-provider trace IR translator.
+import {
+  translateIr as traceTranslateIr,
+  translateTrace as traceTranslateTrace,
+  detectTraceProvider as traceDetectProvider,
+  KNOWN_PROVIDERS as TRACE_KNOWN_PROVIDERS,
+} from './trace-translator.js';
+
 // Per-IP rate limiters (S5, S10). Express trust-proxy is set to 2 in
 // server.js so X-Forwarded-For resolves through the Vercel→Railway chain.
 // Vercel rotates client egress IPs within a /24 subnet on each request, so
@@ -280,8 +288,8 @@ const signupLimiter = rateLimit({
   message: {
     error: 'rate_limited',
     detail: 'too many signups from this network in the last 24h',
-    hint: 'behind a shared network or VPN? mail founders@kolm.ai for a direct invite',
-    contact: 'founders@kolm.ai',
+    hint: 'behind a shared network or VPN? mail dev@kolm.ai for a direct invite',
+    contact: 'dev@kolm.ai',
   },
   keyGenerator: ipKey,
   validate: { trustProxy: false },
@@ -766,6 +774,36 @@ export function buildRouter() {
     res.json({ plans });
   });
 
+  // P0-3 closure: /v1/billing/tiers as a public alias of /v1/plans so the
+  // CLI `kolm billing tiers` (+ alias `plans`) returns useful data without
+  // requiring auth. Includes a billing_configured flag tied to the actual
+  // STRIPE_PAYMENT_LINK_* env presence so the UI can demote when unwired.
+  r.get('/v1/billing/tiers', (_req, res) => {
+    const plans = Object.values(PLAN_CATALOG).map(p => ({
+      id: p.id,
+      label: p.label,
+      price_usd_month: p.price_usd_month,
+      quota: p.quota,
+      seats: p.seats,
+      self_serve: true,
+      billing_link_configured: !!billingLinkFor(p.id),
+    }));
+    const configured = plans.filter(p => p.billing_link_configured).length;
+    const paidConfigured = plans.filter(p => p.price_usd_month > 0 && p.billing_link_configured).length;
+    const paidTotal = plans.filter(p => p.price_usd_month > 0).length;
+    res.json({
+      source: 'cloud',
+      plans,
+      stripe: {
+        configured_links: configured,
+        paid_links_configured: paidConfigured,
+        paid_links_total: paidTotal,
+        webhook_secret_set: !!process.env.STRIPE_WEBHOOK_SECRET,
+        ready: paidConfigured === paidTotal && !!process.env.STRIPE_WEBHOOK_SECRET,
+      },
+    });
+  });
+
   // ---------- OAuth (Google + GitHub) ----------
   // Each provider is a no-op until its CLIENT_ID/CLIENT_SECRET pair is
   // configured. /v1/oauth/providers reports which are live.
@@ -825,7 +863,7 @@ export function buildRouter() {
     if (existingTenant) {
       return res.status(409).json({
         error: 'email_exists',
-        hint: 'an account already exists for this email; sign in via OAuth (/v1/oauth/google/start) or contact founders@kolm.ai for account recovery',
+        hint: 'an account already exists for this email; sign in via OAuth (/v1/oauth/google/start) or contact dev@kolm.ai for account recovery',
         tenant: { id: existingTenant.id, name: existingTenant.name, plan: existingTenant.plan },
       });
     }
@@ -4892,7 +4930,7 @@ export function buildRouter() {
       },
       baa: {
         status: t.plan === 'business' || t.plan === 'enterprise' ? 'eligible' : 'available on Business or Enterprise plan',
-        execution_path: 'mailto:founders@kolm.ai with org + signatory; 48-hour countersign target',
+        execution_path: 'mailto:dev@kolm.ai with org + signatory; 48-hour countersign target',
         phi_schedule: 'https://kolm.ai/baa#phi-schedule',
       },
       subprocessors: [
@@ -4925,7 +4963,7 @@ export function buildRouter() {
       })),
       attestation: {
         statement: `This compliance package was generated from kolm production data for tenant ${t.id}. All receipt hashes are reproducible from the artifacts they reference. No PHI is included.`,
-        contact: 'founders@kolm.ai',
+        contact: 'dev@kolm.ai',
         signed_at: new Date().toISOString(),
       },
     };
@@ -7940,6 +7978,75 @@ export function buildRouter() {
       if (/tenant_mismatch/.test(msg)) return res.status(403).json({ ok: false, error: msg });
       if (/empty trace/.test(msg))     return res.status(404).json({ ok: false, error: msg });
       if (/trace_id must be|no replayable spans/.test(msg)) return _http400(res, msg);
+      _http500(res, e);
+    }
+  });
+
+  // W467 — cross-provider trace IR translator.
+  //
+  // Closes audit P1 Agent Trace cluster open item: rewrites the vendor +
+  // model fields on LLM nodes of a workflow IR so a trace compiled
+  // against one vendor's contract can be replayed against another's
+  // runtime. Tool nodes pass through unchanged because compile-ir.js
+  // already normalises tool_use/tool_calls into a single TOOL kind.
+  r.get('/v1/trace/translate/providers', wave144Limiter, authMiddleware, (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    res.json({ ok: true, providers: TRACE_KNOWN_PROVIDERS });
+  });
+
+  r.get('/v1/trace/translate/detect', wave144Limiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const trace_id = String((req.query && req.query.trace_id) || '');
+      if (!/^[0-9a-f]{32}$/.test(trace_id)) {
+        return _http400(res, 'trace_id must be 32 hex chars');
+      }
+      const out = await traceDetectProvider({
+        trace_id,
+        tenant_id: req.tenant_record.id,
+      });
+      res.json({ ok: true, trace_id, ...out });
+    } catch (e) {
+      const msg = String(e.message || e);
+      if (/tenant_mismatch/.test(msg)) return res.status(403).json({ ok: false, error: msg });
+      _http500(res, e);
+    }
+  });
+
+  r.post('/v1/trace/translate', wave144Limiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const body = req.body || {};
+      const trace_id = String(body.trace_id || '');
+      if (!/^[0-9a-f]{32}$/.test(trace_id)) {
+        return _http400(res, 'trace_id must be 32 hex chars');
+      }
+      const out = await traceTranslateTrace({
+        trace_id,
+        tenant_id: req.tenant_record.id,
+        from: body.from,
+        to: body.to,
+        model_map: body.model_map,
+        strict: !!body.strict,
+      });
+      res.json({ ok: true, ...out });
+    } catch (e) {
+      const code = e && e.code;
+      const msg = String(e.message || e);
+      if (code === 'invalid_from_provider' || code === 'invalid_to_provider') return _http400(res, msg);
+      if (code === 'trace_id_required' || code === 'tenant_id_required')      return _http400(res, msg);
+      if (code === 'ir_required')                                              return _http400(res, msg);
+      if (code === 'trace_empty')                                              return res.status(404).json({ ok: false, error: msg, code });
+      if (code === 'unmapped_models') {
+        return res.status(422).json({
+          ok: false,
+          error: msg,
+          code,
+          mappings: e.mappings || [],
+          unmapped_count: e.unmapped_count || 0,
+        });
+      }
+      if (/tenant_mismatch/.test(msg)) return res.status(403).json({ ok: false, error: msg });
       _http500(res, e);
     }
   });

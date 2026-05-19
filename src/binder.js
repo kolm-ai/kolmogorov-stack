@@ -2138,17 +2138,39 @@ function renderKScore(manifest) {
 
 function renderHashes(manifest) {
   const h = manifest.hashes || {};
-  const rows = Object.keys(h).sort().map(k => `
+  // P1-10 receipt cleanup — flag empty slots so a buyer of a rule-class artifact
+  // never sees "lora_bin: e3b0c4..." and assumes there's a LoRA inside. EMPTY_SHA
+  // is the canonical sentinel meaning "this slot is intentionally absent; the
+  // file does not ride inside the zip". We label it explicitly.
+  const EMPTY_SHA = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+  const SLOT_LABELS = {
+    model_pointer: 'no model weights bundled (this is a rule-class artifact; no GGUF/ONNX inside)',
+    lora_bin: 'no LoRA bundled (rule-class — recipes execute as pure JS, no learned weights)',
+    index_bin: 'no retrieval index bundled (rule-class — no vector lookup at runtime)',
+  };
+  const rows = Object.keys(h).sort().map(k => {
+    const v = h[k];
+    const isEmpty = v === EMPTY_SHA;
+    const label = isEmpty && SLOT_LABELS[k] ? SLOT_LABELS[k] : null;
+    if (isEmpty) {
+      return `
     <tr>
       <td class="mono">${esc(k)}</td>
-      <td class="mono">${esc(h[k])}</td>
-    </tr>`).join('');
+      <td><em>intentionally empty (sha256 of zero bytes)${label ? ` — ${esc(label)}` : ''}</em></td>
+    </tr>`;
+    }
+    return `
+    <tr>
+      <td class="mono">${esc(k)}</td>
+      <td class="mono">${esc(v)}</td>
+    </tr>`;
+  }).join('');
   return `
 <section>
   <h2>Manifest hashes</h2>
-  <p>sha256 over each file inside the .kolm zip. The CID is derived from this table via canonical JSON.</p>
+  <p>sha256 over each file inside the .kolm zip. The CID is derived from this table via canonical JSON. Slots flagged "intentionally empty" do <em>not</em> ride inside the artifact bytes — they are the explicit "this slot is absent" sentinel (sha256 of zero bytes).</p>
   <table>
-    <thead><tr><th style="width: 180px">File</th><th>sha256</th></tr></thead>
+    <thead><tr><th style="width: 180px">File</th><th>sha256 / status</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>
 </section>`;

@@ -332,6 +332,7 @@ COMMANDS
   install-device <art> --device d  push a .kolm onto a registered device (local/ssh/http)
   cc <sub>                         confidential compute attestation inspector (kinds|shape|verify)
   fl <sub>                         federated learning helpers — local only (strategies|new-round|verify|aggregate)
+  federated <sub>                  hash-only approval-row sharing across tenants — opt-in / opt-out / peers / share / aggregate / audit (W461)
   anonymize <file.jsonl> [opts]    shortcut for 'seeds generate --strategy redact-pii-templated'
   run <art.kolm> '<input>'         execute a .kolm against an input
   eval <art.kolm>                  re-run embedded evals, print this artifact's K-score
@@ -4511,6 +4512,7 @@ async function cmdWhoami(args) {
         cli_version: VERSION,
         key_fingerprint: fp,
         error: serverErr.message,
+        hint: 'the key may have been rotated or revoked. run: kolm login --key ks_...',
       }));
     } else {
       console.error('cloud rejected the saved key:', serverErr.message);
@@ -5407,8 +5409,15 @@ async function cmdChangelog(args) {
 async function cmdBilling(args) {
   if (maybeHelp('billing', args)) return;
   const jsonOut = args.includes('--json');
+  // First positional, if not a flag, picks the sub-action (default: 'usage').
+  const positional = args.find(a => !a.startsWith('--'));
+  // P0-3: `plans` is an alias for `tiers` (audit acceptance: `kolm billing plans` exists).
+  let sub = positional || 'usage';
+  if (sub === 'plans') sub = 'tiers';
+  // `tiers` is public pricing info — don't require login.
+  const publicSubs = new Set(['tiers']);
   const c = loadConfig();
-  if (!c.api_key) {
+  if (!c.api_key && !publicSubs.has(sub)) {
     if (jsonOut) {
       console.log(JSON.stringify({ error: 'not_logged_in', hint: 'run: kolm login' }));
     } else {
@@ -5418,9 +5427,6 @@ async function cmdBilling(args) {
     process.exit(EXIT.MISSING_PREREQ);
     return;
   }
-  // First positional, if not a flag, picks the sub-action (default: 'usage').
-  const positional = args.find(a => !a.startsWith('--'));
-  const sub = positional || 'usage';
   const pickFlag = (name) => {
     const i = args.indexOf(name);
     return i >= 0 ? args[i + 1] : null;
@@ -5497,24 +5503,60 @@ async function cmdBilling(args) {
   }
   const path = endpoint + (qs.length ? ('?' + qs.join('&')) : '');
 
+  // P0-3: bundled local catalog so `kolm billing tiers --json` returns useful
+  // data even with no API key or offline. Cloud is authoritative when reachable.
+  const localTiersCatalog = () => ({
+    source: 'local_bundled',
+    plans: [
+      { id: 'free',       label: 'Developer',  price_usd_month: 0,    quota: 10000,    seats: 1  },
+      { id: 'starter',    label: 'Starter',    price_usd_month: 9,    quota: 50000,    seats: 1  },
+      { id: 'pro',        label: 'Pro',        price_usd_month: 49,   quota: 200000,   seats: 1  },
+      { id: 'teams',      label: 'Teams',      price_usd_month: 149,  quota: 1000000,  seats: 5  },
+      { id: 'business',   label: 'Business',   price_usd_month: 1499, quota: 5000000,  seats: 25 },
+      { id: 'enterprise', label: 'Enterprise', price_usd_month: 2999, quota: 10000000, seats: 25 },
+    ],
+  });
+
   let data;
   let usedFallback = false;
   try {
     data = await api(c, 'GET', path);
   } catch (e) {
-    // Fall back to /v1/account so a router without /v1/billing/* still
-    // returns something useful.
-    try {
-      data = await api(c, 'GET', '/v1/account');
-      usedFallback = true;
-    } catch (_) {
-      if (jsonOut) {
-        console.log(JSON.stringify({ error: 'request_failed', message: e.message }));
-      } else {
-        console.error('billing request failed: ' + e.message);
+    if (sub === 'tiers') {
+      // P0-3: tiers is public pricing info; on cloud failure / no key, return
+      // the bundled catalog so consumers don't see "invalid api key".
+      try {
+        data = await api(c, 'GET', '/v1/plans');
+      } catch (_) {
+        data = localTiersCatalog();
       }
-      process.exit(2);
+      usedFallback = true;
+    } else if (!c.api_key) {
+      // For protected subs, surface a logged-out error envelope rather than
+      // bubbling the raw HTTP error so JSON consumers can branch on `error`.
+      if (jsonOut) {
+        console.log(JSON.stringify({ error: 'not_logged_in', hint: 'run: kolm login --key ks_...' }));
+      } else {
+        console.error('billing ' + sub + ' requires login.');
+        console.error('hint: run `kolm login --key ks_...` or `kolm signup --email you@example.com`');
+      }
+      process.exit(EXIT.MISSING_PREREQ);
       return;
+    } else {
+      // Fall back to /v1/account so a router without /v1/billing/* still
+      // returns something useful.
+      try {
+        data = await api(c, 'GET', '/v1/account');
+        usedFallback = true;
+      } catch (_) {
+        if (jsonOut) {
+          console.log(JSON.stringify({ error: 'request_failed', message: e.message }));
+        } else {
+          console.error('billing request failed: ' + e.message);
+        }
+        process.exit(2);
+        return;
+      }
     }
   }
   if (jsonOut) {
@@ -5560,9 +5602,23 @@ async function cmdBilling(args) {
       }
     }
   } else if (sub === 'tiers') {
-    const rows = Array.isArray(data) ? data : (data.tiers || []);
+    // P0-3: accept the canonical /v1/plans shape ({plans:[{price_usd_month}]}),
+    // the legacy {tiers:[{price_usd_monthly}]} shape, or the bundled local
+    // catalog returned on cloud failure.
+    const rows = Array.isArray(data) ? data
+      : (Array.isArray(data.plans) ? data.plans
+      : (Array.isArray(data.tiers) ? data.tiers : []));
+    if (data && data.source === 'local_bundled') {
+      console.log('(source: bundled local catalog — cloud unreachable or not logged in)');
+      console.log('');
+    }
     for (const r of rows) {
-      console.log('  ' + (r.id || r.name || '-') + '  ' + (r.price_usd_monthly != null ? '$' + r.price_usd_monthly + '/mo' : '-'));
+      const price = r.price_usd_month != null ? '$' + r.price_usd_month + '/mo'
+        : (r.price_usd_monthly != null ? '$' + r.price_usd_monthly + '/mo' : '-');
+      const seats = r.seats != null ? '  seats=' + r.seats : '';
+      const quota = r.quota != null ? '  quota=' + r.quota : '';
+      const link = r.billing_link_configured === false ? '  (billing link unconfigured)' : '';
+      console.log('  ' + (r.id || r.name || '-').padEnd(12) + '  ' + (r.label || '').padEnd(14) + '  ' + price.padEnd(10) + seats + quota + link);
     }
   } else if (sub === 'breakdown') {
     // W465 — namespace or team rollup.
@@ -12001,7 +12057,8 @@ async function cmdCapture(args) {
           reason: String(reason || ''),
         }));
       } else {
-        console.log(`namespace ${ns}: ${localCount} pair${localCount === 1 ? '' : 's'} captured (offline · local count)`);
+        const nsLabel = ns === 'default' ? 'namespace default (the auto-assigned bucket — pass --namespace <n> to scope)' : `namespace ${ns}`;
+        console.log(`${nsLabel}: ${localCount} pair${localCount === 1 ? '' : 's'} captured (offline · local count)`);
         console.log(`distill threshold: 1000`);
         if (localCount >= 1000) console.log('  ready to distill — run: kolm distill --namespace ' + ns);
         else console.log(`  ${remaining} more pair${remaining === 1 ? '' : 's'} until distill is unlocked`);
@@ -12040,7 +12097,8 @@ async function cmdCapture(args) {
       }));
       return;
     }
-    console.log(`namespace ${j.namespace}: ${j.count} pair${j.count === 1 ? '' : 's'} captured`);
+    const jnsLabel = j.namespace === 'default' ? 'namespace default (the auto-assigned bucket — pass --namespace <n> to scope)' : `namespace ${j.namespace}`;
+    console.log(`${jnsLabel}: ${j.count} pair${j.count === 1 ? '' : 's'} captured`);
     console.log(`distill threshold: ${j.threshold}`);
     if (j.ready_to_distill) console.log('  ready to distill — run: kolm distill --namespace ' + j.namespace);
     else console.log(`  ${remaining} more pair${remaining === 1 ? '' : 's'} until distill is unlocked`);
@@ -13114,6 +13172,7 @@ async function cmdDistillLocalWorker(args) {
     // Catalog dump is a worker-side concern (single source of truth lives
     // in workers/distill/catalog.mjs); just forward and exit on the child.
     passthru.push('--list-catalog');
+    if (args.includes('--json')) passthru.push('--json');
   } else if (doctor) {
     passthru.push('--doctor');
   } else {
@@ -13696,9 +13755,78 @@ async function cmdDoctor(args) {
   // Node version
   const nodeMaj = Number((process.versions.node || '0').split('.')[0]);
   checks.push({ name: 'node version', status: nodeMaj >= 18 ? 'ok' : 'missing', detail: 'v' + process.versions.node });
-  // Optional: docker (for bench --reproduce)
+  // Optional toolchain probes — each prints an OS-specific install command when
+  // missing so the user can fix it in one paste. None are required for the JS/
+  // rule default install path; they unlock specific verbs (bench --reproduce,
+  // distill --local-worker full mode, compiled_rule native targets, etc).
+  const isWin = process.platform === 'win32';
+  const isMac = process.platform === 'darwin';
+  const installHint = (name) => {
+    if (name === 'docker') {
+      if (isMac) return 'install: brew install --cask docker  (or download Docker Desktop)';
+      if (isWin) return 'install: winget install Docker.DockerDesktop  (or download Docker Desktop)';
+      return 'install: curl -fsSL https://get.docker.com | sh  (or your distro\'s docker.io package)';
+    }
+    if (name === 'python') {
+      if (isMac) return 'install: brew install python@3.12';
+      if (isWin) return 'install: winget install Python.Python.3.12';
+      return 'install: sudo apt-get install -y python3 python3-pip  (or: sudo dnf install python3)';
+    }
+    if (name === 'rust') {
+      if (isWin) return 'install: winget install Rustlang.Rustup  (then: rustup default stable)';
+      return 'install: curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh';
+    }
+    if (name === 'cc') {
+      if (isMac) return 'install: xcode-select --install  (clang via Apple Command Line Tools)';
+      if (isWin) return 'install: winget install Microsoft.VisualStudio.2022.BuildTools  (MSVC cl.exe) or `winget install LLVM.LLVM` (clang)';
+      return 'install: sudo apt-get install -y build-essential  (or: sudo dnf groupinstall "Development Tools")';
+    }
+    return '';
+  };
+  // docker — for bench --reproduce.
   const docker = spawnSync('docker', ['--version'], { stdio: 'pipe' });
-  checks.push({ name: 'docker (optional)', status: docker.status === 0 ? 'ok' : 'warn', detail: docker.status === 0 ? docker.stdout.toString().trim() : 'not on PATH (needed for: kolm bench --reproduce)' });
+  checks.push({
+    name: 'docker (optional)',
+    status: docker.status === 0 ? 'ok' : 'warn',
+    detail: docker.status === 0
+      ? docker.stdout.toString().trim()
+      : 'not on PATH (needed for: kolm bench --reproduce). ' + installHint('docker'),
+  });
+  // python3 — for distill worker full mode, image capture (Pillow), etc.
+  const pyExe = isWin ? 'python' : 'python3';
+  const py = spawnSync(pyExe, ['--version'], { stdio: 'pipe' });
+  // python --version on older versions writes to stderr; check both.
+  const pyOut = (py.stdout && py.stdout.toString().trim()) || (py.stderr && py.stderr.toString().trim()) || '';
+  checks.push({
+    name: 'python3 (optional)',
+    status: py.status === 0 ? 'ok' : 'warn',
+    detail: py.status === 0
+      ? pyOut
+      : 'not on PATH (needed for: kolm distill --local-worker full mode, kolm capture image). ' + installHint('python'),
+  });
+  // rustc — for compiled_rule artifact native targets (Rust path).
+  const rustc = spawnSync('rustc', ['--version'], { stdio: 'pipe' });
+  checks.push({
+    name: 'rustc (optional)',
+    status: rustc.status === 0 ? 'ok' : 'warn',
+    detail: rustc.status === 0
+      ? rustc.stdout.toString().trim()
+      : 'not on PATH (needed for: kolm compile --class=compiled_rule Rust target). ' + installHint('rust'),
+  });
+  // C compiler — for compiled_rule artifact native targets (C path).
+  // Try cc first (POSIX), then gcc, clang, and on Windows finally cl.exe.
+  let ccProbe = spawnSync('cc', ['--version'], { stdio: 'pipe' });
+  let ccLabel = 'cc';
+  if (ccProbe.status !== 0) { ccProbe = spawnSync('gcc', ['--version'], { stdio: 'pipe' }); ccLabel = 'gcc'; }
+  if (ccProbe.status !== 0) { ccProbe = spawnSync('clang', ['--version'], { stdio: 'pipe' }); ccLabel = 'clang'; }
+  if (ccProbe.status !== 0 && isWin) { ccProbe = spawnSync('cl', [], { stdio: 'pipe' }); ccLabel = 'cl'; }
+  checks.push({
+    name: 'C compiler (optional)',
+    status: ccProbe.status === 0 ? 'ok' : 'warn',
+    detail: ccProbe.status === 0
+      ? (ccLabel + ': ' + (ccProbe.stdout.toString().split('\n')[0] || ccProbe.stderr.toString().split('\n')[0] || '').trim())
+      : 'no cc/gcc/clang on PATH (needed for: kolm compile --class=compiled_rule C target). ' + installHint('cc'),
+  });
   // Optional: ANTHROPIC_API_KEY (for cloud compile + bench reproducer)
   checks.push({ name: 'ANTHROPIC_API_KEY (optional)', status: process.env.ANTHROPIC_API_KEY ? 'ok' : 'warn', detail: process.env.ANTHROPIC_API_KEY ? 'set' : 'not set (needed for: kolm bench --reproduce)' });
   // Project config
@@ -21016,8 +21144,17 @@ async function cmdTrace(args) {
       '  kolm trace export <trace_id>      print all spans as JSON\n' +
       '  kolm trace compile <trace_id>     W463 — trace -> seeded IR for replay\n' +
       '  kolm trace verify <trace_id>      W463 — replay-vs-original match check\n' +
+      '  kolm trace translate <trace_id>   W467 — rewrite vendor+model on LLM nodes\n' +
+      '                                    flags: --from <p> --to <p> [--strict] [--remote] [--json]\n' +
+      '                                    providers: anthropic | openai | generic\n' +
+      '  kolm trace providers              W467 — list known translator providers\n' +
+      '  kolm trace detect <trace_id>      W467 — sniff predominant vendor from spans\n' +
       '  kolm trace new                    generate a new trace_id (32 hex)\n' +
-      '  kolm trace span                   generate a new span_id (16 hex)');
+      '  kolm trace span                   generate a new span_id (16 hex)\n\n' +
+      'EXAMPLES\n' +
+      '  kolm trace translate <id> --from anthropic --to openai\n' +
+      '  kolm trace translate <id> --from openai --to anthropic --strict --json\n' +
+      '  kolm trace translate <id> --from anthropic --to openai --remote');
     return;
   }
   if (sub === 'new')   { console.log(tc.newTraceId()); return; }
@@ -21053,6 +21190,93 @@ async function cmdTrace(args) {
       for (const m of r.mismatches) {
         console.error('  mismatch:', JSON.stringify({ input: m.input, expected: m.expected, actual: m.actual, error: m.error }));
       }
+    }
+    return;
+  }
+  if (sub === 'providers') {
+    const tt = await import('../src/trace-translator.js');
+    const out = { ok: true, providers: tt.KNOWN_PROVIDERS };
+    if (jsonOut) return _printJson(out);
+    console.log('known translator providers:');
+    for (const p of tt.KNOWN_PROVIDERS) console.log('  ' + p);
+    return;
+  }
+  if (sub === 'detect') {
+    if (!trace_id) throw _badArgs('kolm trace detect requires a 32-hex trace_id');
+    const remote = rest.includes('--remote');
+    if (remote) {
+      const c = loadConfig();
+      const r = await api(c, 'GET', '/v1/trace/translate/detect?trace_id=' + encodeURIComponent(trace_id));
+      if (jsonOut) return _printJson(r);
+      console.log('trace ' + trace_id);
+      console.log('  provider: ' + r.provider);
+      console.log('  counts:   ' + JSON.stringify(r.counts || {}));
+      return;
+    }
+    const tt = await import('../src/trace-translator.js');
+    const c = loadConfig();
+    const tenant_id = c.tenant_id || c.api_key || 'local';
+    const out = await tt.detectTraceProvider({ trace_id, tenant_id });
+    if (jsonOut) return _printJson({ ok: true, trace_id, ...out });
+    console.log('trace ' + trace_id);
+    console.log('  provider: ' + out.provider);
+    console.log('  counts:   ' + JSON.stringify(out.counts || {}));
+    return;
+  }
+  if (sub === 'translate') {
+    if (!trace_id) throw _badArgs('kolm trace translate requires a 32-hex trace_id');
+    const from = pickFlag(rest, '--from');
+    const to   = pickFlag(rest, '--to');
+    if (!from || !to) throw _badArgs('kolm trace translate requires --from and --to (anthropic | openai | generic)');
+    const strict = rest.includes('--strict');
+    const remote = rest.includes('--remote');
+    const _printTranslateResult = (r) => {
+      console.log('trace ' + trace_id + '  ' + (r.from || from) + ' -> ' + (r.to || to));
+      console.log('  ir_hash:    ' + (r.ir_hash || '(none)'));
+      const mappings = r.mappings || [];
+      console.log('  mappings:   ' + mappings.length);
+      const dropped = r.dropped || [];
+      console.log('  dropped:    ' + dropped.length);
+      const limit = Math.min(mappings.length, 20);
+      if (limit > 0) {
+        console.log('');
+        console.log('  node                  from_vendor/model                          to_vendor/model                            reason');
+        console.log('  --------------------  ----------------------------------------  ----------------------------------------   ------------------');
+        for (let i = 0; i < limit; i++) {
+          const m = mappings[i];
+          const nodeId = String(m.node_id).slice(0, 20).padEnd(20);
+          const fromCol = (String(m.from_vendor || '?') + '/' + String(m.from_model || '?')).slice(0, 40).padEnd(40);
+          const toCol   = (String(m.to_vendor   || '?') + '/' + String(m.to_model   || '?')).slice(0, 40).padEnd(40);
+          console.log('  ' + nodeId + '  ' + fromCol + '  ' + toCol + '   ' + (m.reason || '?'));
+        }
+        if (mappings.length > limit) console.log('  ... (' + (mappings.length - limit) + ' more)');
+      }
+    };
+    if (remote) {
+      try {
+        const c = loadConfig();
+        const r = await api(c, 'POST', '/v1/trace/translate', { trace_id, from, to, strict });
+        if (jsonOut) return _printJson(r);
+        _printTranslateResult(r);
+        if (r && r.ok === false) process.exitCode = 1;
+      } catch (e) {
+        if (jsonOut) return _printJson({ ok: false, error: String(e.message || e) });
+        console.error('translate failed:', e.message || e);
+        process.exitCode = 1;
+      }
+      return;
+    }
+    const tt = await import('../src/trace-translator.js');
+    const c = loadConfig();
+    const tenant_id = c.tenant_id || c.api_key || 'local';
+    try {
+      const r = await tt.translateTrace({ trace_id, tenant_id, from, to, strict });
+      if (jsonOut) return _printJson({ ok: true, ...r });
+      _printTranslateResult({ ok: true, ...r });
+    } catch (e) {
+      if (jsonOut) return _printJson({ ok: false, error: String(e.message || e), code: e.code });
+      console.error('translate failed:', e.message || e);
+      process.exitCode = 1;
     }
     return;
   }
@@ -21801,6 +22025,13 @@ function computeExportPreview({ baseKey, quantKey, deviceKey }) {
   else if (fitPct > 0.80) verdict = 'tight';
   const ms = rate > 0 ? Math.round(1000 / rate * 10) / 10 : null;
   return {
+    // P1-12 mobile/device truth — top-level kind explicitly labels this output
+    // as a forecast (not a real export). Automation can branch on kind===
+    // 'export_forecast' before reading any size_gb / latency number so a
+    // forecast never gets confused with a real toolchain-driven export receipt.
+    kind: 'export_forecast',
+    forecast: true,
+    is_real_export: false,
     device: dev.label,
     device_key: deviceKey,
     quant: quantKey,
@@ -21818,7 +22049,7 @@ function computeExportPreview({ baseKey, quantKey, deviceKey }) {
     need_gb: Math.round(needGb * 10) / 10,
     device_ram_gb: dev.ram_gb,
     backend: dev.backend,
-    note: 'forecast. estimates from public llama.cpp / MLX / CoreML benchmarks (2025). measure on your actual hardware before procurement.',
+    note: 'FORECAST ONLY — this is a numeric estimate, NOT a real exported file. estimates derived from public llama.cpp / MLX / CoreML benchmarks (2025). measure on your actual hardware before procurement. To produce a real exported file, run: kolm export <artifact.kolm> --backend <gguf|mlx|onnx|coreml|tensorrt> (requires the matching toolchain installed).',
   };
 }
 

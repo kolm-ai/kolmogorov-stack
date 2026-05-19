@@ -245,6 +245,37 @@ export function formatCatalogSummary() {
   return lines.join('\n');
 }
 
+// JSON-safe catalog dump for `kolm distill --local-worker --list-catalog --json`.
+// Stable shape so downstream automation can parse it without scraping the
+// pretty-printed form. Keys mirror the in-memory catalog so a verifier can
+// round-trip through here.
+export function formatCatalogJson() {
+  const teachers = {};
+  for (const v of VENDORS) {
+    const prof = VENDOR_PROFILES[v];
+    if (!prof) continue;
+    teachers[v] = {
+      models: prof.models === null ? null : prof.models.slice(),
+      env: prof.env || null,
+      base_url: prof.base_url || null,
+    };
+  }
+  const student_bases = {};
+  for (const [slug, e] of Object.entries(STUDENT_BASES)) {
+    student_bases[slug] = {
+      repo: e.repo,
+      params: e.params,
+      license: e.license,
+      verify_before_ship: !!e.verify_before_ship,
+    };
+  }
+  return {
+    teachers,
+    student_bases,
+    distillation_methods: DISTILLATION_METHODS.slice(),
+  };
+}
+
 export default {
   VENDORS,
   VENDOR_PROFILES,
@@ -256,4 +287,5 @@ export default {
   studentBaseEntry,
   isKnownDistillationMethod,
   formatCatalogSummary,
+  formatCatalogJson,
 };

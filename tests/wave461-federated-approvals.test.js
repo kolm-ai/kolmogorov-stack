@@ -201,7 +201,11 @@ test('W461 #8 — aggregateApprovals applies Laplace noise to peer counts', () =
   assert.ok(shared.peer_count_noised >= 50 && shared.peer_count_noised <= 150,
     `noised peer count for shared hash should be near 100, got ${shared.peer_count_noised}`);
   assert.equal(localOnly.local_count, 1);
-  assert.equal(localOnly.peer_count_noised, 0);   // no peer support → noised count rounds to 0
+  // Laplace noise on raw=0 with scale 1.0 occasionally rounds to 1-2 — that's
+  // privacy doing its job. The stable invariant is peer_count_raw_present:false.
+  assert.ok(localOnly.peer_count_noised <= 5,
+    `noised peer count for local-only hash should be near 0, got ${localOnly.peer_count_noised}`);
+  assert.equal(localOnly.peer_count_raw_present, false);
   assert.equal(peerOnly.local_count, 0);
 });
 

@@ -77,6 +77,7 @@ import {
   DISTILLATION_METHODS,
   STUDENT_BASES,
   formatCatalogSummary,
+  formatCatalogJson,
 } from './catalog.mjs';
 // Wave 253 ML#7: delegate splitting to the canonical src/seeds.js so the
 // distill worker and the build path agree on what holdout is. The legacy
@@ -100,9 +101,15 @@ if (args.doctor) {
 
 // Wave 158 — `--list-catalog` prints the teacher vendor/model + student-base
 // + distillation-method catalog and exits. Used by `kolm distill --list-catalog`
-// surface so tenants don't have to crack open catalog.mjs.
+// surface so tenants don't have to crack open catalog.mjs. `--json` switches
+// to a stable JSON shape so automation can parse it without scraping the
+// pretty-printed form.
 if (args['list-catalog']) {
-  console.log(formatCatalogSummary());
+  if (args.json) {
+    console.log(JSON.stringify(formatCatalogJson(), null, 2));
+  } else {
+    console.log(formatCatalogSummary());
+  }
   process.exit(0);
 }
 

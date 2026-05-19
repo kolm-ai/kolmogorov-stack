@@ -245,9 +245,19 @@ export function validateArtifactClass(manifest) {
   }
   const EMPTY_SHA = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
   if (declared === 'distilled_model') {
+    // W457 — model bytes may be proven by EITHER a legacy model_pointer doc
+    // (sha256 of a small pointer JSON) OR a real bundled model_weights blob
+    // (sha256 of the bytes that ride inside the zip as model.gguf / model.onnx
+    // / etc). When buildAndZip is called with model_weights={filename,content},
+    // hashes.model_pointer is intentionally EMPTY_SHA (the pointer doc is
+    // suppressed) and hashes.model_weights carries the real proof — accept
+    // that path here.
     const mp = manifest.hashes?.model_pointer;
-    if (!mp || mp === EMPTY_SHA) {
-      return { ok: false, reason: 'artifact_class=distilled_model requires non-empty model_pointer; manifest.hashes.model_pointer is empty (sha256 of empty buffer). A distilled_model artifact MUST ship real model bytes.' };
+    const mw = manifest.hashes?.model_weights;
+    const has_pointer = !!(mp && mp !== EMPTY_SHA);
+    const has_weights = !!(mw && mw !== EMPTY_SHA);
+    if (!has_pointer && !has_weights) {
+      return { ok: false, reason: 'artifact_class=distilled_model requires non-empty model_pointer OR bundled model_weights; both manifest.hashes.model_pointer and manifest.hashes.model_weights are empty (sha256 of empty buffer). A distilled_model artifact MUST ship real model bytes.' };
     }
     if (!manifest.base_model || manifest.base_model === 'none') {
       return { ok: false, reason: 'artifact_class=distilled_model requires manifest.base_model to be a real model name; got ' + JSON.stringify(manifest.base_model) };

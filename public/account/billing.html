@@ -288,7 +288,7 @@
 })();
 function pct(u,l){if(!l||l<=0)return null;return Math.min(999,Math.round((u/l)*100));}
 function fmtMeter(name,val){if(name.indexOf("bytes")>=0)return window.kbytes(val);return window.knum(val);}
-// W409y — read live per-tenant usage from /v1/billing/usage (returns
+// W409y - read live per-tenant usage from /v1/billing/usage (returns
 // {meters, limits, soft_limits, over_soft, over_hard}). Fall back to the
 // catalog endpoint then /v1/account so legacy routers still render.
 window.kfetch("/v1/billing/usage").catch(function(){
@@ -316,7 +316,7 @@ window.kfetch("/v1/billing/usage").catch(function(){
   if(!any){document.getElementById("empty-state").hidden=false;}
 });
 
-// W465 — per-namespace breakdown panel. Reads /v1/billing/breakdown
+// W465 - per-namespace breakdown panel. Reads /v1/billing/breakdown
 // (?period=YYYY-MM optional). Refresh button + period input re-fire the fetch.
 function w465LoadBreakdown(){
   var p=document.getElementById("bd-period").value.trim();
