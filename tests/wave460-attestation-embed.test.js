@@ -271,8 +271,11 @@ test('W460 #10 — sw.js CACHE references the wave460 family pattern', async () 
     new URL('../public/sw.js', import.meta.url),
     'utf8',
   );
+  // Family pattern: regex+threshold (never explicit-array). Any wave >= 460 counts.
+  const wm = sw.match(/wave(\d{3,4})/);
+  assert.ok(wm, 'public/sw.js CACHE must declare a waveNNN token');
   assert.ok(
-    /wave46\d-/.test(sw),
-    'public/sw.js CACHE slug should reference the wave460-wave469 family',
+    parseInt(wm[1], 10) >= 460,
+    'public/sw.js CACHE slug should reference wave460 or a successor, got wave' + wm[1],
   );
 });

@@ -268,5 +268,9 @@ test('W461 #12 — source pin: AUDIT_OPS exports the 3 federated ops', async () 
 
 test('W461 #13 — sw.js CACHE references the wave461 family pattern', () => {
   const sw = fs.readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8');
-  assert.ok(/wave46\d-/.test(sw), 'public/sw.js CACHE slug should reference the wave461-wave469 family');
+  // Family pattern: regex+threshold (never explicit-array). Any wave >= 461 counts.
+  const wm = sw.match(/wave(\d{3,4})/);
+  assert.ok(wm, 'public/sw.js CACHE must declare a waveNNN token');
+  assert.ok(parseInt(wm[1], 10) >= 461,
+    'public/sw.js CACHE slug should reference wave461 or a successor, got wave' + wm[1]);
 });

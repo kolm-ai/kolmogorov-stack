@@ -303,8 +303,9 @@ test('W454 #9 — sw.js CACHE slug is current within the W454+ family', () => {
   // the audit-finish family waves so any later cache-bust still counts as
   // moving the wheel, but the family membership is the lock-in. This mirrors
   // W446 #5 which also accepts wave443-wave455 as the family marker.
-  assert.ok(slug.startsWith('kolm-v7-2026-05-19-wave'),
-    'sw.js CACHE slug must follow the v7-date-wave convention, got: ' + slug);
+  // Relaxed past literal 2026-05-19 — same family pattern as W446 #5.
+  assert.match(slug, /^kolm-v7-\d{4}-\d{2}-\d{2}-wave\d+/,
+    'sw.js CACHE slug must follow kolm-v7-YYYY-MM-DD-wave<N> shape, got: ' + slug);
   // Forward-compat: any wave >= 454 keeps this lock passing. Same pattern
   // as W456 #8 once it was relaxed past explicit arrays.
   const wm = slug.match(/wave(\d{3,4})/);

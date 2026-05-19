@@ -317,8 +317,9 @@ test('W462 #10 — sw.js CACHE slug is current within the W454+ family', () => {
   const m = sw.match(/const CACHE = '([^']+)'/);
   assert.ok(m, 'sw.js must export a CACHE const');
   const slug = m[1];
-  assert.ok(slug.startsWith('kolm-v7-2026-05-19-wave'),
-    'sw.js CACHE slug must follow the v7-date-wave convention, got: ' + slug);
+  // Relaxed past literal 2026-05-19 — family pattern, same as W446 #5 / W454 #9.
+  assert.match(slug, /^kolm-v7-\d{4}-\d{2}-\d{2}-wave\d+/,
+    'sw.js CACHE slug must follow kolm-v7-YYYY-MM-DD-wave<N> shape, got: ' + slug);
   const wm = slug.match(/wave(\d{3,4})/);
   assert.ok(wm, 'sw.js CACHE slug must include a waveNNN token, got: ' + slug);
   const n = parseInt(wm[1], 10);

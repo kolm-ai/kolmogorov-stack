@@ -246,10 +246,11 @@ test('W446 #5 — sw.js cache slug is current (audit-finish marker)', () => {
   const m = sw.match(/const CACHE = '([^']+)'/);
   assert.ok(m, 'sw.js must export a CACHE const');
   const slug = m[1];
-  // We pin the wave family this commit-set ships under. When the next batch
-  // bumps it, this test gets updated alongside the bump (lock-in, not freeze).
-  assert.ok(slug.startsWith('kolm-v7-2026-05-19-wave'),
-    'sw.js CACHE slug must start with kolm-v7-2026-05-19-wave*, got: ' + slug);
+  // We pin the SHAPE (kolm-v7-YYYY-MM-DD-wave<N>) — the date moves forward with
+  // each batch and the wave number is the load-bearing lock-in. Relaxed past
+  // the literal 2026-05-19 date so future cache-bust days don't trip this.
+  assert.match(slug, /^kolm-v7-\d{4}-\d{2}-\d{2}-wave\d+/,
+    'sw.js CACHE slug must follow kolm-v7-YYYY-MM-DD-wave<N> shape, got: ' + slug);
   // Family pattern (wave443 onward) — regex+threshold so additive waves don't
   // require updating this test. Per W462 #10 rule: never explicit-array.
   const waveMatch = slug.match(/wave(\d{3,4})/);

@@ -485,5 +485,9 @@ test('W459 #9 — distill-pipeline.js spawns inside an attempt loop with manifes
 
 test('W459 #10 — sw.js CACHE slug references the wave459 family', () => {
   const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
-  assert.match(sw, /wave4(5[9]|6[0-9])/, 'sw.js CACHE must include wave459 (or a successor in the family)');
+  // Family pattern: regex+threshold (never explicit-array). Any wave >= 459 counts.
+  const wm = sw.match(/wave(\d{3,4})/);
+  assert.ok(wm, 'sw.js CACHE must declare a waveNNN token');
+  assert.ok(parseInt(wm[1], 10) >= 459,
+    'sw.js CACHE must include wave459 or a successor in the family, got wave' + wm[1]);
 });

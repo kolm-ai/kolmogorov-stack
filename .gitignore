@@ -87,5 +87,14 @@ sdk/c/*.o
 # W470 — release-verify driver output
 release-verify.out.json
 release-verify.err.log
+release-verify.full.json
+release-verify.full.err
 .audit-w*/
 w[0-9]*-out.txt
+
+# W471 — tesseract.js OCR language packs (downloaded on first run; huge, regenerable)
+eng.traineddata
+*.traineddata
+
+# W471 — release-verify and ad-hoc test scratch
+test-output.txt

@@ -285,7 +285,7 @@ test('W455 #10 — sw.js CACHE slug references the W455+ audit-finish family', (
   const m = sw.match(/const CACHE = '([^']+)'/);
   assert.ok(m, 'sw.js must export a CACHE const');
   const slug = m[1];
-  assert.match(slug, /kolm-v7-2026-05-19-/, 'slug must follow the v7-date convention');
+  assert.match(slug, /^kolm-v7-\d{4}-\d{2}-\d{2}-/, 'slug must follow the v7-YYYY-MM-DD convention');
   const wm = slug.match(/wave(\d{3,4})/);
   assert.ok(wm, 'sw.js CACHE slug must include a waveNNN token, got: ' + slug);
   const n = parseInt(wm[1], 10);
