@@ -386,6 +386,10 @@ const PUBLIC_API = (p) =>
   // an Authorization: Bearer <key> via the body/headers and validates it itself
   // (the body's source_device_id + state envelope acts as the auth contract).
   p === '/v1/sync/inbox' ||
+  // W456 — /v1/changelog is the public marketing surface backing /changelog
+  // and the `kolm changelog` CLI verb. Mirrors /v1/spec / /v1/registry/public:
+  // identical response for every caller, no tenant scoping, no auth.
+  p === '/v1/changelog' ||
   // W384 — accept-invite is invite-token-authenticated (the URL token IS the
   // credential); the workspace lookup happens inside team.js with explicit
   // expiry + consumed checks. Public so a new member with no api_key can join.

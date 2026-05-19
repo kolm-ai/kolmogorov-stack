@@ -156,3 +156,29 @@ test('W456 #10 getWave() returns the canonical entry by exact wave id', async ()
   const miss = mod.getWave('W9999');
   assert.equal(miss, null);
 });
+
+test('W456 #11 /v1/changelog clears authMiddleware unauthed (PUBLIC_API exemption)', async () => {
+  // W456 #3 hits buildRouter() directly, which bypasses auth. Production
+  // mounts authMiddleware in front of every /v1/* path, so the route must
+  // ALSO be listed in PUBLIC_API or it returns 401. This test pins the
+  // full middleware stack so a refactor that drops the PUBLIC_API entry
+  // fails CI instead of silently breaking prod.
+  const { buildRouter } = await import(fileUrl(join(ROOT, 'src', 'router.js')));
+  const { authMiddleware } = await import(fileUrl(join(ROOT, 'src', 'auth.js')));
+  const express = (await import('express')).default;
+  const app = express();
+  app.use(express.json());
+  app.use(authMiddleware);
+  app.use(buildRouter());
+  const server = app.listen(0);
+  try {
+    const port = server.address().port;
+    const res = await fetch('http://127.0.0.1:' + port + '/v1/changelog?limit=1');
+    assert.equal(res.status, 200, 'authMiddleware must let /v1/changelog through unauthed');
+    const body = await res.json();
+    assert.equal(body.ok, true, 'envelope must be ok:true even with no Authorization header');
+    assert.ok(Array.isArray(body.waves));
+  } finally {
+    server.close();
+  }
+});
