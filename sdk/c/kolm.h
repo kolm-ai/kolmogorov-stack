@@ -269,23 +269,29 @@ static char *kolm__json_escape(const char *s) {
 }
 
 kolm_response_t kolm_intent_ask(kolm_client_t *c, const char *prompt) {
+  kolm_response_t r = { 0, NULL, 0 };
   char *esc = kolm__json_escape(prompt);
+  if (!esc) return r;
   size_t need = strlen(esc) + 32;
   char *body = (char*)malloc(need);
+  if (!body) { free(esc); return r; }
   snprintf(body, need, "{\"prompt\":\"%s\"}", esc);
-  kolm_response_t r = kolm_post(c, "/v1/intent/ask", body);
+  r = kolm_post(c, "/v1/intent/ask", body);
   free(esc); free(body);
   return r;
 }
 
 kolm_response_t kolm_capture_log(kolm_client_t *c, const char *namespace_, const char *items_json) {
+  kolm_response_t r = { 0, NULL, 0 };
   const char *ns = namespace_ ? namespace_ : "default";
   char *esc_ns = kolm__json_escape(ns);
+  if (!esc_ns) return r;
   const char *items = items_json ? items_json : "[]";
   size_t need = strlen(esc_ns) + strlen(items) + 64;
   char *body = (char*)malloc(need);
+  if (!body) { free(esc_ns); return r; }
   snprintf(body, need, "{\"namespace\":\"%s\",\"items\":%s}", esc_ns, items);
-  kolm_response_t r = kolm_post(c, "/v1/capture/log", body);
+  r = kolm_post(c, "/v1/capture/log", body);
   free(esc_ns); free(body);
   return r;
 }
