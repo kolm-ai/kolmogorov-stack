@@ -5496,10 +5496,18 @@ export function buildRouter() {
   });
 
   r.post('/v1/search', (req, res) => {
-    const { query, k = 10, tag } = req.body || {};
-    if (!query) return res.status(400).json({ error: 'query is required' });
-    const matches = registry.searchSimilar({ query, tenant: req.tenant, tenantId: req.tenant_record?.id, k, tag });
-    res.json({ matches });
+    try {
+      const { query, k = 10, tag } = req.body || {};
+      if (!query) return res.status(400).json({ error: 'query is required' });
+      const matches = registry.searchSimilar({ query, tenant: req.tenant, tenantId: req.tenant_record?.id, k, tag });
+      res.json({ matches: Array.isArray(matches) ? matches : [] });
+    } catch (e) {
+      // W470 P0-2: never return raw 500 from /v1/search. SDK tests surface
+      // "internal server error" as a hard fail; the honesty envelope keeps
+      // it actionable. Empty matches are a valid answer when the corpus
+      // has nothing the caller can read.
+      res.status(500).json({ error: 'search_failed', detail: String(e && e.message || e), matches: [] });
+    }
   });
 
   // ---------- Layer 3: Runtime ----------

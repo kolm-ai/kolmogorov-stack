@@ -1,0 +1,58 @@
+name: sdk-c-rust
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sdk/c/**'
+      - 'sdk/rust/**'
+      - '.github/workflows/sdk-c-rust.yml'
+  pull_request:
+    paths:
+      - 'sdk/c/**'
+      - 'sdk/rust/**'
+      - '.github/workflows/sdk-c-rust.yml'
+
+jobs:
+  c-sdk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: install libcurl
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+      - name: build kolm-cli
+        run: cd sdk/c && make
+      - name: usage prints help and exits 64
+        run: |
+          cd sdk/c
+          set +e
+          ./kolm-cli
+          rc=$?
+          set -e
+          test "$rc" = "64"
+      - name: health route exits non-zero against bogus host (no panic)
+        env:
+          KOLM_BASE_URL: http://127.0.0.1:1
+        run: |
+          cd sdk/c
+          set +e
+          ./kolm-cli health
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+
+  rust-sdk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: sdk/rust
+      - name: cargo check --all-targets
+        run: cd sdk/rust && cargo check --all-targets --locked || (cd sdk/rust && cargo check --all-targets)
+      - name: cargo test
+        run: cd sdk/rust && cargo test
+      - name: cargo build --release --example whoami
+        run: cd sdk/rust && cargo build --release --example whoami

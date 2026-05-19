@@ -77,3 +77,15 @@ undefined/
 .test-output.tap
 .test-output-serial.tap
 .test-time.txt
+
+# W470 — Rust build outputs (Cargo.lock IS committed; target/ is not)
+sdk/rust/target/
+sdk/c/kolm-cli
+sdk/c/kolm-cli.exe
+sdk/c/*.o
+
+# W470 — release-verify driver output
+release-verify.out.json
+release-verify.err.log
+.audit-w*/
+w[0-9]*-out.txt

@@ -6013,8 +6013,13 @@ async function cmdCompile(args) {
       console.error(`error: --class must be one of: rule, synthesized_rule, compiled_rule, distilled_model (got '${classFlag}')`);
       process.exit(EXIT.BAD_ARGS);
     }
-    if (targetFlag && !['gguf', 'onnx', 'safetensors', 'coreml', 'mlx', 'executorch', 'tensorrt', 'native-c', 'native-rust', 'wasm'].includes(targetFlag)) {
-      console.error(`error: --target must be one of: gguf, onnx, safetensors, coreml, mlx, executorch, tensorrt, native-c, native-rust, wasm (got '${targetFlag}')`);
+    // W470 P1-5 — `c` / `rust` are accepted as bare aliases for native-c /
+    // native-rust so spec-compile's targetLc check (which expects bare 'c' /
+    // 'rust' / 'wasm') is reachable directly from the CLI without forcing
+    // tenants to remember the longer form. Mapping happens just before the
+    // compileSpec call below.
+    if (targetFlag && !['gguf', 'onnx', 'safetensors', 'coreml', 'mlx', 'executorch', 'tensorrt', 'native-c', 'native-rust', 'c', 'rust', 'wasm'].includes(targetFlag)) {
+      console.error(`error: --target must be one of: gguf, onnx, safetensors, coreml, mlx, executorch, tensorrt, native-c (alias c), native-rust (alias rust), wasm (got '${targetFlag}')`);
       process.exit(EXIT.BAD_ARGS);
     }
     if (multiDeviceFlag) {
@@ -6383,6 +6388,20 @@ async function cmdCompile(args) {
       console.error(`error: --attestation-kind ${attestationKindFlag}: must be one of pccs, snp-report, nitro-attestation, nras`);
       process.exit(EXIT.BAD_ARGS);
     }
+    // W470 P1-5 — map the CLI --target surface (native-c/native-rust + bare
+    // c/rust aliases + wasm) to the bare target string spec-compile.js
+    // expects. Auto-enable compileNative for the native-class targets so the
+    // tenant doesn't have to also set KOLM_COMPILE_NATIVE=1.
+    let specTarget = null;
+    let wantNativeCompile = false;
+    let wantWasmCompile = false;
+    if (targetFlag) {
+      const tlc = String(targetFlag).toLowerCase();
+      if (tlc === 'native-c' || tlc === 'c') { specTarget = 'c'; wantNativeCompile = true; }
+      else if (tlc === 'native-rust' || tlc === 'rust') { specTarget = 'rust'; wantNativeCompile = true; }
+      else if (tlc === 'wasm') { specTarget = 'wasm'; wantWasmCompile = true; }
+      else { specTarget = tlc; }
+    }
     try {
       const r = await compileSpec(spec, {
         outDir: outDirL,
@@ -6408,6 +6427,9 @@ async function cmdCompile(args) {
         attestation_report: attestationReportFlag || undefined,
         attestation_kind: attestationKindFlag || undefined,
         allow_below_gate: allowBelowGateFlag,
+        target: specTarget || undefined,
+        compileNative: wantNativeCompile || undefined,
+        compileWasm: wantWasmCompile || undefined,
       });
       const composite = r.k_score && typeof r.k_score.composite === 'number' ? r.k_score.composite : null;
       const gate = kGate();
@@ -13734,20 +13756,29 @@ async function cmdDoctor(args) {
       } catch (e) {
         const msg = String((e && e.message) || e);
         const looksAuth = /401|invalid|unauthori[sz]ed|auth/i.test(msg);
+        // W470 P0-4: server rejection of a stale local key is a BLOCKER, not
+        // a warning. Doctor must NOT surface stale local auth as healthy —
+        // ok:true with a rejected server-side key is exactly the contradiction
+        // the auditor flagged ("doctor says ok but whoami says invalid").
+        // Recovery copy lists all three exits: rotate, sign up fresh, or
+        // forget the bad key locally.
         checks.push({
           name: 'api key (server)',
-          status: 'warn',
+          status: looksAuth ? 'missing' : 'warn',
           detail: looksAuth
-            ? 'server rejected the key (rotated/revoked?) — run: kolm login'
+            ? 'server rejected the key (rotated/revoked?). recover:  kolm login --key ks_...   |   kolm signup --email you@org.com   |   kolm logout (forget local key)'
             : ('server validation failed: ' + msg),
         });
       }
     }
   } else {
+    // W470 P0-4: no local key is also a blocker — without a key the CLI
+    // cannot reach hosted compile / bakeoff / billing. List both entry
+    // ramps so a first-time user knows there's a free signup option.
     checks.push({
       name: 'api key (server)',
-      status: 'warn',
-      detail: 'no key to validate (run: kolm login first)',
+      status: 'missing',
+      detail: 'no key to validate. start here:  kolm signup --email you@org.com   |   kolm login --key ks_...',
     });
   }
   // Local receipt secret
