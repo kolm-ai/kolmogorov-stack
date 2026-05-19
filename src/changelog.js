@@ -9,6 +9,13 @@
 
 const WAVES = [
   {
+    wave: 'W462',
+    date: '2026-05-19',
+    title: 'multimodal image PII redactor (face + license-plate, pixel-space)',
+    summary: 'Closes audit P1 Multimodal cluster open item ("redactor for non-text modalities"). New workers/multimodal-redact-image/ isolated package + redact-image.mjs worker ships pixel-space face + license-plate detection (YOLO-format ONNX models in ~/.kolm/models/yolov8n-face.onnx and license-plate-detector.onnx). Complementary to W454 (which redacts TEXT extracted from media via OCR/ASR/PDF-parse) — for medical photos, dashcam frames, and ID-card scans, you typically want BOTH passes. Heavy ML deps (onnxruntime-node + sharp) live in optionalDependencies of the worker package; root kolm install stays light. Honest-by-default envelope: when ANY of {onnxruntime-node, sharp, an ONNX model} is missing, the worker exits 3 with {ok:false, error:"no_detector_installed", install_hint, redacted_image:null} — never silently claims it redacted PII it could not see. New POST /v1/multimodal/redact-image route spawns the worker (5-min timeout, 64MB stdout buffer for inline base64 PNG). New `kolm media image-doctor` + `kolm media redact-image [--mode blur|mask] [--threshold 0.35]` CLI verbs. 10 W462 tests pin the worker shape, the no-soft-claims envelope, the auth-gated routes, and the root-package-stays-light invariant.',
+    tags: ['multimodal', 'privacy', 'pii', 'audit', 'face-detection', 'license-plate', 'onnx'],
+  },
+  {
     wave: 'W461',
     date: '2026-05-19',
     title: 'federated approval-row sharing (hash-only cross-org decisions)',

@@ -2014,26 +2014,44 @@ USAGE
   kolm media doctor [--remote]
   kolm media redact-job <file:URI | --path <local>> [--kind image|audio|video|pdf] [--mime <mime>] [--model <ggml>] [--lang eng] [--json]
   kolm media redact-job --remote <file:URI> [--kind ...] [--mime ...]
+  kolm media image-doctor [--remote]
+  kolm media redact-image <file:URI | --path <local>> [--output <png>] [--mode blur|mask] [--threshold 0.35]
 
 SUBCOMMANDS
-  doctor       Report which extractors are wired (tesseract.js / pdf-parse /
-               whisper-cli / ffmpeg). --remote asks the server's worker
-               instead of the local install.
-  redact-job   Extract text from media (image/audio/video/pdf), then run the
-               extracted text through the same redactor as 'kolm redact'.
-               Returns {ok, extractor, extracted_chars, redacted, classes_seen,
-               count_by_class, map_hash, detector_version} on success, OR
-               {ok:false, error:'extractor_not_installed', install_hint:...}
-               when the kind's extractor is missing.
+  doctor        Report which extractors are wired (tesseract.js / pdf-parse /
+                whisper-cli / ffmpeg). --remote asks the server's worker
+                instead of the local install.
+  redact-job    Extract text from media (image/audio/video/pdf), then run the
+                extracted text through the same redactor as 'kolm redact'.
+                Returns {ok, extractor, extracted_chars, redacted, classes_seen,
+                count_by_class, map_hash, detector_version} on success, OR
+                {ok:false, error:'extractor_not_installed', install_hint:...}
+                when the kind's extractor is missing.
+  image-doctor  W462 — report whether the multimodal image redactor (face +
+                license-plate detection) has its runtime deps + ONNX models
+                on disk. Distinct from 'doctor' (which covers text-extract).
+  redact-image  W462 — pixel-space redaction. Detects faces + license plates
+                in the image bytes and emits a blurred/masked output PNG.
+                Returns {ok, detector_face, detector_plate, detections[],
+                num_faces, num_plates, mode, output_path|output_b64,
+                redacted_image_sha256} on success. Honest envelope with
+                {ok:false, error:'no_detector_installed', install_hint:...}
+                when onnxruntime-node, sharp, or model files are missing —
+                NEVER claims it redacted PII it could not see.
 
 OPTIONS
-  --remote       POST to /v1/media/redact-job (server runs the worker)
-  --path <p>     Local file path instead of a media-store URI
-  --kind <k>     image|audio|video|pdf (sniffed from --mime or URI extension)
-  --mime <m>     Explicit mime-type override
-  --model <p>    whisper.cpp ggml model path (audio/video only)
-  --lang <code>  OCR language (default: eng)
-  --json         JSON envelope output (default for --remote)
+  --remote          POST to /v1/media/* (server runs the worker)
+  --path <p>        Local file path instead of a media-store URI
+  --kind <k>        image|audio|video|pdf (sniffed from --mime or URI extension)
+  --mime <m>        Explicit mime-type override
+  --model <p>       whisper.cpp ggml model path (audio/video only)
+  --lang <code>     OCR language (default: eng)
+  --output <p>      (redact-image) write redacted PNG to <p> instead of inline b64
+  --mode <m>        (redact-image) blur (default) or mask (solid black)
+  --threshold <0-1> (redact-image) detection score threshold (default 0.35)
+  --face-model <p>  (redact-image) override default ~/.kolm/models/yolov8n-face.onnx
+  --plate-model <p> (redact-image) override default ~/.kolm/models/license-plate-detector.onnx
+  --json            JSON envelope output (default for --remote)
 
 EXAMPLES
   kolm media doctor
@@ -2041,12 +2059,20 @@ EXAMPLES
   kolm media redact-job --path ./scan.png --kind image
   kolm media redact-job file:abc123.pdf --json
   kolm media redact-job --remote file:def456.wav --model /opt/ggml-base.en.bin
+  kolm media image-doctor
+  kolm media redact-image --path ./photo.jpg --output ./redacted.png
+  kolm media redact-image --remote file:abc123.png --mode mask
 
-EXTRACTORS
+EXTRACTORS (text)
   image   tesseract.js (WASM OCR, no native deps)
   pdf     pdf-parse (pure JS)
   audio   whisper-cli (external; brew/apt/winget install whisper-cpp)
   video   ffmpeg + whisper-cli
+
+DETECTORS (pixel-space, W462)
+  face    yolov8n-face.onnx in ~/.kolm/models/ (any YOLOv8 face variant)
+  plate   license-plate-detector.onnx in ~/.kolm/models/
+  runtime onnxruntime-node + sharp (optional; cd workers/multimodal-redact-image && npm install)
 
 The worker is OPTIONAL — root install does not pull tesseract.js or
 pdf-parse. Install in the isolated worker package:
@@ -20075,6 +20101,89 @@ async function cmdMedia(args) {
     const r2 = spawnSync(process.execPath, [workerPath, ...wargs], {
       stdio: ['ignore', 'pipe', 'pipe'],
       timeout: 5 * 60 * 1000,
+    });
+    process.stdout.write(String(r2.stdout || ''));
+    if (r2.stderr && String(r2.stderr).length) process.stderr.write(String(r2.stderr));
+    process.exit(r2.status || 0);
+    return;
+  }
+  // W462 — image-doctor: report whether the multimodal-redact-image
+  // worker has its deps + ONNX models on disk. No image input.
+  if (sub === 'image-doctor') {
+    if (remote) {
+      const c = loadConfig();
+      if (!c.api_key) {
+        console.error('not logged in. run: kolm login (or drop --remote)');
+        process.exit(EXIT.MISSING_PREREQ);
+      }
+      const data = await api(c, 'GET', '/v1/multimodal/redact-image/doctor');
+      console.log(JSON.stringify(data, null, 2));
+      return;
+    }
+    const urlMod = await import('node:url');
+    const __filename = urlMod.fileURLToPath(import.meta.url);
+    const __dirname  = path.dirname(__filename);
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'multimodal-redact-image', 'redact-image.mjs');
+    const r2 = spawnSync(process.execPath, [workerPath, '--doctor'], { stdio: 'pipe' });
+    process.stdout.write(String(r2.stdout || ''));
+    if (r2.status !== 0 && r2.stderr) process.stderr.write(String(r2.stderr));
+    process.exit(r2.status || 0);
+    return;
+  }
+  // W462 — pixel-space PII redaction. Detects faces + license plates
+  // in the image bytes and emits a blurred/masked output PNG.
+  if (sub === 'redact-image') {
+    const positional = rest.find(a => !a.startsWith('--'));
+    const uri = positional || pickFlag(rest, '--uri');
+    const localPath = pickFlag(rest, '--path');
+    if (!uri && !localPath) {
+      console.error('usage: kolm media redact-image <file:URI | --path <local>> [--output <png>] [--mode blur|mask] [--threshold 0.35]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const output = pickFlag(rest, '--output');
+    const mode = pickFlag(rest, '--mode');
+    const threshold = pickFlag(rest, '--threshold');
+    const faceModel = pickFlag(rest, '--face-model');
+    const plateModel = pickFlag(rest, '--plate-model');
+    const maxBytes = pickFlag(rest, '--max-bytes');
+    if (remote) {
+      const c = loadConfig();
+      if (!c.api_key) {
+        console.error('not logged in. run: kolm login (or drop --remote)');
+        process.exit(EXIT.MISSING_PREREQ);
+      }
+      const body = {};
+      if (uri)         body.media_uri = uri;
+      if (localPath)   body.path = localPath;
+      if (output)      body.output_path = output;
+      if (mode)        body.mode = mode;
+      if (threshold)   body.threshold = Number(threshold);
+      if (faceModel)   body.face_model = faceModel;
+      if (plateModel)  body.plate_model = plateModel;
+      if (maxBytes)    body.max_bytes = Number(maxBytes);
+      const data = await api(c, 'POST', '/v1/multimodal/redact-image', body);
+      console.log(JSON.stringify(data, null, 2));
+      if (data && data.ok === false) process.exit(1);
+      return;
+    }
+    const urlMod = await import('node:url');
+    const __filename = urlMod.fileURLToPath(import.meta.url);
+    const __dirname  = path.dirname(__filename);
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'multimodal-redact-image', 'redact-image.mjs');
+    const wargs = [];
+    if (uri)         { wargs.push('--uri', uri); }
+    if (localPath)   { wargs.push('--path', localPath); }
+    if (output)      { wargs.push('--output', output); }
+    if (mode)        { wargs.push('--mode', mode); }
+    if (threshold)   { wargs.push('--threshold', threshold); }
+    if (faceModel)   { wargs.push('--face-model', faceModel); }
+    if (plateModel)  { wargs.push('--plate-model', plateModel); }
+    if (maxBytes)    { wargs.push('--max-bytes', maxBytes); }
+    wargs.push('--json');
+    const r2 = spawnSync(process.execPath, [workerPath, ...wargs], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 5 * 60 * 1000,
+      maxBuffer: 64 * 1024 * 1024,
     });
     process.stdout.write(String(r2.stdout || ''));
     if (r2.stderr && String(r2.stderr).length) process.stderr.write(String(r2.stderr));

@@ -1,0 +1,28 @@
+{
+  "name": "@kolmogorov/multimodal-redact-image-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated kolm multimodal image PII redactor. Detects faces + license plates in raw image bytes and emits a blurred/masked output image. Heavy ML deps (onnxruntime-node, sharp, the YOLO/MediaPipe weights) live HERE — root kolm install stays light. When deps are missing the worker emits an honest install_hint envelope; never silently claims it redacted PII it couldn't see.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "redact-image.mjs",
+  "bin": {
+    "kolm-multimodal-redact-image-worker": "redact-image.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "doctor": "node redact-image.mjs --doctor"
+  },
+  "dependencies": {},
+  "optionalDependencies": {
+    "onnxruntime-node": "^1.17.0",
+    "sharp": "^0.33.0"
+  },
+  "external": {
+    "models": {
+      "note": "Production face / license-plate detection requires an ONNX model on disk. Default search paths: ~/.kolm/models/yolov8n-face.onnx, ~/.kolm/models/license-plate-detector.onnx. Without a model the worker returns {ok:false, install_hint, redacted_image:null} so the caller knows what's missing."
+    }
+  }
+}

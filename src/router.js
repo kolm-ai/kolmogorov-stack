@@ -4110,6 +4110,91 @@ export function buildRouter() {
     return res.json(env);
   });
 
+  // W462 — multimodal IMAGE PII redactor: pixel-space redaction of
+  // faces + license plates. Distinct from /v1/media/redact-job (W454):
+  // W454 extracts text from an image and redacts that text; W462 detects
+  // faces/plates IN PIXEL SPACE and emits a blurred/masked output image.
+  // For medical photos, dashcam frames, and ID-card scans you typically
+  // want BOTH passes. Worker is OPTIONAL (onnxruntime-node + sharp + an
+  // ONNX model on disk live in workers/multimodal-redact-image/). When
+  // any of those is missing, the route returns 200 with an honest
+  // {ok:false, error:'no_detector_installed', install_hint:'...'} so the
+  // caller never thinks redaction succeeded when it didn't.
+  //
+  // Body: { media_uri | path, output_path?, mode?, threshold?,
+  //         face_model?, plate_model?, max_bytes? }
+  r.post('/v1/multimodal/redact-image', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const mediaUri = typeof body.media_uri === 'string' ? body.media_uri : null;
+    const localPath = typeof body.path === 'string' ? body.path : null;
+    if (!mediaUri && !localPath) {
+      return res.status(400).json({ error: 'media_uri_or_path_required' });
+    }
+    const { spawnSync } = await import('node:child_process');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'multimodal-redact-image', 'redact-image.mjs');
+    const wargs = [];
+    if (mediaUri) wargs.push('--uri', mediaUri);
+    if (localPath) wargs.push('--path', localPath);
+    if (body.output_path)  wargs.push('--output', String(body.output_path));
+    if (body.face_model)   wargs.push('--face-model', String(body.face_model));
+    if (body.plate_model)  wargs.push('--plate-model', String(body.plate_model));
+    if (body.threshold !== undefined) wargs.push('--threshold', String(body.threshold));
+    if (body.mode)         wargs.push('--mode', String(body.mode));
+    if (body.max_bytes)    wargs.push('--max-bytes', String(body.max_bytes));
+    wargs.push('--json');
+    const r2 = spawnSync(process.execPath, [workerPath, ...wargs], {
+      stdio: 'pipe',
+      timeout: 5 * 60 * 1000,
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    let env = null;
+    try { env = JSON.parse(String(r2.stdout || '').trim().split('\n').pop() || '{}'); }
+    catch (_) { env = null; }
+    if (!env) {
+      return res.status(500).json({
+        error: 'worker_no_output',
+        exit_code: r2.status,
+        stderr: String(r2.stderr || '').slice(0, 500),
+      });
+    }
+    if (r2.status === 3)  return res.status(200).json(env); // no detector installed — honest envelope
+    if (r2.status === 4)  return res.status(404).json(env);
+    if (r2.status === 2)  return res.status(400).json(env);
+    if (r2.status === 5)  return res.status(422).json(env);
+    if (r2.status === 6)  return res.status(500).json(env);
+    return res.status(200).json(env);
+  });
+
+  // W462 — image-redact worker self-doctor, proxied so the CLI's
+  // `kolm media image-doctor --remote` can ask the server.
+  r.get('/v1/multimodal/redact-image/doctor', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const { spawnSync } = await import('node:child_process');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'multimodal-redact-image', 'redact-image.mjs');
+    const r2 = spawnSync(process.execPath, [workerPath, '--doctor'], {
+      stdio: 'pipe',
+      timeout: 30 * 1000,
+    });
+    let env = null;
+    try { env = JSON.parse(String(r2.stdout || '').trim()); }
+    catch (_) { env = null; }
+    if (!env) {
+      return res.status(500).json({
+        error: 'worker_no_output',
+        exit_code: r2.status,
+        stderr: String(r2.stderr || '').slice(0, 500),
+      });
+    }
+    return res.json(env);
+  });
+
   // Rotate the per-tenant receipt-signing secret. Previous secret is
   // preserved so older signed artifacts and audit rows still verify.
   r.post('/v1/account/rotate-receipt-secret', (req, res) => {
