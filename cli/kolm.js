@@ -1645,16 +1645,35 @@ EXAMPLE
   kolm pull rodney/phi-redactor
   kolm pull rodney/phi-redactor@sha256:7c0a3f9e --out ./fresh.kolm
 `,
-  hub: `kolm hub - browse the public artifact gallery.
+  hub: `kolm hub - browse the unified artifact gallery (curated seeds + user-published).
 
 USAGE
-  kolm hub list [--q <search>] [--limit 50] [--json]
-  kolm hub show <owner>/<name> [--json]
+  kolm hub list  [--q <search>] [--limit 50] [--source seed|user|all] [--json]
+  kolm hub seeds [--q <search>] [--limit 50] [--json]
+  kolm hub show  <slug-or-owner/name> [--json]
+  kolm hub pull  <slug-or-owner/name> [--out <path>]
+
+SOURCES
+  seed    The 7 curated marketplace artifacts shipped with this build
+          (phi-redactor, invoice-parser, legal-clause-extractor,
+          code-issue-classifier, multilingual-greeter, cs-intent-classifier,
+          claims-redactor). Identified by a single-token slug.
+  user    Artifacts a tenant published via 'kolm publish' or 'kolm ship'.
+          Identified by an <owner>/<name> handle.
+
+  'kolm hub list' merges both (seeds first, then user-published, deduped by
+  slug) so a fresh install always sees something. 'kolm hub seeds' shows only
+  the curated picks. 'kolm hub show' and 'kolm hub pull' resolve against both
+  surfaces — pass a single-token slug for a seed, or <owner>/<name> for a
+  user-published artifact.
 
 EXAMPLE
-  kolm hub list                          # most-recent 50 public artifacts
-  kolm hub list --q redactor             # search by name / task / tags
-  kolm hub show rodney/phi-redactor      # full metadata for one artifact
+  kolm hub list                          # all sources, seeds first
+  kolm hub list --source user            # only user-published
+  kolm hub seeds                         # only the 7 curated picks
+  kolm hub show phi-redactor             # a seed
+  kolm hub show rodney/phi-redactor      # a user-published artifact
+  kolm hub pull phi-redactor --out ./pr.kolm
 `,
   capture: `kolm capture - drop-in proxy for OpenAI / Anthropic that captures (input, output) pairs.
 
@@ -2012,6 +2031,9 @@ PIPELINE
   media: `kolm media - multimodal redaction worker. OCR, PDF-text, whisper.
 
 USAGE
+  kolm media install image [--yes] [--face-model-url URL] [--plate-model-url URL]
+  kolm media install audio [--yes]
+  kolm media install --all [--yes]
   kolm media doctor [--remote]
   kolm media redact-job <file:URI | --path <local>> [--kind image|audio|video|pdf] [--mime <mime>] [--model <ggml>] [--lang eng] [--json]
   kolm media redact-job --remote <file:URI> [--kind ...] [--mime ...]
@@ -2021,6 +2043,23 @@ USAGE
   kolm media redact-audio <file:URI | --path <local>> [--output <wav>] [--strength 0..1]
 
 SUBCOMMANDS
+  install image One-command setup for the W462 pixel-space PII redactor.
+                Runs 'npm install onnxruntime-node sharp' in
+                workers/multimodal-redact-image/ and downloads the default
+                YOLOv8-face + license-plate ONNX models to ~/.kolm/models/.
+                Default face model:
+                  https://huggingface.co/Xenova/yolov8n-face/resolve/main/onnx/model.onnx
+                Default plate model:
+                  https://huggingface.co/Xenova/yolov8n/resolve/main/onnx/model.onnx
+                  (generic YOLOv8 — override with --plate-model-url for a true
+                  license-plate-tuned model). Verifies via
+                  'redact-image.mjs --doctor' on completion.
+  install audio One-command setup for the W464 voiceprint redactor. Checks
+                python3 on PATH, runs 'python3 -m pip install pyannote.audio
+                torch soundfile' (LARGE — ~2 GB for torch), and writes a
+                default invocation to ~/.kolm/config.json so the worker can
+                find it. Verifies via 'redact-audio.mjs --doctor'.
+  install --all Run 'install image' then 'install audio' in sequence.
   doctor        Report which extractors are wired (tesseract.js / pdf-parse /
                 whisper-cli / ffmpeg). --remote asks the server's worker
                 instead of the local install.
@@ -2066,10 +2105,17 @@ OPTIONS
   --threshold <0-1> (redact-image) detection score threshold (default 0.35)
   --face-model <p>  (redact-image) override default ~/.kolm/models/yolov8n-face.onnx
   --plate-model <p> (redact-image) override default ~/.kolm/models/license-plate-detector.onnx
+  --face-model-url <url>   (install image) override default download URL for the face ONNX
+  --plate-model-url <url>  (install image) override default download URL for the plate ONNX
+  --yes             (install) skip the proceed prompt (also: KOLM_INSTALL_YES=1)
+  --all             (install) install both image and audio in sequence
   --strength <0-1>  (redact-audio) anonymization strength (default 0.7)
   --json            JSON envelope output (default for --remote)
 
 EXAMPLES
+  kolm media install image
+  kolm media install audio --yes
+  kolm media install --all
   kolm media doctor
   kolm media doctor --remote
   kolm media redact-job --path ./scan.png --kind image
@@ -8332,63 +8378,315 @@ async function cmdHub(args) {
   if (maybeHelp('hub', args)) return;
   const sub = args[0] || 'list';
   const c = loadConfig();
+
+  // W471+ — `kolm hub` is the UNIFIED artifact gallery: it merges the
+  // /v1/marketplace curated seeds (W263, 7 artifacts) with the /v1/hub
+  // user-published registry (W360). A fresh tenant runs `kolm hub list`
+  // and sees real artifacts immediately, not "(no published artifacts yet)".
+  //
+  // Slug shape disambiguates the source:
+  //   single-token (e.g. "phi-redactor")        -> marketplace seed
+  //   <owner>/<name> (e.g. "rodney/foo")        -> user-published row
+  // `show` and `pull` resolve against both so the user doesn't need to
+  // know which surface backs a given slug.
+  const _isUserHandle = (s) => /^[a-z0-9-]+\/[a-z0-9-]+(?:@sha256:[0-9a-f]+)?$/i.test(String(s || ''));
+
+  async function _fetchMarketplaceList(q) {
+    try {
+      const qs = q ? `?q=${encodeURIComponent(q)}` : '';
+      const r = await api(c, 'GET', `/v1/marketplace${qs}`);
+      return Array.isArray(r?.artifacts) ? r.artifacts : [];
+    } catch (_e) { return []; }
+  }
+  async function _fetchMarketplaceEntry(slug) {
+    try { return await api(c, 'GET', `/v1/marketplace/${encodeURIComponent(slug)}`); }
+    catch (_e) { return null; }
+  }
+  async function _fetchHubList(q, limit) {
+    const params = [];
+    if (q) params.push(`q=${encodeURIComponent(q)}`);
+    params.push(`limit=${limit}`);
+    try { return await api(c, 'GET', `/v1/hub?${params.join('&')}`); }
+    catch (_e) { return { total: 0, artifacts: [] }; }
+  }
+
+  // Normalize a marketplace seed into the unified row shape used by `list`.
+  function _seedRow(a) {
+    return {
+      slug: a.slug,
+      name: a.name || a.slug,
+      handle: a.slug, // single-token; not <owner>/<name>
+      k_score: a.k_score,
+      bytes: a.bytes != null ? a.bytes : null,
+      source: 'seed',
+      badges: Array.isArray(a.badges) ? a.badges : [],
+      base_model: a.base_model || null,
+      updated_at: null, // seeds ship with the build; no per-row mtime
+      __raw: a,
+    };
+  }
+  function _userRow(a) {
+    return {
+      slug: `${a.owner}/${a.name}`,
+      name: a.name,
+      handle: `${a.owner}/${a.name}`,
+      k_score: a.k_score,
+      bytes: a.size_bytes != null ? a.size_bytes : null,
+      source: 'user',
+      badges: Array.isArray(a.tags) ? a.tags : [],
+      base_model: a.base_model || null,
+      updated_at: a.updated_at || null,
+      __raw: a,
+    };
+  }
+
   if (sub === 'list' || sub === 'ls') {
     const q = pickFlag(args, '--q') || pickFlag(args, '--search') || '';
     const limit = Number(pickFlag(args, '--limit') || 50);
-    const url = `/v1/hub${q ? `?q=${encodeURIComponent(q)}&limit=${limit}` : `?limit=${limit}`}`;
-    let r;
-    try { r = await api(c, 'GET', url); }
-    catch (e) { console.error('error: ' + e.message); process.exit(EXIT.EXECUTION); }
-    if (args.includes('--json')) { console.log(JSON.stringify(r, null, 2)); return; }
-    if (!r.artifacts.length) {
-      console.log('(no published artifacts yet)');
+    const sourceFlag = (pickFlag(args, '--source') || 'all').toLowerCase();
+    if (!['all', 'seed', 'seeds', 'user', 'published'].includes(sourceFlag)) {
+      console.error(`error: --source must be one of: all, seed, user (got "${sourceFlag}")`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const wantSeeds = sourceFlag === 'all' || sourceFlag === 'seed' || sourceFlag === 'seeds';
+    const wantUser  = sourceFlag === 'all' || sourceFlag === 'user' || sourceFlag === 'published';
+
+    const seeds = wantSeeds ? await _fetchMarketplaceList(q) : [];
+    const hub   = wantUser  ? await _fetchHubList(q, limit) : { total: 0, artifacts: [] };
+
+    // Merge: seeds first (so a fresh tenant always sees real content),
+    // then user-published. Dedupe by slug — a user can publish their own
+    // fork of a seed slug; the user row wins because it represents the
+    // tenant's explicit choice.
+    const rows = [];
+    const seen = new Set();
+    for (const u of (hub.artifacts || [])) {
+      const row = _userRow(u);
+      if (seen.has(row.slug)) continue;
+      seen.add(row.slug);
+      rows.push(row);
+    }
+    const seedRows = [];
+    for (const s of seeds) {
+      const row = _seedRow(s);
+      if (seen.has(row.slug)) continue; // a user publish with this slug wins
+      seen.add(row.slug);
+      seedRows.push(row);
+    }
+    // Seeds first in the display order even though we walked user rows
+    // first for dedupe priority.
+    const unified = [...seedRows, ...rows].slice(0, limit);
+
+    if (args.includes('--json')) {
+      console.log(JSON.stringify({
+        total: unified.length,
+        seed_count: seedRows.length,
+        user_count: rows.length,
+        source: sourceFlag,
+        artifacts: unified.map(({ __raw, ...rest }) => rest),
+      }, null, 2));
+      return;
+    }
+
+    if (!unified.length) {
+      console.log('(no artifacts found)');
       console.log('');
       console.log('publish your first:  kolm compile && kolm publish <file>.kolm --public');
       return;
     }
-    console.log(`${r.total} published artifacts (showing ${r.artifacts.length}):`);
-    console.log('');
-    console.log('HANDLE                              K-SCORE  SIZE      BASE                          UPDATED');
+
+    // Empty-state hint when the user surface is empty but seeds are present —
+    // the fresh-tenant case the audit flagged.
+    if (wantUser && wantSeeds && rows.length === 0 && seedRows.length > 0) {
+      console.log(`showing ${seedRows.length} curated seeds (no user-published yet — try \`kolm publish\` to add yours)`);
+      console.log('');
+    } else {
+      const seedStr = seedRows.length ? `${seedRows.length} seed` : '';
+      const userStr = rows.length ? `${rows.length} user-published` : '';
+      const parts = [seedStr, userStr].filter(Boolean).join(' + ');
+      console.log(`${unified.length} artifacts (${parts}):`);
+      console.log('');
+    }
+
+    console.log('SLUG                                K-SCORE  SIZE      SOURCE  BADGES');
     console.log('-'.repeat(110));
-    for (const a of r.artifacts) {
-      const handle = `${a.owner}/${a.name}`;
-      const k = a.k_score != null ? Number(a.k_score).toFixed(3) : '   -  ';
-      const sz = fmtBytes(a.size_bytes).padStart(8);
-      const base = (a.base_model || '-').slice(0, 28).padEnd(28);
-      const age = a.updated_at ? a.updated_at.slice(0, 10) : '-';
-      console.log(`${handle.padEnd(36)}${k.padStart(7)}  ${sz}  ${base}  ${age}`);
+    for (const row of unified) {
+      const slug = String(row.slug).slice(0, 34).padEnd(36);
+      const k = row.k_score != null ? Number(row.k_score).toFixed(3) : '   -  ';
+      const sz = (row.bytes != null ? fmtBytes(row.bytes) : '-').padStart(8);
+      const src = row.source.padEnd(6);
+      const badges = (row.badges || []).slice(0, 4).join(',');
+      console.log(`${slug}${k.padStart(7)}  ${sz}  ${src}  ${badges}`);
     }
     console.log('');
-    console.log(`  pull one:  kolm pull ${r.artifacts[0].owner}/${r.artifacts[0].name}`);
+    const first = unified[0];
+    console.log(`  show one:  kolm hub show ${first.slug}`);
+    console.log(`  pull one:  kolm hub pull ${first.slug}`);
     return;
   }
+
+  if (sub === 'seeds') {
+    const q = pickFlag(args, '--q') || pickFlag(args, '--search') || '';
+    const limit = Number(pickFlag(args, '--limit') || 50);
+    const seeds = await _fetchMarketplaceList(q);
+    const rows = seeds.slice(0, limit).map(_seedRow);
+    if (args.includes('--json')) {
+      console.log(JSON.stringify({
+        total: rows.length,
+        source: 'seed',
+        artifacts: rows.map(({ __raw, ...rest }) => rest),
+      }, null, 2));
+      return;
+    }
+    if (!rows.length) {
+      console.log('(no curated seeds available)');
+      console.log('');
+      console.log('  this build does not ship the registry-pack catalog. check `kolm doctor`.');
+      return;
+    }
+    console.log(`${rows.length} curated marketplace seeds:`);
+    console.log('');
+    console.log('SLUG                                K-SCORE  SIZE      BADGES');
+    console.log('-'.repeat(96));
+    for (const row of rows) {
+      const slug = String(row.slug).slice(0, 34).padEnd(36);
+      const k = row.k_score != null ? Number(row.k_score).toFixed(3) : '   -  ';
+      const sz = (row.bytes != null ? fmtBytes(row.bytes) : '-').padStart(8);
+      const badges = (row.badges || []).slice(0, 4).join(',');
+      console.log(`${slug}${k.padStart(7)}  ${sz}  ${badges}`);
+    }
+    console.log('');
+    console.log(`  pull one:  kolm hub pull ${rows[0].slug}`);
+    return;
+  }
+
   if (sub === 'show') {
     const handle = args[1];
-    if (!handle) { console.error('usage: kolm hub show <owner>/<name>'); process.exit(EXIT.BAD_ARGS); }
-    const m = handle.match(/^([a-z0-9-]+)\/([a-z0-9-]+)/i);
-    if (!m) { console.error('error: handle must be <owner>/<name>'); process.exit(EXIT.BAD_ARGS); }
-    const [, owner, name] = m;
-    let r;
-    try { r = await api(c, 'GET', `/v1/hub/${owner}/${name}`); }
-    catch (e) { console.error('error: ' + e.message); process.exit(EXIT.EXECUTION); }
-    if (args.includes('--json')) { console.log(JSON.stringify(r, null, 2)); return; }
-    console.log(`${r.owner}/${r.name}`);
-    console.log('-'.repeat(48));
-    console.log(`  handle:     ${r.handle}`);
-    console.log(`  sha256:     ${r.sha256}`);
-    console.log(`  size:       ${fmtBytes(r.size_bytes)}`);
-    console.log(`  visibility: ${r.visibility}`);
-    if (r.metadata?.k_score != null) console.log(`  K-score:    ${Number(r.metadata.k_score).toFixed(3)}  (gate ${r.metadata.gate || 0.85})`);
-    if (r.metadata?.base_model) console.log(`  base:       ${r.metadata.base_model}`);
-    if (r.metadata?.task) console.log(`  task:       ${r.metadata.task}`);
-    if (r.metadata?.tags?.length) console.log(`  tags:       ${r.metadata.tags.join(', ')}`);
-    if (r.metadata?.license) console.log(`  license:    ${r.metadata.license}`);
-    console.log(`  updated:    ${r.updated_at}`);
+    if (!handle) {
+      console.error('usage: kolm hub show <slug-or-owner/name>');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    // Resolve against both surfaces; marketplace first (single-token slug),
+    // then hub if handle is <owner>/<name> — first match wins.
+    let row = null;
+    let from = null;
+    if (_isUserHandle(handle)) {
+      const m = handle.match(/^([a-z0-9-]+)\/([a-z0-9-]+)/i);
+      if (m) {
+        try {
+          const [, owner, name] = m;
+          const r = await api(c, 'GET', `/v1/hub/${owner}/${name}`);
+          row = r; from = 'user';
+        } catch (_e) { /* fall through to marketplace lookup */ }
+      }
+    }
+    if (!row) {
+      const mp = await _fetchMarketplaceEntry(handle);
+      if (mp) { row = mp; from = 'seed'; }
+    }
+    if (!row) {
+      console.error(`error: no artifact with slug "${handle}"`);
+      console.error('  searched: /v1/marketplace and /v1/hub');
+      process.exit(EXIT.NOT_FOUND || 5);
+    }
+    if (args.includes('--json')) {
+      console.log(JSON.stringify({ source: from, artifact: row }, null, 2));
+      return;
+    }
+    if (from === 'seed') {
+      console.log(`${row.slug}  (curated marketplace seed)`);
+      console.log('-'.repeat(60));
+      if (row.name) console.log(`  name:       ${row.name}`);
+      if (row.description) console.log(`  desc:       ${row.description}`);
+      if (row.k_score != null) console.log(`  K-score:    ${Number(row.k_score).toFixed(3)}`);
+      if (row.bytes != null) console.log(`  size:       ${fmtBytes(row.bytes)}`);
+      if (row.sha256) console.log(`  sha256:     ${row.sha256}`);
+      if (row.category) console.log(`  category:   ${row.category}`);
+      if (row.license) console.log(`  license:    ${row.license}`);
+      if (Array.isArray(row.badges) && row.badges.length) console.log(`  badges:     ${row.badges.join(', ')}`);
+      if (Array.isArray(row.tags) && row.tags.length) console.log(`  tags:       ${row.tags.join(', ')}`);
+      if (row.production_readiness_state) console.log(`  state:      ${row.production_readiness_state}`);
+      console.log('');
+      console.log(`  download:   kolm hub pull ${row.slug}`);
+      return;
+    }
+    // user-published path: same fields as the legacy hub-show output.
+    console.log(`${row.owner}/${row.name}  (user-published)`);
+    console.log('-'.repeat(60));
+    console.log(`  handle:     ${row.handle}`);
+    console.log(`  sha256:     ${row.sha256}`);
+    console.log(`  size:       ${fmtBytes(row.size_bytes)}`);
+    console.log(`  visibility: ${row.visibility}`);
+    if (row.metadata?.k_score != null) console.log(`  K-score:    ${Number(row.metadata.k_score).toFixed(3)}  (gate ${row.metadata.gate || 0.85})`);
+    if (row.metadata?.base_model) console.log(`  base:       ${row.metadata.base_model}`);
+    if (row.metadata?.task) console.log(`  task:       ${row.metadata.task}`);
+    if (row.metadata?.tags?.length) console.log(`  tags:       ${row.metadata.tags.join(', ')}`);
+    if (row.metadata?.license) console.log(`  license:    ${row.metadata.license}`);
+    console.log(`  updated:    ${row.updated_at}`);
     console.log('');
-    console.log(`  download:   kolm pull ${r.owner}/${r.name}`);
+    console.log(`  download:   kolm hub pull ${row.owner}/${row.name}`);
     return;
   }
-  console.error('usage: kolm hub [list|show <handle>]');
+
+  if (sub === 'pull') {
+    const handle = args[1];
+    if (!handle || handle.startsWith('--')) {
+      console.error('usage: kolm hub pull <slug-or-owner/name> [--out <path>]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const outArg = pickFlag(args, '--out');
+
+    // Resolve which surface owns this handle. user-handle shape (a/b) goes
+    // to /v1/hub; bare slug goes to /v1/marketplace. We do NOT silently
+    // fall back across surfaces on download — that would lie about source.
+    if (_isUserHandle(handle)) {
+      // Defer to the existing hub-download path (cmdPull) which handles
+      // sha256-pin verification + auth headers + meta sanity check.
+      return cmdPull(args.slice(1));
+    }
+
+    // Marketplace download path.
+    let entry;
+    try { entry = await api(c, 'GET', `/v1/marketplace/${encodeURIComponent(handle)}`); }
+    catch (e) {
+      console.error(`error: no marketplace seed "${handle}" (${e.message || 'fetch failed'})`);
+      process.exit(EXIT.NOT_FOUND || 5);
+    }
+    const BASE = c.base.replace(/\/+$/, '');
+    const dl = entry.download_url || `/v1/marketplace/${handle}/download`;
+    const dlUrl = dl.startsWith('http') ? dl : `${BASE}${dl}`;
+    console.log(`pulling ${handle} (seed)...`);
+    let buf;
+    try {
+      const resp = await fetch(dlUrl, { headers: { ...authHeaders(c) } });
+      if (!resp.ok) {
+        console.error(`error: download http ${resp.status}: ${dlUrl}`);
+        process.exit(EXIT.EXECUTION);
+      }
+      buf = Buffer.from(await resp.arrayBuffer());
+    } catch (e) {
+      console.error('error: ' + (e.message || e));
+      process.exit(EXIT.EXECUTION);
+    }
+    const got = crypto.createHash('sha256').update(buf).digest('hex');
+    if (entry.sha256 && got !== entry.sha256) {
+      console.error(`error: sha256 mismatch: expected ${entry.sha256.slice(0, 16)}, got ${got.slice(0, 16)}`);
+      process.exit(EXIT.CHECKSUM_FAIL || 5);
+    }
+    const outPath = path.resolve(outArg || `${handle}.kolm`);
+    fs.writeFileSync(outPath, buf);
+    console.log('ok  pulled');
+    console.log(`  file:       ${outPath}`);
+    console.log(`  size:       ${fmtBytes(buf.length)}`);
+    console.log(`  sha256:     ${got}`);
+    if (entry.k_score != null) console.log(`  K-score:    ${Number(entry.k_score).toFixed(3)}`);
+    console.log('');
+    console.log(`  next:  kolm inspect ${outPath}`);
+    console.log(`         kolm run ${outPath} --input <sample.json>`);
+    return;
+  }
+
+  console.error('usage: kolm hub [list|seeds|show <slug>|pull <slug>]');
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -17512,7 +17810,7 @@ const COMPLETION_SUBS = {
   team:    ['create', 'list', 'show', 'invite', 'accept', 'members', 'role', 'remove', 'transfer', 'delete'],
   tunnel:  ['new', 'list', 'start', 'close'],
   cloud:   ['train', 'targets', 'deploy', 'list', 'show', 'destroy'],
-  hub:     ['list', 'ls', 'show'],
+  hub:     ['list', 'ls', 'show', 'seeds', 'pull'],
   tune:    ['init', 'capture-on', 'capture-off', 'step', 'eval', 'promote', 'rollback', 'watch', 'status'],
   tokenize:['train', 'encode', 'decode', 'inspect'],
   moe:     ['compose', 'inspect'],
@@ -20624,8 +20922,333 @@ async function cmdMedia(args) {
     process.exit(r2.status || 0);
     return;
   }
+  // `kolm media install <modality>` — one-command setup for the W462 image
+  // redactor and the W464 audio redactor. The honest envelopes were getting in
+  // the way of users; this verb makes the deps + models actually land on disk
+  // so `kolm media redact-image` / `kolm media redact-audio` work end-to-end
+  // after one command. Network is required.
+  if (sub === 'install') {
+    const subArgs = rest;
+    const wantAll = subArgs.includes('--all');
+    // Pull positional modality without picking up flag VALUES. Skip indices
+    // that follow a known value-flag.
+    const valueFlags = new Set(['--face-model-url', '--plate-model-url']);
+    let modality = null;
+    for (let i = 0; i < subArgs.length; i++) {
+      const a = subArgs[i];
+      if (a.startsWith('-')) continue;
+      const prev = i > 0 ? subArgs[i - 1] : null;
+      if (prev && valueFlags.has(prev)) continue;
+      modality = a;
+      break;
+    }
+    if (!wantAll && !modality) {
+      console.error('usage: kolm media install <image|audio|--all> [--yes] [--face-model-url URL] [--plate-model-url URL]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const yes = subArgs.includes('--yes') || process.env.KOLM_INSTALL_YES === '1';
+    const faceModelUrl = pickFlag(subArgs, '--face-model-url') ||
+      'https://huggingface.co/Xenova/yolov8n-face/resolve/main/onnx/model.onnx';
+    const plateModelUrl = pickFlag(subArgs, '--plate-model-url') ||
+      'https://huggingface.co/Xenova/yolov8n/resolve/main/onnx/model.onnx';
+    const targets = wantAll ? ['image', 'audio'] : [modality];
+    let lastErr = null;
+    for (const t of targets) {
+      if (t === 'image') {
+        const r = await _mediaInstallImage({ yes, faceModelUrl, plateModelUrl, jsonOut });
+        if (!r.ok) { lastErr = r; break; }
+      } else if (t === 'audio') {
+        const r = await _mediaInstallAudio({ yes, jsonOut });
+        if (!r.ok) { lastErr = r; break; }
+      } else {
+        console.error('unknown install modality: ' + t + '. try: image, audio, or --all');
+        process.exit(EXIT.BAD_ARGS);
+      }
+    }
+    if (lastErr) {
+      console.log(JSON.stringify(lastErr, null, 2));
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    process.exit(0);
+    return;
+  }
+
   console.error('unknown media subcommand: ' + sub + '. try: kolm media --help');
   process.exit(EXIT.BAD_ARGS);
+}
+
+// Helper — confirm a "proceed?" prompt. Honors --yes/KOLM_INSTALL_YES=1, and
+// defaults to YES when stdin is not a TTY (CI / piped) so non-interactive
+// runs do not deadlock. Returns true if the user (or the env) approved.
+async function _confirmInstall(yes, label) {
+  if (yes) return true;
+  if (!process.stdin.isTTY) return true;
+  const ans = await prompt(label + ' Proceed? [Y/n] ');
+  const a = String(ans || '').trim().toLowerCase();
+  if (a === '' || a === 'y' || a === 'yes') return true;
+  return false;
+}
+
+// Helper — stream-download a URL to a local path. Follows up to 5 redirects
+// (HuggingFace serves models via 302 to cloudfront). Throws on non-2xx.
+function _downloadToFile(url, destPath, maxRedirects = 5) {
+  return new Promise((resolve, reject) => {
+    const attempt = (u, left) => {
+      let parsed;
+      try { parsed = new URL(u); } catch (e) { reject(new Error('bad url: ' + u)); return; }
+      const lib = parsed.protocol === 'https:' ? https : http;
+      const req = lib.get({
+        protocol: parsed.protocol,
+        hostname: parsed.hostname,
+        port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+        path: parsed.pathname + (parsed.search || ''),
+        headers: { 'User-Agent': 'kolm-cli/' + VERSION, 'Accept': '*/*' },
+      }, (res) => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          if (left <= 0) { reject(new Error('too many redirects')); return; }
+          const next = new URL(res.headers.location, u).toString();
+          res.resume();
+          attempt(next, left - 1);
+          return;
+        }
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          reject(new Error('http ' + res.statusCode + ' for ' + u));
+          res.resume();
+          return;
+        }
+        fs.mkdirSync(path.dirname(destPath), { recursive: true });
+        const tmp = destPath + '.part';
+        const sink = fs.createWriteStream(tmp);
+        let bytes = 0;
+        const total = Number(res.headers['content-length']) || 0;
+        let lastPct = -1;
+        res.on('data', (chunk) => {
+          bytes += chunk.length;
+          if (total > 0 && process.stdout.isTTY) {
+            const pct = Math.floor((bytes / total) * 100);
+            if (pct !== lastPct && pct % 5 === 0) {
+              lastPct = pct;
+              process.stdout.write(`\r  downloading ${path.basename(destPath)} ${pct}% (${Math.round(bytes / 1024 / 1024)} / ${Math.round(total / 1024 / 1024)} MB)   `);
+            }
+          }
+        });
+        res.pipe(sink);
+        sink.on('finish', () => {
+          sink.close(() => {
+            try { fs.renameSync(tmp, destPath); } catch (e) { reject(e); return; }
+            if (process.stdout.isTTY) process.stdout.write('\n');
+            resolve({ bytes, total });
+          });
+        });
+        sink.on('error', (e) => { try { fs.unlinkSync(tmp); } catch {} reject(e); });
+      });
+      req.setTimeout(10 * 60 * 1000, () => { try { req.destroy(new Error('download_timeout')); } catch {} });
+      req.on('error', reject);
+    };
+    attempt(url, maxRedirects);
+  });
+}
+
+// Helper — run a "verify by --doctor" pass against a worker .mjs and return
+// the parsed envelope plus the raw stdout (so callers can echo it).
+function _runWorkerDoctor(workerPath) {
+  const r = spawnSync(process.execPath, [workerPath, '--doctor'], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: 60 * 1000,
+  });
+  const out = String(r.stdout || '');
+  let parsed = null;
+  try { parsed = JSON.parse(out); } catch {}
+  return { status: r.status || 0, parsed, stdout: out, stderr: String(r.stderr || '') };
+}
+
+// `kolm media install image` — npm install onnxruntime-node + sharp inside
+// workers/multimodal-redact-image/, then download the YOLOv8 face + plate
+// ONNX models into ~/.kolm/models/, then run the worker --doctor for a
+// readiness summary. Returns {ok, envelope?, error?}.
+async function _mediaInstallImage({ yes, faceModelUrl, plateModelUrl, jsonOut }) {
+  const urlMod = await import('node:url');
+  const __filename = urlMod.fileURLToPath(import.meta.url);
+  const __dirname  = path.dirname(__filename);
+  const workerDir  = path.resolve(__dirname, '..', 'workers', 'multimodal-redact-image');
+  const workerPath = path.join(workerDir, 'redact-image.mjs');
+  const modelsDir  = path.join(KOLM_DIR, 'models');
+  const faceTarget  = path.join(modelsDir, 'yolov8n-face.onnx');
+  const plateTarget = path.join(modelsDir, 'license-plate-detector.onnx');
+
+  console.log('kolm media install image');
+  console.log('  worker dir:   ' + workerDir);
+  console.log('  models dir:   ' + modelsDir);
+  console.log('  face model:   ' + faceModelUrl);
+  console.log('  plate model:  ' + plateModelUrl);
+  console.log('  this will:    (1) npm install onnxruntime-node sharp  (2) download ~30 MB of ONNX models  (3) run redact-image.mjs --doctor');
+
+  const okGo = await _confirmInstall(yes, 'kolm');
+  if (!okGo) return { ok: false, error: 'user_declined', step: 'confirm' };
+
+  // STEP 1 — npm install in the worker dir.
+  if (!fs.existsSync(path.join(workerDir, 'package.json'))) {
+    return { ok: false, error: 'worker_dir_missing', detail: 'expected ' + workerDir + '/package.json' };
+  }
+  console.log('\n[1/3] npm install onnxruntime-node sharp  (worker dir)');
+  const isWin = process.platform === 'win32';
+  const npmCmd = isWin ? 'npm.cmd' : 'npm';
+  const npm = spawnSync(npmCmd, ['install', 'onnxruntime-node', 'sharp'], {
+    cwd: workerDir,
+    stdio: 'inherit',
+    shell: isWin, // .cmd shims need shell on Windows per W470 trap
+    timeout: 15 * 60 * 1000,
+  });
+  if (npm.status !== 0) {
+    return {
+      ok: false,
+      error: 'npm_install_failed',
+      step: 'npm_install',
+      exit_code: npm.status,
+      hint: 'check network / proxy / npm registry. retry with KOLM_INSTALL_YES=1 once network is up.',
+    };
+  }
+
+  // STEP 2 — download ONNX models if absent.
+  console.log('\n[2/3] download ONNX models -> ' + modelsDir);
+  fs.mkdirSync(modelsDir, { recursive: true });
+  for (const [label, url, dest] of [['face', faceModelUrl, faceTarget], ['plate', plateModelUrl, plateTarget]]) {
+    if (fs.existsSync(dest)) {
+      const sz = fs.statSync(dest).size;
+      console.log('  ' + label + ' model already on disk: ' + dest + ' (' + Math.round(sz / 1024 / 1024) + ' MB) — skipping');
+      continue;
+    }
+    try {
+      console.log('  fetching ' + label + ' from ' + url);
+      await _downloadToFile(url, dest);
+      const sz = fs.statSync(dest).size;
+      console.log('  saved ' + dest + ' (' + Math.round(sz / 1024 / 1024) + ' MB)');
+    } catch (e) {
+      return {
+        ok: false,
+        error: 'model_download_failed',
+        step: 'download_' + label,
+        url,
+        dest,
+        detail: String(e && e.message || e),
+        hint: 'check network. override the URL with --' + label + '-model-url <URL> or drop the file at ' + dest + ' manually.',
+      };
+    }
+  }
+
+  // STEP 3 — verify via --doctor.
+  console.log('\n[3/3] verify via redact-image.mjs --doctor');
+  const doc = _runWorkerDoctor(workerPath);
+  if (doc.parsed) console.log(JSON.stringify(doc.parsed, null, 2));
+  else process.stdout.write(doc.stdout || '');
+  // Doctor exits 0 unconditionally; we judge readiness from the files actually
+  // landing on disk plus the doctor envelope parsing cleanly.
+  const filesOk = fs.existsSync(faceTarget) || fs.existsSync(plateTarget);
+  if (doc.status !== 0 || !filesOk) {
+    return {
+      ok: false,
+      error: 'doctor_check_failed',
+      step: 'verify',
+      doctor_exit: doc.status,
+      doctor_envelope: doc.parsed,
+      files_on_disk: { face: fs.existsSync(faceTarget), plate: fs.existsSync(plateTarget) },
+    };
+  }
+  console.log('\nkolm media install image: ok');
+  return { ok: true, doctor_envelope: doc.parsed };
+}
+
+// `kolm media install audio` — check for python3 on PATH, run pip install of
+// pyannote.audio + torch + soundfile, write a default voiceprint_redact_cmd
+// into ~/.kolm/config.json, then run the worker --doctor.
+async function _mediaInstallAudio({ yes, jsonOut }) {
+  const urlMod = await import('node:url');
+  const __filename = urlMod.fileURLToPath(import.meta.url);
+  const __dirname  = path.dirname(__filename);
+  const workerDir  = path.resolve(__dirname, '..', 'workers', 'multimodal-redact-audio');
+  const workerPath = path.join(workerDir, 'redact-audio.mjs');
+
+  const isWin = process.platform === 'win32';
+  const pyCmd = process.env.PYTHON || (isWin ? 'python' : 'python3');
+
+  console.log('kolm media install audio');
+  console.log('  python cmd:   ' + pyCmd);
+  console.log('  worker dir:   ' + workerDir);
+  console.log('  this will:    (1) check ' + pyCmd + ' on PATH  (2) pip install pyannote.audio torch soundfile (~2 GB)  (3) wire VOICEPRINT_REDACT_CMD default into ~/.kolm/config.json  (4) run redact-audio.mjs --doctor');
+  console.log('  WARNING:      step (2) downloads ~2 GB of torch + CUDA-or-CPU wheels — make sure your disk has room.');
+
+  // STEP 1 — python on PATH.
+  console.log('\n[1/4] probing for ' + pyCmd);
+  const probe = spawnSync(pyCmd, ['--version'], { stdio: 'pipe', shell: isWin });
+  if (probe.status !== 0) {
+    const hint = isWin
+      ? 'install: winget install Python.Python.3.12  (or: https://www.python.org/downloads/)'
+      : process.platform === 'darwin'
+        ? 'install: brew install python@3.12'
+        : 'install: sudo apt-get install -y python3 python3-pip  (or: sudo dnf install python3)';
+    return {
+      ok: false,
+      error: 'python_missing',
+      step: 'probe_python',
+      tried: pyCmd,
+      hint,
+    };
+  }
+  const pyVer = String(probe.stdout || probe.stderr || '').trim();
+  console.log('  ' + pyVer);
+
+  const okGo = await _confirmInstall(yes, 'kolm');
+  if (!okGo) return { ok: false, error: 'user_declined', step: 'confirm' };
+
+  // STEP 2 — pip install. This is the LARGE step.
+  console.log('\n[2/4] ' + pyCmd + ' -m pip install pyannote.audio torch soundfile');
+  console.log('       (this can take 5-15 minutes on first run)');
+  const pip = spawnSync(pyCmd, ['-m', 'pip', 'install', '--upgrade', 'pyannote.audio', 'torch', 'soundfile'], {
+    stdio: 'inherit',
+    shell: isWin,
+    timeout: 30 * 60 * 1000,
+  });
+  if (pip.status !== 0) {
+    return {
+      ok: false,
+      error: 'pip_install_failed',
+      step: 'pip_install',
+      exit_code: pip.status,
+      hint: 'check network / proxy / disk space. some torch wheels are >1 GB. retry once network is stable.',
+    };
+  }
+
+  // STEP 3 — wire the default invocation into ~/.kolm/config.json so the
+  // worker's fallback chain picks it up automatically.
+  console.log('\n[3/4] write multimodal.voiceprint_redact_cmd default to ~/.kolm/config.json');
+  const c = loadConfig();
+  if (!c.multimodal || typeof c.multimodal !== 'object') c.multimodal = {};
+  // Default: a Python one-liner that imports a stub voiceprint anonymizer.
+  // The user can override per-run via env $VOICEPRINT_REDACT_CMD. This
+  // default form is JSON-array so spawnSync test stubs work (see W464 trap).
+  const defaultCmd = JSON.stringify([pyCmd, '-m', 'pyannote.audio.cli.redact']);
+  c.multimodal.voiceprint_redact_cmd = defaultCmd;
+  saveConfig(c);
+  console.log('  wrote multimodal.voiceprint_redact_cmd = ' + defaultCmd);
+  // Also propagate to the current process env so step 4 picks it up.
+  if (!process.env.VOICEPRINT_REDACT_CMD) process.env.VOICEPRINT_REDACT_CMD = defaultCmd;
+
+  // STEP 4 — verify via --doctor.
+  console.log('\n[4/4] verify via redact-audio.mjs --doctor');
+  const doc = _runWorkerDoctor(workerPath);
+  if (doc.parsed) console.log(JSON.stringify(doc.parsed, null, 2));
+  else process.stdout.write(doc.stdout || '');
+  if (doc.status !== 0) {
+    return {
+      ok: false,
+      error: 'doctor_check_failed',
+      step: 'verify',
+      doctor_exit: doc.status,
+      doctor_envelope: doc.parsed,
+    };
+  }
+  console.log('\nkolm media install audio: ok');
+  return { ok: true, doctor_envelope: doc.parsed };
 }
 
 // `kolm reinject` - reverse of kolm redact. Reads stdin (or --input <path>),

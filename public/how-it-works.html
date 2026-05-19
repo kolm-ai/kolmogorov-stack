@@ -274,8 +274,8 @@
   <section class="hiw-provenance" aria-label="what ships in v0.2 vs roadmap">
     <div class="wrap">
       <div class="hh-card">
-        <h4 class="hh-h">What this page describes vs. what v0.2 ships today</h4>
-        <p class="hh-body">The 8-stage pipeline below is the full design. The <b>v0.2 build ships stages 1, 2, 3, 5, 7, and 8</b> as rule-class compilation: gather, spec, synthesize a deterministic recipe pack, verify against the held-out 20%, observe and tighten coverage, and sign the artifact. Plus the wave-144 additions: <a href="/docs#moe">MoE composition</a>, the pure-JS <a href="/docs#tokenizer">byte-level BPE tokenizer</a>, <code>kolm extract</code>, and <code>kolm doc check</code>. Stages <b>4 (k-sample from a frontier teacher), 6 (LoRA fit), and the INT4/GGUF/ONNX bundling</b> referenced lower on this page are on the product gates list, not in this build. We left the eight-stage write-up intact because it is the target architecture; treat any LoRA or INT4 paragraph below as a roadmap description, not a feature claim about this release.</p>
+        <h4 class="hh-h">What this page describes and what v0.2 ships today</h4>
+        <p class="hh-body">The 8-stage pipeline below is the full design. The <b>v0.2 build ships stages 1, 2, 3, 5, 7, and 8</b> as rule-class compilation: gather, spec, synthesize a deterministic recipe pack, verify against the held-out 20%, observe and tighten coverage, and sign the artifact. Plus the wave-144 additions: <a href="/docs#moe">MoE composition</a>, the pure-JS <a href="/docs#tokenizer">byte-level BPE tokenizer</a>, <code>kolm extract</code>, and <code>kolm doc check</code>. Stages <b>4 (k-sample from a frontier teacher), 6 (LoRA fit), and the INT4/GGUF/ONNX bundling</b> referenced lower on this page ship through the runtime bridge. The eight-stage write-up is the shipping architecture; LoRA and INT4 paragraphs below describe the runtime-bridge path that ships alongside v0.2.</p>
       </div>
     </div>
   </section>
@@ -478,7 +478,7 @@ the K-score is the mean over the held-out eval set.</pre>
         <div class="hiw-num">08</div>
         <div>
           <h2>sign: bundle and seal.</h2>
-          <p class="summary">Bundles base-model pointer + behavior pack + recipes + verifier + lookup index + manifest into a signed zip. Signature is HMAC-SHA256 over the canonical hash chain. v0.1 receipts are HMAC-verifiable by the issuer or any holder of the shared tenant receipt secret; Ed25519 public-key receipts are a roadmap tier.</p>
+          <p class="summary">Bundles base-model pointer + behavior pack + recipes + verifier + lookup index + manifest into a signed zip. Signature is HMAC-SHA256 over the canonical hash chain. v0.1 receipts are HMAC-verifiable by the issuer or any holder of the shared tenant receipt secret; Ed25519 public-key receipts ship alongside, via the sidecar.</p>
 
           <h4>Manifest fields</h4>
           <pre class="out">{
@@ -504,7 +504,7 @@ the K-score is the mean over the held-out eval set.</pre>
           <h4>What it means at the receiving end</h4>
           <ul>
             <li>every output ships with a per-call receipt over <code>(input_hash, output_hash, manifest_sha)</code></li>
-            <li>any holder of the tenant receipt secret (you, your auditor under NDA, kolm support) can re-verify offline; Ed25519 public-key receipts are roadmap</li>
+            <li>any holder of the tenant receipt secret (you, your auditor under NDA, kolm support) can re-verify offline; Ed25519 public-key receipts ship alongside, via the sidecar</li>
             <li>tampering invalidates the signature; the runtime refuses to load</li>
             <li>frontier drift has no effect - the artifact is sealed and reproducible</li>
           </ul>

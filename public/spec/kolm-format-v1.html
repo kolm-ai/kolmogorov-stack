@@ -243,7 +243,7 @@
 <li><b>No breaking changes to manifest layout.</b> Entries may be added but existing keys keep their meaning.</li>
 <li><b>Canonical JSON stays RFC 8785-compatible.</b> A v1 reader will keep verifying v1 artifacts forever.</li>
 <li><b>K-score formula is fixed.</b> The 0.40 / 0.15 x 4 weighting will not move within v1. A new weighting ships as v2.</li>
-<li><b>Receipt chain remains HMAC-SHA256 + four rings.</b> Ed25519 receipts are planned for v2 as a side-by-side option, not a replacement.</li>
+<li><b>Receipt chain remains HMAC-SHA256 + four rings.</b> Ed25519 receipts ship in v2 as a side-by-side option, not a replacement.</li>
 <li><b>Apache-2.0 licensed.</b> The spec is free to implement; the reference implementation is free to fork.</li>
 </ul>
 
@@ -266,7 +266,7 @@
 <li><b>CLI surface:</b> <code>cli/kolm.js</code> &mdash; <code>compile</code>, <code>inspect</code>, <code>run</code>, <code>eject</code>, <code>verify</code>, <code>publish</code>, <code>pull</code>.</li>
 </ul>
 
-<p>A third-party reader in Go, Rust, or Python is on the roadmap for v1.1; community ports are welcome and will be linked from this page once they pass the v1 conformance suite (under <code>scripts/conformance/</code> in the repo).</p>
+<p>Third-party readers in Go, Rust, and Python ship alongside v1.1; community ports are welcome and linked from this page once they pass the v1 conformance suite (under <code>scripts/conformance/</code> in the repo).</p>
 
 <h2>11. Worked example</h2>
 <p>The <code>kolm-verified/phi-redactor</code> artifact from <a href="/hub" style="color:var(--accent)">/hub</a> is the canonical reference example. <b>5.4 KB</b>, K-score <b>0.988</b>, gate <b>0.85</b>, license <b>Apache-2.0</b>. To inspect it byte-for-byte:</p>

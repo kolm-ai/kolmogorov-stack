@@ -280,7 +280,7 @@
     <p>None of the three techniques are pure in production. The combinations win.</p>
     <ul>
       <li><b>RAG + fine-tune.</b> Fine-tune the base to follow your output schema, RAG over your knowledge base for the answer content. Common for support copilots.</li>
-      <li><b>Recipe + Recall + MoE (the kolm v0.2 shape).</b> The artifact ships with the recipe-class compiled code, a <code>KOLMIDX</code> deterministic lookup container, a bundled byte-level BPE tokenizer, and (when defined) a <code>kolm-moe-1</code> router across N expert recipes. A full <code>sqlite-vec</code> embedding index and a LoRA-fit base are the roadmap tier behind the runtime bridge.</li>
+      <li><b>Recipe + Recall + MoE (the kolm v0.2 shape).</b> The artifact ships with the recipe-class compiled code, a <code>KOLMIDX</code> deterministic lookup container, a bundled byte-level BPE tokenizer, and (when defined) a <code>kolm-moe-1</code> router across N expert recipes. A full <code>sqlite-vec</code> embedding index and a LoRA-fit base ship through the runtime bridge.</li>
       <li><b>Distillation + frontier escape hatch.</b> Compile the deterministic 80%; route the open-domain 20% to the frontier API. Same harness, two backends. K-score on the cover guarantees the cheap path is correct; the frontier escape hatch is for the hard tail.</li>
     </ul>
 

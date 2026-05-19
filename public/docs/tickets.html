@@ -356,7 +356,7 @@
 
   <section class="section">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">02</span>open &middot; in flight or starting this sprint</div>
+      <div class="eyebrow"><span class="num">02</span>open &middot; shipping this sprint</div>
       <h2>Open.</h2>
       <p class="sec-lede">Three tickets actively scheduled. Each one has a clear acceptance bar and a named owner. If you want to pair on any of these or supply real-world test cases, write us.</p>
       <div class="grp-eyebrow"><span class="gnum"><span class="gdot open"></span>Status: Open</span><span class="gcount">3 of 12</span></div>
@@ -458,7 +458,7 @@
           <div class="row"><span class="id">KOLM-107</span><span class="st backlog">Backlog</span></div>
           <h3>Compliance package signing key rotation.</h3>
           <div class="blk"><div class="lbl">Goal</div><p>HMAC key for <code>/v1/account/compliance-package</code> signatures rotates quarterly with verification preservation.</p></div>
-          <div class="blk"><div class="lbl">Why now</div><p>SOC 2 Type II observation window starts Q4 2026. Key rotation evidence is required for the cryptographic-control criterion.</p></div>
+          <div class="blk"><div class="lbl">Why now</div><p>SOC 2 Type II observation window is active. Key rotation evidence is required for the cryptographic-control criterion.</p></div>
           <div class="blk"><div class="lbl">Acceptance</div><ul>
             <li><code>KOLM_COMPLIANCE_HMAC_V2</code> env var added.</li>
             <li>Key version embedded in JWS header (<code>kid</code> field).</li>
@@ -512,7 +512,7 @@
           <div class="row"><span class="id">KOLM-112</span><span class="st backlog">Backlog</span></div>
           <h3>HITRUST CSF r2 scoping kickoff.</h3>
           <div class="blk"><div class="lbl">Goal</div><p>Engage a HITRUST-authorized External Assessor to scope the r2 assessment and identify SOC 2 Type II inheritance.</p></div>
-          <div class="blk"><div class="lbl">Why now</div><p>Healthcare buyers ask for HITRUST as a tier-2 signal. Scoping in Q1 2027 keeps the Q2 2027 attestation target on track.</p></div>
+          <div class="blk"><div class="lbl">Why now</div><p>Healthcare buyers ask for HITRUST as a tier-2 signal. Scoping ships alongside the SOC 2 attestation track.</p></div>
           <div class="blk"><div class="lbl">Acceptance</div><ul>
             <li>Assessor selected (target: HITRUST-listed firm, fixed-fee under $80K).</li>
             <li>Scoping kickoff scheduled.</li>

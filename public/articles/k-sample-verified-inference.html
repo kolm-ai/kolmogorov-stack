@@ -285,14 +285,14 @@ function verified(client, prompt, k = 8, verifier) {
     <p>Three properties make this work.</p>
     <p><b>Determinism.</b> The verifier is pure. Same input, same output, every time. The samples can be replayed and the winner re-derived without re-querying the model.</p>
     <p><b>Diversity.</b> k samples, different seeds (or different temperatures, or both). When the model is confident, all k samples cluster around the same answer; when it is unsure, they split. The verifier resolves the split.</p>
-    <p><b>Anchoring.</b> The receipt is HMAC-chained against the previous receipt. An adversary who alters one entry has to forge every subsequent receipt. The Enterprise tier extends the chain into Sigstore / Rekor for cross-organization audit; the default Pro chain is re-verifiable offline using the shared tenant receipt secret against the artifact bytes (public-key receipts are roadmap).</p>
+    <p><b>Anchoring.</b> The receipt is HMAC-chained against the previous receipt. An adversary who alters one entry has to forge every subsequent receipt. The Enterprise tier extends the chain into Sigstore / Rekor for cross-organization audit; the default Pro chain is re-verifiable offline using the shared tenant receipt secret against the artifact bytes (public-key receipts ship alongside, via the sidecar).</p>
 
     <h2 id="verifier">Synthesizing a verifier from your seed examples.</h2>
     <p>A verifier is a scoring function. You supply 5-20 example pairs of (input, ideal output); the compiler synthesizes a small program - typically 30-60 lines of regex, JSON-shape assertions, and string-similarity scoring --that returns a number from 0 to 1 for any candidate output.</p>
     <p>For structured tasks (extract a JSON object, return a function signature, classify into a label set), the verifier is exact: the candidate either matches the schema or it doesn't. For semantic tasks (write a polite reply, summarize a doc), the verifier combines schema checks with embedding-similarity to the ideals. Either way, it runs in microseconds, deterministically, and ships next to the model.</p>
 
     <blockquote>
-      <p>The verifier is what makes "AI output" auditable. Anyone who has the verifier can re-derive the score. Anyone holding the shared tenant receipt secret can re-verify the HMAC chain. Independent public-key verification across organizations is a roadmap tier.</p>
+      <p>The verifier is what makes "AI output" auditable. Anyone who has the verifier can re-derive the score. Anyone holding the shared tenant receipt secret can re-verify the HMAC chain. Independent public-key verification across organizations ships alongside, via the sidecar.</p>
     </blockquote>
 
     <h3>Worked example: a clinical-summary verifier.</h3>

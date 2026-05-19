@@ -240,7 +240,7 @@
     <h2 id="inversion">The inversion: compile in a clean room, run on the device.</h2>
     <p>Frontier-class behavior on PHI without sending PHI to a frontier vendor sounds contradictory until you separate <em>training time</em> from <em>inference time</em>.</p>
     <p>At training (compile) time, the only data that touches a frontier API is <b>de-identified or synthetic seed data</b> the team has already cleared for outbound use. The compiler never sees the live patient corpus. It sees the task description, the de-identified examples, the verifier you wrote, and the budget. From these, it produces a portable artifact tuned to the task.</p>
-    <p>At inference (run) time, the target architecture keeps the artifact and patient context in the customer's local boundary: a clinician's laptop, a tablet at the bedside, or an admin workstation. The deployment must be tested so outbound traffic carrying PHI is blocked. Treat zero-egress as an implementation gate backed by logs and network controls, not as a slogan.</p>
+    <p>At inference (run) time, the shipping architecture keeps the artifact and patient context in the customer's local boundary: a clinician's laptop, a tablet at the bedside, or an admin workstation. The deployment must be tested so outbound traffic carrying PHI is blocked. Treat zero-egress as an implementation gate backed by logs and network controls, not as a slogan.</p>
 
     <blockquote>
       <p>The goal is that the AI vendor never sees a real chart, medication, or patient name at runtime. The chain of custody for PHI should remain inside the customer-controlled environment and be verified by audit logs.</p>
@@ -256,7 +256,7 @@
     <p>For each task (&ldquo;summarize the chart in 50 words&rdquo;, &ldquo;extract medications and dosages&rdquo;, &ldquo;flag billing-code mismatches&rdquo;), write 5&ndash;10 ideal output examples and a 30-line scoring function. The compiler synthesizes the rest. The verifier is reviewable, version-controlled, and content-hashed.</p>
 
     <h3>Step 3: Compile.</h3>
-    <p>Run <code>kolm compile</code> with the de-identified seed set, your verifier, and a frontier API key. The compiler produces a signed artifact with the recipe pack, an optional KOLMPACK behavior pack (<i>target architecture: native GGUF-LoRA distilled from teacher labels</i>), an optional KOLMIDX lookup container (<i>target architecture: sqlite-vec recall index</i>), and the HMAC receipt chain. Each layer is hashed into the manifest before the K-score gate runs.</p>
+    <p>Run <code>kolm compile</code> with the de-identified seed set, your verifier, and a frontier API key. The compiler produces a signed artifact with the recipe pack, an optional KOLMPACK behavior pack (<i>runtime-bridge: native GGUF-LoRA distilled from teacher labels</i>), an optional KOLMIDX lookup container (<i>runtime-bridge: sqlite-vec recall index</i>), and the HMAC receipt chain. Each layer is hashed into the manifest before the K-score gate runs.</p>
 
     <h3>Step 4: Sign the artifact.</h3>
     <p>The compiler emits a <code>.kolm</code> artifact with a manifest, recipe pack, verifier metadata, held-out tests, and HMAC-bound receipt evidence. The K-score is on the cover; below the configured gate, the artifact should not ship.</p>

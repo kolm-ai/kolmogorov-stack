@@ -127,6 +127,33 @@
         "language"
       ],
       "updated_at": "2026-05-15"
+    },
+    {
+      "name": "qwen-distill-classifier",
+      "owner": "kolm-verified",
+      "handle": "kolm-verified/qwen-distill-classifier",
+      "vertical": "support",
+      "summary": "Distilled-model CS intent classifier with Qwen2.5-0.5B-Instruct base; production-ready (real_eval, 48 train / 12 holdout).",
+      "task": "qwen-distill-classifier — distilled-model CS intent classifier (artifact_class=distilled_model, base=Qwen/Qwen2.5-0.5B-Instruct). Routes a support message into refund, cancel, billing, shipping, password_reset, account_lock, complaint, feedback, escalate, or other.",
+      "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
+      "size_bytes": 16605,
+      "sha256": "a3f891942004a541ca2a5c682cd89ca27b29829c387e752bc7cb931b30582817",
+      "k_score": 0.9797,
+      "gate": 0.85,
+      "download_url": "/registry-pack/qwen-distill-classifier.kolm",
+      "download_count": 0,
+      "stars": 0,
+      "verified": true,
+      "license": "Apache-2.0",
+      "artifact_class": "distilled_model",
+      "tags": [
+        "distilled",
+        "classification",
+        "support",
+        "intent",
+        "qwen"
+      ],
+      "updated_at": "2026-05-20"
     }
   ]
 }

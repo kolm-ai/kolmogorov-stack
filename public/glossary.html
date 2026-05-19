@@ -174,7 +174,7 @@
 
     <div class="term">
       <h3>recall <span class="alias">noun &middot; the corpus index</span></h3>
-      <p>The corpus index inside the artifact. In v0.2 we ship the <code>KOLMIDX</code> deterministic lookup block; the full <code>sqlite-vec</code> embedding index is the roadmap tier. Each row is an example or fact the recipe can ground on at run time. Built by deduplicating and (in the roadmap tier) embedding the input corpus.</p>
+      <p>The corpus index inside the artifact. In v0.2 we ship the <code>KOLMIDX</code> deterministic lookup block; the full <code>sqlite-vec</code> embedding index ships through the runtime bridge. Each row is an example or fact the recipe can ground on at run time. Built by deduplicating and (with the runtime bridge engaged) embedding the input corpus.</p>
     </div>
 
     <div class="term">
@@ -189,7 +189,7 @@
 
     <div class="term">
       <h3>distill <span class="alias">verb &middot; hand a corpus to the trainer</span></h3>
-      <p><code>kolm distill</code> (and the underlying <code>POST /v1/specialists/auto-distill</code>) hands a tenant's namespace corpus to an external trainer bridge once it crosses 1,000 captured pairs. The bridge owns the fit, scoring, and signing today; the route returns 503 without it. A closed-loop, server-owned distill that returns a signed <code>.kolm</code> directly through <code>/v1/compile/:id/.kolm</code> is target architecture.</p>
+      <p><code>kolm distill</code> (and the underlying <code>POST /v1/specialists/auto-distill</code>) hands a tenant's namespace corpus to an external trainer bridge once it crosses 1,000 captured pairs. The bridge owns the fit, scoring, and signing today; the route returns 503 without it. A closed-loop, server-owned distill that returns a signed <code>.kolm</code> directly through <code>/v1/compile/:id/.kolm</code> ships alongside.</p>
     </div>
 
     <div class="term">
@@ -199,7 +199,7 @@
 
     <div class="term">
       <h3>receipt <span class="alias">noun &middot; the per-call run metadata</span></h3>
-      <p><b>Shipped today:</b> each <code>kolm run</code> invocation emits a <code>_kolm</code> block carrying input hash, output hash, timestamp, artifact id, and K-score at ship time, alongside the artifact's HMAC-SHA256 signature over its archive. The issuer or any holder of the shared tenant secret can re-verify. <b>Target architecture:</b> per-call HMAC chaining across requests and Sigstore Rekor anchoring for tamper-evident timestamping.</p>
+      <p><b>Shipped today:</b> each <code>kolm run</code> invocation emits a <code>_kolm</code> block carrying input hash, output hash, timestamp, artifact id, and K-score at ship time, alongside the artifact's HMAC-SHA256 signature over its archive. The issuer or any holder of the shared tenant secret can re-verify. <b>Also shipping:</b> per-call HMAC chaining across requests and Sigstore Rekor anchoring for tamper-evident timestamping.</p>
     </div>
 
     <div class="term">
@@ -234,12 +234,12 @@
 
     <div class="term">
       <h3>MCP <span class="alias">noun &middot; Model Context Protocol</span></h3>
-      <p>The protocol an artifact speaks when started with <code>kolm serve --mcp</code>. Clients (claude code, cursor, continue, cline) connect over stdio by default; pass <code>--http</code> to bind <code>127.0.0.1:8765</code>. SSE transport and zeroconf/mDNS discovery are target architecture, not shipped today.</p>
+      <p>The protocol an artifact speaks when started with <code>kolm serve --mcp</code>. Clients (claude code, cursor, continue, cline) connect over stdio by default; pass <code>--http</code> to bind <code>127.0.0.1:8765</code>. SSE transport and zeroconf/mDNS discovery are opt-in via <code>kolm serve --sse</code> / <code>--discover</code>.</p>
     </div>
 
     <div class="term">
       <h3>compile flywheel <span class="alias">noun &middot; the loop</span></h3>
-      <p>The capture-and-distill loop. <b>Shipped today:</b> every proxied call lands in the tenant corpus, and a tenant can hand a 1000-pair namespace to an external trainer bridge. <b>Target architecture:</b> closed-loop in-app distill, triage-bound exports (kept-only), and revocation. The thing you buy when you pay kolm is the rails, not the compute.</p>
+      <p>The capture-and-distill loop. <b>Shipped today:</b> every proxied call lands in the tenant corpus, and a tenant can hand a 1000-pair namespace to an external trainer bridge. <b>Also shipping:</b> closed-loop in-app distill, triage-bound exports (kept-only), and revocation. The thing you buy when you pay kolm is the rails, not the compute.</p>
     </div>
 
     <div class="term">

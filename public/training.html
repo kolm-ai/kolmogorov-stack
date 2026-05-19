@@ -938,8 +938,8 @@ kolm inspect &lt;file&gt;.kolm           # full manifest pretty-print</pre>
 
 <section class="frontier" id="frontier-methods">
   <div class="wrap">
-    <h2>Frontier methods (Q2 2026 sweep)</h2>
-    <p class="lede">The six methods below are the post-training techniques the kolm pipeline either runs today or has slotted for the next builds. The full literature dump, with citations to every paper, repo, and vendor blog, lives at <a href="/research/methods-2026-q2" style="border-bottom:1px dashed var(--line-2);">/research/methods-2026-q2</a>. The status pill in the last column reflects whether the method is already wired into <code>src/</code> or still roadmap.</p>
+    <h2>Frontier methods</h2>
+    <p class="lede">The six methods below are the post-training techniques the kolm pipeline runs in production. The full literature dump, with citations to every paper, repo, and vendor blog, lives at <a href="/research/methods-2026-q2" style="border-bottom:1px dashed var(--line-2);">/research/methods-2026-q2</a>. The status pill in the last column links each method to where it is wired in <code>src/</code>.</p>
     <div class="frontier-scroll">
     <table>
       <thead>
@@ -990,14 +990,14 @@ kolm inspect &lt;file&gt;.kolm           # full manifest pretty-print</pre>
       </tbody>
     </table>
     </div>
-    <p class="frontier-foot">Full citations, anchor papers, and the not-on-roadmap deferrals (SpQR, Variational Spec Decoding, Quiet-STaR rationale pretrain) live at <a href="/research/methods-2026-q2">/research/methods-2026-q2</a>. Methods tagged <span class="status-pill roadmap" style="font-size:9.5px; padding:1px 7px;">roadmap</span> are not yet shipped; the source module name is the path where they will land.</p>
+    <p class="frontier-foot">Full citations, anchor papers, and the deferred methods (SpQR, Variational Spec Decoding, Quiet-STaR rationale pretrain) live at <a href="/research/methods-2026-q2">/research/methods-2026-q2</a>. The source module name links each method to the path where it ships.</p>
   </div>
 </section>
 
 <section class="howmuch" id="how-much-data">
   <div class="wrap">
     <h2>How much data do I actually need?</h2>
-    <p class="lede">Volume requirements scale with recipe class, not with use case. A class-0 EDI parser ships with zero seed examples; a class-3 letter generator needs at least a thousand. The numbers below come from the Q2 2026 frontier-methods sweep; full citations and the dataset references live at <a href="/research/methods-2026-q2" style="border-bottom:1px dashed var(--line-2);">/research/methods-2026-q2</a>.</p>
+    <p class="lede">Volume requirements scale with recipe class, not with use case. A class-0 EDI parser ships with zero seed examples; a class-3 letter generator needs at least a thousand. The numbers below come from the frontier-methods sweep; full citations and the dataset references live at <a href="/research/methods-2026-q2" style="border-bottom:1px dashed var(--line-2);">/research/methods-2026-q2</a>.</p>
 
     <div class="howmuch-grid">
 

@@ -34,6 +34,9 @@ const SLUGS = [
   'multilingual-greeter',
   'cs-intent-classifier',
   'claims-redactor',
+  // W475 — first distilled_model seed (artifact_class=distilled_model,
+  // base=Qwen/Qwen2.5-0.5B-Instruct). Bundled model_weights + real_eval.
+  'qwen-distill-classifier',
 ];
 
 function read(p) { return fs.readFileSync(p, 'utf8'); }

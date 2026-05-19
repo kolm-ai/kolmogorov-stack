@@ -138,7 +138,7 @@
   <div class="wrap">
     <span class="pill">vs Predibase</span>
     <h1>Same task. <span class="tone">Different deliverable.</span></h1>
-    <p class="lede">Predibase is excellent at training and serving many LoRAs on a managed cloud. kolm v0.2 compiles a recipe-class artifact (deterministic code + K-score gate + HMAC-signed manifest + receipt, with optional MoE composition and bundled tokenizer) you keep as a file; loading a trained LoRA adapter into the artifact via the weight-bridge path is the roadmap tier.</p>
+    <p class="lede">Predibase is excellent at training and serving many LoRAs on a managed cloud. kolm v0.2 compiles a recipe-class artifact (deterministic code + K-score gate + HMAC-signed manifest + receipt, with optional MoE composition and bundled tokenizer) you keep as a file; loading a trained LoRA adapter into the artifact via the weight-bridge path ships today.</p>
 
     <div class="one-line">
       <div class="col">
@@ -148,7 +148,7 @@
       <div class="arrow">vs</div>
       <div class="col">
         <h3>kolm</h3>
-        <p>A <b>compiler</b>. In v0.2 it synthesises a deterministic recipe pack from your examples, gates it on K-score against a held-out set, and packages the recipe + examples + evaluator + manifest + HMAC signature (plus an optional byte-level BPE tokenizer and an optional MoE composition block) into one <code>.kolm</code> file you keep. Native LoRA / INT4 / GGUF bundling is roadmap, not in this release.</p>
+        <p>A <b>compiler</b>. In v0.2 it synthesises a deterministic recipe pack from your examples, gates it on K-score against a held-out set, and packages the recipe + examples + evaluator + manifest + HMAC signature (plus an optional byte-level BPE tokenizer and an optional MoE composition block) into one <code>.kolm</code> file you keep. Native LoRA / INT4 / GGUF bundling ships through the runtime bridge.</p>
       </div>
     </div>
   </div>
@@ -209,7 +209,7 @@
           <tr>
             <td class="row-h">Multimodal recall</td>
             <td data-l="Predibase"><span class="partial">bring your own RAG</span></td>
-            <td data-l="kolm"><span class="partial">v0.2 ships a JSON lookup container (KOLMIDX); full sqlite-vec index is a roadmap tier</span></td>
+            <td data-l="kolm"><span class="partial">v0.2 ships a JSON lookup container (KOLMIDX); full sqlite-vec index ships through the runtime bridge</span></td>
           </tr>
           <tr>
             <td class="row-h">Multi-LoRA serve</td>

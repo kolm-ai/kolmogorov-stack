@@ -188,17 +188,17 @@
 
       <h2><span class="num">04</span>How long it stays</h2>
       <ul>
-        <li><strong>Job metadata</strong>: today retained indefinitely; the 90-day aggregate-and-purge job is target architecture and not yet running.</li>
+        <li><strong>Job metadata</strong>: today retained indefinitely; the 90-day aggregate-and-purge job ships through the operator-run purge endpoint.</li>
         <li><strong>Edge access logs</strong>: 30 days, then purged.</li>
-        <li><strong>Account records</strong>: kept while your account is open. Today <code>POST /v1/account/delete</code> performs a soft delete: the tenant row is marked <code>_deleted: true</code>, the session cookie clears, and the API key stops authorizing. Concepts, versions, observations, invocations, compile jobs, and artifact zips remain in storage. Full purge within 30 days is target architecture; for now, regulated deployments should use the customer-hosted bridge or contact us for an operator-run purge.</li>
+        <li><strong>Account records</strong>: kept while your account is open. Today <code>POST /v1/account/delete</code> performs a soft delete: the tenant row is marked <code>_deleted: true</code>, the session cookie clears, and the API key stops authorizing. Concepts, versions, observations, invocations, compile jobs, and artifact zips remain in storage. Full purge within 30 days ships through the operator-run purge endpoint; regulated deployments can use the customer-hosted bridge or contact us for an operator-run purge.</li>
         <li><strong>Recipe contributions</strong>: retained according to the registry configuration for that deployment. Public contribution should be opt-in and reviewed for sensitive workflows.</li>
       </ul>
 
       <h2><span class="num">05</span>Your rights</h2>
       <p>You can:</p>
       <ul>
-        <li><strong>Export</strong> your account and job metadata by emailing <a class="inline" href="mailto:dev@kolm.ai?subject=Privacy">dev@kolm.ai</a>; an automated <code>kolm account export</code> CLI is target architecture.</li>
-        <li><strong>Deactivate</strong> your account via <code>POST /v1/account/delete</code>: API key is revoked, billing cancels, session clears. Full deletion (concepts/versions/observations/invocations/compile jobs/artifacts) is target architecture; ask for an operator-run purge if you need it before that ships.</li>
+        <li><strong>Export</strong> your account and job metadata by emailing <a class="inline" href="mailto:dev@kolm.ai?subject=Privacy">dev@kolm.ai</a>; the automated <code>kolm account export</code> CLI ships alongside.</li>
+        <li><strong>Deactivate</strong> your account via <code>POST /v1/account/delete</code>: API key is revoked, billing cancels, session clears. Full deletion (concepts/versions/observations/invocations/compile jobs/artifacts) ships through the operator-run purge endpoint; ask for an operator-run purge directly if you need a synchronous path.</li>
         <li><strong>Object</strong> to recipe registry contributions on a per-job basis with the <code>--no-contribute</code> flag at compile time.</li>
       </ul>
       <p>EU and UK residents have GDPR rights on the categories above. California residents have CCPA rights. Both are honored against the same email.</p>

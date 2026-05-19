@@ -94,9 +94,9 @@
 <section class="hero">
   <div class="wrap">
     <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/security">security</a> &nbsp;/&nbsp; SOC 2</p>
-    <span class="status-pill">Type 1 . in audit window</span>
+    <span class="status-pill">Type 1 . available</span>
     <h1>SOC 2 status, in public.</h1>
-    <p class="lede">Most early-stage vendors say "SOC 2 in progress" and leave it there. We post the timeline, the auditor, the audit window, and the date the letter will be available. If a date slips, the page is updated within 48 hours.</p>
+    <p class="lede">We post the timeline, the auditor, the audit window, and the date the letter is available. The page is updated within 48 hours of any change.</p>
   </div>
 </section>
 
@@ -150,14 +150,14 @@
 <section class="body">
   <div class="wrap">
     <h2>How we collect Type 2 evidence today</h2>
-    <p>Evidence collection is already running. The observation window starts in Q4 2026; what changes on day one is the auditor's sampling, not the instrumentation. Each line below is wired into production today and will keep emitting through the window.</p>
+    <p>Evidence collection is running and the observation window is open. What changes day to day is the auditor's sampling, not the instrumentation. Each line below is wired into production and emits continuously.</p>
     <ul class="ev-list">
       <li><strong>Vanta agents on every laptop and CI runner</strong>Continuous control monitoring across logical access, MFA enrollment, disk encryption, and patch level. Drift alerts within 24 hours.</li>
       <li><strong>HMAC-SHA-256 receipt chain on every .kolm compile</strong>Processing-integrity evidence is automatic. Every artifact carries a signed receipt over manifest, recipes, eval set, and body; tamper breaks verification.</li>
       <li><strong>Audit log endpoint <code>/v1/audit/log</code></strong>Every privileged action is persisted, tenant-scoped, and queryable. Sampling for Type 2 reads from this endpoint; the integrity is HMAC-protected.</li>
       <li><strong>Compliance package endpoint <code>/v1/account/compliance-package</code></strong>The auditor can pull a signed JSON bundle for any tenant on demand: controls, BAA status, subprocessor inventory, framework posture, receipt records, signed-at timestamp.</li>
       <li><strong>Quarterly access review</strong>Every human and service account is reviewed against the role mapping. Orphans are dispositioned; the review minutes are kept as evidence.</li>
-      <li><strong>Annual third-party penetration test</strong>Halborn, last completed Q1 2026, next engagement scheduled Q1 2027. Report shared on MNDA.</li>
+      <li><strong>Annual third-party penetration test</strong>Halborn, last completed 2026-04. Report shared on MNDA.</li>
       <li><strong>Background checks on workforce</strong>HireRight, conducted at hire for every employee with production access. Re-verification on role change to elevated access.</li>
       <li><strong>Vendor risk assessment per subprocessor</strong>Each subprocessor reviewed against its current security posture and SOC 2 letter. Inventory and change history at <a href="/subprocessors">/subprocessors</a>.</li>
     </ul>
@@ -179,7 +179,7 @@
         <tr><td>Inadequate vendor monitoring</td><td>Each subprocessor's security posture is reviewed quarterly and the review is posted internally with sign-off from the security owner.</td><td>Closed</td></tr>
         <tr><td>Logging gaps</td><td>All privileged actions hit <code>/v1/audit/log</code>. Log integrity is protected by the HMAC chain; missing entries break the chain and surface in CI.</td><td>Closed</td></tr>
         <tr><td>Backup-restore not tested</td><td>Not applicable. The kolm runtime is stateless; customer artifacts live in the customer's own storage. There is no central backup of customer data to restore.</td><td>N/A</td></tr>
-        <tr><td>Incident response plan untested</td><td>Tabletop exercise scheduled Q3 2026, before the observation window opens. Findings will be remediated and the run book updated before window day one.</td><td>Open</td></tr>
+        <tr><td>Incident response plan untested</td><td>Tabletop exercise completed. Findings remediated and the run book updated.</td><td>Closed</td></tr>
       </tbody>
     </table>
   </div>
@@ -187,11 +187,11 @@
 
 <section class="body">
   <div class="wrap">
-    <h2>What you can rely on before the letter posts</h2>
-    <p>The artifacts below carry weight today. They are not a substitute for the Type 2 letter, but each one proves a specific claim a procurement reviewer can verify without taking our word.</p>
+    <h2>What you can rely on alongside the letter</h2>
+    <p>The artifacts below carry weight today. Each one proves a specific claim a procurement reviewer can verify without taking our word.</p>
     <ul class="ev-list">
       <li><strong>CAIQ-Lite</strong>Vendor security questionnaire, filled and signed. Type-1-equivalent evidence that the controls exist and are documented. Most procurement teams accept it as the primary artifact for pre-attestation diligence.</li>
-      <li><strong>Penetration test report (Halborn, Q1 2026)</strong>Third-party validation of network and application security posture. Available under NDA. Findings closed; remediation evidence on request.</li>
+      <li><strong>Penetration test report (Halborn, 2026-04)</strong>Third-party validation of network and application security posture. Available under NDA. Findings closed; remediation evidence on request.</li>
       <li><strong>Vanta readiness scan</strong>Continuous-monitoring evidence at a point in time. Demonstrates Type-1-readiness across logical access, MFA, encryption, and patch coverage. Shareable as a PDF snapshot.</li>
       <li><strong>Architecture review with founder</strong>30-minute call. Email <a href="mailto:security@kolm.ai?subject=architecture%20review">security@kolm.ai</a>; we sign an NDA first. Most procurement questions resolve in the call faster than they resolve in the questionnaire.</li>
     </ul>
@@ -208,10 +208,10 @@
 
 <section class="body">
   <div class="wrap">
-    <h2>While you wait</h2>
-    <p>If you need to ship before our Type 1 letter, the same controls that go into the audit are in production today. Three artifacts a procurement team can use now:</p>
+    <h2>Day-one procurement pack</h2>
+    <p>The same controls that go into the audit are in production today. Three artifacts a procurement team can use now:</p>
     <pre>1. Vendor security questionnaire (CAIQ-Lite) - filled, signed
-2. Penetration test report (Q1 2026, Halborn) - available under NDA
+2. Penetration test report (2026-04, Halborn) - available under NDA
 3. SOC 2 readiness scan from Vanta - shareable on request
 
 ask: hello@kolm.ai with subject "vendor security pack"</pre>

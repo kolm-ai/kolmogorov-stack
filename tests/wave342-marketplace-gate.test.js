@@ -86,7 +86,11 @@ test('W342 #3 — marketplace.html fetches /v1/marketplace/list and gates pill o
 // W343 — slugs whose .kolm WAS built with --seeds and therefore is expected
 // to pass productionReady() with verified=true. Every other seed-catalog
 // artifact lacks seed_provenance and must remain verified=false.
-const __PROD_READY_SLUGS = new Set(['claims-redactor']);
+// W475 — qwen-distill-classifier joined the prod-ready set: distilled_model
+// artifact (artifact_class=distilled_model, base=Qwen/Qwen2.5-0.5B-Instruct)
+// with real seed_provenance (eval_provenance=real_eval, 48 train / 12 holdout,
+// production_ready=true), bundled model_weights, K=0.9797.
+const __PROD_READY_SLUGS = new Set(['claims-redactor', 'qwen-distill-classifier']);
 
 test('W342 #4 — GET /v1/marketplace/list returns array with verified field reflecting productionReady()', async () => {
   const app = await makeApp();

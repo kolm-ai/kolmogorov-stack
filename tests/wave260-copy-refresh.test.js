@@ -214,14 +214,16 @@ test('W260 #17 - security.html posture summary cites Halborn April 2026 completi
   assert.match(block, /April 2026|2026-04/i, 'block names April 2026 completion date');
 });
 
-test('W260 #18 - security.html posture summary marks SOC 2 Type I as Q3 2026 target (not held)', () => {
+test('W260 #18 - security.html posture summary surfaces SOC 2 Type I status (W476 closure)', () => {
   const m = SECURITY.match(/data-w260="posture-summary"[\s\S]{0,2500}/);
   assert.ok(m, 'posture summary block must be findable');
   const block = m[0];
   assert.match(block, /SOC 2 Type I/, 'block names SOC 2 Type I');
-  assert.match(block, /Q3 2026/, 'block names Q3 2026 target');
-  assert.match(block, /target|not.*held|not.*attestation/i,
-    'block must say target, not held attestation');
+  // W476 closure: Type I attestation is now available under MNDA alongside
+  // Halborn pentest + Vanta posture + CAIQ-Lite. Honest-amber "Q3 2026 target"
+  // language was retired when the letter shipped.
+  assert.match(block, /attestation\s+is\s+available|available\s+under\s+MNDA|available\s+alongside/i,
+    'block must surface SOC 2 Type I availability state (shipped / under-MNDA)');
 });
 
 test('W260 #19 - security.html posture summary names bug bounty $500 to $10k', () => {

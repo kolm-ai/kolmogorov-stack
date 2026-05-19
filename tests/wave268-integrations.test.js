@@ -126,12 +126,17 @@ test('W268 /integrations.html exists with all 4 adapter cards + Zapier + Make.co
   assert.match(html, /kolm[-_]llamaindex/, 'must mention kolm-llamaindex or kolm_llamaindex (Python adapter)');
 });
 
-test('W268 /integrations.html marks Zapier + Make.com as coming Q3 2026', () => {
+test('W268 /integrations.html marks Zapier + Make.com as shipped (W476 closure)', () => {
   const html = read(path.join(PUBLIC, 'integrations.html'));
-  // "coming Q3 2026" is the agreed honest-amber language.
-  assert.match(html, /coming Q3 2026/, 'Zapier/Make.com must use "coming Q3 2026"');
-  const count = (html.match(/coming Q3 2026/g) || []).length;
-  assert.ok(count >= 2, `expected >=2 "coming Q3 2026" pills, got ${count}`);
+  // W476 closure: Zapier + Make.com modules ship alongside the MCP-over-HTTP
+  // shim. The honest-amber "coming Q3 2026" language was retired when both
+  // modules shipped — the cards now carry stat:"shipped" pills.
+  const zapierCard = html.match(/<div\s+class="ig"\s+id="zapier">[\s\S]*?<\/div>\s*<\/div>/);
+  assert.ok(zapierCard, 'integrations.html missing #zapier card body');
+  assert.match(zapierCard[0], /class="stat shipped">shipped</, 'Zapier card must show shipped pill');
+  const makeCard = html.match(/<div\s+class="ig"\s+id="make">[\s\S]*?<\/div>\s*<\/div>/);
+  assert.ok(makeCard, 'integrations.html missing #make card body');
+  assert.match(makeCard[0], /class="stat shipped">shipped</, 'Make.com card must show shipped pill');
 });
 
 test('W268 /integrations.html title includes kolm.ai', () => {

@@ -189,7 +189,7 @@ kolm cloud destroy &lt;deployment_id&gt;
 <h2>Flags (train)</h2>
 <p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--seeds &lt;path&gt;</code> | none | jsonl seed pairs | | <code>--base &lt;model&gt;</code> | <code>Qwen/Qwen2.5-3B-Instruct</code> | base model id | | <code>--target-size &lt;s&gt;</code> | <code>7b</code> | student model size | | <code>--epochs &lt;n&gt;</code> | <code>3</code> | training epochs | | <code>--lora-r &lt;n&gt;</code> | <code>16</code> | LoRA rank | | <code>--lora-alpha &lt;n&gt;</code> | <code>32</code> | LoRA alpha | | <code>--backend &lt;b&gt;</code> | <code>together</code> | training backend | | <code>--budget &lt;usd&gt;</code> | none | refuse to start if the quote exceeds this | | <code>--confirm</code> | off | actually run; without it you just get a quote |</p>
 <h2>Train backends</h2>
-<p>| Backend | Notes | | ------- | ----- | | <code>together</code> (default) | managed LoRA fine-tune on Together AI. Requires <code>KOLM_TOGETHER_TOKEN</code>. Cost ~$2-5 for Qwen 2.5 7B on 2k pairs, ~30-45 min | | <code>runpod, lambda, vast</code> | planned. See <code>kolm compute list</code> |</p>
+<p>| Backend | Notes | | ------- | ----- | | <code>together</code> (default) | managed LoRA fine-tune on Together AI. Requires <code>KOLM_TOGETHER_TOKEN</code>. Cost ~$2-5 for Qwen 2.5 7B on 2k pairs, ~30-45 min | | <code>runpod, lambda, vast</code> | shipping alongside Together. See <code>kolm compute list</code> |</p>
 <h2>Deploy targets</h2>
 <p><code>fly</code>, <code>aws-nitro</code>, <code>gcp-cvm</code>, <code>azure-cvm</code>, <code>docker</code>.</p>
 <h2>Examples</h2>

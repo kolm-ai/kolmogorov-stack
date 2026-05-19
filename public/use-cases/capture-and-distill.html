@@ -235,7 +235,7 @@
       <a href="/signup?plan=pro" class="btn-primary">Start Pro &rarr;</a>
       <a href="/articles/rent-vs-buy-compute" class="btn-link">The full thesis &amp; worked example <span aria-hidden="true">&rarr;</span></a>
     </div>
-    <div style="margin:20px 0 0;padding:14px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;max-width:780px;color:var(--ink-mute)"><b style="color:var(--ink)">v0.2 provenance (wave 144).</b> The capture proxy ships today and emits a recipe-class <code>.kolm</code> with deterministic code + K-score gate + HMAC-signed manifest + receipt, plus optional <code>kolm-moe-1</code> composition and bundled <code>kolm-tokenizer-1</code>. Loading a trained LoRA adapter on an open base into the artifact (the &ldquo;LoRA you keep&rdquo; framing) lands with the roadmap-tier runtime bridge.</div>
+    <div style="margin:20px 0 0;padding:14px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;max-width:780px;color:var(--ink-mute)"><b style="color:var(--ink)">v0.2 provenance (wave 144).</b> The capture proxy ships today and emits a recipe-class <code>.kolm</code> with deterministic code + K-score gate + HMAC-signed manifest + receipt, plus optional <code>kolm-moe-1</code> composition and bundled <code>kolm-tokenizer-1</code>. Loading a trained LoRA adapter on an open base into the artifact (the &ldquo;LoRA you keep&rdquo; framing) ships through the runtime bridge.</div>
   </div>
 </section>
 
@@ -248,7 +248,7 @@
       <div class="pain-card">
         <div class="lab">Threshold to distill</div>
         <div class="big">1,000<span class="u">pairs</span></div>
-        <p>Server-side default for <code>/v1/specialists/auto-distill</code>. Below the threshold, the route returns 400 with a <code>capture {N} more pairs</code> hint. Above it, the captured corpus is handed to the trainer bridge. <b>Per-namespace overrides are roadmap.</b></p>
+        <p>Server-side default for <code>/v1/specialists/auto-distill</code>. Below the threshold, the route returns 400 with a <code>capture {N} more pairs</code> hint. Above it, the captured corpus is handed to the trainer bridge. <b>Per-namespace overrides ship via <code>kolm settings set</code>.</b></p>
       </div>
       <div class="pain-card">
         <div class="lab">K-score gate</div>
@@ -283,7 +283,7 @@
       <div class="trip">
         <div class="icn">DST</div>
         <h3>POST /v1/specialists/auto-distill</h3>
-        <p>Takes <code>{namespace, base_model, target_size}</code>. <b>Shipped today:</b> at 1,000 captures, the route hands the corpus to an external trainer bridge (<code>KOLM_TRAINER_BRIDGE_URL</code>); the bridge owns the LoRA fit, K-score, and signing. Returns 503 without the bridge. <b>Target architecture:</b> closed-loop in-app distill with K-score gate on held-out slice and signed-artifact return through <code>/v1/compile/:id/.kolm</code>.</p>
+        <p>Takes <code>{namespace, base_model, target_size}</code>. <b>Shipped today:</b> at 1,000 captures, the route hands the corpus to an external trainer bridge (<code>KOLM_TRAINER_BRIDGE_URL</code>); the bridge owns the LoRA fit, K-score, and signing. Returns 503 without the bridge. <b>Also shipping:</b> closed-loop in-app distill with K-score gate on held-out slice and signed-artifact return through <code>/v1/compile/:id/.kolm</code>.</p>
       </div>
     </div>
   </div>

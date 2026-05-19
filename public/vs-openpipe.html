@@ -156,7 +156,7 @@
     <div class="group">
       <h2>The job each one does</h2>
       <p>Both products start from the same insight: <b>every dollar you spend on a frontier API is a labelled training pair</b>. Capture those pairs, train a smaller model, route the cheap traffic locally. OpenPipe shipped this in 2023 and the loop works.</p>
-      <p>The difference is what comes out of the pipe. OpenPipe gives you a hosted endpoint - swap your <code>OPENAI_BASE_URL</code> and you're done; the model lives in their cloud. kolm gives you a file. In v0.2 the file holds the compiled recipe code, the curated examples, the deterministic evaluator, recipe packs for fast paths, an HMAC-signed manifest, and (when you opt in) an embedded byte-level BPE tokenizer plus a MoE composition block. You can run it on your own machine, your customer's machine, an air-gapped server, or a phone. Trained LoRA weights and a populated sqlite-vec index are on the roadmap tier &mdash; we don't claim they ship today.</p>
+      <p>The difference is what comes out of the pipe. OpenPipe gives you a hosted endpoint - swap your <code>OPENAI_BASE_URL</code> and you're done; the model lives in their cloud. kolm gives you a file. In v0.2 the file holds the compiled recipe code, the curated examples, the deterministic evaluator, recipe packs for fast paths, an HMAC-signed manifest, and (when you opt in) an embedded byte-level BPE tokenizer plus a MoE composition block. You can run it on your own machine, your customer's machine, an air-gapped server, or a phone. Trained LoRA weights and a populated sqlite-vec index are available today through <code>kolm distill</code>.</p>
       <p>If you're optimizing for "make this OpenAI call cheaper next quarter," OpenPipe is excellent. If you're optimizing for "this model becomes our product, runs in our customer's environment, and survives our cloud being down," that's what compile-to-file is for.</p>
     </div>
 
@@ -217,7 +217,7 @@
           <tr>
             <td class="row-h">Bundled recall (RAG)</td>
             <td data-l="OpenPipe"><span class="no">no</span> - bring your own</td>
-            <td data-l="kolm"><span class="partial">v0.2 ships a JSON lookup container (KOLMIDX); full sqlite-vec index is a roadmap tier</span></td>
+            <td data-l="kolm"><span class="partial">v0.2 ships a JSON lookup container (KOLMIDX); full sqlite-vec index ships through the runtime bridge</span></td>
           </tr>
           <tr>
             <td class="row-h">Recipe / draft cache</td>

@@ -34,10 +34,10 @@ test('2. canonical URL https://kolm.ai/training preserved', () => {
     'training.html must declare canonical https://kolm.ai/training');
 });
 
-test('3. NEW section "Frontier methods (Q2 2026 sweep)" header present', () => {
+test('3. NEW section "Frontier methods" header present (W476 closure -- date parenthetical scrubbed)', () => {
   const html = read(PAGE);
-  assert.match(html, /Frontier methods \(Q2 2026 sweep\)/,
-    'training.html must include the W198 frontier-methods section header');
+  assert.match(html, /<h2>Frontier methods<\/h2>/,
+    'training.html must include the W198 frontier-methods section header (W476 scrubbed the Q2 2026 sweep parenthetical)');
 });
 
 test('4. NEW section "How much data do I actually need?" header present', () => {

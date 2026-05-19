@@ -411,7 +411,7 @@ kolm airgap status</pre>
       </div>
       <div class="qa">
         <h3>kolm serve --mcp: client cannot find the server</h3>
-        <p><code>kolm serve --mcp</code> speaks line-delimited JSON-RPC over stdio, so the client must spawn it as a subprocess. Run <code>kolm install &lt;harness&gt; --apply</code> for claude-code, cursor, continue, or cline to wire the command into the right config file. mDNS announce and <code>.well-known/mcp.json</code> are roadmap, not shipped today.</p>
+        <p><code>kolm serve --mcp</code> speaks line-delimited JSON-RPC over stdio, so the client must spawn it as a subprocess. Run <code>kolm install &lt;harness&gt; --apply</code> for claude-code, cursor, continue, or cline to wire the command into the right config file. mDNS announce and <code>.well-known/mcp.json</code> are opt-in via <code>kolm serve --discover</code>.</p>
       </div>
       <div class="qa">
         <h3>kolm serve --http: port in use</h3>

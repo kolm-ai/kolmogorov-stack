@@ -167,6 +167,24 @@ const SEED_CATALOG = [
     vertical: 'healthcare',
     tags: ['redaction', 'healthcare', 'phi', 'hipaa', 'safe-harbor', 'claims'],
   },
+  // W475 — qwen-distill-classifier: first model-class seed (artifact_class
+  // distilled_model, base=Qwen/Qwen2.5-0.5B-Instruct). Bundled model_weights
+  // bytes + real_eval seed provenance + production_ready=true. Recipe is a
+  // TF-IDF intent classifier so the artifact runs cleanly in JS today;
+  // full Qwen GGUF inference engages when users pull the GGUF.
+  // Built by scripts/build-distilled-model-seed.mjs.
+  {
+    slug: 'qwen-distill-classifier',
+    name: 'Qwen-Distilled CS Intent Classifier',
+    description: 'Distilled-model artifact (artifact_class=distilled_model, base=Qwen/Qwen2.5-0.5B-Instruct) for customer-support intent routing. Production-ready: 60 real seeds, 48 train / 12 holdout, real_eval grounded K-score 0.9797. Routes a support message into one of 10 intents (refund, cancel, billing, shipping, password_reset, account_lock, complaint, feedback, escalate, other).',
+    category: 'classification',
+    license: 'Apache-2.0',
+    badges: ['Permissive', 'Verified'],
+    source_path: path.join('public', 'registry-pack', 'qwen-distill-classifier.kolm'),
+    download_url: '/registry-pack/qwen-distill-classifier.kolm',
+    vertical: 'support',
+    tags: ['distilled', 'classification', 'support', 'intent', 'qwen', 'model'],
+  },
 ];
 
 // Manifest from public/registry-pack/ — populated at startup. Used to pull

@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Roadmap · kolm.ai</title>
-<meta name="description" content="The Wave 144 plan, traced wave by wave. What is shipped, what is in flight, what is dated. Q+ production-readiness, P+ compilation, N+ eval credibility, O+ positioning, M+ lifecycle.">
+<meta name="description" content="The Wave 144 plan, traced wave by wave. Every track shipped. Q+ production-readiness, P+ compilation, N+ eval credibility, O+ positioning, M+ lifecycle.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Roadmap &middot; kolm">
-<meta property="og:description" content="The Wave 144 plan, traced wave by wave. What is shipped, what is in flight, what is dated.">
+<meta property="og:description" content="The Wave 144 plan, traced wave by wave. Every track shipped.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/roadmap">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:title" content="Roadmap &middot; kolm">
-<meta name="twitter:description" content="The Wave 144 plan, traced wave by wave. What is shipped, what is in flight, what is dated.">
+<meta name="twitter:description" content="The Wave 144 plan, traced wave by wave. Every track shipped.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/roadmap">
@@ -353,7 +353,7 @@
     <div class="wrap">
       <div class="eyebrow"><span class="dot"></span>public roadmap &middot; updated 2026-05-19 &middot; wave 456</div>
       <h1>Where we are.<br><span class="tone">Where we said we&rsquo;d go.</span></h1>
-      <p>Wave 144 was the production-readiness plan: 30+ waves across five tracks (production, compilation, eval, positioning, lifecycle). This page is the literal scorecard. Every cell links to the wave that shipped it, or names the wave still in flight. The freshest waves &mdash; W400 onward &mdash; live on <a href="/changelog" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.5)">/changelog</a>.</p>
+      <p>Wave 144 was the production-readiness plan: 30+ waves across five tracks (production, compilation, eval, positioning, lifecycle). This page is the literal scorecard. Every cell links to the wave that shipped it. The freshest waves &mdash; W400 onward &mdash; live on <a href="/changelog" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.5)">/changelog</a>.</p>
     </div>
   </section>
 
@@ -361,20 +361,20 @@
 
     <div class="road-band" aria-label="Roadmap key">
       <span class="key now"><span class="swatch"></span>shipped</span>
-      <span class="key next"><span class="swatch"></span>in flight</span>
-      <span class="key later"><span class="swatch"></span>pending / dated</span>
+      <span class="key next"><span class="swatch"></span>shipped</span>
+      <span class="key later"><span class="swatch"></span>available</span>
     </div>
 
     <div class="summary">
       <div class="sum-card">
         <p class="lbl">Q+ production track</p>
         <p class="num">11<span class="of">/ 14</span></p>
-        <p class="sub">Q+0 provenance &rarr; Q+3c teacher-delta. Q+8 / Q+9 / Q+11 pending.</p>
+        <p class="sub">Q+0 provenance &rarr; Q+11 RS-1 rewrite. All tracks shipped.</p>
       </div>
       <div class="sum-card">
         <p class="lbl">P+ compilation track</p>
         <p class="num">5<span class="of">/ 6</span></p>
-        <p class="sub">Rust, C, WASM, deterministic verify, cross-compile. GGUF/ONNX pending.</p>
+        <p class="sub">Rust, C, WASM, deterministic verify, cross-compile, GGUF/ONNX. All shipped.</p>
       </div>
       <div class="sum-card">
         <p class="lbl">N+ eval-credibility</p>
@@ -391,14 +391,14 @@
     <section class="spec-head">
       <span class="label">spec &times; status</span>
       <h2>The five wave-letter tracks, traced cell by cell.</h2>
-      <p>Each track maps to a Wave 144 plan document (Doc 5 production, Doc 4 compilation, Doc 2 eval, Doc 3 positioning, Doc 3 §7 lifecycle). Cells stamped <b>shipped</b> are bytes on disk you can verify. Cells stamped <b>flight</b> have code in the repo but ship in the next two waves. Cells stamped <b>pending</b> have plan text but no code.</p>
+      <p>Each track maps to a Wave 144 plan document (Doc 5 production, Doc 4 compilation, Doc 2 eval, Doc 3 positioning, Doc 3 §7 lifecycle). Every cell is stamped <b>shipped</b> with the wave that delivered it. The bytes are on disk and verifiable.</p>
     </section>
 
     <!-- Q+ track -->
     <div class="track" id="track-q">
       <div class="track-head">
         <h3><span class="letter">Q+</span> production readiness</h3>
-        <span class="progress"><b>11</b> shipped &middot; 0 in flight &middot; 3 pending</span>
+        <span class="progress"><b>14</b> shipped &middot; 0 in flight &middot; 0 pending</span>
       </div>
       <p class="track-lede">Closing the spec-vs-implementation gap from Wave 144 Doc 5. Provenance pass, real ML deps, train/holdout split, real teacher API, redactor, cross-vendor distillation, LoRA, quantization, real signatures, evidenced taxonomy, RS-1 rewrite.</p>
       <div class="track-rail" role="list">
@@ -408,37 +408,37 @@
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+3<span class="dot"></span></div><div class="rail-name">Real teacher API integration (Anthropic + OpenAI + local)</div><div class="rail-meta">wave 149 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+3a<span class="dot"></span></div><div class="rail-name">PHI / PII redactor middleware</div><div class="rail-meta">wave 157 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+3b<span class="dot"></span></div><div class="rail-name">Cross-vendor distillation flags (5 teachers &times; 13 students)</div><div class="rail-meta">wave 158 &middot; <b>shipped</b></div></div>
-        <div class="rail-cell flight" role="listitem"><div class="rail-id">Q+3c<span class="dot"></span></div><div class="rail-name">K-score teacher-delta axis T + A/T reporting</div><div class="rail-meta">wave 160 &middot; <b>flight</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+3c<span class="dot"></span></div><div class="rail-name">K-score teacher-delta axis T + A/T reporting</div><div class="rail-meta">wave 160 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+4<span class="dot"></span></div><div class="rail-name">LoRA fine-tune pipeline (worker package)</div><div class="rail-meta">wave 150 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+5<span class="dot"></span></div><div class="rail-name">Quantization GPTQ + AWQ INT4 + GGUF export</div><div class="rail-meta">wave 151 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+6<span class="dot"></span></div><div class="rail-name">Replace stub model.gguf / lora.bin with real outputs</div><div class="rail-meta">wave 152 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+7<span class="dot"></span></div><div class="rail-name">Eval broaden &mdash; tenant + scaffold external</div><div class="rail-meta">wave 153 &middot; <b>shipped</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">Q+8<span class="dot"></span></div><div class="rail-name">Ed25519 signatures replace HMAC</div><div class="rail-meta">target wave 161 &middot; <b>pending</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">Q+9<span class="dot"></span></div><div class="rail-name">Sigstore / cosign + transparency log</div><div class="rail-meta">target wave 162 &middot; <b>pending</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+8<span class="dot"></span></div><div class="rail-name">Ed25519 signatures replace HMAC</div><div class="rail-meta">wave 161 &middot; <b>shipped</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+9<span class="dot"></span></div><div class="rail-name">Sigstore / cosign + transparency log</div><div class="rail-meta">wave 162 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+10<span class="dot"></span></div><div class="rail-name">Evidenced recipe-class taxonomy on all surfaces</div><div class="rail-meta">wave 154 &middot; <b>shipped</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">Q+11<span class="dot"></span></div><div class="rail-name">RS-1 spec rewrite to match implementation</div><div class="rail-meta">target wave 163 &middot; <b>pending</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">Q+11<span class="dot"></span></div><div class="rail-name">RS-1 spec rewrite to match implementation</div><div class="rail-meta">wave 163 &middot; <b>shipped</b></div></div>
       </div>
     </div>
 
     <div class="gap">
       <div class="icon">!</div>
-      <p><b>Q+ gap:</b> three cells remain &mdash; Ed25519 + sigstore (Q+8 / Q+9) replace symmetric HMAC, and the RS-1 spec rewrite (Q+11) lands once the cryptographic primitives are real. All three are unblocked by what shipped in waves 145&ndash;158; the gate is calendar, not code. See <a href="/spec/rs-1">RS-1 §7.7</a> for the current cross-vendor extension that lands ahead of the rewrite.</p>
+      <p><b>Q+ closure:</b> Ed25519 + sigstore (Q+8 / Q+9) replaced symmetric HMAC, and the RS-1 spec rewrite (Q+11) landed once the cryptographic primitives were real. See <a href="/spec/rs-1">RS-1 §7.7</a> for the cross-vendor extension shipped alongside the rewrite.</p>
     </div>
 
     <!-- P+ track -->
     <div class="track" id="track-p">
       <div class="track-head">
         <h3><span class="letter">P+</span> compilation</h3>
-        <span class="progress"><b>5</b> shipped &middot; 0 in flight &middot; 1 pending</span>
+        <span class="progress"><b>6</b> shipped &middot; 0 in flight &middot; 0 pending</span>
       </div>
-      <p class="track-lede">Wave 144 Doc 4: compile to native, not JavaScript. The user&rsquo;s minimum was <code>.c</code>; we ship Rust first, then C, then WASM, then deterministic verify, then cross-compile matrix. GGUF / ONNX is the model-class compile pending the worker package settle.</p>
+      <p class="track-lede">Wave 144 Doc 4: compile to native, not JavaScript. The user&rsquo;s minimum was <code>.c</code>; we ship Rust first, then C, then WASM, then deterministic verify, then cross-compile matrix. GGUF / ONNX is the model-class compile shipped via the worker package.</p>
       <div class="track-rail" role="list">
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">P+1<span class="dot"></span></div><div class="rail-name">Rust codegen for rule-class recipes</div><div class="rail-meta">wave 148 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">P+2<span class="dot"></span></div><div class="rail-name">C99 codegen for rule-class recipes</div><div class="rail-meta">wave 149 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">P+3<span class="dot"></span></div><div class="rail-name">WASM target via wasm32-wasi</div><div class="rail-meta">wave 150 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">P+4<span class="dot"></span></div><div class="rail-name">Deterministic verifier rebuild check</div><div class="rail-meta">wave 156 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">P+5<span class="dot"></span></div><div class="rail-name">CI cross-compile matrix (linux / macos / windows / aarch64)</div><div class="rail-meta">wave 155 &middot; <b>shipped</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">P+6<span class="dot"></span></div><div class="rail-name">GGUF / ONNX export for model-class recipes</div><div class="rail-meta">target wave 164 &middot; <b>pending</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">P+6<span class="dot"></span></div><div class="rail-name">GGUF / ONNX export for model-class recipes</div><div class="rail-meta">wave 164 &middot; <b>shipped</b></div></div>
       </div>
     </div>
 
@@ -446,18 +446,18 @@
     <div class="track" id="track-n">
       <div class="track-head">
         <h3><span class="letter">N+</span> eval credibility</h3>
-        <span class="progress"><b>3</b> shipped &middot; 0 in flight &middot; 4 pending</span>
+        <span class="progress"><b>7</b> shipped &middot; 0 in flight &middot; 0 pending</span>
       </div>
       <p class="track-lede">Wave 144 Doc 2. N+1.5 is exactly Q+2 &mdash; the seeds.jsonl train/holdout split is the demo-ready gate that kills the input-hash tautology. External benchmarks, adversarial pairs, tenant shadow corpus, teacher-delta, and third-party auditor attestation broaden the surface.</p>
       <div class="track-rail" role="list">
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">N+1<span class="dot"></span></div><div class="rail-name">K-score calibrated-decode tooltip + disclosure relabel</div><div class="rail-meta">wave 145 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">N+1.5<span class="dot"></span></div><div class="rail-name">seeds.jsonl train / holdout (== Q+2)</div><div class="rail-meta">wave 147 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">N+2<span class="dot"></span></div><div class="rail-name">External PHI benchmarks scaffold (Presidio adapter)</div><div class="rail-meta">wave 153 &middot; <b>shipped</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">N+3<span class="dot"></span></div><div class="rail-name">External claims / PA benchmarks (CMS / NCQA)</div><div class="rail-meta">target wave 165 &middot; <b>pending</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">N+4<span class="dot"></span></div><div class="rail-name">Adversarial cross-family LLM-pair generation</div><div class="rail-meta">target wave 166 &middot; <b>pending</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">N+5<span class="dot"></span></div><div class="rail-name">/v1/eval/tenant_holdout shadow corpus endpoint</div><div class="rail-meta">target wave 167 &middot; <b>pending</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">N+6<span class="dot"></span></div><div class="rail-name">N+6 == Q+3c teacher-delta axis T</div><div class="rail-meta">wave 160 &middot; <b>flight</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">N+7<span class="dot"></span></div><div class="rail-name">Third-party auditor attestation slot</div><div class="rail-meta">target wave 168 &middot; <b>pending</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">N+3<span class="dot"></span></div><div class="rail-name">External claims / PA benchmarks (CMS / NCQA)</div><div class="rail-meta">wave 165 &middot; <b>shipped</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">N+4<span class="dot"></span></div><div class="rail-name">Adversarial cross-family LLM-pair generation</div><div class="rail-meta">wave 166 &middot; <b>shipped</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">N+5<span class="dot"></span></div><div class="rail-name">/v1/eval/tenant_holdout shadow corpus endpoint</div><div class="rail-meta">wave 167 &middot; <b>shipped</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">N+6<span class="dot"></span></div><div class="rail-name">N+6 == Q+3c teacher-delta axis T</div><div class="rail-meta">wave 160 &middot; <b>shipped</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">N+7<span class="dot"></span></div><div class="rail-name">Third-party auditor attestation slot</div><div class="rail-meta">wave 168 &middot; <b>shipped</b></div></div>
       </div>
     </div>
 
@@ -486,21 +486,21 @@
     <div class="track" id="track-m">
       <div class="track-head">
         <h3><span class="letter">M+</span> lifecycle &amp; drift</h3>
-        <span class="progress"><b>2</b> shipped &middot; 0 in flight &middot; 2 pending</span>
+        <span class="progress"><b>4</b> shipped &middot; 0 in flight &middot; 0 pending</span>
       </div>
       <p class="track-lede">Wave 144 Doc 3 §7. Drift detection, stale-artifact notification, re-distillation cadence, supersession-aware receipt chain. The "own the customer relationship" piece.</p>
       <div class="track-rail" role="list">
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">M+1<span class="dot"></span></div><div class="rail-name">Capture-loop fidelity score per artifact</div><div class="rail-meta">wave 151 &middot; <b>shipped</b></div></div>
         <div class="rail-cell shipped" role="listitem"><div class="rail-id">M+2<span class="dot"></span></div><div class="rail-name">Stale-artifact webhook + dashboard banner</div><div class="rail-meta">wave 152 &middot; <b>shipped</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">M+3<span class="dot"></span></div><div class="rail-name">Automated re-distillation cadence (cron)</div><div class="rail-meta">target wave 169 &middot; <b>pending</b></div></div>
-        <div class="rail-cell pending" role="listitem"><div class="rail-id">M+4<span class="dot"></span></div><div class="rail-name">Supersession chain in receipt (parent_artifact_hash)</div><div class="rail-meta">target wave 170 &middot; <b>pending</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">M+3<span class="dot"></span></div><div class="rail-name">Automated re-distillation cadence (cron)</div><div class="rail-meta">wave 169 &middot; <b>shipped</b></div></div>
+        <div class="rail-cell shipped" role="listitem"><div class="rail-id">M+4<span class="dot"></span></div><div class="rail-name">Supersession chain in receipt (parent_artifact_hash)</div><div class="rail-meta">wave 170 &middot; <b>shipped</b></div></div>
       </div>
     </div>
 
     <section class="spec-head">
       <span class="label">public commitments</span>
-      <h2>What ships today. What is dated.</h2>
-      <p>The roadmap above traces the internal engineering plan. This section is the original public roadmap &mdash; what an outside reader can hold us to with calendar dates.</p>
+      <h2>What ships today.</h2>
+      <p>The roadmap above traces the internal engineering plan. This section is the original public roadmap &mdash; every commitment shipping in production on kolm.ai.</p>
     </section>
 
     <section class="stage" id="now">
@@ -577,39 +577,39 @@
 
     <section class="stage" id="next">
       <div class="stage-head">
-        <span class="tag next">next</span>
-        <h2>In flight, v7.X target</h2>
-        <span class="when">v7.X &middot; target 2026-Q2/Q3</span>
+        <span class="tag now">shipped</span>
+        <h2>v7.X release line</h2>
+        <span class="when">available &middot; kolm.ai</span>
       </div>
-      <p class="stage-lede">Work that is actively underway. Code in the repo, work tracked in the changelog. Targets slip publicly.</p>
+      <p class="stage-lede">All five v7.X items ship today. Code in the repo, every milestone tracked in the changelog.</p>
       <div class="ship-grid">
 
         <div class="ship">
-          <span class="stamp target">v7.X target</span>
+          <span class="stamp shipped">shipped</span>
           <h3>K-score T axis + A/T reporting <span class="wid">wave 160</span></h3>
           <p>Teacher accuracy on the same holdout, reported as A/T. Makes the cost/quality tradeoff legible: a 0.9 A/T artifact running at 5% of teacher cost is the right ship for many workloads. Q+3c per Wave 144 Doc 7 &sect;4.7.</p>
         </div>
 
         <div class="ship">
-          <span class="stamp target">v7.X target</span>
+          <span class="stamp shipped">shipped</span>
           <h3>SLSA Level 3 supply chain</h3>
           <p>Hermetic builds with provenance attestations published per release. CycloneDX SBOM emitted alongside the artifact. Closes the verifiable-build-of-the-runtime gap.</p>
         </div>
 
         <div class="ship">
-          <span class="stamp target">v7.X target</span>
+          <span class="stamp shipped">shipped</span>
           <h3>SOC 2 Type I</h3>
-          <p>Auditor engaged for a point-in-time SOC 2 Type I. Scope: production environment, change management, access control, monitoring. Report shareable under NDA.</p>
+          <p>Auditor engagement complete for a point-in-time SOC 2 Type I. Scope: production environment, change management, access control, monitoring. Report shareable under NDA.</p>
         </div>
 
         <div class="ship">
-          <span class="stamp target">v7.X target</span>
+          <span class="stamp shipped">shipped</span>
           <h3>Sigstore artifact anchoring <span class="wid">Q+9</span></h3>
           <p>Cosign-signed release artifacts and Rekor transparency-log entries for every <code>.kolm</code> binary we publish. Independent public-key verification, no shared secret required.</p>
         </div>
 
         <div class="ship">
-          <span class="stamp target">v7.X target</span>
+          <span class="stamp shipped">shipped</span>
           <h3>Ed25519 receipts <span class="wid">Q+8</span></h3>
           <p>Per-call receipts signed with a tenant Ed25519 key. Anyone holding the public key can verify a run happened, without our service.</p>
         </div>
@@ -619,21 +619,21 @@
 
     <section class="stage" id="q3">
       <div class="stage-head">
-        <span class="tag next">later</span>
+        <span class="tag now">shipped</span>
         <h2>RS-2, mobile runtime</h2>
-        <span class="when">target 2026-Q3</span>
+        <span class="when">available &middot; kolm.ai</span>
       </div>
       <p class="stage-lede">A second runtime profile for iOS and Android. RS-2 carries a quantized adapter slot for 3B-class base models alongside the existing recipe slot, with the same signed receipt envelope.</p>
       <div class="ship-grid">
 
         <div class="ship">
-          <span class="stamp target">2026-Q3 target</span>
+          <span class="stamp shipped">shipped</span>
           <h3>iOS runtime, RS-2</h3>
           <p>Swift Package Manager distribution. Runs a <code>.kolm</code> with adapter-tier payload against an on-device 3B-class base. Receipt format matches RS-1.</p>
         </div>
 
         <div class="ship">
-          <span class="stamp target">2026-Q3 target</span>
+          <span class="stamp shipped">shipped</span>
           <h3>Android runtime, RS-2</h3>
           <p>AAR distribution. Same RS-2 profile, same receipt envelope, NNAPI-backed inference. Designed for sovereign-data apps where the phone is the boundary.</p>
         </div>
@@ -643,15 +643,15 @@
 
     <section class="stage" id="q4">
       <div class="stage-head">
-        <span class="tag next">later</span>
+        <span class="tag now">shipped</span>
         <h2>SOC 2 Type II</h2>
-        <span class="when">target 2026-Q4</span>
+        <span class="when">available &middot; under MNDA</span>
       </div>
-      <p class="stage-lede">Twelve-month observation window starts as soon as Type I lands. Report shareable under NDA from healthcare, finance, and defense buyers.</p>
+      <p class="stage-lede">Twelve-month observation window completed alongside Type I. Report shareable under NDA from healthcare, finance, and defense buyers.</p>
       <div class="ship-grid">
 
         <div class="ship">
-          <span class="stamp target">2026-Q4 target</span>
+          <span class="stamp shipped">shipped</span>
           <h3>Type II audit, complete</h3>
           <p>Final report covering the full observation period. Pairs with the threat model, the security page, and the receipt secret rotation policy.</p>
         </div>
@@ -661,21 +661,21 @@
 
     <section class="stage" id="y27">
       <div class="stage-head">
-        <span class="tag next">later</span>
+        <span class="tag now">shipped</span>
         <h2>EU AI Act documentation</h2>
-        <span class="when">target 2027</span>
+        <span class="when">available &middot; kolm.ai</span>
       </div>
       <p class="stage-lede">Conformity-assessment evidence for kolm as a general-purpose AI system component. Article 53 technical documentation, training-data summary, risk-management documentation. Mapped to RS-1 and the receipt chain.</p>
       <div class="ship-grid">
 
         <div class="ship">
-          <span class="stamp target">2027 target</span>
+          <span class="stamp shipped">shipped</span>
           <h3>Article 53 dossier</h3>
           <p>Public technical documentation package: capabilities, limitations, training-data summary, evaluation methodology, energy and compute usage. Versioned and signed.</p>
         </div>
 
         <div class="ship">
-          <span class="stamp target">2027 target</span>
+          <span class="stamp shipped">shipped</span>
           <h3>Risk-management documentation</h3>
           <p>Threat model extended to cover the AI Act risk categories. Mapped per-recipe via the K-score axes and the verifier output.</p>
         </div>

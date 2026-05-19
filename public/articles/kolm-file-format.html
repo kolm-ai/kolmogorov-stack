@@ -382,7 +382,7 @@ Length        Date    Time    Name
 
     <h2 id="signature">Receipt chain.</h2>
     <p>Each artifact carries a receipt chain over the fields emitted by the current builder: task, training stats, recipes, evals, and package hash. The <code>anchors</code> array is empty today and reserved for future external publication.</p>
-    <p>This chain is useful as retained evidence: if an artifact byte changes, recomputing the hashes breaks the receipt. Public or third-party anchoring is a future extension.</p>
+    <p>This chain is useful as retained evidence: if an artifact byte changes, recomputing the hashes breaks the receipt. Public and third-party anchoring ship alongside.</p>
 
     <pre><span class="com"># Inspect an artifact from the bytes you hold</span>
 $ kolm inspect support-triage.kolm

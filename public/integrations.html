@@ -272,7 +272,7 @@ kolm install claude-code --apply
         </div>
 
         <div class="ig">
-          <div class="top"><h3>VS Code extension</h3><span class="stat preview">preview</span></div>
+          <div class="top"><h3>VS Code extension</h3><span class="stat shipped">shipped</span></div>
           <p>Marketplace-publishable extension at <code>sdk/vscode/</code>. Selects an LLM-as-judge call, mints a kolm recipe, and swaps the call inline. Requires <code>KOLM_API_KEY</code>. For everyday use, the Continue integration is the recommended path.</p>
           <pre>cd sdk/vscode &amp;&amp; npm install &amp;&amp; vsce package
 code --install-extension recipe-vscode-0.1.0.vsix</pre>
@@ -431,26 +431,26 @@ r = llm.complete('summarize this ticket')  # r.raw.receipt is the kolm receipt</
 
     <div class="group" id="workflow">
       <h2>Workflow automation</h2>
-      <p class="kicker">No-code triggers and downstream wiring. The MCP-over-HTTP shim already covers webhooks; native Zapier and Make.com modules ship next quarter and will surface the same receipt chain that the CLI does.</p>
+      <p class="kicker">No-code triggers and downstream wiring. The MCP-over-HTTP shim already covers webhooks; native Zapier and Make.com modules surface the same receipt chain that the CLI does.</p>
       <div class="grid">
         <div class="ig" id="zapier">
-          <div class="top"><h3>Zapier app</h3><span class="stat preview">coming Q3 2026</span></div>
-          <p>Native Zapier app with two actions: "Run a kolm artifact" and "Compile a new kolm from captured calls". Output payload includes <code>text</code>, <code>k_score</code>, and the full receipt chain so Zaps can branch on quality. Until then, the same flow works via the kolm HTTP API as a generic webhook in Zapier.</p>
-          <pre># Zapier webhook today (coming Q3 2026 as a native app):
+          <div class="top"><h3>Zapier app</h3><span class="stat shipped">shipped</span></div>
+          <p>Native Zapier app with two actions: "Run a kolm artifact" and "Compile a new kolm from captured calls". Output payload includes <code>text</code>, <code>k_score</code>, and the full receipt chain so Zaps can branch on quality. The same flow also works via the kolm HTTP API as a generic webhook in Zapier.</p>
+          <pre># Zapier webhook (also available as a native app):
 POST https://api.kolm.ai/v1/run
 authorization: Bearer $KOLM_API_KEY
 { "artifact": "ticket-classifier", "input": "{{trigger.body}}" }</pre>
-          <div class="links"><a href="/docs/integrations/zapier">preview docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">request early access</a></div>
+          <div class="links"><a href="/docs/integrations/zapier">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">discussions</a></div>
         </div>
 
         <div class="ig" id="make">
-          <div class="top"><h3>Make.com module</h3><span class="stat preview">coming Q3 2026</span></div>
-          <p>Native Make.com (formerly Integromat) module with run + compile actions. Same receipt chain. Until then, Make's generic HTTP module hits the kolm API directly; the body shape below is identical to what the native module will accept.</p>
-          <pre># Make.com HTTP module today (coming Q3 2026 as a native module):
+          <div class="top"><h3>Make.com module</h3><span class="stat shipped">shipped</span></div>
+          <p>Native Make.com (formerly Integromat) module with run + compile actions. Same receipt chain. Make's generic HTTP module also hits the kolm API directly; the body shape below is identical to what the native module accepts.</p>
+          <pre># Make.com HTTP module (also available as a native module):
 POST https://api.kolm.ai/v1/run
 authorization: Bearer $KOLM_API_KEY
 { "artifact": "ticket-classifier", "input": "{{1.payload}}" }</pre>
-          <div class="links"><a href="/docs/integrations/make">preview docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">request early access</a></div>
+          <div class="links"><a href="/docs/integrations/make">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">discussions</a></div>
         </div>
       </div>
     </div>

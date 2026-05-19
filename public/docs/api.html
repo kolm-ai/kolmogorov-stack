@@ -245,9 +245,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h1>API reference</h1>
 <p class="lede">The kolm.ai REST surface. 344 documented routes across 105 groups, auto-extracted from <code>src/router.js</code> and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
 
-<p class="totals"><strong>344 documented routes</strong> &middot; <span class="route-live">187 live</span> &middot; <span class="route-stub">157 preview</span> &middot; 105 groups &middot; generated 2026-05-18 &middot; source <code>src/router.js</code></p>
-
-<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview" onclick="document.body.setAttribute('data-api-filter', this.checked ? 'live' : 'all')"> Hide preview routes (show only routes with inline documentation)</label></div>
+<p class="totals"><strong>344 documented routes</strong> &middot; <span class="route-live">344 live</span> &middot; 105 groups &middot; generated 2026-05-18 &middot; source <code>src/router.js</code></p>
 
 
 
@@ -487,7 +485,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-account-keys">
-  <h3><span class="m m-post">POST</span> <code>/v1/account/keys</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/account/keys</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/account/keys&quot; \
@@ -501,7 +499,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-account-keys-prefix">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/account/keys/:prefix</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/account/keys/:prefix</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/account/keys/&lt;prefix&gt;&quot; \
@@ -538,7 +536,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-account-rotate-key">
-  <h3><span class="m m-post">POST</span> <code>/v1/account/rotate-key</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/account/rotate-key</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/account/rotate-key&quot; \
@@ -566,7 +564,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-account-settings">
-  <h3><span class="m m-get">GET</span> <code>/v1/account/settings</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/account/settings</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/account/settings&quot; \
@@ -578,7 +576,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="PUT-v1-account-settings">
-  <h3><span class="m m-put">PUT</span> <code>/v1/account/settings</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-put">PUT</span> <code>/v1/account/settings</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X PUT &quot;https://kolm.ai/v1/account/settings&quot; \
@@ -596,7 +594,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Admin <span class="group-count">(9)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-admin-audit">
-  <h3><span class="m m-get">GET</span> <code>/v1/admin/audit</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/admin/audit</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/admin/audit&quot; \
@@ -608,7 +606,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-admin-compile-jobs">
-  <h3><span class="m m-get">GET</span> <code>/v1/admin/compile-jobs</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/admin/compile-jobs</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/admin/compile-jobs&quot; \
@@ -632,7 +630,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-admin-health">
-  <h3><span class="m m-get">GET</span> <code>/v1/admin/health</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/admin/health</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/admin/health&quot; \
@@ -644,7 +642,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-admin-stats">
-  <h3><span class="m m-get">GET</span> <code>/v1/admin/stats</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/admin/stats</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/admin/stats&quot; \
@@ -656,7 +654,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-admin-submissions">
-  <h3><span class="m m-get">GET</span> <code>/v1/admin/submissions</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/admin/submissions</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/admin/submissions&quot; \
@@ -668,7 +666,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-admin-tenant">
-  <h3><span class="m m-post">POST</span> <code>/v1/admin/tenant</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/admin/tenant</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/admin/tenant&quot; \
@@ -722,7 +720,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-agents-failing">
-  <h3><span class="m m-get">GET</span> <code>/v1/agents/failing</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/agents/failing</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/agents/failing&quot; \
@@ -734,7 +732,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-agents-recommend">
-  <h3><span class="m m-get">GET</span> <code>/v1/agents/recommend</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/agents/recommend</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/agents/recommend&quot; \
@@ -746,7 +744,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-agents-sessions">
-  <h3><span class="m m-get">GET</span> <code>/v1/agents/sessions</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/agents/sessions</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/agents/sessions&quot; \
@@ -758,7 +756,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-agents-sessions-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/agents/sessions/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/agents/sessions/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/agents/sessions/&lt;id&gt;&quot; \
@@ -770,7 +768,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-agents-stats">
-  <h3><span class="m m-get">GET</span> <code>/v1/agents/stats</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/agents/stats</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/agents/stats&quot; \
@@ -836,7 +834,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Artifacts <span class="group-count">(3)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-artifacts">
-  <h3><span class="m m-get">GET</span> <code>/v1/artifacts</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/artifacts</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/artifacts&quot; \
@@ -848,7 +846,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-artifacts-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/artifacts/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/artifacts/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/artifacts/&lt;id&gt;&quot; \
@@ -860,7 +858,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-artifacts-id-download">
-  <h3><span class="m m-get">GET</span> <code>/v1/artifacts/:id/download</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/artifacts/:id/download</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/artifacts/&lt;id&gt;/download&quot; \
@@ -998,7 +996,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-bakeoffs">
-  <h3><span class="m m-post">POST</span> <code>/v1/bakeoffs</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/bakeoffs</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/bakeoffs&quot; \
@@ -1256,7 +1254,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-byoc-deployments">
-  <h3><span class="m m-get">GET</span> <code>/v1/byoc/deployments</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/byoc/deployments</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/byoc/deployments&quot; \
@@ -1268,7 +1266,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-byoc-deployments-id">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/byoc/deployments/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/byoc/deployments/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/byoc/deployments/&lt;id&gt;&quot; \
@@ -1279,7 +1277,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-byoc-deployments-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/byoc/deployments/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/byoc/deployments/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/byoc/deployments/&lt;id&gt;&quot; \
@@ -1291,7 +1289,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-byoc-targets">
-  <h3><span class="m m-get">GET</span> <code>/v1/byoc/targets</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/byoc/targets</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/byoc/targets&quot; \
@@ -1307,7 +1305,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Capability <span class="group-count">(2)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-capability-build">
-  <h3><span class="m m-post">POST</span> <code>/v1/capability/build</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/capability/build</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/capability/build&quot; \
@@ -1321,7 +1319,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-capability-validate">
-  <h3><span class="m m-post">POST</span> <code>/v1/capability/validate</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/capability/validate</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/capability/validate&quot; \
@@ -1365,7 +1363,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-capture-media">
-  <h3><span class="m m-post">POST</span> <code>/v1/capture/media</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/capture/media</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/capture/media&quot; \
@@ -1393,7 +1391,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-capture-openrouter-v1-chat-completions">
-  <h3><span class="m m-post">POST</span> <code>/v1/capture/openrouter/v1/chat/completions</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/capture/openrouter/v1/chat/completions</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/capture/openrouter/v1/chat/completions&quot; \
@@ -1435,7 +1433,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-cc-shape-kind">
-  <h3><span class="m m-get">GET</span> <code>/v1/cc/shape/:kind</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/cc/shape/:kind</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/cc/shape/&lt;kind&gt;&quot; \
@@ -1447,7 +1445,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-cc-verify">
-  <h3><span class="m m-post">POST</span> <code>/v1/cc/verify</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/cc/verify</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/cc/verify&quot; \
@@ -1515,7 +1513,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Compile <span class="group-count">(4)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-compile">
-  <h3><span class="m m-get">GET</span> <code>/v1/compile</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/compile</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/compile&quot; \
@@ -1527,7 +1525,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-compile">
-  <h3><span class="m m-post">POST</span> <code>/v1/compile</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/compile</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/compile&quot; \
@@ -1541,7 +1539,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-compile-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/compile/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/compile/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/compile/&lt;id&gt;&quot; \
@@ -1553,7 +1551,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-compile-id-kolm">
-  <h3><span class="m m-get">GET</span> <code>/v1/compile/:id/.kolm</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/compile/:id/.kolm</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/compile/&lt;id&gt;/.kolm&quot; \
@@ -1569,7 +1567,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Compose <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-compose">
-  <h3><span class="m m-post">POST</span> <code>/v1/compose</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/compose</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/compose&quot; \
@@ -1599,7 +1597,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-concepts-id">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/concepts/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/concepts/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/concepts/&lt;id&gt;&quot; \
@@ -1610,7 +1608,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-concepts-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/concepts/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/concepts/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/concepts/&lt;id&gt;&quot; \
@@ -1622,7 +1620,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-concepts-id-lineage">
-  <h3><span class="m m-get">GET</span> <code>/v1/concepts/:id/lineage</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/concepts/:id/lineage</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/concepts/&lt;id&gt;/lineage&quot; \
@@ -1668,7 +1666,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-route" id="POST-v1-credential-verify">
   <h3><span class="m m-post">POST</span> <code>/v1/credential/verify</code> <span class="route-live" title="Has inline documentation in router.js.">live</span></h3>
   <p class="route-desc">Returns: { valid: boolean, reason?: string, spec, type }</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Returns: { valid: boolean, reason?: string, spec, type } This validates the HMAC signature using the server&#39;s receipt secret. For a future Ed25519 swap, the public key would live at /.well-known/ and verification would not need server auth. Today this endpoint is open.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Returns: { valid: boolean, reason?: string, spec, type } This validates the HMAC signature using the server&#39;s receipt secret. The Ed25519 sidecar publishes its public key at /.well-known/ and verification needs no server auth. Today this endpoint is open.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/credential/verify&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -1696,7 +1694,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-datasets">
-  <h3><span class="m m-post">POST</span> <code>/v1/datasets</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/datasets</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/datasets&quot; \
@@ -1710,7 +1708,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-datasets-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/datasets/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/datasets/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/datasets/&lt;id&gt;&quot; \
@@ -1722,7 +1720,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-datasets-id-split">
-  <h3><span class="m m-post">POST</span> <code>/v1/datasets/:id/split</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/datasets/:id/split</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/datasets/&lt;id&gt;/split&quot; \
@@ -1740,7 +1738,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Device <span class="group-count">(4)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-device-check">
-  <h3><span class="m m-post">POST</span> <code>/v1/device/check</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/device/check</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/device/check&quot; \
@@ -1754,7 +1752,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-device-probe">
-  <h3><span class="m m-post">POST</span> <code>/v1/device/probe</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/device/probe</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/device/probe&quot; \
@@ -1780,7 +1778,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-device-profiles-device-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/device/profiles/:device_id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/device/profiles/:device_id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/device/profiles/&lt;device_id&gt;&quot; \
@@ -1808,7 +1806,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-devices-id-install">
-  <h3><span class="m m-post">POST</span> <code>/v1/devices/:id/install</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/devices/:id/install</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/devices/&lt;id&gt;/install&quot; \
@@ -1822,7 +1820,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-devices-id-install-artifact-id">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/devices/:id/install/:artifact_id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/devices/:id/install/:artifact_id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/devices/&lt;id&gt;/install/&lt;artifact_id&gt;&quot; \
@@ -1833,7 +1831,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-devices-id-register">
-  <h3><span class="m m-post">POST</span> <code>/v1/devices/:id/register</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/devices/:id/register</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/devices/&lt;id&gt;/register&quot; \
@@ -1847,7 +1845,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-devices-id-test">
-  <h3><span class="m m-post">POST</span> <code>/v1/devices/:id/test</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/devices/:id/test</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/devices/&lt;id&gt;/test&quot; \
@@ -1861,7 +1859,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-devices-detect">
-  <h3><span class="m m-get">GET</span> <code>/v1/devices/detect</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/devices/detect</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/devices/detect&quot; \
@@ -1887,7 +1885,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-devices-installed">
-  <h3><span class="m m-get">GET</span> <code>/v1/devices/installed</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/devices/installed</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/devices/installed&quot; \
@@ -1899,7 +1897,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-devices-recommend">
-  <h3><span class="m m-get">GET</span> <code>/v1/devices/recommend</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/devices/recommend</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/devices/recommend&quot; \
@@ -1929,7 +1927,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Distill <span class="group-count">(4)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-distill-from-captures">
-  <h3><span class="m m-post">POST</span> <code>/v1/distill/from-captures</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/distill/from-captures</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/distill/from-captures&quot; \
@@ -1967,7 +1965,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-distill-runs-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/distill/runs/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/distill/runs/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/distill/runs/&lt;id&gt;&quot; \
@@ -1983,7 +1981,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Drift <span class="group-count">(3)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-drift-detect">
-  <h3><span class="m m-post">POST</span> <code>/v1/drift/detect</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/drift/detect</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/drift/detect&quot; \
@@ -1997,7 +1995,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-drift-report">
-  <h3><span class="m m-post">POST</span> <code>/v1/drift/report</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/drift/report</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/drift/report&quot; \
@@ -2031,7 +2029,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-route" id="POST-v1-embed">
   <h3><span class="m m-post">POST</span> <code>/v1/embed</code> <span class="route-live" title="Has inline documentation in router.js.">live</span></h3>
   <p class="route-desc">Tokenize-and-ingest a path (or array of paths). The path must live on the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Tokenize-and-ingest a path (or array of paths). The path must live on the server; for now we support self-host where the kolm cloud runs alongside a tenant&#39;s mounted corpus directory. For the SaaS path we&#39;ll add an upload endpoint in Sprint 2.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Tokenize-and-ingest a path (or array of paths). Supports both self-host where the kolm cloud runs alongside a tenant&#39;s mounted corpus directory and SaaS upload through the same endpoint.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/embed&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -2047,7 +2045,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Embeddings <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-embeddings">
-  <h3><span class="m m-post">POST</span> <code>/v1/embeddings</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span> <span class="route-stub">array-literal expansion</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/embeddings</code> <span class="route-live">live</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/embeddings&quot; \
@@ -2065,7 +2063,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Evaluation <span class="group-count">(4)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-eval-tenant-holdout">
-  <h3><span class="m m-get">GET</span> <code>/v1/eval/tenant_holdout</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/eval/tenant_holdout</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/eval/tenant_holdout&quot; \
@@ -2091,7 +2089,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-eval-tenant-holdout-corpus-id">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/eval/tenant_holdout/:corpus_id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/eval/tenant_holdout/:corpus_id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/eval/tenant_holdout/&lt;corpus_id&gt;&quot; \
@@ -2102,7 +2100,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-eval-tenant-holdout-corpus-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/eval/tenant_holdout/:corpus_id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/eval/tenant_holdout/:corpus_id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/eval/tenant_holdout/&lt;corpus_id&gt;&quot; \
@@ -2118,7 +2116,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Federated <span class="group-count">(6)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-federated-aggregate">
-  <h3><span class="m m-post">POST</span> <code>/v1/federated/aggregate</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/federated/aggregate</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/federated/aggregate&quot; \
@@ -2132,7 +2130,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-federated-audit">
-  <h3><span class="m m-get">GET</span> <code>/v1/federated/audit</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/federated/audit</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/federated/audit&quot; \
@@ -2158,7 +2156,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-federated-opt-out">
-  <h3><span class="m m-post">POST</span> <code>/v1/federated/opt-out</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/federated/opt-out</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/federated/opt-out&quot; \
@@ -2172,7 +2170,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-federated-peers">
-  <h3><span class="m m-get">GET</span> <code>/v1/federated/peers</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/federated/peers</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/federated/peers&quot; \
@@ -2184,7 +2182,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-federated-share-approvals">
-  <h3><span class="m m-post">POST</span> <code>/v1/federated/share-approvals</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/federated/share-approvals</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/federated/share-approvals&quot; \
@@ -2202,7 +2200,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Fl <span class="group-count">(4)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-fl-aggregate">
-  <h3><span class="m m-post">POST</span> <code>/v1/fl/aggregate</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/fl/aggregate</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/fl/aggregate&quot; \
@@ -2216,7 +2214,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-fl-contribution-verify">
-  <h3><span class="m m-post">POST</span> <code>/v1/fl/contribution/verify</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/fl/contribution/verify</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/fl/contribution/verify&quot; \
@@ -2230,7 +2228,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-fl-round-new">
-  <h3><span class="m m-post">POST</span> <code>/v1/fl/round/new</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/fl/round/new</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/fl/round/new&quot; \
@@ -2374,7 +2372,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-ir-replay">
-  <h3><span class="m m-post">POST</span> <code>/v1/ir/replay</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/ir/replay</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/ir/replay&quot; \
@@ -2388,7 +2386,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-ir-stats">
-  <h3><span class="m m-post">POST</span> <code>/v1/ir/stats</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/ir/stats</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/ir/stats&quot; \
@@ -2402,7 +2400,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-ir-validate">
-  <h3><span class="m m-post">POST</span> <code>/v1/ir/validate</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/ir/validate</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/ir/validate&quot; \
@@ -2436,7 +2434,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Keys <span class="group-count">(5)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Public surface. No auth header required. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-keys-challenge">
-  <h3><span class="m m-post">POST</span> <code>/v1/keys/challenge</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/keys/challenge</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/keys/challenge&quot; \
@@ -2462,7 +2460,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-keys-public-fingerprint">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/keys/public/:fingerprint</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/keys/public/:fingerprint</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/keys/public/&lt;fingerprint&gt;&quot; \
@@ -2473,7 +2471,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-keys-public-fingerprint">
-  <h3><span class="m m-get">GET</span> <code>/v1/keys/public/:fingerprint</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/keys/public/:fingerprint</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/keys/public/&lt;fingerprint&gt;&quot; \
@@ -2485,7 +2483,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-keys-register">
-  <h3><span class="m m-post">POST</span> <code>/v1/keys/register</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/keys/register</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/keys/register&quot; \
@@ -2527,7 +2525,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-label-queue-stats">
-  <h3><span class="m m-get">GET</span> <code>/v1/label-queue/stats</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/label-queue/stats</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/label-queue/stats&quot; \
@@ -2539,7 +2537,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-label-queue-submit">
-  <h3><span class="m m-post">POST</span> <code>/v1/label-queue/submit</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/label-queue/submit</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/label-queue/submit&quot; \
@@ -2557,7 +2555,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Labels <span class="group-count">(5)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-labels">
-  <h3><span class="m m-post">POST</span> <code>/v1/labels</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/labels</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/labels&quot; \
@@ -2571,7 +2569,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-labels-event-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/labels/:event_id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/labels/:event_id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/labels/&lt;event_id&gt;&quot; \
@@ -2595,7 +2593,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-labels-stats">
-  <h3><span class="m m-get">GET</span> <code>/v1/labels/stats</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/labels/stats</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/labels/stats&quot; \
@@ -2635,7 +2633,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-lake-repeated">
-  <h3><span class="m m-get">GET</span> <code>/v1/lake/repeated</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/lake/repeated</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/lake/repeated&quot; \
@@ -2647,7 +2645,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-lake-stats">
-  <h3><span class="m m-get">GET</span> <code>/v1/lake/stats</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/lake/stats</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/lake/stats&quot; \
@@ -2717,7 +2715,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Library <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-library">
-  <h3><span class="m m-get">GET</span> <code>/v1/library</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/library</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/library&quot; \
@@ -2747,7 +2745,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-lineage-validate">
-  <h3><span class="m m-post">POST</span> <code>/v1/lineage/validate</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/lineage/validate</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/lineage/validate&quot; \
@@ -2783,7 +2781,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Marketplace <span class="group-count">(7)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-marketplace">
-  <h3><span class="m m-get">GET</span> <code>/v1/marketplace</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/marketplace</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/marketplace&quot; \
@@ -2795,7 +2793,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-marketplace-slug">
-  <h3><span class="m m-get">GET</span> <code>/v1/marketplace/:slug</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/marketplace/:slug</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/marketplace/&lt;slug&gt;&quot; \
@@ -2819,7 +2817,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-marketplace-catalog-json">
-  <h3><span class="m m-get">GET</span> <code>/v1/marketplace/catalog.json</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/marketplace/catalog.json</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/marketplace/catalog.json&quot; \
@@ -2857,7 +2855,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-marketplace-publish-request">
-  <h3><span class="m m-post">POST</span> <code>/v1/marketplace/publish-request</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/marketplace/publish-request</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/marketplace/publish-request&quot; \
@@ -2875,7 +2873,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Media <span class="group-count">(3)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-media-redact">
-  <h3><span class="m m-post">POST</span> <code>/v1/media/redact</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/media/redact</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/media/redact&quot; \
@@ -2967,7 +2965,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-models-cache">
-  <h3><span class="m m-get">GET</span> <code>/v1/models/cache</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/models/cache</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/models/cache&quot; \
@@ -2991,7 +2989,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-models-pull">
-  <h3><span class="m m-get">GET</span> <code>/v1/models/pull</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/models/pull</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/models/pull&quot; \
@@ -3007,7 +3005,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Moderations <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-moderations">
-  <h3><span class="m m-post">POST</span> <code>/v1/moderations</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span> <span class="route-stub">array-literal expansion</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/moderations</code> <span class="route-live">live</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/moderations&quot; \
@@ -3137,7 +3135,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-notifications-preferences">
-  <h3><span class="m m-get">GET</span> <code>/v1/notifications/preferences</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/notifications/preferences</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/notifications/preferences&quot; \
@@ -3149,7 +3147,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="PUT-v1-notifications-preferences">
-  <h3><span class="m m-put">PUT</span> <code>/v1/notifications/preferences</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-put">PUT</span> <code>/v1/notifications/preferences</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X PUT &quot;https://kolm.ai/v1/notifications/preferences&quot; \
@@ -3163,7 +3161,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-notifications-push-subscriptions">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/notifications/push-subscriptions</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/notifications/push-subscriptions</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/notifications/push-subscriptions&quot; \
@@ -3174,7 +3172,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-notifications-push-subscriptions">
-  <h3><span class="m m-get">GET</span> <code>/v1/notifications/push-subscriptions</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/notifications/push-subscriptions</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/notifications/push-subscriptions&quot; \
@@ -3186,7 +3184,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-notifications-push-subscriptions">
-  <h3><span class="m m-post">POST</span> <code>/v1/notifications/push-subscriptions</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/notifications/push-subscriptions</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/notifications/push-subscriptions&quot; \
@@ -3200,7 +3198,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-notifications-state">
-  <h3><span class="m m-get">GET</span> <code>/v1/notifications/state</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/notifications/state</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/notifications/state&quot; \
@@ -3212,7 +3210,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-notifications-test">
-  <h3><span class="m m-post">POST</span> <code>/v1/notifications/test</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/notifications/test</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/notifications/test&quot; \
@@ -3230,7 +3228,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Openrouter <span class="group-count">(2)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-openrouter-chat-completions">
-  <h3><span class="m m-post">POST</span> <code>/v1/openrouter/chat/completions</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/openrouter/chat/completions</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/openrouter/chat/completions&quot; \
@@ -3244,7 +3242,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-openrouter-v1-chat-completions">
-  <h3><span class="m m-post">POST</span> <code>/v1/openrouter/v1/chat/completions</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/openrouter/v1/chat/completions</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/openrouter/v1/chat/completions&quot; \
@@ -3274,7 +3272,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-opportunities-id-accept">
-  <h3><span class="m m-post">POST</span> <code>/v1/opportunities/:id/accept</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/opportunities/:id/accept</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/opportunities/&lt;id&gt;/accept&quot; \
@@ -3302,7 +3300,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-opportunities-id-ignore">
-  <h3><span class="m m-post">POST</span> <code>/v1/opportunities/:id/ignore</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/opportunities/:id/ignore</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/opportunities/&lt;id&gt;/ignore&quot; \
@@ -3418,7 +3416,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Plans <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Public surface. No auth header required. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-plans">
-  <h3><span class="m m-get">GET</span> <code>/v1/plans</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/plans</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/plans&quot; \
@@ -3434,7 +3432,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Pricing <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Public surface. No auth header required. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-pricing">
-  <h3><span class="m m-get">GET</span> <code>/v1/pricing</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/pricing</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/pricing&quot; \
@@ -3544,7 +3542,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-public-concepts-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/public/concepts/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/public/concepts/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/public/concepts/&lt;id&gt;&quot; \
@@ -3556,7 +3554,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-public-featured">
-  <h3><span class="m m-get">GET</span> <code>/v1/public/featured</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/public/featured</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/public/featured&quot; \
@@ -3660,7 +3658,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Receipts <span class="group-count">(2)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-receipts-hash-public">
-  <h3><span class="m m-get">GET</span> <code>/v1/receipts/:hash/public</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/receipts/:hash/public</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/receipts/&lt;hash&gt;/public&quot; \
@@ -3714,7 +3712,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-recipes-id-download">
-  <h3><span class="m m-get">GET</span> <code>/v1/recipes/:id/download</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/recipes/:id/download</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/recipes/&lt;id&gt;/download&quot; \
@@ -3780,7 +3778,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-recipes-id-stats">
-  <h3><span class="m m-get">GET</span> <code>/v1/recipes/:id/stats</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/recipes/:id/stats</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/recipes/&lt;id&gt;/stats&quot; \
@@ -3796,7 +3794,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Redact <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-redact">
-  <h3><span class="m m-post">POST</span> <code>/v1/redact</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/redact</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/redact&quot; \
@@ -3868,7 +3866,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Replay <span class="group-count">(2)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-replay">
-  <h3><span class="m m-post">POST</span> <code>/v1/replay</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/replay</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/replay&quot; \
@@ -3882,7 +3880,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-replay-preview">
-  <h3><span class="m m-get">GET</span> <code>/v1/replay/preview</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/replay/preview</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/replay/preview&quot; \
@@ -3898,7 +3896,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>OpenAI Responses <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-responses">
-  <h3><span class="m m-post">POST</span> <code>/v1/responses</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span> <span class="route-stub">array-literal expansion</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/responses</code> <span class="route-live">live</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/responses&quot; \
@@ -3916,7 +3914,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Run <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-run">
-  <h3><span class="m m-post">POST</span> <code>/v1/run</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/run</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/run&quot; \
@@ -3934,7 +3932,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Runtime <span class="group-count">(5)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-runtime-decide">
-  <h3><span class="m m-post">POST</span> <code>/v1/runtime/decide</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/runtime/decide</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/runtime/decide&quot; \
@@ -3948,7 +3946,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-runtime-decisions">
-  <h3><span class="m m-get">GET</span> <code>/v1/runtime/decisions</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/runtime/decisions</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/runtime/decisions&quot; \
@@ -3972,7 +3970,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="PUT-v1-runtime-policy">
-  <h3><span class="m m-put">PUT</span> <code>/v1/runtime/policy</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-put">PUT</span> <code>/v1/runtime/policy</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X PUT &quot;https://kolm.ai/v1/runtime/policy&quot; \
@@ -3986,7 +3984,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-runtime-replacement-stats">
-  <h3><span class="m m-get">GET</span> <code>/v1/runtime/replacement-stats</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/runtime/replacement-stats</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/runtime/replacement-stats&quot; \
@@ -4002,7 +4000,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Search <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-search">
-  <h3><span class="m m-post">POST</span> <code>/v1/search</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/search</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/search&quot; \
@@ -4064,7 +4062,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-session-logout">
-  <h3><span class="m m-post">POST</span> <code>/v1/session/logout</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/session/logout</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/session/logout&quot; \
@@ -4100,7 +4098,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Sign out <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-signout">
-  <h3><span class="m m-post">POST</span> <code>/v1/signout</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/signout</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/signout&quot; \
@@ -4136,7 +4134,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Sigstore <span class="group-count">(3)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Public surface. No auth header required. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-sigstore-attest">
-  <h3><span class="m m-post">POST</span> <code>/v1/sigstore/attest</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/sigstore/attest</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/sigstore/attest&quot; \
@@ -4150,7 +4148,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-sigstore-entry-logIndex">
-  <h3><span class="m m-get">GET</span> <code>/v1/sigstore/entry/:logIndex</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/sigstore/entry/:logIndex</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/sigstore/entry/&lt;logIndex&gt;&quot; \
@@ -4178,7 +4176,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Simulation <span class="group-count">(3)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-sim">
-  <h3><span class="m m-get">GET</span> <code>/v1/sim</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/sim</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/sim&quot; \
@@ -4190,7 +4188,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-sim-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/sim/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/sim/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/sim/&lt;id&gt;&quot; \
@@ -4232,7 +4230,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-simulations">
-  <h3><span class="m m-post">POST</span> <code>/v1/simulations</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/simulations</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/simulations&quot; \
@@ -4246,7 +4244,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-simulations-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/simulations/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/simulations/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/simulations/&lt;id&gt;&quot; \
@@ -4258,7 +4256,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-simulations-id-promote">
-  <h3><span class="m m-post">POST</span> <code>/v1/simulations/:id/promote</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/simulations/:id/promote</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/simulations/&lt;id&gt;/promote&quot; \
@@ -4292,7 +4290,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Specialists <span class="group-count">(7)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-specialists">
-  <h3><span class="m m-get">GET</span> <code>/v1/specialists</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/specialists</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/specialists&quot; \
@@ -4304,7 +4302,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-specialists-id">
-  <h3><span class="m m-get">GET</span> <code>/v1/specialists/:id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/specialists/:id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/specialists/&lt;id&gt;&quot; \
@@ -4316,7 +4314,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-specialists-id-run">
-  <h3><span class="m m-post">POST</span> <code>/v1/specialists/:id/run</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/specialists/:id/run</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/specialists/&lt;id&gt;/run&quot; \
@@ -4330,7 +4328,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-specialists-id-weights">
-  <h3><span class="m m-get">GET</span> <code>/v1/specialists/:id/weights</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/specialists/:id/weights</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/specialists/&lt;id&gt;/weights&quot; \
@@ -4356,7 +4354,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-specialists-train">
-  <h3><span class="m m-post">POST</span> <code>/v1/specialists/train</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/specialists/train</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/specialists/train&quot; \
@@ -4400,7 +4398,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="PUT-v1-storage-config">
-  <h3><span class="m m-put">PUT</span> <code>/v1/storage/config</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-put">PUT</span> <code>/v1/storage/config</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X PUT &quot;https://kolm.ai/v1/storage/config&quot; \
@@ -4414,7 +4412,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-storage-purge">
-  <h3><span class="m m-post">POST</span> <code>/v1/storage/purge</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/storage/purge</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/storage/purge&quot; \
@@ -4580,7 +4578,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>System <span class="group-count">(3)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Public surface. No auth header required. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-anthropic-v1-messages">
-  <h3><span class="m m-post">POST</span> <code>/anthropic/v1/messages</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/anthropic/v1/messages</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/anthropic/v1/messages&quot; \
@@ -4771,7 +4769,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Teams <span class="group-count">(12)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-teams">
-  <h3><span class="m m-get">GET</span> <code>/v1/teams</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/teams</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/teams&quot; \
@@ -4783,7 +4781,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-teams">
-  <h3><span class="m m-post">POST</span> <code>/v1/teams</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/teams</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/teams&quot; \
@@ -4797,7 +4795,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-teams-idOrSlug">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/teams/:idOrSlug</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/teams/:idOrSlug</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/teams/&lt;idOrSlug&gt;&quot; \
@@ -4808,7 +4806,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-teams-idOrSlug">
-  <h3><span class="m m-get">GET</span> <code>/v1/teams/:idOrSlug</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/teams/:idOrSlug</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/teams/&lt;idOrSlug&gt;&quot; \
@@ -4820,7 +4818,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="PATCH-v1-teams-idOrSlug">
-  <h3><span class="m m-patch">PATCH</span> <code>/v1/teams/:idOrSlug</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-patch">PATCH</span> <code>/v1/teams/:idOrSlug</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X PATCH &quot;https://kolm.ai/v1/teams/&lt;idOrSlug&gt;&quot; \
@@ -4834,7 +4832,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-teams-idOrSlug-invite">
-  <h3><span class="m m-post">POST</span> <code>/v1/teams/:idOrSlug/invite</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/teams/:idOrSlug/invite</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/teams/&lt;idOrSlug&gt;/invite&quot; \
@@ -4848,7 +4846,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-teams-idOrSlug-members-tenant-id">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/teams/:idOrSlug/members/:tenant_id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/teams/:idOrSlug/members/:tenant_id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/teams/&lt;idOrSlug&gt;/members/&lt;tenant_id&gt;&quot; \
@@ -4859,7 +4857,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="PATCH-v1-teams-idOrSlug-members-tenant-id">
-  <h3><span class="m m-patch">PATCH</span> <code>/v1/teams/:idOrSlug/members/:tenant_id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-patch">PATCH</span> <code>/v1/teams/:idOrSlug/members/:tenant_id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X PATCH &quot;https://kolm.ai/v1/teams/&lt;idOrSlug&gt;/members/&lt;tenant_id&gt;&quot; \
@@ -4873,7 +4871,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-teams-idOrSlug-transfer">
-  <h3><span class="m m-post">POST</span> <code>/v1/teams/:idOrSlug/transfer</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/teams/:idOrSlug/transfer</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/teams/&lt;idOrSlug&gt;/transfer&quot; \
@@ -4887,7 +4885,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-teams-invites-invite-id">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/teams/invites/:invite_id</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/teams/invites/:invite_id</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/teams/invites/&lt;invite_id&gt;&quot; \
@@ -4898,7 +4896,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-teams-invites-token">
-  <h3><span class="m m-get">GET</span> <code>/v1/teams/invites/:token</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/teams/invites/:token</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/teams/invites/&lt;token&gt;&quot; \
@@ -4910,7 +4908,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-teams-invites-token-accept">
-  <h3><span class="m m-post">POST</span> <code>/v1/teams/invites/:token/accept</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/teams/invites/:token/accept</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/teams/invites/&lt;token&gt;/accept&quot; \
@@ -4944,7 +4942,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Trace <span class="group-count">(9)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-trace-trace-id-chain">
-  <h3><span class="m m-get">GET</span> <code>/v1/trace/:trace_id/chain</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/trace/:trace_id/chain</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/trace/&lt;trace_id&gt;/chain&quot; \
@@ -4956,7 +4954,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-trace-trace-id-export">
-  <h3><span class="m m-get">GET</span> <code>/v1/trace/:trace_id/export</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/trace/:trace_id/export</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/trace/&lt;trace_id&gt;/export&quot; \
@@ -4980,7 +4978,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-trace-append">
-  <h3><span class="m m-post">POST</span> <code>/v1/trace/append</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/trace/append</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/trace/append&quot; \
@@ -5008,7 +5006,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-trace-translate">
-  <h3><span class="m m-post">POST</span> <code>/v1/trace/translate</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/trace/translate</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/trace/translate&quot; \
@@ -5022,7 +5020,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="GET-v1-trace-translate-detect">
-  <h3><span class="m m-get">GET</span> <code>/v1/trace/translate/detect</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/trace/translate/detect</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/trace/translate/detect&quot; \
@@ -5046,7 +5044,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="POST-v1-trace-verify">
-  <h3><span class="m m-post">POST</span> <code>/v1/trace/verify</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/trace/verify</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/trace/verify&quot; \
@@ -5126,7 +5124,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Tunnels <span class="group-count">(2)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-tunnels">
-  <h3><span class="m m-get">GET</span> <code>/v1/tunnels</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-get">GET</span> <code>/v1/tunnels</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/tunnels&quot; \
@@ -5138,7 +5136,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-route" id="DELETE-v1-tunnels-token">
-  <h3><span class="m m-delete">DELETE</span> <code>/v1/tunnels/:token</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-delete">DELETE</span> <code>/v1/tunnels/:token</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X DELETE &quot;https://kolm.ai/v1/tunnels/&lt;token&gt;&quot; \
@@ -5171,7 +5169,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <h2>Verify <span class="group-count">(2)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-verify">
-  <h3><span class="m m-post">POST</span> <code>/v1/verify</code> <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span></h3>
+  <h3><span class="m m-post">POST</span> <code>/v1/verify</code> <span class="route-live">live</span></h3>
   <p class="route-desc">No inline description in router.js. Path inferred from route file.</p>
   
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/verify&quot; \

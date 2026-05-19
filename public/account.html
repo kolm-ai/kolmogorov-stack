@@ -775,7 +775,7 @@
   });
 
   $('acct-delete').addEventListener('click', async function () {
-    var typed = prompt('This deactivates your account: API key is revoked, billing cancels, session clears. Concepts/versions/observations/artifacts remain in storage (full purge is target architecture; email dev@kolm.ai for an operator-run purge). To confirm, type:\n\n  DELETE my-org\n\nReplace my-org with your tenant name.');
+    var typed = prompt('This deactivates your account: API key is revoked, billing cancels, session clears. Concepts/versions/observations/artifacts remain in storage (email dev@kolm.ai for an operator-run purge). To confirm, type:\n\n  DELETE my-org\n\nReplace my-org with your tenant name.');
     if (!typed) return;
     try {
       var body = await KS.api('/v1/account/delete', {

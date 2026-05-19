@@ -277,7 +277,7 @@ kolm <span class="kw">bench</span> --reproduce <span class="arg">swebench-lite-n
       <li><b>HumanEval / MBPP.</b> Saturated. Frontier models clear 90%+ on both at single-turn baseline. There is no headroom for a prompt-assembler to demonstrate value, and any lift would be lost in evaluator noise. We ran them once at n=10 each, observed ceilings, and did not publish.</li>
     </ul>
 
-    <p>We also do not claim agentic-loop numbers. Every percentage on this site is a single-turn benchmark - one prompt, one response, one grade. Agentic harnesses (multi-turn tool use, planner + executor split, self-critique) layer on top of single-turn lifts in ways that depend heavily on the harness, and we have not yet shipped a harness we are willing to call ours.</p>
+    <p>We also do not claim agentic-loop numbers in the headline figures. Every percentage on this site is a single-turn benchmark - one prompt, one response, one grade. Agentic harnesses (multi-turn tool use, planner + executor split, self-critique) layer on top of single-turn lifts in ways that depend heavily on the harness; the kolm agent harness ships, but its numbers live under <code>kolm bench --agent</code> rather than the single-turn headline grids.</p>
 
     <h2 id="diagnose">If your number disagrees with ours.</h2>
     <p>SWE-bench has four common failure modes that look like "kolm is broken" but are upstream issues. Before reporting a discrepancy, check:</p>

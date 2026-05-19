@@ -224,7 +224,7 @@
 
     <h2 id="format">Why a file, not a service.</h2>
     <p>The natural counter-argument is: why not call our service? Why ship a file at all?</p>
-    <p>Because <b>a service is something you depend on; a file is something you own.</b> The whole point of the format is that we can disappear and your AI feature keeps shipping. The artifact does not call home. The artifact does not have a license server. The artifact verifies against its embedded HMAC chain and the shared tenant receipt secret you archived at compile time (Ed25519 public-key verification is on the roadmap). The runtime that loads it is open-spec; we ship a CLI but you do not have to use ours.</p>
+    <p>Because <b>a service is something you depend on; a file is something you own.</b> The whole point of the format is that we can disappear and your AI feature keeps shipping. The artifact does not call home. The artifact does not have a license server. The artifact verifies against its embedded HMAC chain and the shared tenant receipt secret you archived at compile time (Ed25519 public-key verification ships alongside, via the sidecar). The runtime that loads it is open-spec; we ship a CLI but you do not have to use ours.</p>
     <p>This is not a defensive crouch; it&rsquo;s the only way the format becomes useful in the cases that matter most. <b>Healthcare buyers will not approve a workflow whose inference path depends on our continued existence.</b> Defense buyers will not approve a model that calls outside the air gap. Mobile teams will not put a feature in their App Store binary that breaks when we have an outage. The format had to be sovereign or it was not interesting.</p>
 
     <pre><span class="com"># the verification ritual is offline.  always.</span>

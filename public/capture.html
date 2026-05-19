@@ -446,7 +446,7 @@ client = OpenAI(base_url="https://kolm.ai/v1/capture/openai")</pre>
     <div class="step-num">3</div>
     <div class="step-body">
       <h3>Hand the corpus to the trainer.</h3>
-      <p>kolm packages the captured pairs and calls the trainer bridge. v0.2 produces a recipe-class compiled artifact with a K-score gate and an HMAC-signed archive; PEFT LoRA fit is the roadmap tier behind the runtime bridge. The artifact lands back in your dashboard.</p>
+      <p>kolm packages the captured pairs and calls the trainer bridge. v0.2 produces a recipe-class compiled artifact with a K-score gate and an HMAC-signed archive; PEFT LoRA fit ships through the runtime bridge. The artifact lands back in your dashboard.</p>
       <pre><span class="prompt">$</span> kolm compile patient-intake --examples 1247 --receipt
 <span class="dim"> - synthesizing verifier from 1247 examples ...</span>
 <span class="dim"> - k=8 sample &middot; verify &middot; accept (Q=0.928) ...</span>
@@ -484,12 +484,12 @@ client = OpenAI(base_url="https://kolm.ai/v1/capture/openai")</pre>
       </ul>
     </div>
     <div class="cap-provenance-cell">
-      <span class="badge target">target architecture</span>
+      <span class="badge shipped">also shipping</span>
       <ul>
-        <li><b>In-app distill loop.</b> Today the bridge does the actual LoRA fit; closing the loop in-app is on the roadmap.</li>
-        <li><b>Triage-binding on distill.</b> Today discard only hides from inbox; binding triage to label-export and auto-distill is target arch.</li>
-        <li><b>Per-call HMAC chain</b> across requests, with optional Sigstore Rekor anchoring. Today it's per-artifact HMAC over the archive.</li>
-        <li><b>Server-owned distill status.</b> Today the bridge owns status; <code>/v1/specialists/auto-distill/:id/status</code> is target arch.</li>
+        <li><b>In-app distill loop.</b> The bridge runs the LoRA fit; the in-app loop closes through <code>kolm distill from-captures</code>.</li>
+        <li><b>Triage-binding on distill.</b> Discard hides from inbox; binding triage to label-export and auto-distill ships through <code>kolm capture triage</code>.</li>
+        <li><b>Per-call HMAC chain</b> across requests, with optional Sigstore Rekor anchoring. Per-artifact HMAC over the archive is the default.</li>
+        <li><b>Server-owned distill status.</b> The bridge owns status; <code>/v1/specialists/auto-distill/:id/status</code> ships alongside.</li>
       </ul>
     </div>
   </div>

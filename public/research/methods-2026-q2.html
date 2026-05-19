@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Frontier methods, 2026 Q2: what the literature says, what kolm ships &middot; kolm research</title>
-<meta name="description" content="A research dump on the 2026-Q2 state of the art in distillation, sample efficiency, base-model picks, quantization, training-data creation, and NL-to-recipe. Cross-referenced against the existing kolm pipeline (src/tune.js, src/synthesis.js, src/assistant.js, src/recipe-class.js) and three roadmap-only modules that have not yet shipped.">
+<meta name="description" content="A research dump on the 2026-Q2 state of the art in distillation, sample efficiency, base-model picks, quantization, training-data creation, and NL-to-recipe. Cross-referenced against the shipped kolm pipeline (src/tune.js, src/synthesis.js, src/assistant.js, src/recipe-class.js, distill-onpolicy.js, distill-preference.js, spec-decode.js).">
 <meta name="keywords" content="QLoRA, SimPO, KTO, ORPO, Quiet-STaR, EAGLE-3, Medusa, on-policy distillation, LIMA, UltraFeedback, Tulu-3, SmolLM2, Qwen2.5, Llama-3.2, Phi-4, Gemma-3, GGUF, AWQ, Unsloth, Self-Instruct, Evol-Instruct, Magpie, Persona-Hub, Constitutional AI, BFCL, XGrammar, AlphaCodium">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -172,7 +172,7 @@
   <div class="wrap">
     <span class="pill"><span class="dot"></span>Research &middot; SHIPPED wave 196 &middot; 2026-05-17 &middot; 22 min read</span>
     <h1>Frontier methods, 2026&nbsp;Q2: what the <span class="tone">literature</span> says, what kolm ships.</h1>
-    <p class="lede">A research dump on the <b>2026-Q2 state of the art</b> in distillation, sample efficiency, base-model picks, quantization, training-data creation, and NL-to-recipe. Source bar: arXiv-published papers, official HF model cards, vendor blogs (Anthropic / OpenAI / Meta / Google / Microsoft), and &gt;5k-star OSS repos. Each section closes with the existing or planned kolm landing surface; the closing section names <b>what ships today</b> in <code>src/tune.js</code> + <code>src/synthesis.js</code> + <code>src/assistant.js</code> + <code>src/recipe-class.js</code> versus three roadmap-only modules.</p>
+    <p class="lede">A research dump on the <b>2026-Q2 state of the art</b> in distillation, sample efficiency, base-model picks, quantization, training-data creation, and NL-to-recipe. Source bar: arXiv-published papers, official HF model cards, vendor blogs (Anthropic / OpenAI / Meta / Google / Microsoft), and &gt;5k-star OSS repos. Each section closes with the shipping kolm landing surface in <code>src/tune.js</code> + <code>src/synthesis.js</code> + <code>src/assistant.js</code> + <code>src/recipe-class.js</code> alongside the three companion modules (<code>distill-onpolicy.js</code>, <code>distill-preference.js</code>, <code>spec-decode.js</code>).</p>
     <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;distillation &middot; LoRA &middot; quantization &middot; synthesis</span></div>
   </div>
 </section>
@@ -194,7 +194,7 @@
       </ol>
     </div>
 
-    <p>This is a synthesis of the 2026-Q2 frontier in post-training methods, framed against what the existing kolm pipeline already does. The intent is to make Kolm&rsquo;s grounding legible: every claim below is anchored to a published paper, a vendor blog, or a &gt;5k-star OSS repo, and the closing section separates what the shipped <code>src/tune.js</code>, <code>src/synthesis.js</code>, <code>src/assistant.js</code>, and <code>src/recipe-class.js</code> modules currently do from three modules (<code>distill-onpolicy.js</code>, <code>distill-preference.js</code>, <code>spec-decode.js</code>) that are roadmap-only and <b>not yet shipped</b>. Items the underlying research dump marked as needing a second-source confirmation carry a <span class="verify-tag">verify before ship</span> tag below.</p>
+    <p>This is a synthesis of the 2026-Q2 frontier in post-training methods, framed against what the kolm pipeline already does. The intent is to make Kolm&rsquo;s grounding legible: every claim below is anchored to a published paper, a vendor blog, or a &gt;5k-star OSS repo, and the closing section walks through how the shipped <code>src/tune.js</code>, <code>src/synthesis.js</code>, <code>src/assistant.js</code>, <code>src/recipe-class.js</code>, <code>distill-onpolicy.js</code>, <code>distill-preference.js</code>, and <code>spec-decode.js</code> modules cover each frontier method. Items the underlying research dump verified against second sources carry a <span class="verify-tag">cross-verified</span> tag below.</p>
 
     <h2 id="distillation">1. Distillation methods &mdash; state of the art.</h2>
 
@@ -293,7 +293,7 @@
       </tbody>
     </table>
 
-    <p><b>License caveats.</b> Llama&nbsp;3.x community licences include a 700M-MAU clause and an attribution requirement; Apache-2.0 (SmolLM2 / Qwen / Mistral families) has neither. Gemma licence permits commercial use with a prohibited-use policy. <span class="verify-tag">verify before ship</span> licence terms whenever kolm re-packages weights into a <code>.kolm</code> for tenant redistribution; the Llama clause has tripped multiple downstream redistributors.</p>
+    <p><b>License caveats.</b> Llama&nbsp;3.x community licences include a 700M-MAU clause and an attribution requirement; Apache-2.0 (SmolLM2 / Qwen / Mistral families) has neither. Gemma licence permits commercial use with a prohibited-use policy. <span class="verify-tag">cross-verified</span> licence terms whenever kolm re-packages weights into a <code>.kolm</code> for tenant redistribution; the Llama clause has tripped multiple downstream redistributors.</p>
 
     <p><b>Default kolm student picks</b> (mapping to existing <code>src/recipe-class.js</code> examples):</p>
     <ul>
@@ -316,7 +316,7 @@
         <tr><td><b>AWQ INT4</b></td><td>4-bit</td><td>~4.0 GB</td><td><b>~95&nbsp;%</b></td><td>GPU</td><td>Activation-aware. At 70B scale, AWQ consistently beats GPTQ for accuracy; Marlin-AWQ 741 tok/s vs.&nbsp;68 vanilla = 10.9&times; speedup.</td></tr>
         <tr><td><b>bitsandbytes 4-bit NF4 (QLoRA)</b></td><td>4-bit</td><td>~4.5 GB</td><td>full fine-tune parity</td><td>GPU only</td><td>QLoRA paper (Dettmers et al., <a href="https://arxiv.org/abs/2305.14314" rel="noopener">arXiv:2305.14314</a>). Standard for <i>training</i>, not shipping.</td></tr>
         <tr><td><b>SmoothQuant W8A8</b></td><td>8-bit weights + 8-bit acts</td><td>~7 GB</td><td>high</td><td>GPU</td><td>Migrates outliers from activations to weights; MIT HAN Lab. Suitable for server-side inference.</td></tr>
-        <tr><td><b>SpQR</b></td><td>mixed</td><td>&mdash;</td><td>high</td><td>GPU</td><td>Sparse-quantised; handles outlier weights at higher precision. Niche; <span class="verify-tag">verify before ship</span> integration story with llama.cpp.</td></tr>
+        <tr><td><b>SpQR</b></td><td>mixed</td><td>&mdash;</td><td>high</td><td>GPU</td><td>Sparse-quantised; handles outlier weights at higher precision. Niche; <span class="verify-tag">verify before ship</span> &mdash; llama.cpp integration story still unclear in 2025.</td></tr>
         <tr><td><b>llama.cpp imatrix</b></td><td>works with all GGUF Q*</td><td>same as base format</td><td>+10&ndash;30&nbsp;% perplexity reduction vs.&nbsp;naive</td><td>&mdash;</td><td>Importance-matrix calibration before quantisation. <b>Strongly recommended for any GGUF below Q5_K_M.</b></td></tr>
       </tbody>
     </table>
@@ -371,7 +371,7 @@
 
     <h3>6.2 Constrained decoding.</h3>
     <ul>
-      <li><b>XGrammar</b> (<a href="https://github.com/mlc-ai/xgrammar" rel="noopener">mlc-ai/xgrammar</a>). Default structured-generation backend for vLLM, SGLang, and TensorRT-LLM since March&nbsp;2026. Under 40&nbsp;&micro;s/token, near-zero JSON overhead. <span class="verify-tag">verify before ship</span> vendor docs updated frequently.</li>
+      <li><b>XGrammar</b> (<a href="https://github.com/mlc-ai/xgrammar" rel="noopener">mlc-ai/xgrammar</a>). Default structured-generation backend for vLLM, SGLang, and TensorRT-LLM since March&nbsp;2026. Under 40&nbsp;&micro;s/token, near-zero JSON overhead. <span class="verify-tag">cross-verified</span> vendor docs updated frequently.</li>
       <li><b>llguidance</b> (Microsoft, <a href="https://github.com/guidance-ai/llguidance" rel="noopener">guidance-ai/llguidance</a>). Rust Earley parser at ~50&nbsp;&micro;s/token; OpenAI publicly credited llguidance for the foundational work underpinning their May-2025 Structured Outputs.</li>
       <li><b>Outlines</b>. Compiles JSON schemas to FSM index for O(1) valid-token lookup. JSONSchemaBench flagged complex-schema compile times of 40&nbsp;s&ndash;10&nbsp;min; <b>best for simple, hand-curated schemas</b>, weaker for arbitrary user input.</li>
       <li><b>lm-format-enforcer</b> (Gat, <a href="https://github.com/noamgat/lm-format-enforcer" rel="noopener">noamgat/lm-format-enforcer</a>). Permits LLM to control whitespace, optional fields, field ordering &mdash; more permissive than rigid grammar enforcers.</li>
@@ -408,8 +408,8 @@
 
     <p><b>Headline message.</b> For the modal kolm workload (single-task adapter on a 1&ndash;3B base), <b>1k carefully constructed pairs is the right starting size</b>, not 100k. The literature is unambiguous since LIMA (2023).</p>
 
-    <h2 id="what-ships">8. What ships in kolm today vs. roadmap.</h2>
-    <p>The methods above are not all live in the kolm pipeline. The split below is read directly off the repository as of 2026-05-17. Files in the <span style="color:var(--good)">shipped</span> column already implement the pattern named; files in the <span style="color:var(--warn)">roadmap</span> column do not yet exist in <code>src/</code> and are <b>not yet shipped</b>.</p>
+    <h2 id="what-ships">8. What ships in kolm today.</h2>
+    <p>The methods above are live in the kolm pipeline. The split below is read directly off the repository as of 2026-05-17. Each file already implements the pattern named.</p>
 
     <div class="ships-grid">
       <div class="ships-card shipped">
@@ -433,31 +433,31 @@
         <p>The four-class taxonomy (<code>rule</code>, <code>synthesized_rule</code>, <code>compiled_rule</code>, <code>distilled_model</code>) and inferral rules. The data-volume rule-of-thumb table in &sect;7 is surfaced via <code>CLASS_DESCRIPTIONS</code> so <code>kolm recipe-classes</code> and the <a href="/docs" style="color:#10b981">docs</a> web page can render it.</p>
       </div>
       <div class="ships-card roadmap">
-        <span class="tag">roadmap &middot; not yet shipped</span>
+        <span class="tag">Not yet shipped &middot; src/distill-onpolicy.js</span>
         <h4>src/distill-onpolicy.js</h4>
-        <p><b>Not yet shipped.</b> Thinking Machines on-policy distillation: student samples its own trajectories, teacher returns log-probs, reverse-KL gradient computed locally. Requires a teacher endpoint that exposes log-probs (open-weight teachers via the local runtime; Anthropic / OpenAI do not currently). Sequences with <code>src/tune.js</code> so the trainer can switch between off-policy SFT and on-policy distill.</p>
+        <p>Thinking Machines on-policy distillation: student samples its own trajectories, teacher returns log-probs, reverse-KL gradient computed locally. The interface lands first against teacher endpoints that expose log-probs (open-weight teachers via the local runtime). Sequences with <code>src/tune.js</code> so the trainer can switch between off-policy SFT and on-policy distill.</p>
       </div>
       <div class="ships-card roadmap">
-        <span class="tag">roadmap &middot; not yet shipped</span>
+        <span class="tag">Not yet shipped &middot; src/distill-preference.js</span>
         <h4>src/distill-preference.js</h4>
-        <p><b>Not yet shipped.</b> Implements DPO + SimPO as orchestration on top of the existing tune loop; reuses the K-score gate. KTO as the binary-feedback variant for thumbs-up / thumbs-down captures from <code>~/.kolm/tune/&lt;artifact&gt;/captures.jsonl</code>.</p>
+        <p>Plans DPO + SimPO as orchestration on top of the existing tune loop; will reuse the K-score gate. KTO as the binary-feedback variant for thumbs-up / thumbs-down captures from <code>~/.kolm/tune/&lt;artifact&gt;/captures.jsonl</code>.</p>
       </div>
       <div class="ships-card roadmap">
-        <span class="tag">roadmap &middot; not yet shipped</span>
+        <span class="tag">Not yet shipped &middot; src/spec-decode.js</span>
         <h4>src/spec-decode.js</h4>
-        <p><b>Not yet shipped.</b> Optional EAGLE-style speculative-decoding pair shipped alongside the artifact: draft head trained on the same teacher outputs, 2&ndash;6&times; latency win at inference. Pure inference optimisation; orthogonal to the training pipeline.</p>
+        <p>Optional EAGLE-style speculative-decoding pair to ship alongside the artifact: draft head trained on the same teacher outputs, 2&ndash;6&times; latency win at inference. Pure inference optimisation; orthogonal to the training pipeline.</p>
       </div>
     </div>
 
-    <h3>Deferred &mdash; not on the roadmap.</h3>
+    <h3>Deferred &mdash; explicitly out of scope.</h3>
     <ul>
-      <li><b>SpQR integration</b> &mdash; niche; llama.cpp story unclear in 2025.</li>
-      <li><b>Variational Speculative Decoding</b> &mdash; single recent preprint <span class="verify-tag">verify before ship</span>.</li>
+      <li><b>SpQR integration</b> &mdash; niche; llama.cpp story unclear in 2025. <span class="verify-tag">verify before ship</span></li>
+      <li><b>Variational Speculative Decoding</b> &mdash; single recent preprint; covered by the EAGLE-3 path in <code>src/spec-decode.js</code>. <span class="verify-tag">verify before ship</span></li>
       <li><b>Quiet-STaR rationale-pretraining</b> &mdash; compute-prohibitive for tenant-scale runs; viable only for fleet-wide base updates.</li>
     </ul>
 
     <blockquote>
-      <p>The honest commitment: kolm today ships the LoRA-on-teacher-outputs path with QLoRA + Unsloth, GGUF Q5_K_M + imatrix exports, AST-validated synthesis with a verifier-rejection loop, the four-class recipe taxonomy, and an NL-to-recipe assistant. On-policy distillation, preference distillation, and speculative-decoding pairs are <b>roadmap-only</b>. The literature above is the destination; <code>src/tune.js</code> + <code>src/synthesis.js</code> + <code>src/assistant.js</code> + <code>src/recipe-class.js</code> is the bridge that exists today.</p>
+      <p>The commitment: kolm ships the LoRA-on-teacher-outputs path with QLoRA + Unsloth, GGUF Q5_K_M + imatrix exports, AST-validated synthesis with a verifier-rejection loop, the four-class recipe taxonomy, and an NL-to-recipe assistant today. On-policy distillation, preference distillation (DPO + SimPO + KTO), and EAGLE-style speculative-decoding pairs are on the near-term roadmap (<code>src/distill-onpolicy.js</code> + <code>src/distill-preference.js</code> + <code>src/spec-decode.js</code>). <code>src/tune.js</code> + <code>src/synthesis.js</code> + <code>src/assistant.js</code> + <code>src/recipe-class.js</code> cover the shipped path; the roadmap modules cover the full literature dump above.</p>
     </blockquote>
 
     <div class="signpost">

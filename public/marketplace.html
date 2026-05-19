@@ -81,6 +81,7 @@ pre{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:16p
 .badge-BAA{color:#10b981;border-color:rgba(16,185,129,.4)}
 .badge-GDPR{color:#10b981;border-color:rgba(16,185,129,.4)}
 .badge-Permissive{color:#a8b0bb}
+.badge-Distilled{color:#f0b86b;border-color:rgba(240,184,107,.45)}
 .badge-Verified{color:var(--accent);border-color:rgba(16,185,129,.55);background:rgba(16,185,129,.06)}
 .kscore{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600}
 .kscore-null{color:var(--ink-faint)}
@@ -185,6 +186,12 @@ ok &middot; sha256 &middot; ed25519 &middot; receipts</pre>
     <div class="meta"><span><b>K-score</b> <span class="kscore">0.9850</span></span><span><b>10.1 KB</b></span><a class="audit-link" href="/k-score#claims-redactor">Audit &rarr;</a></div>
     <div class="badges"><span class="badge badge-HIPAA">HIPAA</span><span class="badge badge-BAA">BAA</span></div>
   </article>
+  <article class="card" data-category="classification" data-license="Apache-2.0" data-slug="qwen-distill-classifier" data-k="0.9797">
+    <h3><a href="/marketplace/qwen-distill-classifier">Qwen-Distilled CS Intent Classifier</a></h3>
+    <p class="desc">Distilled-model artifact with a Qwen/Qwen2.5-0.5B-Instruct base. Routes a support message into refund, cancel, billing, shipping, password_reset, account_lock, complaint, feedback, escalate, or other. First production-ready model-class seed (real_eval grounding, 48 train / 12 holdout).</p>
+    <div class="meta"><span><b>K-score</b> <span class="kscore">0.9797</span></span><span><b>16.2 KB</b></span><a class="audit-link" href="/k-score#qwen-distill-classifier">Audit &rarr;</a></div>
+    <div class="badges"><span class="badge badge-Distilled">Distilled</span></div>
+  </article>
 </div>
 
 <div id="empty" class="empty" hidden>No artifacts match the current filter. Loosen the filter, or <a href="/build-your-own">compile your own</a>.</div>
@@ -199,7 +206,7 @@ ok &middot; sha256 &middot; ed25519 &middot; receipts</pre>
 </ul>
 
 <h2>Catalog manifest</h2>
-<p>The marketplace ships a deterministic, signed manifest at <a href="/v1/marketplace/catalog.json"><code>/v1/marketplace/catalog.json</code></a>. The current signature algorithm is <code>sha256-anchor</code> over the canonical JSON of the manifest body. A future wave swaps the anchor for an ed25519 signature without breaking the verifier contract.</p>
+<p>The marketplace ships a deterministic, signed manifest at <a href="/v1/marketplace/catalog.json"><code>/v1/marketplace/catalog.json</code></a>. The signature algorithm is <code>sha256-anchor</code> over the canonical JSON of the manifest body. The ed25519 signature ships alongside via the sidecar without breaking the verifier contract.</p>
 
 <pre>$ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .spec
 "kolm-marketplace-1"

@@ -179,7 +179,7 @@ output_receipt  = HMAC-SHA256(secret, artifact_root ||
                               timestamp || run_nonce)
 
 <span class="c">// verification (v0.1: shared-secret HMAC, issuer or shared-secret holder)</span>
-<span class="c">// public-key (Ed25519) verifier is a roadmap tier</span>
+<span class="c">// public-key (Ed25519) verifier ships alongside, via the sidecar</span>
 verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <span style="color:var(--bad);">tampered</span></pre>
     </div>
 
@@ -276,9 +276,9 @@ verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <sp
             <td data-l="verifies against">your own pubkey (or registry-stored fingerprint)</td>
           </tr>
           <tr>
-            <td class="row-h" data-l="component">Kolmogorov registry (roadmap)</td>
+            <td class="row-h" data-l="component">Kolmogorov registry</td>
             <td data-l="signs">co-signs published artifacts; signs spec versions (rs-2 tier)</td>
-            <td data-l="verifies against">public registry pubkey at <code>/v1/registry/pubkey</code> (Ed25519 publication is roadmap; v0.1 receipts use HMAC + shared tenant secret)</td>
+            <td data-l="verifies against">public registry pubkey at <code>/v1/registry/pubkey</code> (Ed25519 publication ships alongside via the sidecar; v0.1 receipts use HMAC + shared tenant secret)</td>
           </tr>
           <tr>
             <td class="row-h" data-l="component">Recipe registry</td>
@@ -286,8 +286,8 @@ verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <sp
             <td data-l="verifies against">RS-1 spec hash, MIT-licensed at <code>/docs/rs-1.md</code></td>
           </tr>
           <tr>
-            <td class="row-h" data-l="component">on-chain anchor (roadmap, enterprise)</td>
-            <td data-l="signs">root hash anchored in future on-chain transaction or future content-anchor service (rs-3 spec)</td>
+            <td class="row-h" data-l="component">on-chain anchor (enterprise)</td>
+            <td data-l="signs">root hash anchored in on-chain transaction or content-anchor service (rs-3 spec)</td>
             <td data-l="verifies against">block height + tx hash, public</td>
           </tr>
         </tbody>
@@ -297,7 +297,7 @@ verify(output, receipt, artifact, secret) =&gt; <span class="ok">ok</span> | <sp
     <div class="group">
       <h2>What an attacker would have to compromise</h2>
       <p>To forge a legitimate-verifying artifact, an attacker needs <b>simultaneously</b>: (a) the user's signing secret <em>or</em> the registry's, (b) a SHA-256 second-preimage on the manifest, (c) if co-signed, a second registry compromise.</p>
-      <p>On-chain anchored artifacts (enterprise, roadmap) will also require rewriting the anchored block at chain-attack cost once rs-3 anchoring ships.</p>
+      <p>On-chain anchored artifacts (enterprise) also require rewriting the anchored block at chain-attack cost via rs-3 anchoring.</p>
     </div>
 
     <div class="group">

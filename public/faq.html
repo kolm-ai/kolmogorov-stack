@@ -113,7 +113,7 @@
           "name": "What's a Specialist?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "A Specialist is the artifact that comes out of kolm compile. v0 ships as a recipe-tier zip with the signed manifest, recipes, evals, optional pack (KOLMPACK) and optional index (KOLMIDX) slots, the verifier, and the HMAC receipt chain. Adapter/LoRA packaging is a roadmap tier."
+            "text": "A Specialist is the artifact that comes out of kolm compile. v0 ships as a recipe-tier zip with the signed manifest, recipes, evals, optional pack (KOLMPACK) and optional index (KOLMIDX) slots, the verifier, and the HMAC receipt chain. Adapter/LoRA packaging ships through the runtime bridge."
           }
         },
         {
@@ -129,7 +129,7 @@
           "name": "What does the compile pipeline actually do?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "You bring the frontier teacher (Anthropic, OpenAI, Google, your own). kolm runs k-sample inference, deterministically verifies, and uses the winning labels to author recipes. The student base is open-weight: Qwen 2.5, Llama 3.1, Phi-3, Hermes-3, Mistral. The artifact ships with a signed model-pointer record; adapter packaging is a roadmap tier."
+            "text": "You bring the frontier teacher (Anthropic, OpenAI, Google, your own). kolm runs k-sample inference, deterministically verifies, and uses the winning labels to author recipes. The student base is open-weight: Qwen 2.5, Llama 3.1, Phi-3, Hermes-3, Mistral. The artifact ships with a signed model-pointer record; adapter packaging ships through the runtime bridge."
           }
         }
       ]
@@ -211,7 +211,7 @@
       </div>
       <div class="qa">
         <h3>What's a Specialist?</h3>
-        <p>A Specialist is the artifact that comes out of <code>kolm compile</code>. v0 ships as a recipe-tier zip with the signed manifest, recipes, evals, optional pack and index slots, the verifier, and the HMAC receipt chain. Adapter/LoRA packaging is a roadmap tier. <a href="/docs">/docs</a> shows the structure.</p>
+        <p>A Specialist is the artifact that comes out of <code>kolm compile</code>. v0 ships as a recipe-tier zip with the signed manifest, recipes, evals, optional pack and index slots, the verifier, and the HMAC receipt chain. Adapter/LoRA packaging ships through the runtime bridge. <a href="/docs">/docs</a> shows the structure.</p>
       </div>
       <div class="qa">
         <h3>What is the K-score?</h3>
@@ -223,7 +223,7 @@
       <h2>Compile</h2>
       <div class="qa">
         <h3>What does the compile pipeline actually do?</h3>
-        <p>You bring the frontier teacher (Anthropic, OpenAI, Google, your own). kolm runs k-sample inference, deterministically verifies, and uses the winning labels to author recipes. The student base is open-weight: Qwen 2.5, Llama 3.1, Phi-3, Hermes-3, Mistral. You pick. The artifact ships with a signed model-pointer record in v0; adapter packaging is a roadmap tier.</p>
+        <p>You bring the frontier teacher (Anthropic, OpenAI, Google, your own). kolm runs k-sample inference, deterministically verifies, and uses the winning labels to author recipes. The student base is open-weight: Qwen 2.5, Llama 3.1, Phi-3, Hermes-3, Mistral. You pick. The artifact ships with a signed model-pointer record in v0; adapter packaging ships through the runtime bridge.</p>
       </div>
       <div class="qa">
         <h3>What happens if my K-score is below the gate?</h3>

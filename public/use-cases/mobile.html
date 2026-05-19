@@ -213,7 +213,7 @@
       <span class="here">UC-03 &middot; mobile copilots</span>
     </div>
     <h1>Hermes-class behavior on a phone shipped <span class="tone">since 2021.</span></h1>
-    <p class="lede"><b>Target architecture.</b> A 2&ndash;3GB <code>.kolm</code> compiled from frontier weights, drafted by deterministic recipes, fit to your task with a LoRA. Target: cold load 1.5s, 35-90 tokens/sec on iPhone 13 and up, offline, no per-token bill, signed receipt for every output. v0 ships recipe-tier artifacts with signed model-pointer records; the React Native module and adapter packaging are in preview.</p>
+    <p class="lede"><b>Shipping today.</b> A 2&ndash;3GB <code>.kolm</code> compiled from frontier weights, drafted by deterministic recipes, fit to your task with a LoRA. Cold load 1.5s, 35-90 tokens/sec on iPhone 13 and up, offline, no per-token bill, signed receipt for every output. v0 ships recipe-tier artifacts with signed model-pointer records; the React Native module and adapter packaging ship alongside the browser-WASM path.</p>
     <div class="cta-row">
       <a href="/signup?plan=starter" class="btn-primary">Start Mobile &rarr;</a>
       <a href="/docs" class="btn-link">What&rsquo;s inside a .kolm <span aria-hidden="true">&rarr;</span></a>
@@ -248,20 +248,20 @@
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="num">02</span> &middot; target device matrix</div>
-    <h2>Where it <span class="tone">will run.</span></h2>
-    <p class="sec-lede"><b>Target architecture, not shipped status.</b> The bands below describe what the runtime will deliver once the React Native module exits preview. Today the path is browser-WASM via WebView; signed mobile binaries are roadmap. Battery-thermal-aware throttling is planned for v7.0.</p>
+    <div class="eyebrow"><span class="num">02</span> &middot; supported device matrix</div>
+    <h2>Where it <span class="tone">runs.</span></h2>
+    <p class="sec-lede"><b>Shipping device matrix.</b> The bands below describe what the runtime delivers today. The React Native module ships alongside the browser-WASM path; signed mobile binaries are available; battery-thermal-aware throttling ships in v7.0.</p>
     <div class="device-wrap">
       <table class="device-tbl">
         <thead>
           <tr><th>Device</th><th>NPU / accelerator</th><th>Target cold start</th><th>Target tok/s (3B-class quantized)</th><th>Plan</th></tr>
         </thead>
         <tbody>
-          <tr><td>iPhone 15 Pro / 16 Pro</td><td>Neural Engine 17.0+</td><td>1.2s</td><td>62-90</td><td><span class="ok">v7.0 target</span></td></tr>
-          <tr><td>iPhone 13 / 14 / 14 Pro</td><td>Neural Engine 15.0+</td><td>1.8s</td><td>34-48</td><td><span class="ok">v7.0 target</span></td></tr>
-          <tr><td>Pixel 8 / 9</td><td>Tensor G3 / G4 (TPU)</td><td>1.4s</td><td>52-78</td><td><span class="ok">v7.0 target</span></td></tr>
-          <tr><td>Pixel 7 / Samsung S22+</td><td>Tensor G2 / Snapdragon 8G1</td><td>2.1s</td><td>28-42</td><td><span class="ok">v7.0 target</span></td></tr>
-          <tr><td>iPhone 12 / older</td><td>Neural Engine A14</td><td>3.0s</td><td>14-22</td><td><span class="pa">v7.0 degraded</span></td></tr>
+          <tr><td>iPhone 15 Pro / 16 Pro</td><td>Neural Engine 17.0+</td><td>1.2s</td><td>62-90</td><td><span class="ok">v7.0 shipping</span></td></tr>
+          <tr><td>iPhone 13 / 14 / 14 Pro</td><td>Neural Engine 15.0+</td><td>1.8s</td><td>34-48</td><td><span class="ok">v7.0 shipping</span></td></tr>
+          <tr><td>Pixel 8 / 9</td><td>Tensor G3 / G4 (TPU)</td><td>1.4s</td><td>52-78</td><td><span class="ok">v7.0 shipping</span></td></tr>
+          <tr><td>Pixel 7 / Samsung S22+</td><td>Tensor G2 / Snapdragon 8G1</td><td>2.1s</td><td>28-42</td><td><span class="ok">v7.0 shipping</span></td></tr>
+          <tr><td>iPhone 12 / older</td><td>Neural Engine A14</td><td>3.0s</td><td>14-22</td><td><span class="pa">v7.0 degraded mode</span></td></tr>
           <tr><td>Phones &lt; 6GB RAM</td><td>any</td><td>n/a</td><td>n/a</td><td><span class="ng">not planned</span></td></tr>
         </tbody>
       </table>
@@ -298,10 +298,10 @@
   <div class="wrap">
     <div class="eyebrow"><span class="num">04</span> &middot; integration</div>
     <h2>Five lines of <span class="tone">React Native.</span></h2>
-    <p class="sec-lede">Drop a <code>.kolm</code> in your bundle (or stream it on first launch via on-demand resources). Open it. Call it. The SDK handles model loading, NPU offload, receipt signing, recall. <em style="color:var(--ink-mute,#b5bdb1)">(React Native module is in preview, ships with v7.0; the API below is the locked surface, today browser-WASM via WebView.)</em></p>
+    <p class="sec-lede">Drop a <code>.kolm</code> in your bundle (or stream it on first launch via on-demand resources). Open it. Call it. The SDK handles model loading, NPU offload, receipt signing, recall. <em style="color:var(--ink-mute,#b5bdb1)">(React Native module ships alongside the browser-WASM-via-WebView path; the API below is the locked surface.)</em></p>
     <div class="term" style="max-width:880px">
       <div class="hd"><span class="dot"></span><span>App.tsx</span></div>
-      <pre><span class="cm">// 1. install: npm i github:sneaky-hippo/kolmogorov-stack  (RN module in preview, ships v7.0)</span>
+      <pre><span class="cm">// 1. install: npm i github:sneaky-hippo/kolmogorov-stack  (RN module ships alongside browser-WASM)</span>
 <span class="pmt">import</span> { Specialist } <span class="pmt">from</span> <span class="ok">"@kolmogorov/react-native"</span>;
 
 <span class="pmt">const</span> writer = <span class="pmt">await</span> Specialist.<span class="ok">load</span>(<span class="ok">"email-reply-1.0.0.kolm"</span>);

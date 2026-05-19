@@ -2,8 +2,8 @@
  * sdk/c/kolm.h — kolm C SDK (single header, libcurl-backed).
  *
  * Drop this file into your project, link against libcurl, and you have a
- * working client for the kolm HTTP surface — /v1/whoami, /v1/health,
- * /v1/capture/log, /v1/intent/ask, /v1/verify/:cid, /v1/changelog.
+ * working client for the kolm HTTP surface — account, marketplace, recipes,
+ * specialists, search, capture, intent, verify, changelog, health, whoami.
  *
  * Build (POSIX):
  *   cc -DKOLM_IMPLEMENTATION -o kolm-cli kolm-cli.c -lcurl
@@ -18,7 +18,7 @@
  *
  *   int main(void) {
  *     kolm_client_t *c = kolm_client_new("https://kolm.ai", getenv("KOLM_API_KEY"));
- *     kolm_response_t r = kolm_get(c, "/v1/whoami");
+ *     kolm_response_t r = kolm_whoami(c);
  *     if (r.status == 200) printf("whoami: %s\n", r.body);
  *     kolm_response_free(&r);
  *     kolm_client_free(c);
@@ -26,9 +26,14 @@
  *
  * Honesty contract:
  *   - kolm_response_t.status is the literal HTTP status integer.
- *   - kolm_response_t.body is a NUL-terminated C string (zero-copy of curl's
- *     receive buffer). Free with kolm_response_free.
+ *   - kolm_response_t.body is a NUL-terminated C string (the raw response
+ *     bytes followed by a sentinel NUL). Free with kolm_response_free.
+ *   - kolm_response_t.body_len is the true byte count of the response. For
+ *     binary payloads (marketplace .kolm downloads) you MUST iterate with
+ *     body_len because the bytes can contain embedded NULs.
  *   - On network failure status is 0 and body is NULL.
+ *   - 4xx and 5xx are NOT errors — they are returned in the envelope so the
+ *     caller can inspect status before parsing. The SDK never retries silently.
  *   - JSON is returned RAW — no parser is bundled. Pair with cJSON / jansson
  *     / json-c if you need structured access.
  */
@@ -74,6 +79,45 @@ kolm_response_t kolm_intent_ask(kolm_client_t *c, const char *prompt);
 /* items_json: a JSON array string like [{"input":"...","output":"..."}].
  * namespace may be NULL (server defaults to "default"). */
 kolm_response_t kolm_capture_log(kolm_client_t *c, const char *namespace_, const char *items_json);
+
+/* Account & auth.
+ * kolm_signup is wired to /v1/signup (the live route). The Node + Rust SDKs
+ * agree; an /v1/auth/signup alias does not exist on the server. name may be
+ * NULL. */
+kolm_response_t kolm_account   (kolm_client_t *c);
+kolm_response_t kolm_signup    (kolm_client_t *c, const char *email, const char *name);
+kolm_response_t kolm_rotate_key(kolm_client_t *c);
+
+/* Marketplace.
+ * - kolm_marketplace_list: q and category may both be NULL.
+ * - kolm_marketplace_download returns BINARY .kolm bytes in r.body. The buffer
+ *   is NUL-terminated by the SDK as a courtesy but the payload itself can
+ *   contain embedded zeros — iterate using r.body_len, not strlen. */
+kolm_response_t kolm_marketplace_list    (kolm_client_t *c, const char *q, const char *category);
+kolm_response_t kolm_marketplace_get     (kolm_client_t *c, const char *slug);
+kolm_response_t kolm_marketplace_download(kolm_client_t *c, const char *slug);
+
+/* Recipes.
+ * - q, tag may be NULL; limit <= 0 omits the parameter (server picks default).
+ * - kolm_recipe_run takes a JSON object string like {"input":"hello"}; the SDK
+ *   does NOT validate it. */
+kolm_response_t kolm_recipe_list (kolm_client_t *c, const char *q, const char *tag, int limit);
+kolm_response_t kolm_recipe_get  (kolm_client_t *c, const char *id);
+kolm_response_t kolm_recipe_stats(kolm_client_t *c, const char *id);
+kolm_response_t kolm_recipe_run  (kolm_client_t *c, const char *id, const char *json_input);
+
+/* Search.
+ * k <= 0 falls back to the server default (currently 10). */
+kolm_response_t kolm_search(kolm_client_t *c, const char *query, int k);
+
+/* Specialists.
+ * kolm_specialist_train posts to /v1/specialists/train (the working route).
+ * json_req is a JSON object string the caller composes verbatim — see
+ * SpecialistTrainRequest in the Node SDK for the shape. */
+kolm_response_t kolm_specialist_list (kolm_client_t *c);
+kolm_response_t kolm_specialist_get  (kolm_client_t *c, const char *id);
+kolm_response_t kolm_specialist_run  (kolm_client_t *c, const char *id, const char *json_input);
+kolm_response_t kolm_specialist_train(kolm_client_t *c, const char *json_req);
 
 void kolm_response_free(kolm_response_t *r);
 
@@ -241,6 +285,34 @@ kolm_response_t kolm_changelog(kolm_client_t *c, int limit) {
   return kolm_get(c, path);
 }
 
+/* Minimal RFC 3986 percent-encoder for URL components (query values + path
+ * segments). Unreserved set is [A-Za-z0-9-._~]; everything else is %HH.
+ * Returns a malloc'd buffer the caller must free, or NULL on OOM. */
+static char *kolm__url_escape(const char *s) {
+  if (!s) return kolm__strdup("");
+  static const char hex[] = "0123456789ABCDEF";
+  size_t n = strlen(s);
+  char *out = (char*)malloc(n * 3 + 1);
+  if (!out) return NULL;
+  size_t j = 0;
+  for (size_t i = 0; i < n; i++) {
+    unsigned char c = (unsigned char)s[i];
+    int safe = (c >= 'A' && c <= 'Z')
+            || (c >= 'a' && c <= 'z')
+            || (c >= '0' && c <= '9')
+            || c == '-' || c == '_' || c == '.' || c == '~';
+    if (safe) {
+      out[j++] = (char)c;
+    } else {
+      out[j++] = '%';
+      out[j++] = hex[(c >> 4) & 0xF];
+      out[j++] = hex[c & 0xF];
+    }
+  }
+  out[j] = 0;
+  return out;
+}
+
 /* Minimal JSON string escaper — just enough for prompt + namespace literals.
  * Returns a malloc'd buffer the caller must free. */
 static char *kolm__json_escape(const char *s) {
@@ -294,6 +366,239 @@ kolm_response_t kolm_capture_log(kolm_client_t *c, const char *namespace_, const
   r = kolm_post(c, "/v1/capture/log", body);
   free(esc_ns); free(body);
   return r;
+}
+
+/* ---------- Account & auth ---------- */
+
+kolm_response_t kolm_account(kolm_client_t *c) {
+  return kolm_get(c, "/v1/account");
+}
+
+kolm_response_t kolm_signup(kolm_client_t *c, const char *email, const char *name) {
+  kolm_response_t r = { 0, NULL, 0 };
+  char *esc_email = kolm__json_escape(email ? email : "");
+  if (!esc_email) return r;
+  char *esc_name = kolm__json_escape(name ? name : "");
+  if (!esc_name) { free(esc_email); return r; }
+  /* Always send both keys; "name" as "" is fine — server treats it as optional. */
+  size_t need = strlen(esc_email) + strlen(esc_name) + 64;
+  char *body = (char*)malloc(need);
+  if (!body) { free(esc_email); free(esc_name); return r; }
+  if (name) {
+    snprintf(body, need, "{\"email\":\"%s\",\"name\":\"%s\"}", esc_email, esc_name);
+  } else {
+    snprintf(body, need, "{\"email\":\"%s\"}", esc_email);
+  }
+  r = kolm_post(c, "/v1/signup", body);
+  free(esc_email); free(esc_name); free(body);
+  return r;
+}
+
+kolm_response_t kolm_rotate_key(kolm_client_t *c) {
+  /* The server treats rotate-key as a no-body POST (an empty {} works too). */
+  return kolm_post(c, "/v1/account/rotate-key", "{}");
+}
+
+/* ---------- Marketplace ---------- */
+
+kolm_response_t kolm_marketplace_list(kolm_client_t *c, const char *q, const char *category) {
+  kolm_response_t r = { 0, NULL, 0 };
+  char *esc_q = NULL, *esc_cat = NULL;
+  if (q) { esc_q = kolm__url_escape(q); if (!esc_q) return r; }
+  if (category) {
+    esc_cat = kolm__url_escape(category);
+    if (!esc_cat) { free(esc_q); return r; }
+  }
+  size_t need = 32
+              + (esc_q ? strlen(esc_q) + 4 : 0)
+              + (esc_cat ? strlen(esc_cat) + 12 : 0);
+  char *path = (char*)malloc(need);
+  if (!path) { free(esc_q); free(esc_cat); return r; }
+  size_t p = 0;
+  p += (size_t)snprintf(path + p, need - p, "/v1/marketplace");
+  int first = 1;
+  if (esc_q) {
+    p += (size_t)snprintf(path + p, need - p, "%cq=%s", first ? '?' : '&', esc_q);
+    first = 0;
+  }
+  if (esc_cat) {
+    p += (size_t)snprintf(path + p, need - p, "%ccategory=%s", first ? '?' : '&', esc_cat);
+    first = 0;
+  }
+  r = kolm_get(c, path);
+  free(esc_q); free(esc_cat); free(path);
+  return r;
+}
+
+kolm_response_t kolm_marketplace_get(kolm_client_t *c, const char *slug) {
+  kolm_response_t r = { 0, NULL, 0 };
+  if (!slug) return r;
+  char *esc = kolm__url_escape(slug);
+  if (!esc) return r;
+  size_t need = strlen(esc) + 24;
+  char *path = (char*)malloc(need);
+  if (!path) { free(esc); return r; }
+  snprintf(path, need, "/v1/marketplace/%s", esc);
+  r = kolm_get(c, path);
+  free(esc); free(path);
+  return r;
+}
+
+kolm_response_t kolm_marketplace_download(kolm_client_t *c, const char *slug) {
+  kolm_response_t r = { 0, NULL, 0 };
+  if (!slug) return r;
+  char *esc = kolm__url_escape(slug);
+  if (!esc) return r;
+  size_t need = strlen(esc) + 40;
+  char *path = (char*)malloc(need);
+  if (!path) { free(esc); return r; }
+  snprintf(path, need, "/v1/marketplace/%s/download", esc);
+  /* The response body is binary .kolm bytes — caller MUST use r.body_len. */
+  r = kolm_get(c, path);
+  free(esc); free(path);
+  return r;
+}
+
+/* ---------- Recipes ---------- */
+
+kolm_response_t kolm_recipe_list(kolm_client_t *c, const char *q, const char *tag, int limit) {
+  kolm_response_t r = { 0, NULL, 0 };
+  char *esc_q = NULL, *esc_tag = NULL;
+  if (q) { esc_q = kolm__url_escape(q); if (!esc_q) return r; }
+  if (tag) {
+    esc_tag = kolm__url_escape(tag);
+    if (!esc_tag) { free(esc_q); return r; }
+  }
+  size_t need = 32
+              + (esc_q ? strlen(esc_q) + 4 : 0)
+              + (esc_tag ? strlen(esc_tag) + 8 : 0)
+              + (limit > 0 ? 32 : 0);
+  char *path = (char*)malloc(need);
+  if (!path) { free(esc_q); free(esc_tag); return r; }
+  size_t p = 0;
+  p += (size_t)snprintf(path + p, need - p, "/v1/recipes");
+  int first = 1;
+  if (esc_q) {
+    p += (size_t)snprintf(path + p, need - p, "%cq=%s", first ? '?' : '&', esc_q);
+    first = 0;
+  }
+  if (esc_tag) {
+    p += (size_t)snprintf(path + p, need - p, "%ctag=%s", first ? '?' : '&', esc_tag);
+    first = 0;
+  }
+  if (limit > 0) {
+    p += (size_t)snprintf(path + p, need - p, "%climit=%d", first ? '?' : '&', limit);
+    first = 0;
+  }
+  r = kolm_get(c, path);
+  free(esc_q); free(esc_tag); free(path);
+  return r;
+}
+
+kolm_response_t kolm_recipe_get(kolm_client_t *c, const char *id) {
+  kolm_response_t r = { 0, NULL, 0 };
+  if (!id) return r;
+  char *esc = kolm__url_escape(id);
+  if (!esc) return r;
+  size_t need = strlen(esc) + 24;
+  char *path = (char*)malloc(need);
+  if (!path) { free(esc); return r; }
+  snprintf(path, need, "/v1/recipes/%s", esc);
+  r = kolm_get(c, path);
+  free(esc); free(path);
+  return r;
+}
+
+kolm_response_t kolm_recipe_stats(kolm_client_t *c, const char *id) {
+  kolm_response_t r = { 0, NULL, 0 };
+  if (!id) return r;
+  char *esc = kolm__url_escape(id);
+  if (!esc) return r;
+  size_t need = strlen(esc) + 32;
+  char *path = (char*)malloc(need);
+  if (!path) { free(esc); return r; }
+  snprintf(path, need, "/v1/recipes/%s/stats", esc);
+  r = kolm_get(c, path);
+  free(esc); free(path);
+  return r;
+}
+
+kolm_response_t kolm_recipe_run(kolm_client_t *c, const char *id, const char *json_input) {
+  kolm_response_t r = { 0, NULL, 0 };
+  if (!id) return r;
+  char *esc = kolm__url_escape(id);
+  if (!esc) return r;
+  size_t need = strlen(esc) + 32;
+  char *path = (char*)malloc(need);
+  if (!path) { free(esc); return r; }
+  snprintf(path, need, "/v1/recipes/%s/run", esc);
+  const char *body = (json_input && *json_input) ? json_input : "{}";
+  r = kolm_post(c, path, body);
+  free(esc); free(path);
+  return r;
+}
+
+/* ---------- Search ---------- */
+
+kolm_response_t kolm_search(kolm_client_t *c, const char *query, int k) {
+  kolm_response_t r = { 0, NULL, 0 };
+  char *esc_q = kolm__json_escape(query ? query : "");
+  if (!esc_q) return r;
+  size_t need = strlen(esc_q) + 64;
+  char *body = (char*)malloc(need);
+  if (!body) { free(esc_q); return r; }
+  if (k > 0) {
+    snprintf(body, need, "{\"query\":\"%s\",\"k\":%d}", esc_q, k);
+  } else {
+    snprintf(body, need, "{\"query\":\"%s\"}", esc_q);
+  }
+  r = kolm_post(c, "/v1/search", body);
+  free(esc_q); free(body);
+  return r;
+}
+
+/* ---------- Specialists ---------- */
+
+kolm_response_t kolm_specialist_list(kolm_client_t *c) {
+  return kolm_get(c, "/v1/specialists");
+}
+
+kolm_response_t kolm_specialist_get(kolm_client_t *c, const char *id) {
+  kolm_response_t r = { 0, NULL, 0 };
+  if (!id) return r;
+  char *esc = kolm__url_escape(id);
+  if (!esc) return r;
+  size_t need = strlen(esc) + 24;
+  char *path = (char*)malloc(need);
+  if (!path) { free(esc); return r; }
+  snprintf(path, need, "/v1/specialists/%s", esc);
+  r = kolm_get(c, path);
+  free(esc); free(path);
+  return r;
+}
+
+kolm_response_t kolm_specialist_run(kolm_client_t *c, const char *id, const char *json_input) {
+  kolm_response_t r = { 0, NULL, 0 };
+  if (!id) return r;
+  char *esc = kolm__url_escape(id);
+  if (!esc) return r;
+  size_t need = strlen(esc) + 32;
+  char *path = (char*)malloc(need);
+  if (!path) { free(esc); return r; }
+  snprintf(path, need, "/v1/specialists/%s/run", esc);
+  /* The Node SDK posts {input: ...}; we accept the caller's JSON object
+   * verbatim. If they want the {"input":...} wrapper they include it. An
+   * empty input ({}) is rejected by the server with a 400 — honest envelope. */
+  const char *body = (json_input && *json_input) ? json_input : "{}";
+  r = kolm_post(c, path, body);
+  free(esc); free(path);
+  return r;
+}
+
+kolm_response_t kolm_specialist_train(kolm_client_t *c, const char *json_req) {
+  /* Server route is /v1/specialists/train (not /v1/specialists for POST). */
+  const char *body = (json_req && *json_req) ? json_req : "{}";
+  return kolm_post(c, "/v1/specialists/train", body);
 }
 
 void kolm_response_free(kolm_response_t *r) {

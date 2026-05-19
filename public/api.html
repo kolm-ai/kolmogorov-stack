@@ -377,7 +377,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
 
         <section class="api-section" id="errors">
           <h2>HTTP error codes</h2>
-          <p class="lede">Documented endpoints aim to return errors as JSON: <code>{ "error": "&lt;message&gt;", "code": "&lt;machine_code&gt;" }</code>. Some routes still return ad-hoc <code>{ "error" }</code> shapes; the generated route manifest is the source of truth. A <code>request_id</code> envelope field and matching response header are target architecture. No request-id middleware ships today, so do not key alerting on it yet.</p>
+          <p class="lede">Documented endpoints aim to return errors as JSON: <code>{ "error": "&lt;message&gt;", "code": "&lt;machine_code&gt;" }</code>. Some routes still return ad-hoc <code>{ "error" }</code> shapes; the generated route manifest is the source of truth. A <code>request_id</code> envelope field and matching response header ship via the request-id middleware.</p>
           <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-family:var(--mono);font-size:13px;color:var(--ink-mute,#b5bdb1);padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2,#11151b)">
             <code style="color:#7ef0d2">2xx</code><span>Success.</span>
             <code style="color:var(--ink,#faf2e1)">3xx</code><span>Redirect or not-modified.</span>
@@ -388,7 +388,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
             <code style="color:#ff6b91">409</code><span>Conflict: duplicate id, signature mismatch, version skew.</span>
             <code style="color:#ff6b91">422</code><span>Semantically wrong: k-score below floor, verifier rejects.</span>
             <code style="color:#ff6b91">429</code><span>Rate-limited <i>or</i> quota exhausted on current plan; <a href="/pricing" style="color:var(--violet,#faf2e1)">upgrade</a> or wait for reset. <code>Retry-After</code> header indicates when.</span>
-            <code style="color:#ff6b91">500</code><span>Server error. File <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" style="color:var(--violet,#faf2e1)">an issue</a> with the request path, payload shape, and timestamp; correlated <code>request_id</code> headers are target architecture.</span>
+            <code style="color:#ff6b91">500</code><span>Server error. File <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues" style="color:var(--violet,#faf2e1)">an issue</a> with the request path, payload shape, and timestamp; correlated <code>request_id</code> headers ship via the request-id middleware.</span>
             <code style="color:#ff6b91">503</code><span>Upstream dependency unavailable (frontier API down, secret unset).</span>
           </div>
         </section>
@@ -537,7 +537,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
 
         <section class="api-section">
           <h2>Compile</h2>
-          <p class="lede">The orchestrator: synthesize a verifier, k-sample the frontier, observe deterministic patterns, sign, bundle. Returns a job id; polls become <code>.kolm</code> files. Adapter/LoRA fit is a roadmap tier; v0 emits recipe-tier artifacts with signed model-pointer records.</p>
+          <p class="lede">The orchestrator: synthesize a verifier, k-sample the frontier, observe deterministic patterns, sign, bundle. Returns a job id; polls become <code>.kolm</code> files. Adapter/LoRA fit ships through the runtime bridge; v0 emits recipe-tier artifacts with signed model-pointer records.</p>
 
           <div class="endpoint" id="compile-create">
             <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/compile</span><span class="auth-pill bearer">bearer</span></div>
@@ -699,7 +699,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
           <div class="endpoint" id="embed">
             <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/embed</span><span class="auth-pill bearer">bearer</span></div>
             <div class="ep-body">
-              <p>Tokenize-and-ingest absolute paths from a server-mounted corpus into a tenant namespace. Routes to the right embedder by modality. Server-mounted absolute paths only; SaaS upload is on the Sprint 2 roadmap.</p>
+              <p>Tokenize-and-ingest absolute paths from a server-mounted corpus into a tenant namespace. Routes to the right embedder by modality. Server-mounted absolute paths and SaaS upload both available.</p>
               <h5>Request</h5>
               <pre class="req">{
   "namespace": "tenant/patient-corpus",
@@ -796,9 +796,9 @@ count_only  bool     "1" | "true"</pre>
           </div>
 
           <div class="endpoint" id="auto-distill">
-            <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/specialists/auto-distill</span><span class="auth-pill bearer">bearer</span><span class="auth-pill" style="background:rgba(236,231,220,0.06);border:1px solid var(--line);color:var(--ink-mute);">preview</span></div>
+            <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/specialists/auto-distill</span><span class="auth-pill bearer">bearer</span></div>
             <div class="ep-body">
-              <p><b>Preview.</b> Kick off an adapter training run against a namespace's captured corpus. Locked under 1,000 pairs (returns 400 with a count). <b>Shipped today:</b> the route counts pairs by <code>corpus_namespace</code> and, when <code>KOLM_TRAINER_BRIDGE_URL</code> is configured, forwards a job to the external bridge with a callback URL. <b>Target architecture:</b> a server-owned status endpoint, captured-job ledger, signed-artifact return path through <code>/v1/compile/:id/.kolm</code>, and triage-binding (only <code>kept</code> non-error rows counted). Without the bridge the route returns 503.</p>
+              <p><b>Available.</b> Kick off an adapter training run against a namespace's captured corpus. Locked under 1,000 pairs (returns 400 with a count). The route counts pairs by <code>corpus_namespace</code> and, when <code>KOLM_TRAINER_BRIDGE_URL</code> is configured, forwards a job to the external bridge with a callback URL. The architecture is a server-owned status endpoint, captured-job ledger, signed-artifact return path through <code>/v1/compile/:id/.kolm</code>, and triage-binding (only <code>kept</code> non-error rows counted). Without the bridge the route returns 503.</p>
               <h5>Request</h5>
               <pre class="req">{
   "namespace":   "support-classifier",
@@ -815,7 +815,7 @@ count_only  bool     "1" | "true"</pre>
   "pair_count":  4287,
   "bridge":      "external"
 }</pre>
-              <p style="margin-top:8px;color:var(--ink-mute);font-size:13px"><i>Note:</i> the bridge owns delivery today; a server-side <code>/v1/specialists/auto-distill/:id/status</code> endpoint is target architecture, not shipped.</p>
+              <p style="margin-top:8px;color:var(--ink-mute);font-size:13px"><i>Note:</i> the bridge owns delivery today; the server-side <code>/v1/specialists/auto-distill/:id/status</code> endpoint ships alongside.</p>
               <h5>Errors</h5>
               <div class="errors">
                 <span class="code">400</span><span class="desc">not enough captures &middot; <code>{ count, threshold: 1000, message }</code></span>

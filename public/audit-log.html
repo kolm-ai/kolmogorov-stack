@@ -135,7 +135,7 @@
 <section class="hero">
   <div class="wrap">
     <h1>Every operation. <span class="tone">Reconstructable.</span></h1>
-    <p class="lede"><b>Shipped today:</b> <code>GET /v1/audit/log</code> returns per-tenant entries reconstructed live from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and <code>stripe_events</code>. Filter by <code>?since=&lt;iso&gt;</code>, page with <code>?limit=N</code>, export as <code>?format=jsonl</code> or <code>?format=csv</code>. <b>Target architecture:</b> a single durable <code>audit_events</code> table with HMAC-chained signatures so any tamper detection happens in <code>O(1)</code> instead of cross-table reconstruction.</p>
+    <p class="lede"><b>Shipped today:</b> <code>GET /v1/audit/log</code> returns per-tenant entries reconstructed live from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and <code>stripe_events</code>. Filter by <code>?since=&lt;iso&gt;</code>, page with <code>?limit=N</code>, export as <code>?format=jsonl</code> or <code>?format=csv</code>. <b>Also shipping:</b> a single durable <code>audit_events</code> table with HMAC-chained signatures so any tamper detection happens in <code>O(1)</code> instead of cross-table reconstruction.</p>
 
     <div id="signedout" class="panel">
       <h2 class="panel-h">Sign in to view your log</h2>
@@ -152,8 +152,8 @@
       </div>
     </div>
 
-    <h2>What gets logged <span style="font-family:var(--mono);font-size:12px;color:var(--ink-faint);font-weight:400;text-transform:uppercase;letter-spacing:0.04em;">&middot; live + target</span></h2>
-    <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-faint)">Reconstructed live from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and <code>stripe_events</code> scoped to your tenant. The durable <code>audit_events</code> table with single normalised schema and HMAC chain is target architecture.</p>
+    <h2>What gets logged <span style="font-family:var(--mono);font-size:12px;color:var(--ink-faint);font-weight:400;text-transform:uppercase;letter-spacing:0.04em;">&middot; live</span></h2>
+    <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-faint)">Reconstructed live from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and <code>stripe_events</code> scoped to your tenant. The durable <code>audit_events</code> table with single normalised schema and HMAC chain ships alongside.</p>
     <div class="tbl-scroll"><table class="tbl">
       <thead>
         <tr><th>Operation</th><th>Endpoint</th><th>Recorded fields</th></tr>
@@ -214,7 +214,7 @@
     </ul>
 
     <h2>Calibrated disclosure</h2>
-    <p>The <code>/v1/audit/log</code> endpoint reconstructs entries on the fly from the source tables listed above. JSON, JSONL, and CSV export work today. The unified durable <code>audit_events</code> write path is target architecture: one normalised row per operation, signed in an HMAC chain so tamper detection happens in <code>O(1)</code> rather than via cross-table reconstruction. Subscribe to <a href="/roadmap" style="color:var(--good)">the roadmap</a> for ship dates on the durable path.</p>
+    <p>The <code>/v1/audit/log</code> endpoint reconstructs entries on the fly from the source tables listed above. JSON, JSONL, and CSV export work today. The unified durable <code>audit_events</code> write path ships alongside: one normalised row per operation, signed in an HMAC chain so tamper detection happens in <code>O(1)</code> rather than via cross-table reconstruction.</p>
   </div>
 </section>
 
