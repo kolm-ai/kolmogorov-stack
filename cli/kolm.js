@@ -1957,6 +1957,50 @@ PIPELINE
   local vLLM) -> pipe the teacher response back through 'kolm reinject --map'
   to restore the original identifiers. The teacher never sees raw PHI.
 `,
+  media: `kolm media - multimodal redaction worker. OCR, PDF-text, whisper.
+
+USAGE
+  kolm media doctor [--remote]
+  kolm media redact-job <file:URI | --path <local>> [--kind image|audio|video|pdf] [--mime <mime>] [--model <ggml>] [--lang eng] [--json]
+  kolm media redact-job --remote <file:URI> [--kind ...] [--mime ...]
+
+SUBCOMMANDS
+  doctor       Report which extractors are wired (tesseract.js / pdf-parse /
+               whisper-cli / ffmpeg). --remote asks the server's worker
+               instead of the local install.
+  redact-job   Extract text from media (image/audio/video/pdf), then run the
+               extracted text through the same redactor as 'kolm redact'.
+               Returns {ok, extractor, extracted_chars, redacted, classes_seen,
+               count_by_class, map_hash, detector_version} on success, OR
+               {ok:false, error:'extractor_not_installed', install_hint:...}
+               when the kind's extractor is missing.
+
+OPTIONS
+  --remote       POST to /v1/media/redact-job (server runs the worker)
+  --path <p>     Local file path instead of a media-store URI
+  --kind <k>     image|audio|video|pdf (sniffed from --mime or URI extension)
+  --mime <m>     Explicit mime-type override
+  --model <p>    whisper.cpp ggml model path (audio/video only)
+  --lang <code>  OCR language (default: eng)
+  --json         JSON envelope output (default for --remote)
+
+EXAMPLES
+  kolm media doctor
+  kolm media doctor --remote
+  kolm media redact-job --path ./scan.png --kind image
+  kolm media redact-job file:abc123.pdf --json
+  kolm media redact-job --remote file:def456.wav --model /opt/ggml-base.en.bin
+
+EXTRACTORS
+  image   tesseract.js (WASM OCR, no native deps)
+  pdf     pdf-parse (pure JS)
+  audio   whisper-cli (external; brew/apt/winget install whisper-cpp)
+  video   ffmpeg + whisper-cli
+
+The worker is OPTIONAL — root install does not pull tesseract.js or
+pdf-parse. Install in the isolated worker package:
+  cd workers/media-redact && npm install
+`,
   reinject: `kolm reinject - reverse the kolm redact mapping after a teacher API call.
 
 USAGE
@@ -16549,7 +16593,7 @@ const COMPLETION_VERBS = [
   'score', 'list', 'ls', 'inspect', 'eject', 'diff', 'verify', 'serve', 'tui', 'repl', 'publish', 'pull', 'hub', 'capture', 'labels', 'distill', 'moe', 'tokenize',
   'config', 'hmac', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'loop', 'logs', 'ask', 'nl', 'chat', 'chat-tui', 'version', 'help', 'completion', 'upgrade', 'update', 'self-update',
-  'models', 'gpu', 'export', 'seeds', 'anonymize', 'redact', 'reinject', 'improve', 'instant', 'extract', 'doc',
+  'models', 'gpu', 'export', 'seeds', 'anonymize', 'redact', 'media', 'reinject', 'improve', 'instant', 'extract', 'doc',
   'keygen', 'pubkey', 'keys', 'auditor', 'audit', 'settings', 'quantize',
   'sigstore-attest', 'attest', 'test', 'drift', 'trace', 'ir', 'device', 'cc', 'fl',
   'marketplace', 'tail', 'replay', 'runtime', 'bridges',
@@ -16639,6 +16683,8 @@ const COMPLETION_SUBS = {
   // W384 — new top-level verbs and extensions for existing verbs.
   privacy:    ['scan', 'test', 'smoke', 'policy', 'report'],
   pipeline:   ['tokenize', 'distill', 'compile', 'full'],
+  // W454 — multimodal redaction worker (OCR / pdf-parse / whisper).
+  media:      ['doctor', 'redact-job'],
   agents:     ['stats', 'sessions', 'recommend', 'failing'],
   'shell-init': [],
   // W409i — billing surface subverbs.
@@ -19441,6 +19487,102 @@ async function cmdRedact(args) {
   } else if (!outputPath) {
     process.stdout.write('\n');
   }
+}
+
+// `kolm media` (W454) — multimodal redaction worker driver. Subcommands:
+//   doctor                       which extractors are wired (local OR --remote)
+//   redact-job <uri | --path p>  extract text + redact (local OR --remote)
+// The worker lives in workers/media-redact/ as an isolated package so root
+// install does NOT pull tesseract.js / pdf-parse. When the kind's extractor
+// is not installed the envelope carries install_hint — no silent fall-through.
+async function cmdMedia(args) {
+  args = args || [];
+  if (args.indexOf('--help') >= 0 || args.indexOf('-h') >= 0 || args.length === 0) {
+    console.log(HELP.media);
+    return;
+  }
+  const sub = args[0];
+  const rest = args.slice(1);
+  const remote = rest.includes('--remote');
+  const jsonOut = rest.includes('--json') || remote;
+  if (sub === 'doctor') {
+    if (remote) {
+      const c = loadConfig();
+      if (!c.api_key) {
+        console.error('not logged in. run: kolm login (or drop --remote)');
+        process.exit(EXIT.MISSING_PREREQ);
+      }
+      const data = await api(c, 'GET', '/v1/media/redact-job/doctor');
+      console.log(JSON.stringify(data, null, 2));
+      return;
+    }
+    const urlMod = await import('node:url');
+    const __filename = urlMod.fileURLToPath(import.meta.url);
+    const __dirname  = path.dirname(__filename);
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'media-redact', 'redact.mjs');
+    const r2 = spawnSync(process.execPath, [workerPath, '--doctor'], { stdio: 'pipe' });
+    process.stdout.write(String(r2.stdout || ''));
+    if (r2.status !== 0 && r2.stderr) process.stderr.write(String(r2.stderr));
+    process.exit(r2.status || 0);
+    return;
+  }
+  if (sub === 'redact-job') {
+    // First positional that doesn't start with -- is the uri.
+    const positional = rest.find(a => !a.startsWith('--'));
+    const uri = positional || pickFlag(rest, '--uri');
+    const localPath = pickFlag(rest, '--path');
+    if (!uri && !localPath) {
+      console.error('usage: kolm media redact-job <file:URI | --path <local>> [--kind ...] [--mime ...]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const kind = pickFlag(rest, '--kind');
+    const mime = pickFlag(rest, '--mime');
+    const model = pickFlag(rest, '--model');
+    const lang = pickFlag(rest, '--lang');
+    const maxBytes = pickFlag(rest, '--max-bytes');
+    if (remote) {
+      const c = loadConfig();
+      if (!c.api_key) {
+        console.error('not logged in. run: kolm login (or drop --remote)');
+        process.exit(EXIT.MISSING_PREREQ);
+      }
+      const body = {};
+      if (uri)       body.media_uri = uri;
+      if (localPath) body.path = localPath;
+      if (kind)      body.kind = kind;
+      if (mime)      body.mime = mime;
+      if (model)     body.model = model;
+      if (lang)      body.lang = lang;
+      if (maxBytes)  body.max_bytes = Number(maxBytes);
+      const data = await api(c, 'POST', '/v1/media/redact-job', body);
+      console.log(JSON.stringify(data, null, 2));
+      if (data && data.ok === false) process.exit(1);
+      return;
+    }
+    const urlMod = await import('node:url');
+    const __filename = urlMod.fileURLToPath(import.meta.url);
+    const __dirname  = path.dirname(__filename);
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'media-redact', 'redact.mjs');
+    const wargs = [];
+    if (uri)       { wargs.push('--uri', uri); }
+    if (localPath) { wargs.push('--path', localPath); }
+    if (kind)      { wargs.push('--kind', kind); }
+    if (mime)      { wargs.push('--mime', mime); }
+    if (model)     { wargs.push('--model', model); }
+    if (lang)      { wargs.push('--lang', lang); }
+    if (maxBytes)  { wargs.push('--max-bytes', maxBytes); }
+    if (jsonOut)   { wargs.push('--json'); } else { wargs.push('--plain'); }
+    const r2 = spawnSync(process.execPath, [workerPath, ...wargs], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 5 * 60 * 1000,
+    });
+    process.stdout.write(String(r2.stdout || ''));
+    if (r2.stderr && String(r2.stderr).length) process.stderr.write(String(r2.stderr));
+    process.exit(r2.status || 0);
+    return;
+  }
+  console.error('unknown media subcommand: ' + sub + '. try: kolm media --help');
+  process.exit(EXIT.BAD_ARGS);
 }
 
 // `kolm reinject` - reverse of kolm redact. Reads stdin (or --input <path>),
@@ -22416,7 +22558,7 @@ async function _dispatchVerb(verb, args) {
     upgrade: cmdUpgrade, update: cmdUpdate, 'self-update': cmdUpdate,
     models: cmdModels, gpu: cmdGpu, export: cmdExport, seeds: cmdSeeds,
     trace: cmdTrace, ir: cmdIr, device: cmdDevice, cc: cmdCc, fl: cmdFl,
-    anonymize: cmdAnonymize, redact: cmdRedact, reinject: cmdReinject,
+    anonymize: cmdAnonymize, redact: cmdRedact, media: cmdMedia, reinject: cmdReinject,
     improve: cmdImprove, instant: cmdInstant, version: cmdVersion,
     // New verbs (W351-W353).
     do: cmdDo, what: cmdWhat, next: cmdNext, explain: cmdExplain, fix: cmdFix,
@@ -22571,6 +22713,8 @@ async function main() {
       case 'fl':       await withErrorContext('fl',       () => cmdFl(rest)); break;
       case 'anonymize':await withErrorContext('anonymize',() => cmdAnonymize(rest)); break;
       case 'redact':   await withErrorContext('redact',   () => cmdRedact(rest)); break;
+      // W454 — multimodal redaction worker (OCR / pdf-parse / whisper).
+      case 'media':    await withErrorContext('media',    () => cmdMedia(rest)); break;
       case 'reinject': await withErrorContext('reinject', () => cmdReinject(rest)); break;
       case 'improve':  await withErrorContext('improve',  () => cmdImprove(rest)); break;
       case 'instant':  await withErrorContext('instant',  () => cmdInstant(rest)); break;

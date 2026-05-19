@@ -167,6 +167,12 @@ test('4. every COMPLETION_VERBS entry has at least one inbound docs reference', 
     // strictness, sync push, locale, timezone). HELP.settings + the page
     // carry user-facing docs; account-app surface, not a workflow verb.
     'settings',
+    // W454 — `media` is the multimodal redaction worker driver (OCR /
+    // pdf-parse / whisper.cpp). HELP.media documents the doctor +
+    // redact-job subcommands; the worker itself lives in workers/media-
+    // redact/ as an isolated optional-deps package. Heavy ML deps stay
+    // out of root install per the standing constraint.
+    'media',
   ]);
   const real = missing.filter(v => !ALLOWED_GAPS.has(v));
   assert.deepEqual(real, [],

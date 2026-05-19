@@ -1,0 +1,29 @@
+{
+  "name": "@kolmogorov/media-redact-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated kolm multimodal redaction worker. Extracts text from images / audio / video / PDF, then routes the extracted text through src/privacy-membrane.js so the same redaction policy applies across modalities. Heavy text-extraction deps (tesseract.js / pdf-parse / whisper.cpp bindings) live HERE — root kolm install stays light.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "redact.mjs",
+  "bin": {
+    "kolm-media-redact-worker": "redact.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "doctor": "node redact.mjs --doctor"
+  },
+  "dependencies": {},
+  "optionalDependencies": {
+    "tesseract.js": "^5.0.0",
+    "pdf-parse": "^1.1.1"
+  },
+  "external": {
+    "audio_video": {
+      "binaries": ["whisper-cli", "ffmpeg"],
+      "note": "Audio + video transcription requires whisper.cpp's whisper-cli (or whisper-cpp / faster-whisper) on PATH. ffmpeg is needed to extract audio from video. The worker spawns these as subprocesses — install them via your OS package manager (brew/apt/winget). When neither is present the worker returns {ok:false, install_hint} so the caller knows what to install."
+    }
+  }
+}

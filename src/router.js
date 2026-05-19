@@ -4008,6 +4008,90 @@ export function buildRouter() {
     }
   });
 
+  // W454 — spawn the workers/media-redact worker to do real OCR / PDF /
+  // whisper extraction, then run the extracted text through the same
+  // redactor as /v1/redact. The worker is OPTIONAL — root install does
+  // not pull tesseract.js / pdf-parse / whisper-cli. When the kind's
+  // extractor is not installed, the route returns 200 with an honest
+  // {ok:false, error:'extractor_not_installed', install_hint:'...'}
+  // envelope so the caller knows exactly what to install.
+  //
+  // Body: { media_uri | path, mime?, kind?, max_bytes?, model?, lang? }
+  // Sync mode (default): worker runs in-process via spawnSync. For long
+  // whisper passes, callers should pass {async:true} (deferred to W455).
+  r.post('/v1/media/redact-job', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const mediaUri = typeof body.media_uri === 'string' ? body.media_uri : null;
+    const localPath = typeof body.path === 'string' ? body.path : null;
+    if (!mediaUri && !localPath) {
+      return res.status(400).json({ error: 'media_uri_or_path_required' });
+    }
+    const { spawnSync } = await import('node:child_process');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'media-redact', 'redact.mjs');
+    const wargs = [];
+    if (mediaUri) wargs.push('--uri', mediaUri);
+    if (localPath) wargs.push('--path', localPath);
+    if (body.mime)  wargs.push('--mime', String(body.mime));
+    if (body.kind)  wargs.push('--kind', String(body.kind));
+    if (body.model) wargs.push('--model', String(body.model));
+    if (body.lang)  wargs.push('--lang',  String(body.lang));
+    if (body.max_bytes) wargs.push('--max-bytes', String(body.max_bytes));
+    wargs.push('--json');
+    const r2 = spawnSync(process.execPath, [workerPath, ...wargs], {
+      stdio: 'pipe',
+      timeout: 5 * 60 * 1000,
+    });
+    let env = null;
+    try { env = JSON.parse(String(r2.stdout || '').trim().split('\n').pop() || '{}'); }
+    catch (_) { env = null; }
+    if (!env) {
+      return res.status(500).json({
+        error: 'worker_no_output',
+        exit_code: r2.status,
+        stderr: String(r2.stderr || '').slice(0, 500),
+      });
+    }
+    // Map worker exit codes to HTTP semantics. Honest: extractor not
+    // installed is 200 with ok:false + install_hint so the caller doesn't
+    // treat it as a server bug.
+    if (r2.status === 3)  return res.status(200).json(env);
+    if (r2.status === 4)  return res.status(404).json(env);
+    if (r2.status === 2)  return res.status(400).json(env);
+    if (r2.status === 5)  return res.status(422).json(env);
+    if (r2.status === 6)  return res.status(500).json(env);
+    return res.status(200).json(env);
+  });
+
+  // W454 — worker self-doctor proxied through the API so `kolm media
+  // doctor --remote` can ask the server which extractors are wired.
+  r.get('/v1/media/redact-job/doctor', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const { spawnSync } = await import('node:child_process');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+    const workerPath = path.resolve(__dirname, '..', 'workers', 'media-redact', 'redact.mjs');
+    const r2 = spawnSync(process.execPath, [workerPath, '--doctor'], {
+      stdio: 'pipe',
+      timeout: 30 * 1000,
+    });
+    let env = null;
+    try { env = JSON.parse(String(r2.stdout || '').trim()); }
+    catch (_) { env = null; }
+    if (!env) {
+      return res.status(500).json({
+        error: 'worker_no_output',
+        exit_code: r2.status,
+        stderr: String(r2.stderr || '').slice(0, 500),
+      });
+    }
+    return res.json(env);
+  });
+
   // Rotate the per-tenant receipt-signing secret. Previous secret is
   // preserved so older signed artifacts and audit rows still verify.
   r.post('/v1/account/rotate-receipt-secret', (req, res) => {

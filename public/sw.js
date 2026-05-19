@@ -1,5 +1,5 @@
 // Recipe service worker · keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-19-wave453-ask-intent-preview';
+const CACHE = 'kolm-v7-2026-05-19-wave454-media-redact-worker';
 const PRECACHE = [
   '/device',
   '/styles.css',
