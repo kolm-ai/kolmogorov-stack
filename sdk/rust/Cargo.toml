@@ -1,0 +1,26 @@
+[package]
+name = "kolm"
+version = "0.1.0"
+edition = "2021"
+description = "Rust client for the kolm.ai AI-compiler HTTP API"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/kolmogorov-ai/kolmogorov-stack"
+homepage = "https://kolm.ai"
+documentation = "https://docs.rs/kolm"
+readme = "README.md"
+keywords = ["kolm", "ai-compiler", "distill", "fine-tune", "llm"]
+categories = ["api-bindings", "web-programming::http-client"]
+rust-version = "1.70"
+
+[dependencies]
+ureq = { version = "2", features = ["json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+
+[dev-dependencies]
+mockito = "1"
+
+[[example]]
+name = "whoami"
+path = "examples/whoami.rs"

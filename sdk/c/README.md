@@ -1,0 +1,96 @@
+# kolm C SDK
+
+A single-header C client for the kolm.ai HTTP surface. Drop `kolm.h` into your project, link against libcurl, and you have access to `/v1/whoami`, `/v1/health`, `/v1/capture/log`, `/v1/intent/ask`, `/v1/verify/:cid`, and `/v1/changelog`.
+
+## Install
+
+Vendor `kolm.h` into your tree. It is a stb-style single header: prototypes are always available; the implementation is gated behind `#define KOLM_IMPLEMENTATION` in exactly one translation unit.
+
+```c
+#define KOLM_IMPLEMENTATION
+#include "kolm.h"
+```
+
+You also need libcurl. On Debian/Ubuntu: `apt-get install libcurl4-openssl-dev`. On macOS: `brew install curl`. On Windows: `vcpkg install curl` or use the curl binaries from https://curl.se/windows/.
+
+## Hello, kolm
+
+```c
+#define KOLM_IMPLEMENTATION
+#include "kolm.h"
+
+int main(void) {
+  kolm_client_t *c = kolm_client_new(NULL, NULL); /* base_url + api_key from env */
+  kolm_response_t r = kolm_whoami(c);
+  if (r.status == 200) printf("whoami: %s\n", r.body);
+  kolm_response_free(&r);
+  kolm_client_free(c);
+}
+```
+
+Build:
+
+```
+cc -DKOLM_IMPLEMENTATION -o hello hello.c -lcurl
+KOLM_API_KEY=sk-... ./hello
+```
+
+## CLI demo
+
+`kolm-cli.c` is a tiny driver that exercises every helper. Build with `make`:
+
+```
+make            # produces ./kolm-cli
+./kolm-cli whoami
+./kolm-cli health
+./kolm-cli verify cid_abc123
+./kolm-cli changelog 5
+./kolm-cli ask "compile a redactor from my last 1000 captures"
+```
+
+## API
+
+```c
+kolm_client_t *kolm_client_new(const char *base_url, const char *api_key);
+void           kolm_client_free(kolm_client_t *c);
+void           kolm_client_set_timeout_ms(kolm_client_t *c, long ms);
+
+kolm_response_t kolm_get (kolm_client_t *c, const char *path);
+kolm_response_t kolm_post(kolm_client_t *c, const char *path, const char *body_json);
+
+kolm_response_t kolm_whoami     (kolm_client_t *c);
+kolm_response_t kolm_health     (kolm_client_t *c);
+kolm_response_t kolm_verify     (kolm_client_t *c, const char *cid);
+kolm_response_t kolm_changelog  (kolm_client_t *c, int limit);
+kolm_response_t kolm_intent_ask (kolm_client_t *c, const char *prompt);
+kolm_response_t kolm_capture_log(kolm_client_t *c, const char *namespace_, const char *items_json);
+
+void        kolm_response_free(kolm_response_t *r);
+const char *kolm_sdk_version  (void);
+```
+
+`kolm_response_t` is:
+
+```c
+typedef struct {
+  long   status;   /* HTTP status code; 0 on network error */
+  char  *body;     /* NUL-terminated response body (owned), or NULL */
+  size_t body_len;
+} kolm_response_t;
+```
+
+## Honesty contract
+
+- `status` is the literal HTTP status code. `0` means the request never reached a server (DNS, TLS, timeout).
+- `body` is the raw response bytes with a NUL terminator. The SDK does NOT parse JSON; pair with cJSON, jansson, or json-c if you need structured access.
+- The base URL defaults to `https://kolm.ai` if both the constructor arg and `KOLM_BASE_URL` env var are unset.
+- The API key falls back to `KOLM_API_KEY` if the constructor arg is NULL. Without a key, calls that require auth will return `401`.
+- Every `kolm_response_t` you receive must be freed with `kolm_response_free` to release the body buffer.
+
+## Why a header-only SDK
+
+Distributing C code is awkward. Customers integrating into existing build systems (CMake, Meson, Bazel, raw makefiles, MSVC `.sln` files) generally do not want a new dependency tree. `kolm.h` is one file, one external link (`-lcurl`), and works with the C99 compiler you already have.
+
+## Versioning
+
+`KOLM_SDK_VERSION` is the constant exposed in the header and via `kolm_sdk_version()`. Bump the patch when the public API stays compatible, the minor when it grows additively, the major when prototypes change shape.
