@@ -994,34 +994,69 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
     } catch (_) {}
   }
 
-  // Capture-namespace summary. Best-effort: try src/capture-store.allCapturesForTenant
-  // when a tenant + driver are reachable, else read the JSON store directly.
-  // In SANDBOX_MODE (caller passed an isolated HOME), skip this probe — the
-  // capture store reads from a process-wide path that the HOME override does
-  // not isolate.
+  // W457 — TELEMETRY RECONCILIATION (P0 release blocker).
+  //
+  // Before W457, `kolm what` aggregated from src/capture-store.js (the legacy
+  // 'observations' JSON store), while `kolm lake stats` / `kolm lake storage`
+  // / `kolm opportunities` all read from the canonical src/event-store.js
+  // (~/.kolm/events/events.sqlite). On any machine that captured traffic
+  // before the W409a one-shot migration ran, the two stores diverged: one
+  // user's audit found `kolm what`=9044 vs `kolm lake stats`=1910, with
+  // `kolm what`'s "next" recommendation pointing at a namespace the
+  // distill/opportunity pipeline could not see. That broke the core product
+  // thesis (capture -> distill).
+  //
+  // The fix: read the canonical event-store FIRST. Fall back to capture-store
+  // ONLY when event-store is empty (truly-empty machine, or sandbox/test
+  // override). All four surfaces now agree on total_events + namespaces.
+  //
+  // SANDBOX_MODE (caller passed isolated HOME) still skips the live probe,
+  // because the event-store driver, like capture-store, reads from a
+  // process-wide singleton that the HOME override does not isolate. Tests
+  // that need a deterministic capture summary continue to use the JSON
+  // observations.json fallback under that mode.
   if (!SANDBOX_MODE) {
     try {
-      const captureStore = await import('./capture-store.js');
-      // We only want a namespace-aggregated summary, so we use the in-process
-      // path. If a driver is configured and there's no tenant, we still get an
-      // empty list — that's fine, we'll fall through to the JSON-store reader.
-      // W432 — prefer the explicit tenant_id from HTTP callers; fall back to
-      // the local config tenant (CLI default) so the existing local-only
-      // surface keeps working.
-      const tenant = _explicitTenant
+      const eventStore = await import('./event-store.js');
+      // Pull every event (limit:0 = unbounded in listEvents). We need the
+      // namespace + created_at off each row to share aggregateNamespaces with
+      // the legacy path. tenant_id scoping mirrors the capture-store path so
+      // HTTP callers under /v1/intent/next still see only their tenant.
+      const tenantForFilter = _explicitTenant
         || (out.current_tenant && (out.current_tenant.id || out.current_tenant))
-        || 'local';
-      let rows = [];
-      try { rows = await captureStore.allCapturesForTenant(tenant, 50000); } catch (_) {}
-      if (rows && rows.length) {
-        out.captures_summary = aggregateNamespaces(rows);
+        || null;
+      let evRows = [];
+      try {
+        evRows = await eventStore.listEvents({
+          limit: 0,
+          tenant_id: tenantForFilter,
+          order: 'asc',
+        });
+      } catch (_) { /* event-store unavailable; fall through */ }
+      if (evRows && evRows.length) {
+        out.captures_summary = aggregateNamespaces(evRows);
       }
-    } catch (_) { /* capture-store not usable in this context */ }
+    } catch (_) { /* event-store not loadable in this context */ }
+
+    // Legacy capture-store fallback: only consulted when the canonical store
+    // came back empty. On a freshly-migrated machine this branch is dead.
+    if (out.captures_summary.length === 0) {
+      try {
+        const captureStore = await import('./capture-store.js');
+        const tenant = _explicitTenant
+          || (out.current_tenant && (out.current_tenant.id || out.current_tenant))
+          || 'local';
+        let rows = [];
+        try { rows = await captureStore.allCapturesForTenant(tenant, 50000); } catch (_) {}
+        if (rows && rows.length) {
+          out.captures_summary = aggregateNamespaces(rows);
+        }
+      } catch (_) { /* capture-store not usable in this context */ }
+    }
   }
 
-  // Fallback to reading the on-disk observations table (JSON store) directly.
-  // We respect the `cwd` parameter (so tests can override) and only fall back
-  // to process.cwd() if no caller-supplied cwd was given.
+  // Final fallback: on-disk observations table (JSON store). Used by SANDBOX
+  // tests that seed observations.json directly, and by truly-empty machines.
   if (out.captures_summary.length === 0) {
     const cwdForFallback = cwd || process.cwd();
     const candidates = [

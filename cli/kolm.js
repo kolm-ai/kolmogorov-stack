@@ -4103,7 +4103,13 @@ async function cmdBuild(args) {
   // path scores K~0.56 on those rows (its rule set is a placeholder), which
   // is dishonest output the user did not ask for. The CLI should treat the
   // curated recipe as the obvious match and tell the user it did so.
-  const curated = findCuratedTemplate(name);
+  // W457b — `--no-baseline` opts out of curated-template detection so the
+  // user's explicit --from template wins unconditionally. Pre-W457b the
+  // override was a quiet console.log under [1/4]; the audit flagged that
+  // ("detects the curated baseline, overrides --from") as too easy to miss.
+  // The warning now lives on stderr and names the opt-out flag.
+  const noBaseline = args.includes('--no-baseline');
+  const curated = noBaseline ? null : findCuratedTemplate(name);
   const examplesPointsAtCurated = curated && examplesFlag
     && fs.existsSync(seedsPath)
     && (() => {
@@ -4118,7 +4124,7 @@ async function cmdBuild(args) {
     && (!fromFlagExplicit || examplesPointsAtCurated)
     && (!fs.existsSync(specPath) || args.includes('--force'));
   if (examplesPointsAtCurated && fromFlagExplicit) {
-    console.log(`  detected curated baseline for "${name}" via --examples; overriding --from ${fromFlagExplicit}.`);
+    console.error(`[kolm build] WARNING: --from ${fromFlagExplicit} overridden by curated baseline ${name} — pass --no-baseline to disable.`);
   }
 
   // Step 1: spec scaffold
@@ -4374,10 +4380,20 @@ async function cmdWhoami(args) {
   // Keeps prefix + suffix only so a screenshot does not leak the live token.
   const key = c.api_key || '';
   const fp = key ? (key.slice(0, 10) + '...' + key.slice(-4)) : null;
-  if (!c.api_key) {
+  // W457 — `logged_in` is now (config_has_key && server_validated), not just
+  // "config has a key". This resolves the audit-flagged disagreement between
+  // `kolm whoami` and `kolm config show`: config-only knows the local state,
+  // whoami knows whether the server actually accepts the key. Both states are
+  // surfaced as separate fields so callers can disambiguate ("revoked key" vs
+  // "never logged in" vs "cloud unreachable").
+  const config_has_key = !!c.api_key;
+  if (!config_has_key) {
     if (jsonOut) {
       console.log(JSON.stringify({
         logged_in: false,
+        config_has_key: false,
+        server_validated: false,
+        tenant: null,
         base: c.base,
         cli_version: VERSION,
         key_fingerprint: null,
@@ -4385,24 +4401,35 @@ async function cmdWhoami(args) {
       }));
     } else {
       console.error('not logged in.');
+      console.error('  config_has_key:   false');
+      console.error('  server_validated: false');
       console.error('hint: run `kolm login --key ks_...` or `kolm signup --email you@example.com`');
     }
     process.exit(EXIT.MISSING_PREREQ);
   }
   let a;
+  let serverErr = null;
   try {
     a = await api(c, 'GET', '/v1/account');
   } catch (e) {
+    serverErr = e;
+  }
+  if (serverErr) {
     if (jsonOut) {
       console.log(JSON.stringify({
         logged_in: false,
+        config_has_key: true,
+        server_validated: false,
+        tenant: null,
         base: c.base,
         cli_version: VERSION,
         key_fingerprint: fp,
-        error: e.message,
+        error: serverErr.message,
       }));
     } else {
-      console.error('cloud rejected the saved key:', e.message);
+      console.error('cloud rejected the saved key:', serverErr.message);
+      console.error('  config_has_key:   true');
+      console.error('  server_validated: false');
       console.error('hint: the key may have been rotated or revoked. run `kolm login --key ks_...` again.');
     }
     process.exit(2);
@@ -4421,6 +4448,8 @@ async function cmdWhoami(args) {
     };
     console.log(JSON.stringify({
       logged_in: true,
+      config_has_key: true,
+      server_validated: true,
       base: c.base,
       cli_version: VERSION,
       key_fingerprint: fp,
@@ -4429,12 +4458,14 @@ async function cmdWhoami(args) {
     }));
     return;
   }
-  console.log('tenant:  ' + (a.id || a.name || '-'));
-  console.log('plan:    ' + (a.plan || '-'));
-  if (a.quota !== undefined) console.log('quota:   ' + a.quota);
-  if (a.seats !== undefined) console.log('seats:   ' + a.seats);
-  console.log('base:    ' + c.base);
-  console.log('key:     ' + fp);
+  console.log('tenant:           ' + (a.id || a.name || '-'));
+  console.log('plan:             ' + (a.plan || '-'));
+  if (a.quota !== undefined) console.log('quota:            ' + a.quota);
+  if (a.seats !== undefined) console.log('seats:            ' + a.seats);
+  console.log('base:             ' + c.base);
+  console.log('key:              ' + fp);
+  console.log('config_has_key:   true');
+  console.log('server_validated: true');
 }
 
 // W304: `kolm status` is the local-only "where am I" pulse. Mirrors what
@@ -11695,14 +11726,122 @@ async function cmdCapture(args) {
     return;
   }
   if (sub === 'status') {
+    // W457 — `kolm capture status` used to die with a raw AggregateError when
+    // the local capture daemon / cloud was unreachable (fetch failed → bubbled
+    // up as the unwrapped TypeError → outer wrapper printed only "fetch failed"
+    // or worse, "AggregateError" with no message). The fix: try the cloud, but
+    // on ANY network/transport failure, fall back to counting local capture
+    // files under ~/.kolm/capture/ and print an offline marker + actionable
+    // hint instead of crashing.
+    const jsonOut = args.includes('--json');
     const c = loadConfig();
-    if (!c.api_key) { console.error('not logged in. run: kolm login'); process.exit(EXIT.MISSING_PREREQ); }
     const ns = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
-    const j = await api(c, 'GET', `/v1/labels/synthesize-corpus?namespace=${encodeURIComponent(ns)}&count_only=1`);
+    const localCaptureCount = async () => {
+      // W457 — TELEMETRY RECONCILIATION: read from the canonical event-store
+      // FIRST so the offline count agrees with `kolm what`, `kolm lake stats`,
+      // `kolm lake storage`, and `kolm opportunities`. Only fall back to
+      // walking ~/.kolm/capture/ + ~/.kolm/captures/ jsonl files when the
+      // event-store is empty (machines that never bridged + truly-empty
+      // first-run state).
+      try {
+        const es = await import('../src/event-store.js');
+        if (typeof es.countEvents === 'function') {
+          // Event-store treats 'default' as a real namespace value; respect
+          // the per-namespace filter the user passed (or implicit default).
+          const n = await es.countEvents(ns ? { namespace: ns } : {});
+          if (n > 0) return n;
+        }
+      } catch (_) { /* event-store not available; fall through */ }
+      let count = 0;
+      const paths = [
+        path.join(KOLM_DIR, 'capture'),
+        path.join(KOLM_DIR, 'captures'),
+      ];
+      for (const dir of paths) {
+        try {
+          if (!fs.existsSync(dir)) continue;
+          const walk = (d) => {
+            for (const ent of fs.readdirSync(d, { withFileTypes: true })) {
+              const full = path.join(d, ent.name);
+              if (ent.isDirectory()) { walk(full); continue; }
+              if (!ent.name.endsWith('.jsonl')) continue;
+              if (ns && ns !== 'default' && !ent.name.includes(ns)) continue;
+              try {
+                const text = fs.readFileSync(full, 'utf8');
+                count += text.split('\n').filter(Boolean).length;
+              } catch (_) {}
+            }
+          };
+          walk(dir);
+        } catch (_) {}
+      }
+      const single = path.join(KOLM_DIR, 'captures.jsonl');
+      try {
+        if (fs.existsSync(single)) {
+          const text = fs.readFileSync(single, 'utf8');
+          count += text.split('\n').filter(Boolean).length;
+        }
+      } catch (_) {}
+      return count;
+    };
+    const offlineFallback = async (reason) => {
+      const localCount = await localCaptureCount();
+      const remaining = Math.max(0, 1000 - localCount);
+      if (jsonOut) {
+        console.log(JSON.stringify({
+          ok: true,
+          source: 'local',
+          offline: true,
+          namespace: ns,
+          count: localCount,
+          threshold: 1000,
+          ready_to_distill: localCount >= 1000,
+          hint: 'capture daemon not running or cloud unreachable — counts come from ~/.kolm/capture/. start the daemon with `kolm capture --provider <openai|anthropic> --as <task>`',
+          reason: String(reason || ''),
+        }));
+      } else {
+        console.log(`namespace ${ns}: ${localCount} pair${localCount === 1 ? '' : 's'} captured (offline · local count)`);
+        console.log(`distill threshold: 1000`);
+        if (localCount >= 1000) console.log('  ready to distill — run: kolm distill --namespace ' + ns);
+        else console.log(`  ${remaining} more pair${remaining === 1 ? '' : 's'} until distill is unlocked`);
+        console.log('');
+        console.log('hint: cloud capture status unavailable (' + (reason || 'no api key / network down') + ').');
+        console.log('  to start the capture daemon: kolm capture --provider <openai|anthropic> --as <task>');
+      }
+    };
+    if (!c.api_key) {
+      // No key on disk: skip the cloud round-trip entirely and report local
+      // counts so the user at least sees what's in ~/.kolm/capture/ rather
+      // than getting a "not logged in" wall.
+      await offlineFallback('not logged in (config has no api key)');
+      return;
+    }
+    let j;
+    try {
+      j = await api(c, 'GET', `/v1/labels/synthesize-corpus?namespace=${encodeURIComponent(ns)}&count_only=1`);
+    } catch (e) {
+      // ANY fetch failure (ECONNREFUSED, ENOTFOUND, AggregateError, http_timeout,
+      // 401 invalid key, 5xx) falls back to local counts. We never throw out of
+      // `kolm capture status` again — the user wants a count, give them one.
+      await offlineFallback(e && e.message ? e.message : String(e));
+      return;
+    }
     const remaining = Math.max(0, (j.threshold || 1000) - (j.count || 0));
+    if (jsonOut) {
+      console.log(JSON.stringify({
+        ok: true,
+        source: 'cloud',
+        offline: false,
+        namespace: j.namespace || ns,
+        count: j.count || 0,
+        threshold: j.threshold || 1000,
+        ready_to_distill: !!j.ready_to_distill,
+      }));
+      return;
+    }
     console.log(`namespace ${j.namespace}: ${j.count} pair${j.count === 1 ? '' : 's'} captured`);
     console.log(`distill threshold: ${j.threshold}`);
-    if (j.ready_to_distill) console.log('  ✓ ready to distill — run: kolm distill --namespace ' + j.namespace);
+    if (j.ready_to_distill) console.log('  ready to distill — run: kolm distill --namespace ' + j.namespace);
     else console.log(`  ${remaining} more pair${remaining === 1 ? '' : 's'} until distill is unlocked`);
     return;
   }
@@ -11964,26 +12103,74 @@ async function cmdDistill(args) {
 //   can see how the run progressed without opening the file directly.
 async function cmdDistillRuns(args) {
   const c = loadConfig();
-  if (!c.api_key) { console.error('not logged in. run: kolm login'); process.exit(EXIT.MISSING_PREREQ); }
   const wantJson = args.includes('--json');
   const positional = args.filter((a) => !a.startsWith('--'));
   const id = positional[0] || null;
+
+  // W457 — local-first offline fallback mirroring the W456 cmdChangelog
+  // pattern. `kolm distill runs` used to die with "fetch failed" whenever
+  // the server was unreachable, the route was missing, or the response
+  // was not a clean {ok:true,...} envelope. The fix: try the cloud, but
+  // on ANY failure (network, non-ok body, transport error) fall back to
+  // reading ~/.kolm/distill-runs/run_*/{run-meta.json,progress.jsonl}
+  // directly via src/distill-pipeline.js. Always print "(offline)" so
+  // the user can tell where the rows came from.
+  const localList = async ({ limit, namespace, tenant_id }) => {
+    try {
+      const mod = await import('../src/distill-pipeline.js');
+      return mod.listDistillRuns({ tenant_id: tenant_id || 'local', limit: Number(limit) || 50, namespace: namespace || null });
+    } catch (_) { return []; }
+  };
+  const localRead = async (runId, { tenant_id }) => {
+    try {
+      const mod = await import('../src/distill-pipeline.js');
+      return mod.readDistillRun(runId, { tenant_id: tenant_id || 'local' });
+    } catch (_) { return null; }
+  };
+  // Local tenant_id key — match listDistillRuns default for unowned runs.
+  const localTenant = 'local';
+
   if (id) {
     // Detail view — single run.
-    const url = c.base.replace(/\/+$/, '') + '/v1/distill/runs/' + encodeURIComponent(id);
-    const res = await fetch(url, { headers: authHeaders(c) });
-    const text = await res.text();
-    let j;
-    try { j = JSON.parse(text); } catch { j = { _raw: text }; }
-    if (wantJson) { console.log(JSON.stringify(j, null, 2)); if (!res.ok) process.exit(EXIT.EXECUTION); return; }
-    if (!res.ok) {
-      if (res.status === 404) { console.error(`run not found: ${id}`); process.exit(EXIT.NOT_FOUND || 4); }
-      console.error(`error: http ${res.status} ${text.slice(0, 400)}`);
-      process.exit(EXIT.EXECUTION);
+    let j = null;
+    let okFromCloud = false;
+    if (c.api_key) {
+      try {
+        const url = c.base.replace(/\/+$/, '') + '/v1/distill/runs/' + encodeURIComponent(id);
+        const res = await fetch(url, { headers: authHeaders(c) });
+        const text = await res.text();
+        try { j = JSON.parse(text); } catch { j = { _raw: text }; }
+        if (res.ok && j && j.run) okFromCloud = true;
+        else if (res.status === 404) {
+          // 404 from cloud — try local as a last chance (developer may have a
+          // run in ~/.kolm/distill-runs/ that never round-tripped to cloud).
+          j = null;
+        } else if (!res.ok && !wantJson) {
+          // Non-404 cloud failure: surface the http code in JSON mode below.
+        }
+      } catch (_) { /* network unreachable — fall through to local */ }
     }
+    if (!okFromCloud) {
+      const local = await localRead(id, { tenant_id: localTenant });
+      if (local) {
+        j = { ok: true, run: local, source: 'local' };
+        okFromCloud = true;
+      }
+    }
+    if (!okFromCloud) {
+      if (wantJson) {
+        console.log(JSON.stringify({ ok: false, error: 'run_not_found', id, hint: 'no cloud match and no local run-meta.json under ~/.kolm/distill-runs/' + id + '/' }, null, 2));
+      } else {
+        console.error(`run not found: ${id}`);
+        console.error('  (cloud unreachable or run absent; local lookup also empty)');
+      }
+      process.exit(EXIT.NOT_FOUND || 4);
+    }
+    if (wantJson) { console.log(JSON.stringify(j, null, 2)); return; }
     const run = j.run || {};
     const meta = run.meta || {};
-    console.log(`run ${run.id}`);
+    if (j.source === 'local') console.log('(offline · ~/.kolm/distill-runs/' + (run.id || id) + ')');
+    console.log(`run ${run.id || id}`);
     console.log(`  namespace:   ${meta.namespace || '-'}`);
     console.log(`  base:        ${meta.student_base || '-'}`);
     console.log(`  mode:        ${meta.pipeline_mode || '-'}`);
@@ -12004,23 +12191,37 @@ async function cmdDistillRuns(args) {
     }
     return;
   }
+
   // List view.
   const limit = pickFlag(args, '--limit') || '50';
   const namespace = pickFlag(args, '--namespace') || null;
-  const qs = new URLSearchParams();
-  qs.set('limit', String(limit));
-  if (namespace) qs.set('namespace', namespace);
-  const url = c.base.replace(/\/+$/, '') + '/v1/distill/runs?' + qs.toString();
-  const res = await fetch(url, { headers: authHeaders(c) });
-  const text = await res.text();
-  let j;
-  try { j = JSON.parse(text); } catch { j = { _raw: text }; }
-  if (wantJson) { console.log(JSON.stringify(j, null, 2)); if (!res.ok) process.exit(EXIT.EXECUTION); return; }
-  if (!res.ok) {
-    console.error(`error: http ${res.status} ${text.slice(0, 400)}`);
-    process.exit(EXIT.EXECUTION);
+
+  let body = null;
+  let okFromCloud = false;
+  if (c.api_key) {
+    try {
+      const qs = new URLSearchParams();
+      qs.set('limit', String(limit));
+      if (namespace) qs.set('namespace', namespace);
+      const url = c.base.replace(/\/+$/, '') + '/v1/distill/runs?' + qs.toString();
+      const res = await fetch(url, { headers: authHeaders(c) });
+      const text = await res.text();
+      let j;
+      try { j = JSON.parse(text); } catch { j = { _raw: text }; }
+      if (res.ok && j && Array.isArray(j.runs)) {
+        body = j;
+        okFromCloud = true;
+      }
+    } catch (_) { /* network unreachable — fall back to local */ }
   }
-  const runs = Array.isArray(j.runs) ? j.runs : [];
+  if (!okFromCloud) {
+    const runs = await localList({ limit, namespace, tenant_id: localTenant });
+    body = { ok: true, runs, source: 'local', count: runs.length };
+  }
+  if (wantJson) { console.log(JSON.stringify(body, null, 2)); return; }
+  const runs = Array.isArray(body.runs) ? body.runs : [];
+  const offline = body.source === 'local';
+  if (offline) console.log('(offline · ~/.kolm/distill-runs/)');
   if (runs.length === 0) {
     console.log('no distill runs recorded yet.');
     console.log("  tip: run 'kolm distill --namespace <ns>' to start one.");
@@ -13146,13 +13347,59 @@ async function cmdDoctor(args) {
   const c = loadConfig();
   // Config + auth
   checks.push({ name: 'config file', status: fs.existsSync(CONFIG_PATH) ? 'ok' : 'warn', detail: CONFIG_PATH });
-  checks.push({ name: 'api key', status: c.api_key ? 'ok' : 'warn', detail: c.api_key ? c.api_key.slice(0, 8) + '...' : 'not set (run: kolm login or set KOLM_API_KEY)' });
-  // Cloud reachable
+  // W457 — "api key" used to print "ok" any time the config held a key, even
+  // when the cloud was unreachable or had rotated the key. That created the
+  // audit-flagged disagreement with `kolm whoami`. Split into two checks:
+  //   1) "api key (config)"     — local-only: is there a key on disk?
+  //   2) "api key (server)"     — round-trip: does /v1/account accept it?
+  // The two MUST be reported separately so a stale-but-present key surfaces
+  // as a warning instead of a false-positive "ok".
+  checks.push({
+    name: 'api key (config)',
+    status: c.api_key ? 'ok' : 'warn',
+    detail: c.api_key ? c.api_key.slice(0, 8) + '... (config holds key)' : 'not set (run: kolm login or set KOLM_API_KEY)',
+  });
+  // Cloud reachable + server-validated key check. We probe /health for
+  // reachability and /v1/account for key validity. If /v1/account 401s, the
+  // "api key (server)" check downgrades to warn even though the config holds
+  // a key — exactly the state that confused users in the audit.
+  let cloudReachable = false;
   try {
     const r = await fetch((c.base || 'https://kolm.ai').replace(/\/+$/, '') + '/health', { headers: authHeaders(c) });
+    cloudReachable = r.ok;
     checks.push({ name: 'cloud reachable', status: r.ok ? 'ok' : 'warn', detail: `${c.base} -> ${r.status}` });
   } catch (e) {
     checks.push({ name: 'cloud reachable', status: 'warn', detail: `${c.base} -> ${e.message}` });
+  }
+  if (c.api_key) {
+    if (!cloudReachable) {
+      checks.push({
+        name: 'api key (server)',
+        status: 'warn',
+        detail: 'cloud unreachable — cannot validate (config holds key but server-side state unknown)',
+      });
+    } else {
+      try {
+        await api(c, 'GET', '/v1/account');
+        checks.push({ name: 'api key (server)', status: 'ok', detail: 'server accepts the key' });
+      } catch (e) {
+        const msg = String((e && e.message) || e);
+        const looksAuth = /401|invalid|unauthori[sz]ed|auth/i.test(msg);
+        checks.push({
+          name: 'api key (server)',
+          status: 'warn',
+          detail: looksAuth
+            ? 'server rejected the key (rotated/revoked?) — run: kolm login'
+            : ('server validation failed: ' + msg),
+        });
+      }
+    }
+  } else {
+    checks.push({
+      name: 'api key (server)',
+      status: 'warn',
+      detail: 'no key to validate (run: kolm login first)',
+    });
   }
   // Local receipt secret
   checks.push({ name: 'receipt secret', status: process.env.RECIPE_RECEIPT_SECRET ? 'ok' : 'warn', detail: process.env.RECIPE_RECEIPT_SECRET ? '(env or config)' : 'not set; offline compile will fall back to a per-user random secret' });

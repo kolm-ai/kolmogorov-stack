@@ -1283,9 +1283,11 @@
       <span><b>Keep it</b> after the contract ends.</span>
     </p>
     <p class="hero-artifact w335-artifact" data-w220="artifact-strip" aria-label="live shipped artifact">
-      See one ship:
-      <a href="/models" class="ha-mono">qwen3.6-27b.kolm</a>
-      &middot; distilled from a frontier teacher, runs on a single RTX 3090.
+      Shipping today:
+      <a href="/marketplace/claims-redactor" class="ha-mono">claims-redactor.kolm</a>
+      &middot; rule-class bundle, 15&nbsp;KB, runs in JS on any device.
+      <span class="ha-sep" aria-hidden="true">&middot;</span>
+      <span>Weight-class students (LoRA / INT4 / GGUF) on the <a href="/roadmap" class="ha-mono">roadmap</a>.</span>
     </p>
 
     <!-- W402 lede: introduce "the local AI stack" as the broad category
@@ -1396,7 +1398,7 @@
       <li class="w410-step" data-w410-step="run">
         <span class="w410-step-num">8</span>
         <h3 class="w410-step-h3">Run</h3>
-        <p class="w410-step-p">JS, WASM, native, GGUF, ONNX. <code>kolm run</code> dispatches to the runtime declared in the manifest. Same path for <code>kolm eval</code>, so the bake-off and the production call use the same code.</p>
+        <p class="w410-step-p">JS rule-class runtime ships today. WASM, native, GGUF, and ONNX targets are declared in the manifest spec and gated on the weight-class roadmap (<a href="/roadmap">/roadmap</a>). <code>kolm run</code> dispatches by runtime; <code>kolm eval</code> uses the same path so the bake-off and the production call run identical code.</p>
         <a class="w410-step-link" href="/runtimes">Runtimes &rarr;</a>
       </li>
     </ol>
@@ -1715,6 +1717,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
       <div class="w373-opt-card" data-w373="opp-eval"><b>eval-gate</b><span>block regressions before they ship</span></div>
       <div class="w373-opt-card" data-w373="opp-quantize"><b>quantize</b><span>int4/int8 for laptops and phones</span></div>
     </div>
+    <p class="w373-foot" data-w373="opt-gate" style="font-size:12.5px;color:var(--ink-faint, #737c73);margin-top:14px"><b>Today:</b> bake-off, route, and eval-gate run on every artifact. <b>Distill, fine-tune, and quantize</b> produce weight-class outputs (LoRA / INT4 / GGUF) gated on the roadmap. The planner queues the job and signs the recipe; the worker ships in a follow-up wave. See <a href="/roadmap">/roadmap</a>.</p>
   </div>
 </section>
 
@@ -1752,6 +1755,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
   <div class="wrap">
     <h2 class="w373-h2">6. Ship to every device you own.</h2>
     <p class="w373-sub">Compile once. Sign once. Run anywhere from a phone to a DGX Spark. The .kolm artifact is a single file with a portable runtime spec.</p>
+    <p class="w373-sub" data-w373="devices-gate" style="margin-top:-6px;font-size:12.5px;color:var(--ink-faint, #737c73)"><b>What ships today:</b> rule-class artifacts run in JS on every row below (laptop, phone, server). <b>Weight-class</b> rows (llama.cpp, vLLM, TensorRT-LLM, int4/int8/fp16) are declared in the manifest spec and gated on the LoRA / INT4 / GGUF roadmap. See <a href="/roadmap">/roadmap</a>.</p>
     <table class="w373-devices-tbl" data-w373="devices-matrix" aria-label="device target matrix">
       <thead>
         <tr><th>Target</th><th>Runtime</th><th>Quant</th><th>Footprint</th></tr>
@@ -2857,6 +2861,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
         <a href="/changelog">Changelog</a>
         <a href="/security">Security</a>
         <a href="/community">Community</a>
+        <a href="https://discord.gg/kolm" rel="noopener">Discord</a>
         <a href="/contact">Contact</a>
       </div>
     </div>

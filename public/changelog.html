@@ -252,6 +252,12 @@
       <h2>Most recent</h2>
       <div class="cl-recent-grid">
       <article class="cl-recent-card">
+        <span class="cl-tag">W456</span>
+        <h3>public changelog + roadmap</h3>
+        <p>closes audit P1 Website &quot;public changelog/roadmap&quot; open item: src/changelog.js WAVES source-of-truth + helpers.</p>
+        <time datetime="2026-05-19">2026-05-19</time>
+      </article>
+      <article class="cl-recent-card">
         <span class="cl-tag">W455</span>
         <h3>distill-runs per-prompt loss telemetry</h3>
         <p>closes audit P1 distill cluster open item: distill-pipeline writes ~/.kolm/distill-runs/run_*/{run-meta.json,progress.jsonl,manifest.json} on every iteration.</p>
@@ -263,20 +269,23 @@
         <p>closes W452 deferred surface: workers/media-redact/ isolated optional-deps package (tesseract.js / pdf-parse + external whisper-cli/ffmpeg).</p>
         <time datetime="2026-05-19">2026-05-19</time>
       </article>
-      <article class="cl-recent-card">
-        <span class="cl-tag">W453</span>
-        <h3>kolm ask --intent preview</h3>
-        <p>closes audit P1 CLI/TUI item: `kolm ask --intent / --preview` routes through /v1/intent/ask (same classifier as W415 web ask-bar) - prints proposed `kolm ...` command + confidence .</p>
-        <time datetime="2026-05-19">2026-05-19</time>
-      </article>
       </div>
     </section>
 
     <section class="cl-history" aria-label="Full wave history">
       <h2>Full history</h2>
       <details class="cl-bucket" open>
-        <summary><span class="cl-bucket-label">May 2026</span> <span class="cl-bucket-count">105 waves</span></summary>
+        <summary><span class="cl-bucket-label">May 2026</span> <span class="cl-bucket-count">106 waves</span></summary>
         <ol class="cl-timeline">
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W456</span>
+          <h3 class="cl-row-title">public changelog + roadmap</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">closes audit P1 Website &quot;public changelog/roadmap&quot; open item: src/changelog.js WAVES source-of-truth + helpers; public GET /v1/changelog (no auth) returns {ok,count,total,latest,waves}; `kolm changelog [--limit N --since W400 --tag distill --json]` CLI with offline-fallback (bundled module)</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">distill</span></p>
+      </li>
       <li class="cl-row">
         <div class="cl-row-head">
           <span class="cl-tag">W455</span>
@@ -1169,7 +1178,7 @@
           <h3 class="cl-row-title">- codebase spec + dead-CSS cleanup. Public `/spec/codebase` shipped (public/spec/codebase.html ~330 lines, academic-paper layout modeled on rs-1.html, v1.0 citeable URL, 12 numbered sections distilled from INTERNAL_BACKEND_SPEC.md with all gap-analysis stripped, 4 tables: Module/Path/LOC/Role + Trust class + Persistence class + CLI verb, Apache-2.0 framing, section 10 &quot;What this codebase is not&quot; honestly states no durable storage in OSS runtime / no external queue / no proprietary inference engine / no telemetry). Vercel rewrite /spec/codebase→codebase.html + sitemap entry priority 0.8 (206→207) + discoverable card on /spec.html. Dead CSS cleanup in public/index.html (3374→3281 lines -93 LOC): deleted orphan .cred-band block (~19 lines) + .dp-bar block (~21 lines) + .lab-strip + 25 .ls-* child classes (~51 lines) all 0 HTML usages after v7.2; restored single @keyframes ls-blink because .cassette-meta .rec::before still uses it. Deployed kolm.ai 2026-05-15.</h3>
           <time datetime="2026-05-15">2026-05-15</time>
         </div>
-        <p class="cl-row-sum">User directive: &quot;i need you to do ALL OF THIS in WAVES and FINISH OUR ENTIRE PRODUCT OFFERING SOUP TO NUTS TO BOLTS. 100% DONE.&quot; Vercel kolm-kz9s1xs1t-mithrilpro 32s aliased kolm.ai (public dir only, no Railway redeploy needed) + parallel audits all green against prod: smoke-live 103/0 + audit-buyer-journey 30/30 + e2e...</p>
+        <p class="cl-row-sum">User directive: &quot;i need you to do ALL OF THIS in WAVES and FINISH OUR ENTIRE PRODUCT OFFERING end to end. 100% DONE.&quot; Vercel kolm-kz9s1xs1t-mithrilpro 32s aliased kolm.ai (public dir only, no Railway redeploy needed) + parallel audits all green against prod: smoke-live 103/0 + audit-buyer-journey 30/30 + e2e-flow 9/9 +...</p>
         <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">runtime</span><span class="cl-pill">seo</span><span class="cl-pill">distill</span></p>
       </li>
       <li class="cl-row">

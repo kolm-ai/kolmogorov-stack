@@ -102,7 +102,7 @@ hidden_l = target.layers[L].output     # mid-layer hidden state
 draft_logits = eagle_head(hidden_l)    # tiny head, ~100M params for a 7B base
 draft_tokens = sample(draft_logits, k=4)
 # verify draft_tokens with one more target forward pass</code></pre>
-  <p>EAGLE-3's incremental contribution over EAGLE-2 is multi-layer feature aggregation and a sharper training objective that explicitly conditions on later-layer features. Reported speedups on Llama-3-70B: 3.05? (EAGLE) ??4.26? (EAGLE-2) ??5.62? (EAGLE-3) at temperature 0, while matching greedy output exactly.</p>
+  <p>EAGLE-3's incremental contribution over EAGLE-2 is multi-layer feature aggregation and a sharper training objective that explicitly conditions on later-layer features. Reported speedups on Llama-3-70B: 3.05× (EAGLE) → 4.26× (EAGLE-2) → 5.62× (EAGLE-3) at temperature 0, while matching greedy output exactly.</p>
 
   <h2>Lookahead decoding</h2>
   <p>Fu 2024 (Lookahead) takes a different angle: skip the draft model entirely. Use the Jacobi-iteration trick: at each step, generate candidate n-grams from existing context tokens by running the target model in parallel with multiple guessed positions, then collect the n-grams that the model agrees with itself on.</p>
@@ -165,7 +165,7 @@ runtime.serve(request, spec_decode=cfg)</code></pre>
   <p class="cite">Leviathan et al. 2022. <em>Fast Inference from Transformers via Speculative Decoding</em>. <a href="https://arxiv.org/abs/2211.17192">arXiv:2211.17192</a></p>
 
   <div class="meta-line" style="margin-top:48px">
-    <span><a href="/research">??back to research</a></span>
+    <span><a href="/research">← back to research</a></span>
     <span>kolm.ai/research/eagle3-lookahead</span>
   </div>
 </main>

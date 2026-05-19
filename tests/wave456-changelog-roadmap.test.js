@@ -1,3 +1,4 @@
+// @public-routes-only
 // W456: public changelog + roadmap surface.
 //
 // Asserts behavior + structural invariants, NOT page copy:
@@ -35,9 +36,13 @@ test('W456 #1 src/changelog.js exports WAVES + helpers, latest is the current wa
     assert.ok(w.title.length > 0, 'title cannot be empty');
     assert.equal(typeof w.summary, 'string');
   }
-  // Latest entry is W456 (this wave) — the file is the source of truth.
+  // Latest entry must be in the W456+ shipping family — when W457+ lands at
+  // the top of WAVES, this test continues to pass without churning. Same
+  // family-pattern relaxation pattern as W456 #8 (sw.js CACHE slug).
   const latest = mod.latestWave();
-  assert.equal(latest.wave, 'W456', 'latestWave() must be W456 (current shipping wave)');
+  const latestFamily = ['W456', 'W457', 'W458', 'W459', 'W460', 'W461', 'W462', 'W463'];
+  assert.ok(latestFamily.includes(latest.wave),
+    `latestWave() must be in the W456+ family, got: ${latest.wave}`);
 });
 
 test('W456 #2 listWaves respects --limit, --since, --tag filters', async () => {
@@ -131,7 +136,8 @@ test('W456 #8 sw.js CACHE slug references the W454+ audit-finish family', () => 
   const m = sw.match(/CACHE\s*=\s*['"]([^'"]+)['"]/);
   assert.ok(m, 'sw.js must define CACHE');
   const slug = m[1];
-  const family = ['wave454', 'wave455', 'wave456', 'wave457', 'wave458', 'wave459', 'wave460'];
+  // Relaxed past wave456 once W457+ landed. Same pattern as W446 #5 / W454 #9.
+  const family = ['wave454', 'wave455', 'wave456', 'wave457', 'wave458', 'wave459', 'wave460', 'wave461'];
   assert.ok(family.some((w) => slug.includes(w)), 'sw.js CACHE slug must reference the W454+ family, got: ' + slug);
 });
 

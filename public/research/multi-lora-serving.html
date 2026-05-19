@@ -100,7 +100,7 @@
   <p>The hard part is the kernel. A single batch may have requests bound to different adapters. You cannot run one matmul for the whole batch; you need a kernel that applies <code>x · W_base + x · (A_i · B_i)</code> where <code>i</code> varies row by row. S-LoRA wrote that kernel. Punica (Chen 2023) wrote a sibling kernel optimized for the heterogeneous case.</p>
 
   <h2>The math</h2>
-  <p>For a base of size B and adapter of size a (where a ??0.01·B):</p>
+  <p>For a base of size B and adapter of size a (where a ≈ 0.01·B):</p>
   <table>
     <tr><th>Strategy</th><th>VRAM (N adapters)</th><th>Time-to-first-token</th></tr>
     <tr><td>One server per adapter</td><td>N·B</td><td>0 (always warm)</td></tr>
@@ -156,7 +156,7 @@ pool.serve(request, adapter_cid="cidv1:sha256:...")</code></pre>
   <p class="cite">Hu et al. 2021. <em>LoRA: Low-Rank Adaptation of Large Language Models</em>. <a href="https://arxiv.org/abs/2106.09685">arXiv:2106.09685</a></p>
 
   <div class="meta-line" style="margin-top:48px">
-    <span><a href="/research">??back to research</a></span>
+    <span><a href="/research">← back to research</a></span>
     <span>kolm.ai/research/multi-lora-serving</span>
   </div>
 </main>

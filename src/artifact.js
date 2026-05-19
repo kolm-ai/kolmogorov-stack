@@ -299,7 +299,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint }) {
   const secret = requireSignSecret();
   // W252 — K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -555,11 +555,53 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // (We don't reject downgrades here — buildPayload still produces the
   // artifact, but validateArtifactClass below would reject a misdeclared one
   // before the receipt is signed.)
-  const want_model_pointer = (_finalClass === 'distilled_model') || (base_model && base_model !== 'none');
+  // W457 — runtime_target is the single source of truth (resolved early so
+  // model_pointer + manifest both reference the same value, never the
+  // legacy hardcoded 'cloud' that diverged from receipt.runtime_target).
+  // Values: js | wasm | native | gguf | onnx | cloud. Default 'js' for the
+  // rule-class path; weight-class callers pass runtime_target='gguf' (or
+  // 'onnx'/'wasm'/'native') plus the matching model_weights blob.
+  const _supportedTargets = new Set(['js', 'wasm', 'native', 'gguf', 'onnx', 'cloud']);
+  const _runtimeTargetDeclared = (typeof runtime_target === 'string' && _supportedTargets.has(runtime_target))
+    ? runtime_target
+    : 'js';
+  const _runtimeTargetConfig = (runtime_target_config && typeof runtime_target_config === 'object')
+    ? { ...runtime_target_config }
+    : null;
+  const _entrypoint = (entrypoint && typeof entrypoint === 'object')
+    ? { ...entrypoint }
+    : null;
+  // model_weights: optional { filename:string, content:Buffer } record. When
+  // present, gets bundled into the zip at the declared filename + folded into
+  // manifest.hashes + artifact_hash so any post-build tampering breaks the
+  // signature chain. The verifier (binder.js rtCheck for 'gguf'/'onnx'/'wasm')
+  // re-opens the zip and confirms the bytes match the declared sha256.
+  let _modelWeightsRecord = null;
+  if (model_weights) {
+    if (!model_weights.filename || typeof model_weights.filename !== 'string') {
+      throw new Error('model_weights.filename must be a string');
+    }
+    if (!Buffer.isBuffer(model_weights.content)) {
+      throw new Error('model_weights.content must be a Buffer');
+    }
+    _modelWeightsRecord = {
+      filename: model_weights.filename,
+      content: model_weights.content,
+      sha256: sha256(model_weights.content),
+      bytes: model_weights.content.length,
+    };
+  }
+  // W457 — model_pointer is the legacy pointer-only document (no real
+  // weights). Suppressed entirely when a real model_weights bundle was
+  // supplied — the bundled weights are the source of truth, the pointer
+  // would just be dead bytes that the verifier would have to skip. The
+  // pointer's `runtime` field used to be a hardcoded 'cloud' lie; now it
+  // mirrors `runtime_target` so a reader cannot get a divergent answer.
+  const want_model_pointer = !_modelWeightsRecord && ((_finalClass === 'distilled_model') || (base_model && base_model !== 'none'));
   const model_pointer = want_model_pointer ? JSON.stringify({
     spec: ARTIFACT_SPEC,
     base_model: base_model || 'Qwen/Qwen2.5-3B-Instruct',
-    runtime: 'cloud',
+    runtime: _runtimeTargetDeclared,
     note: 'pointer-only artifact; weights resolved on `kolm run` first launch.',
   }, null, 2) : null;
 
@@ -600,6 +642,11 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // W367 — bundle hash. Only present for rule/synthesized_rule/compiled_rule
   // artifacts; absent for distilled_model so legacy CIDs stay byte-stable.
   if (recipe_bundle_mjs) hashes.recipe_bundle_mjs = sha256(Buffer.from(recipe_bundle_mjs));
+  // W457 — model_weights hash. Present whenever the caller bundled real
+  // weights (gguf/onnx/wasm/native). The verifier (binder.js rtCheck) reads
+  // manifest.runtime_target + runtime_target_config[<target>_path] to locate
+  // the entry, hashes the bytes, and refuses to pass when sha256 drifts.
+  if (_modelWeightsRecord) hashes.model_weights = _modelWeightsRecord.sha256;
   // Wave 144 — extra files (e.g. tokenizer.json) ride inside the .kolm zip.
   // Each gets a hash in manifest.hashes.extra_files keyed by filename, and the
   // canonical hash-of-extra-files folds into artifact_hash_input so tampering
@@ -767,7 +814,14 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     job_id,
     task,
     created_at: new Date().toISOString(),
-    runtime: 'cloud',  // becomes 'on-device' once Sprint 3 LoRA bridge ships
+    // W457 — alias of runtime_target so the two fields can never diverge.
+    // Legacy readers (binder HTML, intent ranking, marketplace fingerprint)
+    // consume manifest.runtime; the verifier + dispatchRuntime + receipt
+    // consume manifest.runtime_target. Both now report the same string.
+    runtime: _runtimeTargetDeclared,
+    runtime_target: _runtimeTargetDeclared,
+    runtime_target_config: _runtimeTargetConfig,
+    entrypoint: _entrypoint,
     artifact_class: _finalClass,
     // Wave 151 — per-class recipe count surfaces "we have 6 rule recipes and
     // 1 distilled-model recipe" without forcing readers to parse recipes.json.
@@ -1046,6 +1100,13 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (recipe_bundle_mjs) {
     artifact_hash_input.recipe_bundle_mjs_hash = hashes.recipe_bundle_mjs;
   }
+  // W457 — bind model_weights into artifact_hash so swapping weight bytes
+  // (e.g. replacing a vetted Qwen 0.5B GGUF with a tampered build) breaks
+  // every signature down the chain. The matching verifier check rehashes the
+  // declared file and refuses on mismatch.
+  if (_modelWeightsRecord) {
+    artifact_hash_input.model_weights_hash = _modelWeightsRecord.sha256;
+  }
   const artifact_hash = sha256(canonicalJson(artifact_hash_input));
 
   // Build the HMAC chain. Each step seals the previous step's output.
@@ -1310,6 +1371,36 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // an air-gapped server" is a lie. The bundle is a self-contained ESM module
   // any Node 18+ / Bun 1+ / Deno 1.40+ host can `import` directly.
   if (recipe_bundle_mjs) files.push({ filename: bundle_filename, content: Buffer.from(recipe_bundle_mjs) });
+  // W457 — emit bundled model weights (gguf/onnx/wasm/native). The verifier
+  // refuses any manifest whose runtime_target is a weight class but whose
+  // declared *_path entry is absent from the zip, so PATH B (rule-class) and
+  // PATH A (weight-class) cannot be mixed up. The runtime_target_config path
+  // must match the bundled filename — we don't blindly trust the caller; the
+  // check below errors at build time if they drift.
+  if (_modelWeightsRecord) {
+    const _isWeightClass = ['gguf', 'onnx', 'wasm', 'native'].includes(_runtimeTargetDeclared);
+    if (!_isWeightClass) {
+      throw new Error(`model_weights supplied but runtime_target=${JSON.stringify(_runtimeTargetDeclared)} is not a weight class (gguf|onnx|wasm|native)`);
+    }
+    const _expectedPath = _runtimeTargetDeclared === 'gguf' ? _runtimeTargetConfig?.gguf_path
+      : _runtimeTargetDeclared === 'onnx' ? _runtimeTargetConfig?.onnx_path
+      : _runtimeTargetDeclared === 'wasm' ? 'target.wasm'
+      : _entrypoint?.binary;
+    if (!_expectedPath) {
+      throw new Error(`runtime_target=${_runtimeTargetDeclared} requires a path in runtime_target_config (or entrypoint.binary for native)`);
+    }
+    if (_expectedPath !== _modelWeightsRecord.filename) {
+      throw new Error(`model_weights.filename=${JSON.stringify(_modelWeightsRecord.filename)} does not match declared path ${JSON.stringify(_expectedPath)}; the verifier would refuse the bundle`);
+    }
+    files.push({ filename: _modelWeightsRecord.filename, content: _modelWeightsRecord.content });
+  } else if (['gguf', 'onnx', 'wasm', 'native'].includes(_runtimeTargetDeclared)) {
+    // W457 — runtime_target declared a weight class but no model_weights was
+    // supplied. This is the honest-failure path: the verifier would refuse the
+    // bundle (rtCheck would see a missing entry), so refuse at build time
+    // instead of shipping a known-broken artifact. Callers can pass
+    // runtime_target='js' (the default) to ship a rule-class artifact.
+    throw new Error(`runtime_target=${_runtimeTargetDeclared} requires model_weights={filename,content:Buffer} to bundle the matching weights; got none`);
+  }
   // Wave F — emit the C and Rust sources for compiled_rule artifacts. They
   // are the source-of-truth the verifier rebuilds against. Wave G adds the
   // compiled binary alongside (target binary hash also enters the manifest).
@@ -1323,6 +1414,9 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // shift offsets of the load-bearing files above. Filename collisions with
   // the reserved set would silently shadow; we guard here.
   const RESERVED_FILENAMES = new Set(['manifest.json', 'recipes.json', 'signature.sig', 'evals.json', 'receipt.json', 'credential.json', 'model.gguf', 'lora.bin', 'index.sqlite-vec', 'workflow_ir.json', 'attestation_report.json', 'recipe.bundle.mjs']);
+  // W457 — also reserve the bundled model_weights filename so an extra_files
+  // entry can't silently shadow real weights with a tampered payload.
+  if (_modelWeightsRecord) RESERVED_FILENAMES.add(_modelWeightsRecord.filename);
   for (const f of extra_files_list) {
     if (RESERVED_FILENAMES.has(f.filename)) {
       throw new Error(`extra_files: filename '${f.filename}' is reserved`);
@@ -1371,9 +1465,15 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // with the size-aware K-score patched into the manifest. The double-zip is
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
 // axis includes the K-score bytes themselves.
-export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons }) {
+export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint }) {
   requireSignSecret();
-  const dir = outDir || path.join(os.tmpdir(), 'kolm-artifacts');
+  // W457b (build-honors-out) — when an explicit outPath is supplied, write
+  // the .kolm directly at the user-requested filename. Otherwise fall back
+  // to the legacy `outDir/${job_id}.kolm` path. The override removes the
+  // copy-rename step in spec-compile.js that (a) leaked `<job_id>.kolm` into
+  // error messages and (b) was the actual line that raised EBUSY/EPERM on
+  // Windows when the target was locked by another process.
+  const dir = outPathOverride ? path.dirname(outPathOverride) : (outDir || path.join(os.tmpdir(), 'kolm-artifacts'));
   fs.mkdirSync(dir, { recursive: true });
 
   // Derive eval_score from the synthesis result. Pattern-mode synthesis
@@ -1400,7 +1500,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     confidential_compute = await verifyAttestation(kind, attestation_report);
   }
 
-  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons };
+  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint };
 
   // W350 — temp-file cleanup registry. The two-pass build writes a probe zip
   // to measure its size before the K-score is embedded; on success the probe
@@ -1412,7 +1512,33 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
   // flips true.
   const cleanupOnFail = [];
   let success = false;
-  const outPath = path.join(dir, `${job_id}.kolm`);
+  // W457b — honor explicit outPath override so the on-disk artifact is named
+  // exactly what the user asked for (no `<job_id>.kolm` intermediate). Wrap
+  // the pre-flight write probe so a locked/permission-denied target produces
+  // a clean, actionable error instead of an unhandled EPERM/EBUSY crash with
+  // the intermediate job_id in the message.
+  const outPath = outPathOverride || path.join(dir, `${job_id}.kolm`);
+  if (outPathOverride) {
+    try {
+      // Probe the destination by opening write-only. fs.openSync returns
+      // immediately on success and throws synchronously on permission /
+      // lock / read-only-file-system errors so we can attach actionable
+      // hints before the archiver pipe hits the same failure deep inside
+      // async code (where the original stack trace was useless).
+      const _fd = fs.openSync(outPath, 'w');
+      fs.closeSync(_fd);
+    } catch (e) {
+      const code = (e && e.code) || 'UNKNOWN';
+      if (code === 'EPERM' || code === 'EACCES' || code === 'EBUSY' || code === 'EROFS') {
+        const hint = `${code} opening ${outPath}: is the file open in another process? Try a different --out or close the previous build.`;
+        const err = new Error(hint);
+        err.code = code;
+        err.path = outPath;
+        throw err;
+      }
+      throw e;
+    }
+  }
   try {
   // Pass 1 — zip to measure size.
   const probePayload = buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, judge_id: _judgeId, eval_score, tier: _tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, ...sharedBlocks });

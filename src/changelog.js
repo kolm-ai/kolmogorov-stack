@@ -9,6 +9,13 @@
 
 const WAVES = [
   {
+    wave: 'W457',
+    date: '2026-05-19',
+    title: 'omnibus finish: runtime/GGUF + CLI auth + telemetry + EPERM + hrefs + trust honesty',
+    summary: '7-block finish closing every release blocker. (1) manifest.runtime === manifest.runtime_target === receipt.runtime_target locked in; bundled 491MB Qwen2.5-0.5B q4_k_m as proof. (2) kolm whoami/doctor split api-key into config + server rows; capture status + distill runs fall back to local store on cloud failure (no AggregateError). (3) kolm what / lake / opportunities / capture status all read the canonical event-store. (4) kolm build honors --out, EPERM on locked file gives a clean error, --from override warns when overridden by curated baseline. (5) 7 broken hrefs cleared (/cookbook reroute to /docs/cookbook, /security.txt rewrite); homepage drops weight-class artifact overclaim, names rule-class today + roadmap separately. (6) trust.html demo-signature replaced with clearly-invalid fixture; status.html 99.97% placeholder rows now explain the cell populates from /v1/uptime; 34 mojibake fixes across cookbook/research/vs/soc2. (7) Recent-shipped panel on /account/overview reads /v1/changelog; soup-to-nuts phrase scrubbed from generated changelog. 3907/3907 + 0 broken hrefs.',
+    tags: ['compile', 'verify', 'distill', 'cli', 'trust', 'docs', 'hero'],
+  },
+  {
     wave: 'W456',
     date: '2026-05-19',
     title: 'public changelog + roadmap surface',

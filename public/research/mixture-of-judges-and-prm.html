@@ -142,7 +142,7 @@ trainer.train(captures="math/step_preferences.jsonl")</code></pre>
 
   <h2>Where this fits in the K-score gate</h2>
   <p>The K-score is <code>K = 0.40·A + 0.15·S + 0.15·L + 0.15·C + 0.15·V</code>. The judges-mix is what produces the <em>A</em> term (Accuracy) for tasks where there is no exact verifier. The PRM is what produces the per-step component when the task is multi-step (math, planning, agentic). For coding tasks with unit tests, neither shows up; the test suite is the verifier.</p>
-  <p>The gate is <code>K ??0.85 AND pass_rate ??0.85</code>. The judges-mix votes go into the pass_rate side: a response "passes" only if at least 2 of 3 judges score it ??rubric_threshold.</p>
+  <p>The gate is <code>K ≥ 0.85 AND pass_rate ≥ 0.85</code>. The judges-mix votes go into the pass_rate side: a response "passes" only if at least 2 of 3 judges score it ≥ rubric_threshold.</p>
 
   <h2>What the receipt records</h2>
   <pre><code>{
@@ -179,7 +179,7 @@ trainer.train(captures="math/step_preferences.jsonl")</code></pre>
   <p class="cite">Lai et al. 2024. <em>Step-DPO: Step-wise Preference Optimization for Long-chain Reasoning</em>. <a href="https://arxiv.org/abs/2406.18629">arXiv:2406.18629</a></p>
 
   <div class="meta-line" style="margin-top:48px">
-    <span><a href="/research">??back to research</a></span>
+    <span><a href="/research">← back to research</a></span>
     <span>kolm.ai/research/mixture-of-judges-and-prm</span>
   </div>
 </main>

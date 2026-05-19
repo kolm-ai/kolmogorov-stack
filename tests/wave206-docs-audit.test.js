@@ -173,6 +173,12 @@ test('4. every COMPLETION_VERBS entry has at least one inbound docs reference', 
     // redact/ as an isolated optional-deps package. Heavy ML deps stay
     // out of root install per the standing constraint.
     'media',
+    // W456 — `changelog` mirrors the /changelog public marketing surface
+    // (curated WAVES source-of-truth in src/changelog.js + /v1/changelog
+    // public route). HELP.changelog + the /changelog page itself carry
+    // user-facing docs; no /docs/cli/changelog page required because the
+    // changelog is a marketing surface, not a workflow verb.
+    'changelog',
   ]);
   const real = missing.filter(v => !ALLOWED_GAPS.has(v));
   assert.deepEqual(real, [],

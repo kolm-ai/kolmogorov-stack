@@ -815,6 +815,16 @@ export async function compileSpec(spec, opts = {}) {
     }
   }
 
+  // W457b — when the caller passes opts.outPath, hand it straight to
+  // buildAndZip so the .kolm is written at the user's exact filename
+  // (no `<job_id>.kolm` intermediate + copy-rename that leaked the
+  // job_id into error messages and raised EBUSY when the target was
+  // locked deep inside copyFileSync).
+  if (opts.outPath) {
+    // Surface the resolved destination BEFORE the open probe so the
+    // user can see exactly what's about to be written if it fails.
+    console.error(`[kolm build] writing artifact to: ${opts.outPath}`);
+  }
   const built = await buildAndZip({
     job_id: spec.job_id,
     task: spec.task,
@@ -825,6 +835,7 @@ export async function compileSpec(spec, opts = {}) {
     evals,
     training_stats: trainingStatsForBuild,
     outDir,
+    outPath: opts.outPath || undefined,
     license: opts.license != null ? opts.license : (spec.license || null),
     artifact_class: artifactClass,
     seed_provenance,

@@ -540,7 +540,10 @@ gate = 0.85    K &lt; gate    DO NOT PROMOTE</pre>
       { step: 0, input_hash: 'aaaa', output_hash: 'bbbb', hmac: 'tampered_hmac_value' },
       { step: 1, input_hash: 'bbbb', output_hash: 'cccc', hmac: 'also_tampered' }
     ],
-    signature: 'fake_signature_for_demo'
+    // Example shape only — real receipts carry a 64-char hex HMAC (and a
+    // signature_ed25519 block since Wave 149). This demo string is
+    // intentionally invalid so the verifier below trips the tamper path.
+    signature: 'example_invalid_demo_0000000000000000000000000000000000000000000000000000000000'
   };
 
   function escape(s) {

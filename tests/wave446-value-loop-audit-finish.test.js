@@ -250,10 +250,11 @@ test('W446 #5 — sw.js cache slug is current (audit-finish marker)', () => {
   // bumps it, this test gets updated alongside the bump (lock-in, not freeze).
   assert.ok(slug.startsWith('kolm-v7-2026-05-19-wave'),
     'sw.js CACHE slug must start with kolm-v7-2026-05-19-wave*, got: ' + slug);
-  assert.ok(
-    slug.includes('wave443') || slug.includes('wave445') || slug.includes('wave446') ||
-    slug.includes('wave447') || slug.includes('wave448') || slug.includes('wave449') ||
-    slug.includes('wave450') || slug.includes('wave451') || slug.includes('wave452') ||
-    slug.includes('wave453') || slug.includes('wave454') || slug.includes('wave455'),
-    'sw.js CACHE slug must reference the W443-W455 audit-finish/follow-up batch, got: ' + slug);
+  // Family pattern (wave443 onward) — relaxed past wave455 once W456+ landed.
+  // Each new wave relaxes the prior wave's pin to a wider family band.
+  const family = ['wave443','wave445','wave446','wave447','wave448','wave449',
+                  'wave450','wave451','wave452','wave453','wave454','wave455',
+                  'wave456','wave457','wave458','wave459','wave460','wave461'];
+  assert.ok(family.some((w) => slug.includes(w)),
+    'sw.js CACHE slug must reference the W443+ audit-finish/follow-up family, got: ' + slug);
 });

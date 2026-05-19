@@ -182,6 +182,10 @@ const BANNED_REPLACE = [
   [/coming soon/gi, 'on the roadmap'],
   [/verify before ship/gi, 'check before ship'],
   [/\bTBD\b/g, 'pending'],
+  // W457: W409j #8 forbids the literal "soup to nuts" anywhere on the site.
+  // Historical user-directive quotes used the phrase; rewrite to "end to end".
+  [/\bsoup\s+to\s+nuts\s+to\s+bolts\b/gi, 'end to end'],
+  [/\bsoup\s+to\s+nuts\b/gi, 'end to end'],
 ];
 
 function scrubBanned(s) {

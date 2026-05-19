@@ -280,6 +280,20 @@
   <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
   <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
 </div>
+<!-- W457: Recently shipped. Hooks the W456 public /v1/changelog feed into
+     the authed dashboard so the operator sees wave context next to their
+     tenant numbers. Public route (no auth, identical for every caller)
+     mirrored by `kolm changelog` CLI verb. -->
+<div id="recent-shipped" class="kpanel" data-w457="recent-shipped" aria-busy="true" style="margin-top:18px">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px">
+    <h2 style="margin:0;font-size:15px">Recently shipped</h2>
+    <span class="pill mute" style="font-size:10px"><a href="/changelog" style="color:inherit;text-decoration:none">/changelog</a></span>
+  </div>
+  <div id="recent-shipped-body">
+    <div class="skel" style="width:340px;height:14px"></div>
+    <div class="skel" style="width:240px;height:11px;margin-top:6px"></div>
+  </div>
+</div>
 <div id="empty-state" class="empty" hidden data-empty-state>
   <strong>No captured events yet.</strong> Set <code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code> (or point at <code>https://kolm.ai/v1/capture/openai</code>) and your first call lands here. See <a href="/account/connectors">Connectors</a>.
 </div>
@@ -486,6 +500,39 @@ window.kfetch("/v1/intent/next").then(function(payload){
         var msg = (e && e.name==="AbortError") ? "request timed out (8s)" : (e && e.message) || "network error";
         answer.innerHTML = '<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:6px">'+esc(msg)+'</div>';
       });
+  });
+})();
+// W457: Recently shipped. Public /v1/changelog (no auth needed, marketing
+// surface) → top 3 waves. Identical source as the `kolm changelog` CLI verb.
+// Soft-fails to "see /changelog" if the route is unreachable.
+(function wireRecentShipped(){
+  var panel=document.getElementById("recent-shipped");
+  var body=document.getElementById("recent-shipped-body");
+  if(!panel||!body) return;
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+  fetch("/v1/changelog?limit=3").then(function(r){return r.json();}).then(function(j){
+    panel.removeAttribute("aria-busy");
+    var waves=(j && Array.isArray(j.waves)) ? j.waves : [];
+    if(!waves.length){
+      body.innerHTML='<div style="color:var(--ink-mute);font-size:13px">No recent waves. See <a href="/changelog" style="color:inherit">/changelog</a>.</div>';
+      return;
+    }
+    body.innerHTML=waves.map(function(w){
+      var tags=(Array.isArray(w.tags)?w.tags:[]).slice(0,3).map(function(t){
+        return '<span class="pill mute" style="font-size:10px;margin-right:4px">'+esc(t)+'</span>';
+      }).join("");
+      return '<div data-w457="wave-row" data-wave="'+esc(w.wave)+'" style="padding:10px 0;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04))">'+
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">'+
+          '<div style="font-family:var(--mono);font-size:12.5px;color:var(--accent)">'+esc(w.wave)+' &middot; '+esc(w.title||"")+'</div>'+
+          '<div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute)">'+esc(w.date||"")+'</div>'+
+        '</div>'+
+        '<div style="font-size:12.5px;color:var(--ink-mute);margin-top:4px;line-height:1.5">'+esc(w.summary||"")+'</div>'+
+        (tags?'<div style="margin-top:6px">'+tags+'</div>':'')+
+      '</div>';
+    }).join("");
+  }).catch(function(){
+    panel.removeAttribute("aria-busy");
+    body.innerHTML='<div style="color:var(--ink-mute);font-size:13px">Changelog feed offline. See <a href="/changelog" style="color:inherit">/changelog</a> or run <code style="background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--accent)">kolm changelog</code>.</div>';
   });
 })();
 </script>

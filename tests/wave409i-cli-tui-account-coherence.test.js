@@ -167,7 +167,12 @@ test('W409i #5 - cmdBilling exists + is wired into main dispatcher + _dispatchVe
   assert.match(CLI_SRC, /case 'billing':\s*await withErrorContext\('billing',\s*\(\)\s*=>\s*cmdBilling/,
     'main switch must route billing -> cmdBilling');
   assert.match(CLI_SRC, /billing:\s*cmdBilling/, '_dispatchVerb table must include billing');
-  assert.match(CLI_SRC, /'metrics',\s*'billing'/, 'COMPLETION_VERBS must list billing');
+  // Relaxed past W456 — `changelog` slots between `metrics` and `billing` in
+  // COMPLETION_VERBS. The pin is that billing exists and is reachable from
+  // tab-completion; the exact neighbor is a stable-order convenience, not a
+  // behavior contract.
+  assert.match(CLI_SRC, /COMPLETION_VERBS\s*=\s*\[[^\]]*['"]billing['"]/s,
+    'COMPLETION_VERBS must list billing');
   assert.match(CLI_SRC, /billing:\s*\[\s*['"]usage['"]/,
     'COMPLETION_SUBS must include billing -> [usage, plan, ...]');
 });
