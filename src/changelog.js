@@ -9,6 +9,13 @@
 
 const WAVES = [
   {
+    wave: 'W460',
+    date: '2026-05-19',
+    title: 'confidential compute attestation embed in .kolm RS-1 receipt',
+    summary: 'Closes audit P1 Confidential Compute cluster open item ("attestation report embed in .kolm RS-1 receipt; verification path"). src/spec-compile.js accepts opts.attestation_report (filesystem path or pre-loaded object) + opts.attestation_kind (pccs/snp-report/nitro-attestation/nras); the report flows through buildAndZip → verifyAttestation → manifest.confidential_compute. The state machine is honest-by-default — shape_ok + verified:false when only the shipped shape-only stub is wired, cryptographically_verified + verified:true only when a tenant has registered a real crypto verifier via registerAttestationVerifier(kind, fn). confidential_compute_hash binds into artifact_hash so post-build tampering of the attestation invalidates the receipt. CLI: `kolm compile --attestation-report <file> --attestation-kind <kind>` + `kolm verify --attestation` pretty-prints the embedded block. 10 W460 tests exercise the full spec→artifact path, hash-binding, plugin upgrade, malformed-report rejection, missing-kind error, and no-attestation default.',
+    tags: ['confidential-compute', 'attestation', 'audit', 'tee', 'rs-1'],
+  },
+  {
     wave: 'W459',
     date: '2026-05-19',
     title: 'distillation reliability: teacher fallback + partial-run resume',

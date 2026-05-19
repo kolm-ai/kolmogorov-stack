@@ -815,6 +815,39 @@ export async function compileSpec(spec, opts = {}) {
     }
   }
 
+  // W460 — confidential compute attestation report embed. Caller passes
+  // opts.attestation_report as either (a) a filesystem path to a JSON
+  // attestation report, (b) a pre-loaded object, or (c) nothing (skip the
+  // block). The kind hint comes from opts.attestation_kind ('pccs' |
+  // 'snp-report' | 'nitro-attestation' | 'nras') and is stamped on the
+  // report as `_kind` so artifact.js's buildAndZip picks it up (it runs the
+  // actual verifyAttestation call). The resulting confidential_compute
+  // block binds into artifact_hash via artifact.js:1092, so a verifier
+  // that re-runs verifyAttestation on the same report bytes gets the same
+  // state and the same artifact_hash. Shape-only is the default (state
+  // 'shape_ok', verified:false) until a tenant registers a real crypto
+  // verifier via registerAttestationVerifier.
+  let attestationReportObj = null;
+  if (opts.attestation_report) {
+    if (typeof opts.attestation_report === 'string') {
+      try {
+        attestationReportObj = JSON.parse(fs.readFileSync(opts.attestation_report, 'utf8'));
+      } catch (e) {
+        throw err(`attestation_report path ${opts.attestation_report} failed to load: ${e.message}`);
+      }
+    } else if (typeof opts.attestation_report === 'object' && opts.attestation_report !== null) {
+      attestationReportObj = { ...opts.attestation_report };
+    } else {
+      throw err(`attestation_report must be a file path or an object; got ${typeof opts.attestation_report}`);
+    }
+    if (opts.attestation_kind) {
+      attestationReportObj._kind = opts.attestation_kind;
+    }
+    if (!attestationReportObj._kind && !attestationReportObj.kind) {
+      throw err(`attestation_report supplied without an attestation kind; pass --attestation-kind=<pccs|snp-report|nitro-attestation|nras> (or set report._kind / report.kind directly)`);
+    }
+  }
+
   // W457b — when the caller passes opts.outPath, hand it straight to
   // buildAndZip so the .kolm is written at the user's exact filename
   // (no `<job_id>.kolm` intermediate + copy-rename that leaked the
@@ -853,6 +886,7 @@ export async function compileSpec(spec, opts = {}) {
     auditor_attestation: auditorAttestationBlocks.length > 0 ? auditorAttestationBlocks : null,
     supersession: supersessionBlock,
     drift_report: driftReportBlock,
+    attestation_report: attestationReportObj,
     allow_below_gate: opts.allow_below_gate === true || opts.allowBelowGate === true,
   });
 

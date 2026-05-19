@@ -885,6 +885,23 @@ OPTIONS (spec)
                                matches the builder key (a self-attestation is
                                not independent). Repeatable.
                                Example: --auditor-attestation ./acme-trustlab.attestation.json
+  --attestation-report <file>  embed a confidential-compute attestation report
+                               into the .kolm RS-1 receipt (wave 460). The file
+                               is a JSON attestation report (PCCS quote / SNP
+                               report / Nitro document / NRAS report). The block
+                               is verified through verifyAttestation(kind, report)
+                               at build time; default is shape-only (state=
+                               shape_ok, verified:false). A tenant who has
+                               registered a real crypto verifier via
+                               registerAttestationVerifier(kind, fn) gets
+                               state=cryptographically_verified. The block binds
+                               into artifact_hash so post-build tampering of the
+                               attestation invalidates the receipt.
+                               Example: --attestation-report ./tdx-quote.json --attestation-kind pccs
+  --attestation-kind <kind>    name the attestation kind (used with
+                               --attestation-report). One of: pccs (Intel TDX),
+                               snp-report (AMD SEV-SNP), nitro-attestation (AWS
+                               Nitro), nras (NVIDIA Confidential Compute).
 
 RECIPE SOURCE - two ways to author
   Inline:    "recipes": [{ "source": "function generate(input, lib) {...}" }]
@@ -6155,6 +6172,23 @@ async function cmdCompile(args) {
       console.error(`error: --drift-report ${driftReportFlag}: not found`);
       process.exit(EXIT.NOT_FOUND);
     }
+    // W460 — `--attestation-report <file>` + `--attestation-kind <kind>`
+    // embed a confidential-compute attestation block into the .kolm RS-1
+    // receipt. Default is shape-only (state=shape_ok, verified:false). A
+    // tenant who has registered a real cryptographic verifier via
+    // registerAttestationVerifier(kind, fn) gets state=cryptographically_verified.
+    // The block binds into artifact_hash so any post-build tamper of the
+    // attestation invalidates the receipt.
+    const attestationReportFlag = pickFlag(args, '--attestation-report');
+    const attestationKindFlag = pickFlag(args, '--attestation-kind');
+    if (attestationReportFlag && !fs.existsSync(attestationReportFlag)) {
+      console.error(`error: --attestation-report ${attestationReportFlag}: not found`);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    if (attestationKindFlag && !['pccs', 'snp-report', 'nitro-attestation', 'nras'].includes(attestationKindFlag)) {
+      console.error(`error: --attestation-kind ${attestationKindFlag}: must be one of pccs, snp-report, nitro-attestation, nras`);
+      process.exit(EXIT.BAD_ARGS);
+    }
     try {
       const r = await compileSpec(spec, {
         outDir: outDirL,
@@ -6177,6 +6211,8 @@ async function cmdCompile(args) {
         auditorAttestations: auditorAttestationFlag.length ? auditorAttestationFlag : undefined,
         supersession: supersessionInput || undefined,
         drift_report: driftReportFlag || undefined,
+        attestation_report: attestationReportFlag || undefined,
+        attestation_kind: attestationKindFlag || undefined,
         allow_below_gate: allowBelowGateFlag,
       });
       const composite = r.k_score && typeof r.k_score.composite === 'number' ? r.k_score.composite : null;
@@ -7532,9 +7568,16 @@ async function cmdVerify(args) {
     return;
   }
 
+  // W460 — `--attestation` pretty-prints the manifest.confidential_compute
+  // block alongside the verdict so a regulator / oncall can see at a glance
+  // which attestation kind was embedded + what state the verifier landed on.
+  // Independent of binder mode: works for both --json and plaintext output.
+  const showAttestation = args.includes('--attestation');
+
   // No --binder: print the verification summary as JSON or plaintext.
   const result = await buildBinder(ap);
   void repoRoot;
+  const ccBlock = result.manifest?.confidential_compute || null;
   // W339 — single source-of-truth gate. The binder still runs its full set
   // of checks (signature, receipt chain, exports, holdouts, attestations);
   // productionReady() collapses the four "is this safe to ship" gates the
@@ -7557,6 +7600,7 @@ async function cmdVerify(args) {
       production_ready: prodVerdict.ok,
       gate_reasons: prodVerdict.reasons,
       gates: prodVerdict.gates,
+      confidential_compute: showAttestation ? ccBlock : undefined,
     }, null, 2));
   } else {
     console.log(`verdict: ${combinedFail ? 'fail' : result.verdict}`);
@@ -7573,6 +7617,25 @@ async function cmdVerify(args) {
       for (const reason of prodVerdict.reasons) {
         console.log(`  - ${reason}`);
       }
+    }
+    // W460 — confidential_compute pretty-print. Always shows when --attestation
+    // is set; otherwise only shows when a block is present AND state != unverified
+    // (so the noise stays off the common case but a real attestation never gets
+    // hidden by accident).
+    if (ccBlock && (showAttestation || ccBlock.state !== 'unverified')) {
+      console.log('');
+      console.log('confidential_compute:');
+      console.log(`  kind:          ${ccBlock.kind || '(none)'}`);
+      console.log(`  state:         ${ccBlock.state || '(none)'}`);
+      console.log(`  verifier:      ${ccBlock.verifier || '(none)'}`);
+      console.log(`  verified:      ${ccBlock.verified === true}`);
+      if (ccBlock.report_hash) console.log(`  report_hash:   ${ccBlock.report_hash}`);
+      if (ccBlock.trust_root)  console.log(`  trust_root:    ${ccBlock.trust_root}`);
+      if (ccBlock.not_after)   console.log(`  not_after:     ${ccBlock.not_after}`);
+      if (ccBlock.timestamp)   console.log(`  timestamp:     ${ccBlock.timestamp}`);
+    } else if (showAttestation) {
+      console.log('');
+      console.log('confidential_compute: (none — artifact has no embedded attestation)');
     }
     console.log('');
     console.log('hint: add --binder out.html to emit a printable compliance report');
