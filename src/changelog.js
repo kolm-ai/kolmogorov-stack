@@ -9,6 +9,13 @@
 
 const WAVES = [
   {
+    wave: 'W465',
+    date: '2026-05-19',
+    title: 'per-namespace cost attribution + team-level rollup (closes P1 Billing)',
+    summary: 'Closes audit P1 Billing cluster open item ("hosted dashboard for usage breakdown; per-namespace cost attribution; team-level rollup"). New src/billing-breakdown.js aggregates event-store rows (the authoritative cost ledger — not the meter file) into a per-namespace cost+token+latency breakdown for one tenant in a billing period; teamRollup() walks team members via listMembers() and aggregates each member tenant\'s breakdown into a single envelope. Per-member detail is gated by role: owner/admin see every member\'s namespaces; member/viewer see only their own. Connector capture path now reads `x-kolm-namespace:` header (or body.corpus_namespace, or body.metadata.namespace) and stamps it on the event-store row + capture-store row + response header — previously every connector capture landed under literal "default", which made per-namespace attribution useless. New GET /v1/billing/breakdown?period=YYYY-MM[&by=team&team_id=<id>] auth-gated route (tenant_id forced from req.tenant_record, never from query/body). New `kolm billing breakdown [--by namespace|team] [--team-id <id>] [--period YYYY-MM]` CLI verb. New "Per-namespace breakdown" panel on /account/billing.html. New 16th TUI view billing-breakdown (key J) + :breakdown / :rollup / :spend-breakdown command-mode aliases. 10 W465 tests pin the loop: route auth, tenant fence, per-namespace aggregation correctness, team rollup correctness, role-gated detail visibility, period validation, connector namespace threading via header.',
+    tags: ['billing', 'cost-attribution', 'namespace', 'team', 'audit', 'rollup'],
+  },
+  {
     wave: 'W464',
     date: '2026-05-19',
     title: 'multimodal audio voiceprint scrub worker (third media-redact primitive)',

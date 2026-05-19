@@ -252,6 +252,24 @@
 <div id="empty-state" class="empty" hidden data-empty-state>
   <strong>No billing data yet.</strong> Sign in to a paid plan to see per-meter usage. Free tier shows the captured / redacted / install meters only.
 </div>
+
+<!-- W465: per-namespace cost attribution + team rollup -->
+<div class="kpanel" id="w465-breakdown">
+  <h2>Per-namespace breakdown</h2>
+  <p class="pdesc">Spend, captures, and tokens grouped by <code>corpus_namespace</code> for the current billing period. Read by <code>kolm billing breakdown</code> + the TUI <code>:breakdown</code> view from the same <code>/v1/billing/breakdown</code> route.</p>
+  <div class="toolbar">
+    <label>Period <input id="bd-period" type="text" placeholder="YYYY-MM (defaults to current)"></label>
+    <button class="btn" id="bd-refresh" type="button">Refresh</button>
+    <span id="bd-totals" style="margin-left:auto;color:var(--ink-mute);font-size:12.5px"></span>
+  </div>
+  <table class="ktable">
+    <thead><tr><th>Namespace</th><th>Captures</th><th>Tokens (in)</th><th>Tokens (out)</th><th>Spend (USD)</th><th>Latency avg (ms)</th></tr></thead>
+    <tbody id="bd-rows"><tr><td colspan="6" style="color:var(--ink-mute)">Loading namespace breakdown...</td></tr></tbody>
+  </table>
+  <div id="bd-empty" class="empty" hidden>
+    <strong>No captures in this period.</strong> Once any captured event lands in the event-store, it will show up here grouped by <code>corpus_namespace</code>.
+  </div>
+</div>
 </section>
 </div>
 </main>
@@ -297,6 +315,52 @@ window.kfetch("/v1/billing/usage").catch(function(){
   });
   if(!any){document.getElementById("empty-state").hidden=false;}
 });
+
+// W465 — per-namespace breakdown panel. Reads /v1/billing/breakdown
+// (?period=YYYY-MM optional). Refresh button + period input re-fire the fetch.
+function w465LoadBreakdown(){
+  var p=document.getElementById("bd-period").value.trim();
+  var url="/v1/billing/breakdown";
+  if(p){
+    if(!/^\d{4}-\d{2}$/.test(p)){
+      document.getElementById("bd-rows").innerHTML='<tr><td colspan="6" class="pill bad">invalid period (must be YYYY-MM)</td></tr>';
+      return;
+    }
+    url+="?period="+encodeURIComponent(p);
+  }
+  document.getElementById("bd-rows").innerHTML='<tr><td colspan="6" style="color:var(--ink-mute)">Loading...</td></tr>';
+  document.getElementById("bd-empty").hidden=true;
+  window.kfetch(url).then(function(j){
+    var ns=(j&&j.namespaces)||[];
+    var totals=(j&&j.totals)||{};
+    document.getElementById("bd-totals").textContent=
+      "period "+(j.period||"-")+" · total $"+Number(totals.cost_usd||0).toFixed(6)+
+      " · "+(totals.captures||0)+" captures · tokens in/out "+(totals.tokens_in||0)+"/"+(totals.tokens_out||0);
+    if(!ns.length){
+      document.getElementById("bd-rows").innerHTML="";
+      document.getElementById("bd-empty").hidden=false;
+      return;
+    }
+    var html="";
+    for(var i=0;i<ns.length;i++){
+      var row=ns[i];
+      html+="<tr>"+
+        "<td><code>"+window.kesc(row.namespace||"-")+"</code></td>"+
+        "<td>"+window.knum(row.captures||0)+"</td>"+
+        "<td>"+window.knum(row.tokens_in||0)+"</td>"+
+        "<td>"+window.knum(row.tokens_out||0)+"</td>"+
+        "<td>$"+Number(row.cost_usd||0).toFixed(6)+"</td>"+
+        "<td>"+Number(row.latency_ms_avg||0).toFixed(1)+"</td>"+
+      "</tr>";
+    }
+    document.getElementById("bd-rows").innerHTML=html;
+  }).catch(function(e){
+    document.getElementById("bd-rows").innerHTML='<tr><td colspan="6" class="pill bad">breakdown failed: '+window.kesc(String(e&&e.message||e))+'</td></tr>';
+  });
+}
+document.getElementById("bd-refresh").addEventListener("click",w465LoadBreakdown);
+document.getElementById("bd-period").addEventListener("keydown",function(e){if(e.key==="Enter")w465LoadBreakdown();});
+w465LoadBreakdown();
 </script>
 </body>
 </html>

@@ -241,6 +241,12 @@ import {
   shouldMeter as usageShouldMeter,
 } from './usage.js';
 
+// W465 — per-namespace cost attribution + team-level rollup.
+import {
+  tenantNamespaceBreakdown as billingTenantNamespaceBreakdown,
+  teamRollup as billingTeamRollup,
+} from './billing-breakdown.js';
+
 // Per-IP rate limiters (S5, S10). Express trust-proxy is set to 2 in
 // server.js so X-Forwarded-For resolves through the Vercel→Railway chain.
 // Vercel rotates client egress IPs within a /24 subnet on each request, so
@@ -1911,6 +1917,18 @@ export function buildRouter() {
     }
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
     const model = String(body.model || '').slice(0, 128);
+    // W465 — per-namespace cost attribution. Connector callers can scope a
+    // capture to a corpus namespace via `x-kolm-namespace:` header (preferred)
+    // or `corpus_namespace` body field (fallback). Defaults to 'default' for
+    // back-compat. Sanitized so /v1/billing/breakdown rolls up safe slugs.
+    const callerNamespace = sanitizeNamespace(
+      String(
+        req.headers['x-kolm-namespace']
+        || body.corpus_namespace
+        || (body && body.metadata && body.metadata.namespace)
+        || 'default'
+      )
+    );
     // Extract a prompt string for hashing + scan.
     let promptText = '';
     if (Array.isArray(body.messages)) {
@@ -2104,7 +2122,7 @@ export function buildRouter() {
           tenant_id: (req && req.tenant_record && req.tenant_record.id)
             || (req && req.tenant)
             || 'local',
-          namespace: 'default',
+          namespace: callerNamespace,
           provider,
           // W411 — explicit canonical vendor for lake parity. provider stays
           // as free-text alias; vendor is the closed enum lake consumers read.
@@ -2149,7 +2167,7 @@ export function buildRouter() {
             latency_us: 0,
             cost_usd: 0,
             provider: evErr.provider,
-            corpus_namespace: 'default',
+            corpus_namespace: callerNamespace,
             status: 502,
             created_at: evErr.created_at,
             redaction_policy: evErr.redaction_policy,
@@ -2228,7 +2246,7 @@ export function buildRouter() {
       tenant_id: (req && req.tenant_record && req.tenant_record.id)
         || (req && req.tenant)
         || 'local',
-      namespace: 'default',
+      namespace: callerNamespace,
       provider,
       // W411 — explicit canonical vendor for lake parity. provider stays
       // as free-text alias; vendor is the closed enum lake consumers read.
@@ -2284,7 +2302,7 @@ export function buildRouter() {
         latency_us: ev.latency_ms * 1000,
         cost_usd: ev.estimated_cost_usd,
         provider: ev.provider,
-        corpus_namespace: 'default',
+        corpus_namespace: callerNamespace,
         status: httpStatus,
         created_at: ev.created_at,
         redaction_policy: ev.redaction_policy,
@@ -2314,6 +2332,9 @@ export function buildRouter() {
     res.set('x-kolm-provider', provider);
     res.set('x-kolm-model', model);
     res.set('x-kolm-event-durable', String(durable));
+    // W465 — surface the namespace the capture landed under so SDK callers
+    // can audit billing-breakdown attribution without a round-trip to /v1/events.
+    res.set('x-kolm-namespace', callerNamespace);
     res.set('x-kolm-redaction-policy', policy);
     res.set('x-kolm-raw-available', String(ev.raw_available === true));
     if (noncompliantIds.length) res.set('x-kolm-noncompliant-identifiers', noncompliantIds.join(','));
@@ -9878,6 +9899,54 @@ export function buildRouter() {
       res.json(Object.assign({ ok: true }, payload, { used: payload.meters }));
     } catch (e) {
       res.status(500).json({ error: 'billing_usage_error', message: String(e && e.message || e) });
+    }
+  });
+
+  // ============== W465: per-namespace cost attribution + team rollup ==============
+  // Aggregates event-store rows (the authoritative cost ledger) into a
+  // per-namespace breakdown for the caller's tenant. With `by=team&team_id=<id>`
+  // it walks the team's member tenants and rolls up.
+  //
+  // Tenant fence: tenant_id is forced from req.tenant_record.id — never read
+  // from the request body or query string. Team caller is forced to be a
+  // member of the named team (non-members get 403 forbidden).
+  r.get('/v1/billing/breakdown', async (req, res) => {
+    const trec = req && req.tenant_record;
+    if (!trec) {
+      return res.status(401).json({ error: 'auth_required', hint: 'send Authorization: Bearer <ks_* or kao_* key>' });
+    }
+    let period = (req.query && req.query.period) || null;
+    if (period && !/^\d{4}-\d{2}$/.test(String(period))) {
+      return res.status(400).json({ error: 'invalid_period', hint: 'period must match YYYY-MM' });
+    }
+    const by = String((req.query && req.query.by) || 'namespace').toLowerCase();
+    if (by !== 'namespace' && by !== 'team') {
+      return res.status(400).json({ error: 'invalid_by', hint: 'by must be namespace or team' });
+    }
+    try {
+      if (by === 'team') {
+        const teamId = req.query && req.query.team_id;
+        if (!teamId) {
+          return res.status(400).json({ error: 'team_id_required', hint: 'by=team requires team_id query param' });
+        }
+        const rollup = await billingTeamRollup({
+          team_id: String(teamId),
+          period,
+          caller_tenant_id: trec.id,
+        });
+        return res.json({ ok: true, by: 'team', ...rollup });
+      }
+      const breakdown = await billingTenantNamespaceBreakdown({
+        tenant_id: trec.id,
+        period,
+      });
+      return res.json({ ok: true, by: 'namespace', ...breakdown });
+    } catch (e) {
+      const code = e && e.code;
+      if (code === 'invalid_period') return res.status(400).json({ error: 'invalid_period' });
+      if (code === 'team_not_found') return res.status(404).json({ error: 'team_not_found' });
+      if (code === 'forbidden') return res.status(403).json({ error: 'forbidden', message: String(e.message || '') });
+      return res.status(500).json({ error: 'billing_breakdown_error', message: String((e && e.message) || e) });
     }
   });
 

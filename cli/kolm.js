@@ -3341,20 +3341,24 @@ EXAMPLE
   kolm profile save demo
   kolm profile use demo
 `,
-  billing: `kolm billing - tenant usage + plan + invoice surface. (W409i)
+  billing: `kolm billing - tenant usage + plan + invoice + breakdown surface. (W409i + W465)
 
 USAGE
   kolm billing                       (alias for 'usage')
-  kolm billing usage   [--since <iso>] [--until <iso>] [--json]
+  kolm billing usage     [--period YYYY-MM] [--since <iso>] [--until <iso>] [--json]
   kolm billing plan                  [--json]
   kolm billing tiers                 [--json]
   kolm billing invoices [--limit <N>] [--json]
+  kolm billing breakdown [--by namespace|team] [--team-id <id>] [--period YYYY-MM] [--json]
 
 FLAGS
-  --since <iso>     ISO timestamp lower bound
-  --until <iso>     ISO timestamp upper bound
-  --limit <N>       cap invoice count (default 20)
-  --json            deterministic JSON output (script-parseable)
+  --since <iso>       ISO timestamp lower bound
+  --until <iso>       ISO timestamp upper bound
+  --limit <N>         cap invoice count (default 20)
+  --period <YYYY-MM>  billing-month bucket (defaults to current UTC month)
+  --by <namespace|team>  W465 breakdown axis (defaults to namespace)
+  --team-id <id>      W465 team rollup (required when --by team)
+  --json              deterministic JSON output (script-parseable)
 
 EMPTY STATE
   Not logged in? Run \`kolm login\` first or set KOLM_API_KEY.
@@ -3365,6 +3369,8 @@ EXIT CODES
 EXAMPLE
   kolm billing usage --json
   kolm billing plan
+  kolm billing breakdown --by namespace --period 2026-05
+  kolm billing breakdown --by team --team-id team_<id> --period 2026-05
 `,
   privacy: `kolm privacy - privacy-membrane scan / smoke / policy / report. (W384)
 
@@ -5431,21 +5437,50 @@ async function cmdBilling(args) {
   else if (sub === 'tiers') endpoint = '/v1/billing/tiers';
   else if (sub === 'invoices') endpoint = '/v1/billing/invoices';
   else if (sub === 'usage') endpoint = '/v1/billing/usage';
+  else if (sub === 'breakdown') endpoint = '/v1/billing/breakdown';
   else if (sub !== 'usage') {
     if (jsonOut) {
       console.log(JSON.stringify({ error: 'unknown_subcommand', sub }));
     } else {
       console.error('unknown billing subcommand: ' + sub);
-      console.error('try: kolm billing usage | plan | tiers | invoices');
+      console.error('try: kolm billing usage | plan | tiers | invoices | breakdown');
     }
     process.exit(EXIT.BAD_ARGS);
     return;
   }
+  // W465 — `kolm billing breakdown` accepts --by namespace|team and --team-id <id>.
+  const breakdownBy = pickFlag('--by');
+  const breakdownTeamId = pickFlag('--team-id');
   const qs = [];
   if (since) qs.push('since=' + encodeURIComponent(since));
   if (until) qs.push('until=' + encodeURIComponent(until));
   if (limit) qs.push('limit=' + encodeURIComponent(limit));
   if (period) qs.push('period=' + encodeURIComponent(period));
+  if (sub === 'breakdown') {
+    const b = breakdownBy || 'namespace';
+    if (b !== 'namespace' && b !== 'team') {
+      if (jsonOut) {
+        console.log(JSON.stringify({ error: 'invalid_by', hint: '--by must be namespace or team' }));
+      } else {
+        console.error('invalid --by (must be namespace or team)');
+      }
+      process.exit(EXIT.BAD_ARGS);
+      return;
+    }
+    qs.push('by=' + encodeURIComponent(b));
+    if (b === 'team') {
+      if (!breakdownTeamId) {
+        if (jsonOut) {
+          console.log(JSON.stringify({ error: 'team_id_required', hint: '--by team requires --team-id <id>' }));
+        } else {
+          console.error('--by team requires --team-id <id>');
+        }
+        process.exit(EXIT.BAD_ARGS);
+        return;
+      }
+      qs.push('team_id=' + encodeURIComponent(breakdownTeamId));
+    }
+  }
   const path = endpoint + (qs.length ? ('?' + qs.join('&')) : '');
 
   let data;
@@ -5514,6 +5549,46 @@ async function cmdBilling(args) {
     const rows = Array.isArray(data) ? data : (data.tiers || []);
     for (const r of rows) {
       console.log('  ' + (r.id || r.name || '-') + '  ' + (r.price_usd_monthly != null ? '$' + r.price_usd_monthly + '/mo' : '-'));
+    }
+  } else if (sub === 'breakdown') {
+    // W465 — namespace or team rollup.
+    if (data && data.by === 'team') {
+      console.log('team:     ' + (data.team_slug || data.team_id));
+      console.log('period:   ' + (data.period || '-'));
+      console.log('role:     ' + (data.caller_role || '-'));
+      const totals = (data && data.totals) || {};
+      console.log('total $:  ' + Number(totals.cost_usd || 0).toFixed(6));
+      console.log('captures: ' + (totals.captures || 0));
+      console.log('');
+      const members = Array.isArray(data.members) ? data.members : [];
+      if (!members.length) {
+        console.log('no members yet.');
+      } else {
+        console.log('members (by spend):');
+        const sorted = members.slice().sort((a, b) => Number(b.cost_micro_usd || 0) - Number(a.cost_micro_usd || 0));
+        for (const m of sorted) {
+          const dollars = '$' + Number(m.cost_usd || 0).toFixed(6);
+          console.log('  ' + (m.tenant_id || '-').padEnd(28) + '  ' + (m.role || '-').padEnd(8) + '  ' + dollars.padStart(14) + '  captures=' + (m.captures || 0));
+        }
+      }
+    } else {
+      console.log('tenant:   ' + (data.tenant_id || '-'));
+      console.log('period:   ' + (data.period || '-'));
+      const totals = (data && data.totals) || {};
+      console.log('total $:  ' + Number(totals.cost_usd || 0).toFixed(6));
+      console.log('captures: ' + (totals.captures || 0));
+      console.log('tokens:   in=' + (totals.tokens_in || 0) + '  out=' + (totals.tokens_out || 0));
+      console.log('');
+      const namespaces = Array.isArray(data.namespaces) ? data.namespaces : [];
+      if (!namespaces.length) {
+        console.log('no captures in this period.');
+      } else {
+        console.log('namespaces (by spend):');
+        for (const n of namespaces) {
+          const dollars = '$' + Number(n.cost_usd || 0).toFixed(6);
+          console.log('  ' + String(n.namespace || '-').padEnd(28) + '  ' + dollars.padStart(14) + '  captures=' + (n.captures || 0) + '  tokens(in/out)=' + (n.tokens_in || 0) + '/' + (n.tokens_out || 0));
+        }
+      }
     }
   }
 }
@@ -22234,6 +22309,9 @@ async function cmdTui(args) {
     // W450 — Settings view. Closes the new /account/settings triangle: page,
     // CLI (`kolm settings show / set k=v`), and TUI all read /v1/account/settings.
     { id: 'settings',           key: 'F', endpoint: '/v1/account/settings',      kind: 'get',   label: 'account settings (read-only)' },
+    // W465 — Billing breakdown view. Closes the per-namespace cost
+    // attribution triangle: page panel, CLI (`kolm billing breakdown`), TUI.
+    { id: 'billing-breakdown',  key: 'J', endpoint: '/v1/billing/breakdown',     kind: 'get',   label: 'billing breakdown (by namespace)' },
   ];
   // Also expose simulations under view 'simulations' (alias for one of the
   // workflow rows so the W384 14-view test grep finds the literal). We list
@@ -22273,6 +22351,8 @@ async function cmdTui(args) {
               : Array.isArray(data.rows) ? data.rows
               : Array.isArray(data.data) ? data.data
               : Array.isArray(data.recommendations) ? data.recommendations
+              : Array.isArray(data.namespaces) ? data.namespaces
+              : Array.isArray(data.members) ? data.members
               : Array.isArray(data[viewId]) ? data[viewId]
               : [data];
             state.viewData = rows;
@@ -22581,6 +22661,11 @@ async function cmdTui(args) {
       'settings':      'settings',
       'preferences':   'settings',
       'prefs':         'settings',
+      // W465 — billing breakdown view aliases (CLI `kolm billing breakdown` + TUI `:breakdown` + web).
+      'breakdown':     'billing-breakdown',
+      'billing-breakdown':'billing-breakdown',
+      'spend-breakdown':'billing-breakdown',
+      'rollup':        'billing-breakdown',
     };
     if (VIEW_ALIAS[verb]) {
       const id = VIEW_ALIAS[verb];
@@ -22630,7 +22715,7 @@ async function cmdTui(args) {
     // Normal mode.
     if (k === 'q') { teardown(); process.exit(EXIT.OK); return; }
     if (k === '?') {
-      state.status = 'views: 1=live-calls 2=artifacts 3=compile 4=spend 5=privacy-events 6=repeated-workflows 7=opportunities 8=labeling-queue 9=datasets 0=builds A=bakeoffs B=devices C=storage-sync D=agent-telemetry N=next  |  :verbs: :events :opportunities :datasets :labels :bakeoffs :artifacts :billing :next  |  keys: j/k move  g/G top/bot  Tab pane  / filter  : cmd  r refresh  d distill  R replay  v verify  q quit';
+      state.status = 'views: 1=live-calls 2=artifacts 3=compile 4=spend 5=privacy-events 6=repeated-workflows 7=opportunities 8=labeling-queue 9=datasets 0=builds A=bakeoffs B=devices C=storage-sync D=agent-telemetry N=next J=billing-breakdown  |  :verbs: :events :opportunities :datasets :labels :bakeoffs :artifacts :billing :breakdown :next  |  keys: j/k move  g/G top/bot  Tab pane  / filter  : cmd  r refresh  d distill  R replay  v verify  q quit';
       render(); return;
     }
     if (k === 'j') { state.selectedIdx = Math.min(state.selectedIdx + 1, 9999); render(); return; }
