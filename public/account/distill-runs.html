@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Distill runs &middot; Account &middot; kolm.ai</title>
+<meta name="description" content="Per-prompt loss telemetry for every local distill run on kolm.ai. Reads ~/.kolm/distill-runs/run_*/{run-meta.json,progress.jsonl,manifest.json} and renders the loss curve so you can see how the run progressed.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/distill-runs">
+<meta property="og:title" content="Distill runs &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Per-prompt loss telemetry for every local distill run on kolm.ai." />
+<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/distill-runs" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Distill runs · Account · kolm.ai","description":"Per-prompt loss telemetry for every local distill run on kolm.ai.","url":"https://kolm.ai/account/distill-runs","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Distill runs","item":"https://kolm.ai/account/distill-runs"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable tr.run-row{cursor:pointer}
+.ktable tr.run-row:hover td{background:var(--bg-elev)}
+.ktable tr.run-row[aria-expanded=true]{background:var(--bg-elev)}
+.ktable tr.detail-row td{background:var(--bg);padding:14px 16px;border-bottom:1px solid var(--line)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.skel{background:linear-gradient(90deg,var(--bg-elev) 0%,var(--bg-card) 50%,var(--bg-elev) 100%);background-size:200% 100%;animation:skel 1.4s linear infinite;border-radius:4px;height:12px}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.toolbar input,.toolbar select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.curve-card{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.curve-card svg{width:100%;height:160px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px}
+.curve-card h3{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px}
+.meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:12.5px;margin-bottom:12px}
+.meta-grid div{font-family:var(--mono)}
+.meta-grid .k{color:var(--ink-faint);text-transform:uppercase;font-size:10.5px;letter-spacing:0.06em;margin-bottom:3px}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.curve-card{grid-template-columns:1fr}.meta-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-page="distill-runs" data-wave="455">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product"><a class="nav-top" href="/product">Product</a></div>
+    <div class="nav-item nav-item--models"><a class="nav-top" href="/models">Models</a></div>
+    <div class="nav-item nav-item--docs"><a class="nav-top" href="/docs">Docs</a></div>
+    <div class="nav-item nav-item--pricing"><a class="nav-top" href="/pricing">Pricing</a></div>
+    <div class="nav-item nav-item--enterprise"><a class="nav-top" href="/enterprise">Enterprise</a></div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+    <div class="site-actions"><a href="/docs">Help</a></div>
+  </div>
+</header>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul>
+  <li><a href="/account/overview">Overview</a></li>
+  <li><a href="/account/connectors">Connectors</a></li>
+  <li><a href="/account/captured">Captured events</a></li>
+  <li><a href="/account/agent-telemetry">Agent telemetry</a></li>
+  <li><a href="/account/privacy-events">Privacy events</a></li>
+  <li><a href="/account/repeated-workflows">Repeated workflows</a></li>
+  <li><a href="/account/opportunities">Opportunities</a></li>
+  <li><a href="/account/labeling">Labeling queue</a></li>
+  <li><a href="/account/datasets">Datasets</a></li>
+  <li><a href="/account/simulations">Simulations</a></li>
+  <li><a href="/account/bakeoffs">Bakeoffs</a></li>
+  <li><a href="/account/builds">Builds</a></li>
+  <li><a href="/account/distill-runs" aria-current="page">Distill runs</a></li>
+  <li><a href="/account/artifacts">Artifacts</a></li>
+  <li><a href="/account/devices">Devices</a></li>
+  <li><a href="/account/storage">Storage truth</a></li>
+  <li><a href="/account/billing">Billing</a></li>
+</ul></nav>
+<section class="acct-content">
+<h1>Distill runs.</h1>
+<p class="lede">Per-prompt loss telemetry for every local distill run. Each row is one
+<code>kolm distill</code> invocation; click to reveal the loss + K-score curve
+straight from <code>progress.jsonl</code>. Tenant-scoped &mdash; we only show your runs.</p>
+<div class="toolbar">
+  <input type="search" id="ns-filter" placeholder="Filter by namespace..." aria-label="Namespace filter">
+  <select id="limit-filter" aria-label="Row limit">
+    <option value="20">Last 20</option>
+    <option value="50" selected>Last 50</option>
+    <option value="100">Last 100</option>
+    <option value="500">Last 500</option>
+  </select>
+  <button class="btn" id="refresh-btn" type="button">Refresh</button>
+</div>
+<table class="ktable" data-runs-table>
+  <thead><tr><th>Started</th><th>Run id</th><th>Namespace</th><th>Base</th><th>Mode</th><th>Pairs</th><th>Steps</th><th>Loss</th><th>K</th></tr></thead>
+  <tbody id="dr-rows"><tr><td colspan="9"><div class="skel" style="width:260px"></div></td></tr></tbody>
+</table>
+<div id="empty-state" class="empty" hidden data-empty-state>
+  <strong>No distill runs yet.</strong> Start one with <code>kolm distill --namespace &lt;ns&gt;</code>
+  or browse <a href="/docs/distill">the distill docs</a>. Telemetry lands in
+  <code>~/.kolm/distill-runs/run_*/progress.jsonl</code> as the worker iterates.
+</div>
+<p class="lede" style="margin-top:18px;font-size:12px">
+  <strong>Source of truth.</strong> Pulled from
+  <code>GET /v1/distill/runs</code> &amp; <code>/v1/distill/runs/:id</code>
+  (auth-gated, tenant-scoped). The same data is available locally:
+  <code>kolm distill runs</code> &middot; <code>kolm distill runs &lt;id&gt;</code>.
+</p>
+</section>
+</div>
+</main>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+})();
+
+var rows=document.getElementById("dr-rows");
+var emptyEl=document.getElementById("empty-state");
+var nsInput=document.getElementById("ns-filter");
+var limitSel=document.getElementById("limit-filter");
+var refreshBtn=document.getElementById("refresh-btn");
+
+function fmtN(v){if(v==null)return "-";return typeof v==="number"?(Number.isInteger(v)?v.toString():v.toFixed(3)):String(v);}
+function shortId(id){return String(id||"-").replace(/^run_/,"").slice(0,12);}
+function shortTs(s){if(!s)return "-";return String(s).slice(0,16).replace("T"," ");}
+
+function sparkline(points, opts){
+  opts = opts || {};
+  if(!points || points.length === 0){
+    return '<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg"><text x="100" y="34" fill="currentColor" font-size="10" text-anchor="middle" opacity="0.5">no data</text></svg>';
+  }
+  var w = 200, h = 60, pad = 4;
+  var ys = points.map(function(p){return p.y;}).filter(function(v){return typeof v === 'number' && isFinite(v);});
+  if(ys.length === 0){
+    return '<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg"><text x="100" y="34" fill="currentColor" font-size="10" text-anchor="middle" opacity="0.5">no data</text></svg>';
+  }
+  var mn = Math.min.apply(null, ys), mx = Math.max.apply(null, ys);
+  if(mn === mx){ mn = mn - 1; mx = mx + 1; }
+  var n = points.length;
+  var d = points.map(function(p, i){
+    var x = pad + (i / Math.max(1, n - 1)) * (w - 2*pad);
+    var y;
+    if(typeof p.y !== 'number' || !isFinite(p.y)){
+      y = h/2;
+    } else {
+      y = h - pad - ((p.y - mn) / (mx - mn)) * (h - 2*pad);
+    }
+    return (i === 0 ? 'M' : 'L') + x.toFixed(2) + ',' + y.toFixed(2);
+  }).join(' ');
+  var stroke = opts.color || '#9bd1ff';
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + (opts.label || 'sparkline') + '">' +
+    '<path d="' + d + '" fill="none" stroke="' + stroke + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '<text x="' + (w - 4) + '" y="12" fill="' + stroke + '" font-size="9" text-anchor="end" opacity="0.9" font-family="ui-monospace,monospace">' + fmtN(mx) + '</text>' +
+    '<text x="' + (w - 4) + '" y="' + (h - 4) + '" fill="' + stroke + '" font-size="9" text-anchor="end" opacity="0.6" font-family="ui-monospace,monospace">' + fmtN(mn) + '</text>' +
+  '</svg>';
+}
+
+function buildDetailRow(run){
+  var meta = run.meta || {};
+  var prog = Array.isArray(run.progress) ? run.progress : [];
+  var lossPts = prog.map(function(ev, i){return {x:i, y: typeof ev.loss === 'number' ? ev.loss : null};});
+  var kPts = prog.map(function(ev, i){return {x:i, y: typeof ev.k_score === 'number' ? ev.k_score : null};});
+  var html = '<div class="meta-grid">' +
+      '<div><div class="k">job_id</div>' + window.kesc(meta.job_id || '-') + '</div>' +
+      '<div><div class="k">teacher</div>' + window.kesc((meta.teacher && (meta.teacher.vendor + ':' + (meta.teacher.model || '-'))) || '-') + '</div>' +
+      '<div><div class="k">worker</div>' + window.kesc(meta.worker_mode || '-') + '</div>' +
+    '</div>' +
+    '<div class="curve-card">' +
+      '<div><h3>Loss per step (' + prog.length + ')</h3>' + sparkline(lossPts, {color:'#ff9a8a', label:'loss curve'}) + '</div>' +
+      '<div><h3>K-score per step (' + prog.length + ')</h3>' + sparkline(kPts, {color:'#9bd1ff', label:'k-score curve'}) + '</div>' +
+    '</div>';
+  if(run.manifest){
+    html += '<p style="font-size:11.5px;color:var(--ink-faint);margin-top:10px">' +
+      '<strong>manifest</strong>: artifact_hash=<code>' + window.kesc(((run.manifest && run.manifest.artifact_hash) || (run.manifest && run.manifest.cid) || '-')).slice(0,32) + '</code>' +
+    '</p>';
+  }
+  if(run.log_tail){
+    html += '<details style="margin-top:10px"><summary style="font-size:12px;color:var(--ink-faint);cursor:pointer">distill.log tail</summary>' +
+      '<pre style="font-size:11px;background:var(--bg-elev);padding:8px;border-radius:4px;overflow:auto;max-height:200px;color:var(--ink-mute)">' +
+      window.kesc(run.log_tail).slice(0, 8000) + '</pre></details>';
+  }
+  return html;
+}
+
+function bindRowToggle(tr, run){
+  tr.addEventListener('click', function(){
+    var open = tr.getAttribute('aria-expanded') === 'true';
+    var next = tr.nextElementSibling;
+    if(open){
+      tr.setAttribute('aria-expanded', 'false');
+      if(next && next.classList.contains('detail-row')) next.remove();
+      return;
+    }
+    tr.setAttribute('aria-expanded', 'true');
+    var dr = document.createElement('tr');
+    dr.className = 'detail-row';
+    dr.innerHTML = '<td colspan="9"><div class="skel" style="width:200px"></div></td>';
+    tr.parentNode.insertBefore(dr, tr.nextSibling);
+    window.kfetch('/v1/distill/runs/' + encodeURIComponent(run.id))
+      .then(function(j){ dr.innerHTML = '<td colspan="9">' + buildDetailRow((j && j.run) || {}) + '</td>'; })
+      .catch(function(e){ dr.innerHTML = '<td colspan="9" style="color:var(--bad);font-size:12px">load failed: ' + window.kesc(String(e.message||e)) + '</td>'; });
+  });
+}
+
+function render(list){
+  if(!list || !list.length){ rows.innerHTML = ''; emptyEl.hidden = false; return; }
+  emptyEl.hidden = true;
+  rows.innerHTML = '';
+  list.forEach(function(run){
+    var tr = document.createElement('tr');
+    tr.className = 'run-row';
+    tr.setAttribute('aria-expanded', 'false');
+    tr.setAttribute('data-run-id', run.id);
+    tr.innerHTML =
+      '<td>' + window.kesc(shortTs(run.created_at)) + '</td>' +
+      '<td><code>' + window.kesc(shortId(run.id)) + '</code></td>' +
+      '<td>' + window.kesc(run.namespace || '-') + '</td>' +
+      '<td>' + window.kesc(run.student_base || '-') + '</td>' +
+      '<td>' + window.kesc(run.pipeline_mode || '-') + '</td>' +
+      '<td>' + fmtN(run.pair_count) + '</td>' +
+      '<td>' + fmtN(run.step_count) + '</td>' +
+      '<td>' + fmtN(run.loss_final) + '</td>' +
+      '<td>' + fmtN(run.k_final) + '</td>';
+    bindRowToggle(tr, run);
+    rows.appendChild(tr);
+  });
+}
+
+function load(){
+  var ns = (nsInput.value || '').trim();
+  var limit = limitSel.value || '50';
+  var qs = 'limit=' + encodeURIComponent(limit);
+  if(ns) qs += '&namespace=' + encodeURIComponent(ns);
+  rows.innerHTML = '<tr><td colspan="9"><div class="skel" style="width:260px"></div></td></tr>';
+  window.kfetch('/v1/distill/runs?' + qs)
+    .then(function(j){ render((j && j.runs) || []); })
+    .catch(function(){ rows.innerHTML = ''; emptyEl.hidden = false; });
+}
+
+refreshBtn.addEventListener('click', load);
+nsInput.addEventListener('change', load);
+limitSel.addEventListener('change', load);
+load();
+</script>
+</body>
+</html>

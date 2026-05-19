@@ -1736,6 +1736,19 @@ EXAMPLES
   kolm distill --namespace support
   kolm distill --namespace support --json
   kolm distill --local-worker --spec ./recipe.spec.json --seeds ./seeds.jsonl --out ./dist/
+
+SUBCOMMANDS — RUN TELEMETRY (wave 455)
+  kolm distill runs                  list local distill runs with step counts +
+                                     final loss / k_score
+  kolm distill runs <run_id>         show one run's metadata + per-step loss
+                                     curve (last 20 steps)
+  kolm distill runs --json           machine-readable envelope
+  kolm distill runs --namespace ns   filter list by namespace
+  kolm distill runs --limit N        cap list length (default 50)
+
+  Telemetry is recorded automatically by every \`kolm distill --local-worker\` run
+  in ~/.kolm/distill-runs/<run_id>/{run-meta.json,progress.jsonl,manifest.json}
+  and served via /v1/distill/runs (tenant-scoped).
 `,
   nl: `kolm nl - natural-language recipe scaffolder. Describe a recipe in
 plain English and get a structured scaffold ready to drop into spec.json +
@@ -11769,6 +11782,10 @@ async function cmdLabels(args) {
 //   kolm cloud. No login required. Heavy ML deps stay in the worker package.
 async function cmdDistill(args) {
   if (maybeHelp('distill', args)) return;
+  // W455 — `kolm distill runs [<id>]` lists or shows local distill runs with
+  // per-prompt loss telemetry. Hoisted above the `--from-captures` short-circuit
+  // so `runs` is always reachable even when other flags are present.
+  if (args[0] === 'runs') return cmdDistillRuns(args.slice(1));
   // Wave 214: --from-captures routes to /v1/distill/from-captures (preview-first).
   // Hoisted above --detach so the W214 dispatch lives in the first 600 chars
   // of the function (cmdDistillFromCaptures handles its own detach semantics).
@@ -11851,6 +11868,90 @@ async function cmdDistill(args) {
   if (j.pair_count !== undefined) console.log('  pairs:     ' + j.pair_count);
   if (j.status_url || j.poll_url) console.log('  status:    ' + (j.status_url || j.poll_url));
   if (j.bridge_source) console.log('  source:    ' + j.bridge_source);
+}
+
+// W455 — kolm distill runs [<id>] [--json] [--limit N] [--namespace NS]
+//   List local distill runs OR show one run's per-prompt loss curve. Reads
+//   /v1/distill/runs (list) or /v1/distill/runs/:id (detail). The detail mode
+//   prints a compact loss/k_score table from progress.jsonl so the customer
+//   can see how the run progressed without opening the file directly.
+async function cmdDistillRuns(args) {
+  const c = loadConfig();
+  if (!c.api_key) { console.error('not logged in. run: kolm login'); process.exit(EXIT.MISSING_PREREQ); }
+  const wantJson = args.includes('--json');
+  const positional = args.filter((a) => !a.startsWith('--'));
+  const id = positional[0] || null;
+  if (id) {
+    // Detail view — single run.
+    const url = c.base.replace(/\/+$/, '') + '/v1/distill/runs/' + encodeURIComponent(id);
+    const res = await fetch(url, { headers: authHeaders(c) });
+    const text = await res.text();
+    let j;
+    try { j = JSON.parse(text); } catch { j = { _raw: text }; }
+    if (wantJson) { console.log(JSON.stringify(j, null, 2)); if (!res.ok) process.exit(EXIT.EXECUTION); return; }
+    if (!res.ok) {
+      if (res.status === 404) { console.error(`run not found: ${id}`); process.exit(EXIT.NOT_FOUND || 4); }
+      console.error(`error: http ${res.status} ${text.slice(0, 400)}`);
+      process.exit(EXIT.EXECUTION);
+    }
+    const run = j.run || {};
+    const meta = run.meta || {};
+    console.log(`run ${run.id}`);
+    console.log(`  namespace:   ${meta.namespace || '-'}`);
+    console.log(`  base:        ${meta.student_base || '-'}`);
+    console.log(`  mode:        ${meta.pipeline_mode || '-'}`);
+    console.log(`  pairs:       ${meta.pair_count ?? '-'}`);
+    console.log(`  worker:      ${meta.worker_mode || '-'}`);
+    console.log(`  created_at:  ${meta.created_at || '-'}`);
+    const prog = Array.isArray(run.progress) ? run.progress : [];
+    console.log(`  steps:       ${prog.length}`);
+    if (prog.length) {
+      console.log('  step       loss          k_score');
+      for (const ev of prog.slice(-20)) {
+        const step = String(ev.step ?? ev.i ?? '?').padStart(5);
+        const loss = ev.loss !== undefined ? Number(ev.loss).toFixed(4).padStart(10) : '         -';
+        const k = ev.k_score !== undefined ? Number(ev.k_score).toFixed(4).padStart(10) : '         -';
+        console.log(`  ${step}   ${loss}   ${k}`);
+      }
+      if (prog.length > 20) console.log(`  ... (${prog.length - 20} earlier steps omitted)`);
+    }
+    return;
+  }
+  // List view.
+  const limit = pickFlag(args, '--limit') || '50';
+  const namespace = pickFlag(args, '--namespace') || null;
+  const qs = new URLSearchParams();
+  qs.set('limit', String(limit));
+  if (namespace) qs.set('namespace', namespace);
+  const url = c.base.replace(/\/+$/, '') + '/v1/distill/runs?' + qs.toString();
+  const res = await fetch(url, { headers: authHeaders(c) });
+  const text = await res.text();
+  let j;
+  try { j = JSON.parse(text); } catch { j = { _raw: text }; }
+  if (wantJson) { console.log(JSON.stringify(j, null, 2)); if (!res.ok) process.exit(EXIT.EXECUTION); return; }
+  if (!res.ok) {
+    console.error(`error: http ${res.status} ${text.slice(0, 400)}`);
+    process.exit(EXIT.EXECUTION);
+  }
+  const runs = Array.isArray(j.runs) ? j.runs : [];
+  if (runs.length === 0) {
+    console.log('no distill runs recorded yet.');
+    console.log("  tip: run 'kolm distill --namespace <ns>' to start one.");
+    return;
+  }
+  console.log(`distill runs (${runs.length}):`);
+  console.log('  id                                          namespace        steps   loss     k       created_at');
+  for (const r of runs) {
+    const id = (r.id || '').padEnd(42);
+    const ns = (r.namespace || '-').padEnd(15);
+    const steps = String(r.step_count ?? 0).padStart(5);
+    const loss = r.loss_final !== null && r.loss_final !== undefined ? Number(r.loss_final).toFixed(3) : '  -  ';
+    const k = r.k_final !== null && r.k_final !== undefined ? Number(r.k_final).toFixed(3) : '  -  ';
+    const created = r.created_at || '-';
+    console.log(`  ${id} ${ns} ${steps}   ${loss}   ${k}   ${created}`);
+  }
+  console.log("");
+  console.log("  show a run:  kolm distill runs <id>");
 }
 
 // Wave 214: kolm distill --from-captures <namespace> [--preview] [--mode recipe|specialist]
@@ -16685,6 +16786,8 @@ const COMPLETION_SUBS = {
   pipeline:   ['tokenize', 'distill', 'compile', 'full'],
   // W454 — multimodal redaction worker (OCR / pdf-parse / whisper).
   media:      ['doctor', 'redact-job'],
+  // W455 — per-prompt loss telemetry: `kolm distill runs [<id>]`.
+  distill:    ['runs'],
   agents:     ['stats', 'sessions', 'recommend', 'failing'],
   'shell-init': [],
   // W409i — billing surface subverbs.

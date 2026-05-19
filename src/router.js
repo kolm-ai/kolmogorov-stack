@@ -6252,6 +6252,41 @@ export function buildRouter() {
     }
   });
 
+  // ===== W455: per-prompt loss telemetry — list + show distill runs ===========
+  // Reads ~/.kolm/distill-runs/run_<id>/{run-meta.json, progress.jsonl, manifest.json}.
+  // Tenant-scoped: listDistillRuns filters by req.tenant_record.id (fail closed
+  // on missing tag). The progress.jsonl events are emitted from distill() each
+  // step so the dashboard can replay the loss curve without re-running the job.
+  r.get('/v1/distill/runs', authMiddleware, async (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    try {
+      const { listDistillRuns } = await import('./distill-pipeline.js');
+      const tenant_id = req.tenant_record?.id || req.tenant || 'local';
+      const limit = Math.max(1, Math.min(500, Number(req.query?.limit) || 100));
+      const namespace = req.query?.namespace ? String(req.query.namespace) : null;
+      const runs = listDistillRuns({ tenant_id, limit, namespace });
+      return res.json({ ok: true, count: runs.length, runs });
+    } catch (e) {
+      return res.status(500).json({ error: 'distill_runs_list_failed', message: String(e.message || e) });
+    }
+  });
+  r.get('/v1/distill/runs/:id', authMiddleware, async (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const id = String(req.params.id || '');
+    if (!/^run_[a-z0-9_]+$/i.test(id)) {
+      return res.status(400).json({ error: 'invalid_run_id', id });
+    }
+    try {
+      const { readDistillRun } = await import('./distill-pipeline.js');
+      const tenant_id = req.tenant_record?.id || req.tenant || 'local';
+      const run = readDistillRun(id, { tenant_id });
+      if (!run) return res.status(404).json({ error: 'run_not_found', id });
+      return res.json({ ok: true, run });
+    } catch (e) {
+      return res.status(500).json({ error: 'distill_run_read_failed', message: String(e.message || e) });
+    }
+  });
+
   // ===== W216: replay captured prompts against a compiled artifact ===========
   // Close-the-loop demo. Pull N rows from the durable W212 store, run each
   // through runtime.runVersion(use_cache:false), and emit a per-row diff

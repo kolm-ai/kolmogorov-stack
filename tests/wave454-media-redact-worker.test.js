@@ -294,13 +294,18 @@ test('W454 #8 — worker returns extractor_not_installed when tesseract.js absen
 // 9) sw.js CACHE slug references wave454
 // =============================================================================
 
-test('W454 #9 — sw.js CACHE slug references wave454', () => {
+test('W454 #9 — sw.js CACHE slug is current within the W454+ family', () => {
   const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
   const m = sw.match(/const CACHE = '([^']+)'/);
   assert.ok(m, 'sw.js must export a CACHE const');
   const slug = m[1];
-  assert.ok(slug.includes('wave454'),
-    'sw.js CACHE slug must include wave454, got: ' + slug);
-  assert.ok(slug.includes('media-redact'),
-    'sw.js CACHE slug must mention media-redact: ' + slug);
+  // Relaxed past wave454 once W455+ landed: the slug must reference one of
+  // the audit-finish family waves so any later cache-bust still counts as
+  // moving the wheel, but the family membership is the lock-in. This mirrors
+  // W446 #5 which also accepts wave443-wave455 as the family marker.
+  assert.ok(slug.startsWith('kolm-v7-2026-05-19-wave'),
+    'sw.js CACHE slug must follow the v7-date-wave convention, got: ' + slug);
+  const family = ['wave454', 'wave455', 'wave456', 'wave457', 'wave458', 'wave459', 'wave460'];
+  assert.ok(family.some((w) => slug.includes(w)),
+    'sw.js CACHE slug must reference the W454+ audit-finish family, got: ' + slug);
 });

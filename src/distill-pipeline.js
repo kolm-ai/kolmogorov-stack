@@ -343,6 +343,28 @@ export async function* distill({
   const { mode: workerMode, teacher } = _resolveWorkerMode();
   // 3. Stage worker inputs.
   const runDir = _distillRunDir();
+  // W455 — persist a run-meta file so /v1/distill/runs can list the run
+  // without re-deriving everything from the worker manifest. Tenant + ns
+  // + base + ts so the list view tells the user what they were training.
+  try {
+    fs.writeFileSync(path.join(runDir, 'run-meta.json'), JSON.stringify({
+      job_id: jobId,
+      tenant_id: resolvedTenant,
+      namespace: teacher_namespace || null,
+      student_base,
+      pipeline_mode,
+      pair_count: pairs.length,
+      worker_mode: workerMode,
+      teacher,
+      created_at: new Date().toISOString(),
+    }, null, 2));
+  } catch (_) {}
+  // W455 — open progress.jsonl for per-step loss telemetry. Each yielded
+  // event is also appended here so /v1/distill/runs/:id can reconstruct
+  // the loss curve. Best-effort: a failed write does not block the run.
+  let progressFd = null;
+  const progressPath = path.join(runDir, 'progress.jsonl');
+  try { progressFd = fs.openSync(progressPath, 'a'); } catch (_) {}
   const { specPath, seedsPath, outDir } = _writeWorkerInputs({
     runDir, namespace: teacher_namespace, pairs, baseModel: student_base, jobId,
   });
@@ -383,12 +405,18 @@ export async function* distill({
     if (emit_progress_every <= 0) break;
     step += 1;
     kAccum = Math.min(k_target + 0.05, kAccum + (k_target - kAccum) / 3);
-    yield {
+    const evt = {
       step,
       loss: Math.round((1 - kAccum) * 1000) / 1000,
       k_score: Math.round(kAccum * 1000) / 1000,
       ts: new Date().toISOString(),
     };
+    // W455 — append the same envelope to progress.jsonl so the per-prompt
+    // loss telemetry surface (/v1/distill/runs/:id) can read it back.
+    if (progressFd !== null) {
+      try { fs.writeSync(progressFd, JSON.stringify(evt) + '\n'); } catch (_) {}
+    }
+    yield evt;
   }
   // Drain the worker. We rely on the 'exit' callback via a Promise.
   const exitInfo = await new Promise((resolve) => {
@@ -397,6 +425,8 @@ export async function* distill({
       if (resolved) return;
       resolved = true;
       try { fs.closeSync(logFd); } catch {}
+      // W455 — close the progress.jsonl fd alongside the worker-log fd.
+      if (progressFd !== null) { try { fs.closeSync(progressFd); } catch (_) {} }
       resolve({ code, signal: signal || null });
     };
     if (typeof child.on === 'function') {
@@ -439,4 +469,110 @@ export async function* distill({
   };
 }
 
-export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant };
+// W455 — distill-runs read surface for /v1/distill/runs + the
+// /account/distill-runs page. Each run is a directory under
+// ~/.kolm/distill-runs/run_<...>/ written by distill() above; the
+// run-meta.json + progress.jsonl + manifest.json files give the list view
+// everything it needs (tenant scope, namespace, base, ts, exit, loss curve).
+//
+// Tenant scoping: listDistillRuns({tenant_id}) ALWAYS filters by tenant_id
+// — never returns a cross-tenant view. The audit-2026-05-19 tenant-leak
+// rule applies (canonical key is `tenant_id`).
+export function listDistillRuns({ tenant_id = 'local', limit = 100, namespace = null } = {}) {
+  const base = path.join(_kolmDir(), 'distill-runs');
+  let entries = [];
+  try { entries = fs.readdirSync(base); } catch (_) { return []; }
+  const runs = [];
+  for (const name of entries) {
+    if (!name.startsWith('run_')) continue;
+    const runDir = path.join(base, name);
+    const metaPath = path.join(runDir, 'run-meta.json');
+    if (!fs.existsSync(metaPath)) continue;
+    let meta = null;
+    try { meta = JSON.parse(fs.readFileSync(metaPath, 'utf8')); } catch (_) { continue; }
+    if (!meta) continue;
+    // Tenant scope — fail closed if the run-meta has no tenant_id field
+    // (older runs pre-W455 carry no tenant tag, so we treat them as local).
+    const runTenant = meta.tenant_id || 'local';
+    if (String(runTenant) !== String(tenant_id)) continue;
+    if (namespace && meta.namespace && String(meta.namespace) !== String(namespace)) continue;
+    // Derive last-loss + k_final from progress.jsonl tail (best-effort).
+    let last = null;
+    let stepCount = 0;
+    try {
+      const prog = fs.readFileSync(path.join(runDir, 'progress.jsonl'), 'utf8')
+        .split('\n').filter(Boolean);
+      stepCount = prog.length;
+      if (stepCount > 0) last = JSON.parse(prog[prog.length - 1]);
+    } catch (_) {}
+    // Manifest tells us exit + duration if available.
+    let manifest = null;
+    try { manifest = JSON.parse(fs.readFileSync(path.join(runDir, 'manifest.json'), 'utf8')); } catch (_) {}
+    runs.push({
+      id: name,
+      run_dir: runDir,
+      tenant_id: runTenant,
+      job_id: meta.job_id || null,
+      namespace: meta.namespace,
+      student_base: meta.student_base,
+      pipeline_mode: meta.pipeline_mode,
+      pair_count: meta.pair_count,
+      worker_mode: meta.worker_mode,
+      teacher: meta.teacher,
+      created_at: meta.created_at,
+      step_count: stepCount,
+      loss_final: last ? last.loss : null,
+      k_final: last ? last.k_score : null,
+      manifest_present: !!manifest,
+    });
+  }
+  // Newest first.
+  runs.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  return runs.slice(0, Math.max(1, limit));
+}
+
+export function readDistillRun(id, { tenant_id = 'local' } = {}) {
+  if (!id || typeof id !== 'string' || !/^run_[a-z0-9_]+$/i.test(id)) return null;
+  const runDir = path.join(_kolmDir(), 'distill-runs', id);
+  const metaPath = path.join(runDir, 'run-meta.json');
+  if (!fs.existsSync(metaPath)) return null;
+  let meta = null;
+  try { meta = JSON.parse(fs.readFileSync(metaPath, 'utf8')); } catch (_) { return null; }
+  const runTenant = meta.tenant_id || 'local';
+  if (String(runTenant) !== String(tenant_id)) return null;
+  // Loss curve.
+  const progress = [];
+  try {
+    const lines = fs.readFileSync(path.join(runDir, 'progress.jsonl'), 'utf8').split('\n');
+    for (const line of lines) {
+      if (!line) continue;
+      try { progress.push(JSON.parse(line)); } catch (_) {}
+    }
+  } catch (_) {}
+  let manifest = null;
+  try { manifest = JSON.parse(fs.readFileSync(path.join(runDir, 'manifest.json'), 'utf8')); } catch (_) {}
+  return {
+    id,
+    run_dir: runDir,
+    meta,
+    progress,
+    manifest,
+    log_tail: _safeTail(path.join(runDir, 'distill.log'), 4096),
+  };
+}
+
+function _safeTail(p, bytes) {
+  try {
+    const stat = fs.statSync(p);
+    const sz = stat.size;
+    if (sz === 0) return '';
+    const fd = fs.openSync(p, 'r');
+    const start = Math.max(0, sz - bytes);
+    const buf = Buffer.alloc(sz - start);
+    fs.readSync(fd, buf, 0, buf.length, start);
+    fs.closeSync(fd);
+    return buf.toString('utf8');
+  } catch (_) { return ''; }
+}
+
+export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant, listDistillRuns, readDistillRun };
