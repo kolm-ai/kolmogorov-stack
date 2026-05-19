@@ -9,6 +9,13 @@
 
 const WAVES = [
   {
+    wave: 'W458',
+    date: '2026-05-19',
+    title: 'definition-of-done 12-step e2e test',
+    summary: 'tests/wave458-dod-12-step-e2e.test.js is now the canonical "did we ship?" assertion. One in-process flow walks all 12 audit DoD steps: tenant provisioning → /v1/whoami → BASE_URL proxy chain → 30 captures land → /v1/intent/next ranks actions → /v1/distill/from-captures → /v1/bakeoff/run → compileFull → loadArtifact + Ed25519 sidecar → runArtifact (RS-1 receipt + kolm-audit-1) → /v1/drift/snapshot + /v1/drift/detect (verdict ≠ within on a 23-pt K drop) → compileFull --since=last-compile fresh artifact. Zero hand-curation between steps 4-10; behavior assertions only. Plus an invariant lock so a 13th DoD step cannot ship without its assertion landing here.',
+    tags: ['e2e', 'audit', 'compile', 'verify', 'distill', 'drift'],
+  },
+  {
     wave: 'W457',
     date: '2026-05-19',
     title: 'omnibus finish: runtime/GGUF + CLI auth + telemetry + EPERM + hrefs + trust honesty',

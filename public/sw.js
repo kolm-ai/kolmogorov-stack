@@ -1,5 +1,5 @@
 // Recipe service worker · keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-19-wave457-runtime-target-consistency-and-gguf-bundling';
+const CACHE = 'kolm-v7-2026-05-19-wave458-dod-12-step-e2e';
 const PRECACHE = [
   '/device',
   '/styles.css',
