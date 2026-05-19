@@ -137,8 +137,11 @@ test('W456 #8 sw.js CACHE slug references the W454+ audit-finish family', () => 
   assert.ok(m, 'sw.js must define CACHE');
   const slug = m[1];
   // Relaxed past wave456 once W457+ landed. Same pattern as W446 #5 / W454 #9.
-  const family = ['wave454', 'wave455', 'wave456', 'wave457', 'wave458', 'wave459', 'wave460', 'wave461'];
-  assert.ok(family.some((w) => slug.includes(w)), 'sw.js CACHE slug must reference the W454+ family, got: ' + slug);
+  // Match wave454 or any wave with index >= 454 (forward-compat for the audit-finish family).
+  const wm = slug.match(/wave(\d{3,4})/);
+  assert.ok(wm, 'sw.js CACHE slug must include a waveNNN token, got: ' + slug);
+  const n = parseInt(wm[1], 10);
+  assert.ok(n >= 454, 'sw.js CACHE slug must reference the W454+ family, got: ' + slug);
 });
 
 test('W456 #9 vercel.json has /changelog and /roadmap rewrites', () => {

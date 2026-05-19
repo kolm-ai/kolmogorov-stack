@@ -9,6 +9,13 @@
 
 const WAVES = [
   {
+    wave: 'W463',
+    date: '2026-05-19',
+    title: 'agent trace compilation MVP (trace_id → IR → seeded cache-hit replay)',
+    summary: 'Closes audit P1 Agent Trace cluster open item ("trace storage schema + replay verification + workflow IR across providers"). The trace storage primitive (src/trace-capture.js, W144) and the IR compile/replay primitives (src/workflow-ir.js + src/compile-ir.js, W409w) shipped earlier. What was missing was the loop CLOSER tying the three together. New src/trace-compile.js ships two exports: compileTraceToReplay(trace_id, {tenant_id, opts}) walks the trace, builds the IR via compileIr.traceToIr, seeds the IR with the (user_input → final LLM/tool output) pair, and returns {ir, ir_hash, seeds_count, dropped}. verifyTraceReplay(trace_id, {tenant_id, exec}) replays the seeded input through runCompiledWorkflow and reports per-output match/mismatch with a coverage ratio. Tenant-fenced at the trace_id level via traceCapture.readTrace tenant_mismatch semantics — foreign traces fail loud, never silently rebind. New POST /v1/trace/compile + POST /v1/trace/verify routes (auth-gated, wave144Limiter rate-limit, force tenant scope from req.tenant_record). New `kolm trace compile <trace_id>` + `kolm trace verify <trace_id>` CLI verbs. 10 W463 tests pin the loop end-to-end with inline span fixtures.',
+    tags: ['agent-trace', 'workflow-ir', 'replay', 'audit', 'tenant-isolation'],
+  },
+  {
     wave: 'W462',
     date: '2026-05-19',
     title: 'multimodal image PII redactor (face + license-plate, pixel-space)',

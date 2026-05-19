@@ -20734,11 +20734,13 @@ async function cmdTrace(args) {
   const jsonOut = rest.includes('--json');
   const tc = await import('../src/trace-capture.js');
   if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
-    console.log('kolm trace - structured agent/workflow trace inspector\n\n' +
+    console.log('kolm trace - structured agent/workflow trace inspector + compiler\n\n' +
       'USAGE\n' +
       '  kolm trace stats <trace_id>\n' +
       '  kolm trace chain <trace_id>\n' +
       '  kolm trace export <trace_id>      print all spans as JSON\n' +
+      '  kolm trace compile <trace_id>     W463 — trace -> seeded IR for replay\n' +
+      '  kolm trace verify <trace_id>      W463 — replay-vs-original match check\n' +
       '  kolm trace new                    generate a new trace_id (32 hex)\n' +
       '  kolm trace span                   generate a new span_id (16 hex)');
     return;
@@ -20746,6 +20748,39 @@ async function cmdTrace(args) {
   if (sub === 'new')   { console.log(tc.newTraceId()); return; }
   if (sub === 'span')  { console.log(tc.newSpanId()); return; }
   const trace_id = rest.find(a => /^[0-9a-f]{32}$/.test(a));
+  if (sub === 'compile') {
+    if (!trace_id) throw _badArgs('kolm trace compile requires a 32-hex trace_id');
+    const tcm = await import('../src/trace-compile.js');
+    const r = await tcm.compileTraceToReplay(trace_id);
+    if (jsonOut) return _printJson(r);
+    console.log(`trace ${trace_id}`);
+    console.log(`  ir_hash:     ${r.ir_hash}`);
+    console.log(`  seeds_count: ${r.seeds_count}`);
+    console.log(`  ir.nodes:    ${(r.ir && r.ir.nodes && r.ir.nodes.length) || 0}`);
+    console.log(`  ir.edges:    ${(r.ir && r.ir.edges && r.ir.edges.length) || 0}`);
+    console.log(`  dropped:     ${r.dropped.length}`);
+    return;
+  }
+  if (sub === 'verify') {
+    if (!trace_id) throw _badArgs('kolm trace verify requires a 32-hex trace_id');
+    const tcm = await import('../src/trace-compile.js');
+    const r = await tcm.verifyTraceReplay(trace_id);
+    if (jsonOut) return _printJson(r);
+    console.log(`trace ${trace_id}`);
+    console.log(`  ir_hash:     ${r.ir_hash}`);
+    console.log(`  total:       ${r.total}`);
+    console.log(`  matches:     ${r.matches.length}`);
+    console.log(`  mismatches:  ${r.mismatches.length}`);
+    console.log(`  coverage:    ${(r.coverage * 100).toFixed(1)}%`);
+    console.log(`  verdict:     ${r.ok ? 'OK' : 'MISMATCH'}`);
+    if (!r.ok) {
+      process.exitCode = 1;
+      for (const m of r.mismatches) {
+        console.error('  mismatch:', JSON.stringify({ input: m.input, expected: m.expected, actual: m.actual, error: m.error }));
+      }
+    }
+    return;
+  }
   if (sub === 'stats') {
     if (!trace_id) throw _badArgs('kolm trace stats requires a 32-hex trace_id');
     const s = await tc.stats(trace_id);

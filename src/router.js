@@ -45,6 +45,7 @@ import * as byoc from './byoc.js';
 import * as traceCapture from './trace-capture.js';
 import * as workflowIr from './workflow-ir.js';
 import * as compileIr from './compile-ir.js';
+import * as traceCompile from './trace-compile.js';
 import * as deviceCaps from './device-capabilities.js';
 import * as confidentialCompute from './confidential-compute.js';
 import * as federatedLearning from './federated-learning.js';
@@ -7702,6 +7703,56 @@ export function buildRouter() {
       const r2 = await workflowIr.replaySeeds(ir);
       res.json(r2);
     } catch (e) { _http400(res, e.message || e); }
+  });
+
+  // ----- W463: trace compile + verify (Agent Trace Compilation MVP) -----
+  // Closes audit P1 Agent Trace cluster: trace → IR → seeded-replay verify
+  // loop wired end-to-end. compileTraceToReplay wraps existing traceToIr +
+  // pre-seeds the IR with (user_input → final_output) so cache-hit replay
+  // against the same input returns the original output without re-running
+  // the LLM/tool steps. verifyTraceReplay reports match/mismatch counts.
+  // Both routes are tenant-fenced — the route forces tenant_id to the
+  // authenticated tenant; callers cannot spoof scope via the body.
+
+  r.post('/v1/trace/compile', wave144Limiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const trace_id = String((req.body && req.body.trace_id) || '');
+      if (!/^[0-9a-f]{32}$/.test(trace_id)) {
+        return _http400(res, 'trace_id must be 32 hex chars');
+      }
+      const r2 = await traceCompile.compileTraceToReplay(trace_id, {
+        tenant_id: req.tenant_record.id,
+        ir_opts: (req.body && req.body.ir_opts) || {},
+      });
+      res.json(r2);
+    } catch (e) {
+      const msg = String(e.message || e);
+      if (/tenant_mismatch/.test(msg)) return res.status(403).json({ ok: false, error: msg });
+      if (/empty trace/.test(msg))     return res.status(404).json({ ok: false, error: msg });
+      if (/trace_id must be|no replayable spans/.test(msg)) return _http400(res, msg);
+      _http500(res, e);
+    }
+  });
+
+  r.post('/v1/trace/verify', wave144Limiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const trace_id = String((req.body && req.body.trace_id) || '');
+      if (!/^[0-9a-f]{32}$/.test(trace_id)) {
+        return _http400(res, 'trace_id must be 32 hex chars');
+      }
+      const r2 = await traceCompile.verifyTraceReplay(trace_id, {
+        tenant_id: req.tenant_record.id,
+      });
+      res.json(r2);
+    } catch (e) {
+      const msg = String(e.message || e);
+      if (/tenant_mismatch/.test(msg)) return res.status(403).json({ ok: false, error: msg });
+      if (/empty trace/.test(msg))     return res.status(404).json({ ok: false, error: msg });
+      if (/trace_id must be|no replayable spans/.test(msg)) return _http400(res, msg);
+      _http500(res, e);
+    }
   });
 
   // ----- device -----

@@ -1,5 +1,5 @@
 // Recipe service worker · keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-19-wave462-multimodal-image-redact';
+const CACHE = 'kolm-v7-2026-05-19-wave463-trace-compile';
 const PRECACHE = [
   '/device',
   '/styles.css',
