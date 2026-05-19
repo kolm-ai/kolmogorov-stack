@@ -9,6 +9,13 @@
 
 const WAVES = [
   {
+    wave: 'W466',
+    date: '2026-05-19',
+    title: 'multimodal bake-off harness (compare base vs compiled across image/audio/video/pdf)',
+    summary: 'Closes audit P1 Multimodal cluster open item ("multimodal bake-off harness — compare base vs compiled across image/audio/video tasks"). New src/multimodal-bakeoff.js orchestrator replays captured multimodal events (event-store rows with media_kind set) through each compiled .kolm artifact and scores the artifact\'s output against the captured base-model response by token-overlap (Jaccard). Tenant-fenced via listEvents tenant_id filter + per-row defense-in-depth tenant check. Pure string/token compute — no heavy ML in the router (per the standing constraint). Embedding-similarity scoring (CLIP for images, etc.) is opt-in via the KOLM_MULTIMODAL_SCORE_CMD worker hook and lives outside Node. runMultimodalBakeoff() returns a ranked contestants[] envelope with mean_score/median_score/samples/scored/errors + a winner field (highest mean_score, samples desc tie-breaker). When zero captures match the filter, the envelope is ok:true with samples:0 + message:"no_multimodal_captures" so the dashboard can render a "no data yet" panel instead of an error. Why a separate module from src/bakeoff.js: that one compares hosted-model contestants across a dataset (text-only); W466 compares ARTIFACTS across CAPTURES where media_kind is set, which is a fundamentally different input source. Keeping them split makes the tenant-fence + media_kind filter obvious in the source instead of buried in another module\'s branches. New POST /v1/multimodal/bakeoff (auth-gated, tenant_id forced from req.tenant_record, never from body) + GET /v1/multimodal/bakeoff (auto-discovers up to 4 ~/.kolm/artifacts/*.kolm artifacts so the page works zero-config). New `kolm bakeoff multimodal [--modality image|audio|video|pdf] [--namespace ns] [--artifact PATH ...] [--limit N] [--remote]` CLI sub-branch + pretty-printed table. New 17th TUI view multimodal-bakeoff (key M) + :multimodal / :mm / :mm-bakeoff aliases. New /account/multimodal-bakeoff.html page with modality picker + namespace input + winner pill + contestants table + honest empty-state (distinguishes no_multimodal_captures from no_local_artifacts). 10 W466 tests pin the loop: exports + Jaccard edge cases + tenant fence + modality filter + no-captures envelope + artifact_load_failed envelope + route auth + GET auto-discovery + CLI/TUI/sw.js source-pins.',
+    tags: ['multimodal', 'bakeoff', 'audit', 'tenant-isolation', 'jaccard'],
+  },
+  {
     wave: 'W465',
     date: '2026-05-19',
     title: 'per-namespace cost attribution + team-level rollup (closes P1 Billing)',

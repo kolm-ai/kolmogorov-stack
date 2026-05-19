@@ -319,7 +319,8 @@ test('W462 #10 — sw.js CACHE slug is current within the W454+ family', () => {
   const slug = m[1];
   assert.ok(slug.startsWith('kolm-v7-2026-05-19-wave'),
     'sw.js CACHE slug must follow the v7-date-wave convention, got: ' + slug);
-  const family = ['wave454', 'wave455', 'wave456', 'wave457', 'wave458', 'wave459', 'wave460', 'wave461', 'wave462', 'wave463', 'wave464'];
-  assert.ok(family.some((w) => slug.includes(w)),
-    'sw.js CACHE slug must reference the W454+ audit-finish family, got: ' + slug);
+  const wm = slug.match(/wave(\d{3,4})/);
+  assert.ok(wm, 'sw.js CACHE slug must include a waveNNN token, got: ' + slug);
+  const n = parseInt(wm[1], 10);
+  assert.ok(n >= 454, 'sw.js CACHE slug must reference the W454+ audit-finish family, got: ' + slug);
 });

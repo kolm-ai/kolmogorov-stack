@@ -247,6 +247,9 @@ import {
   teamRollup as billingTeamRollup,
 } from './billing-breakdown.js';
 
+// W466 — multimodal bake-off harness (image/audio/video).
+import { runMultimodalBakeoff } from './multimodal-bakeoff.js';
+
 // Per-IP rate limiters (S5, S10). Express trust-proxy is set to 2 in
 // server.js so X-Forwarded-For resolves through the Vercel→Railway chain.
 // Vercel rotates client egress IPs within a /24 subnet on each request, so
@@ -4287,6 +4290,99 @@ export function buildRouter() {
       });
     }
     return res.json(env);
+  });
+
+  // W466 — multimodal bake-off harness. Replays a tenant's captured rows
+  // that carry media_kind (image/audio/video/pdf) through one or more
+  // compiled .kolm artifacts and scores each artifact's output against
+  // the captured base response by token-overlap. Returns ranked
+  // contestants + winner. The compute is pure string scoring — heavy ML
+  // (CLIP, embedding similarity) stays in workers/multimodal-bakeoff/
+  // and is opt-in via env override.
+  r.post('/v1/multimodal/bakeoff', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const artifacts = Array.isArray(body.artifacts) ? body.artifacts.map(a => String(a)) : [];
+    const modality = body.modality ? String(body.modality) : null;
+    const namespace = body.namespace ? sanitizeNamespace(String(body.namespace)) : null;
+    const limit = Number.isFinite(Number(body.limit)) ? Math.max(1, Math.min(500, Number(body.limit))) : 20;
+    try {
+      const out = await runMultimodalBakeoff({
+        tenant_id: req.tenant_record.id,
+        artifacts,
+        modality,
+        namespace,
+        limit,
+      });
+      return res.json(out);
+    } catch (e) {
+      const code = e && e.code;
+      if (code === 'tenant_id_required') return res.status(400).json({ error: 'tenant_id_required' });
+      if (code === 'artifacts_required') return res.status(400).json({ error: 'artifacts_required', hint: 'pass artifacts: ["path1.kolm","path2.kolm"]' });
+      if (code === 'invalid_modality') return res.status(400).json({ error: 'invalid_modality', hint: 'modality must be image|audio|video|pdf' });
+      return res.status(500).json({ error: 'multimodal_bakeoff_error', message: String((e && e.message) || e) });
+    }
+  });
+
+  // GET helper for TUI/CLI list-view: same shape as POST but with the
+  // contestants list pulled from the tenant's locally-compiled artifacts
+  // (~/.kolm/artifacts/). Query params: ?modality=image&namespace=ns&limit=20.
+  // Returns the same envelope shape; the TUI's get-view unwrap chain
+  // already handles the `contestants` array.
+  r.get('/v1/multimodal/bakeoff', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const modality = req.query && req.query.modality ? String(req.query.modality) : null;
+    const namespace = req.query && req.query.namespace ? sanitizeNamespace(String(req.query.namespace)) : null;
+    const limit = req.query && req.query.limit && Number.isFinite(Number(req.query.limit))
+      ? Math.max(1, Math.min(500, Number(req.query.limit)))
+      : 20;
+    // Auto-discover the tenant's local artifacts. The list is best-effort:
+    // when ~/.kolm/artifacts is empty the harness returns ok:true with a
+    // no-artifact hint and the dashboard renders the empty state.
+    let artifacts = [];
+    try {
+      const fsm = await import('node:fs');
+      const pathm = await import('node:path');
+      const osm = await import('node:os');
+      const home = process.env.KOLM_DATA_DIR
+        ? pathm.resolve(process.env.KOLM_DATA_DIR)
+        : pathm.join(process.env.HOME || process.env.USERPROFILE || osm.homedir(), '.kolm');
+      const artDir = pathm.join(home, 'artifacts');
+      if (fsm.existsSync(artDir)) {
+        artifacts = fsm.readdirSync(artDir)
+          .filter(f => f.endsWith('.kolm'))
+          .map(f => pathm.join(artDir, f))
+          .slice(0, 4);
+      }
+    } catch (_) {}
+    if (!artifacts.length) {
+      return res.json({
+        ok: true,
+        tenant_id: req.tenant_record.id,
+        namespace: namespace || null,
+        modality: modality || 'all',
+        samples: 0,
+        contestants: [],
+        winner: null,
+        message: 'no_local_artifacts',
+        hint: 'compile a .kolm first via `kolm compile` or POST /v1/multimodal/bakeoff with explicit artifacts[]',
+        created_at: new Date().toISOString(),
+      });
+    }
+    try {
+      const out = await runMultimodalBakeoff({
+        tenant_id: req.tenant_record.id,
+        artifacts,
+        modality,
+        namespace,
+        limit,
+      });
+      return res.json(out);
+    } catch (e) {
+      const code = e && e.code;
+      if (code === 'invalid_modality') return res.status(400).json({ error: 'invalid_modality' });
+      return res.status(500).json({ error: 'multimodal_bakeoff_error', message: String((e && e.message) || e) });
+    }
   });
 
   // Rotate the per-tenant receipt-signing secret. Previous secret is

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#08090c;color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<title>Multimodal bakeoff &middot; Account &middot; kolm.ai</title>
+<meta name="description" content="Multimodal bakeoff results on kolm.ai: compare base captured response vs compiled .kolm artifact output across image/audio/video/pdf captures. Built by src/multimodal-bakeoff.js.">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/multimodal-bakeoff">
+<meta property="og:title" content="Multimodal bakeoff &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Compare base vs compiled .kolm artifact output across image/audio/video/pdf captures. W466 P1 Multimodal closer." />
+<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/multimodal-bakeoff" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Multimodal bakeoff · Account · kolm.ai","description":"Multimodal bakeoff results on kolm.ai: compare base captured response vs compiled .kolm artifact output across image/audio/video/pdf captures.","url":"https://kolm.ai/account/multimodal-bakeoff","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Multimodal bakeoff","item":"https://kolm.ai/account/multimodal-bakeoff"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content h3{font-size:14px;margin:16px 0 8px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable tr:hover td{background:var(--bg-elev)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.btn.primary:hover{filter:brightness(1.1);color:#0b0d10}
+.skel{background:linear-gradient(90deg,var(--bg-elev) 0%,var(--bg-card) 50%,var(--bg-elev) 100%);background-size:200% 100%;animation:skel 1.4s linear infinite;border-radius:4px;height:12px}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px;align-items:center}
+.toolbar input[type=search],.toolbar select,.toolbar input[type=text]{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.toolbar label{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em}
+.kbd{font-family:var(--mono);font-size:11px;background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--ink-mute);border:1px solid var(--line)}
+.winner-pill{background:rgba(126,240,210,0.10);color:var(--good);border:1px solid var(--good);padding:3px 10px;border-radius:999px;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em}
+.metric-line{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0 4px;color:var(--ink-mute);font-family:var(--mono);font-size:12px}
+.metric-line b{color:var(--ink);font-weight:600}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
+</style>
+</head>
+<body>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Get started</p>
+          <a href="/product">Product overview</a>
+          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/tui">Terminal UI</a>
+          <a href="/foundations">Foundations</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Why kolm</p>
+          <a href="/drift">Drift report</a>
+          <a href="/k-score">K-Score explained</a>
+          <a href="/kscore-leaderboard">Leaderboard</a>
+          <a href="/how-vs-diy">vs DIY</a>
+          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
+          <a href="/how-vs-openpipe">vs OpenPipe</a>
+          <a href="/how-vs-predibase">vs Predibase</a>
+          <a href="/how-vs-lorax">vs LoRAX</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Use cases</p>
+          <a href="/use-cases">All use cases</a>
+          <a href="/healthcare">Healthcare (PHI)</a>
+          <a href="/legal">Legal (privilege)</a>
+          <a href="/finance">Finance (SR 11-7)</a>
+          <a href="/defense">Defense (air-gap)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/docs/cookbook">Cookbook</a>
+          <a href="/articles">Articles</a>
+          <a href="/press">Press</a>
+          <a href="/whitepaper">Whitepaper</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Catalog</p>
+          <a href="/models">Frontier catalog</a>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Supported devices</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Hardware</p>
+          <a href="/models#frontier">Hardware tiers</a>
+          <a href="/runtimes">Source-built llama.cpp</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Inference</p>
+          <a href="/docs/runtime">Runtime guide</a>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/optimizer">Optimizer</a>
+          <a href="/docs/evals">Evals</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Quickstarts</p>
+          <a href="/quickstart">Overview</a>
+          <a href="/quickstart/cli">CLI quickstart</a>
+          <a href="/quickstart/api">API quickstart</a>
+          <a href="/quickstart/sdk">SDK quickstart</a>
+          <a href="/quickstart/embed">Embed quickstart</a>
+          <a href="/quickstart/nl">Natural language</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/cli">CLI reference</a>
+          <a href="/docs/connectors">Connectors</a>
+          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Concepts</p>
+          <a href="/docs/distill">Distillation</a>
+          <a href="/docs/runtime">Runtime</a>
+          <a href="/docs/evals">Evals</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/storage">Storage</a>
+          <a href="/docs/datasets">Datasets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Help</p>
+          <a href="/docs">Docs home</a>
+          <a href="/faq">FAQ</a>
+          <a href="/changelog">Changelog</a>
+          <a href="/research">Research</a>
+          <a href="/training">Training</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Pricing</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/baa">BAA / SLA</a>
+          <a href="/enterprise">Enterprise</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Solutions</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/healthcare">Healthcare</a>
+          <a href="/legal">Legal</a>
+          <a href="/finance">Finance</a>
+          <a href="/defense">Defense</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deployment</p>
+          <a href="/byoc">BYOC</a>
+          <a href="/airgap">Air-gap</a>
+          <a href="/tunnels">Tunnels</a>
+          <a href="/self-host">Self-host</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/compliance-packs">Compliance packs</a>
+          <a href="/soc2">SOC 2</a>
+          <a href="/hipaa-mapping">HIPAA mapping</a>
+          <a href="/slsa">SLSA</a>
+          <a href="/sbom">SBOM</a>
+          <a href="/subprocessors">Subprocessors</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+    <div class="site-actions"><a href="/docs">Help</a></div>
+  </div>
+</header>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/agent-telemetry">Agent telemetry</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/multimodal-bakeoff" aria-current="page">Multimodal bakeoff</a></li><li><a href="/account/builds">Builds</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<section class="acct-content">
+<h1>Multimodal bakeoff.</h1>
+<p class="lede">Replay your captured multimodal events (image / audio / video / pdf) through each compiled <code>.kolm</code> artifact. Score each artifact's output against the captured base-model response by token-overlap (Jaccard). Highest mean score wins.</p>
+<div class="kpanel" id="w466-bakeoff">
+  <h2>Contestants</h2>
+  <p class="pdesc">Source: <code>src/multimodal-bakeoff.js</code>. Tenant-fenced. Pure string/token scoring, no heavy ML in router. Embedding-similarity scoring is opt-in via <code>KOLM_MULTIMODAL_SCORE_CMD</code> worker hook.</p>
+  <div class="toolbar">
+    <label for="mm-modality">Modality</label>
+    <select id="mm-modality" aria-label="Modality">
+      <option value="">all</option>
+      <option value="image">image</option>
+      <option value="audio">audio</option>
+      <option value="video">video</option>
+      <option value="pdf">pdf</option>
+    </select>
+    <label for="mm-namespace">Namespace</label>
+    <input id="mm-namespace" type="text" placeholder="(all)" style="min-width:160px">
+    <label for="mm-limit">Limit</label>
+    <input id="mm-limit" type="text" value="20" style="width:80px">
+    <button class="btn primary" id="mm-refresh" type="button">Refresh</button>
+    <span id="mm-winner" style="margin-left:auto"></span>
+  </div>
+  <div class="metric-line" id="mm-meta"><span>samples <b id="mm-samples">-</b></span><span>modality <b id="mm-mod">all</b></span><span>namespace <b id="mm-ns">all</b></span></div>
+  <table class="ktable">
+    <thead><tr><th>Artifact</th><th>Samples</th><th>Scored</th><th>Mean</th><th>Median</th><th>Errors</th><th>Verdict</th></tr></thead>
+    <tbody id="mm-rows"><tr><td colspan="7"><div class="skel" style="width:260px"></div></td></tr></tbody>
+  </table>
+  <div id="mm-empty" class="empty" hidden>
+    <strong>No multimodal captures yet.</strong> Send multimodal traffic through the kolm connector (image_url / audio / video / pdf in OpenAI multimodal format) to populate this bakeoff. Then compile artifacts with <code>kolm compile</code> and they'll appear here automatically.
+  </div>
+</div>
+</section>
+</div>
+</main>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+})();
+var rows=document.getElementById("mm-rows");
+var emptyEl=document.getElementById("mm-empty");
+function paintMM(result){
+  var contestants=(result&&result.contestants)||[];
+  document.getElementById("mm-samples").textContent=(result&&result.samples!=null)?result.samples:"-";
+  document.getElementById("mm-mod").textContent=(result&&result.modality)||"all";
+  document.getElementById("mm-ns").textContent=(result&&result.namespace)||"all";
+  var winner=result&&result.winner;
+  var winEl=document.getElementById("mm-winner");
+  if(winner){
+    var short=String(winner).split(/[\\/]/).pop();
+    winEl.innerHTML='<span class="winner-pill">winner: '+window.kesc(short)+'</span>';
+  } else { winEl.innerHTML=''; }
+  if(!contestants.length||(result&&result.message==="no_multimodal_captures")||(result&&result.message==="no_local_artifacts")){
+    rows.innerHTML="";
+    emptyEl.hidden=false;
+    if(result&&result.message==="no_local_artifacts"){
+      emptyEl.innerHTML='<strong>No local .kolm artifacts.</strong> Run <code>kolm compile</code> to build one, then refresh this page.';
+    }
+    return;
+  }
+  emptyEl.hidden=true;
+  rows.innerHTML=contestants.map(function(c){
+    var path=String(c.artifact_path||"");
+    var name=path.split(/[\\/]/).pop()||path;
+    var isWinner=winner&&path===winner;
+    var rowStyle=isWinner?' style="background:rgba(126,240,210,0.06)"':'';
+    var verdict=isWinner?'<span class="pill ok">winner</span>'
+      : (c.error?'<span class="pill bad">'+window.kesc(c.error)+'</span>'
+      : (c.scored>0?'<span class="pill mute">-</span>':'<span class="pill warn">no score</span>'));
+    var mean=(c.mean_score!=null)?Number(c.mean_score).toFixed(3):"-";
+    var median=(c.median_score!=null)?Number(c.median_score).toFixed(3):"-";
+    return "<tr"+rowStyle+">"+
+      "<td><b>"+window.kesc(name)+"</b></td>"+
+      "<td>"+(c.samples!=null?c.samples:"-")+"</td>"+
+      "<td>"+(c.scored!=null?c.scored:"-")+"</td>"+
+      "<td>"+mean+"</td>"+
+      "<td>"+median+"</td>"+
+      "<td>"+(c.errors!=null?c.errors:"-")+"</td>"+
+      "<td>"+verdict+"</td>"+
+    "</tr>";
+  }).join("");
+}
+function loadMM(){
+  var mod=document.getElementById("mm-modality").value;
+  var ns=document.getElementById("mm-namespace").value.trim();
+  var lim=document.getElementById("mm-limit").value.trim();
+  var q=[];
+  if(mod) q.push("modality="+encodeURIComponent(mod));
+  if(ns) q.push("namespace="+encodeURIComponent(ns));
+  if(lim) q.push("limit="+encodeURIComponent(lim));
+  var url="/v1/multimodal/bakeoff"+(q.length?("?"+q.join("&")):"");
+  rows.innerHTML='<tr><td colspan="7"><div class="skel" style="width:260px"></div></td></tr>';
+  window.kfetch(url).then(paintMM).catch(function(e){
+    rows.innerHTML="";
+    emptyEl.hidden=false;
+    emptyEl.innerHTML='<strong>Bakeoff failed.</strong> '+window.kesc(e.message);
+  });
+}
+document.getElementById("mm-refresh").addEventListener("click",loadMM);
+document.getElementById("mm-modality").addEventListener("change",loadMM);
+loadMM();
+</script>
+</body>
+</html>

@@ -3012,10 +3012,11 @@ captured corpus.
 
 Types: ${'user_simulator|api_tool_simulator|log_stream_simulator|support_ticket_simulator|incident_simulator|browser_workflow_simulator|payer_prior_auth_simulator|privacy_red_team_simulator|device_performance_simulator'}
 `,
-  bakeoff: `kolm bakeoff - score-per-dollar bakeoff across cache/rule/small/frontier (wave 371).
+  bakeoff: `kolm bakeoff - score-per-dollar bakeoff across cache/rule/small/frontier (wave 371) + multimodal (W466).
 
 USAGE
   kolm bakeoff <dataset_id|path|ds_*> [--contestants cache,rule,gemma-3n-e2b,claude-haiku-4-5,gpt-4o-mini] [--stub-model] [--json]
+  kolm bakeoff multimodal [--modality image|audio|video|pdf] [--namespace ns] [--artifact path.kolm]+ [--limit N] [--remote] [--json]
 
 Default contestants:  cache, rule, prompt_only, gemma-3n-e2b, qwen-0.5b,
                       phi-mini, claude-haiku-4-5, gpt-4o-mini.
@@ -3028,8 +3029,19 @@ pass-rate when nothing clears the gate.
 --stub-model uses deterministic per-model quality so the bakeoff prints a
 useful ranking on a dev box with no KOLM_LLM_PROVIDER configured.
 
+MULTIMODAL (W466)
+  The 'multimodal' sub replays captures that carry media_kind through one or
+  more compiled .kolm artifacts and scores by token-overlap against the
+  base response. Pass --artifact one or more times to add contestants; with
+  no --artifact + --remote, the route auto-discovers ~/.kolm/artifacts/.
+
 FLAGS
   --json     emit a deterministic ranking envelope for scripts
+  --modality filter rows by media_kind (image|audio|video|pdf); default: all
+  --namespace filter to one capture namespace
+  --artifact <path.kolm> add an artifact contestant (repeatable)
+  --limit N  max captures to replay (1..500, default 20)
+  --remote   call kolm.ai instead of running locally
 
 EXIT CODES
   0 ok   1 user error   2 server error
@@ -3038,6 +3050,8 @@ EXAMPLES
   kolm bakeoff ds_tickets --json
   kolm bakeoff ./holdout.jsonl --contestants cache,rule,gemma-3n-e2b
   kolm bakeoff ds_smoke --stub-model --json
+  kolm bakeoff multimodal --modality image --artifact ./v1.kolm --artifact ./v2.kolm
+  kolm bakeoff multimodal --modality audio --namespace voice-support --remote
 `,
   fix: `kolm fix <artifact.kolm> - auto-iterate on a failing artifact.
 
@@ -12836,6 +12850,95 @@ async function cmdSim(args) {
 
 async function cmdBakeoff(args) {
   if (maybeHelp('bakeoff', args)) return;
+  // W466 — multimodal sub: `kolm bakeoff multimodal [--modality image|audio|video|pdf] [--namespace ns] [--artifact path]+ [--limit N] [--remote]`
+  if ((args[0] || '').toLowerCase() === 'multimodal') {
+    const sub = args.slice(1);
+    const modality = pickFlag(sub, '--modality');
+    const namespace = pickFlag(sub, '--namespace');
+    const limitFlag = pickFlag(sub, '--limit');
+    const limit = limitFlag ? Math.max(1, Math.min(500, Number(limitFlag) || 20)) : 20;
+    // --artifact repeatable. pickFlag returns the first; manually walk for the rest.
+    const artifacts = [];
+    for (let i = 0; i < sub.length; i++) {
+      if (sub[i] === '--artifact' && i + 1 < sub.length) {
+        artifacts.push(sub[i + 1]);
+        i++;
+      }
+    }
+    const remote = sub.includes('--remote');
+    const wantJson = sub.includes('--json') || remote;
+    if (remote || !artifacts.length) {
+      const c = loadConfig();
+      if (!c.api_key) {
+        console.error('not logged in. run: kolm login');
+        process.exit(EXIT.MISSING_PREREQ);
+      }
+      if (artifacts.length) {
+        const body = { artifacts, limit };
+        if (modality) body.modality = modality;
+        if (namespace) body.namespace = namespace;
+        const data = await api(c, 'POST', '/v1/multimodal/bakeoff', body);
+        console.log(JSON.stringify(data, null, 2));
+        if (data && data.ok === false) process.exit(1);
+        return;
+      }
+      const qs = [];
+      if (modality) qs.push('modality=' + encodeURIComponent(modality));
+      if (namespace) qs.push('namespace=' + encodeURIComponent(namespace));
+      qs.push('limit=' + limit);
+      const data = await api(c, 'GET', '/v1/multimodal/bakeoff?' + qs.join('&'));
+      console.log(JSON.stringify(data, null, 2));
+      if (data && data.ok === false) process.exit(1);
+      return;
+    }
+    const mb = await import('../src/multimodal-bakeoff.js');
+    // Local mode: need tenant_id from config.
+    const c = loadConfig();
+    const tenantId = c.tenant_id || c.api_key || 'local';
+    try {
+      const out = await mb.runMultimodalBakeoff({
+        tenant_id: tenantId,
+        artifacts,
+        modality: modality || null,
+        namespace: namespace || null,
+        limit,
+      });
+      if (wantJson) {
+        console.log(JSON.stringify(out, null, 2));
+      } else {
+        console.log('Multimodal bake-off (' + (out.modality || 'all') + ', samples=' + out.samples + ')');
+        console.log('');
+        if (!out.contestants || !out.contestants.length) {
+          console.log('  (no contestants)');
+          return;
+        }
+        console.log('  artifact                                  samples  scored  mean    median  errors');
+        console.log('  ----------------------------------------  -------  ------  ------  ------  ------');
+        for (const k of out.contestants) {
+          const name = String(k.artifact_path).slice(-40).padStart(40);
+          const samples = String(k.samples).padStart(7);
+          const scored = String(k.scored || 0).padStart(6);
+          const mean = (k.mean_score || 0).toFixed(3).padStart(6);
+          const median = (k.median_score || 0).toFixed(3).padStart(6);
+          const errs = String(k.errors || 0).padStart(6);
+          console.log('  ' + name + '  ' + samples + '  ' + scored + '  ' + mean + '  ' + median + '  ' + errs);
+        }
+        if (out.winner) {
+          console.log('');
+          console.log('  winner: ' + out.winner);
+        }
+        if (out.message) {
+          console.log('');
+          console.log('  note: ' + out.message);
+        }
+      }
+      if (out && out.ok === false) process.exit(1);
+      return;
+    } catch (e) {
+      console.error('multimodal-bakeoff error: ' + String(e.message || e));
+      process.exit(1);
+    }
+  }
   const bakeoff = await import('../src/bakeoff.js');
   // W409p subverb form: `kolm bakeoff run [--dataset id] [--frontier m] [--local m] [--artifact path]`
   // Legacy form: `kolm bakeoff <dataset_id|namespace|template> [--contestants list]`
@@ -22312,6 +22415,9 @@ async function cmdTui(args) {
     // W465 — Billing breakdown view. Closes the per-namespace cost
     // attribution triangle: page panel, CLI (`kolm billing breakdown`), TUI.
     { id: 'billing-breakdown',  key: 'J', endpoint: '/v1/billing/breakdown',     kind: 'get',   label: 'billing breakdown (by namespace)' },
+    // W466 — Multimodal bake-off view. Closes the multimodal compare triangle:
+    // /account/multimodal-bakeoff page, CLI (`kolm bakeoff multimodal`), TUI.
+    { id: 'multimodal-bakeoff', key: 'M', endpoint: '/v1/multimodal/bakeoff',    kind: 'get',   label: 'multimodal bakeoff (base vs compiled)' },
   ];
   // Also expose simulations under view 'simulations' (alias for one of the
   // workflow rows so the W384 14-view test grep finds the literal). We list
@@ -22353,6 +22459,7 @@ async function cmdTui(args) {
               : Array.isArray(data.recommendations) ? data.recommendations
               : Array.isArray(data.namespaces) ? data.namespaces
               : Array.isArray(data.members) ? data.members
+              : Array.isArray(data.contestants) ? data.contestants
               : Array.isArray(data[viewId]) ? data[viewId]
               : [data];
             state.viewData = rows;
@@ -22666,6 +22773,11 @@ async function cmdTui(args) {
       'billing-breakdown':'billing-breakdown',
       'spend-breakdown':'billing-breakdown',
       'rollup':        'billing-breakdown',
+      // W466 — multimodal bakeoff aliases (CLI `kolm bakeoff multimodal` + TUI `:multimodal` + web).
+      'multimodal':    'multimodal-bakeoff',
+      'multimodal-bakeoff':'multimodal-bakeoff',
+      'mm-bakeoff':    'multimodal-bakeoff',
+      'mm':            'multimodal-bakeoff',
     };
     if (VIEW_ALIAS[verb]) {
       const id = VIEW_ALIAS[verb];
