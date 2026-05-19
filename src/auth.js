@@ -370,6 +370,18 @@ const PUBLIC_API = (p) =>
   p === '/v1/marketplace/catalog.json' ||
   p === '/v1/marketplace/publish-request' ||
   /^\/v1\/marketplace\/[A-Za-z0-9._-]+(?:\/download)?$/.test(p) ||
+  // W436 — public artifact verification. /v1/verify/:cid surfaces the
+  // recompute-cid-from-manifest-hashes verdict so an auditor can verify
+  // provenance without an account; /v1/artifact/verify-manifest is the
+  // stateless POST variant for callers that already have the hashes block.
+  /^\/v1\/verify\/[A-Za-z0-9:_-]+$/.test(p) ||
+  p === '/v1/artifact/verify-manifest' ||
+  // W409g/W409k — GET /v1/models is OpenAI-compatible model discovery. Public
+  // so SDKs that call client.models.list() before authenticating get a usable
+  // envelope; the soft-auth block above will still populate req.tenant when a
+  // valid key is present, so the handler can decide whether to surface
+  // tenant-specific compiled .kolm artifacts (private rows).
+  p === '/v1/models' ||
   // W384 — sync inbox accepts pushes from peer daemons; the sender supplies
   // an Authorization: Bearer <key> via the body/headers and validates it itself
   // (the body's source_device_id + state envelope acts as the auth contract).

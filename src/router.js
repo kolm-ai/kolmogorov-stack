@@ -25,6 +25,7 @@ import { LIBRARY_VERSION, libraryDescription } from './library.js';
 import { all, findOne, findByField, findByTenant, insert, update, withTransaction, id as storeId, stats as storeStats } from './store.js';
 import { verifiedInference } from './verified.js';
 import { createJob, getJob, listJobs, runJob } from './compile.js';
+import { cidFromManifestHashes, verifyCidAgainstManifestHashes, canonicalJson as cidCanonicalJson } from './cid.js';
 import * as recall from './recall.js';
 import { verifyStripeSignature, planFromAmount, appendCheckoutParams } from './stripe.js';
 import {
@@ -3518,6 +3519,30 @@ export function buildRouter() {
     });
   });
 
+  // W433 — /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the
+  // convention `GET /v1/whoami` (or `/v1/me`) for "who is this key?". The
+  // canonical kolm endpoint is GET /v1/account, but /v1/whoami forwards to
+  // the same handler so SDKs probing the conventional path get an answer
+  // instead of a 404 + bad first-impression. Auth-gated identically.
+  r.get('/v1/whoami', (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth required' });
+    }
+    const t = req.tenant_record;
+    res.json({
+      ok: true,
+      id: t.id,
+      name: t.name,
+      email: t.email || null,
+      plan: t.plan,
+      quota: t.quota,
+      used: t.used,
+      remaining: Math.max(0, (t.quota || 0) - (t.used || 0)),
+      auth_provider: t.auth_provider || 'apikey',
+      api_key_prefix: typeof req.api_key === 'string' ? req.api_key.slice(0, 8) + '...' : (t.api_key_prefix || null),
+    });
+  });
+
   r.post('/v1/account/rotate-key', (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot rotate' });
     const k = rotateTenantKey(req.tenant_record.id);
@@ -4412,6 +4437,12 @@ export function buildRouter() {
   // public-by-default. Returns manifest summary + signature status so an
   // auditor or buyer can verify the artifact's provenance without trusting us.
   // GET /v1/verify/cidv1:sha256:7a2c1f9b... -> { verified, cid, manifest, ... }
+  //
+  // W436 — DoD step 9 closer. If the registry row carries `manifest.hashes`,
+  // recompute the CID from those hashes (cidFromManifestHashes) and refuse to
+  // return verified=true unless the recomputed CID matches the requested CID.
+  // Surfaces `manifest_hash_mismatch` envelope with both expected_cid and
+  // actual_cid so an auditor can diff the discrepancy without trusting us.
   r.get('/v1/verify/:cid', (req, res) => {
     const cid = String(req.params.cid || '').trim();
     if (!cid) return res.status(400).json({ error: 'cid required' });
@@ -4436,6 +4467,36 @@ export function buildRouter() {
       });
     }
     const c = concepts.find(x => x.id === v.concept_id || x.head_version === v.id);
+    // W436 — real manifest_hash check. Look for hashes in the most common
+    // places we record them (the evaluation block, the version, or the
+    // concept's head_manifest snapshot). If we have them, recompute and
+    // compare; mismatch returns 200 with verified:false + the canonical
+    // `manifest_hash_mismatch` envelope.
+    const hashes =
+      v?.evaluation?.manifest?.hashes ||
+      v?.manifest?.hashes ||
+      v?.hashes ||
+      c?.head_manifest?.hashes ||
+      null;
+    if (hashes && typeof hashes === 'object') {
+      let recomputed = null;
+      try { recomputed = cidFromManifestHashes(hashes); } catch (_) { recomputed = null; }
+      if (recomputed && recomputed !== normalized) {
+        return res.status(200).json({
+          verified: false,
+          cid: normalized,
+          error: 'manifest_hash_mismatch',
+          reason: 'recomputed manifest cid does not match requested cid',
+          expected_cid: recomputed,
+          actual_cid: normalized,
+          audit: {
+            registry: '/registry',
+            spec: '/spec/rs-1',
+            replay: 'kolm verify ' + normalized,
+          },
+        });
+      }
+    }
     res.json({
       verified: true,
       cid: normalized,
@@ -4448,7 +4509,9 @@ export function buildRouter() {
         k_score: v?.evaluation?.quality_score ?? v?.evaluation?.k_score ?? null,
         size_bytes: v?.evaluation?.size_bytes ?? null,
         compliance_pack: v?.evaluation?.compliance_pack || null,
+        hashes: hashes || null,
       },
+      manifest_hash_verified: !!hashes,
       signed_by: v?.signed_by || 'kolm:registry',
       signed_at: v?.created_at || c?.updated_at || null,
       receipt_format: 'HMAC-SHA256 over (cid, input_sha, output_sha, ts)',
@@ -4457,6 +4520,46 @@ export function buildRouter() {
         spec: '/spec/rs-1',
         replay: 'kolm verify ' + normalized,
       },
+    });
+  });
+
+  // W436 — POST /v1/artifact/verify-manifest. Stateless manifest_hash check
+  // for callers that have the manifest hashes block in hand (e.g. a CLI
+  // that just downloaded the artifact and parsed its manifest.json). No auth
+  // required — the check is pure: recompute CID from hashes, compare to the
+  // claimed CID. Returns `manifest_hash_mismatch` envelope on disagreement,
+  // `verified:true` + recomputed cid on match.
+  r.post('/v1/artifact/verify-manifest', (req, res) => {
+    const body = req.body || {};
+    const claimed = String(body.cid || body.claimed_cid || '').trim();
+    const hashes = body.hashes || body.manifest_hashes || (body.manifest && body.manifest.hashes) || null;
+    if (!claimed) return res.status(400).json({ ok: false, error: 'cid (claimed cidv1:sha256:hex) required' });
+    if (!hashes || typeof hashes !== 'object') {
+      return res.status(400).json({ ok: false, error: 'hashes (manifest hashes object) required' });
+    }
+    const normalized = claimed.startsWith('cidv1:') ? claimed : ('cidv1:sha256:' + claimed);
+    let recomputed = null;
+    try { recomputed = cidFromManifestHashes(hashes); }
+    catch (e) {
+      return res.status(400).json({ ok: false, error: 'invalid_hashes', detail: String(e.message || e) });
+    }
+    if (recomputed !== normalized) {
+      return res.status(200).json({
+        ok: true,
+        verified: false,
+        error: 'manifest_hash_mismatch',
+        reason: 'recomputed manifest cid does not match claimed cid',
+        expected_cid: recomputed,
+        actual_cid: normalized,
+      });
+    }
+    res.json({
+      ok: true,
+      verified: true,
+      cid: normalized,
+      expected_cid: recomputed,
+      actual_cid: normalized,
+      manifest_hash_verified: true,
     });
   });
 
@@ -5529,11 +5632,20 @@ export function buildRouter() {
     const ns = req.query?.namespace ? String(req.query.namespace) : null;
     const lim = Math.min(200, Math.max(1, parseInt(req.query?.limit, 10) || 50));
     const includeDiscarded = req.query?.include_discarded === '1';
+    // W435 — `?since=<iso>` lower-bound on created_at. Enables incremental
+    // capture export for the retrain loop ("give me everything captured
+    // since my last compile"). The CLI `kolm bridges observations
+    // --since-last-compile <artifact>` resolves the artifact manifest's
+    // created_at locally then passes the ISO timestamp here.
+    const sinceISO = req.query?.since ? String(req.query.since) : null;
     const tenantObs = findByTenant('observations', req.tenant);
     const obsNs = (o) => o.corpus_namespace || o.namespace || 'default';
     let obs = tenantObs;
     if (ns) obs = obs.filter(o => obsNs(o) === ns);
     if (!includeDiscarded) obs = obs.filter(o => !o.discarded);
+    if (sinceISO) {
+      obs = obs.filter(o => String(o.created_at || '') >= sinceISO);
+    }
     obs.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
     const namespaces = [...new Set(tenantObs.map(obsNs))];
     const ready = namespaces.map(n => ({
@@ -5544,6 +5656,7 @@ export function buildRouter() {
       total: obs.length,
       namespaces,
       ready_to_distill: ready,
+      since_applied: sinceISO || null,
       observations: obs.slice(0, lim).map(o => ({
         id: o.id,
         namespace: o.namespace || 'default',
@@ -8103,6 +8216,73 @@ export function buildRouter() {
     };
     job.subscribers.add(sub);
     req.on('close', () => { job.subscribers.delete(sub); });
+  });
+
+  // ============== W434: drift detection HTTP surface ==============
+  // The drift module (src/drift-supersession.js) has shipped since W167 but
+  // was reachable only from CLI + cron — there was no HTTP route, which is
+  // why the DoD audit (2026-05-19) named drift as the missing step 11 of
+  // the 12-step compile→verify→run→drift→retrain loop. W434 exposes three
+  // tenant-scoped POST routes that wrap the existing pure functions. The
+  // routes are stateless (no server-side persistence) — the report's hash
+  // is verifiable client-side, so the round-trip is just "validate my
+  // inputs + compute signals + return the report you can persist anywhere."
+  r.post('/v1/drift/snapshot', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const drift = await import('./drift-supersession.js');
+      const body = req.body || {};
+      const snap = drift.buildDriftSnapshot({
+        artifact_hash: body.artifact_hash,
+        captured_at: body.captured_at || new Date().toISOString(),
+        cid: body.cid,
+        eval_score: body.eval_score,
+        k_score: body.k_score,
+        external_holdout_hash: body.external_holdout_hash,
+        tenant_shadow_corpus_hash: body.tenant_shadow_corpus_hash,
+        recipe_class: body.recipe_class,
+      });
+      res.json({ ok: true, snapshot: snap });
+    } catch (e) { res.status(400).json(_w384Err(e, 'drift_snapshot_error')); }
+  });
+
+  r.post('/v1/drift/detect', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const drift = await import('./drift-supersession.js');
+      const body = req.body || {};
+      if (!body.baseline_snapshot || !body.current_snapshot) {
+        return res.status(400).json({ ok: false, error: 'baseline_snapshot and current_snapshot required' });
+      }
+      const signals = drift.detectDrift(body.baseline_snapshot, body.current_snapshot, body.tolerances || {});
+      const breach = signals.filter(s => s.status === 'breach').length;
+      const driftCount = signals.filter(s => s.status === 'drift').length;
+      let verdict;
+      if (breach > 0) verdict = 'breach';
+      else if (driftCount > 0) verdict = 'drift';
+      else verdict = 'within';
+      res.json({ ok: true, signals, verdict, breach_count: breach, drift_count: driftCount });
+    } catch (e) { res.status(400).json(_w384Err(e, 'drift_detect_error')); }
+  });
+
+  r.post('/v1/drift/report', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const drift = await import('./drift-supersession.js');
+      const body = req.body || {};
+      if (!body.baseline_snapshot || !body.current_snapshot) {
+        return res.status(400).json({ ok: false, error: 'baseline_snapshot and current_snapshot required' });
+      }
+      const signals = drift.detectDrift(body.baseline_snapshot, body.current_snapshot, body.tolerances || {});
+      const report = drift.buildDriftReport({
+        baseline_snapshot: body.baseline_snapshot,
+        current_snapshot: body.current_snapshot,
+        signals,
+        tolerances: body.tolerances || undefined,
+        notes: typeof body.notes === 'string' ? body.notes : undefined,
+      });
+      res.json({ ok: true, report });
+    } catch (e) { res.status(400).json(_w384Err(e, 'drift_report_error')); }
   });
 
   // ============== W384: agent telemetry ==============
