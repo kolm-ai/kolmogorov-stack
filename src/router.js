@@ -3693,18 +3693,57 @@ export function buildRouter() {
 
   // W409f — /v1/account/audit-log surfaces the audit ledger for the calling
   // tenant. The audit-log.html page renders {entries:[{at,actor,op,payload}]}.
+  // W448 — added ?format=csv (defaults to json) so the page's export button
+  // and `kolm audit --format csv` CLI verb hit the same route. Also added
+  // ?since=<iso|epoch> filter so the CLI can scope to a recent window.
   r.get('/v1/account/audit-log', (req, res) => {
-    if (!req.tenant_record && !req.is_admin) return res.json({ entries: [], total: 0 });
+    if (!req.tenant_record && !req.is_admin) {
+      if (String(req.query.format || '').toLowerCase() === 'csv') {
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        return res.send('at,actor,op,payload\n');
+      }
+      return res.json({ entries: [], total: 0 });
+    }
     try {
       const tenantId = req.is_admin
         ? (req.query.tenant_id ? String(req.query.tenant_id) : null)
         : req.tenant_record.id;
       const limit = Math.min(500, Number(req.query.limit) || 100);
+      const sinceParam = req.query.since;
+      let sinceMs = null;
+      if (sinceParam != null && String(sinceParam).length > 0) {
+        const asNum = Number(sinceParam);
+        if (Number.isFinite(asNum) && asNum > 0) sinceMs = asNum;
+        else {
+          const asDate = Date.parse(String(sinceParam));
+          if (!Number.isNaN(asDate)) sinceMs = asDate;
+        }
+      }
       const rows = findByTenant('audit_log', tenantId) || [];
-      const sorted = rows
+      const filtered = rows
         .filter((e) => !tenantId || e.tenant_id === tenantId)
+        .filter((e) => {
+          if (sinceMs == null) return true;
+          const t = Date.parse(e.at || '');
+          return Number.isFinite(t) && t >= sinceMs;
+        });
+      const sorted = filtered
         .sort((a, b) => (b.at || '').localeCompare(a.at || ''))
         .slice(0, limit);
+      const format = String(req.query.format || 'json').toLowerCase();
+      if (format === 'csv') {
+        const esc = (v) => {
+          if (v == null) return '';
+          const s = typeof v === 'string' ? v : JSON.stringify(v);
+          return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        };
+        const lines = ['at,actor,op,payload'];
+        for (const e of sorted) {
+          lines.push([esc(e.at), esc(e.actor), esc(e.op), esc(e.payload)].join(','));
+        }
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        return res.send(lines.join('\n') + '\n');
+      }
       res.json({ ok: true, entries: sorted, total: sorted.length });
     } catch (e) {
       res.status(500).json({ error: 'audit_log_error', detail: String(e && e.message || e) });

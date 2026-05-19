@@ -250,6 +250,8 @@ test('W446 #5 — sw.js cache slug is current (audit-finish marker)', () => {
   // bumps it, this test gets updated alongside the bump (lock-in, not freeze).
   assert.ok(slug.startsWith('kolm-v7-2026-05-19-wave'),
     'sw.js CACHE slug must start with kolm-v7-2026-05-19-wave*, got: ' + slug);
-  assert.ok(slug.includes('wave443') || slug.includes('wave445') || slug.includes('wave446'),
-    'sw.js CACHE slug must reference the W443/W445/W446 audit-finish batch, got: ' + slug);
+  assert.ok(
+    slug.includes('wave443') || slug.includes('wave445') || slug.includes('wave446') ||
+    slug.includes('wave447') || slug.includes('wave448'),
+    'sw.js CACHE slug must reference the W443-W448 audit-finish/follow-up batch, got: ' + slug);
 });

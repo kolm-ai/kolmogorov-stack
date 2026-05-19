@@ -157,6 +157,11 @@ test('4. every COMPLETION_VERBS entry has at least one inbound docs reference', 
     // the W434 drift HTTP surface; dedicated docs page under /docs/cli/bridges
     // tracked separately.
     'bridges',
+    // W448 — `audit` mirrors the /account/audit-log post-auth surface (CSV +
+    // since-filter). HELP.audit + the dedicated /account/audit-log page carry
+    // user-facing docs; no /docs/cli/audit page required because the audit
+    // ledger is an account-app surface, not a workflow verb.
+    'audit',
   ]);
   const real = missing.filter(v => !ALLOWED_GAPS.has(v));
   assert.deepEqual(real, [],

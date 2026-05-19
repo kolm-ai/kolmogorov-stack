@@ -425,6 +425,23 @@ Continue) can auto-attach the project's .kolm artifacts via 'kolm serve --mcp'.
 SCHEMA
   https://kolm.ai/docs/kolm-yaml-v0.1.json
 `,
+  audit: `kolm audit - read-only per-tenant audit ledger. Same view the web
+account/audit-log page renders; CSV export honors the same filters.
+
+USAGE
+  kolm audit [--limit N] [--since <iso|epoch>] [--format csv] [--json]
+
+EXAMPLES
+  kolm audit                            # last 100 entries, table format
+  kolm audit --limit 25
+  kolm audit --since 2026-05-01         # ISO date / ISO datetime / epoch ms
+  kolm audit --since 7d                 # (NOTE: relative shorthand pending — use ISO)
+  kolm audit --format csv > audit.csv   # CSV stream for compliance export
+  kolm audit --json                     # raw JSON envelope (entries[]+total)
+
+Backed by GET /v1/account/audit-log (same endpoint as /account/audit-log page).
+Read-only. Audit rows are hash-chained; tampering surfaces on kolm auditor verify.
+`,
   ask: `kolm ask - ask in plain English. Routes through the deterministic
 natural-language assistant (no LLM round-trip). Useful when you don't remember
 the exact verb-noun grammar.
@@ -10861,6 +10878,69 @@ async function cmdQuantizeLocalWorker(args) {
 //   --auditor-attestation <file>`. The verifier (`kolm verify`) check #22
 //   re-validates the signature offline using the public key embedded in the
 //   attestation block; no network call needed.
+// W448 — `kolm audit` is the read-only per-tenant audit-log mirror of
+// /account/audit-log.html. Same route (/v1/account/audit-log) feeds both
+// surfaces; the web page exports CSV via the same ?format=csv path.
+//
+// Examples:
+//   kolm audit                       # last 100 entries, human-readable
+//   kolm audit --limit 25            # cap rows
+//   kolm audit --since 2026-05-01    # ISO date / iso datetime / epoch ms
+//   kolm audit --format csv          # CSV stream (export)
+//   kolm audit --json                # raw JSON envelope
+async function cmdAudit(args) {
+  if (maybeHelp('audit', args)) return;
+  const limit = Number(pickFlag(args, '--limit') || 100);
+  const sinceRaw = pickFlag(args, '--since') || null;
+  const format = (pickFlag(args, '--format') || '').toLowerCase();
+  const asJson = args.includes('--json');
+  const baseUrl = (process.env.KOLM_URL || 'https://kolm.ai').replace(/\/$/, '');
+  const key = process.env.KOLM_KEY || '';
+  if (!key) {
+    console.error('KOLM_KEY env required (try: kolm login or kolm key import)');
+    process.exit(EXIT.MISSING_PREREQ);
+  }
+  const qs = new URLSearchParams();
+  if (limit) qs.set('limit', String(limit));
+  if (sinceRaw) qs.set('since', sinceRaw);
+  if (format === 'csv') qs.set('format', 'csv');
+  const url = baseUrl + '/v1/account/audit-log?' + qs.toString();
+  let res;
+  try {
+    res = await fetch(url, { headers: { authorization: 'Bearer ' + key } });
+  } catch (e) {
+    console.error('connect failed: ' + (e && e.message ? e.message : e));
+    process.exit(EXIT.NETWORK || 5);
+  }
+  if (!res.ok) {
+    console.error('HTTP ' + res.status + ' on ' + url);
+    process.exit(EXIT.NETWORK || 5);
+  }
+  if (format === 'csv') {
+    const text = await res.text();
+    process.stdout.write(text);
+    return;
+  }
+  const body = await res.json();
+  if (asJson) {
+    console.log(JSON.stringify(body, null, 2));
+    return;
+  }
+  const entries = (body && (body.entries || body.items)) || [];
+  if (!entries.length) {
+    console.error('# no audit entries (try a wider --since window, or check that you have admin/tenant scope)');
+    return;
+  }
+  console.error(`# ${entries.length} entries  total=${body.total ?? entries.length}  since=${sinceRaw || '-'}`);
+  for (const e of entries) {
+    const at = e.at || '-';
+    const actor = String(e.actor || '-').padEnd(14);
+    const op = String(e.op || '-').padEnd(28);
+    const payloadShort = e.payload == null ? '' : (typeof e.payload === 'string' ? e.payload : JSON.stringify(e.payload)).slice(0, 80);
+    console.log(`${at}  ${actor}  ${op}  ${payloadShort}`);
+  }
+}
+
 async function cmdAuditor(args) {
   if (maybeHelp('auditor', args)) return;
   const sub = args[0];
@@ -16309,7 +16389,7 @@ const COMPLETION_VERBS = [
   'config', 'hmac', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'loop', 'logs', 'ask', 'nl', 'chat', 'chat-tui', 'version', 'help', 'completion', 'upgrade', 'update', 'self-update',
   'models', 'gpu', 'export', 'seeds', 'anonymize', 'redact', 'reinject', 'improve', 'instant', 'extract', 'doc',
-  'keygen', 'pubkey', 'keys', 'auditor', 'quantize',
+  'keygen', 'pubkey', 'keys', 'auditor', 'audit', 'quantize',
   'sigstore-attest', 'attest', 'test', 'drift', 'trace', 'ir', 'device', 'cc', 'fl',
   'marketplace', 'tail', 'replay', 'runtime', 'bridges',
   'jobs', 'watch', 'sync', 'profile', 'checkpoint', 'import-chat', 'merge',
@@ -20962,6 +21042,9 @@ async function cmdTui(args) {
     // and `kolm next` CLI via the W413 server-side recommender route. Three
     // surfaces (CLI / TUI / web) reading the same snapshotContext+recommendNext.
     { id: 'next',               key: 'N', endpoint: '/v1/intent/next',           kind: 'get',   label: 'next actions (kolm next)' },
+    // W448 — Audit-log view. Mirrors /account/audit-log + `kolm audit` CLI via
+    // the same /v1/account/audit-log route. Triangle complete (CLI + TUI + web).
+    { id: 'audit-log',          key: 'E', endpoint: '/v1/account/audit-log',     kind: 'get',   label: 'audit log (read-only)' },
   ];
   // Also expose simulations under view 'simulations' (alias for one of the
   // workflow rows so the W384 14-view test grep finds the literal). We list
@@ -21296,6 +21379,11 @@ async function cmdTui(args) {
       'next':          'next',           // W414 — Next-actions view (mirrors kolm next + /v1/intent/next)
       'recommendations':'next',
       'actions':       'next',
+      // W448 — audit-log view aliases (CLI `kolm audit` + TUI `:audit` + web).
+      audit:           'audit-log',
+      'audit':         'audit-log',
+      'audit-log':     'audit-log',
+      'auditlog':      'audit-log',
     };
     if (VIEW_ALIAS[verb]) {
       const id = VIEW_ALIAS[verb];
@@ -22190,6 +22278,10 @@ async function main() {
       case 'pubkey':   await withErrorContext('pubkey',   () => cmdPubkey(rest)); break;
       case 'keys':     await withErrorContext('keys',     () => cmdKeys(rest)); break;
       case 'auditor':  await withErrorContext('auditor',  () => cmdAuditor(rest)); break;
+      // W448 — `kolm audit` is the read-only per-tenant audit-log mirror of
+      // /account/audit-log.html. Distinct from `kolm auditor` (third-party
+      // signing tool); kept as separate verbs to match muscle memory.
+      case 'audit':    await withErrorContext('audit',    () => cmdAudit(rest)); break;
       case 'quantize': await withErrorContext('quantize', () => cmdQuantize(rest)); break;
       case 'runtime':  await withErrorContext('runtime',  () => cmdRuntime(rest)); break;
       case 'jobs':     await withErrorContext('jobs',     () => cmdJobs(rest)); break;
