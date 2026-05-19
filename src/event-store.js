@@ -25,7 +25,7 @@ import path from 'node:path';
 import { EventEmitter } from 'node:events';
 import { createRequire } from 'node:module';
 
-import { newEvent, validateEvent, canonicalize, EVENT_FIELDS } from './event-schema.js';
+import { newEvent, validateEvent, canonicalize, backfillLegacy, EVENT_FIELDS } from './event-schema.js';
 
 const require = createRequire(import.meta.url);
 
@@ -131,8 +131,18 @@ function _openSqlite() {
 }
 
 // Lazily pick the driver and return its name.
+//
+// W411 — KOLM_EVENT_STORE_DRIVER='jsonl' forces the JSONL path even when
+// node:sqlite is available. Used by migration/backfill tests that need to
+// seed a pre-W411 events.jsonl file directly. Production code should not
+// set this env var.
 function _ensureDriver() {
   if (_driver) return _driver;
+  if (process.env.KOLM_EVENT_STORE_DRIVER === 'jsonl') {
+    _ensureDirs();
+    _driver = 'jsonl';
+    return _driver;
+  }
   _openSqlite();
   if (!_driver) _driver = 'jsonl';
   return _driver;
@@ -194,7 +204,30 @@ export async function appendEvent(partial = {}) {
     );
   } else {
     _ensureDirs();
-    fs.appendFileSync(_jsonlPath, JSON.stringify(ev) + '\n', 'utf8');
+    // W411 P0 #6 — JSONL dedupe by event_id. Re-appending the same event_id
+    // must be idempotent: SQLite path uses INSERT OR REPLACE; the JSONL fallback
+    // previously appended blindly so a re-emit (network retry, replay) would
+    // double-count in listEvents(). Now: scan the file for any pre-existing
+    // row with this event_id; if present, rewrite the file in place (last
+    // write wins). If absent, append. Both paths keep the file durable.
+    if (fs.existsSync(_jsonlPath)) {
+      const existing = _jsonlAll();
+      let found = false;
+      for (let i = 0; i < existing.length; i++) {
+        if (existing[i] && existing[i].event_id === ev.event_id) {
+          existing[i] = ev;
+          found = true;
+          break;
+        }
+      }
+      if (found) {
+        fs.writeFileSync(_jsonlPath, existing.map(e => JSON.stringify(e)).join('\n') + '\n', 'utf8');
+      } else {
+        fs.appendFileSync(_jsonlPath, JSON.stringify(ev) + '\n', 'utf8');
+      }
+    } else {
+      fs.appendFileSync(_jsonlPath, JSON.stringify(ev) + '\n', 'utf8');
+    }
   }
   _emitter.emit('event', ev);
   return ev;
@@ -204,18 +237,37 @@ function _jsonlAll() {
   _ensureDirs();
   if (!fs.existsSync(_jsonlPath)) return [];
   const text = fs.readFileSync(_jsonlPath, 'utf8');
-  const out = [];
+  // W411 P0 #6 — last-write-wins dedupe by event_id when reading back. Defends
+  // against legacy JSONL files (pre-W411) that contain duplicate event_id
+  // lines from blind appends. listEvents/getEvent/countEvents all funnel
+  // through here, so dedupe at the read layer guarantees idempotent semantics
+  // regardless of file age.
+  const seen = new Map();
+  const order = [];
   for (const line of text.split('\n')) {
     if (!line.trim()) continue;
-    try { out.push(JSON.parse(line)); } catch {}
+    try {
+      const row = JSON.parse(line);
+      if (!row || !row.event_id) continue;
+      if (!seen.has(row.event_id)) order.push(row.event_id);
+      seen.set(row.event_id, row);
+    } catch {}
   }
-  return out;
+  // W411 addendum #9 — apply backfillLegacy to every read so legacy JSONL rows
+  // (pre-W411, missing tenant_id/source_type/review_state/production_eligible)
+  // surface as canonical events with safe defaults. Idempotent on already-
+  // canonical rows.
+  return order.map(id => backfillLegacy(seen.get(id)));
 }
 
 function _matchEvent(ev, q) {
   if (!ev) return false;
   if (q.namespace && ev.namespace !== q.namespace) return false;
-  if (q.tenant_id && ev.tenant_id !== q.tenant_id) return false;
+  // W411 — accept both `tenant_id` (canonical) and `tenant` (shorthand used
+  // by route handlers that pass req.tenant_record.id directly). Either one
+  // restricts the read to that tenant; the seam is enforced here.
+  const tenantFilter = q.tenant_id || q.tenant;
+  if (tenantFilter && ev.tenant_id !== tenantFilter) return false;
   if (q.provider && ev.provider !== q.provider) return false;
   if (q.model && ev.model !== q.model) return false;
   if (q.workflow_id && ev.workflow_id !== q.workflow_id) return false;
@@ -226,19 +278,24 @@ function _matchEvent(ev, q) {
   return true;
 }
 
-// listEvents({namespace, tenant_id, provider, model, workflow_id, since, until, limit, filter}).
+// listEvents({namespace, tenant_id|tenant, provider, model, workflow_id, since, until, limit, filter}).
 // Returns an array of events (newest first by default). limit defaults to
 // 1000; pass 0 for unlimited (sparingly).
+//
+// W411 — `tenant` is a shorthand alias for `tenant_id`. Both filter on the
+// canonical `tenant_id` column; route handlers that read req.tenant_record.id
+// can pass either name without renaming at the call site.
 export async function listEvents(query = {}) {
   const drv = _ensureDriver();
   const limit = query.limit == null ? 1000 : Math.max(0, Math.trunc(Number(query.limit)));
   const order = (query.order || 'desc').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+  const tenantFilter = query.tenant_id || query.tenant;
   if (drv === 'sqlite') {
     const db = _openSqlite();
     const where = [];
     const args = [];
     if (query.namespace) { where.push('namespace = ?'); args.push(query.namespace); }
-    if (query.tenant_id) { where.push('tenant_id = ?'); args.push(query.tenant_id); }
+    if (tenantFilter) { where.push('tenant_id = ?'); args.push(tenantFilter); }
     if (query.provider) { where.push('provider = ?'); args.push(query.provider); }
     if (query.model) { where.push('model = ?'); args.push(query.model); }
     if (query.workflow_id) { where.push('workflow_id = ?'); args.push(query.workflow_id); }
@@ -249,7 +306,7 @@ export async function listEvents(query = {}) {
     const limSql = limit > 0 ? ('LIMIT ' + limit) : '';
     const sql = `SELECT json FROM events ${whereSql} ORDER BY created_at ${order} ${limSql}`;
     const rows = db.prepare(sql).all(...args).map(r => {
-      try { return JSON.parse(r.json); } catch { return null; }
+      try { return backfillLegacy(JSON.parse(r.json)); } catch { return null; }
     }).filter(Boolean);
     if (query.filter) return rows.filter(query.filter);
     return rows;
@@ -271,7 +328,7 @@ export async function getEvent(eventId) {
     const db = _openSqlite();
     const r = db.prepare('SELECT json FROM events WHERE event_id = ?').get(eventId);
     if (!r) return null;
-    try { return JSON.parse(r.json); } catch { return null; }
+    try { return backfillLegacy(JSON.parse(r.json)); } catch { return null; }
   }
   return _jsonlAll().find(ev => ev.event_id === eventId) || null;
 }
@@ -317,13 +374,17 @@ export function streamEvents(cb) {
   return () => _emitter.off('event', cb);
 }
 
-// exportEvents({format, namespace, since, until, limit}).
+// exportEvents({format, namespace, tenant_id, since, until, limit}).
 //   format = 'jsonl' (default) | 'json' | 'csv'.
 // Returns a string buffer.
+//
+// W411 — tenant_id forwarded to listEvents so routes that call /v1/lake/export
+// only export the caller's rows.
 export async function exportEvents(opts = {}) {
   const fmt = (opts.format || 'jsonl').toLowerCase();
   const rows = await listEvents({
     namespace: opts.namespace,
+    tenant_id: opts.tenant_id || opts.tenant || null,
     since: opts.since,
     until: opts.until,
     limit: opts.limit == null ? 0 : opts.limit,
@@ -348,12 +409,14 @@ export async function exportEvents(opts = {}) {
 
 export async function countEvents(query = {}) {
   const drv = _ensureDriver();
+  // W411 — alias as in listEvents.
+  const tenantFilter = query.tenant_id || query.tenant;
   if (drv === 'sqlite') {
     const db = _openSqlite();
     const where = [];
     const args = [];
     if (query.namespace) { where.push('namespace = ?'); args.push(query.namespace); }
-    if (query.tenant_id) { where.push('tenant_id = ?'); args.push(query.tenant_id); }
+    if (tenantFilter) { where.push('tenant_id = ?'); args.push(tenantFilter); }
     if (query.media_kind) { where.push('media_kind = ?'); args.push(query.media_kind); }
     if (query.since) { where.push('created_at >= ?'); args.push(new Date(query.since).toISOString()); }
     if (query.until) { where.push('created_at <= ?'); args.push(new Date(query.until).toISOString()); }

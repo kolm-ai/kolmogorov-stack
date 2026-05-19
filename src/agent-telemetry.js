@@ -126,8 +126,17 @@ export function inferAcceptance({
   events,
   acceptance_window_s = WINDOWS.acceptance_s,
   correction_window_s = WINDOWS.correction_s,
+  // W424 — tenant_id (default null): if supplied, drop any event whose
+  // ev.tenant_id does not match. Defensive: the helpers above already gate
+  // listEvents() by tenant, but inferAcceptance is also exported and may be
+  // handed an unscoped event list from another caller.
+  tenant_id = null,
 } = {}) {
   if (!Array.isArray(events) || !events.length) return [];
+  if (tenant_id) {
+    events = events.filter(ev => ev && ev.tenant_id === tenant_id);
+    if (!events.length) return [];
+  }
 
   const W_ACC = Math.max(1, Number(acceptance_window_s) || WINDOWS.acceptance_s);
   const W_CORR = Math.max(W_ACC, Number(correction_window_s) || WINDOWS.correction_s);
@@ -230,9 +239,12 @@ export function inferAcceptance({
 // ─── listAgents ─────────────────────────────────────────────────────────────
 // One entry per distinct app_id present in the event store. Sums cost+tokens,
 // counts sessions+events, tracks first_seen + last_seen.
+// W424 — tenant_id (default null for legacy local callers) scopes the
+// underlying listEvents() so cross-tenant rows never leak into the rollup.
 export async function listAgents(opts = {}) {
   const since = _parseSince(opts.since);
-  const rows = await listEvents({ since, limit: 0, order: 'asc' });
+  const tenant_id = opts.tenant_id == null ? null : opts.tenant_id;
+  const rows = await listEvents({ since, tenant_id, limit: 0, order: 'asc' });
 
   const withSess = _withSessionIds(rows);
   const byApp = _groupBy(withSess, ev => ev.app_id || 'unknown');
@@ -267,12 +279,15 @@ export async function listAgents(opts = {}) {
 
 // ─── listSessions ───────────────────────────────────────────────────────────
 // Per-session rollup. Optional app_id + since filter. Default limit 50.
+// W424 — tenant_id (default null) gates listEvents() so a session rollup never
+// crosses tenants.
 export async function listSessions(opts = {}) {
   const appId = opts.app_id || null;
   const since = _parseSince(opts.since);
   const limit = opts.limit == null ? 50 : Math.max(1, Math.trunc(Number(opts.limit)));
+  const tenant_id = opts.tenant_id == null ? null : opts.tenant_id;
 
-  const rows = await listEvents({ since, limit: 0, order: 'asc' });
+  const rows = await listEvents({ since, tenant_id, limit: 0, order: 'asc' });
   const filtered = appId ? rows.filter(r => (r.app_id || 'unknown') === appId) : rows;
   const withSess = _withSessionIds(filtered);
   const bySession = _groupBy(withSess, ev => ev.session_id);
@@ -331,9 +346,11 @@ export async function listSessions(opts = {}) {
 
 // ─── getSession ─────────────────────────────────────────────────────────────
 // Full detail for one session: header + every event (annotated).
-export async function getSession({ session_id } = {}) {
+// W424 — tenant_id (default null) scopes the underlying listEvents() so a
+// session_id observed in another tenant cannot be returned to the caller.
+export async function getSession({ session_id, tenant_id = null } = {}) {
   if (!session_id) return null;
-  const rows = await listEvents({ limit: 0, order: 'asc' });
+  const rows = await listEvents({ tenant_id, limit: 0, order: 'asc' });
   const withSess = _withSessionIds(rows);
   const evs = withSess.filter(e => e.session_id === session_id);
   if (!evs.length) return null;
@@ -367,9 +384,11 @@ export async function getSession({ session_id } = {}) {
 // share the Pareto front, weighted score = 0.7 * acceptance_rate
 // - 0.3 * normalized_cost picks the winner. Returns reason string so the
 // dashboard can show "we picked X because Y".
+// W424 — tenant_id (default null) gates listEvents() so model-recommendation
+// stats never aggregate across tenants.
 export async function recommendModel(opts = {}) {
-  const { app_id = null, codebase_hint = null, task_hint = null, since = null } = opts;
-  const rows = await listEvents({ since: _parseSince(since), limit: 0, order: 'asc' });
+  const { app_id = null, codebase_hint = null, task_hint = null, since = null, tenant_id = null } = opts;
+  const rows = await listEvents({ since: _parseSince(since), tenant_id, limit: 0, order: 'asc' });
   const filtered = (rows || []).filter(r => {
     if (app_id && (r.app_id || 'unknown') !== app_id) return false;
     if (!r.model) return false;
@@ -474,9 +493,11 @@ export async function recommendModel(opts = {}) {
 // ─── topFailingPromptShapes ─────────────────────────────────────────────────
 // Ranks template_signature shapes by acceptance_rate ascending (worst first),
 // then count descending (most painful shapes surface). Returns at most `limit`.
+// W424 — tenant_id (default null) gates listEvents() so failing-shape rankings
+// never leak prompts from another tenant.
 export async function topFailingPromptShapes(opts = {}) {
-  const { app_id = null, since = null, limit = 10 } = opts;
-  const rows = await listEvents({ since: _parseSince(since), limit: 0, order: 'asc' });
+  const { app_id = null, since = null, limit = 10, tenant_id = null } = opts;
+  const rows = await listEvents({ since: _parseSince(since), tenant_id, limit: 0, order: 'asc' });
   const filtered = (rows || []).filter(r => {
     if (app_id && (r.app_id || 'unknown') !== app_id) return false;
     if (!r.prompt_redacted) return false;
@@ -522,9 +543,12 @@ export async function topFailingPromptShapes(opts = {}) {
 
 // ─── agentTelemetryStats ────────────────────────────────────────────────────
 // Top-level dashboard summary. Cheap one-call snapshot for the headline page.
+// W424 — tenant_id (default null) scopes listEvents() so headline totals never
+// sum rows belonging to another tenant.
 export async function agentTelemetryStats(opts = {}) {
   const since = _parseSince(opts.since);
-  const rows = await listEvents({ since, limit: 0, order: 'asc' });
+  const tenant_id = opts.tenant_id == null ? null : opts.tenant_id;
+  const rows = await listEvents({ since, tenant_id, limit: 0, order: 'asc' });
 
   if (!rows.length) {
     return {

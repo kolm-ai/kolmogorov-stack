@@ -41,12 +41,18 @@ function _diskUsed(filePath) {
   } catch { return 0; }
 }
 
-// lakeStats({since, namespace}): structured snapshot of everything in the
-// lake right now. Honest counts; never makes up numbers.
+// lakeStats({since, namespace, tenant_id|tenant}): structured snapshot of
+// everything in the lake right now. Honest counts; never makes up numbers.
+//
+// W411 — when `tenant_id`/`tenant` is supplied, the snapshot is scoped to that
+// tenant only. Route handlers in router.js read req.tenant_record.id and pass
+// it down so /v1/lake/stats only ever surfaces the caller's spend/latency/
+// repeated clusters. Admin / local-only daemon callers leave the field unset.
 export async function lakeStats(opts = {}) {
   const since = _parseSince(opts.since) || _parseSince('30d');
   const rows = await listEvents({
     namespace: opts.namespace,
+    tenant_id: opts.tenant_id || opts.tenant || null,
     since,
     limit: 0, // unlimited
     order: 'asc',
@@ -141,7 +147,11 @@ export async function lakeStats(opts = {}) {
       oldest_event,
       newest_event,
     },
-    window: { since, namespace: opts.namespace || null },
+    window: {
+      since,
+      namespace: opts.namespace || null,
+      tenant_id: opts.tenant_id || opts.tenant || null,
+    },
   };
 }
 

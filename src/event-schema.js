@@ -30,20 +30,91 @@ export const EVENT_FIELDS = [
   'accepted', 'feedback', 'created_at',
   // schema/data provenance — required to pin every event back to a source.
   'namespace', 'source_type', 'redaction_policy', 'schema_version',
+  // W411 — canonical vendor normalization + parity field names so OpenAI,
+  // Anthropic, OpenRouter, Ollama, vLLM and llama.cpp all land in the lake
+  // with identical column names. `vendor` is the closed enum the auditor
+  // mandated; `provider` is preserved as a free-text alias for back-compat
+  // (some legacy rows used 'manual', 'kolm', or other non-vendor strings).
+  // tokens_in/out + cost_micro_usd + latency_us mirror the legacy
+  // prompt_tokens/completion_tokens/estimated_cost_usd/latency_ms fields with
+  // the units the auditor wants on the wire. `files` is the multimodal
+  // attachment list (parallel to tool_calls). `error` is the human-readable
+  // error message (paired with the existing error_type enum).
+  'vendor', 'tokens_in', 'tokens_out', 'cost_micro_usd', 'latency_us',
+  'files', 'error',
+  // W409b — privacy provenance.
+  // raw_available: whether raw_prompt_path / raw_response_path actually point at
+  // a raw byte blob (true only when explicit opt-in via KOLM_ALLOW_RAW=true or
+  // per-request header x-kolm-raw: true). Default false so consumers can trust
+  // "no raw on disk" without inspecting the filesystem.
+  // raw_prompt_hash / raw_response_hash: sha256-hex of the raw bytes (when
+  // stored). Lets the lake reference the raw blob without re-loading it.
+  // noncompliant_identifiers: array of classes (e.g. ['malformed_ssn']) where a
+  // detector regex matched but the format failed validation; this is the
+  // "noncompliant identifier detected" warning the auditor flagged.
+  'raw_available', 'raw_prompt_hash', 'raw_response_hash', 'noncompliant_identifiers',
   // W377 — multimodal capture extension. media_uri points at a blob in the
   // media-store (file:~/.kolm/events/raw/<sha256>.<ext>) so the events table
   // stays small and the heavy bytes live on disk. media_extracted_text is the
   // OCR/transcription/pdf-text result (may be null until the worker runs).
   'media_kind', 'media_uri', 'media_hash', 'media_bytes', 'media_mime',
   'media_extracted_text', 'media_extraction_status', 'media_extraction_engine',
+  // W411 — event-level holdout pin. When true, this event MUST NOT enter
+  // any training split (distill, recipe-gen, augmentation, worker input).
+  // The reviewer-set approval-row flag is the primary path; this field is
+  // for cases where the holdout assignment is intrinsic to the event
+  // (eg. an externally-curated benchmark row imported via importSeedsJsonl).
+  'holdout_only',
+  // W411 P0 addendum #9 — legacy migration + review-state fields.
+  // review_state: human-review state machine.
+  //   'unreviewed' (default) — never seen by a reviewer; cannot be promoted
+  //     into a verified/production_ready artifact.
+  //   'approved' / 'rejected' / 'needs_fix' — reviewer outcomes.
+  // production_eligible: hard gate on whether this row may flow into a
+  //   verified/production_ready artifact. Fail-closed false by default; only
+  //   the productionReady() full-async pipeline sets this true.
+  'review_state', 'production_eligible',
 ];
 
 export const REQUIRED_FIELDS = ['event_id', 'tenant_id', 'namespace', 'created_at', 'schema_version'];
 export const SCHEMA_VERSION = 1;
 
 const STATUS_VALUES = new Set(['ok', 'error', 'timeout', 'rate_limited', 'blocked']);
-const SOURCE_TYPES = new Set(['real', 'synthetic', 'simulated', 'teacher_generated']);
-const POLICY_VALUES = new Set(['allow', 'redact', 'block']);
+// 'legacy_unknown' is the safe default the migration layer assigns to rows
+// that pre-date W411 and never wrote source_type. Keeping it in the enum
+// (vs collapsing to 'real') makes the lake honest about provenance: a row
+// tagged 'legacy_unknown' must NOT be treated as approved real customer
+// data without re-review.
+const SOURCE_TYPES = new Set(['real', 'synthetic', 'simulated', 'teacher_generated', 'legacy_unknown']);
+const REVIEW_STATES = new Set(['unreviewed', 'approved', 'rejected', 'needs_fix']);
+// W411 — closed vendor enum. The auditor's mandate is that every captured
+// event maps onto one of these. Anything else (free-text provider tags like
+// 'manual', 'kolm', etc.) collapses to 'other' so downstream lake queries can
+// switch on a finite set. The 'manual' value is preserved because seed /
+// capture-log paths use it for non-LLM rows that still need the canonical
+// schema.
+export const VENDOR_VALUES = new Set([
+  'openai', 'anthropic', 'openrouter',
+  'ollama', 'vllm', 'llama-cpp',
+  'gemini', 'kolm', 'manual', 'other',
+]);
+// Map free-text provider strings the legacy paths emit onto the closed vendor
+// enum. Returns 'other' for anything outside the set (never null, never empty).
+export function normalizeVendor(provider) {
+  if (provider == null) return 'other';
+  const p = String(provider).trim().toLowerCase();
+  if (!p) return 'other';
+  if (VENDOR_VALUES.has(p)) return p;
+  // Common aliases the wild emits.
+  if (p === 'llama.cpp' || p === 'llamacpp' || p === 'llama_cpp') return 'llama-cpp';
+  if (p === 'open-router' || p === 'open_router') return 'openrouter';
+  if (p === 'google' || p === 'google_gemini' || p === 'google-gemini') return 'gemini';
+  return 'other';
+}
+// W409b — added 'review_required' so the membrane can return rows that need
+// reviewer attention without forcing a binary allow/block. Default remains
+// 'redact' (fail-closed) at the schema, daemon, and router layers.
+const POLICY_VALUES = new Set(['allow', 'redact', 'block', 'review_required']);
 
 // W377 — multimodal capture kinds. null is a valid value (text-only events
 // still flow through the same schema). The enum is closed on purpose so
@@ -124,6 +195,13 @@ export function newEvent(partial = {}) {
     source_type: partial.source_type || 'real',
     redaction_policy: partial.redaction_policy || 'redact',
     schema_version: partial.schema_version || SCHEMA_VERSION,
+    // W409b — privacy provenance defaults. raw_available is fail-closed (false)
+    // so anything that does not explicitly opt in via KOLM_ALLOW_RAW or the
+    // x-kolm-raw header reports "no raw on disk".
+    raw_available: partial.raw_available === true,
+    raw_prompt_hash: partial.raw_prompt_hash == null ? null : partial.raw_prompt_hash,
+    raw_response_hash: partial.raw_response_hash == null ? null : partial.raw_response_hash,
+    noncompliant_identifiers: partial.noncompliant_identifiers || [],
     // W377 — multimodal defaults. media_kind null === text-only legacy event.
     media_kind: partial.media_kind == null ? null : partial.media_kind,
     media_uri: partial.media_uri == null ? null : partial.media_uri,
@@ -133,6 +211,36 @@ export function newEvent(partial = {}) {
     media_extracted_text: partial.media_extracted_text == null ? null : partial.media_extracted_text,
     media_extraction_status: partial.media_extraction_status || 'none',
     media_extraction_engine: partial.media_extraction_engine == null ? null : partial.media_extraction_engine,
+    // W411 — canonical vendor + parity field names. vendor defaults to
+    // normalized form of provider (or 'other' when provider is unknown).
+    // tokens_in/out mirror prompt_tokens/completion_tokens, cost_micro_usd
+    // mirrors estimated_cost_usd (in micro-USD), latency_us mirrors
+    // latency_ms*1000, files defaults to []. error mirrors error_type's
+    // human-readable message when the caller passes it explicitly.
+    vendor: partial.vendor != null
+      ? normalizeVendor(partial.vendor)
+      : normalizeVendor(partial.provider),
+    tokens_in: partial.tokens_in != null
+      ? partial.tokens_in
+      : (partial.prompt_tokens != null ? partial.prompt_tokens : 0),
+    tokens_out: partial.tokens_out != null
+      ? partial.tokens_out
+      : (partial.completion_tokens != null ? partial.completion_tokens : 0),
+    cost_micro_usd: partial.cost_micro_usd != null
+      ? partial.cost_micro_usd
+      : (partial.estimated_cost_usd != null ? Math.round(Number(partial.estimated_cost_usd) * 1_000_000) : 0),
+    latency_us: partial.latency_us != null
+      ? partial.latency_us
+      : (partial.latency_ms != null ? Number(partial.latency_ms) * 1000 : 0),
+    files: Array.isArray(partial.files) ? partial.files : [],
+    error: partial.error == null ? null : partial.error,
+    // W411 — event-level holdout pin (see EVENT_FIELDS comment).
+    holdout_only: partial.holdout_only === true,
+    // W411 P0 addendum #9 — review-state machine + production gate.
+    // Defaults are fail-closed: new rows are 'unreviewed' and not eligible
+    // for production-ready artifacts until productionReady() flips them.
+    review_state: partial.review_state || 'unreviewed',
+    production_eligible: partial.production_eligible === true,
   };
   return canonicalize(base);
 }
@@ -190,6 +298,12 @@ export function canonicalize(ev = {}) {
   out.redaction_policy = POLICY_VALUES.has(pol) ? pol : 'redact';
   out.schema_version = _clampInt(ev.schema_version, 1, 1000) || SCHEMA_VERSION;
 
+  // W409b — privacy provenance: fail-closed defaults.
+  out.raw_available = ev.raw_available === true;
+  out.raw_prompt_hash = ev.raw_prompt_hash == null ? null : _str(ev.raw_prompt_hash, 128);
+  out.raw_response_hash = ev.raw_response_hash == null ? null : _str(ev.raw_response_hash, 128);
+  out.noncompliant_identifiers = _arr(ev.noncompliant_identifiers);
+
   // W377 — multimodal fields. media_kind null is a valid (text-only) state;
   // any invalid enum value collapses to null so the downstream loader doesn't
   // have to guess. media_extraction_status defaults to 'none' for legacy rows
@@ -208,6 +322,54 @@ export function canonicalize(ev = {}) {
   const xst = _str(ev.media_extraction_status, 32) || 'none';
   out.media_extraction_status = EXTRACTION_STATUS_VALUES.has(xst) ? xst : 'none';
   out.media_extraction_engine = ev.media_extraction_engine == null ? null : _str(ev.media_extraction_engine, 128);
+
+  // W411 — event-level holdout pin. Bool with fail-closed false default;
+  // honored by distill-pipeline and the dataset workbench when assigning
+  // a split bucket.
+  out.holdout_only = ev.holdout_only === true;
+
+  // W411 P0 addendum #9 — review-state + production-eligible coercion.
+  // review_state collapses to 'unreviewed' on unknown values so callers
+  // cannot smuggle in a 'production' string and trick the gate. The hard
+  // gate is fail-closed: any value other than literal `true` becomes false.
+  const rev = _str(ev.review_state, 32) || 'unreviewed';
+  out.review_state = REVIEW_STATES.has(rev) ? rev : 'unreviewed';
+  out.production_eligible = ev.production_eligible === true;
+
+  // W411 — canonical vendor + parity field names. Coerce + clamp so the
+  // canonicalize(canonicalize(x)) === canonicalize(x) idempotency contract
+  // holds. vendor falls back to the normalized provider when missing so
+  // legacy rows that only carry `provider` still report the canonical enum.
+  out.vendor = normalizeVendor(ev.vendor != null ? ev.vendor : ev.provider);
+  out.tokens_in = _clampInt(
+    ev.tokens_in != null ? ev.tokens_in : ev.prompt_tokens,
+    0, 10_000_000,
+  );
+  out.tokens_out = _clampInt(
+    ev.tokens_out != null ? ev.tokens_out : ev.completion_tokens,
+    0, 10_000_000,
+  );
+  out.cost_micro_usd = _clampInt(
+    ev.cost_micro_usd != null
+      ? ev.cost_micro_usd
+      : (ev.estimated_cost_usd != null ? Math.round(Number(ev.estimated_cost_usd) * 1_000_000) : 0),
+    0, Number.MAX_SAFE_INTEGER,
+  );
+  out.latency_us = _clampInt(
+    ev.latency_us != null
+      ? ev.latency_us
+      : (ev.latency_ms != null ? Number(ev.latency_ms) * 1000 : 0),
+    0, 24 * 60 * 60 * 1_000_000,
+  );
+  // files: array of small objects/strings describing multimodal attachments.
+  // Keep at most 50 entries to cap row size; preserve shape (object or string)
+  // rather than coercing to string so the lake can read sha/uri/mime fields.
+  if (Array.isArray(ev.files)) {
+    out.files = ev.files.slice(0, 50);
+  } else {
+    out.files = [];
+  }
+  out.error = ev.error == null ? null : _str(ev.error, 2048);
 
   return out;
 }
@@ -238,7 +400,50 @@ export function validateEvent(ev) {
   if (ev.media_kind != null && !MEDIA_KINDS.has(ev.media_kind)) errors.push('media_kind_invalid');
   if (ev.media_extraction_status != null && ev.media_extraction_status !== '' && !EXTRACTION_STATUS_VALUES.has(ev.media_extraction_status)) errors.push('media_extraction_status_invalid');
   if (ev.media_bytes != null && (!Number.isFinite(Number(ev.media_bytes)) || Number(ev.media_bytes) < 0)) errors.push('media_bytes_invalid');
+  // W411 — vendor closed-enum check. Only flag when set to a non-null value
+  // outside the set; null collapses to 'other' in canonicalize so the lake
+  // still gets a clean column.
+  if (ev.vendor != null && !VENDOR_VALUES.has(String(ev.vendor).toLowerCase())) errors.push('vendor_invalid');
+  // W411 — files must be array (or absent). tool_calls follows the same shape.
+  if (ev.files != null && !Array.isArray(ev.files)) errors.push('files_invalid');
   return { ok: missing.length === 0 && errors.length === 0, missing, extra, errors };
+}
+
+// W411 P0 addendum #9 — legacy row backfill at the READ boundary.
+//
+// Rows on disk written before W411 do not carry tenant_id (or carry a
+// placeholder), source_type, review_state, production_eligible. Reading
+// them back as-is would let the data plane treat them as approved real
+// customer data — exactly the failure mode the auditor flagged.
+//
+// backfillLegacy(rawRow) returns a row with safe defaults applied to any
+// missing fields:
+//   - tenant_id missing/empty/'local-tenant' → 'local'
+//   - source_type missing                    → 'legacy_unknown'
+//   - review_state missing                   → 'unreviewed'
+//   - production_eligible missing            → false
+// It then runs canonicalize() so the row is shape-compatible with every
+// downstream reader. Rows that already carry these fields are returned
+// unchanged (the function is idempotent).
+//
+// Apply this in listEvents/getEvent/_jsonlAll on read; never on write
+// (writes go through newEvent which sets the modern defaults).
+export function backfillLegacy(rawRow) {
+  if (!rawRow || typeof rawRow !== 'object') return rawRow;
+  const r = { ...rawRow };
+  if (r.tenant_id == null || r.tenant_id === '' || r.tenant_id === 'local-tenant') {
+    // 'local-tenant' was the previous newEvent() default for unauthenticated
+    // rows; in retrospect 'local' is the audit-mandated value. Migrate at
+    // read time so the lake reports a single canonical name.
+    r.tenant_id = 'local';
+  }
+  if (r.source_type == null) r.source_type = 'legacy_unknown';
+  if (r.review_state == null) r.review_state = 'unreviewed';
+  if (r.production_eligible == null) r.production_eligible = false;
+  // namespace must not be empty — canonicalize defaults to 'default' but the
+  // legacy backfill keeps it explicit for the audit trail.
+  if (r.namespace == null || r.namespace === '') r.namespace = 'default';
+  return canonicalize(r);
 }
 
 // templateSignature(prompt, model): deterministic skeleton hash used by lake

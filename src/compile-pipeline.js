@@ -79,47 +79,237 @@ function _writePhaseLog(jobId, phase, payload) {
   fs.appendFileSync(p, line, 'utf8');
 }
 
-// Phase 7 — bundle. We construct a minimal rule-class .kolm via
-// src/artifact.js so the W367 invariant (recipe.bundle.mjs entry) holds
-// for the produced artifact. For distill-only runs (no rule recipes) the
-// pipeline still emits a synthetic identity recipe — the student weights
-// live in extra_files['student.bin'] and the recipe.bundle.mjs dispatches
-// to the loaded weights at run time. This keeps the artifact runnable on a
-// fresh host (the homepage hero claim) regardless of which path the
-// pipeline took.
-async function _bundlePhase({ jobId, namespace, distillResult, plan, tokenizerInfo, datasetId, splitInfo, opts }) {
+// Wave 409c — auditor mandate. The bundle phase used to emit a fake
+// identity echo recipe + hard-coded pass_rate_positive: 0.95 + a stub
+// seed_provenance with production_ready:true. That let a pipeline that
+// never actually evaluated anything ship a .kolm labelled production-ready.
+//
+// Post-409c contract:
+//   1. Identity / echo / stub recipes produce production_ready:false UNLESS
+//      the source task is explicitly task_type:'echo' AND opts.allow_stub
+//      is set. Default rejects stub.
+//   2. Build consumes only the approved train split. Reject if seeds are
+//      synthetic-only without explicit opts.allow_synthetic override.
+//   3. Eval runs against a DISJOINT holdout. Verifier checks no overlap by
+//      row-hash set intersection (not just train_ids equality).
+//   4. Receipt MUST record: split_seed, train_hash, holdout_hash,
+//      source_seed_count, approved_count, synthetic_count.
+//   5. If pass_rate is injected without a real eval run, mark the artifact
+//      eval_provenance:'placeholder' and force production_ready:false.
+//   6. --allow-stub flag exists for the rare echo-task case; default rejects.
+
+const ECHO_RECIPE_NAME = 'wave381 distill-shim';
+
+function _canonicalJson(value) {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return '[' + value.map(_canonicalJson).join(',') + ']';
+  const keys = Object.keys(value).sort();
+  return '{' + keys.map((k) => JSON.stringify(k) + ':' + _canonicalJson(value[k])).join(',') + '}';
+}
+
+// Hash a single (input, output) pair deterministically. The row hash is the
+// auditor's primary disjointness probe — train.rowhash ∩ holdout.rowhash must
+// be empty by construction. We use both prompt+response so a benign rewrite
+// of either side is enough to break the equivalence (false-positive bias is
+// fine; we err on the side of "treat as distinct").
+function _rowHash(pair) {
+  const canon = _canonicalJson({
+    p: String(pair && pair.prompt != null ? pair.prompt : (pair && pair.input != null ? pair.input : '')),
+    r: String(pair && pair.response != null ? pair.response : (pair && pair.output != null ? pair.output : '')),
+  });
+  return crypto.createHash('sha256').update(canon).digest('hex');
+}
+
+// Hash an entire array of pairs (the auditor's train_hash / holdout_hash
+// field). Stable across machines + ordering-sensitive (the split-signature
+// pins ordering via its own hash, so we hash the rows as supplied).
+function _rowsHash(pairs) {
+  const h = crypto.createHash('sha256');
+  for (const p of pairs) h.update(_rowHash(p)).update('|');
+  return h.digest('hex');
+}
+
+// Real disjointness check by row-hash set intersection. Returns the
+// overlap count + sample of offending hashes (capped at 5) so the verifier
+// can surface a clear reason.
+function _rowOverlap(trainPairs, holdoutPairs) {
+  const ts = new Set(trainPairs.map(_rowHash));
+  const offenders = [];
+  for (const h of holdoutPairs) {
+    const hh = _rowHash(h);
+    if (ts.has(hh)) {
+      offenders.push(hh);
+      if (offenders.length >= 5) break;
+    }
+  }
+  return { overlap_count: offenders.length, sample: offenders };
+}
+
+// Detect echo recipes (synthesized identity / stub recipes that just mirror
+// input → echoed:input). Used to gate production_ready when the task type
+// is not explicitly 'echo'.
+function _isEchoRecipe(recipe) {
+  if (!recipe || typeof recipe !== 'object') return false;
+  if (typeof recipe.source !== 'string') return false;
+  // The wave381 identity shim ships a fixed name + a tell-tale `echoed:` body.
+  if (recipe.name === ECHO_RECIPE_NAME) return true;
+  return /\becho\b/i.test(recipe.source) && /\bechoed\s*:/i.test(recipe.source);
+}
+
+// Phase 7 — bundle. Produces a .kolm via src/artifact.js. The auditor mandate
+// forces honest provenance: real row hashes, real disjointness gating, and an
+// explicit eval_provenance flag. The historical W381 path emitted an identity
+// echo recipe + 0.95 pass_rate; we keep that path runnable for tests/demos but
+// mark it eval_provenance:'placeholder' so productionReady() returns false.
+async function _bundlePhase({
+  jobId, namespace, distillResult, plan, tokenizerInfo, datasetId, splitInfo, trainPairs, holdoutPairs, sourceTypeStats, opts,
+}) {
   const { buildAndZip } = await import('./artifact.js');
   const outDir = opts.out_dir || path.join(_kolmDir(), 'artifacts');
   fs.mkdirSync(outDir, { recursive: true });
+
+  // Caller-supplied recipes (real rules from src/rule-synth / DSL compile).
+  // When none are supplied AND the task type is not explicitly 'echo' the
+  // bundle phase still emits the identity shim (so the W367 recipe.bundle.mjs
+  // invariant holds) but flags the artifact as non-production. The shim
+  // recipe carries an honest name + comment so a human inspecting the .kolm
+  // can see why production_ready:false.
+  const callerRecipes = Array.isArray(opts.recipes) ? opts.recipes : null;
+  const taskType = (plan && plan.task) || (opts && opts.task_type) || 'unknown';
+  const allowStub = !!opts.allow_stub;
+  const allowSynthetic = !!opts.allow_synthetic;
+  const isEchoTask = taskType === 'echo';
+
   const recipeSource = `function generate(input, lib) {
-  // wave381 synthesized identity recipe. The student weights ship in
-  // extra_files['student.bin'] inside the .kolm; the host runtime loads them
-  // and routes inputs through them. This stub keeps the artifact runnable on
-  // a fresh host without the kolm runtime.
-  if (typeof input === 'string') return { echoed: input, _wave: 381 };
-  return { echoed: JSON.stringify(input), _wave: 381 };
+  // wave409c synthesized identity stub. Marked eval_provenance:'placeholder'
+  // so productionReady() refuses to ship this as production_ready:true
+  // unless the source task is explicitly task_type:'echo' AND --allow-stub
+  // was passed. See src/compile-pipeline.js _bundlePhase for the contract.
+  if (typeof input === 'string') return { echoed: input, _wave: 409 };
+  return { echoed: JSON.stringify(input), _wave: 409 };
 }`;
-  const recipes = [{
-    id: 'rcp_wave381_' + jobId,
-    name: 'wave381 distill-shim',
+  const stubRecipe = {
+    id: 'rcp_wave409c_stub_' + jobId,
+    name: ECHO_RECIPE_NAME,
     schema: { input: {}, output: {} },
     source: recipeSource,
     class: 'rule',
-  }];
-  // Seed provenance — pull from the split.
-  const trainCount = splitInfo ? splitInfo.train_count : 0;
-  const holdoutCount = splitInfo ? splitInfo.holdout_count : 0;
+  };
+  const recipes = (callerRecipes && callerRecipes.length > 0) ? callerRecipes : [stubRecipe];
+  const recipesAreStubOnly = recipes.every(_isEchoRecipe);
+
+  // Determine if THIS build qualifies as a real distill + real eval. A stub
+  // is anything where the only recipe shipped is the identity echo AND there
+  // is no real eval result attached. The auditor's rule: stub artifacts MUST
+  // be production_ready:false unless task is explicitly 'echo' AND
+  // --allow-stub is set.
+  const hasRealEvalResult = !!(opts.eval_result && typeof opts.eval_result.pass_rate === 'number');
+  const stubAcceptable = recipesAreStubOnly && isEchoTask && allowStub;
+
+  // Source-type accounting. The pipeline reads from a captured-events namespace
+  // by default (sourceTypeStats.real > 0); a tenant can also supply synthetic
+  // seeds via opts. Reject synthetic-only without opts.allow_synthetic so a
+  // pipeline that captured nothing real cannot ship a production artifact.
+  const sourceCounts = sourceTypeStats || { source_seed_count: 0, approved_count: 0, synthetic_count: 0 };
+  const isSyntheticOnly = sourceCounts.source_seed_count > 0
+    && sourceCounts.synthetic_count === sourceCounts.source_seed_count
+    && !allowSynthetic;
+
+  // Real train / holdout hashing. The wave381 codepath used
+  // sha256(datasetId|jobId) which had no relationship to the row content.
+  // Post-409c we hash the actual pairs so a verifier can recompute the same
+  // values from the on-disk dataset record.
+  const tp = Array.isArray(trainPairs) ? trainPairs : [];
+  const hp = Array.isArray(holdoutPairs) ? holdoutPairs : [];
+  const trainHash = tp.length ? _rowsHash(tp) : null;
+  const holdoutHash = hp.length ? _rowsHash(hp) : null;
+  const seedsHash = (tp.length || hp.length)
+    ? crypto.createHash('sha256').update((trainHash || '') + '|' + (holdoutHash || '')).digest('hex')
+    : crypto.createHash('sha256').update(String(datasetId || jobId)).digest('hex');
+
+  // Real row-hash disjointness probe. The dataset_split phase also asserts
+  // train_ids ∩ holdout_ids = ∅, but that is identity-based; this one is
+  // content-based and catches the cross-namespace replay attack where two
+  // distinct event_ids happen to carry the same (prompt, response) pair.
+  const overlap = _rowOverlap(tp, hp);
+
+  // Eval provenance. Real eval result → 'real_eval'. Stub injection (the
+  // wave381 hard-coded 0.95) → 'placeholder', which the productionReady()
+  // gate rejects.
+  const evalProvenance = hasRealEvalResult ? 'real_eval' : 'placeholder';
+  const passRate = hasRealEvalResult ? Number(opts.eval_result.pass_rate) : 0;
+
+  // Production_ready synthesis — the bundle phase's honest verdict on whether
+  // this artifact deserves the production_ready:true stamp on seed_provenance.
+  // The full productionReady() gate runs in the verdict phase; this is the
+  // first line of defence so a stub artifact's manifest is never even hashed
+  // as production-ready in the first place.
+  const trainCount = splitInfo ? splitInfo.train_count : tp.length;
+  const holdoutCount = splitInfo ? splitInfo.holdout_count : hp.length;
+  const splitWasStub = !!(splitInfo && splitInfo.stub);
+  let seedProductionReady = true;
+  const seedReasons = [];
+  if (recipesAreStubOnly && !stubAcceptable) {
+    seedProductionReady = false;
+    seedReasons.push('echo-only recipe set (task_type=' + taskType + ', allow_stub=' + allowStub + ')');
+  }
+  if (isSyntheticOnly) {
+    seedProductionReady = false;
+    seedReasons.push('synthetic-only seeds (pass --allow-synthetic to override)');
+  }
+  if (!hasRealEvalResult) {
+    seedProductionReady = false;
+    seedReasons.push('no real eval result (eval_provenance=placeholder)');
+  }
+  if (overlap.overlap_count > 0) {
+    seedProductionReady = false;
+    seedReasons.push('train/holdout row-hash overlap=' + overlap.overlap_count);
+  }
+  if (splitWasStub) {
+    seedProductionReady = false;
+    seedReasons.push('dataset_split used stub fallback (real workbench rejected the corpus)');
+  }
+  if (sourceCounts.source_seed_count === 0 && tp.length === 0 && hp.length === 0) {
+    seedProductionReady = false;
+    seedReasons.push('no seeds available (corpus was empty)');
+  }
+
+  // W411 P0 #8 + #10 — honest receipt audit fields. holdout_excluded_count is
+  // the number of pairs the distill() boundary refused as holdout_only;
+  // row_hash_dedupe_count is the number of duplicate (prompt, response) rows
+  // collapsed by createDataset() before split. Both are forwarded into the
+  // .kolm bundle so a verifier can confirm the dedupe + holdout chokepoints
+  // fired without re-running the pipeline.
+  const holdoutExcludedCount = (distillResult && Number.isFinite(distillResult.holdout_excluded_count))
+    ? Number(distillResult.holdout_excluded_count)
+    : 0;
+  const rowHashDedupeCount = (splitInfo && Number.isFinite(splitInfo.row_hash_dedupe_count))
+    ? Number(splitInfo.row_hash_dedupe_count)
+    : (opts && Number.isFinite(opts.row_hash_dedupe_count) ? Number(opts.row_hash_dedupe_count) : 0);
+
   const seedProvenance = {
-    seeds_hash: crypto.createHash('sha256').update(String(datasetId || jobId)).digest('hex').slice(0, 32),
-    split_seed: 'wave381-pipeline-v1',
+    seeds_hash: seedsHash,
+    split_seed: (splitInfo && splitInfo.split_signature) || 'wave409c-pipeline-v1',
+    train_hash: trainHash,
+    holdout_hash: holdoutHash,
     train_count: trainCount,
     holdout_count: holdoutCount,
-    input_overlap_count: 0,
+    input_overlap_count: overlap.overlap_count,
     output_overlap_count: 0,
     near_duplicate_count: 0,
     grouped_overlap_count: 0,
-    production_ready: true,
+    production_ready: seedProductionReady,
+    // Wave 409c new fields.
+    source_seed_count: sourceCounts.source_seed_count,
+    approved_count: sourceCounts.approved_count,
+    synthetic_count: sourceCounts.synthetic_count,
+    eval_provenance: evalProvenance,
+    eval_source: hasRealEvalResult ? 'tenant_captured' : 'self_generated',
+    // W411 P0 #8 + #10 — dedupe + holdout audit.
+    holdout_excluded_count: holdoutExcludedCount,
+    row_hash_dedupe_count: rowHashDedupeCount,
   };
+
   const extra_files = [];
   if (tokenizerInfo && tokenizerInfo.tokenizer_path && fs.existsSync(tokenizerInfo.tokenizer_path)) {
     extra_files.push({
@@ -128,39 +318,59 @@ async function _bundlePhase({ jobId, namespace, distillResult, plan, tokenizerIn
     });
   }
   if (distillResult && distillResult.student_path && fs.existsSync(distillResult.student_path)) {
-    // Pack a manifest pointer for the student weights — the actual weights
-    // may be large; we record a hash and path. The full weights file is too
-    // large to embed; tests/wave381 verifies the bundle invariant holds.
     extra_files.push({
       filename: 'student.pointer.json',
       content: Buffer.from(JSON.stringify({
-        spec: 'wave381-student-pointer',
+        spec: 'wave409c-student-pointer',
         path: distillResult.student_path,
         backbone: plan.backbone || 'unknown',
       }, null, 2)),
     });
   }
-  const artifactName = `${jobId}.kolm`;
-  const outPath = path.join(outDir, artifactName);
-  // buildAndZip writes outPath into outDir/<job_id>.kolm. We pass the
-  // built name through and rename if needed afterwards.
   const result = await buildAndZip({
     job_id: jobId,
-    task: { id: 'wave381_pipeline', kind: 'distill' },
+    task: { id: 'wave409c_pipeline', kind: taskType, type: taskType },
     base_model: plan.backbone || 'qwen-0.5b',
     recipes,
     training_stats: {
-      pass_rate_positive: 0.95, // honest synthetic value from distill (acc target)
+      // Wave 409c — was hard-coded to 0.95. Now 0 unless a real eval ran.
+      pass_rate_positive: passRate,
       latency_p50_us: 200,
       cost_usd_per_call: 0,
     },
-    evals: { cases: [], coverage: 0.95 },
+    evals: opts.eval_result && Array.isArray(opts.eval_result.cases)
+      ? { cases: opts.eval_result.cases, coverage: opts.eval_result.coverage || 0 }
+      : { cases: [], coverage: 0 },
     outDir,
     seed_provenance: seedProvenance,
     extra_files,
     artifact_class: 'rule',
+    // Wave 409c — a placeholder eval produces a sub-gate K-score by
+    // construction (pass_rate=0). We DO still want the artifact to materialize
+    // so the user / verifier can inspect the honest non-production verdict;
+    // the productionReady() gate is the load-bearing reject path (k_score and
+    // seed_provenance both fail), not the buildPayload throw. The manifest
+    // records ship_gate_overridden=true so a downstream consumer can see the
+    // override was applied at build time.
+    allow_below_gate: !hasRealEvalResult ? true : !!opts.allow_below_gate,
   });
-  return result;
+  // Annotate the in-memory result so compileFull's caller can log the honest
+  // reasons even before the productionReady() verdict runs.
+  return {
+    ...result,
+    _wave409c: {
+      seed_production_ready: seedProductionReady,
+      seed_reasons: seedReasons,
+      recipes_are_stub_only: recipesAreStubOnly,
+      stub_acceptable: stubAcceptable,
+      eval_provenance: evalProvenance,
+      row_overlap_count: overlap.overlap_count,
+      source_counts: sourceCounts,
+      // W411 P0 #8 + #10 — surface to compileFull's yield/log path.
+      holdout_excluded_count: holdoutExcludedCount,
+      row_hash_dedupe_count: rowHashDedupeCount,
+    },
+  };
 }
 
 // Optional quantize phase — calls into the workers/quantize/quantize.mjs
@@ -234,6 +444,17 @@ async function _signPhase({ jobId, artifactResult, opts }) {
 }
 
 // Main pipeline. Yields phase events; the caller drives the iterator.
+//
+// Wave 409c flags (auditor mandate):
+//   opts.allow_stub      — accept identity / echo recipes as production_ready.
+//                          Default false. Only honored when plan.task is
+//                          explicitly 'echo'.
+//   opts.allow_synthetic — accept synthetic-only training seeds. Default false:
+//                          a corpus that contains zero real captured events is
+//                          rejected.
+//   opts.eval_result     — { pass_rate, cases?, coverage? } from a real eval
+//                          run. When absent, eval_provenance is stamped
+//                          'placeholder' and productionReady() returns false.
 export async function* compileFull({ namespace, opts = {} } = {}) {
   if (!namespace) throw new Error('compileFull requires {namespace}');
   const jobId = opts.job_id || _newJobId();
@@ -242,10 +463,16 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   const noSign = !!opts.no_sign;
   const noInstall = !!opts.no_install;
   const installTarget = opts.install_target || null;
+  const allowStub = !!opts.allow_stub;
+  const allowSynthetic = !!opts.allow_synthetic;
+  // W411 — tenant fence: the compile pipeline must only ingest rows owned by
+  // the calling tenant. Routes (router.js) pass tenant_id from req.tenant_record.id;
+  // CLI / local-daemon callers leave it null and get the global view.
+  const tenantScope = opts.tenant_id || opts.tenant || null;
 
   // 1. plan ----------------------------------------------------------------
   // Pull a sample of events from the namespace and run the training planner.
-  const { pairs: corpusPairs, stats: corpusStats } = await prepareDistillCorpus({ namespace, split: 'all' });
+  const { pairs: corpusPairs, stats: corpusStats } = await prepareDistillCorpus({ namespace, split: 'all', tenant_id: tenantScope });
   const planRows = corpusPairs.map((p) => ({ input: p.prompt, output: p.response }));
   const plan = await plannerPlan('inline', { rows: planRows });
   _writePhaseLog(jobId, 'plan', { plan_id: plan.plan_id, task: plan.task, backbone: plan.backbone, examples: planRows.length });
@@ -293,14 +520,48 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   };
 
   // 4. dataset_split -------------------------------------------------------
+  // Auditor mandate (W409c): the workbench split is the ONLY approved
+  // train/holdout split path. The pre-409c code fell back to a synthetic
+  // "all-rows-train, no-holdout" stub when the workbench rejected the corpus,
+  // which let a pipeline with zero approved events still emit a .kolm. Now
+  // the stub fallback is reachable only with opts.allow_stub OR opts.force
+  // (the existing override).
   let trainId = null;
   let holdoutId = null;
   let splitInfo = null;
+  let trainPairs = [];
+  let holdoutPairs = [];
   try {
-    const ds = await createDataset(namespace, { train_ratio: 0.8 });
+    // W409n/W409o — pass approvedOnly through so that pipelines built with
+    // --approved-only see exactly the rows that passed human review; the
+    // unapproved-row-never-in-split invariant is enforced at dataset creation
+    // time so the rest of the pipeline (split, bundle, distill) inherits it.
+    const approvedOnly = !!opts.approved_only || !!opts.approvedOnly;
+    const splitSeed = opts.split_seed != null ? opts.split_seed : opts.splitSeed;
+    const ds = await createDataset(namespace, {
+      train_ratio: 0.8,
+      approvedOnly,
+      seed: splitSeed,
+      tenant_id: tenantScope,
+    });
     trainId = ds.dataset_id;
-    splitInfo = await splitDataset(trainId, 0.8);
+    splitInfo = await splitDataset(trainId, 0.8, { seed: splitSeed });
+    // W411 P0 #10 — propagate row-hash dedupe count from createDataset into
+    // the splitInfo envelope so the bundle phase can fold it into the
+    // seed_provenance receipt.
+    if (ds && Number.isFinite(ds.row_hash_dedupe_count)) {
+      splitInfo.row_hash_dedupe_count = ds.row_hash_dedupe_count;
+    }
     holdoutId = trainId + ':holdout';
+    // Resolve pair content for the train/holdout row sets. The workbench
+    // returns event_ids; we hydrate them back to (prompt, response) pairs from
+    // the corpus we already prepared so the bundle phase can hash row content.
+    const idToPair = new Map();
+    for (const p of corpusPairs) {
+      if (p && p.event_id) idToPair.set(p.event_id, p);
+    }
+    trainPairs = splitInfo.train_ids.map((id) => idToPair.get(id)).filter(Boolean);
+    holdoutPairs = splitInfo.holdout_ids.map((id) => idToPair.get(id)).filter(Boolean);
     _writePhaseLog(jobId, 'dataset_split', { train_id: trainId, holdout_id: holdoutId, ...splitInfo });
     yield {
       phase: 'dataset_split',
@@ -323,17 +584,52 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
         }
       }
     }
+    // Wave 409c — content-based disjointness (row-hash intersection). The
+    // identity-based check above guards against the same event_id ending up
+    // in both buckets, but two distinct event_ids carrying the same
+    // (prompt, response) pair would still pass that probe. Verifier checks
+    // this same intersection in the bundle phase.
+    {
+      const trainHashes = new Set(trainPairs.map((p) => _rowHash(p)));
+      let rowOverlap = 0;
+      for (const h of holdoutPairs) {
+        if (trainHashes.has(_rowHash(h))) rowOverlap += 1;
+      }
+      if (rowOverlap > 0) {
+        const reason = `dataset_split: row-hash overlap=${rowOverlap} (content-based train/holdout leakage)`;
+        _writePhaseLog(jobId, 'dataset_split', { error: reason });
+        if (!force) {
+          throw new Error(reason);
+        }
+      }
+    }
   } catch (e) {
-    // dataset_workbench rejects empty namespaces. We continue with a stub
-    // split so the pipeline can still progress to the bundle phase (e.g.
-    // when running tests with no event-store entries).
+    // Wave 409c — gated stub fallback. Previously this branch fired silently
+    // whenever the workbench rejected the corpus, which meant an empty
+    // namespace still produced a .kolm. Now the fallback requires explicit
+    // allow_stub or force; without either we re-throw so the pipeline fails
+    // closed.
+    const stubAllowed = allowStub || force;
+    if (!stubAllowed) {
+      _writePhaseLog(jobId, 'dataset_split', { error: String(e.message || e), stub_blocked: true });
+      throw new Error('dataset_split: workbench rejected corpus and stub fallback requires --allow-stub or --force (' + String(e.message || e) + ')');
+    }
     _writePhaseLog(jobId, 'dataset_split', { error: String(e.message || e), stub: true });
-    splitInfo = { train_count: corpusPairs.length, holdout_count: 0, train_ids: corpusPairs.map((p) => p.event_id || ''), holdout_ids: [], split_signature: 'sha256:wave381-stub' };
+    splitInfo = {
+      train_count: corpusPairs.length,
+      holdout_count: 0,
+      train_ids: corpusPairs.map((p) => p.event_id || ''),
+      holdout_ids: [],
+      split_signature: 'sha256:wave409c-stub',
+      stub: true,
+    };
+    trainPairs = corpusPairs.slice();
+    holdoutPairs = [];
     yield {
       phase: 'dataset_split',
       job_id: jobId,
-      train_id: trainId || 'wave381-stub',
-      holdout_id: holdoutId || 'wave381-stub:holdout',
+      train_id: trainId || 'wave409c-stub',
+      holdout_id: holdoutId || 'wave409c-stub:holdout',
       train_count: splitInfo.train_count,
       holdout_count: splitInfo.holdout_count,
       split_signature: splitInfo.split_signature,
@@ -346,6 +642,15 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     task_type: plan.task,
     hw_tier: opts.hw_tier,
   });
+  // W411 P0 #1 — distillation MUST see trainPairs only, never the full
+  // corpus. Previously this passed `corpusPairs` (the entire namespace,
+  // including holdout rows), so the artifact was trained on its own eval
+  // set and the K-score "honest holdout" claim was a lie. trainPairs is
+  // hydrated from splitInfo.train_ids at line 533, so distillation now
+  // sees exactly the train half of the workbench split. Fallback to
+  // corpusPairs only when stubAllowed branch hydrated trainPairs from the
+  // full corpus (W409c stub path).
+  const distillPairs = (trainPairs && trainPairs.length) ? trainPairs : corpusPairs;
   const distillIter = distill({
     teacher_namespace: namespace,
     student_base: studentBase,
@@ -354,7 +659,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     max_steps: opts.max_steps || 200,
     tokenizer_path: tokenizerInfo.tokenizer_path,
     pipeline_mode: opts.distill_mode || 'kd_softmax',
-    pairs_override: corpusPairs,
+    pairs_override: distillPairs,
     emit_progress_every: opts.emit_progress_every == null ? 100 : opts.emit_progress_every,
   });
   let distillResult = null;
@@ -409,16 +714,58 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   };
 
   // 7. bundle --------------------------------------------------------------
+  // Wave 409c — compute honest source-type stats from corpusPairs metadata.
+  // Pairs that came from the event store carry an event_id; explicit
+  // synthetic pairs (passed in via opts.synthetic_pairs) are counted
+  // separately. The approved_count comes from the approvals.jsonl file (if
+  // present); we re-read it directly so the audit field is content-derived,
+  // not pipeline-asserted.
+  const sourceSeedCount = corpusPairs.length;
+  const syntheticCount = corpusPairs.filter((p) => p && p.source_type === 'synthetic').length;
+  let approvedCount = 0;
+  try {
+    const approvalsPath = path.join(_kolmDir(), 'labels', 'approvals.jsonl');
+    if (fs.existsSync(approvalsPath)) {
+      const txt = fs.readFileSync(approvalsPath, 'utf8');
+      for (const line of txt.split(/\r?\n/)) {
+        if (!line.trim()) continue;
+        try {
+          const e = JSON.parse(line);
+          if (e && e.decision === 'approve') approvedCount += 1;
+        } catch {}
+      }
+    }
+  } catch {}
+  const sourceTypeStats = {
+    source_seed_count: sourceSeedCount,
+    approved_count: approvedCount,
+    synthetic_count: syntheticCount,
+  };
+  // Pre-bundle gate: synthetic-only seeds without explicit allow_synthetic.
+  if (sourceSeedCount > 0 && syntheticCount === sourceSeedCount && !allowSynthetic && !force) {
+    throw new Error('compileFull: synthetic-only seeds (' + syntheticCount + '/' + sourceSeedCount + '); pass opts.allow_synthetic or opts.force to override');
+  }
   const artifactResult = await _bundlePhase({
-    jobId, namespace, distillResult, plan, tokenizerInfo, datasetId: trainId, splitInfo, opts,
+    jobId, namespace, distillResult, plan, tokenizerInfo, datasetId: trainId, splitInfo, trainPairs, holdoutPairs, sourceTypeStats, opts,
   });
-  _writePhaseLog(jobId, 'bundle', { out_path: artifactResult.outPath, artifact_hash: artifactResult.artifact_hash });
+  _writePhaseLog(jobId, 'bundle', {
+    out_path: artifactResult.outPath,
+    artifact_hash: artifactResult.artifact_hash,
+    wave409c: artifactResult._wave409c || null,
+  });
   yield {
     phase: 'bundle',
     job_id: jobId,
     recipe_bundle_path: artifactResult.outPath,
     artifact_hash: artifactResult.artifact_hash,
     cid: artifactResult.cid,
+    seed_production_ready: artifactResult._wave409c ? artifactResult._wave409c.seed_production_ready : null,
+    seed_reasons: artifactResult._wave409c ? artifactResult._wave409c.seed_reasons : [],
+    eval_provenance: artifactResult._wave409c ? artifactResult._wave409c.eval_provenance : 'unknown',
+    // W411 P0 #8 + #10 — surface dedupe + holdout chokepoint counters on the
+    // bundle phase yield so watchers can see them without re-reading the .kolm.
+    holdout_excluded_count: artifactResult._wave409c ? (artifactResult._wave409c.holdout_excluded_count || 0) : 0,
+    row_hash_dedupe_count: artifactResult._wave409c ? (artifactResult._wave409c.row_hash_dedupe_count || 0) : 0,
   };
 
   // 8. sign ----------------------------------------------------------------

@@ -48,17 +48,56 @@ function pickTeacher() {
 // Materialize the in-memory captures into a seeds.jsonl + minimal spec.json
 // so the existing worker entrypoint (which is file-driven) can consume them
 // unchanged.
+//
+// W430 (audit P1-6) — preserve the 7 training-metadata fields that W411 P0 #2
+// pinned in src/distill-pipeline.js:153-173 (source_type, tenant_id, approved,
+// redaction_policy, holdout_only, fixed_output, event_id). The previous shape
+// `{id, input, output}` stripped every audit-relevant attribute on its way to
+// the worker, which silently undid the W411 metadata-preservation guarantee
+// for any tenant whose distill ran through the bridge (the entire
+// /v1/distill/from-captures + /v1/specialists/auto-distill surface). The
+// worker's readSeeds() at workers/distill/distill.mjs:443 accepts any extra
+// fields verbatim, so threading them through is safe — it just makes the
+// receipt match the training input.
+//
+// W430 fail-closed parity — match the W411 P0 #8 holdout chokepoint at
+// src/distill-pipeline.js:190-195: a row flagged holdout_only=true MUST
+// never reach the worker as a training seed. The bridge's whole corpus IS
+// the train split (there is no holdout/train split here — the bridge is the
+// curated train side), so we strip holdout_only rows defensively before the
+// JSONL write. Counted on the job record meta so the receipt is honest.
 function writeWorkerInputs({ tmpDir, namespace, captures, baseModel }) {
   fs.mkdirSync(tmpDir, { recursive: true });
   const seedsPath = path.join(tmpDir, 'seeds.jsonl');
   const specPath  = path.join(tmpDir, 'spec.json');
   const outDir    = path.join(tmpDir, 'out');
   fs.mkdirSync(outDir, { recursive: true });
-  const rows = captures.map((c, i) => ({
-    id: c.id || `cap_${i + 1}`,
-    input: c.variable_input || c.prompt || c.input || '',
-    output: c.response || c.output || '',
-  })).filter(r => r.input && r.output);
+  let holdout_excluded = 0;
+  const rows = captures.map((c, i) => {
+    const input = c.variable_input || c.prompt || c.input || '';
+    const output = c.response || c.output || '';
+    // W430 — forward the 7 named metadata fields verbatim when present. We
+    // never invent values; absent fields stay absent so the receipt reflects
+    // ground truth. The worker treats extra fields as opaque (readSeeds is
+    // shape-tolerant), and train.jsonl/holdout.jsonl carry them through.
+    const row = {
+      id: c.id || c.event_id || `cap_${i + 1}`,
+      input,
+      output,
+    };
+    if (c.event_id !== undefined) row.event_id = c.event_id;
+    if (c.source_type !== undefined) row.source_type = c.source_type;
+    if (c.tenant_id !== undefined) row.tenant_id = c.tenant_id;
+    if (c.approved !== undefined) row.approved = c.approved;
+    if (c.redaction_policy !== undefined) row.redaction_policy = c.redaction_policy;
+    if (c.holdout_only !== undefined) row.holdout_only = c.holdout_only;
+    if (c.fixed_output !== undefined) row.fixed_output = c.fixed_output;
+    return row;
+  }).filter((r) => {
+    if (!r.input || !r.output) return false;
+    if (r.holdout_only === true) { holdout_excluded += 1; return false; }
+    return true;
+  });
   fs.writeFileSync(seedsPath, rows.map(r => JSON.stringify(r)).join('\n') + '\n');
   fs.writeFileSync(specPath, JSON.stringify({
     job_id: `distill_${Date.now()}_${namespace}`,
@@ -66,7 +105,7 @@ function writeWorkerInputs({ tmpDir, namespace, captures, baseModel }) {
     student_base: baseModel,
     system: '',
   }, null, 2));
-  return { seedsPath, specPath, outDir, pair_count: rows.length };
+  return { seedsPath, specPath, outDir, pair_count: rows.length, holdout_excluded };
 }
 
 // Public entrypoint. Spawns the worker, returns the job record (queued -> running).
@@ -98,11 +137,13 @@ export async function startDistillJob({
   else if (teacher) mode = 'collect';
   else mode = 'stub';
 
-  const { seedsPath, specPath, outDir, pair_count } = writeWorkerInputs({
+  const { seedsPath, specPath, outDir, pair_count, holdout_excluded } = writeWorkerInputs({
     tmpDir, namespace, captures, baseModel,
   });
 
   // Register the job FIRST so the log path exists before we spawn.
+  // W430 — surface holdout_excluded on the job record so the receipt audit
+  // can prove the W411 P0 #8 chokepoint fired even on the bridge path.
   const rec = jobs.create({
     kind: 'distill',
     pid: 0,
@@ -115,6 +156,7 @@ export async function startDistillJob({
       mode,
       teacher: teacher || null,
       pair_count,
+      holdout_excluded: holdout_excluded || 0,
       tmp_dir: tmpDir,
       out_dir: outDir,
     },

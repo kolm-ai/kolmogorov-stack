@@ -335,6 +335,37 @@ export const VERB_DESCRIPTIONS = [
     when: 'An artifact failed eval and you want help patching it.',
     phrasings: ['fix', 'auto fix', 'patch artifact', 'fix the kolm'],
     examples: ['kolm fix phi-redactor.kolm --apply'] },
+
+  // W412 — W409 canonical control-plane verbs reach the NL classifier so
+  // `kolm do "show me spend"` resolves to `kolm lake stats`, not a fallback.
+  { verb: 'lake', desc: 'Canonical telemetry lake stats / tail / export / storage.',
+    when: 'You want to see calls / spend / models / providers across all captures.',
+    phrasings: ['lake', 'lake stats', 'telemetry', 'usage', 'spend', 'spending',
+      'how much am i spending', 'how much have i spent', 'show spend', 'show usage',
+      'show telemetry', 'show calls', 'how many calls', 'top providers', 'top models'],
+    examples: ['kolm lake stats', 'kolm lake tail --namespace support'] },
+  { verb: 'opportunities', desc: 'Savings-opportunity engine: repeated prompts, error spikes, privacy leaks.',
+    when: 'You want to know where money / quality / risk is going.',
+    phrasings: ['opportunities', 'find opportunities', 'savings', 'find savings',
+      'duplicate calls', 'duplicate prompts', 'repeated prompts', 'find duplicates',
+      'find waste', 'where can i save', 'find leaks', 'privacy leaks', 'find regressions',
+      'show errors', 'error spikes', 'expensive calls'],
+    examples: ['kolm opportunities --namespace support'] },
+  { verb: 'dataset', desc: 'Dataset workbench: create / inspect / promote a curated train+holdout split.',
+    when: 'You want to turn captures into a reviewable, splitable training dataset.',
+    phrasings: ['dataset', 'datasets', 'create dataset', 'make dataset', 'new dataset',
+      'inspect dataset', 'show dataset', 'list datasets', 'promote to dataset'],
+    examples: ['kolm dataset create --namespace support', 'kolm dataset list'] },
+  { verb: 'labels', desc: 'Label / review queue: approve, reject, or rewrite captured (input, output) pairs.',
+    when: 'You want a human-in-the-loop review pass before promoting to a dataset.',
+    phrasings: ['labels', 'label queue', 'review', 'reviewer queue', 'approve',
+      'show labels', 'pending reviews', 'review pairs', 'review captures'],
+    examples: ['kolm labels queue --namespace support', 'kolm labels stats'] },
+  { verb: 'bakeoff', desc: 'Side-by-side bake-off: candidate models vs holdout, ranked by K-score + cost.',
+    when: 'You want to pick the cheapest model that meets your quality bar.',
+    phrasings: ['bakeoff', 'bake off', 'bake-off', 'compare models', 'pick a model',
+      'which model is best', 'rank models', 'cheapest model', 'eval candidates'],
+    examples: ['kolm bakeoff --dataset ds_xxx', 'kolm bakeoff --namespace support'] },
 ];
 
 // ---------------------------------------------------------------------------
@@ -827,11 +858,20 @@ function pickContextualNamespace(normalized, context) {
 // dispatcher in cli/kolm.js stays thin.
 // ---------------------------------------------------------------------------
 
-export async function snapshotContext({ cwd = process.cwd(), home = null } = {}) {
+export async function snapshotContext({ cwd = process.cwd(), home = null, tenant_id = null, tenant = null } = {}) {
   // When caller passes home explicitly, treat as a sandbox: skip the
   // capture-store probe (which reads from a process-wide SQLite path that
   // is not parameterized by HOME). This keeps tests deterministic.
   const SANDBOX_MODE = home != null;
+  // W432 — accept tenant_id (or tenant alias) from the caller so HTTP routes
+  // that ride on snapshotContext can scope lake/opportunities/datasets reads
+  // to the authenticated tenant. Falls back to current_tenant from the local
+  // config (CLI default), then to 'local' (which existing local-only verbs
+  // already use). When this is non-null, every downstream optional probe
+  // (lakeStats, findOpportunities, listDatasets, capture-store) gets the
+  // tenant id so cross-tenant counters never appear in /v1/intent/next or
+  // /v1/intent/ask snapshot_summary.
+  const _explicitTenant = tenant_id || tenant || null;
   const HOME = home || (process.env.KOLM_HOME || (await import('node:os')).homedir());
   const KOLM_DIR = path.join(HOME, '.kolm');
   const ARTIFACTS_DIR = path.join(KOLM_DIR, 'artifacts');
@@ -880,19 +920,44 @@ export async function snapshotContext({ cwd = process.cwd(), home = null } = {})
   out.counts.artifacts = out.artifacts.length;
 
   // Enrich each artifact with manifest metadata if we can read it.
+  // W389 — production_ready is computed via the canonical productionReady()
+  // from src/production-ready.js (the same module cmdVerify, cmdRun, and the
+  // marketplace install gate use). A stale manifest.production_ready field
+  // was previously read here, which disagreed with `kolm verify` for any
+  // artifact whose manifest did not carry a top-level boolean (W339-era
+  // artifacts only ship manifest.seed_provenance.production_ready). All
+  // surfaces now compute the verdict from artifact bytes, so they agree.
+  //
+  // The productionReady() probe runs INDEPENDENT of loadArtifact() so a
+  // bundle whose signature trust entry is missing (e.g., a curated example
+  // checked into the repo) still receives a faithful production_ready
+  // boolean — same answer `kolm verify` prints — instead of silently
+  // dropping the field when loadArtifact() throws.
+  const { productionReady: _prodReady } = await import('./production-ready.js');
   for (const a of out.artifacts) {
+    // 1) Probe the canonical verdict first; it reads the manifest directly
+    //    out of the zip and does not depend on signature trust.
+    try {
+      const v = await _prodReady(a.path);
+      a.production_ready = v.ok === true;
+      a.production_ready_reasons = v.ok ? [] : (v.reasons || []);
+    } catch (_e) {
+      a.production_ready = false;
+      a.production_ready_reasons = ['probe_failed'];
+    }
+    // 2) Then attempt to enrich with manifest metadata via the runner so we
+    //    keep the existing task / k_score / base_model surface.
     try {
       const mod = await import('./artifact-runner.js');
       const bundle = mod.loadArtifact(a.path);
       const m = bundle.manifest || {};
       a.task = m.task || null;
       a.k_score = m.k_score?.composite ?? null;
-      a.production_ready = m.production_ready === true;
       a.base_model = m.base_model || null;
       a.runtime = m.runtime || m.runtime_target || null;
       a.created_at = m.created_at || null;
       a.artifact_class = m.artifact_class || null;
-    } catch (_) { /* leave bare */ }
+    } catch (_) { /* leave manifest fields bare */ }
   }
 
   // Jobs
@@ -940,7 +1005,12 @@ export async function snapshotContext({ cwd = process.cwd(), home = null } = {})
       // We only want a namespace-aggregated summary, so we use the in-process
       // path. If a driver is configured and there's no tenant, we still get an
       // empty list — that's fine, we'll fall through to the JSON-store reader.
-      const tenant = (out.current_tenant && (out.current_tenant.id || out.current_tenant)) || 'local';
+      // W432 — prefer the explicit tenant_id from HTTP callers; fall back to
+      // the local config tenant (CLI default) so the existing local-only
+      // surface keeps working.
+      const tenant = _explicitTenant
+        || (out.current_tenant && (out.current_tenant.id || out.current_tenant))
+        || 'local';
       let rows = [];
       try { rows = await captureStore.allCapturesForTenant(tenant, 50000); } catch (_) {}
       if (rows && rows.length) {
@@ -972,7 +1042,78 @@ export async function snapshotContext({ cwd = process.cwd(), home = null } = {})
   }
   out.counts.captures = out.captures_summary.reduce((s, r) => s + r.count, 0);
   out.counts.namespaces = out.captures_summary.length;
+
+  // W412 — canonical lake + opportunities + datasets, so `kolm next` reads from
+  // the same source the optimizer and bake-off do. All three are best-effort:
+  // a thrown import just leaves the field unset and the recommender falls
+  // through. We never let an intent snapshot fail because of a downstream
+  // module's load error.
+  out.lake = null;
+  out.opportunities = [];
+  out.datasets = [];
+  if (!SANDBOX_MODE) {
+    try {
+      const lakeMod = await import('./lake.js');
+      if (typeof lakeMod.lakeStats === 'function') {
+        // W432 — tenant_id scopes the lake aggregator to the calling tenant
+        // when present. When null (local CLI default), lakeStats falls back
+        // to its existing behavior.
+        const stats = await lakeMod.lakeStats(_explicitTenant ? { tenant_id: _explicitTenant } : {});
+        out.lake = {
+          total_calls: stats.total_calls || 0,
+          total_spend_usd: stats.total_spend_usd || 0,
+          top_provider: pickTopKey(stats.providers, 'calls'),
+          top_model: pickTopKey(stats.models, 'calls'),
+        };
+      }
+    } catch (_) { /* lake module not available */ }
+    try {
+      const oppMod = await import('./opportunity-engine.js');
+      if (typeof oppMod.findOpportunities === 'function') {
+        // W432 — tenant_id scopes the opportunity engine so /v1/intent/next
+        // never surfaces another tenant's optimization opportunities.
+        const opps = await oppMod.findOpportunities(_explicitTenant ? { tenant_id: _explicitTenant } : {});
+        out.opportunities = (opps || []).slice(0, 5).map((o) => ({
+          id: o.id,
+          type: o.type,
+          namespace: o.namespace || null,
+          estimated_savings_usd: o.estimated_savings || 0,
+          volume: o.volume || 0,
+          score: o.score || 0,
+        }));
+      }
+    } catch (_) { /* opportunity engine not available */ }
+    try {
+      const dsMod = await import('./dataset-workbench.js');
+      if (typeof dsMod.listDatasets === 'function') {
+        // W432 — tenant_id scopes dataset listing for HTTP callers.
+        const datasets = await dsMod.listDatasets(_explicitTenant ? { tenant_id: _explicitTenant } : {});
+        out.datasets = (datasets || []).slice(0, 5).map((d) => ({
+          id: d.id,
+          namespace: d.namespace || null,
+          train_count: (d.train_ids || []).length,
+          holdout_count: (d.holdout_ids || []).length,
+        }));
+      }
+    } catch (_) { /* dataset workbench not available */ }
+  }
+  out.counts.opportunities = out.opportunities.length;
+  out.counts.datasets = out.datasets.length;
+
   return out;
+}
+
+// W412 — given a {providers: {openai: {calls: 12}, ...}} style map, return
+// the key with the highest value of `field`. Returns null on empty maps.
+function pickTopKey(map, field) {
+  if (!map || typeof map !== 'object') return null;
+  let bestKey = null;
+  let best = -1;
+  for (const [k, v] of Object.entries(map)) {
+    const n = (v && typeof v[field] === 'number') ? v[field] : 0;
+    if (n > best) { best = n; bestKey = k; }
+  }
+  return bestKey;
 }
 
 function aggregateNamespaces(rows) {
@@ -1071,6 +1212,61 @@ export function recommendNext(snapshot) {
       rank: 80,
     });
   }
+
+  // W412 — opportunity engine recommendations. Rank by estimated savings so
+  // the biggest dollar-value cluster wins. Skip privacy_leak in the dollar
+  // path (it has its own dedicated suggestion below).
+  const opps = snapshot.opportunities || [];
+  const moneyOpps = opps
+    .filter(o => o.type !== 'privacy_leak' && (o.estimated_savings_usd || 0) > 0)
+    .sort((a, b) => (b.estimated_savings_usd || 0) - (a.estimated_savings_usd || 0));
+  if (moneyOpps.length) {
+    const top = moneyOpps[0];
+    const savings = top.estimated_savings_usd.toFixed(2);
+    recs.push({
+      action: 'promote_opportunity',
+      command: `kolm opportunities promote ${top.id}`,
+      why: `top opportunity (${top.type}) shows ~$${savings} in estimated monthly savings across ${top.volume} calls. Promote it to a dataset to start the bake-off.`,
+      rank: 88,
+    });
+  }
+  const privacyOpps = opps.filter(o => o.type === 'privacy_leak');
+  if (privacyOpps.length) {
+    const top = privacyOpps[0];
+    recs.push({
+      action: 'fix_privacy_leak',
+      command: `kolm opportunities --namespace ${top.namespace || 'default'} --type privacy_leak`,
+      why: `${privacyOpps.length} privacy-leak opportunity(ies) detected — sensitive_data passed through with policy=allow. Inspect and fix before promoting.`,
+      rank: 99,
+    });
+  }
+
+  // W412 — datasets that exist but have no bake-off yet.
+  const dsets = snapshot.datasets || [];
+  if (dsets.length) {
+    const top = dsets[0];
+    if (top.holdout_count > 0) {
+      recs.push({
+        action: 'run_bakeoff',
+        command: `kolm bakeoff --dataset ${top.id}`,
+        why: `dataset ${top.id} has ${top.train_count} train + ${top.holdout_count} holdout rows. Run a bake-off to pick the cheapest model that holds its K-score.`,
+        rank: 78,
+      });
+    }
+  }
+
+  // W412 — lake-level baseline. If a tenant has any spend at all, surface
+  // `kolm lake stats` so they discover the dollar-level dashboard.
+  if (snapshot.lake && snapshot.lake.total_spend_usd > 0) {
+    const spend = snapshot.lake.total_spend_usd.toFixed(2);
+    recs.push({
+      action: 'review_lake',
+      command: 'kolm lake stats',
+      why: `~$${spend} captured in the lake so far across ${snapshot.lake.total_calls} calls. \`kolm lake stats\` shows per-provider + per-model breakdowns.`,
+      rank: 35,
+    });
+  }
+
   // Always-available baseline.
   recs.push({
     action: 'show_dashboard',
@@ -1079,7 +1275,7 @@ export function recommendNext(snapshot) {
     rank: 10,
   });
   recs.sort((a, b) => b.rank - a.rank);
-  return recs.slice(0, 3);
+  return recs.slice(0, 5);
 }
 
 export default {

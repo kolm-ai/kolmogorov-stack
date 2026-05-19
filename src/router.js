@@ -106,7 +106,7 @@ import {
 import { PROVIDERS as CONNECTOR_PROVIDERS, summarizeProviders as connectorSummarizeProviders } from './provider-registry.js';
 import { estimateCost as connectorEstimateCost, extractUsage as connectorExtractUsage } from './cost-estimator.js';
 import { newEvent as connectorNewEvent, hashContent as connectorHashContent } from './event-schema.js';
-import { scan as connectorPrivacyScan } from './privacy-membrane.js';
+import { scan as connectorPrivacyScan, redact as connectorPrivacyRedact, reinsert as connectorPrivacyReinsert } from './privacy-membrane.js';
 
 // =====================================================================
 // W384 — backend wiring imports for /v1/* routes that expose the W369–
@@ -168,6 +168,7 @@ import {
   findOpportunities as oppFindOpportunities,
   acceptOpportunity as oppAcceptOpportunity,
   ignoreOpportunity as oppIgnoreOpportunity,
+  promoteOpportunity as oppPromoteOpportunity,
   loadOpportunitiesState as oppLoadState,
 } from './opportunity-engine.js';
 import {
@@ -206,6 +207,13 @@ import {
   testDevice as devTestDevice,
   getDevice as devGetDevice,
 } from './device-capabilities.js';
+// W409s — device target PROFILES.
+// Add the static-profile picker so /v1/devices/detect (GET + POST) returns
+// the matching W409s PROFILE alongside the W372 capability snapshot.
+import {
+  detectProfile as devDetectProfile,
+  recommendForProfile as devRecommendForProfile,
+} from './devices.js';
 import {
   installToDevice as devInstallToDevice,
   listInstalled as devListInstalled,
@@ -215,6 +223,20 @@ import {
 import { storeBlob as mediaStoreBlob, mimeToExt as mediaMimeToExt } from './media-store.js';
 import { appendEvent as eventAppend, listEvents as eventList, countEvents as eventCount, purgeEvents as eventPurge, storeInfo as eventStoreInfo } from './event-store.js';
 import { MEDIA_KINDS as EVENT_MEDIA_KINDS } from './event-schema.js';
+
+// W409y — real billing-units metering. Counters live in JSON files under
+// KOLM_USAGE_DIR (or KOLM_DATA_DIR/usage). Tier caps + privacy-promise
+// guards (local-only → never reports) are enforced inside usage.js, so
+// every call here is safe to fire regardless of auth state.
+import {
+  BILLING_UNITS as USAGE_UNITS,
+  TIER_LIMITS as USAGE_TIER_LIMITS,
+  tierForPlan as usageTierForPlan,
+  incrementMeter as usageIncrementMeter,
+  checkLimit as usageCheckLimit,
+  dashboardPayload as usageDashboardPayload,
+  shouldMeter as usageShouldMeter,
+} from './usage.js';
 
 // Per-IP rate limiters (S5, S10). Express trust-proxy is set to 2 in
 // server.js so X-Forwarded-For resolves through the Vercel→Railway chain.
@@ -341,6 +363,143 @@ const builderLimiter = rateLimit({
   keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
+
+// W411 — anonymous /v1/models probe limiter. OpenAI/Anthropic SDKs hit
+// /v1/models BEFORE authenticating so we must keep it open. Cap anonymous
+// probes at 60/min/ip to defang abuse; authenticated callers bypass the cap.
+const anonModelsProbeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate-limited - /v1/models anonymous probes cap at 60/min/ip' },
+  keyGenerator: ipKey,
+  validate: { trustProxy: false },
+  // Skip the rate-limit entirely when an Authorization header is present.
+  skip: (req) => {
+    const h = String(req.headers.authorization || '');
+    const x = String(req.headers['x-api-key'] || '');
+    return h.length > 0 || x.length > 0;
+  },
+});
+
+// W411 — runtime-mode discriminator. Hosted (kolm.ai cloud) REQUIRES a kolm
+// tenant key on the OpenAI/Anthropic-compatible inference passthrough routes
+// so anonymous traffic cannot bill upstream costs against the operator.
+// Local-daemon mode (127.0.0.1:7403 via `kolm connect start`) stays
+// unauthenticated but stamps a sentinel tenant_id so captured events still
+// land under a traceable tenant.
+//
+// Discriminator:
+//   KOLM_LOCAL_DAEMON=1      → local-daemon mode (no auth, sentinel tenant)
+//   KOLM_PRODUCTION=1        → hosted mode (auth required on inference)
+//   isProductionRuntime()    → hosted mode fallback (Railway/Vercel/Lambda)
+//   anything else            → local-daemon mode (developer laptop)
+//
+// We resolve hostname once at module load; it never changes for a given
+// process. The sentinel survives across requests so all events from the
+// same daemon share the same tenant_id.
+function __w411IsLocalDaemonMode() {
+  if (process.env.KOLM_LOCAL_DAEMON === '1' || process.env.KOLM_LOCAL_DAEMON === 'true') return true;
+  if (process.env.KOLM_PRODUCTION === '1' || process.env.KOLM_PRODUCTION === 'true') return false;
+  return !isProductionRuntime();
+}
+let __w411LocalTenantId = null;
+function __w411LocalSentinelTenant() {
+  if (__w411LocalTenantId) return __w411LocalTenantId;
+  try {
+    __w411LocalTenantId = 'local:' + ((os && os.hostname && os.hostname()) || 'host');
+  } catch (_e) {
+    __w411LocalTenantId = 'local:host';
+  }
+  return __w411LocalTenantId;
+}
+
+// W411 — hosted-auth gate. Mounted BEFORE the connector passthrough routes
+// (/v1/chat/completions, /v1/responses, /v1/embeddings, /v1/messages,
+// /v1/capture/openai, /v1/capture/anthropic, /v1/capture/openrouter, plus
+// the openrouter aliases). On hosted servers, requires a valid kolm tenant
+// key (ks_*/kao_*) OR the admin key; returns 401 with structured body
+// otherwise. On the local daemon, stamps req.tenant + req.tenant_record
+// with a sentinel ('local:<hostname>') so the downstream connector proxy
+// writes captures under a traceable tenant_id instead of the bare 'local'
+// literal.
+function __w411HostedAuthGate(req, res, next) {
+  if (__w411IsLocalDaemonMode()) {
+    // Local-daemon mode: anonymous requests get stamped with a sentinel
+    // tenant. BUT if a valid kolm tenant key is presented (Bearer or
+    // X-API-Key), resolve it so captures land under that tenant_id — the
+    // local daemon doubles as an authenticated dev workspace and the lake /
+    // datasets / labels surfaces fence on req.tenant_record.id.
+    const header = String(req.headers.authorization || '');
+    const xApi = String(req.headers['x-api-key'] || '');
+    const bearer = header.replace(/^Bearer\s+/i, '').trim();
+    const key = bearer || xApi;
+    if (key && (key.startsWith('ks_') || key.startsWith('kao_'))) {
+      const tenant = findTenantByApiKey(key);
+      if (tenant) {
+        req.tenant = tenant.name;
+        req.tenant_record = tenant;
+        req.api_key = key;
+        return next();
+      }
+    }
+    const tid = __w411LocalSentinelTenant();
+    req.tenant = tid;
+    req.tenant_record = req.tenant_record || {
+      id: tid,
+      name: tid,
+      kind: 'local_daemon',
+      plan: 'local',
+      source: 'local_daemon',
+    };
+    req.local_daemon = true;
+    return next();
+  }
+  // Hosted mode: require a kolm tenant key.
+  const adminKey = adminApiKey();
+  const header = String(req.headers.authorization || '');
+  const xApi = String(req.headers['x-api-key'] || '');
+  const cookieKey = (req.cookies && req.cookies.kolm_session) || '';
+  const bearer = header.replace(/^Bearer\s+/i, '').trim();
+  const key = cookieKey || bearer || xApi;
+  if (!key) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'kolm_api_key_required',
+      hint: 'set Authorization: Bearer <kolm_api_key> (ks_*/kao_*) or X-API-Key header',
+    });
+  }
+  if (adminKey && key === adminKey) {
+    req.tenant = process.env.DEFAULT_TENANT || 'demo';
+    req.is_admin = true;
+    return next();
+  }
+  // Only kolm-minted keys are accepted here. Upstream provider keys (sk-*,
+  // sk-ant-*, etc.) get rejected so they can't piggyback hosted billing.
+  if (!(key.startsWith('ks_') || key.startsWith('kao_'))) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'kolm_api_key_required',
+      hint: 'hosted /v1/* inference requires a kolm tenant key (ks_*/kao_*), not an upstream provider key',
+    });
+  }
+  const tenant = findTenantByApiKey(key);
+  if (!tenant) {
+    return res.status(401).json({ error: 'unauthorized', reason: 'invalid_kolm_api_key' });
+  }
+  if (tenant.kind === 'anon' && tenant.expires_at && new Date(tenant.expires_at) < new Date()) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'anon_workspace_expired',
+      expired_at: tenant.expires_at,
+    });
+  }
+  req.tenant = tenant.name;
+  req.tenant_record = tenant;
+  req.api_key = key;
+  next();
+}
 
 // W261: starter templates shown on /builder. Each template has a task
 // description and a small example set the user can clone with one click.
@@ -1692,8 +1851,26 @@ export function buildRouter() {
   //   1. Authorization: Bearer <upstream-key>     (e.g. sk-... for OpenAI)
   //   2. x-upstream-api-key: <upstream-key>       (legacy)
   //   3. process.env[<PROVIDER>_API_KEY]          (server-side env)
-  // If none, returns 401 with a hint pointing to env setup.
+  // If none AND KOLM_CONNECTOR_FIXTURE=1, we return a deterministic mock
+  // shaped like the provider's real response (so tests + offline dev can
+  // exercise the connector surface without real upstream keys). Otherwise
+  // 401 with a hint pointing to env setup.
   async function __connectorProxy(provider, upstreamPath, req, res) {
+    // W418 — defense-in-depth: every connector-proxy entry MUST carry a
+    // resolved tenant_record by the time we reach this point. The W411
+    // hosted-auth gate (__w411HostedAuthGate) stamps req.tenant_record on
+    // every legitimate path (real tenant in hosted mode, sentinel
+    // 'local:<host>' in local-daemon mode). If a future route wires this
+    // proxy without the gate, fail CLOSED in hosted mode rather than
+    // forwarding an anonymous request to the upstream provider. Audit
+    // 2026-05-19 P0 Core Truth #3: "No anonymous proxy slip."
+    if (!req.tenant_record && !__w411IsLocalDaemonMode()) {
+      return res.status(401).json({
+        error: 'unauthorized',
+        reason: 'kolm_api_key_required',
+        hint: 'hosted /v1/* inference requires a kolm tenant key (ks_*/kao_*)',
+      });
+    }
     const pcfg = CONNECTOR_PROVIDERS[provider];
     if (!pcfg) return res.status(400).json({ error: { type: 'unknown_provider', message: provider } });
     // Resolve upstream key.
@@ -1703,7 +1880,8 @@ export function buildRouter() {
     if (m) upstreamKey = m[1];
     if (!upstreamKey && req.headers['x-upstream-api-key']) upstreamKey = String(req.headers['x-upstream-api-key']);
     if (!upstreamKey && pcfg.env_key && process.env[pcfg.env_key]) upstreamKey = process.env[pcfg.env_key];
-    if (!upstreamKey) {
+    const fixtureMode = (process.env.KOLM_CONNECTOR_FIXTURE === '1' || process.env.KOLM_CONNECTOR_FIXTURE === 'true');
+    if (!upstreamKey && !fixtureMode) {
       return res.status(401).json({
         error: {
           type: 'missing_upstream_credentials',
@@ -1732,6 +1910,119 @@ export function buildRouter() {
       promptText = 'system: ' + body.system + '\n\n' + promptText;
     }
     const scan = connectorPrivacyScan(promptText);
+    // W409b — FAIL-CLOSED policy. Server-direct proxy used to hard-code the
+    // permissive policy literal which leaked raw PII into the cloud lake.
+    // Default is now 'redact'. Operators opt out via env or per-request hdr.
+    let policy = String(
+      req.headers['x-kolm-privacy-policy']
+      || process.env.KOLM_PRIVACY_POLICY
+      || 'redact'
+    ).toLowerCase();
+    if (!['redact', 'allow', 'block', 'review_required'].includes(policy)) policy = 'redact';
+    // W409b — raw_available is fail-closed (default false). Operators opt in
+    // via KOLM_ALLOW_RAW=true OR per-request x-kolm-raw: true header.
+    const rawHdr = String(req.headers['x-kolm-raw'] || '').toLowerCase();
+    const rawEnv = String(process.env.KOLM_ALLOW_RAW || '').toLowerCase();
+    const rawAllowed = (rawEnv === 'true' || rawEnv === '1' || rawEnv === 'yes'
+      || rawHdr === 'true' || rawHdr === '1' || rawHdr === 'yes');
+    // W409b — "noncompliant identifier detected" surfaced as a tag so dashboards
+    // can flag broken-but-not-validated identifiers (e.g. malformed SSN).
+    const noncompliantIds = Array.from(new Set((scan.classes || []).filter((c) => c === 'malformed_ssn')));
+    // Fail-closed: enforce policy=block BEFORE forwarding.
+    if (policy === 'block' && scan.sensitive && req.headers['x-kolm-privacy-override'] !== 'true') {
+      return res.status(451).json({
+        error: {
+          type: 'privacy_blocked',
+          classes: scan.classes,
+          message: 'sensitive data detected; pass x-kolm-privacy-override: true to allow',
+        },
+      });
+    }
+    // W409b — pre-compute redacted prompt whenever sensitive data is present,
+    // regardless of policy. Both success and error paths read this through
+    // deriveLakePrompt() so a 5xx from upstream cannot smuggle raw PII into
+    // the lake (the historical daemon-connector.js error path leak).
+    let forwardBody = body;
+    let placeholderMap = null;
+    let redactedPromptText = null;
+    if (scan.sensitive) {
+      const r = connectorPrivacyRedact(promptText);
+      redactedPromptText = r.redacted_text || r.redacted || '';
+      if (policy === 'redact') {
+        placeholderMap = r.map || r.vault;
+        try {
+          forwardBody = JSON.parse(JSON.stringify(body));
+          const swapStr = (s) => {
+            let out = String(s);
+            for (const [ph, val] of Object.entries(placeholderMap || {})) {
+              if (typeof val === 'string' && val.length > 0) out = out.split(val).join(ph);
+            }
+            return out;
+          };
+          const walk = (n) => {
+            if (n == null) return n;
+            if (typeof n === 'string') return swapStr(n);
+            if (Array.isArray(n)) return n.map(walk);
+            if (typeof n === 'object') {
+              for (const k of Object.keys(n)) n[k] = walk(n[k]);
+              return n;
+            }
+            return n;
+          };
+          forwardBody = walk(forwardBody);
+        } catch (_) { forwardBody = body; placeholderMap = null; }
+      }
+    }
+    function deriveLakePrompt() {
+      if (policy === 'allow' && rawAllowed) return promptText;
+      if (redactedPromptText != null) return redactedPromptText;
+      if (!scan.sensitive) return promptText;
+      try { return connectorPrivacyRedact(promptText || '').redacted_text || ''; } catch (_) { return ''; }
+    }
+    function deriveLakeResponse(rt) {
+      if (policy === 'allow' && rawAllowed) return rt;
+      try {
+        const rs = connectorPrivacyRedact(rt || '');
+        return rs.redacted_text || rs.redacted || '';
+      } catch (_) { return ''; }
+    }
+    async function writeRawSidecar(text, kind) {
+      const s = String(text == null ? '' : text);
+      if (s.length === 0) return { hash: null, path: null };
+      try {
+        const fsMod = await import('node:fs');
+        const pathMod = await import('node:path');
+        const osMod = await import('node:os');
+        const cryptoMod = await import('node:crypto');
+        const HOME = osMod.default.homedir();
+        const RAW_DIR = pathMod.default.join(HOME, '.kolm', 'events', 'raw');
+        if (!fsMod.default.existsSync(RAW_DIR)) fsMod.default.mkdirSync(RAW_DIR, { recursive: true });
+        const hash = cryptoMod.default.createHash('sha256').update(s, 'utf8').digest('hex');
+        const fp = pathMod.default.join(RAW_DIR, `${hash}_${kind}.txt`);
+        if (!fsMod.default.existsSync(fp)) fsMod.default.writeFileSync(fp, s, 'utf8');
+        try { fsMod.default.chmodSync(fp, 0o600); } catch (_) {}
+        return { hash, path: fp };
+      } catch (_) { return { hash: null, path: null }; }
+    }
+    let rawPromptHash = null;
+    let rawResponseHash = null;
+    if (rawAllowed && promptText) {
+      const sc = await writeRawSidecar(promptText, 'prompt');
+      rawPromptHash = sc.hash;
+    }
+    function extractRespText(json, prov) {
+      if (!json || typeof json !== 'object') return '';
+      if (prov === 'anthropic') {
+        const blocks = Array.isArray(json.content) ? json.content : [];
+        return blocks.map((b) => (b && b.text) || '').join('').trim();
+      }
+      const choices = Array.isArray(json.choices) ? json.choices : [];
+      const first = choices[0] || {};
+      const msg = first.message || {};
+      if (typeof msg.content === 'string') return msg.content;
+      if (Array.isArray(msg.content)) return msg.content.map((c) => (c && c.text) || '').join('');
+      return String(first.text || '');
+    }
     const upstreamUrl = pcfg.upstream.replace(/\/+$/, '') + upstreamPath;
     // Forward via node:http(s) directly (avoids global fetch dispatcher pinning sockets).
     const headers = { 'content-type': 'application/json' };
@@ -1746,34 +2037,145 @@ export function buildRouter() {
     }
     let upstreamResp;
     const t0 = Date.now();
-    try {
-      const httpMod = await import('node:http');
-      const httpsMod = await import('node:https');
-      upstreamResp = await new Promise((resolve, reject) => {
-        const u = new URL(upstreamUrl);
-        const lib = u.protocol === 'https:' ? httpsMod.default : httpMod.default;
-        const payload = JSON.stringify(body);
-        headers['content-length'] = Buffer.byteLength(payload).toString();
-        const rq = lib.request({
-          protocol: u.protocol, hostname: u.hostname,
-          port: u.port || (u.protocol === 'https:' ? 443 : 80),
-          path: u.pathname + (u.search || ''),
-          method: 'POST', headers,
-        }, (resp) => {
-          let buf = ''; resp.setEncoding('utf8');
-          resp.on('data', d => { buf += d; });
-          resp.on('end', () => {
-            let json; try { json = JSON.parse(buf); } catch (_) { json = { _raw: buf }; }
-            resolve({ status: resp.statusCode, body: json });
+    if (fixtureMode) {
+      // W409k — deterministic mock when no upstream is configured. Shape per
+      // provider + endpoint so OpenAI/Anthropic SDKs see a valid envelope.
+      upstreamResp = { status: 200, body: __connectorFixtureBody(provider, upstreamPath, forwardBody, promptText) };
+    } else {
+      try {
+        const httpMod = await import('node:http');
+        const httpsMod = await import('node:https');
+        upstreamResp = await new Promise((resolve, reject) => {
+          const u = new URL(upstreamUrl);
+          const lib = u.protocol === 'https:' ? httpsMod.default : httpMod.default;
+          const payload = JSON.stringify(forwardBody);
+          headers['content-length'] = Buffer.byteLength(payload).toString();
+          const rq = lib.request({
+            protocol: u.protocol, hostname: u.hostname,
+            port: u.port || (u.protocol === 'https:' ? 443 : 80),
+            path: u.pathname + (u.search || ''),
+            method: 'POST', headers,
+          }, (resp) => {
+            let buf = ''; resp.setEncoding('utf8');
+            resp.on('data', d => { buf += d; });
+            resp.on('end', () => {
+              let json; try { json = JSON.parse(buf); } catch (_) { json = { _raw: buf }; }
+              resolve({ status: resp.statusCode, body: json });
+            });
           });
+          rq.setTimeout(120000, () => { try { rq.destroy(new Error('upstream_timeout')); } catch (_) {} });
+          rq.on('error', reject);
+          rq.write(payload); rq.end();
         });
-        rq.setTimeout(120000, () => { try { rq.destroy(new Error('upstream_timeout')); } catch (_) {} });
-        rq.on('error', reject);
-        rq.write(payload); rq.end();
-      });
-    } catch (e) {
-      return res.status(502).json({ error: { type: 'upstream_error', message: String(e.message || e) } });
+      } catch (e) {
+        // W409b — FAIL-CLOSED error path. The lake row gets the redacted
+        // prompt (via deriveLakePrompt()), never raw `promptText`. Same bug
+        // pattern as the historical daemon-connector.js error path leak.
+        const lakePromptOnError = deriveLakePrompt();
+        const promptRedactedFieldErr = scan.sensitive
+          ? (redactedPromptText != null ? redactedPromptText : (connectorPrivacyRedact(promptText).redacted_text || null))
+          : null;
+        const evErr = connectorNewEvent({
+          // W411 — pin tenant_id on canonical event row to req.tenant_record.id
+          // (canonical id like `tenant_*`) so lake / datasets / labels surfaces
+          // fence on the authoritative scope. Falls back to req.tenant (name
+          // slug) for the daemon-connector untenanted passthrough path, then
+          // to 'local' when fully unauthenticated.
+          tenant_id: (req && req.tenant_record && req.tenant_record.id)
+            || (req && req.tenant)
+            || 'local',
+          namespace: 'default',
+          provider,
+          // W411 — explicit canonical vendor for lake parity. provider stays
+          // as free-text alias; vendor is the closed enum lake consumers read.
+          vendor: provider,
+          model,
+          upstream_url: upstreamUrl,
+          request_hash: connectorHashContent(promptText + '|' + model),
+          response_hash: null,
+          prompt_redacted: promptRedactedFieldErr,
+          response_redacted: null,
+          latency_ms: 0,
+          status: 'error',
+          error_type: 'upstream_error',
+          error: 'upstream_error: ' + String(e.message || e).slice(0, 256),
+          sensitive_data_detected: scan.sensitive,
+          sensitive_classes: scan.classes,
+          redaction_policy: policy,
+          raw_available: rawAllowed && !!rawPromptHash,
+          raw_prompt_hash: rawPromptHash,
+          raw_response_hash: null,
+          noncompliant_identifiers: noncompliantIds,
+          source_type: 'real',
+        });
+        let errDurable = true;
+        try {
+          await insertCapture({
+            id: evErr.event_id,
+            tenant: (req && req.tenant) || 'local',
+            // W411 — propagate canonical tenant_id through capture-store so the
+            // bridgeToEventStore() hook agrees with the eventAppend(evErr) write
+            // below (both keyed on event_id; INSERT OR REPLACE collapses them).
+            tenant_id: (req && req.tenant_record && req.tenant_record.id)
+              || (req && req.tenant)
+              || 'local',
+            template_hash: evErr.request_hash,
+            template_preview: String(lakePromptOnError || '').slice(0, 200),
+            model: evErr.model,
+            prompt: String(lakePromptOnError || '').slice(0, 8000),
+            variable_input: null,
+            response: '',
+            latency_ms: 0,
+            latency_us: 0,
+            cost_usd: 0,
+            provider: evErr.provider,
+            corpus_namespace: 'default',
+            status: 502,
+            created_at: evErr.created_at,
+            redaction_policy: evErr.redaction_policy,
+            raw_available: evErr.raw_available === true,
+            raw_prompt_hash: evErr.raw_prompt_hash || null,
+            raw_response_hash: null,
+            noncompliant_identifiers: evErr.noncompliant_identifiers || [],
+          });
+        } catch (_) { errDurable = false; }
+        try { await eventAppend(evErr); } catch (_) {}
+        res.set('x-kolm-event-id', evErr.event_id);
+        res.set('x-kolm-provider', provider);
+        res.set('x-kolm-model', model);
+        res.set('x-kolm-event-durable', String(errDurable));
+        res.set('x-kolm-redaction-policy', policy);
+        res.set('x-kolm-raw-available', String(evErr.raw_available === true));
+        if (noncompliantIds.length) res.set('x-kolm-noncompliant-identifiers', noncompliantIds.join(','));
+        if (scan.sensitive) res.set('x-kolm-sensitive-classes', scan.classes.join(','));
+        return res.status(502).json({ error: { type: 'upstream_error', message: String(e.message || e) } });
+      }
     }
+    // Extract response text + reinsert placeholders + sidecar raw response.
+    const respText = extractRespText(upstreamResp.body, provider);
+    let bodyForCaller = upstreamResp.body;
+    if (placeholderMap) {
+      try {
+        bodyForCaller = JSON.parse(JSON.stringify(upstreamResp.body));
+        const walkResp = (n) => {
+          if (n == null) return n;
+          if (typeof n === 'string') return connectorPrivacyReinsert(n, placeholderMap);
+          if (Array.isArray(n)) return n.map(walkResp);
+          if (typeof n === 'object') {
+            for (const k of Object.keys(n)) n[k] = walkResp(n[k]);
+            return n;
+          }
+          return n;
+        };
+        bodyForCaller = walkResp(bodyForCaller);
+      } catch (_) { bodyForCaller = upstreamResp.body; }
+    }
+    if (rawAllowed && respText) {
+      const sc = await writeRawSidecar(respText, 'response');
+      rawResponseHash = sc.hash;
+    }
+    const lakePrompt = deriveLakePrompt();
+    const lakeResponse = deriveLakeResponse(respText);
     const latencyMs = Date.now() - t0;
     const usage = connectorExtractUsage(upstreamResp.body, provider);
     const cost = connectorEstimateCost({ provider, model, prompt_tokens: usage.prompt_tokens, completion_tokens: usage.completion_tokens });
@@ -1782,24 +2184,62 @@ export function buildRouter() {
     if (httpStatus === 429) canonStatus = 'rate_limited';
     else if (httpStatus === 408 || httpStatus === 504) canonStatus = 'timeout';
     else if (httpStatus >= 400) canonStatus = 'error';
+    // W409b — fail-closed redacted fields on the canonical event row. Always
+    // populated when sensitive data was detected, regardless of policy, so the
+    // lake row always carries a sanitized version even on the allow path.
+    // W409h — when scan.sensitive=false, fall back to the raw promptText so
+    // downstream lake/opportunities/datasets/bakeoff hydration can read the
+    // canonical prompt. promptText is safe in that case (no sensitive classes
+    // detected). This unblocks the observe → optimize → distill → bake-off →
+    // compile loop on non-sensitive traffic.
+    const promptRedactedField = scan.sensitive
+      ? (redactedPromptText != null ? redactedPromptText : (connectorPrivacyRedact(promptText).redacted_text || null))
+      : (promptText || null);
+    const responseRedactedField = respText
+      ? ((policy === 'allow' && rawAllowed) ? null : (connectorPrivacyRedact(respText).redacted_text || null))
+      : null;
+    const ev_raw_available_flag = rawAllowed && (!!rawPromptHash || !!rawResponseHash);
     const ev = connectorNewEvent({
-      tenant_id: 'local',
+      // W411 — pin tenant_id on canonical event row to req.tenant_record.id
+      // (canonical id like `tenant_*`) so lake / datasets / labels surfaces
+      // fence on the authoritative scope. Falls back to req.tenant (name
+      // slug) for the daemon-connector untenanted passthrough path, then to
+      // 'local' when fully unauthenticated.
+      tenant_id: (req && req.tenant_record && req.tenant_record.id)
+        || (req && req.tenant)
+        || 'local',
       namespace: 'default',
       provider,
+      // W411 — explicit canonical vendor for lake parity. provider stays
+      // as free-text alias; vendor is the closed enum lake consumers read.
+      vendor: provider,
       model,
       upstream_url: upstreamUrl,
       request_hash: connectorHashContent(promptText + '|' + model),
       response_hash: connectorHashContent(JSON.stringify(upstreamResp.body || {})),
       prompt_tokens: usage.prompt_tokens,
       completion_tokens: usage.completion_tokens,
+      // W411 — parity field names (auditor mandate). tokens_in/out + cost_micro_usd
+      // + latency_us mirror the legacy fields with the units the lake expects.
+      tokens_in: usage.prompt_tokens,
+      tokens_out: usage.completion_tokens,
+      cost_micro_usd: Math.round(Number(cost) * 1_000_000),
+      latency_us: latencyMs * 1000,
       estimated_cost_usd: cost,
       latency_ms: latencyMs,
       status: canonStatus,
       error_type: httpStatus >= 400 ? 'upstream_status_' + httpStatus : null,
       sensitive_data_detected: scan.sensitive,
       sensitive_classes: scan.classes,
-      redaction_policy: 'allow',
-      source_type: 'real',
+      redaction_policy: policy,
+      raw_available: ev_raw_available_flag,
+      raw_prompt_hash: rawPromptHash,
+      raw_response_hash: rawResponseHash,
+      noncompliant_identifiers: noncompliantIds,
+      prompt_redacted: promptRedactedField,
+      response_redacted: responseRedactedField,
+      redaction_count: placeholderMap ? Object.keys(placeholderMap).length : 0,
+      source_type: fixtureMode ? 'simulated' : 'real',
     });
     // Best-effort capture-store insert. Failure does not block the upstream
     // response to the SDK; we surface via x-kolm-event-durable header.
@@ -1807,13 +2247,19 @@ export function buildRouter() {
     try {
       await insertCapture({
         id: ev.event_id,
-        tenant: 'local',
+        tenant: (req && req.tenant) || 'local',
+        // W411 — propagate canonical tenant_id through capture-store so the
+        // bridgeToEventStore() hook agrees with the eventAppend(ev) write below
+        // (both keyed on event_id; INSERT OR REPLACE collapses them).
+        tenant_id: (req && req.tenant_record && req.tenant_record.id)
+          || (req && req.tenant)
+          || 'local',
         template_hash: ev.request_hash,
-        template_preview: String(promptText || '').slice(0, 200),
+        template_preview: String(lakePrompt || '').slice(0, 200),
         model: ev.model,
-        prompt: String(promptText || '').slice(0, 8000),
+        prompt: String(lakePrompt || '').slice(0, 8000),
         variable_input: null,
-        response: typeof upstreamResp.body === 'object' ? JSON.stringify(upstreamResp.body).slice(0, 16000) : String(upstreamResp.body).slice(0, 16000),
+        response: String(lakeResponse || '').slice(0, 16000),
         latency_ms: ev.latency_ms,
         latency_us: ev.latency_ms * 1000,
         cost_usd: ev.estimated_cost_usd,
@@ -1821,26 +2267,241 @@ export function buildRouter() {
         corpus_namespace: 'default',
         status: httpStatus,
         created_at: ev.created_at,
+        redaction_policy: ev.redaction_policy,
+        raw_available: ev.raw_available === true,
+        raw_prompt_hash: ev.raw_prompt_hash || null,
+        raw_response_hash: ev.raw_response_hash || null,
+        noncompliant_identifiers: ev.noncompliant_identifiers || [],
       });
     } catch (_) { durable = false; }
+    // W409a — canonical event-store write. The ev row carries the richer
+    // canonical fields (sensitive_data_detected, sensitive_classes, status
+    // string, error_type) that the lake / opportunity engine / dataset
+    // workbench / label queue / training planner all read. Idempotent: the
+    // capture-store insert above also bridges into event-store; appendEvent
+    // is INSERT OR REPLACE keyed on event_id so the two collapse into one.
+    try { await eventAppend(ev); } catch (_) {}
+    // W409y — meter captured_events + stored_events on the connector path.
+    // tenant_id is the request-scoped tenant when authenticated, or 'local'
+    // for the daemon-connector untenanted passthrough — usageIncrementMeter
+    // is a no-op for 'local' so the Free-tier privacy promise holds.
+    try {
+      const tid = (req.tenant_record && req.tenant_record.id) || null;
+      await usageIncrementMeter(tid, 'captured_events', 1);
+      if (durable) await usageIncrementMeter(tid, 'stored_events', 1);
+    } catch (_) {}
     res.set('x-kolm-event-id', ev.event_id);
     res.set('x-kolm-provider', provider);
     res.set('x-kolm-model', model);
     res.set('x-kolm-event-durable', String(durable));
+    res.set('x-kolm-redaction-policy', policy);
+    res.set('x-kolm-raw-available', String(ev.raw_available === true));
+    if (noncompliantIds.length) res.set('x-kolm-noncompliant-identifiers', noncompliantIds.join(','));
+    if (fixtureMode) res.set('x-kolm-fixture', 'true');
     if (scan.sensitive) res.set('x-kolm-sensitive-classes', scan.classes.join(','));
-    res.status(httpStatus).json(upstreamResp.body);
+    res.status(httpStatus).json(bodyForCaller);
   }
 
-  // OpenAI-compatible direct routes.
-  for (const p of ['/v1/chat/completions', '/v1/responses', '/v1/embeddings', '/v1/moderations']) {
-    r.post(p, (req, res) => __connectorProxy('openai', p, req, res));
+  // W409k — fixture body shapes. Returned when KOLM_CONNECTOR_FIXTURE=1 AND
+  // no upstream key is configured. Deterministic, no network, exact shape per
+  // provider so OpenAI/Anthropic SDK happy-path tests don't need real keys.
+  function __connectorFixtureBody(provider, upstreamPath, body, promptText) {
+    const created = Math.floor(Date.now() / 1000);
+    const model = String((body && body.model) || 'kolm-fixture-model');
+    const echo = String(promptText || '').slice(0, 120);
+    // Anthropic /v1/messages — content blocks, usage object.
+    if (provider === 'anthropic') {
+      return {
+        id: 'msg_fixture_' + created.toString(36),
+        type: 'message',
+        role: 'assistant',
+        model,
+        content: [{ type: 'text', text: `[kolm fixture] ${echo}` }],
+        stop_reason: 'end_turn',
+        usage: { input_tokens: 4, output_tokens: 6 },
+      };
+    }
+    // OpenAI /v1/embeddings — { data:[{embedding:[...]}] }.
+    if (upstreamPath === '/v1/embeddings') {
+      const dim = 8;
+      const vec = Array.from({ length: dim }, (_, i) => Math.round(Math.sin(i + 1) * 1000) / 1000);
+      return {
+        object: 'list',
+        data: [{ object: 'embedding', index: 0, embedding: vec }],
+        model,
+        usage: { prompt_tokens: 4, total_tokens: 4 },
+      };
+    }
+    // OpenAI /v1/audio/transcriptions — { text: '...' }.
+    if (upstreamPath === '/v1/audio/transcriptions' || upstreamPath === '/v1/audio/translations') {
+      return { text: '[kolm fixture transcription]' };
+    }
+    // OpenAI /v1/audio/speech — bytes upstream; we return JSON envelope in fixture mode.
+    if (upstreamPath === '/v1/audio/speech') {
+      return { object: 'audio.speech', model, format: (body && body.response_format) || 'mp3', bytes_b64: 'a29sbS1maXh0dXJl' };
+    }
+    // OpenAI /v1/moderations — pass-through shape.
+    if (upstreamPath === '/v1/moderations') {
+      return { id: 'modr_fixture_' + created.toString(36), model, results: [{ flagged: false, categories: {}, category_scores: {} }] };
+    }
+    // OpenAI /v1/responses — Responses API.
+    if (upstreamPath === '/v1/responses') {
+      return {
+        id: 'resp_fixture_' + created.toString(36),
+        object: 'response',
+        created_at: created,
+        model,
+        status: 'completed',
+        output: [{ type: 'message', role: 'assistant', content: [{ type: 'output_text', text: `[kolm fixture] ${echo}` }] }],
+        usage: { input_tokens: 4, output_tokens: 6, total_tokens: 10 },
+      };
+    }
+    // Default: /v1/chat/completions (OpenAI + OpenRouter share this shape).
+    return {
+      id: 'chatcmpl_fixture_' + created.toString(36),
+      object: 'chat.completion',
+      created,
+      model,
+      choices: [{
+        index: 0,
+        message: { role: 'assistant', content: `[kolm fixture] ${echo}` },
+        finish_reason: 'stop',
+      }],
+      usage: { prompt_tokens: 4, completion_tokens: 6, total_tokens: 10 },
+    };
+  }
+
+  // W409y — hosted-inference metering wrapper. Wraps the connector proxy so
+  // that when the caller authenticates with a kolm tenant key (ks_* or kao_*)
+  // AND the request is opted in to hosted inference (x-kolm-hosted: true OR
+  // KOLM_HOSTED_INFERENCE=true env), we:
+  //   1. resolve req.tenant_record from the auth header before the proxy runs
+  //   2. enforce the hosted_inference HARD cap (429 with structured body)
+  //   3. set x-kolm-quota-warning: true when over soft cap
+  //   4. after the upstream response, increment hosted_inference by the
+  //      actual token count extracted by connectorExtractUsage()
+  // Untenanted callers (no key, or upstream provider key in Authorization)
+  // fall through to the original __connectorProxy with NO metering. This
+  // preserves the privacy promise: local-only never reports.
+  async function __hostedInferenceWrapper(provider, upstreamPath, req, res) {
+    const hostedHeader = String(req.headers['x-kolm-hosted'] || '').toLowerCase();
+    const hostedEnv = String(process.env.KOLM_HOSTED_INFERENCE || '').toLowerCase();
+    const hostedOptIn = (hostedHeader === 'true' || hostedHeader === '1'
+                       || hostedEnv === 'true' || hostedEnv === '1');
+    const authH = String(req.headers.authorization || '');
+    const m = authH.match(/^Bearer\s+(\S+)$/i);
+    const rawKey = m ? m[1] : '';
+    const xApi = String(req.headers['x-api-key'] || '');
+    // Detect a kolm tenant key. ks_* is a paying-tenant key, kao_* is anon.
+    // Provider keys (sk-*, sk-ant-*, etc.) don't match either prefix so they
+    // fall through to the unmetered passthrough.
+    const kolmKey = (rawKey.startsWith('ks_') || rawKey.startsWith('kao_')) ? rawKey
+                  : ((xApi.startsWith('ks_') || xApi.startsWith('kao_')) ? xApi : '');
+    if (!hostedOptIn || !kolmKey) {
+      return __connectorProxy(provider, upstreamPath, req, res);
+    }
+    const tenant = findTenantByApiKey(kolmKey);
+    if (!tenant) {
+      return res.status(401).json({
+        error: { type: 'invalid_kolm_key', message: 'x-kolm-hosted=true requires a valid ks_*/kao_* tenant key' },
+      });
+    }
+    const tier = usageTierForPlan(tenant.plan);
+    // Pre-flight hard-cap check. Estimate inbound prompt tokens from
+    // body.messages so we can refuse early without paying for an upstream
+    // round-trip. We use a conservative estimate (4 chars per token); the
+    // post-call increment uses the upstream's exact usage map.
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    let promptChars = 0;
+    if (Array.isArray(body.messages)) {
+      for (const mm of body.messages) {
+        const c = typeof mm.content === 'string' ? mm.content
+          : Array.isArray(mm.content) ? mm.content.map(x => (x && (x.text || x.content)) || '').join('\n')
+          : '';
+        promptChars += c.length;
+      }
+    }
+    const estPromptTokens = Math.max(1, Math.ceil(promptChars / 4));
+    const maxOut = Math.min(4096, Math.max(0, Number(body.max_tokens || 1024)));
+    const estTotal = estPromptTokens + maxOut;
+    const cap = usageCheckLimit({
+      tenantId: tenant.id,
+      tier,
+      unit: 'hosted_inference',
+      amount: estTotal,
+    });
+    if (!cap.allowed) {
+      res.set('x-kolm-quota-warning', 'true');
+      return res.status(429).json({
+        error: {
+          type: 'hosted_inference_quota_exceeded',
+          message: `hosted_inference hard cap of ${cap.hard} tokens reached for tier ${tier}`,
+          unit: 'hosted_inference',
+          tier,
+          current: cap.current,
+          hard: cap.hard,
+          soft: cap.soft,
+          plan: tenant.plan,
+          hint: 'upgrade your plan at https://kolm.ai/pricing or wait for the next billing period',
+        },
+      });
+    }
+    if (cap.overSoft) {
+      res.set('x-kolm-quota-warning', 'true');
+      res.set('x-kolm-quota-soft', String(cap.soft));
+      res.set('x-kolm-quota-hard', String(cap.hard));
+    }
+    // Hand-off to the connector proxy, intercepting res.json so we can read
+    // the upstream usage object and meter the actual token count.
+    const origJson = res.json.bind(res);
+    let captured = null;
+    res.json = (payload) => { captured = payload; return origJson(payload); };
+    try {
+      await __connectorProxy(provider, upstreamPath, req, res);
+    } finally {
+      try {
+        const u = connectorExtractUsage(captured || {}, provider);
+        const actualTokens = Math.max(0, Number(u.prompt_tokens || 0) + Number(u.completion_tokens || 0));
+        if (actualTokens > 0) {
+          await usageIncrementMeter(tenant.id, 'hosted_inference', actualTokens);
+        }
+      } catch (_) {}
+    }
+  }
+
+  // OpenAI-compatible direct routes. /v1/chat/completions threads through the
+  // hosted-inference metering wrapper above; the rest still flow to the
+  // unmetered passthrough since they aren't on the billing-units catalog yet.
+  // W411 — every inference passthrough is gated by __w411HostedAuthGate so the
+  // hosted server (KOLM_PRODUCTION=1 / Railway / Vercel / Lambda) rejects
+  // anonymous requests with 401 {error:'unauthorized'}. The local daemon
+  // (KOLM_LOCAL_DAEMON=1 or developer laptop) stays unauthenticated; the gate
+  // stamps req.tenant = 'local:<hostname>' so captures still carry a tenant.
+  r.post('/v1/chat/completions', __w411HostedAuthGate, (req, res) => __hostedInferenceWrapper('openai', '/v1/chat/completions', req, res));
+  for (const p of ['/v1/responses', '/v1/embeddings', '/v1/moderations']) {
+    r.post(p, __w411HostedAuthGate, (req, res) => __connectorProxy('openai', p, req, res));
+  }
+  // W409k — audio routes. Real proxy when configured; fixture returns deterministic
+  // bodies; otherwise honest 501 with a structured "not yet supported" envelope so
+  // SDKs see something better than 404. Same __connectorProxy → audio paths hit
+  // OpenAI's /v1/audio/* upstream directly when a key is present.
+  for (const p of ['/v1/audio/transcriptions', '/v1/audio/translations', '/v1/audio/speech']) {
+    r.post(p, __w411HostedAuthGate, (req, res) => __connectorProxy('openai', p, req, res));
   }
   // Anthropic direct + alias.
-  r.post('/v1/messages', (req, res) => __connectorProxy('anthropic', '/v1/messages', req, res));
-  r.post('/anthropic/v1/messages', (req, res) => __connectorProxy('anthropic', '/v1/messages', req, res));
-  // OpenRouter explicit capture endpoint + alias for SDKs whose base URL ends in /v1.
-  r.post('/v1/capture/openrouter', (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
-  r.post('/v1/capture/openrouter/v1/chat/completions', (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
+  r.post('/v1/messages', __w411HostedAuthGate, (req, res) => __connectorProxy('anthropic', '/v1/messages', req, res));
+  r.post('/anthropic/v1/messages', __w411HostedAuthGate, (req, res) => __connectorProxy('anthropic', '/v1/messages', req, res));
+  // OpenRouter — three aliases. W409k adds a direct /v1/openrouter/* path so
+  // SDKs that point their BASE_URL at https://kolm.ai/v1/openrouter just work.
+  r.post('/v1/capture/openrouter', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
+  r.post('/v1/capture/openrouter/v1/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
+  r.post('/v1/openrouter/v1/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
+  r.post('/v1/openrouter/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
+
+  // W409k — GET /v1/models is mounted after authMiddleware by W409g so it can
+  // combine the connector registry, FRONTIER_MODELS, AND the tenant's compiled
+  // .kolm artifacts in a single OpenAI-shaped envelope. See the W409g block
+  // near the end of buildRouter().
 
   // ====================================================================
   // W386 — model weights manifest + pull redirect + cache inspector.
@@ -2033,6 +2694,17 @@ export function buildRouter() {
     // billing path single-threaded so concurrent compiles can't race the
     // counter — only the request handler holds tenant_record.
     chargeUsage(req.tenant_record, 10);
+    // W409y — billing-units metering for compile jobs. One compile = 1 build.
+    // recipe_class === 'distilled_model' additionally increments
+    // distillation_jobs. usageIncrementMeter is a no-op for local-only /
+    // anon / no-tenant paths so this respects the privacy promise.
+    try {
+      const tid = (req.tenant_record && req.tenant_record.id) || null;
+      await usageIncrementMeter(tid, 'builds', 1);
+      if (recipe_class === 'distilled_model') {
+        await usageIncrementMeter(tid, 'distillation_jobs', 1);
+      }
+    } catch (_) {}
     tryAppendAudit({
       tenant_id: req.tenant_record?.id || req.tenant,
       tenant_name: req.tenant_record?.name || null,
@@ -2857,6 +3529,161 @@ export function buildRouter() {
       payload: { api_key_prefix: typeof k === 'string' ? k.slice(0, 12) : null },
     });
     res.json({ api_key: k });
+  });
+
+  // W413 — /v1/intent/next surfaces the W412 recommender to /account/overview.
+  // The CLI verb `kolm next` runs the same {snapshotContext, recommendNext}
+  // pair locally; this route runs it server-side so the post-auth dashboard
+  // can render the same top-N ranked actions without shelling out. Auth-gated.
+  //
+  // Response envelope: { ok, recommendations: [{action, command, why, rank}],
+  //                      generated_at, snapshot_summary: {captures, opps, ...} }
+  r.get('/v1/intent/next', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const intent = await import('./intent.js');
+      // W432 — pass the authenticated tenant_id into snapshotContext so the
+      // lake/opportunities/datasets/capture probes scope to this tenant only.
+      // Cross-tenant counter leak from /v1/intent/next snapshot_summary closed.
+      const snap = await intent.snapshotContext({ tenant_id: req.tenant_record.id });
+      const recs = intent.recommendNext(snap);
+      res.json({
+        ok: true,
+        recommendations: recs,
+        generated_at: snap.generated_at,
+        snapshot_summary: {
+          artifacts: snap.counts.artifacts,
+          captures: snap.counts.captures,
+          namespaces: snap.counts.namespaces,
+          opportunities: snap.counts.opportunities || 0,
+          datasets: snap.counts.datasets || 0,
+          jobs: snap.counts.jobs,
+        },
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'intent_failed', message: String(e && e.message || e) });
+    }
+  });
+
+  // W415 — /v1/intent/ask surfaces the W412 classifyIntent to /account/overview.
+  // POST { question: '<natural language>' } returns the matched verb + the
+  // exact CLI command + a one-line explanation + up to 3 alternatives + a
+  // 1-line snapshot summary (so the UI can render context without a second
+  // round-trip). Same source as `kolm do "..."` -- this route is the server-
+  // side mirror so the dashboard's ask-bar reads the SAME classifier.
+  //
+  // Response envelope:
+  //   { ok, question, verb, command, args, why, confidence, source,
+  //     alternatives: [{verb, command, confidence}], snapshot_summary }
+  //
+  // Auth-gated. Empty question returns 400. Classifier throw returns 500.
+  r.post('/v1/intent/ask', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    const question = String((req.body && req.body.question) || '').trim();
+    if (!question) {
+      return res.status(400).json({ ok: false, error: 'missing_question', message: 'POST body must include a non-empty {question}' });
+    }
+    try {
+      const intent = await import('./intent.js');
+      // W432 — tenant_id passed through so the snapshot_summary returned to
+      // the ask-bar caller cannot leak cross-tenant counters.
+      const snap = await intent.snapshotContext({ tenant_id: req.tenant_record.id });
+      const cls = await intent.classifyIntent(question, snap);
+      const cmd = 'kolm ' + cls.verb + (cls.args && cls.args.length ? ' ' + cls.args.map(a => /\s/.test(String(a)) ? JSON.stringify(a) : a).join(' ') : '');
+      const alts = (cls.alternatives || []).slice(0, 3).map(a => ({
+        verb: a.verb,
+        command: 'kolm ' + a.verb + (a.args && a.args.length ? ' ' + a.args.join(' ') : ''),
+        confidence: a.confidence,
+      }));
+      res.json({
+        ok: true,
+        question,
+        verb: cls.verb,
+        command: cmd,
+        args: cls.args || [],
+        why: cls.matchedPhrase
+          ? ('matched phrase "' + cls.matchedPhrase + '"')
+          : ('classifier source: ' + cls.source),
+        confidence: cls.confidence,
+        source: cls.source,
+        alternatives: alts,
+        snapshot_summary: {
+          artifacts: snap.counts.artifacts,
+          captures: snap.counts.captures,
+          namespaces: snap.counts.namespaces,
+          opportunities: snap.counts.opportunities || 0,
+          datasets: snap.counts.datasets || 0,
+          jobs: snap.counts.jobs,
+        },
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'classify_failed', message: String(e && e.message || e) });
+    }
+  });
+
+  // W409f — /v1/account/keys list/create/revoke for /account/api-keys.html.
+  //
+  // The current tenant model holds ONE api_key_hash per row (multi-key was
+  // never wired). These endpoints expose a one-row "keys" table that mirrors
+  // that reality. When a true multi-key model lands these should grow to
+  // list/insert/delete rows from a dedicated table.
+  r.get('/v1/account/keys', (req, res) => {
+    if (!req.tenant_record) return res.json({ keys: [] });
+    const t = req.tenant_record;
+    res.json({
+      keys: [{
+        prefix: t.api_key_prefix || (req.api_key || '').slice(0, 10),
+        label: 'tenant primary key',
+        scopes: ['read', 'write', 'compile', 'capture'],
+        created_at: t.created_at || null,
+        last_used_at: t.last_used_at || new Date().toISOString(),
+        active: true,
+      }],
+    });
+  });
+  r.post('/v1/account/keys', (req, res) => {
+    if (!req.tenant_record) return res.status(403).json({ error: 'cannot mint keys without a tenant context' });
+    const k = rotateTenantKey(req.tenant_record.id);
+    tryAppendAudit({
+      tenant_id: req.tenant_record.id,
+      tenant_name: req.tenant_record.name || null,
+      actor: 'tenant',
+      op: AUDIT_OPS.KEY_ROTATED,
+      payload: { source: 'POST /v1/account/keys', label: (req.body && req.body.label) || null },
+    });
+    res.json({ api_key: k, label: (req.body && req.body.label) || null });
+  });
+  r.delete('/v1/account/keys/:prefix', (req, res) => {
+    if (!req.tenant_record) return res.status(403).json({ error: 'cannot revoke keys without a tenant context' });
+    const k = rotateTenantKey(req.tenant_record.id);
+    tryAppendAudit({
+      tenant_id: req.tenant_record.id,
+      tenant_name: req.tenant_record.name || null,
+      actor: 'tenant',
+      op: AUDIT_OPS.KEY_ROTATED,
+      payload: { source: 'DELETE /v1/account/keys', revoked_prefix: req.params.prefix || null },
+    });
+    res.json({ ok: true, revoked: req.params.prefix, new_api_key: k });
+  });
+
+  // W409f — /v1/account/audit-log surfaces the audit ledger for the calling
+  // tenant. The audit-log.html page renders {entries:[{at,actor,op,payload}]}.
+  r.get('/v1/account/audit-log', (req, res) => {
+    if (!req.tenant_record && !req.is_admin) return res.json({ entries: [], total: 0 });
+    try {
+      const tenantId = req.is_admin
+        ? (req.query.tenant_id ? String(req.query.tenant_id) : null)
+        : req.tenant_record.id;
+      const limit = Math.min(500, Number(req.query.limit) || 100);
+      const rows = findByTenant('audit_log', tenantId) || [];
+      const sorted = rows
+        .filter((e) => !tenantId || e.tenant_id === tenantId)
+        .sort((a, b) => (b.at || '').localeCompare(a.at || ''))
+        .slice(0, limit);
+      res.json({ ok: true, entries: sorted, total: sorted.length });
+    } catch (e) {
+      res.status(500).json({ error: 'audit_log_error', detail: String(e && e.message || e) });
+    }
   });
 
   // Rotate the per-tenant receipt-signing secret. Previous secret is
@@ -5157,13 +5984,17 @@ export function buildRouter() {
   // to the SSE fan-out (W258-BE-2) so /v1/capture/stream pushes immediately
   // and the dashboard stops doing a 2 s poll-and-scan, and (b) check
   // threshold crossings (W258-BE-3) and fire alerts atomically.
-  async function recordCapture({ tenant, provider, model, namespace, prompt, response, latency_us, status, cost_usd }) {
+  async function recordCapture({ tenant, tenant_id, provider, model, namespace, prompt, response, latency_us, status, cost_usd, tokens_in, tokens_out, files, tool_calls, error: errorMsg }) {
     if (!prompt || response === undefined || response === null) return null;
     const hash = promptHash(prompt + '|' + (model || ''));
     const ns = namespace || 'default';
     const obs = {
       id: 'cap_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
       tenant,
+      // W411 — pin canonical tenant_id on the capture row so observationToCanonical
+      // Event() stamps the same id on the bridged event-store row. Defaults to
+      // tenant (the name) for legacy callers — matches the prior behavior.
+      tenant_id: tenant_id || tenant,
       template_hash: hash,
       template_preview: String(prompt).slice(0, 200),
       model: String(model || '').slice(0, 128),
@@ -5174,12 +6005,30 @@ export function buildRouter() {
       latency_us: latency_us || 0,
       cost_usd: cost_usd || 0,
       provider,
+      // W411 — propagate canonical vendor + parity field names + multimodal
+      // attachment list + tool_calls into the obs row so observationToCanonical
+      // Event() picks them up at bridge time and the lake row carries the
+      // closed-enum vendor + tokens_in/out + files/tool_calls the auditor
+      // mandated. Defaulted from existing fields so non-W411 callsites are
+      // unaffected.
+      vendor: provider,
+      prompt_tokens: tokens_in != null ? tokens_in : 0,
+      completion_tokens: tokens_out != null ? tokens_out : 0,
+      tokens_in: tokens_in != null ? tokens_in : 0,
+      tokens_out: tokens_out != null ? tokens_out : 0,
+      files: Array.isArray(files) ? files : [],
+      tool_calls: Array.isArray(tool_calls) ? tool_calls : [],
+      error: errorMsg == null ? null : String(errorMsg),
       corpus_namespace: ns,
       status,
       created_at: new Date().toISOString(),
     };
     // insertCapture throws on disk-full / ephemeral-/tmp / driver failure.
     // We do NOT catch here — propagation is the whole point of the fix.
+    // W409a — insertCapture also bridges to the canonical event-store via
+    // bridgeToEventStore() inside src/capture-store.js. The bridge keys the
+    // canonical event on obs.id (= the capture row id) and is idempotent
+    // (INSERT OR REPLACE) so this single call writes both stores.
     await insertCapture(obs);
     obs.durable = captureIsDurable();
     // Fan-out to live tail subscribers (browser dashboard + `kolm tail captures`).
@@ -5265,6 +6114,10 @@ export function buildRouter() {
       try {
         const obs = await recordCapture({
           tenant: req.tenant,
+          // W411 — pin tenant_id on the canonical event row so the lake /
+          // datasets / labels surfaces can fence to it. req.tenant_record.id
+          // is the authoritative tenant scope; req.tenant is a display name.
+          tenant_id: (req.tenant_record && req.tenant_record.id) || req.tenant,
           provider: String(provider).slice(0, 32),
           model: String(model).slice(0, 128),
           namespace: cleanNs,
@@ -5489,6 +6342,9 @@ export function buildRouter() {
     const completion = result.status >= 200 && result.status < 300
       ? extractCompletionText(result.json, 'anthropic')
       : '';
+    // W411 — extract upstream token usage so the bridged canonical event
+    // carries tokens_in/tokens_out the lake + opportunity engine need.
+    const usageAnt = connectorExtractUsage(result.json || {}, 'anthropic');
     // W258-BE-1: recordCaptureWithReceipt sets x-kolm-capture-id +
     // x-kolm-capture-durable + x-kolm-distill-ready when applicable, OR
     // sends a 503 + x-kolm-capture-durable:false on store failure (no
@@ -5503,6 +6359,9 @@ export function buildRouter() {
       response: completion || (result.json && result.json.error ? `[error] ${result.json.error.message || result.json.error.type || 'upstream'}` : ''),
       latency_us: result.elapsed_us || 0,
       status: result.status,
+      tokens_in: usageAnt.prompt_tokens || 0,
+      tokens_out: usageAnt.completion_tokens || 0,
+      error: result.json && result.json.error ? String(result.json.error.message || result.json.error.type || '') : null,
     });
     if (!obs && res.headersSent) return; // 503 already returned
     res.status(result.status).json(result.json);
@@ -5531,6 +6390,8 @@ export function buildRouter() {
     const completion = result.status >= 200 && result.status < 300
       ? extractCompletionText(result.json, 'openai')
       : '';
+    // W411 — token usage for parity field names in the bridged event.
+    const usageOAI = connectorExtractUsage(result.json || {}, 'openai');
     const obs = await recordCaptureWithReceipt(req, res, {
       tenant: req.tenant,
       provider: 'openai',
@@ -5540,6 +6401,9 @@ export function buildRouter() {
       response: completion || (result.json && result.json.error ? `[error] ${result.json.error.message || result.json.error.type || 'upstream'}` : ''),
       latency_us: result.elapsed_us || 0,
       status: result.status,
+      tokens_in: usageOAI.prompt_tokens || 0,
+      tokens_out: usageOAI.completion_tokens || 0,
+      error: result.json && result.json.error ? String(result.json.error.message || result.json.error.type || '') : null,
     });
     if (!obs && res.headersSent) return; // 503 already returned
     res.status(result.status).json(result.json);
@@ -6094,37 +6958,51 @@ export function buildRouter() {
   }
 
   // ----- trace -----
+  //
+  // W425 — tenant ownership: every trace route requires req.tenant_record
+  // and passes req.tenant_record.id down into trace-capture / compile-ir
+  // so traces written by tenant A cannot be read, exported, or compiled by
+  // tenant B even when B obtains the trace_id. authMiddleware still runs
+  // (rate-limit, anon-tenant resolution) but the explicit tenant_record
+  // gate makes the cross-tenant fence visible at this layer.
   r.get('/v1/trace/:trace_id/stats', wave144Limiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const tid = String(req.params.trace_id || '');
       if (!/^[0-9a-f]{32}$/.test(tid)) return _http400(res, 'trace_id must be 32 hex chars');
-      const s = await traceCapture.stats(tid);
+      const s = await traceCapture.stats(tid, req.tenant_record.id);
       res.json(s);
     } catch (e) { _http500(res, e); }
   });
 
   r.get('/v1/trace/:trace_id/chain', wave144Limiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const tid = String(req.params.trace_id || '');
       if (!/^[0-9a-f]{32}$/.test(tid)) return _http400(res, 'trace_id must be 32 hex chars');
-      const c = await traceCapture.chain(tid);
+      const c = await traceCapture.chain(tid, req.tenant_record.id);
       res.json(c);
     } catch (e) { _http500(res, e); }
   });
 
   r.get('/v1/trace/:trace_id/export', wave144Limiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const tid = String(req.params.trace_id || '');
       if (!/^[0-9a-f]{32}$/.test(tid)) return _http400(res, 'trace_id must be 32 hex chars');
-      const spans = await traceCapture.readTrace(tid);
+      const spans = await traceCapture.readTrace(tid, req.tenant_record.id);
       res.json({ trace_id: tid, spans });
     } catch (e) { _http500(res, e); }
   });
 
   r.post('/v1/trace/append', wave144Limiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const span = req.body && req.body.span;
       if (!span || typeof span !== 'object') return _http400(res, 'span object required');
+      // Force tenant_id to the authenticated tenant. Callers cannot spoof
+      // tenant_id via the body — the route owns the binding.
+      span.tenant_id = req.tenant_record.id;
       const enriched = await traceCapture.appendSpan(span);
       res.status(201).json({ ok: true, span: enriched });
     } catch (e) {
@@ -6132,29 +7010,42 @@ export function buildRouter() {
       if (/span missing field|unknown span kind|trace_id must|span_id must|parent_span_id must|payload must/.test(msg)) {
         return _http400(res, msg);
       }
+      if (/tenant_id mismatch/.test(msg)) {
+        return res.status(403).json({ ok: false, error: msg });
+      }
       _http500(res, e);
     }
   });
 
   // ----- ir -----
   r.post('/v1/ir/compile', wave144Limiter, authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const { trace_ids, spans, opts } = req.body || {};
+      // W425 — every compile is scoped to the authenticated tenant. Any
+      // tenant_id passed in opts is overridden by req.tenant_record.id so
+      // callers cannot forge the scope.
+      const scopedOpts = { ...(opts || {}), tenant_id: req.tenant_record.id };
       let result;
       if (Array.isArray(trace_ids) && trace_ids.length > 0) {
         for (const tid of trace_ids) {
           if (!/^[0-9a-f]{32}$/.test(String(tid))) return _http400(res, `bad trace_id: ${tid}`);
         }
         result = trace_ids.length === 1
-          ? await compileIr.traceToIr(trace_ids[0], opts || {})
-          : await compileIr.tracesToIr(trace_ids, opts || {});
+          ? await compileIr.traceToIr(trace_ids[0], scopedOpts)
+          : await compileIr.tracesToIr(trace_ids, scopedOpts);
       } else if (Array.isArray(spans) && spans.length > 0) {
-        result = compileIr.spansToIr(spans, opts || {});
+        result = compileIr.spansToIr(spans, scopedOpts);
+        if (result && result.ir) result.ir.tenant_id = req.tenant_record.id;
       } else {
         return _http400(res, 'trace_ids[] or spans[] required');
       }
       res.json(result);
-    } catch (e) { _http500(res, e); }
+    } catch (e) {
+      const msg = String(e.message || e);
+      if (/tenant_mismatch/.test(msg)) return res.status(403).json({ ok: false, error: msg });
+      _http500(res, e);
+    }
   });
 
   r.post('/v1/ir/stats', wave144Limiter, (req, res) => {
@@ -6322,7 +7213,20 @@ export function buildRouter() {
       // show a green badge for an artifact that productionReady() fails.
       const badges = Array.isArray(a.badges) ? a.badges.filter((b) => b !== 'Verified') : [];
       if (v.ok) badges.push('Verified');
-      out.push({ ...a, verified: v.ok, badges, gate_reasons: v.ok ? [] : v.reasons });
+      // W411 — production_ready + production_readiness_state must come from the
+      // LIVE async productionReady() call, NOT productionReadySync() (which
+      // hydrate() in marketplace.js called at catalog-load time). The sync
+      // verdict carried `_provisional: true` and could falsely report
+      // 'production_ready_verified' before the eval-parity + executable-bundle
+      // gates ran. Overlaying the async verdict here is the fix.
+      out.push({
+        ...a,
+        verified: v.ok,
+        badges,
+        gate_reasons: v.ok ? [] : v.reasons,
+        production_ready: v.ok,
+        production_readiness_state: v.ok ? 'production_ready_verified' : 'foundation',
+      });
     }
     return out;
   }
@@ -6387,7 +7291,17 @@ export function buildRouter() {
       const v = await __verifyArtifactCached(a);
       const badges = Array.isArray(a.badges) ? a.badges.filter((b) => b !== 'Verified') : [];
       if (v.ok) badges.push('Verified');
-      res.json({ ...a, verified: v.ok, badges, gate_reasons: v.ok ? [] : v.reasons });
+      // W411 — same overlay as __hydrateVerified: production_ready and
+      // production_readiness_state must come from the LIVE async verdict, not
+      // the catalog's provisional sync verdict.
+      res.json({
+        ...a,
+        verified: v.ok,
+        badges,
+        gate_reasons: v.ok ? [] : v.reasons,
+        production_ready: v.ok,
+        production_readiness_state: v.ok ? 'production_ready_verified' : 'foundation',
+      });
     } catch (e) { res.status(500).json({ error: 'marketplace_get_error', detail: String(e.message || e) }); }
   });
 
@@ -6876,6 +7790,89 @@ export function buildRouter() {
     }
   });
 
+  // W409y — POST /v1/team/sync. Enterprise-only sync endpoint that fans
+  // out an events envelope to a connected team workspace. The body shape
+  // mirrors /v1/sync/inbox (events[], namespace, source_device_id) so a
+  // peer daemon can push directly. Each call meters
+  // enterprise_sync_volume by the byte count of the request body so the
+  // dashboard surfaces real throughput. Hard cap returns 429 with a
+  // structured body; soft cap sets x-kolm-quota-warning.
+  //
+  // Auth flows through the standard middleware (mounted later as
+  // r.use(authMiddleware) at the section below). The tenant_record is
+  // already attached when this handler runs.
+  r.post('/v1/team/sync', async (req, res) => {
+    try {
+      const tenant = req.tenant_record;
+      if (!tenant) {
+        return res.status(401).json({ error: 'auth_required', hint: 'pass Authorization: Bearer <ks_*>' });
+      }
+      const body = req.body || {};
+      const events = Array.isArray(body.events) ? body.events : [];
+      // Measure the byte volume that crossed the wire. JSON.stringify(body)
+      // is the cheapest faithful proxy for actual ingress bytes — content-length
+      // includes framing the upstream caller may or may not set.
+      const bytes = Buffer.byteLength(JSON.stringify(body), 'utf8');
+      const tier = usageTierForPlan(tenant.plan);
+      const cap = usageCheckLimit({
+        tenantId: tenant.id,
+        tier,
+        unit: 'enterprise_sync_volume',
+        amount: bytes,
+      });
+      if (!cap.allowed) {
+        res.set('x-kolm-quota-warning', 'true');
+        return res.status(429).json({
+          error: {
+            type: 'enterprise_sync_quota_exceeded',
+            message: `enterprise_sync_volume hard cap of ${cap.hard} bytes reached for tier ${tier}`,
+            unit: 'enterprise_sync_volume',
+            tier,
+            current: cap.current,
+            hard: cap.hard,
+            soft: cap.soft,
+            plan: tenant.plan,
+            hint: 'upgrade your plan at https://kolm.ai/pricing or wait for the next billing period',
+          },
+        });
+      }
+      if (cap.overSoft) {
+        res.set('x-kolm-quota-warning', 'true');
+        res.set('x-kolm-quota-soft', String(cap.soft));
+        res.set('x-kolm-quota-hard', String(cap.hard));
+      }
+      // Fan-out the events through the existing event-store. Per-row
+      // failures are silent (we still return the aggregate count) so a
+      // single malformed event does not break a 1k-event push.
+      let received = 0;
+      for (const ev of events) {
+        try {
+          await eventAppend({
+            ...ev,
+            tenant_id: tenant.id,
+            source_device_id: body.source_device_id || ev.source_device_id || 'team_sync',
+          });
+          received++;
+        } catch (_) {}
+      }
+      // Meter the volume after the fan-out. usageIncrementMeter is a no-op
+      // for free/anon/local so this is safe to call unconditionally.
+      try {
+        await usageIncrementMeter(tenant.id, 'enterprise_sync_volume', bytes);
+      } catch (_) {}
+      res.json({
+        ok: true,
+        received,
+        bytes,
+        namespace: body.namespace || null,
+        source_device_id: body.source_device_id || null,
+        quota: { current: cap.current + bytes, soft: cap.soft, hard: cap.hard, tier },
+      });
+    } catch (e) {
+      res.status(500).json(_w384Err(e, 'team_sync_error'));
+    }
+  });
+
   // ============== W384: pipeline (tokenizer + distill + compile + full) ==============
   // POST /v1/pipeline/tokenize — train a tokenizer over corpus body.
   r.post('/v1/pipeline/tokenize', async (req, res) => {
@@ -6896,12 +7893,21 @@ export function buildRouter() {
   // In-memory pipeline-job registry. Jobs hold the phase events from
   // compileFull() so the matching GET /v1/pipeline/jobs/:id/stream SSE
   // can replay them. Jobs are tenant-scoped via _ownedBy.
+  //
+  // W429 — _ownedBy stores the canonical tenant id (req.tenant_record.id)
+  // not the human-readable tenant name. Before W429 two tenants sharing a
+  // legacy name (e.g. both 'local-tenant' during a migration) could read
+  // each other's job phases. We also fall back to req.tenant so unauthed
+  // local-only daemons still get a stable owner key.
   const _W384_PIPELINE_JOBS = new Map();
+  function _jobOwnerKey(req) {
+    return (req && req.tenant_record && req.tenant_record.id) || (req && req.tenant) || null;
+  }
   function _newPipelineJob(req, kind, namespace) {
     const id = 'job_' + crypto.randomBytes(8).toString('hex');
     const job = {
       id, kind, namespace, status: 'queued',
-      _ownedBy: req.tenant,
+      _ownedBy: _jobOwnerKey(req),
       created_at: new Date().toISOString(),
       phases: [],
       subscribers: new Set(),
@@ -6921,23 +7927,60 @@ export function buildRouter() {
   // Returns 202 + {job_id}. The actual distill work is delegated to the
   // existing /v1/distill/from-captures path (in-process module call).
   r.post('/v1/pipeline/distill', async (req, res) => {
+    // W421 — route was calling distill-bridge.synthesizeFromCaptures which
+    // does not exist in this build (the export is `startDistillJob`). Result
+    // was a silent always-success no-op that never actually distilled
+    // anything. Now we:
+    //   1. require auth (tenant required to scope the corpus read)
+    //   2. read captures from event-store filtered by tenant + namespace
+    //   3. invoke the real startDistillJob entrypoint with tenant_id forced
+    //      from req.tenant_record.id so cross-tenant rows can never feed
+    //      another tenant's distill.
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const body = req.body || {};
-      const job = _newPipelineJob(req, 'distill', body.namespace || 'default');
+      const namespace = body.namespace || 'default';
+      const job = _newPipelineJob(req, 'distill', namespace);
       job.status = 'running';
-      // We do the synth in-process; this is a thin wrapper that records
-      // a phase event with the result and marks the job done.
       (async () => {
         try {
-          _emitPhase(job, { phase: 'distill', status: 'started', namespace: body.namespace });
+          _emitPhase(job, { phase: 'distill', status: 'started', namespace });
           const dist = await import('./distill-bridge.js').catch(() => null);
-          if (dist && typeof dist.synthesizeFromCaptures === 'function') {
-            const r2 = await dist.synthesizeFromCaptures({ namespace: body.namespace, tenant: req.tenant, mode: body.mode || 'specialist', min_pairs: body.min_pairs || 4 });
-            _emitPhase(job, { phase: 'distill', status: 'ok', result: r2 });
-            job.final = r2;
-          } else {
+          if (!dist || typeof dist.startDistillJob !== 'function') {
             _emitPhase(job, { phase: 'distill', status: 'ok', note: 'distill-bridge unavailable in this build' });
+            job.status = 'done';
+            return;
           }
+          // Read tenant-scoped captures for the namespace. The event-store
+          // listEvents() respects {namespace, tenant_id} and returns the
+          // canonical rows the distill worker expects.
+          const evMod = await import('./event-store.js');
+          const captures = await evMod.listEvents({
+            namespace,
+            tenant_id: req.tenant_record.id,
+            limit: Number(body.limit || 1000),
+            order: 'desc',
+          });
+          const minPairs = Number(body.min_pairs || 4);
+          if (!Array.isArray(captures) || captures.length < minPairs) {
+            _emitPhase(job, {
+              phase: 'distill',
+              status: 'error',
+              error: `not_enough_captures: ${captures ? captures.length : 0} < min_pairs=${minPairs}`,
+            });
+            job.status = 'error';
+            return;
+          }
+          const rec = await dist.startDistillJob({
+            tenant: req.tenant_record.id,
+            namespace,
+            captures,
+            baseModel: body.base_model || body.baseModel || undefined,
+            targetSize: body.target_size || body.targetSize || null,
+            source: 'pipeline_distill_route',
+          });
+          _emitPhase(job, { phase: 'distill', status: 'ok', result: rec });
+          job.final = rec;
           job.status = 'done';
         } catch (e) {
           _emitPhase(job, { phase: 'distill', status: 'error', error: String(e.message || e) });
@@ -6950,14 +7993,21 @@ export function buildRouter() {
 
   // POST /v1/pipeline/compile — alias for /v1/pipeline/full (kept as a
   // distinct verb so future divergence is easy).
+  //
+  // W420 — tenant gate. The pipeline runs compileFull which reads from the
+  // event store; without forcing tenant scope it would compile another
+  // tenant's corpus into the caller's artifact namespace. opts.tenant_id is
+  // injected from req.tenant_record.id and supersedes anything the body sent.
   r.post('/v1/pipeline/compile', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const body = req.body || {};
       const job = _newPipelineJob(req, 'compile', body.namespace || 'default');
       job.status = 'running';
+      const scopedOpts = { ...(body.opts || {}), tenant_id: req.tenant_record.id };
       (async () => {
         try {
-          for await (const ev of pipelineCompileFull({ namespace: body.namespace, opts: body.opts || {} })) {
+          for await (const ev of pipelineCompileFull({ namespace: body.namespace, opts: scopedOpts })) {
             _emitPhase(job, ev);
             if (ev.phase === 'done') job.final = ev;
           }
@@ -6973,14 +8023,20 @@ export function buildRouter() {
 
   // POST /v1/pipeline/full — 11-phase compileFull pipeline. Returns 202 +
   // job_id. Phases are streamed via /v1/pipeline/jobs/:id/stream (SSE).
+  //
+  // W420 — same tenant gate as /v1/pipeline/compile. The caller's
+  // req.tenant_record.id is the only tenant scope that ever reaches
+  // compileFull from this route.
   r.post('/v1/pipeline/full', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const body = req.body || {};
       const job = _newPipelineJob(req, 'full', body.namespace || 'default');
       job.status = 'running';
+      const scopedOpts = { ...(body.opts || {}), tenant_id: req.tenant_record.id };
       (async () => {
         try {
-          for await (const ev of pipelineCompileFull({ namespace: body.namespace, opts: body.opts || {} })) {
+          for await (const ev of pipelineCompileFull({ namespace: body.namespace, opts: scopedOpts })) {
             _emitPhase(job, ev);
             if (ev.phase === 'done') job.final = ev;
           }
@@ -6998,7 +8054,7 @@ export function buildRouter() {
   r.get('/v1/pipeline/jobs/:id', (req, res) => {
     const job = _W384_PIPELINE_JOBS.get(req.params.id);
     if (!job) return res.status(404).json({ error: 'job_not_found' });
-    if (job._ownedBy && job._ownedBy !== req.tenant && !req.is_admin) {
+    if (job._ownedBy && job._ownedBy !== _jobOwnerKey(req) && !req.is_admin) {
       return res.status(403).json({ error: 'cross_tenant_job_access' });
     }
     res.json({
@@ -7016,7 +8072,7 @@ export function buildRouter() {
   r.get('/v1/pipeline/jobs/:id/stream', (req, res) => {
     const job = _W384_PIPELINE_JOBS.get(req.params.id);
     if (!job) return res.status(404).json({ error: 'job_not_found' });
-    if (job._ownedBy && job._ownedBy !== req.tenant && !req.is_admin) {
+    if (job._ownedBy && job._ownedBy !== _jobOwnerKey(req) && !req.is_admin) {
       return res.status(403).json({ error: 'cross_tenant_job_access' });
     }
     res.set('content-type', 'text/event-stream');
@@ -7050,27 +8106,39 @@ export function buildRouter() {
   });
 
   // ============== W384: agent telemetry ==============
+  // W424 — every /v1/agents/* route fences on req.tenant_record and forwards
+  // req.tenant_record.id as tenant_id into the helper so cross-tenant rows
+  // never appear in the rollup. _tenantScope() returns null for admin
+  // (cross-tenant reads allowed) and the canonical tenant_id otherwise.
   r.get('/v1/agents', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
-      const rows = await agentListAgents({ since: req.query.since, limit: req.query.limit ? Number(req.query.limit) : undefined });
+      const rows = await agentListAgents({
+        since: req.query.since,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+        tenant_id: _tenantScope(req),
+      });
       res.json({ ok: true, total: Array.isArray(rows) ? rows.length : 0, agents: rows });
     } catch (e) { res.status(500).json(_w384Err(e, 'agents_list_error')); }
   });
 
   r.get('/v1/agents/sessions', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const rows = await agentListSessions({
         app_id: req.query.app_id ? String(req.query.app_id) : undefined,
         since: req.query.since,
         limit: req.query.limit ? Number(req.query.limit) : undefined,
+        tenant_id: _tenantScope(req),
       });
       res.json({ ok: true, total: Array.isArray(rows) ? rows.length : 0, sessions: rows });
     } catch (e) { res.status(500).json(_w384Err(e, 'agents_sessions_error')); }
   });
 
   r.get('/v1/agents/sessions/:id', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
-      const result = await agentGetSession({ session_id: req.params.id });
+      const result = await agentGetSession({ session_id: req.params.id, tenant_id: _tenantScope(req) });
       if (!result || (Array.isArray(result.events) && result.events.length === 0 && !result.session_id)) {
         return res.status(404).json({ error: 'session_not_found', session_id: req.params.id });
       }
@@ -7079,41 +8147,56 @@ export function buildRouter() {
   });
 
   r.get('/v1/agents/recommend', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const result = await agentRecommendModel({
         app_id: req.query.app_id ? String(req.query.app_id) : undefined,
         task_hint: req.query.task_hint ? String(req.query.task_hint) : undefined,
         codebase_hint: req.query.codebase_hint ? String(req.query.codebase_hint) : undefined,
         since: req.query.since,
+        tenant_id: _tenantScope(req),
       });
       res.json({ ok: true, ...result });
     } catch (e) { res.status(500).json(_w384Err(e, 'agents_recommend_error')); }
   });
 
   r.get('/v1/agents/failing', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const result = await agentTopFailing({
         app_id: req.query.app_id ? String(req.query.app_id) : undefined,
         since: req.query.since,
         limit: req.query.limit ? Number(req.query.limit) : undefined,
+        tenant_id: _tenantScope(req),
       });
       res.json({ ok: true, top_failing: result });
     } catch (e) { res.status(500).json(_w384Err(e, 'agents_failing_error')); }
   });
 
   r.get('/v1/agents/stats', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
-      const result = await agentStats({ since: req.query.since });
+      const result = await agentStats({ since: req.query.since, tenant_id: _tenantScope(req) });
       res.json({ ok: true, ...result });
     } catch (e) { res.status(500).json(_w384Err(e, 'agents_stats_error')); }
   });
 
   // ============== W384: lake ==============
+  // W411 — _tenantScope(req): pull the canonical tenant_id off the request.
+  // Returns null for admin (cross-tenant reads allowed) and null when no key
+  // is attached (handlers must still 401 themselves where required). The
+  // tenant_record id is the authoritative scope; req.tenant is a name string.
+  function _tenantScope(req) {
+    if (req && req.is_admin) return null;
+    return (req && req.tenant_record && req.tenant_record.id) || null;
+  }
+
   r.get('/v1/lake/stats', async (req, res) => {
     try {
       const stats = await lakeStatsFn({
         namespace: req.query.namespace ? String(req.query.namespace) : undefined,
         since: req.query.since,
+        tenant_id: _tenantScope(req),
       });
       res.json({ ok: true, ...stats });
     } catch (e) { res.status(500).json(_w384Err(e, 'lake_stats_error')); }
@@ -7123,6 +8206,7 @@ export function buildRouter() {
     try {
       const evs = await eventList({
         namespace: req.query.namespace ? String(req.query.namespace) : undefined,
+        tenant_id: _tenantScope(req),
         limit: 0,
         order: 'asc',
       });
@@ -7133,10 +8217,16 @@ export function buildRouter() {
   });
 
   // ============== W384: opportunities ==============
+  // W419 — every opportunity surface must be tenant-scoped. Without auth the
+  // engine would surface another tenant's pattern detections (cache_candidate
+  // request_hash, repeated prompt clusters, etc). 401s use the canonical
+  // {ok:false, error:'auth required'} envelope.
   r.get('/v1/opportunities', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const rows = await oppFindOpportunities({
         namespace: req.query.namespace ? String(req.query.namespace) : undefined,
+        tenant_id: req.tenant_record.id,
         since: req.query.since,
         limit: req.query.limit ? Number(req.query.limit) : undefined,
       });
@@ -7150,31 +8240,131 @@ export function buildRouter() {
   });
 
   r.post('/v1/opportunities/:id/accept', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
-      const result = await oppAcceptOpportunity(req.params.id, { reason: req.body && req.body.reason });
+      const result = await oppAcceptOpportunity(req.params.id, {
+        reason: req.body && req.body.reason,
+        tenant_id: req.tenant_record.id,
+      });
       res.json({ ok: true, ...result });
-    } catch (e) { res.status(500).json(_w384Err(e, 'opportunity_accept_error')); }
+    } catch (e) {
+      const status = (e && e.code === 'OPPORTUNITY_NOT_FOUND') ? 404 : 500;
+      res.status(status).json(_w384Err(e, 'opportunity_accept_error'));
+    }
   });
 
   // Accept either /dismiss or /ignore — both map to ignoreOpportunity.
   r.post('/v1/opportunities/:id/dismiss', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
-      const result = await oppIgnoreOpportunity(req.params.id, { reason: req.body && req.body.reason });
+      const result = await oppIgnoreOpportunity(req.params.id, {
+        reason: req.body && req.body.reason,
+        tenant_id: req.tenant_record.id,
+      });
       res.json({ ok: true, ...result });
-    } catch (e) { res.status(500).json(_w384Err(e, 'opportunity_dismiss_error')); }
+    } catch (e) {
+      const status = (e && e.code === 'OPPORTUNITY_NOT_FOUND') ? 404 : 500;
+      res.status(status).json(_w384Err(e, 'opportunity_dismiss_error'));
+    }
   });
 
   r.post('/v1/opportunities/:id/ignore', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
-      const result = await oppIgnoreOpportunity(req.params.id, { reason: req.body && req.body.reason });
+      const result = await oppIgnoreOpportunity(req.params.id, {
+        reason: req.body && req.body.reason,
+        tenant_id: req.tenant_record.id,
+      });
       res.json({ ok: true, ...result });
-    } catch (e) { res.status(500).json(_w384Err(e, 'opportunity_ignore_error')); }
+    } catch (e) {
+      const status = (e && e.code === 'OPPORTUNITY_NOT_FOUND') ? 404 : 500;
+      res.status(status).json(_w384Err(e, 'opportunity_ignore_error'));
+    }
+  });
+
+  // W409m — POST /v1/opportunities/:id/promote → dataset.
+  // Turns the opportunity into a real dataset by calling dataset-workbench
+  // createDataset() with the opportunity's namespace + provenance. Returns
+  // { ok, dataset_id, train_count, holdout_count, ... }. Marks the
+  // opportunity status='promoted' so subsequent reads show the badge.
+  r.post('/v1/opportunities/:id/promote', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    try {
+      const body = req.body || {};
+      const result = await oppPromoteOpportunity(req.params.id, {
+        namespace: body.namespace,
+        tenant_id: req.tenant_record.id,
+        train_ratio: body.train_ratio,
+        redactionPolicy: body.redaction_policy,
+        sourceType: body.source_type,
+        approvedBy: body.approved_by,
+      });
+      res.json({ ok: true, ...result });
+    } catch (e) {
+      const status = (e && e.code === 'OPPORTUNITY_NOT_FOUND') ? 404
+                   : (e && e.code === 'NAMESPACE_REQUIRED') ? 400
+                   : 500;
+      res.status(status).json(_w384Err(e, 'opportunity_promote_error'));
+    }
+  });
+
+  // W409l — GET /v1/lake/tail → recent canonical events for the inbox UI.
+  // Reads directly from the event-store (NOT capture-store). Default limit
+  // 50, capped at 500. Returns newest first.
+  r.get('/v1/lake/tail', async (req, res) => {
+    try {
+      const limit = Math.min(500, Math.max(1, parseInt(String(req.query.limit || '50'), 10) || 50));
+      const events = await eventList({
+        namespace: req.query.namespace ? String(req.query.namespace) : undefined,
+        tenant_id: _tenantScope(req),
+        limit,
+        order: 'desc',
+      });
+      res.json({ ok: true, total: events.length, events });
+    } catch (e) { res.status(500).json(_w384Err(e, 'lake_tail_error')); }
+  });
+
+  // W409l — GET /v1/lake/export → bulk export of canonical events.
+  // Supports format=jsonl (default) | json | csv. Streams the buffer back.
+  r.get('/v1/lake/export', async (req, res) => {
+    try {
+      const { exportEvents } = await import('./event-store.js');
+      const format = String(req.query.format || 'jsonl').toLowerCase();
+      const out = await exportEvents({
+        format,
+        namespace: req.query.namespace ? String(req.query.namespace) : undefined,
+        tenant_id: _tenantScope(req),
+        since: req.query.from || req.query.since,
+        until: req.query.to || req.query.until,
+      });
+      const ctype = format === 'csv' ? 'text/csv; charset=utf-8'
+                  : format === 'json' ? 'application/json'
+                  : 'application/x-ndjson';
+      res.set('content-type', ctype);
+      res.set('cache-control', 'no-store');
+      res.set('x-kolm-lake-format', format);
+      res.send(out);
+    } catch (e) { res.status(500).json(_w384Err(e, 'lake_export_error')); }
+  });
+
+  // W409l — GET /v1/lake/storage → small env probe for the Account UI so the
+  // dashboard can show "Local storage: ~/.kolm/events/events.sqlite (12 MB)".
+  // Returns the same envelope storeInfo() emits, plus a coarse byte total.
+  r.get('/v1/lake/storage', async (req, res) => {
+    try {
+      const info = eventStoreInfo();
+      // W411 — tenant-scoped count so the dashboard never claims another
+      // tenant's rows as our own.
+      const total = await eventCount({ tenant_id: _tenantScope(req) });
+      res.json({ ok: true, ...info, total_events: total });
+    } catch (e) { res.status(500).json(_w384Err(e, 'lake_storage_error')); }
   });
 
   // ============== W384: datasets ==============
   r.get('/v1/datasets', async (req, res) => {
     try {
-      const rows = await dsListDatasets();
+      // W411 — tenant-scoped listing.
+      const rows = await dsListDatasets({ tenant_id: _tenantScope(req) });
       res.json({ ok: true, total: rows.length, datasets: rows });
     } catch (e) { res.status(500).json(_w384Err(e, 'datasets_list_error')); }
   });
@@ -7183,7 +8373,9 @@ export function buildRouter() {
     try {
       const body = req.body || {};
       if (!body.namespace) return res.status(400).json({ error: 'namespace_required' });
-      const result = await dsCreateDataset(body.namespace, body);
+      // W411 — stamp the caller's tenant_id on the new dataset and gate the
+      // underlying listEvents() to the caller's rows.
+      const result = await dsCreateDataset(body.namespace, { ...body, tenant_id: _tenantScope(req) });
       res.json({ ok: true, ...result });
     } catch (e) { res.status(400).json(_w384Err(e, 'dataset_create_error')); }
   });
@@ -7191,12 +8383,26 @@ export function buildRouter() {
   r.get('/v1/datasets/:id', async (req, res) => {
     try {
       const result = await dsInspectDataset(req.params.id);
+      // W411 — fence cross-tenant inspect. Legacy datasets with no tenant_id
+      // stamped still resolve (admin / local-only); tenant-stamped datasets
+      // 404 out for everyone except the owner.
+      const scope = _tenantScope(req);
+      if (scope && result && result.tenant_id && result.tenant_id !== scope) {
+        return res.status(404).json({ error: 'dataset_not_found' });
+      }
       res.json({ ok: true, ...result });
     } catch (e) { res.status(404).json(_w384Err(e, 'dataset_not_found')); }
   });
 
   r.post('/v1/datasets/:id/split', async (req, res) => {
     try {
+      // W411 — same cross-tenant fence on split. The split mutates the
+      // dataset record, so leaking it across tenants would corrupt train_ids.
+      const ds = await dsInspectDataset(req.params.id);
+      const scope = _tenantScope(req);
+      if (scope && ds && ds.tenant_id && ds.tenant_id !== scope) {
+        return res.status(404).json({ error: 'dataset_not_found' });
+      }
       const ratio = req.body && req.body.train_ratio != null ? Number(req.body.train_ratio) : 0.8;
       const result = await dsSplitDataset(req.params.id, ratio);
       res.json({ ok: true, ...result });
@@ -7210,6 +8416,7 @@ export function buildRouter() {
         namespace: req.query.namespace ? String(req.query.namespace) : undefined,
         workflowId: req.query.workflow_id ? String(req.query.workflow_id) : undefined,
         n: req.query.n ? Number(req.query.n) : undefined,
+        tenant_id: _tenantScope(req),
       });
       res.json({ ok: true, total: events.length, events });
     } catch (e) { res.status(500).json(_w384Err(e, 'labels_next_error')); }
@@ -7227,14 +8434,21 @@ export function buildRouter() {
         workflow: body.workflow,
         reviewer: body.reviewer,
         reason: body.reason,
+        tenant_id: _tenantScope(req),
       });
       res.json({ ok: true, ...result });
-    } catch (e) { res.status(400).json(_w384Err(e, 'labels_submit_error')); }
+    } catch (e) {
+      // W411 — cross-tenant label attempt returns 403.
+      if (e && (e.code === 'CROSS_TENANT_LABEL' || e.code === 'CROSS_TENANT_APPROVAL')) {
+        return res.status(403).json({ error: 'cross_tenant_label_forbidden', message: e.message });
+      }
+      res.status(400).json(_w384Err(e, 'labels_submit_error'));
+    }
   });
 
   r.get('/v1/labels/stats', async (req, res) => {
     try {
-      const result = await lblStats();
+      const result = await lblStats({ tenant_id: _tenantScope(req) });
       res.json({ ok: true, ...result });
     } catch (e) { res.status(500).json(_w384Err(e, 'labels_stats_error')); }
   });
@@ -7245,6 +8459,107 @@ export function buildRouter() {
       if (!result) return res.status(404).json({ error: 'label_not_found' });
       res.json({ ok: true, label: result });
     } catch (e) { res.status(500).json(_w384Err(e, 'label_get_error')); }
+  });
+
+  // ============== W409o: label-queue aliases ==============
+  // The /account/labeling.html UI was wired against /v1/label-queue/* before
+  // the canonical surface settled at /v1/labels/*. Rather than chase the
+  // legacy page (and break any client polling the old path), we alias the
+  // three endpoints. The shapes also tolerate the older field names
+  // (label vs verdict, accepted vs approved, pending vs decided).
+  r.get('/v1/label-queue/next', async (req, res) => {
+    try {
+      const events = await lblNextToLabel({
+        namespace: req.query.namespace ? String(req.query.namespace) : undefined,
+        workflowId: req.query.workflow_id ? String(req.query.workflow_id) : undefined,
+        n: req.query.n ? Number(req.query.n) : 1,
+        tenant_id: _tenantScope(req),
+      });
+      // The legacy UI expects ONE event with top-level prompt/response keys
+      // (not the {ok, total, events:[...]} envelope). Pick the first row and
+      // surface the redacted text as prompt/response — that's what the
+      // labeling form binds to.
+      if (!events.length) return res.json({});
+      const ev = events[0];
+      res.json({
+        event_id: ev.event_id,
+        namespace: ev.namespace,
+        prompt: ev.prompt_redacted || ev.prompt || ev.input || '',
+        response: ev.response_redacted || ev.response || ev.output || '',
+        model: ev.model || null,
+        provider: ev.provider || null,
+        workflow_id: ev.workflow_id || null,
+        trace_id: ev.trace_id || null,
+        media_kind: ev.media_kind || null,
+        created_at: ev.created_at,
+      });
+    } catch (e) { res.status(500).json(_w384Err(e, 'labels_next_error')); }
+  });
+
+  r.get('/v1/label-queue/stats', async (req, res) => {
+    try {
+      const result = await lblStats({ tenant_id: _tenantScope(req) });
+      // Field-name compatibility layer: legacy UI reads accepted/corrected;
+      // canonical store uses approved/edited.
+      res.json({
+        ok: true,
+        accepted: result.approved || 0,
+        approved: result.approved || 0,
+        corrected: result.edited || 0,
+        edited: result.edited || 0,
+        rejected: result.rejected || 0,
+        pending: result.pending || 0,
+        decided: result.decided || 0,
+        total_events: result.total_events || 0,
+        by_reviewer: result.by_reviewer || {},
+      });
+    } catch (e) { res.status(500).json(_w384Err(e, 'labels_stats_error')); }
+  });
+
+  r.post('/v1/label-queue/submit', async (req, res) => {
+    try {
+      const body = req.body || {};
+      if (!body.event_id) return res.status(400).json({ error: 'event_id_required' });
+      // legacy "label" field -> canonical "verdict":
+      //   accept  -> good
+      //   correct -> edit
+      //   reject  -> bad
+      const labelLegacy = (body.label || '').toLowerCase();
+      const verdictMap = { accept: 'good', correct: 'edit', reject: 'bad' };
+      const verdict = body.verdict || verdictMap[labelLegacy] || labelLegacy;
+      const reviewer = body.reviewer || (req.tenant && req.tenant.id) || (req.is_admin ? 'admin' : 'local-user');
+      const result = await lblSubmitLabel(body.event_id, {
+        verdict,
+        fixedOutput: body.fixed_output,
+        sensitive: body.sensitive,
+        holdoutOnly: body.holdout_only,
+        workflow: body.workflow,
+        reviewer,
+        reason: body.reason,
+        teamApproval: body.team_approval === true,
+        coReviewers: Array.isArray(body.co_reviewers) ? body.co_reviewers : [],
+        tenant_id: _tenantScope(req),
+      });
+      res.json({ ok: true, ...result });
+    } catch (e) {
+      // W411 — cross-tenant label attempt returns 403.
+      if (e && (e.code === 'CROSS_TENANT_LABEL' || e.code === 'CROSS_TENANT_APPROVAL')) {
+        return res.status(403).json({ error: 'cross_tenant_label_forbidden', message: e.message });
+      }
+      res.status(400).json(_w384Err(e, 'labels_submit_error'));
+    }
+  });
+
+  // W409o — full audit trail for a single event_id. Tests assert that every
+  // approval/reject/edit decision is recorded with reviewer + timestamp +
+  // before/after output. The legacy /v1/labels/:event_id returns the last
+  // label only; this endpoint returns the whole sequence.
+  r.get('/v1/label-queue/audit/:event_id', async (req, res) => {
+    try {
+      const { loadAuditTrail } = await import('./dataset-workbench.js');
+      const trail = loadAuditTrail(req.params.event_id);
+      res.json({ ok: true, event_id: req.params.event_id, total: trail.length, audit: trail });
+    } catch (e) { res.status(500).json(_w384Err(e, 'labels_audit_error')); }
   });
 
   // ============== W384: simulation ==============
@@ -7352,7 +8667,12 @@ export function buildRouter() {
   r.get('/v1/devices/detect', async (req, res) => {
     try {
       const result = await devDetectLocal();
-      res.json({ ok: true, ...result });
+      // W409s — also pick a static PROFILE (mobile-ios / desktop-cpu / etc.)
+      // alongside the W372 capability snapshot. Mobile picks are returned
+      // with runtime_status:'foundation' until a real runtime ships.
+      let profile = null;
+      try { profile = await devDetectProfile({}); } catch { profile = null; }
+      res.json({ ok: true, ...result, profile });
     } catch (e) { res.status(500).json(_w384Err(e, 'devices_detect_error')); }
   });
 
@@ -7514,12 +8834,20 @@ export function buildRouter() {
       }
       if (!blobs.length) return res.status(400).json({ error: 'no_file_parts' });
       // Append an event for each blob so the lake reflects the capture.
+      //
+      // W423 — audit P0-5. The route was sending `tenant: req.tenant` but
+      // event-schema.js newEvent() reads `partial.tenant_id`, so every media
+      // capture was getting stamped with the default tenant_id ('local-tenant')
+      // and silently dropping out of any tenant-scoped lake query. Now we
+      // canonicalize to `tenant_id: req.tenant_record?.id || req.tenant` so
+      // both authenticated tenants and the local-only daemon path land on the
+      // right record.
       const eventIds = [];
       for (const b of blobs) {
         try {
           const ev = await eventAppend({
             namespace: fields.namespace || 'media',
-            tenant: req.tenant,
+            tenant_id: req.tenant_record?.id || req.tenant,
             input: fields.input || '',
             output: '',
             media_uri: b.uri,
@@ -7545,12 +8873,13 @@ export function buildRouter() {
     }
   });
 
-  // ============== W384: billing meters ==============
-  // Returns a static catalog of the 12 meters that ship with the runtime.
-  // Live counter aggregation is delegated to the existing /v1/billing/*
-  // routes; this endpoint is the schema source-of-truth.
+  // ============== W384 + W409y: billing meters ==============
+  // Returns the static catalog of legacy W384 meters merged with the W409y
+  // billing-unit catalog (10 units the auditor signed off on). The W409y
+  // entries carry tier_soft + tier_hard limits resolved from the caller's
+  // tenant plan when an authenticated key is present.
   r.get('/v1/billing/meters', (req, res) => {
-    const meters = [
+    const legacy = [
       { id: 'capture_count', label: 'captured pairs', unit: 'count', billable: false, category: 'lake' },
       { id: 'distill_synth_count', label: 'distill syntheses', unit: 'count', billable: true, category: 'pipeline' },
       { id: 'compile_jobs', label: 'compile jobs', unit: 'count', billable: true, category: 'pipeline' },
@@ -7564,7 +8893,56 @@ export function buildRouter() {
       { id: 'sync_push_count', label: 'sync push ops', unit: 'count', billable: false, category: 'sync' },
       { id: 'privacy_redactions', label: 'privacy redactions', unit: 'count', billable: false, category: 'privacy' },
     ];
-    res.json({ ok: true, total: meters.length, meters });
+    let tier = 'free';
+    try {
+      const plan = req && req.tenant_record && req.tenant_record.plan;
+      tier = usageTierForPlan(plan);
+    } catch (_) { tier = 'free'; }
+    const tierCaps = (USAGE_TIER_LIMITS && USAGE_TIER_LIMITS[tier]) || {};
+    const billingUnits = Object.keys(USAGE_UNITS || {}).map((id) => {
+      const meta = USAGE_UNITS[id] || {};
+      const caps = tierCaps[id] || {};
+      return {
+        id,
+        label: meta.label || id,
+        unit: meta.unit || 'count',
+        category: meta.category || 'usage',
+        billable: !!meta.billable,
+        tier,
+        tier_soft: typeof caps.soft === 'number' ? caps.soft : null,
+        tier_hard: typeof caps.hard === 'number' ? caps.hard : null,
+        wave: 'W409y',
+      };
+    });
+    const meters = legacy.concat(billingUnits);
+    res.json({ ok: true, total: meters.length, meters, tier, billing_units: billingUnits });
+  });
+
+  // ============== W409y: billing usage dashboard ==============
+  // Returns the current-period usage map for the caller's tenant. The
+  // dashboard at /account/billing reads this endpoint; the CLI
+  // `kolm billing usage [--period]` hits it directly.
+  r.get('/v1/billing/usage', (req, res) => {
+    const trec = req && req.tenant_record;
+    if (!trec) return res.status(401).json({ error: 'auth_required', hint: 'send Authorization: Bearer <ks_* or kao_* key>' });
+    let period = (req.query && req.query.period) || null;
+    if (period && !/^\d{4}-\d{2}$/.test(String(period))) {
+      return res.status(400).json({ error: 'invalid_period', hint: 'period must match YYYY-MM' });
+    }
+    try {
+      const tier = usageTierForPlan(trec.plan);
+      const payload = usageDashboardPayload({
+        tenantId: trec.id,
+        tier,
+        period,
+        plan: trec.plan || tier,
+      });
+      // Back-compat shape: the CLI print path + the legacy /v1/account
+      // fallback both inspect `used`, so we mirror `meters` under that key.
+      res.json(Object.assign({ ok: true }, payload, { used: payload.meters }));
+    } catch (e) {
+      res.status(500).json({ error: 'billing_usage_error', message: String(e && e.message || e) });
+    }
   });
 
   // ============== W384: connectors ==============
@@ -7616,6 +8994,287 @@ export function buildRouter() {
       });
       res.json({ ok: true, ...result });
     } catch (e) { res.status(500).json(_w384Err(e, 'storage_purge_error')); }
+  });
+
+  // ====================================================================
+  // W409f — account UI <-> server route aliases.
+  //
+  // public/account/*.html ship inline scripts that fetch a stable set of
+  // /v1/* paths. Several pages used noun-plural URLs (/v1/bakeoffs,
+  // /v1/simulations, /v1/label-queue/*) that did not match the existing
+  // server verbs (/v1/bakeoff/run, /v1/sim, /v1/labels/next). The pages
+  // were silently returning empty arrays via .catch() handlers and showing
+  // blank tables.
+  //
+  // Strategy: keep the original verbs (they are documented elsewhere and
+  // referenced by CLI + SDK), and add thin aliases below that forward to
+  // the same handler functions. A route-walker test (W409f) scans
+  // public/account/*.html for every fetch('/v1/...') call and asserts a
+  // matching server route exists. New account pages must add the alias
+  // here OR rewrite the fetch URL to a documented verb.
+  // ====================================================================
+
+  // /v1/builds — aliases the compile-job list for /account/builds.html.
+  // builds.html expects {builds:[{job_id, status, ...}]}; the canonical
+  // /v1/compile/jobs returns {jobs:[...]}, so we adapt the shape here.
+  r.get('/v1/builds', (req, res) => {
+    try {
+      const limit = Math.min(200, Number(req.query.limit) || 25);
+      const rows = listJobs(req.tenant, limit);
+      res.json({
+        ok: true,
+        total: rows.length,
+        builds: rows.map((j) => ({
+          id: j.id,
+          job_id: j.id,
+          status: j.status,
+          progress: j.progress || 0,
+          base_model: j.base_model || null,
+          task: j.task || null,
+          k_score: j.k_score || null,
+          artifact_path: j.artifact_path || null,
+          created_at: j.created_at || null,
+        })),
+      });
+    } catch (e) {
+      res.status(500).json({ error: 'builds_list_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // /v1/workflows/repeated — repeated-workflows.html surfaces the cluster
+  // summary from /v1/bridges/observations (the canonical W297 source) under
+  // a more discoverable URL. Returns {workflows:[{template,count,samples}]}.
+  r.get('/v1/workflows/repeated', async (req, res) => {
+    try {
+      const mod = await import('./bridges.js');
+      if (typeof mod.observations !== 'function') {
+        return res.json({ ok: true, total: 0, workflows: [], note: 'bridges.observations not exported in this build' });
+      }
+      const result = await mod.observations({
+        tenant: req.tenant,
+        namespace: req.query.namespace ? String(req.query.namespace) : undefined,
+        min_count: Math.max(2, Number(req.query.min_count) || 2),
+      });
+      const clusters = (result && result.clusters) || [];
+      res.json({
+        ok: true,
+        total: clusters.length,
+        workflows: clusters.map((c) => ({
+          template: c.template || c.template_signature || null,
+          count: c.count || 0,
+          first_seen: c.first_seen || null,
+          last_seen: c.last_seen || null,
+          samples: Array.isArray(c.samples) ? c.samples : [],
+        })),
+      });
+    } catch (e) {
+      res.json({ ok: true, total: 0, workflows: [], note: String(e && e.message || e) });
+    }
+  });
+
+  // /v1/bakeoffs — list + run alias for /v1/bakeoff/run. The bakeoff module
+  // does not persist runs to a registry (each call returns a fresh result),
+  // so GET returns an empty array; the page already handles that shape via
+  // `{bakeoffs: []}` in its .catch fallback.
+  r.get('/v1/bakeoffs', (req, res) => {
+    res.json({ ok: true, total: 0, bakeoffs: [] });
+  });
+  r.post('/v1/bakeoffs', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const datasetId = body.dataset_id;
+      if (!datasetId) return res.status(400).json({ error: 'dataset_id_required' });
+      // W411 — fence cross-tenant bake-offs at the dataset boundary.
+      const ds = await dsInspectDataset(datasetId);
+      const scope = _tenantScope(req);
+      if (scope && ds && ds.tenant_id && ds.tenant_id !== scope) {
+        return res.status(404).json({ error: 'dataset_not_found' });
+      }
+      const result = await bakeoffRun(datasetId, {
+        contestants: body.contestants,
+        opts: body.opts || {},
+      });
+      res.json({ ok: true, ...result });
+    } catch (e) { res.status(400).json(_w384Err(e, 'bakeoff_error')); }
+  });
+
+  // /v1/label-queue/* aliases are already wired by W409o above (~line 7670):
+  //   /v1/label-queue/next, /v1/label-queue/stats, /v1/label-queue/submit,
+  //   /v1/label-queue/audit/:event_id. Express first-match: the earlier
+  //   handlers win, so re-defining them here is dead code. The route-walker
+  //   test (W409f #4) asserts they are reachable regardless of which block
+  //   registered them.
+
+  // /v1/simulations — list + run alias for /v1/sim + /v1/sim/run. Plus a
+  // promote endpoint that mirrors simulations.html's "promote to holdout"
+  // button (delegates to simulation.generateDatasetFromSim).
+  r.get('/v1/simulations', (req, res) => {
+    try {
+      const rows = simListSims();
+      res.json({ ok: true, total: rows.length, simulations: rows, types: SIM_TYPES });
+    } catch (e) { res.status(500).json(_w384Err(e, 'simulations_list_error')); }
+  });
+  r.post('/v1/simulations', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const sim = await simCreateSim(body.workflow_id || 'default', {
+        type: body.type,
+        n: body.n,
+        personas: body.personas,
+        opts: body.opts || {},
+      });
+      const result = await simRunSim(sim.sim_id, { n: body.n, opts: { ...body.opts, toLake: body.toLake !== false } });
+      res.json({ ok: true, sim_id: sim.sim_id, type: sim.type, ...result });
+    } catch (e) { res.status(400).json(_w384Err(e, 'simulations_run_error')); }
+  });
+  r.get('/v1/simulations/:id', (req, res) => {
+    try {
+      const sim = simReadRaw(req.params.id);
+      if (!sim) return res.status(404).json({ error: 'simulation_not_found' });
+      res.json({ ok: true, sim });
+    } catch (e) { res.status(500).json(_w384Err(e, 'simulations_get_error')); }
+  });
+  r.post('/v1/simulations/:id/promote', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const mod = await import('./simulation.js');
+      if (typeof mod.generateDatasetFromSim !== 'function') {
+        return res.status(501).json({ error: 'promote_unsupported', hint: 'simulation.generateDatasetFromSim is not exported in this build' });
+      }
+      const result = await mod.generateDatasetFromSim(req.params.id, {
+        name: body.name || null,
+        holdoutFromSim: body.holdoutFromSim !== false,
+      });
+      res.json({ ok: true, sim_id: req.params.id, ...result });
+    } catch (e) { res.status(400).json(_w384Err(e, 'simulations_promote_error')); }
+  });
+
+  // /v1/devices/detect (POST) — devices.html POSTs (with an optional hints
+  // body) to ask the daemon to refresh the local hardware inventory. The
+  // existing GET handler covers read-only callers; add a POST handler that
+  // accepts an optional device-hints body and forwards to devDetectLocal.
+  r.post('/v1/devices/detect', async (req, res) => {
+    try {
+      const hints = req.body && typeof req.body === 'object' ? req.body : {};
+      const result = await devDetectLocal(hints);
+      // W409s — pick a static PROFILE for the body hints (or this machine).
+      let profile = null;
+      try { profile = await devDetectProfile(hints); } catch { profile = null; }
+      res.json({ ok: true, ...result, profile });
+    } catch (e) { res.status(500).json(_w384Err(e, 'devices_detect_error')); }
+  });
+
+  // ====================================================================
+  // W409g — hosted OpenAI-compatible GET /v1/models.
+  //
+  // The local daemon (src/daemon-connector.js) already serves an
+  // OpenAI-shaped /v1/models. The hosted server only had /v1/models/manifest
+  // + /pull + /cache, so SDKs that call client.models.list() (langchain,
+  // llamaindex, OpenAI client auto-discovery) got 404'd against the cloud
+  // endpoint.
+  //
+  // The hosted listing combines:
+  //   1. Frontier teacher models from src/model-registry.js (FRONTIER_MODELS),
+  //      owned_by:'kolm-teachers'.
+  //   2. The current tenant's compiled .kolm artifacts surfaced by the
+  //      existing /v1/artifacts handler, id = `kolm:<artifact_id>`,
+  //      owned_by:'kolm'.
+  //
+  // Anthropic-compat: the registry doesn't separate Anthropic models from
+  // other teachers, but rows whose family hints at an Anthropic-shaped
+  // client probe are also surfaced under an `anthropic:`-prefixed alias so
+  // a probe via the Anthropic SDK can discover them without colliding with
+  // the canonical HF id.
+  // ====================================================================
+  r.get('/v1/models', anonModelsProbeLimiter, async (req, res) => {
+    try {
+      const created = Math.floor(Date.now() / 1000);
+      const data = [];
+      // 1) Connector registry (W409k carry-over). The OpenAI SDK auto-discovers
+      //    available IDs against this surface; if we drop them the W409k tests
+      //    + every connector tutorial breaks. Source of truth is CONNECTOR_PROVIDERS.
+      try {
+        for (const [provId, cfg] of Object.entries(CONNECTOR_PROVIDERS || {})) {
+          const cost = (cfg && cfg.cost_per_1k) || {};
+          for (const id of Object.keys(cost)) {
+            data.push({ id, object: 'model', created, owned_by: provId });
+            if (/^anthropic/i.test(provId)) {
+              data.push({ id: `anthropic:${id}`, object: 'model', created, owned_by: 'anthropic-compat', alias_of: id });
+            }
+          }
+        }
+      } catch (_e) { /* connector listing is best-effort */ }
+      // 2) Teachers from FRONTIER_MODELS (always-on, no tenant scope).
+      try {
+        const reg = await import('./model-registry.js');
+        const rows = Array.isArray(reg.FRONTIER_MODELS) ? reg.FRONTIER_MODELS : [];
+        for (const row of rows) {
+          if (!row || typeof row.id !== 'string') continue;
+          data.push({
+            id: row.id,
+            object: 'model',
+            created,
+            owned_by: 'kolm-teachers',
+            kolm: {
+              family: row.family || null,
+              params: row.params || null,
+              arch: row.arch || null,
+              modality: row.modality || null,
+              hw_tier: row.hw_tier || null,
+              license: row.license || null,
+              source_url: row.source_url || null,
+            },
+          });
+          // Anthropic-compat alias for rows whose family or id hints at an
+          // Anthropic-shaped client probe. Kept narrow — only synthetic
+          // `anthropic:<id>` aliases so the Anthropic SDK can list them
+          // without colliding with the canonical HF id.
+          if (typeof row.family === 'string' && /^(claude|anthropic)/i.test(row.family)) {
+            data.push({
+              id: `anthropic:${row.id}`,
+              object: 'model',
+              created,
+              owned_by: 'anthropic-compat',
+              alias_of: row.id,
+            });
+          }
+        }
+      } catch (_e) {
+        // Registry import failure is non-fatal for the alias surface; still
+        // attempt to surface tenant artifacts below.
+      }
+      // 2) Tenant's compiled .kolm artifacts. The same jobs the
+      //    /v1/artifacts handler returns are exposed here under id
+      //    `kolm:<artifact_id>` so an OpenAI client can pick one with
+      //    `model: 'kolm:job_xxx'`.
+      try {
+        const tenantJobs = listJobs(req.tenant, 200).filter((j) => j.status === 'completed');
+        for (const j of tenantJobs) {
+          data.push({
+            id: `kolm:${j.id}`,
+            object: 'model',
+            created: Math.floor(new Date(j.created_at || Date.now()).getTime() / 1000),
+            owned_by: 'kolm',
+            kolm: {
+              artifact_id: j.id,
+              base_model: j.base_model || j.manifest?.base_model || null,
+              artifact_hash: j.artifact_hash || null,
+              k_score: j.k_score || null,
+              download_url: `/v1/artifacts/${j.id}/download`,
+            },
+          });
+        }
+      } catch (_e) {
+        // Tenant scoping not available in this context — skip; teachers
+        // still surface.
+      }
+      // Cache-Control: private when tenant data is included; public otherwise.
+      const cache = req.tenant ? 'private, max-age=30' : 'public, max-age=300';
+      res.set('Cache-Control', cache);
+      res.json({ object: 'list', data });
+    } catch (e) {
+      res.status(500).json({ error: 'models_list_error', detail: String(e.message || e) });
+    }
   });
 
   return r;

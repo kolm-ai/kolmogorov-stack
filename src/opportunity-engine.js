@@ -58,12 +58,20 @@ function _isStrongModel(m) {
 const JSON_OPENER = /^\s*[{[]/;
 function _looksLikeJson(s) { return typeof s === 'string' && JSON_OPENER.test(s); }
 
-// findOpportunities({since, namespace, minCallCount, minMonthlySpend})
+// findOpportunities({since, namespace, minCallCount, minMonthlySpend, tenant_id})
+//
+// W419 — `tenant_id` (or `tenant` alias) restricts the opportunity scan to the
+// caller's events. Without this guard the engine would surface another
+// tenant's optimization opportunities through `/v1/opportunities/*` and via
+// `/v1/intent/next` snapshot_summary. Local-only daemon callers leave the
+// field unset, in which case behavior matches the pre-W419 default.
 export async function findOpportunities(opts = {}) {
   const minCallCount = opts.minCallCount == null ? 50 : opts.minCallCount;
   const minMonthlySpend = opts.minMonthlySpend == null ? 10 : opts.minMonthlySpend;
+  const tenant_id = opts.tenant_id || opts.tenant || null;
   const events = await listEvents({
     namespace: opts.namespace,
+    tenant_id,
     since: opts.since,
     limit: opts.limit == null ? 10000 : opts.limit,
     order: 'desc',
@@ -380,6 +388,52 @@ function _finalize(opp, state) {
   } else {
     opp.status = 'open';
   }
+  // W409m — universal score envelope. Every opportunity carries the same
+  // four signals so the UI / CLI / promote endpoint can sort/group without
+  // having to special-case by type:
+  //   - estimated_savings: USD/month savings the suggestion would unlock
+  //   - volume:            call count in the lookback window
+  //   - risk:              {low,medium,high} string + numeric weight
+  //   - trainability:      0..1 — how viable a local-replacement adapter is.
+  // The aggregate `score` is the product of normalized savings * volume *
+  // (1-risk_weight) * trainability, scaled to a 0..100 readable range. It's
+  // a relative ranker, not a cost forecast.
+  const savings = Number(opp.estimated_savings_usd) || 0;
+  const volume = Number(opp.call_count) || 0;
+  const replacement = Number(opp.expected_replacement_rate) || 0;
+  // Per-type baseline trainability — privacy_leak and dataset_ready are not
+  // "trainable" in the local-replacement sense; they're routing / policy
+  // hints. The remaining types map directly to their replacement rate.
+  const baseTrainability = {
+    cache_candidate: 0.95,
+    cheaper_model_candidate: 0.80,
+    local_replacement_candidate: replacement || 0.78,
+    privacy_leak: 0.0,
+    prompt_compression: 0.6,
+    repeated_extraction: 0.9,
+    repeated_classification: 0.92,
+    log_triage: 0.83,
+    routing_policy: 1.0,
+    dataset_ready: 0.7,
+    training_ready: 0.85,
+  };
+  opp.trainability = baseTrainability[opp.type] != null ? baseTrainability[opp.type] : 0.5;
+  opp.volume = volume;
+  opp.estimated_savings = savings;
+  // Risk numeric weight: 0=low, 0.5=medium, 1=high.
+  const riskWeight = opp.risk === 'high' ? 1 : opp.risk === 'medium' ? 0.5 : 0;
+  // privacy_leak is treated as INFINITE business risk to ignore — we want it
+  // to surface first, so we score it 100 outright. Other types get the
+  // product of normalized signals scaled to 0..100.
+  if (opp.type === 'privacy_leak') {
+    opp.score = 100;
+  } else {
+    const normSav = Math.min(1, savings / 1000); // $1000/mo savings = 1.0
+    const normVol = Math.min(1, volume / 1000);  // 1000 calls = 1.0
+    opp.score = Math.round(
+      normSav * 35 + normVol * 25 + (1 - riskWeight) * 15 + opp.trainability * 25,
+    );
+  }
   return opp;
 }
 
@@ -398,16 +452,118 @@ export async function explainOpportunity(id, opts = {}) {
   };
 }
 
+// W419 — accept/ignore must verify the opportunity id belongs to the calling
+// tenant before mutating shared state. Otherwise tenant B could accept/ignore
+// tenant A's opportunities by guessing the id (the ids are deterministic per
+// request_hash / model). When tenant_id is unset (local-only daemon mode) the
+// check is skipped to preserve pre-W419 behavior.
+async function _assertOppOwnership(id, tenant_id) {
+  if (!tenant_id) return;
+  const live = await findOpportunities({ tenant_id, limit: 10000 });
+  const owned = live.some(o => o.id === id);
+  if (!owned) {
+    const err = new Error('opportunity_not_found_for_tenant: ' + id);
+    err.code = 'OPPORTUNITY_NOT_FOUND';
+    throw err;
+  }
+}
+
 export async function acceptOpportunity(id, opts = {}) {
+  await _assertOppOwnership(id, opts.tenant_id || opts.tenant || null);
   return _writeState(id, 'accepted', opts.reason || null);
 }
 export async function ignoreOpportunity(id, opts = {}) {
+  await _assertOppOwnership(id, opts.tenant_id || opts.tenant || null);
   return _writeState(id, 'ignored', opts.reason || null);
+}
+
+// W409m — promoteOpportunity: turn an opportunity into a dataset.
+//
+// Looks up the live opportunity by id, resolves its namespace, and invokes
+// the dataset-workbench createDataset() with from_opportunity provenance.
+// Records the promotion (status='promoted', dataset_id) on the same state
+// log so future findOpportunities() can show users which opportunities
+// already shipped to a dataset.
+//
+// Imports dataset-workbench lazily to keep the opportunity-engine module a
+// pure aggregator that does NOT pull dataset code on the read path (which
+// keeps `kolm opportunities` / `kolm optimize list` snappy).
+export async function promoteOpportunity(id, opts = {}) {
+  if (!id) throw new Error('promoteOpportunity requires an opportunity id');
+  // W419 — tenant_id (or alias) restricts the live lookup so a tenant cannot
+  // promote another tenant's opportunity into their own dataset namespace.
+  const tenant_id = opts.tenant_id || opts.tenant || null;
+  // Find the live opportunity so we know its namespace + sample event ids.
+  const live = await findOpportunities({
+    namespace: opts.namespace,
+    tenant_id,
+    since: opts.since,
+    limit: opts.limit == null ? 10000 : opts.limit,
+  });
+  const opp = live.find(o => o.id === id);
+  if (!opp) {
+    // The id might be a synthetic/persisted-only opportunity that no longer
+    // shows up in the live recompute (events purged, window moved). We still
+    // need a namespace to promote — fall back to a caller-supplied one.
+    if (!opts.namespace) {
+      const err = new Error('opportunity_not_found_and_no_namespace: ' + id);
+      err.code = 'OPPORTUNITY_NOT_FOUND';
+      throw err;
+    }
+  }
+  const namespace = (opp && opp.namespace) || opts.namespace;
+  if (!namespace) {
+    const err = new Error('promoteOpportunity requires a resolvable namespace');
+    err.code = 'NAMESPACE_REQUIRED';
+    throw err;
+  }
+  // dataset-workbench.createDataset() reads
+  //   state.byId[opts.fromOpportunity].sample_event_ids
+  // to restrict the dataset to the events the opportunity actually flagged
+  // (otherwise the dataset balloons to every event in the namespace). The
+  // default `_writeState()` only persists {id, status, reason} so we have to
+  // also stash the sample_event_ids before we hand off to createDataset.
+  if (opp && Array.isArray(opp.sample_event_ids) && opp.sample_event_ids.length) {
+    _writeStateExtra(id, { sample_event_ids: opp.sample_event_ids.slice() });
+  }
+  // Lazy import to avoid a cycle (dataset-workbench imports from this file).
+  const { createDataset } = await import('./dataset-workbench.js');
+  const ds = await createDataset(namespace, {
+    fromOpportunity: id,
+    train_ratio: opts.train_ratio != null ? opts.train_ratio : 0.8,
+    approvedBy: opts.approvedBy || 'opportunity-promote',
+    redactionPolicy: opts.redactionPolicy || 'redact',
+    sourceType: opts.sourceType || 'real',
+    limit: opts.limit,
+  });
+  // Persist a 'promoted' state row so the engine can render the badge later.
+  _writeState(id, 'promoted', 'dataset:' + ds.dataset_id);
+  return {
+    opportunity_id: id,
+    dataset_id: ds.dataset_id,
+    namespace,
+    train_count: ds.train_count,
+    holdout_count: ds.holdout_count,
+    source_event_ids: ds.source_event_ids,
+    split_signature: ds.split_signature,
+    version: ds.version,
+    promoted_at: new Date().toISOString(),
+  };
 }
 
 function _writeState(id, status, reason) {
   const file = _opportunitiesLog();
   const entry = { id, status, reason: reason || null, decided_at: new Date().toISOString() };
+  fs.appendFileSync(file, JSON.stringify(entry) + '\n', 'utf8');
+  return entry;
+}
+
+// W409m — _writeStateExtra: append a state row that carries additional
+// fields (e.g. sample_event_ids) without setting status. The last-write-wins
+// reducer in _loadState() will merge the extra keys into byId[id].
+function _writeStateExtra(id, extra) {
+  const file = _opportunitiesLog();
+  const entry = { id, ...extra, recorded_at: new Date().toISOString() };
   fs.appendFileSync(file, JSON.stringify(entry) + '\n', 'utf8');
   return entry;
 }
@@ -421,7 +577,12 @@ function _loadState() {
     if (!line.trim()) continue;
     try {
       const e = JSON.parse(line);
-      if (e && e.id) byId[e.id] = e; // last write wins
+      if (e && e.id) {
+        // Merge instead of last-write-wins, so an extra-fields write
+        // (_writeStateExtra with sample_event_ids) doesn't clobber a prior
+        // status row, and so a later status row keeps prior sample_event_ids.
+        byId[e.id] = { ...(byId[e.id] || {}), ...e };
+      }
     } catch {}
   }
   return { byId };
