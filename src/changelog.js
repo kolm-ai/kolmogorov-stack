@@ -9,6 +9,13 @@
 
 const WAVES = [
   {
+    wave: 'W459',
+    date: '2026-05-19',
+    title: 'distillation reliability: teacher fallback + partial-run resume',
+    summary: 'Closes audit P1 distillation cluster. src/distill-pipeline.js wraps the worker spawn in an attempt loop over _pickTeachers() — first teacher whose worker exits clean (code 0 + no `teacher_error` in manifest) wins. KOLM_DISTILL_TEACHER accepts a comma list for explicit operator-ordered fallback. distill() exposes new params `teacher_fallback:true` (auto-retry next teacher) and `resume_from:<run_id>` (reuse prior runDir + seeds.jsonl, append to progress.jsonl, monotonic step counter). Resume is tenant-fenced — mismatched tenant_id throws, never silently rebinds. run-meta.json records teacher_planned + resume_from + first teacher. Done envelope adds teacher_used + teacher_attempts[] + resumed_from + resume_prior_steps. 10 W459 tests pin the contract end-to-end with inline stub workers.',
+    tags: ['distill', 'reliability', 'audit', 'tenant-isolation'],
+  },
+  {
     wave: 'W458',
     date: '2026-05-19',
     title: 'definition-of-done 12-step e2e test',

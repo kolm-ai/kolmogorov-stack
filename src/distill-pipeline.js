@@ -237,10 +237,39 @@ function _distillRunDir() {
 }
 
 function _pickTeacher() {
-  if (process.env.KOLM_DISTILL_TEACHER) return process.env.KOLM_DISTILL_TEACHER;
-  if (process.env.ANTHROPIC_API_KEY) return 'anthropic:claude-opus-4-7';
-  if (process.env.OPENAI_API_KEY) return 'openai:gpt-4o-mini';
-  return null;
+  const list = _pickTeachers();
+  return list.length ? list[0] : null;
+}
+
+// W459 — return an ordered teacher list so distill() can fall back when the
+// first teacher's worker errors (rate-limit, transient API, key revoked).
+// The audit P1 distillation cluster (2026-05-19) flagged the missing
+// fallback: a single API outage on the highest-priority teacher would kill
+// the compile run instead of retrying with the next-best teacher in scope.
+//
+// Priority order: explicit KOLM_DISTILL_TEACHER first (operator override
+// wins), then Anthropic (best teacher for most KD tasks), then OpenAI.
+// Duplicates are removed so KOLM_DISTILL_TEACHER='anthropic:...' + ANTHROPIC
+// _API_KEY do not double-count the same provider. KOLM_DISTILL_TEACHER may
+// also be a comma list (`'anthropic:opus-4-7,openai:gpt-4o-mini'`) for
+// operators who want an explicit fallback order.
+export function _pickTeachers() {
+  const out = [];
+  const seen = new Set();
+  const add = (t) => {
+    if (!t) return;
+    const norm = String(t).trim();
+    if (!norm) return;
+    if (seen.has(norm)) return;
+    seen.add(norm);
+    out.push(norm);
+  };
+  if (process.env.KOLM_DISTILL_TEACHER) {
+    for (const t of String(process.env.KOLM_DISTILL_TEACHER).split(',')) add(t);
+  }
+  if (process.env.ANTHROPIC_API_KEY) add('anthropic:claude-opus-4-7');
+  if (process.env.OPENAI_API_KEY) add('openai:gpt-4o-mini');
+  return out;
 }
 
 // Resolve the mode policy: 'full' only when KOLM_DISTILL_FULL=1 + a teacher
@@ -308,6 +337,8 @@ export async function* distill({
   emit_progress_every = 100,
   tenant_id = null,                // W422 P0-4 — canonical tenant scope
   tenant = null,                   // W422 P0-4 — shorthand alias for tenant_id
+  teacher_fallback = true,         // W459 — auto-retry with next teacher on worker_error
+  resume_from = null,              // W459 — resume a prior run_<id>: replay seeds + skip completed steps
 } = {}) {
   if (!MODES.includes(pipeline_mode)) {
     throw new Error(`pipeline_mode must be one of [${MODES.join(', ')}]`);
@@ -339,13 +370,63 @@ export async function* distill({
   const _holdoutBefore = pairs.length;
   pairs = pairs.filter((p) => !(p && p.holdout_only));
   const holdout_excluded_count = _holdoutBefore - pairs.length;
-  // 2. Resolve mode + teacher.
-  const { mode: workerMode, teacher } = _resolveWorkerMode();
+  // 2. Resolve mode + teacher list (W459 — fallback-aware).
+  const { mode: workerMode } = _resolveWorkerMode();
+  const teacherList = teacher_fallback ? _pickTeachers() : (() => {
+    const one = _pickTeacher();
+    return one ? [one] : [];
+  })();
+  // Stub mode has no teacher; preserve the historical [null] shape so the
+  // attempt loop runs exactly once. teacher_fallback=false also collapses
+  // to single-shot (operator opted out of retry).
+  const attemptList = teacherList.length ? teacherList : [null];
   // 3. Stage worker inputs.
-  const runDir = _distillRunDir();
+  // W459 — when resume_from is set, reuse the prior run_<id> directory
+  // verbatim (same seeds.jsonl, same spec.json), append new progress to the
+  // existing progress.jsonl, and skip forward in the synthetic step counter
+  // to where the prior run left off. Resume is by-design tenant-local —
+  // the caller is responsible for matching tenant_id; mismatches yield an
+  // error rather than silently rebinding.
+  let runDir;
+  let resumeMeta = null;
+  let resumePriorSteps = 0;
+  if (resume_from) {
+    if (typeof resume_from !== 'string' || !/^run_[a-z0-9_]+$/i.test(resume_from)) {
+      throw new Error(`distill resume_from must match /^run_[a-z0-9_]+$/i (got ${JSON.stringify(resume_from)})`);
+    }
+    runDir = path.join(_kolmDir(), 'distill-runs', resume_from);
+    if (!fs.existsSync(runDir)) {
+      throw new Error(`distill resume_from: run dir ${runDir} does not exist`);
+    }
+    const metaPath = path.join(runDir, 'run-meta.json');
+    if (!fs.existsSync(metaPath)) {
+      throw new Error(`distill resume_from: run-meta.json missing under ${runDir}`);
+    }
+    try { resumeMeta = JSON.parse(fs.readFileSync(metaPath, 'utf8')); } catch (e) {
+      throw new Error(`distill resume_from: run-meta.json unreadable: ${e.message}`);
+    }
+    if (String(resumeMeta.tenant_id || 'local') !== String(resolvedTenant)) {
+      throw new Error(`distill resume_from: tenant mismatch (run is ${resumeMeta.tenant_id}, caller is ${resolvedTenant})`);
+    }
+    // Count prior synthetic steps in the existing progress.jsonl so the
+    // resumed iteration picks up where the previous run left off.
+    try {
+      const prog = fs.readFileSync(path.join(runDir, 'progress.jsonl'), 'utf8')
+        .split('\n').filter(Boolean);
+      resumePriorSteps = prog.length;
+    } catch (_) {}
+  } else {
+    runDir = _distillRunDir();
+  }
+  // W459 — make sure runDir exists before any in-runDir writes (run-meta,
+  // progress.jsonl, log). _distillRunDir() only creates the parent base dir;
+  // without this mkdir the first writes below silently fail under try/catch.
+  fs.mkdirSync(runDir, { recursive: true });
   // W455 — persist a run-meta file so /v1/distill/runs can list the run
   // without re-deriving everything from the worker manifest. Tenant + ns
   // + base + ts so the list view tells the user what they were training.
+  // W459 — record the planned teacher attempt list so the run is auditable
+  // even before any worker has reported back which teacher won.
   try {
     fs.writeFileSync(path.join(runDir, 'run-meta.json'), JSON.stringify({
       job_id: jobId,
@@ -355,7 +436,9 @@ export async function* distill({
       pipeline_mode,
       pair_count: pairs.length,
       worker_mode: workerMode,
-      teacher,
+      teacher: attemptList[0] || null,
+      teacher_planned: attemptList,
+      resume_from: resume_from || null,
       created_at: new Date().toISOString(),
     }, null, 2));
   } catch (_) {}
@@ -365,86 +448,137 @@ export async function* distill({
   let progressFd = null;
   const progressPath = path.join(runDir, 'progress.jsonl');
   try { progressFd = fs.openSync(progressPath, 'a'); } catch (_) {}
-  const { specPath, seedsPath, outDir } = _writeWorkerInputs({
-    runDir, namespace: teacher_namespace, pairs, baseModel: student_base, jobId,
-  });
+  // W459 — when resume_from is set, reuse the existing seeds.jsonl + spec.json
+  // verbatim (the prior run already paid the IO cost). Otherwise stage fresh
+  // worker inputs from this run's pairs.
+  let specPath, seedsPath, outDir;
+  if (resume_from) {
+    specPath = path.join(runDir, 'spec.json');
+    seedsPath = path.join(runDir, 'seeds.jsonl');
+    outDir = path.join(runDir, 'out');
+    fs.mkdirSync(outDir, { recursive: true });
+    // Yield resume marker so iterator consumers can show "resumed from X".
+    yield { resume: true, prev_steps: resumePriorSteps, run_id: resume_from };
+  } else {
+    const staged = _writeWorkerInputs({
+      runDir, namespace: teacher_namespace, pairs, baseModel: student_base, jobId,
+    });
+    specPath = staged.specPath;
+    seedsPath = staged.seedsPath;
+    outDir = staged.outDir;
+  }
   const worker = worker_cmd || process.env.KOLM_DISTILL_WORKER_CMD || DEFAULT_WORKER;
-  const args = [
-    worker,
-    `--spec=${specPath}`,
-    `--seeds=${seedsPath}`,
-    `--out=${outDir}`,
-    `--mode=${workerMode}`,
-    `--student-base=${student_base}`,
-    '--allow-unknown-student-base',
-    `--max-rows=${Math.min(max_steps, pairs.length || 200)}`,
-  ];
-  if (teacher) args.push(`--teacher=${teacher}`);
-  if (pipeline_mode !== 'kd_softmax') args.push(`--distillation-method=${pipeline_mode}`);
-  if (tokenizer_path) args.push(`--tokenizer-path=${tokenizer_path}`);
-  // Spawn detached so the parent can move on while the worker runs.
   const logPath = path.join(runDir, 'distill.log');
-  const logFd = fs.openSync(logPath, 'a');
-  const child = spawn(process.execPath, args, {
-    detached: true,
-    stdio: ['ignore', logFd, logFd],
-    env: { ...process.env, KOLM_JOB_ID: jobId },
-    windowsHide: true,
-  });
-  if (typeof child.unref === 'function') child.unref();
-  // The async iterator yields synthetic progress events as the worker is
-  // still running. Tests + callers can opt-out via emit_progress_every=0.
-  let step = 0;
-  let kAccum = 0.5;
   const start = Date.now();
-  // Wait for the worker to exit, polling for the manifest. We synthesize a
-  // few progress events so the iterator surface is consistent across
-  // stub/collect/full modes (stub mode finishes in ~50ms).
-  const stepCap = Math.min(max_steps, 10);
-  for (let i = 0; i < stepCap; i++) {
-    if (emit_progress_every <= 0) break;
-    step += 1;
-    kAccum = Math.min(k_target + 0.05, kAccum + (k_target - kAccum) / 3);
-    const evt = {
-      step,
-      loss: Math.round((1 - kAccum) * 1000) / 1000,
-      k_score: Math.round(kAccum * 1000) / 1000,
-      ts: new Date().toISOString(),
-    };
-    // W455 — append the same envelope to progress.jsonl so the per-prompt
-    // loss telemetry surface (/v1/distill/runs/:id) can read it back.
-    if (progressFd !== null) {
-      try { fs.writeSync(progressFd, JSON.stringify(evt) + '\n'); } catch (_) {}
-    }
-    yield evt;
-  }
-  // Drain the worker. We rely on the 'exit' callback via a Promise.
-  const exitInfo = await new Promise((resolve) => {
-    let resolved = false;
-    const finish = (code, signal) => {
-      if (resolved) return;
-      resolved = true;
-      try { fs.closeSync(logFd); } catch {}
-      // W455 — close the progress.jsonl fd alongside the worker-log fd.
-      if (progressFd !== null) { try { fs.closeSync(progressFd); } catch (_) {} }
-      resolve({ code, signal: signal || null });
-    };
-    if (typeof child.on === 'function') {
-      child.on('exit', (code, signal) => finish(code, signal));
-      child.on('error', () => finish(2, null));
-    } else {
-      finish(0, null);
-    }
-    // Hard deadline: 90s for stub/collect, 600s for full.
-    const deadlineMs = workerMode === 'full' ? 600_000 : 90_000;
-    setTimeout(() => finish(null, 'timeout'), deadlineMs).unref?.();
-  });
-  // Load the manifest the worker wrote (if any).
-  const manifestPath = path.join(outDir, 'manifest.json');
+  let step = resumePriorSteps;
+  let kAccum = 0.5;
+  // W459 — try each teacher in attemptList until one succeeds. A "success"
+  // means: worker exit code === 0 AND a manifest.json was written without a
+  // `teacher_error` field. On failure (rate-limit, transient API error,
+  // revoked key, worker crash) we record the attempt and roll to the next
+  // teacher. If the loop exhausts every teacher we surface the final attempt's
+  // exit + manifest so the caller can inspect the failure chain.
+  const teacher_attempts = [];
+  let teacher_used = null;
   let workerManifest = null;
-  if (fs.existsSync(manifestPath)) {
-    try { workerManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch {}
+  let exitInfo = null;
+  for (let attemptIdx = 0; attemptIdx < attemptList.length; attemptIdx++) {
+    const teacher = attemptList[attemptIdx];
+    // Per-attempt: clean the manifest from a prior failed attempt so the
+    // load check below reflects only this attempt's worker output.
+    const manifestPath = path.join(outDir, 'manifest.json');
+    if (attemptIdx > 0) {
+      try { fs.unlinkSync(manifestPath); } catch (_) {}
+    }
+    const args = [
+      worker,
+      `--spec=${specPath}`,
+      `--seeds=${seedsPath}`,
+      `--out=${outDir}`,
+      `--mode=${workerMode}`,
+      `--student-base=${student_base}`,
+      '--allow-unknown-student-base',
+      `--max-rows=${Math.min(max_steps, pairs.length || 200)}`,
+    ];
+    if (teacher) args.push(`--teacher=${teacher}`);
+    if (pipeline_mode !== 'kd_softmax') args.push(`--distillation-method=${pipeline_mode}`);
+    if (tokenizer_path) args.push(`--tokenizer-path=${tokenizer_path}`);
+    // Spawn detached so the parent can move on while the worker runs.
+    const logFd = fs.openSync(logPath, 'a');
+    const child = spawn(process.execPath, args, {
+      detached: true,
+      stdio: ['ignore', logFd, logFd],
+      env: { ...process.env, KOLM_JOB_ID: jobId, KOLM_DISTILL_ATTEMPT: String(attemptIdx + 1) },
+      windowsHide: true,
+    });
+    if (typeof child.unref === 'function') child.unref();
+    // Synthetic progress: yield a few k/loss events so the iterator surface
+    // is uniform across stub/collect/full modes (stub mode finishes in ~50ms).
+    // On a retry we keep the synthetic step counter monotonic — the previous
+    // attempt's events already shipped to consumers + progress.jsonl.
+    const stepCap = Math.min(max_steps, 10);
+    for (let i = 0; i < stepCap; i++) {
+      if (emit_progress_every <= 0) break;
+      step += 1;
+      kAccum = Math.min(k_target + 0.05, kAccum + (k_target - kAccum) / 3);
+      const evt = {
+        step,
+        loss: Math.round((1 - kAccum) * 1000) / 1000,
+        k_score: Math.round(kAccum * 1000) / 1000,
+        ts: new Date().toISOString(),
+        attempt: attemptIdx + 1,
+      };
+      if (progressFd !== null) {
+        try { fs.writeSync(progressFd, JSON.stringify(evt) + '\n'); } catch (_) {}
+      }
+      yield evt;
+    }
+    // Drain.
+    const attemptExit = await new Promise((resolve) => {
+      let resolved = false;
+      const finish = (code, signal) => {
+        if (resolved) return;
+        resolved = true;
+        try { fs.closeSync(logFd); } catch {}
+        resolve({ code, signal: signal || null });
+      };
+      if (typeof child.on === 'function') {
+        child.on('exit', (code, signal) => finish(code, signal));
+        child.on('error', () => finish(2, null));
+      } else {
+        finish(0, null);
+      }
+      const deadlineMs = workerMode === 'full' ? 600_000 : 90_000;
+      setTimeout(() => finish(null, 'timeout'), deadlineMs).unref?.();
+    });
+    // Load + classify this attempt's manifest.
+    let attemptManifest = null;
+    if (fs.existsSync(manifestPath)) {
+      try { attemptManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch {}
+    }
+    const hadTeacherError = !!(attemptManifest && attemptManifest.teacher_error);
+    const cleanExit = attemptExit.code === 0;
+    const ok = cleanExit && !hadTeacherError;
+    teacher_attempts.push({
+      attempt: attemptIdx + 1,
+      teacher,
+      exit: attemptExit,
+      teacher_error: attemptManifest && attemptManifest.teacher_error ? attemptManifest.teacher_error : null,
+      ok,
+    });
+    if (ok) {
+      teacher_used = teacher;
+      workerManifest = attemptManifest;
+      exitInfo = attemptExit;
+      break;
+    }
+    // Failed — try the next teacher (if any remain).
+    workerManifest = attemptManifest;
+    exitInfo = attemptExit;
   }
+  // W455 — close progress.jsonl after the attempt loop finishes (success or
+  // exhaustion). All synthetic events from every attempt have been appended.
+  if (progressFd !== null) { try { fs.closeSync(progressFd); } catch (_) {} }
   // The artifact_path is the worker's out dir (the .kolm itself is built by
   // src/compile-pipeline.js in the bundle phase — distill yields the path to
   // the training pairs / student weights, not a sealed .kolm).
@@ -456,8 +590,17 @@ export async function* distill({
     distill_log_path: logPath,
     worker_mode: workerMode,
     pipeline_mode,
-    teacher,
+    // W459 — `teacher` is the winning teacher (first one whose worker exited
+    // clean). `teacher_used` is the same value, exposed under both names so
+    // callers reading `done.teacher` (pre-W459) and `done.teacher_used`
+    // (W459+) both see the right value.
+    teacher: teacher_used,
+    teacher_used,
+    teacher_attempts,
+    teacher_attempted_count: teacher_attempts.length,
     pair_count: pairs.length,
+    resumed_from: resume_from || null,
+    resume_prior_steps: resumePriorSteps,
     // W411 P0 #8 — how many pairs the distill() boundary refused as
     // holdout_only. Compile-pipeline forwards this into the seed_provenance
     // block of the .kolm receipt so a verifier can confirm the chokepoint
