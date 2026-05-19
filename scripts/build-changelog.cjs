@@ -526,7 +526,20 @@ function build() {
     process.exitCode = 1;
     return { waves: 0, touched: 0 };
   }
-  const html = fullPage(entries);
+  // W456: respect the W221+W399 mega-menu nav by only replacing the auto-block
+  // between the two HTML comment markers. Falls back to fullPage() ONLY when
+  // the markers are missing entirely (first-time build).
+  let existing = '';
+  try { existing = fs.readFileSync(OUT, 'utf8'); } catch (_) {}
+  const beginAt = existing.indexOf(AUTO_BEGIN);
+  const endAt = existing.indexOf(AUTO_END);
+  let html;
+  if (existing && beginAt >= 0 && endAt > beginAt) {
+    const block = AUTO_BEGIN + '\n' + renderAutoBlock(entries) + '\n' + AUTO_END;
+    html = existing.slice(0, beginAt) + block + existing.slice(endAt + AUTO_END.length);
+  } else {
+    html = fullPage(entries);
+  }
   assertSafe(html);
   const touched = writeIdempotent(OUT, html);
   console.log(`changelog: ${entries.length} waves rendered, ${touched} files touched`);

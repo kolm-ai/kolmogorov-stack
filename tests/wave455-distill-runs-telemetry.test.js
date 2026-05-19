@@ -277,12 +277,15 @@ test('W455 #9 — /account/distill-runs.html exists with the loss-curve UI', () 
 // 10) sw.js CACHE slug includes wave455
 // =============================================================================
 
-test('W455 #10 — sw.js CACHE slug bumped to wave455 + distill-runs', () => {
+test('W455 #10 — sw.js CACHE slug references the W455+ audit-finish family', () => {
+  // Relaxed past wave455 once W456+ landed: the slug must reference one of the
+  // audit-finish family waves (W455 through W460). Matches the W446 #5 family
+  // pattern so the next wave bump does not auto-fail this assertion.
   const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
   const m = sw.match(/const CACHE = '([^']+)'/);
   assert.ok(m, 'sw.js must export a CACHE const');
   const slug = m[1];
   assert.match(slug, /kolm-v7-2026-05-19-/, 'slug must follow the v7-date convention');
-  assert.match(slug, /wave455/, 'slug must include wave455');
-  assert.match(slug, /distill-runs/, 'slug must mention distill-runs');
+  const family = ['wave455', 'wave456', 'wave457', 'wave458', 'wave459', 'wave460'];
+  assert.ok(family.some((w) => slug.includes(w)), 'sw.js CACHE slug must reference the W455+ audit-finish family, got: ' + slug);
 });

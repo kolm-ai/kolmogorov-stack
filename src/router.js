@@ -1426,6 +1426,23 @@ export function buildRouter() {
     });
   });
 
+  // W456: public changelog — marketing surface, no auth, no tenant scoping.
+  // Source of truth lives in src/changelog.js (a single static WAVES array).
+  r.get('/v1/changelog', async (req, res) => {
+    try {
+      const mod = await import('./changelog.js');
+      const limit = Math.max(1, Math.min(200, Number(req.query?.limit) || 20));
+      const since = req.query?.since ? String(req.query.since) : null;
+      const tag = req.query?.tag ? String(req.query.tag) : null;
+      const waves = mod.listWaves({ limit, since, tag });
+      const latest = mod.latestWave();
+      const total = mod.waveCount();
+      return res.json({ ok: true, count: waves.length, total, latest, waves });
+    } catch (e) {
+      return res.status(500).json({ error: 'changelog_failed', message: String(e.message || e) });
+    }
+  });
+
   // Public RS-1 spec document — open standard, no auth required.
   r.get('/v1/spec', (_req, res) => {
     res.json({

@@ -664,6 +664,27 @@ PRINTS
 EXIT CODES
   0   always (informational; for liveness use 'kolm health')
 `,
+  changelog: `kolm changelog - public wave history. No auth, no tenant data.
+
+USAGE
+  kolm changelog [--limit N] [--since W400] [--tag distill] [--json]
+
+WHAT IT PRINTS
+  Reverse-chronological list of recent waves: wave-id, date, title, summary,
+  and tags. Hits /v1/changelog on the configured base; falls back to the
+  bundled local module when offline. Same source-of-truth that drives the
+  /changelog and /roadmap recent strips.
+
+FLAGS
+  --limit N        cap rows (default 20, max 200)
+  --since W400     filter to waves >= the given wave number
+  --tag distill    filter by tag (distill, audit, hero, tui, web, ...)
+  --json           emit the raw {ok,count,total,latest,waves} envelope
+
+EXIT CODES
+  0   ok
+  2   route returned non-2xx and local fallback was unavailable
+`,
   key: `kolm key - api-key inspection (NOT the receipt-signing keys — use 'kolm keys' for that).
 
 USAGE
@@ -5193,6 +5214,72 @@ async function cmdMetrics(args) {
       console.log('    ' + k + ': ' + byKind[k]);
     }
   }
+}
+
+// W456 — `kolm changelog` is the public wave-history surface. Hits the
+// /v1/changelog public route (no auth) so anyone can scroll the recent
+// shipped waves without touching the website. Same envelope as the
+// /changelog page renders.
+async function cmdChangelog(args) {
+  if (maybeHelp('changelog', args)) return;
+  const jsonOut = args.includes('--json');
+  let limit = 20;
+  let since = null;
+  let tag = null;
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '--limit' && args[i + 1]) { limit = Number(args[++i]) || 20; }
+    else if (a.startsWith('--limit=')) { limit = Number(a.split('=')[1]) || 20; }
+    else if (a === '--since' && args[i + 1]) { since = args[++i]; }
+    else if (a.startsWith('--since=')) { since = a.split('=')[1]; }
+    else if (a === '--tag' && args[i + 1]) { tag = args[++i]; }
+    else if (a.startsWith('--tag=')) { tag = a.split('=')[1]; }
+  }
+  const c = loadConfig();
+  const base = c.base || 'https://kolm.ai';
+  const qs = new URLSearchParams();
+  qs.set('limit', String(limit));
+  if (since) qs.set('since', String(since));
+  if (tag) qs.set('tag', String(tag));
+  const url = base + '/v1/changelog?' + qs.toString();
+  let body;
+  let okFromRoute = false;
+  try {
+    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+    const json = await res.json();
+    if (res.ok && json && json.ok && Array.isArray(json.waves)) {
+      body = json;
+      okFromRoute = true;
+    }
+  } catch (_) { /* network unreachable — fall back to local module below */ }
+  if (!okFromRoute) {
+    // Local fallback: the source-of-truth ships with the CLI bundle so the
+    // verb works offline AND on bases that have not deployed /v1/changelog yet.
+    try {
+      const mod = await import('../src/changelog.js');
+      const waves = mod.listWaves({ limit, since, tag });
+      body = { ok: true, count: waves.length, total: mod.waveCount(), latest: mod.latestWave(), waves, source: 'local' };
+    } catch (ee) {
+      console.error('changelog: ' + String(ee.message || ee));
+      process.exit(2);
+    }
+  }
+  if (jsonOut) {
+    console.log(JSON.stringify(body));
+    return;
+  }
+  console.log('kolm changelog · ' + (body.total || body.count) + ' waves' + (body.source === 'local' ? ' (offline)' : ''));
+  console.log('');
+  for (const w of body.waves || []) {
+    console.log('  ' + w.wave.padEnd(12) + ' ' + (w.date || '') + '  ' + w.title);
+    if (w.summary) {
+      const wrap = String(w.summary).match(/.{1,86}(\s|$)/g) || [w.summary];
+      for (const line of wrap) console.log('    ' + line.trim());
+    }
+    if (w.tags && w.tags.length) console.log('    tags: ' + w.tags.join(', '));
+    console.log('');
+  }
+  console.log('see: ' + base + '/changelog');
 }
 
 // W409i — `kolm billing` is the canonical-verb wrapper for the tenant
@@ -16690,7 +16777,7 @@ function looksLikeNaturalLanguage(cmd, rest) {
 // Single source of truth for the verb + subcommand tables the shell completion
 // scripts consume. Keep this in sync with the dispatch switch below.
 const COMPLETION_VERBS = [
-  'init', 'signup', 'login', 'whoami', 'artifacts', 'status', 'health', 'metrics', 'billing', 'support-bundle', 'key', 'new', 'build', 'compile', 'train', 'make', 'ship', 'run', 'eval', 'benchmark', 'bench',
+  'init', 'signup', 'login', 'whoami', 'artifacts', 'status', 'health', 'metrics', 'changelog', 'billing', 'support-bundle', 'key', 'new', 'build', 'compile', 'train', 'make', 'ship', 'run', 'eval', 'benchmark', 'bench',
   'score', 'list', 'ls', 'inspect', 'eject', 'diff', 'verify', 'serve', 'tui', 'repl', 'publish', 'pull', 'hub', 'capture', 'labels', 'distill', 'moe', 'tokenize',
   'config', 'hmac', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'loop', 'logs', 'ask', 'nl', 'chat', 'chat-tui', 'version', 'help', 'completion', 'upgrade', 'update', 'self-update',
@@ -21372,6 +21459,7 @@ async function dispatchRepl(verb, rest) {
     case 'status': return withErrorContext('status', () => cmdStatus(rest));
     case 'health': return withErrorContext('health', () => cmdHealth(rest));
     case 'metrics': return withErrorContext('metrics', () => cmdMetrics(rest));
+    case 'changelog': return withErrorContext('changelog', () => cmdChangelog(rest));
     case 'support-bundle': return withErrorContext('support-bundle', () => cmdSupportBundle(rest));
     case 'key': return withErrorContext('key', () => cmdKey(rest));
     case 'list': case 'ls': return withErrorContext('list', () => cmdList(rest));
@@ -22693,6 +22781,8 @@ async function main() {
       case 'status':   await withErrorContext('status',   () => cmdStatus(rest)); break;
       case 'health':   await withErrorContext('health',   () => cmdHealth(rest)); break;
       case 'metrics':  await withErrorContext('metrics',  () => cmdMetrics(rest)); break;
+      // W456 — `kolm changelog` (public wave history; no auth).
+      case 'changelog': await withErrorContext('changelog', () => cmdChangelog(rest)); break;
       // W409i — `kolm billing` (usage|plan|tiers|invoices).
       case 'billing':  await withErrorContext('billing',  () => cmdBilling(rest)); break;
       case 'support-bundle': await withErrorContext('support-bundle', () => cmdSupportBundle(rest)); break;

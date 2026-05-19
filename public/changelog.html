@@ -252,22 +252,22 @@
       <h2>Most recent</h2>
       <div class="cl-recent-grid">
       <article class="cl-recent-card">
-        <span class="cl-tag">W399</span>
-        <h3>nav mega-menus (12-pillar surface coverage)</h3>
-        <p>user &quot;useless info, ensure ALL product surfaces are covered in primary nav, optionality to go deeper into branches&quot;.</p>
-        <time datetime="2026-05-18">2026-05-18</time>
+        <span class="cl-tag">W455</span>
+        <h3>distill-runs per-prompt loss telemetry</h3>
+        <p>closes audit P1 distill cluster open item: distill-pipeline writes ~/.kolm/distill-runs/run_*/{run-meta.json,progress.jsonl,manifest.json} on every iteration.</p>
+        <time datetime="2026-05-19">2026-05-19</time>
       </article>
       <article class="cl-recent-card">
-        <span class="cl-tag">W398</span>
-        <h3>hero rewrite (Jung-grade plain-English pass)</h3>
-        <p>user &quot;extremely unrelatable...</p>
-        <time datetime="2026-05-18">2026-05-18</time>
+        <span class="cl-tag">W454</span>
+        <h3>multimodal redact-job worker</h3>
+        <p>closes W452 deferred surface: workers/media-redact/ isolated optional-deps package (tesseract.js / pdf-parse + external whisper-cli/ffmpeg).</p>
+        <time datetime="2026-05-19">2026-05-19</time>
       </article>
       <article class="cl-recent-card">
-        <span class="cl-tag">W397</span>
-        <h3>dataset-to-bakeoff hydration</h3>
-        <p>closes W396 trap.</p>
-        <time datetime="2026-05-18">2026-05-18</time>
+        <span class="cl-tag">W453</span>
+        <h3>kolm ask --intent preview</h3>
+        <p>closes audit P1 CLI/TUI item: `kolm ask --intent / --preview` routes through /v1/intent/ask (same classifier as W415 web ask-bar) - prints proposed `kolm ...` command + confidence .</p>
+        <time datetime="2026-05-19">2026-05-19</time>
       </article>
       </div>
     </section>
@@ -275,8 +275,204 @@
     <section class="cl-history" aria-label="Full wave history">
       <h2>Full history</h2>
       <details class="cl-bucket" open>
-        <summary><span class="cl-bucket-label">May 2026</span> <span class="cl-bucket-count">83 waves</span></summary>
+        <summary><span class="cl-bucket-label">May 2026</span> <span class="cl-bucket-count">105 waves</span></summary>
         <ol class="cl-timeline">
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W455</span>
+          <h3 class="cl-row-title">distill-runs per-prompt loss telemetry</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">closes audit P1 distill cluster open item: distill-pipeline writes ~/.kolm/distill-runs/run_*/{run-meta.json,progress.jsonl,manifest.json} on every iteration; new listDistillRuns/readDistillRun (tenant_id filter fail closed + /^run_[a-z0-9_]+$/i path-traversal chokepoint); GET /v1/distill/runs[/:id] auth-gated routes</p>
+        <p class="cl-pills"><span class="cl-pill">distill</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W454</span>
+          <h3 class="cl-row-title">multimodal redact-job worker</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">closes W452 deferred surface: workers/media-redact/ isolated optional-deps package (tesseract.js / pdf-parse + external whisper-cli/ffmpeg); new POST /v1/media/redact-job spawns the worker (sync, 5min timeout); new `kolm media doctor` + `kolm media redact-job` CLI verbs (--remote proxies through router)</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W453</span>
+          <h3 class="cl-row-title">kolm ask --intent preview</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">closes audit P1 CLI/TUI item: `kolm ask --intent / --preview` routes through /v1/intent/ask (same classifier as W415 web ask-bar) - prints proposed `kolm ...` command + confidence + alternatives WITHOUT executing. /v1/assistant default path unchanged (still does Q&amp;A + can trigger compiles server-side). 5 tests + 3775/3...</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">tui</span><span class="cl-pill">tests</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W451-W452</span>
+          <h3 class="cl-row-title">/452 no-teacher synth default + multimodal redactor routes</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">W451 compileFull defaults synthesize_recipe:true when no teacher env wired (rule-class W438 synth path auto-engages; explicit opt:false still wins); W452 first-class POST /v1/redact + POST /v1/media/redact routes (256 KiB cap, map_hash response, multimodal deferral envelope for image/audio/video/pdf with worker hints -...</p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W449-W450</span>
+          <h3 class="cl-row-title">/450 billing TUI parity + settings triangle</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">W449 adds TUI billing view (key I) closing the /account/billing triangle; W450 ships new /account/settings triangle: route GET+PUT with whitelist+enum validation + AUDIT_OPS.SETTINGS_UPDATED, new `kolm settings show/set k=v` CLI verb, new TUI settings view (key F), new public/account/settings.html page with 9 fields (d...</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">tui</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W448</span>
+          <h3 class="cl-row-title">audit-log triangle</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">closes P1 /account/audit-log triangle: route now accepts ?format=csv + ?since=&lt;iso|epoch&gt;, new `kolm audit` CLI verb (distinct from `kolm auditor` signing tool), new TUI audit-log view (key E) + VIEW_ALIAS audit/auditlog/audit-log; 7 W448 tests + 3826/3848 full sweep; sw.js wave448-audit-log-triangle</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">tui</span><span class="cl-pill">tests</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W447</span>
+          <h3 class="cl-row-title">DoD fixture full-sweep fix</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">bumped DoD #8/#9/#10 from 60 → 100 rows + unique-per-run ns/event_ids so binomial 80/20 split never dips below MIN_PRODUCTION_HOLDOUT=10 (was ~20% flake at 60 rows, now ~0.6%); 3819/3841 full sweep green; commit 4579697 deployed kolm.ai; rule for production-floor fixtures: min_rows &gt;= (floor + 4·sd) / holdout_ratio.</p>
+        <p class="cl-pills"><span class="cl-pill">tests</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W443-W446</span>
+          <h3 class="cl-row-title">audit-finish batch</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">W443 DoD compile honesty (synthClassifier TF-IDF rewrite + coverage K-score V semantics + evalParity floor uses accuracy not composite K → K=0.9843 production_ready:true); W444 kolm lake storage+retention verbs (config-stored lake_retention_days, apply dry-run by default)</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W438-W439</span>
+          <h3 class="cl-row-title">real compile + incremental retrain</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">W438 closes audit item 5 (rule-class real synth-path compile, allow_below_gate defaults true so productionReady verdict gates instead of buildPayload throw, 5+4 tests, LM lane env-gated KOLM_DISTILL_TEACHER + KOLM_DISTILL_FULL)</p>
+        <p class="cl-pills"><span class="cl-pill">tests</span><span class="cl-pill">distill</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W437</span>
+          <h3 class="cl-row-title">full-suite green</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">closes 6 post-W436 audit-flagged test failures: W409lm #6/#7 (thread tenantId into seedEvents), W384 #14 (seed real opportunity instead of synthetic ID), wave202 (add &#39;bridges&#39; to COMPLETION_VERBS), wave206 (add &#39;bridges&#39; to ALLOWED_GAPS), site.test self-trip (hex-escape U+FFFD + cp1252 sentinels in wave431), W397 #6 (...</p>
+        <p class="cl-pills"><span class="cl-pill">tests</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W433-W436</span>
+          <h3 class="cl-row-title">DoD closure batch</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">closes 4 remaining DoD gaps after the user pushed back &quot;are you sure?&quot; on a premature done-declaration: W433 /v1/whoami SDK alias, W434 /v1/drift/{snapshot,detect,report} HTTP surface, W435 /v1/bridges/observations ?since= + CLI cmdBridges + --since-last-compile, W436 /v1/verify/:cid + new POST /v1/artifact/verify-mani...</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W419-W432</span>
+          <h3 class="cl-row-title">audit-finish batch</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">closes 13-item w415-outstanding-diffs audit (P0-1 W419 opportunity tenant, P0-2 W420 pipeline force, P0-3 W421 distill real-bridge, P0-5 W423 media-capture tenant_id, P0-6 W424 agent-telemetry, P1-1 W425 trace, P1-5 W429 job _ownedBy canonical id, P1-6 W430 distill metadata, P2-1 W431 mojibake guard, + W432 snapshotCon...</p>
+        <p class="cl-pills"><span class="cl-pill">distill</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W427</span>
+          <h3 class="cl-row-title">local:* meter exclusion (P1-3 closer)</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">one-line fix in src/usage.js shouldMeter(): `if (tid &amp;&amp; tid.startsWith(&#39;local:&#39;)) return false;` so local-daemon traffic stamped `local:&lt;host&gt;` (router.js:447) stops being metered by connector proxy (router.js:2274); 12/12 + static-source pin</p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W415</span>
+          <h3 class="cl-row-title">NL ask-bar on /account/overview</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">POST /v1/intent/ask classifyIntent envelope + exact `kolm ...` command + alternatives + confidence pill + copy buttons; mirrors `kolm do` on the web; 7 tests + sw.js wave415; trap: ESM tests need fileURLToPath(import.meta.url) for __dirname.</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">tests</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W414</span>
+          <h3 class="cl-row-title">TUI Next-actions view + /docs/verify page</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">closes 3-surface triangle (CLI `kolm next` + web /account/overview + TUI); 15th TUI view (key N, kind=get, endpoint /v1/intent/next); loadViewGet envelope chain extended with `Array.isArray(data.recommendations)` branch; status bar + ?-help + empty-detail help + VIEW_ALIAS all advertise N=next + `:next`</p>
+        <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">tui</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W413</span>
+          <h3 class="cl-row-title">Next-Actions panel on /account/overview</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">new auth-gated `/v1/intent/next` route mirrors `kolm next` CLI; injects Next-Actions panel ABOVE W409i 9-counter grid on `/account/overview.html` with copy-buttons per rec; 5 W413 tests + 3540/3560 sweep + sw.js wave413</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">tests</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W411</span>
+          <h3 class="cl-row-title">P0 correctness lock-in</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">12 atoms (tenant_id parity, content-dedupe, fail-closed redaction, worker-input-spy, redaction leak, backfill defaults, golden e2e) + 8 sweep-stabilizers (W258 byte-marker slice-to-boundary, W368/W407b sentinel=`local:&lt;host&gt;`+100k limit, W375/em-dash, W384 #16/#19/#23, W206 ALLOWED_GAPS, W397 #6 lower-bound, W409m #7 `...</p>
+        <p class="cl-pills"><span class="cl-pill">tests</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W405</span>
+          <h3 class="cl-row-title">Apple-style restraint</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">fixed 25-section wall-of-text home vs frontier 5-8 sections; deleted 5 sections (~1100 lines: tax/after-compile/vr-calc/access/uc-strip moved to /taxonomy /docs /roi /remote verticals); hero artifact phi-redactor→qwen3.6-27b (frontier framing); W404 num-phi→num-frontier; section 2 dropped 35-field schema</p>
+        <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">hero</span><span class="cl-pill">models</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W404</span>
+          <h3 class="cl-row-title">visual audit + structure/copy</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">Playwright shot 9 ours + 20 competitors; 5-cut: 3 debug-pill leaks (product/runtimes/tui) removed, W221 nav normalized on /models + /healthcare, W404 numbers strip (17 PHI / 13×5 distill / 10 hw / 14 receipt) below hero, /enterprise + /pricing H1 compressed via `!important` beating brand-refresh.css:504, /captures H1 p...</p>
+        <p class="cl-pills"><span class="cl-pill">captures</span><span class="cl-pill">hero</span><span class="cl-pill">nav</span><span class="cl-pill">models</span><span class="cl-pill">runtime</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W403</span>
+          <h3 class="cl-row-title">surface-map + proxy dogfood</h3>
+          <time datetime="2026-05-19">2026-05-19</time>
+        </div>
+        <p class="cl-row-sum">W373 sec 1-6 plain-English rewrite + sec 3 11→12 cards (bake-off frontier-vs-frontier); new sec 7 `data-w403=&quot;surface-grid&quot;` 8-card 40-link map; W373+W403 CSS injection (sec 1-6 had no styles); /datasets vercel rewrite; sw.js wave403</p>
+        <p class="cl-pills"><span class="cl-pill">models</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W402</span>
+          <h3 class="cl-row-title">hero &quot;the local AI stack&quot;</h3>
+          <time datetime="2026-05-18">2026-05-18</time>
+        </div>
+        <p class="cl-row-sum">user &quot;people use our product for all sorts of stuff from api saving to compiling and distillation to enterprise ai to training frontier models&quot;; H1 13 words: `.h1-claim`=&quot;Your own AI stack.&quot; + `.stop`=&quot;Compile workflows. Distill models. Train frontier.&quot; + `.pain`=&quot;On hardware you control.&quot;; lede enumerates 5 use cases</p>
+        <p class="cl-pills"><span class="cl-pill">hero</span><span class="cl-pill">models</span><span class="cl-pill">enterprise</span><span class="cl-pill">distill</span></p>
+      </li>
+      <li class="cl-row">
+        <div class="cl-row-head">
+          <span class="cl-tag">W400-W401</span>
+          <h3 class="cl-row-title">/401 docs-audit batch close</h3>
+          <time datetime="2026-05-18">2026-05-18</time>
+        </div>
+        <p class="cl-row-sum">closer for docs-vs-$10B-SOTA audit; fixed wave206 #1 (docs.html 35k→46k Zone 5 Reference matrix), wave206 #4 (added `kolm improve`+`key`/`import` ALLOWED_GAPS), site.test.js #4 (built /docs/agent-guide + /docs/state); 3268/3284 + sw.js wave401, 6 prod routes 200.</p>
+        <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
+      </li>
       <li class="cl-row">
         <div class="cl-row-head">
           <span class="cl-tag">W399</span>
@@ -328,8 +524,7 @@
           <h3 class="cl-row-title">finish everything (8-agent batch)</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">driven by user end-to-end trial (10 bugs W338 missed) + &quot;$10B 100x UX no honesty bullshit&quot; mandate; 8 parallel agents shipped: A production-verdict (src/production-ready.js, 5 marketplace routes, cmdRun --strict/--force) / B real claims-redactor.kolm (60 seeds, 21 PHI, K=0.985) / C eval-bench parity (src/case-scorer.js...</p>
-        <p class="cl-pills"><span class="cl-pill">marketplace</span></p>
+        <p class="cl-row-sum">8 parallel agents: A production-verdict + cmdRun --strict/--force; B real claims-redactor.kolm (60 seeds, K=0.985); C eval-bench parity + probe cleanup; D node:http api() Windows libuv crash fix + mobile=Gemma 3n; F NL intent classifier (src/intent.js 1055 LOC + cmdDo/What/Next/Explain/Fix); G 5 seeds modules</p>
       </li>
       <li class="cl-row">
         <div class="cl-row-head">
@@ -337,7 +532,7 @@
           <h3 class="cl-row-title">reality audit (codex-grade)</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">W336 codebase agent + W337 backend agent + manual file:line spot-check; 13 compute backends are REAL (fal/replicate/runpod=HTTPS+poll, modal=spawn CLI, lambda/vast=honest list+SSH-handle, remote-ssh=ssh spawn, 6 local-*=child_process with device env)</p>
+        <p class="cl-row-sum">13 compute backends REAL (fal/replicate/runpod=HTTPS+poll, modal=spawn CLI, lambda/vast=SSH-handle, 6 local-*=child_process); closed P0 (router.js:3847 misleading TODO) + P2 (280-LOC workers/quantize/scripts/quantize.py for int4/8/gptq/awq); 105/105 W212/W213/W287-W291/W293/W297 green</p>
         <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">compute</span></p>
       </li>
       <li class="cl-row">
@@ -363,25 +558,25 @@
           <h3 class="cl-row-title">sprint scorecard + prod deploy</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">W326 sweep (216/216 W3xx after em-dash fix); W327 W211-W325 cross-sweep (2599/2615) caught 3 regressions: W218 cmdDoctor slice 4000→14000 (W298 --loop pushed --detect-hw past window), W206 docs for 5 inspection verbs (combined inspection.md), value-loop em-dash</p>
-        <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
+        <p class="cl-row-sum">W326 sweep 216/216 + W327 W211-W325 cross-sweep 2599/2615 caught 3 regressions (W218 doctor slice 4000→14000, W206 docs for 5 inspection verbs, value-loop em-dash); W328 lighthouse static audit; W329 sitemap 298→317; W330 vercel prod 49s; W331 9/9 prod 200</p>
+        <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">seo</span><span class="cl-pill">tests</span><span class="cl-pill">ops</span></p>
       </li>
       <li class="cl-row">
         <div class="cl-row-head">
           <span class="cl-tag">W322-W325</span>
-          <h3 class="cl-row-title">/quickstart/{cli,api,sdk,embed} per-surface subpages</h3>
+          <h3 class="cl-row-title">/quickstart/{cli,api,sdk,embed}</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">4 focused 5-step walkthroughs; shared invariants (title `· kolm.ai`, canonical, 5-anchor nav W221, skip-link W207, JSON-LD TechArticle W225/W226, brand anchor first 1200 chars W228, cross-links to peer surfaces)</p>
+        <p class="cl-row-sum">4 focused 5-step walkthroughs; shared invariants (title `· kolm.ai`/canonical/5-anchor nav W221/skip-link W207/JSON-LD TechArticle W225/W226/brand anchor 1200 chars W228); cli=5 verbs, api=15-row endpoint cheat-sheet, sdk=TS+Python tabs, embed=3 target cards; vercel 4 rewrites; sw.js wave325</p>
         <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">nav</span><span class="cl-pill">quickstart</span><span class="cl-pill">seo</span></p>
       </li>
       <li class="cl-row">
         <div class="cl-row-head">
           <span class="cl-tag">W318-W321</span>
-          <h3 class="cl-row-title">CLI inspection: whoami --json polish + kolm artifacts {list,show,diff}</h3>
+          <h3 class="cl-row-title">CLI inspection + kolm artifacts</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">W318 stable JSON envelope (logged_in/base/cli_version/key_fingerprint/tenant{id,name,plan,quota,seats,email}/_raw) with prefix+suffix-only fingerprint; W319/W320/W321 new `kolm artifacts` verb hits /v1/artifacts + /v1/artifacts/:id with field-diff suppression</p>
+        <p class="cl-row-sum">W318 stable JSON envelope (logged_in/base/cli_version/key_fingerprint/tenant) prefix+suffix-only fingerprint; W319-W321 `kolm artifacts {list,show,diff}` hits /v1/artifacts; wired into both dispatchers + HELP + COMPLETION_VERBS; trap: env spawn must delete KOLM_API_KEY or it overrides fresh config.</p>
         <p class="cl-pills"><span class="cl-pill">cli</span></p>
       </li>
       <li class="cl-row">
@@ -390,7 +585,7 @@
           <h3 class="cl-row-title">/captures inbox UI polish</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">W314 client-side substring search (#search-filter + debounce + MutationObserver re-apply across SSE), W315 ?namespace= deep link + history.replaceState round-trip + render preference for state.ns, W316 promote-confirm modal (role=dialog, aria-modal, Escape, backdrop click) intercepts a.prom navigation, W317 CSV downloa...</p>
+        <p class="cl-row-sum">W314 client-side substring search + MutationObserver re-apply across SSE; W315 ?namespace= deep link + history.replaceState; W316 promote-confirm modal (role=dialog, aria-modal, Escape, backdrop click); W317 CSV download honoring search filter + RFC4180 escape; pattern: client-side filter &gt; server param</p>
         <p class="cl-pills"><span class="cl-pill">captures</span></p>
       </li>
       <li class="cl-row">
@@ -399,7 +594,7 @@
           <h3 class="cl-row-title">/value-loop try-it-now form</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">new public anonymous `POST /v1/loop/try` returns the real receipt envelope with `demo:true`+`durable:false` body + headers `x-kolm-capture-durable:false`+`x-kolm-capture-demo:true`; 2000-char cap → 413; templateSignature() hash is real</p>
+        <p class="cl-row-sum">POST /v1/loop/try public anonymous returns real receipt + `demo:true`+`durable:false` body + headers; 2000-char cap → 413; templateSignature() hash real; inline form with 5s AbortController; trap: express.Router not full app - wrap in app.use(express.json()) for smokes.</p>
         <p class="cl-pills"><span class="cl-pill">receipts</span></p>
       </li>
       <li class="cl-row">
@@ -408,7 +603,7 @@
           <h3 class="cl-row-title">/value-loop live status badge</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">`&lt;div id=loop-status role=status data-state=checking aria-live=polite&gt;` on /value-loop probes /health (cache:no-store) with 4s AbortController timeout; sets green on 200, red on HTTP error, **amber** on network error (visitor-network bias); sessionStorage &#39;kolm-loop-status&#39; 60s TTL suppresses flash</p>
+        <p class="cl-row-sum">loop-status pill probes /health w/4s AbortController; green=200/red=HTTP-error/**amber**=network-error (visitor-network bias); sessionStorage 60s TTL suppresses flash.</p>
       </li>
       <li class="cl-row">
         <div class="cl-row-head">
@@ -416,7 +611,7 @@
           <h3 class="cl-row-title">walkLoop parallel-flake fix</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">two-layer root cause: (1) .env&#39;s KOLM_STORE_DRIVER=sqlite + dotenv loading before store.js means parallel tests fight same data/kolm.sqlite - fixed by PRAGMA busy_timeout=30000 in same exec block as journal_mode=WAL</p>
+        <p class="cl-row-sum">(1) .env KOLM_STORE_DRIVER=sqlite + dotenv loads before store.js → parallel tests fight ./data/kolm.sqlite; fixed by PRAGMA busy_timeout=30000 in same exec as journal_mode=WAL; (2) walkLoop fetch() crashed libuv on Windows exit → node:http rewrite (W305 pattern)</p>
         <p class="cl-pills"><span class="cl-pill">tests</span></p>
       </li>
       <li class="cl-row">
@@ -425,8 +620,8 @@
           <h3 class="cl-row-title">+305 status + health verbs</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">`kolm status` local snapshot (version/base/key-fingerprint/jobs) + `kolm health` cloud ping (exit 0/1/2 healthy/down/slow + --json + --slow-ms + --timeout-ms); 13/13 tests; CRITICAL TRAP - fetch() crashes libuv on Windows process.exit() (STATUS_STACK_BUFFER_OVERRUN), fixed by switching probe() to node:http directly</p>
-        <p class="cl-pills"><span class="cl-pill">cli</span><span class="cl-pill">tests</span></p>
+        <p class="cl-row-sum">`kolm status` local snapshot + `kolm health` cloud ping (exit 0/1/2 healthy/down/slow); TRAP: fetch() crashes libuv on Windows process.exit() (STATUS_STACK_BUFFER_OVERRUN), use node:http not fetch.</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span></p>
       </li>
       <li class="cl-row">
         <div class="cl-row-head">
@@ -434,8 +629,8 @@
           <h3 class="cl-row-title">+303 loop NEXT STEPS + --remote</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">green run prints 5 copy-pasteable follow-on verbs (proxy/tail/distill/replay + docs URL); `kolm loop --remote` walks same 5 rungs against loadConfig().base; walkLoop() helper extracted so both modes share one body; W303 #5 source-test guards single source of truth; JSON payload now tags mode:&#39;remote&#39;|&#39;in-process&#39;</p>
-        <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">tests</span><span class="cl-pill">distill</span><span class="cl-pill">replay</span></p>
+        <p class="cl-row-sum">green run prints 5 copy-pasteable follow-on verbs; `kolm loop --remote` walks 5 rungs against loadConfig().base; walkLoop() shared; JSON payload tags mode:&#39;remote&#39;|&#39;in-process&#39;.</p>
+        <p class="cl-pills"><span class="cl-pill">cli</span></p>
       </li>
       <li class="cl-row">
         <div class="cl-row-head">
@@ -443,8 +638,8 @@
           <h3 class="cl-row-title">value-loop lock-in + corpus_namespace bugfix</h3>
           <time datetime="2026-05-18">2026-05-18</time>
         </div>
-        <p class="cl-row-sum">8-test in-process HTTP harness against buildRouter() walks capture→SSE→bridges→distill→replay + cross-tenant isolation; locks in W297 fix to /v1/bridges/observations where recordCapture writes corpus_namespace but handler filtered on namespace (made post-W212 captures invisible)</p>
-        <p class="cl-pills"><span class="cl-pill">captures</span><span class="cl-pill">tests</span><span class="cl-pill">distill</span><span class="cl-pill">replay</span></p>
+        <p class="cl-row-sum">8-test buildRouter() harness walks capture→SSE→bridges→distill→replay + cross-tenant isolation; W297 fix /v1/bridges/observations: recordCapture writes corpus_namespace but handler filtered on namespace; template_hash needs identical prompts for cluster ≥4; 2478 sweep green.</p>
+        <p class="cl-pills"><span class="cl-pill">tests</span><span class="cl-pill">distill</span><span class="cl-pill">replay</span></p>
       </li>
       <li class="cl-row">
         <div class="cl-row-head">
@@ -974,7 +1169,7 @@
           <h3 class="cl-row-title">- codebase spec + dead-CSS cleanup. Public `/spec/codebase` shipped (public/spec/codebase.html ~330 lines, academic-paper layout modeled on rs-1.html, v1.0 citeable URL, 12 numbered sections distilled from INTERNAL_BACKEND_SPEC.md with all gap-analysis stripped, 4 tables: Module/Path/LOC/Role + Trust class + Persistence class + CLI verb, Apache-2.0 framing, section 10 &quot;What this codebase is not&quot; honestly states no durable storage in OSS runtime / no external queue / no proprietary inference engine / no telemetry). Vercel rewrite /spec/codebase→codebase.html + sitemap entry priority 0.8 (206→207) + discoverable card on /spec.html. Dead CSS cleanup in public/index.html (3374→3281 lines -93 LOC): deleted orphan .cred-band block (~19 lines) + .dp-bar block (~21 lines) + .lab-strip + 25 .ls-* child classes (~51 lines) all 0 HTML usages after v7.2; restored single @keyframes ls-blink because .cassette-meta .rec::before still uses it. Deployed kolm.ai 2026-05-15.</h3>
           <time datetime="2026-05-15">2026-05-15</time>
         </div>
-        <p class="cl-row-sum">User directive: ship the full product offering end-to-end. Vercel kolm-kz9s1xs1t-mithrilpro 32s aliased kolm.ai (public dir only, no Railway redeploy needed) + parallel audits all green against prod: smoke-live 103/0 + audit-buyer-journey 30/30 + e2e...</p>
+        <p class="cl-row-sum">User directive: &quot;i need you to do ALL OF THIS in WAVES and FINISH OUR ENTIRE PRODUCT OFFERING SOUP TO NUTS TO BOLTS. 100% DONE.&quot; Vercel kolm-kz9s1xs1t-mithrilpro 32s aliased kolm.ai (public dir only, no Railway redeploy needed) + parallel audits all green against prod: smoke-live 103/0 + audit-buyer-journey 30/30 + e2e...</p>
         <p class="cl-pills"><span class="cl-pill">docs</span><span class="cl-pill">cli</span><span class="cl-pill">runtime</span><span class="cl-pill">seo</span><span class="cl-pill">distill</span></p>
       </li>
       <li class="cl-row">
