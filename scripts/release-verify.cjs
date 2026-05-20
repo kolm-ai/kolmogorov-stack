@@ -6,7 +6,8 @@
 // never hang, and per-gate progress so the user always knows where it is.
 //
 // Gates, in order:
-//   1.  npm run lint:refs                (static-ref + href integrity)
+//   1.  npm run lint:refs                (static-ref + href integrity + product-surface
+//                                         catalog vs api-routes.json contract)
 //   2.  openapi-sync                     (W490: public/openapi.json covers every
 //                                         non-stub route in api-routes.json)
 //   3.  sdk-manifest                     (current + versioned browser SDK assets
@@ -14,16 +15,22 @@
 //   4.  npm test                         (full test suite, --test-concurrency=1)
 //   5.  SDK smoke against local server   (boots PORT=3939, then runs
 //                                         sdk/node/test/sdk.test.mjs)
-//   6.  kolm doctor --json               (ok:true + blockers:0 unless --allow-logged-out)
-//   7.  kolm whoami --json               (logged_in:true unless --allow-logged-out)
-//   8.  kolm verify <kolm> --json        (ok:true + production_ready:true)
-//   9.  kolm billing tiers --json        (data is non-empty tier list)
+//   6.  local-surfaces                   (W545: boots an isolated server, provisions
+//                                         a disposable tenant, runs every safe
+//                                         production_smoke probe declared in
+//                                         docs/product-surfaces.json. With
+//                                         --deep-surfaces also runs deep probes.)
+//   7.  kolm doctor --json               (ok:true + blockers:0 unless --allow-logged-out)
+//   8.  kolm whoami --json               (logged_in:true unless --allow-logged-out)
+//   9.  kolm verify <kolm> --json        (ok:true + production_ready:true)
+//  10.  kolm billing tiers --json        (data is non-empty tier list)
 //
 // Invocation:
 //   node scripts/release-verify.cjs                       # all gates
 //   node scripts/release-verify.cjs --skip=test           # skip a gate by name
 //   node scripts/release-verify.cjs --json                # one machine-readable line
 //   node scripts/release-verify.cjs --allow-logged-out    # accept rejected api-key
+//   node scripts/release-verify.cjs --deep-surfaces       # local-surfaces gate runs --deep
 //   node scripts/release-verify.cjs --test-timeout-ms=1800000  # full suite gate ceiling
 //   node scripts/release-verify.cjs --test-shards=8            # run sorted tests in 8 chunks
 //   node scripts/release-verify.cjs --timeout-ms=2100000       # wall ceiling (default = test timeout + 5m)
@@ -55,6 +62,7 @@ const CLAIMS_KOLM = path.join(REPO_ROOT, 'examples', 'claims-redactor', 'claims-
 const args = process.argv.slice(2);
 const jsonMode = args.includes('--json');
 const allowLoggedOut = args.includes('--allow-logged-out');
+const deepSurfaces = args.includes('--deep-surfaces');
 const skipFlag = args.find((a) => a.startsWith('--skip='));
 const skipSet = new Set(skipFlag ? skipFlag.slice('--skip='.length).split(',').map((s) => s.trim()) : []);
 const timeoutFlag = args.find((a) => a.startsWith('--timeout-ms='));
@@ -490,6 +498,70 @@ async function gateSdkSmoke() {
   }
 }
 
+// W545 — product-surface contract gate. Boots an isolated server, provisions a
+// disposable tenant, and runs the structured production_smoke probes declared in
+// docs/product-surfaces.json against the running server. This is the local-mode
+// equivalent of the prod-surface-smoke runner; it certifies that every documented
+// product surface still answers per its contract, not just that some endpoint
+// exists.
+async function gateLocalSurfaces() {
+  if (!shouldRun('local-surfaces')) return recordResult('local-surfaces', true, { skipped: true });
+  progress(`local-surfaces ${deepSurfaces ? '(deep) ' : ''}starting`);
+  const t = Date.now();
+  const argv = [path.join('scripts', 'local-surface-smoke.cjs'), '--json'];
+  // --deep adds the additional deep-mode probes (e.g. /v1/intent/ask round-trip
+  // against a provisioned tenant). Safe mode covers all 49 safe probes.
+  if (deepSurfaces) {
+    argv.push('--deep');
+    argv.push('--timeout-ms=60000');
+  } else {
+    argv.push('--timeout-ms=30000');
+  }
+  // local-surface-smoke spends most of its time booting the server + provisioning
+  // a tenant + sequentially probing 49 (safe) or 58 (deep) endpoints. 300s is
+  // a comfortable ceiling that still trips on real hangs.
+  const r = runSync(nodeBin, argv, { silent: true, timeoutMs: 300_000 });
+  const stdoutText = r.stdout || '';
+  const stderrText = r.stderr || '';
+  let parsed = null;
+  // The smoke runner emits one JSON document; tolerate trailing whitespace.
+  try { parsed = JSON.parse(stdoutText.trim()); } catch (_) {}
+  if (!parsed) {
+    recordResult('local-surfaces', false, {
+      detail: 'non-JSON output from local-surface-smoke (first 300 stdout / last 300 stderr): '
+        + stdoutText.slice(0, 300) + ' || ' + stderrText.slice(-300),
+      duration_ms: Date.now() - t,
+    });
+    return false;
+  }
+  const exitOk = r.status === 0;
+  const okFlag = parsed.ok === true;
+  const failed = Number(parsed.failed || 0);
+  const blocked = Number(parsed.blocked || 0);
+  const passed = Number(parsed.passed || 0);
+  const probes = Number(parsed.probes || 0);
+  const surfaces = Array.isArray(parsed.surfaces) ? parsed.surfaces.length : 0;
+  const ok = exitOk && okFlag && failed === 0 && blocked === 0;
+  const detail = ok
+    ? `${passed}/${probes} probes across ${surfaces} surfaces (deep=${!!parsed.deep})`
+    : `ok=${okFlag} exit=${r.status} passed=${passed} failed=${failed} blocked=${blocked} (deep=${!!parsed.deep}); first failures: `
+      + (parsed.results || []).filter((p) => !p.ok).slice(0, 3)
+        .map((p) => `${p.surface}/${p.probe && p.probe.id} :: ${(p.reason || (p.failures || []).join(';'))}`)
+        .join(' | ');
+  recordResult('local-surfaces', ok, {
+    detail,
+    duration_ms: Date.now() - t,
+    deep: !!parsed.deep,
+    surfaces,
+    probes,
+    passed,
+    failed,
+    blocked,
+  });
+  progress(`local-surfaces ${ok ? 'PASS' : 'FAIL'} ${passed}/${probes} in ${((Date.now() - t) / 1000).toFixed(1)}s`);
+  return ok;
+}
+
 // Run kolm CLI, parse JSON, hand the parsed envelope to a validator.
 // validator(parsed, raw) => { ok: boolean, reason?: string }
 function gateCli(name, argv, validator) {
@@ -525,6 +597,7 @@ function gateCli(name, argv, validator) {
   await gateSdkManifest();
   await gateTests();
   await gateSdkSmoke();
+  await gateLocalSurfaces();
 
   // doctor: ok:true + blockers:0 — unless --allow-logged-out, in which case
   // we both pass the flag THROUGH to the CLI (so it demotes the api-key

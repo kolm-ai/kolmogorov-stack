@@ -1,5 +1,17 @@
 # Final Backend Audit - 2026-05-20
 
+## Update — 2026-05-20 (post-W545)
+
+Three of the five blockers below have changed state:
+
+- **Blocker #3 refuted.** `node scripts/prod-surface-smoke.cjs --json --surface=public-docs-sdk` now returns `7/7` against `https://kolm.ai` from this shell with sub-second RTTs. The earlier `AggregateError` was transient; DNS resolves to two IPv4 A-records (no AAAA), so there is no dual-stack hazard. The Node prod runner is unblocked.
+- **Blocker #5 closed.** The working tree at the time of the original audit was committed as `685eeaf` (`W543 — whole-site production pass + W544 backend audit + surface verifier`) on top of `fce2824` and pushed to `origin/main` and `public/main`. Vercel/Railway redeploys auto-fired off the public push.
+- **Product-surface contract is now a release gate.** `scripts/release-verify.cjs` adds `local-surfaces` as gate #6 (after `sdk-smoke`, before `doctor`). It boots an isolated server, provisions a disposable enterprise tenant, and runs every `production_smoke` probe declared in `docs/product-surfaces.json`. `--deep-surfaces` adds deep probes. Verified `49/49` (safe) and `58/58` (deep) across all 7 surfaces.
+
+Blockers #1, #2, and #4 remain — they require provisioning a valid prod API key and (optionally) a hosted model provider. These are external infra actions, not code defects. The truthful verdict is unchanged: **NOT FINAL — PRODUCTION AUTH BLOCKED.**
+
+---
+
 ## Final Verdict
 
 **NOT FINAL - PRODUCTION AUTH BLOCKED**
@@ -63,6 +75,8 @@ a0afef6 W475-W479 - total completion: marketplace seed, scrub, real CLI/SDK, rel
 | Release verifier | `node scripts\release-verify.cjs --json --test-timeout-ms=1800000 --timeout-ms=2100000` | FAIL overall due `whoami`, but local gates PASS |
 | Release verifier local tests | same command | PASS: `pass 4357 / fail 0` |
 | SDK smoke | same command | PASS: `sdk smoke green` |
+| Local product surfaces (release-verify gate, W545) | `node scripts\release-verify.cjs --skip=test,sdk-smoke --allow-logged-out --json` | PASS: `49/49 probes across 7 surfaces (deep=false)` |
+| Local product surfaces deep (release-verify gate, W545) | `node scripts\release-verify.cjs --deep-surfaces --skip=test,sdk-smoke --allow-logged-out --json` | PASS: `58/58 probes across 7 surfaces (deep=true)` |
 
 Release verifier gate summary:
 
@@ -120,11 +134,11 @@ No `--allow-logged-out` result is accepted as final evidence.
 
 ## Blockers To 100%
 
-1. **Production auth is invalid or revoked.** `whoami` returns `logged_in:false`; `doctor` reports `api key (server)` missing.
-2. **Authenticated production product surfaces are not certified.** Local safe/deep surface probes pass, but production auth-required routes cannot be exercised.
-3. **The product-surface Node prod runner cannot fetch prod from this shell.** CLI health can reach prod, but direct Node fetch probes return status `0` / `AggregateError`; CI or an unrestricted runner must execute the prod surface pack.
-4. **Production model provider is optional but unset.** `/ready` stays 200, but hosted provider-dependent inference surfaces are not proven.
-5. **The working tree is not committed.** This audit covers the current working tree based on `fce2824`; a final certification must run on a committed deployed revision.
+1. **Production auth is invalid or revoked.** `whoami` returns `logged_in:false`; `doctor` reports `api key (server)` missing. **External — needs a freshly provisioned prod API key.**
+2. **Authenticated production product surfaces are not certified.** Local safe/deep surface probes pass, but production auth-required routes cannot be exercised. **Blocked on #1.**
+3. ~~**The product-surface Node prod runner cannot fetch prod from this shell.**~~ **REFUTED 2026-05-20 post-W545.** `node scripts/prod-surface-smoke.cjs --json --surface=public-docs-sdk` now returns `7/7` from this shell with sub-second RTTs against `https://kolm.ai`.
+4. **Production model provider is optional but unset.** `/ready` stays 200, but hosted provider-dependent inference surfaces are not proven. **External — needs `KOLM_MODEL_PROVIDER` configured on Vercel/Railway.**
+5. ~~**The working tree is not committed.**~~ **CLOSED 2026-05-20 post-W545.** Committed as `685eeaf` and pushed to `origin/main` + `public/main`.
 
 ## Final Certification Rule
 
@@ -140,7 +154,7 @@ npm.cmd test
 npm.cmd run lint:refs
 npm.cmd run local:surfaces
 npm.cmd run local:surfaces:deep
-node scripts\release-verify.cjs --json
+node scripts\release-verify.cjs --deep-surfaces --json
 node cli\kolm.js health --json --require-ready --require-auth
 node cli\kolm.js doctor --json
 node cli\kolm.js whoami --json
@@ -150,5 +164,7 @@ node cli\kolm.js billing tiers --json
 node scripts\prod-surface-smoke.cjs --json --require-auth
 node scripts\prod-surface-smoke.cjs --json --deep --require-auth
 ```
+
+(With W545, `release-verify --deep-surfaces` rolls the safe + deep local-surfaces probes into the same release run, so the standalone `local:surfaces` lines are redundant when release-verify passes — but kept here for hand-validation.)
 
 Until those pass without logged-out allowance, skipped gates, or offline fallbacks, the truthful verdict remains **NOT FINAL - PRODUCTION AUTH BLOCKED**.
