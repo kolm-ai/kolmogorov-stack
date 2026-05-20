@@ -23,7 +23,7 @@ const SRC = fs.readFileSync(DRIVER, 'utf8');
 
 const ALL_GATES = [
   'lint:refs', 'openapi-sync', 'sdk-manifest', 'test', 'sdk-smoke',
-  'doctor', 'whoami', 'verify-claims', 'billing-tiers',
+  'local-surfaces', 'doctor', 'whoami', 'verify-claims', 'billing-tiers',
 ];
 
 test('W528 #1 — happy path exits 0 (or 1 if a real gate fails)', () => {
@@ -130,7 +130,7 @@ test('W528 #9 — header documents the full gate invocation contract', () => {
   assert.match(head, /--allow-logged-out/, 'header must show --allow-logged-out invocation');
   // Each gate's name (loose match — accept underscores/spaces/dashes).
   const headLower = head.toLowerCase();
-  for (const fragment of ['lint:refs', 'openapi-sync', 'sdk-manifest', 'npm test', 'sdk smoke', 'doctor', 'whoami', 'verify', 'billing']) {
+  for (const fragment of ['lint:refs', 'openapi-sync', 'sdk-manifest', 'npm test', 'sdk smoke', 'local-surfaces', 'doctor', 'whoami', 'verify', 'billing']) {
     assert.ok(headLower.includes(fragment.toLowerCase()),
       `header gates list must reference: ${fragment}`);
   }

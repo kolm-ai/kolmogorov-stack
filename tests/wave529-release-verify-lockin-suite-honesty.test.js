@@ -141,7 +141,7 @@ test('W529 #8 — release-verify driver itself is still single-file CJS', () => 
 test('W529 #9 — every gate name in ALL_GATES list is locked-in somewhere', () => {
   const ALL_GATES = [
     'lint:refs', 'openapi-sync', 'sdk-manifest', 'test', 'sdk-smoke',
-    'doctor', 'whoami', 'verify-claims', 'billing-tiers',
+    'local-surfaces', 'doctor', 'whoami', 'verify-claims', 'billing-tiers',
   ];
   let combined = '';
   for (const entry of SUITE) {
