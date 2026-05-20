@@ -43,9 +43,10 @@ function _home() {
 
 function _ensureDirs() {
   if (_eventsDir && fs.existsSync(_eventsDir)) return;
+  const testMode = process.env.NODE_ENV === 'test' || process.env.npm_lifecycle_event === 'test';
   const base = process.env.KOLM_DATA_DIR
     ? path.resolve(process.env.KOLM_DATA_DIR)
-    : process.env.NODE_ENV === 'test'
+    : testMode
       ? path.join(os.tmpdir(), `kolm-event-store-test-${process.pid}`)
     : path.join(_home(), '.kolm');
   _eventsDir = path.join(base, 'events');

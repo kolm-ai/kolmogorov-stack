@@ -7,10 +7,12 @@
 //
 //     Product · Models · Docs · Pricing · Enterprise
 //
-// Each top label is an <a class="nav-top">; below it sits a <div class="mega-menu">
-// with grouped columns of deep links. The desktop CSS opens the mega-menu on
-// :hover and :focus-within; the mobile CSS stacks everything inline inside the
-// hamburger panel. ALL paths point at pages that exist in public/ (verified).
+// Each top label is an <a class="nav-top"> so W221 static invariants can
+// identify the five top-level anchors even when the mega-menu contains deep
+// links. Below each anchor sits a <div class="mega-menu"> with grouped columns
+// of deep links. The desktop CSS opens the mega-menu on :hover and
+// :focus-within; the mobile CSS stacks everything inline inside the hamburger
+// panel. ALL paths point at pages that exist in public/ (verified).
 //
 // Run: node scripts/inject-nav.cjs
 
@@ -36,119 +38,70 @@ const NAV_ITEMS = [
 // each column appear top-to-bottom. Anchors are confined to pages that exist.
 const MEGA = {
   product: [
-    { heading: 'Get started', links: [
-      { href: '/product',                  label: 'Product overview' },
-      { href: '/what-is-an-ai-compiler',   label: 'What is an AI compiler?' },
+    { heading: 'Start', links: [
+      { href: '/product',                  label: 'Overview' },
       { href: '/quickstart',               label: 'Quickstart' },
-      { href: '/tui',                      label: 'Terminal UI' },
-      { href: '/foundations',              label: 'Foundations' },
+      { href: '/capture',                  label: 'Gateway' },
     ]},
-    { heading: 'Why kolm', links: [
-      { href: '/drift',                    label: 'Drift report' },
-      { href: '/k-score',                  label: 'K-Score explained' },
-      { href: '/kscore-leaderboard',       label: 'Leaderboard' },
-      { href: '/how-vs-diy',               label: 'vs DIY' },
-      { href: '/how-vs-hyperscaler',       label: 'vs Hyperscaler' },
-      { href: '/how-vs-openpipe',          label: 'vs OpenPipe' },
-      { href: '/how-vs-predibase',         label: 'vs Predibase' },
-      { href: '/how-vs-lorax',             label: 'vs LoRAX' },
+    { heading: 'Build', links: [
+      { href: '/training',                 label: 'Training loop' },
+      { href: '/distill',                  label: 'Distill' },
+      { href: '/compile',                  label: 'Compile' },
     ]},
-    { heading: 'Use cases', links: [
-      { href: '/use-cases',                label: 'All use cases' },
-      { href: '/healthcare',               label: 'Healthcare (PHI)' },
-      { href: '/legal',                    label: 'Legal (privilege)' },
-      { href: '/finance',                  label: 'Finance (SR 11-7)' },
-      { href: '/defense',                  label: 'Defense (air-gap)' },
-    ]},
-    { heading: 'Reference', links: [
-      { href: '/integrations',             label: 'Integrations' },
-      { href: '/marketplace',              label: 'Marketplace' },
-      { href: '/docs/cookbook',            label: 'Cookbook' },
-      { href: '/articles',                 label: 'Articles' },
-      { href: '/press',                    label: 'Press' },
-      { href: '/whitepaper',               label: 'Whitepaper' },
+    { heading: 'Run', links: [
+      { href: '/runtimes',                 label: 'Runtimes' },
+      { href: '/docs/devices',             label: 'Devices' },
+      { href: '/trust',                    label: 'Verify' },
     ]},
   ],
   models: [
-    { heading: 'Catalog', links: [
-      { href: '/models',                   label: 'Frontier catalog' },
-      { href: '/runtimes',                 label: 'Runtimes' },
-      { href: '/docs/devices',             label: 'Supported devices' },
+    { heading: 'Choose', links: [
+      { href: '/models',                   label: 'Model catalog' },
+      { href: '/build-your-own',           label: 'Build your own' },
+      { href: '/docs/runtime',             label: 'Runtime targets' },
     ]},
-    { heading: 'Hardware', links: [
-      { href: '/models#frontier',          label: 'Hardware tiers' },
-      { href: '/runtimes',                 label: 'Source-built llama.cpp' },
-    ]},
-    { heading: 'Inference', links: [
-      { href: '/docs/runtime',             label: 'Runtime guide' },
-      { href: '/docs/distill',             label: 'Distillation' },
-      { href: '/docs/optimizer',           label: 'Optimizer' },
-      { href: '/docs/evals',               label: 'Evals' },
+    { heading: 'Deploy', links: [
+      { href: '/compute',                  label: 'Compute' },
+      { href: '/runtimes',                 label: 'Mobile and edge' },
     ]},
   ],
   docs: [
-    { heading: 'Quickstarts', links: [
-      { href: '/quickstart',               label: 'Overview' },
-      { href: '/quickstart/cli',           label: 'CLI quickstart' },
-      { href: '/quickstart/api',           label: 'API quickstart' },
-      { href: '/quickstart/sdk',           label: 'SDK quickstart' },
-      { href: '/quickstart/embed',         label: 'Embed quickstart' },
-      { href: '/quickstart/nl',            label: 'Natural language' },
+    { heading: 'Start', links: [
+      { href: '/capture',                  label: 'API gateway' },
+      { href: '/docs/cli',                 label: 'CLI' },
+      { href: '/docs/sdk',                 label: 'SDKs' },
     ]},
     { heading: 'Reference', links: [
-      { href: '/docs/api',                 label: 'API reference' },
-      { href: '/docs/cli',                 label: 'CLI reference' },
-      { href: '/docs/connectors',          label: 'Connectors' },
-      { href: '/docs/rs-1',                label: 'Receipts spec (RS-1)' },
-    ]},
-    { heading: 'Concepts', links: [
-      { href: '/docs/distill',             label: 'Distillation' },
-      { href: '/docs/runtime',             label: 'Runtime' },
-      { href: '/docs/evals',               label: 'Evals' },
-      { href: '/docs/privacy',             label: 'Privacy membrane' },
-      { href: '/docs/storage',             label: 'Storage' },
-      { href: '/docs/datasets',            label: 'Datasets' },
-    ]},
-    { heading: 'Help', links: [
       { href: '/docs',                     label: 'Docs home' },
-      { href: '/faq',                      label: 'FAQ' },
-      { href: '/changelog',                label: 'Changelog' },
-      { href: '/research',                 label: 'Research' },
-      { href: '/training',                 label: 'Training' },
+      { href: '/docs/api',                 label: 'API reference' },
+      { href: '/api',                      label: 'HTTP routes' },
+    ]},
+    { heading: 'Operate', links: [
+      { href: '/integrations',             label: 'Integrations' },
+      { href: '/docs/privacy',             label: 'Privacy membrane' },
+      { href: '/docs/datasets',            label: 'Datasets' },
+      { href: '/docs/distillation',        label: 'Distillation' },
+      { href: '/docs/verify',              label: 'Verification' },
     ]},
   ],
   pricing: [
-    { heading: 'Pricing', links: [
+    { heading: 'Buy', links: [
       { href: '/pricing',                  label: 'Plans' },
       { href: '/pricing#roi',              label: 'ROI calculator' },
-      { href: '/baa',                      label: 'BAA / SLA' },
-      { href: '/enterprise',               label: 'Enterprise' },
+      { href: '/nonprofits',               label: 'Nonprofits' },
     ]},
   ],
   enterprise: [
-    { heading: 'Solutions', links: [
+    { heading: 'Deploy', links: [
       { href: '/enterprise',               label: 'Enterprise overview' },
-      { href: '/healthcare',               label: 'Healthcare' },
-      { href: '/legal',                    label: 'Legal' },
-      { href: '/finance',                  label: 'Finance' },
-      { href: '/defense',                  label: 'Defense' },
-    ]},
-    { heading: 'Deployment', links: [
-      { href: '/byoc',                     label: 'BYOC' },
-      { href: '/airgap',                   label: 'Air-gap' },
-      { href: '/tunnels',                  label: 'Tunnels' },
       { href: '/self-host',                label: 'Self-host' },
+      { href: '/airgap',                   label: 'Air-gap' },
     ]},
     { heading: 'Trust', links: [
       { href: '/trust',                    label: 'Trust center' },
       { href: '/security',                 label: 'Security' },
       { href: '/compliance',               label: 'Compliance' },
-      { href: '/compliance-packs',         label: 'Compliance packs' },
-      { href: '/soc2',                     label: 'SOC 2' },
-      { href: '/hipaa-mapping',            label: 'HIPAA mapping' },
-      { href: '/slsa',                     label: 'SLSA' },
-      { href: '/sbom',                     label: 'SBOM' },
-      { href: '/subprocessors',            label: 'Subprocessors' },
+      { href: '/baa',                      label: 'BAA' },
     ]},
   ],
 };
@@ -235,6 +188,13 @@ function walk(dir) {
       continue;
     }
     if (/<header[^>]*class="site-header/.test(s)) {
+      const headerInsert = /(<header[^>]*class="[^"]*\bsite-header\b[^"]*"[^>]*>\s*<div[^>]*class="[^"]*\bwrap\b[^"]*"[^>]*>[\s\S]*?<a[^>]*class="[^"]*(?:\bbrand\b|\blogo\b|\bkolm-mark\b)[^"]*"[\s\S]*?<\/a>)/;
+      if (headerInsert.test(s)) {
+        const replaced = s.replace(headerInsert, `$1\n${block}`);
+        fs.writeFileSync(full, replaced);
+        touched++;
+        continue;
+      }
       missing++;
       continue;
     }

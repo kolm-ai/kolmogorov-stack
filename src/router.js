@@ -2729,6 +2729,27 @@ export function buildRouter() {
     }
   });
 
+  // Public trainer doctors. These report only local trainer availability and
+  // install hints, so CLIs can decide whether a host is train-capable before a
+  // tenant exists. Training jobs themselves remain authenticated below.
+  r.get('/v1/distill/onpolicy/doctor', async (_req, res) => {
+    try {
+      const { doctor } = await import('./distill-onpolicy.js');
+      return res.json(doctor());
+    } catch (e) {
+      return res.status(500).json({ error: 'onpolicy_doctor_failed', message: String(e.message || e) });
+    }
+  });
+
+  r.get('/v1/distill/preference/doctor', async (_req, res) => {
+    try {
+      const { doctor } = await import('./distill-preference.js');
+      return res.json(doctor());
+    } catch (e) {
+      return res.status(500).json({ error: 'preference_doctor_failed', message: String(e.message || e) });
+    }
+  });
+
   r.use(authMiddleware);
 
   // Authenticated /v1/health — full snapshot including provider availability
@@ -6796,17 +6817,6 @@ export function buildRouter() {
   // honest no_trainer_installed envelope when the corresponding $KOLM_*_TRAINER
   // is not on PATH, mirroring the W454/W462 install-hint contract.
 
-  // W480 - Thinking Machines on-policy distillation doctor. Reports whether
-  // $KOLM_ONPOLICY_TRAINER is resolvable; returns install_hint when absent.
-  // No auth required so tooling can probe before signing in.
-  r.get('/v1/distill/onpolicy/doctor', async (_req, res) => {
-    try {
-      const { doctor } = await import('./distill-onpolicy.js');
-      return res.json(doctor());
-    } catch (e) {
-      return res.status(500).json({ error: 'onpolicy_doctor_failed', message: String(e.message || e) });
-    }
-  });
   // W480 - Run an on-policy distillation against a teacher-student pair via the
   // tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path,
   // out_dir, namespace, max_steps }. Returns trainer envelope or no_trainer_installed.
@@ -6827,16 +6837,6 @@ export function buildRouter() {
       return res.json(out);
     } catch (e) {
       return res.status(500).json({ error: 'onpolicy_failed', message: String(e.message || e) });
-    }
-  });
-  // W480 - Preference-pair trainer doctor (DPO / SimPO / KTO / ORPO). Reports
-  // whether $KOLM_PREFERENCE_TRAINER is resolvable; honest install_hint when not.
-  r.get('/v1/distill/preference/doctor', async (_req, res) => {
-    try {
-      const { doctor } = await import('./distill-preference.js');
-      return res.json(doctor());
-    } catch (e) {
-      return res.status(500).json({ error: 'preference_doctor_failed', message: String(e.message || e) });
     }
   });
   // W480 - Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant-
@@ -10221,15 +10221,37 @@ export function buildRouter() {
 
   // Device fleet detect - probes local hardware and persists the local fleet profile.
   r.get('/v1/devices/detect', async (req, res) => {
+    const warnings = [];
+    let result;
     try {
-      const result = await devDetectLocal();
-      // W409s — also pick a static PROFILE (mobile-ios / desktop-cpu / etc.)
-      // alongside the W372 capability snapshot. Mobile picks are returned
-      // with runtime_status:'foundation' until a real runtime ships.
-      let profile = null;
-      try { profile = await devDetectProfile({}); } catch { profile = null; }
-      res.json({ ok: true, ...result, profile });
-    } catch (e) { res.status(500).json(_w384Err(e, 'devices_detect_error')); }
+      result = await devDetectLocal();
+    } catch (e) {
+      warnings.push({ stage: 'capability_detect', error: String(e && e.message || e) });
+      result = {
+        device_id: 'local',
+        kind: 'local',
+        os: `${process.platform}-${process.arch}`,
+        ram_gb: Math.round(os.totalmem() / 1024 / 1024 / 1024),
+        runtimes: ['node', 'llama.cpp', 'onnx'],
+        supports: { text: true, vision: false, audio: false, video: false },
+        partial: true,
+      };
+    }
+    // W409s — also pick a static PROFILE (mobile-ios / desktop-cpu / etc.)
+    // alongside the W372 capability snapshot. Mobile picks are returned
+    // with runtime_status:'foundation' until a real runtime ships.
+    let profile = null;
+    try { profile = await devDetectProfile({}); }
+    catch (e) {
+      warnings.push({ stage: 'profile_detect', error: String(e && e.message || e) });
+      profile = {
+        profile_id: process.arch === 'arm64' ? 'desktop-cpu-arm64' : 'desktop-cpu-x64',
+        source: 'fallback-error',
+        confidence: 0,
+        raw: { platform: process.platform, arch: process.arch },
+      };
+    }
+    res.json({ ok: true, ...result, profile, partial: !!(result.partial || warnings.length), warnings });
   });
 
   // Device fleet registration - validates and stores a canonical profile for a device id.
@@ -10822,14 +10844,36 @@ export function buildRouter() {
 
   // Device fleet detect with hints - refreshes local inventory using optional device hints.
   r.post('/v1/devices/detect', async (req, res) => {
+    const hints = req.body && typeof req.body === 'object' ? req.body : {};
+    const warnings = [];
+    let result;
     try {
-      const hints = req.body && typeof req.body === 'object' ? req.body : {};
-      const result = await devDetectLocal(hints);
-      // W409s — pick a static PROFILE for the body hints (or this machine).
-      let profile = null;
-      try { profile = await devDetectProfile(hints); } catch { profile = null; }
-      res.json({ ok: true, ...result, profile });
-    } catch (e) { res.status(500).json(_w384Err(e, 'devices_detect_error')); }
+      result = await devDetectLocal(hints);
+    } catch (e) {
+      warnings.push({ stage: 'capability_detect', error: String(e && e.message || e) });
+      result = {
+        device_id: 'local',
+        kind: 'local',
+        os: `${process.platform}-${process.arch}`,
+        ram_gb: Math.round(os.totalmem() / 1024 / 1024 / 1024),
+        runtimes: ['node', 'llama.cpp', 'onnx'],
+        supports: { text: true, vision: false, audio: false, video: false },
+        partial: true,
+      };
+    }
+    // W409s — pick a static PROFILE for the body hints (or this machine).
+    let profile = null;
+    try { profile = await devDetectProfile(hints); }
+    catch (e) {
+      warnings.push({ stage: 'profile_detect', error: String(e && e.message || e) });
+      profile = {
+        profile_id: process.arch === 'arm64' ? 'desktop-cpu-arm64' : 'desktop-cpu-x64',
+        source: 'fallback-error',
+        confidence: 0,
+        raw: { platform: process.platform, arch: process.arch, hints },
+      };
+    }
+    res.json({ ok: true, ...result, profile, partial: !!(result.partial || warnings.length), warnings });
   });
 
   // ====================================================================

@@ -44,11 +44,11 @@ for (const surface of SURFACES) {
     assert.match(html, new RegExp(`<link rel="canonical" href="https://kolm\\.ai/quickstart/${surface}"`),
       'canonical must point at the kolm.ai surface URL');
     // Skip-link a11y
-    assert.match(html, /<a class="skip" href="#main">Skip to content<\/a>/, 'skip-link required by W207 a11y contract');
+    assert.match(html, /<a\b[^>]*href="#main"[^>]*>Skip to content<\/a>/, 'skip-link required by W207 a11y contract');
     assert.match(html, /<main id="main">/, 'main landmark required');
     // 5-anchor consolidated nav (W221)
     for (const v of ['Product', 'Models', 'Docs', 'Pricing', 'Enterprise']) {
-      assert.match(html, new RegExp(`<a href="/${v.toLowerCase()}">${v}</a>`),
+      assert.match(html, new RegExp(`<a\\b[^>]*href="/${v.toLowerCase()}"[^>]*>${v}</a>`),
         `nav must include ${v} (W221 5-link consolidation)`);
     }
     // JSON-LD TechArticle

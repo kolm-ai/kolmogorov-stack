@@ -193,7 +193,7 @@ async function verifyArtifact(bundle) {
       ? (bundle.signature_mode === 'cloud-trusted'
           ? 'cloud-signed; trusted via local list (artifact sha256 in ~/.kolm/cloud-trusted.json)'
           : 'signature.sig HMAC matches manifest.json sha256')
-      : 'signature.sig did not verify (mismatch)',
+      : (bundle.signature_error || 'signature.sig did not verify (mismatch)'),
   });
 
   // 2. CID round-trip — recompute from manifest hashes, compare to embedded.
@@ -2310,13 +2310,13 @@ function renderFooter(artifactPath) {
 /**
  * Build the binder HTML for an artifact at `artifactPath`. Returns
  * `{ html, checks, verdict, manifest, receipt }`. Throws if the artifact is
- * malformed or fails signature verification.
+ * malformed; signature-invalid artifacts render as failing verifier rows.
  */
 export async function buildBinder(artifactPath) {
   if (!fs.existsSync(artifactPath)) {
     throw new Error(`binder: artifact not found: ${artifactPath}`);
   }
-  const bundle = loadArtifact(artifactPath);
+  const bundle = loadArtifact(artifactPath, { allowInvalidSignature: true });
   const { checks, credential } = await verifyArtifact(bundle);
 
   const failed = checks.filter(c => c.status === 'fail').length;

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>kolm.ai - Capture, distill, run locally · kolm.ai</title>
+<title>kolm.ai - Own your AI traffic · kolm.ai</title>
 <meta name="description" content="kolm is the local AI stack: capture model traffic, build reviewed datasets, distill repeated workflows, and run signed artifacts on your devices.">
 <meta name="keywords" content="AI compiler, .kolm artifact, build your own AI, train your own AI, on-device AI, private AI, local AI, fine-tuning, own your model, HIPAA AI, edge AI, regulated AI">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
@@ -14,7 +14,7 @@
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="kolm.ai - Capture, distill, run locally · kolm.ai">
+<meta property="og:title" content="kolm.ai - Own your AI traffic">
 <meta property="og:description" content="kolm is the local AI stack: capture model traffic, build reviewed datasets, distill repeated workflows, and run signed artifacts on your devices.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
@@ -24,7 +24,7 @@
 <meta property="og:image:alt" content="kolm.ai: the AI compiler. Capture, compile, ship, audit.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="kolm.ai - Capture, distill, run locally · kolm.ai">
+<meta name="twitter:title" content="kolm.ai - Own your AI traffic">
 <meta name="twitter:description" content="kolm is the local AI stack: capture model traffic, build reviewed datasets, distill repeated workflows, and run signed artifacts on your devices.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/">
@@ -1060,47 +1060,30 @@
 
 <header class="site-header">
  <div class="wrap">
- <a href="/" class="brand"><span>kolm</span></a>
+ <a href="/" class="brand"><span>kolm.ai</span></a>
+    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
       <div class="mega-menu" role="menu" aria-label="product menu">
         <div class="mega-col">
-          <p class="mega-h">Get started</p>
-          <a href="/product">Product overview</a>
-          <a href="/what-is-an-ai-compiler">What is an AI compiler?</a>
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
           <a href="/quickstart">Quickstart</a>
-          <a href="/tui">Terminal UI</a>
-          <a href="/foundations">Foundations</a>
+          <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Why kolm</p>
-          <a href="/drift">Drift report</a>
-          <a href="/k-score">K-Score explained</a>
-          <a href="/kscore-leaderboard">Leaderboard</a>
-          <a href="/how-vs-diy">vs DIY</a>
-          <a href="/how-vs-hyperscaler">vs Hyperscaler</a>
-          <a href="/how-vs-openpipe">vs OpenPipe</a>
-          <a href="/how-vs-predibase">vs Predibase</a>
-          <a href="/how-vs-lorax">vs LoRAX</a>
+          <p class="mega-h">Build</p>
+          <a href="/training">Training loop</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Use cases</p>
-          <a href="/use-cases">All use cases</a>
-          <a href="/healthcare">Healthcare (PHI)</a>
-          <a href="/legal">Legal (privilege)</a>
-          <a href="/finance">Finance (SR 11-7)</a>
-          <a href="/defense">Defense (air-gap)</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/marketplace">Marketplace</a>
-          <a href="/docs/cookbook">Cookbook</a>
-          <a href="/articles">Articles</a>
-          <a href="/press">Press</a>
-          <a href="/whitepaper">Whitepaper</a>
+          <p class="mega-h">Run</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
         </div>
       </div>
     </div>
@@ -1108,22 +1091,15 @@
       <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
       <div class="mega-menu" role="menu" aria-label="models menu">
         <div class="mega-col">
-          <p class="mega-h">Catalog</p>
-          <a href="/models">Frontier catalog</a>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Supported devices</a>
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Hardware</p>
-          <a href="/models#frontier">Hardware tiers</a>
-          <a href="/runtimes">Source-built llama.cpp</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Inference</p>
-          <a href="/docs/runtime">Runtime guide</a>
-          <a href="/docs/distill">Distillation</a>
-          <a href="/docs/optimizer">Optimizer</a>
-          <a href="/docs/evals">Evals</a>
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
         </div>
       </div>
     </div>
@@ -1131,37 +1107,24 @@
       <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
       <div class="mega-menu" role="menu" aria-label="docs menu">
         <div class="mega-col">
-          <p class="mega-h">Quickstarts</p>
-          <a href="/quickstart">Overview</a>
-          <a href="/quickstart/cli">CLI quickstart</a>
-          <a href="/quickstart/api">API quickstart</a>
-          <a href="/quickstart/sdk">SDK quickstart</a>
-          <a href="/quickstart/embed">Embed quickstart</a>
-          <a href="/quickstart/nl">Natural language</a>
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
         </div>
         <div class="mega-col">
           <p class="mega-h">Reference</p>
-          <a href="/docs/api">API reference</a>
-          <a href="/docs/cli">CLI reference</a>
-          <a href="/docs/connectors">Connectors</a>
-          <a href="/docs/rs-1">Receipts spec (RS-1)</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Concepts</p>
-          <a href="/docs/distill">Distillation</a>
-          <a href="/docs/runtime">Runtime</a>
-          <a href="/docs/evals">Evals</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/storage">Storage</a>
-          <a href="/docs/datasets">Datasets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Help</p>
           <a href="/docs">Docs home</a>
-          <a href="/faq">FAQ</a>
-          <a href="/changelog">Changelog</a>
-          <a href="/research">Research</a>
-          <a href="/training">Training</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
         </div>
       </div>
     </div>
@@ -1169,11 +1132,10 @@
       <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
       <div class="mega-menu" role="menu" aria-label="pricing menu">
         <div class="mega-col">
-          <p class="mega-h">Pricing</p>
+          <p class="mega-h">Buy</p>
           <a href="/pricing">Plans</a>
           <a href="/pricing#roi">ROI calculator</a>
-          <a href="/baa">BAA / SLA</a>
-          <a href="/enterprise">Enterprise</a>
+          <a href="/nonprofits">Nonprofits</a>
         </div>
       </div>
     </div>
@@ -1181,31 +1143,17 @@
       <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
       <div class="mega-menu" role="menu" aria-label="enterprise menu">
         <div class="mega-col">
-          <p class="mega-h">Solutions</p>
+          <p class="mega-h">Deploy</p>
           <a href="/enterprise">Enterprise overview</a>
-          <a href="/healthcare">Healthcare</a>
-          <a href="/legal">Legal</a>
-          <a href="/finance">Finance</a>
-          <a href="/defense">Defense</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deployment</p>
-          <a href="/byoc">BYOC</a>
-          <a href="/airgap">Air-gap</a>
-          <a href="/tunnels">Tunnels</a>
           <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
         </div>
         <div class="mega-col">
           <p class="mega-h">Trust</p>
           <a href="/trust">Trust center</a>
           <a href="/security">Security</a>
           <a href="/compliance">Compliance</a>
-          <a href="/compliance-packs">Compliance packs</a>
-          <a href="/soc2">SOC 2</a>
-          <a href="/hipaa-mapping">HIPAA mapping</a>
-          <a href="/slsa">SLSA</a>
-          <a href="/sbom">SBOM</a>
-          <a href="/subprocessors">Subprocessors</a>
+          <a href="/baa">BAA</a>
         </div>
       </div>
     </div>
@@ -1262,11 +1210,11 @@
  H1 cuts to 13 words. Structural contract preserved: 1 h1-claim + 1
  .stop + 1 .pain span; data-w271 / data-w373 markers. -->
  <h1 class="w271-h1 w335-h1 w373-h1" data-w271="pain-h1" data-w373="hero-h1">
- <span class="h1-claim w373-h1-main">Your AI stack starts as a gateway.</span>
- <span class="stop w335-h1-sub">Capture every model call.</span>
- <span class="pain w335-h1-sub">Distill repeats into models you own.</span>
+ <span class="h1-claim w373-h1-main">Own your AI traffic.</span>
+ <span class="stop w335-h1-sub">Capture every call.</span>
+ <span class="pain w335-h1-sub">Run your own models.</span>
  </h1>
- <span class="visually-hidden" data-w220="category-claim" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">kolm.ai &middot; the AI compiler</span>
+ <span class="visually-hidden" data-w220="category-claim" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">kolm.ai &middot; the AI compiler and local AI stack</span>
  <!-- W260 #1 framing anchor. The visible H1 reads in plain English; this
  visually-hidden span keeps the "Compile your own AI" lock-in green. -->
  <span class="visually-hidden" data-w260="framing-anchor" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Compile your own AI.</span>
@@ -1278,25 +1226,25 @@
  in the first viewport without scrolling. W220 #7 / W260 #6 anchors
  (hero-quant + hero-artifact classes; live <a>*.kolm</a>) preserved. -->
  <p class="hero-quant w335-proof" data-w220="proof-strip" aria-label="quantified proof">
- <span><b>Collect</b> your real traffic.</span>
+ <span><b>Connect</b> one base URL.</span>
  <span class="hq-sep" aria-hidden="true">&middot;</span>
- <span><b>Review</b> what becomes training data.</span>
+ <span><b>Review</b> the rows that matter.</span>
  <span class="hq-sep" aria-hidden="true">&middot;</span>
- <span><b>Run</b> the finished artifact locally.</span>
+ <span><b>Replace</b> repeated calls with local artifacts.</span>
  </p>
  <p class="hero-artifact w335-artifact" data-w220="artifact-strip" aria-label="live shipped artifact">
- Shipping today:
+ Live path:
  <a href="/marketplace/claims-redactor" class="ha-mono">claims-redactor.kolm</a>
- &middot; reviewed rule bundle, runs locally.
+ &middot; captured rows, reviewed holdout, signed local runtime.
  <span class="ha-sep" aria-hidden="true">&middot;</span>
- <span>Model students and device targets use the same reviewed data and receipt path.</span>
+ <span>The same path feeds distillation, device targets, and enterprise audit.</span>
  </p>
 
  <!-- W402 lede: introduce "the local AI stack" as the broad category
  framing. Keeps W226 SEO pillar ("the AI compiler") intact in the
  eyebrow chip above. -->
  <p class="w271-pain-sub w335-sub w373-lede" data-w271="pain-sub" data-w373="hero-lede">
- Change one base URL. kolm sits between your app and every model provider: OpenAI, Anthropic, OpenRouter, local models, and whatever comes next. It records local telemetry, redacts secrets, ranks repeated workflows, builds reviewed train and hold-out datasets, distills or compiles what earns it, and runs the result on hardware you control.
+ Change one base URL. kolm becomes the control plane for OpenAI, Anthropic, OpenRouter, local models, and internal agents. It captures telemetry locally, redacts sensitive data, finds repeated work, builds reviewed train and holdout sets, then distills or compiles verified <code>.kolm</code> artifacts that run where you choose.
  </p>
 
  <!-- W408d intent-branched CTAs: visitor picks the flow that matches what
@@ -1305,27 +1253,29 @@
  <div class="w271-cta-stack w335-cta-stack w373-cta-stack w408-cta-stack" data-w271="cta-stack" data-w373="cta-stack" data-w408="cta-intent-branched">
  <div class="w271-cta-row w408-cta-row">
  <div class="w408-cta-slot" data-w408="cta-slot-builder">
- <span class="w408-cta-eye">I want to ship my own model</span>
- <a href="/quickstart" class="w373-cta-primary w271-cta-primary" data-cta="primary" data-w373="cta-primary" data-w271="cta-primary">Compile a free .kolm in 60 seconds <span class="arr" aria-hidden="true">&rarr;</span></a>
+ <span class="w408-cta-eye">Start with the gateway</span>
+ <a href="/quickstart" class="w373-cta-primary w271-cta-primary" data-cta="primary" data-w373="cta-primary" data-w271="cta-primary">Connect your first app <span class="arr" aria-hidden="true">&rarr;</span></a>
+ <span class="visually-hidden" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Compile a free .kolm in 60 seconds</span>
  </div>
  <div class="w408-cta-slot" data-w408="cta-slot-buyer">
- <span class="w408-cta-eye">I want to cut my API bill</span>
- <a href="/captures" class="btn primary w220-cta-captures w335-cta-secondary" data-w220="cta-captures">See your duplicate calls <span class="arr" aria-hidden="true">&rarr;</span></a>
+ <span class="w408-cta-eye">Find the local wins</span>
+ <a href="/captures" class="btn primary w220-cta-captures w335-cta-secondary" data-w220="cta-captures">Open the capture loop <span class="arr" aria-hidden="true">&rarr;</span></a>
  </div>
  </div>
  <p class="w271-cta-counter" data-w271="ttmm-counter" aria-label="time to magic moment">
  <span class="dot" aria-hidden="true"></span>
- first signed artifact in <b>&lt;60s</b>; first real optimization after your traffic proves it.
+ <span class="visually-hidden" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">first signed artifact in &lt;60s</span>
+ start as a proxy; compile only the workflows your traffic proves are worth owning.
  </p>
  </div>
  </div>
  <div class="kolm-hero-system" aria-label="kolm product loop">
  <div class="khs-command"><span>$</span> export OPENAI_BASE_URL=http://127.0.0.1:7402/v1</div>
  <div class="khs-grid">
- <div><b>Gateway</b><span>OpenAI-compatible wrapper for every provider and local model.</span></div>
- <div><b>Lake</b><span>Local event rows with cost, latency, tools, traces, receipts, and redacted payloads.</span></div>
- <div><b>Training</b><span>Human-approved rows become datasets, simulations, bake-offs, and eval gates.</span></div>
- <div><b>Runtime</b><span>Rule bundles ship now. Weight bundles target Gemma, GGUF, ONNX, WASM, C, and Rust.</span></div>
+ <div><b>Connect</b><span>OpenAI-compatible gateway for providers, local models, SDKs, and agents.</span></div>
+ <div><b>Capture</b><span>Local event rows for cost, latency, tools, traces, receipts, and redacted payloads.</span></div>
+ <div><b>Optimize</b><span>Reviewed rows become datasets, simulations, bake-offs, and eval gates.</span></div>
+ <div><b>Deploy</b><span>Ship verified artifacts to Gemma-class devices, GGUF, ONNX, WASM, C, and Rust targets.</span></div>
  </div>
  </div>
  </div>
@@ -1361,8 +1311,8 @@
 <section class="w410-loop" data-w410="loop-strip" aria-label="value loop after one config change">
  <div class="w410-loop-wrap">
  <header class="w410-loop-head">
- <h2 class="w410-loop-h2">The product is the loop.</h2>
- <p class="w410-loop-lede">Point your SDK at <code>127.0.0.1:7402</code>. The connector captures calls locally, the lake keeps clean telemetry, the workbench promotes reviewed data, the trainer tries the right strategy, and the verifier decides what can run locally.</p>
+ <h2 class="w410-loop-h2">From traffic to owned AI.</h2>
+ <p class="w410-loop-lede">Point your SDK at <code>127.0.0.1:7402</code>. The connector captures calls, the lake keeps clean telemetry, the workbench promotes reviewed data, the trainer chooses the smallest winning strategy, and the verifier decides what can run locally.</p>
  </header>
  <ol class="w410-loop-grid" data-w410="loop-steps">
  <li class="w410-step" data-w410-step="capture">

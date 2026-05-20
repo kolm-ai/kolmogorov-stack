@@ -1,0 +1,392 @@
+{
+  "schema": "kolm-product-surface-catalog-1",
+  "updated_at": "2026-05-20",
+  "owner": "product-engineering",
+  "purpose": "Canonical product, feature, route-group, competitor, upgrade, and certification registry. Every shipped route group must be owned by exactly one product surface.",
+  "human_spec_path": "docs/PRODUCT_SURFACE_SPEC_2026-05-20.md",
+  "category_definition": "Kolm is the verifiable AI compiler and artifact contract layer: traces and specs become portable signed artifacts with eval gates, receipts, runtime targets, and governance.",
+  "state_of_art_principles": [
+    "Every product promise must have a route or artifact surface, owner, source docs, competitor context, and certification gate.",
+    "Every route group must be mapped exactly once to a product surface.",
+    "Every authenticated production surface must have an explicit prod smoke command before it can be called final.",
+    "Every competitor claim must resolve to primary docs or a refreshed source register entry.",
+    "Every launch blocker must be represented as code, config, or a named non-code credential dependency."
+  ],
+  "research_references": [
+    {
+      "id": "openai-finetune",
+      "category": "provider-model-customization",
+      "title": "OpenAI supervised fine-tuning",
+      "url": "https://platform.openai.com/docs/guides/supervised-fine-tuning",
+      "state_of_art_signal": "Provider-hosted fine-tuning can create adapted models but remains provider-bound; Kolm must win on portability, receipts, local execution, and cross-runtime packaging."
+    },
+    {
+      "id": "openai-prompt-caching",
+      "category": "gateway-runtime-optimization",
+      "title": "OpenAI prompt caching",
+      "url": "https://platform.openai.com/docs/guides/prompt-caching",
+      "state_of_art_signal": "Provider caching reduces repeated prompt cost; Kolm must prove avoided calls and deterministic local hot paths, not just cache discounts."
+    },
+    {
+      "id": "anthropic-prompt-caching",
+      "category": "gateway-runtime-optimization",
+      "title": "Anthropic prompt caching",
+      "url": "https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching",
+      "state_of_art_signal": "Prompt-cache block control is now standard for long-context apps; Kolm routing should preserve provider cache fallbacks while compiling stable repeated tasks."
+    },
+    {
+      "id": "langsmith-evals",
+      "category": "observability-evaluation",
+      "title": "LangSmith evaluation concepts",
+      "url": "https://docs.langchain.com/langsmith/evaluation-concepts",
+      "state_of_art_signal": "Datasets, experiments, traces, and online evaluators are table stakes; Kolm should import these signals and bind them into K-score evidence."
+    },
+    {
+      "id": "langsmith-observability",
+      "category": "observability-evaluation",
+      "title": "LangSmith observability",
+      "url": "https://docs.langchain.com/langsmith/observability",
+      "state_of_art_signal": "Trace every call, step, and decision; Kolm receipts and trace export must interoperate with this workflow."
+    },
+    {
+      "id": "arize-phoenix",
+      "category": "observability-evaluation",
+      "title": "Arize Phoenix",
+      "url": "https://arize.com/docs/phoenix",
+      "state_of_art_signal": "OpenTelemetry-based traces and eval integrations are standard; Kolm should emit and ingest OpenTelemetry/OpenInference-compatible traces."
+    },
+    {
+      "id": "wandb-weave",
+      "category": "observability-evaluation",
+      "title": "W&B Weave",
+      "url": "https://docs.wandb.ai/weave/",
+      "state_of_art_signal": "Tracing, evaluation, and improvement loops are bundled in modern LLM platforms; Kolm must bind improvements to portable artifacts."
+    },
+    {
+      "id": "predibase-finetune",
+      "category": "model-customization",
+      "title": "Predibase fine-tuning overview",
+      "url": "https://docs.predibase.com/fine-tuning/overview",
+      "state_of_art_signal": "LoRA fine-tuning and multi-adapter serving are mature; Kolm should treat training backends as pluggable while owning artifact proof and runtime packaging."
+    },
+    {
+      "id": "together-finetune",
+      "category": "model-customization",
+      "title": "Together AI fine-tuning",
+      "url": "https://docs.together.ai/docs/fine-tuning-overview",
+      "state_of_art_signal": "Managed LoRA and full fine-tuning are widely available; Kolm should not compete on generic training UX alone."
+    },
+    {
+      "id": "openpipe-finetune",
+      "category": "model-customization",
+      "title": "OpenPipe fine-tuning quick start",
+      "url": "https://docs.openpipe.ai/features/fine-tuning/quick-start",
+      "state_of_art_signal": "Trace-to-fine-tune workflows are an adjacent wedge; Kolm must make trace imports and eval gates first-class."
+    },
+    {
+      "id": "aws-bedrock-custom-models",
+      "category": "model-customization",
+      "title": "Amazon Bedrock model customization",
+      "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "state_of_art_signal": "Managed distillation and fine-tuning are cloud-native enterprise expectations; Kolm should support BYOC/backend adapters and stronger artifact governance."
+    },
+    {
+      "id": "workos-identity",
+      "category": "identity-access",
+      "title": "WorkOS docs",
+      "url": "https://workos.com/docs",
+      "state_of_art_signal": "SSO, SCIM, admin portal, and audit logs are expected for enterprise identity; Kolm account/team surfaces must converge there."
+    },
+    {
+      "id": "auth0-organizations",
+      "category": "identity-access",
+      "title": "Auth0 Organizations",
+      "url": "https://auth0.com/docs/organizations",
+      "state_of_art_signal": "B2B org modeling is a product primitive; Kolm must separate org, workspace, user, and tenant semantics."
+    },
+    {
+      "id": "stripe-billing",
+      "category": "billing",
+      "title": "Stripe Billing",
+      "url": "https://stripe.com/billing/features",
+      "state_of_art_signal": "Self-serve subscription, invoice, and customer portal flows are table stakes; Kolm must move beyond payment-link-only certification."
+    },
+    {
+      "id": "stripe-portal",
+      "category": "billing",
+      "title": "Stripe customer portal",
+      "url": "https://docs.stripe.com/billing/subscriptions/customer-portal",
+      "state_of_art_signal": "Customer-managed billing is expected; Kolm account billing should expose portal and webhook-backed entitlement state."
+    },
+    {
+      "id": "apple-coreml",
+      "category": "edge-runtime",
+      "title": "Apple Core ML",
+      "url": "https://developer.apple.com/documentation/CoreML",
+      "state_of_art_signal": "On-device runtime targets are platform-native; Kolm should emit/verifiably wrap runtime-specific assets instead of pretending to replace them."
+    },
+    {
+      "id": "apple-foundation-models",
+      "category": "edge-runtime",
+      "title": "Apple Foundation Models",
+      "url": "https://developer.apple.com/documentation/FoundationModels",
+      "state_of_art_signal": "On-device foundation model APIs raise the offline bar; Kolm needs proof, evals, receipts, and governance above native model access."
+    },
+    {
+      "id": "google-litert",
+      "category": "edge-runtime",
+      "title": "Google LiteRT",
+      "url": "https://ai.google.dev/edge/litert/overview",
+      "state_of_art_signal": "Android and edge deployment should target established runtimes; Kolm should be compiler/governance layer."
+    },
+    {
+      "id": "onnx-runtime-mobile",
+      "category": "edge-runtime",
+      "title": "ONNX Runtime Mobile",
+      "url": "https://onnxruntime.ai/docs/tutorials/mobile/",
+      "state_of_art_signal": "Cross-platform mobile inference requires model/runtime optimization; Kolm artifact manifests must name target runtime and proof."
+    },
+    {
+      "id": "executorch",
+      "category": "edge-runtime",
+      "title": "PyTorch ExecuTorch",
+      "url": "https://docs.pytorch.org/executorch/stable/intro-overview.html",
+      "state_of_art_signal": "Edge PyTorch deployment is a real substrate; Kolm should target it as an export backend."
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "identity-access-billing",
+      "name": "Identity, Access, Teams, And Billing",
+      "promise": "A buyer can sign up, authenticate, manage organizations and keys, change plans, and prove entitlement state without support intervention.",
+      "route_groups": ["account", "anon", "oauth", "signin", "signout", "signup", "whoami", "keys", "billing", "plans", "pricing", "stripe", "team", "teams"],
+      "primary_paths": ["/signup", "/signin", "/account", "/pricing", "/teams", "/v1/account", "/v1/billing/tiers"],
+      "code_paths": ["src/auth.js", "src/oauth.js", "src/stripe.js", "src/teams.js", "src/router.js", "cli/kolm.js"],
+      "doc_paths": ["docs/PRODUCT.md", "docs/research/auth-boundary-audit-2026-05-12.md", "docs/research/billing-plan-enforcement-audit-2026-05-12.md"],
+      "competitor_refs": ["workos-identity", "auth0-organizations", "stripe-billing", "stripe-portal"],
+      "optimal_spec": [
+        "Separate org, workspace, user, tenant, service account, and API-key identities.",
+        "Require server-validated credentials for all authenticated certification.",
+        "Expose billing portal, invoice state, entitlement, usage, quota, and webhook audit state.",
+        "Support SSO, SCIM, RBAC, key scopes, key rotation, and admin audit logs before enterprise-final claims."
+      ],
+      "certification": {
+        "local_gates": ["node scripts/local-surface-smoke.cjs --json --surface=identity-access-billing", "node cli/kolm.js doctor --json", "local anon bootstrap plus account smoke"],
+        "prod_gates": ["node cli/kolm.js whoami --json", "node cli/kolm.js health --json --require-auth", "node cli/kolm.js billing tiers --json"],
+        "slo": "99.9% auth and billing control-plane availability",
+        "blockers": ["production key currently rejected", "SSO/SCIM not final-certified", "payment-link billing must be backed by portal and webhook entitlement checks"]
+      },
+      "production_smoke": [
+        { "id": "billing-tiers-public", "method": "GET", "path": "/v1/billing/tiers", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json", "plans"] },
+        { "id": "whoami-auth", "method": "GET", "path": "/v1/whoami", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json", "whoami"] },
+        { "id": "account-auth", "method": "GET", "path": "/v1/account", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "account-keys-auth", "method": "GET", "path": "/v1/account/keys", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "teams-auth", "method": "GET", "path": "/v1/teams", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "billing-usage-auth", "method": "GET", "path": "/v1/billing/usage", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] }
+      ],
+      "status": "blocked-prod-auth"
+    },
+    {
+      "id": "public-docs-sdk",
+      "name": "Public Site, Docs, API Reference, And SDK Distribution",
+      "promise": "Every public page, API reference, SDK asset, and route contract is current, crawlable, coherent, and hash-verifiable.",
+      "route_groups": ["system", "health", "status", "public", "changelog", "spec", "spec-decode", "library", "recipes", "registry"],
+      "primary_paths": ["/", "/docs", "/docs/api", "/openapi.json", "/sdk-current.json", "/v1/spec"],
+      "code_paths": ["server.js", "scripts/build-api-ref.cjs", "scripts/build-openapi.cjs", "scripts/build-sdk-version.js", "public/docs/api-routes.json"],
+      "doc_paths": ["docs/PRODUCT.md", "docs/research/api-docs-contract-drift-audit-2026-05-12.md", "docs/research/sdk-cli-integration-audit-2026-05-12.md"],
+      "competitor_refs": ["openai-finetune", "langsmith-evals"],
+      "optimal_spec": [
+        "Docs are generated from source route inventory and OpenAPI has zero undocumented route flags.",
+        "SDK assets are content-addressed and SRI-checked.",
+        "Public comparison pages use source-backed claims and never overstate live functionality.",
+        "Every public claim links to either a product route, a verifier, or an explicit roadmap status."
+      ],
+      "certification": {
+        "local_gates": ["node scripts/local-surface-smoke.cjs --json --surface=public-docs-sdk", "node scripts/build-api-ref.cjs", "node scripts/build-openapi.cjs", "npm run lint:refs"],
+        "prod_gates": ["GET https://kolm.ai/docs/api", "GET https://kolm.ai/openapi.json", "GET https://kolm.ai/sdk-current.json"],
+        "slo": "99.9% public docs and SDK asset availability",
+        "blockers": ["direct production docs asset smoke must be added to product-surface verifier"]
+      },
+      "production_smoke": [
+        { "id": "health", "method": "GET", "path": "/health", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json", "health"] },
+        { "id": "ready", "method": "GET", "path": "/ready", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json", "ready"] },
+        { "id": "docs-api", "method": "GET", "path": "/docs/api", "auth": "none", "mode": "safe", "expect": [200], "checks": ["html"] },
+        { "id": "openapi", "method": "GET", "path": "/openapi.json", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json", "openapi"] },
+        { "id": "api-routes", "method": "GET", "path": "/docs/api-routes.json", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json", "api-routes"] },
+        { "id": "sdk-current", "method": "GET", "path": "/sdk-current.json", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json", "sdk-current"] },
+        { "id": "spec-public", "method": "GET", "path": "/v1/spec", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json"] }
+      ],
+      "status": "needs-prod-smoke"
+    },
+    {
+      "id": "compile-artifact-verification",
+      "name": "Compile, Artifact, Registry, Receipts, And Verification",
+      "promise": "A task can become a signed, portable, content-addressed artifact with K-score, receipt chain, registry metadata, and offline verification.",
+      "route_groups": ["build", "builds", "builder", "compile", "jobs", "synthesize", "artifacts", "artifact", "cid", "receipts", "verify", "sigstore", "credential", "publish", "marketplace", "hub"],
+      "primary_paths": ["/build-your-own", "/compile", "/run", "/registry", "/v1/compile", "/v1/artifacts", "/v1/verify"],
+      "code_paths": ["src/compile.js", "src/artifact.js", "src/artifact-runner.js", "src/production-ready.js", "src/registry.js", "src/marketplace.js", "src/sigstore.js", "cli/kolm.js"],
+      "doc_paths": ["docs/rs-1.md", "docs/research/artifact-truth-audit-2026-05-12.md", "docs/research/receipt-verification-truth-2026-05-12.md"],
+      "competitor_refs": ["openai-finetune", "predibase-finetune", "together-finetune", "openpipe-finetune", "aws-bedrock-custom-models"],
+      "optimal_spec": [
+        "Artifact manifests bind source, evals, K-score, provenance, runtime target, signature, CID, and optional transparency-log state.",
+        "Every publish path enforces productionReady unless explicitly forced with an auditable reason.",
+        "Registry and marketplace rows distinguish verified, yanked, deprecated, and manual-review states.",
+        "Cloud compile must be durable across restarts before enterprise-final claims."
+      ],
+      "certification": {
+        "local_gates": ["node scripts/local-surface-smoke.cjs --json --surface=compile-artifact-verification", "node cli/kolm.js verify examples/claims-redactor/claims-redactor.kolm --json", "node scripts/release-verify.cjs --json --skip=doctor,whoami"],
+        "prod_gates": ["authenticated compile smoke", "artifact list/download/verify from production", "marketplace publish dry-run or sandbox smoke"],
+        "slo": "99% compile control-plane availability; artifact verification must be deterministic",
+        "blockers": ["production auth is blocked", "durable cloud compile and object storage are not proven from this audit"]
+      },
+      "production_smoke": [
+        { "id": "compile-list-auth", "method": "GET", "path": "/v1/compile", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "artifact-list-auth", "method": "GET", "path": "/v1/artifacts", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "registry-public", "method": "GET", "path": "/v1/registry/public", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "marketplace-catalog", "method": "GET", "path": "/v1/marketplace/catalog.json", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "hub-public", "method": "GET", "path": "/v1/hub", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "sigstore-health", "method": "GET", "path": "/v1/sigstore/health", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "compile-deep-auth", "method": "POST", "path": "/v1/compile", "auth": "required", "mode": "deep", "expect": [200, 202], "checks": ["json"], "body": { "task": "surface smoke: classify invoice approval emails", "examples": [{ "input": "approve invoice 123", "output": "approve" }, { "input": "reject duplicate invoice", "output": "reject" }], "preset": "rule" } }
+      ],
+      "status": "blocked-prod-auth"
+    },
+    {
+      "id": "runtime-inference-connectors",
+      "name": "Runtime, Inference, Connectors, And Multimodal APIs",
+      "promise": "Kolm can sit in the hot path as an OpenAI/Anthropic-compatible runtime, local artifact runner, and connector gateway with receipts and fallback behavior.",
+      "route_groups": ["run", "runtime", "chat", "responses", "messages", "embeddings", "embed", "moderations", "models", "connectors", "openrouter", "wrap", "verified-inference", "assistant", "compose", "audio", "media", "multimodal", "search", "redact"],
+      "primary_paths": ["/run", "/models", "/integrations/openai-sdk", "/integrations/anthropic-sdk", "/v1/chat/completions", "/v1/responses", "/v1/models"],
+      "code_paths": ["src/runtime.js", "src/completions-api.js", "src/capture.js", "src/provider-registry.js", "src/verified.js", "src/assistant.js", "src/multimodal-bakeoff.js", "cli/kolm.js"],
+      "doc_paths": ["docs/research/runtime-sandbox-threat-audit-2026-05-13.md", "docs/research/sdk-cli-integration-audit-2026-05-12.md", "docs/research/competitor-landscape-2026-05-12.md"],
+      "competitor_refs": ["openai-prompt-caching", "anthropic-prompt-caching", "langsmith-observability", "arize-phoenix"],
+      "optimal_spec": [
+        "Hosted runtime requires tenant auth; local daemon mode remains explicit and isolated.",
+        "Every connector records provider, model, latency, cost, prompt hash, privacy scan, and receipt metadata.",
+        "Prompt caching and provider fallback are preserved as fallbacks, while stable tasks can route to local artifacts.",
+        "Sandboxed recipe execution must be resource-limited and backed by a documented threat model."
+      ],
+      "certification": {
+        "local_gates": ["node scripts/local-surface-smoke.cjs --json --surface=runtime-inference-connectors", "SDK smoke against local server", "runtime sandbox threat audit"],
+        "prod_gates": ["authenticated /v1/models", "authenticated /v1/chat/completions", "authenticated /v1/responses", "authenticated /v1/messages", "authenticated /v1/verified-inference"],
+        "slo": "p99 runtime control-plane latency under 500 ms for metadata routes",
+        "blockers": ["production auth is blocked", "production readiness reports optional model_provider false"]
+      },
+      "production_smoke": [
+        { "id": "models-auth", "method": "GET", "path": "/v1/models", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "connectors-auth", "method": "GET", "path": "/v1/connectors", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "runtime-policy-auth", "method": "GET", "path": "/v1/runtime/policy", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "runtime-stats-auth", "method": "GET", "path": "/v1/runtime/replacement-stats", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "media-redact-doctor", "method": "GET", "path": "/v1/media/redact-job/doctor", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "multimodal-audio-doctor", "method": "GET", "path": "/v1/multimodal/redact-audio/doctor", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "runtime-decide-deep-auth", "method": "POST", "path": "/v1/runtime/decide", "auth": "required", "mode": "deep", "expect": [200], "checks": ["json"], "body": { "request": { "kind": "chat", "model": "surface-smoke", "tokens": 32 }, "context": { "tenant": "surface-smoke" } } },
+        { "id": "chat-wrapper-deep-auth", "method": "POST", "path": "/v1/chat/completions", "auth": "required", "mode": "deep", "expect": [200], "checks": ["json"], "body": { "model": "kolm:surface-smoke", "messages": [{ "role": "user", "content": "Return the word ok." }], "stream": false } },
+        { "id": "responses-wrapper-deep-auth", "method": "POST", "path": "/v1/responses", "auth": "required", "mode": "deep", "expect": [200], "checks": ["json"], "body": { "model": "kolm:surface-smoke", "input": "Return the word ok." } }
+      ],
+      "status": "blocked-prod-auth"
+    },
+    {
+      "id": "capture-data-eval-training",
+      "name": "Capture, Datasets, Evals, Labels, Training, And Improvement Loop",
+      "promise": "Production traces and user data can become governed datasets, labels, evals, simulations, distill runs, and safer follow-up artifacts.",
+      "route_groups": ["capture", "bridges", "datasets", "eval", "label-queue", "labels", "lake", "distill", "training", "opportunities", "sim", "simulations", "bakeoff", "bakeoffs", "workflows", "seeds", "replay", "recall", "memory", "pipeline", "specialists", "drift", "nl", "intent", "ir"],
+      "primary_paths": ["/capture", "/training", "/distill", "/account/datasets", "/account/lake", "/v1/capture/log", "/v1/datasets", "/v1/distill/from-captures"],
+      "code_paths": ["src/capture-store.js", "src/distill-bridge.js", "src/dataset-workbench.js", "src/label-queue.js", "src/lake.js", "src/distill*.js", "src/simulation.js", "src/training-planner.js", "src/workflow-ir.js", "src/compile-ir.js", "cli/kolm.js"],
+      "doc_paths": ["docs/research/capture-distillation-governance-audit-2026-05-12.md", "docs/research/trace-eval-schema-spec-2026-05-13.md", "docs/research/external-score-normalization-audit-2026-05-13.md"],
+      "competitor_refs": ["langsmith-evals", "arize-phoenix", "wandb-weave", "openpipe-finetune", "predibase-finetune"],
+      "optimal_spec": [
+        "Every imported or captured row carries tenant, namespace, privacy mode, source system, checksum, retention, and purge metadata.",
+        "Eval cases are versioned, split, and linked to trace provenance before they affect K-score.",
+        "Distill, bakeoff, simulation, and training plans can be run in dry-run and production modes with cost bounds.",
+        "Improvement loops never overwrite a production artifact without K-score, drift, and rollback evidence."
+      ],
+      "certification": {
+        "local_gates": ["node scripts/local-surface-smoke.cjs --json --surface=capture-data-eval-training", "node cli/kolm.js doctor --loop --json", "trace/eval schema fixture checks"],
+        "prod_gates": ["node cli/kolm.js doctor --loop --remote --json", "dataset create/split smoke", "label next/submit smoke", "distill dry-run smoke"],
+        "slo": "99% capture ingest availability; zero cross-tenant dataset leakage",
+        "blockers": ["remote value-loop currently fails 401", "external trace importer coverage remains roadmap unless fixtures are wired"]
+      },
+      "production_smoke": [
+        { "id": "capture-health-auth", "method": "GET", "path": "/v1/capture/health", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "bridges-observations-auth", "method": "GET", "path": "/v1/bridges/observations?limit=5", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "datasets-auth", "method": "GET", "path": "/v1/datasets", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "lake-stats-auth", "method": "GET", "path": "/v1/lake/stats", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "label-queue-stats-auth", "method": "GET", "path": "/v1/label-queue/stats", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "distill-preview-auth", "method": "GET", "path": "/v1/distill/from-captures/preview", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "distill-onpolicy-doctor", "method": "GET", "path": "/v1/distill/onpolicy/doctor", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "distill-preference-doctor", "method": "GET", "path": "/v1/distill/preference/doctor", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "capture-log-deep-auth", "method": "POST", "path": "/v1/capture/log", "auth": "required", "mode": "deep", "expect": [200, 201, 207], "checks": ["json"], "body": { "namespace": "surface-smoke", "provider": "surface-smoke", "model": "smoke-model", "items": [{ "input": "approve invoice 123", "output": "approve" }, { "input": "reject duplicate invoice", "output": "reject" }] } },
+        { "id": "training-plan-deep-auth", "method": "POST", "path": "/v1/training/plan", "auth": "required", "mode": "deep", "expect": [200], "checks": ["json"], "body": { "dataset_id": "surface-smoke-inline", "rows": [{ "input": "approve invoice 123", "output": "approve" }, { "input": "reject duplicate invoice", "output": "reject" }] } }
+      ],
+      "status": "blocked-prod-auth"
+    },
+    {
+      "id": "governance-compliance-security",
+      "name": "Governance, Compliance, Admin, Audit, Privacy, Trace, And Notifications",
+      "promise": "Operators can prove who did what, what data moved, what artifact ran, what privacy controls applied, and what compliance package can be exported.",
+      "route_groups": ["admin", "audit", "privacy", "notifications", "trace", "telemetry", "lineage", "concepts", "agents", "session", "lead", "loop"],
+      "primary_paths": ["/security", "/privacy", "/enterprise", "/account/audit-log", "/v1/audit/log", "/v1/privacy/scan", "/v1/trace/append"],
+      "code_paths": ["src/audit.js", "src/privacy-membrane.js", "src/notifications.js", "src/trace-capture.js", "src/artifact-lineage.js", "src/agent-telemetry.js", "src/router.js"],
+      "doc_paths": ["docs/research/compliance-security-posture-audit-2026-05-12.md", "docs/research/audit-observability-evidence-audit-2026-05-12.md", "docs/research/tenant-data-lifecycle-audit-2026-05-12.md"],
+      "competitor_refs": ["langsmith-observability", "arize-phoenix", "wandb-weave", "workos-identity"],
+      "optimal_spec": [
+        "Audit logs are append-only, signed, exportable, and scoped by org/workspace/tenant.",
+        "Privacy scans can block, redact, hash, or allow by policy with explainable class-level evidence.",
+        "Compliance packages bind receipts, manifests, audit rows, DSR status, subprocessors, and retention policy.",
+        "Notifications and admin actions are rate-limited, tenant-fenced, and auditable."
+      ],
+      "certification": {
+        "local_gates": ["node scripts/local-surface-smoke.cjs --json --surface=governance-compliance-security", "audit chain verifier", "privacy policy scan/redact behavior", "route tenant-fence checks"],
+        "prod_gates": ["authenticated compliance package export", "trace append/stats/export smoke", "audit log export smoke", "privacy scan/redact smoke"],
+        "slo": "audit export and privacy policy routes must never expose cross-tenant data",
+        "blockers": ["production auth is blocked", "SOC2/HIPAA claims require external control evidence beyond code"]
+      },
+      "production_smoke": [
+        { "id": "audit-log-auth", "method": "GET", "path": "/v1/audit/log", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "audit-verify-auth", "method": "GET", "path": "/v1/audit/verify", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "privacy-policy", "method": "GET", "path": "/v1/privacy/policy", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "privacy-report-auth", "method": "GET", "path": "/v1/privacy/report", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "notifications-state-auth", "method": "GET", "path": "/v1/notifications/state", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "trace-providers-auth", "method": "GET", "path": "/v1/trace/translate/providers", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "account-compliance-package-auth", "method": "GET", "path": "/v1/account/compliance-package", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "privacy-scan-deep", "method": "POST", "path": "/v1/privacy/scan", "auth": "required", "mode": "deep", "expect": [200], "checks": ["json"], "body": { "text": "Patient Jane Doe email jane@example.com", "dry_run": true } },
+        { "id": "trace-append-deep-auth", "method": "POST", "path": "/v1/trace/append", "auth": "required", "mode": "deep", "expect": [201], "checks": ["json"], "body": { "span": { "trace_id": "11111111111111111111111111111111", "span_id": "1111111111111111", "kind": "llm_call", "started_at": "2026-05-20T00:00:00.000Z", "ended_at": "2026-05-20T00:00:00.001Z", "duration_ms": 1, "payload": { "vendor": "surface-smoke", "model": "surface-smoke", "prompt": "Return ok.", "response": "ok", "tokens_in": 2, "tokens_out": 1, "cost_usd": 0 } } } }
+      ],
+      "status": "blocked-prod-auth"
+    },
+    {
+      "id": "deployment-edge-federated",
+      "name": "Deployment, Edge Devices, BYOC, Storage, Sync, Tunnel, And Federated Learning",
+      "promise": "Artifacts can move across cloud, BYOC, device, tunnel, sync, confidential-compute, and federated workflows without losing tenant boundaries or evidence.",
+      "route_groups": ["device", "devices", "capability", "cc", "fl", "federated", "byoc", "storage", "sync", "tunnel", "tunnels"],
+      "primary_paths": ["/device", "/byoc", "/self-host", "/tunnels", "/v1/devices", "/v1/byoc/deployments", "/v1/storage/config"],
+      "code_paths": ["src/device-capabilities.js", "src/devices.js", "src/device-install.js", "src/byoc.js", "src/cloud-sync.js", "src/tunnel.js", "src/confidential-compute.js", "src/federated-learning.js", "src/federated-approvals.js", "src/event-store.js", "src/media-store.js", "src/store.js"],
+      "doc_paths": ["docs/research/device-offline-browser-governance-audit-2026-05-12.md", "docs/research/deployment-readiness-truth-2026-05-12.md", "docs/research/sandbox-hardening-decision-2026-05-12.md"],
+      "competitor_refs": ["apple-coreml", "apple-foundation-models", "google-litert", "onnx-runtime-mobile", "executorch", "aws-bedrock-custom-models"],
+      "optimal_spec": [
+        "Device detection returns partial structured results instead of 500 when local probes fail.",
+        "Runtime targets name exact backend, quantization, hardware, expected latency, and verification status.",
+        "BYOC and tunnel deployments separate control plane from customer data plane and preserve receipt evidence.",
+        "Federated flows exchange hashes, approvals, and aggregates without leaking raw tenant data."
+      ],
+      "certification": {
+        "local_gates": ["node scripts/local-surface-smoke.cjs --json --surface=deployment-edge-federated", "GET/POST /v1/devices/detect local smoke", "storage config smoke", "federated approval unit gates"],
+        "prod_gates": ["authenticated device list/register/test smoke", "BYOC deployment lifecycle dry-run", "sync push/pull smoke", "tunnel register/list/close smoke"],
+        "slo": "device and deployment control-plane routes must degrade gracefully and never leak cross-tenant state",
+        "blockers": ["production auth is blocked", "BYOC/sync/tunnel/federated lifecycle smoke still requires live production credentials"]
+      },
+      "production_smoke": [
+        { "id": "devices-auth", "method": "GET", "path": "/v1/devices", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "devices-detect", "method": "GET", "path": "/v1/devices/detect", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "storage-config", "method": "GET", "path": "/v1/storage/config", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "byoc-targets", "method": "GET", "path": "/v1/byoc/targets", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "sync-status-auth", "method": "GET", "path": "/v1/sync/status", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "tunnels-auth", "method": "GET", "path": "/v1/tunnels", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "federated-peers-auth", "method": "GET", "path": "/v1/federated/peers", "auth": "required", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "fl-strategies", "method": "GET", "path": "/v1/fl/strategies", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "cc-kinds", "method": "GET", "path": "/v1/cc/kinds", "auth": "none", "mode": "safe", "expect": [200], "checks": ["json"] },
+        { "id": "device-recommend-deep", "method": "POST", "path": "/v1/devices/recommend", "auth": "required", "mode": "deep", "expect": [200], "checks": ["json"], "body": { "hints": { "profile_id": "cpu-x86_64" } } }
+      ],
+      "status": "blocked-prod-auth"
+    }
+  ]
+}

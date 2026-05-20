@@ -290,8 +290,10 @@ function sha256Hex(buf) {
 }
 
 // Open a .kolm and return its contents as a structured bundle. Verifies the
-// signature; throws if mangled.
-export function loadArtifact(artifactPath) {
+// signature by default; verifier-report callers can opt into a lenient load so
+// signature-invalid artifacts still produce explicit failing evidence rows.
+export function loadArtifact(artifactPath, opts = {}) {
+  const allowInvalidSignature = opts && opts.allowInvalidSignature === true;
   const fileBuf = fs.readFileSync(artifactPath);
   const zip = new AdmZip(fileBuf);
   const entries = Object.fromEntries(zip.getEntries().map(e => [e.entryName, e.getData()]));
@@ -313,6 +315,8 @@ export function loadArtifact(artifactPath) {
   // artifacts (signed with the shared RECIPE_RECEIPT_SECRET both sides have).
   const verification = verifyManifestSignature(manifest_json, signature);
   let signatureMode = 'hmac-local';
+  let signatureValid = true;
+  let signatureError = null;
   if (!verification.valid) {
     // Cloud-trust fallback. When the artifact bytes match an entry recorded
     // by `kolm compile` (cloud path), accept the artifact - the cloud signed
@@ -325,9 +329,17 @@ export function loadArtifact(artifactPath) {
     if (trustedSha) {
       const integrity = structuralIntegrityOk(manifest_json, signature);
       if (!integrity.ok) {
-        throw kolmError('KOLM_E_SIGNATURE_INVALID', `signature invalid (cloud-trust set, but structural integrity failed: ${integrity.reason})`);
+        const message = `signature invalid (cloud-trust set, but structural integrity failed: ${integrity.reason})`;
+        if (allowInvalidSignature) {
+          signatureMode = 'invalid';
+          signatureValid = false;
+          signatureError = message;
+        } else {
+          throw kolmError('KOLM_E_SIGNATURE_INVALID', message);
+        }
+      } else {
+        signatureMode = 'cloud-trusted';
       }
-      signatureMode = 'cloud-trusted';
     } else {
       // W481 — Ed25519 structural-integrity fallback. The artifact carries a
       // self-describing Ed25519 receipt: signature + public key both bundled
@@ -347,10 +359,14 @@ export function loadArtifact(artifactPath) {
       if (ed25519Result.ok) {
         signatureMode = 'ed25519-public-key';
       } else {
-        throw kolmError(
-          'KOLM_E_SIGNATURE_INVALID',
-          `signature invalid: ${verification.reason}. Ed25519 fallback also failed: ${ed25519Result.reason}. If this artifact was downloaded via \`kolm compile\` (cloud), make sure the download finished and re-run \`kolm compile\` to refresh the local trust entry. Set KOLM_TRUST_CLOUD_ARTIFACTS=0 to disable the cloud-trust fallback.`
-        );
+        const message = `signature invalid: ${verification.reason}. Ed25519 fallback also failed: ${ed25519Result.reason}. If this artifact was downloaded via \`kolm compile\` (cloud), make sure the download finished and re-run \`kolm compile\` to refresh the local trust entry. Set KOLM_TRUST_CLOUD_ARTIFACTS=0 to disable the cloud-trust fallback.`;
+        if (allowInvalidSignature) {
+          signatureMode = 'invalid';
+          signatureValid = false;
+          signatureError = message;
+        } else {
+          throw kolmError('KOLM_E_SIGNATURE_INVALID', message);
+        }
       }
     }
   }
@@ -382,8 +398,9 @@ export function loadArtifact(artifactPath) {
     // bytes like target.wasm / target/linux-x64/recipe / model.gguf without
     // re-opening the zip. Keys are entry names; values are Buffers.
     entries,
-    signature_valid: true,
+    signature_valid: signatureValid,
     signature_mode: signatureMode,
+    signature_error: signatureError,
     artifact_path: artifactPath,
   };
 }

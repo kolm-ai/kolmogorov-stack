@@ -164,7 +164,7 @@ for (const page of PAGES) {
 
   test(`W274 ${page.file} ships header nav + footer cross-links`, () => {
     const html = readPage(page.file);
-    assert.match(html, /<header class="site">/, 'site header missing');
+    assert.match(html, /<header class="site-header">/, 'site header missing');
     assert.match(html, /<footer class="site">/, 'site footer missing');
     assert.match(html, /\/compare/, 'cross-link to /compare missing');
   });

@@ -228,10 +228,12 @@ test('19. Each page includes the kolm site header navigation', () => {
   const all = [MIGRATE_INDEX, ...SLUGS.map((s) => COMPETITOR_PAGES[s])];
   for (const p of all) {
     const html = read(p);
-    assert.match(html, /<header class="site">/,
+    assert.match(html, /<header class="site-header">/,
       `${path.basename(p)} must include the standard site header`);
-    assert.match(html, /class="logo"[^>]*>k o l m</,
-      `${path.basename(p)} must include the kolm logo link`);
+    assert.match(html, /class="brand"[^>]*>kolm\.ai<\/a>/,
+      `${path.basename(p)} must include the canonical kolm.ai brand link`);
+    assert.match(html, /class="site-nav"/,
+      `${path.basename(p)} must include the canonical site nav`);
   }
 });
 

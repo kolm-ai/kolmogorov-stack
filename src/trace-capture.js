@@ -26,8 +26,8 @@
 // dataset) it MUST go through redactForExport first. Raw spans NEVER cross
 // the boundary by default.
 //
-// Storage: jsonl under KOLM_HOME/traces/<trace_id>.jsonl. One file per
-// trace_id. Append-only; chain hashes link spans.
+// Storage: jsonl under KOLM_TRACE_DIR, KOLM_DATA_DIR/traces, or
+// KOLM_HOME/traces. One file per trace_id. Append-only; chain hashes link spans.
 
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -82,10 +82,16 @@ function _validateSpan(span) {
   }
 }
 
+function _traceDir() {
+  if (process.env.KOLM_TRACE_DIR) return path.resolve(process.env.KOLM_TRACE_DIR);
+  if (process.env.KOLM_HOME) return path.join(path.resolve(process.env.KOLM_HOME), 'traces');
+  if (process.env.KOLM_DATA_DIR) return path.join(path.resolve(process.env.KOLM_DATA_DIR), 'traces');
+  const home = path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
+  return path.join(home, 'traces');
+}
+
 function _traceFile(trace_id) {
-  const home = process.env.KOLM_HOME
-    || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
-  return path.join(home, 'traces', `${trace_id}.jsonl`);
+  return path.join(_traceDir(), `${trace_id}.jsonl`);
 }
 
 // Append a span to the trace's log. Chain hash links to prior span.

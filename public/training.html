@@ -213,17 +213,114 @@
 
 <header class="site-header">
  <div class="wrap">
- <a href="/" class="kolm-mark" aria-label="kolm home"><img src="/logo-mark.svg" alt="" width="28" height="28"></a>
+ <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training loop</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Run</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
  </div>
 </header>
 
 <main id="main">
 <section class="hero">
  <div class="wrap">
- <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; training</p>
- <p class="pcap">Six tiers. Same CLI. Verifiable artifact at every step.</p>
- <h1>Train your AI from <em>five examples</em> to <em>fifty thousand</em></h1>
- <p class="lede">A rule recipe in thirty seconds. A synthesized rule in five minutes. A distilled 7B in an afternoon. Or compose four specialists into one MoE bundle. Same CLI, same receipt chain, same <code>.kolm</code> file on the other end.</p>
+ <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; training</p>
+ <p class="pcap">Training, distillation, compilation. One reviewed data path.</p>
+ <h1>Build the smallest model that wins.</h1>
+ <p class="lede">Start with captured traffic. Promote only reviewed rows. Then choose the cheapest strategy that passes the holdout: rule, synthesized rule, distilled student, quantized bundle, or composed specialist set. Same CLI, same receipt chain, same <code>.kolm</code> artifact.</p>
  <div class="cta-row">
  <a href="#tier-0" class="cta primary">Start at tier 0 &rarr;</a>
  <a href="/captures" class="cta">Distillation deep dive</a>
@@ -1062,10 +1159,11 @@ kolm inspect &lt;file&gt;.kolm # full manifest pretty-print</pre>
 
 <footer style="border-top: 1px solid var(--line); padding: 30px 0; font-family: var(--mono); font-size: 12px; color: var(--ink-faint); text-align: center;">
  <div class="wrap">
- <a href="/" style="color: var(--ink-mute);">kolm</a> &middot; <a href="/spec/rs-1" style="color: var(--ink-mute);">RS-1 spec</a> &middot; <a href="/roadmap" style="color: var(--ink-mute);">roadmap</a> &middot; <a href="/docs" style="color: var(--ink-mute);">artifact anatomy</a> &middot; <a href="/k-score" style="color: var(--ink-mute);">K-score</a> &middot; <a href="/captures" style="color: var(--ink-mute);">distillation</a> &middot; <a href="/threat-model" style="color: var(--ink-mute);">threat model</a>
+ <a href="/" style="color: var(--ink-mute);">kolm.ai</a> &middot; <a href="/spec/rs-1" style="color: var(--ink-mute);">RS-1 spec</a> &middot; <a href="/roadmap" style="color: var(--ink-mute);">roadmap</a> &middot; <a href="/docs" style="color: var(--ink-mute);">artifact anatomy</a> &middot; <a href="/k-score" style="color: var(--ink-mute);">K-score</a> &middot; <a href="/captures" style="color: var(--ink-mute);">distillation</a> &middot; <a href="/threat-model" style="color: var(--ink-mute);">threat model</a>
  </div>
 </footer>
 
 <script src="/sdk.js" defer></script>
+<script src="/nav.js" defer></script>
 </body>
 </html>

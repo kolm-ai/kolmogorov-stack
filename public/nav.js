@@ -12,7 +12,14 @@
  var isLegacy = header.classList.contains('site') && !header.classList.contains('site-header');
  var nav = isLegacy ? header.querySelector('.left nav, nav') : header.querySelector('.site-nav');
  var actions = isLegacy ? header.querySelector('.right') : header.querySelector('.site-actions');
- if (!nav || !actions) return;
+ if (!nav) return;
+ if (!actions && !isLegacy) {
+ actions = document.createElement('div');
+ actions.className = 'site-actions';
+ var wrapForActions = header.querySelector('.wrap') || header;
+ wrapForActions.appendChild(actions);
+ }
+ if (!actions) return;
 
  // Active state only. Path-driven; idempotent; never rewrites innerHTML.
  // W221: collapsed 6-item to canonical 5-item nav
@@ -44,9 +51,91 @@
  }
  }
 
+ // Reliable desktop mega menus. CSS hover alone left a dead gap between the
+ // top tab and the panel on multiple pages. Keep one panel open while the
+ // pointer or keyboard focus is inside either the tab or the menu.
+ var megaItems = nav.querySelectorAll('.nav-item.has-mega');
+ var megaCloseTimer = 0;
+ function desktopMegaEnabled() {
+ return window.innerWidth > 920;
+ }
+ function setMegaOpen(item, open) {
+ if (!item) return;
+ item.classList.toggle('is-open', !!open);
+ var top = item.querySelector(':scope > a.nav-top, :scope > a');
+ if (top) top.setAttribute('aria-expanded', String(!!open));
+ }
+ function closeMegas(except) {
+ for (var m = 0; m < megaItems.length; m++) {
+ if (megaItems[m] !== except) setMegaOpen(megaItems[m], false);
+ }
+ }
+ function openMega(item) {
+ if (!desktopMegaEnabled()) return;
+ window.clearTimeout(megaCloseTimer);
+ closeMegas(item);
+ setMegaOpen(item, true);
+ }
+ function scheduleMegaClose(item) {
+ if (!desktopMegaEnabled()) return;
+ window.clearTimeout(megaCloseTimer);
+ megaCloseTimer = window.setTimeout(function () { setMegaOpen(item, false); }, 120);
+ }
+ for (var mi = 0; mi < megaItems.length; mi++) {
+ (function (item) {
+ var top = item.querySelector(':scope > a.nav-top, :scope > a');
+ var menu = item.querySelector(':scope > .mega-menu');
+ if (!top || !menu) return;
+ top.setAttribute('aria-haspopup', 'true');
+ top.setAttribute('aria-expanded', 'false');
+ item.addEventListener('pointerenter', function () { openMega(item); });
+ item.addEventListener('pointerleave', function () { scheduleMegaClose(item); });
+ menu.addEventListener('pointerenter', function () { openMega(item); });
+ menu.addEventListener('pointerleave', function () { scheduleMegaClose(item); });
+ item.addEventListener('focusin', function () { openMega(item); });
+ item.addEventListener('focusout', function (e) {
+ if (!item.contains(e.relatedTarget)) scheduleMegaClose(item);
+ });
+ top.addEventListener('keydown', function (e) {
+ if (e.key !== 'ArrowDown') return;
+ e.preventDefault();
+ openMega(item);
+ var first = menu.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
+ if (first) first.focus();
+ });
+ })(megaItems[mi]);
+ }
+ document.addEventListener('pointerdown', function (e) {
+ if (!desktopMegaEnabled()) return;
+ if (!nav.contains(e.target)) closeMegas();
+ });
+
  // Strip github star button · keep right side compact (theme + sign in + CTA).
  var gh = actions.querySelector('#gh-star, .gh-star');
  if (gh && gh.parentNode) gh.parentNode.removeChild(gh);
+
+ if (!isLegacy && !actions.querySelector('.theme-toggle')) {
+ var themeBtn = document.createElement('button');
+ themeBtn.type = 'button';
+ themeBtn.className = 'theme-toggle';
+ themeBtn.setAttribute('aria-label', 'Toggle theme');
+ themeBtn.innerHTML = '<span aria-hidden="true">◐</span>';
+ actions.appendChild(themeBtn);
+ }
+ if (!isLegacy && !actions.querySelector('a[href="/signin"]')) {
+ var signIn = document.createElement('a');
+ signIn.href = '/signin';
+ signIn.className = 'signin';
+ signIn.textContent = 'sign in';
+ actions.appendChild(signIn);
+ }
+ if (!isLegacy && !actions.querySelector('.cta')) {
+ var cta = document.createElement('a');
+ cta.href = '/signup';
+ cta.className = 'cta';
+ cta.textContent = 'Get API Key →';
+ actions.appendChild(cta);
+ }
 
  // Auth-aware status pill. Validates the session before showing anything ·
  // localStorage alone is not trusted (stale keys from deleted tenants would
@@ -154,9 +243,34 @@
  if (e.target && e.target.tagName === 'A') setOpen(false);
  });
  document.addEventListener('keydown', function (e) {
- if (e.key === 'Escape' && nav.classList.contains('is-open')) setOpen(false);
+ if (e.key === 'Escape') {
+ closeMegas();
+ if (nav.classList.contains('is-open')) setOpen(false);
+ }
  });
  window.addEventListener('resize', function () {
  if (window.innerWidth > 920 && nav.classList.contains('is-open')) setOpen(false);
+ if (!desktopMegaEnabled()) closeMegas();
  });
+
+ // Product spine: a compact orientation layer for deep pages. It keeps the
+ // site from feeling like hundreds of disconnected landing pages while leaving
+ // auth/app consoles uncluttered.
+ (function injectProductSpine() {
+ if (document.querySelector('.kolm-product-spine')) return;
+ if (/^\/(account|admin|signin|signup|password-reset|teams-accept)(\/|$)/.test(path)) return;
+ var main = document.querySelector('main');
+ if (!main || main.querySelector('.home-hero')) return;
+ var spine = document.createElement('nav');
+ spine.className = 'kolm-product-spine';
+ spine.setAttribute('aria-label', 'kolm product stack');
+ spine.innerHTML =
+ '<a href="/capture"><span>01</span>Gateway</a>' +
+ '<a href="/docs/lake"><span>02</span>Lake</a>' +
+ '<a href="/training"><span>03</span>Train</a>' +
+ '<a href="/distill"><span>04</span>Distill</a>' +
+ '<a href="/runtimes"><span>05</span>Run</a>' +
+ '<a href="/trust"><span>06</span>Verify</a>';
+ main.parentNode.insertBefore(spine, main);
+ })();
 })();

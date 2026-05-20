@@ -11249,8 +11249,15 @@ async function cmdBootstrap(args) {
   const skipServices = args.includes('--no-services');
   const skipDoctor = args.includes('--no-doctor');
   const profileName = pickFlagEq(args, '--profile') || 'default';
-  const homeDir = process.env.USERPROFILE || process.env.HOME || os.homedir();
-  const kolmDir = path.join(homeDir, '.kolm');
+  const testMode = process.env.NODE_ENV === 'test' || process.env.npm_lifecycle_event === 'test';
+  const explicitKolmDir = process.env.KOLM_DATA_DIR || process.env.KOLM_HOME || null;
+  const candidateHomeDir = process.env.USERPROFILE || process.env.HOME || os.homedir();
+  const tmpRelative = path.relative(os.tmpdir(), path.resolve(candidateHomeDir));
+  const candidateIsTmp = tmpRelative === '' || (tmpRelative && !tmpRelative.startsWith('..') && !path.isAbsolute(tmpRelative));
+  const homeDir = testMode && !explicitKolmDir && !candidateIsTmp
+    ? path.join(os.tmpdir(), `kolm-bootstrap-test-${process.pid}`)
+    : candidateHomeDir;
+  const kolmDir = explicitKolmDir ? path.resolve(explicitKolmDir) : path.join(homeDir, '.kolm');
   const dirs = ['captures', 'services', 'service-logs', 'state', 'profiles', 'recipes', 'artifacts'];
   const steps = [];
   // dirs

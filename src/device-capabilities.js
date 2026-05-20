@@ -370,9 +370,21 @@ export async function detectLocalDevice() {
   if (!profile.runtimes.includes('llama.cpp')) profile.runtimes.push('llama.cpp');
   if (!profile.runtimes.includes('onnx')) profile.runtimes.push('onnx');
 
-  // Persist + return.
-  const f = _profilePath('local');
-  fs.writeFileSync(f, JSON.stringify(profile, null, 2));
+  // Persist best-effort. Device detection is a control-plane read path; a
+  // readonly HOME/KOLM_DATA_DIR must not turn capability detection into a 500.
+  let f = null;
+  try {
+    f = _profilePath('local');
+    fs.writeFileSync(f, JSON.stringify(profile, null, 2));
+    profile.persistence = { ok: true, path: f };
+  } catch (e) {
+    profile.persistence = {
+      ok: false,
+      path: f,
+      error: String(e && e.code ? e.code : (e && e.message) || e),
+    };
+    profile.partial = true;
+  }
   return profile;
 }
 
