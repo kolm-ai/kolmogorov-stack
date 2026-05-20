@@ -10,9 +10,9 @@ description: List, show, and prune the local job registry.
 ## Usage
 
 ```bash
-kolm jobs                  # alias for: kolm jobs list
-kolm jobs list   [--json]
-kolm jobs <id>   [--json]
+kolm jobs # alias for: kolm jobs list
+kolm jobs list [--json]
+kolm jobs <id> [--json]
 kolm jobs prune
 ```
 
@@ -27,8 +27,8 @@ kolm jobs prune
 The list view shows one row per job:
 
 ```
-<job-id>            <kind>     <status>    <age>     <log-path>
-job_018a3e9c        compile    completed   2h        ~/.kolm/jobs/job_018a3e9c/log
+<job-id> <kind> <status> <age> <log-path>
+job_018a3e9c compile completed 2h ~/.kolm/jobs/job_018a3e9c/log
 ```
 
 Kinds: `compile`, `distill`, `quantize`, `sync`, `runtime-build`.
@@ -38,10 +38,10 @@ Statuses: `queued`, `running`, `completed`, `failed`, `cancelled`.
 The detail view (`kolm jobs <id>`) prints the job header plus the last 8 KiB of the log:
 
 ```
-# job_018a3e9c  (compile, completed)
-# log:   ~/.kolm/jobs/job_018a3e9c/log
-# pid:   42813
-# meta:  {"name":"redactor","namespace":"phi"}
+# job_018a3e9c (compile, completed)
+# log: ~/.kolm/jobs/job_018a3e9c/log
+# pid: 42813
+# meta: {"name":"redactor","namespace":"phi"}
 ---
 ... last 8 KiB of log ...
 ```

@@ -21,22 +21,17 @@ test('1. spec stamp is v2.1 (Q+11 reconciliation)', () => {
 
 test('2. provenance note explains the v2.1 reconciliation', () => {
   assert.match(SPEC, /Provenance note \(v2\.1 reconciliation\)/);
-  assert.match(SPEC, /Q\+11 reconciliation track from the Wave 144 plan/);
-  assert.match(SPEC, /every numbered subsection in §7 is now grounded in a shipping wave/);
+  assert.match(SPEC, /removes the remaining implementation-status markers/);
+  assert.match(SPEC, /documented as shipping verifier contracts/);
 });
 
-test('3. no stale "wave forthcoming" markers outside the provenance note', () => {
-  // The only allowed occurrence of "wave forthcoming" is the verbatim quoted
-  // historical reference inside the provenance note explaining what v2.0 said.
+test('3. no stale "wave forthcoming" markers', () => {
   const lines = SPEC.split('\n');
   const occurrences = lines
     .map((line, idx) => ({ line, idx: idx + 1 }))
     .filter(({ line }) => /wave forthcoming|forthcoming wave/i.test(line));
-  // Allow only the provenance note line (single quoted historical reference).
-  const offending = occurrences.filter(({ line }) =>
-    !/Provenance note \(v2\.1 reconciliation\)/.test(line));
-  assert.equal(offending.length, 0,
-    `stale "forthcoming" markers outside provenance note:\n${offending.map(o => `  L${o.idx}: ${o.line.trim().slice(0, 200)}`).join('\n')}`);
+  assert.equal(occurrences.length, 0,
+    `stale "forthcoming" markers:\n${occurrences.map(o => `  L${o.idx}: ${o.line.trim().slice(0, 200)}`).join('\n')}`);
 });
 
 test('4. §7.1 PHI redactor + §7.2 cross-vendor distillation now stamped with implementing waves', () => {
@@ -59,15 +54,15 @@ test('6. K-score axis Z (drift) cites wave 167 + §7.15', () => {
   assert.match(m[0], /§7\.15|&sect;7\.15/);
 });
 
-test('7. every §7.X subsection from 7.3 through 7.15 carries a wave stamp', () => {
-  // Heading shape: <h3>7.N[.M] Title (... wave NNN[, track]) </h3>
+test('7. every ?7.X subsection from 7.3 through 7.15 carries a wave or release stamp', () => {
+  // Heading shape: <h3>7.N[.M] Title (... wave/release NNN[, track]) </h3>
   // §7.1 + §7.2 are overviews stamped with W157/W158; §7.3 onward each
   // names its implementing wave directly. Locked here to prevent regressions.
   const headings = [...SPEC.matchAll(/<h3>(7\.[0-9]+(?:\.[0-9]+)?)\s+([^<]+)<\/h3>/g)]
     .map(m => ({ id: m[1], title: m[2].trim() }));
   // At least 15 subsections (7.1 .. 7.15 + a couple .x).
   assert.ok(headings.length >= 15, `expected >= 15 §7.X subsections, got ${headings.length}`);
-  const missingWave = headings.filter(h => !/wave\s*\d+/i.test(h.title));
+  const missingWave = headings.filter(h => !/(wave|release)\s*\d+/i.test(h.title));
   assert.equal(missingWave.length, 0,
     `subsections without wave stamp:\n${missingWave.map(h => `  ${h.id} ${h.title}`).join('\n')}`);
 });

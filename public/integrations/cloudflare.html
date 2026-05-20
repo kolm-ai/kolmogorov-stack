@@ -4,181 +4,192 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Verify a .kolm at the edge with Cloudflare Workers &middot; kolm</title>
+<title>Verify a .kolm at the edge with Cloudflare Workers · kolm.ai</title>
 <meta name="description" content="Drop the kolm verifier into a Cloudflare Worker. Sub-millisecond receipt checks at the edge, no origin round trip.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/integrations/cloudflare">
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
-  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
-  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
-  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
-  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.site nav a{color:inherit;text-decoration:none}
-  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
-  .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0}
-  .meta{display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing:0.04em;flex-wrap:wrap}
-  .meta span b{color:var(--accent);font-weight:500}
-  section.step{padding:36px 0;border-bottom:1px solid var(--line)}
-  section.step h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em;color:var(--ink)}
-  section.step .stepno{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
-  section.step p{color:var(--ink-mute);margin:0 0 16px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
-  pre .c{color:var(--ink-faint)}
-  pre .g{color:var(--accent)}
-  pre .k{color:#ec7373}
-  .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(16,185,129,0.32);border-radius:8px;background:rgba(16,185,129,0.05);font-size:13.5px;color:var(--ink-mute);margin:0 0 8px}
-  .checkpoint b{color:var(--accent);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
-  .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
-  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .btn:hover{transform:translateY(-1px)}
-  footer{padding:32px 0;color:var(--ink-faint);font-size:13px}
-  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
+ .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0}
+ .meta{display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing:0.04em;flex-wrap:wrap}
+ .meta span b{color:var(--accent);font-weight:500}
+ section.step{padding:36px 0;border-bottom:1px solid var(--line)}
+ section.step h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em;color:var(--ink)}
+ section.step .stepno{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+ section.step p{color:var(--ink-mute);margin:0 0 16px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
+ pre .c{color:var(--ink-faint)}
+ pre .g{color:var(--accent)}
+ pre .k{color:#ec7373}
+ .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(16,185,129,0.32);border-radius:8px;background:rgba(16,185,129,0.05);font-size:13.5px;color:var(--ink-mute);margin:0 0 8px}
+ .checkpoint b{color:var(--accent);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
+ .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+ .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+ .btn:hover{transform:translateY(-1px)}
+ footer{padding:32px 0;color:var(--ink-faint);font-size:13px}
+ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
 <link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta property="og:title" content="Verify a .kolm at the edge with Cloudflare Workers · kolm.ai">
+<meta property="og:description" content="Drop the kolm verifier into a Cloudflare Worker. Sub-millisecond receipt checks at the edge, no origin round trip.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/integrations/cloudflare">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Verify a .kolm at the edge with Cloudflare Workers · kolm.ai">
+<meta name="twitter:description" content="Drop the kolm verifier into a Cloudflare Worker. Sub-millisecond receipt checks at the edge, no origin round trip.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/quickstart">quickstart</a><a href="/docs">docs</a><a href="/integrations">integrations</a></nav></div></header>
-<main>
+<main id="main">
 <section class="hero">
-  <div class="wrap">
-    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/integrations">integrations</a> &nbsp;/&nbsp; Cloudflare</p>
-    <h1>Verify a .kolm at the edge.</h1>
-    <p class="lede">Drop the kolm verifier into a Cloudflare Worker. Sub-millisecond CID + HMAC checks run in 320+ cities. Every request that reaches your origin is already cryptographically validated. No origin round-trip, no client trust.</p>
-    <div class="meta"><span>Worker size <b>14 KB</b></span><span>Verify p50 <b>0.8 ms</b></span><span>Runtime <b>workerd</b></span><span>Free tier <b>100K req/day</b></span></div>
-  </div>
+ <div class="wrap">
+ <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/integrations">integrations</a> &nbsp;/&nbsp; Cloudflare</p>
+ <h1>Verify a .kolm at the edge.</h1>
+ <p class="lede">Drop the kolm verifier into a Cloudflare Worker. Sub-millisecond CID + Ed25519 checks run in 320+ cities. Every request that reaches your origin is already cryptographically validated. No origin round-trip, no client trust.</p>
+ <div class="meta"><span>Worker size <b>14 KB</b></span><span>Verify p50 <b>0.8 ms</b></span><span>Runtime <b>workerd</b></span><span>Free tier <b>100K req/day</b></span></div>
+ </div>
 </section>
 
 <section class="step">
-  <div class="wrap">
-    <p class="stepno">Step 1 . 60 seconds</p>
-    <h2>Install wrangler and the verifier package.</h2>
-    <pre>$ npm install -g wrangler
+ <div class="wrap">
+ <p class="stepno">Step 1 . 60 seconds</p>
+ <h2>Install wrangler and the verifier package.</h2>
+ <pre>$ npm install -g wrangler
 $ wrangler init kolm-edge-verify
 $ cd kolm-edge-verify
 $ npm install kolm-verify-edge</pre>
-  </div>
+ </div>
 </section>
 
 <section class="step">
-  <div class="wrap">
-    <p class="stepno">Step 2 . 2 minutes</p>
-    <h2>Add the worker.</h2>
-    <p>The Worker reads the `X-Kolm-Receipt` header on every inbound request and verifies it against the artifact CID before letting the request reach your origin.</p>
-    <pre><span class="c">// src/index.ts</span>
+ <div class="wrap">
+ <p class="stepno">Step 2 . 2 minutes</p>
+ <h2>Add the worker.</h2>
+ <p>The Worker reads the `X-Kolm-Receipt` header on every inbound request and verifies it against the artifact CID before letting the request reach your origin.</p>
+ <pre><span class="c">// src/index.ts</span>
 <span class="k">import</span> { verifyReceipt, cidFromManifest } <span class="k">from</span> <span class="g">'kolm-verify-edge'</span>;
 
 <span class="k">export default</span> {
-  <span class="k">async</span> fetch(req: Request, env: Env): Promise&lt;Response&gt; {
-    <span class="k">const</span> receipt = req.headers.get(<span class="g">'X-Kolm-Receipt'</span>);
-    <span class="k">if</span> (!receipt) <span class="k">return new</span> Response(<span class="g">'missing receipt'</span>, { status: 401 });
+ <span class="k">async</span> fetch(req: Request, env: Env): Promise&lt;Response&gt; {
+ <span class="k">const</span> receipt = req.headers.get(<span class="g">'X-Kolm-Receipt'</span>);
+ <span class="k">if</span> (!receipt) <span class="k">return new</span> Response(<span class="g">'missing receipt'</span>, { status: 401 });
 
-    <span class="k">const</span> ok = <span class="k">await</span> verifyReceipt(receipt, env.KOLM_VERIFY_KEY);
-    <span class="k">if</span> (!ok) <span class="k">return new</span> Response(<span class="g">'invalid receipt'</span>, { status: 403 });
+ <span class="k">const</span> ok = <span class="k">await</span> verifyReceipt(receipt, env.KOLM_VERIFY_KEY);
+ <span class="k">if</span> (!ok) <span class="k">return new</span> Response(<span class="g">'invalid receipt'</span>, { status: 403 });
 
-    <span class="c">// receipt valid - forward to origin</span>
-    <span class="k">return</span> fetch(req);
-  },
+ <span class="c">// receipt valid - forward to origin</span>
+ <span class="k">return</span> fetch(req);
+ },
 };</pre>
-  </div>
+ </div>
 </section>
 
 <section class="step">
-  <div class="wrap">
-    <p class="stepno">Step 3 . 30 seconds</p>
-    <h2>Add the public verify key as a Worker secret.</h2>
-    <pre>$ wrangler secret put KOLM_VERIFY_KEY
+ <div class="wrap">
+ <p class="stepno">Step 3 . 30 seconds</p>
+ <h2>Add the public verify key as a Worker secret.</h2>
+ <pre>$ wrangler secret put KOLM_VERIFY_KEY
 <span class="c"># paste the kolm.ai org public key, available at:</span>
 <span class="c"># https://kolm.ai/.well-known/kolm/keys.json</span></pre>
-    <div class="checkpoint"><b>Checkpoint</b><span>The verify key is the org public key, not your API key. It only verifies receipts, never produces them.</span></div>
-  </div>
+ <div class="checkpoint"><b>Checkpoint</b><span>The verify key is the org public key, not your API key. It only verifies receipts, never produces them.</span></div>
+ </div>
 </section>
 
 <section class="step">
-  <div class="wrap">
-    <p class="stepno">Step 4 . 30 seconds</p>
-    <h2>Deploy.</h2>
-    <pre>$ wrangler deploy
+ <div class="wrap">
+ <p class="stepno">Step 4 . 30 seconds</p>
+ <h2>Deploy.</h2>
+ <pre>$ wrangler deploy
 
-<span class="g">  k o l m  /  cloudflare</span>
+<span class="g"> k o l m / cloudflare</span>
 deployed kolm-edge-verify
-  endpoint: https://kolm-edge-verify.your-acct.workers.dev
-  size:     14.2 KB (uncompressed) / 5.8 KB (gzip)
-  p50:      0.84 ms (london .. ord .. sfo)</pre>
-  </div>
+ endpoint: https://kolm-edge-verify.your-acct.workers.dev
+ size: 14.2 KB (uncompressed) / 5.8 KB (gzip)
+ p50: 0.84 ms (london .. ord .. sfo)</pre>
+ </div>
 </section>
 
 <section class="step">
-  <div class="wrap">
-    <p class="stepno">Step 5 . 60 seconds</p>
-    <h2>Point your origin at the worker.</h2>
-    <p>Either set the Worker as a route on your zone, or point your client traffic at the worker URL directly. Every request that reaches origin has a receipt that passed at the edge.</p>
-    <pre>$ wrangler route add <span class="g">"api.your-domain.com/*"</span> kolm-edge-verify</pre>
-    <div class="checkpoint"><b>Checkpoint</b><span>Receipts that fail at the edge never touch your origin. Receipts that pass arrive at origin with the CID still in the header for audit logging.</span></div>
-    <div class="actions"><a class="btn primary" href="/integrations/github-actions">CI verify next &rarr;</a><a class="btn" href="/spec/rs-1">RS-1 spec &rarr;</a></div>
-  </div>
+ <div class="wrap">
+ <p class="stepno">Step 5 . 60 seconds</p>
+ <h2>Point your origin at the worker.</h2>
+ <p>Either set the Worker as a route on your zone, or point your client traffic at the worker URL directly. Every request that reaches origin has a receipt that passed at the edge.</p>
+ <pre>$ wrangler route add <span class="g">"api.your-domain.com/*"</span> kolm-edge-verify</pre>
+ <div class="checkpoint"><b>Checkpoint</b><span>Receipts that fail at the edge never touch your origin. Receipts that pass arrive at origin with the CID still in the header for audit logging.</span></div>
+ <div class="actions"><a class="btn primary" href="/integrations/github-actions">CI verify next &rarr;</a><a class="btn" href="/spec/rs-1">RS-1 spec &rarr;</a></div>
+ </div>
 </section>
 
 </main>
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

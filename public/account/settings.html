@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Settings · Account · kolm.ai</title>
-<meta name="description" content="Per-tenant account settings on kolm.ai: default namespace, notification channels, redaction strictness, sync push, key-rotation reminders, locale, timezone. One source of truth across web + CLI + TUI.">
+<title>Settings · Account · Account · kolm.ai</title>
+<meta name="description" content="Per-tenant account settings on kolm.ai: default namespace, notification channels, redaction strictness, sync push, key-rotation reminders, locale, timezone....">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/settings">
-<meta property="og:title" content="Settings &middot; Account &middot; kolm.ai" />
-<meta property="og:description" content="Per-tenant account settings on kolm.ai: default namespace, notification channels, redaction strictness, sync push, key-rotation reminders, locale, timezone. One source of truth across web + CLI + TUI." />
-<meta property="og:image" content="https://kolm.ai/og-card.svg" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://kolm.ai/account/settings" />
+<meta property="og:title" content="Settings · Account · Account · kolm.ai">
+<meta property="og:description" content="Per-tenant account settings on kolm.ai: default namespace, notification channels, redaction strictness, sync push, key-rotation reminders, locale, timezone....">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/settings">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
@@ -52,13 +52,18 @@ input[type=checkbox]{accent-color:var(--accent)}
 .kbd{font-family:var(--mono);font-size:11px;background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--ink-mute);border:1px solid var(--line)}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Settings · Account · Account · kolm.ai">
+<meta name="twitter:description" content="Per-tenant account settings on kolm.ai: default namespace, notification channels, redaction strictness, sync push, key-rotation reminders, locale, timezone....">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -209,8 +214,8 @@ input[type=checkbox]{accent-color:var(--accent)}
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions"><a href="/docs">Help</a></div>
-  </div>
+ <div class="site-actions"><a href="/docs">Help</a></div>
+ </div>
 </header>
 
 <main id="main">
@@ -238,11 +243,11 @@ input[type=checkbox]{accent-color:var(--accent)}
 <thead><tr><th>Field</th><th>Value</th></tr></thead>
 <tbody>
 <tr><td><span class="field-name">redaction_strictness</span><div class="field-help">strict: 17-class PHI+PII+secrets. balanced: PHI+secrets only. minimal: secrets only.</div></td><td>
-  <select id="f-redaction_strictness" name="redaction_strictness">
-    <option value="strict">strict (17-class PHI+PII+secrets)</option>
-    <option value="balanced">balanced (PHI+secrets only)</option>
-    <option value="minimal">minimal (secrets only)</option>
-  </select>
+ <select id="f-redaction_strictness" name="redaction_strictness">
+ <option value="strict">strict (17-class PHI+PII+secrets)</option>
+ <option value="balanced">balanced (PHI+secrets only)</option>
+ <option value="minimal">minimal (secrets only)</option>
+ </select>
 </td></tr>
 </tbody>
 </table>
@@ -277,7 +282,7 @@ input[type=checkbox]{accent-color:var(--accent)}
 </div>
 
 <div id="empty-state" class="empty" hidden data-empty-state>
-  <strong>No settings yet.</strong> Sign in to save your tenant settings. Defaults shown above will apply until you save.
+ <strong>No settings yet.</strong> Sign in to save your tenant settings. Defaults shown above will apply until you save.
 </div>
 </section>
 </div>
@@ -285,46 +290,46 @@ input[type=checkbox]{accent-color:var(--accent)}
 
 <script>
 (function(){
-  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
-  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
-  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json","Content-Type":"application/json"};
-  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+ var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+ if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json","Content-Type":"application/json"};
+ window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
 })();
 
 // W450 — /v1/account/settings is the read+write source of truth. Page hydrates
 // the form on load, PUT on save. Same shape as `kolm settings show/set` and TUI.
 function loadForm(s){
-  for (var k in s){ if(!s.hasOwnProperty(k)) continue;
-    var el = document.getElementById('f-'+k); if(!el) continue;
-    if (el.type === 'checkbox') el.checked = !!s[k]; else el.value = (s[k] == null ? '' : String(s[k]));
-  }
+ for (var k in s){ if(!s.hasOwnProperty(k)) continue;
+ var el = document.getElementById('f-'+k); if(!el) continue;
+ if (el.type === 'checkbox') el.checked = !!s[k]; else el.value = (s[k] == null ? '' : String(s[k]));
+ }
 }
 function readForm(){
-  var out = {};
-  var fields = ['default_namespace','notifications_email','notifications_webpush','redaction_strictness','sync_push_enabled','key_rotation_warning_days','locale','timezone','capture_default_durable'];
-  for (var i=0;i<fields.length;i++){
-    var k = fields[i]; var el = document.getElementById('f-'+k); if(!el) continue;
-    if (el.type === 'checkbox') out[k] = !!el.checked;
-    else if (el.type === 'number') out[k] = Number(el.value || 0);
-    else out[k] = el.value;
-  }
-  return out;
+ var out = {};
+ var fields = ['default_namespace','notifications_email','notifications_webpush','redaction_strictness','sync_push_enabled','key_rotation_warning_days','locale','timezone','capture_default_durable'];
+ for (var i=0;i<fields.length;i++){
+ var k = fields[i]; var el = document.getElementById('f-'+k); if(!el) continue;
+ if (el.type === 'checkbox') out[k] = !!el.checked;
+ else if (el.type === 'number') out[k] = Number(el.value || 0);
+ else out[k] = el.value;
+ }
+ return out;
 }
 window.kfetch('/v1/account/settings').then(function(j){
-  if (j && j.settings) loadForm(j.settings);
+ if (j && j.settings) loadForm(j.settings);
 }).catch(function(){ document.getElementById('empty-state').hidden=false; });
 
 document.getElementById('save-btn').addEventListener('click', function(){
-  var patch = readForm();
-  document.getElementById('save-status').textContent = 'saving...';
-  window.kfetch('/v1/account/settings', { method: 'PUT', body: JSON.stringify(patch) })
-    .then(function(j){
-      document.getElementById('save-status').textContent = 'saved ' + new Date().toLocaleTimeString();
-      if (j && j.settings) loadForm(j.settings);
-    })
-    .catch(function(e){
-      document.getElementById('save-status').textContent = 'error: ' + (e && e.message || e);
-    });
+ var patch = readForm();
+ document.getElementById('save-status').textContent = 'saving...';
+ window.kfetch('/v1/account/settings', { method: 'PUT', body: JSON.stringify(patch) })
+ .then(function(j){
+ document.getElementById('save-status').textContent = 'saved ' + new Date().toLocaleTimeString();
+ if (j && j.settings) loadForm(j.settings);
+ })
+ .catch(function(e){
+ document.getElementById('save-status').textContent = 'error: ' + (e && e.message || e);
+ });
 });
 </script>
 </body>

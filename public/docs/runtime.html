@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Runtime · kolm.ai</title>
-<meta name="description" content="kolm.ai runtime policies (local_first, frontier_first, cost_optimized, privacy_only) and the decision chain: privacy -> cache -> local artifact -> cheaper model -> frontier.">
+<title>Runtime guide · kolm.ai</title>
+<meta name="description" content="Runtime is what happens at request time. The proxy walks a deterministic decision chain on every call: privacy gate, cache lookup, local artifact lookup,..."> cache -> local artifact -> cheaper model -> frontier.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Runtime &middot; kolm.ai">
-<meta property="og:description" content="kolm.ai runtime policies (local_first, frontier_first, cost_optimized, privacy_only) and the decision chain: privacy -> cache -> local artifact -> cheaper model -> frontier.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Runtime guide · kolm.ai">
+<meta property="og:description" content="Runtime is what happens at request time. The proxy walks a deterministic decision chain on every call: privacy gate, cache lookup, local artifact lookup,..."> cache -> local artifact -> cheaper model -> frontier.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/runtime">
-<meta property="og:image" content="https://kolm.ai/og/docs-runtime.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Runtime &middot; kolm.ai">
-<meta name="twitter:description" content="kolm.ai runtime policies (local_first, frontier_first, cost_optimized, privacy_only) and the decision chain: privacy -> cache -> local artifact -> cheaper model -> frontier.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-runtime.svg">
+<meta name="twitter:title" content="Runtime guide · kolm.ai">
+<meta name="twitter:description" content="Runtime is what happens at request time. The proxy walks a deterministic decision chain on every call: privacy gate, cache lookup, local artifact lookup,..."> cache -> local artifact -> cheaper model -> frontier.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/runtime">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Runtime","description":"kolm.ai runtime policies (local_first, frontier_first, cost_optimized, privacy_only) and the decision chain: privacy -> cache -> local artifact -> cheaper model -> frontier.","url":"https://kolm.ai/docs/runtime","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -109,19 +110,19 @@ kolm runtime policy set privacy_only --namespace medical-claims
 
 # Inspect
 kolm runtime policy show
-# default     local_first
+# default local_first
 # namespaces:
-#   medical-claims  privacy_only</code></pre>
+# medical-claims privacy_only</code></pre>
 
 <h2 id="stats">Replacement stats</h2>
 <p>How often did each stage win? The runtime maintains a rolling counter.</p>
 <pre><code>kolm runtime stats --window 24h
-# total requests:     18,442
-# blocked (privacy):    312    1.7%
-# cache hits:         3,118   16.9%
-# local artifact:     9,420   51.1%
-# cheaper model:      1,840   10.0%
-# frontier:           3,752   20.3%
+# total requests: 18,442
+# blocked (privacy): 312 1.7%
+# cache hits: 3,118 16.9%
+# local artifact: 9,420 51.1%
+# cheaper model: 1,840 10.0%
+# frontier: 3,752 20.3%
 # avg savings vs frontier-first: $0.083 per call</code></pre>
 
 <h2 id="rollback">Rollback</h2>
@@ -133,15 +134,15 @@ kolm runtime policy set frontier_first --namespace summarizer</code></pre>
 <p>Read <a href="/docs/devices">devices</a> to know which targets the runtime can dispatch to and <a href="/docs/storage">storage</a> for the local-first guarantees. Start from <a href="/docs/quickstart">/docs/quickstart</a> if you have not yet shipped an artifact.</p>
 
 <div class="related">
-  <a href="/docs/distillation"><b>Distillation &rarr;</b><span>Where the local artifact comes from.</span></a>
-  <a href="/docs/devices"><b>Devices &rarr;</b><span>Where the runtime dispatches.</span></a>
-  <a href="/docs/privacy"><b>Privacy &rarr;</b><span>The first stage of the decision chain.</span></a>
+ <a href="/docs/distillation"><b>Distillation &rarr;</b><span>Where the local artifact comes from.</span></a>
+ <a href="/docs/devices"><b>Devices &rarr;</b><span>Where the runtime dispatches.</span></a>
+ <a href="/docs/privacy"><b>Privacy &rarr;</b><span>The first stage of the decision chain.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>KTO &middot; Kahneman-Tversky Optimization &middot; kolm.ai</title>
-<meta name="description" content="KTO trains language models on unpaired good/bad labels instead of pairwise preferences, using a loss derived from prospect theory. Useful when collecting pairs is expensive.">
+<title>KTO Kahneman-Tversky Optimization · kolm.ai</title>
+<meta name="description" content="KTO trains language models on unpaired good/bad labels instead of pairwise preferences, using a loss derived from prospect theory. Useful when collecting...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="KTO &middot; Kahneman-Tversky Optimization &middot; kolm.ai">
-<meta property="og:description" content="A preference-optimization loss derived from prospect theory; uses unpaired binary labels.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="KTO Kahneman-Tversky Optimization · kolm.ai">
+<meta property="og:description" content="KTO trains language models on unpaired good/bad labels instead of pairwise preferences, using a loss derived from prospect theory. Useful when collecting...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/research/kto">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="KTO &middot; Kahneman-Tversky Optimization &middot; kolm.ai">
-<meta name="twitter:description" content="A preference-optimization loss derived from prospect theory.">
+<meta name="twitter:title" content="KTO Kahneman-Tversky Optimization · kolm.ai">
+<meta name="twitter:description" content="KTO trains language models on unpaired good/bad labels instead of pairwise preferences, using a loss derived from prospect theory. Useful when collecting...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/research/kto">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -48,13 +48,14 @@ footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:1
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 .brand-anchor{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" aria-hidden="true">kolm.ai</span>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -67,7 +68,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Ethayarajh et al. (2024) start from the observation that human preference data is almost never collected as clean pairs. Operators flag bad customer-service replies, ML platforms log thumbs-up on individual generations, RLHF teams keep large piles of single examples annotated with a binary label. DPO and PPO both need pairs. KTO sidesteps the requirement by deriving a loss from Kahneman and Tversky's prospect theory: the implicit reward is the log-likelihood ratio between the policy and a reference (same as DPO), but the loss applies a kinked utility function around a reference point. Desirable examples push the reward above the reference; undesirable examples push it below; the asymmetry of the utility encodes loss-aversion. Empirically the paper shows KTO matches or slightly outperforms DPO on standard benchmarks even when paired data is available, and is the only viable option when only unpaired labels exist.</p>
 
 <h2 id="how">How kolm uses it</h2>
-<p>KTO is not implemented in kolm v0.2.6. Preference-optimization recipes (DPO, KTO, ORPO) are all on the v0.3 roadmap. The reason KTO is a likely first integration is the shape of typical capture data: a tenant's captured prompts include thumbs-up/thumbs-down signals from the dev-agent telemetry layer (accept-or-reject heuristics on code completions, sentiment tags on customer service drafts) far more often than clean pairs. When v0.3 ships, the trainer will accept a captured-rows manifest with per-row binary labels and run KTO with the standard <code>beta=0.1</code>, <code>lambda_D=1.0</code> for desirable and <code>lambda_U=1.0</code> for undesirable defaults from the paper. The receipt will record beta, the lambda values, the desirable-to-undesirable ratio, and the post-KTO holdout K-score.</p>
+<p>KTO is the preferred research-track preference optimizer for the kind of feedback the capture layer naturally collects. A tenant's captured prompts often include thumbs-up/thumbs-down signals from dev-agent telemetry, accept-or-reject heuristics on code completions, and sentiment tags on customer-service drafts more often than clean preference pairs. The KTO track takes a captured-rows manifest with per-row binary labels and runs KTO with the standard <code>beta=0.1</code>, <code>lambda_D=1.0</code> for desirable and <code>lambda_U=1.0</code> for undesirable defaults from the paper. The receipt records beta, lambda values, desirable-to-undesirable ratio, and post-KTO holdout K-score.</p>
 
 <h2 id="refs">References</h2>
 <div class="refs">
@@ -80,13 +81,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div></main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 kolm.ai</span>
-  &middot;
-  <a href="/security">Security</a>
-  &middot;
-  <a href="/research">Research</a>
-  &middot;
-  <a href="/docs">Docs</a>
+ <span>&copy; 2026 kolm.ai</span>
+ &middot;
+ <a href="/security">Security</a>
+ &middot;
+ <a href="/research">Research</a>
+ &middot;
+ <a href="/docs">Docs</a>
 </div></footer>
 
 </body>

@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>docker-compose &middot; kolm.ai</title>
+<title>docker-compose · kolm.ai</title>
 <meta name="description" content="Run the kolm daemon inside docker-compose. One yaml file. SQLite-backed captures, signed receipts, OpenAI-compatible endpoint on localhost.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="docker-compose &middot; kolm.ai">
-<meta property="og:description" content="One docker-compose.yaml. The kolm daemon, SQLite captures, receipts.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="docker-compose · kolm.ai">
+<meta property="og:description" content="Run the kolm daemon inside docker-compose. One yaml file. SQLite-backed captures, signed receipts, OpenAI-compatible endpoint on localhost.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations/docker-compose">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="docker-compose &middot; kolm.ai">
-<meta name="twitter:description" content="One yaml file. The kolm daemon up on localhost.">
+<meta name="twitter:title" content="docker-compose · kolm.ai">
+<meta name="twitter:description" content="Run the kolm daemon inside docker-compose. One yaml file. SQLite-backed captures, signed receipts, OpenAI-compatible endpoint on localhost.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/integrations/docker-compose">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -54,12 +54,13 @@ pre.code{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-ra
 footer{padding:36px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &ndash; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
+ <a class="logo" href="/">kolm.ai</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -215,69 +216,69 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <main id="main">
 
 <section class="hero"><div class="wrap">
-  <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / docker-compose</div>
-  <h1>The kolm daemon, in docker-compose.</h1>
-  <p class="lede">One <code>docker-compose.yaml</code>. The daemon comes up on <code>localhost:7403</code> with an OpenAI-compatible endpoint, SQLite-backed captures, and signed receipts. Drop it into your existing stack &ndash; the rest of your services talk to kolm at <code>http://kolm:7403/v1</code>.</p>
+ <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / docker-compose</div>
+ <h1>The kolm daemon, in docker-compose.</h1>
+ <p class="lede">One <code>docker-compose.yaml</code>. The daemon comes up on <code>localhost:7403</code> with an OpenAI-compatible endpoint, SQLite-backed captures, and signed receipts. Drop it into your existing stack &ndash; the rest of your services talk to kolm at <code>http://kolm:7403/v1</code>.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>How it works in one paragraph</h2>
-  <p>The kolm image bundles the Node 22 runtime, the CLI, and the embedded SQLite WAL driver. Boot it with <code>KOLM_API_KEY</code> + <code>KOLM_BASE_URL</code> pointing at your hosted kolm (or omit both for fully-local mode). The container exposes port 7403 for the OpenAI-compatible endpoint and writes captures + receipts under <code>/data</code>, which you mount as a volume so they survive container restarts. Health probes hit <code>GET /health</code> on the same port.</p>
+ <h2>How it works in one paragraph</h2>
+ <p>The kolm image bundles the Node 22 runtime, the CLI, and the embedded SQLite WAL driver. Boot it with <code>KOLM_API_KEY</code> + <code>KOLM_BASE_URL</code> pointing at your hosted kolm (or omit both for fully-local mode). The container exposes port 7403 for the OpenAI-compatible endpoint and writes captures + receipts under <code>/data</code>, which you mount as a volume so they survive container restarts. Health probes hit <code>GET /health</code> on the same port.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>docker-compose.yaml</h2>
-  <p>Copy this file. Run <code>docker compose up -d</code>. The daemon is reachable from peer services on the <code>kolm</code> network as <code>http://kolm:7403/v1</code>.</p>
-  <div class="tabs"><span>docker-compose.yaml</span></div>
+ <h2>docker-compose.yaml</h2>
+ <p>Copy this file. Run <code>docker compose up -d</code>. The daemon is reachable from peer services on the <code>kolm</code> network as <code>http://kolm:7403/v1</code>.</p>
+ <div class="tabs"><span>docker-compose.yaml</span></div>
 <pre class="code">version: "3.9"
 
 services:
-  kolm:
-    image: ghcr.io/sneaky-hippo/kolm:latest
-    container_name: kolm
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:7403:7403"
-    environment:
-      KOLM_API_KEY:        "${KOLM_API_KEY}"
-      KOLM_BASE_URL:       "https://kolm.ai"
-      KOLM_STORE_DRIVER:   "sqlite"
-      KOLM_DATA_DIR:       "/data"
-      KOLM_REDACTION_POLICY: "redact"
-    volumes:
-      - kolm-data:/data
-    healthcheck:
-      test:     ["CMD", "wget", "-qO-", "http://127.0.0.1:7403/health"]
-      interval: 30s
-      timeout:  5s
-      retries:  3
+ kolm:
+ image: ghcr.io/sneaky-hippo/kolm:latest
+ container_name: kolm
+ restart: unless-stopped
+ ports:
+ - "127.0.0.1:7403:7403"
+ environment:
+ KOLM_API_KEY: "${KOLM_API_KEY}"
+ KOLM_BASE_URL: "https://kolm.ai"
+ KOLM_STORE_DRIVER: "sqlite"
+ KOLM_DATA_DIR: "/data"
+ KOLM_REDACTION_POLICY: "redact"
+ volumes:
+ - kolm-data:/data
+ healthcheck:
+ test: ["CMD", "wget", "-qO-", "http://127.0.0.1:7403/health"]
+ interval: 30s
+ timeout: 5s
+ retries: 3
 
-  app:
-    image: your-app:latest
-    depends_on:
-      kolm:
-        condition: service_healthy
-    environment:
-      OPENAI_BASE_URL: "http://kolm:7403/v1"
-      OPENAI_API_KEY:  "${KOLM_API_KEY}"
+ app:
+ image: your-app:latest
+ depends_on:
+ kolm:
+ condition: service_healthy
+ environment:
+ OPENAI_BASE_URL: "http://kolm:7403/v1"
+ OPENAI_API_KEY: "${KOLM_API_KEY}"
 
 volumes:
-  kolm-data: {}</pre>
+ kolm-data: {}</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Where to go next</h2>
-  <div class="related">
-    <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands against the daemon.</span></a>
-    <a href="/captures"><b>Captures inbox &rarr;</b><span>See what landed in /data.</span></a>
-    <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
-  </div>
+ <h2>Where to go next</h2>
+ <div class="related">
+ <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands against the daemon.</span></a>
+ <a href="/captures"><b>Captures inbox &rarr;</b><span>See what landed in /data.</span></a>
+ <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
+ </div>
 </div></section>
 
 </main>
 
 <footer><div class="wrap">
-  <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
 </div></footer>
 </body>
 </html>

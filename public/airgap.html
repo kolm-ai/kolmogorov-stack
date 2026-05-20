@@ -11,42 +11,47 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://kolm.ai/airgap">
-<meta property="og:title" content="Airgapped mode · kolm">
-<meta property="og:description" content="Run kolm with zero outbound network. Built for environments where the machine never touches the internet.">
+<meta property="og:title" content="Airgapped mode · kolm.ai">
+<meta property="og:description" content="Run kolm with zero outbound network. Local model loading, local recipe execution, local receipt verification.">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
-  <meta property="og:url" content="https://kolm.ai/airgap">
+ <meta property="og:url" content="https://kolm.ai/airgap">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/airgap",
-  "description": "Run kolm with zero outbound network. Local model loading, local recipe execution, local receipt verification.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/airgap",
+ "description": "Run kolm with zero outbound network. Local model loading, local recipe execution, local receipt verification.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:title" content="Airgapped mode · kolm.ai">
+<meta name="twitter:description" content="Run kolm with zero outbound network. Local model loading, local recipe execution, local receipt verification.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -197,246 +202,246 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions">
-      <a href="/dashboard">dashboard</a>
-      <a href="/account">account</a>
-    </div>
-  </div>
+ <div class="site-actions">
+ <a href="/dashboard">dashboard</a>
+ <a href="/account">account</a>
+ </div>
+ </div>
 </header>
 
-<main class="page-main">
-  <section class="page-head">
-    <div>
-      <div class="eyebrow">Local · offline</div>
-      <h1>Airgapped mode</h1>
-      <p class="lede">Run kolm on a machine that has never seen the public internet. Compile against a local model cache, run recipes against local artifacts, verify receipts against a local secret. No phone-home, no telemetry, no exfil paths.</p>
-    </div>
-    <div class="page-actions">
-      <a class="btn ghost" href="/docs">Read the docs</a>
-      <a class="btn primary" href="/device">On-prem deployments</a>
-    </div>
-  </section>
+<main id="main" class="page-main">
+ <section class="page-head">
+ <div>
+ <div class="eyebrow">Local · offline</div>
+ <h1>Airgapped mode</h1>
+ <p class="lede">Run kolm on a machine that has never seen the public internet. Compile against a local model cache, run recipes against local artifacts, verify receipts against a local secret. No phone-home, no telemetry, no exfil paths.</p>
+ </div>
+ <div class="page-actions">
+ <a class="btn ghost" href="/docs">Read the docs</a>
+ <a class="btn primary" href="/device">On-prem deployments</a>
+ </div>
+ </section>
 
-  <section class="dashboard-panel">
-    <div class="section-head">
-      <h2>What stays local</h2>
-      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Zero outbound network required</span>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6">
-      <div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">01 &middot; compile</div>
-        <p>Pre-staged base models in <code style="font-family:var(--mono);font-size:12px">~/.kolm/models</code>. The compiler reads from disk and writes adapters/eval reports back to disk. No HF Hub, no S3.</p>
-      </div>
-      <div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">02 &middot; run</div>
-        <p><code style="font-family:var(--mono);font-size:12px">kolm run &lt;artifact.kolm&gt;</code> executes recipes in a local sandbox. The artifact is a self-contained zip with manifest, recipes, receipt chain.</p>
-      </div>
-      <div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">03 &middot; verify</div>
-        <p><code style="font-family:var(--mono);font-size:12px">kolm inspect &lt;artifact&gt; --receipts</code> walks the HMAC chain against your local <code style="font-family:var(--mono);font-size:12px">RECIPE_RECEIPT_SECRET</code>. No registry lookup.</p>
-      </div>
-      <div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">04 &middot; store</div>
-        <p>Concepts, versions, audit log, RAG indices land in <code style="font-family:var(--mono);font-size:12px">data/*.json</code> or an optional local SQLite. Nothing reaches kolm.ai.</p>
-      </div>
-    </div>
-  </section>
+ <section class="dashboard-panel">
+ <div class="section-head">
+ <h2>What stays local</h2>
+ <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Zero outbound network required</span>
+ </div>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6">
+ <div>
+ <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">01 &middot; compile</div>
+ <p>Pre-staged base models in <code style="font-family:var(--mono);font-size:12px">~/.kolm/models</code>. The compiler reads from disk and writes adapters/eval reports back to disk. No HF Hub, no S3.</p>
+ </div>
+ <div>
+ <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">02 &middot; run</div>
+ <p><code style="font-family:var(--mono);font-size:12px">kolm run &lt;artifact.kolm&gt;</code> executes recipes in a local sandbox. The artifact is a self-contained zip with manifest, recipes, receipt chain.</p>
+ </div>
+ <div>
+ <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">03 &middot; verify</div>
+ <p><code style="font-family:var(--mono);font-size:12px">kolm inspect &lt;artifact&gt; --receipts</code> walks the Ed25519 receipt chain against the embedded public key or local key directory. No registry lookup.</p>
+ </div>
+ <div>
+ <div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em">04 &middot; store</div>
+ <p>Concepts, versions, audit log, RAG indices land in <code style="font-family:var(--mono);font-size:12px">data/*.json</code> or an optional local SQLite. Nothing reaches kolm.ai.</p>
+ </div>
+ </div>
+ </section>
 
-  <section class="dashboard-panel">
-    <div class="section-head">
-      <h2>Enable airgapped mode</h2>
-      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">CLI · writes ~/.kolm/airgap.env</span>
-    </div>
-    <div style="margin-top:14px;font-family:var(--mono);font-size:13px;line-height:1.7">
-      <div style="color:var(--ink-mute);margin-bottom:6px">Flip the kill-switch:</div>
-      <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">kolm airgap enable</pre>
-      <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Inspect what is set:</div>
-      <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">kolm airgap status</pre>
-      <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Confirm the environment refuses outbound:</div>
-      <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">kolm airgap verify</pre>
-      <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Switch back to networked mode:</div>
-      <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">kolm airgap disable</pre>
-    </div>
-    <p style="margin-top:18px;padding:12px 14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;font-size:13px;line-height:1.6;color:var(--ink-mute)">
-      <code style="font-family:var(--mono);font-size:12px">kolm airgap enable</code> writes <code style="font-family:var(--mono);font-size:12px">~/.kolm/airgap.env</code> with the four offline switches below. Source that file from your shell rc, your systemd unit, or your container entrypoint to pin a process tree to local-only mode.
-    </p>
-  </section>
+ <section class="dashboard-panel">
+ <div class="section-head">
+ <h2>Enable airgapped mode</h2>
+ <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">CLI · writes ~/.kolm/airgap.env</span>
+ </div>
+ <div style="margin-top:14px;font-family:var(--mono);font-size:13px;line-height:1.7">
+ <div style="color:var(--ink-mute);margin-bottom:6px">Flip the kill-switch:</div>
+ <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">kolm airgap enable</pre>
+ <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Inspect what is set:</div>
+ <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">kolm airgap status</pre>
+ <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Confirm the environment refuses outbound:</div>
+ <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">kolm airgap verify</pre>
+ <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Switch back to networked mode:</div>
+ <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">kolm airgap disable</pre>
+ </div>
+ <p style="margin-top:18px;padding:12px 14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;font-size:13px;line-height:1.6;color:var(--ink-mute)">
+ <code style="font-family:var(--mono);font-size:12px">kolm airgap enable</code> writes <code style="font-family:var(--mono);font-size:12px">~/.kolm/airgap.env</code> with the four offline switches below. Source that file from your shell rc, your systemd unit, or your container entrypoint to pin a process tree to local-only mode.
+ </p>
+ </section>
 
-  <section class="dashboard-panel">
-    <div class="section-head">
-      <h2>Environment switches</h2>
-      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Set by enable · read by every kolm process</span>
-    </div>
-    <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px;font-family:var(--mono);font-size:13px;line-height:1.7">
-      <div style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px">
-        <div style="color:var(--ink);font-weight:500">KOLM_AIRGAP=1</div>
-        <div style="color:var(--ink-mute);font-family:var(--sans);font-size:13.5px;margin-top:4px">Master switch. The CLI refuses to hit kolm.ai for publish, leaderboard, registry, or telemetry when set. The compiler skips opportunistic remote checks.</div>
-      </div>
-      <div style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px">
-        <div style="color:var(--ink);font-weight:500">TRANSFORMERS_OFFLINE=1</div>
-        <div style="color:var(--ink-mute);font-family:var(--sans);font-size:13.5px;margin-top:4px">HuggingFace transformers will not call out to download missing weights. Any model not pre-cached fails loudly instead of silently fetching.</div>
-      </div>
-      <div style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px">
-        <div style="color:var(--ink);font-weight:500">HF_DATASETS_OFFLINE=1</div>
-        <div style="color:var(--ink-mute);font-family:var(--sans);font-size:13.5px;margin-top:4px">Datasets library will not contact the Hub. Eval sets must be present on disk.</div>
-      </div>
-      <div style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px">
-        <div style="color:var(--ink);font-weight:500">HF_HUB_OFFLINE=1</div>
-        <div style="color:var(--ink-mute);font-family:var(--sans);font-size:13.5px;margin-top:4px">huggingface_hub blocks every network operation. Combined with the two above, the HF stack runs read-only from local cache.</div>
-      </div>
-    </div>
-  </section>
+ <section class="dashboard-panel">
+ <div class="section-head">
+ <h2>Environment switches</h2>
+ <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Set by enable · read by every kolm process</span>
+ </div>
+ <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px;font-family:var(--mono);font-size:13px;line-height:1.7">
+ <div style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px">
+ <div style="color:var(--ink);font-weight:500">KOLM_AIRGAP=1</div>
+ <div style="color:var(--ink-mute);font-family:var(--sans);font-size:13.5px;margin-top:4px">Master switch. The CLI refuses to hit kolm.ai for publish, leaderboard, registry, or telemetry when set. The compiler skips opportunistic remote checks.</div>
+ </div>
+ <div style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px">
+ <div style="color:var(--ink);font-weight:500">TRANSFORMERS_OFFLINE=1</div>
+ <div style="color:var(--ink-mute);font-family:var(--sans);font-size:13.5px;margin-top:4px">HuggingFace transformers will not call out to download missing weights. Any model not pre-cached fails loudly instead of silently fetching.</div>
+ </div>
+ <div style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px">
+ <div style="color:var(--ink);font-weight:500">HF_DATASETS_OFFLINE=1</div>
+ <div style="color:var(--ink-mute);font-family:var(--sans);font-size:13.5px;margin-top:4px">Datasets library will not contact the Hub. Eval sets must be present on disk.</div>
+ </div>
+ <div style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px">
+ <div style="color:var(--ink);font-weight:500">HF_HUB_OFFLINE=1</div>
+ <div style="color:var(--ink-mute);font-family:var(--sans);font-size:13.5px;margin-top:4px">huggingface_hub blocks every network operation. Combined with the two above, the HF stack runs read-only from local cache.</div>
+ </div>
+ </div>
+ </section>
 
-  <section class="dashboard-panel">
-    <div class="section-head">
-      <h2>Offline receipt verification</h2>
-      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Holder of the secret can audit · no network needed</span>
-    </div>
-    <div style="margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6">
-      <p>Every <code style="font-family:var(--mono);font-size:12px">.kolm</code> ships with a receipt chain: HMAC-SHA256 over (prev_hash, recipe_id, action, timestamp, payload digest). Anyone holding the issuing secret can replay the chain on a disconnected machine.</p>
-      <div style="font-family:var(--mono);font-size:13px;line-height:1.7;margin-top:14px">
-        <div style="color:var(--ink-mute);margin-bottom:6px">Set the shared secret:</div>
-        <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">export RECIPE_RECEIPT_SECRET="&lt;your tenant secret&gt;"</pre>
-        <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Walk the chain on the artifact:</div>
-        <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">kolm inspect support-bot.kolm --receipts</pre>
-        <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Expected output (chain ok):</div>
-        <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">receipts: 6 / 6 verified
+ <section class="dashboard-panel">
+ <div class="section-head">
+ <h2>Offline receipt verification</h2>
+ <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Holder of the secret can audit · no network needed</span>
+ </div>
+ <div style="margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6">
+ <p>Every <code style="font-family:var(--mono);font-size:12px">.kolm</code> ships with a receipt chain: Ed25519 signatures over (prev_hash, recipe_id, action, timestamp, payload digest). Anyone holding the public key can replay the chain on a disconnected machine.</p>
+ <div style="font-family:var(--mono);font-size:13px;line-height:1.7;margin-top:14px">
+ <div style="color:var(--ink-mute);margin-bottom:6px">Set the shared secret:</div>
+ <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">export RECIPE_RECEIPT_SECRET="&lt;your tenant secret&gt;"</pre>
+ <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Walk the chain on the artifact:</div>
+ <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">kolm inspect support-bot.kolm --receipts</pre>
+ <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">Expected output (chain ok):</div>
+ <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">receipts: 6 / 6 verified
 chain head: 9c4f...e0a1
 last action: score
 status: ok</pre>
-      </div>
-      <p style="margin-top:18px;padding:12px 14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;font-size:13px;line-height:1.6;color:var(--ink-mute)">
-        The receipt secret is held by the tenant that compiled the artifact. Anyone you share the secret with can verify; without it the chain prints as opaque hashes. Treat the secret as you would a signing key.
-      </p>
-    </div>
-  </section>
+ </div>
+ <p style="margin-top:18px;padding:12px 14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;font-size:13px;line-height:1.6;color:var(--ink-mute)">
+ The receipt secret is held by the tenant that compiled the artifact. Anyone you share the secret with can verify; without it the chain prints as opaque hashes. Treat the secret as you would a signing key.
+ </p>
+ </div>
+ </section>
 
-  <section class="dashboard-panel">
-    <div class="section-head">
-      <h2>Pre-stage everything</h2>
-      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">One-time bootstrap on a networked machine</span>
-    </div>
-    <div style="margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6">
-      <ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px">
-        <li>On a networked workstation, install kolm and pre-cache every base model you intend to compile against with <code style="font-family:var(--mono);font-size:12px">huggingface-cli download &lt;org/repo&gt;</code>. Weights land under <code style="font-family:var(--mono);font-size:12px">~/.cache/huggingface</code>.</li>
-        <li>Run a trial compile end-to-end so the recipe runner caches its sandbox dependencies. The <code style="font-family:var(--mono);font-size:12px">node_modules</code> tree stays inside the install directory.</li>
-        <li>Tar the install dir + <code style="font-family:var(--mono);font-size:12px">~/.kolm</code> and move the tarball to the offline machine via your sneakernet of choice.</li>
-        <li>On the offline machine, untar, then run <code style="font-family:var(--mono);font-size:12px">kolm airgap enable</code> followed by <code style="font-family:var(--mono);font-size:12px">kolm airgap verify</code>.</li>
-        <li>Compile and run as normal. Every operation reads/writes the local filesystem.</li>
-      </ol>
-    </div>
-  </section>
+ <section class="dashboard-panel">
+ <div class="section-head">
+ <h2>Pre-stage everything</h2>
+ <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">One-time bootstrap on a networked machine</span>
+ </div>
+ <div style="margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6">
+ <ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px">
+ <li>On a networked workstation, install kolm and pre-cache every base model you intend to compile against with <code style="font-family:var(--mono);font-size:12px">huggingface-cli download &lt;org/repo&gt;</code>. Weights land under <code style="font-family:var(--mono);font-size:12px">~/.cache/huggingface</code>.</li>
+ <li>Run a trial compile end-to-end so the recipe runner caches its sandbox dependencies. The <code style="font-family:var(--mono);font-size:12px">node_modules</code> tree stays inside the install directory.</li>
+ <li>Tar the install dir + <code style="font-family:var(--mono);font-size:12px">~/.kolm</code> and move the tarball to the offline machine via your sneakernet of choice.</li>
+ <li>On the offline machine, untar, then run <code style="font-family:var(--mono);font-size:12px">kolm airgap enable</code> followed by <code style="font-family:var(--mono);font-size:12px">kolm airgap verify</code>.</li>
+ <li>Compile and run as normal. Every operation reads/writes the local filesystem.</li>
+ </ol>
+ </div>
+ </section>
 
-  <section class="dashboard-panel">
-    <div class="section-head">
-      <h2>Verify the install tarball before you unpack</h2>
-      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">tar &middot; sha256sum &middot; kolm inspect --binder</span>
-    </div>
-    <div style="margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6;color:var(--ink-mute)">
-      <p>The bootstrap tarball moves from a networked host to an offline machine over removable media. Three commands prove it arrived intact, before a single byte gets executed.</p>
-      <div style="font-family:var(--mono);font-size:13px;line-height:1.7;margin-top:14px">
-        <div style="color:var(--ink-mute);margin-bottom:6px">1. compute checksum of the tarball:</div>
-        <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">sha256sum kolm-bootstrap-0.1.0.tar.gz</pre>
-        <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">2. compare against the published value at <a href="/airgap" style="color:var(--accent);text-decoration:underline">kolm.ai/airgap</a>:</div>
-        <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">tar -tzf kolm-bootstrap-0.1.0.tar.gz | head -1
+ <section class="dashboard-panel">
+ <div class="section-head">
+ <h2>Verify the install tarball before you unpack</h2>
+ <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">tar &middot; sha256sum &middot; kolm inspect --binder</span>
+ </div>
+ <div style="margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6;color:var(--ink-mute)">
+ <p>The bootstrap tarball moves from a networked host to an offline machine over removable media. Three commands prove it arrived intact, before a single byte gets executed.</p>
+ <div style="font-family:var(--mono);font-size:13px;line-height:1.7;margin-top:14px">
+ <div style="color:var(--ink-mute);margin-bottom:6px">1. compute checksum of the tarball:</div>
+ <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">sha256sum kolm-bootstrap-0.1.0.tar.gz</pre>
+ <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">2. compare against the published value at <a href="/airgap" style="color:var(--accent);text-decoration:underline">kolm.ai/airgap</a>:</div>
+ <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">tar -tzf kolm-bootstrap-0.1.0.tar.gz | head -1
 kolm inspect kolm-bootstrap-0.1.0.tar.gz --binder bootstrap.pdf</pre>
-        <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">3. PDF binder lists checksum + signing cert + base-model digests in one page an auditor signs:</div>
-        <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">bootstrap.pdf
-  tarball sha256: 7f4a...3c91
-  signing cert:    cosign/kolm-release-2026.pem
-  base models:     6 (qwen2.5-7b, phi-4, ...)
-  date sealed:     2026-05-15</pre>
-      </div>
-      <div style="margin-top:22px;overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px">
-          <thead><tr style="border-bottom:1px solid var(--line-strong)"><th style="text-align:left;padding:10px 12px;color:var(--ink-faint);font-weight:400;font-size:11px;letter-spacing:0.14em;text-transform:uppercase">Distribution</th><th style="text-align:left;padding:10px 12px;color:var(--ink-faint);font-weight:400;font-size:11px;letter-spacing:0.14em;text-transform:uppercase">File</th><th style="text-align:left;padding:10px 12px;color:var(--ink-faint);font-weight:400;font-size:11px;letter-spacing:0.14em;text-transform:uppercase">SHA-256 (first 16)</th></tr></thead>
-          <tbody>
-            <tr style="border-bottom:1px solid var(--line)"><td style="padding:10px 12px;color:var(--ink)">Debian / Ubuntu</td><td style="padding:10px 12px;color:var(--ink-mute)">kolm_0.1.0_amd64.deb</td><td style="padding:10px 12px;color:var(--accent)">a18c4f9b2e037db5</td></tr>
-            <tr style="border-bottom:1px solid var(--line)"><td style="padding:10px 12px;color:var(--ink)">RHEL / Fedora</td><td style="padding:10px 12px;color:var(--ink-mute)">kolm-0.1.0-1.x86_64.rpm</td><td style="padding:10px 12px;color:var(--accent)">c2f49aba6e1d7833</td></tr>
-            <tr style="border-bottom:1px solid var(--line)"><td style="padding:10px 12px;color:var(--ink)">Generic Linux</td><td style="padding:10px 12px;color:var(--ink-mute)">kolm-0.1.0-linux-x86_64.tar.gz</td><td style="padding:10px 12px;color:var(--accent)">7f4a830b1c5d3c91</td></tr>
-            <tr style="border-bottom:1px solid var(--line)"><td style="padding:10px 12px;color:var(--ink)">macOS arm64</td><td style="padding:10px 12px;color:var(--ink-mute)">kolm-0.1.0-darwin-arm64.tar.gz</td><td style="padding:10px 12px;color:var(--accent)">e09bcc1ad88f4a72</td></tr>
-            <tr><td style="padding:10px 12px;color:var(--ink)">Windows x64</td><td style="padding:10px 12px;color:var(--ink-mute)">kolm-0.1.0-win-x64.zip</td><td style="padding:10px 12px;color:var(--accent)">b3c7d2a91e6f5b08</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p style="margin-top:18px;font-size:13px;color:var(--ink-faint)">Full 64-char digests + cosign signature files at <a href="/sbom" style="color:var(--accent);text-decoration:underline">/sbom</a>. If the published digest changes mid-version, that is a publication incident; we post within 24 hours.</p>
-    </div>
-  </section>
+ <div style="color:var(--ink-mute);margin-top:18px;margin-bottom:6px">3. PDF binder lists checksum + signing cert + base-model digests in one page an auditor signs:</div>
+ <pre style="padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;overflow:auto;margin:0">bootstrap.pdf
+ tarball sha256: 7f4a...3c91
+ signing cert: cosign/kolm-release-2026.pem
+ base models: 6 (qwen2.5-7b, phi-4, ...)
+ date sealed: 2026-05-15</pre>
+ </div>
+ <div style="margin-top:22px;overflow-x:auto">
+ <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px">
+ <thead><tr style="border-bottom:1px solid var(--line-strong)"><th style="text-align:left;padding:10px 12px;color:var(--ink-faint);font-weight:400;font-size:11px;letter-spacing:0.14em;text-transform:uppercase">Distribution</th><th style="text-align:left;padding:10px 12px;color:var(--ink-faint);font-weight:400;font-size:11px;letter-spacing:0.14em;text-transform:uppercase">File</th><th style="text-align:left;padding:10px 12px;color:var(--ink-faint);font-weight:400;font-size:11px;letter-spacing:0.14em;text-transform:uppercase">SHA-256 (first 16)</th></tr></thead>
+ <tbody>
+ <tr style="border-bottom:1px solid var(--line)"><td style="padding:10px 12px;color:var(--ink)">Debian / Ubuntu</td><td style="padding:10px 12px;color:var(--ink-mute)">kolm_0.1.0_amd64.deb</td><td style="padding:10px 12px;color:var(--accent)">a18c4f9b2e037db5</td></tr>
+ <tr style="border-bottom:1px solid var(--line)"><td style="padding:10px 12px;color:var(--ink)">RHEL / Fedora</td><td style="padding:10px 12px;color:var(--ink-mute)">kolm-0.1.0-1.x86_64.rpm</td><td style="padding:10px 12px;color:var(--accent)">c2f49aba6e1d7833</td></tr>
+ <tr style="border-bottom:1px solid var(--line)"><td style="padding:10px 12px;color:var(--ink)">Generic Linux</td><td style="padding:10px 12px;color:var(--ink-mute)">kolm-0.1.0-linux-x86_64.tar.gz</td><td style="padding:10px 12px;color:var(--accent)">7f4a830b1c5d3c91</td></tr>
+ <tr style="border-bottom:1px solid var(--line)"><td style="padding:10px 12px;color:var(--ink)">macOS arm64</td><td style="padding:10px 12px;color:var(--ink-mute)">kolm-0.1.0-darwin-arm64.tar.gz</td><td style="padding:10px 12px;color:var(--accent)">e09bcc1ad88f4a72</td></tr>
+ <tr><td style="padding:10px 12px;color:var(--ink)">Windows x64</td><td style="padding:10px 12px;color:var(--ink-mute)">kolm-0.1.0-win-x64.zip</td><td style="padding:10px 12px;color:var(--accent)">b3c7d2a91e6f5b08</td></tr>
+ </tbody>
+ </table>
+ </div>
+ <p style="margin-top:18px;font-size:13px;color:var(--ink-faint)">Full 64-char digests + cosign signature files at <a href="/sbom" style="color:var(--accent);text-decoration:underline">/sbom</a>. If the published digest changes mid-version, that is a publication incident; we post within 24 hours.</p>
+ </div>
+ </section>
 
-  <section class="dashboard-panel">
-    <div class="section-head">
-      <h2>What is intentionally not possible</h2>
-    </div>
-    <div style="margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6;color:var(--ink-mute)">
-      <ul style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px">
-        <li><strong style="color:var(--ink)">Publish to the public registry.</strong> The publish verb hard-fails when <code style="font-family:var(--mono);font-size:12px">KOLM_AIRGAP=1</code> is set. The compiled <code style="font-family:var(--mono);font-size:12px">.kolm</code> already lives at <code style="font-family:var(--mono);font-size:12px">~/.kolm/artifacts/</code>. Copy the file to your sneakernet medium and move it manually.</li>
-        <li><strong style="color:var(--ink)">Pull a model on demand.</strong> Missing weights produce a clear "not in local cache" error. Restage from your networked bootstrap host.</li>
-        <li><strong style="color:var(--ink)">Telemetry.</strong> No anonymous metrics, no error reporting, no leaderboard heartbeats. The CLI runs silent.</li>
-        <li><strong style="color:var(--ink)">Cross-tenant receipt verification.</strong> You can only verify chains for which you hold the secret. This is by design.</li>
-      </ul>
-    </div>
-  </section>
+ <section class="dashboard-panel">
+ <div class="section-head">
+ <h2>What is intentionally not possible</h2>
+ </div>
+ <div style="margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6;color:var(--ink-mute)">
+ <ul style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px">
+ <li><strong style="color:var(--ink)">Publish to the public registry.</strong> The publish verb hard-fails when <code style="font-family:var(--mono);font-size:12px">KOLM_AIRGAP=1</code> is set. The compiled <code style="font-family:var(--mono);font-size:12px">.kolm</code> already lives at <code style="font-family:var(--mono);font-size:12px">~/.kolm/artifacts/</code>. Copy the file to your sneakernet medium and move it manually.</li>
+ <li><strong style="color:var(--ink)">Pull a model on demand.</strong> Missing weights produce a clear "not in local cache" error. Restage from your networked bootstrap host.</li>
+ <li><strong style="color:var(--ink)">Telemetry.</strong> No anonymous metrics, no error reporting, no leaderboard heartbeats. The CLI runs silent.</li>
+ <li><strong style="color:var(--ink)">Cross-tenant receipt verification.</strong> You can only verify chains for which you hold the secret. This is by design.</li>
+ </ul>
+ </div>
+ </section>
 
-  <section class="dashboard-panel" style="background:transparent;border:1px dashed var(--line-strong)">
-    <div class="section-head">
-      <h2>Pair with TEE for remote-but-local</h2>
-    </div>
-    <p style="margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6;color:var(--ink-mute)">
-      If the model must live in the cloud yet remain payload-blind to the cloud provider, use <a href="/byoc" style="color:var(--accent);text-decoration:underline">BYOC</a> to deploy inside a Trusted Execution Environment (AWS Nitro, GCP Confidential VM, Azure Confidential VM). Airgap mode covers the on-prem half; TEE covers the cloud half. Same artifact, same receipt chain.
-    </p>
-  </section>
+ <section class="dashboard-panel" style="background:transparent;border:1px dashed var(--line-strong)">
+ <div class="section-head">
+ <h2>Pair with TEE for remote-but-local</h2>
+ </div>
+ <p style="margin-top:14px;font-family:var(--sans);font-size:14px;line-height:1.6;color:var(--ink-mute)">
+ If the model must live in the cloud yet remain payload-blind to the cloud provider, use <a href="/byoc" style="color:var(--accent);text-decoration:underline">BYOC</a> to deploy inside a Trusted Execution Environment (AWS Nitro, GCP Confidential VM, Azure Confidential VM). Airgap mode covers the on-prem half; TEE covers the cloud half. Same artifact, same receipt chain.
+ </p>
+ </section>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>

@@ -12,7 +12,7 @@ description: Sanity-check the environment. Detect GPU. Run the value-loop smoke.
 ```bash
 kolm doctor
 kolm doctor --detect-hw [--json]
-kolm doctor --loop      [--json]
+kolm doctor --loop [--json]
 ```
 
 ## Flags

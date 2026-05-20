@@ -5,8 +5,11 @@ First-party LlamaIndex adapter for kolm.ai compiled artifacts. Drop a `.kolm` in
 ## Install
 
 ```bash
-pip install kolm-llamaindex llama-index-core
+git clone https://github.com/sneaky-hippo/kolmogorov-stack
+pip install -e ./kolmogorov-stack/packages/python-llamaindex-kolm[llamaindex]
 ```
+
+The `kolm-llamaindex` package name is the local package name. It is not published under Kolm control on PyPI yet, so install it from a checkout until a registry release is verified.
 
 ## Usage (3 lines)
 

@@ -34,7 +34,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import archiver from 'archiver';
-import { effectiveReceiptSecret, isProductionRuntime } from './env.js';
+import { effectiveReceiptSecret, isProductionRuntime, verificationSecrets } from './env.js';
 import { cidFromManifestHashes } from './cid.js';
 import { buildArtifactCredential } from './provenance.js';
 import { validateCapability, validateLineage } from './artifact-lineage.js';
@@ -1645,8 +1645,14 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
 }
 
 export function verifyManifestSignature(manifest_json, signature) {
-  const secret = signSecret();
-  if (!secret) return { valid: false, reason: 'sign secret unavailable on server' };
+  // W481 — try every candidate verification secret in order so in-repo
+  // marketplace seed artifacts verify on a fresh checkout AND user-compiled
+  // artifacts verify on the user's own machine. The candidate list is built
+  // by verificationSecrets() in env.js: env RECIPE_RECEIPT_SECRET first
+  // (legacy KOLM_ARTIFACT_SECRET if requested), then MARKETPLACE_FIXTURE_SECRET,
+  // then DEV_RECEIPT_SECRET (in dev mode only — never in production-like).
+  const candidates = verificationSecrets({ includeLegacyArtifactSecret: true });
+  if (candidates.length === 0) return { valid: false, reason: 'sign secret unavailable on server' };
   try {
     const sig = typeof signature === 'string' ? JSON.parse(signature) : signature;
     if (!sig || sig.spec !== ARTIFACT_SPEC || !sig.hmac) return { valid: false, reason: 'bad signature shape' };
@@ -1671,9 +1677,11 @@ export function verifyManifestSignature(manifest_json, signature) {
     }
     payloads.push({ spec: ARTIFACT_SPEC, manifest_hash, job_id: sig.job_id });
 
-    for (const payload of payloads) {
-      const expected = crypto.createHmac('sha256', secret).update(canonicalJson(payload)).digest('hex');
-      if (constantTimeEqualHex(sig.hmac, expected)) return { valid: true };
+    for (const candidate of candidates) {
+      for (const payload of payloads) {
+        const expected = crypto.createHmac('sha256', candidate).update(canonicalJson(payload)).digest('hex');
+        if (constantTimeEqualHex(sig.hmac, expected)) return { valid: true };
+      }
     }
     return { valid: false, reason: 'hmac mismatch' };
   } catch (e) {

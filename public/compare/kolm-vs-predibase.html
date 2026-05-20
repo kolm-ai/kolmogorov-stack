@@ -4,145 +4,156 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm vs Predibase | axis-by-axis matrix</title>
+<title>kolm vs Predibase | axis-by-axis matrix · kolm.ai</title>
 <meta name="description" content="Eleven axes that separate a kolm-compiled signed artifact from a Predibase enterprise multi-LoRA serving deployment.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/compare/kolm-vs-predibase">
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
-  body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.site .wrap{display:flex;justify-content:space-between;align-items:center}
-  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.site nav a{color:inherit;text-decoration:none}
-  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  .hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  h1{font-size:46px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:780px}
-  .lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:680px;margin:0}
-  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:20px 0 0;letter-spacing:0.04em}
-  table.matrix{width:100%;border-collapse:collapse;margin:48px 0;font-size:14px}
-  table.matrix th{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);text-align:left;padding:14px 12px;border-bottom:1px solid var(--line);font-weight:400}
-  table.matrix td{padding:18px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
-  table.matrix td.axis{font-weight:500;color:var(--ink);min-width:160px}
-  table.matrix td.kolm{color:var(--ink)}
-  table.matrix td.kolm b{color:var(--accent);font-weight:500}
-  table.matrix td.other{color:var(--ink-mute)}
-  table.matrix td.other b{color:var(--ink);font-weight:500}
-  table.matrix td.why{color:var(--ink-mute);font-size:13.5px}
-  table.matrix td.proof a{color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:12.5px;border-bottom:1px dashed rgba(16,185,129,0.32)}
-  table.matrix td.proof a:hover{border-bottom-color:var(--accent)}
-  table.matrix tr.win-kolm td.kolm{background:rgba(16,185,129,0.06)}
-  table.matrix tr.win-other td.other{background:rgba(236,231,220,0.04)}
-  table.matrix tr.tie td.kolm, table.matrix tr.tie td.other{background:rgba(236,231,220,0.02)}
-  @media(max-width:880px){table.matrix,table.matrix thead,table.matrix tbody,table.matrix tr,table.matrix td,table.matrix th{display:block}table.matrix th{display:none}table.matrix tr{border-bottom:2px solid var(--line);padding:18px 0}table.matrix td{padding:6px 0;border:none}table.matrix td.axis{font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-family:var(--mono);margin-bottom:6px}}
-  .close{padding:48px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .close h2{font-size:24px;font-weight:500;letter-spacing:-0.012em;margin:0 0 16px}
-  .close p{color:var(--ink-mute);max-width:680px;margin:0 0 16px}
-  .actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
-  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .btn:hover{transform:translateY(-1px)}
-  footer{padding:36px 0;color:var(--ink-faint);font-size:13px}
-  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:46px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:780px}
+ .lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:680px;margin:0}
+ .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:20px 0 0;letter-spacing:0.04em}
+ table.matrix{width:100%;border-collapse:collapse;margin:48px 0;font-size:14px}
+ table.matrix th{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);text-align:left;padding:14px 12px;border-bottom:1px solid var(--line);font-weight:400}
+ table.matrix td{padding:18px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
+ table.matrix td.axis{font-weight:500;color:var(--ink);min-width:160px}
+ table.matrix td.kolm{color:var(--ink)}
+ table.matrix td.kolm b{color:var(--accent);font-weight:500}
+ table.matrix td.other{color:var(--ink-mute)}
+ table.matrix td.other b{color:var(--ink);font-weight:500}
+ table.matrix td.why{color:var(--ink-mute);font-size:13.5px}
+ table.matrix td.proof a{color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:12.5px;border-bottom:1px dashed rgba(16,185,129,0.32)}
+ table.matrix td.proof a:hover{border-bottom-color:var(--accent)}
+ table.matrix tr.win-kolm td.kolm{background:rgba(16,185,129,0.06)}
+ table.matrix tr.win-other td.other{background:rgba(236,231,220,0.04)}
+ table.matrix tr.tie td.kolm, table.matrix tr.tie td.other{background:rgba(236,231,220,0.02)}
+ @media(max-width:880px){table.matrix,table.matrix thead,table.matrix tbody,table.matrix tr,table.matrix td,table.matrix th{display:block}table.matrix th{display:none}table.matrix tr{border-bottom:2px solid var(--line);padding:18px 0}table.matrix td{padding:6px 0;border:none}table.matrix td.axis{font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-family:var(--mono);margin-bottom:6px}}
+ .close{padding:48px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+ .close h2{font-size:24px;font-weight:500;letter-spacing:-0.012em;margin:0 0 16px}
+ .close p{color:var(--ink-mute);max-width:680px;margin:0 0 16px}
+ .actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+ .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+ .btn:hover{transform:translateY(-1px)}
+ footer{padding:36px 0;color:var(--ink-faint);font-size:13px}
+ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
 <link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta property="og:title" content="kolm vs Predibase | axis-by-axis matrix · kolm.ai">
+<meta property="og:description" content="Eleven axes that separate a kolm-compiled signed artifact from a Predibase enterprise multi-LoRA serving deployment.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/compare/kolm-vs-predibase">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm vs Predibase | axis-by-axis matrix · kolm.ai">
+<meta name="twitter:description" content="Eleven axes that separate a kolm-compiled signed artifact from a Predibase enterprise multi-LoRA serving deployment.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/quickstart">quickstart</a><a href="/pricing">pricing</a><a href="/docs">docs</a><a href="/compare">compare</a></nav></div></header>
-<main>
+<main id="main">
 <section class="hero">
-  <div class="wrap">
-    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; vs Predibase</p>
-    <h1>kolm vs Predibase.</h1>
-    <p class="lede">Predibase pioneered LoRA-Land and multi-LoRA serving in 2024. Their LoRAX server is a real piece of infrastructure. Where we differ is in what comes out of the compile: we ship a single signed artifact, not a deployed endpoint, and the artifact carries its own receipt.</p>
-    <p class="stamp">Eleven axes. Reviewed 2026-05-17 (wave 144 audit pass).</p>
-  </div>
+ <div class="wrap">
+ <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; vs Predibase</p>
+ <h1>kolm vs Predibase.</h1>
+ <p class="lede">Predibase pioneered LoRA-Land and multi-LoRA serving in 2024. Their LoRAX server is a real piece of infrastructure. Where we differ is in what comes out of the compile: we ship a single signed artifact, not a deployed endpoint, and the artifact carries its own receipt.</p>
+ <p class="stamp">Eleven axes. Reviewed 2026-05-17 (wave 144 audit pass).</p>
+ </div>
 </section>
 <section>
-  <div class="wrap">
-    <table class="matrix">
-      <thead><tr><th>Axis</th><th>kolm</th><th>Predibase</th><th>Why it matters</th><th>Proof</th></tr></thead>
-      <tbody>
-      <tr class="win-kolm"><td class="axis">What you ship</td><td class="kolm"><b>signed .kolm file</b></td><td class="other">VPC-deployed endpoint</td><td class="why">A file moves with the work. An endpoint requires a network round trip.</td><td class="proof"><a href="/docs">anatomy &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Run location</td><td class="kolm">local + cloud + edge</td><td class="other">their VPC or yours</td><td class="why">Edge fleets and on-device require the artifact pattern.</td><td class="proof"><a href="/device">/device &rarr;</a></td></tr>
-      <tr class="win-other"><td class="axis">Multi-LoRA serving</td><td class="kolm">single artifact per task; MoE composition via <code>kolm moe compose</code></td><td class="other"><b>yes</b>, LoRAX server &mdash; the strongest multi-adapter serving infra in market</td><td class="why">Predibase wins this axis. We don't compete on multi-tenant LoRA hosting; we compose experts into one signed file.</td><td class="proof"><a href="/docs#moe">moe block &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Receipt chain</td><td class="kolm"><b>HMAC-SHA256</b> per inference</td><td class="other">none</td><td class="why">Auditors want a primitive, not a dashboard.</td><td class="proof"><a href="/docs/showcase/receipt.json">receipt JSON &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">K-score gate</td><td class="kolm"><b>compile-time blocking</b>, formula public</td><td class="other">eval metrics in console</td><td class="why">A gate that blocks a compile is a contract.</td><td class="proof"><a href="/k-score">K-score formal &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Reference open spec</td><td class="kolm"><b>RS-1</b> public, Apache-2.0</td><td class="other">proprietary</td><td class="why">Open spec means you can verify with a small TypeScript SDK that has no third-party runtime deps.</td><td class="proof"><a href="/spec">RS-1 &rarr;</a></td></tr>
-      <tr class="win-other"><td class="axis">Quantization stack</td><td class="kolm"><span class="partial">runtime-bridge &mdash; INT4 / GGUF / ONNX ships alongside v0.2</span></td><td class="other"><b>yes</b></td><td class="why">Predibase ships native quantization at serve; kolm ships rule-class recipes + MoE + tokenizer in v0.2 and the quantization stack through the runtime bridge.</td><td class="proof"><a href="/roadmap">/roadmap &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Bundled tokenizer</td><td class="kolm"><b>pure-JS byte-level BPE</b> (<code>kolm-tokenizer-1</code>) embedded inside the artifact</td><td class="other">inherits base model tokenizer</td><td class="why">Deterministic, no native deps, round-trips any UTF-8 input by construction.</td><td class="proof"><a href="/docs#tokenizer">tokenizer layer &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Document ingest</td><td class="kolm"><code>kolm extract</code> (PDF text-layer, HTML, JSON/JSONL, opt-in OCR/vision) + <code>kolm doc check</code> completeness gate</td><td class="other">user supplies extracted text</td><td class="why">Health-insurance workflows start with paper. We ingest it; competitors expect you already did.</td><td class="proof"><a href="/healthcare">/healthcare &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Vendor exit</td><td class="kolm">file on disk, RS-1 spec Apache-2.0</td><td class="other">re-deploy</td><td class="why">If you change vendors the artifact still runs.</td><td class="proof"><a href="/spec">/spec &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Browser / TS SDK</td><td class="kolm">Python + <b>TypeScript</b> + CLI + MCP</td><td class="other">Python only</td><td class="why">Front-end teams need TS; mobile teams need RN; agent harnesses need MCP.</td><td class="proof"><a href="/sdks">/sdks &rarr;</a></td></tr>
-      </tbody>
-    </table>
-  </div>
+ <div class="wrap">
+ <table class="matrix">
+ <thead><tr><th>Axis</th><th>kolm</th><th>Predibase</th><th>Why it matters</th><th>Proof</th></tr></thead>
+ <tbody>
+ <tr class="win-kolm"><td class="axis">What you ship</td><td class="kolm"><b>signed .kolm file</b></td><td class="other">VPC-deployed endpoint</td><td class="why">A file moves with the work. An endpoint requires a network round trip.</td><td class="proof"><a href="/docs">anatomy &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Run location</td><td class="kolm">local + cloud + edge</td><td class="other">their VPC or yours</td><td class="why">Edge fleets and on-device require the artifact pattern.</td><td class="proof"><a href="/device">/device &rarr;</a></td></tr>
+ <tr class="win-other"><td class="axis">Multi-LoRA serving</td><td class="kolm">single artifact per task; MoE composition via <code>kolm moe compose</code></td><td class="other"><b>yes</b>, LoRAX server &mdash; the strongest multi-adapter serving infra in market</td><td class="why">Predibase wins this axis. We don't compete on multi-tenant LoRA hosting; we compose experts into one signed file.</td><td class="proof"><a href="/docs#moe">moe block &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Receipt chain</td><td class="kolm"><b>Ed25519</b> per inference</td><td class="other">none</td><td class="why">Auditors want a primitive, not a dashboard.</td><td class="proof"><a href="/docs/showcase/receipt.json">receipt JSON &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">K-score gate</td><td class="kolm"><b>compile-time blocking</b>, formula public</td><td class="other">eval metrics in console</td><td class="why">A gate that blocks a compile is a contract.</td><td class="proof"><a href="/k-score">K-score formal &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Reference open spec</td><td class="kolm"><b>RS-1</b> public, Apache-2.0</td><td class="other">proprietary</td><td class="why">Open spec means you can verify with a small TypeScript SDK that has no third-party runtime deps.</td><td class="proof"><a href="/spec">RS-1 &rarr;</a></td></tr>
+ <tr class="win-other"><td class="axis">Quantization stack</td><td class="kolm"><span class="partial">runtime-bridge &mdash; INT4 / GGUF / ONNX ships alongside v0.2</span></td><td class="other"><b>yes</b></td><td class="why">Predibase ships native quantization at serve; kolm ships rule-class recipes + MoE + tokenizer in v0.2 and the quantization stack through the runtime bridge.</td><td class="proof"><a href="/roadmap">/roadmap &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Bundled tokenizer</td><td class="kolm"><b>pure-JS byte-level BPE</b> (<code>kolm-tokenizer-1</code>) embedded inside the artifact</td><td class="other">inherits base model tokenizer</td><td class="why">Deterministic, no native deps, round-trips any UTF-8 input by construction.</td><td class="proof"><a href="/docs#tokenizer">tokenizer layer &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Document ingest</td><td class="kolm"><code>kolm extract</code> (PDF text-layer, HTML, JSON/JSONL, opt-in OCR/vision) + <code>kolm doc check</code> completeness gate</td><td class="other">user supplies extracted text</td><td class="why">Health-insurance workflows start with paper. We ingest it; competitors expect you already did.</td><td class="proof"><a href="/healthcare">/healthcare &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Vendor exit</td><td class="kolm">file on disk, RS-1 spec Apache-2.0</td><td class="other">re-deploy</td><td class="why">If you change vendors the artifact still runs.</td><td class="proof"><a href="/spec">/spec &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Browser / TS SDK</td><td class="kolm">Python + <b>TypeScript</b> + CLI + MCP</td><td class="other">Python only</td><td class="why">Front-end teams need TS; mobile teams need RN; agent harnesses need MCP.</td><td class="proof"><a href="/sdks">/sdks &rarr;</a></td></tr>
+ </tbody>
+ </table>
+ </div>
 </section>
 <section class="close">
-  <div class="wrap">
-    <h2>When Predibase is the right answer.</h2>
-    <p>Enterprise procurement wants a vendor with a Series B / C check, a dedicated VPC SKU, and a sales team. Predibase has all three. If your buyer's procurement asks "where is the company headquartered and what is their MRR," they are a strong fit.</p>
-    <h2 style="margin-top:32px">When kolm is the right answer.</h2>
-    <p>Your team is technical enough to consume a signed file and run it themselves, or your workload is edge / multi-tenant in a way that endpoint deployment does not address. The receipt chain and the MoE composition pattern (one .kolm routing across N expert recipes) become load-bearing the moment you have more than one task in flight.</p>
-    <div class="actions"><a class="btn primary" href="/quickstart">Compile your first AI &rarr;</a><a class="btn" href="/docs/showcase/receipt.json" target="_blank">Open a receipt &rarr;</a></div>
-  </div>
+ <div class="wrap">
+ <h2>When Predibase is the right answer.</h2>
+ <p>Enterprise procurement wants a vendor with a Series B / C check, a dedicated VPC SKU, and a sales team. Predibase has all three. If your buyer's procurement asks "where is the company headquartered and what is their MRR," they are a strong fit.</p>
+ <h2 style="margin-top:32px">When kolm is the right answer.</h2>
+ <p>Your team is technical enough to consume a signed file and run it themselves, or your workload is edge / multi-tenant in a way that endpoint deployment does not address. The receipt chain and the MoE composition pattern (one .kolm routing across N expert recipes) become load-bearing the moment you have more than one task in flight.</p>
+ <div class="actions"><a class="btn primary" href="/quickstart">Compile your first AI &rarr;</a><a class="btn" href="/docs/showcase/receipt.json" target="_blank">Open a receipt &rarr;</a></div>
+ </div>
 </section>
 </main>
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

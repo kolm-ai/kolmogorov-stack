@@ -10,9 +10,9 @@ description: Reproducible benchmark for a .kolm artifact or a public reproducer 
 ## Usage
 
 ```bash
-kolm bench <artifact.kolm> [flags]                  # artifact-local benchmark JSON
-kolm bench --reproduce <suite> [flags]              # public-reproducer suite (Docker)
-kolm bench --compare <artifact.kolm> [flags]        # head-to-head: kolm vs LLM
+kolm bench <artifact.kolm> [flags] # artifact-local benchmark JSON
+kolm bench --reproduce <suite> [flags] # public-reproducer suite (Docker)
+kolm bench --compare <artifact.kolm> [flags] # head-to-head: kolm vs LLM
 ```
 
 ## Flags

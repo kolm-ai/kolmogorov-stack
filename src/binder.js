@@ -48,7 +48,7 @@ import crypto from 'node:crypto';
 import { loadArtifact, isArtifactPathCloudTrusted, SUPPORTED_RUNTIME_TARGETS } from './artifact-runner.js';
 import { cidFromManifestHashes, parseCid, shortCid } from './cid.js';
 import { verifyCredential } from './provenance.js';
-import { effectiveReceiptSecret } from './env.js';
+import { effectiveReceiptSecret, verificationSecrets } from './env.js';
 import { validateCapability, validateLineage } from './artifact-lineage.js';
 import { hashIr } from './workflow-ir.js';
 import { verifyAttestation, STATES as CC_STATES } from './confidential-compute.js';
@@ -396,6 +396,7 @@ async function verifyArtifact(bundle) {
     }
 
     const secret = effectiveReceiptSecret({ includeLegacyArtifactSecret: true });
+    const candidateSecrets = verificationSecrets({ includeLegacyArtifactSecret: true });
     const chainStructureOk = chainStructuralIntegrityOk(receipt);
     if (cloudTrustedSha) {
       // Cloud-trust path. Structural check stands in for HMAC verification
@@ -408,35 +409,45 @@ async function verifyArtifact(bundle) {
           ? `structural integrity verified across ${receipt.chain?.length || 0} steps (cloud-signed; HMAC chain seal trusted via cloud-trust list)`
           : `chain structural integrity failed: ${chainStructureOk.reason}`,
       });
-    } else if (!secret) {
+    } else if (!secret && candidateSecrets.length === 0) {
       checks.push({
         name: 'Audit chain (HMAC receipt)',
         status: 'warn',
         detail: `chain structure ok (${receipt.chain?.length || 0} steps); HMAC unverified — RECIPE_RECEIPT_SECRET not present in this environment`,
       });
     } else {
-      const chainOk = (receipt.chain || []).every(step => {
-        const expected = hmacHex(secret, canonicalJson({
-          step: step.step, input_hash: step.input_hash, output_hash: step.output_hash,
-        }));
-        return expected === step.hmac;
-      });
-      const bodyOk = (() => {
-        // Strip every signature block added after the HMAC was computed:
-        //   * `signature` (the HMAC hex itself)
-        //   * `signature_ed25519` (Wave 149 public-key block)
-        //   * `signature_sigstore` (Wave 150 cosign-compatible bundle)
-        // so the canonical payload matches what was hashed at sign-time.
-        const { signature, signature_ed25519, signature_sigstore, ...rest } = receipt;
-        void signature_ed25519; void signature_sigstore;
-        return hmacHex(secret, canonicalJson(rest)) === signature;
-      })();
+      // W481 — try every candidate secret (env primary, MARKETPLACE_FIXTURE_SECRET
+      // for in-repo seed artifacts, DEV_RECEIPT_SECRET for legacy dev-signed
+      // artifacts). Accept on the first match so verify works on a fresh
+      // checkout without env setup AND on a user's machine that has compiled
+      // their own artifacts (RECIPE_RECEIPT_SECRET points at their
+      // local_receipt_secret).
+      let matchedSecret = null;
+      for (const candidate of candidateSecrets) {
+        const chainOk = (receipt.chain || []).every(step => {
+          const expected = hmacHex(candidate, canonicalJson({
+            step: step.step, input_hash: step.input_hash, output_hash: step.output_hash,
+          }));
+          return expected === step.hmac;
+        });
+        const bodyOk = (() => {
+          // Strip every signature block added after the HMAC was computed:
+          //   * `signature` (the HMAC hex itself)
+          //   * `signature_ed25519` (Wave 149 public-key block)
+          //   * `signature_sigstore` (Wave 150 cosign-compatible bundle)
+          // so the canonical payload matches what was hashed at sign-time.
+          const { signature, signature_ed25519, signature_sigstore, ...rest } = receipt;
+          void signature_ed25519; void signature_sigstore;
+          return hmacHex(candidate, canonicalJson(rest)) === signature;
+        })();
+        if (chainOk && bodyOk) { matchedSecret = candidate; break; }
+      }
       checks.push({
         name: 'Audit chain (HMAC receipt)',
-        status: (chainOk && bodyOk) ? 'pass' : 'fail',
-        detail: (chainOk && bodyOk)
+        status: matchedSecret ? 'pass' : 'fail',
+        detail: matchedSecret
           ? `chain verified across ${receipt.chain.length} steps; receipt body signature verified`
-          : (!chainOk ? 'chain step HMAC mismatch' : 'receipt body signature mismatch'),
+          : 'chain step HMAC mismatch',
       });
     }
   }
@@ -482,6 +493,7 @@ async function verifyArtifact(bundle) {
     });
   } else {
     const secret = effectiveReceiptSecret({ includeLegacyArtifactSecret: true });
+    const candidateSecrets = verificationSecrets({ includeLegacyArtifactSecret: true });
     const credStructure = credentialStructuralIntegrityOk(credential, bundle.manifest);
     if (cloudTrustedSha) {
       // Cloud-trust path. The credential signature was produced with the
@@ -495,20 +507,29 @@ async function verifyArtifact(bundle) {
           ? `credential structure verified (${credential.spec}; cloud-signed; signature trusted via cloud-trust list)`
           : `credential structural integrity failed: ${credStructure.reason}`,
       });
-    } else if (!secret) {
+    } else if (!secret && candidateSecrets.length === 0) {
       checks.push({
         name: 'Provenance credential',
         status: 'warn',
         detail: `credential present (${credential.spec || 'unknown spec'}); signature unverified without RECIPE_RECEIPT_SECRET`,
       });
     } else {
-      const r = verifyCredential(credential, secret);
+      // W481 — try every candidate secret (env primary, MARKETPLACE_FIXTURE_SECRET,
+      // legacy DEV_RECEIPT_SECRET). Same fallback chain as the audit chain
+      // check above so in-repo marketplace seed artifacts verify on any host.
+      let matched = null;
+      let lastReason = '';
+      for (const candidate of candidateSecrets) {
+        const r = verifyCredential(credential, candidate);
+        if (r.valid) { matched = r; break; }
+        lastReason = r.reason;
+      }
       checks.push({
         name: 'Provenance credential',
-        status: r.valid ? 'pass' : 'fail',
-        detail: r.valid
+        status: matched ? 'pass' : 'fail',
+        detail: matched
           ? `credential signature verified (${credential.spec})`
-          : `credential signature failed: ${r.reason}`,
+          : `credential signature failed: ${lastReason}`,
       });
     }
   }

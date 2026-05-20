@@ -10,10 +10,10 @@ description: List, show, and diff compiled .kolm artifacts in your tenant.
 ## Usage
 
 ```bash
-kolm artifacts                       # alias for: kolm artifacts list
-kolm artifacts list  [--limit N] [--json]
-kolm artifacts show  <id>            [--json]
-kolm artifacts diff  <a> <b>         [--json]
+kolm artifacts # alias for: kolm artifacts list
+kolm artifacts list [--limit N] [--json]
+kolm artifacts show <id> [--json]
+kolm artifacts diff <a> <b> [--json]
 ```
 
 ## Flags

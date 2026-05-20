@@ -7,19 +7,19 @@ re-checks the active fingerprint against the manifest's signing block.
 ## Usage
 
 ```
-kolm keys list                                  list keys + status + KMS target
+kolm keys list list keys + status + KMS target
 kolm keys rotate [--kms <target>] [--overlap-days <N>]
-kolm keys fingerprint                           print active key short fingerprint
-kolm keys export                                emit the rotation manifest as JSON
+kolm keys fingerprint print active key short fingerprint
+kolm keys export emit the rotation manifest as JSON
 ```
 
 ## Flags
 
 - `--kms <target>` one of `local`, `aws-kms`, `gcp-kms`, `azure-kv`,
-  `hashicorp-vault`. Default: `local`. Hosted targets emit a wrap intent;
-  the customer KMS hook applies the wrapping.
+ `hashicorp-vault`. Default: `local`. Hosted targets emit a wrap intent;
+ the customer KMS hook applies the wrapping.
 - `--overlap-days <N>` how long the old key stays valid during rotation
-  (default: 30 days; spec lock at `DEFAULT_OVERLAP_DAYS`).
+ (default: 30 days; spec lock at `DEFAULT_OVERLAP_DAYS`).
 - `--json` machine-readable output. Default: human-readable.
 
 ## Examples
@@ -41,8 +41,8 @@ Verify the wrap landed in your KMS before rotating production traffic.
 ## See also
 
 - `kolm verify <artifact>.kolm` re-runs the signature checks including the
-  active fingerprint binding.
+ active fingerprint binding.
 - `/spec/rs-1` (RS-1 v2.1) section 7.13 covers the signing block and key
-  rotation field shape.
+ rotation field shape.
 - `/frozen-eval` for how the eval-set hash is anchored alongside the key
-  fingerprint in the receipt chain.
+ fingerprint in the receipt chain.

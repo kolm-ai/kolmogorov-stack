@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm artifacts · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm artifacts CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/artifacts">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm artifacts","description":"Reference for the kolm artifacts CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/artifacts","mainEntityOfPage":"https://kolm.ai/docs/cli/artifacts","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm artifacts · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm artifacts CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,17 +176,17 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="artifacts">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>artifacts</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>artifacts</span>
 </nav>
 <p>--- title: kolm artifacts · kolm.ai description: List, show, and diff compiled .kolm artifacts in your tenant. ---</p>
 <h1>kolm artifacts</h1>
 <p>&gt; List, show, and diff compiled .kolm artifacts in your tenant. Hits <code>GET /v1/artifacts</code> (list) and <code>GET /v1/artifacts/:id</code> (show).</p>
 <h2>Usage</h2>
 <pre><code>
-kolm artifacts                       # alias for: kolm artifacts list
-kolm artifacts list  [--limit N] [--json]
-kolm artifacts show  &lt;id&gt;            [--json]
-kolm artifacts diff  &lt;a&gt; &lt;b&gt;         [--json]
+kolm artifacts # alias for: kolm artifacts list
+kolm artifacts list [--limit N] [--json]
+kolm artifacts show &lt;id&gt; [--json]
+kolm artifacts diff &lt;a&gt; &lt;b&gt; [--json]
 </code></pre>
 <h2>Flags</h2>
 <p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--limit &lt;n&gt;</code> | <code>50</code> | max rows in list. Max <code>200</code> | | <code>--json</code> | off | machine-readable JSON |</p>
@@ -206,13 +210,13 @@ kolm artifacts diff art_018a3e art_018b1f
 <li><a href="/docs/cli/inspection">Inspection verbs</a> for the consolidated read-only set</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

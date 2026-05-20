@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm runtime · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm runtime CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/runtime">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm runtime","description":"Reference for the kolm runtime CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/runtime","mainEntityOfPage":"https://kolm.ai/docs/cli/runtime","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm runtime · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm runtime CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,7 +176,7 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="runtime">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>runtime</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>runtime</span>
 </nav>
 <p>--- title: kolm runtime · kolm.ai description: Per-call policy decider plus the runtime-target builder for cross-compile. ---</p>
 <h1>kolm runtime</h1>
@@ -180,19 +184,19 @@
 <h2>Usage</h2>
 <h3>Policy ladder (W372)</h3>
 <pre><code>
-kolm runtime status                                # current policy + 7d decision stats
-kolm runtime policy   [--set key=value]            # inspect or tune the policy
-kolm runtime start    [--policy &lt;name&gt;]            # switch policy
-kolm runtime install  &lt;art.kolm&gt;                   # install a .kolm into the local runtime cache
-kolm runtime decisions [--limit N]                 # recent per-call decisions
-kolm runtime stats     [--since 7d]                # rolled-up stats
+kolm runtime status # current policy + 7d decision stats
+kolm runtime policy [--set key=value] # inspect or tune the policy
+kolm runtime start [--policy &lt;name&gt;] # switch policy
+kolm runtime install &lt;art.kolm&gt; # install a .kolm into the local runtime cache
+kolm runtime decisions [--limit N] # recent per-call decisions
+kolm runtime stats [--since 7d] # rolled-up stats
 </code></pre>
 <h3>Source-build (W219)</h3>
 <pre><code>
-kolm runtime targets                               # list cross-compile targets
-kolm runtime info &lt;target&gt;                         # target spec
-kolm runtime doctor                                # toolchain check across all targets
-kolm runtime build-from-source &lt;target&gt;            # compile llama.cpp from source
+kolm runtime targets # list cross-compile targets
+kolm runtime info &lt;target&gt; # target spec
+kolm runtime doctor # toolchain check across all targets
+kolm runtime build-from-source &lt;target&gt; # compile llama.cpp from source
 </code></pre>
 <h2>Policy names</h2>
 <p><code>local_first</code>, <code>frontier_first</code>, <code>cost_optimized</code>, <code>privacy_only</code>.</p>
@@ -222,13 +226,13 @@ kolm runtime build-from-source cuda-89
 <li><a href="/docs/cli/install-device">kolm install-device</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

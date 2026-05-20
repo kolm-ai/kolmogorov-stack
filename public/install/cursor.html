@@ -4,35 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Install kolm.ai for Cursor (one-click MCP) · kolm.ai</title>
-<meta name="description" content="One command wires kolm.ai into Cursor as an MCP server. Your compiled .kolm artifacts appear as tools the editor can call. No new dependencies, idempotent installer.">
+<meta name="description" content="One command wires kolm.ai into Cursor as an MCP server. Your compiled .kolm artifacts appear as tools the editor can call. No new dependencies, idempotent...">
 <meta name="keywords" content="cursor mcp install, kolm cursor, AI compiler cursor, mcp.json cursor, kolm.ai install">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="Install kolm.ai for Cursor (one-click MCP)">
-<meta property="og:description" content="Wire kolm into Cursor as an MCP server. One command, idempotent, no overwrite of existing servers.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Install kolm.ai for Cursor (one-click MCP) · kolm.ai">
+<meta property="og:description" content="One command wires kolm.ai into Cursor as an MCP server. Your compiled .kolm artifacts appear as tools the editor can call. No new dependencies, idempotent...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/install/cursor">
-<meta property="og:image" content="https://kolm.ai/og/install-cursor.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="kolm.ai for Cursor &middot; one-click MCP install">
-<meta name="twitter:description" content="Compile your task into a .kolm and Cursor calls it as an MCP tool. One command to wire it up.">
+<meta name="twitter:title" content="Install kolm.ai for Cursor (one-click MCP) · kolm.ai">
+<meta name="twitter:description" content="One command wires kolm.ai into Cursor as an MCP server. Your compiled .kolm artifacts appear as tools the editor can call. No new dependencies, idempotent...">
 <link rel="canonical" href="https://kolm.ai/install/cursor">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "HowTo",
-  "name": "Install kolm.ai for Cursor",
-  "description": "One command wires kolm.ai into Cursor as an MCP server.",
-  "step": [
-    { "@type": "HowToStep", "name": "Run the installer", "text": "node scripts/install-mcp.cjs cursor" },
-    { "@type": "HowToStep", "name": "Reload Cursor MCP", "text": "Cmd+Shift+P, then 'MCP: Reload'" },
-    { "@type": "HowToStep", "name": "Call a kolm tool", "text": "Ask the agent to use a compiled .kolm artifact." }
-  ]
+ "@context": "https://schema.org",
+ "@type": "HowTo",
+ "name": "Install kolm.ai for Cursor",
+ "description": "One command wires kolm.ai into Cursor as an MCP server.",
+ "step": [
+ { "@type": "HowToStep", "name": "Run the installer", "text": "node scripts/install-mcp.cjs cursor" },
+ { "@type": "HowToStep", "name": "Reload Cursor MCP", "text": "Cmd+Shift+P, then 'MCP: Reload'" },
+ { "@type": "HowToStep", "name": "Call a kolm tool", "text": "Ask the agent to use a compiled .kolm artifact." }
+ ]
 }
 </script>
 <style>
@@ -71,6 +71,8 @@ details[open] summary{margin-bottom:10px}
 footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
 @media (max-width:560px){main{padding:32px 18px 64px}h1{font-size:30px}h2{font-size:20px}.cmdbox pre{font-size:13px}}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>
@@ -82,52 +84,52 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 
 <h2>Install command</h2>
 <div class="cmdbox">
-  <div class="label">copy &middot; paste &middot; run</div>
-  <button class="copy" onclick="navigator.clipboard.writeText('node scripts/install-mcp.cjs cursor').then(()=>{this.textContent='copied'})">copy</button>
-  <pre>node scripts/install-mcp.cjs cursor</pre>
+ <div class="label">copy &middot; paste &middot; run</div>
+ <button class="copy" onclick="navigator.clipboard.writeText('node scripts/install-mcp.cjs cursor').then(()=>{this.textContent='copied'})">copy</button>
+ <pre>node scripts/install-mcp.cjs cursor</pre>
 </div>
 <p class="muted">Already have kolm installed globally? Run <code>kolm install cursor</code> instead. Pass <code>--dry-run</code> to preview the JSON without touching disk.</p>
 <p class="path">target config: ~/.cursor/mcp.json</p>
 
 <details>
-  <summary>What this does</summary>
-  <p>The installer reads <code>~/.cursor/mcp.json</code> (if present), parses the JSON, merges in a single <code>mcpServers.kolm</code> entry that points to <code>kolm serve --mcp</code>, and writes atomically using a tmp-file + rename. Other servers in the same file are preserved byte-for-byte. Re-running is a no-op when the kolm block is already correct.</p>
-  <p>The exact block injected:</p>
-  <pre>{
-  "mcpServers": {
-    "kolm": {
-      "command": "kolm",
-      "args": ["serve", "--mcp"],
-      "env": {}
-    }
-  }
+ <summary>What this does</summary>
+ <p>The installer reads <code>~/.cursor/mcp.json</code> (if present), parses the JSON, merges in a single <code>mcpServers.kolm</code> entry that points to <code>kolm serve --mcp</code>, and writes atomically using a tmp-file + rename. Other servers in the same file are preserved byte-for-byte. Re-running is a no-op when the kolm block is already correct.</p>
+ <p>The exact block injected:</p>
+ <pre>{
+ "mcpServers": {
+ "kolm": {
+ "command": "kolm",
+ "args": ["serve", "--mcp"],
+ "env": {}
+ }
+ }
 }</pre>
-  <p>If an existing <code>mcpServers.kolm</code> block differs from the canonical one, the installer prints a diff and refuses to overwrite. Pass <code>--force</code> to replace it.</p>
+ <p>If an existing <code>mcpServers.kolm</code> block differs from the canonical one, the installer prints a diff and refuses to overwrite. Pass <code>--force</code> to replace it.</p>
 </details>
 
 <h2>After install</h2>
 <div class="grid3">
-  <div class="step">
-    <div class="n">step 1</div>
-    <h3>Reload Cursor MCP</h3>
-    <p>Cmd+Shift+P, then "MCP: Reload". Cursor picks up the new server without a full restart.</p>
-  </div>
-  <div class="step">
-    <div class="n">step 2</div>
-    <h3>See kolm tools appear</h3>
-    <p>Open the MCP panel. Every .kolm artifact under your kolm.yaml is listed as a callable tool.</p>
-  </div>
-  <div class="step">
-    <div class="n">step 3</div>
-    <h3>Call from chat</h3>
-    <p>Ask Cursor to run a compiled task. It will route to the local kolm server, sign the call, and write a receipt.</p>
-  </div>
+ <div class="step">
+ <div class="n">step 1</div>
+ <h3>Reload Cursor MCP</h3>
+ <p>Cmd+Shift+P, then "MCP: Reload". Cursor picks up the new server without a full restart.</p>
+ </div>
+ <div class="step">
+ <div class="n">step 2</div>
+ <h3>See kolm tools appear</h3>
+ <p>Open the MCP panel. Every .kolm artifact under your kolm.yaml is listed as a callable tool.</p>
+ </div>
+ <div class="step">
+ <div class="n">step 3</div>
+ <h3>Call from chat</h3>
+ <p>Ask Cursor to run a compiled task. It will route to the local kolm server, sign the call, and write a receipt.</p>
+ </div>
 </div>
 
 <h2>Cross-platform paths</h2>
 <ul>
-  <li>macOS &amp; Linux: <code>~/.cursor/mcp.json</code></li>
-  <li>Windows: <code>%USERPROFILE%\.cursor\mcp.json</code></li>
+ <li>macOS &amp; Linux: <code>~/.cursor/mcp.json</code></li>
+ <li>Windows: <code>%USERPROFILE%\.cursor\mcp.json</code></li>
 </ul>
 
 <h2>Troubleshooting</h2>

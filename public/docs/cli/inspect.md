@@ -10,8 +10,8 @@ description: Show what a .kolm artifact is in plain text. Manifest, recipes, sig
 ## Usage
 
 ```bash
-kolm inspect <artifact.kolm>          # human-readable summary
-kolm inspect <artifact.kolm> --json   # full manifest dump
+kolm inspect <artifact.kolm> # human-readable summary
+kolm inspect <artifact.kolm> --json # full manifest dump
 ```
 
 ## Flags
@@ -31,7 +31,7 @@ kolm inspect redactor.kolm --json | jq '.k_score'
 
 Text mode is the default. `--json` keeps the old behavior for scripts that parse the full manifest.
 
-`inspect` is a passive read of the artifact's manifest. For active chain verification (recompute CID, replay HMAC audit chain, check signatures and K-score gate) use [`kolm verify`](/docs/cli/verify) instead.
+`inspect` is a passive read of the artifact's manifest. For active chain verification (recompute CID, replay Ed25519 audit chain, check signatures and K-score gate) use [`kolm verify`](/docs/cli/verify) instead.
 
 ## See also
 

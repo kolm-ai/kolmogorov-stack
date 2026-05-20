@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>HTTP API quickstart &middot; kolm.ai &middot; the AI compiler over REST · kolm.ai</title>
-<meta name="description" content="Five curl commands. Sign up, capture, compile, replay, verify. Every kolm.ai surface is reachable as REST over Bearer-keyed HTTP. JSON in, JSON out, signed receipts on the way back.">
+<title>HTTP API quickstart: the AI compiler over REST · kolm.ai</title>
+<meta name="description" content="Five curl commands. Sign up, capture, compile, replay, verify. Every kolm.ai surface is reachable as REST over Bearer-keyed HTTP. JSON in, JSON out, signed...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="HTTP API quickstart &middot; kolm.ai &middot; the AI compiler over REST">
-<meta property="og:description" content="Five curl commands. Capture, compile, verify. JSON in, signed receipts out.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP API quickstart: the AI compiler over REST · kolm.ai">
+<meta property="og:description" content="Five curl commands. Sign up, capture, compile, replay, verify. Every kolm.ai surface is reachable as REST over Bearer-keyed HTTP. JSON in, JSON out, signed...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/quickstart/api">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="HTTP API quickstart &middot; kolm.ai &middot; the AI compiler over REST">
-<meta name="twitter:description" content="Five curl commands. Capture, compile, verify. Signed receipts.">
+<meta name="twitter:title" content="HTTP API quickstart: the AI compiler over REST · kolm.ai">
+<meta name="twitter:description" content="Five curl commands. Sign up, capture, compile, replay, verify. Every kolm.ai surface is reachable as REST over Bearer-keyed HTTP. JSON in, JSON out, signed...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/quickstart/api">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -65,106 +65,109 @@ pre.terminal .mute{color:var(--ink-faint)}
 footer{padding:36px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <!-- kolm-nav-start --><nav><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav><!-- kolm-nav-end -->
+ <a class="logo" href="/">kolm.ai</a>
+ <!-- kolm-nav-start --><nav><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav><!-- kolm-nav-end -->
 </div></header>
 
 <main id="main">
 
 <section class="hero"><div class="wrap">
-  <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/quickstart">quickstart</a> / api</div>
-  <h1>The HTTP API quickstart for kolm.ai &middot; the AI compiler</h1>
-  <p class="lede">Five curl commands. Every kolm.ai surface is reachable as REST over Bearer-keyed HTTP. JSON in, JSON out, signed receipts on the way back. If your stack speaks HTTP you already speak kolm.ai.</p>
-  <p class="stamp">target time: 2 minutes &middot; prerequisites: a shell with curl &middot; auth: Bearer ks_...</p>
+ <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/quickstart">quickstart</a> / api</div>
+ <h1>The HTTP API quickstart for kolm.ai &middot; the AI compiler</h1>
+ <p class="lede">Five curl commands. Every kolm.ai surface is reachable as REST over Bearer-keyed HTTP. JSON in, JSON out, signed receipts on the way back. If your stack speaks HTTP you already speak kolm.ai.</p>
+ <p class="stamp">target time: 2 minutes &middot; prerequisites: a shell with curl &middot; auth: Bearer ks_...</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Five-step flow</h2>
+ <h2>Five-step flow</h2>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 1</span><span class="step-name">Provision an anonymous tenant</span><span class="step-cli">POST /v1/auth/anon</span></div>
-    <p>No signup form. POST returns a Bearer key valid for the trial quota. Save it once; reuse it forever.</p>
-    <pre class="terminal"><b>$</b> curl -s https://kolm.ai/v1/auth/anon -X POST | tee /tmp/k.json
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 1</span><span class="step-name">Provision an anonymous workspace</span><span class="step-cli">POST /v1/anon/bootstrap</span></div>
+ <p>No signup form. POST returns a Bearer key valid for the anonymous workspace quota. Claim the workspace later with <code>POST /v1/anon/claim</code>.</p>
+ <pre class="terminal"><b>$</b> curl -s https://kolm.ai/v1/anon/bootstrap -X POST | tee /tmp/k.json
 <span class="mute">{
-  &quot;tenant&quot;: { &quot;id&quot;: &quot;ten_yc8e9f2a&quot;, &quot;plan&quot;: &quot;free&quot;, &quot;quota&quot;: 10000 },
-  &quot;api_key&quot;: &quot;ks_anon_8e2a4...c1d7&quot;
+ &quot;anon_token&quot;: &quot;kao_8e2a4...c1d7&quot;,
+ &quot;tenant_id&quot;: &quot;anon_yc8e9f2a&quot;,
+ &quot;kind&quot;: &quot;anon&quot;,
+ &quot;quota&quot;: 1000,
+ &quot;expires_at&quot;: &quot;2026-06-19T00:00:00.000Z&quot;
 }</span>
-<b>$</b> export KOLM_KEY=$(jq -r .api_key /tmp/k.json)</pre>
-  </div>
+<b>$</b> export KOLM_KEY=$(jq -r .anon_token /tmp/k.json)</pre>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 2</span><span class="step-name">Capture a prompt+response pair</span><span class="step-cli">POST /v1/capture/log</span></div>
-    <p>Push the observation directly. The response carries <code>x-kolm-capture-durable: true</code> only after the write reached durable storage. If that header is missing or <code>false</code>, the row did not persist and your client must retry &mdash; the receipt cannot lie.</p>
-    <pre class="terminal"><b>$</b> curl -s https://kolm.ai/v1/capture/log -i \
-    -H &quot;authorization: Bearer $KOLM_KEY&quot; -H &quot;content-type: application/json&quot; \
-    -d &apos;{&quot;namespace&quot;:&quot;summarizer&quot;,&quot;items&quot;:[{&quot;input&quot;:&quot;Summarize this PR:...&quot;,&quot;output&quot;:&quot;This PR refactors...&quot;,&quot;latency_us&quot;:8421}],&quot;model&quot;:&quot;qwen-3.5-27b&quot;}&apos;
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 2</span><span class="step-name">Capture a prompt+response pair</span><span class="step-cli">POST /v1/capture/log</span></div>
+ <p>Push the observation directly. The response carries <code>x-kolm-capture-durable: true</code> only after the write reached durable storage. If that header is missing or <code>false</code>, the row did not persist and your client must retry &mdash; the receipt cannot lie.</p>
+ <pre class="terminal"><b>$</b> curl -s https://kolm.ai/v1/capture/log -i \
+ -H &quot;authorization: Bearer $KOLM_KEY&quot; -H &quot;content-type: application/json&quot; \
+ -d &apos;{&quot;namespace&quot;:&quot;summarizer&quot;,&quot;items&quot;:[{&quot;input&quot;:&quot;Summarize this PR:...&quot;,&quot;output&quot;:&quot;This PR refactors...&quot;,&quot;latency_us&quot;:8421}],&quot;model&quot;:&quot;qwen-3.5-27b&quot;}&apos;
 <span class="mute">HTTP/2 201
 x-kolm-capture-durable: true
 x-kolm-namespace: summarizer
 x-kolm-capture-id: cap_018a3e...</span>
 <span class="mute">{ &quot;persisted&quot;: 1, &quot;total&quot;: 1, &quot;durable&quot;: true }</span></pre>
-  </div>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 3</span><span class="step-name">Compile from captures</span><span class="step-cli">POST /v1/distill/from-captures</span></div>
-    <p>Promote a namespace once it has crossed the readiness threshold. The job runs async; poll the returned <code>job_id</code> via <code>GET /v1/jobs/:id</code>, or open the streaming receipt with <code>GET /v1/jobs/:id/logs</code>.</p>
-    <pre class="terminal"><b>$</b> curl -s https://kolm.ai/v1/distill/from-captures -X POST \
-    -H &quot;authorization: Bearer $KOLM_KEY&quot; -H &quot;content-type: application/json&quot; \
-    -d &apos;{&quot;namespace&quot;:&quot;summarizer&quot;,&quot;tier&quot;:&quot;3090&quot;,&quot;recipe_class&quot;:&quot;specialist&quot;}&apos;
-<span class="mute">{ &quot;job_id&quot;: &quot;job_w8e2&quot;, &quot;status&quot;: &quot;running&quot;, &quot;watch&quot;: &quot;/v1/jobs/job_w8e2/logs&quot; }</span></pre>
-  </div>
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 3</span><span class="step-name">Compile from captures</span><span class="step-cli">POST /v1/distill/from-captures</span></div>
+ <p>Promote a namespace once it has crossed the readiness threshold. The job runs async; poll the returned <code>job_id</code> via <code>GET /v1/jobs/:id</code>.</p>
+ <pre class="terminal"><b>$</b> curl -s https://kolm.ai/v1/distill/from-captures -X POST \
+ -H &quot;authorization: Bearer $KOLM_KEY&quot; -H &quot;content-type: application/json&quot; \
+ -d &apos;{&quot;namespace&quot;:&quot;summarizer&quot;,&quot;tier&quot;:&quot;3090&quot;,&quot;recipe_class&quot;:&quot;specialist&quot;}&apos;
+<span class="mute">{ &quot;job_id&quot;: &quot;job_w8e2&quot;, &quot;status&quot;: &quot;running&quot;, &quot;watch&quot;: &quot;/v1/jobs/job_w8e2&quot; }</span></pre>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 4</span><span class="step-name">List + download the artifact</span><span class="step-cli">GET /v1/artifacts &amp; GET /v1/artifacts/:id/download</span></div>
-    <p>Every completed compile job becomes an artifact under your tenant. Pull the metadata first, then the bytes.</p>
-    <pre class="terminal"><b>$</b> curl -s https://kolm.ai/v1/artifacts -H &quot;authorization: Bearer $KOLM_KEY&quot; | jq &apos;.artifacts[0]&apos;
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 4</span><span class="step-name">List + download the artifact</span><span class="step-cli">GET /v1/artifacts &amp; GET /v1/artifacts/:id/download</span></div>
+ <p>Every completed compile job becomes an artifact under your tenant. Pull the metadata first, then the bytes.</p>
+ <pre class="terminal"><b>$</b> curl -s https://kolm.ai/v1/artifacts -H &quot;authorization: Bearer $KOLM_KEY&quot; | jq &apos;.artifacts[0]&apos;
 <span class="mute">{ &quot;id&quot;: &quot;art_summ_v3&quot;, &quot;recipe_class&quot;: &quot;specialist&quot;, &quot;k_score&quot;: 0.91, &quot;download_url&quot;: &quot;/v1/artifacts/art_summ_v3/download&quot; }</span>
 <b>$</b> curl -sLO https://kolm.ai/v1/artifacts/art_summ_v3/download -H &quot;authorization: Bearer $KOLM_KEY&quot;</pre>
-  </div>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 5</span><span class="step-name">Replay against the captures</span><span class="step-cli">POST /v1/replay</span></div>
-    <p>Close the loop: replay the same captured prompts against the new artifact, compare per-row k_score + latency delta + cost delta. Same screen, same one click, observe&rarr;compile&rarr;replay.</p>
-    <pre class="terminal"><b>$</b> curl -s https://kolm.ai/v1/replay -X POST \
-    -H &quot;authorization: Bearer $KOLM_KEY&quot; -H &quot;content-type: application/json&quot; \
-    -d &apos;{&quot;namespace&quot;:&quot;summarizer&quot;,&quot;artifact_id&quot;:&quot;art_summ_v3&quot;,&quot;limit&quot;:20}&apos;
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 5</span><span class="step-name">Replay against the captures</span><span class="step-cli">POST /v1/replay</span></div>
+ <p>Close the loop: replay the same captured prompts against the new artifact, compare per-row k_score + latency delta + cost delta. Same screen, same one click, observe&rarr;compile&rarr;replay.</p>
+ <pre class="terminal"><b>$</b> curl -s https://kolm.ai/v1/replay -X POST \
+ -H &quot;authorization: Bearer $KOLM_KEY&quot; -H &quot;content-type: application/json&quot; \
+ -d &apos;{&quot;namespace&quot;:&quot;summarizer&quot;,&quot;artifact_id&quot;:&quot;art_summ_v3&quot;,&quot;limit&quot;:20}&apos;
 <span class="mute">{ &quot;rows&quot;: 20, &quot;k_mean&quot;: 0.91, &quot;latency_delta_us&quot;: -184000, &quot;cost_delta_micro_usd&quot;: -2400 }</span></pre>
-  </div>
+ </div>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Endpoint cheat sheet</h2>
-  <p class="lede">The full list lives in <a href="/docs/api">/docs/api</a>. The fifteen most-used endpoints &mdash; one row per concern.</p>
-  <table class="endpoint-table">
-    <thead><tr><th>Method</th><th>Path</th><th>What it does</th></tr></thead>
-    <tbody>
-      <tr><td><code>POST</code></td><td><code>/v1/auth/anon</code></td><td>provision an anonymous tenant + Bearer key</td></tr>
-      <tr><td><code>GET</code></td><td><code>/v1/account</code></td><td>tenant identity + plan + quota</td></tr>
-      <tr><td><code>POST</code></td><td><code>/v1/capture/log</code></td><td>push a batch of prompt+response observations</td></tr>
-      <tr><td><code>GET</code></td><td><code>/v1/capture/stream</code></td><td>SSE live tail of captures for a namespace</td></tr>
-      <tr><td><code>GET</code></td><td><code>/v1/capture/health</code></td><td>capture driver liveness + durability flag</td></tr>
-      <tr><td><code>POST</code></td><td><code>/v1/distill/from-captures</code></td><td>kick off a compile job from a namespace</td></tr>
-      <tr><td><code>POST</code></td><td><code>/v1/compile</code></td><td>compile from an explicit recipe spec</td></tr>
-      <tr><td><code>GET</code></td><td><code>/v1/jobs/:id</code></td><td>poll job state</td></tr>
-      <tr><td><code>GET</code></td><td><code>/v1/jobs/:id/logs</code></td><td>SSE stream of job log lines</td></tr>
-      <tr><td><code>GET</code></td><td><code>/v1/artifacts</code></td><td>list completed artifacts in your tenant</td></tr>
-      <tr><td><code>GET</code></td><td><code>/v1/artifacts/:id</code></td><td>artifact metadata + receipt chain summary</td></tr>
-      <tr><td><code>GET</code></td><td><code>/v1/artifacts/:id/download</code></td><td>artifact bytes (zip)</td></tr>
-      <tr><td><code>POST</code></td><td><code>/v1/replay</code></td><td>replay captures against an artifact + diff</td></tr>
-      <tr><td><code>POST</code></td><td><code>/v1/receipts/verify</code></td><td>offline-replay the receipt chain</td></tr>
-      <tr><td><code>POST</code></td><td><code>/v1/loop/try</code></td><td>anonymous demo of the capture receipt envelope</td></tr>
-    </tbody>
-  </table>
+ <h2>Endpoint cheat sheet</h2>
+ <p class="lede">The full list lives in <a href="/docs/api">/docs/api</a>. The fifteen most-used endpoints &mdash; one row per concern.</p>
+ <table class="endpoint-table">
+ <thead><tr><th>Method</th><th>Path</th><th>What it does</th></tr></thead>
+ <tbody>
+ <tr><td><code>POST</code></td><td><code>/v1/anon/bootstrap</code></td><td>provision an anonymous workspace + Bearer key</td></tr>
+ <tr><td><code>GET</code></td><td><code>/v1/account</code></td><td>tenant identity + plan + quota</td></tr>
+ <tr><td><code>POST</code></td><td><code>/v1/capture/log</code></td><td>push a batch of prompt+response observations</td></tr>
+ <tr><td><code>GET</code></td><td><code>/v1/capture/stream</code></td><td>SSE live tail of captures for a namespace</td></tr>
+ <tr><td><code>GET</code></td><td><code>/v1/capture/health</code></td><td>capture driver liveness + durability flag</td></tr>
+ <tr><td><code>POST</code></td><td><code>/v1/distill/from-captures</code></td><td>kick off a compile job from a namespace</td></tr>
+ <tr><td><code>POST</code></td><td><code>/v1/compile</code></td><td>compile from an explicit recipe spec</td></tr>
+ <tr><td><code>GET</code></td><td><code>/v1/jobs/:id</code></td><td>poll job state</td></tr>
+ <tr><td><code>GET</code></td><td><code>/v1/artifacts</code></td><td>list completed artifacts in your tenant</td></tr>
+ <tr><td><code>GET</code></td><td><code>/v1/artifacts/:id</code></td><td>artifact metadata + receipt chain summary</td></tr>
+ <tr><td><code>GET</code></td><td><code>/v1/artifacts/:id/download</code></td><td>artifact bytes (zip)</td></tr>
+ <tr><td><code>POST</code></td><td><code>/v1/replay</code></td><td>replay captures against an artifact + diff</td></tr>
+ <tr><td><code>POST</code></td><td><code>/v1/receipts/verify</code></td><td>offline-replay the receipt chain</td></tr>
+ <tr><td><code>POST</code></td><td><code>/v1/loop/try</code></td><td>anonymous demo of the capture receipt envelope</td></tr>
+ </tbody>
+ </table>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>One-config-change for existing SDKs</h2>
-  <p class="lede">Point your existing OpenAI / Anthropic / OpenRouter SDK at <code>kolm.ai</code> (or the local daemon) and every call gets captured, redacted, costed, and event-store&shy;d &mdash; no code changes. Drop these two env vars into your shell and your SDK keeps working.</p>
-  <pre class="terminal"><span class="mute"># Hosted (cloud capture, signed receipts):</span>
+ <h2>One-config-change for existing SDKs</h2>
+ <p class="lede">Point your existing OpenAI / Anthropic / OpenRouter SDK at <code>kolm.ai</code> (or the local daemon) and every call gets captured, redacted, costed, and event-store&shy;d &mdash; no code changes. Drop these two env vars into your shell and your SDK keeps working.</p>
+ <pre class="terminal"><span class="mute"># Hosted (cloud capture, signed receipts):</span>
 <b>$</b> export OPENAI_BASE_URL=https://kolm.ai/v1
 <b>$</b> export ANTHROPIC_BASE_URL=https://kolm.ai
 
@@ -176,23 +179,23 @@ x-kolm-capture-id: cap_018a3e...</span>
 
 <span class="mute"># Now your existing OpenAI / Anthropic / OpenRouter code just works:</span>
 <b>$</b> python -c &quot;from openai import OpenAI; print(OpenAI().chat.completions.create(model='gpt-4o-mini', messages=[{'role':'user','content':'hi'}]).choices[0].message.content)&quot;</pre>
-  <p class="lede" style="margin-top:18px">Surface covered (server <em>and</em> daemon, same envelope): <code>/v1/chat/completions</code>, <code>/v1/responses</code>, <code>/v1/embeddings</code>, <code>/v1/audio/transcriptions</code>, <code>/v1/audio/speech</code>, <code>/v1/messages</code> (Anthropic), <code>/v1/openrouter/v1/chat/completions</code> (with <code>HTTP-Referer</code> + <code>X-Title</code>), <code>GET /v1/models</code>. Every call emits a canonical event row in your lake.</p>
+ <p class="lede" style="margin-top:18px">Surface covered (server <em>and</em> daemon, same envelope): <code>/v1/chat/completions</code>, <code>/v1/responses</code>, <code>/v1/embeddings</code>, <code>/v1/audio/transcriptions</code>, <code>/v1/audio/speech</code>, <code>/v1/messages</code> (Anthropic), <code>/v1/openrouter/v1/chat/completions</code> (with <code>HTTP-Referer</code> + <code>X-Title</code>), <code>GET /v1/models</code>. Every call emits a canonical event row in your lake.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>The other quickstarts</h2>
-  <p class="lede">Same five-step value loop, different surface.</p>
-  <div class="related">
-    <a href="/quickstart/cli"><b>CLI quickstart &rarr;</b><span>Five terminal commands. No web UI, no SaaS handoff.</span></a>
-    <a href="/quickstart/sdk"><b>SDK quickstart &rarr;</b><span>Native TypeScript and Python bindings. Drop-in for the OpenAI SDK.</span></a>
-    <a href="/quickstart/embed"><b>Embed quickstart &rarr;</b><span>Ship a signed .kolm inside another product.</span></a>
-  </div>
+ <h2>The other quickstarts</h2>
+ <p class="lede">Same five-step value loop, different surface.</p>
+ <div class="related">
+ <a href="/quickstart/cli"><b>CLI quickstart &rarr;</b><span>Five terminal commands. No web UI, no SaaS handoff.</span></a>
+ <a href="/quickstart/sdk"><b>SDK quickstart &rarr;</b><span>Native TypeScript and Python bindings. Drop-in for the OpenAI SDK.</span></a>
+ <a href="/quickstart/embed"><b>Embed quickstart &rarr;</b><span>Ship a signed .kolm inside another product.</span></a>
+ </div>
 </div></section>
 
 </main>
 
 <footer><div class="wrap">
-  <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
 </div></footer>
 </body>
 </html>

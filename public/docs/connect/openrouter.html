@@ -9,15 +9,15 @@
 <meta name="description" content="Wire OpenRouter through the kolm.ai local proxy. One key, 100+ upstream models, OpenAI-compatible wire format. Streaming preserved.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Connect OpenRouter &middot; kolm.ai">
+<meta property="og:title" content="Connect OpenRouter · kolm.ai">
 <meta property="og:description" content="Wire OpenRouter through the kolm.ai local proxy. One key, 100+ upstream models, OpenAI-compatible wire format. Streaming preserved.">
-<meta property="og:type" content="article">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/connect/openrouter">
-<meta property="og:image" content="https://kolm.ai/og/docs-connect-openrouter.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Connect OpenRouter &middot; kolm.ai">
+<meta name="twitter:title" content="Connect OpenRouter · kolm.ai">
 <meta name="twitter:description" content="Wire OpenRouter through the kolm.ai local proxy. One key, 100+ upstream models, OpenAI-compatible wire format. Streaming preserved.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-connect-openrouter.svg">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/connect/openrouter">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Connect OpenRouter","description":"Wire OpenRouter through the kolm.ai local proxy. One key, 100+ upstream models, OpenAI-compatible wire format. Streaming preserved.","url":"https://kolm.ai/docs/connect/openrouter","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -99,18 +100,18 @@ kolm connect start --upstream openrouter</code></pre>
 client = OpenAI(base_url="http://127.0.0.1:8787/v1")
 
 r = client.chat.completions.create(
-    model="anthropic/claude-haiku-4-5",
-    extra_headers={"HTTP-Referer": "https://your.app", "X-Title": "your-app"},
-    messages=[{"role": "user", "content": "Compare cosmic ray flux at LEO vs GEO."}],
+ model="anthropic/claude-haiku-4-5",
+ extra_headers={"HTTP-Referer": "https://your.app", "X-Title": "your-app"},
+ messages=[{"role": "user", "content": "Compare cosmic ray flux at LEO vs GEO."}],
 )
 print(r.choices[0].message.content)</code></pre>
 
 <h2 id="routing">Routing across providers</h2>
 <p>OpenRouter lets you fall back across providers per-call. The proxy captures the <em>final</em> resolved provider in the <code>upstream_provider</code> lake field so you can attribute cost correctly.</p>
 <pre><code>r = client.chat.completions.create(
-    model="qwen/qwen-3.5-32b-instruct",
-    extra_body={"route": "fallback", "models": ["qwen/qwen-3.5-32b-instruct", "meta-llama/llama-3.3-70b-instruct"]},
-    messages=[{"role": "user", "content": "List five MMU TLB miss causes."}],
+ model="qwen/qwen-3.5-32b-instruct",
+ extra_body={"route": "fallback", "models": ["qwen/qwen-3.5-32b-instruct", "meta-llama/llama-3.3-70b-instruct"]},
+ messages=[{"role": "user", "content": "List five MMU TLB miss causes."}],
 )</code></pre>
 
 <h2 id="cost">Cost tracking</h2>
@@ -121,15 +122,15 @@ print(r.choices[0].message.content)</code></pre>
 <p>Read <a href="/docs/lake">the lake schema</a> for the full 35-field row and <a href="/docs/optimizer">optimizer</a> for what to do with the data. Start from <a href="/docs/quickstart">/docs/quickstart</a> if you have not installed the CLI yet.</p>
 
 <div class="related">
-  <a href="/docs/connect/openai"><b>OpenAI &rarr;</b><span>Same proxy, native OpenAI /v1 surface.</span></a>
-  <a href="/docs/connect/anthropic"><b>Anthropic &rarr;</b><span>Same proxy, /v1/messages surface.</span></a>
-  <a href="/docs/connect/gemini"><b>Gemini &rarr;</b><span>Google AI Studio OpenAI-compat endpoint.</span></a>
+ <a href="/docs/connect/openai"><b>OpenAI &rarr;</b><span>Same proxy, native OpenAI /v1 surface.</span></a>
+ <a href="/docs/connect/anthropic"><b>Anthropic &rarr;</b><span>Same proxy, /v1/messages surface.</span></a>
+ <a href="/docs/connect/gemini"><b>Gemini &rarr;</b><span>Google AI Studio OpenAI-compat endpoint.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

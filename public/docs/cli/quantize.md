@@ -14,7 +14,7 @@ kolm quantize --local-worker --doctor
 ## Flags
 
 - `--local-worker` required flag. Today the verb only runs against the local
-  worker; the bare verb prints scaffolding instructions.
+ worker; the bare verb prints scaffolding instructions.
 - `--method <m>` one of `int4`, `int8`, `gptq`, `awq`. Default: `int4`.
 - `--in <dir>` source model checkpoint directory.
 - `--out <dir>` destination directory for quantized weights.
@@ -47,7 +47,7 @@ multiple points.
 ## See also
 
 - `kolm compile --spec <file>` to wrap the quantized weights in a signed
-  `.kolm` artifact.
+ `.kolm` artifact.
 - `kolm verify <artifact>.kolm` to confirm the receipt chain.
 - `/spec/rs-1` for the manifest fields that record the quantization method
-  and the source-checkpoint hash.
+ and the source-checkpoint hash.

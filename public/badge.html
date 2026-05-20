@@ -8,8 +8,8 @@
 <meta name="description" content="Copy-paste a Made with .kolm badge into your README or product. Markdown, HTML, and SVG variants. No tracker, no JS, no remote dependency.">
 <link rel="canonical" href="https://kolm.ai/badge">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Made with .kolm - embed badge">
-<meta property="og:description" content="A small, signed-bytes badge for projects that ship a verifiable .kolm artifact.">
+<meta property="og:title" content="Made with .kolm - embed badge | Kolmogorov · kolm.ai">
+<meta property="og:description" content="Copy-paste a Made with .kolm badge into your README or product. Markdown, HTML, and SVG variants. No tracker, no JS, no remote dependency.">
 <meta property="og:url" content="https://kolm.ai/badge">
 <meta name="theme-color" content="#08090c" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#faf2e1" media="(prefers-color-scheme: light)">
@@ -17,220 +17,225 @@
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <style>
-  body { background: var(--bg, #08090c); color: var(--fg, #faf2e1); font-family: var(--sans, system-ui); margin: 0; }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 0 32px; }
-  header.site { border-bottom: 1px solid var(--line); padding: 22px 0; }
-  header.site .wrap { display: flex; align-items: center; justify-content: space-between; max-width: 1180px; }
-  header.site .brand { font-family: var(--mono, ui-monospace); font-weight: 600; letter-spacing: -0.01em; color: var(--fg); text-decoration: none; font-size: 17px; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute, #b5bdb1); text-decoration: none; font-size: 14px; }
-  header.site nav a:hover { color: var(--fg); }
-  header.site nav a.cta { color: var(--accent, #7ef0d2); font-weight: 500; }
-  .hero { padding: 80px 0 48px; border-bottom: 1px solid var(--line); }
-  .eyebrow { font-family: var(--mono); font-size: 12px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 16px; }
-  h1 { font-size: 42px; line-height: 1.15; letter-spacing: -0.025em; margin: 0 0 18px; font-weight: 500; }
-  .lede { font-size: 18px; line-height: 1.55; color: var(--ink-mute); max-width: 640px; margin: 0; }
-  section { padding: 56px 0; border-bottom: 1px solid var(--line); }
-  h2 { font-size: 24px; letter-spacing: -0.015em; margin: 0 0 8px; font-weight: 500; }
-  h3 { font-size: 16px; font-family: var(--mono); color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.05em; margin: 28px 0 10px; font-weight: 500; }
-  p { line-height: 1.6; color: var(--ink-mute); margin: 0 0 14px; }
-  .preview { display: flex; gap: 14px; align-items: center; padding: 22px 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); margin: 16px 0 24px; }
-  .preview .pv-img { display: inline-flex; align-items: center; gap: 10px; padding: 6px 12px; background: #0a0c10; border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 12.5px; color: var(--fg); text-decoration: none; }
-  .preview .pv-img .pv-dot { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 6px rgba(126,240,210,0.6); }
-  .preview .pv-img b { color: var(--accent, #7ef0d2); font-weight: 500; }
-  .preview .pv-note { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
-  pre.snippet { background: var(--bg-2, #11151b); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.55; color: var(--fg); margin: 0 0 24px; }
-  pre.snippet code { color: inherit; background: transparent; }
-  .tag { display: inline-block; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); padding: 2px 8px; border: 1px solid var(--line); border-radius: 4px; margin-left: 10px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; }
-  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
-  @media (max-width: 720px) { .rules { grid-template-columns: 1fr; } h1 { font-size: 32px; } }
-  .rule { padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-2); }
-  .rule b { display: block; color: var(--fg); margin-bottom: 4px; font-weight: 500; font-size: 14px; }
-  .rule span { font-size: 13px; color: var(--ink-mute); line-height: 1.5; }
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); }
-  .footer-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px; margin-bottom: 40px; }
-  @media (max-width: 880px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
-  .footer-grid h4 { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 14px; font-weight: 500; }
-  .footer-grid a { display: block; color: var(--ink-mute); text-decoration: none; font-size: 13.5px; margin-bottom: 8px; }
-  .footer-grid a:hover { color: var(--fg); }
-  .footer-tag { padding-top: 22px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); display: flex; justify-content: space-between; align-items: center; }
-  @media (max-width: 720px) { .footer-tag { flex-direction: column; gap: 10px; align-items: flex-start; } }
+ body { background: var(--bg, #08090c); color: var(--fg, #faf2e1); font-family: var(--sans, system-ui); margin: 0; }
+ .wrap { max-width: 880px; margin: 0 auto; padding: 0 32px; }
+ header.site { border-bottom: 1px solid var(--line); padding: 22px 0; }
+ header.site .wrap { display: flex; align-items: center; justify-content: space-between; max-width: 1180px; }
+ header.site .brand { font-family: var(--mono, ui-monospace); font-weight: 600; letter-spacing: -0.01em; color: var(--fg); text-decoration: none; font-size: 17px; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute, #b5bdb1); text-decoration: none; font-size: 14px; }
+ header.site nav a:hover { color: var(--fg); }
+ header.site nav a.cta { color: var(--accent, #7ef0d2); font-weight: 500; }
+ .hero { padding: 80px 0 48px; border-bottom: 1px solid var(--line); }
+ .eyebrow { font-family: var(--mono); font-size: 12px; color: var(--ink-faint, #737c73); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 16px; }
+ h1 { font-size: 42px; line-height: 1.15; letter-spacing: -0.025em; margin: 0 0 18px; font-weight: 500; }
+ .lede { font-size: 18px; line-height: 1.55; color: var(--ink-mute); max-width: 640px; margin: 0; }
+ section { padding: 56px 0; border-bottom: 1px solid var(--line); }
+ h2 { font-size: 24px; letter-spacing: -0.015em; margin: 0 0 8px; font-weight: 500; }
+ h3 { font-size: 16px; font-family: var(--mono); color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.05em; margin: 28px 0 10px; font-weight: 500; }
+ p { line-height: 1.6; color: var(--ink-mute); margin: 0 0 14px; }
+ .preview { display: flex; gap: 14px; align-items: center; padding: 22px 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-2, #11151b); margin: 16px 0 24px; }
+ .preview .pv-img { display: inline-flex; align-items: center; gap: 10px; padding: 6px 12px; background: #0a0c10; border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 12.5px; color: var(--fg); text-decoration: none; }
+ .preview .pv-img .pv-dot { width: 7px; height: 7px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 6px rgba(126,240,210,0.6); }
+ .preview .pv-img b { color: var(--accent, #7ef0d2); font-weight: 500; }
+ .preview .pv-note { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+ pre.snippet { background: var(--bg-2, #11151b); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.55; color: var(--fg); margin: 0 0 24px; }
+ pre.snippet code { color: inherit; background: transparent; }
+ .tag { display: inline-block; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); padding: 2px 8px; border: 1px solid var(--line); border-radius: 4px; margin-left: 10px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; }
+ .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+ @media (max-width: 720px) { .rules { grid-template-columns: 1fr; } h1 { font-size: 32px; } }
+ .rule { padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-2); }
+ .rule b { display: block; color: var(--fg); margin-bottom: 4px; font-weight: 500; font-size: 14px; }
+ .rule span { font-size: 13px; color: var(--ink-mute); line-height: 1.5; }
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); }
+ .footer-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px; margin-bottom: 40px; }
+ @media (max-width: 880px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
+ .footer-grid h4 { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 14px; font-weight: 500; }
+ .footer-grid a { display: block; color: var(--ink-mute); text-decoration: none; font-size: 13.5px; margin-bottom: 8px; }
+ .footer-grid a:hover { color: var(--fg); }
+ .footer-tag { padding-top: 22px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); display: flex; justify-content: space-between; align-items: center; }
+ @media (max-width: 720px) { .footer-tag { flex-direction: column; gap: 10px; align-items: flex-start; } }
 </style>
-  <meta property="og:image" content="https://kolm.ai/og/badge.svg">
+ <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/badge",
-  "description": "Copy-paste a Made with .kolm badge into your README or product. Markdown, HTML, and SVG variants. No tracker, no JS, no remote dependency.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/badge",
+ "description": "Copy-paste a Made with .kolm badge into your README or product. Markdown, HTML, and SVG variants. No tracker, no JS, no remote dependency.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Made with .kolm - embed badge | Kolmogorov · kolm.ai">
+<meta name="twitter:description" content="Copy-paste a Made with .kolm badge into your README or product. Markdown, HTML, and SVG variants. No tracker, no JS, no remote dependency.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap">
-    <a class="brand" href="/">kolm.ai</a>
-    <nav>
-      <a href="/use-cases">Use cases</a>
-      <a href="/docs">Docs</a>
-      <a href="/research">Research</a>
-      <a href="/enterprise">Enterprise</a>
-      <a href="/pricing">Pricing</a>
-      <a class="cta" href="/signup">Get API key -&gt;</a>
-    </nav>
-  </div>
+ <div class="wrap">
+ <a class="brand" href="/">kolm.ai</a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ <a class="cta" href="/signup">Get API key -&gt;</a>
+ </nav>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <p class="eyebrow">Embed</p>
-    <h1>Made with .kolm</h1>
-    <p class="lede">A small badge for projects that ship a verifiable .kolm artifact. Drop it into a README, a docs page, or your own product. No tracker, no JS, no remote dependency. The badge is a static SVG hosted alongside the rest of the site, and an anchor link to where readers can verify the artifact CID.</p>
-  </div>
+ <div class="wrap">
+ <p class="eyebrow">Embed</p>
+ <h1>Made with .kolm</h1>
+ <p class="lede">A small badge for projects that ship a verifiable .kolm artifact. Drop it into a README, a docs page, or your own product. No tracker, no JS, no remote dependency. The badge is a static SVG hosted alongside the rest of the site, and an anchor link to where readers can verify the artifact CID.</p>
+ </div>
 </section>
 
 <section>
-  <div class="wrap">
-    <h2>Live preview</h2>
-    <p>Hover the badge to see the destination. The link points to a verify page where the reader can check the artifact CID, K-score, and HMAC chain.</p>
-    <div class="preview">
-      <a class="pv-img" href="/verify-prod" rel="noopener">
-        <span class="pv-dot"></span>
-        Made with <b>.kolm</b>
-      </a>
-      <span class="pv-note">14 KB SVG - or 9 chars in plain text - readers click to verify</span>
-    </div>
-  </div>
+ <div class="wrap">
+ <h2>Live preview</h2>
+ <p>Hover the badge to see the destination. The link points to a verify page where the reader can check the artifact CID, eval score, and Ed25519 receipt chain.</p>
+ <div class="preview">
+ <a class="pv-img" href="/verify-prod" rel="noopener">
+ <span class="pv-dot"></span>
+ Made with <b>.kolm</b>
+ </a>
+ <span class="pv-note">14 KB SVG - or 9 chars in plain text - readers click to verify</span>
+ </div>
+ </div>
 </section>
 
 <section>
-  <div class="wrap">
-    <h2>Markdown <span class="tag">README</span></h2>
-    <p>For GitHub READMEs and any markdown-rendered surface. The image is a static SVG; the link can point to your own verify URL or to kolm.ai/verify-prod.</p>
-    <pre class="snippet"><code>[![Made with .kolm](https://kolm.ai/badge.svg)](https://kolm.ai/verify-prod)</code></pre>
+ <div class="wrap">
+ <h2>Markdown <span class="tag">README</span></h2>
+ <p>For GitHub READMEs and any markdown-rendered surface. The image is a static SVG; the link can point to your own verify URL or to kolm.ai/verify-prod.</p>
+ <pre class="snippet"><code>[![Made with .kolm](https://kolm.ai/badge.svg)](https://kolm.ai/verify-prod)</code></pre>
 
-    <h3>With your own artifact CID</h3>
-    <pre class="snippet"><code>[![Made with .kolm](https://kolm.ai/badge.svg)](https://kolm.ai/r/cidv1:sha256:7c0a3f...)</code></pre>
+ <h3>With your own artifact CID</h3>
+ <pre class="snippet"><code>[![Made with .kolm](https://kolm.ai/badge.svg)](https://kolm.ai/r/cidv1:sha256:7c0a3f...)</code></pre>
 
-    <h2 style="margin-top:48px">HTML <span class="tag">website / product</span></h2>
-    <p>For any HTML surface - product footer, marketing page, doc site. Same SVG, plain anchor. The badge is unstyled by default so you can wrap it in whatever shell matches your site.</p>
-    <pre class="snippet"><code>&lt;a href="https://kolm.ai/verify-prod" rel="noopener"&gt;
-  &lt;img src="https://kolm.ai/badge.svg" alt="Made with .kolm" width="118" height="22"&gt;
+ <h2 style="margin-top:48px">HTML <span class="tag">website / product</span></h2>
+ <p>For any HTML surface - product footer, marketing page, doc site. Same SVG, plain anchor. The badge is unstyled by default so you can wrap it in whatever shell matches your site.</p>
+ <pre class="snippet"><code>&lt;a href="https://kolm.ai/verify-prod" rel="noopener"&gt;
+ &lt;img src="https://kolm.ai/badge.svg" alt="Made with .kolm" width="118" height="22"&gt;
 &lt;/a&gt;</code></pre>
 
-    <h3>Inline text-only variant</h3>
-    <p>Lighter footprint - no image fetch, scales perfectly. Use this when you care about zero remote dependencies.</p>
-    <pre class="snippet"><code>&lt;a href="https://kolm.ai/verify-prod" style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#7ef0d2;text-decoration:none;border:1px solid #1f262f;padding:4px 10px;border-radius:6px"&gt;
-  &#x2022; Made with .kolm
+ <h3>Inline text-only variant</h3>
+ <p>Lighter footprint - no image fetch, scales perfectly. Use this when you care about zero remote dependencies.</p>
+ <pre class="snippet"><code>&lt;a href="https://kolm.ai/verify-prod" style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#7ef0d2;text-decoration:none;border:1px solid #1f262f;padding:4px 10px;border-radius:6px"&gt;
+ &#x2022; Made with .kolm
 &lt;/a&gt;</code></pre>
 
-    <h2 style="margin-top:48px">SVG source <span class="tag">self-host</span></h2>
-    <p>If you'd rather host the SVG yourself - no remote fetch, no kolm.ai dependency at all - copy the source below into your repo and serve it from your own origin. The badge ships under the same Apache-2.0 license as the rest of kolm.</p>
-    <pre class="snippet"><code>&lt;svg xmlns="http://www.w3.org/2000/svg" width="118" height="22" viewBox="0 0 118 22"&gt;
-  &lt;rect width="118" height="22" rx="4" fill="#0a0c10" stroke="#1f262f"/&gt;
-  &lt;circle cx="10" cy="11" r="3" fill="#7ef0d2"/&gt;
-  &lt;text x="22" y="15" font-family="ui-monospace,Menlo,monospace" font-size="11" fill="#faf2e1"&gt;Made with &lt;tspan fill="#7ef0d2"&gt;.kolm&lt;/tspan&gt;&lt;/text&gt;
+ <h2 style="margin-top:48px">SVG source <span class="tag">self-host</span></h2>
+ <p>If you'd rather host the SVG yourself - no remote fetch, no kolm.ai dependency at all - copy the source below into your repo and serve it from your own origin. The badge ships under the same Apache-2.0 license as the rest of kolm.</p>
+ <pre class="snippet"><code>&lt;svg xmlns="http://www.w3.org/2000/svg" width="118" height="22" viewBox="0 0 118 22"&gt;
+ &lt;rect width="118" height="22" rx="4" fill="#0a0c10" stroke="#1f262f"/&gt;
+ &lt;circle cx="10" cy="11" r="3" fill="#7ef0d2"/&gt;
+ &lt;text x="22" y="15" font-family="ui-monospace,Menlo,monospace" font-size="11" fill="#faf2e1"&gt;Made with &lt;tspan fill="#7ef0d2"&gt;.kolm&lt;/tspan&gt;&lt;/text&gt;
 &lt;/svg&gt;</code></pre>
-  </div>
+ </div>
 </section>
 
 <section>
-  <div class="wrap">
-    <h2>Badge rules</h2>
-    <p>Use the badge on projects that genuinely ship a .kolm artifact. We don't moderate this; it's an honor system backed by the fact that any reader can click the badge and verify the CID exists.</p>
-    <div class="rules">
-      <div class="rule">
-        <b>OK</b>
-        <span>Your project ships a .kolm artifact, a manifest with a CID, and signed receipts. The badge points at your verify URL.</span>
-      </div>
-      <div class="rule">
-        <b>OK</b>
-        <span>You use kolm internally as a tool and want to credit upstream. The badge points at /verify-prod where readers can verify any .kolm.</span>
-      </div>
-      <div class="rule">
-        <b>Not OK</b>
-        <span>Implying kolm endorses you, a partnership, or any specific tier of support. We don't pre-screen badge usage.</span>
-      </div>
-      <div class="rule">
-        <b>Not OK</b>
-        <span>Modifying the badge to imply a different product, a fork, or a vendor name. Self-host the SVG and rename if you fork.</span>
-      </div>
-    </div>
-  </div>
+ <div class="wrap">
+ <h2>Badge rules</h2>
+ <p>Use the badge on projects that genuinely ship a .kolm artifact. We don't moderate this; it's an honor system backed by the fact that any reader can click the badge and verify the CID exists.</p>
+ <div class="rules">
+ <div class="rule">
+ <b>OK</b>
+ <span>Your project ships a .kolm artifact, a manifest with a CID, and signed receipts. The badge points at your verify URL.</span>
+ </div>
+ <div class="rule">
+ <b>OK</b>
+ <span>You use kolm internally as a tool and want to credit upstream. The badge points at /verify-prod where readers can verify any .kolm.</span>
+ </div>
+ <div class="rule">
+ <b>Not OK</b>
+ <span>Implying kolm endorses you, a partnership, or any specific tier of support. We don't pre-screen badge usage.</span>
+ </div>
+ <div class="rule">
+ <b>Not OK</b>
+ <span>Modifying the badge to imply a different product, a fork, or a vendor name. Self-host the SVG and rename if you fork.</span>
+ </div>
+ </div>
+ </div>
 </section>
 
 <section>
-  <div class="wrap">
-    <h2>Why we publish this</h2>
-    <p>Most "made with" badges advertise the tool. This one advertises the artifact. A reader who clicks it can verify what was actually shipped - the CID, the K-score, the HMAC chain - against a public registry, without trusting either the project or kolm. That is the only kind of badge worth embedding on a serious project.</p>
-    <p>The SVG is 14 KB. There is no tracker, no analytics beacon, no callback. The image is served from a static CDN edge that doesn't log or correlate referrers. Embed freely.</p>
-  </div>
+ <div class="wrap">
+ <h2>Why we publish this</h2>
+ <p>Most "made with" badges advertise the tool. This one advertises the artifact. A reader who clicks it can verify what was actually shipped: the CID, the eval score, and the Ed25519 receipt chain against a public registry, without trusting either the project or kolm. That is the only kind of badge worth embedding on a serious project.</p>
+ <p>The SVG is 14 KB. There is no tracker, no analytics beacon, no callback. The image is served from a static CDN edge that doesn't log or correlate referrers. Embed freely.</p>
+ </div>
 </section>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 </body>

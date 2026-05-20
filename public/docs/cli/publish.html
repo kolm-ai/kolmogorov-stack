@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm publish · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm publish CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/publish">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm publish","description":"Reference for the kolm publish CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/publish","mainEntityOfPage":"https://kolm.ai/docs/cli/publish","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm publish · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm publish CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,17 +176,17 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="publish">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>publish</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>publish</span>
 </nav>
 <h1>kolm publish</h1>
 <p>Publish a <code>.kolm</code> artifact to the marketplace or a private registry. The artifact must pass <code>kolm verify</code> before publish is allowed.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm publish &lt;artifact.kolm&gt;                              # default registry
-kolm publish &lt;artifact.kolm&gt; --registry &lt;url&gt;             # private registry
-kolm publish &lt;artifact.kolm&gt; --visibility public          # marketplace listing
-kolm publish &lt;artifact.kolm&gt; --visibility unlisted        # private link
-kolm publish &lt;artifact.kolm&gt; --tag &lt;semver&gt;               # explicit version tag
+kolm publish &lt;artifact.kolm&gt; # default registry
+kolm publish &lt;artifact.kolm&gt; --registry &lt;url&gt; # private registry
+kolm publish &lt;artifact.kolm&gt; --visibility public # marketplace listing
+kolm publish &lt;artifact.kolm&gt; --visibility unlisted # private link
+kolm publish &lt;artifact.kolm&gt; --tag &lt;semver&gt; # explicit version tag
 </code></pre>
 <h2>Pre-publish checks</h2>
 <ol>
@@ -200,13 +204,13 @@ kolm publish &lt;artifact.kolm&gt; --tag &lt;semver&gt;               # explicit
 <li><code>/marketplace</code> to browse public recipes.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

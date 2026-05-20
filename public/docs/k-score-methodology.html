@@ -5,271 +5,272 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>K-score methodology &middot; how every .kolm artifact is scored &middot; kolm</title>
-<meta name="description" content="K-score is K = 0.40A + 0.15S + 0.15L + 0.15C + 0.15V. Accuracy, stability, latency, compliance, verifier. The formal definition, the weights, and why 0.85 is the deploy gate.">
+<title>K-score methodology how every .kolm artifact is scored · kolm.ai</title>
+<meta name="description" content="K-score is K = 0.40A + 0.15S + 0.15L + 0.15C + 0.15V. Accuracy, stability, latency, compliance, verifier. The formal definition, the weights, and why 0.85...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="K-score methodology &middot; kolm">
-<meta property="og:description" content="K = 0.40A + 0.15S + 0.15L + 0.15C + 0.15V. Formal definition, weights, deploy gate.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="K-score methodology how every .kolm artifact is scored · kolm.ai">
+<meta property="og:description" content="K-score is K = 0.40A + 0.15S + 0.15L + 0.15C + 0.15V. Accuracy, stability, latency, compliance, verifier. The formal definition, the weights, and why 0.85...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/k-score-methodology">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="K-score methodology &middot; kolm">
-<meta name="twitter:description" content="K = 0.40A + 0.15S + 0.15L + 0.15C + 0.15V. Formal definition.">
+<meta name="twitter:title" content="K-score methodology how every .kolm artifact is scored · kolm.ai">
+<meta name="twitter:description" content="K-score is K = 0.40A + 0.15S + 0.15L + 0.15C + 0.15V. Accuracy, stability, latency, compliance, verifier. The formal definition, the weights, and why 0.85...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/k-score-methodology">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--line-strong:rgba(236,231,220,0.16);--bg:#0b0d10;--bg-elev:#101316;--bg-card:#13171b;--accent:#10b981;--bad:#ff6b91;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.16);--bg:#fdfcf8;--bg-elev:#ffffff;--bg-card:#f7f4ec;--accent:#059669;--bad:#c53270}
-  body.km{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0;min-height:100vh;display:flex;flex-direction:column}
-  body.km a{color:inherit;text-decoration:none}
-  .wrap{max-width:780px;margin:0 auto;padding:0 24px;width:100%}
-  @media(max-width:560px){.wrap{padding:0 16px}}
-  header.bar{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.bar .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
-  header.bar nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.bar nav a{color:inherit;text-decoration:none}
-  header.bar nav a.cta{color:var(--accent);font-weight:500}
-  header.bar .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  @media(max-width:560px){header.bar nav a:not(.cta){display:none}}
-  .hero{padding:64px 0 28px;border-bottom:1px solid var(--line)}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 14px}
-  @media(max-width:560px){h1{font-size:28px}}
-  .lede{font-size:16.5px;line-height:1.55;color:var(--ink-mute);margin:0;max-width:60ch}
-  section.body{padding:32px 0;border-bottom:1px solid var(--line)}
-  h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
-  h2 .weight{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-left:10px;vertical-align:middle;background:var(--bg-elev);border:1px solid var(--line);padding:3px 8px;border-radius:4px;letter-spacing:0.02em}
-  h3{margin:18px 0 8px;font-size:15.5px;font-weight:500;color:var(--ink)}
-  p{color:var(--ink-mute);margin:0 0 14px}
-  p code,li code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:3px;padding:1px 5px}
-  ul{margin:0 0 14px;padding:0 0 0 22px;color:var(--ink-mute)}
-  ul li{margin:0 0 6px;line-height:1.55}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 14px}
-  .k-big{display:block;margin:18px 0 6px;padding:22px 28px;border:1px solid var(--line-strong);border-radius:12px;background:var(--bg-elev);font-family:var(--mono);font-size:24px;color:var(--ink);text-align:center;letter-spacing:0.01em;font-variant-numeric:tabular-nums}
-  @media(max-width:520px){.k-big{font-size:18px;padding:18px 16px}}
-  .k-big .acc{color:var(--accent)}
-  .formula-sub{text-align:center;font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 18px}
-  .pill-row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
-  .pill-row .pill{font-family:var(--mono);font-size:11px;color:var(--ink-mute);background:var(--bg-elev);border:1px solid var(--line);padding:3px 9px;border-radius:4px}
-  .gate-call{margin:14px 0 0;padding:18px 22px;border:1px solid rgba(16,185,129,0.25);background:rgba(16,185,129,0.04);border-radius:10px}
-  .gate-call .lab{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 8px}
-  .gate-call .v{margin:0;color:var(--ink-mute);font-size:14.5px;line-height:1.6}
-  .gate-call .v b{color:var(--ink);font-weight:500}
-  table.tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0 14px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-  table.tbl th,table.tbl td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line)}
-  table.tbl th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.06em;background:var(--bg-card);font-weight:500}
-  table.tbl td{color:var(--ink-mute)}
-  table.tbl td b{color:var(--ink);font-weight:500}
-  table.tbl td.mono{font-family:var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
-  table.tbl tr:last-child td{border-bottom:0}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--line-strong:rgba(236,231,220,0.16);--bg:#0b0d10;--bg-elev:#101316;--bg-card:#13171b;--accent:#10b981;--bad:#ff6b91;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.16);--bg:#fdfcf8;--bg-elev:#ffffff;--bg-card:#f7f4ec;--accent:#059669;--bad:#c53270}
+ body.km{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0;min-height:100vh;display:flex;flex-direction:column}
+ body.km a{color:inherit;text-decoration:none}
+ .wrap{max-width:780px;margin:0 auto;padding:0 24px;width:100%}
+ @media(max-width:560px){.wrap{padding:0 16px}}
+ header.bar{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.bar .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+ header.bar nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.bar nav a{color:inherit;text-decoration:none}
+ header.bar nav a.cta{color:var(--accent);font-weight:500}
+ header.bar .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ @media(max-width:560px){header.bar nav a:not(.cta){display:none}}
+ .hero{padding:64px 0 28px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 14px}
+ @media(max-width:560px){h1{font-size:28px}}
+ .lede{font-size:16.5px;line-height:1.55;color:var(--ink-mute);margin:0;max-width:60ch}
+ section.body{padding:32px 0;border-bottom:1px solid var(--line)}
+ h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
+ h2 .weight{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-left:10px;vertical-align:middle;background:var(--bg-elev);border:1px solid var(--line);padding:3px 8px;border-radius:4px;letter-spacing:0.02em}
+ h3{margin:18px 0 8px;font-size:15.5px;font-weight:500;color:var(--ink)}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p code,li code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:3px;padding:1px 5px}
+ ul{margin:0 0 14px;padding:0 0 0 22px;color:var(--ink-mute)}
+ ul li{margin:0 0 6px;line-height:1.55}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 14px}
+ .k-big{display:block;margin:18px 0 6px;padding:22px 28px;border:1px solid var(--line-strong);border-radius:12px;background:var(--bg-elev);font-family:var(--mono);font-size:24px;color:var(--ink);text-align:center;letter-spacing:0.01em;font-variant-numeric:tabular-nums}
+ @media(max-width:520px){.k-big{font-size:18px;padding:18px 16px}}
+ .k-big .acc{color:var(--accent)}
+ .formula-sub{text-align:center;font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 18px}
+ .pill-row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+ .pill-row .pill{font-family:var(--mono);font-size:11px;color:var(--ink-mute);background:var(--bg-elev);border:1px solid var(--line);padding:3px 9px;border-radius:4px}
+ .gate-call{margin:14px 0 0;padding:18px 22px;border:1px solid rgba(16,185,129,0.25);background:rgba(16,185,129,0.04);border-radius:10px}
+ .gate-call .lab{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 8px}
+ .gate-call .v{margin:0;color:var(--ink-mute);font-size:14.5px;line-height:1.6}
+ .gate-call .v b{color:var(--ink);font-weight:500}
+ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0 14px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+ table.tbl th,table.tbl td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line)}
+ table.tbl th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.06em;background:var(--bg-card);font-weight:500}
+ table.tbl td{color:var(--ink-mute)}
+ table.tbl td b{color:var(--ink);font-weight:500}
+ table.tbl td.mono{font-family:var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+ table.tbl tr:last-child td{border-bottom:0}
 </style>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "K-score methodology",
-      "description": "K = 0.40A + 0.15S + 0.15L + 0.15C + 0.15V. The formal definition of the K-score gate and what each weight measures.",
-      "url": "https://kolm.ai/docs/k-score-methodology",
-      "datePublished": "2026-05-15",
-      "author": {"@type":"Organization","name":"Kolmogorov"}
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type":"ListItem","position":1,"name":"kolm","item":"https://kolm.ai/"},
-        {"@type":"ListItem","position":2,"name":"Docs","item":"https://kolm.ai/docs"},
-        {"@type":"ListItem","position":3,"name":"K-score methodology","item":"https://kolm.ai/docs/k-score-methodology"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "K-score methodology",
+ "description": "K = 0.40A + 0.15S + 0.15L + 0.15C + 0.15V. The formal definition of the K-score gate and what each weight measures.",
+ "url": "https://kolm.ai/docs/k-score-methodology",
+ "datePublished": "2026-05-15",
+ "author": {"@type":"Organization","name":"Kolmogorov"}
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type":"ListItem","position":1,"name":"kolm","item":"https://kolm.ai/"},
+ {"@type":"ListItem","position":2,"name":"Docs","item":"https://kolm.ai/docs"},
+ {"@type":"ListItem","position":3,"name":"K-score methodology","item":"https://kolm.ai/docs/k-score-methodology"}
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body class="km">
 
 <header class="bar">
-  <div class="wrap">
-    <a href="/" class="logo">kolm</a>
-    <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
-  </div>
+ <div class="wrap">
+ <a href="/" class="logo">kolm</a>
+ <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
+ </div>
 </header>
 
 <section class="hero"><div class="wrap">
-  <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/docs">docs</a> &nbsp;/&nbsp; k-score methodology</p>
-  <h1>K-score: how we score every artifact.</h1>
-  <p class="lede"><b>Per-artifact, not per-model.</b> Every <code>.kolm</code> file gets its own K-score from its own frozen eval set; the score gates that artifact's shipping, not the underlying base model. K-score is a five-component weighted score, computed at compile time, replayable at any time from the receipt log. A single number that compresses what an engineering team would otherwise check by hand across five different dashboards. This page is the formal definition.</p>
+ <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/docs">docs</a> &nbsp;/&nbsp; k-score methodology</p>
+ <h1>K-score: how we score every artifact.</h1>
+ <p class="lede"><b>Per-artifact, not per-model.</b> Every <code>.kolm</code> file gets its own K-score from its own frozen eval set; the score gates that artifact's shipping, not the underlying base model. K-score is a five-component weighted score, computed at compile time, replayable at any time from the receipt log. A single number that compresses what an engineering team would otherwise check by hand across five different dashboards. This page is the formal definition.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>The formula</h2>
-  <code class="k-big">K = <span class="acc">0.40</span>&middot;A + <span class="acc">0.15</span>&middot;S + <span class="acc">0.15</span>&middot;L + <span class="acc">0.15</span>&middot;C + <span class="acc">0.15</span>&middot;V</code>
-  <p class="formula-sub">A accuracy &middot; S stability &middot; L latency &middot; C compliance &middot; V verifier</p>
-  <p>Each component is normalized to the range [0, 1]. Weights sum to 1.00, so K is also bounded [0, 1]. The K-score is computed once at compile-time over <i>this artifact's</i> frozen eval set; the components are also recomputed at runtime per inference and emitted on the receipt, so drift over time is observable. Two artifacts with different eval sets cannot be compared by K alone: each one only certifies that <i>that</i> .kolm meets <i>its</i> gate.</p>
+ <h2>The formula</h2>
+ <code class="k-big">K = <span class="acc">0.40</span>&middot;A + <span class="acc">0.15</span>&middot;S + <span class="acc">0.15</span>&middot;L + <span class="acc">0.15</span>&middot;C + <span class="acc">0.15</span>&middot;V</code>
+ <p class="formula-sub">A accuracy &middot; S stability &middot; L latency &middot; C compliance &middot; V verifier</p>
+ <p>Each component is normalized to the range [0, 1]. Weights sum to 1.00, so K is also bounded [0, 1]. The K-score is computed once at compile-time over <i>this artifact's</i> frozen eval set; the components are also recomputed at runtime per inference and emitted on the receipt, so drift over time is observable. Two artifacts with different eval sets cannot be compared by K alone: each one only certifies that <i>that</i> .kolm meets <i>its</i> gate.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>A &middot; Accuracy <span class="weight">0.40 weight</span></h2>
-  <p>A is the artifact's task-specific accuracy on its declared eval set. The eval set is frozen at compile time and its sha256 is recorded in the manifest, so the same A is reproducible months later.</p>
-  <p>Metric depends on the task:</p>
-  <ul>
-    <li><b>Classification</b> (incident triage, ticket priority, BI-RADS) - exact-match accuracy, with per-class F1 published as supplementary.</li>
-    <li><b>Extraction</b> (clause, invoice line-item, action item) - schema-locked F1 across all declared fields. A missing required field counts the same as a wrong value.</li>
-    <li><b>Generation</b> (summarize, rewrite, code review) - BLEU against reference + a constrained verifier-judge cross-check. We publish both numbers, but A uses the verifier-judge agreement rate.</li>
-    <li><b>Redaction</b> (PHI, PII) - precision + recall, both required. A redactor that misses one PHI entity in 100 fails A no matter how many it caught - this is the regulated-task asymmetry.</li>
-  </ul>
-  <p>For benchmark artifacts (like SWE-bench Mini) A is the harness's binary pass/fail per problem, averaged over the suite. <a href="/benchmarks/swe-bench-mini" style="color:var(--accent);border-bottom:1px dashed var(--line)">See SWE-bench Verified Mini results &rarr;</a></p>
+ <h2>A &middot; Accuracy <span class="weight">0.40 weight</span></h2>
+ <p>A is the artifact's task-specific accuracy on its declared eval set. The eval set is frozen at compile time and its sha256 is recorded in the manifest, so the same A is reproducible months later.</p>
+ <p>Metric depends on the task:</p>
+ <ul>
+ <li><b>Classification</b> (incident triage, ticket priority, BI-RADS) - exact-match accuracy, with per-class F1 published as supplementary.</li>
+ <li><b>Extraction</b> (clause, invoice line-item, action item) - schema-locked F1 across all declared fields. A missing required field counts the same as a wrong value.</li>
+ <li><b>Generation</b> (summarize, rewrite, code review) - BLEU against reference + a constrained verifier-judge cross-check. We publish both numbers, but A uses the verifier-judge agreement rate.</li>
+ <li><b>Redaction</b> (PHI, PII) - precision + recall, both required. A redactor that misses one PHI entity in 100 fails A no matter how many it caught - this is the regulated-task asymmetry.</li>
+ </ul>
+ <p>For benchmark artifacts (like SWE-bench Mini) A is the harness's binary pass/fail per problem, averaged over the suite. <a href="/benchmarks/swe-bench-mini" style="color:var(--accent);border-bottom:1px dashed var(--line)">See SWE-bench Verified Mini results &rarr;</a></p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>S &middot; Stability <span class="weight">0.15 weight</span></h2>
-  <p>S measures variance across N=10 reruns of the same eval set with the same seed but different sampler nonces. The motivation: a 0.92 average that comes from runs scoring [0.95, 0.92, 0.89, 0.91, ...] is one artifact; a 0.92 average that comes from [1.0, 0.99, 0.78, 0.91, ...] is a different artifact under regulated load.</p>
-  <p>Normalization: <code>S = 1 - clamp(stdev_over_reruns / 0.50, 0, 1)</code>. Zero variance gives 1.0; a stdev of 0.50 (effectively coin-flip behavior across reruns) collapses to 0. The 0.50 anchor is chosen so a regulated task with stdev &gt; 0.10 starts to take a visible hit.</p>
-  <p>Recorded as <code>k_stability_10x</code> on the receipt. For artifacts deployed in non-determinism-sensitive settings (e.g., financial routing, medical), we recommend the recipe set the K-score gate to require S &gt;= 0.95 in addition to the K threshold.</p>
+ <h2>S &middot; Stability <span class="weight">0.15 weight</span></h2>
+ <p>S measures variance across N=10 reruns of the same eval set with the same seed but different sampler nonces. The motivation: a 0.92 average that comes from runs scoring [0.95, 0.92, 0.89, 0.91, ...] is one artifact; a 0.92 average that comes from [1.0, 0.99, 0.78, 0.91, ...] is a different artifact under regulated load.</p>
+ <p>Normalization: <code>S = 1 - clamp(stdev_over_reruns / 0.50, 0, 1)</code>. Zero variance gives 1.0; a stdev of 0.50 (effectively coin-flip behavior across reruns) collapses to 0. The 0.50 anchor is chosen so a regulated task with stdev &gt; 0.10 starts to take a visible hit.</p>
+ <p>Recorded as <code>k_stability_10x</code> on the receipt. For artifacts deployed in non-determinism-sensitive settings (e.g., financial routing, medical), we recommend the recipe set the K-score gate to require S &gt;= 0.95 in addition to the K threshold.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>L &middot; Latency <span class="weight">0.15 weight</span></h2>
-  <p>L compares observed p95 inference latency against the budget declared in the artifact's recipe. The budget is what the compile job promised the operator at gate time; L measures how often the runtime keeps that promise.</p>
-  <p>Formula:</p>
-<pre>L = 1.0                                  if p95 &lt;= budget
+ <h2>L &middot; Latency <span class="weight">0.15 weight</span></h2>
+ <p>L compares observed p95 inference latency against the budget declared in the artifact's recipe. The budget is what the compile job promised the operator at gate time; L measures how often the runtime keeps that promise.</p>
+ <p>Formula:</p>
+<pre>L = 1.0 if p95 &lt;= budget
 L = exp(-ln(2) &middot; (p95 - budget) / budget) if p95 &gt; budget</pre>
-  <p>Geometric intuition: at budget, L = 1.0. At 2x budget, L = 0.5. At 4x budget, L = 0.25. Past 10x budget L is effectively 0 - the artifact missed its promise hard enough that no other component should save it.</p>
-  <p>p95 is measured over the eval set at compile time and over a rolling 1000-inference window at runtime. The runtime number is what shows up on /dashboard and is what underwriters see in the receipt log.</p>
+ <p>Geometric intuition: at budget, L = 1.0. At 2x budget, L = 0.5. At 4x budget, L = 0.25. Past 10x budget L is effectively 0 - the artifact missed its promise hard enough that no other component should save it.</p>
+ <p>p95 is measured over the eval set at compile time and over a rolling 1000-inference window at runtime. The runtime number is what shows up on /dashboard and is what underwriters see in the receipt log.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>C &middot; Compliance <span class="weight">0.15 weight</span></h2>
-  <p>C is the pass rate over the artifact's compliance pack. A compliance pack is a set of checks declared in the manifest: HIPAA Safe Harbor for PHI redactors, SR 11-7 / OCC model risk for finance routers, NIST AI RMF GenAI Profile for general regulated use, EU AI Act Annex III for high-risk applications, custom checks for narrowly scoped pipelines.</p>
-  <p>Each check is binary; C is the unweighted average. All-pass = 1.0. One check fails = (n-1)/n. Two checks fail = (n-2)/n. The compliance pack itself is included in the .kolm compile so the same check set is replayable at audit time.</p>
-  <p>Examples of what a check looks like:</p>
-  <ul>
-    <li>HIPAA Safe Harbor: scan eval outputs for the 18 PHI identifier types, fail if any match.</li>
-    <li>SR 11-7: confirm the manifest declares a refusal path with a rationale; fail if missing.</li>
-    <li>NIST AI RMF: confirm provenance fields are populated end-to-end; fail if any are blank.</li>
-  </ul>
-  <p>See <a href="/compliance-packs" style="color:var(--accent);border-bottom:1px dashed var(--line)">/compliance-packs</a> for the full pack catalog.</p>
+ <h2>C &middot; Compliance <span class="weight">0.15 weight</span></h2>
+ <p>C is the pass rate over the artifact's compliance pack. A compliance pack is a set of checks declared in the manifest: HIPAA Safe Harbor for PHI redactors, SR 11-7 / OCC model risk for finance routers, NIST AI RMF GenAI Profile for general regulated use, EU AI Act Annex III for high-risk applications, custom checks for narrowly scoped pipelines.</p>
+ <p>Each check is binary; C is the unweighted average. All-pass = 1.0. One check fails = (n-1)/n. Two checks fail = (n-2)/n. The compliance pack itself is included in the .kolm compile so the same check set is replayable at audit time.</p>
+ <p>Examples of what a check looks like:</p>
+ <ul>
+ <li>HIPAA Safe Harbor: scan eval outputs for the 18 PHI identifier types, fail if any match.</li>
+ <li>SR 11-7: confirm the manifest declares a refusal path with a rationale; fail if missing.</li>
+ <li>NIST AI RMF: confirm provenance fields are populated end-to-end; fail if any are blank.</li>
+ </ul>
+ <p>See <a href="/compliance-packs" style="color:var(--accent);border-bottom:1px dashed var(--line)">/compliance-packs</a> for the full pack catalog.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>V &middot; Verifier <span class="weight">0.15 weight</span></h2>
-  <p>V is the agreement rate of the runtime verifier with the agent's output. The verifier is a separate model (usually smaller, constrained-decoded) whose job is to spot-check that the primary output is consistent with the input.</p>
-  <p>For classification, V is the rate at which the verifier model agrees the chosen label is plausible. For extraction, V is the rate at which the verifier model agrees each extracted field is grounded in the input. For generation, V is the rate at which the verifier model judges the output non-hallucinated against the input.</p>
-  <p>Sampling rate at runtime is configurable. Production deploys usually run V at 5-10% (every Nth inference); benchmark runs are typically at 100% for transparency. The recipe declares the target sampling rate, the runtime emits the actual rate on the receipt, and a discrepancy &gt; 1% drops V proportionally to zero.</p>
-  <p>V also incorporates a supply-chain check: every compile runs Trivy and Grype on the artifact's dependency tree and binds the result into <code>manifest.dependencies.cve_audit</code>. If <code>cve_audit.ok</code> is false (Critical CVE present, or High with a patched version available under the default policy), V is forced to 0 regardless of verifier agreement, which is enough on its own to fail the K &gt;= 0.85 gate. See <a href="/docs/cve-in-kscore" style="color:var(--accent);border-bottom:1px dashed var(--line)">cve audit in the k-score &rarr;</a> for the manifest shape and the policy options.</p>
+ <h2>V &middot; Verifier <span class="weight">0.15 weight</span></h2>
+ <p>V is the agreement rate of the runtime verifier with the agent's output. The verifier is a separate model (usually smaller, constrained-decoded) whose job is to spot-check that the primary output is consistent with the input.</p>
+ <p>For classification, V is the rate at which the verifier model agrees the chosen label is plausible. For extraction, V is the rate at which the verifier model agrees each extracted field is grounded in the input. For generation, V is the rate at which the verifier model judges the output non-hallucinated against the input.</p>
+ <p>Sampling rate at runtime is configurable. Production deploys usually run V at 5-10% (every Nth inference); benchmark runs are typically at 100% for transparency. The recipe declares the target sampling rate, the runtime emits the actual rate on the receipt, and a discrepancy &gt; 1% drops V proportionally to zero.</p>
+ <p>V also incorporates a supply-chain check: every compile runs Trivy and Grype on the artifact's dependency tree and binds the result into <code>manifest.dependencies.cve_audit</code>. If <code>cve_audit.ok</code> is false (Critical CVE present, or High with a patched version available under the default policy), V is forced to 0 regardless of verifier agreement, which is enough on its own to fail the K &gt;= 0.85 gate. See <a href="/docs/cve-in-kscore" style="color:var(--accent);border-bottom:1px dashed var(--line)">cve audit in the k-score &rarr;</a> for the manifest shape and the policy options.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>Why these weights</h2>
-  <p>Accuracy dominates at 0.40 because, in practice, an artifact with strong stability and latency but weak accuracy is useless - the operator pays for nothing. We considered 0.50 for A but pulled back; over-weighting A would let teams game the score by burning latency budget to crank one more accuracy point. 0.40 keeps A primary without making it everything.</p>
-  <p>S, L, C, V split the remaining 0.60 evenly at 0.15 each because we have not seen evidence that one of those four matters strictly more than the others. S matters most in regulated settings; L matters most in latency-sensitive settings; C matters most in audited settings; V matters most in safety-sensitive settings. Equal weights let the recipe author tune via the K-score gate threshold instead of the weights themselves.</p>
-  <p>Weights are versioned (currently K-score v1.0, attribute on receipts as <code>k_score_version: "1.0"</code>). If we change weights, the old receipts continue to validate against the old version - we never silently re-score history.</p>
+ <h2>Why these weights</h2>
+ <p>Accuracy dominates at 0.40 because, in practice, an artifact with strong stability and latency but weak accuracy is useless - the operator pays for nothing. We considered 0.50 for A but pulled back; over-weighting A would let teams game the score by burning latency budget to crank one more accuracy point. 0.40 keeps A primary without making it everything.</p>
+ <p>S, L, C, V split the remaining 0.60 evenly at 0.15 each because we have not seen evidence that one of those four matters strictly more than the others. S matters most in regulated settings; L matters most in latency-sensitive settings; C matters most in audited settings; V matters most in safety-sensitive settings. Equal weights let the recipe author tune via the K-score gate threshold instead of the weights themselves.</p>
+ <p>Weights are versioned (currently K-score v1.0, attribute on receipts as <code>k_score_version: "1.0"</code>). If we change weights, the old receipts continue to validate against the old version - we never silently re-score history.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>Why K &gt;= 0.85 is the deploy gate</h2>
-  <div class="gate-call">
-    <p class="lab">the gate</p>
-    <p class="v"><b>0.85</b> is the public registry minimum. <b>0.92</b> is the kolm-team Featured tier. <b>0.95+</b> is the bar we recommend for any artifact behind a regulated decision (medical, financial, legal, defense).</p>
-  </div>
-  <p>0.85 is the threshold below which we've observed an artifact reliably fails some component badly enough that even strong values elsewhere can't save the operator from a bad week. Concretely: at K = 0.85 you can be one weak component (say C = 0.4 because compliance pack is half-failing) or two moderately weak components (say S = 0.65 and L = 0.65), but you can't be three components below 0.7. The arithmetic forces a floor across the dimensions an operator cares about.</p>
-  <p>The CLI rejects compile jobs below K = 0.85 by default; that floor can be lowered with <code>--k-min</code>, but the artifact is then flagged in its manifest, the registry lists it under "Experimental" rather than the public grid, and the dashboard surfaces a warning every time it runs.</p>
+ <h2>Why K &gt;= 0.85 is the deploy gate</h2>
+ <div class="gate-call">
+ <p class="lab">the gate</p>
+ <p class="v"><b>0.85</b> is the public registry minimum. <b>0.92</b> is the kolm-team Featured tier. <b>0.95+</b> is the bar we recommend for any artifact behind a regulated decision (medical, financial, legal, defense).</p>
+ </div>
+ <p>0.85 is the threshold below which we've observed an artifact reliably fails some component badly enough that even strong values elsewhere can't save the operator from a bad week. Concretely: at K = 0.85 you can be one weak component (say C = 0.4 because compliance pack is half-failing) or two moderately weak components (say S = 0.65 and L = 0.65), but you can't be three components below 0.7. The arithmetic forces a floor across the dimensions an operator cares about.</p>
+ <p>The CLI rejects compile jobs below K = 0.85 by default; that floor can be lowered with <code>--k-min</code>, but the artifact is then flagged in its manifest, the registry lists it under "Experimental" rather than the public grid, and the dashboard surfaces a warning every time it runs.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>Threshold customization</h2>
-  <p>Most teams tighten the threshold past the default. Examples:</p>
-  <table class="tbl">
-    <thead><tr><th>scenario</th><th>recommended</th><th>flag</th></tr></thead>
-    <tbody>
-      <tr><td><b>experimental / research</b></td><td class="mono">0.70</td><td class="mono">--k-min=0.70</td></tr>
-      <tr><td><b>default (public registry)</b></td><td class="mono">0.85</td><td class="mono">--k-min=0.85</td></tr>
-      <tr><td><b>regulated production</b></td><td class="mono">0.90</td><td class="mono">--k-min=0.90</td></tr>
-      <tr><td><b>safety-critical</b></td><td class="mono">0.95</td><td class="mono">--k-min=0.95</td></tr>
-    </tbody>
-  </table>
+ <h2>Threshold customization</h2>
+ <p>Most teams tighten the threshold past the default. Examples:</p>
+ <table class="tbl">
+ <thead><tr><th>scenario</th><th>recommended</th><th>flag</th></tr></thead>
+ <tbody>
+ <tr><td><b>experimental / research</b></td><td class="mono">0.70</td><td class="mono">--k-min=0.70</td></tr>
+ <tr><td><b>default (public registry)</b></td><td class="mono">0.85</td><td class="mono">--k-min=0.85</td></tr>
+ <tr><td><b>regulated production</b></td><td class="mono">0.90</td><td class="mono">--k-min=0.90</td></tr>
+ <tr><td><b>safety-critical</b></td><td class="mono">0.95</td><td class="mono">--k-min=0.95</td></tr>
+ </tbody>
+ </table>
 <pre>kolm compile recipes/phi-redactor.yaml \
-  --base llama-3.1-8b \
-  --k-min=0.90 \
-  --gate-stability=0.95 \
-  --gate-latency-budget=200ms</pre>
-  <p>Per-component gates (<code>--gate-stability</code>, <code>--gate-latency-budget</code>, etc.) are additive on top of the K threshold - they let you require, e.g., K &gt;= 0.90 AND S &gt;= 0.95 even when a stronger A could otherwise carry the K average. This is what we recommend for any artifact whose failure mode is "rare but expensive."</p>
-  <p style="color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);margin:0 0 12px"><code>--k-min</code>, <code>--gate-stability</code>, <code>--gate-latency-budget</code> are shipped flags. <code>kolm compile --help</code> prints the full flag list on the CLI you have installed.</p>
-  <p>The K-score gate, the per-component gates, and the K-score version are all written into the manifest and signed at compile time. <code> kolm inspect</code> replays the gate at audit time and confirms the artifact passed the gate it claimed. See also <a href="/frozen-eval" style="color:var(--accent);border-bottom:1px dashed var(--line)">/frozen-eval</a> for how the eval set hash is bound into the receipt chain, and <a href="/k-score-explained" style="color:var(--accent);border-bottom:1px dashed var(--line)">/k-score-explained</a> for the prose walk-through.</p>
+ --base llama-3.1-8b \
+ --k-min=0.90 \
+ --gate-stability=0.95 \
+ --gate-latency-budget=200ms</pre>
+ <p>Per-component gates (<code>--gate-stability</code>, <code>--gate-latency-budget</code>, etc.) are additive on top of the K threshold - they let you require, e.g., K &gt;= 0.90 AND S &gt;= 0.95 even when a stronger A could otherwise carry the K average. This is what we recommend for any artifact whose failure mode is "rare but expensive."</p>
+ <p style="color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);margin:0 0 12px"><code>--k-min</code>, <code>--gate-stability</code>, <code>--gate-latency-budget</code> are shipped flags. <code>kolm compile --help</code> prints the full flag list on the CLI you have installed.</p>
+ <p>The K-score gate, the per-component gates, and the K-score version are all written into the manifest and signed at compile time. <code> kolm inspect</code> replays the gate at audit time and confirms the artifact passed the gate it claimed. See also <a href="/frozen-eval" style="color:var(--accent);border-bottom:1px dashed var(--line)">/frozen-eval</a> for how the eval set hash is bound into the receipt chain, and <a href="/k-score-explained" style="color:var(--accent);border-bottom:1px dashed var(--line)">/k-score-explained</a> for the prose walk-through.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>Cross-links</h2>
-  <p>Where the K-score fits in the rest of the trust surface:</p>
-  <ul>
-    <li><a href="/k-score-explained" style="color:var(--accent);border-bottom:1px dashed var(--line)">/k-score-explained</a> &middot; prose walk-through of the gate for non-engineers in procurement.</li>
-    <li><a href="/frozen-eval" style="color:var(--accent);border-bottom:1px dashed var(--line)">/frozen-eval</a> &middot; eval-set hash binding that makes the K-score replayable across versions.</li>
-    <li><a href="/spec/rs-1" style="color:var(--accent);border-bottom:1px dashed var(--line)">/spec/rs-1</a> &middot; RS-1 v2.1 defines the manifest field shape; the <code>k_score</code> block ships in <code>manifest.json</code>.</li>
-    <li><a href="/format/v2" style="color:var(--accent);border-bottom:1px dashed var(--line)">/format/v2</a> &middot; the <code>.kolm v2</code> archive format that carries the K-score and its receipt chain.</li>
-    <li><a href="/docs/cve-in-kscore" style="color:var(--accent);border-bottom:1px dashed var(--line)">/docs/cve-in-kscore</a> &middot; the CVE sub-check inside the V component.</li>
-    <li><a href="/drift" style="color:var(--accent);border-bottom:1px dashed var(--line)">/drift</a> &middot; supersession + re-scoring lifecycle when an artifact's K-score moves over time.</li>
-    <li><a href="/verify-prod" style="color:var(--accent);border-bottom:1px dashed var(--line)">/verify-prod</a> &middot; drop a <code>.kolm</code> into the browser and re-run the gate replay.</li>
-    <li><a href="/training" style="color:var(--accent);border-bottom:1px dashed var(--line)">/training</a> &middot; how seed examples become the eval set the K-score scores against.</li>
-  </ul>
+ <h2>Cross-links</h2>
+ <p>Where the K-score fits in the rest of the trust surface:</p>
+ <ul>
+ <li><a href="/k-score-explained" style="color:var(--accent);border-bottom:1px dashed var(--line)">/k-score-explained</a> &middot; prose walk-through of the gate for non-engineers in procurement.</li>
+ <li><a href="/frozen-eval" style="color:var(--accent);border-bottom:1px dashed var(--line)">/frozen-eval</a> &middot; eval-set hash binding that makes the K-score replayable across versions.</li>
+ <li><a href="/spec/rs-1" style="color:var(--accent);border-bottom:1px dashed var(--line)">/spec/rs-1</a> &middot; RS-1 v2.1 defines the manifest field shape; the <code>k_score</code> block ships in <code>manifest.json</code>.</li>
+ <li><a href="/format/v2" style="color:var(--accent);border-bottom:1px dashed var(--line)">/format/v2</a> &middot; the <code>.kolm v2</code> archive format that carries the K-score and its receipt chain.</li>
+ <li><a href="/docs/cve-in-kscore" style="color:var(--accent);border-bottom:1px dashed var(--line)">/docs/cve-in-kscore</a> &middot; the CVE sub-check inside the V component.</li>
+ <li><a href="/drift" style="color:var(--accent);border-bottom:1px dashed var(--line)">/drift</a> &middot; supersession + re-scoring lifecycle when an artifact's K-score moves over time.</li>
+ <li><a href="/verify-prod" style="color:var(--accent);border-bottom:1px dashed var(--line)">/verify-prod</a> &middot; drop a <code>.kolm</code> into the browser and re-run the gate replay.</li>
+ <li><a href="/training" style="color:var(--accent);border-bottom:1px dashed var(--line)">/training</a> &middot; how seed examples become the eval set the K-score scores against.</li>
+ </ul>
 </div></section>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

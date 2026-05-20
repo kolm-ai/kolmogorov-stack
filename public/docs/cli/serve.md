@@ -10,8 +10,8 @@ description: Expose .kolm artifacts as MCP tools or as an OpenAI-compatible HTTP
 ## Usage
 
 ```bash
-kolm serve --mcp [--port <n>]                            # frontier-agent transport
-kolm serve --http <art.kolm> [--port <n>] [--host H]     # OpenAI-compatible HTTP
+kolm serve --mcp [--port <n>] # frontier-agent transport
+kolm serve --http <art.kolm> [--port <n>] [--host H] # OpenAI-compatible HTTP
 ```
 
 ## Flags
@@ -26,9 +26,9 @@ kolm serve --http <art.kolm> [--port <n>] [--host H]     # OpenAI-compatible HTT
 ## Examples
 
 ```bash
-kolm serve --mcp                                    # what Claude Code sees
-kolm serve --http job_foo.kolm --port 8765          # local OpenAI server
-KOLM_FORCE_TRANSFORMERS=1 kolm serve --http foo.kolm  # skip vLLM, use HF only
+kolm serve --mcp # what Claude Code sees
+kolm serve --http job_foo.kolm --port 8765 # local OpenAI server
+KOLM_FORCE_TRANSFORMERS=1 kolm serve --http foo.kolm # skip vLLM, use HF only
 ```
 
 ## Environment

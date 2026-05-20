@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Recipe from observations recipe · kolm cookbook</title>
-<meta name="description" content="Compile a signed local model that turns clusters of (input, verified_output) observations from your production traffic into a kolm recipe. The capture-to-distill bridge.">
+<title>Recipe from observations recipe · kolm cookbook · kolm.ai</title>
+<meta name="description" content="Compile a signed local model that turns clusters of (input, verified_output) observations from your production traffic into a kolm recipe. The...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Recipe-from-observations recipe">
-<meta property="og:description" content="Local recipe synthesizer from production traffic. Signed, offline.">
-<meta property="og:type" content="article">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Recipe-from-observations recipe" />
-<meta name="twitter:description" content="Local recipe synthesizer from production traffic. Signed, offline." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:title" content="Recipe from observations recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Compile a signed local model that turns clusters of (input, verified_output) observations from your production traffic into a kolm recipe. The...">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Recipe from observations recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Compile a signed local model that turns clusters of (input, verified_output) observations from your production traffic into a kolm recipe. The...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/cookbook/recipe-from-observations">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/cookbook/recipe-from-observations">
@@ -26,242 +26,243 @@
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "HowTo",
-      "name": "Recipe-from-observations recipe",
-      "description": "Local recipe synthesizer from production traffic. Signed, offline.",
-      "url": "https://kolm.ai/cookbook/recipe-from-observations",
-      "totalTime": "PT5M",
-      "tool": [
-        {
-          "@type": "HowToTool",
-          "name": "kolm CLI"
-        }
-      ],
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install",
-          "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Compile",
-          "text": "kolm compile recipe-from-observations.toml"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Run",
-          "text": "kolm run recipe-from-observations.kolm"
-        }
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "kolm",
-          "item": "https://kolm.ai/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Cookbook",
-          "item": "https://kolm.ai/cookbook"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Recipe from observations recipe",
-          "item": "https://kolm.ai/cookbook/recipe-from-observations"
-        }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "Recipe-from-observations recipe",
+ "description": "Local recipe synthesizer from production traffic. Signed, offline.",
+ "url": "https://kolm.ai/cookbook/recipe-from-observations",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile recipe-from-observations.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run recipe-from-observations.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Recipe from observations recipe",
+ "item": "https://kolm.ai/cookbook/recipe-from-observations"
+ }
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <div class="crumbs"><a href="/docs">cookbook</a> &middot; meta &middot; recipe-from-observations</div>
-    <span class="pill">Recipe &middot; meta</span>
-    <h1>Production traffic in, <span class="tone">a recipe out.</span></h1>
-    <p class="lede">A local <code>.kolm</code> file that takes a cluster of <em>(input, verified_output)</em> observations from <code>/v1/bridges/observations</code> (the "rent vs buy" capture loop) and synthesizes a complete kolm recipe · pairs, schema, verifier hooks, K-floor · ready to feed into <code>kolm compile</code>. The capture-to-distill bridge.</p>
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; meta &middot; recipe-from-observations</div>
+ <span class="pill">Recipe &middot; meta</span>
+ <h1>Production traffic in, <span class="tone">a recipe out.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that takes a cluster of <em>(input, verified_output)</em> observations from <code>/v1/bridges/observations</code> (the "rent vs buy" capture loop) and synthesizes a complete kolm recipe · pairs, schema, verifier hooks, K-floor · ready to feed into <code>kolm compile</code>. The capture-to-distill bridge.</p>
 
-    <div class="meta-row">
-      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-7b</span></div>
-      <div class="item"><span class="label">gold pairs</span><span class="value">340 (240 train / 100 eval)</span></div>
-      <div class="item"><span class="label">k-score floor</span><span class="value">0.80</span></div>
-      <div class="item"><span class="label">artifact size</span><span class="value">2.4 GB</span></div>
-      <div class="item"><span class="label">compile time</span><span class="value">~42 min</span></div>
-      <div class="item"><span class="label">spec source</span><span class="value">spec-from-traffic</span></div>
-    </div>
-  </div>
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-7b</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">340 (240 train / 100 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.80</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">2.4 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~42 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">spec-from-traffic</span></div>
+ </div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="group">
-      <h2>What this recipe does</h2>
-      <p>Every API call you proxy through <code>/v1/capture/anthropic</code> or <code>/v1/capture/openai</code> writes an observation. After you accumulate ~1,000 observations clustered around an intent, this recipe turns that cluster into a deployable recipe: it picks the train/eval split, infers the JSON schema from the verified outputs, picks the right verifier hooks (closed-vocab if outputs are categorical, byte-grounded if extractive, etc.), and writes the K-floor based on how clean the cluster is.</p>
-      <p>The output is a complete recipe directory ready for <code>kolm compile --recipe ./recipe-out</code>. No copy-paste, no hand-tuning. The "rent vs buy" loop completes itself.</p>
-    </div>
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>Every API call you proxy through <code>/v1/capture/anthropic</code> or <code>/v1/capture/openai</code> writes an observation. After you accumulate ~1,000 observations clustered around an intent, this recipe turns that cluster into a deployable recipe: it picks the train/eval split, infers the JSON schema from the verified outputs, picks the right verifier hooks (closed-vocab if outputs are categorical, byte-grounded if extractive, etc.), and writes the K-floor based on how clean the cluster is.</p>
+ <p>The output is a complete recipe directory ready for <code>kolm compile --recipe ./recipe-out</code>. No copy-paste, no hand-tuning. The "rent vs buy" loop completes itself.</p>
+ </div>
 
-    <div class="group">
-      <h2>The spec</h2>
-      <pre class="code">{
-  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
-  <span class="k">"schema"</span>: {
-    <span class="k">"required"</span>: [<span class="k">"recipe_dir"</span>, <span class="k">"pairs_jsonl"</span>, <span class="k">"spec_json"</span>, <span class="k">"k_floor"</span>],
-    <span class="k">"properties"</span>: {
-      <span class="k">"recipe_dir"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
-      <span class="k">"pairs_jsonl"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
-      <span class="k">"spec_json"</span>: { <span class="k">"$ref"</span>: <span class="k">"kolm-verifier-spec.schema.json"</span> },
-      <span class="k">"k_floor"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span>, <span class="k">"minimum"</span>: 0.5, <span class="k">"maximum"</span>: 0.95 },
-      <span class="k">"diagnostics"</span>: { <span class="k">"type"</span>: <span class="k">"object"</span> }
-    }
-  },
-  <span class="k">"verifier"</span>: {
-    <span class="k">"output_must_compile_dry_run"</span>: <span class="ok">true</span>,
-    <span class="k">"k_floor_must_match_cluster_purity"</span>: <span class="ok">true</span>,
-    <span class="k">"pairs_count_minimum"</span>: 200
-  }
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"recipe_dir"</span>, <span class="k">"pairs_jsonl"</span>, <span class="k">"spec_json"</span>, <span class="k">"k_floor"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"recipe_dir"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+ <span class="k">"pairs_jsonl"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+ <span class="k">"spec_json"</span>: { <span class="k">"$ref"</span>: <span class="k">"kolm-verifier-spec.schema.json"</span> },
+ <span class="k">"k_floor"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span>, <span class="k">"minimum"</span>: 0.5, <span class="k">"maximum"</span>: 0.95 },
+ <span class="k">"diagnostics"</span>: { <span class="k">"type"</span>: <span class="k">"object"</span> }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"output_must_compile_dry_run"</span>: <span class="ok">true</span>,
+ <span class="k">"k_floor_must_match_cluster_purity"</span>: <span class="ok">true</span>,
+ <span class="k">"pairs_count_minimum"</span>: 200
+ }
 }</pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>Compile</h2>
-      <pre class="code">kolm compile <span class="k">"recipe synthesizer from production observations"</span> \
-  --base qwen2.5-coder-7b \
-  --pairs ./meta-pairs/recipe-from-traffic-pairs.jsonl \
-  --verifier output-compiles-dry-run,k-floor-matches-purity \
-  --k-floor 0.80 \
-  --output recipe-from-observations.kolm
+ <div class="group">
+ <h2>Compile</h2>
+ <pre class="code">kolm compile <span class="k">"recipe synthesizer from production observations"</span> \
+ --base qwen2.5-coder-7b \
+ --pairs ./meta-pairs/recipe-from-traffic-pairs.jsonl \
+ --verifier output-compiles-dry-run,k-floor-matches-purity \
+ --k-floor 0.80 \
+ --output recipe-from-observations.kolm
 
 <span class="ok">ok</span> wrote <span class="k">recipe-from-observations.kolm</span>
-   k_score=0.84  signature=hmac-sha256</pre>
-    </div>
+ k_score=0.84 signature=ed25519</pre>
+ </div>
 
-    <div class="group">
-      <h2>K-score gate</h2>
-      <div class="k-bar">
-        <span class="k-label">K-score</span>
-        <span class="k-value">0.84</span>
-        <span class="k-detail">held-out 100 clusters &middot; output-compiles-dry-run 96% &middot; k-floor within 0.05 of cluster purity 91% &middot; final-recipe-passes-K 78%</span>
-      </div>
-      <p>The "final-recipe-passes-K 78%" number is the load-bearing one: when a customer feeds this recipe a cluster of 1,000 observations and runs the resulting recipe through <code>kolm compile</code>, 78 times out of 100 the compiled artifact passes its own K-floor on first try.</p>
-    </div>
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.84</span>
+ <span class="k-detail">held-out 100 clusters &middot; output-compiles-dry-run 96% &middot; k-floor within 0.05 of cluster purity 91% &middot; final-recipe-passes-K 78%</span>
+ </div>
+ <p>The "final-recipe-passes-K 78%" number is the load-bearing one: when a customer feeds this recipe a cluster of 1,000 observations and runs the resulting recipe through <code>kolm compile</code>, 78 times out of 100 the compiled artifact passes its own K-floor on first try.</p>
+ </div>
 
-    <div class="group">
-      <h2>Run-time profile</h2>
-      <div class="lat-grid">
-        <div class="cell"><div class="h">M2 MacBook</div><div class="v">3.8<span class="u">s</span><div class="u">/cluster</div></div></div>
-        <div class="cell"><div class="h">RTX 5090</div><div class="v">920<span class="u">ms</span><div class="u">/cluster</div></div></div>
-        <div class="cell"><div class="h">Mac Studio</div><div class="v">2.1<span class="u">s</span><div class="u">/cluster</div></div></div>
-        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">5.4<span class="u">s</span><div class="u">/cluster</div></div></div>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">M2 MacBook</div><div class="v">3.8<span class="u">s</span><div class="u">/cluster</div></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">920<span class="u">ms</span><div class="u">/cluster</div></div></div>
+ <div class="cell"><div class="h">Mac Studio</div><div class="v">2.1<span class="u">s</span><div class="u">/cluster</div></div></div>
+ <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">5.4<span class="u">s</span><div class="u">/cluster</div></div></div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Deploy</h2>
-      <pre class="code"><span class="c"># the rent-vs-buy loop, fully closed:</span>
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># the rent-vs-buy loop, fully closed:</span>
 const obs = await fetch(<span class="k">'/v1/bridges/observations?namespace=email-classify'</span>);
 const recipe = kolm.run(<span class="k">'recipe-from-observations.kolm'</span>, obs);
 fs.writeSync(<span class="k">'recipe-out/spec.json'</span>, recipe.spec_json);
 fs.writeSync(<span class="k">'recipe-out/pairs.jsonl'</span>, recipe.pairs_jsonl);
 exec(<span class="k">'kolm compile --recipe ./recipe-out --output ./email-classify.kolm'</span>);</pre>
-      <p>Three steps: capture (proxy via <code>/v1/capture</code>), distill (this recipe), compile (<code>kolm compile</code>). What goes in is your frontier-API spend; what comes out is a signed <code>.kolm</code> you can run offline forever.</p>
-    </div>
+ <p>Three steps: capture (proxy via <code>/v1/capture/openai</code> or <code>/v1/capture/anthropic</code>, or post rows directly to <code>/v1/capture/log</code>), distill (this recipe), compile (<code>kolm compile</code>). What goes in is your frontier-API spend; what comes out is a signed <code>.kolm</code> you can run offline forever.</p>
+ </div>
 
-    <div class="group">
-      <h2>Related recipes</h2>
-      <div class="related">
-        <a href="/cookbook/verifier-from-examples"><div class="h">Verifier from examples</div><div class="d">20 pairs →kolm verifier spec.</div></a>
-        <a href="/cookbook/recall-namespace-tagger"><div class="h">Namespace tagger</div><div class="d">Auto-classify recall queries into namespaces.</div></a>
-        <a href="/cookbook/k-score-explainer"><div class="h">K-score explainer</div><div class="d">Score →why it failed + fix.</div></a>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/verifier-from-examples"><div class="h">Verifier from examples</div><div class="d">20 pairs →kolm verifier spec.</div></a>
+ <a href="/cookbook/recall-namespace-tagger"><div class="h">Namespace tagger</div><div class="d">Auto-classify recall queries into namespaces.</div></a>
+ <a href="/cookbook/k-score-explainer"><div class="h">K-score explainer</div><div class="d">Score →why it failed + fix.</div></a>
+ </div>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

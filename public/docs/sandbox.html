@@ -3,20 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sandbox · kolm.ai docs</title>
+<title>Sandbox · kolm.ai docs · kolm.ai</title>
 <meta name="description" content="The kolm.ai sandbox: the constrained runtime where .kolm artifacts execute user code. Forbidden identifiers, network policy, and verification.">
 <link rel="canonical" href="https://kolm.ai/docs/sandbox">
-<meta property="og:title" content="Sandbox · kolm.ai docs">
-<meta property="og:description" content="The constrained runtime where .kolm artifacts execute user code.">
+<meta property="og:title" content="Sandbox · kolm.ai docs · kolm.ai">
+<meta property="og:description" content="The kolm.ai sandbox: the constrained runtime where .kolm artifacts execute user code. Forbidden identifiers, network policy, and verification.">
 <meta property="og:url" content="https://kolm.ai/docs/sandbox">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-sandbox.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm.ai sandbox","description":"The constrained runtime for .kolm artifacts.","url":"https://kolm.ai/docs/sandbox","mainEntityOfPage":"https://kolm.ai/docs/sandbox","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:title" content="Sandbox · kolm.ai docs · kolm.ai">
+<meta name="twitter:description" content="The kolm.ai sandbox: the constrained runtime where .kolm artifacts execute user code. Forbidden identifiers, network policy, and verification.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,48 +176,48 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-page" data-w401g="sandbox">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <span>Sandbox</span>
+ <a href="/docs">Docs</a> / <span>Sandbox</span>
 </nav>
 <header class="page-h">
-  <p class="eyebrow">kolm.ai · sandbox spec</p>
-  <h1>The constrained runtime for <code>.kolm</code> artifacts.</h1>
-  <p class="lede">Recipe code inside a <code>.kolm</code> bundle runs inside a sandbox: no <code>process</code>, no <code>require</code>, no <code>eval</code>, no outbound sockets. The verifier rejects any artifact whose recipe code references a forbidden identifier.</p>
+ <p class="eyebrow">kolm.ai · sandbox spec</p>
+ <h1>The constrained runtime for <code>.kolm</code> artifacts.</h1>
+ <p class="lede">Recipe code inside a <code>.kolm</code> bundle runs inside a sandbox: no <code>process</code>, no <code>require</code>, no <code>eval</code>, no outbound sockets. The verifier rejects any artifact whose recipe code references a forbidden identifier.</p>
 </header>
 
 <section>
-  <h2>Forbidden identifiers</h2>
-  <ul>
-    <li><code>process</code>, <code>process.env</code>, <code>process.exit</code>.</li>
-    <li><code>require</code>, <code>import()</code>, dynamic module resolution.</li>
-    <li><code>eval(</code>, <code>Function(</code>, <code>new Function</code>.</li>
-    <li>Direct file-system access: <code>fs</code>, <code>node:fs</code>.</li>
-    <li>Outbound network: <code>fetch</code>, <code>http</code>, <code>https</code>, <code>net</code>, <code>dgram</code>.</li>
-    <li>Child processes: <code>child_process</code>, <code>node:child_process</code>.</li>
-  </ul>
+ <h2>Forbidden identifiers</h2>
+ <ul>
+ <li><code>process</code>, <code>process.env</code>, <code>process.exit</code>.</li>
+ <li><code>require</code>, <code>import()</code>, dynamic module resolution.</li>
+ <li><code>eval(</code>, <code>Function(</code>, <code>new Function</code>.</li>
+ <li>Direct file-system access: <code>fs</code>, <code>node:fs</code>.</li>
+ <li>Outbound network: <code>fetch</code>, <code>http</code>, <code>https</code>, <code>net</code>, <code>dgram</code>.</li>
+ <li>Child processes: <code>child_process</code>, <code>node:child_process</code>.</li>
+ </ul>
 </section>
 
 <section>
-  <h2>What the sandbox allows</h2>
-  <ul>
-    <li>Pure deterministic transforms on prompt and response strings.</li>
-    <li>The <code>kolm.*</code> host API: <code>kolm.score()</code>, <code>kolm.replay()</code>, <code>kolm.embed()</code>.</li>
-    <li>Use of the bundled model, tokenizer, and frozen-eval set.</li>
-  </ul>
+ <h2>What the sandbox allows</h2>
+ <ul>
+ <li>Pure deterministic transforms on prompt and response strings.</li>
+ <li>The <code>kolm.*</code> host API: <code>kolm.score()</code>, <code>kolm.replay()</code>, <code>kolm.embed()</code>.</li>
+ <li>Use of the bundled model, tokenizer, and frozen-eval set.</li>
+ </ul>
 </section>
 
 <section>
-  <h2>Verify before bundling</h2>
-  <p>Run <code>kolm verify</code> on any recipe before shipping. The verifier scans the recipe AST against the forbidden-identifier list and rejects anything that would not pass at runtime.</p>
+ <h2>Verify before bundling</h2>
+ <p>Run <code>kolm verify</code> on any recipe before shipping. The verifier scans the recipe AST against the forbidden-identifier list and rejects anything that would not pass at runtime.</p>
 </section>
 
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/rs-1">RS-1 receipts spec</a>: signing and verification.</li>
-    <li><a href="/docs/cli/verify">kolm verify CLI</a>.</li>
-    <li><a href="/security">Security &amp; trust</a>.</li>
-    <li><a href="/docs/glossary">Glossary</a>.</li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/rs-1">RS-1 receipts spec</a>: signing and verification.</li>
+ <li><a href="/docs/cli/verify">kolm verify CLI</a>.</li>
+ <li><a href="/security">Security &amp; trust</a>.</li>
+ <li><a href="/docs/glossary">Glossary</a>.</li>
+ </ul>
 </section>
 </main>
 </body>

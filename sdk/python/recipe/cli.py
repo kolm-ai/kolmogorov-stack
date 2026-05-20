@@ -1,4 +1,5 @@
-"""``recipe`` CLI — installed via ``pip install kolmogorov-recipe``."""
+"""``recipe`` CLI — installed from a local SDK checkout (legacy entry point;
+the modern surface is ``from kolm import Kolm``)."""
 
 from __future__ import annotations
 

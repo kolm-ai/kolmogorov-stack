@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Rent vs. buy compute: API bill into local LoRA ·kolm</title>
-<meta name="description" content="Every dollar you spend on Anthropic or OpenAI can compound into a local LoRA you keep forever. The math, the mechanism, the legal frame, and a worked example for a 50-engineer team.">
-<meta name="keywords" content="rent vs buy compute, capture and distill, frontier API to local LoRA, kolm capture, AI compiler, signed LoRA, on-device AI, Anthropic capture, OpenAI capture, model distillation">
+<title>Rent vs. buy compute: API bill into local student · kolm.ai</title>
+<meta name="description" content="Every dollar you spend on Anthropic or OpenAI can compound into a local student artifact you keep forever. The math, the mechanism, the legal frame, and a...">
+<meta name="keywords" content="rent vs buy compute, capture and distill, frontier API to local student artifact, kolm capture, AI compiler, signed LoRA, on-device AI, Anthropic capture, OpenAI capture, model distillation">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
@@ -14,230 +14,231 @@
 <meta name="author" content="Kolmogorov">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="Rent vs. buy compute. Every API call you proxy through us trains a local LoRA you keep forever.">
-<meta property="og:description" content="The strongest thesis we have: turn the most expensive recurring line on your AWS bill into a one-time job, and keep the artifact.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Rent vs. buy compute: API bill into local student · kolm.ai">
+<meta property="og:description" content="Every dollar you spend on Anthropic or OpenAI can compound into a local student artifact you keep forever. The math, the mechanism, the legal frame, and a...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/articles/rent-vs-buy-compute">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Rent vs. buy compute: turn your frontier API bill into a local LoRA">
-<meta name="twitter:description" content="The math, the mechanism, the legal frame, and a worked example.">
+<meta name="twitter:title" content="Rent vs. buy compute: API bill into local student · kolm.ai">
+<meta name="twitter:description" content="Every dollar you spend on Anthropic or OpenAI can compound into a local student artifact you keep forever. The math, the mechanism, the legal frame, and a...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/articles/rent-vs-buy-compute">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {"@type": "TechArticle",
-  "headline": "Rent vs. buy compute - turn your frontier API bill into a local LoRA",
-  "description": "Every dollar you spend on Anthropic or OpenAI can compound into a local LoRA you keep forever. The math, the mechanism, the legal frame, and a worked example.",
-  "author": { "@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai" },
-  "publisher": { "@type": "Organization", "name": "Kolmogorov", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
-  "datePublished": "2026-05-09",
-  "dateModified": "2026-05-09",
-  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/articles/rent-vs-buy-compute" },
-  "image": "https://kolm.ai/og-card.svg",
-  "keywords": "rent vs buy compute, capture and distill, frontier API, local LoRA, kolm capture, .kolm artifact",
-  "articleSection": "Engineering",
-  "wordCount": 2400
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Articles", "item": "https://kolm.ai/articles"},
-        {"@type": "ListItem", "position": 3, "name": "Rent vs. buy compute: API bill into local LoRA", "item": "https://kolm.ai/articles/rent-vs-buy-compute"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {"@type": "TechArticle",
+ "headline": "Rent vs. buy compute - turn your frontier API bill into a local student artifact",
+ "description": "Every dollar you spend on Anthropic or OpenAI can compound into a local student artifact you keep forever. The math, the mechanism, the legal frame, and a worked example.",
+ "author": { "@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "Kolmogorov", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-09",
+ "dateModified": "2026-05-09",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/articles/rent-vs-buy-compute" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "rent vs buy compute, capture and distill, frontier API, local student artifact, kolm capture, .kolm artifact",
+ "articleSection": "Engineering",
+ "wordCount": 2400
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Articles", "item": "https://kolm.ai/articles"},
+ {"@type": "ListItem", "position": 3, "name": "Rent vs. buy compute: API bill into local student artifact", "item": "https://kolm.ai/articles/rent-vs-buy-compute"}
+ ]
+ }
+ ]
 }
 </script>
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
-    --good: #7ef0d2; --bad: #ff6b91;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 0 32px; }
-  .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
-  header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
-  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
-  header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
-  header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
-  header.site nav a:hover { color: var(--ink); }
-  header.site .right { display: flex; align-items: center; gap: 14px; }
-  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
-  header.site .right .cta:hover { background: #fff; }
-  @media (max-width: 720px) { header.site nav { display: none; } }
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
+ header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .ghost:hover { color: var(--ink); }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ header.site .right .cta:hover { background: #fff; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
 
-  section.hero { padding: 80px 0 36px; position: relative; overflow: hidden; }
-  section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 460px at 22% 12%, rgba(236,231,220, 0.10), transparent 60%); }
-  section.hero .wrap { position: relative; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
-  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
-  h1 { margin: 22px 0 18px; font-size: clamp(34px, 5.4vw, 54px); line-height: 1.05; font-weight: 500; letter-spacing: 0; max-width: 22ch; }
-  h1 .tone { color: var(--accent); }
-  p.lede { margin: 0 0 0; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
-  p.lede b { color: var(--ink); font-weight: 500; }
-  p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
+ section.hero { padding: 80px 0 36px; position: relative; overflow: hidden; }
+ section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 460px at 22% 12%, rgba(236,231,220, 0.10), transparent 60%); }
+ section.hero .wrap { position: relative; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+ h1 { margin: 22px 0 18px; font-size: clamp(34px, 5.4vw, 54px); line-height: 1.05; font-weight: 500; letter-spacing: 0; max-width: 22ch; }
+ h1 .tone { color: var(--accent); }
+ p.lede { margin: 0 0 0; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+ p.lede b { color: var(--ink); font-weight: 500; }
+ p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
 
-  .meta { display: flex; gap: 18px; margin-top: 22px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
-  .meta b { color: var(--ink-mute); font-weight: 500; }
+ .meta { display: flex; gap: 18px; margin-top: 22px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
+ .meta b { color: var(--ink-mute); font-weight: 500; }
 
-  article { padding: 36px 0 96px; }
-  article h2 { margin: 56px 0 14px; font-size: clamp(24px, 2.6vw, 30px); line-height: 1.2; font-weight: 500; letter-spacing: 0; color: var(--ink); }
-  article h2 .tone { color: var(--accent); }
-  article h3 { margin: 36px 0 10px; font-size: 18px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
-  article p { margin: 0 0 16px; font-size: 16.5px; line-height: 1.7; color: var(--ink-mute); }
-  article p b { color: var(--ink); font-weight: 500; }
-  article p code, article li code { font-family: var(--mono); font-size: 0.92em; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
-  article blockquote { margin: 28px 0; padding: 16px 22px; border-left: 2px solid var(--accent); background: var(--bg-elev); border-radius: 0 8px 8px 0; font-size: 17px; line-height: 1.6; color: var(--ink); }
-  article blockquote p { color: var(--ink); margin: 0; font-weight: 500; }
-  article ul { padding-left: 0; list-style: none; margin: 16px 0 24px; }
-  article ul li { padding: 8px 0 8px 22px; position: relative; font-size: 16px; line-height: 1.6; color: var(--ink-mute); }
-  article ul li::before { content: "-"; color: var(--accent); position: absolute; left: 6px; font-weight: 500; }
-  article ul li b { color: var(--ink); font-weight: 500; }
+ article { padding: 36px 0 96px; }
+ article h2 { margin: 56px 0 14px; font-size: clamp(24px, 2.6vw, 30px); line-height: 1.2; font-weight: 500; letter-spacing: 0; color: var(--ink); }
+ article h2 .tone { color: var(--accent); }
+ article h3 { margin: 36px 0 10px; font-size: 18px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
+ article p { margin: 0 0 16px; font-size: 16.5px; line-height: 1.7; color: var(--ink-mute); }
+ article p b { color: var(--ink); font-weight: 500; }
+ article p code, article li code { font-family: var(--mono); font-size: 0.92em; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
+ article blockquote { margin: 28px 0; padding: 16px 22px; border-left: 2px solid var(--accent); background: var(--bg-elev); border-radius: 0 8px 8px 0; font-size: 17px; line-height: 1.6; color: var(--ink); }
+ article blockquote p { color: var(--ink); margin: 0; font-weight: 500; }
+ article ul { padding-left: 0; list-style: none; margin: 16px 0 24px; }
+ article ul li { padding: 8px 0 8px 22px; position: relative; font-size: 16px; line-height: 1.6; color: var(--ink-mute); }
+ article ul li::before { content: "-"; color: var(--accent); position: absolute; left: 6px; font-weight: 500; }
+ article ul li b { color: var(--ink); font-weight: 500; }
 
-  article pre { margin: 18px 0 24px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.75; color: var(--ink); box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
-  article pre .com { color: var(--ink-faint); }
-  article pre .arg { color: var(--accent); }
-  article pre .kw { color: #b0bbff; }
+ article pre { margin: 18px 0 24px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.75; color: var(--ink); box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
+ article pre .com { color: var(--ink-faint); }
+ article pre .arg { color: var(--accent); }
+ article pre .kw { color: #b0bbff; }
 
-  .figure { margin: 28px 0; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
-  .figure .cap { margin-top: 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
-  .figure .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 720px) { .figure .grid { grid-template-columns: 1fr; } }
-  .figure .row { padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; background: rgba(0,0,0,0.18); display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute); }
-  .figure .row .v { color: var(--ink); }
-  .figure .row .v.acc { color: var(--accent); }
-  .figure .row .v.good { color: var(--good); }
+ .figure { margin: 28px 0; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 18px 40px -22px rgba(0,0,0,0.55); }
+ .figure .cap { margin-top: 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
+ .figure .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+ @media (max-width: 720px) { .figure .grid { grid-template-columns: 1fr; } }
+ .figure .row { padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; background: rgba(0,0,0,0.18); display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute); }
+ .figure .row .v { color: var(--ink); }
+ .figure .row .v.acc { color: var(--accent); }
+ .figure .row .v.good { color: var(--good); }
 
-  table.ledger { width: 100%; border-collapse: collapse; margin: 18px 0 24px; font-family: var(--mono); font-size: 13px; }
-  table.ledger th, table.ledger td { border: 1px solid var(--line); padding: 10px 14px; text-align: left; }
-  table.ledger th { background: var(--bg-elev); color: var(--ink); font-weight: 500; font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); }
-  table.ledger td { color: var(--ink-mute); }
-  table.ledger td.v { color: var(--ink); }
-  table.ledger td.acc { color: var(--accent); }
-  table.ledger td.good { color: var(--good); }
-  table.ledger tr:hover td { background: rgba(236,231,220, 0.04); }
+ table.ledger { width: 100%; border-collapse: collapse; margin: 18px 0 24px; font-family: var(--mono); font-size: 13px; }
+ table.ledger th, table.ledger td { border: 1px solid var(--line); padding: 10px 14px; text-align: left; }
+ table.ledger th { background: var(--bg-elev); color: var(--ink); font-weight: 500; font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); }
+ table.ledger td { color: var(--ink-mute); }
+ table.ledger td.v { color: var(--ink); }
+ table.ledger td.acc { color: var(--accent); }
+ table.ledger td.good { color: var(--good); }
+ table.ledger tr:hover td { background: rgba(236,231,220, 0.04); }
 
-  .signpost { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 36px 0 0; }
-  @media (max-width: 720px) { .signpost { grid-template-columns: 1fr; } }
-  .signpost a { display: flex; flex-direction: column; gap: 8px; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; transition: transform 220ms cubic-bezier(.2,.6,.2,1), border-color 220ms; }
-  .signpost a:hover { transform: translateY(-2px); border-color: var(--line-strong); }
-  .signpost a .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
-  .signpost a .v { color: var(--ink); font-weight: 500; font-size: 16px; letter-spacing: 0; }
-  .signpost a .v .arrow { color: var(--accent); margin-left: 6px; }
-  .signpost a p { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-mute); line-height: 1.5; }
+ .signpost { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 36px 0 0; }
+ @media (max-width: 720px) { .signpost { grid-template-columns: 1fr; } }
+ .signpost a { display: flex; flex-direction: column; gap: 8px; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; transition: transform 220ms cubic-bezier(.2,.6,.2,1), border-color 220ms; }
+ .signpost a:hover { transform: translateY(-2px); border-color: var(--line-strong); }
+ .signpost a .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
+ .signpost a .v { color: var(--ink); font-weight: 500; font-size: 16px; letter-spacing: 0; }
+ .signpost a .v .arrow { color: var(--accent); margin-left: 6px; }
+ .signpost a p { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-mute); line-height: 1.5; }
 
-  .toc { margin: 28px 0 36px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; }
-  .toc h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; font-weight: 500; }
-  .toc ol { margin: 0; padding-left: 20px; }
-  .toc li { padding: 4px 0; font-size: 14px; color: var(--ink-mute); }
-  .toc li a { color: var(--ink-mute); }
-  .toc li a:hover { color: var(--accent); }
+ .toc { margin: 28px 0 36px; padding: 18px 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; }
+ .toc h5 { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; font-weight: 500; }
+ .toc ol { margin: 0; padding-left: 20px; }
+ .toc li { padding: 4px 0; font-size: 14px; color: var(--ink-mute); }
+ .toc li a { color: var(--ink-mute); }
+ .toc li a:hover { color: var(--accent); }
 
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); }
-  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  footer.site a { color: var(--ink-faint); transition: color 120ms; }
-  footer.site a:hover { color: var(--ink-mute); }
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-faint); transition: color 120ms; }
+ footer.site a:hover { color: var(--ink-mute); }
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand" aria-label="kolm"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand" aria-label="kolm"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <span class="pill"><span class="dot"></span>Engineering &middot; 2026-05-09 &middot; 12 min read</span>
-    <h1>Rent vs. buy compute. <span class="tone">Keep the artifact.</span></h1>
-    <p class="lede">Every dollar you spend on Anthropic or OpenAI is a rental fee for a model you do not own and cannot run offline. <b>Proxy those calls through <code>kolm capture</code></b> and the same dollar also pays for a verified <code>(input, output)</code> dataset. At the threshold you choose, that dataset compiles into a signed local <code>.kolm</code>: a LoRA on an open base model that runs on your hardware, on your network, in perpetuity. The frontier API bill becomes a deposit account.</p>
-    <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;capture &middot; distill &middot; on-device</span></div>
-  </div>
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Engineering &middot; 2026-05-09 &middot; 12 min read</span>
+ <h1>Rent vs. buy compute. <span class="tone">Keep the artifact.</span></h1>
+ <p class="lede">Every dollar you spend on Anthropic or OpenAI is a rental fee for a model you do not own and cannot run offline. <b>Proxy those calls through <code>kolm capture</code></b> and the same dollar also pays for a verified <code>(input, output)</code> dataset. At the threshold you choose, that dataset compiles into a signed local <code>.kolm</code>: a LoRA on an open base model that runs on your hardware, on your network, in perpetuity. The frontier calls become reviewed training data.</p>
+ <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;capture &middot; distill &middot; on-device</span></div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="toc">
-      <h5>Contents</h5>
-      <ol>
-        <li><a href="#problem">The problem with renting forever</a></li>
-        <li><a href="#thesis">The thesis in one paragraph</a></li>
-        <li><a href="#how">How capture-and-distill actually works</a></li>
-        <li><a href="#worked">A worked example: 50 engineers on Anthropic</a></li>
-        <li><a href="#legal">The legal frame: who owns what</a></li>
-        <li><a href="#privacy">The privacy frame: who sees what</a></li>
-        <li><a href="#receipts">Why the signed receipt matters</a></li>
-        <li><a href="#vs">vs. fine-tuning, vs. observability, vs. RAG</a></li>
-        <li><a href="#starthere">Start here</a></li>
-      </ol>
-    </div>
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#problem">The problem with renting forever</a></li>
+ <li><a href="#thesis">The thesis in one paragraph</a></li>
+ <li><a href="#how">How capture-and-distill actually works</a></li>
+ <li><a href="#worked">A worked example: 50 engineers on Anthropic</a></li>
+ <li><a href="#legal">The legal frame: who owns what</a></li>
+ <li><a href="#privacy">The privacy frame: who sees what</a></li>
+ <li><a href="#receipts">Why the signed receipt matters</a></li>
+ <li><a href="#vs">vs. fine-tuning, vs. observability, vs. RAG</a></li>
+ <li><a href="#starthere">Start here</a></li>
+ </ol>
+ </div>
 
-    <h2 id="problem">The problem with renting forever.</h2>
-    <p>If you ship anything that calls a frontier model in production, the bill grows linearly with usage. Every prompt is a network round trip and a row in someone else's log. The model is deprecated on a fourteen-day notice. The data leaves your perimeter on every call. Latency floor is two hundred to eight hundred milliseconds even on the best path. None of these are bugs in your stack. They are properties of a rental architecture.</p>
-    <p>The line item that this creates on a finance team's monthly close is unique: <b>spend goes up, no asset accumulates.</b> Every other large recurring line in a software company (cloud hosting, observability, payments) is either fungible commodity or accrues real switching cost in the form of integration. Frontier API spend accrues neither. Cancel today and you have nothing to show for it but log entries.</p>
-    <p>This is the wrong shape for spend that is forecast to keep doubling. The rational move is to convert it.</p>
+ <h2 id="problem">The problem with renting forever.</h2>
+ <p>If you ship anything that calls a frontier model in production, the bill grows linearly with usage. Every prompt is a network round trip and a row in someone else's log. The model is deprecated on a fourteen-day notice. The data leaves your perimeter on every call. Latency floor is two hundred to eight hundred milliseconds even on the best path. None of these are bugs in your stack. They are properties of a rental architecture.</p>
+ <p>The line item that this creates on a finance team's monthly close is unique: <b>spend goes up, no asset accumulates.</b> Every other large recurring line in a software company (cloud hosting, observability, payments) is either fungible commodity or accrues real switching cost in the form of integration. Frontier API spend accrues neither. Cancel today and you have nothing to show for it but log entries.</p>
+ <p>This is the wrong shape for spend that is forecast to keep doubling. The rational move is to convert it.</p>
 
-    <blockquote>
-      <p>Most of what your team is paying Anthropic or OpenAI to do is a small set of tasks repeated thousands of times. Each repetition produces a verified label. Save the labels and you can train a model that performs the same tasks for free.</p>
-    </blockquote>
+ <blockquote>
+ <p>Most of what your team is paying Anthropic or OpenAI to do is a small set of tasks repeated thousands of times. Each repetition produces a verified label. Save the labels and you can train a model that performs the same tasks for free.</p>
+ </blockquote>
 
-    <h2 id="thesis">The thesis in one paragraph.</h2>
-    <p>You are already paying the frontier model to do work for you. The output it returns is, under every major provider's terms of service, yours to use. <b>What we add is a thin proxy that captures the verified <code>(input, output, latency)</code> tuple for each call and a compiler that turns the captured corpus into a signed LoRA on an open base.</b> When the LoRA is good enough to retire the proxy on a slice of traffic, you stop paying for that slice. The local artifact compounds in coverage as your traffic does. Every dollar of frontier spend you pass through the proxy is, mechanically, also a deposit into the local model. That is the rent-to-own moment for AI compute.</p>
+ <h2 id="thesis">The thesis in one paragraph.</h2>
+ <p>You are already paying the frontier model to do work for you. The output it returns is, under every major provider's terms of service, yours to use. <b>What we add is a thin proxy that captures the verified <code>(input, output, latency)</code> tuple for each call and a compiler that turns the captured corpus into a signed LoRA on an open base.</b> When the LoRA is good enough to retire the proxy on a slice of traffic, you stop paying for that slice. The local artifact compounds in coverage as your traffic does. Every dollar of frontier spend you pass through the proxy is, mechanically, also a deposit into the local model. That is the rent-to-own moment for AI compute.</p>
 
-    <h2 id="how">How capture-and-distill actually works.</h2>
-    <p>There are four moving parts. None of them are exotic.</p>
+ <h2 id="how">How capture-and-distill actually works.</h2>
+ <p>There are four moving parts. None of them are exotic.</p>
 
-    <h3>1. The capture proxy.</h3>
-    <p>Two endpoints, <code>POST /v1/capture/anthropic</code> and <code>POST /v1/capture/openai</code>, accept the same body shape as the upstream provider. You send your customer's API key in a header that we strip before forwarding. The upstream call is unmodified. The response is unmodified. Before returning, we record a tuple of <code>(input, output, model, latency_us, namespace, tenant)</code> to your tenant's <code>observations</code> table. Surface area for the caller is one base-URL change in their codebase.</p>
+ <h3>1. The capture proxy.</h3>
+ <p>Two endpoints, <code>POST /v1/capture/anthropic</code> and <code>POST /v1/capture/openai</code>, accept the same body shape as the upstream provider. You send your customer's API key in a header that we strip before forwarding. The upstream call is unmodified. The response is unmodified. Before returning, we record a tuple of <code>(input, output, model, latency_us, namespace, tenant)</code> to your tenant's <code>observations</code> table. Surface area for the caller is one base-URL change in their codebase.</p>
 
-    <h3>2. The verifier sample.</h3>
-    <p>By default a configurable fraction of captures are run through k-sample verification (the same primitive that powers <a href="/articles/k-sample-verified-inference">verified inference</a> on the compile path) to attach a confidence score to each label. Captures that fail verification are still recorded but tagged so the distiller can quarantine them. The verifier is the brake that stops you from training on outputs the frontier model itself was uncertain about.</p>
+ <h3>2. The verifier sample.</h3>
+ <p>By default a configurable fraction of captures are run through k-sample verification (the same primitive that powers <a href="/articles/k-sample-verified-inference">verified inference</a> on the compile path) to attach a confidence score to each label. Captures that fail verification are still recorded but tagged so the distiller can quarantine them. The verifier is the brake that stops you from training on outputs the frontier model itself was uncertain about.</p>
 
-    <h3>3. The label endpoint.</h3>
-    <p><code>GET /v1/labels/synthesize-corpus?namespace=<n>&format=jsonl</code> returns the captured pairs as JSONL or parquet, ready to feed to any training framework. Tenant-scoped. Filtered by namespace, optional date range, and optional minimum verifier confidence. This is the format used by the next stage, but the export path lets you take the data anywhere. You are not locked into our trainer.</p>
+ <h3>3. The label endpoint.</h3>
+ <p><code>GET /v1/labels/synthesize-corpus?namespace=<n>&format=jsonl</code> returns the captured pairs as JSONL or parquet, ready to feed to any training framework. Tenant-scoped. Filtered by namespace, optional date range, and optional minimum verifier confidence. This is the format used by the next stage, but the export path lets you take the data anywhere. You are not locked into our trainer.</p>
 
-    <h3>4. The distill bridge.</h3>
-    <p><code>POST /v1/specialists/auto-distill</code> takes a namespace, a base model, and a target footprint. At a configurable threshold (default one thousand verified pairs) the bridge fires a LoRA training job, runs the K-score gate on a held-out evaluation slice, and ships back a signed <code>.kolm</code> artifact when the gate passes. From the operator's view it is a single CLI call and a download.</p>
+ <h3>4. The distill bridge.</h3>
+ <p><code>POST /v1/specialists/auto-distill</code> takes a namespace, a base model, and a target footprint. At a configurable threshold (default one thousand verified pairs) the bridge fires a LoRA training job, runs the K-score gate on a held-out evaluation slice, and ships back a signed <code>.kolm</code> artifact when the gate passes. From the operator's view it is a single CLI call and a download.</p>
 
-    <p>The five-line CLI surface that wraps these endpoints:</p>
-    <pre><span class="com"># point your existing OpenAI / Anthropic SDK at our capture endpoint</span>
+ <p>The five-line CLI surface that wraps these endpoints:</p>
+ <pre><span class="com"># point your existing OpenAI / Anthropic SDK at our capture endpoint</span>
 kolm capture --provider anthropic --as <span class="arg">support-replies</span> --namespace <span class="arg">prod-tickets</span>
 
 <span class="com"># inspect what has been captured so far</span>
@@ -250,162 +251,162 @@ kolm labels --namespace <span class="arg">prod-tickets</span> --format jsonl &gt
 kolm distill --namespace <span class="arg">prod-tickets</span> --base-model <span class="arg">phi-3-mini</span>
 kolm inspect ~/.kolm/artifacts/<span class="arg">prod-tickets.kolm</span></pre>
 
-    <h2 id="worked">A worked example: 50 engineers on Anthropic.</h2>
-    <p>The math only matters at scale. Here is one team-shaped example to make it concrete.</p>
-    <p><b>Shape:</b> A fifty-person engineering org running an internal customer-support copilot on Claude Opus through Anthropic's API. <b>Volume:</b> approximately eighty thousand calls per month, average two thousand input tokens and four hundred output tokens per call. <b>Bill:</b> roughly twelve thousand dollars per month at current Opus pricing, climbing as the team grows.</p>
+ <h2 id="worked">A worked example: 50 engineers on Anthropic.</h2>
+ <p>The math only matters at scale. Here is one team-shaped example to make it concrete.</p>
+ <p><b>Shape:</b> A fifty-person engineering org running an internal customer-support copilot on Claude Opus through Anthropic's API. <b>Volume:</b> approximately eighty thousand calls per month, average two thousand input tokens and four hundred output tokens per call. <b>Bill:</b> roughly twelve thousand dollars per month at current Opus pricing, climbing as the team grows.</p>
 
-    <table class="ledger">
-      <tr><th>Month</th><th>Frontier calls</th><th>Captured pairs</th><th>Verified pairs</th><th>Local LoRA status</th><th>Frontier spend</th></tr>
-      <tr><td>Month 0</td><td class="v">80,000</td><td class="v">0</td><td class="v">0</td><td>None</td><td class="v">$12,000</td></tr>
-      <tr><td>Month 1</td><td class="v">80,000</td><td class="v">80,000</td><td class="v">62,400 (78%)</td><td>Below threshold</td><td class="v">$12,000</td></tr>
-      <tr><td>Month 2</td><td class="v">80,000</td><td class="v">160,000</td><td class="v">~125k</td><td class="acc">Compiled. K=0.86 on 240-pair holdout. 78% Opus quality.</td><td class="v">$12,000</td></tr>
-      <tr><td>Month 3</td><td class="v">~32,000</td><td class="v">~32,000</td><td class="v">~25k</td><td class="good">60% of traffic served locally. Frontier slice is the long tail.</td><td class="good">$4,800</td></tr>
-      <tr><td>Month 4</td><td class="v">~16,000</td><td class="v">~16,000</td><td class="v">~13k</td><td class="good">80% local. LoRA retrained on tail traffic.</td><td class="good">$2,400</td></tr>
-      <tr><td>Month 12</td><td class="v">~12,000</td><td class="v">~12,000</td><td class="v">~10k</td><td class="good">85% local steady-state. Tail is novel cases &amp; escalations.</td><td class="good">$1,800</td></tr>
-    </table>
+ <table class="ledger">
+ <tr><th>Month</th><th>Frontier calls</th><th>Captured pairs</th><th>Verified pairs</th><th>Local LoRA status</th><th>Frontier spend</th></tr>
+ <tr><td>Month 0</td><td class="v">80,000</td><td class="v">0</td><td class="v">0</td><td>None</td><td class="v">$12,000</td></tr>
+ <tr><td>Month 1</td><td class="v">80,000</td><td class="v">80,000</td><td class="v">62,400 (78%)</td><td>Below threshold</td><td class="v">$12,000</td></tr>
+ <tr><td>Month 2</td><td class="v">80,000</td><td class="v">160,000</td><td class="v">~125k</td><td class="acc">Compiled. K=0.86 on 240-pair holdout. 78% Opus quality.</td><td class="v">$12,000</td></tr>
+ <tr><td>Month 3</td><td class="v">~32,000</td><td class="v">~32,000</td><td class="v">~25k</td><td class="good">60% of traffic served locally. Frontier slice is the long tail.</td><td class="good">$4,800</td></tr>
+ <tr><td>Month 4</td><td class="v">~16,000</td><td class="v">~16,000</td><td class="v">~13k</td><td class="good">80% local. LoRA retrained on tail traffic.</td><td class="good">$2,400</td></tr>
+ <tr><td>Month 12</td><td class="v">~12,000</td><td class="v">~12,000</td><td class="v">~10k</td><td class="good">85% local steady-state. Tail is novel cases &amp; escalations.</td><td class="good">$1,800</td></tr>
+ </table>
 
-    <p>The interesting line is month two. After two months of capture and one distill cycle, this team has a local Phi-3-mini-LoRA that scores K=0.86 on a held-out two-hundred-and-forty-pair eval. A signed gate that says, in plain numbers, <b>"this artifact replicates seventy-eight percent of Opus's behavior on this team's prompts."</b> The artifact runs on a single 5090 at sixty milliseconds per call. The marginal cost per call is electricity.</p>
+ <p>The interesting line is month two. After two months of capture and one distill cycle, this team has a local Phi-3-mini-LoRA that scores K=0.86 on a held-out two-hundred-and-forty-pair eval. A signed gate that says, in plain numbers, <b>"this artifact replicates seventy-eight percent of Opus's behavior on this team's prompts."</b> The artifact runs on a single 5090 at sixty milliseconds per call. The marginal cost per call is electricity.</p>
 
-    <p>From month three onward the proxy routes the easy slice of traffic to the local artifact and only escalates the tail to Opus. The frontier bill compresses to the slice that the local model cannot yet handle. The team keeps capturing on that escalated slice, retrains the LoRA on a quarterly cadence, and the local-served fraction grows.</p>
+ <p>From month three onward the proxy routes the easy slice of traffic to the local artifact and only escalates the tail to Opus. The frontier bill compresses to the slice that the local model cannot yet handle. The team keeps capturing on that escalated slice, retrains the LoRA on a quarterly cadence, and the local-served fraction grows.</p>
 
-    <p><b>Twelve-month total:</b> ~$48k in frontier spend (down from $144k linear), one signed local artifact owned in perpetuity, sub-hundred-millisecond p50 latency on most calls, no PHI or customer data leaving the perimeter on the local-served slice. <b>The frontier bill paid for the artifact.</b> That is the rent-to-own moment.</p>
+ <p><b>Twelve-month total:</b> ~$48k in frontier spend (down from $144k linear), one signed local artifact owned in perpetuity, sub-hundred-millisecond p50 latency on most calls, no PHI or customer data leaving the perimeter on the local-served slice. <b>The frontier bill paid for the artifact.</b> That is the rent-to-own moment.</p>
 
-    <h2 id="legal">The legal frame: who owns what.</h2>
-    <p>The legal question every counsel asks first is whether training a model on frontier-model outputs is permitted. Three things resolve it cleanly:</p>
-    <ul>
-      <li><b>Anthropic and OpenAI both grant the customer ownership of the outputs they paid for</b>, with carve-outs for prompt content and a no-competing-model clause that targets training a general-purpose foundation model. We are not training a competing general model; we are training a task-specific LoRA on the customer's own prompts and the outputs they purchased.</li>
-      <li><b>The artifact is task-specific by construction.</b> The signed manifest names the namespace, the prompt schema, the verifier, and the holdout eval. It is a calculator, not a chatbot. Provider TOS allow this use.</li>
-      <li><b>The customer holds the keys to the artifact.</b> No part of the LoRA is hosted on our infrastructure after delivery. We do not retain rights to it. We do not retrain on it. The customer can run it offline, on-prem, in a SCIF if they want.</li>
-    </ul>
-    <p>Counsel still has to read the relevant TOS for the customer's specific contract tier. We are not a substitute for that. But the structure of capture-and-distill is the structure that the TOS authors clearly contemplated, not a loophole.</p>
+ <h2 id="legal">The legal frame: who owns what.</h2>
+ <p>The legal question every counsel asks first is whether training a model on frontier-model outputs is permitted. Three things resolve it cleanly:</p>
+ <ul>
+ <li><b>Anthropic and OpenAI both grant the customer ownership of the outputs they paid for</b>, with carve-outs for prompt content and a no-competing-model clause that targets training a general-purpose foundation model. We are not training a competing general model; we are training a task-specific LoRA on the customer's own prompts and the outputs they purchased.</li>
+ <li><b>The artifact is task-specific by construction.</b> The signed manifest names the namespace, the prompt schema, the verifier, and the holdout eval. It is a calculator, not a chatbot. Provider TOS allow this use.</li>
+ <li><b>The customer holds the keys to the artifact.</b> No part of the LoRA is hosted on our infrastructure after delivery. We do not retain rights to it. We do not retrain on it. The customer can run it offline, on-prem, in a SCIF if they want.</li>
+ </ul>
+ <p>Counsel still has to read the relevant TOS for the customer's specific contract tier. We are not a substitute for that. But the structure of capture-and-distill is the structure that the TOS authors clearly contemplated, not a loophole.</p>
 
-    <h2 id="privacy">The privacy frame: who sees what.</h2>
-    <p>The capture proxy is a network hop. It sees the prompt and the response in transit. Three things make this safer than it sounds:</p>
-    <ul>
-      <li><b>TLS end-to-end.</b> The proxy terminates TLS, inspects the body for capture, and re-establishes TLS to the upstream provider. No plaintext on disk.</li>
-      <li><b>Tenant-scoped storage.</b> Captured pairs are stored in a database row keyed by tenant id. There is no cross-tenant join path. We never train on captured data without an explicit, per-namespace consent flag flipped on the tenant's account.</li>
-      <li><b>Optional bring-your-own deployment.</b> For regulated buyers (HIPAA, GDPR, ITAR), the capture proxy ships as a docker image you run in your environment. No data ever transits our infrastructure. The compile bridge is the only network hop, and even that becomes optional in the Enterprise tier with the on-prem trainer bundle.</li>
-    </ul>
-    <p>The privacy model is straightforward: we are a passthrough, the data is yours, the artifact is yours, the receipts let you prove it.</p>
+ <h2 id="privacy">The privacy frame: who sees what.</h2>
+ <p>The capture proxy is a network hop. It sees the prompt and the response in transit. Three things make this safer than it sounds:</p>
+ <ul>
+ <li><b>TLS end-to-end.</b> The proxy terminates TLS, inspects the body for capture, and re-establishes TLS to the upstream provider. No plaintext on disk.</li>
+ <li><b>Tenant-scoped storage.</b> Captured pairs are stored in a database row keyed by tenant id. There is no cross-tenant join path. We never train on captured data without an explicit, per-namespace consent flag flipped on the tenant's account.</li>
+ <li><b>Optional bring-your-own deployment.</b> For regulated buyers (HIPAA, GDPR, ITAR), the capture proxy ships as a docker image you run in your environment. No data ever transits our infrastructure. The compile bridge is the only network hop, and even that becomes optional in the Enterprise tier with the on-prem trainer bundle.</li>
+ </ul>
+ <p>The privacy model is straightforward: we are a passthrough, the data is yours, the artifact is yours, the receipts let you prove it.</p>
 
-    <h2 id="receipts">Why the signed receipt matters.</h2>
-    <p>When the artifact ships, it carries a receipt. In v0.2 the receipt is an HMAC-SHA256 chain over (a) the captured corpus content hash, (b) the verifier configuration, (c) the holdout eval set hash, (d) the resulting K-score, (e) the base model identity (and the LoRA delta hash when the runtime-bridge weight path is engaged), and (f) the build environment manifest. The chain is anchored optionally to Sigstore Rekor for cross-organization audit.</p>
-    <p>What this buys you in practice: a counsel review can reproduce the exact dataset that produced the exact LoRA that produced the exact eval score. <b>"Did we train on PII"</b> becomes a query against the receipt, not a forensic exercise. <b>"Has this model drifted"</b> becomes a comparison of two receipts. <b>"Is this the model we deployed"</b> becomes a verify call.</p>
-    <p>The same receipt is the answer to the auditor question that kills most internal-AI projects: <b>what is in this thing.</b> The receipt is the bill of materials. The signature says we did not change it after the fact.</p>
+ <h2 id="receipts">Why the signed receipt matters.</h2>
+ <p>When the artifact ships, it carries a receipt. In v0.2 the receipt is an Ed25519 chain over (a) the captured corpus content hash, (b) the verifier configuration, (c) the holdout eval set hash, (d) the resulting K-score, (e) the base model identity (and the LoRA delta hash when the runtime-bridge weight path is engaged), and (f) the build environment manifest. The chain is anchored optionally to Sigstore Rekor for cross-organization audit.</p>
+ <p>What this buys you in practice: a counsel review can reproduce the exact dataset that produced the exact LoRA that produced the exact eval score. <b>"Did we train on PII"</b> becomes a query against the receipt, not a forensic exercise. <b>"Has this model drifted"</b> becomes a comparison of two receipts. <b>"Is this the model we deployed"</b> becomes a verify call.</p>
+ <p>The same receipt is the answer to the auditor question that kills most internal-AI projects: <b>what is in this thing.</b> The receipt is the bill of materials. The signature says we did not change it after the fact.</p>
 
-    <blockquote>
-      <p>If your local LoRA can answer the question "what data trained you and on what date" with a cryptographic proof, your security review goes from a quarter of meetings to a fifteen-minute conversation.</p>
-    </blockquote>
+ <blockquote>
+ <p>If your local student artifact can answer the question "what data trained you and on what date" with a cryptographic proof, your security review goes from a quarter of meetings to a fifteen-minute conversation.</p>
+ </blockquote>
 
-    <h2 id="vs">vs. fine-tuning, vs. observability, vs. RAG.</h2>
-    <p>Three categories of tool look adjacent on the surface. They are not the same product.</p>
-    <h3>vs. OpenAI / Anthropic fine-tuning.</h3>
-    <p>Fine-tuning hosted by the same provider you are renting from gives you a lower per-call rate but no local artifact. The model still lives in their data center, the data still leaves your perimeter, the latency floor is unchanged, and you are still on the deprecation treadmill. We ship a file. They ship a charge code.</p>
-    <h3>vs. observability tools (LangSmith, Langfuse).</h3>
-    <p>Observability captures for diagnostics: trace, debug, replay. The capture is in the right place but the next move is not "train a local model from these traces." There is no verifier on the captures, no distiller, no signed artifact. We are downstream of where they stop.</p>
-    <h3>vs. RAG.</h3>
-    <p>RAG is the right pattern for situations where the relevant knowledge changes on a daily cadence and you want the frontier model's reasoning over fresh documents. Capture-and-distill is the right pattern for tasks that are stable over months and where the marginal call cost is the binding constraint. <b>They compose.</b> A common deployment shape is a local LoRA for the high-volume routine slice and a frontier-RAG fallback for the long tail and novel queries.</p>
+ <h2 id="vs">vs. fine-tuning, vs. observability, vs. RAG.</h2>
+ <p>Three categories of tool look adjacent on the surface. They are not the same product.</p>
+ <h3>vs. OpenAI / Anthropic fine-tuning.</h3>
+ <p>Fine-tuning hosted by the same provider you are renting from gives you a lower per-call rate but no local artifact. The model still lives in their data center, the data still leaves your perimeter, the latency floor is unchanged, and you are still on the deprecation treadmill. We ship a file. They ship a charge code.</p>
+ <h3>vs. observability tools (LangSmith, Langfuse).</h3>
+ <p>Observability captures for diagnostics: trace, debug, replay. The capture is in the right place but the next move is not "train a local model from these traces." There is no verifier on the captures, no distiller, no signed artifact. We are downstream of where they stop.</p>
+ <h3>vs. RAG.</h3>
+ <p>RAG is the right pattern for situations where the relevant knowledge changes on a daily cadence and you want the frontier model's reasoning over fresh documents. Capture-and-distill is the right pattern for tasks that are stable over months and where the marginal call cost is the binding constraint. <b>They compose.</b> A common deployment shape is a local student artifact for the high-volume routine slice and a frontier-RAG fallback for the long tail and novel queries.</p>
 
-    <div class="figure">
-      <div class="grid">
-        <div class="row"><span>capture surface</span><span class="v">drop-in proxy</span></div>
-        <div class="row"><span>training data</span><span class="v">verified pairs (yours)</span></div>
-        <div class="row"><span>output artifact</span><span class="v acc">signed .kolm LoRA</span></div>
-        <div class="row"><span>where it runs</span><span class="v">your hardware</span></div>
-        <div class="row"><span>what it costs to call</span><span class="v good">electricity</span></div>
-        <div class="row"><span>what stays at the frontier</span><span class="v">long-tail escalations</span></div>
-      </div>
-      <div class="cap">capture-and-distill, end to end. The proxy compounds. The artifact persists.</div>
-    </div>
+ <div class="figure">
+ <div class="grid">
+ <div class="row"><span>capture surface</span><span class="v">drop-in proxy</span></div>
+ <div class="row"><span>training data</span><span class="v">verified pairs (yours)</span></div>
+ <div class="row"><span>output artifact</span><span class="v acc">signed .kolm LoRA</span></div>
+ <div class="row"><span>where it runs</span><span class="v">your hardware</span></div>
+ <div class="row"><span>what it costs to call</span><span class="v good">electricity</span></div>
+ <div class="row"><span>what stays at the frontier</span><span class="v">long-tail escalations</span></div>
+ </div>
+ <div class="cap">capture-and-distill, end to end. The proxy compounds. The artifact persists.</div>
+ </div>
 
-    <h2 id="starthere">Start here.</h2>
-    <p>Two ways in. <b>Smallest commitment:</b> install the CLI, point one of your existing services at the capture endpoint for a week, run <code>kolm capture status</code> to see what your verified pair count looks like. There is no charge for capture under a hundred thousand pairs per month. <b>Larger commitment:</b> book a thirty-minute design-partner call and we will scope a namespace plan with your team, including the bring-your-own-VPC option if your data residency requires it.</p>
+ <h2 id="starthere">Start here.</h2>
+ <p>Two ways in. <b>Smallest commitment:</b> install the CLI, point one of your existing services at the capture endpoint for a week, run <code>kolm capture status</code> to see what your verified pair count looks like. There is no charge for capture under a hundred thousand pairs per month. <b>Larger commitment:</b> book a thirty-minute design-partner call and we will scope a namespace plan with your team, including the bring-your-own-VPC option if your data residency requires it.</p>
 
-    <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
+ <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
 kolm config base <span class="arg">https://kolm.ai</span>
 kolm login
 
 <span class="com"># 30 seconds in:</span>
 kolm capture --provider anthropic --as <span class="arg">first-run</span></pre>
 
-    <p>The capture endpoint is what makes the rest possible. Once your existing traffic is flowing through it, every other piece (the labels endpoint, the distill bridge, the receipt, the K-score) is one CLI call away. <b>The first call you proxy through the capture is the first dollar that goes from rent to deposit.</b></p>
+ <p>The capture endpoint is what makes the rest possible. Once your existing traffic is flowing through it, every other piece (the labels endpoint, the distill bridge, the receipt, the K-score) is one CLI call away. <b>The first call you proxy through the capture is the first dollar that goes from rent to deposit.</b></p>
 
-    <div class="signpost">
-      <a href="/use-cases/capture-and-distill">
-        <span class="lab">use case</span>
-        <span class="v">Capture &amp; distill <span class="arrow">&rarr;</span></span>
-        <p>The end-to-end shape, with the four endpoints and the CLI surface laid out.</p>
-      </a>
-      <a href="/articles/k-sample-verified-inference">
-        <span class="lab">read</span>
-        <span class="v">K-sample verified inference <span class="arrow">&rarr;</span></span>
-        <p>The verifier behind every captured label. Why the dataset is trustworthy.</p>
-      </a>
-      <a href="/k-score">
-        <span class="lab">measure</span>
-        <span class="v">The K-score, defined <span class="arrow">&rarr;</span></span>
-        <p>The release gate that tells you when the local artifact is ready to retire a slice of traffic.</p>
-      </a>
-      <a href="/articles/ai-compiler">
-        <span class="lab">read</span>
-        <span class="v">What an AI compiler is <span class="arrow">&rarr;</span></span>
-        <p>The compile step that turns the verified corpus into a signed local artifact.</p>
-      </a>
-    </div>
+ <div class="signpost">
+ <a href="/use-cases/capture-and-distill">
+ <span class="lab">use case</span>
+ <span class="v">Capture &amp; distill <span class="arrow">&rarr;</span></span>
+ <p>The end-to-end shape, with the four endpoints and the CLI surface laid out.</p>
+ </a>
+ <a href="/articles/k-sample-verified-inference">
+ <span class="lab">read</span>
+ <span class="v">K-sample verified inference <span class="arrow">&rarr;</span></span>
+ <p>The verifier behind every captured label. Why the dataset is trustworthy.</p>
+ </a>
+ <a href="/k-score">
+ <span class="lab">measure</span>
+ <span class="v">The K-score, defined <span class="arrow">&rarr;</span></span>
+ <p>The release gate that tells you when the local artifact is ready to retire a slice of traffic.</p>
+ </a>
+ <a href="/articles/ai-compiler">
+ <span class="lab">read</span>
+ <span class="v">What an AI compiler is <span class="arrow">&rarr;</span></span>
+ <p>The compile step that turns the verified corpus into a signed local artifact.</p>
+ </a>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

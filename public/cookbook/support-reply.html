@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Support reply recipe · kolm cookbook</title>
+<title>Support reply recipe · kolm cookbook · kolm.ai</title>
 <meta name="description" content="Compile a signed local model that drafts a support reply matching your brand voice. 200 gold pairs, brand-voice verifier, runs offline.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Support-reply recipe">
-<meta property="og:description" content="Local support draft writer. Brand voice, never invents fixes. Signed, offline.">
-<meta property="og:type" content="article">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Support-reply recipe" />
-<meta name="twitter:description" content="Local support draft writer. Brand voice, never invents fixes. Signed, offline." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:title" content="Support reply recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Compile a signed local model that drafts a support reply matching your brand voice. 200 gold pairs, brand-voice verifier, runs offline.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Support reply recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Compile a signed local model that drafts a support reply matching your brand voice. 200 gold pairs, brand-voice verifier, runs offline.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/cookbook/support-reply">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/cookbook/support-reply">
@@ -26,263 +26,264 @@
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "HowTo",
-      "name": "Support-reply recipe",
-      "description": "Local support draft writer. Brand voice, never invents fixes. Signed, offline.",
-      "url": "https://kolm.ai/cookbook/support-reply",
-      "totalTime": "PT5M",
-      "tool": [
-        {
-          "@type": "HowToTool",
-          "name": "kolm CLI"
-        }
-      ],
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install",
-          "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Compile",
-          "text": "kolm compile support-reply.toml"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Run",
-          "text": "kolm run support-reply.kolm"
-        }
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "kolm",
-          "item": "https://kolm.ai/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Cookbook",
-          "item": "https://kolm.ai/cookbook"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Support reply recipe",
-          "item": "https://kolm.ai/cookbook/support-reply"
-        }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "Support-reply recipe",
+ "description": "Local support draft writer. Brand voice, never invents fixes. Signed, offline.",
+ "url": "https://kolm.ai/cookbook/support-reply",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile support-reply.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run support-reply.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Support reply recipe",
+ "item": "https://kolm.ai/cookbook/support-reply"
+ }
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <div class="crumbs"><a href="/docs">cookbook</a> &middot; product &middot; support-reply</div>
-    <span class="pill">Recipe &middot; product</span>
-    <h1>Support replies <span class="tone">in your voice.</span></h1>
-    <p class="lede">A local <code>.kolm</code> file that drafts a support reply for an inbound ticket. Trained on 200 of your team's actual replies, so the voice matches what your customers expect from you. The verifier rejects outputs that promise things outside your KB or invent product behavior.</p>
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; product &middot; support-reply</div>
+ <span class="pill">Recipe &middot; product</span>
+ <h1>Support replies <span class="tone">in your voice.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that drafts a support reply for an inbound ticket. Trained on 200 of your team's actual replies, so the voice matches what your customers expect from you. The verifier rejects outputs that promise things outside your KB or invent product behavior.</p>
 
-    <div class="meta-row">
-      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-7b-instruct</span></div>
-      <div class="item"><span class="label">gold pairs</span><span class="value">200 (140 train / 60 eval)</span></div>
-      <div class="item"><span class="label">k-score floor</span><span class="value">0.82</span></div>
-      <div class="item"><span class="label">artifact size</span><span class="value">2.6 GB</span></div>
-      <div class="item"><span class="label">compile time</span><span class="value">~34 min</span></div>
-      <div class="item"><span class="label">spec source</span><span class="value">KB grounding + style verifier</span></div>
-    </div>
-  </div>
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">qwen2.5-7b-instruct</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">200 (140 train / 60 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.82</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">2.6 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~34 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">KB grounding + style verifier</span></div>
+ </div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="group">
-      <h2>What this recipe does</h2>
-      <p>Drafts a first-pass reply, never the final send. Output goes into the support agent's draft window, not directly to the customer. The verifier enforces that any factual claim in the reply (a feature exists, a behavior is intended, a fix is available) is grounded in your KB corpus · outputs that promise something the KB doesn't say are dropped from training.</p>
-    </div>
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>Drafts a first-pass reply, never the final send. Output goes into the support agent's draft window, not directly to the customer. The verifier enforces that any factual claim in the reply (a feature exists, a behavior is intended, a fix is available) is grounded in your KB corpus · outputs that promise something the KB doesn't say are dropped from training.</p>
+ </div>
 
-    <div class="group">
-      <h2>The spec</h2>
-      <pre class="code">{
-  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
-  <span class="k">"schema"</span>: {
-    <span class="k">"required"</span>: [<span class="k">"reply"</span>, <span class="k">"kb_articles_cited"</span>, <span class="k">"requires_human_review"</span>],
-    <span class="k">"properties"</span>: {
-      <span class="k">"reply"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 1200 },
-      <span class="k">"kb_articles_cited"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} },
-      <span class="k">"requires_human_review"</span>: { <span class="k">"type"</span>: <span class="k">"boolean"</span> },
-      <span class="k">"sentiment"</span>: { <span class="k">"enum"</span>: [<span class="k">"calm"</span>, <span class="k">"frustrated"</span>, <span class="k">"angry"</span>, <span class="k">"praise"</span>] }
-    }
-  },
-  <span class="k">"verifier"</span>: {
-    <span class="k">"kb_corpus"</span>: <span class="k">"kb/"</span>,
-    <span class="k">"factual_claim_must_be_grounded"</span>: <span class="ok">true</span>,
-    <span class="k">"style_corpus"</span>: <span class="k">"prior-replies/"</span>,
-    <span class="k">"escalate_on_anger"</span>: <span class="ok">true</span>
-  }
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"reply"</span>, <span class="k">"kb_articles_cited"</span>, <span class="k">"requires_human_review"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"reply"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 1200 },
+ <span class="k">"kb_articles_cited"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} },
+ <span class="k">"requires_human_review"</span>: { <span class="k">"type"</span>: <span class="k">"boolean"</span> },
+ <span class="k">"sentiment"</span>: { <span class="k">"enum"</span>: [<span class="k">"calm"</span>, <span class="k">"frustrated"</span>, <span class="k">"angry"</span>, <span class="k">"praise"</span>] }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"kb_corpus"</span>: <span class="k">"kb/"</span>,
+ <span class="k">"factual_claim_must_be_grounded"</span>: <span class="ok">true</span>,
+ <span class="k">"style_corpus"</span>: <span class="k">"prior-replies/"</span>,
+ <span class="k">"escalate_on_anger"</span>: <span class="ok">true</span>
+ }
 }</pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>Gold pairs (1 of 200 shown)</h2>
+ <div class="group">
+ <h2>Gold pairs (1 of 200 shown)</h2>
 
-      <div class="pair">
-        <div class="pair-h">input</div>
-        <pre class="code">subject: export to CSV broken
+ <div class="pair">
+ <div class="pair-h">input</div>
+ <pre class="code">subject: export to CSV broken
 body: I tried exporting my saved list to CSV and got a 502. Tried 3 times,
 same result. This used to work last week. Pretty frustrating, I have a
 deadline today.</pre>
-        <div class="pair-h">output</div>
-        <pre class="code">{
-  <span class="k">"reply"</span>: <span class="k">"Thanks for the report · sorry that hit you under deadline. The CSV export endpoint had an issue this morning that we shipped a fix for at 14:22 PT. If you can retry the export now, it should work; if you still see the 502 in the next 10 minutes, reply to this thread and I'll pull it up myself. As a backup, the JSON export at /export/saved.json includes the same fields and we can convert it for you if you prefer."</span>,
-  <span class="k">"kb_articles_cited"</span>: [<span class="k">"kb/exports.md#csv"</span>, <span class="k">"kb/exports.md#json-fallback"</span>],
-  <span class="k">"requires_human_review"</span>: <span class="ok">false</span>,
-  <span class="k">"sentiment"</span>: <span class="k">"frustrated"</span>
+ <div class="pair-h">output</div>
+ <pre class="code">{
+ <span class="k">"reply"</span>: <span class="k">"Thanks for the report · sorry that hit you under deadline. The CSV export endpoint had an issue this morning that we shipped a fix for at 14:22 PT. If you can retry the export now, it should work; if you still see the 502 in the next 10 minutes, reply to this thread and I'll pull it up myself. As a backup, the JSON export at /export/saved.json includes the same fields and we can convert it for you if you prefer."</span>,
+ <span class="k">"kb_articles_cited"</span>: [<span class="k">"kb/exports.md#csv"</span>, <span class="k">"kb/exports.md#json-fallback"</span>],
+ <span class="k">"requires_human_review"</span>: <span class="ok">false</span>,
+ <span class="k">"sentiment"</span>: <span class="k">"frustrated"</span>
 }</pre>
-      </div>
-    </div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Compile</h2>
-      <pre class="code">kolm compile <span class="k">"draft support reply, KB-grounded, brand voice"</span> \
-  --base qwen2.5-7b-instruct \
-  --pairs pairs.jsonl \
-  --kb-corpus kb/ \
-  --style-corpus prior-replies/ \
-  --verifier ground-and-style \
-  --k-floor 0.82 \
-  --output support-reply.kolm
+ <div class="group">
+ <h2>Compile</h2>
+ <pre class="code">kolm compile <span class="k">"draft support reply, KB-grounded, brand voice"</span> \
+ --base qwen2.5-7b-instruct \
+ --pairs pairs.jsonl \
+ --kb-corpus kb/ \
+ --style-corpus prior-replies/ \
+ --verifier ground-and-style \
+ --k-floor 0.82 \
+ --output support-reply.kolm
 
 <span class="ok">ok</span> wrote <span class="k">support-reply.kolm</span>
-   k_score=0.85  signature=hmac-sha256</pre>
-    </div>
+ k_score=0.85 signature=ed25519</pre>
+ </div>
 
-    <div class="group">
-      <h2>K-score gate</h2>
-      <div class="k-bar">
-        <span class="k-label">K-score</span>
-        <span class="k-value">0.85</span>
-        <span class="k-detail">held-out 60 tickets &middot; ground-pass 96% &middot; style-match 91% &middot; agent-edit-distance &lt; 20% on 78%</span>
-      </div>
-      <p>"Edit-distance &lt; 20%" is the practical metric: 78% of held-out replies needed less than 20% character-level edits before the agent sent them. The remaining 22% needed more substantive rework or were flagged for escalation.</p>
-    </div>
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.85</span>
+ <span class="k-detail">held-out 60 tickets &middot; ground-pass 96% &middot; style-match 91% &middot; agent-edit-distance &lt; 20% on 78%</span>
+ </div>
+ <p>"Edit-distance &lt; 20%" is the practical metric: 78% of held-out replies needed less than 20% character-level edits before the agent sent them. The remaining 22% needed more substantive rework or were flagged for escalation.</p>
+ </div>
 
-    <div class="group">
-      <h2>Run-time profile</h2>
-      <div class="lat-grid">
-        <div class="cell"><div class="h">M2 MacBook</div><div class="v">2.0<span class="u">s</span></div></div>
-        <div class="cell"><div class="h">RTX 5090</div><div class="v">470<span class="u">ms</span></div></div>
-        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">5.4<span class="u">s</span></div></div>
-        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">6.8<span class="u">s</span></div></div>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">M2 MacBook</div><div class="v">2.0<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">470<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">5.4<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">6.8<span class="u">s</span></div></div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Deploy</h2>
-      <pre class="code"><span class="c"># zendesk app · drops a draft into the agent's reply pane:</span>
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># zendesk app · drops a draft into the agent's reply pane:</span>
 client.on(<span class="k">'ticket.opened'</span>, async (t) =&gt; {
-  const draft = await kolm.run(<span class="k">'support-reply.kolm'</span>, {
-    subject: t.subject, body: t.body, customer_tier: t.requester.tier,
-  });
-  if (draft.requires_human_review) ZAFClient.routeTo(<span class="k">'tier-2'</span>);
-  else ZAFClient.draftReply(draft.reply);
+ const draft = await kolm.run(<span class="k">'support-reply.kolm'</span>, {
+ subject: t.subject, body: t.body, customer_tier: t.requester.tier,
+ });
+ if (draft.requires_human_review) ZAFClient.routeTo(<span class="k">'tier-2'</span>);
+ else ZAFClient.draftReply(draft.reply);
 });</pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>Related recipes</h2>
-      <div class="related">
-        <a href="/cookbook/feature-spec-from-issue"><div class="h">Feature spec</div><div class="d">GitHub issue →4-section spec.</div></a>
-        <a href="/cookbook/pricing-quote"><div class="h">Pricing quote</div><div class="d">Customer info →reconciled quote.</div></a>
-        <a href="/cookbook/nps-classifier"><div class="h">NPS classifier</div><div class="d">Free-text response →score + theme.</div></a>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/feature-spec-from-issue"><div class="h">Feature spec</div><div class="d">GitHub issue →4-section spec.</div></a>
+ <a href="/cookbook/pricing-quote"><div class="h">Pricing quote</div><div class="d">Customer info →reconciled quote.</div></a>
+ <a href="/cookbook/nps-classifier"><div class="h">NPS classifier</div><div class="d">Free-text response →score + theme.</div></a>
+ </div>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

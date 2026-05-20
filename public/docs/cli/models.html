@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm models &middot; kolm.ai</title>
-<meta name="description" content="kolm models inspects the frontier catalog and pre-caches model weights from HuggingFace. list, info, recommend, pin, devices, plus the weights manifest and tier-keyed prefetch.">
+<title>kolm models command · kolm.ai</title>
+<meta name="description" content="kolm models inspects the frontier catalog and pre-caches model weights from HuggingFace. list, info, recommend, pin, devices, plus the weights manifest and...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="kolm models &middot; kolm.ai">
-<meta property="og:description" content="Inspect the frontier catalog and pre-cache model weights from HuggingFace.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="kolm models command · kolm.ai">
+<meta property="og:description" content="kolm models inspects the frontier catalog and pre-caches model weights from HuggingFace. list, info, recommend, pin, devices, plus the weights manifest and...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/cli/models">
-<meta property="og:image" content="https://kolm.ai/og/docs-cli-models.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="kolm models &middot; kolm.ai">
-<meta name="twitter:description" content="Inspect the frontier catalog and pre-cache model weights.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-cli-models.svg">
+<meta name="twitter:title" content="kolm models command · kolm.ai">
+<meta name="twitter:description" content="kolm models inspects the frontier catalog and pre-caches model weights from HuggingFace. list, info, recommend, pin, devices, plus the weights manifest and...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/cli/models">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm models","description":"Inspect the frontier model catalog and pre-cache GGUF weights from HuggingFace.","url":"https://kolm.ai/docs/cli/models","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -61,13 +61,14 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, not the Kolm band, not Petter Kolm.</span>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -77,35 +78,35 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Inspect the frontier catalog and pre-cache model weights from HuggingFace. Two halves: catalog verbs (<code>list</code>, <code>info</code>, <code>recommend</code>, <code>pin</code>, <code>devices</code>, <code>frontier</code>, <code>tiers</code>, <code>show</code>, <code>verify</code>) that read the local registry; weights verbs (<code>manifest</code>, <code>pull</code>, <code>prefetch</code>, <code>cache</code>) that stream GGUF files into <code>~/.kolm/models</code>.</p>
 
 <h2 id="catalog">Catalog</h2>
-<pre><code>kolm models list                            local model registry
-kolm models info &lt;id&gt;                       one-row inspection
-kolm models recommend                       pick a model for this machine
-kolm models pin &lt;id&gt;                        pin the active default
-kolm models devices                         show registered devices for this row
-kolm models frontier                        list verified frontier rows
-kolm models tiers                           list hardware tier presets
-kolm models show &lt;id&gt;                       per-row inspection (frontier)
-kolm models verify                          re-fetch source URLs, fail on 4xx/5xx</code></pre>
+<pre><code>kolm models list local model registry
+kolm models info &lt;id&gt; one-row inspection
+kolm models recommend pick a model for this machine
+kolm models pin &lt;id&gt; pin the active default
+kolm models devices show registered devices for this row
+kolm models frontier list verified frontier rows
+kolm models tiers list hardware tier presets
+kolm models show &lt;id&gt; per-row inspection (frontier)
+kolm models verify re-fetch source URLs, fail on 4xx/5xx</code></pre>
 
 <h2 id="weights">Weights</h2>
-<pre><code>kolm models manifest [--tier=&lt;t&gt;] [--json]            print the GGUF manifest
-kolm models pull &lt;id&gt; [--variant=&lt;q&gt;]                 download one variant
-kolm models prefetch [--tier=&lt;t&gt;] [--concurrency N]   pull every variant in a tier
-kolm models cache list [--json]                       what is on disk
-kolm models cache clear [&lt;id&gt;]                        delete one model or all
-kolm models cache rescan                              rebuild index.json from disk</code></pre>
+<pre><code>kolm models manifest [--tier=&lt;t&gt;] [--json] print the GGUF manifest
+kolm models pull &lt;id&gt; [--variant=&lt;q&gt;] download one variant
+kolm models prefetch [--tier=&lt;t&gt;] [--concurrency N] pull every variant in a tier
+kolm models cache list [--json] what is on disk
+kolm models cache clear [&lt;id&gt;] delete one model or all
+kolm models cache rescan rebuild index.json from disk</code></pre>
 
 <h2 id="tiers">Tiers</h2>
 <p>Tiers are keyed off the GGUF download size, not the GPU class. Pick the one that fits the disk and bandwidth you can spare.</p>
 <table>
-  <thead><tr><th>Tier</th><th>Typical models</th><th>Rough size</th></tr></thead>
-  <tbody>
-    <tr><td><code>edge</code></td><td>SmolLM2-1.7B, Qwen 2.5 0.5B / 1.5B, Phi 3.5 mini</td><td>~7 GB</td></tr>
-    <tr><td><code>mobile</code></td><td>Gemma 2 2B, Phi 3.5 mini, Llama 3.2 3B</td><td>~6 GB</td></tr>
-    <tr><td><code>laptop</code></td><td>Qwen 2.5 7B, Llama 3.1 8B</td><td>~10 GB</td></tr>
-    <tr><td><code>workstation</code></td><td>Qwen 2.5 14B / 32B, Llama 3.3 70B Q4</td><td>~50 GB</td></tr>
-    <tr><td><code>datacenter</code></td><td>Qwen 2.5 72B fp16, larger MoE variants</td><td>~140 GB</td></tr>
-  </tbody>
+ <thead><tr><th>Tier</th><th>Typical models</th><th>Rough size</th></tr></thead>
+ <tbody>
+ <tr><td><code>edge</code></td><td>SmolLM2-1.7B, Qwen 2.5 0.5B / 1.5B, Phi 3.5 mini</td><td>~7 GB</td></tr>
+ <tr><td><code>mobile</code></td><td>Gemma 2 2B, Phi 3.5 mini, Llama 3.2 3B</td><td>~6 GB</td></tr>
+ <tr><td><code>laptop</code></td><td>Qwen 2.5 7B, Llama 3.1 8B</td><td>~10 GB</td></tr>
+ <tr><td><code>workstation</code></td><td>Qwen 2.5 14B / 32B, Llama 3.3 70B Q4</td><td>~50 GB</td></tr>
+ <tr><td><code>datacenter</code></td><td>Qwen 2.5 72B fp16, larger MoE variants</td><td>~140 GB</td></tr>
+ </tbody>
 </table>
 
 <h2 id="examples">Examples</h2>
@@ -127,23 +128,23 @@ kolm models cache rescan</code></pre>
 
 <h2 id="see">Related</h2>
 <div class="related">
-  <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
-  <a href="/models"><b>/models</b><span>Public catalog page. The pre-cached weights section reads the same manifest live.</span></a>
-  <a href="/docs/cli/quantize"><b>/docs/cli/quantize</b><span>Quantize a downloaded checkpoint via the local worker.</span></a>
-  <a href="/docs/distill"><b>/docs/distill</b><span>Auto-distill a captured namespace into a local LoRA against a chosen base.</span></a>
-  <a href="/docs/cli/seeds"><b>/docs/cli/seeds</b><span>Scaffold seeds.jsonl that feeds compile and distill against these models.</span></a>
+ <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
+ <a href="/models"><b>/models</b><span>Public catalog page. The pre-cached weights section reads the same manifest live.</span></a>
+ <a href="/docs/cli/quantize"><b>/docs/cli/quantize</b><span>Quantize a downloaded checkpoint via the local worker.</span></a>
+ <a href="/docs/distill"><b>/docs/distill</b><span>Auto-distill a captured namespace into a local student artifact against a chosen base.</span></a>
+ <a href="/docs/cli/seeds"><b>/docs/cli/seeds</b><span>Scaffold seeds.jsonl that feeds compile and distill against these models.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 kolm.ai</span>
-  &middot;
-  <a href="/security">Security</a>
-  &middot;
-  <a href="/pricing">Pricing</a>
-  &middot;
-  <a href="/docs">Docs</a>
+ <span>&copy; 2026 kolm.ai</span>
+ &middot;
+ <a href="/security">Security</a>
+ &middot;
+ <a href="/pricing">Pricing</a>
+ &middot;
+ <a href="/docs">Docs</a>
 </div></footer>
 
 </body>

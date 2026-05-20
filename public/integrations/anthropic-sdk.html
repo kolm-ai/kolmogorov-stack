@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Anthropic SDK &middot; kolm.ai</title>
+<title>Anthropic SDK · kolm.ai</title>
 <meta name="description" content="Use the Anthropic Python and JavaScript SDKs against kolm.ai with a one-line base URL change. Captures, redaction, and signed receipts come along for free.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Anthropic SDK &middot; kolm.ai">
-<meta property="og:description" content="One line: set base_url. Your existing Anthropic code now flows through kolm.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Anthropic SDK · kolm.ai">
+<meta property="og:description" content="Use the Anthropic Python and JavaScript SDKs against kolm.ai with a one-line base URL change. Captures, redaction, and signed receipts come along for free.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations/anthropic-sdk">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Anthropic SDK &middot; kolm.ai">
-<meta name="twitter:description" content="One config change. Point the Anthropic SDK at kolm.">
+<meta name="twitter:title" content="Anthropic SDK · kolm.ai">
+<meta name="twitter:description" content="Use the Anthropic Python and JavaScript SDKs against kolm.ai with a one-line base URL change. Captures, redaction, and signed receipts come along for free.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/integrations/anthropic-sdk">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -54,12 +54,13 @@ pre.code{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-ra
 footer{padding:36px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &ndash; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
+ <a class="logo" href="/">kolm.ai</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -215,69 +216,69 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <main id="main">
 
 <section class="hero"><div class="wrap">
-  <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / anthropic sdk</div>
-  <h1>The Anthropic SDK, pointed at kolm.</h1>
-  <p class="lede">Change one line. Your existing Anthropic Python or JavaScript code keeps working &ndash; the calls now flow through kolm.ai. Every prompt is captured, the redaction membrane runs in-line, and the response carries a signed receipt header. Same SDK. Same Messages API. New compiler underneath.</p>
+ <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / anthropic sdk</div>
+ <h1>The Anthropic SDK, pointed at kolm.</h1>
+ <p class="lede">Change one line. Your existing Anthropic Python or JavaScript code keeps working &ndash; the calls now flow through kolm.ai. Every prompt is captured, the redaction membrane runs in-line, and the response carries a signed receipt header. Same SDK. Same Messages API. New compiler underneath.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>How it works in one paragraph</h2>
-  <p>kolm.ai speaks the Anthropic Messages API on the wire. The SDK sees a normal HTTPS endpoint at <code>https://kolm.ai/v1/anthropic</code> with the same <code>x-api-key</code> header. Set <code>base_url</code> (Python) or <code>baseURL</code> (JS), use your <code>ks_...</code> key, and every <code>messages.create</code> call is forwarded. The capture log writes durably before the response returns, and <code>x-kolm-capture-durable: true</code> appears in the response headers when the row reached the lake.</p>
+ <h2>How it works in one paragraph</h2>
+ <p>kolm.ai speaks the Anthropic Messages API on the wire through <code>https://kolm.ai/v1/capture/anthropic</code>. Set <code>base_url</code> (Python) or <code>baseURL</code> (JS), use your <code>ks_...</code> key for the Kolm client key, and pass the real Anthropic key in <code>x-upstream-api-key</code> or <code>x-anthropic-api-key</code>. Every <code>messages.create</code> call is forwarded. The capture log writes durably before the response returns, and <code>x-kolm-capture-durable: true</code> appears in the response headers when the row reached the lake.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Python &ndash; one line</h2>
-  <p>Install the official Anthropic SDK. Pass <code>base_url</code> + <code>api_key</code> at client construction. Streaming, tool use, and vision behave exactly the way the Anthropic SDK behaves.</p>
-  <div class="tabs"><span>python &ndash; anthropic &gt;= 0.30</span></div>
+ <h2>Python &ndash; one line</h2>
+ <p>Install the official Anthropic SDK. Pass <code>base_url</code> + <code>api_key</code> at client construction. Streaming, tool use, and vision behave exactly the way the Anthropic SDK behaves.</p>
+ <div class="tabs"><span>python &ndash; anthropic &gt;= 0.30</span></div>
 <pre class="code">from anthropic import Anthropic
 
 client = Anthropic(
-    base_url="https://kolm.ai/v1/anthropic",
-    api_key="ks_live_...",   # your kolm API key
+ base_url="https://kolm.ai/v1/capture/anthropic",
+ api_key="ks_live_...", # your kolm API key
 )
 
 resp = client.messages.create(
-    model="claude-3-5-sonnet-latest",
-    max_tokens=1024,
-    messages=[{"role": "user", "content": "Summarize this PR: ..."}],
+ model="claude-3-5-sonnet-latest",
+ max_tokens=1024,
+ messages=[{"role": "user", "content": "Summarize this PR: ..."}],
 )
 
 print(resp.content[0].text)</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>JavaScript / TypeScript &ndash; one line</h2>
-  <p>Same idea on Node. The <code>baseURL</code> field is the entire change.</p>
-  <div class="tabs"><span>node &ndash; @anthropic-ai/sdk &gt;= 0.30</span></div>
+ <h2>JavaScript / TypeScript &ndash; one line</h2>
+ <p>Same idea on Node. The <code>baseURL</code> field is the entire change.</p>
+ <div class="tabs"><span>node &ndash; @anthropic-ai/sdk &gt;= 0.30</span></div>
 <pre class="code">import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic({
-  baseURL: "https://kolm.ai/v1/anthropic",
-  apiKey: process.env.KOLM_API_KEY,
+ baseURL: "https://kolm.ai/v1/capture/anthropic",
+ apiKey: process.env.KOLM_API_KEY,
 });
 
 const resp = await client.messages.create({
-  model: "claude-3-5-sonnet-latest",
-  max_tokens: 1024,
-  messages: [{ role: "user", content: "Summarize this PR: ..." }],
+ model: "claude-3-5-sonnet-latest",
+ max_tokens: 1024,
+ messages: [{ role: "user", content: "Summarize this PR: ..." }],
 });
 
 console.log(resp.content[0].text);</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Where to go next</h2>
-  <div class="related">
-    <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. Capture, compile, replay, verify.</span></a>
-    <a href="/captures"><b>Captures inbox &rarr;</b><span>See your prompts as they land. Filter by namespace.</span></a>
-    <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
-  </div>
+ <h2>Where to go next</h2>
+ <div class="related">
+ <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. Capture, compile, replay, verify.</span></a>
+ <a href="/captures"><b>Captures inbox &rarr;</b><span>See your prompts as they land. Filter by namespace.</span></a>
+ <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
+ </div>
 </div></section>
 
 </main>
 
 <footer><div class="wrap">
-  <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
 </div></footer>
 </body>
 </html>

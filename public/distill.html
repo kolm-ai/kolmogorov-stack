@@ -6,22 +6,22 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Distillation · kolm.ai</title>
-<meta name="description" content="Distillation in kolm.ai: compress captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from fine-tuning and from compilation. One CLI verb runs the 7-step pipeline.">
+<meta name="description" content="Distillation in kolm.ai: compress captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from...">
 <meta name="keywords" content="distillation, model distillation, ai distillation, kolm distill, knowledge distillation, specialist model, teacher student, captured prompts">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="Distillation &middot; kolm.ai">
-<meta property="og:description" content="Compress captured prompts into a smaller specialist, frozen at a K-score threshold. One command runs the 7-step pipeline.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Distillation · kolm.ai">
+<meta property="og:description" content="Distillation in kolm.ai: compress captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/distill">
-<meta property="og:image" content="https://kolm.ai/og/distill.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Distillation &middot; kolm.ai">
-<meta name="twitter:description" content="Compress captured prompts into a smaller specialist, frozen at a K-score threshold.">
-<meta name="twitter:image" content="https://kolm.ai/og/distill.svg">
+<meta name="twitter:title" content="Distillation · kolm.ai">
+<meta name="twitter:description" content="Distillation in kolm.ai: compress captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/distill">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
@@ -29,17 +29,17 @@
 <script defer src="/nav.js"></script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Distillation: compress captured prompts into a smaller specialist model",
-  "description": "Distillation in kolm.ai compresses captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from fine-tuning and from compilation.",
-  "datePublished": "2026-05-18",
-  "dateModified": "2026-05-18",
-  "author": { "@type": "Organization", "name": "kolm.ai" },
-  "publisher": { "@type": "Organization", "name": "kolm.ai" },
-  "image": "https://kolm.ai/og/distill.svg",
-  "url": "https://kolm.ai/distill",
-  "mainEntityOfPage": "https://kolm.ai/distill"
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "Distillation: compress captured prompts into a smaller specialist model",
+ "description": "Distillation in kolm.ai compresses captured prompt and response pairs into a smaller specialist model, frozen at a K-score threshold. Different from fine-tuning and from compilation.",
+ "datePublished": "2026-05-18",
+ "dateModified": "2026-05-18",
+ "author": { "@type": "Organization", "name": "kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm.ai" },
+ "image": "https://kolm.ai/og/distill.svg",
+ "url": "https://kolm.ai/distill",
+ "mainEntityOfPage": "https://kolm.ai/distill"
 }
 </script>
 <style>
@@ -76,14 +76,15 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 .pipeline .step b{display:block;color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
 .pipeline .step span{color:var(--ink-mute)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>
 
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -234,11 +235,11 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions">
-      <a href="/signin">Sign in</a>
-      <a class="cta-btn" href="/train">Compile &rarr;</a>
-    </div>
-  </div>
+ <div class="site-actions">
+ <a href="/signin">Sign in</a>
+ <a class="cta-btn" href="/train">Compile &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <main id="main">
@@ -260,13 +261,13 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 
 <h2 id="pipeline">The 7-step pipeline</h2>
 <div class="pipeline">
-  <div class="step"><b>1. Mining</b><span>Cluster captures by template hash, pick the dominant cluster as the training spine.</span></div>
-  <div class="step"><b>2. Augment</b><span>Generate paraphrases and edge cases to widen the cluster without changing its semantics.</span></div>
-  <div class="step"><b>3. Active select</b><span>Down-sample to the rows that best cover the cluster's decision surface.</span></div>
-  <div class="step"><b>4. Sanitize</b><span>Strip PHI, secrets, and other class-banned tokens via the configured redactor.</span></div>
-  <div class="step"><b>5. Seeds</b><span>Materialize the sanitized rows as a deterministic <code>seeds.jsonl</code>.</span></div>
-  <div class="step"><b>6. Train</b><span>Run the trainer bridge (LoRA or full fine-tune) against the base model on the seeds.</span></div>
-  <div class="step"><b>7. Score</b><span>Evaluate the trained specialist on a frozen holdout. Ship only if K-score crosses the threshold.</span></div>
+ <div class="step"><b>1. Mining</b><span>Cluster captures by template hash, pick the dominant cluster as the training spine.</span></div>
+ <div class="step"><b>2. Augment</b><span>Generate paraphrases and edge cases to widen the cluster without changing its semantics.</span></div>
+ <div class="step"><b>3. Active select</b><span>Down-sample to the rows that best cover the cluster's decision surface.</span></div>
+ <div class="step"><b>4. Sanitize</b><span>Strip PHI, secrets, and other class-banned tokens via the configured redactor.</span></div>
+ <div class="step"><b>5. Seeds</b><span>Materialize the sanitized rows as a deterministic <code>seeds.jsonl</code>.</span></div>
+ <div class="step"><b>6. Train</b><span>Run the trainer bridge (LoRA or full fine-tune) against the base model on the seeds.</span></div>
+ <div class="step"><b>7. Score</b><span>Evaluate the trained specialist on a frozen holdout. Ship only if K-score crosses the threshold.</span></div>
 </div>
 <p>See <a href="/docs/distill">/docs/distill</a> for the per-step CLI flags, the trainer-bridge contract, and the failure modes for each step. The seeds format is documented at <a href="/docs/datasets">/docs/datasets</a>; the K-score gate at <a href="/k-score">/k-score</a>.</p>
 
@@ -294,9 +295,9 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 
 <h2 id="see-also">See also</h2>
 <div class="grid">
-  <div class="card"><div class="step-num">Start here</div><h3><a href="/quickstart">Quickstart</a></h3><p>Three paths to your first <code>.kolm</code> artifact: try one live, download one, or compile your own.</p><a href="/quickstart">Read &rarr;</a></div>
-  <div class="card"><div class="step-num">Source data</div><h3><a href="/captures">Captures</a></h3><p>The dashboard for the captured prompts you will distill from. Filter by namespace, search, promote to recipe.</p><a href="/captures">Read &rarr;</a></div>
-  <div class="card"><div class="step-num">The gate</div><h3><a href="/k-score">K-score</a></h3><p>The 5-axis quality metric that decides whether a distilled artifact is allowed to ship. Frozen-holdout methodology.</p><a href="/k-score">Read &rarr;</a></div>
+ <div class="card"><div class="step-num">Start here</div><h3><a href="/quickstart">Quickstart</a></h3><p>Three paths to your first <code>.kolm</code> artifact: try one live, download one, or compile your own.</p><a href="/quickstart">Read &rarr;</a></div>
+ <div class="card"><div class="step-num">Source data</div><h3><a href="/captures">Captures</a></h3><p>The dashboard for the captured prompts you will distill from. Filter by namespace, search, promote to recipe.</p><a href="/captures">Read &rarr;</a></div>
+ <div class="card"><div class="step-num">The gate</div><h3><a href="/k-score">K-score</a></h3><p>The 5-axis quality metric that decides whether a distilled artifact is allowed to ship. Frozen-holdout methodology.</p><a href="/k-score">Read &rarr;</a></div>
 </div>
 
 </main>

@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Air-gapped deployment: when the network is the threat model &middot; kolm research</title>
-<meta name="description" content="How to deploy a compiled .kolm artifact into an air-gapped environment. The KOLM_AIRGAP=1 switch, HuggingFace offline flags, kolm airgap verbs, pre-flight cache plan, and the operational realities of static-artifact refresh.">
+<title>Air-gapped deployment: when the network is the threat · kolm.ai</title>
+<meta name="description" content="How to deploy a compiled .kolm artifact into an air-gapped environment. The KOLM_AIRGAP=1 switch, HuggingFace offline flags, kolm airgap verbs, pre-flight...">
 <meta name="keywords" content="air-gapped AI, KOLM_AIRGAP, offline inference, HF_HUB_OFFLINE, TRANSFORMERS_OFFLINE, regulated deployment, sneakernet, TOFU attestation">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -14,12 +14,12 @@
 <meta name="author" content="kolm">
 <meta name="robots" content="index,follow,max-snippet:-1">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="Air-gapped deployment: when the network is the threat model">
-<meta property="og:description" content="Pre-download, disconnect, verify offline. The verifiable operational story of running .kolm artifacts on networks that never reach the internet.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Air-gapped deployment: when the network is the threat · kolm.ai">
+<meta property="og:description" content="How to deploy a compiled .kolm artifact into an air-gapped environment. The KOLM_AIRGAP=1 switch, HuggingFace offline flags, kolm airgap verbs, pre-flight...">
+<meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Air-gapped deployment: the network is the threat model">
-<meta name="twitter:description" content="Pre-download, disconnect, verify offline. The verifiable operational story of running .kolm artifacts on networks that never reach the internet.">
+<meta name="twitter:title" content="Air-gapped deployment: when the network is the threat · kolm.ai">
+<meta name="twitter:description" content="How to deploy a compiled .kolm artifact into an air-gapped environment. The KOLM_AIRGAP=1 switch, HuggingFace offline flags, kolm airgap verbs, pre-flight...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/airgap-deployment">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,344 +27,345 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Air-gapped deployment: when the network is the threat model",
-      "description": "How to deploy a compiled .kolm artifact into an air-gapped environment. The KOLM_AIRGAP=1 switch, HuggingFace offline flags, kolm airgap verbs, pre-flight cache plan, and the operational realities of static-artifact refresh.",
-      "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
-      "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
-      "datePublished": "2026-05-14",
-      "dateModified": "2026-05-14",
-      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/airgap-deployment" },
-      "image": "https://kolm.ai/og-card.svg",
-      "keywords": "air-gapped AI, KOLM_AIRGAP, offline inference, regulated deployment, TOFU attestation",
-      "articleSection": "Deployment",
-      "wordCount": 1850
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "Air-gapped deployment", "item": "https://kolm.ai/research/airgap-deployment"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Air-gapped deployment: when the network is the threat model",
+ "description": "How to deploy a compiled .kolm artifact into an air-gapped environment. The KOLM_AIRGAP=1 switch, HuggingFace offline flags, kolm airgap verbs, pre-flight cache plan, and the operational realities of static-artifact refresh.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/airgap-deployment" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "air-gapped AI, KOLM_AIRGAP, offline inference, regulated deployment, TOFU attestation",
+ "articleSection": "Deployment",
+ "wordCount": 1850
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Air-gapped deployment", "item": "https://kolm.ai/research/airgap-deployment"}
+ ]
+ }
+ ]
 }
 </script>
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
-  a{color:inherit;text-decoration:none}
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px}
-  .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
-  header.site .brand span{font-weight:500;font-size:16px}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
-  header.site nav a:hover{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
-  header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
-  @media(max-width:720px){header.site nav{display:none}}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
 
-  section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
-  section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
-  section.hero .wrap{position:relative}
-  .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
-  .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
-  h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
-  h1 .tone{color:#10b981}
-  p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
-  p.lede b{color:var(--ink);font-weight:500}
-  .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .meta b{color:var(--ink-mute);font-weight:500}
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
 
-  article{padding:36px 0 96px}
-  article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
-  article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
-  article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
-  article p b{color:var(--ink);font-weight:500}
-  article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
-  article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
-  article blockquote p{color:var(--ink);margin:0;font-weight:500}
-  article ul{padding-left:0;list-style:none;margin:16px 0 24px}
-  article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
-  article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
-  article ul li b{color:var(--ink);font-weight:500}
-  article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
-  article pre .com{color:var(--ink-faint)}
-  article pre .arg{color:#10b981}
-  article pre .kw{color:#b0bbff}
-  article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
-  article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
-  article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
-  article table td b{color:var(--ink)}
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
+ article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+ article table td b{color:var(--ink)}
 
-  .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
-  .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
-  .toc ol{margin:0;padding-left:20px}
-  .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
-  .toc li a{color:var(--ink-mute)}
-  .toc li a:hover{color:#10b981}
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
 
-  .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
-  @media(max-width:720px){.signpost{grid-template-columns:1fr}}
-  .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
-  .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
-  .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
-  .signpost a .v .arrow{color:#10b981;margin-left:6px}
-  .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
 
-  footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
-  footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <span class="pill"><span class="dot"></span>Research &middot; Deployment &middot; 2026-05-14 &middot; 12 min read</span>
-    <h1>Air-gapped deployment: <span class="tone">when the network is the threat model.</span></h1>
-    <p class="lede">A compiled <code>.kolm</code> is a single signed file. <b>An air-gapped deployment is the case where that property stops being a convenience and starts being the entire reason the system exists.</b> The pre-flight cache plan, the offline switches, the verification path, and the documented limits of a static artifact.</p>
-    <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;airgap &middot; offline &middot; regulated</span></div>
-  </div>
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; Deployment &middot; 2026-05-14 &middot; 12 min read</span>
+ <h1>Air-gapped deployment: <span class="tone">when the network is the threat model.</span></h1>
+ <p class="lede">A compiled <code>.kolm</code> is a single signed file. <b>An air-gapped deployment is the case where that property stops being a convenience and starts being the entire reason the system exists.</b> The pre-flight cache plan, the offline switches, the verification path, and the documented limits of a static artifact.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;airgap &middot; offline &middot; regulated</span></div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="toc">
-      <h5>Contents</h5>
-      <ol>
-        <li><a href="#what-airgap-means">What air-gap means here</a></li>
-        <li><a href="#switches">The offline switches</a></li>
-        <li><a href="#preflight">Pre-flight: prime the cache</a></li>
-        <li><a href="#verify">Verifying integrity offline</a></li>
-        <li><a href="#tee">TEE attestation in an air-gap</a></li>
-        <li><a href="#sectors">Where this lands in practice</a></li>
-        <li><a href="#limits">Documented limits</a></li>
-      </ol>
-    </div>
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#what-airgap-means">What air-gap means here</a></li>
+ <li><a href="#switches">The offline switches</a></li>
+ <li><a href="#preflight">Pre-flight: prime the cache</a></li>
+ <li><a href="#verify">Verifying integrity offline</a></li>
+ <li><a href="#tee">TEE attestation in an air-gap</a></li>
+ <li><a href="#sectors">Where this lands in practice</a></li>
+ <li><a href="#limits">Documented limits</a></li>
+ </ol>
+ </div>
 
-    <h2 id="what-airgap-means">What air-gap means here.</h2>
-    <p>Air-gap is an architectural property, not a checkbox. The receiving network does not route packets to the public internet, and the rules that enforce that are part of the regulated boundary the system is sitting inside. A vendor binary that calls home, a runtime that downloads a missing tokenizer on first run, a verifier that wants to hit a certificate authority for a freshness check, every one of those is a violation, every one of those fails closed inside the boundary, and every one of those is a recurring incident the operator has to write a memo about.</p>
+ <h2 id="what-airgap-means">What air-gap means here.</h2>
+ <p>Air-gap is an architectural property, not a checkbox. The receiving network does not route packets to the public internet, and the rules that enforce that are part of the regulated boundary the system is sitting inside. A vendor binary that calls home, a runtime that downloads a missing tokenizer on first run, a verifier that wants to hit a certificate authority for a freshness check, every one of those is a violation, every one of those fails closed inside the boundary, and every one of those is a recurring incident the operator has to write a memo about.</p>
 
-    <p>The kolm posture for this case is the inverse of the cloud-runtime default. The compile step is allowed to fetch base weights, build the recall index, and write the artifact. The deploy step writes one file to disk and assumes nothing about the network it lands on. The runtime opens that file, verifies the receipt chain against an HMAC key that is in operator possession, loads the base into the in-process accelerator, and answers requests. No DNS lookup. No HTTPS handshake. No background heartbeat. If the box has no network interface configured, the artifact still runs.</p>
+ <p>The kolm posture for this case is the inverse of the cloud-runtime default. The compile step is allowed to fetch base weights, build the recall index, and write the artifact. The deploy step writes one file to disk and assumes nothing about the network it lands on. The runtime opens that file, verifies the receipt chain against an Ed25519 private key that is in operator possession, loads the base into the in-process accelerator, and answers requests. No DNS lookup. No HTTPS handshake. No background heartbeat. If the box has no network interface configured, the artifact still runs.</p>
 
-    <p>The cost of getting there is a pre-flight discipline. Anything the runtime might want at first boot has to be on local disk before the deploy machine is moved inside the boundary. The <code>kolm airgap</code> verbs exist to make that discipline a workflow, not an audit checklist.</p>
+ <p>The cost of getting there is a pre-flight discipline. Anything the runtime might want at first boot has to be on local disk before the deploy machine is moved inside the boundary. The <code>kolm airgap</code> verbs exist to make that discipline a workflow, not an audit checklist.</p>
 
-    <h2 id="switches">The offline switches.</h2>
-    <p>Three environment variables, one config file, and one CLI verb. The switches are designed so that an air-gap-violating call fails loudly at startup, not silently on the seventh user request.</p>
+ <h2 id="switches">The offline switches.</h2>
+ <p>Three environment variables, one config file, and one CLI verb. The switches are designed so that an air-gap-violating call fails loudly at startup, not silently on the seventh user request.</p>
 
-    <pre><span class="com"># the three switches kolm respects at process start</span>
+ <pre><span class="com"># the three switches kolm respects at process start</span>
 <span class="kw">$</span> export KOLM_AIRGAP=1
 <span class="kw">$</span> export HF_HUB_OFFLINE=1
 <span class="kw">$</span> export TRANSFORMERS_OFFLINE=1
 
 <span class="com"># or write them once to ~/.kolm/airgap.env</span>
 <span class="kw">$</span> kolm airgap enable
-<span class="arg">[airgap]</span>     wrote ~/.kolm/airgap.env
-<span class="arg">[airgap]</span>     KOLM_AIRGAP=1
-<span class="arg">[airgap]</span>     HF_HUB_OFFLINE=1
-<span class="arg">[airgap]</span>     TRANSFORMERS_OFFLINE=1
-<span class="arg">[airgap]</span>     subsequent kolm invocations will source this file</pre>
+<span class="arg">[airgap]</span> wrote ~/.kolm/airgap.env
+<span class="arg">[airgap]</span> KOLM_AIRGAP=1
+<span class="arg">[airgap]</span> HF_HUB_OFFLINE=1
+<span class="arg">[airgap]</span> TRANSFORMERS_OFFLINE=1
+<span class="arg">[airgap]</span> subsequent kolm invocations will source this file</pre>
 
-    <p><code>KOLM_AIRGAP=1</code> is the kolm-side switch. It disables the registry sync (<code>kolm registry pull</code> exits non-zero with a message naming the variable), it forbids the compute layer from picking a cloud backend even if a token is set, and it forbids the runtime from issuing any outbound request. The two HuggingFace switches are upstream library flags that have the same effect on the Transformers stack: any code path that would normally call <code>hf_hub_download</code> raises a local-cache miss instead.</p>
+ <p><code>KOLM_AIRGAP=1</code> is the kolm-side switch. It disables the registry sync (<code>kolm registry pull</code> exits non-zero with a message naming the variable), it forbids the compute layer from picking a cloud backend even if a token is set, and it forbids the runtime from issuing any outbound request. The two HuggingFace switches are upstream library flags that have the same effect on the Transformers stack: any code path that would normally call <code>hf_hub_download</code> raises a local-cache miss instead.</p>
 
-    <p>The disable path is symmetric. <code>kolm airgap disable</code> removes the env file and unsets the variables in the current shell. The status verb shows where each switch lives:</p>
+ <p>The disable path is symmetric. <code>kolm airgap disable</code> removes the env file and unsets the variables in the current shell. The status verb shows where each switch lives:</p>
 
-    <pre><span class="kw">$</span> kolm airgap status
-<span class="arg">airgap mode:</span>         enabled
-<span class="arg">env file:</span>            ~/.kolm/airgap.env
-<span class="arg">KOLM_AIRGAP:</span>         1   (set)
-<span class="arg">HF_HUB_OFFLINE:</span>      1   (set)
-<span class="arg">TRANSFORMERS_OFFLINE:</span> 1   (set)
-<span class="arg">on-disk artifacts:</span>   4 in ~/.kolm/artifacts
-<span class="arg">hf cache:</span>            ~/.cache/huggingface (3 base models, 18.4 GB)</pre>
+ <pre><span class="kw">$</span> kolm airgap status
+<span class="arg">airgap mode:</span> enabled
+<span class="arg">env file:</span> ~/.kolm/airgap.env
+<span class="arg">KOLM_AIRGAP:</span> 1 (set)
+<span class="arg">HF_HUB_OFFLINE:</span> 1 (set)
+<span class="arg">TRANSFORMERS_OFFLINE:</span> 1 (set)
+<span class="arg">on-disk artifacts:</span> 4 in ~/.kolm/artifacts
+<span class="arg">hf cache:</span> ~/.cache/huggingface (3 base models, 18.4 GB)</pre>
 
-    <p>The status output is the first thing an operator checks before moving a workstation into the regulated network. If any of the three switches says <code>(unset)</code>, the pre-flight is incomplete.</p>
+ <p>The status output is the first thing an operator checks before moving a workstation into the regulated network. If any of the three switches says <code>(unset)</code>, the pre-flight is incomplete.</p>
 
-    <h2 id="preflight">Pre-flight: prime the cache.</h2>
-    <p>The hardest mistake to recover from is a runtime that gets to the bounded network and then realizes it needs a tokenizer file. The pre-flight sequence is the same five steps in every environment we have shipped into.</p>
+ <h2 id="preflight">Pre-flight: prime the cache.</h2>
+ <p>The hardest mistake to recover from is a runtime that gets to the bounded network and then realizes it needs a tokenizer file. The pre-flight sequence is the same five steps in every environment we have shipped into.</p>
 
-    <p><b>Step one: list every weight the artifact will reach for.</b> The artifact manifest names a base model, an adapter, and a recall index. The manifest does not embed the base weights; it points at a HuggingFace repo and a revision SHA. The <code>kolm inspect</code> verb produces a flat list of every base the runtime will load.</p>
+ <p><b>Step one: list every weight the artifact will reach for.</b> The artifact manifest names a base model, an adapter, and a recall index. The manifest does not embed the base weights; it points at a HuggingFace repo and a revision SHA. The <code>kolm inspect</code> verb produces a flat list of every base the runtime will load.</p>
 
-    <pre><span class="kw">$</span> kolm inspect support_ticket_router-1.0.0.kolm
-<span class="arg">base:</span>     Qwen/Qwen2.5-3B-Instruct  rev=5d6f9...   approx 1.84 GB int4
-<span class="arg">adapter:</span>  lora rank 16 on q_proj, v_proj, o_proj
-<span class="arg">recall:</span>   bge-small-en-v1.5  rev=4d0a2...   approx 0.13 GB fp16
-<span class="arg">eval:</span>     embedded (no external dependency)
-<span class="arg">receipt:</span>  chain of 5 HMAC-SHA256 steps</pre>
+ <pre><span class="kw">$</span> kolm inspect support_ticket_router-1.0.0.kolm
+<span class="arg">base:</span> Qwen/Qwen2.5-3B-Instruct rev=5d6f9... approx 1.84 GB int4
+<span class="arg">adapter:</span> lora rank 16 on q_proj, v_proj, o_proj
+<span class="arg">recall:</span> bge-small-en-v1.5 rev=4d0a2... approx 0.13 GB fp16
+<span class="arg">eval:</span> embedded (no external dependency)
+<span class="arg">receipt:</span> chain of 5 Ed25519 steps</pre>
 
-    <p><b>Step two: pre-download each base into the HuggingFace cache.</b> A regular <code>huggingface-cli download</code> call against each repo, with the revision pinned to the SHA above. The cache directory (<code>~/.cache/huggingface</code> by default) is now a copyable artifact. The recall encoder is included; long-context tasks pull a second encoder, the same rule applies.</p>
+ <p><b>Step two: pre-download each base into the HuggingFace cache.</b> A regular <code>huggingface-cli download</code> call against each repo, with the revision pinned to the SHA above. The cache directory (<code>~/.cache/huggingface</code> by default) is now a copyable artifact. The recall encoder is included; long-context tasks pull a second encoder, the same rule applies.</p>
 
-    <p><b>Step three: copy the cache plus the artifact to removable media.</b> The exact media is regulator-defined: write-once optical, a hardware-attested USB device, an offline relay server. The two things that have to move are the artifact file and the HuggingFace cache directory. Everything else (Python, the kolm CLI, the runtime binary) is part of the base image of the bounded workstation and follows that image's own provenance chain.</p>
+ <p><b>Step three: copy the cache plus the artifact to removable media.</b> The exact media is regulator-defined: write-once optical, a hardware-attested USB device, an offline relay server. The two things that have to move are the artifact file and the HuggingFace cache directory. Everything else (Python, the kolm CLI, the runtime binary) is part of the base image of the bounded workstation and follows that image's own provenance chain.</p>
 
-    <p><b>Step four: import on the bounded side.</b> The HuggingFace cache is unpacked into <code>~/.cache/huggingface</code> on the destination. The artifact is unpacked into <code>~/.kolm/artifacts</code>. <code>kolm airgap enable</code> writes the env file. <code>kolm run</code> opens a server.</p>
+ <p><b>Step four: import on the bounded side.</b> The HuggingFace cache is unpacked into <code>~/.cache/huggingface</code> on the destination. The artifact is unpacked into <code>~/.kolm/artifacts</code>. <code>kolm airgap enable</code> writes the env file. <code>kolm run</code> opens a server.</p>
 
-    <p><b>Step five: smoke-test offline.</b> Run the embedded eval pack against the loaded artifact. The K-score should match the score recorded at compile time, byte for byte. A mismatch here is the integrity signal: either the base weights drifted (impossible if you pinned the revision SHA), or the artifact bytes are not the bytes you compiled.</p>
+ <p><b>Step five: smoke-test offline.</b> Run the embedded eval pack against the loaded artifact. The K-score should match the score recorded at compile time, byte for byte. A mismatch here is the integrity signal: either the base weights drifted (impossible if you pinned the revision SHA), or the artifact bytes are not the bytes you compiled.</p>
 
-    <pre><span class="kw">$</span> kolm airgap verify ~/.kolm/artifacts/support_ticket_router-1.0.0.kolm
-<span class="arg">[1/5]</span>     manifest schema                  ok
-<span class="arg">[2/5]</span>     base + adapter present in cache  ok (1.84 GB + 0.04 GB)
-<span class="arg">[3/5]</span>     HMAC receipt chain (5 steps)      ok
-<span class="arg">[4/5]</span>     CID over canonical-JSON           ok (cidv1:sha256:7a3b...)
-<span class="arg">[5/5]</span>     embedded eval pack                K=0.917 (gate 0.85)
-<span class="arg">PASS</span>     artifact verifies entirely offline</pre>
+ <pre><span class="kw">$</span> kolm airgap verify ~/.kolm/artifacts/support_ticket_router-1.0.0.kolm
+<span class="arg">[1/5]</span> manifest schema ok
+<span class="arg">[2/5]</span> base + adapter present in cache ok (1.84 GB + 0.04 GB)
+<span class="arg">[3/5]</span> Ed25519 receipt chain (5 steps) ok
+<span class="arg">[4/5]</span> CID over canonical-JSON ok (cidv1:sha256:7a3b...)
+<span class="arg">[5/5]</span> embedded eval pack K=0.917 (gate 0.85)
+<span class="arg">PASS</span> artifact verifies entirely offline</pre>
 
-    <h2 id="verify">Verifying integrity offline.</h2>
-    <p>The receipt chain, the content identifier, and the embedded eval pack are the three things an air-gapped operator can check without any network. None of them require a certificate authority, a clock-skew oracle, or a remote attestation server.</p>
+ <h2 id="verify">Verifying integrity offline.</h2>
+ <p>The receipt chain, the content identifier, and the embedded eval pack are the three things an air-gapped operator can check without any network. None of them require a certificate authority, a clock-skew oracle, or a remote attestation server.</p>
 
-    <p><b>The HMAC chain.</b> Five steps over canonical JSON, keyed by an HMAC-SHA256 secret that the operator possesses. The chain binds: the task description, the base model SHA, the adapter weights hash, the embedded eval pack, and the final artifact manifest. Each step's output is the next step's salt. The verifier walks the chain start to finish; one byte off the canonical JSON serialization fails the step.</p>
+ <p><b>The Ed25519 receipt chain.</b> Five steps over canonical JSON, keyed by an Ed25519 secret that the operator possesses. The chain binds: the task description, the base model SHA, the adapter weights hash, the embedded eval pack, and the final artifact manifest. Each step's output is the next step's salt. The verifier walks the chain start to finish; one byte off the canonical JSON serialization fails the step.</p>
 
-    <p><b>The content identifier.</b> A <code>cidv1:sha256:&lt;64-hex&gt;</code> string over the canonical-JSON form of the manifest's hash table. The CID is embedded in three places: the manifest itself, the receipt, and the audit log. They all have to agree, and they all have to match a recomputation against the bytes on disk. The CID is also the offline key the operator uses to refer to the artifact in incident logs (it's stable across moves, since it's content-derived).</p>
+ <p><b>The content identifier.</b> A <code>cidv1:sha256:&lt;64-hex&gt;</code> string over the canonical-JSON form of the manifest's hash table. The CID is embedded in three places: the manifest itself, the receipt, and the audit log. They all have to agree, and they all have to match a recomputation against the bytes on disk. The CID is also the offline key the operator uses to refer to the artifact in incident logs (it's stable across moves, since it's content-derived).</p>
 
-    <p><b>The embedded eval pack.</b> A small set of prompt-and-expected-output pairs that the compile step locked in. The runtime can replay the pack against the loaded artifact and produce the same K-score the compile produced, deterministically. A K-score that has drifted is a strong signal that the artifact has been substituted or corrupted on the way through the airlock.</p>
+ <p><b>The embedded eval pack.</b> A small set of prompt-and-expected-output pairs that the compile step locked in. The runtime can replay the pack against the loaded artifact and produce the same K-score the compile produced, deterministically. A K-score that has drifted is a strong signal that the artifact has been substituted or corrupted on the way through the airlock.</p>
 
-    <blockquote>
-      <p>The point is not that an air-gapped operator trusts the kolm runtime. The point is that the verification path is small enough to audit, deterministic enough to re-run on demand, and self-contained enough to do without any network at all.</p>
-    </blockquote>
+ <blockquote>
+ <p>The point is not that an air-gapped operator trusts the kolm runtime. The point is that the verification path is small enough to audit, deterministic enough to re-run on demand, and self-contained enough to do without any network at all.</p>
+ </blockquote>
 
-    <p>The Rust verifier crate at <code>packages/runtime-rs</code> is built with <code>forbid(unsafe_code)</code>, pure-Rust dependencies, and no network surface. It compiles to a static binary that can verify any <code>.kolm</code> file. An auditor working under a regulator who does not trust the JavaScript runtime can build the Rust binary from source on their own infrastructure and use it as the second pair of eyes.</p>
+ <p>The Rust verifier crate at <code>packages/runtime-rs</code> is built with <code>forbid(unsafe_code)</code>, pure-Rust dependencies, and no network surface. It compiles to a static binary that can verify any <code>.kolm</code> file. An auditor working under a regulator who does not trust the JavaScript runtime can build the Rust binary from source on their own infrastructure and use it as the second pair of eyes.</p>
 
-    <h2 id="tee">TEE attestation in an air-gap.</h2>
-    <p>The TEE attestation story changes shape inside an air-gap. A normal cloud deploy validates an attestation document by fetching the vendor's root certificate, then verifying the COSE_Sign1 envelope (Nitro), the SEV-SNP report, the TDX quote, or the Azure MAA JWT against that root. An air-gapped operator cannot fetch the root, because the root lives at an AWS, GCP, Azure, or Intel endpoint.</p>
+ <h2 id="tee">TEE attestation in an air-gap.</h2>
+ <p>The TEE attestation story changes shape inside an air-gap. A normal cloud deploy validates an attestation document by fetching the vendor's root certificate, then verifying the COSE_Sign1 envelope (Nitro), the SEV-SNP report, the TDX quote, or the Azure MAA JWT against that root. An air-gapped operator cannot fetch the root, because the root lives at an AWS, GCP, Azure, or Intel endpoint.</p>
 
-    <p>The pragmatic answer is trust-on-first-use. The first attestation document the operator sees, on the bounded side, gets pinned. Subsequent boots produce documents that have to match the pinned record on the fields that should be stable: the PCR0 measurement (Nitro), the launch digest (SEV-SNP), the MRTD (TDX), the image hash (docker). A mismatch is flagged. The operator decides whether to roll forward (an authorized image update) or to halt (a substitution).</p>
+ <p>The pragmatic answer is trust-on-first-use. The first attestation document the operator sees, on the bounded side, gets pinned. Subsequent boots produce documents that have to match the pinned record on the fields that should be stable: the PCR0 measurement (Nitro), the launch digest (SEV-SNP), the MRTD (TDX), the image hash (docker). A mismatch is flagged. The operator decides whether to roll forward (an authorized image update) or to halt (a substitution).</p>
 
-    <p>TOFU is not cryptographic certainty. It is pragmatic enough for the cases that air-gap is the right answer for: the bounded environment is already trusted under a different controls regime, and the attestation is one more verifiable signal, not a sole control. The audit log records every pinning event, every mismatch, and every operator override. The regulator's review is over those records, not over the attestation root.</p>
+ <p>TOFU is not cryptographic certainty. It is pragmatic enough for the cases that air-gap is the right answer for: the bounded environment is already trusted under a different controls regime, and the attestation is one more verifiable signal, not a sole control. The audit log records every pinning event, every mismatch, and every operator override. The regulator's review is over those records, not over the attestation root.</p>
 
-    <h2 id="sectors">Where this lands in practice.</h2>
-    <p>Four sectors where the air-gapped path is the deployment, not an edge case.</p>
+ <h2 id="sectors">Where this lands in practice.</h2>
+ <p>Four sectors where the air-gapped path is the deployment, not an edge case.</p>
 
-    <p><b>Defense.</b> The classified enclave is the bounded network. The artifact lands on a workstation cleared for the same classification level. The model can answer questions about classified material because the material never leaves the enclave. The compile happens on the unclassified side from de-identified examples; the artifact's K-score on the embedded eval pack is what the program office reviews.</p>
+ <p><b>Defense.</b> The classified enclave is the bounded network. The artifact lands on a workstation cleared for the same classification level. The model can answer questions about classified material because the material never leaves the enclave. The compile happens on the unclassified side from de-identified examples; the artifact's K-score on the embedded eval pack is what the program office reviews.</p>
 
-    <p><b>Healthcare under HIPAA.</b> The regulated boundary is the hospital's clinical network. A compiled note-summarizer runs against the EHR's PHI inside that boundary; no outbound call carries text, no inbound call delivers a model update. The Business Associate Agreement work disappears because there is no third party in the data path. The compile uses de-identified prior notes; the K-score gate is what the privacy officer signs against.</p>
+ <p><b>Healthcare under HIPAA.</b> The regulated boundary is the hospital's clinical network. A compiled note-summarizer runs against the EHR's PHI inside that boundary; no outbound call carries text, no inbound call delivers a model update. The Business Associate Agreement work disappears because there is no third party in the data path. The compile uses de-identified prior notes; the K-score gate is what the privacy officer signs against.</p>
 
-    <p><b>Industrial control.</b> Plant-floor networks for utilities, refining, manufacturing. The bounded side is the OT network; the compile happens on the IT side. A vibration-anomaly classifier or a maintenance-log triage artifact lands on a workstation that already lives behind the OT firewall. The artifact is static; the model never proposes an action it was not trained to propose, because there is no live channel to a frontier API.</p>
+ <p><b>Industrial control.</b> Plant-floor networks for utilities, refining, manufacturing. The bounded side is the OT network; the compile happens on the IT side. A vibration-anomaly classifier or a maintenance-log triage artifact lands on a workstation that already lives behind the OT firewall. The artifact is static; the model never proposes an action it was not trained to propose, because there is no live channel to a frontier API.</p>
 
-    <p><b>Regulated finance.</b> A market-making firm's trading network. Surveillance, supervision, and regulator-bounded analytics live on the inside. A compiled artifact for a specific surveillance task answers questions on the bounded side; the receipt chain is what the firm produces under an SR 11-7 model-risk review.</p>
+ <p><b>Regulated finance.</b> A market-making firm's trading network. Surveillance, supervision, and regulator-bounded analytics live on the inside. A compiled artifact for a specific surveillance task answers questions on the bounded side; the receipt chain is what the firm produces under an SR 11-7 model-risk review.</p>
 
-    <h2 id="limits">Documented limits.</h2>
-    <p>Three things an air-gap cannot give you.</p>
+ <h2 id="limits">Documented limits.</h2>
+ <p>Three things an air-gap cannot give you.</p>
 
-    <p><b>Model updates require manual sync.</b> A static artifact is static. The same compile job, run six months later against a refreshed corpus, produces a new artifact with a new CID and a new receipt. The pre-flight sequence above runs again. There is no auto-update path that survives the airlock; that is by construction. The operational cadence is whatever the regulated environment's change-management process supports: weekly, monthly, quarterly. The artifact format is small enough that a quarterly refresh is reasonable, but it is a human-driven cycle.</p>
+ <p><b>Model updates require manual sync.</b> A static artifact is static. The same compile job, run six months later against a refreshed corpus, produces a new artifact with a new CID and a new receipt. The pre-flight sequence above runs again. There is no auto-update path that survives the airlock; that is by construction. The operational cadence is whatever the regulated environment's change-management process supports: weekly, monthly, quarterly. The artifact format is small enough that a quarterly refresh is reasonable, but it is a human-driven cycle.</p>
 
-    <p><b>The capture-distill loop is broken at runtime.</b> kolm's normal lifecycle is: capture frontier traffic, distill it into a recipe pack, recompile. None of that runs on the bounded side, because by definition nothing leaves. Air-gapped artifacts are read-only at deploy time. The corpus refresh, if there is one, happens on a separate ingestion path that the regulator has independently approved (typically a one-way diode or a periodic export from the bounded environment back to the unclassified side, both subject to the same controls regime that the rest of the data follows).</p>
+ <p><b>The capture-distill loop is broken at runtime.</b> kolm's normal lifecycle is: capture frontier traffic, distill it into a recipe pack, recompile. None of that runs on the bounded side, because by definition nothing leaves. Air-gapped artifacts are read-only at deploy time. The corpus refresh, if there is one, happens on a separate ingestion path that the regulator has independently approved (typically a one-way diode or a periodic export from the bounded environment back to the unclassified side, both subject to the same controls regime that the rest of the data follows).</p>
 
-    <p><b>Software-update channel still exists.</b> The kolm runtime itself, the Python interpreter, the operating system, the CUDA stack, all need patching against CVEs. The air-gap does not abolish those updates; it pushes them through a signed sneakernet pattern. Most regulated environments already have this discipline (CVE feeds, vendor advisories, mirrored package repositories on the bounded side). The kolm-specific addition is that artifact updates ride the same channel as runtime updates. A signed artifact bundle is one more tarball on the patching mirror; the operator signs receipts on each install.</p>
+ <p><b>Software-update channel still exists.</b> The kolm runtime itself, the Python interpreter, the operating system, the CUDA stack, all need patching against CVEs. The air-gap does not abolish those updates; it pushes them through a signed sneakernet pattern. Most regulated environments already have this discipline (CVE feeds, vendor advisories, mirrored package repositories on the bounded side). The kolm-specific addition is that artifact updates ride the same channel as runtime updates. A signed artifact bundle is one more tarball on the patching mirror; the operator signs receipts on each install.</p>
 
-    <p>The point of the static-artifact model is that the failure modes are visible. A compiled <code>.kolm</code> that is six months stale is observably six months stale; the manifest date and the receipt date both say so. An air-gapped operator who has a stale artifact knows. An operator running a frontier API against the same task has no comparable visibility, which is why the bounded environment does not allow it in the first place.</p>
+ <p>The point of the static-artifact model is that the failure modes are visible. A compiled <code>.kolm</code> that is six months stale is observably six months stale; the manifest date and the receipt date both say so. An air-gapped operator who has a stale artifact knows. An operator running a frontier API against the same task has no comparable visibility, which is why the bounded environment does not allow it in the first place.</p>
 
-    <div class="signpost">
-      <a href="/research/byoc-deploy-modes">
-        <span class="lab">read next</span>
-        <span class="v">BYOC deploy modes <span class="arrow">&rarr;</span></span>
-        <p>Five attestation tiers, four vendor TEEs plus docker. When TOFU is enough and when you need a vendor-rooted chain.</p>
-      </a>
-      <a href="/research/receipt-chains">
-        <span class="lab">read next</span>
-        <span class="v">Receipt chains <span class="arrow">&rarr;</span></span>
-        <p>The five HMAC steps and the CID that make the offline verification path the same code as the online path.</p>
-      </a>
-      <a href="/airgap">
-        <span class="lab">docs</span>
-        <span class="v">kolm airgap reference <span class="arrow">&rarr;</span></span>
-        <p>Full CLI surface for the airgap verbs: status, enable, disable, verify.</p>
-      </a>
-      <a href="/spec">
-        <span class="lab">spec</span>
-        <span class="v">RS-1 spec <span class="arrow">&rarr;</span></span>
-        <p>The on-disk shape of a <code>.kolm</code> artifact and the canonical-JSON serialization the CID is computed over.</p>
-      </a>
-    </div>
+ <div class="signpost">
+ <a href="/research/byoc-deploy-modes">
+ <span class="lab">read next</span>
+ <span class="v">BYOC deploy modes <span class="arrow">&rarr;</span></span>
+ <p>Five attestation tiers, four vendor TEEs plus docker. When TOFU is enough and when you need a vendor-rooted chain.</p>
+ </a>
+ <a href="/research/receipt-chains">
+ <span class="lab">read next</span>
+ <span class="v">Receipt chains <span class="arrow">&rarr;</span></span>
+ <p>The five Ed25519 steps and the CID that make the offline verification path the same code as the online path.</p>
+ </a>
+ <a href="/airgap">
+ <span class="lab">docs</span>
+ <span class="v">kolm airgap reference <span class="arrow">&rarr;</span></span>
+ <p>Full CLI surface for the airgap verbs: status, enable, disable, verify.</p>
+ </a>
+ <a href="/spec">
+ <span class="lab">spec</span>
+ <span class="v">RS-1 spec <span class="arrow">&rarr;</span></span>
+ <p>The on-disk shape of a <code>.kolm</code> artifact and the canonical-JSON serialization the CID is computed over.</p>
+ </a>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

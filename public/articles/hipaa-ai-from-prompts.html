@@ -3,53 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>How to compile a HIPAA-compliant AI from your captured prompts · kolm.ai</title>
-<meta name="description" content="A practical walkthrough for compliance teams: turning captured GPT-class traffic into a HIPAA-compliant local artifact that never leaves the covered entity's network. PHI redaction, BAA scope, USCDI normalization, receipt-chain audit trail, and the kolm verify command auditors care about.">
+<title>How to compile a HIPAA-compliant AI from your captured · kolm.ai</title>
+<meta name="description" content="A practical walkthrough for compliance teams: turning captured GPT-class traffic into a HIPAA-compliant local artifact that never leaves the covered entity">
 <meta name="keywords" content="HIPAA AI, HIPAA compliant AI, on-device PHI, kolm.ai, ai compiler healthcare, USCDI, BAA AI, captured prompts to local model">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="How to compile a HIPAA-compliant AI from your captured prompts">
-<meta property="og:description" content="Turning captured GPT-class traffic into a HIPAA-compliant local artifact that never leaves the covered entity's network.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="How to compile a HIPAA-compliant AI from your captured · kolm.ai">
+<meta property="og:description" content="A practical walkthrough for compliance teams: turning captured GPT-class traffic into a HIPAA-compliant local artifact that never leaves the covered entity">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/articles/hipaa-ai-from-prompts">
-<meta property="og:image" content="https://kolm.ai/og/articles-hipaa-ai-from-prompts.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="HIPAA-compliant AI from captured prompts · kolm.ai">
-<meta name="twitter:description" content="From captured production traffic to a regulated local artifact, step by step.">
-<meta name="twitter:image" content="https://kolm.ai/og/articles-hipaa-ai-from-prompts.svg">
+<meta name="twitter:title" content="How to compile a HIPAA-compliant AI from your captured · kolm.ai">
+<meta name="twitter:description" content="A practical walkthrough for compliance teams: turning captured GPT-class traffic into a HIPAA-compliant local artifact that never leaves the covered entity">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/articles/hipaa-ai-from-prompts">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "@id": "https://kolm.ai/articles/hipaa-ai-from-prompts#article",
-      "headline": "How to compile a HIPAA-compliant AI from your captured prompts",
-      "description": "Turning captured GPT-class traffic into a HIPAA-compliant local artifact that never leaves the covered entity's network.",
-      "author": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
-      "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
-      "image": "https://kolm.ai/og/articles-hipaa-ai-from-prompts.svg",
-      "datePublished": "2026-05-18",
-      "dateModified": "2026-05-18",
-      "mainEntityOfPage": "https://kolm.ai/articles/hipaa-ai-from-prompts",
-      "articleSection": "Compliance",
-      "keywords": "HIPAA, on-device AI, PHI redaction, USCDI, BAA, ai compiler"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
-        { "@type": "ListItem", "position": 2, "name": "Articles", "item": "https://kolm.ai/articles" },
-        { "@type": "ListItem", "position": 3, "name": "HIPAA AI from captured prompts", "item": "https://kolm.ai/articles/hipaa-ai-from-prompts" }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "Article",
+ "@id": "https://kolm.ai/articles/hipaa-ai-from-prompts#article",
+ "headline": "How to compile a HIPAA-compliant AI from your captured prompts",
+ "description": "Turning captured GPT-class traffic into a HIPAA-compliant local artifact that never leaves the covered entity's network.",
+ "author": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
+ "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
+ "image": "https://kolm.ai/og/articles-hipaa-ai-from-prompts.svg",
+ "datePublished": "2026-05-18",
+ "dateModified": "2026-05-18",
+ "mainEntityOfPage": "https://kolm.ai/articles/hipaa-ai-from-prompts",
+ "articleSection": "Compliance",
+ "keywords": "HIPAA, on-device AI, PHI redaction, USCDI, BAA, ai compiler"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Articles", "item": "https://kolm.ai/articles" },
+ { "@type": "ListItem", "position": 3, "name": "HIPAA AI from captured prompts", "item": "https://kolm.ai/articles/hipaa-ai-from-prompts" }
+ ]
+ }
+ ]
 }
 </script>
 <style>
@@ -75,6 +75,7 @@ pre{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:16p
 footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
 @media (max-width:560px){main{padding:32px 18px 64px}h1{font-size:30px}h2{font-size:22px}}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>

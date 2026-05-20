@@ -10,10 +10,10 @@ description: Run the value-loop smoke against an in-process router. Five rungs, 
 ## Usage
 
 ```bash
-kolm loop                  # human-readable [PASS]/[FAIL] rung table
-kolm loop --json           # structured report keyed by rung name
-kolm loop --remote         # walk the same rungs against your configured cloud
-kolm loop --remote --json  # remote run, JSON output
+kolm loop # human-readable [PASS]/[FAIL] rung table
+kolm loop --json # structured report keyed by rung name
+kolm loop --remote # walk the same rungs against your configured cloud
+kolm loop --remote --json # remote run, JSON output
 ```
 
 ## Flags

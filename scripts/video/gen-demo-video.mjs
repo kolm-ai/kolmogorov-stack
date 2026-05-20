@@ -66,7 +66,7 @@ const SCENES = [
     lines: [
       { t: 0.4,  speed: TYPE_USER,   runs: [['$ ', C.prompt], ['kolm capture --provider openai --as support-bot --namespace support-bot', C.cream]] },
       { t: 2.2,  speed: TYPE_OUTPUT, runs: [['→ ', C.muted], ['wrote ', C.cream], ['~/.kolm/capture/support-bot.json', C.hl]] },
-      { t: 2.9,  speed: TYPE_OUTPUT, runs: [['→ ', C.muted], ['proxy at ', C.cream], ['https://api.kolm.ai/v1/proxy/support-bot', C.hl]] },
+  { t: 2.9,  speed: TYPE_OUTPUT, runs: [['→ ', C.muted], ['proxy at ', C.cream], ['https://kolm.ai/v1/proxy/support-bot', C.hl]] },
       { t: 3.7,  speed: TYPE_OUTPUT, runs: [['→ ', C.muted], ['point ', C.cream], ['OPENAI_BASE_URL', C.hl], [' at the proxy · send key as ', C.cream], ['x-upstream-api-key', C.hl]] },
       { t: 4.6,  speed: TYPE_PASTE,  runs: [['', C.muted]] },
       { t: 4.8,  speed: TYPE_OUTPUT, runs: [['# ... your app makes 1,000 calls ...', C.dim]] },

@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm whoami · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm whoami CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/whoami">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm whoami","description":"Reference for the kolm whoami CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/whoami","mainEntityOfPage":"https://kolm.ai/docs/cli/whoami","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm whoami · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm whoami CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,31 +176,31 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="whoami">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>whoami</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>whoami</span>
 </nav>
 <h1>kolm whoami</h1>
 <p>Print the current authenticated identity, base URL, key fingerprint, tenant, plan, and quota.</p>
 <h2>Usage</h2>
 <pre><code>
 kolm whoami
-kolm whoami --json    # stable envelope: logged_in, base, cli_version,
-                      # key_fingerprint, tenant{id,name,plan,quota,seats,email}
+kolm whoami --json # stable envelope: logged_in, base, cli_version,
+ # key_fingerprint, tenant{id,name,plan,quota,seats,email}
 </code></pre>
 <h2>Stable JSON envelope</h2>
 <pre><code>
 {
-  &quot;logged_in&quot;: true,
-  &quot;base&quot;: &quot;https://kolm.ai&quot;,
-  &quot;cli_version&quot;: &quot;11.x&quot;,
-  &quot;key_fingerprint&quot;: &quot;kolm-XXXX...YYYY&quot;,
-  &quot;tenant&quot;: {
-    &quot;id&quot;: &quot;tnt_...&quot;,
-    &quot;name&quot;: &quot;Acme Health&quot;,
-    &quot;plan&quot;: &quot;team&quot;,
-    &quot;quota&quot;: { &quot;captures_per_month&quot;: 1000000, &quot;compiles_per_month&quot;: 100 },
-    &quot;seats&quot;: 12,
-    &quot;email&quot;: &quot;ops@acme.example&quot;
-  }
+ &quot;logged_in&quot;: true,
+ &quot;base&quot;: &quot;https://kolm.ai&quot;,
+ &quot;cli_version&quot;: &quot;11.x&quot;,
+ &quot;key_fingerprint&quot;: &quot;kolm-XXXX...YYYY&quot;,
+ &quot;tenant&quot;: {
+ &quot;id&quot;: &quot;tnt_...&quot;,
+ &quot;name&quot;: &quot;Acme Health&quot;,
+ &quot;plan&quot;: &quot;team&quot;,
+ &quot;quota&quot;: { &quot;captures_per_month&quot;: 1000000, &quot;compiles_per_month&quot;: 100 },
+ &quot;seats&quot;: 12,
+ &quot;email&quot;: &quot;ops@acme.example&quot;
+ }
 }
 </code></pre>
 <h2>Exit codes</h2>
@@ -212,13 +216,13 @@ kolm whoami --json    # stable envelope: logged_in, base, cli_version,
 <li><code>kolm doctor</code> for a deeper environment check.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

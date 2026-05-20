@@ -6,11 +6,11 @@ The artifact must pass `kolm verify` before publish is allowed.
 ## Usage
 
 ```
-kolm publish <artifact.kolm>                              # default registry
-kolm publish <artifact.kolm> --registry <url>             # private registry
-kolm publish <artifact.kolm> --visibility public          # marketplace listing
-kolm publish <artifact.kolm> --visibility unlisted        # private link
-kolm publish <artifact.kolm> --tag <semver>               # explicit version tag
+kolm publish <artifact.kolm> # default registry
+kolm publish <artifact.kolm> --registry <url> # private registry
+kolm publish <artifact.kolm> --visibility public # marketplace listing
+kolm publish <artifact.kolm> --visibility unlisted # private link
+kolm publish <artifact.kolm> --tag <semver> # explicit version tag
 ```
 
 ## Pre-publish checks

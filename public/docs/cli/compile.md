@@ -10,9 +10,9 @@ description: Build a .kolm artifact from a cloud-synthesised task or a local JSO
 ## Usage
 
 ```bash
-kolm compile "<task>" [flags]                  # cloud compile
-kolm compile --spec <file.json> [--out <p>]    # offline build from a JSON spec
-kolm compile --spec - [--out <p>]              # offline build from JSON on stdin
+kolm compile "<task>" [flags] # cloud compile
+kolm compile --spec <file.json> [--out <p>] # offline build from a JSON spec
+kolm compile --spec - [--out <p>] # offline build from JSON on stdin
 ```
 
 ## Flags

@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Billing · Account · kolm.ai</title>
-<meta name="description" content="Billing meters on kolm.ai: 12 meters spanning captured_events, redacted_events, raw_cloud_synced_bytes, redacted_cloud_synced_bytes, hosted_build_minutes, training_gpu_minutes, synthetic_examples_generated, eval_examples_run, artifacts_built, artifact_installs, team_seats, device_sync_targets.">
+<title>Billing · Account · Account · kolm.ai</title>
+<meta name="description" content="Billing meters on kolm.ai: 12 meters spanning captured_events, redacted_events, raw_cloud_synced_bytes, redacted_cloud_synced_bytes, hosted_build_minutes,...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/billing">
-<meta property="og:title" content="Billing &middot; Account &middot; kolm.ai" />
-<meta property="og:description" content="Billing meters on kolm.ai: 12 meters spanning captured_events, redacted_events, raw_cloud_synced_bytes, redacted_cloud_synced_bytes, hosted_build_minutes, training_gpu_minutes, synthetic_examples_generated, eval_examples_run, artifacts_built, artifact_installs, team_seats, device_sync_targets." />
-<meta property="og:image" content="https://kolm.ai/og-card.svg" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://kolm.ai/account/billing" />
+<meta property="og:title" content="Billing · Account · Account · kolm.ai">
+<meta property="og:description" content="Billing meters on kolm.ai: 12 meters spanning captured_events, redacted_events, raw_cloud_synced_bytes, redacted_cloud_synced_bytes, hosted_build_minutes,...">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/billing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
@@ -61,13 +61,18 @@
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
 
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Billing · Account · Account · kolm.ai">
+<meta name="twitter:description" content="Billing meters on kolm.ai: 12 meters spanning captured_events, redacted_events, raw_cloud_synced_bytes, redacted_cloud_synced_bytes, hosted_build_minutes,...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -218,8 +223,8 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions"><a href="/docs">Help</a></div>
-  </div>
+ <div class="site-actions"><a href="/docs">Help</a></div>
+ </div>
 </header>
 
 <main id="main">
@@ -229,46 +234,46 @@
 <h1>Billing.</h1>
 <p class="lede">12 meters. Each shows current usage, your tier limit, and an over-limit pill if you have crossed. No surprise overage.</p>
 <div class="kpanel" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
-  <div><h2 style="margin:0">Current plan</h2><div id="plan-name" style="font-family:var(--mono);font-size:22px;color:var(--accent);margin-top:4px">...</div></div>
-  <div class="toolbar" style="margin:0"><a class="btn primary" href="/pricing">Change plan</a><a class="btn" href="/v1/account/export">Download invoice history</a></div>
+ <div><h2 style="margin:0">Current plan</h2><div id="plan-name" style="font-family:var(--mono);font-size:22px;color:var(--accent);margin-top:4px">...</div></div>
+ <div class="toolbar" style="margin:0"><a class="btn primary" href="/pricing">Change plan</a><a class="btn" href="/v1/account/export">Download invoice history</a></div>
 </div>
 <table class="ktable">
-  <thead><tr><th>Meter</th><th>Current usage</th><th>Tier limit</th><th>% used</th><th>Status</th></tr></thead>
-  <tbody id="bm-rows">
-    <tr data-meter="captured_events"><td><code>captured_events</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="redacted_events"><td><code>redacted_events</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="raw_cloud_synced_bytes"><td><code>raw_cloud_synced_bytes</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="redacted_cloud_synced_bytes"><td><code>redacted_cloud_synced_bytes</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="hosted_build_minutes"><td><code>hosted_build_minutes</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="training_gpu_minutes"><td><code>training_gpu_minutes</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="synthetic_examples_generated"><td><code>synthetic_examples_generated</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="eval_examples_run"><td><code>eval_examples_run</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="artifacts_built"><td><code>artifacts_built</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="artifact_installs"><td><code>artifact_installs</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="team_seats"><td><code>team_seats</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-    <tr data-meter="device_sync_targets"><td><code>device_sync_targets</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
-  </tbody>
+ <thead><tr><th>Meter</th><th>Current usage</th><th>Tier limit</th><th>% used</th><th>Status</th></tr></thead>
+ <tbody id="bm-rows">
+ <tr data-meter="captured_events"><td><code>captured_events</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="redacted_events"><td><code>redacted_events</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="raw_cloud_synced_bytes"><td><code>raw_cloud_synced_bytes</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="redacted_cloud_synced_bytes"><td><code>redacted_cloud_synced_bytes</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="hosted_build_minutes"><td><code>hosted_build_minutes</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="training_gpu_minutes"><td><code>training_gpu_minutes</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="synthetic_examples_generated"><td><code>synthetic_examples_generated</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="eval_examples_run"><td><code>eval_examples_run</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="artifacts_built"><td><code>artifacts_built</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="artifact_installs"><td><code>artifact_installs</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="team_seats"><td><code>team_seats</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ <tr data-meter="device_sync_targets"><td><code>device_sync_targets</code></td><td class="u">-</td><td class="l">-</td><td class="p">-</td><td class="s">-</td></tr>
+ </tbody>
 </table>
 <div id="empty-state" class="empty" hidden data-empty-state>
-  <strong>No billing data yet.</strong> Sign in to a paid plan to see per-meter usage. Free tier shows the captured / redacted / install meters only.
+ <strong>No billing data yet.</strong> Sign in to a paid plan to see per-meter usage. Free tier shows the captured / redacted / install meters only.
 </div>
 
 <!-- W465: per-namespace cost attribution + team rollup -->
 <div class="kpanel" id="w465-breakdown">
-  <h2>Per-namespace breakdown</h2>
-  <p class="pdesc">Spend, captures, and tokens grouped by <code>corpus_namespace</code> for the current billing period. Read by <code>kolm billing breakdown</code> + the TUI <code>:breakdown</code> view from the same <code>/v1/billing/breakdown</code> route.</p>
-  <div class="toolbar">
-    <label>Period <input id="bd-period" type="text" placeholder="YYYY-MM (defaults to current)"></label>
-    <button class="btn" id="bd-refresh" type="button">Refresh</button>
-    <span id="bd-totals" style="margin-left:auto;color:var(--ink-mute);font-size:12.5px"></span>
-  </div>
-  <table class="ktable">
-    <thead><tr><th>Namespace</th><th>Captures</th><th>Tokens (in)</th><th>Tokens (out)</th><th>Spend (USD)</th><th>Latency avg (ms)</th></tr></thead>
-    <tbody id="bd-rows"><tr><td colspan="6" style="color:var(--ink-mute)">Loading namespace breakdown...</td></tr></tbody>
-  </table>
-  <div id="bd-empty" class="empty" hidden>
-    <strong>No captures in this period.</strong> Once any captured event lands in the event-store, it will show up here grouped by <code>corpus_namespace</code>.
-  </div>
+ <h2>Per-namespace breakdown</h2>
+ <p class="pdesc">Spend, captures, and tokens grouped by <code>corpus_namespace</code> for the current billing period. Read by <code>kolm billing breakdown</code> + the TUI <code>:breakdown</code> view from the same <code>/v1/billing/breakdown</code> route.</p>
+ <div class="toolbar">
+ <label>Period <input id="bd-period" type="text" placeholder="YYYY-MM (defaults to current)"></label>
+ <button class="btn" id="bd-refresh" type="button">Refresh</button>
+ <span id="bd-totals" style="margin-left:auto;color:var(--ink-mute);font-size:12.5px"></span>
+ </div>
+ <table class="ktable">
+ <thead><tr><th>Namespace</th><th>Captures</th><th>Tokens (in)</th><th>Tokens (out)</th><th>Spend (USD)</th><th>Latency avg (ms)</th></tr></thead>
+ <tbody id="bd-rows"><tr><td colspan="6" style="color:var(--ink-mute)">Loading namespace breakdown...</td></tr></tbody>
+ </table>
+ <div id="bd-empty" class="empty" hidden>
+ <strong>No captures in this period.</strong> Once any captured event lands in the event-store, it will show up here grouped by <code>corpus_namespace</code>.
+ </div>
 </div>
 </section>
 </div>
@@ -276,15 +281,15 @@
 
 <script>
 (function(){
-  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+ var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
 
-  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
-  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
-  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
-  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
-  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
-  window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
-  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+ if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
+ window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+ window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+ window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
+ window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
+ window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
 })();
 function pct(u,l){if(!l||l<=0)return null;return Math.min(999,Math.round((u/l)*100));}
 function fmtMeter(name,val){if(name.indexOf("bytes")>=0)return window.kbytes(val);return window.knum(val);}
@@ -292,71 +297,71 @@ function fmtMeter(name,val){if(name.indexOf("bytes")>=0)return window.kbytes(val
 // {meters, limits, soft_limits, over_soft, over_hard}). Fall back to the
 // catalog endpoint then /v1/account so legacy routers still render.
 window.kfetch("/v1/billing/usage").catch(function(){
-  return window.kfetch("/v1/billing/meters").catch(function(){
-    return window.kfetch("/v1/account").then(function(a){return {plan:a.plan,meters:(a&&a.meters)||{},limits:(a&&a.limits)||{}};});
-  });
+ return window.kfetch("/v1/billing/meters").catch(function(){
+ return window.kfetch("/v1/account").then(function(a){return {plan:a.plan,meters:(a&&a.meters)||{},limits:(a&&a.limits)||{}};});
+ });
 }).then(function(j){
-  document.getElementById("plan-name").textContent=(j&&j.plan)||"free";
-  var ms=(j&&j.meters)||{},ls=(j&&j.limits)||{};
-  var any=false;
-  document.querySelectorAll("tr[data-meter]").forEach(function(tr){
-    var name=tr.getAttribute("data-meter");
-    var u=ms[name],l=ls[name];
-    if(u!=null)any=true;
-    tr.querySelector(".u").textContent=fmtMeter(name,u);
-    tr.querySelector(".l").textContent=l!=null?fmtMeter(name,l):"unlimited";
-    var p=pct(u,l);
-    tr.querySelector(".p").textContent=p!=null?p+"%":"-";
-    var s=tr.querySelector(".s");
-    if(p==null){s.innerHTML="<span class=\"pill mute\">-</span>";}
-    else if(p>=100){s.innerHTML="<span class=\"pill bad\">over limit</span>";}
-    else if(p>=80){s.innerHTML="<span class=\"pill warn\">near limit</span>";}
-    else{s.innerHTML="<span class=\"pill ok\">ok</span>";}
-  });
-  if(!any){document.getElementById("empty-state").hidden=false;}
+ document.getElementById("plan-name").textContent=(j&&j.plan)||"free";
+ var ms=(j&&j.meters)||{},ls=(j&&j.limits)||{};
+ var any=false;
+ document.querySelectorAll("tr[data-meter]").forEach(function(tr){
+ var name=tr.getAttribute("data-meter");
+ var u=ms[name],l=ls[name];
+ if(u!=null)any=true;
+ tr.querySelector(".u").textContent=fmtMeter(name,u);
+ tr.querySelector(".l").textContent=l!=null?fmtMeter(name,l):"unlimited";
+ var p=pct(u,l);
+ tr.querySelector(".p").textContent=p!=null?p+"%":"-";
+ var s=tr.querySelector(".s");
+ if(p==null){s.innerHTML="<span class=\"pill mute\">-</span>";}
+ else if(p>=100){s.innerHTML="<span class=\"pill bad\">over limit</span>";}
+ else if(p>=80){s.innerHTML="<span class=\"pill warn\">near limit</span>";}
+ else{s.innerHTML="<span class=\"pill ok\">ok</span>";}
+ });
+ if(!any){document.getElementById("empty-state").hidden=false;}
 });
 
 // W465 - per-namespace breakdown panel. Reads /v1/billing/breakdown
 // (?period=YYYY-MM optional). Refresh button + period input re-fire the fetch.
 function w465LoadBreakdown(){
-  var p=document.getElementById("bd-period").value.trim();
-  var url="/v1/billing/breakdown";
-  if(p){
-    if(!/^\d{4}-\d{2}$/.test(p)){
-      document.getElementById("bd-rows").innerHTML='<tr><td colspan="6" class="pill bad">invalid period (must be YYYY-MM)</td></tr>';
-      return;
-    }
-    url+="?period="+encodeURIComponent(p);
-  }
-  document.getElementById("bd-rows").innerHTML='<tr><td colspan="6" style="color:var(--ink-mute)">Loading...</td></tr>';
-  document.getElementById("bd-empty").hidden=true;
-  window.kfetch(url).then(function(j){
-    var ns=(j&&j.namespaces)||[];
-    var totals=(j&&j.totals)||{};
-    document.getElementById("bd-totals").textContent=
-      "period "+(j.period||"-")+" · total $"+Number(totals.cost_usd||0).toFixed(6)+
-      " · "+(totals.captures||0)+" captures · tokens in/out "+(totals.tokens_in||0)+"/"+(totals.tokens_out||0);
-    if(!ns.length){
-      document.getElementById("bd-rows").innerHTML="";
-      document.getElementById("bd-empty").hidden=false;
-      return;
-    }
-    var html="";
-    for(var i=0;i<ns.length;i++){
-      var row=ns[i];
-      html+="<tr>"+
-        "<td><code>"+window.kesc(row.namespace||"-")+"</code></td>"+
-        "<td>"+window.knum(row.captures||0)+"</td>"+
-        "<td>"+window.knum(row.tokens_in||0)+"</td>"+
-        "<td>"+window.knum(row.tokens_out||0)+"</td>"+
-        "<td>$"+Number(row.cost_usd||0).toFixed(6)+"</td>"+
-        "<td>"+Number(row.latency_ms_avg||0).toFixed(1)+"</td>"+
-      "</tr>";
-    }
-    document.getElementById("bd-rows").innerHTML=html;
-  }).catch(function(e){
-    document.getElementById("bd-rows").innerHTML='<tr><td colspan="6" class="pill bad">breakdown failed: '+window.kesc(String(e&&e.message||e))+'</td></tr>';
-  });
+ var p=document.getElementById("bd-period").value.trim();
+ var url="/v1/billing/breakdown";
+ if(p){
+ if(!/^\d{4}-\d{2}$/.test(p)){
+ document.getElementById("bd-rows").innerHTML='<tr><td colspan="6" class="pill bad">invalid period (must be YYYY-MM)</td></tr>';
+ return;
+ }
+ url+="?period="+encodeURIComponent(p);
+ }
+ document.getElementById("bd-rows").innerHTML='<tr><td colspan="6" style="color:var(--ink-mute)">Loading...</td></tr>';
+ document.getElementById("bd-empty").hidden=true;
+ window.kfetch(url).then(function(j){
+ var ns=(j&&j.namespaces)||[];
+ var totals=(j&&j.totals)||{};
+ document.getElementById("bd-totals").textContent=
+ "period "+(j.period||"-")+" · total $"+Number(totals.cost_usd||0).toFixed(6)+
+ " · "+(totals.captures||0)+" captures · tokens in/out "+(totals.tokens_in||0)+"/"+(totals.tokens_out||0);
+ if(!ns.length){
+ document.getElementById("bd-rows").innerHTML="";
+ document.getElementById("bd-empty").hidden=false;
+ return;
+ }
+ var html="";
+ for(var i=0;i<ns.length;i++){
+ var row=ns[i];
+ html+="<tr>"+
+ "<td><code>"+window.kesc(row.namespace||"-")+"</code></td>"+
+ "<td>"+window.knum(row.captures||0)+"</td>"+
+ "<td>"+window.knum(row.tokens_in||0)+"</td>"+
+ "<td>"+window.knum(row.tokens_out||0)+"</td>"+
+ "<td>$"+Number(row.cost_usd||0).toFixed(6)+"</td>"+
+ "<td>"+Number(row.latency_ms_avg||0).toFixed(1)+"</td>"+
+ "</tr>";
+ }
+ document.getElementById("bd-rows").innerHTML=html;
+ }).catch(function(e){
+ document.getElementById("bd-rows").innerHTML='<tr><td colspan="6" class="pill bad">breakdown failed: '+window.kesc(String(e&&e.message||e))+'</td></tr>';
+ });
 }
 document.getElementById("bd-refresh").addEventListener("click",w465LoadBreakdown);
 document.getElementById("bd-period").addEventListener("keydown",function(e){if(e.key==="Enter")w465LoadBreakdown();});

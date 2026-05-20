@@ -3,20 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RS-1 receipts spec · kolm.ai docs</title>
+<title>RS-1 receipts spec · kolm.ai docs · kolm.ai</title>
 <meta name="description" content="RS-1 is the receipts spec that backs every capture, compile, distill, and replay in kolm.ai. Schema, signing, verification, and chain rules.">
 <link rel="canonical" href="https://kolm.ai/docs/rs-1">
-<meta property="og:title" content="RS-1 receipts spec · kolm.ai docs">
-<meta property="og:description" content="The receipts spec that backs every capture, compile, distill, and replay.">
+<meta property="og:title" content="RS-1 receipts spec · kolm.ai docs · kolm.ai">
+<meta property="og:description" content="RS-1 is the receipts spec that backs every capture, compile, distill, and replay in kolm.ai. Schema, signing, verification, and chain rules.">
 <meta property="og:url" content="https://kolm.ai/docs/rs-1">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-rs-1.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"RS-1 receipts spec","description":"The receipts spec that backs every capture and replay on kolm.ai.","url":"https://kolm.ai/docs/rs-1","mainEntityOfPage":"https://kolm.ai/docs/rs-1","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:title" content="RS-1 receipts spec · kolm.ai docs · kolm.ai">
+<meta name="twitter:description" content="RS-1 is the receipts spec that backs every capture, compile, distill, and replay in kolm.ai. Schema, signing, verification, and chain rules.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,49 +176,49 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-page" data-w401g="rs-1">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <span>RS-1 receipts spec</span>
+ <a href="/docs">Docs</a> / <span>RS-1 receipts spec</span>
 </nav>
 <header class="page-h">
-  <p class="eyebrow">kolm.ai · receipts spec v2.1</p>
-  <h1>RS-1: every step has a signed receipt.</h1>
-  <p class="lede">RS-1 is the on-disk format for receipts emitted by capture, compile, distill, eval, and replay. The full spec lives at <a href="/spec/rs-1">/spec/rs-1</a>; this page summarizes the public-facing shape and the verification path.</p>
+ <p class="eyebrow">kolm.ai · receipts spec v2.1</p>
+ <h1>RS-1: every step has a signed receipt.</h1>
+ <p class="lede">RS-1 is the on-disk format for receipts emitted by capture, compile, distill, eval, and replay. The full spec lives at <a href="/spec/rs-1">/spec/rs-1</a>; this page summarizes the public-facing shape and the verification path.</p>
 </header>
 
 <section>
-  <h2>What a receipt records</h2>
-  <ul>
-    <li>The verb that ran (capture, compile, distill, eval, replay, bundle).</li>
-    <li>Inputs: artifact hashes, recipe hash, dataset rows, model id.</li>
-    <li>Outputs: K-score, latency, cost, durability flag.</li>
-    <li>Provenance: actor (key fingerprint), tenant, timestamp, prior receipt hash.</li>
-    <li>Signature: Ed25519 over the canonical JSON.</li>
-  </ul>
+ <h2>What a receipt records</h2>
+ <ul>
+ <li>The verb that ran (capture, compile, distill, eval, replay, bundle).</li>
+ <li>Inputs: artifact hashes, recipe hash, dataset rows, model id.</li>
+ <li>Outputs: K-score, latency, cost, durability flag.</li>
+ <li>Provenance: actor (key fingerprint), tenant, timestamp, prior receipt hash.</li>
+ <li>Signature: Ed25519 over the canonical JSON.</li>
+ </ul>
 </section>
 
 <section>
-  <h2>Chain rules</h2>
-  <ol>
-    <li>Every receipt embeds the previous receipt hash for the same artifact.</li>
-    <li>The bundle of receipts ships inside the <code>.kolm</code> artifact as <code>receipts.jsonl</code>.</li>
-    <li>Verification is offline: the artifact carries the public key it was signed with.</li>
-    <li>The <code>x-kolm-capture-durable: true</code> response header is the live counterpart at capture time.</li>
-  </ol>
+ <h2>Chain rules</h2>
+ <ol>
+ <li>Every receipt embeds the previous receipt hash for the same artifact.</li>
+ <li>The bundle of receipts ships inside the <code>.kolm</code> artifact as <code>receipts.jsonl</code>.</li>
+ <li>Verification is offline: the artifact carries the public key it was signed with.</li>
+ <li>The <code>x-kolm-capture-durable: true</code> response header is the live counterpart at capture time.</li>
+ </ol>
 </section>
 
 <section>
-  <h2>Verify locally</h2>
-  <pre><code>kolm verify ./phi-redactor.kolm
-kolm verify --strict ./phi-redactor.kolm   # also re-runs the frozen eval set</code></pre>
+ <h2>Verify locally</h2>
+ <pre><code>kolm verify ./phi-redactor.kolm
+kolm verify --strict ./phi-redactor.kolm # also re-runs the frozen eval set</code></pre>
 </section>
 
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/spec/rs-1">Full RS-1 specification</a>.</li>
-    <li><a href="/docs/cli/verify">kolm verify CLI</a>.</li>
-    <li><a href="/security">Security &amp; trust</a>: signing keys and rotation.</li>
-    <li><a href="/verify-prod">Live receipt verifier</a>.</li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/spec/rs-1">Full RS-1 specification</a>.</li>
+ <li><a href="/docs/cli/verify">kolm verify CLI</a>.</li>
+ <li><a href="/security">Security &amp; trust</a>: signing keys and rotation.</li>
+ <li><a href="/verify-prod">Live receipt verifier</a>.</li>
+ </ul>
 </section>
 </main>
 </body>

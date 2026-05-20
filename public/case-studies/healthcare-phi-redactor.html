@@ -4,186 +4,196 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Case study &middot; PHI redactor on 4M call-center transcripts | kolm</title>
-<meta name="description" content="A regional health plan replaced a cloud PHI redactor with a compiled .kolm. K-score 0.982, leak rate 0 across 50,000 audit samples, cost $1.8M/yr down to $40k/yr.">
+<title>Case study PHI redactor on 4M call-center transcripts · kolm.ai</title>
+<meta name="description" content="A regional health plan replaced a cloud PHI redactor with a compiled .kolm. K-score 0.982, leak rate 0 across 50,000 audit samples, cost $1.8M/yr down to...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/case-studies/healthcare-phi-redactor">
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
-  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
-  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
-  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
-  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.site nav a{color:inherit;text-decoration:none}
-  header.site nav a.cta{color:var(--accent);font-weight:500}
-  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  .hero{padding:72px 0 24px;border-bottom:1px solid var(--line)}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  h1{font-size:36px;line-height:1.15;font-weight:500;letter-spacing:-0.02em;margin:0 0 14px}
-  .lede{font-size:17px;line-height:1.55;color:var(--ink-mute);margin:0 0 22px}
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 0 0}
-  .stat{padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev)}
-  .stat .k{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.04em;text-transform:uppercase;margin:0 0 4px}
-  .stat .v{font-size:18px;color:var(--ink);font-weight:500;margin:0}
-  @media(max-width:680px){.stats{grid-template-columns:1fr 1fr}}
-  section.body{padding:36px 0;border-bottom:1px solid var(--line)}
-  h2{margin:0 0 14px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
-  h3{margin:24px 0 10px;font-size:15px;font-weight:500;color:var(--ink);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.04em}
-  p{color:var(--ink-mute);margin:0 0 16px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 16px}
-  blockquote{margin:18px 0;padding:14px 18px;border-left:2px solid var(--accent);background:var(--bg-elev);font-style:normal;color:var(--ink)}
-  blockquote .who{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.06em;text-transform:uppercase;margin-top:8px;display:block}
-  ul{color:var(--ink-mute);margin:0 0 16px;padding-left:20px}
-  ul li{margin:4px 0}
-  footer.site{padding:36px 0 60px;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
-  footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;max-width:1080px}
-  footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site nav a.cta{color:var(--accent);font-weight:500}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:72px 0 24px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:36px;line-height:1.15;font-weight:500;letter-spacing:-0.02em;margin:0 0 14px}
+ .lede{font-size:17px;line-height:1.55;color:var(--ink-mute);margin:0 0 22px}
+ .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 0 0}
+ .stat{padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev)}
+ .stat .k{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.04em;text-transform:uppercase;margin:0 0 4px}
+ .stat .v{font-size:18px;color:var(--ink);font-weight:500;margin:0}
+ @media(max-width:680px){.stats{grid-template-columns:1fr 1fr}}
+ section.body{padding:36px 0;border-bottom:1px solid var(--line)}
+ h2{margin:0 0 14px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
+ h3{margin:24px 0 10px;font-size:15px;font-weight:500;color:var(--ink);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.04em}
+ p{color:var(--ink-mute);margin:0 0 16px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 16px}
+ blockquote{margin:18px 0;padding:14px 18px;border-left:2px solid var(--accent);background:var(--bg-elev);font-style:normal;color:var(--ink)}
+ blockquote .who{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.06em;text-transform:uppercase;margin-top:8px;display:block}
+ ul{color:var(--ink-mute);margin:0 0 16px;padding-left:20px}
+ ul li{margin:4px 0}
+ footer.site{padding:36px 0 60px;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
+ footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;max-width:1080px}
+ footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
 <link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta property="og:title" content="Case study PHI redactor on 4M call-center transcripts · kolm.ai">
+<meta property="og:description" content="A regional health plan replaced a cloud PHI redactor with a compiled .kolm. K-score 0.982, leak rate 0 across 50,000 audit samples, cost $1.8M/yr down to...">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/case-studies/healthcare-phi-redactor">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Case study PHI redactor on 4M call-center transcripts · kolm.ai">
+<meta name="twitter:description" content="A regional health plan replaced a cloud PHI redactor with a compiled .kolm. K-score 0.982, leak rate 0 across 50,000 audit samples, cost $1.8M/yr down to...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <header class="site">
-  <div class="wrap">
-    <a href="/" class="logo">kolm</a>
-    <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
-  </div>
+ <div class="wrap">
+ <a href="/" class="logo">kolm</a>
+ <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
+ </div>
 </header>
 
 <section class="hero"><div class="wrap">
-  <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/case-studies">case studies</a> &nbsp;/&nbsp; healthcare</p>
-  <h1>A regional health plan moved PHI redaction off the cloud and into a compiled artifact.</h1>
-  <p class="lede">4 million quarterly call-center transcripts. HIPAA Safe Harbor identifiers. Previously routed to a vendor API. Now redacted by a 7B-param .kolm running on the plan's existing on-prem boxes. The receipts are the audit trail.</p>
-  <div class="stats">
-    <div class="stat"><p class="k">K-score</p><p class="v">0.982</p></div>
-    <div class="stat"><p class="k">Leak rate</p><p class="v">0 / 50k</p></div>
-    <div class="stat"><p class="k">Egress</p><p class="v">0 bytes</p></div>
-    <div class="stat"><p class="k">Cost</p><p class="v">$1.8M&rarr;$0.04M/yr</p></div>
-  </div>
+ <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/case-studies">case studies</a> &nbsp;/&nbsp; healthcare</p>
+ <h1>A regional health plan moved PHI redaction off the cloud and into a compiled artifact.</h1>
+ <p class="lede">4 million quarterly call-center transcripts. HIPAA Safe Harbor identifiers. Previously routed to a vendor API. Now redacted by a 7B-param .kolm running on the plan's existing on-prem boxes. The receipts are the audit trail.</p>
+ <div class="stats">
+ <div class="stat"><p class="k">K-score</p><p class="v">0.982</p></div>
+ <div class="stat"><p class="k">Leak rate</p><p class="v">0 / 50k</p></div>
+ <div class="stat"><p class="k">Egress</p><p class="v">0 bytes</p></div>
+ <div class="stat"><p class="k">Cost</p><p class="v">$1.8M&rarr;$0.04M/yr</p></div>
+ </div>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>The setup</h2>
-  <p>A regional Medicare Advantage plan, ~340k members. Call-center workflow recorded calls, transcribed them with a vendor STT, then ran a separate vendor API to redact PHI before piping transcripts into an analytics warehouse. The redactor API cost ran about $1.8M annually. More importantly, every transcript transited a third party that the plan's Privacy Officer had to BAA, audit, and re-certify yearly.</p>
-  <p>The plan's data-science team was small (4 people). They did not want to train a redactor from scratch and they did not want a fine-tuning project. They wanted the existing vendor's behavior, on their hardware, with paperwork that survived an OCR examiner.</p>
+ <h2>The setup</h2>
+ <p>A regional Medicare Advantage plan, ~340k members. Call-center workflow recorded calls, transcribed them with a vendor STT, then ran a separate vendor API to redact PHI before piping transcripts into an analytics warehouse. The redactor API cost ran about $1.8M annually. More importantly, every transcript transited a third party that the plan's Privacy Officer had to BAA, audit, and re-certify yearly.</p>
+ <p>The plan's data-science team was small (4 people). They did not want to train a redactor from scratch and they did not want a fine-tuning project. They wanted the existing vendor's behavior, on their hardware, with paperwork that survived an OCR examiner.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>The compile</h2>
-  <p>Source: ~12,000 labeled transcripts the plan already had in their Snowflake account, plus the public n2c2 de-identification dataset. Base model: Llama-3.1-8B-Instruct, INT8. The team used kolm's HIPAA compliance pack as the harness: 18 Safe Harbor identifier classes, constrained-decoder verifier, per-class leak counters.</p>
-  <pre>$ kolm compile recipe.yaml \
-    --base meta-llama/Llama-3.1-8B-Instruct \
-    --pack hipaa-safe-harbor \
-    --gate K=0.95 \
-    --gate leak_rate=0
+ <h2>The compile</h2>
+ <p>Source: ~12,000 labeled transcripts the plan already had in their Snowflake account, plus the public n2c2 de-identification dataset. Base model: Llama-3.1-8B-Instruct, INT8. The team used kolm's HIPAA compliance pack as the harness: 18 Safe Harbor identifier classes, constrained-decoder verifier, per-class leak counters.</p>
+ <pre>$ kolm compile recipe.yaml \
+ --base meta-llama/Llama-3.1-8B-Instruct \
+ --pack hipaa-safe-harbor \
+ --gate K=0.95 \
+ --gate leak_rate=0
 &hellip;
 [7/7] OK signature attached
 artifact: build/phi-redactor.kolm
-CID:      cidv1:sha256:1bcf2323&hellip;
-K-score:  0.982 (gate 0.95) PASS
-Leak:     0 / 50,000 (gate 0) PASS</pre>
-  <p>Case-study figure (illustrative, runtime-bridge deployment): compile time on a single A100, 4 hours 22 minutes, artifact 9.4 GB; the payload carries the base model digest, the trained LoRA adapter, the verifier schema, the eval results, and an HMAC-signed manifest. v0.2 of <code>kolm compile</code> produces the recipe + manifest + receipt portions; the LoRA weight bundle ships through the runtime bridge.</p>
+CID: cidv1:sha256:1bcf2323&hellip;
+K-score: 0.982 (gate 0.95) PASS
+Leak: 0 / 50,000 (gate 0) PASS</pre>
+ <p>Case-study figure (illustrative, runtime-bridge deployment): compile time on a single A100, 4 hours 22 minutes, artifact 9.4 GB; the payload carries the base model digest, the trained LoRA adapter, the verifier schema, the eval results, and an Ed25519-signed manifest. v0.2 of <code>kolm compile</code> produces the recipe + manifest + receipt portions; the LoRA weight bundle ships through the runtime bridge.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>The deployment</h2>
-  <p>The plan's existing call-center boxes are 2&times;A10 GPUs (commodity, ~$0.35/hr equivalent). The .kolm runs there. Throughput: ~1,800 tokens/sec per box, which clears the daily transcript backlog by 10am. Cold-start: 38 seconds from process boot to first inference.</p>
-  <p>No new vendor onboarding. No new BAA. Privacy Officer's binder grew by one document &mdash; the manifest and a receipt sample &mdash; rather than another vendor row.</p>
+ <h2>The deployment</h2>
+ <p>The plan's existing call-center boxes are 2&times;A10 GPUs (commodity, ~$0.35/hr equivalent). The .kolm runs there. Throughput: ~1,800 tokens/sec per box, which clears the daily transcript backlog by 10am. Cold-start: 38 seconds from process boot to first inference.</p>
+ <p>No new vendor onboarding. No new BAA. Privacy Officer's binder grew by one document &mdash; the manifest and a receipt sample &mdash; rather than another vendor row.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>What the receipt records</h2>
-  <pre>{
-  "artifact_cid":  "cidv1:sha256:1bcf2323&hellip;",
-  "input_sha":     "sha256:8c2d1fa0&hellip;",
-  "output_sha":    "sha256:4e1a90c3&hellip;",
-  "k_score":       0.982,
-  "leak_count":    0,
-  "verifier_ok":   true,
-  "ts":            "2026-05-09T14:18:32Z",
-  "issuer_pubkey": "kolm-issuer-2026q2",
-  "hmac":          "b7c41e87&hellip;"
+ <h2>What the receipt records</h2>
+ <pre>{
+ "artifact_cid": "cidv1:sha256:1bcf2323&hellip;",
+ "input_sha": "sha256:8c2d1fa0&hellip;",
+ "output_sha": "sha256:4e1a90c3&hellip;",
+ "k_score": 0.982,
+ "leak_count": 0,
+ "verifier_ok": true,
+ "ts": "2026-05-09T14:18:32Z",
+ "issuer_pubkey": "kolm-issuer-2026q2",
+ "hmac": "b7c41e87&hellip;"
 }</pre>
-  <p>The plan exports a JSONL of receipts nightly into the existing model-risk warehouse. The Privacy Officer can spot-check any transcript months later: the artifact CID resolves, the input hash matches what's in the warehouse, the output hash matches what the analytics layer received, the leak count is 0.</p>
+ <p>The plan exports a JSONL of receipts nightly into the existing model-risk warehouse. The Privacy Officer can spot-check any transcript months later: the artifact CID resolves, the input hash matches what's in the warehouse, the output hash matches what the analytics layer received, the leak count is 0.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>The audit result</h2>
-  <blockquote>
-    The vendor API gave us a SOC 2 report and a BAA. The .kolm gives us the actual model, the actual numbers, and a receipt for every transcript. The compliance team prefers the receipt.
-    <span class="who">&mdash; Director, Privacy &amp; Compliance (anonymized)</span>
-  </blockquote>
-  <p>Outcome at year-end audit: zero findings on PHI handling. The plan's external auditor (Big-4, name on request from carrier) accepted the manifest + receipt JSONL as in-scope evidence for HIPAA &sect;164.514(b) Safe Harbor.</p>
+ <h2>The audit result</h2>
+ <blockquote>
+ The vendor API gave us a SOC 2 report and a BAA. The .kolm gives us the actual model, the actual numbers, and a receipt for every transcript. The compliance team prefers the receipt.
+ <span class="who">&mdash; Director, Privacy &amp; Compliance (anonymized)</span>
+ </blockquote>
+ <p>Outcome at year-end audit: zero findings on PHI handling. The plan's external auditor (Big-4, name on request from carrier) accepted the manifest + receipt JSONL as in-scope evidence for HIPAA &sect;164.514(b) Safe Harbor.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>What we did not solve</h2>
-  <ul>
-    <li>The STT vendor is still in the loop. Transcription accuracy gates downstream redaction. We did not replace STT.</li>
-    <li>The plan still pays for a second .kolm to run on their claims-narrative workload. The redactor is a single artifact, not a platform contract.</li>
-    <li>Compile cost ran ~$220 (single A100 for 4.5 hr on a spot market). That number recurs every refresh, not once.</li>
-  </ul>
+ <h2>What we did not solve</h2>
+ <ul>
+ <li>The STT vendor is still in the loop. Transcription accuracy gates downstream redaction. We did not replace STT.</li>
+ <li>The plan still pays for a second .kolm to run on their claims-narrative workload. The redactor is a single artifact, not a platform contract.</li>
+ <li>Compile cost ran ~$220 (single A100 for 4.5 hr on a spot market). That number recurs every refresh, not once.</li>
+ </ul>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>Reproducing this case</h2>
-  <p>The artifact CID is public. The HIPAA compliance pack is at <a href="/compliance-packs" style="color:inherit;border-bottom:1px solid var(--line)">/compliance-packs</a>. The recipe is in the <a href="/docs#hipaa-onboarding" style="color:inherit;border-bottom:1px solid var(--line)">docs HIPAA-onboarding</a> section. Two hours from <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 5px;border-radius:3px">kolm init</code> to a signed artifact you can curl.</p>
+ <h2>Reproducing this case</h2>
+ <p>The artifact CID is public. The HIPAA compliance pack is at <a href="/compliance-packs" style="color:inherit;border-bottom:1px solid var(--line)">/compliance-packs</a>. The recipe is in the <a href="/docs#hipaa-onboarding" style="color:inherit;border-bottom:1px solid var(--line)">docs HIPAA-onboarding</a> section. Two hours from <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 5px;border-radius:3px">kolm init</code> to a signed artifact you can curl.</p>
 </div></section>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

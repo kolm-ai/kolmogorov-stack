@@ -4,21 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Document ingestion &middot; From PDF, email, and HTML to training pairs | kolm research</title>
-<meta name="description" content="A multi-format ingest pipeline that turns PDFs, emails, mailboxes, HTML pages, and CSV exports into chunked, redacted, mode-tagged training pairs. The RAG replacement story: no retriever, no embedding store, no vector DB.">
+<title>Document ingestion From PDF, email, and HTML to · kolm.ai</title>
+<meta name="description" content="A multi-format ingest pipeline that turns PDFs, emails, mailboxes, HTML pages, and CSV exports into chunked, redacted, mode-tagged training pairs. The RAG...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Document ingestion . kolm research">
-<meta property="og:description" content="Multi-format documents to training pairs. Paragraph-aware chunking, PII redaction, three task modes, no vector DB.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Document ingestion From PDF, email, and HTML to · kolm.ai">
+<meta property="og:description" content="A multi-format ingest pipeline that turns PDFs, emails, mailboxes, HTML pages, and CSV exports into chunked, redacted, mode-tagged training pairs. The RAG...">
+<meta property="og:type" content="website">
 <meta property="article:published_time" content="2026-05-14">
 <meta property="article:author" content="Kolmogorov">
 <meta property="article:section" content="data">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Document ingestion">
-<meta name="twitter:description" content="PDFs, emails, HTML, CSV in. Chunked, redacted, mode-tagged training pairs out. The RAG replacement.">
+<meta name="twitter:title" content="Document ingestion From PDF, email, and HTML to · kolm.ai">
+<meta name="twitter:description" content="A multi-format ingest pipeline that turns PDFs, emails, mailboxes, HTML pages, and CSV exports into chunked, redacted, mode-tagged training pairs. The RAG...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/document-ingestion">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,298 +27,300 @@
 <script src="/escape.js"></script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Document ingestion: from PDF, email, and HTML to training pairs",
-      "description": "How kolm turns multi-format documents into training pairs. Paragraph-aware chunking with overlap, PII redaction, three task modes, no embedding store required.",
-      "url": "https://kolm.ai/research/document-ingestion",
-      "author": {"@type": "Organization", "name": "Kolmogorov"},
-      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
-      "datePublished": "2026-05-14",
-      "articleSection": "data",
-      "keywords": "document ingest, training data, PDF extraction, RAG replacement, instruction tuning, self-instruct",
-      "citation": [
-        "Hendrycks et al, 2020, arXiv:2009.03300 (MMLU)",
-        "Wang et al, 2022, arXiv:2212.10560 (Self-Instruct)",
-        "Lewis et al, 2020, arXiv:2005.11401 (RAG)",
-        "Borgeaud et al, 2022, arXiv:2112.04426 (RETRO)"
-      ],
-      "license": "https://creativecommons.org/licenses/by/4.0/"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "Document ingestion", "item": "https://kolm.ai/research/document-ingestion"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Document ingestion: from PDF, email, and HTML to training pairs",
+ "description": "How kolm turns multi-format documents into training pairs. Paragraph-aware chunking with overlap, PII redaction, three task modes, no embedding store required.",
+ "url": "https://kolm.ai/research/document-ingestion",
+ "author": {"@type": "Organization", "name": "Kolmogorov"},
+ "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-14",
+ "articleSection": "data",
+ "keywords": "document ingest, training data, PDF extraction, RAG replacement, instruction tuning, self-instruct",
+ "citation": [
+ "Hendrycks et al, 2020, arXiv:2009.03300 (MMLU)",
+ "Wang et al, 2022, arXiv:2212.10560 (Self-Instruct)",
+ "Lewis et al, 2020, arXiv:2005.11401 (RAG)",
+ "Borgeaud et al, 2022, arXiv:2112.04426 (RETRO)"
+ ],
+ "license": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Document ingestion", "item": "https://kolm.ai/research/document-ingestion"}
+ ]
+ }
+ ]
 }
 </script>
 
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
-  a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
-  a:hover{border-bottom-color:var(--ink)}
-  .nb{border:0}
-  ::selection{background:rgba(236,231,220,0.30)}
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
-  @media(max-width:720px){.wrap{padding:0 20px}}
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){header.site .row{padding:0 20px}}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
-  header.site .brand span{font-weight:500;font-size:16px;letter-spacing:0}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500;border:0}
-  main{padding:80px 0 96px;flex:1}
-  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
-  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
-  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
-  h1{font-weight:500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
-  .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
-  h2{font-weight:500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
-  h3{font-weight:500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
-  p{color:var(--ink-mute);margin:0 0 14px}
-  p strong{color:var(--ink);font-weight:500}
-  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
-  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
-  ul li{margin:6px 0}
-  .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
-  .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
-  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-  .table th{font-weight:500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
-  .table tr:last-child td{border-bottom:0}
-  .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
-  .citations a{color:var(--ink-mute)}
-  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
-  footer a{color:var(--ink-mute);border:0}
-  footer a:hover{color:var(--ink)}
-  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
-  .footer-row a{color:inherit}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+ a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+ a:hover{border-bottom-color:var(--ink)}
+ .nb{border:0}
+ ::selection{background:rgba(236,231,220,0.30)}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.wrap{padding:0 20px}}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){header.site .row{padding:0 20px}}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+ header.site .brand span{font-weight:500;font-size:16px;letter-spacing:0}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site .right .ghost:hover{color:var(--ink)}
+ header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500;border:0}
+ main{padding:80px 0 96px;flex:1}
+ .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+ .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+ h1{font-weight:500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+ .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+ h2{font-weight:500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+ h3{font-weight:500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p strong{color:var(--ink);font-weight:500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+ ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+ ul li{margin:6px 0}
+ .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+ .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+ .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ .table th{font-weight:500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+ .table tr:last-child td{border-bottom:0}
+ .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+ .citations a{color:var(--ink-mute)}
+ footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+ footer a{color:var(--ink-mute);border:0}
+ footer a:hover{color:var(--ink)}
+ .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+ .footer-row a{color:inherit}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site">
-  <div class="row">
-    <div class="left">
-      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research" class="active">Research</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="row">
+ <div class="left">
+ <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research" class="active">Research</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main>
-  <div class="wrap">
-    <div class="hero-eyebrow"><span class="he-dot"></span>research . data . 10 min read</div>
-    <h1>Document ingestion.</h1>
-    <p class="lede">The buyer's data is in PDFs, EMLs, mailboxes, HTML exports, and CSVs. The training pipeline needs uniform JSONL with prompt/response pairs, deduplicated, redacted of PII, and tagged with a task mode. The conversion is unglamorous and decisive: a 20% bad ingest means a 20% worse adapter, no matter how good the trainer is downstream. kolm runs a single multi-format pipeline that turns the buyer's raw documents into training pairs without a retriever, an embedding store, or a vector database.</p>
+<main id="main">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>research . data . 10 min read</div>
+ <h1>Document ingestion.</h1>
+ <p class="lede">The buyer's data is in PDFs, EMLs, mailboxes, HTML exports, and CSVs. The training pipeline needs uniform JSONL with prompt/response pairs, deduplicated, redacted of PII, and tagged with a task mode. The conversion is unglamorous and decisive: a 20% bad ingest means a 20% worse adapter, no matter how good the trainer is downstream. kolm runs a single multi-format pipeline that turns the buyer's raw documents into training pairs without a retriever, an embedding store, or a vector database.</p>
 
-    <div class="meta-line">
-      <span>May 14, 2026</span>
-      <span>&middot;</span>
-      <span>Kolmogorov research</span>
-      <span>&middot;</span>
-      <span>apps/data/ingest.py</span>
-    </div>
+ <div class="meta-line">
+ <span>May 14, 2026</span>
+ <span>&middot;</span>
+ <span>Kolmogorov research</span>
+ <span>&middot;</span>
+ <span>apps/data/ingest.py</span>
+ </div>
 
-    <h2>The RAG replacement story</h2>
+ <h2>The RAG replacement story</h2>
 
-    <p>The conventional architecture for &quot;ask questions about the buyer's documents&quot; is retrieval-augmented generation: embed every chunk into a vector store, run the user's query through the same embedder, retrieve the top-k chunks, and stuff them into the model's context window at inference time. RAG works. It also requires a vector database, an embedder, an embedding refresh job whenever the documents change, a retrieval-quality eval, and a per-query latency cost that grows with k.</p>
+ <p>The conventional architecture for &quot;ask questions about the buyer's documents&quot; is retrieval-augmented generation: embed every chunk into a vector store, run the user's query through the same embedder, retrieve the top-k chunks, and stuff them into the model's context window at inference time. RAG works. It also requires a vector database, an embedder, an embedding refresh job whenever the documents change, a retrieval-quality eval, and a per-query latency cost that grows with k.</p>
 
-    <p>The alternative kolm pursues is to train the document content into a LoRA adapter, gate the result against a held-out QA eval set, and serve the adapter without retrieval at inference. The buyer pays the training cost once (and re-pays it when the documents change) instead of paying retrieval latency forever. For a fixed and slowly-changing document corpus (compliance manuals, internal policies, product specs, dictation templates), the math favors training. For a high-churn corpus or one where the buyer needs precise citation back to a document id, retrieval is the right tool; kolm does not block it.</p>
+ <p>The alternative kolm pursues is to train the document content into a LoRA adapter, gate the result against a held-out QA eval set, and serve the adapter without retrieval at inference. The buyer pays the training cost once (and re-pays it when the documents change) instead of paying retrieval latency forever. For a fixed and slowly-changing document corpus (compliance manuals, internal policies, product specs, dictation templates), the math favors training. For a high-churn corpus or one where the buyer needs precise citation back to a document id, retrieval is the right tool; kolm does not block it.</p>
 
-    <h2>Paragraph-aware chunking with overlap</h2>
+ <h2>Paragraph-aware chunking with overlap</h2>
 
-    <p>The dumbest chunker (fixed character window with a sliding stride) corrupts every paragraph that crosses a chunk boundary and produces training pairs where the response references content that is no longer in the prompt. The fix is small and decisive: split on paragraph breaks first, then pack paragraphs into chunks up to a target token count, with an overlap of N tokens between adjacent chunks. The overlap is enough to recover most cross-boundary references.</p>
+ <p>The dumbest chunker (fixed character window with a sliding stride) corrupts every paragraph that crosses a chunk boundary and produces training pairs where the response references content that is no longer in the prompt. The fix is small and decisive: split on paragraph breaks first, then pack paragraphs into chunks up to a target token count, with an overlap of N tokens between adjacent chunks. The overlap is enough to recover most cross-boundary references.</p>
 
-    <pre>def chunk_paragraphs(text: str, target_tokens: int = 512, overlap_tokens: int = 64) -&gt; list[str]:
-    paragraphs = [p.strip() for p in re.split(r&quot;\n\s*\n&quot;, text) if p.strip()]
-    chunks, current, current_tokens = [], [], 0
-    for p in paragraphs:
-        p_tokens = _approx_token_count(p)
-        if current_tokens + p_tokens &gt; target_tokens and current:
-            chunks.append(&quot;\n\n&quot;.join(current))
-            tail = _tail_tokens(&quot;\n\n&quot;.join(current), overlap_tokens)
-            current, current_tokens = [tail] if tail else [], _approx_token_count(tail) if tail else 0
-        current.append(p)
-        current_tokens += p_tokens
-    if current:
-        chunks.append(&quot;\n\n&quot;.join(current))
-    return chunks</pre>
+ <pre>def chunk_paragraphs(text: str, target_tokens: int = 512, overlap_tokens: int = 64) -&gt; list[str]:
+ paragraphs = [p.strip() for p in re.split(r&quot;\n\s*\n&quot;, text) if p.strip()]
+ chunks, current, current_tokens = [], [], 0
+ for p in paragraphs:
+ p_tokens = _approx_token_count(p)
+ if current_tokens + p_tokens &gt; target_tokens and current:
+ chunks.append(&quot;\n\n&quot;.join(current))
+ tail = _tail_tokens(&quot;\n\n&quot;.join(current), overlap_tokens)
+ current, current_tokens = [tail] if tail else [], _approx_token_count(tail) if tail else 0
+ current.append(p)
+ current_tokens += p_tokens
+ if current:
+ chunks.append(&quot;\n\n&quot;.join(current))
+ return chunks</pre>
 
-    <p>The token counter is approximate (4 characters per token is close enough for chunking purposes); the trainer's actual tokenizer runs later. The overlap is calibrated per task mode: 64 tokens for QA, 32 for instruction, 128 for completion (longer because cross-boundary context matters more for autoregressive continuation).</p>
+ <p>The token counter is approximate (4 characters per token is close enough for chunking purposes); the trainer's actual tokenizer runs later. The overlap is calibrated per task mode: 64 tokens for QA, 32 for instruction, 128 for completion (longer because cross-boundary context matters more for autoregressive continuation).</p>
 
-    <h2>PII redaction</h2>
+ <h2>PII redaction</h2>
 
-    <p>The ingest pipeline is the right layer to redact PII because it runs on raw documents before any model sees them. The redactor uses regex patterns for the structured fields (email, phone, social-security, account number, ICD-10 with a leading patient name) and a token-class denylist for the unstructured ones (name + DOB combinations, signature blocks at the end of emails). Patterns hit are replaced with stable placeholder tokens (<code>[EMAIL_1]</code>, <code>[PHONE_2]</code>) so the model learns to ignore them rather than reproduce them.</p>
+ <p>The ingest pipeline is the right layer to redact PII because it runs on raw documents before any model sees them. The redactor uses regex patterns for the structured fields (email, phone, social-security, account number, ICD-10 with a leading patient name) and a token-class denylist for the unstructured ones (name + DOB combinations, signature blocks at the end of emails). Patterns hit are replaced with stable placeholder tokens (<code>[EMAIL_1]</code>, <code>[PHONE_2]</code>) so the model learns to ignore them rather than reproduce them.</p>
 
-    <p>The structured-regex layer catches roughly 95% of PII; the residual 5% (free-text names, addresses inside narrative paragraphs) needs an entity recognizer or a human-in-the-loop pass. kolm reports the regex-hit count per document and flags documents with hit-density above a threshold for the buyer's review. The redactor is conservative: a false positive (redacting a non-PII token) costs only some training signal; a false negative (leaking real PII into the training set) is the bug the pipeline must not have.</p>
+ <p>The structured-regex layer catches roughly 95% of PII; the residual 5% (free-text names, addresses inside narrative paragraphs) needs an entity recognizer or a human-in-the-loop pass. kolm reports the regex-hit count per document and flags documents with hit-density above a threshold for the buyer's review. The redactor is conservative: a false positive (redacting a non-PII token) costs only some training signal; a false negative (leaking real PII into the training set) is the bug the pipeline must not have.</p>
 
-    <h2>Three task modes</h2>
+ <h2>Three task modes</h2>
 
-    <table class="table">
-      <thead><tr><th>Mode</th><th>Prompt shape</th><th>Response shape</th><th>When to use</th></tr></thead>
-      <tbody>
-        <tr><td>qa</td><td>Synthetic question over the chunk (Self-Instruct-style, generated by a teacher model)</td><td>The relevant span from the chunk</td><td>Buyer wants to ask questions and get cited answers</td></tr>
-        <tr><td>instruction</td><td>Task description + the chunk as context</td><td>The action the task description specifies (summarize, rewrite, classify)</td><td>Buyer wants the model to perform a task over their documents</td></tr>
-        <tr><td>completion</td><td>The first half of the chunk</td><td>The second half of the chunk</td><td>Buyer wants the model to write in the style of their documents</td></tr>
-      </tbody>
-    </table>
+ <table class="table">
+ <thead><tr><th>Mode</th><th>Prompt shape</th><th>Response shape</th><th>When to use</th></tr></thead>
+ <tbody>
+ <tr><td>qa</td><td>Synthetic question over the chunk (Self-Instruct-style, generated by a teacher model)</td><td>The relevant span from the chunk</td><td>Buyer wants to ask questions and get cited answers</td></tr>
+ <tr><td>instruction</td><td>Task description + the chunk as context</td><td>The action the task description specifies (summarize, rewrite, classify)</td><td>Buyer wants the model to perform a task over their documents</td></tr>
+ <tr><td>completion</td><td>The first half of the chunk</td><td>The second half of the chunk</td><td>Buyer wants the model to write in the style of their documents</td></tr>
+ </tbody>
+ </table>
 
-    <p>kolm's default for an enterprise distill job is qa+instruction at a 3:1 mix, with completion added only when the buyer's brief explicitly names &quot;style&quot; or &quot;voice&quot; as the objective. The Self-Instruct technique (Wang et al, 2022) generates the QA prompts: a teacher model is shown the chunk and asked to produce 5 plausible questions, then each question is paired with the answer it implies. Pairs that fail a simple round-trip check (answer not in chunk) are dropped.</p>
+ <p>kolm's default for an enterprise distill job is qa+instruction at a 3:1 mix, with completion added only when the buyer's brief explicitly names &quot;style&quot; or &quot;voice&quot; as the objective. The Self-Instruct technique (Wang et al, 2022) generates the QA prompts: a teacher model is shown the chunk and asked to produce 5 plausible questions, then each question is paired with the answer it implies. Pairs that fail a simple round-trip check (answer not in chunk) are dropped.</p>
 
-    <h2>Per-format readers</h2>
+ <h2>Per-format readers</h2>
 
-    <p>Each format has its own reader that returns plain text; everything downstream is format-agnostic. The four hot-path readers:</p>
+ <p>Each format has its own reader that returns plain text; everything downstream is format-agnostic. The four hot-path readers:</p>
 
-    <ul>
-      <li><strong>PDF.</strong> PyMuPDF first (fast, layout-preserving), with a pdfplumber fallback for PDFs that PyMuPDF returns empty text from (scanned PDFs with broken text layers). OCR fallback (Tesseract) is wired but off by default; the buyer opts in because the throughput drop is large.</li>
-      <li><strong>EML and MBOX.</strong> Python's <code>mailbox</code> module for mbox, <code>email</code> module for individual .eml files. Multipart messages prefer text/plain; HTML body is converted via BeautifulSoup. Attachments are skipped by default; the buyer opts in if the attachments themselves are training data.</li>
-      <li><strong>HTML.</strong> BeautifulSoup with the lxml parser, body text only, &lt;script&gt; and &lt;style&gt; stripped, link-text preserved as plain text. The reader does not chase outbound links; URLs are added to a queue the buyer can run a separate ingest over.</li>
-      <li><strong>CSV.</strong> Each row becomes a paragraph constructed from the header-to-value mapping. The buyer specifies which columns are prompt and which are response (or the reader infers it from the column-name patterns &quot;input&quot;/&quot;output&quot;, &quot;question&quot;/&quot;answer&quot;, &quot;prompt&quot;/&quot;completion&quot;).</li>
-    </ul>
+ <ul>
+ <li><strong>PDF.</strong> PyMuPDF first (fast, layout-preserving), with a pdfplumber fallback for PDFs that PyMuPDF returns empty text from (scanned PDFs with broken text layers). OCR fallback (Tesseract) is wired but off by default; the buyer opts in because the throughput drop is large.</li>
+ <li><strong>EML and MBOX.</strong> Python's <code>mailbox</code> module for mbox, <code>email</code> module for individual .eml files. Multipart messages prefer text/plain; HTML body is converted via BeautifulSoup. Attachments are skipped by default; the buyer opts in if the attachments themselves are training data.</li>
+ <li><strong>HTML.</strong> BeautifulSoup with the lxml parser, body text only, &lt;script&gt; and &lt;style&gt; stripped, link-text preserved as plain text. The reader does not chase outbound links; URLs are added to a queue the buyer can run a separate ingest over.</li>
+ <li><strong>CSV.</strong> Each row becomes a paragraph constructed from the header-to-value mapping. The buyer specifies which columns are prompt and which are response (or the reader infers it from the column-name patterns &quot;input&quot;/&quot;output&quot;, &quot;question&quot;/&quot;answer&quot;, &quot;prompt&quot;/&quot;completion&quot;).</li>
+ </ul>
 
-    <p>Three more formats are wired but rare: DOCX via python-docx, TXT via direct read, JSONL via line-by-line parse with explicit schema validation.</p>
+ <p>Three more formats are wired but rare: DOCX via python-docx, TXT via direct read, JSONL via line-by-line parse with explicit schema validation.</p>
 
-    <h2>Deduplication</h2>
+ <h2>Deduplication</h2>
 
-    <p>Two passes. The first is exact-hash deduplication: chunks with identical SHA-256 are collapsed to one. The second is near-duplicate detection via MinHash + locality-sensitive hashing with a Jaccard threshold of 0.85 on shingled 5-grams. Both passes run before mode-tagging because a duplicate chunk in qa mode produces a duplicate prompt-answer pair and inflates the training set with no new signal.</p>
+ <p>Two passes. The first is exact-hash deduplication: chunks with identical SHA-256 are collapsed to one. The second is near-duplicate detection via MinHash + locality-sensitive hashing with a Jaccard threshold of 0.85 on shingled 5-grams. Both passes run before mode-tagging because a duplicate chunk in qa mode produces a duplicate prompt-answer pair and inflates the training set with no new signal.</p>
 
-    <p>The dedup statistics ship in the receipt: <code>n_documents, n_chunks_pre_dedup, n_chunks_post_dedup, dedup_ratio</code>. A high dedup ratio is a flag (the buyer may have ingested the same set of templates twice); a low one is normal.</p>
+ <p>The dedup statistics ship in the receipt: <code>n_documents, n_chunks_pre_dedup, n_chunks_post_dedup, dedup_ratio</code>. A high dedup ratio is a flag (the buyer may have ingested the same set of templates twice); a low one is normal.</p>
 
-    <h2>Edge cases worth naming</h2>
+ <h2>Edge cases worth naming</h2>
 
-    <p><strong>Scanned PDFs.</strong> PyMuPDF returns empty strings for scanned PDFs. The reader falls back to pdfplumber, which is more aggressive about pulling text from form fields and tagged structure but still fails on actual image scans. The OCR fallback exists; the buyer must opt in because Tesseract throughput on a 200-page contract is roughly 60 seconds, vs sub-second for a text-layer PDF.</p>
+ <p><strong>Scanned PDFs.</strong> PyMuPDF returns empty strings for scanned PDFs. The reader falls back to pdfplumber, which is more aggressive about pulling text from form fields and tagged structure but still fails on actual image scans. The OCR fallback exists; the buyer must opt in because Tesseract throughput on a 200-page contract is roughly 60 seconds, vs sub-second for a text-layer PDF.</p>
 
-    <p><strong>The signature block at the end of every email.</strong> A 50,000-message mailbox where every message ends with the same 6-line signature contributes 50,000 copies of that signature to the training set. The signature-block detector looks for a delimiter (-- or three or more newlines) followed by a recognized name pattern; everything after is stripped. The detector is opt-in (the buyer may want the signature in the training set if the model needs to learn to sign emails) and on-by-default for the redaction pipeline (the signature contains PII).</p>
+ <p><strong>The signature block at the end of every email.</strong> A 50,000-message mailbox where every message ends with the same 6-line signature contributes 50,000 copies of that signature to the training set. The signature-block detector looks for a delimiter (-- or three or more newlines) followed by a recognized name pattern; everything after is stripped. The detector is opt-in (the buyer may want the signature in the training set if the model needs to learn to sign emails) and on-by-default for the redaction pipeline (the signature contains PII).</p>
 
-    <p><strong>HTML with heavy boilerplate.</strong> Most HTML pages are 80% navigation, footer, sidebar, and 20% content. BeautifulSoup naively returns all of it. The reader includes a heuristic content extractor (Mozilla's Readability port) that the buyer can enable; without it, the chunker tends to fill chunks with menu items. The heuristic is not always right; the receipt records which extractor was used so a reviewer can spot-check.</p>
+ <p><strong>HTML with heavy boilerplate.</strong> Most HTML pages are 80% navigation, footer, sidebar, and 20% content. BeautifulSoup naively returns all of it. The reader includes a heuristic content extractor (Mozilla's Readability port) that the buyer can enable; without it, the chunker tends to fill chunks with menu items. The heuristic is not always right; the receipt records which extractor was used so a reviewer can spot-check.</p>
 
-    <p><strong>Encoding.</strong> Real-world PDFs and emails carry mixed encodings that crash naive UTF-8 readers. Every reader runs <code>chardet</code> on the raw bytes and decodes with <code>errors=&quot;replace&quot;</code> as a last resort. Documents where the replacement rate exceeds 1% are flagged in the receipt.</p>
+ <p><strong>Encoding.</strong> Real-world PDFs and emails carry mixed encodings that crash naive UTF-8 readers. Every reader runs <code>chardet</code> on the raw bytes and decodes with <code>errors=&quot;replace&quot;</code> as a last resort. Documents where the replacement rate exceeds 1% are flagged in the receipt.</p>
 
-    <h2>What the receipt records</h2>
+ <h2>What the receipt records</h2>
 
-    <pre>"ingest": {
-  "method": "multi_format_paragraph_chunk_with_overlap",
-  "n_documents": 1820,
-  "n_chunks_pre_dedup": 41612,
-  "n_chunks_post_dedup": 38904,
-  "dedup_ratio": 0.065,
-  "redaction_hits": {
-    "email": 1284,
-    "phone": 712,
-    "ssn": 31,
-    "signature_block": 14076
-  },
-  "modes": {"qa": 29178, "instruction": 9726, "completion": 0},
-  "target_tokens": 512,
-  "overlap_tokens": 64,
-  "papers": [
-    "arXiv:2212.10560",
-    "arXiv:2009.03300"
-  ]
+ <pre>"ingest": {
+ "method": "multi_format_paragraph_chunk_with_overlap",
+ "n_documents": 1820,
+ "n_chunks_pre_dedup": 41612,
+ "n_chunks_post_dedup": 38904,
+ "dedup_ratio": 0.065,
+ "redaction_hits": {
+ "email": 1284,
+ "phone": 712,
+ "ssn": 31,
+ "signature_block": 14076
+ },
+ "modes": {"qa": 29178, "instruction": 9726, "completion": 0},
+ "target_tokens": 512,
+ "overlap_tokens": 64,
+ "papers": [
+ "arXiv:2212.10560",
+ "arXiv:2009.03300"
+ ]
 }</pre>
 
-    <p>The canonical-JSON manifest hash covers the block, so a tampered receipt invalidates the artifact signature. A reviewer can check the dedup ratio, the redaction-hit distribution, and the mode mix against the buyer's brief.</p>
+ <p>The canonical-JSON manifest hash covers the block, so a tampered receipt invalidates the artifact signature. A reviewer can check the dedup ratio, the redaction-hit distribution, and the mode mix against the buyer's brief.</p>
 
-    <h2>Where ingest sits in the kolm compile loop</h2>
+ <h2>Where ingest sits in the kolm compile loop</h2>
 
-    <p>Ingest is the first stage of every training run that starts from documents instead of captured API traffic. The pipeline is <code>documents &rarr; ingest &rarr; training pairs (JSONL) &rarr; SFT &rarr; (optional preference) &rarr; K-score gate &rarr; sign &rarr; ship</code>. The captured-traffic path is shorter (no ingest needed); the document path is the path enterprises pick when they want to train on their corpus rather than on their live traffic. The same K-score gate, the same audit log, the same receipt format on the way out.</p>
+ <p>Ingest is the first stage of every training run that starts from documents instead of captured API traffic. The pipeline is <code>documents &rarr; ingest &rarr; training pairs (JSONL) &rarr; SFT &rarr; (optional preference) &rarr; K-score gate &rarr; sign &rarr; ship</code>. The captured-traffic path is shorter (no ingest needed); the document path is the path enterprises pick when they want to train on their corpus rather than on their live traffic. The same K-score gate, the same audit log, the same receipt format on the way out.</p>
 
-    <div class="citations">
-      <p><strong>Citations</strong></p>
-      <p>Wang, Y. et al. <em>Self-Instruct: Aligning Language Models with Self-Generated Instructions</em>. arXiv:2212.10560, 2022. The QA-pair generation pattern.</p>
-      <p>Hendrycks, D. et al. <em>Measuring Massive Multitask Language Understanding</em>. arXiv:2009.03300, 2020. MMLU, the canonical knowledge eval that ingest pipelines should at least match on shape.</p>
-      <p>Lewis, P. et al. <em>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</em>. arXiv:2005.11401, 2020. The architecture this pipeline is the alternative to.</p>
-      <p>Borgeaud, S. et al. <em>Improving language models by retrieving from trillions of tokens</em>. arXiv:2112.04426, 2022. RETRO.</p>
-    </div>
+ <div class="citations">
+ <p><strong>Citations</strong></p>
+ <p>Wang, Y. et al. <em>Self-Instruct: Aligning Language Models with Self-Generated Instructions</em>. arXiv:2212.10560, 2022. The QA-pair generation pattern.</p>
+ <p>Hendrycks, D. et al. <em>Measuring Massive Multitask Language Understanding</em>. arXiv:2009.03300, 2020. MMLU, the canonical knowledge eval that ingest pipelines should at least match on shape.</p>
+ <p>Lewis, P. et al. <em>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</em>. arXiv:2005.11401, 2020. The architecture this pipeline is the alternative to.</p>
+ <p>Borgeaud, S. et al. <em>Improving language models by retrieving from trillions of tokens</em>. arXiv:2112.04426, 2022. RETRO.</p>
+ </div>
 
-    <div class="meta-line" style="margin-top:36px">
-      <a class="nb" href="/research">&larr; Back to research</a>
-      <span>&middot;</span>
-      <a class="nb" href="/research#ingest">Frontier reference &middot; Document ingestion</a>
-      <span>&middot;</span>
-      <a class="nb" href="/spec">RS-1 spec</a>
-    </div>
-  </div>
+ <div class="meta-line" style="margin-top:36px">
+ <a class="nb" href="/research">&larr; Back to research</a>
+ <span>&middot;</span>
+ <a class="nb" href="/research#ingest">Frontier reference &middot; Document ingestion</a>
+ <span>&middot;</span>
+ <a class="nb" href="/spec">RS-1 spec</a>
+ </div>
+ </div>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 <script src="/nav.js"></script>
 </body>

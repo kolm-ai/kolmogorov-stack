@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm replay · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm replay CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/replay">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm replay","description":"Reference for the kolm replay CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/replay","mainEntityOfPage":"https://kolm.ai/docs/cli/replay","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm replay · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm replay CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,7 +176,7 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="replay">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>replay</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>replay</span>
 </nav>
 <p>--- title: kolm replay · kolm.ai description: Replay captured prompts against a compiled artifact and report per-row diffs. ---</p>
 <h1>kolm replay</h1>
@@ -185,9 +189,9 @@ kolm replay --concept-id &lt;id&gt; [--namespace ns] [--limit N]
 kolm replay --version-id &lt;ver_...&gt; [--namespace ns] [--limit N]
 
 # local replay (W371)
-kolm replay trace      &lt;trace_id&gt;     --against &lt;artifact|model&gt; [--json]
-kolm replay namespace  &lt;namespace&gt;    --against &lt;artifact|model&gt; [--limit N] [--json]
-kolm replay dataset    &lt;dataset_id&gt;   --against &lt;artifact|model&gt; [--json]
+kolm replay trace &lt;trace_id&gt; --against &lt;artifact|model&gt; [--json]
+kolm replay namespace &lt;namespace&gt; --against &lt;artifact|model&gt; [--limit N] [--json]
+kolm replay dataset &lt;dataset_id&gt; --against &lt;artifact|model&gt; [--json]
 </code></pre>
 <h2>Flags</h2>
 <p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--namespace &lt;n&gt;</code> | <code>default</code> | which captured namespace to replay | | <code>--limit &lt;n&gt;</code> | server default | cap replay row count | | <code>--concept-id &lt;id&gt;</code> | inferred | force concept id resolution | | <code>--version-id &lt;ver_...&gt;</code> | inferred | force version id (those starting <code>ver_</code>) | | <code>--preview</code> | off | hit <code>GET /v1/replay/preview</code>. No replay execution; just count + plan | | <code>--against &lt;ref&gt;</code> | required (local) | <code>.kolm</code> path or model id | | <code>--stub-model</code> | off | use deterministic stub-model for local replays without <code>KOLM_LLM_PROVIDER</code> | | <code>--json</code> | off | structured output |</p>
@@ -201,7 +205,7 @@ kolm replay dataset ds_018a3e --against ./redactor.kolm --json
 </code></pre>
 <h2>Exit codes</h2>
 <p>| Code | Meaning | | ---- | ------- | | <code>0</code> | replay completed | | <code>2</code> | bad args | | <code>3</code> | artifact not found | | <code>5</code> | network error |</p>
-<p>503 with <code>error: capture_store_unavailable</code> means the durable capture store is not ready. See <a href="/docs/troubleshooting">Troubleshooting</a>.</p>
+<p>503 with <code>error: capture_store_unavailable</code> means the durable capture store is initializing or unreachable. See <a href="/docs/troubleshooting">Troubleshooting</a>.</p>
 <h2>See also</h2>
 <ul>
 <li><a href="/quickstart">Quickstart</a></li>
@@ -211,13 +215,13 @@ kolm replay dataset ds_018a3e --against ./redactor.kolm --json
 <li><a href="/captures">Captures</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

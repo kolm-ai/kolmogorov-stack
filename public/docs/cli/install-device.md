@@ -8,10 +8,10 @@ copying.
 ## Usage
 
 ```
-kolm install-device <artifact.kolm>                       # auto-detect
-kolm install-device <artifact.kolm> --target <id>         # explicit device id
-kolm install-device <artifact.kolm> --tier <preset>       # 3090/5090/spark/m3-ultra-512
-kolm install-device --list                                # connected devices
+kolm install-device <artifact.kolm> # auto-detect
+kolm install-device <artifact.kolm> --target <id> # explicit device id
+kolm install-device <artifact.kolm> --tier <preset> # 3090/5090/spark/m3-ultra-512
+kolm install-device --list # connected devices
 ```
 
 ## What runs on the device

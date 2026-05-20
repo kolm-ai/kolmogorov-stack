@@ -10,11 +10,11 @@ description: Real GPU fine-tunes and bring-your-own-cloud deploys.
 ## Usage
 
 ```bash
-kolm cloud train   <name> [--seeds <f.jsonl>] [--base <model>] [--confirm]
+kolm cloud train <name> [--seeds <f.jsonl>] [--base <model>] [--confirm]
 kolm cloud targets
-kolm cloud deploy  --target <t> --artifact <id> [--region r] [--name n] [--team <id>] [--out <path>]
+kolm cloud deploy --target <t> --artifact <id> [--region r] [--name n] [--team <id>] [--out <path>]
 kolm cloud list
-kolm cloud show    <deployment_id>
+kolm cloud show <deployment_id>
 kolm cloud destroy <deployment_id>
 ```
 
@@ -37,7 +37,7 @@ kolm cloud destroy <deployment_id>
 | Backend | Notes |
 | ------- | ----- |
 | `together` (default) | managed LoRA fine-tune on Together AI. Requires `KOLM_TOGETHER_TOKEN`. Cost ~$2-5 for Qwen 2.5 7B on 2k pairs, ~30-45 min |
-| `runpod, lambda, vast` | planned. See `kolm compute list` |
+| `runpod, lambda, vast` | available through compute profiles listed by `kolm compute list` when credentials are configured |
 
 ## Deploy targets
 

@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm init-agent · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm init-agent CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/init-agent">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm init-agent","description":"Reference for the kolm init-agent CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/init-agent","mainEntityOfPage":"https://kolm.ai/docs/cli/init-agent","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm init-agent · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm init-agent CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,42 +176,42 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="init-agent">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>init-agent</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>init-agent</span>
 </nav>
 <h1>kolm init-agent</h1>
 <p>Script-first project scaffolder (W238). Creates a complete kolm agent project directory you can <code>cd</code> into and run with <code>./run.sh</code>. No config wizards, no globals, just plain-text files you can hand-edit and commit to git.</p>
 <h2>Usage</h2>
 <pre><code>
 kolm init-agent &lt;name&gt; [dir] [--template chatbot|redactor|classifier|extraction|agent]
-                              [--git] [--tmux] [--force] [--dry-run] [--json]
+ [--git] [--tmux] [--force] [--dry-run] [--json]
 </code></pre>
 <p><code>&lt;name&gt;</code> must match <code>[a-zA-Z0-9._-]+</code>. <code>[dir]</code> defaults to <code>&lt;name&gt;</code>. <code>--git</code> runs <code>git init</code> + first commit. <code>--tmux</code> writes a <code>tmux.conf</code> for a 3-pane compile/serve/watch session. <code>--force</code> overwrites a non-empty directory. <code>--dry-run</code> prints the file plan without writing.</p>
 <h2>Templates</h2>
 <ul>
-<li><code>chatbot</code>    - Qwen 2.5 3B Instruct, chatml chat template (default)</li>
-<li><code>redactor</code>   - rule class, no model bytes</li>
+<li><code>chatbot</code> - Qwen 2.5 3B Instruct, chatml chat template (default)</li>
+<li><code>redactor</code> - rule class, no model bytes</li>
 <li><code>classifier</code> - Qwen 2.5 0.5B distilled student</li>
 <li><code>extraction</code> - Qwen 2.5 3B, JSON output target</li>
-<li><code>agent</code>      - Hermes 4.3 36B with a self-growing blueprint (W236 link)</li>
+<li><code>agent</code> - Hermes 4.3 36B with a self-growing blueprint (W236 link)</li>
 </ul>
 <h2>Examples</h2>
 <pre><code>
-kolm init-agent demo                                        # default chatbot, ./demo
-kolm init-agent ops ./ops --template agent --tmux --git     # full agent stack
-kolm init-agent redact --template redactor --dry-run        # plan only
-kolm init-agent demo --template extraction --json           # machine-readable
+kolm init-agent demo # default chatbot, ./demo
+kolm init-agent ops ./ops --template agent --tmux --git # full agent stack
+kolm init-agent redact --template redactor --dry-run # plan only
+kolm init-agent demo --template extraction --json # machine-readable
 </code></pre>
 <h2>What gets scaffolded</h2>
 <pre><code>
 &lt;dir&gt;/
-  spec.json        kolm compile spec
-  seeds.jsonl      one seed pair per line (one stub example)
-  blueprint.json   self-growing agent blueprint (W236)
-  run.sh / run.ps1     compile + serve scripts
-  watch.sh / watch.ps1 capture + auto-distill watchers
-  tmux.conf        optional 3-pane session layout
-  .gitignore       sensible defaults
-  README.md        one-paragraph &quot;what is this&quot; + how-to-run
+ spec.json kolm compile spec
+ seeds.jsonl one seed pair per line (one stub example)
+ blueprint.json self-growing agent blueprint (W236)
+ run.sh / run.ps1 compile + serve scripts
+ watch.sh / watch.ps1 capture + auto-distill watchers
+ tmux.conf optional 3-pane session layout
+ .gitignore sensible defaults
+ README.md one-paragraph &quot;what is this&quot; + how-to-run
 </code></pre>
 <h2>See also</h2>
 <ul>
@@ -216,13 +220,13 @@ kolm init-agent demo --template extraction --json           # machine-readable
 <li><code>/foundations/scripts</code> for the script-everything recipe.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

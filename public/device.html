@@ -3,212 +3,214 @@
 <head>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-  <title>On-device runtime · kolm.ai</title>
-  <meta name="description" content="The full kolm registry, running on your device. Type anything. Every recipe classifies it locally, in microseconds, offline, free. Add to home screen for an offline AI app." />
-  <meta property="og:title" content="kolm. Running on this device, right now." />
-  <meta property="og:description" content="Frontier-grade structured behavior, decomposed into recipes, deployed to any device with 1 MB of storage. No GPU. No network. No bill." />
-  <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+ <title>On-device runtime · kolm.ai</title>
+ <meta name="description" content="The full kolm registry, running on your device. Type anything. Every recipe classifies it locally, in microseconds, offline, free. Add to home screen for an...">
+ <meta property="og:title" content="On-device runtime · kolm.ai">
+ <meta property="og:description" content="The full kolm registry, running on your device. Type anything. Every recipe classifies it locally, in microseconds, offline, free. Add to home screen for an...">
+ <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="canonical" href="https://kolm.ai/device" />
-  <meta property="og:image" content="https://kolm.ai/img/brand-og.png" />
+ <meta name="apple-mobile-web-app-capable" content="yes" />
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+ <link rel="canonical" href="https://kolm.ai/device">
+ <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/device">
-<meta name="twitter:title" content="kolm. Running on this device, right now.">
-<meta name="twitter:description" content="Frontier-grade structured behavior, decomposed into recipes, deployed to any device with 1 MB of storage. No GPU. No network. No bill.">
-<meta name="twitter:image" content="https://kolm.ai/img/brand-og.png">
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:image" content="https://kolm.ai/img/brand-og.png" />
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="stylesheet" href="/styles.css" />
+<meta name="twitter:title" content="On-device runtime · kolm.ai">
+<meta name="twitter:description" content="The full kolm registry, running on your device. Type anything. Every recipe classifies it locally, in microseconds, offline, free. Add to home screen for an...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+ <meta name="twitter:card" content="summary_large_image">
+ <meta property="twitter:image" content="https://kolm.ai/img/brand-og.png" />
+ <link rel="manifest" href="/manifest.json" />
+ <link rel="stylesheet" href="/styles.css" />
 <link rel="stylesheet" href="/brand-refresh.css">
-  <meta property="og:type" content="website">
+ <meta property="og:type" content="website">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/device",
-  "description": "The full kolm registry, running on your device. Type anything. Every recipe classifies it locally, in microseconds, offline, free. Add to home screen for an offline AI app.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/device",
+ "description": "The full kolm registry, running on your device. Type anything. Every recipe classifies it locally, in microseconds, offline, free. Add to home screen for an offline AI app.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <div class="bg-stage" aria-hidden="true"></div>
 <div class="app">
-  <aside class="sidebar">
-    <div class="brand-h1"><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></div>
-    <div class="tag">on-device · live</div>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/compile">Compile</a>
-      <a href="/run">Run</a>
-      <a href="/registry">Registry</a>
-      <a href="/docs">Recall</a>
-      <a href="/enterprise">Cloud</a>
-      <a href="/device" class="active">On-device</a>
-      <a href="/captures">Playground</a>
-      <a href="/docs">Docs</a>
-      <a href="/articles">Articles</a>
-      <a href="/research">Research</a>
-      <a href="/enterprise">Enterprise</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/account">Account</a>
-      <a href="/signup">Get API key &rarr;</a>
-    </nav>
-    <div class="footnote">
-      <strong>Compile · Run · Recall.</strong><br/>
-      Compile frontier behavior once, run it locally forever.
-    </div>
-  </aside>
+ <aside class="sidebar">
+ <div class="brand-h1"><span class="glyph"></span> kolm<span class="sub">by Kolmogorov</span></div>
+ <div class="tag">on-device · live</div>
+ <nav>
+ <a href="/">Home</a>
+ <a href="/compile">Compile</a>
+ <a href="/run">Run</a>
+ <a href="/registry">Registry</a>
+ <a href="/docs">Recall</a>
+ <a href="/enterprise">Cloud</a>
+ <a href="/device" class="active">On-device</a>
+ <a href="/captures">Playground</a>
+ <a href="/docs">Docs</a>
+ <a href="/articles">Articles</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ <a href="/account">Account</a>
+ <a href="/signup">Get API key &rarr;</a>
+ </nav>
+ <div class="footnote">
+ <strong>Compile · Run · Recall.</strong><br/>
+ Compile frontier behavior once, run it locally forever.
+ </div>
+ </aside>
 
-  <main class="main">
+ <main id="main" class="main">
 
-    <section class="hero">
-      <div class="eyebrow"><span class="dot live"></span> running on <strong style="color:var(--ink);">this device</strong> · 0&nbsp;ms network · offline-capable</div>
-      <h1>The registry <span class="grad">is the model</span>.</h1>
-      <p class="sub">
-        You just downloaded the entire public Recipe registry to your phone.
-        Every recipe below runs locally, in microseconds, with no network call,
-        no GPU, no API bill.
-        Type anything; you'll watch frontier-decomposed structured behavior
-        execute on your device in real time.
-        Add to home screen and it works on a plane.
-      </p>
-    </section>
+ <section class="hero">
+ <div class="eyebrow"><span class="dot live"></span> running on <strong style="color:var(--ink);">this device</strong> · 0&nbsp;ms network · offline-capable</div>
+ <h1>The registry <span class="grad">is the model</span>.</h1>
+ <p class="sub">
+ You just downloaded the entire public Recipe registry to your phone.
+ Every recipe below runs locally, in microseconds, with no network call,
+ no GPU, no API bill.
+ Type anything; you'll watch frontier-decomposed structured behavior
+ execute on your device in real time.
+ Add to home screen and it works on a plane.
+ </p>
+ </section>
 
-    <!-- STATUS -->
-    <div class="dev-status" id="status">
-      <span><span class="lbl">Registry</span><span class="v" id="s-recipes">loading…</span></span>
-      <span><span class="lbl">Bundle size</span><span class="v" id="s-size">&hellip;</span></span>
-      <span><span class="lbl">Hash</span><span class="v mono" id="s-hash" style="font-size:11px;">&hellip;</span></span>
-      <span><span class="lbl">Offline-ready</span><span class="v" id="s-offline">checking…</span></span>
-      <span><span class="lbl">Network calls</span><span class="v ok" id="s-network">0</span></span>
-      <span><span class="lbl">Local runs</span><span class="v ok" id="s-runs">0</span></span>
-      <span><span class="lbl">$ saved (est.)</span><span class="v ok" id="s-saved">$0.000</span></span>
-    </div>
+ <!-- STATUS -->
+ <div class="dev-status" id="status">
+ <span><span class="lbl">Registry</span><span class="v" id="s-recipes">loading…</span></span>
+ <span><span class="lbl">Bundle size</span><span class="v" id="s-size">&hellip;</span></span>
+ <span><span class="lbl">Hash</span><span class="v mono" id="s-hash" style="font-size:11px;">&hellip;</span></span>
+ <span><span class="lbl">Offline-ready</span><span class="v" id="s-offline">checking…</span></span>
+ <span><span class="lbl">Network calls</span><span class="v ok" id="s-network">0</span></span>
+ <span><span class="lbl">Local runs</span><span class="v ok" id="s-runs">0</span></span>
+ <span><span class="lbl">$ saved (est.)</span><span class="v ok" id="s-saved">$0.000</span></span>
+ </div>
 
-    <!-- INPUT -->
-    <div class="card" style="margin-bottom: 14px;">
-      <div class="label">Type anything. Every recipe in the registry runs as you type.</div>
-      <textarea id="dev-input" class="dev-input" placeholder="e.g. FREE $$$ click here unsubscribe&#10;or: Hi, is the meeting still at 3pm?&#10;or paste anything: an email, a message, a sentence."></textarea>
-      <div class="demo-row">
-        <button class="btn ghost" data-demo="FREE $$$ click here to unsubscribe NOW">Spam-y text</button>
-        <button class="btn ghost" data-demo="Hi! Are we still meeting tomorrow at 3pm to talk about the $400 invoice?">Calendar + money</button>
-        <button class="btn ghost" data-demo="¿Cómo estás? Espero que todo vaya bien con tu nuevo proyecto.">Spanish</button>
-        <button class="btn ghost" data-demo="My email is jane.doe@company.com and my phone is 415-555-0188.">PII (email + phone)</button>
-        <button class="btn ghost" data-demo="URGENT, server is down, please respond ASAP!!!">Urgent</button>
-        <button class="btn ghost" data-demo="Thanks so much for the help yesterday, really appreciated it.">Gratitude</button>
-        <button class="btn ghost" data-demo="">Clear</button>
-      </div>
-    </div>
+ <!-- INPUT -->
+ <div class="card" style="margin-bottom: 14px;">
+ <div class="label">Type anything. Every recipe in the registry runs as you type.</div>
+ <textarea id="dev-input" class="dev-input" placeholder="e.g. FREE $$$ click here unsubscribe&#10;or: Hi, is the meeting still at 3pm?&#10;or paste anything: an email, a message, a sentence."></textarea>
+ <div class="demo-row">
+ <button class="btn ghost" data-demo="FREE $$$ click here to unsubscribe NOW">Spam-y text</button>
+ <button class="btn ghost" data-demo="Hi! Are we still meeting tomorrow at 3pm to talk about the $400 invoice?">Calendar + money</button>
+ <button class="btn ghost" data-demo="¿Cómo estás? Espero que tu nuevo proyecto vaya bien.">Spanish</button>
+ <button class="btn ghost" data-demo="My email is jane.doe@company.com and my phone is 415-555-0188.">PII (email + phone)</button>
+ <button class="btn ghost" data-demo="URGENT, server is down, please respond ASAP!!!">Urgent</button>
+ <button class="btn ghost" data-demo="Thanks so much for the help yesterday, really appreciated it.">Gratitude</button>
+ <button class="btn ghost" data-demo="">Clear</button>
+ </div>
+ </div>
 
-    <!-- RESULTS -->
-    <div class="dev-results" id="dev-results">
-      <div class="dev-result" style="grid-template-columns:1fr;color:var(--ink-mute);">
-        Hydrating registry from <code>/v1/registry/export</code>. This happens once.
-      </div>
-    </div>
+ <!-- RESULTS -->
+ <div class="dev-results" id="dev-results">
+ <div class="dev-result" style="grid-template-columns:1fr;color:var(--ink-mute);">
+ Hydrating registry from <code>/v1/registry/export</code>. This happens once.
+ </div>
+ </div>
 
-    <!-- HOW THIS WORKS -->
-    <h2 class="h2" style="margin-top: 32px;">What just happened</h2>
-    <div class="row cols-3">
-      <div class="card">
-        <div class="label">Step 1 &middot; one fetch</div>
-        <h3 style="margin: 6px 0 8px;">Registry hydrated, then cached.</h3>
-        <p>Your browser fetched <code>/v1/registry/export</code>: a JSON envelope with every public recipe's source, hash, and metadata.
-        It's stored in <code>localStorage</code>. The next visit hits no network at all.</p>
-      </div>
-      <div class="card">
-        <div class="label">Step 2 &middot; compile in-process</div>
-        <h3 style="margin: 6px 0 8px;">Each source is turned into a function.</h3>
-        <p>For every recipe, the SDK does <code>new&nbsp;Function('return&nbsp;(' + source + ');')()</code>.
-        That gives you a real JS function, in your tab's process, deterministic, microsecond-fast.</p>
-      </div>
-      <div class="card">
-        <div class="label">Step 3 &middot; run them all</div>
-        <h3 style="margin: 6px 0 8px;">Every keystroke fires every recipe.</h3>
-        <p>As you type, all recipes run in parallel against your input.
-        The "fired" highlight means a positive classification: spam detected, urgency detected, language identified.
-        Latency is real, measured per call.</p>
-      </div>
-    </div>
+ <!-- HOW THIS WORKS -->
+ <h2 class="h2" style="margin-top: 32px;">What just happened</h2>
+ <div class="row cols-3">
+ <div class="card">
+ <div class="label">Step 1 &middot; one fetch</div>
+ <h3 style="margin: 6px 0 8px;">Registry hydrated, then cached.</h3>
+ <p>Your browser fetched <code>/v1/registry/export</code>: a JSON envelope with every public recipe's source, hash, and metadata.
+ It's stored in <code>localStorage</code>. The next visit hits no network at all.</p>
+ </div>
+ <div class="card">
+ <div class="label">Step 2 &middot; compile in-process</div>
+ <h3 style="margin: 6px 0 8px;">Each source is turned into a function.</h3>
+ <p>For every recipe, the SDK does <code>new&nbsp;Function('return&nbsp;(' + source + ');')()</code>.
+ That gives you a real JS function, in your tab's process, deterministic, microsecond-fast.</p>
+ </div>
+ <div class="card">
+ <div class="label">Step 3 &middot; run them all</div>
+ <h3 style="margin: 6px 0 8px;">Every keystroke fires every recipe.</h3>
+ <p>As you type, all recipes run in parallel against your input.
+ The "fired" highlight means a positive classification: spam detected, urgency detected, language identified.
+ Latency is real, measured per call.</p>
+ </div>
+ </div>
 
-    <!-- THE THESIS, IN-CONTEXT -->
-    <section class="card glow" style="margin-top: 28px;">
-      <div class="row cols-2">
-        <div>
-          <div class="label">The thesis, demonstrated above</div>
-          <h3 style="margin: 6px 0 10px;">A trillion-parameter model is doing this for free in production today.</h3>
-          <p>Spam classification, language detection, intent recognition, PII extraction.
-          Right now, every team building on LLMs pays $0.001/call to a frontier model for these.
-          Per call. Times every request. Times every product.</p>
-          <p style="margin-top: 10px;">
-            What you just watched on your phone (the entire registry running locally, in microseconds, with zero network)
-            is the same behavior, decomposed. <strong>The registry is the model.</strong>
-            Every recipe is a piece of frontier behavior that no longer needs a frontier model to execute.
-          </p>
-        </div>
-        <div>
+ <!-- THE THESIS, IN-CONTEXT -->
+ <section class="card glow" style="margin-top: 28px;">
+ <div class="row cols-2">
+ <div>
+ <div class="label">The thesis, demonstrated above</div>
+ <h3 style="margin: 6px 0 10px;">A trillion-parameter model is doing this for free in production today.</h3>
+ <p>Spam classification, language detection, intent recognition, PII extraction.
+ Right now, every team building on LLMs pays $0.001/call to a frontier model for these.
+ Per call. Times every request. Times every product.</p>
+ <p style="margin-top: 10px;">
+ What you just watched on your phone (the entire registry running locally, in microseconds, with zero network)
+ is the same behavior, decomposed. <strong>The registry is the model.</strong>
+ Every recipe is a piece of frontier behavior that no longer needs a frontier model to execute.
+ </p>
+ </div>
+ <div>
 <pre class="terminal"><code><span class="dim">// What you just imported (or could):</span>
 <span class="kw">import</span> { recipe } <span class="kw">from</span>
-  <span class="dim">'https://kolm.ai/sdk.js'</span>;
+ <span class="dim">'https://kolm.ai/sdk.js'</span>;
 
 <span class="kw">await</span> recipe.load();
 <span class="kw">const</span> r = <span class="kw">await</span> recipe.run(<span class="dim">'is-spam'</span>, text);
 
-<span class="dim">// r.output         === true / false</span>
-<span class="dim">// r.latency_us     === 35</span>
-<span class="dim">// r.receipt        === { source_hash, input_hash, ... }</span>
+<span class="dim">// r.output === true / false</span>
+<span class="dim">// r.latency_us === 35</span>
+<span class="dim">// r.receipt === { source_hash, input_hash, ... }</span>
 
 <span class="dim">// Same import in Deno, Bun, Cloudflare Workers</span>
 <span class="dim">// any modern browser. No build step. No npm install.</span></code></pre>
-        </div>
-      </div>
-    </section>
+ </div>
+ </div>
+ </section>
 
-    <!-- INSTALL ON PHONE -->
-    <h2 class="h2" style="margin-top: 32px;" id="install">Install this as a phone app</h2>
-    <div class="card">
-      <p>This page is a Progressive Web App with a service worker and manifest.
-      Add it to your home screen and it becomes a real app icon. Works completely offline.</p>
-      <ul style="line-height: 1.85; margin: 12px 0 0 18px;">
-        <li><strong>iPhone (Safari):</strong> tap the share icon &rarr; <em>Add to Home Screen</em></li>
-        <li><strong>Android (Chrome):</strong> tap the menu &rarr; <em>Install app</em> (or use the prompt that may appear)</li>
-        <li><strong>Desktop (Chrome / Edge):</strong> tap the install icon at the right of the address bar</li>
-      </ul>
-      <p style="margin-top: 12px; color: var(--ink-mute);">
-        After install, opening the app uses no network. The registry is on your device.
-        New recipes published to the registry sync silently in the background.
-      </p>
-    </div>
+ <!-- INSTALL ON PHONE -->
+ <h2 class="h2" style="margin-top: 32px;" id="install">Install this as a phone app</h2>
+ <div class="card">
+ <p>This page is a Progressive Web App with a service worker and manifest.
+ Add it to your home screen and it becomes a real app icon. Works completely offline.</p>
+ <ul style="line-height: 1.85; margin: 12px 0 0 18px;">
+ <li><strong>iPhone (Safari):</strong> tap the share icon &rarr; <em>Add to Home Screen</em></li>
+ <li><strong>Android (Chrome):</strong> tap the menu &rarr; <em>Install app</em> (or use the prompt that may appear)</li>
+ <li><strong>Desktop (Chrome / Edge):</strong> tap the install icon at the right of the address bar</li>
+ </ul>
+ <p style="margin-top: 12px; color: var(--ink-mute);">
+ After install, opening the app uses no network. The registry is on your device.
+ New recipes published to the registry sync silently in the background.
+ </p>
+ </div>
 
-    <section class="bottom-cta" style="margin-top: 36px;">
-      <h2>The biggest models on earth, on the smallest devices that can run a function.</h2>
-      <p>Cost reduction is the proof. The product is that the registry runs anywhere a function runs.</p>
-      <div class="actions" style="margin-top: 14px;">
-        <a class="btn accent lg" href="/compile">Compile a Specialist</a>
-        <a class="btn ghost lg" href="/enterprise">Cloud &amp; tiers</a>
-      </div>
-    </section>
+ <section class="bottom-cta" style="margin-top: 36px;">
+ <h2>The biggest models on earth, on the smallest devices that can run a function.</h2>
+ <p>Cost reduction is the proof. The product is that the registry runs anywhere a function runs.</p>
+ <div class="actions" style="margin-top: 14px;">
+ <a class="btn accent lg" href="/compile">Compile a Specialist</a>
+ <a class="btn ghost lg" href="/enterprise">Cloud &amp; tiers</a>
+ </div>
+ </section>
 
-  </main>
+ </main>
 </div>
 
 <script type="module">
@@ -236,298 +238,298 @@ let lastRunSig = '';
 // through this. The registry is shared across tenants, so a hostile recipe
 // name/description would otherwise stored-XSS every visitor of /device.
 function esc(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+ return String(s == null ? '' : s)
+ .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+ .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // ---- HMAC trust gate ----
 // We refuse to execute any recipe whose source hash we can't verify against
 // the recipe's declared signature. The local demo uses a pinned public trust root.
 // Two layers of verification are accepted:
-//   1. HMAC-SHA256(canonical(recipe-without-signature), TRUST_ROOT) === recipe.signature.hmac
-//   2. fallback: SHA-256(source) === recipe.source_hash (anti-tamper baseline)
+// 1. HMAC-SHA256(canonical(recipe-without-signature), TRUST_ROOT) === recipe.signature.hmac
+// 2. fallback: SHA-256(source) === recipe.source_hash (anti-tamper baseline)
 // If neither passes, the recipe is marked unsigned and `recipe.run` is gated.
 const TRUST_ROOT_PUBLIC = 'kolm_public_verifier_v1_2026-05-06';
 const verifiedRecipes = new Set();
 const refusedRecipes = new Map(); // name -> reason
 
 async function _sha256Hex(s) {
-  const buf = new TextEncoder().encode(s);
-  const hash = await crypto.subtle.digest('SHA-256', buf);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+ const buf = new TextEncoder().encode(s);
+ const hash = await crypto.subtle.digest('SHA-256', buf);
+ return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 async function _hmacSha256Hex(secret, msg) {
-  const k = await crypto.subtle.importKey(
-    'raw', new TextEncoder().encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-  );
-  const sig = await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(msg));
-  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+ const k = await crypto.subtle.importKey(
+ 'raw', new TextEncoder().encode(secret),
+ { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+ );
+ const sig = await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(msg));
+ return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function _canonicalJson(v) {
-  if (v === null || typeof v !== 'object') return JSON.stringify(v);
-  if (Array.isArray(v)) return '[' + v.map(_canonicalJson).join(',') + ']';
-  const keys = Object.keys(v).sort();
-  return '{' + keys.map(k => JSON.stringify(k) + ':' + _canonicalJson(v[k])).join(',') + '}';
+ if (v === null || typeof v !== 'object') return JSON.stringify(v);
+ if (Array.isArray(v)) return '[' + v.map(_canonicalJson).join(',') + ']';
+ const keys = Object.keys(v).sort();
+ return '{' + keys.map(k => JSON.stringify(k) + ':' + _canonicalJson(v[k])).join(',') + '}';
 }
 
 async function verifyRecipeMeta(meta) {
-  if (!meta || !meta.source) return { ok: false, reason: 'no source' };
-  // Layer 1: source_hash anti-tamper. The export ships sha256-16 (first 16 hex
-  // chars). Both forms (16 or 64 hex) are accepted.
-  if (meta.source_hash) {
-    try {
-      const computed = await _sha256Hex(meta.source);
-      const declared = String(meta.source_hash);
-      const matches = declared.length === 16
-        - computed.startsWith(declared)
-        : computed === declared;
-      if (!matches) return { ok: false, reason: 'source_hash mismatch' };
-    } catch (e) {
-      return { ok: false, reason: 'hash compute failed' };
-    }
-  } else {
-    return { ok: false, reason: 'no source_hash' };
-  }
-  // Layer 2: optional HMAC envelope. If meta.signature.hmac is present, recompute.
-  if (meta.signature && meta.signature.hmac) {
-    try {
-      const { signature, ...payload } = meta;
-      const expected = await _hmacSha256Hex(TRUST_ROOT_PUBLIC, _canonicalJson(payload));
-      if (expected !== signature.hmac) return { ok: false, reason: 'hmac mismatch' };
-    } catch (e) {
-      return { ok: false, reason: 'hmac verify failed' };
-    }
-  }
-  return { ok: true };
+ if (!meta || !meta.source) return { ok: false, reason: 'no source' };
+ // Layer 1: source_hash anti-tamper. The export ships sha256-16 (first 16 hex
+ // chars). Both forms (16 or 64 hex) are accepted.
+ if (meta.source_hash) {
+ try {
+ const computed = await _sha256Hex(meta.source);
+ const declared = String(meta.source_hash);
+ const matches = declared.length === 16
+ - computed.startsWith(declared)
+ : computed === declared;
+ if (!matches) return { ok: false, reason: 'source_hash mismatch' };
+ } catch (e) {
+ return { ok: false, reason: 'hash compute failed' };
+ }
+ } else {
+ return { ok: false, reason: 'no source_hash' };
+ }
+ // Layer 2: optional HMAC envelope. If meta.signature.hmac is present, recompute.
+ if (meta.signature && meta.signature.hmac) {
+ try {
+ const { signature, ...payload } = meta;
+ const expected = await _hmacSha256Hex(TRUST_ROOT_PUBLIC, _canonicalJson(payload));
+ if (expected !== signature.hmac) return { ok: false, reason: 'hmac mismatch' };
+ } catch (e) {
+ return { ok: false, reason: 'hmac verify failed' };
+ }
+ }
+ return { ok: true };
 }
 
 async function verifyAllRecipes(list) {
-  for (const meta of list) {
-    const v = await verifyRecipeMeta(meta);
-    if (v.ok) verifiedRecipes.add(meta.name);
-    else refusedRecipes.set(meta.name, v.reason);
-  }
+ for (const meta of list) {
+ const v = await verifyRecipeMeta(meta);
+ if (v.ok) verifiedRecipes.add(meta.name);
+ else refusedRecipes.set(meta.name, v.reason);
+ }
 }
 
 function fmt(out) {
-  if (out === undefined) return 'undefined';
-  if (out === null) return 'null';
-  if (typeof out === 'boolean') return out ? 'true' : 'false';
-  if (typeof out === 'string') return out.length > 80 - out.slice(0, 80) + '…' : out;
-  if (typeof out === 'number') return String(out);
-  try { const s = JSON.stringify(out); return s.length > 200 - s.slice(0, 200) + '…' : s; }
-  catch { return String(out); }
+ if (out === undefined) return 'undefined';
+ if (out === null) return 'null';
+ if (typeof out === 'boolean') return out ? 'true' : 'false';
+ if (typeof out === 'string') return out.length > 80 - out.slice(0, 80) + '…' : out;
+ if (typeof out === 'number') return String(out);
+ try { const s = JSON.stringify(out); return s.length > 200 - s.slice(0, 200) + '…' : s; }
+ catch { return String(out); }
 }
 
 function fired(out) {
-  if (out === null || out === undefined || out === false) return false;
-  if (typeof out === 'string' && (out === '' || out === 'no' || out === 'none')) return false;
-  if (Array.isArray(out)) return out.length > 0;
-  if (typeof out === 'object') return Object.keys(out).length > 0;
-  return !!out;
+ if (out === null || out === undefined || out === false) return false;
+ if (typeof out === 'string' && (out === '' || out === 'no' || out === 'none')) return false;
+ if (Array.isArray(out)) return out.length > 0;
+ if (typeof out === 'object') return Object.keys(out).length > 0;
+ return !!out;
 }
 
 function renderEmpty(meta) {
-  resultsEl.replaceChildren();
-  for (const r of meta) {
-    const el = document.createElement('div');
-    el.className = 'dev-result';
-    el.dataset.name = r.name;
+ resultsEl.replaceChildren();
+ for (const r of meta) {
+ const el = document.createElement('div');
+ el.className = 'dev-result';
+ el.dataset.name = r.name;
 
-    const left = document.createElement('div');
-    const nameEl = document.createElement('div');
-    nameEl.className = 'name';
-    nameEl.textContent = r.name;
-    const descEl = document.createElement('div');
-    descEl.className = 'desc';
-    descEl.textContent = r.description || '';
-    const outEl = document.createElement('div');
-    outEl.className = 'out';
-    outEl.style.cssText = 'margin-top:6px;color:var(--ink-faint);';
-    outEl.textContent = '(type to run)';
-    left.append(nameEl, descEl, outEl);
+ const left = document.createElement('div');
+ const nameEl = document.createElement('div');
+ nameEl.className = 'name';
+ nameEl.textContent = r.name;
+ const descEl = document.createElement('div');
+ descEl.className = 'desc';
+ descEl.textContent = r.description || '';
+ const outEl = document.createElement('div');
+ outEl.className = 'out';
+ outEl.style.cssText = 'margin-top:6px;color:var(--ink-faint);';
+ outEl.textContent = '(type to run)';
+ left.append(nameEl, descEl, outEl);
 
-    const lat = document.createElement('div');
-    lat.className = 'lat';
-    lat.textContent = '…';
+ const lat = document.createElement('div');
+ lat.className = 'lat';
+ lat.textContent = '…';
 
-    el.append(left, lat);
-    resultsEl.appendChild(el);
-  }
+ el.append(left, lat);
+ resultsEl.appendChild(el);
+ }
 }
 
 async function runAll(text) {
-  const sig = text;
-  if (sig === lastRunSig) return;
-  lastRunSig = sig;
-  if (!text.trim()) {
-    for (const el of resultsEl.children) {
-      el.classList.remove('fired', 'errored');
-      const out = el.querySelector('.out');
-      const lat = el.querySelector('.lat');
-      if (out) { out.textContent = '(type to run)'; out.style.color = 'var(--ink-faint)'; }
-      if (lat) lat.textContent = '…';
-    }
-    return;
-  }
-  const t0 = performance.now();
-  for (const el of resultsEl.children) {
-    const name = el.dataset.name;
-    if (!name) continue;
-    let res;
-    if (!verifiedRecipes.has(name)) {
-      res = { error: 'Refusing to execute unsigned recipe (' + (refusedRecipes.get(name) || 'unverified') + ')', latency_us: 0 };
-    } else {
-      try { res = await recipe.run(name, text); }
-      catch (e) { res = { error: String(e.message || e), latency_us: 0 }; }
-    }
-    totalRuns++;
-    const out = el.querySelector('.out');
-    const lat = el.querySelector('.lat');
-    if (res.error) {
-      el.classList.add('errored');
-      el.classList.remove('fired');
-      out.textContent = 'error: ' + res.error;
-      out.style.color = 'var(--bad)';
-      lat.textContent = 'err';
-    } else {
-      el.classList.remove('errored');
-      const did = fired(res.output);
-      el.classList.toggle('fired', did);
-      out.textContent = fmt(res.output);
-      out.style.color = did ? 'var(--ink)' : 'var(--ink-mute)';
-      lat.textContent = (res.latency_us || 0) + ' µs';
-    }
-  }
-  resultsEl.querySelectorAll('.dev-result.fired').forEach((el, i) => {
-    if (i === 0) resultsEl.prepend(el);
-  });
-  const wall = Math.round(performance.now() - t0);
-  sRuns.textContent = totalRuns.toLocaleString();
-  sSaved.textContent = '$' + (totalRuns * COST_PER_CLOUD_CALL_USD).toFixed(3);
-  // Network calls only count: registry hydration + service worker registration. Keep at 1 once loaded.
+ const sig = text;
+ if (sig === lastRunSig) return;
+ lastRunSig = sig;
+ if (!text.trim()) {
+ for (const el of resultsEl.children) {
+ el.classList.remove('fired', 'errored');
+ const out = el.querySelector('.out');
+ const lat = el.querySelector('.lat');
+ if (out) { out.textContent = '(type to run)'; out.style.color = 'var(--ink-faint)'; }
+ if (lat) lat.textContent = '…';
+ }
+ return;
+ }
+ const t0 = performance.now();
+ for (const el of resultsEl.children) {
+ const name = el.dataset.name;
+ if (!name) continue;
+ let res;
+ if (!verifiedRecipes.has(name)) {
+ res = { error: 'Refusing to execute unsigned recipe (' + (refusedRecipes.get(name) || 'unverified') + ')', latency_us: 0 };
+ } else {
+ try { res = await recipe.run(name, text); }
+ catch (e) { res = { error: String(e.message || e), latency_us: 0 }; }
+ }
+ totalRuns++;
+ const out = el.querySelector('.out');
+ const lat = el.querySelector('.lat');
+ if (res.error) {
+ el.classList.add('errored');
+ el.classList.remove('fired');
+ out.textContent = 'error: ' + res.error;
+ out.style.color = 'var(--bad)';
+ lat.textContent = 'err';
+ } else {
+ el.classList.remove('errored');
+ const did = fired(res.output);
+ el.classList.toggle('fired', did);
+ out.textContent = fmt(res.output);
+ out.style.color = did ? 'var(--ink)' : 'var(--ink-mute)';
+ lat.textContent = (res.latency_us || 0) + ' µs';
+ }
+ }
+ resultsEl.querySelectorAll('.dev-result.fired').forEach((el, i) => {
+ if (i === 0) resultsEl.prepend(el);
+ });
+ const wall = Math.round(performance.now() - t0);
+ sRuns.textContent = totalRuns.toLocaleString();
+ sSaved.textContent = '$' + (totalRuns * COST_PER_CLOUD_CALL_USD).toFixed(3);
+ // Network calls only count: registry hydration + service worker registration. Keep at 1 once loaded.
 }
 
 function debounce(fn, ms) {
-  let t; return function (...args) { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+ let t; return function (...args) { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
 
 const debouncedRun = debounce(() => runAll(inputEl.value), 120);
 inputEl.addEventListener('input', debouncedRun);
 
 document.querySelectorAll('[data-demo]').forEach((b) => {
-  b.addEventListener('click', () => { inputEl.value = b.dataset.demo; runAll(inputEl.value); inputEl.focus(); });
+ b.addEventListener('click', () => { inputEl.value = b.dataset.demo; runAll(inputEl.value); inputEl.focus(); });
 });
 
 // Hydrate registry, then render result rows.
 (async () => {
-  try {
-    const env = await recipe.load();
-    registry = env;
-    const list = recipe.list();
-    // Verify every recipe in the bundle against the trust root before any
-    // source can ever reach a Function constructor. Unverified recipes still
-    // render but their row will show "Refusing to execute unsigned recipe".
-    await verifyAllRecipes(list);
-    const verifiedN = verifiedRecipes.size;
-    const refusedN = refusedRecipes.size;
-    sRecipes.textContent = list.length + ' recipes' + (refusedN ? ` (${refusedN} unsigned)` : '');
-    sSize.textContent = (env.total_bytes ? Math.round(env.total_bytes / 102.4) / 10 : Math.round(JSON.stringify(env).length / 102.4) / 10) + ' KB';
-    sHash.textContent = env.registry_hash || '…';
-    sNetwork.textContent = '1 (registry)';
-    renderEmpty(list);
-  } catch (e) {
-    document.getElementById('status').classList.add('bad');
-    sRecipes.textContent = 'failed';
-    sSize.textContent = '…';
-    sHash.textContent = String(e.message || e);
-    resultsEl.innerHTML = '<div class="dev-result errored" style="grid-template-columns:1fr;">Could not hydrate registry: ' + esc(String(e.message || e)) + '</div>';
-  }
+ try {
+ const env = await recipe.load();
+ registry = env;
+ const list = recipe.list();
+ // Verify every recipe in the bundle against the trust root before any
+ // source can ever reach a Function constructor. Unverified recipes still
+ // render but their row will show "Refusing to execute unsigned recipe".
+ await verifyAllRecipes(list);
+ const verifiedN = verifiedRecipes.size;
+ const refusedN = refusedRecipes.size;
+ sRecipes.textContent = list.length + ' recipes' + (refusedN ? ` (${refusedN} unsigned)` : '');
+ sSize.textContent = (env.total_bytes ? Math.round(env.total_bytes / 102.4) / 10 : Math.round(JSON.stringify(env).length / 102.4) / 10) + ' KB';
+ sHash.textContent = env.registry_hash || '…';
+ sNetwork.textContent = '1 (registry)';
+ renderEmpty(list);
+ } catch (e) {
+ document.getElementById('status').classList.add('bad');
+ sRecipes.textContent = 'failed';
+ sSize.textContent = '…';
+ sHash.textContent = String(e.message || e);
+ resultsEl.innerHTML = '<div class="dev-result errored" style="grid-template-columns:1fr;">Could not hydrate registry: ' + esc(String(e.message || e)) + '</div>';
+ }
 })();
 
 // Register service worker so the page works offline and installs as a PWA.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then(
-    () => { sOffline.textContent = 'yes'; sOffline.classList.add('ok'); },
-    (err) => { sOffline.textContent = 'sw failed'; }
-  );
+ navigator.serviceWorker.register('/sw.js').then(
+ () => { sOffline.textContent = 'yes'; sOffline.classList.add('ok'); },
+ (err) => { sOffline.textContent = 'sw failed'; }
+ );
 } else {
-  sOffline.textContent = 'no SW';
+ sOffline.textContent = 'no SW';
 }
 
 // Listen for the PWA install prompt and surface a chip if available.
 let installPromptEvt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  installPromptEvt = e;
-  const btn = document.createElement('button');
-  btn.className = 'btn accent';
-  btn.style.marginLeft = '8px';
-  btn.textContent = 'Install as app';
-  btn.onclick = async () => {
-    btn.disabled = true;
-    installPromptEvt.prompt();
-    const choice = await installPromptEvt.userChoice;
-    if (choice.outcome === 'accepted') btn.textContent = 'Installed ✓';
-    else { btn.disabled = false; btn.textContent = 'Install as app'; }
-  };
-  document.getElementById('status').appendChild(btn);
+ e.preventDefault();
+ installPromptEvt = e;
+ const btn = document.createElement('button');
+ btn.className = 'btn accent';
+ btn.style.marginLeft = '8px';
+ btn.textContent = 'Install as app';
+ btn.onclick = async () => {
+ btn.disabled = true;
+ installPromptEvt.prompt();
+ const choice = await installPromptEvt.userChoice;
+ if (choice.outcome === 'accepted') btn.textContent = 'Installed ✓';
+ else { btn.disabled = false; btn.textContent = 'Install as app'; }
+ };
+ document.getElementById('status').appendChild(btn);
 });
 </script>
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

@@ -10,9 +10,9 @@ description: Execute a .kolm artifact locally against a JSON or string input.
 ## Usage
 
 ```bash
-kolm run <artifact.kolm> --input <file|->                # read input from file or stdin
-kolm run <artifact.kolm> '<input-json>' [--params ...]   # inline JSON
-cat input.json | kolm run <artifact.kolm>                # stdin auto-detect
+kolm run <artifact.kolm> --input <file|-> # read input from file or stdin
+kolm run <artifact.kolm> '<input-json>' [--params ...] # inline JSON
+cat input.json | kolm run <artifact.kolm> # stdin auto-detect
 ```
 
 ## Flags
@@ -33,7 +33,7 @@ kolm run redactor.kolm '{"text":"call 555-1212"}' --json
 
 # tenant runtime params
 kolm run redactor.kolm '{"text":"id 12-345"}' \
-  --params '{"extra_patterns":[{"name":"emp_id","regex":"\\b\\d{2}-\\d{3}\\b","replacement":"[ID]"}]}'
+ --params '{"extra_patterns":[{"name":"emp_id","regex":"\\b\\d{2}-\\d{3}\\b","replacement":"[ID]"}]}'
 
 kolm run redactor.kolm '{"text":"..."}' --params @hospital-rules.json
 ```

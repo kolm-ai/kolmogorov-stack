@@ -5,8 +5,12 @@ First-party LangChain adapter for kolm.ai compiled artifacts. Drop a `.kolm` int
 ## Install
 
 ```bash
-npm install @kolm/langchain langchain @langchain/core
+git clone https://github.com/sneaky-hippo/kolmogorov-stack
+cd your-app
+npm install ../kolmogorov-stack/packages/langchain-kolm langchain @langchain/core
 ```
+
+The `@kolm/langchain` package name is the local package name. It is not published under Kolm control on npm yet, so install it from a checkout until a registry release is verified.
 
 ## Usage (3 lines)
 

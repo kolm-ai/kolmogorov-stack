@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Prompt caching &middot; semantic and KV-prefix caches &middot; kolm.ai</title>
-<meta name="description" content="Prompt caching at two levels: KV-prefix cache reuse (the read costs 10 percent of a write on Anthropic, OpenAI, and DeepSeek) and semantic caches that match equivalent prompts before they hit the model.">
+<title>Prompt caching semantic and KV-prefix caches · kolm.ai</title>
+<meta name="description" content="Prompt caching at two levels: KV-prefix cache reuse (the read costs 10 percent of a write on Anthropic, OpenAI, and DeepSeek) and semantic caches that match...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Prompt caching &middot; kolm.ai">
-<meta property="og:description" content="KV-prefix and semantic caches in the kolm capture and runtime path.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Prompt caching semantic and KV-prefix caches · kolm.ai">
+<meta property="og:description" content="Prompt caching at two levels: KV-prefix cache reuse (the read costs 10 percent of a write on Anthropic, OpenAI, and DeepSeek) and semantic caches that match...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/research/prompt-cache">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Prompt caching &middot; kolm.ai">
-<meta name="twitter:description" content="KV-prefix and semantic caches.">
+<meta name="twitter:title" content="Prompt caching semantic and KV-prefix caches · kolm.ai">
+<meta name="twitter:description" content="Prompt caching at two levels: KV-prefix cache reuse (the read costs 10 percent of a write on Anthropic, OpenAI, and DeepSeek) and semantic caches that match...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/research/prompt-cache">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -48,13 +48,14 @@ footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:1
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 .brand-anchor{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" aria-hidden="true">kolm.ai</span>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -67,7 +68,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>KV-cache prefix sharing is a server-side optimization. When two requests start with the same tokens (a system prompt, a long document, a few-shot block), the attention key-value tensors for that prefix can be computed once and reused. vLLM's PagedAttention (Kwon et al. 2023) and SGLang's RadixAttention (Zheng et al. 2024) generalized the idea across requests at the engine level. Anthropic, OpenAI, and DeepSeek expose it as a per-message <code>cache_control</code> hint with a published discount (cached input is ~10 percent of full input). Semantic prompt caching is a client-side optimization: embed the prompt, look it up in a vector index of past prompts, and if the cosine distance to the nearest is below a threshold, return the cached response. GPTCache (Bang 2023) is the reference open-source implementation. Semantic caches trade exactness for hit rate; on production traces with repeated questions, hit rates of 20 to 60 percent are common, but every false positive returns the wrong answer.</p>
 
 <h2 id="how">How kolm uses it</h2>
-<p>KV-prefix caching is wired into the distillation stage. The synthesis pipeline batches teacher calls by stable prompt prefix (system prompt + recipe-fixed few-shot block) and emits the cache-control hint, so the typical distillation run pays the ten-percent rate for the prefix on every call after the first. The receipt records <code>cache_hit_rate</code> and <code>cache_savings_usd</code> so the buyer can verify the bill. Semantic prompt caching is not implemented in kolm v0.2.6; it conflicts with the capture-loop's job of recording every request as a training example. Buyers who want semantic caching for runtime cost reduction can layer GPTCache or LiteLLM in front of the kolm runtime; the recipe is documented in <a href="/docs/optimizer">/docs/optimizer</a>. A first-party semantic cache that respects per-tenant isolation and emits cache-hit events to the capture log ships in v0.3.</p>
+<p>KV-prefix caching is wired into the distillation stage. The synthesis pipeline batches teacher calls by stable prompt prefix (system prompt + recipe-fixed few-shot block) and emits the cache-control hint, so the typical distillation run pays the ten-percent rate for the prefix on every call after the first. The receipt records <code>cache_hit_rate</code> and <code>cache_savings_usd</code> so the buyer can verify the bill. Semantic prompt caching stays separate from the capture loop because the lake needs every request as a training example. Buyers who want semantic runtime caching can layer GPTCache or LiteLLM in front of the kolm runtime; the recipe is documented in <a href="/docs/optimizer">/docs/optimizer</a>. The first-party semantic-cache track preserves tenant isolation and emits cache-hit events to the capture log.</p>
 
 <h2 id="refs">References</h2>
 <div class="refs">
@@ -80,13 +81,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div></main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 kolm.ai</span>
-  &middot;
-  <a href="/security">Security</a>
-  &middot;
-  <a href="/research">Research</a>
-  &middot;
-  <a href="/docs">Docs</a>
+ <span>&copy; 2026 kolm.ai</span>
+ &middot;
+ <a href="/security">Security</a>
+ &middot;
+ <a href="/research">Research</a>
+ &middot;
+ <a href="/docs">Docs</a>
 </div></footer>
 
 </body>

@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Builds · Account · kolm.ai</title>
+<title>Builds · Account · Account · kolm.ai</title>
 <meta name="description" content="Build history on kolm.ai: started_at, status, held-out pass rate, production-ready badge, artifact_hash. Backed by src/production-ready.js.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/builds">
-<meta property="og:title" content="Builds &middot; Account &middot; kolm.ai" />
-<meta property="og:description" content="Build history on kolm.ai: started_at, status, held-out pass rate, production-ready badge, artifact_hash. Backed by src/production-ready.js." />
-<meta property="og:image" content="https://kolm.ai/og-card.svg" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://kolm.ai/account/builds" />
+<meta property="og:title" content="Builds · Account · Account · kolm.ai">
+<meta property="og:description" content="Build history on kolm.ai: started_at, status, held-out pass rate, production-ready badge, artifact_hash. Backed by src/production-ready.js.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/builds">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
@@ -61,13 +61,18 @@
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
 
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Builds · Account · Account · kolm.ai">
+<meta name="twitter:description" content="Build history on kolm.ai: started_at, status, held-out pass rate, production-ready badge, artifact_hash. Backed by src/production-ready.js.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -218,8 +223,8 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions"><a href="/docs">Help</a></div>
-  </div>
+ <div class="site-actions"><a href="/docs">Help</a></div>
+ </div>
 </header>
 
 <main id="main">
@@ -229,15 +234,15 @@
 <h1>Builds.</h1>
 <p class="lede">Every build, in order. Capture &rarr; dataset &rarr; bakeoff &rarr; build &rarr; verify. Status, held-out pass rate, whether it passed the production-ready gate, the artifact hash you can pin.</p>
 <div class="toolbar">
-  <a class="btn primary" href="/builder">New build</a>
-  <a class="btn" href="/account/artifacts">Installed artifacts</a>
+ <a class="btn primary" href="/builder">New build</a>
+ <a class="btn" href="/account/artifacts">Installed artifacts</a>
 </div>
 <table class="ktable">
-  <thead><tr><th>Started</th><th>Recipe</th><th>Status</th><th>% passed</th><th>Production ready</th><th>Artifact</th></tr></thead>
-  <tbody id="bl-rows"><tr><td colspan="6"><div class="skel" style="width:260px"></div></td></tr></tbody>
+ <thead><tr><th>Started</th><th>Recipe</th><th>Status</th><th>% passed</th><th>Production ready</th><th>Artifact</th></tr></thead>
+ <tbody id="bl-rows"><tr><td colspan="6"><div class="skel" style="width:260px"></div></td></tr></tbody>
 </table>
 <div id="empty-state" class="empty" hidden data-empty-state>
-  <strong>No builds yet.</strong> Build your first artifact from the <a href="/builder">builder</a> or from accepted labels on <a href="/account/labeling">/account/labeling</a>.
+ <strong>No builds yet.</strong> Build your first artifact from the <a href="/builder">builder</a> or from accepted labels on <a href="/account/labeling">/account/labeling</a>.
 </div>
 </section>
 </div>
@@ -245,34 +250,34 @@
 
 <script>
 (function(){
-  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+ var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
 
-  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
-  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
-  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
-  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
-  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
-  window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
-  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+ if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
+ window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+ window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+ window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
+ window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
+ window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
 })();
 var rows=document.getElementById("bl-rows");
 function statusPill(s){return s==="succeeded"||s==="green"?"<span class=\"pill ok\">"+s+"</span>":s==="failed"||s==="red"?"<span class=\"pill bad\">"+s+"</span>":s==="running"?"<span class=\"pill warn\">running</span>":"<span class=\"pill mute\">"+window.kesc(s||"-")+"</span>";}
 function readyPill(r){return r===true?"<span class=\"pill ok\">ready</span>":r===false?"<span class=\"pill bad\">held</span>":"<span class=\"pill mute\">-</span>";}
 window.kfetch("/v1/builds").catch(function(){
-  return window.kfetch("/v1/compile?limit=50").then(function(j){return {builds:(j&&j.jobs)||[]};});
+ return window.kfetch("/v1/compile?limit=50").then(function(j){return {builds:(j&&j.jobs)||[]};});
 }).then(function(j){
-  var list=(j&&j.builds)||(Array.isArray(j)?j:[]);
-  if(!list.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
-  rows.innerHTML=list.map(function(b){
-    return "<tr>"+
-      "<td>"+window.kesc((b.started_at||b.created_at||"").slice(0,16).replace("T"," "))+"</td>"+
-      "<td><code>"+window.kesc(b.recipe||b.spec_name||b.name||"-")+"</code></td>"+
-      "<td>"+statusPill(b.status)+"</td>"+
-      "<td>"+(b.k_score!=null?(Math.round(b.k_score*100)+"% passed"):(b.pass_rate!=null?(Math.round(b.pass_rate*100)+"% passed"):"-"))+"</td>"+
-      "<td>"+readyPill(b.production_ready)+"</td>"+
-      "<td><code>"+window.kesc((b.artifact_hash||b.cid||b.id||"-").slice(0,16))+"</code></td>"+
-    "</tr>";
-  }).join("");
+ var list=(j&&j.builds)||(Array.isArray(j)?j:[]);
+ if(!list.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
+ rows.innerHTML=list.map(function(b){
+ return "<tr>"+
+ "<td>"+window.kesc((b.started_at||b.created_at||"").slice(0,16).replace("T"," "))+"</td>"+
+ "<td><code>"+window.kesc(b.recipe||b.spec_name||b.name||"-")+"</code></td>"+
+ "<td>"+statusPill(b.status)+"</td>"+
+ "<td>"+(b.k_score!=null?(Math.round(b.k_score*100)+"% passed"):(b.pass_rate!=null?(Math.round(b.pass_rate*100)+"% passed"):"-"))+"</td>"+
+ "<td>"+readyPill(b.production_ready)+"</td>"+
+ "<td><code>"+window.kesc((b.artifact_hash||b.cid||b.id||"-").slice(0,16))+"</code></td>"+
+ "</tr>";
+ }).join("");
 }).catch(function(){document.getElementById("empty-state").hidden=false;rows.innerHTML="";});
 </script>
 </body>

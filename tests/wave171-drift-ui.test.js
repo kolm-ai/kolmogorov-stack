@@ -61,12 +61,12 @@ test('5. /drift references the four lifecycle ladder tiers M+1 through M+4', () 
   }
 });
 
-test('6. /drift cites the backend wave (167) and the originating plan wave (144)', () => {
+test('6. /drift cites the shipped backend and dedicated surface without exposing planning-wave copy', () => {
   const html = read(DRIFT);
   const lower = html.toLowerCase();
   assert.ok(lower.includes('wave 167'), 'drift.html must cite the W167 backend');
-  assert.ok(lower.includes('wave 144'), 'drift.html must cite the W144 plan');
   assert.ok(lower.includes('wave 171'), 'drift.html must self-stamp wave 171');
+  assert.ok(!lower.includes('wave 144 doc'), 'drift.html must not expose private planning-doc citations');
 });
 
 test('7. /drift names the three spec-version constants from drift-supersession.js', () => {

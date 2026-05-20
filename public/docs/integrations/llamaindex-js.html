@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>LlamaIndex JS &middot; kolm.ai</title>
+<title>LlamaIndex JS · kolm.ai</title>
 <meta name="description" content="Point a LlamaIndex.TS chat engine, query engine, or agent at the local kolm proxy. One additionalSessionOptions baseURL. Streaming preserved.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="LlamaIndex JS &middot; kolm.ai">
-<meta property="og:description" content="Point a LlamaIndex.TS chat engine, query engine, or agent at the local kolm proxy.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="LlamaIndex JS · kolm.ai">
+<meta property="og:description" content="Point a LlamaIndex.TS chat engine, query engine, or agent at the local kolm proxy. One additionalSessionOptions baseURL. Streaming preserved.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/integrations/llamaindex-js">
-<meta property="og:image" content="https://kolm.ai/og/docs-integrations-llamaindex-js.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="LlamaIndex JS &middot; kolm.ai">
-<meta name="twitter:description" content="Point LlamaIndex.TS at the local kolm proxy.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-integrations-llamaindex-js.svg">
+<meta name="twitter:title" content="LlamaIndex JS · kolm.ai">
+<meta name="twitter:description" content="Point a LlamaIndex.TS chat engine, query engine, or agent at the local kolm proxy. One additionalSessionOptions baseURL. Streaming preserved.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/integrations/llamaindex-js">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"LlamaIndex JS","description":"Wire LlamaIndex.TS through the local kolm capture proxy.","url":"https://kolm.ai/docs/integrations/llamaindex-js","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -61,13 +61,14 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, not the Kolm band, not Petter Kolm.</span>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -78,7 +79,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="install">Install</h2>
 <pre><code>npm i llamaindex
-npm i -g kolm</code></pre>
+npm i -g github:sneaky-hippo/kolmogorov-stack</code></pre>
 
 <h2 id="start">Start the proxy</h2>
 <pre><code>kolm capture --provider openai --as docs-rag --namespace docs-rag
@@ -88,15 +89,15 @@ npm i -g kolm</code></pre>
 <pre><code>import { OpenAI, Settings } from "llamaindex";
 
 Settings.llm = new OpenAI({
-  model: "gpt-4o-mini",
-  apiKey: process.env.OPENAI_API_KEY,
-  additionalSessionOptions: {
-    baseURL: "http://127.0.0.1:8787/v1",
-    defaultHeaders: {
-      "x-upstream-api-key": process.env.OPENAI_API_KEY,
-      "x-kolm-namespace": "docs-rag",
-    },
-  },
+ model: "gpt-4o-mini",
+ apiKey: process.env.OPENAI_API_KEY,
+ additionalSessionOptions: {
+ baseURL: "http://127.0.0.1:8787/v1",
+ defaultHeaders: {
+ "x-upstream-api-key": process.env.OPENAI_API_KEY,
+ "x-kolm-namespace": "docs-rag",
+ },
+ },
 });
 
 const response = await Settings.llm.complete({ prompt: "summarize: ..." });
@@ -106,15 +107,15 @@ console.log(response.text);</code></pre>
 <pre><code>import { Anthropic, Settings } from "llamaindex";
 
 Settings.llm = new Anthropic({
-  model: "claude-3-5-sonnet-latest",
-  apiKey: process.env.ANTHROPIC_API_KEY,
-  additionalSessionOptions: {
-    baseURL: "http://127.0.0.1:8787",
-    defaultHeaders: {
-      "x-upstream-api-key": process.env.ANTHROPIC_API_KEY,
-      "x-kolm-namespace": "docs-rag",
-    },
-  },
+ model: "claude-3-5-sonnet-latest",
+ apiKey: process.env.ANTHROPIC_API_KEY,
+ additionalSessionOptions: {
+ baseURL: "http://127.0.0.1:8787",
+ defaultHeaders: {
+ "x-upstream-api-key": process.env.ANTHROPIC_API_KEY,
+ "x-kolm-namespace": "docs-rag",
+ },
+ },
 });</code></pre>
 
 <h2 id="rag">RAG and agents</h2>
@@ -127,28 +128,28 @@ process.env.ANTHROPIC_BASE_URL = "http://127.0.0.1:8787";</code></pre>
 
 <h2 id="verify">Verify the proxy sees traffic</h2>
 <pre><code>kolm capture status --namespace docs-rag
-# pairs captured:    412 / 1000
+# pairs captured: 412 / 1000
 # pairs until distill: 588</code></pre>
 
 <h2 id="see">Related</h2>
 <div class="related">
-  <a href="/docs/integrations/llamaindex-py"><b>/docs/integrations/llamaindex-py</b><span>Same pattern for LlamaIndex Python.</span></a>
-  <a href="/docs/integrations/langchain-js"><b>/docs/integrations/langchain-js</b><span>LangChain JS via the OpenAI-compatible proxy.</span></a>
-  <a href="/docs/connectors"><b>/docs/connectors</b><span>The full connector list with raw env vars per runtime.</span></a>
-  <a href="/docs/distill"><b>/docs/distill</b><span>Auto-distill a captured namespace into a local LoRA.</span></a>
-  <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
+ <a href="/docs/integrations/llamaindex-py"><b>/docs/integrations/llamaindex-py</b><span>Same pattern for LlamaIndex Python.</span></a>
+ <a href="/docs/integrations/langchain-js"><b>/docs/integrations/langchain-js</b><span>LangChain JS via the OpenAI-compatible proxy.</span></a>
+ <a href="/docs/connectors"><b>/docs/connectors</b><span>The full connector list with raw env vars per runtime.</span></a>
+ <a href="/docs/distill"><b>/docs/distill</b><span>Auto-distill a captured namespace into a local student artifact.</span></a>
+ <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 kolm.ai</span>
-  &middot;
-  <a href="/security">Security</a>
-  &middot;
-  <a href="/pricing">Pricing</a>
-  &middot;
-  <a href="/docs">Docs</a>
+ <span>&copy; 2026 kolm.ai</span>
+ &middot;
+ <a href="/security">Security</a>
+ &middot;
+ <a href="/pricing">Pricing</a>
+ &middot;
+ <a href="/docs">Docs</a>
 </div></footer>
 
 </body>

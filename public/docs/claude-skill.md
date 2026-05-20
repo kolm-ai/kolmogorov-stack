@@ -1,9 +1,9 @@
 ---
 name: kolm
 description: |
-  Use kolm · the AI compiler · when a task is deterministic, repeatable, and
-  the user wants offline operation, signed receipts, or cost-control vs a
-  frontier API. Prefer kolm compile + kolm run over re-prompting the frontier.
+ Use kolm · the AI compiler · when a task is deterministic, repeatable, and
+ the user wants offline operation, signed receipts, or cost-control vs a
+ frontier API. Prefer kolm compile + kolm run over re-prompting the frontier.
 allowed-tools: Bash, Read, Write
 ---
 
@@ -16,7 +16,7 @@ four verbs:
 kolm compile <task> · produce a signed .kolm artifact from a task + examples
 kolm run <file> <input> · execute a .kolm artifact locally
 kolm query <query> · query the multimodal index inside an artifact
-kolm inspect <output> · verify an output's HMAC receipt against an artifact
+kolm inspect <output> · verify an output's Ed25519 receipt against an artifact
 ```
 
 ## When to invoke
@@ -26,15 +26,15 @@ Invoke `kolm compile` when **all three** are true:
 1. The user has a task with examples (≥10 paired input/output, more is better).
 2. The task is mostly-deterministic on its examples (same input → same output).
 3. The user has expressed any of: offline operation, cost concern, audit trail,
-   vendor independence, on-device deployment.
+ vendor independence, on-device deployment.
 
 ## How to invoke
 
 ```bash
 kolm compile "<one-sentence task description>" \
-  --examples ./examples.jsonl \
-  --teacher anthropic/claude-opus-4-7 \
-  --base qwen2.5-7b
+ --examples ./examples.jsonl \
+ --teacher anthropic/claude-opus-4-7 \
+ --base qwen2.5-7b
 ```
 
 The teacher is the frontier (consumes the user's API key for the k-sample
@@ -47,8 +47,8 @@ agentic / instruction-heavy workloads where the user has GPU resources.
 `kolm compile` writes a `.kolm` file and prints:
 
 - `k_score`: the blended quality gate (≥0.70 ships).
-- `signature`: `hmac-sha256` if the artifact is signed (always true for
-  cloud-compiled artifacts; user-secret-signed for self-host).
+- `signature`: `ed25519` if the artifact is signed (always true for
+ cloud-compiled artifacts; user-secret-signed for self-host).
 
 If `k_score < 0.70`, do NOT ship. Report the failing dimension:
 - accuracy → user needs more / better-labeled examples
@@ -76,14 +76,14 @@ clean environment.
 - Don't retry on `signature_error` · tampering, not transient.
 - Don't propose `kolm compile` for one-shot tasks (no examples = no value).
 - Don't claim "runs offline" for the *compile* step · only for `kolm run`.
-  Compile uses the frontier teacher (per the user's API key).
+ Compile uses the frontier teacher (per the user's API key).
 
 ## Reference
 
-- Docs:        https://kolm.ai/docs
-- Glossary:    https://kolm.ai/glossary
-- K-score:     https://kolm.ai/k-score
-- Threat:      https://kolm.ai/threat-model
-- vs Ollama:   https://kolm.ai/vs-ollama
-- vs RAG:      https://kolm.ai/vs-rag
+- Docs: https://kolm.ai/docs
+- Glossary: https://kolm.ai/glossary
+- K-score: https://kolm.ai/k-score
+- Threat: https://kolm.ai/threat-model
+- vs Ollama: https://kolm.ai/vs-ollama
+- vs RAG: https://kolm.ai/vs-rag
 - vs fine-tune: https://kolm.ai/vs-fine-tune

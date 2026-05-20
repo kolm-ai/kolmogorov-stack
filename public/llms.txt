@@ -1,119 +1,136 @@
-# kolm · your own AI, compiled to your task
+# kolm.ai - private AI stack for captured traffic, reviewed data, and local artifacts
 
-> One signed file. Runs anywhere. Receipts on every call.
-> kolm is the AI compiler. Take a task spec, compile it into a `.kolm` artifact:
-> a single signed file containing recipes, a small LoRA, a verifier, an index,
-> and tests. Run it offline on a phone, edge box, or laptop. Every inference
-> emits a verifiable receipt anchored in a four-ring HMAC chain.
+> One OpenAI-compatible gateway. One local event lake. One reviewed data path.
+> One signed `.kolm` artifact when a workflow is ready to run locally.
 
-## Core idea
+kolm.ai helps teams and solo developers turn the model calls they already make
+into private AI systems they can inspect, improve, and run on their own
+hardware. The product starts as a drop-in gateway for OpenAI-compatible clients,
+captures telemetry locally, redacts sensitive fields, promotes reviewed rows
+into train and eval datasets, then compiles repeated workflows into signed
+artifacts with receipts and verifier state.
 
-Frontier models are general. Production tasks are specific. Most tokens you
-spend with Anthropic and OpenAI are wasted on capability you do not use.
+## What kolm.ai is
 
-kolm captures (input, verified-output) pairs from the frontier API calls you
-already make, distills them into a task-specific local LoRA, and signs the
-artifact. The compute you rent compounds into compute you own.
+- A local-first AI gateway for OpenAI-compatible traffic.
+- A telemetry lake for prompts, responses, cost, latency, provider, model,
+ tool traces, privacy decisions, and lineage.
+- A review queue for approving, correcting, rejecting, and labeling rows before
+ they become train or eval data.
+- A training and distillation control plane for repeated model workflows.
+- A `.kolm` artifact format for portable, signed, verified local AI units.
+- A runtime target catalog for laptops, servers, edge devices, and phone-class
+ model backbones such as Gemma-family targets.
+- A verification surface for receipts, eval splits, signatures, and production
+ readiness.
 
-## What is a `.kolm` file?
+## What kolm.ai is not
 
-A signed zip with seven segments: model.gguf · lora.bin · recipes.json ·
-index.sqlite-vec · verifier.json · manifest.json · signature.sig.
-Specified by RS-1 (MIT-licensed). In v0.1 the slots hold: a JSON base-model
-pointer (model.gguf), an optional KOLMPACK behavior pack (lora.bin), and an
-optional KOLMIDX JSON lookup (index.sqlite-vec). Native quantized weights,
-GGUF-LoRA adapters, and sqlite-vec databases are roadmap tiers. Receipts are
-HMAC-SHA256; the issuer or holder of the shared tenant receipt secret can
-re-verify offline. Ed25519 public-key receipts and Sigstore Rekor anchoring
-are roadmap.
+- Not a replacement for every frontier-model call.
+- Not a claim that all workloads should be trained immediately.
+- Not a promise that raw sensitive data is safe to send upstream.
+- Not a marketplace-first product before the capture and optimization loop
+ proves value.
+- Not a generic autonomous-agent platform. Agent and workflow traces are
+ captured so they can later compile into rules, models, or human checkpoints.
+
+## Primary product loop
+
+1. Connect your app by changing the model base URL.
+2. Capture model calls into a local event lake.
+3. Detect and redact sensitive data according to policy.
+4. Review rows before they enter train or eval datasets.
+5. Find repeated workflows and high-token quick wins.
+6. Train or distill the repeat when there is enough approved evidence.
+7. Compile the result into a signed `.kolm` artifact.
+8. Verify the artifact against held-out data and receipt checks.
+9. Run the artifact locally where it makes economic and privacy sense.
+10. Keep capturing drift and supersede the artifact when better evidence wins.
 
 ## Primary URLs
 
-- https://kolm.ai/ · landing page
-- https://kolm.ai/manifesto · why we built this
-- https://kolm.ai/how-it-works · the compile loop
-- https://kolm.ai/anatomy · `.kolm` byte-map
-- https://kolm.ai/k-score · the per-artifact K-score gate, formula and thresholds (each .kolm has its own score, not the base model)
-- https://kolm.ai/compile · the compile step
-- https://kolm.ai/serve · local MCP endpoint
-- https://kolm.ai/run · on-device inference
-- https://kolm.ai/recall · recipe registry
-- https://kolm.ai/pricing · six-tier ladder, BYO frontier key
-- https://kolm.ai/benchmarks · reproducible runs, public seeds
-- https://kolm.ai/whitepaper · RS-1 specification, full text
-- https://kolm.ai/security · threat model and mitigations
-- https://kolm.ai/trust · receipt walker, K-score gates
-- https://kolm.ai/api · endpoint reference
-- https://kolm.ai/docs · quickstart and SDK reference
-- https://kolm.ai/articles · long-form essays
-- https://kolm.ai/use-cases · six built-out patterns
-- https://kolm.ai/cookbook · recipe examples
-- https://kolm.ai/roadmap · what shipped and what is queued, version-by-version
+- https://kolm.ai/ - homepage
+- https://kolm.ai/product - full product surface
+- https://kolm.ai/capture - OpenAI-compatible gateway and capture loop
+- https://kolm.ai/docs - documentation map
+- https://kolm.ai/docs/api - HTTP API reference
+- https://kolm.ai/docs/quickstart - docs quickstart
+- https://kolm.ai/quickstart - product quickstart
+- https://kolm.ai/training - training tiers and distillation path
+- https://kolm.ai/runtimes - runtime targets
+- https://kolm.ai/models - model and backbone catalog
+- https://kolm.ai/pricing - pricing
+- https://kolm.ai/security - security posture
+- https://kolm.ai/trust - trust and verification
+- https://kolm.ai/spec - `.kolm` format and receipt specification
+- https://kolm.ai/openapi.json - OpenAPI manifest
+- https://kolm.ai/sitemap.xml - sitemap
 
-## Cornerstone articles
+## Integration surfaces
 
-- https://kolm.ai/articles/k-sample-verified-inference
-- https://kolm.ai/articles/rent-vs-buy-compute
-- https://kolm.ai/articles/how-we-benchmark
-- https://kolm.ai/articles/anatomy-of-a-kolm
-- https://kolm.ai/articles/the-spec-layer
+- OpenAI SDK: https://kolm.ai/integrations/openai-sdk
+- Anthropic SDK: https://kolm.ai/integrations/anthropic-sdk
+- OpenRouter: https://kolm.ai/integrations/openrouter
+- LiteLLM: https://kolm.ai/integrations/litellm
+- Vercel AI SDK: https://kolm.ai/integrations/vercel-ai-sdk
+- LangChain: https://kolm.ai/integrations/langchain
+- Docker Compose: https://kolm.ai/integrations/docker-compose
+- Environment variables: https://kolm.ai/integrations/env-vars
 
-## Use-cases
+## Developer surfaces
 
-- https://kolm.ai/use-cases/agentic-coding · captured-pair distillation for coding agents
-- https://kolm.ai/use-cases/capture-and-distill · rent-vs-buy compute loop
-- https://kolm.ai/use-cases/ai-saas · per-tenant LoRA, BYOK, gross margin
-- https://kolm.ai/use-cases/mobile · on-device, offline, signed
-- https://kolm.ai/use-cases/embedded · edge boxes, MCUs, isolated networks
-- https://kolm.ai/use-cases/web3-verifiable · Future cryptographic anchoring
+- CLI reference: https://kolm.ai/docs/cli
+- SDK reference: https://kolm.ai/docs/sdk
+- Node SDK source install: `npm i github:sneaky-hippo/kolmogorov-stack`
+- Python SDK docs: https://kolm.ai/sdks
+- MCP server docs: https://kolm.ai/docs/connectors
+- VS Code local extension docs: https://kolm.ai/install/vscode
 
-## Key concepts
+## Account surfaces
 
-- `.kolm` (artifact) · the signed binary; one file you ship and run
-- RS-1 (specification) · the open spec; MIT for code, CC-BY for text
-- K-score (quality gate, per-artifact) · `K = 0.40·A + 0.15·S + 0.15·L + 0.15·C + 0.15·V`. Computed for each compiled .kolm against its own frozen eval set; NOT a leaderboard for the underlying base model.
-- A (accuracy) · pass rate on held-out positives
-- S (size score) · inverse of artifact bytes on disk
-- L (latency score) · inverse of p50 inference latency
-- C (cost score) · inverse of training + inference cost
-- V (coverage) · fraction of intents the recipe pack resolves
-- four-ring receipt chain · pre-image → derived → execution → seal, HMAC-SHA256
+The post-auth account UI covers connectors, captured traffic, the event lake,
+privacy events, repeated workflows, opportunities, labeling, datasets,
+simulations, bakeoffs, builds, artifacts, devices, storage, and billing.
 
-## Proof points (verifiable)
+## Important concepts
 
-- SWE-bench Lite harness: ships at `kolm bench --reproduce swebench-lite-n150`
-  against the official swebench 4.1.0 evaluator, seed=42, Opus-4.7. The
-  headline lift lands when the first end-to-end signed run completes; no
-  point estimate is published before then.
-- Smoke battery: 792/0 tests, runs against any URL via
-  `URL=https://kolm.ai bash scripts/smoke-live.sh`.
-- Receipts: Sigstore Rekor anchoring is opt-in, off by default.
+- Gateway: the OpenAI-compatible front door for model calls.
+- Lake: the local event store that records model traffic and lineage.
+- Privacy membrane: detection, redaction, blocking, and override policy before
+ rows move across trust boundaries.
+- Reviewed dataset: approved rows only, separated into train and holdout.
+- Opportunity: a repeated or expensive workflow that could be optimized.
+- Bakeoff: comparison between frontier calls, local candidates, rules, and
+ distilled artifacts.
+- `.kolm`: the portable artifact carrying implementation, eval state, receipt
+ chain, manifest, and runtime target metadata.
+- K-score: a weighted artifact score. It is not a claim of unconditional
+ correctness; it is evidence about performance on the declared eval surface.
+- Production-ready gate: verifier state that checks eval independence,
+ signatures, receipt lineage, and runtime metadata before an artifact is
+ treated as shippable.
 
-## Pricing
+## Current install posture
 
-Six tiers. Free CLI ($0). Mobile ($9). Pro ($49). Team ($149). Business
-($1,499). Enterprise ($2,999). All tiers BYO frontier-API key. We never resell
-tokens. The customer's spend stays the customer's spend; we charge for the
-artifact, not the inference.
+The honest source install path is:
 
-## Brand
+```bash
+npm i github:sneaky-hippo/kolmogorov-stack
+```
 
-- Kolmogorov · the company
-- kolm · the binary (the CLI)
-- `.kolm` · the file format
-- RS-1 · the specification (MIT-licensed)
-
-Inspired by Andrey Kolmogorov's 1965 question: what is the smallest specialist
-program that produces a given behavior? The compiler answers it for any task.
+Package-registry, Homebrew, Docker, mobile SDK, and marketplace claims should
+only be treated as available when their corresponding docs and verification
+tests state that they are published.
 
 ## Repository
 
-- https://github.com/sneaky-hippo/kolmogorov-stack · server + CLI + spec
-- install: `npm i -g github:sneaky-hippo/kolmogorov-stack` (source-install; `kolm` lands on PATH)
-- license: MIT (code) · CC-BY-4.0 (text)
+- Public repository: https://github.com/sneaky-hippo/kolmogorov-stack
+- Private working repository may contain unreleased development.
+- Code license and text license are documented in the repository and public
+ license page.
 
 ## Contact
 
-- press@kolm.ai
-- security disclosures: see https://kolm.ai/.well-known/security.txt
-- general: see https://kolm.ai/contact
+- General: https://kolm.ai/contact
+- Security disclosures: https://kolm.ai/.well-known/security.txt
+- Press: press@kolm.ai

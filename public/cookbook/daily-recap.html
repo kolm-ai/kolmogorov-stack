@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Daily recap recipe · kolm cookbook</title>
-<meta name="description" content="Compile a signed local model that turns your day's logs, commits, and messages into a one-paragraph recap. Trained on your own writing, runs on-device.">
+<title>Daily recap recipe · kolm cookbook · kolm.ai</title>
+<meta name="description" content="Daily recap recipe · kolm cookbook: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Daily-recap recipe">
-<meta property="og:description" content="Local end-of-day recap in your voice. Signed, offline.">
-<meta property="og:type" content="article">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Daily-recap recipe" />
-<meta name="twitter:description" content="Local end-of-day recap in your voice. Signed, offline." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:title" content="Daily recap recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Daily recap recipe · kolm cookbook: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Daily recap recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Daily recap recipe · kolm cookbook: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/cookbook/daily-recap">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/cookbook/daily-recap">
@@ -26,257 +26,258 @@
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "HowTo",
-      "name": "Daily-recap recipe",
-      "description": "Local end-of-day recap in your voice. Signed, offline.",
-      "url": "https://kolm.ai/cookbook/daily-recap",
-      "totalTime": "PT5M",
-      "tool": [
-        {
-          "@type": "HowToTool",
-          "name": "kolm CLI"
-        }
-      ],
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install",
-          "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Compile",
-          "text": "kolm compile daily-recap.toml"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Run",
-          "text": "kolm run daily-recap.kolm"
-        }
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "kolm",
-          "item": "https://kolm.ai/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Cookbook",
-          "item": "https://kolm.ai/cookbook"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Daily recap recipe",
-          "item": "https://kolm.ai/cookbook/daily-recap"
-        }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "Daily-recap recipe",
+ "description": "Local end-of-day recap in your voice. Signed, offline.",
+ "url": "https://kolm.ai/cookbook/daily-recap",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile daily-recap.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run daily-recap.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Daily recap recipe",
+ "item": "https://kolm.ai/cookbook/daily-recap"
+ }
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <div class="crumbs"><a href="/docs">cookbook</a> &middot; personal &middot; daily-recap</div>
-    <span class="pill">Recipe &middot; personal</span>
-    <h1>End-of-day, <span class="tone">in one paragraph.</span></h1>
-    <p class="lede">A local <code>.kolm</code> file that takes your day's git commits, calendar entries, browser history (if you want), and slack messages, and returns a one-paragraph recap in your own voice. 150 days of your past journal entries are the gold corpus. Verifier rejects any recap that mentions a project or person not present in the input.</p>
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; personal &middot; daily-recap</div>
+ <span class="pill">Recipe &middot; personal</span>
+ <h1>End-of-day, <span class="tone">in one paragraph.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that takes your day's git commits, calendar entries, browser history (if you want), and slack messages, and returns a one-paragraph recap in your own voice. 150 days of your past journal entries are the gold corpus. Verifier rejects any recap that mentions a project or person not present in the input.</p>
 
-    <div class="meta-row">
-      <div class="item"><span class="label">base model</span><span class="value">phi-3-mini-4k</span></div>
-      <div class="item"><span class="label">gold pairs</span><span class="value">150 (105 train / 45 eval)</span></div>
-      <div class="item"><span class="label">k-score floor</span><span class="value">0.78</span></div>
-      <div class="item"><span class="label">artifact size</span><span class="value">2.1 GB</span></div>
-      <div class="item"><span class="label">compile time</span><span class="value">~24 min</span></div>
-      <div class="item"><span class="label">spec source</span><span class="value">style + grounded extraction</span></div>
-    </div>
-  </div>
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">phi-3-mini-4k</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">150 (105 train / 45 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.78</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">2.1 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~24 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">style + grounded extraction</span></div>
+ </div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="group">
-      <h2>What this recipe does</h2>
-      <p>You journal but skip days. This bridges the gap. It gathers what already exists (commits, calendar, slack DMs you bookmarked) and writes the entry that you would have written if you had sat down for ten minutes. It does not fabricate emotions, projects, or people · every named entity in the recap must appear in the input.</p>
-      <p>The verifier's tone-similarity check holds the recap close to the corpus of your own entries: same sentence rhythm, same hedge words, same trick of starting with the verb instead of "I."</p>
-    </div>
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>You journal but skip days. This bridges the gap. It gathers what already exists (commits, calendar, slack DMs you bookmarked) and writes the entry that you would have written if you had sat down for ten minutes. It does not fabricate emotions, projects, or people · every named entity in the recap must appear in the input.</p>
+ <p>The verifier's tone-similarity check holds the recap close to the corpus of your own entries: same sentence rhythm, same hedge words, same trick of starting with the verb instead of "I."</p>
+ </div>
 
-    <div class="group">
-      <h2>The spec</h2>
-      <pre class="code">{
-  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
-  <span class="k">"schema"</span>: {
-    <span class="k">"required"</span>: [<span class="k">"recap"</span>, <span class="k">"highlights"</span>, <span class="k">"mood"</span>],
-    <span class="k">"properties"</span>: {
-      <span class="k">"recap"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 800 },
-      <span class="k">"highlights"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>}, <span class="k">"maxItems"</span>: 5 },
-      <span class="k">"mood"</span>: { <span class="k">"enum"</span>: [<span class="k">"flowing"</span>, <span class="k">"steady"</span>, <span class="k">"scattered"</span>, <span class="k">"drained"</span>, <span class="k">"sharp"</span>] },
-      <span class="k">"open_loops"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} }
-    }
-  },
-  <span class="k">"verifier"</span>: {
-    <span class="k">"named_entity_must_appear_in_input"</span>: <span class="ok">true</span>,
-    <span class="k">"style_corpus"</span>: <span class="k">"journal/"</span>,
-    <span class="k">"redact_before_train"</span>: <span class="k">"pii.regex"</span>
-  }
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"recap"</span>, <span class="k">"highlights"</span>, <span class="k">"mood"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"recap"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 800 },
+ <span class="k">"highlights"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>}, <span class="k">"maxItems"</span>: 5 },
+ <span class="k">"mood"</span>: { <span class="k">"enum"</span>: [<span class="k">"flowing"</span>, <span class="k">"steady"</span>, <span class="k">"scattered"</span>, <span class="k">"drained"</span>, <span class="k">"sharp"</span>] },
+ <span class="k">"open_loops"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"named_entity_must_appear_in_input"</span>: <span class="ok">true</span>,
+ <span class="k">"style_corpus"</span>: <span class="k">"journal/"</span>,
+ <span class="k">"redact_before_train"</span>: <span class="k">"pii.regex"</span>
+ }
 }</pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>Gold pair (1 of 150 shown)</h2>
+ <div class="group">
+ <h2>Gold pair (1 of 150 shown)</h2>
 
-      <div class="pair">
-        <div class="pair-h">input - day's events (compacted)</div>
-        <pre class="code">commits: [kolm@a1b2c3] fix smoke 304 redirect, [kolm@d4e5f6] add cookbook idx
+ <div class="pair">
+ <div class="pair-h">input - day's events (compacted)</div>
+ <pre class="code">commits: [kolm@a1b2c3] fix smoke 304 redirect, [kolm@d4e5f6] add cookbook idx
 calendar: 10:00 standup, 14:00 design partner #2 call (45m)
 slack-dms: alex@studio "thursday coffee?", jen "sent the contract"
 keep-notes: "the verifier idea is the right framing · write it down"</pre>
-        <div class="pair-h">output</div>
-        <pre class="code">{
-  <span class="k">"recap"</span>: <span class="k">"good day. fixed the smoke redirect that was eating my morning, then shipped the cookbook index. design partner call with #2 went well · they get the verifier framing. jen sent the contract. wrote down the framing framing because it's the right one."</span>,
-  <span class="k">"highlights"</span>: [<span class="k">"smoke fix"</span>, <span class="k">"DP #2 call"</span>, <span class="k">"contract from jen"</span>],
-  <span class="k">"mood"</span>: <span class="k">"flowing"</span>,
-  <span class="k">"open_loops"</span>: [<span class="k">"thursday coffee with alex - reply needed"</span>]
+ <div class="pair-h">output</div>
+ <pre class="code">{
+ <span class="k">"recap"</span>: <span class="k">"good day. fixed the smoke redirect that was eating my morning, then shipped the cookbook index. design partner call with #2 went well · they get the verifier framing. jen sent the contract. wrote down the framing framing because it's the right one."</span>,
+ <span class="k">"highlights"</span>: [<span class="k">"smoke fix"</span>, <span class="k">"DP #2 call"</span>, <span class="k">"contract from jen"</span>],
+ <span class="k">"mood"</span>: <span class="k">"flowing"</span>,
+ <span class="k">"open_loops"</span>: [<span class="k">"thursday coffee with alex - reply needed"</span>]
 }</pre>
-      </div>
-    </div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Compile</h2>
-      <pre class="code">kolm compile <span class="k">"end-of-day recap in my voice"</span> \
-  --base phi-3-mini-4k \
-  --pairs ~/.kolm/journal-pairs.jsonl \
-  --style-corpus ~/.kolm/journal/ \
-  --verifier entity-grounded,style-faithful \
-  --k-floor 0.78 \
-  --output daily-recap.kolm
+ <div class="group">
+ <h2>Compile</h2>
+ <pre class="code">kolm compile <span class="k">"end-of-day recap in my voice"</span> \
+ --base phi-3-mini-4k \
+ --pairs ~/.kolm/journal-pairs.jsonl \
+ --style-corpus ~/.kolm/journal/ \
+ --verifier entity-grounded,style-faithful \
+ --k-floor 0.78 \
+ --output daily-recap.kolm
 
 <span class="ok">ok</span> wrote <span class="k">daily-recap.kolm</span>
-   k_score=0.82  signature=hmac-sha256</pre>
-    </div>
+ k_score=0.82 signature=ed25519</pre>
+ </div>
 
-    <div class="group">
-      <h2>K-score gate</h2>
-      <div class="k-bar">
-        <span class="k-label">K-score</span>
-        <span class="k-value">0.82</span>
-        <span class="k-detail">held-out 45 days &middot; named-entity-grounded 100% &middot; style-similarity 0.81 cosine vs journal &middot; mood-correct 87%</span>
-      </div>
-    </div>
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.82</span>
+ <span class="k-detail">held-out 45 days &middot; named-entity-grounded 100% &middot; style-similarity 0.81 cosine vs journal &middot; mood-correct 87%</span>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Run-time profile</h2>
-      <div class="lat-grid">
-        <div class="cell"><div class="h">M2 MacBook</div><div class="v">760<span class="u">ms</span></div></div>
-        <div class="cell"><div class="h">RTX 5090</div><div class="v">200<span class="u">ms</span></div></div>
-        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">2.2<span class="u">s</span></div></div>
-        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">2.9<span class="u">s</span></div></div>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">M2 MacBook</div><div class="v">760<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">200<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">2.2<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">2.9<span class="u">s</span></div></div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Deploy</h2>
-      <pre class="code"><span class="c"># 9pm cron · write today's recap to your journal:</span>
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># 9pm cron · write today's recap to your journal:</span>
 0 21 * * * /usr/local/bin/build-day-input.sh | \
-  kolm run daily-recap.kolm | \
-  jq -r .recap &gt;&gt; ~/journal/$(date +%Y-%m-%d).md</pre>
-    </div>
+ kolm run daily-recap.kolm | \
+ jq -r .recap &gt;&gt; ~/journal/$(date +%Y-%m-%d).md</pre>
+ </div>
 
-    <div class="group">
-      <h2>Related recipes</h2>
-      <div class="related">
-        <a href="/cookbook/calendar-summary"><div class="h">Calendar summary</div><div class="d">Week's events →summary + conflicts.</div></a>
-        <a href="/cookbook/email-reply"><div class="h">Email reply</div><div class="d">Inbound email →draft in your voice.</div></a>
-        <a href="/cookbook/voice-memo-to-task"><div class="h">Voice →task</div><div class="d">Voice memo →structured todo entry.</div></a>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/calendar-summary"><div class="h">Calendar summary</div><div class="d">Week's events →summary + conflicts.</div></a>
+ <a href="/cookbook/email-reply"><div class="h">Email reply</div><div class="d">Inbound email →draft in your voice.</div></a>
+ <a href="/cookbook/voice-memo-to-task"><div class="h">Voice →task</div><div class="d">Voice memo →structured task entry.</div></a>
+ </div>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

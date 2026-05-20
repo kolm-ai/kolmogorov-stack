@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm eval · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm eval CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/eval">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm eval","description":"Reference for the kolm eval CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/eval","mainEntityOfPage":"https://kolm.ai/docs/cli/eval","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm eval · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm eval CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,7 +176,7 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="eval">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>eval</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>eval</span>
 </nav>
 <p>--- title: kolm eval · kolm.ai description: Re-run a .kolm&#39;s embedded eval set and show per-case pass / fail. ---</p>
 <h1>kolm eval</h1>
@@ -193,7 +197,7 @@ kolm eval my-redactor.kolm --json &gt; eval-report.json
 </code></pre>
 <h2>Notes</h2>
 <p>Use <code>--examples</code> to A/B an artifact against real holdout data without recompiling. The score reflects the new corpus; the embedded eval set is ignored for that run.</p>
-<p>For an active 7-check audit (manifest signature, content identifier, HMAC chain, receipt body signature, provenance credential, K-score gate, eval coverage) use <a href="/docs/cli/verify"><code>kolm verify</code></a> instead.</p>
+<p>For an active 7-check audit (manifest signature, content identifier, Ed25519 receipt chain, receipt body signature, provenance credential, K-score gate, eval coverage) use <a href="/docs/cli/verify"><code>kolm verify</code></a> instead.</p>
 <h2>See also</h2>
 <ul>
 <li><a href="/quickstart">Quickstart</a></li>
@@ -202,13 +206,13 @@ kolm eval my-redactor.kolm --json &gt; eval-report.json
 <li><a href="/docs/cli/compile">kolm compile</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

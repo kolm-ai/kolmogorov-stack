@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Articles ·kolm</title>
+<title>Articles · kolm.ai</title>
 <meta name="description" content="Engineering essays from Kolmogorov: AI compilers, verified inference, on-device HIPAA, the .kolm artifact format, and recipe-driven speculative decoding.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -12,289 +12,290 @@
 
 <meta name="robots" content="index,follow">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="Articles ·kolm">
-<meta property="og:description" content="Engineering essays from Kolmogorov.">
+<meta property="og:title" content="Articles · kolm.ai">
+<meta property="og:description" content="Engineering essays from Kolmogorov: AI compilers, verified inference, on-device HIPAA, the .kolm artifact format, and recipe-driven speculative decoding.">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Articles ·kolm" />
-<meta name="twitter:description" content="Engineering essays from Kolmogorov." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Articles · kolm.ai">
+<meta name="twitter:description" content="Engineering essays from Kolmogorov: AI compilers, verified inference, on-device HIPAA, the .kolm artifact format, and recipe-driven speculative decoding.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/articles">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/articles">
 <link rel="alternate" type="application/rss+xml" title="Kolmogorov - Articles" href="https://kolm.ai/articles/rss.xml">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 0 32px; }
-  .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 880px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
 
-  header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
-  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
-  header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
-  header.site .brand img { width: 22px; height: 22px; }
-  header.site .brand .lyr { transition: transform 280ms cubic-bezier(.2,.6,.2,1), opacity 280ms; }
-  header.site .brand:hover .lyr-1 { transform: translate(-1.4px,-1.4px); }
-  header.site .brand:hover .lyr-3 { transform: translate(1.4px,1.4px); }
-  header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
-  header.site nav a:hover { color: var(--ink); }
-  header.site .right { display: flex; align-items: center; gap: 14px; }
-  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; box-shadow: 0 1px 0 rgba(255,255,255,0.55) inset, 0 4px 14px -4px rgba(0,0,0,0.45); transition: background 120ms, transform 120ms; }
-  header.site .right .cta:hover { background: #fff; transform: translateY(-1px); }
-  @media (max-width: 720px) { header.site nav { display: none; } }
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
+ header.site .brand img { width: 22px; height: 22px; }
+ header.site .brand .lyr { transition: transform 280ms cubic-bezier(.2,.6,.2,1), opacity 280ms; }
+ header.site .brand:hover .lyr-1 { transform: translate(-1.4px,-1.4px); }
+ header.site .brand:hover .lyr-3 { transform: translate(1.4px,1.4px); }
+ header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .ghost:hover { color: var(--ink); }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; box-shadow: 0 1px 0 rgba(255,255,255,0.55) inset, 0 4px 14px -4px rgba(0,0,0,0.45); transition: background 120ms, transform 120ms; }
+ header.site .right .cta:hover { background: #fff; transform: translateY(-1px); }
+ @media (max-width: 720px) { header.site nav { display: none; } }
 
-  section.hero { padding: 88px 0 24px; position: relative; overflow: hidden; }
-  section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 460px at 22% 12%, rgba(236,231,220, 0.10), transparent 60%); }
-  section.hero .wrap { position: relative; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
-  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
-  h1 { margin: 22px 0 12px; font-size: clamp(36px, 5.4vw, 60px); line-height: 1.05; font-weight: 500; letter-spacing: 0; max-width: 22ch; }
-  h1 .tone { color: var(--accent); }
-  p.lede { margin: 0; font-size: clamp(17px, 1.4vw, 19px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+ section.hero { padding: 88px 0 24px; position: relative; overflow: hidden; }
+ section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 460px at 22% 12%, rgba(236,231,220, 0.10), transparent 60%); }
+ section.hero .wrap { position: relative; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+ h1 { margin: 22px 0 12px; font-size: clamp(36px, 5.4vw, 60px); line-height: 1.05; font-weight: 500; letter-spacing: 0; max-width: 22ch; }
+ h1 .tone { color: var(--accent); }
+ p.lede { margin: 0; font-size: clamp(17px, 1.4vw, 19px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
 
-  section.list { padding: 36px 0 96px; }
-  .article-card { display: grid; grid-template-columns: 110px 1fr auto; align-items: center; gap: 28px; padding: 28px 0; border-bottom: 1px solid var(--line); transition: background 200ms; }
-  .article-card:first-of-type { border-top: 1px solid var(--line); }
-  .article-card:hover { background: rgba(236,231,220, 0.022); }
-  .article-card .num { font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); text-transform: uppercase; }
-  .article-card .num .ix { display: inline-block; color: var(--accent); margin-right: 8px; }
-  .article-card .body h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: 0; font-weight: 500; color: var(--ink); }
-  .article-card .body p { margin: 0; color: var(--ink-mute); font-size: 14.5px; line-height: 1.55; max-width: 64ch; }
-  .article-card .arrow { color: var(--accent); font-size: 22px; padding-right: 4px; transition: transform 200ms; }
-  .article-card:hover .arrow { transform: translateX(4px); }
-  @media (max-width: 720px) {
-    .article-card { grid-template-columns: 1fr; gap: 4px; padding: 22px 0; }
-    .article-card .arrow { display: none; }
-  }
+ section.list { padding: 36px 0 96px; }
+ .article-card { display: grid; grid-template-columns: 110px 1fr auto; align-items: center; gap: 28px; padding: 28px 0; border-bottom: 1px solid var(--line); transition: background 200ms; }
+ .article-card:first-of-type { border-top: 1px solid var(--line); }
+ .article-card:hover { background: rgba(236,231,220, 0.022); }
+ .article-card .num { font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); text-transform: uppercase; }
+ .article-card .num .ix { display: inline-block; color: var(--accent); margin-right: 8px; }
+ .article-card .body h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: 0; font-weight: 500; color: var(--ink); }
+ .article-card .body p { margin: 0; color: var(--ink-mute); font-size: 14.5px; line-height: 1.55; max-width: 64ch; }
+ .article-card .arrow { color: var(--accent); font-size: 22px; padding-right: 4px; transition: transform 200ms; }
+ .article-card:hover .arrow { transform: translateX(4px); }
+ @media (max-width: 720px) {
+ .article-card { grid-template-columns: 1fr; gap: 4px; padding: 22px 0; }
+ .article-card .arrow { display: none; }
+ }
 
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); }
-  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  footer.site a { color: var(--ink-faint); transition: color 120ms; }
-  footer.site a:hover { color: var(--ink-mute); }
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-faint); transition: color 120ms; }
+ footer.site a:hover { color: var(--ink-mute); }
 
-  body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 100; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); background-size: 180px 180px; opacity: 0.5; mix-blend-mode: overlay; }
-  @media (prefers-reduced-motion: reduce) { body::after { display: none; } }
+ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 100; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); background-size: 180px 180px; opacity: 0.5; mix-blend-mode: overlay; }
+ @media (prefers-reduced-motion: reduce) { body::after { display: none; } }
 
-  /* plate */
-  .plate{position:relative;margin:36px 0 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:#050607;isolation:isolate}
-  .plate .img{position:relative;aspect-ratio:16/9;background-position:center;background-size:cover;background-repeat:no-repeat}
-  .plate .img::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 50%,rgba(8,8,10,0.78) 100%),linear-gradient(90deg,rgba(8,8,10,0.55) 0%,transparent 30%,transparent 70%,rgba(8,8,10,0.55) 100%)}
-  .plate .img::before{content:"";position:absolute;left:12%;right:12%;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(236,231,220, 0.5),transparent);pointer-events:none;z-index:2}
-  .plate .stamp{position:absolute;top:18px;left:20px;z-index:3;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute);border:1px solid rgba(236,231,220, 0.22);background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 11px;border-radius:4px}
-  .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(236,231,220, 0.85)}
-  .plate .cap{position:absolute;left:24px;right:24px;bottom:20px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
-  .plate .cap .title{font-family:var(--sans);font-size:clamp(17px,1.8vw,22px);font-weight: 500;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:62%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
-  .plate .cap .title .tone{background:linear-gradient(170deg,#faf2e1 0%,#c9c2b2 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .plate .cap .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);letter-spacing: 0;text-align:right;line-height:1.7}
-  .plate .cap .meta b{color:var(--ink);font-weight: 500}
-  @media(max-width:720px){.plate .cap{left:14px;right:14px;bottom:12px;flex-direction:column;align-items:flex-start;gap:8px}.plate .cap .title{font-size:14px;max-width:100%}.plate .cap .meta{text-align:left;font-size:10px}.plate .stamp{top:12px;left:12px;font-size:9px;padding:4px 9px}}
+ /* plate */
+ .plate{position:relative;margin:36px 0 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:#050607;isolation:isolate}
+ .plate .img{position:relative;aspect-ratio:16/9;background-position:center;background-size:cover;background-repeat:no-repeat}
+ .plate .img::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 50%,rgba(8,8,10,0.78) 100%),linear-gradient(90deg,rgba(8,8,10,0.55) 0%,transparent 30%,transparent 70%,rgba(8,8,10,0.55) 100%)}
+ .plate .img::before{content:"";position:absolute;left:12%;right:12%;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(236,231,220, 0.5),transparent);pointer-events:none;z-index:2}
+ .plate .stamp{position:absolute;top:18px;left:20px;z-index:3;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing: 0;text-transform:uppercase;color:var(--ink-mute);border:1px solid rgba(236,231,220, 0.22);background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 11px;border-radius:4px}
+ .plate .stamp .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(236,231,220, 0.85)}
+ .plate .cap{position:absolute;left:24px;right:24px;bottom:20px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+ .plate .cap .title{font-family:var(--sans);font-size:clamp(17px,1.8vw,22px);font-weight: 500;letter-spacing: 0;line-height:1.18;color:var(--ink);max-width:62%;text-shadow:0 1px 2px rgba(0,0,0,0.55)}
+ .plate .cap .title .tone{background:linear-gradient(170deg,#faf2e1 0%,#c9c2b2 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+ .plate .cap .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);letter-spacing: 0;text-align:right;line-height:1.7}
+ .plate .cap .meta b{color:var(--ink);font-weight: 500}
+ @media(max-width:720px){.plate .cap{left:14px;right:14px;bottom:12px;flex-direction:column;align-items:flex-start;gap:8px}.plate .cap .title{font-size:14px;max-width:100%}.plate .cap .meta{text-align:left;font-size:10px}.plate .stamp{top:12px;left:12px;font-size:9px;padding:4px 9px}}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  "name": "Articles ·kolm",
-  "description": "Cornerstone reading on the kolm compiler ·file format, k-sample inference, rent vs buy compute, benchmarks.",
-  "url": "https://kolm.ai/articles",
-  "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
+ "@context": "https://schema.org",
+ "@type": "ItemList",
+ "name": "Articles ·kolm",
+ "description": "Cornerstone reading on the kolm compiler ·file format, k-sample inference, rent vs buy compute, benchmarks.",
+ "url": "https://kolm.ai/articles",
+ "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand" aria-label="kolm">
-        <span>kolm</span>
-      </a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand" aria-label="kolm">
+ <span>kolm</span>
+ </a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <h1>Articles, <span class="tone">written for builders.</span></h1>
-    <p class="lede">Five-to-twelve minute reads on what the AI compiler does, why it does it, and how the pieces fit together. Updated as the product ships.</p>  </div>
+ <div class="wrap">
+ <h1>Articles, <span class="tone">written for builders.</span></h1>
+ <p class="lede">Five-to-twelve minute reads on what the AI compiler does, why it does it, and how the pieces fit together. Updated as the product ships.</p> </div>
 </section>
 
 <section class="list">
-  <div class="wrap">
+ <div class="wrap">
 
-    <a class="article-card" href="/articles/rent-vs-buy-compute">
-      <div class="num"><span class="ix">01</span>12&nbsp;min</div>
-      <div class="body">
-        <h3>Rent vs. buy compute. Turn your frontier API bill into a local LoRA.</h3>
-        <p>Every dollar you spend on Anthropic or OpenAI is a rental fee. Proxy through <code style="font-family:var(--mono)">kolm capture</code> and the same dollar pays for a verified dataset. At threshold, that dataset compiles into a signed local <code style="font-family:var(--mono)">.kolm</code> you keep forever. The math, the mechanism, the legal frame, and a worked example for a 50-engineer team.</p>
-      </div>
-      <span class="arrow">&rarr;</span>
-    </a>
+ <a class="article-card" href="/articles/rent-vs-buy-compute">
+ <div class="num"><span class="ix">01</span>12&nbsp;min</div>
+ <div class="body">
+ <h3>Rent vs. buy compute. Turn your frontier API bill into a local student artifact.</h3>
+ <p>Every dollar you spend on Anthropic or OpenAI is a rental fee. Proxy through <code style="font-family:var(--mono)">kolm capture</code> and the same dollar pays for a verified dataset. At threshold, that dataset compiles into a signed local <code style="font-family:var(--mono)">.kolm</code> you keep forever. The math, the mechanism, the legal frame, and a worked example for a 50-engineer team.</p>
+ </div>
+ <span class="arrow">&rarr;</span>
+ </a>
 
-    <a class="article-card" href="/articles/ai-compiler">
-      <div class="num"><span class="ix">02</span>11&nbsp;min</div>
-      <div class="body">
-        <h3>How to compile GPT-5 into a 4GB local model that runs offline.</h3>
-        <p>The missing build step between a frontier API and a local artifact. What the compiler does, why the unit economics flip, and how to compile your first <code style="font-family:var(--mono)">.kolm</code> in five minutes.</p>
-      </div>
-      <span class="arrow">&rarr;</span>
-    </a>
+ <a class="article-card" href="/articles/ai-compiler">
+ <div class="num"><span class="ix">02</span>11&nbsp;min</div>
+ <div class="body">
+ <h3>How to compile GPT-5 into a 4GB local model that runs offline.</h3>
+ <p>The missing build step between a frontier API and a local artifact. What the compiler does, why the unit economics flip, and how to compile your first <code style="font-family:var(--mono)">.kolm</code> in five minutes.</p>
+ </div>
+ <span class="arrow">&rarr;</span>
+ </a>
 
-    <a class="article-card" href="/articles/k-sample-verified-inference">
-      <div class="num"><span class="ix">03</span>9&nbsp;min</div>
-      <div class="body">
-        <h3>K-sample verified inference: a practical alternative to zk-ML.</h3>
-        <p>Zero-knowledge proofs of inference are technically beautiful and economically dead. Verified inference takes a different route: sample <em>k</em> times, score deterministically, sign the receipt. The mechanism behind every label inside a <code style="font-family:var(--mono)">.kolm</code>.</p>
-      </div>
-      <span class="arrow">&rarr;</span>
-    </a>
+ <a class="article-card" href="/articles/k-sample-verified-inference">
+ <div class="num"><span class="ix">03</span>9&nbsp;min</div>
+ <div class="body">
+ <h3>K-sample verified inference: a practical alternative to zk-ML.</h3>
+ <p>Zero-knowledge proofs of inference are technically beautiful and economically dead. Verified inference takes a different route: sample <em>k</em> times, score deterministically, sign the receipt. The mechanism behind every label inside a <code style="font-family:var(--mono)">.kolm</code>.</p>
+ </div>
+ <span class="arrow">&rarr;</span>
+ </a>
 
-    <a class="article-card" href="/articles/hipaa-on-device">
-      <div class="num"><span class="ix">04</span>12&nbsp;min</div>
-      <div class="body">
-        <h3>HIPAA-aligned AI on a laptop: keep PHI local by design.</h3>
-        <p>Every PHI-bearing frontier call expands the compliance surface. Compile from de-identified examples, run inside the approved boundary, and verify the evidence. A practical architecture playbook.</p>
-      </div>
-      <span class="arrow">&rarr;</span>
-    </a>
+ <a class="article-card" href="/articles/hipaa-on-device">
+ <div class="num"><span class="ix">04</span>12&nbsp;min</div>
+ <div class="body">
+ <h3>HIPAA-aligned AI on a laptop: keep PHI local by design.</h3>
+ <p>Every PHI-bearing frontier call expands the compliance surface. Compile from de-identified examples, run inside the approved boundary, and verify the evidence. A practical architecture playbook.</p>
+ </div>
+ <span class="arrow">&rarr;</span>
+ </a>
 
-    <a class="article-card" href="/articles/kolm-file-format">
-      <div class="num"><span class="ix">05</span>10&nbsp;min</div>
-      <div class="body">
-        <h3>The <code style="font-family:var(--mono)">.kolm</code> file format, component by component.</h3>
-        <p>One signed zip with seven internal components and a manifest. Why everything is co-versioned, how the HMAC chain works, and what the file looks like on disk.</p>
-      </div>
-      <span class="arrow">&rarr;</span>
-    </a>
+ <a class="article-card" href="/articles/kolm-file-format">
+ <div class="num"><span class="ix">05</span>10&nbsp;min</div>
+ <div class="body">
+ <h3>The <code style="font-family:var(--mono)">.kolm</code> file format, component by component.</h3>
+ <p>One signed zip with seven internal components and a manifest. Why everything is co-versioned, how the Ed25519 receipt chain works, and what the file looks like on disk.</p>
+ </div>
+ <span class="arrow">&rarr;</span>
+ </a>
 
-    <a class="article-card" href="/articles/speculative-decoding-recipes">
-      <div class="num"><span class="ix">06</span>10&nbsp;min</div>
-      <div class="body">
-        <h3>Speculative decoding with deterministic drafts.</h3>
-        <p>A draft model is the standard way. A recipe pack is faster, smaller, free at runtime, and verifiably correct on the patterns it covers. How RSD cuts the local inference bill to zero on structured tokens.</p>
-      </div>
-      <span class="arrow">&rarr;</span>
-    </a>
+ <a class="article-card" href="/articles/speculative-decoding-recipes">
+ <div class="num"><span class="ix">06</span>10&nbsp;min</div>
+ <div class="body">
+ <h3>Speculative decoding with deterministic drafts.</h3>
+ <p>A draft model is the standard way. A recipe pack is faster, smaller, free at runtime, and verifiably correct on the patterns it covers. How RSD cuts the local inference bill to zero on structured tokens.</p>
+ </div>
+ <span class="arrow">&rarr;</span>
+ </a>
 
-    <a class="article-card" href="/articles/why-we-built-kolm">
-      <div class="num"><span class="ix">07</span>9&nbsp;min</div>
-      <div class="body">
-        <h3>Why we built kolm.</h3>
-        <p>Every shipped AI feature today has the same shape: prompt, JSON, retry. Webpack happened to JavaScript, Docker happened to deployment, the App Store happened to mobile. Each one took an artisanal step and made it a build artifact. The same step had not happened for AI features. So we built it.</p>
-      </div>
-      <span class="arrow">&rarr;</span>
-    </a>
+ <a class="article-card" href="/articles/why-we-built-kolm">
+ <div class="num"><span class="ix">07</span>9&nbsp;min</div>
+ <div class="body">
+ <h3>Why we built kolm.</h3>
+ <p>Every shipped AI feature today has the same shape: prompt, JSON, retry. Webpack happened to JavaScript, Docker happened to deployment, the App Store happened to mobile. Each one took an artisanal step and made it a build artifact. The same step had not happened for AI features. So we built it.</p>
+ </div>
+ <span class="arrow">&rarr;</span>
+ </a>
 
-    <a class="article-card" href="/articles/distillation-vs-fine-tuning-vs-rag">
-      <div class="num"><span class="ix">08</span>11&nbsp;min</div>
-      <div class="body">
-        <h3>Distillation vs fine-tuning vs RAG: pick the right one.</h3>
-        <p>Three techniques, three jobs, three failure modes. A decision tree, a cost matrix, and a worked ticket-routing example. When RAG dies, when fine-tuning is a vendor trap, and where distillation actually wins.</p>
-      </div>
-      <span class="arrow">&rarr;</span>
-    </a>
+ <a class="article-card" href="/articles/distillation-vs-fine-tuning-vs-rag">
+ <div class="num"><span class="ix">08</span>11&nbsp;min</div>
+ <div class="body">
+ <h3>Distillation vs fine-tuning vs RAG: pick the right one.</h3>
+ <p>Three techniques, three jobs, three failure modes. A decision tree, a cost matrix, and a worked ticket-routing example. When RAG dies, when fine-tuning is a vendor trap, and where distillation actually wins.</p>
+ </div>
+ <span class="arrow">&rarr;</span>
+ </a>
 
-    <a class="article-card" href="/articles/running-our-marketing-on-distilled-models">
-      <div class="num"><span class="ix">09</span>10&nbsp;min</div>
-      <div class="body">
-        <h3>Running our marketing on distilled models.</h3>
-        <p>Dogfood case study. Four Specialists, one $99/mo GPU sliver, $1,860 -> $339 monthly bill. K-scores per artifact, the two compiles that failed (one rolled back, one quietly retired), and the six commands that drive the whole pipeline.</p>
-      </div>
-      <span class="arrow">&rarr;</span>
-    </a>
+ <a class="article-card" href="/articles/running-our-marketing-on-distilled-models">
+ <div class="num"><span class="ix">09</span>10&nbsp;min</div>
+ <div class="body">
+ <h3>Running our marketing on distilled models.</h3>
+ <p>Dogfood case study. Four Specialists, one $99/mo GPU sliver, $1,860 -> $339 monthly bill. K-scores per artifact, the two compiles that failed (one rolled back, one quietly retired), and the six commands that drive the whole pipeline.</p>
+ </div>
+ <span class="arrow">&rarr;</span>
+ </a>
 
-    <a class="article-card" href="/articles/how-we-benchmark">
-      <div class="num"><span class="ix">10</span>8&nbsp;min</div>
-      <div class="body">
-        <h3>How we benchmark, and how to disagree with us.</h3>
-        <p>The methodology behind every percentage on this site. n=150 SWE-bench Lite, seed=42, swebench 4.1.0 evaluator. What the harness measures, what it does not, and the diagnosis flowchart for when your reproduce attempt lands somewhere different. First signed run lands here when it lands.</p>
-      </div>
-      <span class="arrow">&rarr;</span>
-    </a>
+ <a class="article-card" href="/articles/how-we-benchmark">
+ <div class="num"><span class="ix">10</span>8&nbsp;min</div>
+ <div class="body">
+ <h3>How we benchmark, and how to disagree with us.</h3>
+ <p>The methodology behind every percentage on this site. n=150 SWE-bench Lite, seed=42, swebench 4.1.0 evaluator. What the harness measures, what it does not, and the diagnosis flowchart for when your reproduce attempt lands somewhere different. First signed run lands here when it lands.</p>
+ </div>
+ <span class="arrow">&rarr;</span>
+ </a>
 
-  </div>
+ </div>
 </section>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

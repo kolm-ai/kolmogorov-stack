@@ -7,16 +7,20 @@
 <meta name="description" content="The kolm.ai cloud SLA: 99.95% monthly uptime for the hosted plane, 12-month rolling history, credit schedule, and how to file a claim.">
 <link rel="canonical" href="https://kolm.ai/sla">
 <meta property="og:title" content="Service-level agreement · kolm.ai">
-<meta property="og:description" content="99.95% monthly uptime, transparent history, credit schedule, claim process.">
+<meta property="og:description" content="The kolm.ai cloud SLA: 99.95% monthly uptime for the hosted plane, 12-month rolling history, credit schedule, and how to file a claim.">
 <meta property="og:url" content="https://kolm.ai/sla">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/sla.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm.ai SLA","description":"99.95% monthly uptime for the hosted plane.","url":"https://kolm.ai/sla","mainEntityOfPage":"https://kolm.ai/sla","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:title" content="Service-level agreement · kolm.ai">
+<meta name="twitter:description" content="The kolm.ai cloud SLA: 99.95% monthly uptime for the hosted plane, 12-month rolling history, credit schedule, and how to file a claim.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -173,59 +177,59 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="sla-page" data-w401g="sla">
 <header class="page-h">
-  <p class="eyebrow">kolm.ai · service-level agreement</p>
-  <h1>99.95% monthly uptime for the hosted plane.</h1>
-  <p class="lede">If we miss it, you get service credits. Your compiled artifacts run on your hardware, so an SLA breach never blocks inference — only the hosted control plane and managed compile/distill jobs.</p>
+ <p class="eyebrow">kolm.ai · service-level agreement</p>
+ <h1>99.95% monthly uptime for the hosted plane.</h1>
+ <p class="lede">If we miss it, you get service credits. Your compiled artifacts run on your hardware, so an SLA breach never blocks inference — only the hosted control plane and managed compile/distill jobs.</p>
 </header>
 
 <section>
-  <h2>What is covered</h2>
-  <ul>
-    <li>The hosted API at <code>https://kolm.ai/v1/*</code> (capture, distill, compile, replay, registry, signin).</li>
-    <li>The hosted dashboard at <code>https://kolm.ai</code> and account surfaces.</li>
-    <li>Managed compile and distill workers when the cloud target is selected.</li>
-  </ul>
+ <h2>What is covered</h2>
+ <ul>
+ <li>The hosted API at <code>https://kolm.ai/v1/*</code> (capture, distill, compile, replay, registry, signin).</li>
+ <li>The hosted dashboard at <code>https://kolm.ai</code> and account surfaces.</li>
+ <li>Managed compile and distill workers when the cloud target is selected.</li>
+ </ul>
 </section>
 
 <section>
-  <h2>What is not covered</h2>
-  <ul>
-    <li>Self-hosted runtime: by design, your <code>.kolm</code> artifact has no runtime dependency on our cloud.</li>
-    <li>Third-party model providers (OpenAI, Anthropic, etc.) when you proxy through us. Their SLAs apply.</li>
-    <li>Scheduled maintenance windows announced at least 48 hours in advance.</li>
-  </ul>
+ <h2>What is not covered</h2>
+ <ul>
+ <li>Self-hosted runtime: by design, your <code>.kolm</code> artifact has no runtime dependency on our cloud.</li>
+ <li>Third-party model providers (OpenAI, Anthropic, etc.) when you proxy through us. Their SLAs apply.</li>
+ <li>Scheduled maintenance windows announced at least 48 hours in advance.</li>
+ </ul>
 </section>
 
 <section>
-  <h2>Credit schedule</h2>
-  <table class="comparison-matrix">
-    <thead><tr><th>Monthly uptime</th><th>Credit (% of monthly fee)</th></tr></thead>
-    <tbody>
-      <tr><td>&lt; 99.95%</td><td>10%</td></tr>
-      <tr><td>&lt; 99.9%</td><td>25%</td></tr>
-      <tr><td>&lt; 99.0%</td><td>50%</td></tr>
-      <tr><td>&lt; 95.0%</td><td>100%</td></tr>
-    </tbody>
-  </table>
+ <h2>Credit schedule</h2>
+ <table class="comparison-matrix">
+ <thead><tr><th>Monthly uptime</th><th>Credit (% of monthly fee)</th></tr></thead>
+ <tbody>
+ <tr><td>&lt; 99.95%</td><td>10%</td></tr>
+ <tr><td>&lt; 99.9%</td><td>25%</td></tr>
+ <tr><td>&lt; 99.0%</td><td>50%</td></tr>
+ <tr><td>&lt; 95.0%</td><td>100%</td></tr>
+ </tbody>
+ </table>
 </section>
 
 <section>
-  <h2>How to file a claim</h2>
-  <ol>
-    <li>Within 30 days of the incident, email <a href="mailto:sla@kolm.ai">sla@kolm.ai</a>.</li>
-    <li>Include your workspace ID, the time window, and any affected request IDs.</li>
-    <li>We confirm against the 90-day public history on <a href="/status">/status</a>. Credits post to the next invoice.</li>
-  </ol>
+ <h2>How to file a claim</h2>
+ <ol>
+ <li>Within 30 days of the incident, email <a href="mailto:sla@kolm.ai">sla@kolm.ai</a>.</li>
+ <li>Include your workspace ID, the time window, and any affected request IDs.</li>
+ <li>We confirm against the 90-day public history on <a href="/status">/status</a>. Credits post to the next invoice.</li>
+ </ol>
 </section>
 
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/status">Live status</a>: current health and 90-day history.</li>
-    <li><a href="/security">Security &amp; trust</a>: encryption, RBAC, SOC 2 progress.</li>
-    <li><a href="/pricing">Pricing</a>: plans, included usage, BAA availability.</li>
-    <li><a href="/enterprise">Enterprise</a>: custom SLA, MSA, dedicated support.</li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/status">Live status</a>: current health and 90-day history.</li>
+ <li><a href="/security">Security &amp; trust</a>: encryption, RBAC, SOC 2 progress.</li>
+ <li><a href="/pricing">Pricing</a>: plans, included usage, BAA availability.</li>
+ <li><a href="/enterprise">Enterprise</a>: custom SLA, MSA, dedicated support.</li>
+ </ul>
 </section>
 </main>
 </body>

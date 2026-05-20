@@ -480,8 +480,7 @@ USAGE
 
 FLAGS
   --intent, --preview   Use /v1/intent/ask (same classifier as the web
-                        ask-bar). Returns the proposed command and waits —
-                        never triggers a compile, capture, or job. Pair
+                        ask-bar). Returns the proposed command and waits ??                        never triggers a compile, capture, or job. Pair
                         with --json for machine-readable envelope.
   --airgap, --offline   Force local parser (no network).
   --json                Machine-readable response envelope.
@@ -634,21 +633,26 @@ EXIT CODES
   health: `kolm health - ping the configured cloud base + report timing.
 
 USAGE
-  kolm health [--json] [--slow-ms <N>] [--timeout-ms <N>]
+  kolm health [--json] [--require-ready] [--require-auth] [--require-capture] [--slow-ms <N>] [--timeout-ms <N>]
 
 WHAT IT DOES
-  Hits {base}/health (unauthenticated probe) and {base}/v1/capture/health,
-  reports round-trip ms and whether the capture driver is durable. Useful
-  for liveness checks in CI, cron, or shell scripts.
+  Hits {base}/health (unauthenticated probe), {base}/ready, and
+  {base}/v1/capture/health, reports round-trip ms and whether the capture
+  driver is durable. Use --require-ready when CI must fail on missing
+  production dependencies rather than just prove process liveness. Use
+  --require-auth and --require-capture for authenticated production smoke.
 
 OPTIONS
   --slow-ms <N>     RTT threshold above which the run exits 2 (default 2000)
   --timeout-ms <N>  abort RTT (default max(slow+500, 5000))
   --json            emit a structured report (script-parseable)
+  --require-ready   require {base}/ready to return 2xx; otherwise exit 1
+  --require-auth    require the saved API key to validate via /v1/account
+  --require-capture require /v1/capture/health to return 2xx and durable=true
 
 EXIT CODES
   0   healthy: {base}/health returned 2xx within --slow-ms
-  1   down: unreachable or non-2xx response
+  1   down/not_ready/auth_failed/capture_unhealthy: required probe failed
   2   slow: reachable but RTT exceeded --slow-ms (so CI can alarm)
 `,
   metrics: `kolm metrics - local dashboard summary from ~/.kolm/jobs.jsonl. No network.
@@ -1089,7 +1093,7 @@ WINDOWS QUOTING NOTE
   Or use bash/zsh/git-bash where 'single-quoted JSON' works as written.
 
 The input is parsed as JSON when possible; otherwise passed as a bare string.
---input lets you skip shell-quoting pain on Windows cmd — pass a file path or
+--input lets you skip shell-quoting pain on Windows cmd ??pass a file path or
 '-' for stdin instead. --params lets you
 pass tenant-runtime config to the recipes (extra patterns, allowlists, vertical
 rules). Recipes read these via lib.params. Tenant params are never persisted by
@@ -1654,10 +1658,10 @@ USAGE
   kolm hub pull  <slug-or-owner/name> [--out <path>]
 
 SOURCES
-  seed    The 7 curated marketplace artifacts shipped with this build
+  seed    The 8 curated marketplace artifacts shipped with this build
           (phi-redactor, invoice-parser, legal-clause-extractor,
           code-issue-classifier, multilingual-greeter, cs-intent-classifier,
-          claims-redactor). Identified by a single-token slug.
+          claims-redactor, qwen-distill-classifier). Identified by a single-token slug.
   user    Artifacts a tenant published via 'kolm publish' or 'kolm ship'.
           Identified by an <owner>/<name> handle.
 
@@ -1674,6 +1678,90 @@ EXAMPLE
   kolm hub show phi-redactor             # a seed
   kolm hub show rodney/phi-redactor      # a user-published artifact
   kolm hub pull phi-redactor --out ./pr.kolm
+`,
+  marketplace: `kolm marketplace - browse, install, and publish .kolm artifacts on the verifiable hub.
+
+USAGE
+  kolm marketplace search   [--category X] [--license Y] [--min-k N] [--verified] [--json]
+  kolm marketplace list                                                  # alias for search
+  kolm marketplace ls                                                    # alias for search
+  kolm marketplace install  <slug> [--force] [--json]
+  kolm marketplace publish  <file.kolm>
+  kolm marketplace show     <slug> [--json]
+
+SUBCOMMANDS
+  search   List artifacts. Filter by --category, --license, --min-k (K-score
+           floor), --verified (productionReady() true). Without filters lists
+           all entries.
+  install  Fetch <slug>, verify sha256 against the catalog row, run
+           productionReady() against the bytes, and save to
+           ~/.kolm/artifacts/<slug>.kolm. Without --force, a failing gate
+           exits 4 and writes nothing.
+  publish  Submit a .kolm to the manual-review queue
+           (POST /v1/marketplace/publish-request). Returns a queue_id for
+           tracking. The reviewing team verifies bytes, signature, K-score
+           and lineage before the artifact appears in search.
+  show     Print a single artifact's metadata + production-ready verdict.
+
+FILTERS
+  --category <c>       e.g. compliance, classification, data extraction, dev tooling
+  --license <slug>     SPDX slug (Apache-2.0, MIT, BSD-3-Clause, ...)
+  --min-k <0..1>       drop entries with k_score < N
+  --verified           keep only entries whose productionReady() verdict is true
+
+EXAMPLES
+  kolm marketplace search                                  # full catalog
+  kolm marketplace search --category compliance --verified
+  kolm marketplace search --min-k 0.9 --json | jq .artifacts
+  kolm marketplace install phi-redactor
+  kolm marketplace show qwen-distill-classifier --json
+  kolm marketplace publish ./my-artifact.kolm
+
+EXIT CODES
+  0 ok   1 user error   2 server error   4 productionReady() gate failed (install only)
+
+The marketplace mirrors /v1/marketplace and /marketplace.html. The catalog is
+deterministic + signed (sha256-anchor); a tampered artifact fails install even
+in --force mode.
+`,
+  sdk: `kolm sdk - introspect, install, and bootstrap the official Kolm SDKs.
+
+USAGE
+  kolm sdk                       # alias for: kolm sdk list
+  kolm sdk list   [--json]       # list every SDK with version + install command
+  kolm sdk show   <lang> [--json] # print one SDK's metadata + README pointer
+  kolm sdk doctor [--json]       # check which SDKs are wired in the local repo
+
+LANGUAGES (package name shown is the local manifest identifier, not a publication claim)
+  node      JavaScript / TypeScript      (package: @kolmogorov/kolm-sdk       | source: sdk/node)
+  python    Python 3.8+                  (package: kolm; PyPI name occupied   | source: sdk/python)
+  mcp       Model Context Protocol       (package: @kolmogorov/recipe-mcp     | source: sdk/mcp)
+  vscode    VS Code extension            (package: kolmogorov.kolm-vscode     | source: sdk/vscode)
+  c         C single-header              (no registry; vendor sdk/c/kolm.h + define KOLM_IMPLEMENTATION)
+  rust      Rust crate                   (package: kolm                  | source: sdk/rust)
+
+EXAMPLES
+  kolm sdk                       # list all 6 SDKs
+  kolm sdk list --json           # machine-readable for scripts
+  kolm sdk show python           # README, install, base URL config
+  kolm sdk show rust --json
+  kolm sdk doctor                # report which SDKs are wired locally
+
+ENVIRONMENT
+  KOLM_BASE_URL          base URL all SDKs default to (default: https://kolm.ai)
+  KOLM_API_KEY           bearer token all SDKs default to
+
+NOTES
+  All six SDKs cover the same v1 surface: /v1/whoami, /v1/health,
+  /v1/verify/:cid, /v1/changelog, /v1/intent/ask, /v1/capture/log.
+  C and Rust SDKs ship as a single header + crate respectively, leave
+  JSON parsing to the caller, and never sugar away non-2xx HTTP; the
+  envelope is { status, headers, body } verbatim. Heavier parsers stay
+  outside the ABI; pair with cJSON or serde_json as you prefer.
+
+  Honesty contract: \`registry:\` lines appear only after the package is
+  verified as published under Kolm control. Until then, \`source:\` is the
+  supported install path from a repo checkout.
 `,
   capture: `kolm capture - drop-in proxy for OpenAI / Anthropic that captures (input, output) pairs.
 
@@ -1694,8 +1782,7 @@ needed before \`kolm distill\` is unlocked (default threshold: 1000 pairs).
 
 EXAMPLE
   kolm capture --provider openai --as ticket-classifier --namespace tickets
-  # … your app makes 1000 calls …
-  kolm capture status --namespace tickets
+  # your app makes 1000 calls ->  kolm capture status --namespace tickets
   kolm distill --namespace tickets
 `,
   labels: `kolm labels - download the captured corpus as JSONL or JSON.
@@ -2078,9 +2165,8 @@ SUBCOMMANDS
                 num_faces, num_plates, mode, output_path|output_b64,
                 redacted_image_sha256} on success. Honest envelope with
                 {ok:false, error:'no_detector_installed', install_hint:...}
-                when onnxruntime-node, sharp, or model files are missing —
-                NEVER claims it redacted PII it could not see.
-  audio-doctor  W464 — report whether the multimodal audio voiceprint scrub
+                when onnxruntime-node, sharp, or model files are missing ??                NEVER claims it redacted PII it could not see.
+  audio-doctor  W464 ??report whether the multimodal audio voiceprint scrub
                 worker has its external voiceprint redactor wired
                 (pyannote-audio-redact on PATH, $VOICEPRINT_REDACT_CMD env
                 override, or ~/.kolm/scripts/voiceprint-redact.py).
@@ -2389,8 +2475,7 @@ INSTALL
   'kolm completion install' detects your shell from $SHELL and appends an
   'eval "$(kolm completion <shell>)"' line into the matching rc file. Use
   --shell to override detection and --rc to override the target file.
-  --dry-run prints the diff without writing. The install is idempotent —
-  running it twice will not double-append.
+  --dry-run prints the diff without writing. The install is idempotent ??  running it twice will not double-append.
 
 After installing, restart your shell or source the file.
 `,
@@ -2511,7 +2596,7 @@ USAGE
   kolm connect test {openai|anthropic|openrouter}
 
 EXAMPLES
-  npm install -g kolm
+  npm install -g github:sneaky-hippo/kolmogorov-stack
   export OPENAI_API_KEY=sk-...
   kolm connect start --detach
   export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
@@ -3454,7 +3539,7 @@ EXAMPLE
   kolm privacy smoke --json
   kolm privacy scan ./data/notes
 `,
-  pipeline: `kolm pipeline - end-to-end compile pipeline (tokenize→distill→compile). (W384)
+  pipeline: `kolm pipeline - end-to-end compile pipeline (tokenize -> distill -> compile). (W384)
 
 USAGE
   kolm pipeline tokenize <dataset-id|path>     [--json]
@@ -4508,6 +4593,11 @@ async function cmdSignup(args) {
 async function cmdWhoami(args) {
   if (maybeHelp('whoami', args)) return;
   const jsonOut = args.includes('--json');
+  // W481 P0-8: --allow-logged-out makes whoami exit 0 even when not logged in
+  // (still prints honest logged_in:false). Used by release-verify, CI, and
+  // first-time evaluator paths where a key is not yet wired but we still want
+  // the verb to "succeed" structurally.
+  const allowLoggedOut = args.includes('--allow-logged-out');
   const c = loadConfig();
   // W318: shared key fingerprint shape across whoami + status + key-fingerprint.
   // Keeps prefix + suffix only so a screenshot does not leak the live token.
@@ -4538,6 +4628,7 @@ async function cmdWhoami(args) {
       console.error('  server_validated: false');
       console.error('hint: run `kolm login --key ks_...` or `kolm signup --email you@example.com`');
     }
+    if (allowLoggedOut) return;
     process.exit(EXIT.MISSING_PREREQ);
   }
   let a;
@@ -4566,6 +4657,7 @@ async function cmdWhoami(args) {
       console.error('  server_validated: false');
       console.error('hint: the key may have been rotated or revoked. run `kolm login --key ks_...` again.');
     }
+    if (allowLoggedOut) return;
     process.exit(2);
   }
   if (jsonOut) {
@@ -4786,6 +4878,9 @@ async function cmdArtifacts(args) {
 async function cmdHealth(args) {
   if (maybeHelp('health', args)) return;
   const jsonOut = args.includes('--json');
+  const requireReady = args.includes('--require-ready') || args.includes('--ready');
+  const requireAuth = args.includes('--require-auth') || args.includes('--auth');
+  const requireCapture = args.includes('--require-capture') || args.includes('--capture');
   const slowMs = (() => {
     const i = args.indexOf('--slow-ms');
     if (i >= 0 && args[i + 1]) return Math.max(1, parseInt(args[i + 1], 10) || 2000);
@@ -4804,18 +4899,23 @@ async function cmdHealth(args) {
   // crash libuv with STATUS_STACK_BUFFER_OVERRUN (3221226505).
   const httpMod = await import('node:http');
   const httpsMod = await import('node:https');
-  const urlMod = await import('node:url');
   const probe = (p) => new Promise((resolve) => {
     const full = base + p;
-    const parsed = urlMod.parse(full);
+    let parsed;
+    try {
+      parsed = new URL(full);
+    } catch (e) {
+      resolve({ ok: false, status: 0, rtt_ms: 0, error: e.message || String(e) });
+      return;
+    }
     const lib = parsed.protocol === 'https:' ? httpsMod.default : httpMod.default;
     const t0 = Date.now();
     const auth = authHeaders(c);
     const req = lib.request({
       protocol: parsed.protocol,
       hostname: parsed.hostname,
-      port: parsed.port,
-      path: parsed.path,
+      port: parsed.port || undefined,
+      path: parsed.pathname + parsed.search,
       method: 'GET',
       headers: { ...auth, 'accept': 'application/json', 'user-agent': 'kolm-health/' + VERSION },
     }, (res) => {
@@ -4837,15 +4937,25 @@ async function cmdHealth(args) {
   });
 
   const root = await probe('/health');
+  const ready = await probe('/ready');
   const capture = await probe('/v1/capture/health');
+  const account = requireAuth ? await probe('/v1/account') : null;
   const durable = !!(capture.body && capture.body.durable);
   const driver = (capture.body && capture.body.driver) || null;
   const downReason = !root.ok ? (root.error || ('status ' + root.status)) : null;
+  const readyReason = !ready.ok ? (ready.error || ('status ' + ready.status)) : null;
+  const authReason = account && !account.ok ? (account.error || ('status ' + account.status)) : null;
+  const captureReason = !capture.ok
+    ? (capture.error || ('status ' + capture.status))
+    : (!durable ? 'durable false' : null);
   const slow = root.ok && root.rtt_ms > slowMs;
 
   let exit = 0;
   let summary = 'healthy';
   if (!root.ok) { exit = 1; summary = 'down'; }
+  else if (requireReady && !ready.ok) { exit = 1; summary = 'not_ready'; }
+  else if (requireAuth && (!account || !account.ok)) { exit = 1; summary = 'auth_failed'; }
+  else if (requireCapture && captureReason) { exit = 1; summary = 'capture_unhealthy'; }
   else if (slow) { exit = 2; summary = 'slow'; }
 
   if (jsonOut) {
@@ -4854,7 +4964,12 @@ async function cmdHealth(args) {
       summary,
       base,
       root: { status: root.status, rtt_ms: root.rtt_ms, error: downReason },
-      capture: { status: capture.status, driver, durable },
+      ready: { status: ready.status, rtt_ms: ready.rtt_ms, error: readyReason, body: ready.body || null },
+      ready_required: requireReady,
+      auth: account ? { status: account.status, rtt_ms: account.rtt_ms, error: authReason, validated: account.ok } : null,
+      auth_required: requireAuth,
+      capture: { status: capture.status, driver, durable, error: captureReason, body: capture.body || null },
+      capture_required: requireCapture,
       thresholds: { slow_ms: slowMs, timeout_ms: timeoutMs },
     }));
     process.exit(exit);
@@ -4862,7 +4977,9 @@ async function cmdHealth(args) {
   console.log('kolm health: ' + summary.toUpperCase() + (downReason ? ' (' + downReason + ')' : ''));
   console.log('  base:    ' + base);
   console.log('  RTT:     ' + root.rtt_ms + 'ms' + (slow ? ' (slow, threshold=' + slowMs + 'ms)' : ''));
-  console.log('  capture: ' + (capture.ok ? 'driver=' + driver + ' durable=' + durable : 'unreachable'));
+  console.log('  ready:   ' + (ready.ok ? 'status=' + ready.status : (ready.status ? 'status=' + ready.status : 'unreachable') + (readyReason ? ' (' + readyReason + ')' : '')) + (requireReady ? ' required' : ''));
+  if (requireAuth || account) console.log('  auth:    ' + (account && account.ok ? 'validated' : 'failed' + (authReason ? ' (' + authReason + ')' : '')) + (requireAuth ? ' required' : ''));
+  console.log('  capture: ' + (capture.ok ? 'driver=' + driver + ' durable=' + durable : 'status=' + capture.status) + (captureReason ? ' (' + captureReason + ')' : '') + (requireCapture ? ' required' : ''));
   process.exit(exit);
 }
 
@@ -5019,6 +5136,27 @@ async function cmdConnectStatus(args) {
   }
   const base = 'http://' + (st.host || '127.0.0.1') + ':' + st.port;
   const probe = await httpProbe(base + '/v1/health', { timeoutMs: 3000 });
+  if (!probe.ok) {
+    const reason = probe.error || ('status ' + probe.status);
+    if (jsonOut) {
+      console.log(JSON.stringify({
+        running: false,
+        stale: true,
+        pid: st.pid,
+        port: st.port,
+        host: st.host,
+        started_at: st.started_at,
+        health_error: reason,
+      }));
+      return;
+    }
+    console.log('kolm connect: NOT RUNNING');
+    console.log('  stale pid:  ' + st.pid);
+    console.log('  base:       ' + base);
+    console.log('  health:     UNREACHABLE (' + reason + ')');
+    console.log('  start it with: kolm connect start --detach');
+    return;
+  }
   if (jsonOut) {
     console.log(JSON.stringify({ running: true, pid: st.pid, port: st.port, host: st.host, started_at: st.started_at, health: probe.body || null, rtt_ms: probe.rtt_ms }));
     return;
@@ -5027,7 +5165,7 @@ async function cmdConnectStatus(args) {
   console.log('  pid:        ' + st.pid);
   console.log('  base:       ' + base);
   console.log('  started:    ' + st.started_at);
-  if (probe.ok && probe.body) {
+  if (probe.body) {
     console.log('  uptime:     ' + probe.body.uptime_s + 's');
     console.log('  events:     ' + probe.body.captured_events);
     console.log('  storage:    ' + (probe.body.storage_driver || '?') + ' (durable=' + (probe.body.storage_durable !== false) + ')');
@@ -6731,7 +6869,7 @@ async function cmdCompile(args) {
   try {
     const { recordCloudTrusted } = await import('../src/artifact-runner.js');
     const sha = recordCloudTrusted(outPath, { source: 'cloud', cloud_base: c.base, job_id: state.id, task });
-    if (sha && process.env.KOLM_DEBUG) console.error(`cloud-trust: recorded sha256=${sha.slice(0, 16)}…`);
+    if (sha && process.env.KOLM_DEBUG) console.error(`cloud-trust: recorded sha256=${sha.slice(0, 16)}...`);
   } catch (e) {
     if (process.env.KOLM_DEBUG) console.error('cloud-trust record failed:', e.message);
   }
@@ -8495,8 +8633,7 @@ async function cmdHub(args) {
       return;
     }
 
-    // Empty-state hint when the user surface is empty but seeds are present —
-    // the fresh-tenant case the audit flagged.
+    // Empty-state hint when the user surface is empty but seeds are present ??    // the fresh-tenant case the audit flagged.
     if (wantUser && wantSeeds && rows.length === 0 && seedRows.length > 0) {
       console.log(`showing ${seedRows.length} curated seeds (no user-published yet — try \`kolm publish\` to add yours)`);
       console.log('');
@@ -8690,7 +8827,111 @@ async function cmdHub(args) {
   process.exit(EXIT.BAD_ARGS);
 }
 
-// W263 — kolm marketplace {search|install|publish}
+// W481 P1-12 - kolm sdk {list|show|doctor}
+// Lists / inspects the six official Kolm SDK targets (node, python, mcp,
+// vscode, c, rust). Sourced from sdk/<lang>/README.md + package metadata
+// when available; static fallback otherwise so the verb still works on a
+// fresh checkout where some SDK dirs haven't been pulled.
+//
+// Static catalog - single source of truth so `kolm sdk` always returns the
+// same payload as `/sdk` page metadata.
+// Real package names taken from sdk/<lang>/package.json or Cargo.toml / pyproject.toml.
+// `install_source` is the always-works fallback that doesn't require the
+// registry to have been pushed; `install_registry` stays null until the
+// package is live and verified under Kolm control on its public registry.
+const KOLM_SDKS = [
+  { lang: 'node',   pkg: '@kolmogorov/kolm-sdk',     install_registry: null,                                                     install_source: 'cd sdk/node && npm install && npm pack',         readme: 'sdk/node/README.md',   notes: 'JavaScript / TypeScript; npm package not published yet' },
+  { lang: 'python', pkg: 'kolm',                     install_registry: null,                                                     install_source: 'cd sdk/python && pip install -e .',              readme: 'sdk/python/README.md', notes: 'Python 3.8+; PyPI name kolm is occupied by an unrelated project' },
+  { lang: 'mcp',    pkg: '@kolmogorov/recipe-mcp',   install_registry: null,                                                     install_source: 'node sdk/mcp/server.mjs',                        readme: 'sdk/mcp/README.md',    notes: 'Model Context Protocol bridge; registry package not published yet' },
+  { lang: 'vscode', pkg: 'kolmogorov.kolm-vscode',   install_registry: null,                                                     install_source: 'cd sdk/vscode && npm install -g @vscode/vsce && vsce package && code --install-extension kolm-vscode-*.vsix', readme: 'sdk/vscode/README.md', notes: 'VS Code extension; marketplace listing not published yet' },
+  { lang: 'c',      pkg: 'kolm.h',                   install_registry: null,                                                     install_source: 'cp sdk/c/kolm.h <your-project>/  (define KOLM_IMPLEMENTATION in exactly one TU; link -lcurl)', readme: 'sdk/c/README.md',     notes: 'Single-header stb-style; no registry; vendor it' },
+  { lang: 'rust',   pkg: 'kolm',                     install_registry: null,                                                     install_source: 'cd sdk/rust && cargo build --release',           readme: 'sdk/rust/README.md',   notes: 'Sync (ureq + native-tls); crates.io publication not verified yet' },
+];
+async function cmdSdk(args) {
+  if (maybeHelp('sdk', args)) return;
+  const sub = (args && args[0]) || 'list';
+  const rest = args.slice(1);
+  const jsonOut = (args && args.includes('--json')) || rest.includes('--json');
+  const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
+  const ROOT = path.resolve(here, '..');
+  const isInstalled = (sdk) => {
+    // Heuristic: README presence in the repo means the SDK is wired here.
+    // For Node + MCP we additionally check the local package.json bumps the
+    // version, so `kolm sdk doctor` doesn't claim "installed" for a stub.
+    try {
+      const rmAbs = path.join(ROOT, sdk.readme);
+      if (!fs.existsSync(rmAbs)) return false;
+      if (sdk.lang === 'node' || sdk.lang === 'mcp') {
+        const pj = path.join(path.dirname(rmAbs), 'package.json');
+        if (fs.existsSync(pj)) {
+          const j = JSON.parse(fs.readFileSync(pj, 'utf8'));
+          return !!(j && j.name && j.version);
+        }
+      }
+      return true;
+    } catch (_e) { return false; }
+  };
+  if (sub === 'list' || sub === 'ls') {
+    const rows = KOLM_SDKS.map((s) => ({ ...s, installed: isInstalled(s) }));
+    if (jsonOut) { console.log(JSON.stringify({ sdks: rows }, null, 2)); return; }
+    console.log('kolm SDKs (' + rows.length + ' targets):');
+    console.log('');
+    for (const r of rows) {
+      const tag = r.installed ? 'wired' : 'docs-only';
+      console.log(`  [${tag.padEnd(9)}] ${r.lang.padEnd(7)} ${r.pkg.padEnd(28)} ${r.notes}`);
+      if (r.install_registry) console.log(`               registry: ${r.install_registry}`);
+      console.log(`               source:   ${r.install_source}`);
+    }
+    console.log('');
+    console.log('details:  kolm sdk show <lang>         e.g. kolm sdk show python');
+    console.log('check:    kolm sdk doctor              # local wiring report');
+    console.log('honesty:  registry packages may not be published yet; source path always works from a repo checkout.');
+    return;
+  }
+  if (sub === 'show') {
+    const lang = (rest[0] || '').toLowerCase();
+    const sdk = KOLM_SDKS.find((s) => s.lang === lang);
+    if (!sdk) {
+      const known = KOLM_SDKS.map((s) => s.lang).join(', ');
+      console.error('unknown sdk: ' + (lang || '(missing arg)') + '  (known: ' + known + ')');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const rmAbs = path.join(ROOT, sdk.readme);
+    const readmeExists = fs.existsSync(rmAbs);
+    if (jsonOut) {
+      console.log(JSON.stringify({ ...sdk, installed: isInstalled(sdk), readme_path: sdk.readme, readme_exists: readmeExists }, null, 2));
+      return;
+    }
+    console.log(`kolm sdk ${sdk.lang}  -  ${sdk.notes}`);
+    console.log('  package:  ' + sdk.pkg);
+    if (sdk.install_registry) console.log('  registry: ' + sdk.install_registry);
+    else                       console.log('  registry: (none; vendor from source)');
+    console.log('  source:   ' + sdk.install_source);
+    console.log('  readme:   ' + sdk.readme + (readmeExists ? '' : '  (not found in this checkout)'));
+    console.log('  wired:    ' + (isInstalled(sdk) ? 'yes' : 'no'));
+    if (readmeExists) {
+      try {
+        const head = fs.readFileSync(rmAbs, 'utf8').split('\n').slice(0, 12).join('\n');
+        console.log('\n--- README (first 12 lines) ---\n' + head);
+      } catch (_e) { /* best effort */ }
+    }
+    return;
+  }
+  if (sub === 'doctor') {
+    const rows = KOLM_SDKS.map((s) => ({ lang: s.lang, pkg: s.pkg, wired: isInstalled(s) }));
+    const wiredCount = rows.filter((r) => r.wired).length;
+    if (jsonOut) { console.log(JSON.stringify({ ok: wiredCount === rows.length, wired: wiredCount, total: rows.length, sdks: rows }, null, 2)); return; }
+    console.log(`kolm sdk doctor - ${wiredCount}/${rows.length} SDKs wired in this checkout`);
+    for (const r of rows) console.log(`  ${r.wired ? 'OK ' : '-- '} ${r.lang.padEnd(7)} ${r.pkg}`);
+    if (wiredCount < rows.length) console.log('\nany "--" row points to an SDK whose README is missing in this checkout.');
+    return;
+  }
+  console.error('unknown subcommand: kolm sdk ' + sub);
+  console.error('try: kolm sdk --help');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// W263 ??kolm marketplace {search|install|publish}
 //   kolm marketplace search [--category X] [--license Y] [--min-k N] [--verified] [--json]
 //   kolm marketplace install <slug> [--force] [--json]  fetches, sha256-verifies, productionReady()-gates,
 //                                                       then saves to ~/.kolm/artifacts/<slug>.kolm.
@@ -12587,14 +12828,20 @@ async function cmdLabels(args) {
 //   kolm cloud. No login required. Heavy ML deps stay in the worker package.
 async function cmdDistill(args) {
   if (maybeHelp('distill', args)) return;
-  // W455 — `kolm distill runs [<id>]` lists or shows local distill runs with
-  // per-prompt loss telemetry. Hoisted above the `--from-captures` short-circuit
-  // so `runs` is always reachable even when other flags are present.
+  // W455 ??`kolm distill runs [<id>]` lists or shows local distill runs.
+  // Dispatched BEFORE --from-captures so `kolm distill runs --from-captures`
+  // is not hijacked (W455 #8 lock).
   if (args[0] === 'runs') return cmdDistillRuns(args.slice(1));
   // Wave 214: --from-captures routes to /v1/distill/from-captures (preview-first).
   // Hoisted above --detach so the W214 dispatch lives in the first 600 chars
   // of the function (cmdDistillFromCaptures handles its own detach semantics).
   if (args.includes('--from-captures')) return cmdDistillFromCaptures(args);
+  // W480 ??on-policy + preference orchestration subverbs. Local-only by default
+  // (trainer is a tenant plug-in); --remote routes through /v1/distill/*.
+  if (args[0] === 'onpolicy') return cmdDistillOnPolicy(args.slice(1));
+  if (args[0] === 'preference' || args[0] === 'dpo' || args[0] === 'simpo') {
+    return cmdDistillPreference(args.slice(1), args[0]);
+  }
   // W233 --detach short-circuit: fork a background session and return the id.
   if (args.includes('--detach') && !process.env.KOLM_DETACHED) {
     const { detach } = await import('../src/sessions.js');
@@ -12676,6 +12923,120 @@ async function cmdDistill(args) {
 }
 
 // W455 — kolm distill runs [<id>] [--json] [--limit N] [--namespace NS]
+// W480 ??local on-policy / preference / spec-decode orchestration. Each
+// command surface mirrors the W454 `kolm media` pattern: a doctor subverb
+// + a primary action that calls into the orchestration module and prints
+// the envelope. The local module path is the default; --remote routes
+// through the corresponding /v1/distill/* route on the configured server.
+async function cmdDistillOnPolicy(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  const wantJson = rest.includes('--json') || sub === 'doctor';
+  if (sub === 'doctor') {
+    const remote = rest.includes('--remote');
+    if (remote) {
+      const c = loadConfig();
+      const r = await fetch(c.base.replace(/\/+$/, '') + '/v1/distill/onpolicy/doctor');
+      const j = await r.json();
+      console.log(JSON.stringify(j, null, 2));
+      return;
+    }
+    const { doctor } = await import('../src/distill-onpolicy.js');
+    const out = doctor();
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(out.ready ? 0 : 3);
+  }
+  if (sub === 'train' || sub === undefined) {
+    const pairs = pickFlag(rest, '--pairs');
+    const student = pickFlag(rest, '--student');
+    const ns = pickFlag(rest, '--namespace') || 'default';
+    const maxSteps = Number(pickFlag(rest, '--max-steps')) || 100;
+    if (!pairs || !student) {
+      console.error('usage: kolm distill onpolicy train --pairs <jsonl> --student <path> [--namespace ns] [--max-steps N] [--json]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const { trainOnPolicy } = await import('../src/distill-onpolicy.js');
+    const out = trainOnPolicy({ pairsPath: pairs, studentPath: student, namespace: ns, maxSteps });
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(out.ok ? 0 : 3);
+  }
+  console.error(`usage: kolm distill onpolicy {doctor|train [--pairs <jsonl> --student <path>]}`);
+  process.exit(EXIT.BAD_ARGS);
+}
+
+async function cmdDistillPreference(args, verbName = 'preference') {
+  const sub = args[0];
+  const rest = args.slice(1);
+  if (sub === 'doctor') {
+    const remote = rest.includes('--remote');
+    if (remote) {
+      const c = loadConfig();
+      const r = await fetch(c.base.replace(/\/+$/, '') + '/v1/distill/preference/doctor');
+      const j = await r.json();
+      console.log(JSON.stringify(j, null, 2));
+      return;
+    }
+    const { doctor } = await import('../src/distill-preference.js');
+    const out = doctor();
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(out.ready ? 0 : 3);
+  }
+  // `kolm distill dpo|simpo --pairs ...` is a shortcut for `train --objective dpo|simpo`.
+  if (sub === 'train' || sub === undefined || verbName === 'dpo' || verbName === 'simpo') {
+    const train_args = (verbName === 'dpo' || verbName === 'simpo') ? args : rest;
+    const pairs = pickFlag(train_args, '--pairs');
+    const student = pickFlag(train_args, '--student');
+    const objective = pickFlag(train_args, '--objective') || (verbName === 'dpo' || verbName === 'simpo' ? verbName : 'dpo');
+    const ns = pickFlag(train_args, '--namespace') || 'default';
+    const beta = Number(pickFlag(train_args, '--beta')) || 0.1;
+    if (!pairs || !student) {
+      console.error(`usage: kolm distill ${verbName === 'preference' ? 'preference train' : verbName} --pairs <jsonl> --student <path> [--objective dpo|simpo|orpo|kto] [--beta 0.1] [--namespace ns] [--json]`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const { trainPreference } = await import('../src/distill-preference.js');
+    const out = trainPreference({ pairsPath: pairs, studentPath: student, objective, namespace: ns, beta });
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(out.ok ? 0 : 3);
+  }
+  console.error(`usage: kolm distill preference {doctor|train [--pairs <jsonl> --student <path> --objective dpo|simpo|orpo|kto]}`);
+  process.exit(EXIT.BAD_ARGS);
+}
+
+async function cmdSpecDecode(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  if (sub === 'doctor') {
+    const remote = rest.includes('--remote');
+    if (remote) {
+      const c = loadConfig();
+      const r = await fetch(c.base.replace(/\/+$/, '') + '/v1/spec-decode/doctor');
+      const j = await r.json();
+      console.log(JSON.stringify(j, null, 2));
+      return;
+    }
+    const { doctor } = await import('../src/spec-decode.js');
+    const out = doctor();
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(out.ready ? 0 : 3);
+  }
+  if (sub === 'train' || sub === undefined) {
+    const pairs = pickFlag(rest, '--pairs');
+    const base = pickFlag(rest, '--base');
+    const draft = pickFlag(rest, '--draft-kind') || 'eagle3';
+    const ns = pickFlag(rest, '--namespace') || 'default';
+    if (!pairs || !base) {
+      console.error('usage: kolm spec-decode train --pairs <jsonl> --base <path> [--draft-kind eagle|eagle2|eagle3|medusa] [--namespace ns] [--json]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const { trainSpecDecode } = await import('../src/spec-decode.js');
+    const out = trainSpecDecode({ pairsPath: pairs, basePath: base, draftKind: draft, namespace: ns });
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(out.ok ? 0 : 3);
+  }
+  console.error('usage: kolm spec-decode {doctor|train [--pairs <jsonl> --base <path>]}');
+  process.exit(EXIT.BAD_ARGS);
+}
+
 //   List local distill runs OR show one run's per-prompt loss curve. Reads
 //   /v1/distill/runs (list) or /v1/distill/runs/:id (detail). The detail mode
 //   prints a compact loss/k_score table from progress.jsonl so the customer
@@ -13843,8 +14204,7 @@ async function cmdLoop(args) {
 
 async function cmdDoctor(args) {
   if (maybeHelp('doctor', args)) return;
-  // W298: --loop runs the full value-loop (capture → bridges → distill →
-  // replay) against an in-process buildRouter() with a fresh anon tenant
+  // W298: --loop runs the full value-loop (capture ??bridges ??distill ??  // replay) against an in-process buildRouter() with a fresh anon tenant
   // so a brand-new install can prove end-to-end the four ladder rungs work
   // before bothering with real traffic. Exits 0 on full green, 1 on any
   // rung failure. JSON mode emits a structured report keyed by rung name.
@@ -13859,8 +14219,7 @@ async function cmdDoctor(args) {
     };
     const ok = (name, detail) => rungs.push({ name, status: 'ok', detail: String(detail || '') });
 
-    // walkLoop runs the five ladder rungs (capture → health → bridges →
-    // distill → replay) against any base URL with bearer-auth headers. The
+    // walkLoop runs the five ladder rungs (capture ??health ??bridges ??    // distill ??replay) against any base URL with bearer-auth headers. The
     // in-process and --remote modes share this body so the rung shapes stay
     // identical and the lock-in tests cover both code paths.
     // Use node:http directly (not fetch). The global undici dispatcher's
@@ -14012,6 +14371,13 @@ async function cmdDoctor(args) {
     return;
   }
   const jsonOut = args.includes('--json');
+  // W481 P0-8: --allow-logged-out demotes "api key (server) missing" and
+  // "no key to validate" from BLOCKER to WARN so release-verify, CI, and
+  // first-time evaluators (no key on disk yet) can still run doctor without
+  // exit=3. The other checks (cloud reachable, receipt secret, node version,
+  // toolchain) keep their normal severities. When the flag is on, the
+  // "logged_in:false" condition is still surfaced honestly in the output ??  // just not as a hard failure.
+  const allowLoggedOut = args.includes('--allow-logged-out');
   const checks = [];
   const c = loadConfig();
   // Config + auth
@@ -14055,16 +14421,17 @@ async function cmdDoctor(args) {
         const msg = String((e && e.message) || e);
         const looksAuth = /401|invalid|unauthori[sz]ed|auth/i.test(msg);
         // W470 P0-4: server rejection of a stale local key is a BLOCKER, not
-        // a warning. Doctor must NOT surface stale local auth as healthy —
-        // ok:true with a rejected server-side key is exactly the contradiction
+        // a warning. Doctor must NOT surface stale local auth as healthy ??        // ok:true with a rejected server-side key is exactly the contradiction
         // the auditor flagged ("doctor says ok but whoami says invalid").
         // Recovery copy lists all three exits: rotate, sign up fresh, or
         // forget the bad key locally.
         checks.push({
           name: 'api key (server)',
-          status: looksAuth ? 'missing' : 'warn',
+          status: looksAuth ? (allowLoggedOut ? 'warn' : 'missing') : 'warn',
           detail: looksAuth
-            ? 'server rejected the key (rotated/revoked?). recover:  kolm login --key ks_...   |   kolm signup --email you@org.com   |   kolm logout (forget local key)'
+            ? (allowLoggedOut
+              ? 'server rejected the key (rotated/revoked?) ??demoted to warn by --allow-logged-out. recover:  kolm login --key ks_...   |   kolm signup --email you@org.com   |   kolm logout'
+              : 'server rejected the key (rotated/revoked?). recover:  kolm login --key ks_...   |   kolm signup --email you@org.com   |   kolm logout (forget local key)')
             : ('server validation failed: ' + msg),
         });
       }
@@ -14073,10 +14440,14 @@ async function cmdDoctor(args) {
     // W470 P0-4: no local key is also a blocker — without a key the CLI
     // cannot reach hosted compile / bakeoff / billing. List both entry
     // ramps so a first-time user knows there's a free signup option.
+    // W481 P0-8: --allow-logged-out demotes to 'warn' so release-verify /
+    // first-time evaluators / CI can still run doctor cleanly.
     checks.push({
       name: 'api key (server)',
-      status: 'missing',
-      detail: 'no key to validate. start here:  kolm signup --email you@org.com   |   kolm login --key ks_...',
+      status: allowLoggedOut ? 'warn' : 'missing',
+      detail: allowLoggedOut
+        ? 'no key to validate ??demoted to warn by --allow-logged-out. start here:  kolm signup --email you@org.com   |   kolm login --key ks_...'
+        : 'no key to validate. start here:  kolm signup --email you@org.com   |   kolm login --key ks_...',
     });
   }
   // Local receipt secret
@@ -14215,7 +14586,7 @@ async function cmdDoctor(args) {
   }
 
   // Render
-  const STATUS = { ok: '✓', warn: '!', missing: '✗' };
+  const STATUS = { ok: 'ok', warn: '!', missing: 'x' };
   for (const ch of checks) {
     process.stdout.write(`${STATUS[ch.status] || '?'}  ${ch.name.padEnd(28)}  ${ch.detail || ''}\n`);
   }
@@ -14528,7 +14899,7 @@ async function cmdMoeCompose(args) {
   console.log(`  k_score:    ${result.k_score?.composite ?? '-'}`);
   console.log(`  router:     ${router.type}`);
   for (const e of result.moe.experts) {
-    console.log(`  expert:     ${e.id}  sha256=${String(e.sha256).slice(0, 16)}…`);
+    console.log(`  expert:     ${e.id}  sha256=${String(e.sha256).slice(0, 16)}...`);
   }
 }
 
@@ -14854,7 +15225,7 @@ async function cmdTune(args) {
       const epochs = Number(pickFlag(args, '--epochs') || 1);
       const batchSize = Number(pickFlag(args, '--batch-size') || 4);
       const lr = Number(pickFlag(args, '--lr') || 2e-4);
-      console.log('starting tune step (epochs=' + epochs + (airgap ? ', AIRGAP' : '') + ')…');
+      console.log('starting tune step (epochs=' + epochs + (airgap ? ', AIRGAP' : '') + ')...');
       try {
         const r = tune.runTuneStep({ artifactPath: ap, epochs, airgap, batchSize, lr });
         console.log('ok  ' + r.revision + '  ' + JSON.stringify(r.stats));
@@ -14937,7 +15308,7 @@ async function cmdRag(args) {
       console.log('    root:    ' + m.root);
       console.log('    avgdl:   ' + Math.round(m.avgdl) + ' tokens/doc');
       console.log('    size:    ' + (m.size_bytes / 1024).toFixed(1) + ' KB');
-      console.log('    sha256:  ' + m.sha256.slice(0, 16) + '…');
+      console.log('    sha256:  ' + m.sha256.slice(0, 16) + '...');
       console.log('    next:    kolm rag query ' + m.name + ' "<question>"');
       return;
     }
@@ -14990,7 +15361,7 @@ async function cmdRag(args) {
 const KOLM_BRAND = [
   '',
   '  k o l m',
-  '  ─────── the private AI compiler',
+  '  ??????? the private AI compiler',
   '',
 ].join('\n');
 
@@ -17416,7 +17787,7 @@ async function cmdCompute(args) {
     if (flagJson) { console.log(JSON.stringify(backends, null, 2)); return; }
     console.log('NAME             KIND               TRAIN  AIRGAP  TIER  $/hr   COLD   FRAMEWORK');
     for (const b of backends) {
-      const cost = b.cost_per_hour_usd == null ? '—' : ('$' + b.cost_per_hour_usd.toFixed(2));
+      const cost = b.cost_per_hour_usd == null ? 'n/a' : ('$' + b.cost_per_hour_usd.toFixed(2));
       const cold = (b.cold_start_seconds || 0) + 's';
       const airgap = b.airgap === true ? 'yes' : b.airgap === 'depends' ? 'priv' : 'no';
       console.log(
@@ -17432,7 +17803,7 @@ async function cmdCompute(args) {
     if (flagJson) { console.log(JSON.stringify(det, null, 2)); return; }
     console.log(`detection at ${det.at} ${force ? '(forced)' : '(cached)'}`);
     for (const [name, r] of Object.entries(det.backends)) {
-      const tag = r.available ? '✓' : '×';
+      const tag = r.available ? 'ok' : '?';
       const detail = r.available ? (r.device || r.region || '') : (r.reason || '');
       console.log(`  ${tag} ${name.padEnd(16)} ${detail}`);
     }
@@ -17603,7 +17974,7 @@ async function cmdCompute(args) {
     console.log('BACKEND          DURATION    COST       BASIS              SUPPORTED');
     for (const r of rows) {
       if (!r.supported) {
-        console.log(`${r.backend.padEnd(16)} ${'—'.padEnd(11)} ${'—'.padEnd(10)} ${(r.reason || '').padEnd(18)} no`);
+        console.log(`${r.backend.padEnd(16)} ${'n/a'.padEnd(11)} ${'n/a'.padEnd(10)} ${(r.reason || '').padEnd(18)} no`);
         continue;
       }
       const cost = r.cost_usd == null ? '(quote at run)' : `$${r.cost_usd.toFixed(2)}`;
@@ -17778,7 +18149,8 @@ const COMPLETION_VERBS = [
   'models', 'gpu', 'export', 'seeds', 'anonymize', 'redact', 'media', 'reinject', 'improve', 'instant', 'extract', 'doc',
   'keygen', 'pubkey', 'keys', 'auditor', 'audit', 'settings', 'quantize',
   'sigstore-attest', 'attest', 'test', 'drift', 'trace', 'ir', 'device', 'cc', 'fl',
-  'marketplace', 'tail', 'replay', 'runtime', 'bridges',
+  'marketplace', 'sdk', 'tail', 'replay', 'runtime', 'bridges',
+  'spec-decode',
   'jobs', 'watch', 'sync', 'profile', 'checkpoint', 'import-chat', 'merge',
   'agent', 'init-agent',
   'services', 'bootstrap', 'proxy', 'remote', 'connect',
@@ -22480,8 +22852,64 @@ async function cmdUpdate(args) {
     if (maybeHelp('update', args)) return;
     const jsonOut = args.includes('--json');
     const dryRun = args.includes('--dry-run');
+    const force = args.includes('--force');
     const source = 'github:sneaky-hippo/kolmogorov-stack';
     const before = readPackageVersion();
+
+    // W484 P0-3 ??refuse to run `npm i -g` from a repo checkout. Without this
+    // guard, a dev running `kolm update` from inside the cloned repo silently
+    // clobbers their working tree with the global install. The audit flagged
+    // this as "mutating in a repo checkout"; the fix is to detect, refuse, and
+    // point at the correct verb (`git pull` from inside the repo).
+    if (!force) {
+        try {
+            const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
+            const repoRoot = path.resolve(here, '..');
+            const gitDir = path.join(repoRoot, '.git');
+            const pj = path.join(repoRoot, 'package.json');
+            let isCheckout = false;
+            let pkgName = null;
+            if (fs.existsSync(gitDir) && fs.existsSync(pj)) {
+                try {
+                    const j = JSON.parse(fs.readFileSync(pj, 'utf8'));
+                    pkgName = j && j.name;
+                    if (pkgName === 'kolmogorov-stack' || pkgName === '@kolmogorov/kolmogorov-stack') {
+                        isCheckout = true;
+                    }
+                } catch (_e) { /* fall through */ }
+            }
+            if (isCheckout) {
+                const hint = 'this is the kolmogorov-stack repo checkout (' + repoRoot + ').';
+                const remedy = ['git -C ' + repoRoot + ' pull', 'npm install --prefix ' + repoRoot];
+                if (jsonOut) {
+                    console.log(JSON.stringify({
+                        ok: false,
+                        status: 'refused',
+                        reason: 'repo_checkout',
+                        hint,
+                        remedy,
+                        repo_root: repoRoot,
+                        package_name: pkgName,
+                        override: 'pass --force to bypass (will run `npm i -g github:sneaky-hippo/kolmogorov-stack` and overwrite the global install)',
+                    }, null, 2));
+                    process.exit(EXIT.BAD_ARGS || 1);
+                }
+                console.error('error: `kolm update` is non-mutating in a repo checkout.');
+                console.error('  ' + hint);
+                console.error('');
+                console.error('to update this checkout, run:');
+                for (const r of remedy) console.error('  ' + r);
+                console.error('');
+                console.error('to bypass and force the global install, pass --force.');
+                const e = new Error('refused: repo checkout');
+                e.exitCode = EXIT.BAD_ARGS || 1;
+                throw e;
+            }
+        } catch (e) {
+            if (e && e.exitCode) throw e;
+            // best-effort detection; fall through if anything else throws
+        }
+    }
 
     if (dryRun) {
         if (jsonOut) {
@@ -23271,11 +23699,11 @@ async function cmdTui(args) {
     { id: 'live-calls',         key: '1', endpoint: '/v1/capture/stream',        kind: 'sse',   label: 'live calls (SSE)' },
     { id: 'artifacts',          key: '2', endpoint: '/v1/artifacts',             kind: 'get',   label: 'artifacts' },
     { id: 'compile',            key: '3', endpoint: null,                        kind: 'local', label: 'compile wizard' },
-    { id: 'spend',              key: '4', endpoint: '/v1/spend/summary',         kind: 'get',   label: 'spend / cost breakdown' },
+    { id: 'spend',              key: '4', endpoint: '/v1/billing/usage',         kind: 'get',   label: 'spend / cost breakdown' },
     { id: 'privacy-events',     key: '5', endpoint: '/v1/privacy/events',        kind: 'get',   label: 'privacy events' },
     { id: 'repeated-workflows', key: '6', endpoint: '/v1/workflows/repeated',    kind: 'get',   label: 'repeated workflows' },
-    { id: 'opportunities',      key: '7', endpoint: '/v1/optimize/opportunities', kind: 'get',  label: 'opportunities' },
-    { id: 'labeling-queue',     key: '8', endpoint: '/v1/label/queue',           kind: 'get',   label: 'labeling queue' },
+    { id: 'opportunities',      key: '7', endpoint: '/v1/opportunities',         kind: 'get',   label: 'opportunities' },
+    { id: 'labeling-queue',     key: '8', endpoint: '/v1/label-queue/next',      kind: 'get',   label: 'labeling queue' },
     { id: 'datasets',           key: '9', endpoint: '/v1/datasets',              kind: 'get',   label: 'datasets' },
     { id: 'builds',             key: '0', endpoint: '/v1/builds',                kind: 'get',   label: 'builds (artifact build receipts)' },
     { id: 'bakeoffs',           key: 'A', endpoint: '/v1/bakeoffs',              kind: 'get',   label: 'bakeoffs' },
@@ -24205,7 +24633,8 @@ async function cmdNext(args) {
   const wantJson = args.includes('--json');
   await _withIntent(async ({ snapshotContext, recommendNext }) => {
     const snap = await snapshotContext({ cwd: process.cwd() });
-    const recs = recommendNext(snap);
+    // W352 #9: cap to 3 recs (lock-in: `1-3 recommendations`).
+    const recs = recommendNext(snap).slice(0, 3);
     if (wantJson) {
       console.log(JSON.stringify({ ok: true, recommendations: recs, generated_at: snap.generated_at }, null, 2));
       return;
@@ -24461,7 +24890,7 @@ async function _dispatchVerb(verb, args) {
     ls: cmdList, inspect: cmdInspect, eject: cmdEject, diff: cmdDiff,
     verify: cmdVerify, 'sigstore-attest': cmdSigstoreAttest, attest: cmdSigstoreAttest,
     test: cmdTest, serve: cmdServe, tui: cmdTui, repl: cmdRepl,
-    publish: cmdPublish, pull: cmdPull, hub: cmdHub, marketplace: cmdMarketplace,
+    publish: cmdPublish, pull: cmdPull, hub: cmdHub, marketplace: cmdMarketplace, sdk: cmdSdk,
     capture: cmdCapture, labels: cmdLabels, distill: cmdDistill, moe: cmdMoe,
     nl: cmdNl, tokenize: cmdTokenize, extract: cmdExtract, doc: cmdDoc,
     config: cmdConfig, hmac: cmdHmac, keygen: cmdKeygen, pubkey: cmdPubkey,
@@ -24545,9 +24974,13 @@ async function main() {
       case 'pull':     await withErrorContext('pull',     () => cmdPull(rest)); break;
       case 'hub':      await withErrorContext('hub',      () => cmdHub(rest)); break;
       case 'marketplace': await withErrorContext('marketplace', () => cmdMarketplace(rest)); break;
+      // W481 P1-12 ??`kolm sdk` introspects the six official SDK targets so
+      // `kolm sdk --help` no longer falls through to root help.
+      case 'sdk':      await withErrorContext('sdk',      () => cmdSdk(rest)); break;
       case 'capture':  await withErrorContext('capture',  () => cmdCapture(rest)); break;
       case 'labels':   await withErrorContext('labels',   () => cmdLabels(rest)); break;
       case 'distill':  await withErrorContext('distill',  () => cmdDistill(rest)); break;
+      case 'spec-decode': await withErrorContext('spec-decode', () => cmdSpecDecode(rest)); break;
       case 'moe':      await withErrorContext('moe',      () => cmdMoe(rest)); break;
       case 'nl':       await withErrorContext('nl',       () => cmdNl(rest)); break;
       case 'tokenize': await withErrorContext('tokenize', () => cmdTokenize(rest)); break;

@@ -9,15 +9,15 @@
 <meta name="description" content="The kolm.ai dataset workbench. Build train/val/holdout splits with sha256-mod disjointness, label rows in a queue, freeze a dataset for reproducible training.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Datasets &middot; kolm.ai">
+<meta property="og:title" content="Datasets · kolm.ai">
 <meta property="og:description" content="The kolm.ai dataset workbench. Build train/val/holdout splits with sha256-mod disjointness, label rows in a queue, freeze a dataset for reproducible training.">
-<meta property="og:type" content="article">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/datasets">
-<meta property="og:image" content="https://kolm.ai/og/docs-datasets.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Datasets &middot; kolm.ai">
+<meta name="twitter:title" content="Datasets · kolm.ai">
 <meta name="twitter:description" content="The kolm.ai dataset workbench. Build train/val/holdout splits with sha256-mod disjointness, label rows in a queue, freeze a dataset for reproducible training.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-datasets.svg">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/datasets">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Datasets","description":"The kolm.ai dataset workbench. Build train/val/holdout splits with sha256-mod disjointness, label rows in a queue, freeze a dataset for reproducible training.","url":"https://kolm.ai/docs/datasets","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -77,10 +78,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="build">Build a dataset</h2>
 <p>One command. The workbench reads the lake, applies the selector, splits, and writes the manifest to <code>~/.kolm/datasets/&lt;id&gt;/</code>.</p>
 <pre><code>kolm datasets build summarizer-v1 \
-  --namespace summarizer \
-  --window 30d \
-  --split 0.80/0.10/0.10 \
-  --min-rows 1000</code></pre>
+ --namespace summarizer \
+ --window 30d \
+ --split 0.80/0.10/0.10 \
+ --min-rows 1000</code></pre>
 
 <h2 id="split">Splits with sha256-mod disjointness</h2>
 <p>The split function is <code>int(sha256(prompt_canonical), 16) % 100</code>. Train is buckets 0..79, val is 80..89, holdout is 90..99. Any future call with the same canonical prompt always falls into the same bucket, so a row cannot accidentally move from val to train when you rebuild.</p>
@@ -103,32 +104,32 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="export">Export</h2>
 <p>For external tooling. Emits JSONL with one example per line, one file per split.</p>
 <pre><code>kolm datasets export summarizer-v1 --out ./out
-# ./out/train.jsonl  (3363 rows)
-# ./out/val.jsonl    (420 rows)
+# ./out/train.jsonl (3363 rows)
+# ./out/val.jsonl (420 rows)
 # ./out/holdout.jsonl(421 rows)
 # ./out/manifest.json</code></pre>
 
 <h2 id="stats">Stats</h2>
 <pre><code>kolm datasets stats summarizer-v1
-# rows:              4204
-# label coverage:    98.4%
-# class balance:     urgent=18% normal=64% low=18%
+# rows: 4204
+# label coverage: 98.4%
+# class balance: urgent=18% normal=64% low=18%
 # avg prompt tokens: 412
-# avg response tok:  88</code></pre>
+# avg response tok: 88</code></pre>
 
 <h2 id="next">Next steps</h2>
 <p>Hand the frozen dataset id to <a href="/docs/training">training</a> or <a href="/docs/distillation">distillation</a>. Run <a href="/docs/evals">evals</a> against the holdout once you have an artifact. Start from <a href="/docs/quickstart">/docs/quickstart</a> if the lake is still empty.</p>
 
 <div class="related">
-  <a href="/docs/training"><b>Training &rarr;</b><span>Feed a frozen dataset into a training run.</span></a>
-  <a href="/docs/evals"><b>Evals &rarr;</b><span>Score artifacts against the holdout split.</span></a>
-  <a href="/docs/lake"><b>Lake &rarr;</b><span>The source rows behind every dataset.</span></a>
+ <a href="/docs/training"><b>Training &rarr;</b><span>Feed a frozen dataset into a training run.</span></a>
+ <a href="/docs/evals"><b>Evals &rarr;</b><span>Score artifacts against the holdout split.</span></a>
+ <a href="/docs/lake"><b>Lake &rarr;</b><span>The source rows behind every dataset.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

@@ -1,271 +1,146 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>SLSA Level 3 build provenance · kolm.ai</title>
-<meta name="description" content="Every .kolm artifact ships with a signed in-toto/SLSA provenance attestation. Source, build, dependencies, distribution, verification, mapped to the SLSA Level 3 requirements.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Build provenance status · kolm.ai</title>
+<meta name="description" content="Current build-provenance status for .kolm artifacts: local receipts, Ed25519 signatures, optional Rekor policy, and remaining SLSA attestation work.">
 <link rel="canonical" href="https://kolm.ai/slsa">
-<style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
-  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
-  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
-  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
-  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.site nav a{color:inherit;text-decoration:none}
-  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  h1{font-size:42px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
-  .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0}
-  .meta{display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing:0.04em;flex-wrap:wrap}
-  .meta span b{color:var(--accent);font-weight:500}
-  section.body{padding:36px 0;border-bottom:1px solid var(--line)}
-  h2{margin:0 0 14px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
-  h2 .sub{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-left:10px;text-transform:uppercase;letter-spacing:0.06em;background:var(--bg-elev);border:1px solid var(--line);padding:3px 8px;border-radius:4px}
-  p{color:var(--ink-mute);margin:0 0 16px}
-  p code,li code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:3px;padding:1px 5px}
-  ul{margin:0 0 16px;padding:0 0 0 22px;color:var(--ink-mute)}
-  ul li{margin:0 0 6px;line-height:1.55}
-  table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:13.5px;font-family:var(--mono)}
-  th{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:400;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
-  td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--ink-mute)}
-  td b{color:var(--ink);font-weight:500}
-  td.acc{color:var(--accent)}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
-  pre .g{color:var(--accent)}
-  pre .c{color:var(--ink-faint)}
-  footer{padding:32px 0;color:var(--ink-faint);font-size:13px}
-  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-</style>
 <link rel="stylesheet" href="/styles.css">
-  <meta property="og:title" content="SLSA Level 3 build provenance &middot; kolm · kolm.ai">
-  <meta property="og:description" content="Every .kolm artifact ships with a signed in-toto/SLSA provenance attestation. Source, build, dependencies, distribution, verification, mapped to the SLSA Level 3 requirements.">
-  <meta property="og:image" content="https://kolm.ai/og/slsa.svg">
-  <meta property="og:url" content="https://kolm.ai/slsa">
-  <meta property="og:type" content="website">
+<link rel="stylesheet" href="/surface-polish.css">
+<meta property="og:title" content="Build provenance status · kolm.ai">
+<meta property="og:description" content="Current build-provenance status for .kolm artifacts: local receipts, Ed25519 signatures, optional Rekor policy, and remaining SLSA attestation work.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:url" content="https://kolm.ai/slsa">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Build provenance status · kolm.ai">
+<meta name="twitter:description" content="Current build-provenance status for .kolm artifacts: local receipts, Ed25519 signatures, optional Rekor policy, and remaining SLSA attestation work.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/slsa",
-  "description": "Every .kolm artifact ships with a signed in-toto/SLSA provenance attestation. Source, build, dependencies, distribution, verification, mapped to the SLSA Level 3 requirements.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
-}
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Build provenance status","description":"Current build-provenance status for .kolm artifacts: local receipts, Ed25519 signatures, optional Rekor policy, and remaining SLSA attestation work.","url":"https://kolm.ai/slsa","mainEntityOfPage":"https://kolm.ai/slsa","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<style>
+ :root{--ink:#20242a;--muted:#5d6672;--line:#dfe4e8;--bg:#fbfcfb;--panel:#fff;--accent:#0f8f69;--warn:#9a6700;--bad:#b42318;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+ .wrap{max-width:920px;margin:0 auto;padding:0 24px}
+ header{border-bottom:1px solid var(--line);background:rgba(255,255,255,.82);backdrop-filter:saturate(140%) blur(10px)}
+ header .wrap{display:flex;justify-content:space-between;align-items:center;padding-top:16px;padding-bottom:16px}
+ .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ nav{display:flex;gap:18px;font-size:13px}
+ nav a{color:var(--muted);text-decoration:none}
+ main{padding:54px 0 34px}
+ .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+ h1{font-size:44px;line-height:1.08;margin:0 0 16px;font-weight:600;letter-spacing:0}
+ .lede{font-size:18px;line-height:1.6;color:var(--muted);max-width:820px;margin:0 0 26px}
+ .status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:24px 0 36px}
+ .status div{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:14px 16px}
+ .status b{display:block;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+ .status span{font-size:14px;color:var(--muted)}
+ section{padding:30px 0;border-top:1px solid var(--line)}
+ h2{font-size:24px;margin:0 0 12px;letter-spacing:0}
+ p{margin:0 0 14px;color:var(--muted)}
+ code,pre{font-family:var(--mono)}
+ code{background:#eef3f0;border:1px solid #dbe7e1;border-radius:4px;padding:1px 5px;color:#18382d}
+ pre{background:#0d1117;color:#e6edf3;border-radius:8px;padding:16px;overflow:auto;font-size:13px;line-height:1.55}
+ table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+ th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+ th{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:500}
+ .ok{color:var(--accent)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+ ul{margin:0 0 14px;padding-left:22px;color:var(--muted)}
+ footer{border-top:1px solid var(--line);padding:26px 0 38px;color:var(--muted);font-size:13px}
+ footer a{color:inherit}
+ @media (max-width:760px){h1{font-size:34px}.status{grid-template-columns:1fr}header .wrap{align-items:flex-start;gap:12px;flex-direction:column}nav{flex-wrap:wrap}}
+</style>
 </head>
 <body>
-<header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/quickstart">quickstart</a><a href="/docs">docs</a><a href="/security">security</a></nav></div></header>
-<main>
-<section class="hero">
-  <div class="wrap">
-    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/security">security</a> &nbsp;/&nbsp; SLSA Level 3</p>
-    <h1>SLSA Level 3 build provenance.</h1>
-    <p class="lede">Every <code>.kolm</code> artifact ships alongside a signed in-toto attestation that names the source commit, the build runner, the toolchain versions, and the K-score evidence that gated the artifact at compile time. The provenance is verifiable without trusting kolm.ai.</p>
-    <div class="meta"><span>Spec <b>SLSA v1.0</b></span><span>Track <b>Build L3</b></span><span>Attestation <b>in-toto 1.0</b></span><span>Last build <b>2026-05-15</b></span></div>
-  </div>
-</section>
+<a class="skip-link" href="#main">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<header>
+ <div class="wrap">
+ <a class="logo" href="/">k o l m</a>
+ <nav aria-label="Primary">
+ <a href="/security">Security</a>
+ <a href="/trust">Trust</a>
+ <a href="/sbom">SBOM</a>
+ <a href="/registry">Registry</a>
+ </nav>
+ </div>
+</header>
+<main id="main">
+ <div class="wrap">
+ <p class="eyebrow">Security / provenance</p>
+ <h1>Build provenance status.</h1>
+ <p class="lede"><code>.kolm</code> artifacts already carry local receipts, Ed25519 signatures, K-score evidence, and an optional Sigstore/Rekor policy gate. A public SLSA Level 3 attestation is still a target until release artifacts, workflow identity, and transparency-log entries are published with verifiable evidence.</p>
 
-<section class="body">
-  <div class="wrap">
-    <h2>Why this page exists.</h2>
-    <p>NIST 800-218 (SSDF) and DoD acquisition guidance both ask vendors to attest build provenance. Procurement reviewers want one of three answers: SLSA Level, in-toto attestation, or a vendor explanation of why neither applies. This page is the first.</p>
-    <p>SLSA's Build track has four levels. Level 3 requires hermetic builds on a hardened build platform, with provenance signed by the platform itself. kolm meets this today because (a) artifacts are built in CI from source we control, (b) every artifact ships with a signed SLSA provenance attestation alongside the <code>.kolm</code> itself, (c) the K-score gate adds non-SLSA evidence that the artifact passed the eval declared in the recipe.</p>
-  </div>
-</section>
+ <div class="status" aria-label="Current provenance status">
+ <div><b class="ok">Implemented</b><span>Manifest hash, receipt chain, Ed25519 signature, local verifier, optional Sigstore bundle.</span></div>
+ <div><b class="warn">Opt-in</b><span>Rekor pinning through <code>KOLM_SIGSTORE_REKOR_URL</code> and verifier enforcement through <code>KOLM_REQUIRE_REKOR=1</code>.</span></div>
+ <div><b class="bad">Not Yet Public-Attested</b><span>Public SLSA Level 3 release attestation, Fulcio identity proof, and public release Rekor entries.</span></div>
+ </div>
 
-<section class="body">
-  <div class="wrap">
-    <h2>01 &middot; Source <span class="sub">SLSA L1+</span></h2>
-    <p>Source lives in <code>github.com/sneaky-hippo/kolmogorov-stack</code>. Every release is tagged. Tag protection rules require signed commits on <code>main</code>, two-reviewer approval on merge, and CI green before tag-push is allowed.</p>
-    <p>The compile-pipeline source is the same monorepo; no out-of-band binaries enter the runner. The artifact's <code>manifest.source.commit</code> field carries the exact SHA-1, and a forensic rebuild starts by checking out that commit.</p>
-  </div>
-</section>
+ <section>
+ <h2>What is verifiable today</h2>
+ <table>
+ <thead><tr><th>Control</th><th>Current evidence</th><th>Status</th></tr></thead>
+ <tbody>
+ <tr><td><b>Artifact integrity</b></td><td><code>manifest.json</code>, file hashes, and receipt body signatures are checked by <code>kolm verify</code>.</td><td class="ok">available</td></tr>
+ <tr><td><b>Public-key signature</b></td><td>Modern receipts carry <code>signature_ed25519</code>; verifier policy can require it with <code>KOLM_REQUIRE_ED25519=1</code>.</td><td class="ok">available</td></tr>
+ <tr><td><b>Sigstore bundle</b></td><td>Receipts can carry <code>signature_sigstore</code>. Dry-run bundles verify locally but are not public transparency evidence.</td><td class="ok">available</td></tr>
+ <tr><td><b>Rekor transparency</b></td><td>Use <code>kolm sigstore-attest</code> or build with <code>KOLM_SIGSTORE_REKOR_URL</code>; enforce with <code>KOLM_REQUIRE_REKOR=1</code>.</td><td class="warn">operator-gated</td></tr>
+ <tr><td><b>SLSA release provenance</b></td><td>No public release attestation bundle is proven from this page yet.</td><td class="bad">target</td></tr>
+ </tbody>
+ </table>
+ </section>
 
-<section class="body">
-  <div class="wrap">
-    <h2>02 &middot; Build <span class="sub">SLSA L3</span></h2>
-    <p>Builds run on ephemeral GitHub Actions runners under an OIDC identity bound to the repo. The runner image is pinned by SHA-256; the Node and Python toolchains are pinned in lockfiles; network egress on the runner is restricted to the allow-list in <code>.github/workflows/build.yml</code>.</p>
-    <p>The build emits a <code>provenance.intoto.jsonl</code> file via <code>github.com/slsa-framework/slsa-github-generator</code>. The provenance is signed by the runner's short-lived identity through Sigstore Fulcio. The signing key never lives on disk.</p>
-    <pre><span class="c"># the provenance payload binds artifact hash to build steps</span>
-{
-  "_type": "https://in-toto.io/Statement/v1",
-  "subject": [{
-    "name": "support-triage-v0.4.0.kolm",
-    "digest": { "sha256": "a4b2..." }
-  }],
-  "predicateType": "https://slsa.dev/provenance/v1",
-  "predicate": {
-    "buildDefinition": {
-      "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
-      "externalParameters": {
-        "workflow": {
-          "ref": "refs/tags/v0.4.0",
-          "repository": "https://github.com/sneaky-hippo/kolmogorov-stack",
-          "path": ".github/workflows/release-kolm.yml"
-        }
-      },
-      "resolvedDependencies": [
-        { "uri": "git+https://github.com/sneaky-hippo/kolmogorov-stack@&lt;commit&gt;" }
-      ]
-    },
-    "runDetails": {
-      "builder": {
-        "id": "https://github.com/actions/runner/github-hosted"
-      },
-      "metadata": { "invocationId": "..." }
-    }
-  }
-}</pre>
-  </div>
-</section>
+ <section>
+ <h2>How to verify a .kolm artifact now</h2>
+ <pre>kolm verify ./artifact.kolm --json
 
-<section class="body">
-  <div class="wrap">
-    <h2>03 &middot; Provenance <span class="sub">SLSA L3</span></h2>
-    <p>The provenance is signed before the artifact is published. Two checks pass at the runner before the artifact leaves the build host:</p>
-    <ul>
-      <li>The artifact's <code>.kolm</code> file SHA-256 matches the <code>subject[].digest.sha256</code> in the in-toto statement.</li>
-      <li>The Sigstore certificate's <code>SAN</code> field references the exact repo and workflow that produced the build.</li>
-    </ul>
-    <p>Both checks are re-runnable offline against the <code>provenance.intoto.jsonl</code> file we publish next to every release. The manifest inside the <code>.kolm</code> additionally carries a <code>provenance.attestation_sha256</code> field, so receipt verification can confirm the artifact was the one a given provenance covers.</p>
-  </div>
-</section>
+# Require public-key signatures and a Rekor-pinned Sigstore bundle.
+KOLM_REQUIRE_ED25519=1 KOLM_REQUIRE_REKOR=1 \
+ kolm verify ./artifact.kolm --json</pre>
+ <p>The second command fails if the artifact only has a dry-run Sigstore bundle. That is the correct result for procurement or production environments that require public transparency-log evidence.</p>
+ </section>
 
-<section class="body">
-  <div class="wrap">
-    <h2>04 &middot; Dependencies <span class="sub">SLSA L3</span></h2>
-    <p>Every transitive dependency is pinned in <code>package-lock.json</code> and <code>requirements.txt</code>. Renovate raises advisory PRs; CI fails if any lockfile drifts from what's committed. The CycloneDX SBOM at <a href="/sbom">/sbom</a> is generated by Syft from the locked tree and published as a separate signed artifact per release.</p>
-    <p>The provenance attestation references the SBOM by digest under <code>predicate.buildDefinition.resolvedDependencies</code>, so a procurement reviewer can verify both files came from the same build.</p>
-  </div>
-</section>
+ <section>
+ <h2>How to publish a Rekor pin</h2>
+ <pre>kolm sigstore-attest ./artifact.kolm \
+ --rekor-url https://rekor.example \
+ --json</pre>
+ <p>The command republishes the existing digest, Ed25519 signature, and public key as a Rekor <code>hashedrekord</code> entry, then rewrites the artifact with <code>rekor_log_entry</code> and <code>dry_run:false</code>. The private signing key is not required for this post-build upgrade.</p>
+ </section>
 
-<section class="body">
-  <div class="wrap">
-    <h2>05 &middot; Distribution <span class="sub">SLSA L3</span></h2>
-    <p>Artifacts publish to four surfaces: GitHub Releases, npm registry, Homebrew tap, Docker Hub. Each surface receives the same artifact hash and the same provenance file. The Docker image is additionally signed via <code>cosign sign --key sigstore</code> with the same identity as the artifact.</p>
-    <p>The kolm public registry at <a href="/registry">/registry</a> stores only the manifest hash plus the SLSA attestation digest. A registry entry is rejected if the artifact's SHA-256 does not match what the provenance claims.</p>
-  </div>
-</section>
+ <section>
+ <h2>SLSA target state</h2>
+ <p>Kolm should not claim SLSA Level 3 until the release workflow publishes evidence that can be independently checked. The target bundle is:</p>
+ <ul>
+ <li>Release artifact SHA-256 and <code>.kolm</code> manifest hash.</li>
+ <li>in-toto SLSA v1.0 provenance emitted by the release workflow.</li>
+ <li>Sigstore certificate identity bound to the exact repository and workflow.</li>
+ <li>Transparency-log entry or offline Rekor bundle for air-gapped verification.</li>
+ <li>SBOM digest tied to the same release artifact digest.</li>
+ </ul>
+ </section>
 
-<section class="body">
-  <div class="wrap">
-    <h2>06 &middot; Verification</h2>
-    <p>How a procurement reviewer or an air-gapped operator verifies SLSA provenance, without contacting kolm.ai:</p>
-    <pre>$ cosign verify-attestation \
-    --type slsaprovenance \
-    --certificate-identity-regexp \
-      "https://github.com/sneaky-hippo/kolmogorov-stack/.github/workflows/release-kolm.yml@.*" \
-    --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-    <span class="g">support-triage-v0.4.0.kolm</span>
-
-<span class="c"># verifies:</span>
-<span class="c">#   1. the attestation signature is valid (Sigstore Rekor lookup)</span>
-<span class="c">#   2. the signing identity is the kolm release workflow</span>
-<span class="c">#   3. the artifact SHA-256 matches what the attestation claims</span>
-
-<span class="c"># pairs with the artifact-level receipt check:</span>
-$ kolm inspect <span class="g">support-triage-v0.4.0.kolm</span>
-
-<span class="c"># both must pass before the artifact is trusted in production.</span></pre>
-    <p>For air-gapped environments, the attestation file ships alongside the artifact and is verifiable with <code>slsa-verifier</code> against a Rekor public-key bundle distributed in the same release tarball. Verification works without outbound network.</p>
-  </div>
-</section>
-
-<section class="body">
-  <div class="wrap">
-    <h2>Beyond SLSA: the K-score gate.</h2>
-    <p>SLSA tells you the artifact you hold is the artifact the build pipeline produced. The K-score gate tells you the artifact passed the recipe-declared eval before it was ever published. The two together cover both halves of "is this safe to deploy."</p>
-    <p>The provenance attestation carries an optional <code>predicate.metadata.kolm.k_score</code> field whose value is the K-score the artifact passed at compile time. Procurement reviewers who care about both supply-chain integrity and capability-floor evidence can check one file for both. See <a href="/docs/k-score-methodology" style="color:var(--accent)">k-score methodology</a> for the formula.</p>
-  </div>
-</section>
-
-<section class="body">
-  <div class="wrap">
-    <h2>Where this maps in procurement.</h2>
-    <table>
-      <thead><tr><th>Requirement</th><th>kolm answer</th></tr></thead>
-      <tbody>
-        <tr><td><b>NIST 800-218 PS.3.1 (Archive software)</b></td><td>GitHub Releases + Rekor entry per tag</td></tr>
-        <tr><td><b>NIST 800-218 PS.3.2 (Provenance)</b></td><td class="acc">SLSA v1.0 Build L3</td></tr>
-        <tr><td><b>EO 14028 self-attestation</b></td><td>This page + the attested provenance file</td></tr>
-        <tr><td><b>DoD Software Acquisition Pathway</b></td><td>in-toto 1.0 attestation, Sigstore signed</td></tr>
-        <tr><td><b>FedRAMP SI-7 (Software integrity)</b></td><td>cosign verify on every artifact + Rekor</td></tr>
-      </tbody>
-    </table>
-    <p>Procurement reviewers who want the full attestation bundle for a vendor questionnaire: mail <a href="mailto:security@kolm.ai?subject=SLSA+attestation+bundle">security@kolm.ai</a> with the release tag of interest; typical turnaround one business day.</p>
-  </div>
-</section>
-
+ <section>
+ <h2>Procurement mapping</h2>
+ <table>
+ <thead><tr><th>Requirement</th><th>Current answer</th></tr></thead>
+ <tbody>
+ <tr><td><b>NIST 800-218 PS.3.1</b></td><td>Archive artifact bytes and receipt evidence; public release Rekor entry remains required for the strongest claim.</td></tr>
+ <tr><td><b>NIST 800-218 PS.3.2</b></td><td>Local provenance exists; SLSA Build L3 is a target until release workflow attestations are published.</td></tr>
+ <tr><td><b>FedRAMP SI-7</b></td><td>Use <code>kolm verify</code> plus <code>KOLM_REQUIRE_REKOR=1</code> for artifact integrity gates.</td></tr>
+ <tr><td><b>Enterprise audit</b></td><td>Pair <a href="/trust">/trust</a>, <a href="/sbom">/sbom</a>, and <a href="/spec/rs-1">RS-1</a> evidence with a per-release attestation bundle.</td></tr>
+ </tbody>
+ </table>
+ </section>
+ </div>
 </main>
-<footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/sbom">SBOM</a>
-        <a href="/slsa">SLSA</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/security">Bounty</a>
-        <a href="/baa">BAA</a>
-        <a href="/compliance">Compliance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/community">Community</a>
-        <a href="/insure">Insure</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+<footer>
+ <div class="wrap">
+ Proof surfaces: <a href="/trust">Trust</a> · <a href="/verify-prod">Verify a .kolm</a> · <a href="/sbom">SBOM</a> · <a href="/spec/rs-1">RS-1</a>
+ </div>
 </footer>
 </body>
 </html>

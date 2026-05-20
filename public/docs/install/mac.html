@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Install kolm on macOS &middot; kolm.ai</title>
+<title>Install kolm on macOS · kolm.ai</title>
 <meta name="description" content="Install the kolm CLI on macOS via npm. Apple Silicon and Intel both supported. Five minutes from npm install to first signed artifact.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Install kolm on macOS &middot; kolm.ai">
-<meta property="og:description" content="Install the kolm CLI on macOS via npm. Apple Silicon and Intel both supported.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Install kolm on macOS · kolm.ai">
+<meta property="og:description" content="Install the kolm CLI on macOS via npm. Apple Silicon and Intel both supported. Five minutes from npm install to first signed artifact.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/install/mac">
-<meta property="og:image" content="https://kolm.ai/og/docs-install-mac.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Install kolm on macOS &middot; kolm.ai">
-<meta name="twitter:description" content="Install the kolm CLI on macOS via npm.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-install-mac.svg">
+<meta name="twitter:title" content="Install kolm on macOS · kolm.ai">
+<meta name="twitter:description" content="Install the kolm CLI on macOS via npm. Apple Silicon and Intel both supported. Five minutes from npm install to first signed artifact.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/install/mac">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Install kolm on macOS","description":"Install the kolm CLI on macOS via npm. Apple Silicon and Intel both supported.","url":"https://kolm.ai/docs/install/mac","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -64,73 +64,74 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, not the Kolm band, not Petter Kolm.</span>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / install / mac</div>
 <h1>Install kolm on macOS</h1>
-<p class="lede">The kolm CLI ships as a single npm package. One command installs it, one command verifies the version, one command signs in. Apple Silicon (M1, M2, M3, M4) and Intel macs both supported.</p>
+<p class="lede">The supported CLI install path is npm from the GitHub source package. One command installs it, one command verifies the version, one command signs in. Apple Silicon (M1, M2, M3, M4) and Intel macs both supported.</p>
 
 <h2 id="prereq">Prerequisites</h2>
 <p>Node.js 20 or newer. Check your version with <code>node --version</code>. If you do not have Node:</p>
 <table>
-  <thead><tr><th>Path</th><th>Command</th></tr></thead>
-  <tbody>
-    <tr><td>Recommended (Homebrew)</td><td><code>brew install node@20</code></td></tr>
-    <tr><td>System pkg</td><td>Download from <a href="https://nodejs.org">nodejs.org</a></td></tr>
-    <tr><td>Apple-silicon native</td><td>Make sure Node was installed via the arm64 installer; check with <code>node -p "process.arch"</code> (should print <code>arm64</code>)</td></tr>
-  </tbody>
+ <thead><tr><th>Path</th><th>Command</th></tr></thead>
+ <tbody>
+ <tr><td>Recommended (Homebrew)</td><td><code>brew install node@20</code></td></tr>
+ <tr><td>System pkg</td><td>Download from <a href="https://nodejs.org">nodejs.org</a></td></tr>
+ <tr><td>Apple-silicon native</td><td>Make sure Node was installed via the arm64 installer; check with <code>node -p "process.arch"</code> (should print <code>arm64</code>)</td></tr>
+ </tbody>
 </table>
 
 <h2 id="install">Five minutes</h2>
 
 <div class="step">
-  <span class="num">Step 1</span>
-  <h3>Install via npm</h3>
-<pre><code>npm i -g kolm</code></pre>
-  <p>Global install puts the <code>kolm</code> binary on your path. If you hit a permission error on the system Node, prefer nvm; nvm-managed Node owns its own global folder and never needs sudo for global packages.</p>
+ <span class="num">Step 1</span>
+ <h3>Install from GitHub via npm</h3>
+<pre><code>npm i -g github:sneaky-hippo/kolmogorov-stack</code></pre>
+ <p>Global install puts the <code>kolm</code> binary on your path. If you hit a permission error on the system Node, prefer nvm; nvm-managed Node owns its own global folder and never needs sudo for global packages.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 2</span>
-  <h3>Verify</h3>
+ <span class="num">Step 2</span>
+ <h3>Verify</h3>
 <pre><code>kolm --version
 kolm --help</code></pre>
-  <p>You should see a version line and the one-screen verb list.</p>
+ <p>You should see a version line and the one-screen verb list.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 3</span>
-  <h3>Sign in</h3>
+ <span class="num">Step 3</span>
+ <h3>Sign in</h3>
 <pre><code>kolm signup --email you@company.com
 # or, if you already have a key:
 kolm login --key ks_...</code></pre>
-  <p>The signup verb provisions a tenant and an API key, then writes them to <code>~/.kolm/config.json</code>. The login verb takes an existing key directly.</p>
+ <p>The signup verb provisions a tenant and an API key, then writes them to <code>~/.kolm/config.json</code>. The login verb takes an existing key directly.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 4</span>
-  <h3>Run the doctor</h3>
+ <span class="num">Step 4</span>
+ <h3>Run the doctor</h3>
 <pre><code>kolm doctor
 kolm doctor --detect-hw</code></pre>
-  <p>The first form sanity-checks config, cloud, Docker if present, and any project-level <code>kolm.yaml</code>. The second reads system_profiler to recommend a model tier based on the Apple Silicon variant and memory.</p>
+ <p>The first form sanity-checks config, cloud, Docker if present, and any project-level <code>kolm.yaml</code>. The second reads system_profiler to recommend a model tier based on the Apple Silicon variant and memory.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 5</span>
-  <h3>Build the first artifact</h3>
+ <span class="num">Step 5</span>
+ <h3>Build the first artifact</h3>
 <pre><code>kolm build first --from chatbot
 kolm list
 kolm run ~/.kolm/artifacts/first.kolm 'hello'</code></pre>
-  <p>One-shot scaffold plus seeds plus compile plus verify. Drops a signed <code>.kolm</code> under <code>~/.kolm/artifacts/</code>.</p>
+ <p>One-shot scaffold plus seeds plus compile plus verify. Drops a signed <code>.kolm</code> under <code>~/.kolm/artifacts/</code>.</p>
 </div>
 
 <h2 id="silicon">Apple Silicon notes</h2>
@@ -138,39 +139,39 @@ kolm run ~/.kolm/artifacts/first.kolm 'hello'</code></pre>
 
 <h2 id="paths">Where files land</h2>
 <table>
-  <thead><tr><th>Path</th><th>Holds</th></tr></thead>
-  <tbody>
-    <tr><td><code>~/.kolm/config.json</code></td><td>Tenant + API key + base URL.</td></tr>
-    <tr><td><code>~/.kolm/artifacts/</code></td><td>Signed <code>.kolm</code> files.</td></tr>
-    <tr><td><code>~/.kolm/events.sqlite</code></td><td>Captured (input, output) pairs from <code>kolm capture</code>.</td></tr>
-    <tr><td><code>~/.kolm/models/</code></td><td>Pre-cached GGUF weights from <code>kolm models pull</code>.</td></tr>
-    <tr><td><code>~/.kolm/logs/runs.jsonl</code></td><td>Append-only run history. Tail with <code>kolm logs</code>.</td></tr>
-  </tbody>
+ <thead><tr><th>Path</th><th>Holds</th></tr></thead>
+ <tbody>
+ <tr><td><code>~/.kolm/config.json</code></td><td>Tenant + API key + base URL.</td></tr>
+ <tr><td><code>~/.kolm/artifacts/</code></td><td>Signed <code>.kolm</code> files.</td></tr>
+ <tr><td><code>~/.kolm/events.sqlite</code></td><td>Captured (input, output) pairs from <code>kolm capture</code>.</td></tr>
+ <tr><td><code>~/.kolm/models/</code></td><td>Pre-cached GGUF weights from <code>kolm models pull</code>.</td></tr>
+ <tr><td><code>~/.kolm/logs/runs.jsonl</code></td><td>Append-only run history. Tail with <code>kolm logs</code>.</td></tr>
+ </tbody>
 </table>
 
 <h2 id="upgrade">Upgrade</h2>
-<pre><code>kolm upgrade           # check for a newer release
-kolm update            # self-install the latest from github</code></pre>
+<pre><code>kolm upgrade # check for a newer release
+kolm update # self-install the latest from github</code></pre>
 
 <h2 id="see">Related</h2>
 <div class="related">
-  <a href="/docs/install/linux"><b>/docs/install/linux</b><span>Install on Linux. Same npm command, same five steps.</span></a>
-  <a href="/docs/install/windows"><b>/docs/install/windows</b><span>Install on Windows via PowerShell.</span></a>
-  <a href="/quickstart"><b>/quickstart</b><span>Five minute onboarding from npm install to first signed artifact.</span></a>
-  <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
-  <a href="/docs/connectors"><b>/docs/connectors</b><span>Wire OpenAI, Anthropic, Ollama, vLLM into the local capture proxy.</span></a>
+ <a href="/docs/install/linux"><b>/docs/install/linux</b><span>Install on Linux. Same npm command, same five steps.</span></a>
+ <a href="/docs/install/windows"><b>/docs/install/windows</b><span>Install on Windows via PowerShell.</span></a>
+ <a href="/quickstart"><b>/quickstart</b><span>Five minute onboarding from npm install to first signed artifact.</span></a>
+ <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
+ <a href="/docs/connectors"><b>/docs/connectors</b><span>Wire OpenAI, Anthropic, Ollama, vLLM into the local capture proxy.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 kolm.ai</span>
-  &middot;
-  <a href="/security">Security</a>
-  &middot;
-  <a href="/pricing">Pricing</a>
-  &middot;
-  <a href="/docs">Docs</a>
+ <span>&copy; 2026 kolm.ai</span>
+ &middot;
+ <a href="/security">Security</a>
+ &middot;
+ <a href="/pricing">Pricing</a>
+ &middot;
+ <a href="/docs">Docs</a>
 </div></footer>
 
 </body>

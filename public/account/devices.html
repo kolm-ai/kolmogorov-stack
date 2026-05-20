@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Devices · Account · kolm.ai</title>
-<meta name="description" content="Registered devices on kolm.ai: kind, runtime, RAM, artifacts installed, last seen, test button per row. Backed by src/device-capabilities.js + src/device-install.js.">
+<title>Devices · Account · Account · kolm.ai</title>
+<meta name="description" content="Registered devices on kolm.ai: kind, runtime, RAM, artifacts installed, last seen, test button per row. Backed by src/device-capabilities.js +...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/devices">
-<meta property="og:title" content="Devices &middot; Account &middot; kolm.ai" />
-<meta property="og:description" content="Registered devices on kolm.ai: kind, runtime, RAM, artifacts installed, last seen, test button per row. Backed by src/device-capabilities.js + src/device-install.js." />
-<meta property="og:image" content="https://kolm.ai/og-card.svg" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://kolm.ai/account/devices" />
+<meta property="og:title" content="Devices · Account · Account · kolm.ai">
+<meta property="og:description" content="Registered devices on kolm.ai: kind, runtime, RAM, artifacts installed, last seen, test button per row. Backed by src/device-capabilities.js +...">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/devices">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
@@ -61,13 +61,18 @@
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
 
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Devices · Account · Account · kolm.ai">
+<meta name="twitter:description" content="Registered devices on kolm.ai: kind, runtime, RAM, artifacts installed, last seen, test button per row. Backed by src/device-capabilities.js +...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -218,8 +223,8 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions"><a href="/docs">Help</a></div>
-  </div>
+ <div class="site-actions"><a href="/docs">Help</a></div>
+ </div>
 </header>
 
 <main id="main">
@@ -229,18 +234,18 @@
 <h1>Devices.</h1>
 <p class="lede">Every device this account knows about. Kind, runtime, RAM, the artifacts installed there, last heartbeat. Test reachability with one click.</p>
 <div class="toolbar">
-  <button class="btn primary" id="btn-detect" type="button">Detect this device</button>
-  <a class="btn" href="/docs/devices">Register a remote device</a>
+ <button class="btn primary" id="btn-detect" type="button">Detect this device</button>
+ <a class="btn" href="/docs/devices">Register a remote device</a>
 </div>
 <table class="ktable" id="dev-table">
-  <thead><tr><th>Device id</th><th>Kind</th><th>Runtime</th><th>RAM</th><th>Artifacts</th><th>Last seen</th><th>Test</th></tr></thead>
-  <tbody id="dev-rows">
-    <!-- row template: <tr><td>...</td>...<td><button class="btn" data-action="test-device" data-id="...">test</button></td></tr> -->
-    <tr><td colspan="7"><div class="skel" style="width:260px"></div></td></tr>
-  </tbody>
+ <thead><tr><th>Device id</th><th>Kind</th><th>Runtime</th><th>RAM</th><th>Artifacts</th><th>Last seen</th><th>Test</th></tr></thead>
+ <tbody id="dev-rows">
+ <!-- row template: <tr><td>...</td>...<td><button class="btn" data-action="test-device" data-id="...">test</button></td></tr> -->
+ <tr><td colspan="7"><div class="skel" style="width:260px"></div></td></tr>
+ </tbody>
 </table>
 <div id="empty-state" class="empty" hidden data-empty-state>
-  <strong>No devices registered.</strong> Click "Detect this device" to auto-register the box you are reading this on. Or follow <a href="/docs/devices">the docs</a> to register a remote.
+ <strong>No devices registered.</strong> Click "Detect this device" to auto-register the box you are reading this on. Or follow <a href="/docs/devices">the docs</a> to register a remote.
 </div>
 </section>
 </div>
@@ -248,42 +253,42 @@
 
 <script>
 (function(){
-  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+ var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
 
-  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
-  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
-  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
-  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
-  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
-  window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
-  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+ if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
+ window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+ window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+ window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
+ window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
+ window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
 })();
 var rows=document.getElementById("dev-rows");
 function render(list){
-  if(!list.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
-  document.getElementById("empty-state").hidden=true;
-  rows.innerHTML=list.map(function(d){
-    var arts=(d.artifacts_installed||d.installed||[]).length;
-    var last=d.last_seen||d.detected_at||"-";
-    return "<tr>"+
-      "<td><b>"+window.kesc(d.device_id||"-")+"</b></td>"+
-      "<td>"+window.kesc(d.kind||"-")+"</td>"+
-      "<td><code>"+window.kesc((d.runtimes||[d.runtime||"-"]).join(", "))+"</code></td>"+
-      "<td>"+(d.ram_gb!=null?d.ram_gb+" GB":"-")+"</td>"+
-      "<td>"+arts+"</td>"+
-      "<td>"+window.kesc(last)+"</td>"+
-      "<td><button class=\"btn\" data-action=\"test-device\" data-id=\""+window.kesc(d.device_id||"")+"\">test</button></td>"+
-    "</tr>";
-  }).join("");
+ if(!list.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
+ document.getElementById("empty-state").hidden=true;
+ rows.innerHTML=list.map(function(d){
+ var arts=(d.artifacts_installed||d.installed||[]).length;
+ var last=d.last_seen||d.detected_at||"-";
+ return "<tr>"+
+ "<td><b>"+window.kesc(d.device_id||"-")+"</b></td>"+
+ "<td>"+window.kesc(d.kind||"-")+"</td>"+
+ "<td><code>"+window.kesc((d.runtimes||[d.runtime||"-"]).join(", "))+"</code></td>"+
+ "<td>"+(d.ram_gb!=null?d.ram_gb+" GB":"-")+"</td>"+
+ "<td>"+arts+"</td>"+
+ "<td>"+window.kesc(last)+"</td>"+
+ "<td><button class=\"btn\" data-action=\"test-device\" data-id=\""+window.kesc(d.device_id||"")+"\">test</button></td>"+
+ "</tr>";
+ }).join("");
 }
 function refresh(){window.kfetch("/v1/devices").catch(function(){return {devices:[]};}).then(function(j){render((j&&j.devices)||(Array.isArray(j)?j:[]));});}
 refresh();
 document.getElementById("btn-detect").addEventListener("click",function(){window.kfetch("/v1/devices/detect",{method:"POST"}).then(refresh).catch(function(e){alert("detect failed: "+e.message);});});
 rows.addEventListener("click",function(e){
-  var b=e.target.closest("button[data-action=test-device]"); if(!b)return;
-  b.textContent="testing..."; b.disabled=true;
-  var id=b.getAttribute("data-id");
-  window.kfetch("/v1/devices/"+encodeURIComponent(id)+"/test",{method:"POST"}).then(function(t){b.textContent=t.reachable?"reachable":"unreachable";b.className="btn "+(t.reachable?"":"bad");}).catch(function(){b.textContent="error";b.className="btn bad";}).finally(function(){b.disabled=false;});
+ var b=e.target.closest("button[data-action=test-device]"); if(!b)return;
+ b.textContent="testing..."; b.disabled=true;
+ var id=b.getAttribute("data-id");
+ window.kfetch("/v1/devices/"+encodeURIComponent(id)+"/test",{method:"POST"}).then(function(t){b.textContent=t.reachable?"reachable":"unreachable";b.className="btn "+(t.reachable?"":"bad");}).catch(function(){b.textContent="error";b.className="btn bad";}).finally(function(){b.disabled=false;});
 });
 </script>
 </body>

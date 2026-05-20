@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Captures · kolm.ai</title>
-<meta name="description" content="Every inference your agents make, captured and triaged. Keep / discard / promote each observation. When a namespace hits 1,000 pairs, distill it into a signed .kolm artifact.">
+<meta name="description" content="Every inference your agents make, captured and triaged. Keep / discard / promote each observation. When a namespace hits 1,000 pairs, distill it into a...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="kolm captures inbox">
-<meta property="og:description" content="Rent-vs-buy inbox: capture every upstream inference, triage with one click, distill into a Specialist when ready.">
+<meta property="og:title" content="Captures · kolm.ai">
+<meta property="og:description" content="Every inference your agents make, captured and triaged. Keep / discard / promote each observation. When a namespace hits 1,000 pairs, distill it into a...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/captures">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -21,266 +21,270 @@
 <meta name="robots" content="noindex,follow">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #faf2e1; --accent-strong: #c9c2b2;
-    --good: #7ef0d2; --warn: #ffd07a; --bad: #ff6b91;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 0 32px; }
-  .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --warn: #ffd07a; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 980px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
 
-  header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
-  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
-  header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
-  header.site nav a:hover { color: var(--ink); }
-  header.site .right { display: flex; align-items: center; gap: 14px; }
-  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .ghost:hover { color: var(--ink); }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
 
-  section.hero { padding: 120px 0 24px; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
-  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
-  h1 { margin: 22px 0 22px; font-size: clamp(48px, 6.4vw, 80px); line-height: 1.02; font-weight: 500; max-width: 16ch; letter-spacing: -0.025em; }
-  h1 .tone { color: var(--good); }
-  p.lede { margin: 0 0 36px; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: var(--ink-mute); max-width: 58ch; }
-  p.lede b { color: var(--ink); font-weight: 500; }
+ section.hero { padding: 120px 0 24px; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+ h1 { margin: 22px 0 22px; font-size: clamp(48px, 6.4vw, 80px); line-height: 1.02; font-weight: 500; max-width: 16ch; letter-spacing: -0.025em; }
+ h1 .tone { color: var(--good); }
+ p.lede { margin: 0 0 36px; font-size: clamp(17px, 1.4vw, 20px); line-height: 1.55; color: var(--ink-mute); max-width: 58ch; }
+ p.lede b { color: var(--ink); font-weight: 500; }
 
-  h2 { margin: 120px 0 22px; font-size: clamp(36px, 4.2vw, 56px); line-height: 1.05; font-weight: 500; letter-spacing: -0.02em; max-width: 20ch; }
-  h2 + p { font-size: clamp(16px, 1.3vw, 18px); max-width: 58ch; margin-bottom: 32px; }
-  p { margin: 0 0 14px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.65; }
-  p code, li code, td code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+ h2 { margin: 120px 0 22px; font-size: clamp(36px, 4.2vw, 56px); line-height: 1.05; font-weight: 500; letter-spacing: -0.02em; max-width: 20ch; }
+ h2 + p { font-size: clamp(16px, 1.3vw, 18px); max-width: 58ch; margin-bottom: 32px; }
+ p { margin: 0 0 14px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.65; }
+ p code, li code, td code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
 
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 16px 0 28px; }
-  @media (max-width: 720px) { .stats { grid-template-columns: 1fr; } }
-  .stat { border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; background: var(--bg-elev); }
-  .stat .k { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); }
-  .stat .v { margin-top: 4px; font-size: 28px; font-weight: 500; color: var(--ink); font-family: var(--mono); line-height: 1; }
-  .stat .v small { font-size: 13px; color: var(--ink-mute); margin-left: 8px; font-weight: 400; }
-  .stat.ready { border-color: rgba(126,240,210,0.25); }
-  .stat.ready .v { color: var(--good); }
+ .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 16px 0 28px; }
+ @media (max-width: 720px) { .stats { grid-template-columns: 1fr; } }
+ .stat { border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; background: var(--bg-elev); }
+ .stat .k { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); }
+ .stat .v { margin-top: 4px; font-size: 28px; font-weight: 500; color: var(--ink); font-family: var(--mono); line-height: 1; }
+ .stat .v small { font-size: 13px; color: var(--ink-mute); margin-left: 8px; font-weight: 400; }
+ .stat.ready { border-color: rgba(126,240,210,0.25); }
+ .stat.ready .v { color: var(--good); }
 
-  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .toolbar-primary { margin: 8px 0 8px; }
-  .toolbar-secondary { margin: 0 0 24px; }
-  .toolbar-secondary .btn { font-size: 11.5px; padding: 6px 10px; }
-  .toolbar .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--ink-mute); cursor: pointer; }
-  .toolbar .btn:hover { color: var(--ink); }
-  .toolbar .btn.primary { background: var(--good); color: var(--bg); border-color: var(--good); font-weight: 500; }
-  .toolbar .btn.primary:hover { color: var(--bg); opacity: 0.9; }
-  .toolbar .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .toolbar select { background: var(--bg-elev); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; padding: 6px 10px; font-family: var(--mono); font-size: 12px; }
-  @media (max-width: 720px) {
-    .toolbar { gap: 6px; }
-    .toolbar select, .toolbar #search-filter, .toolbar .btn { width: 100%; max-width: 100%; flex: 1 0 100%; }
-    .toolbar-secondary span[style*="flex:1"] { display: none; }
-  }
+ .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+ .toolbar-primary { margin: 8px 0 8px; }
+ .toolbar-secondary { margin: 0 0 24px; }
+ .toolbar-secondary .btn { font-size: 11.5px; padding: 6px 10px; }
+ .toolbar .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--ink-mute); cursor: pointer; }
+ .toolbar .btn:hover { color: var(--ink); }
+ .toolbar .btn.primary { background: var(--good); color: var(--bg); border-color: var(--good); font-weight: 500; }
+ .toolbar .btn.primary:hover { color: var(--bg); opacity: 0.9; }
+ .toolbar .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+ .toolbar select { background: var(--bg-elev); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; padding: 6px 10px; font-family: var(--mono); font-size: 12px; }
+ @media (max-width: 720px) {
+ .toolbar { gap: 6px; }
+ .toolbar select, .toolbar #search-filter, .toolbar .btn { width: 100%; max-width: 100%; flex: 1 0 100%; }
+ .toolbar-secondary span[style*="flex:1"] { display: none; }
+ }
 
-  .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 8px 0 0; border: 1px solid var(--line); border-radius: 8px; }
-  .tbl-scroll table.tbl { margin: 0; min-width: 720px; }
-  table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0 0; table-layout: fixed; }
-  table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
-  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
-  table.tbl td { color: var(--ink-mute); word-break: break-word; }
-  table.tbl td b { color: var(--ink); font-weight: 500; }
-  table.tbl td.excerpt { font-family: var(--mono); font-size: 12px; color: var(--ink); }
-  table.tbl td.actions { white-space: nowrap; }
-  table.tbl tr.discarded td { opacity: 0.4; text-decoration: line-through; }
-  table.tbl tr.kept td { background: rgba(126,240,210,0.04); }
+ .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 8px 0 0; border: 1px solid var(--line); border-radius: 8px; }
+ .tbl-scroll table.tbl { margin: 0; min-width: 720px; }
+ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0 0; table-layout: fixed; }
+ table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+ table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
+ table.tbl td { color: var(--ink-mute); word-break: break-word; }
+ table.tbl td b { color: var(--ink); font-weight: 500; }
+ table.tbl td.excerpt { font-family: var(--mono); font-size: 12px; color: var(--ink); }
+ table.tbl td.actions { white-space: nowrap; }
+ table.tbl tr.discarded td { opacity: 0.4; text-decoration: line-through; }
+ table.tbl tr.kept td { background: rgba(126,240,210,0.04); }
 
-  .act { display: inline-flex; gap: 4px; }
-  .act button, .act a { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 5px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--ink-mute); cursor: pointer; line-height: 1.4; }
-  .act button:hover, .act a:hover { color: var(--ink); }
-  .act .keep:hover { color: var(--good); border-color: var(--good); }
-  .act .disc:hover { color: var(--bad); border-color: var(--bad); }
-  .act .prom:hover { color: var(--accent); border-color: var(--accent-strong); }
+ .act { display: inline-flex; gap: 4px; }
+ .act button, .act a { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 5px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--ink-mute); cursor: pointer; line-height: 1.4; }
+ .act button:hover, .act a:hover { color: var(--ink); }
+ .act .keep:hover { color: var(--good); border-color: var(--good); }
+ .act .disc:hover { color: var(--bad); border-color: var(--bad); }
+ .act .prom:hover { color: var(--accent); border-color: var(--accent-strong); }
 
-  pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 12px 0; white-space: pre; }
-  @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
-  pre.code .com { color: var(--ink-faint); }
-  pre.code .ok { color: var(--good); }
-  pre.code .arg { color: var(--accent-strong); }
+ pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 12px 0; white-space: pre; }
+ @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
+ pre.code .com { color: var(--ink-faint); }
+ pre.code .ok { color: var(--good); }
+ pre.code .arg { color: var(--accent-strong); }
 
-  .panel { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); margin: 16px 0; }
-  .panel h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink); }
-  .panel p { font-size: 14px; }
+ .panel { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); margin: 16px 0; }
+ .panel h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink); }
+ .panel p { font-size: 14px; }
 
-  .empty { display: none; padding: 32px; border: 1px dashed var(--line-strong); border-radius: 10px; background: var(--bg-elev); margin: 16px 0; text-align: center; }
-  .empty.on { display: block; }
-  .empty h3 { margin: 0 0 12px; font-size: 17px; font-weight: 500; color: var(--ink); }
-  .empty p { font-size: 14px; max-width: 60ch; margin: 0 auto 16px; }
+ .empty { display: none; padding: 32px; border: 1px dashed var(--line-strong); border-radius: 10px; background: var(--bg-elev); margin: 16px 0; text-align: center; }
+ .empty.on { display: block; }
+ .empty h3 { margin: 0 0 12px; font-size: 17px; font-weight: 500; color: var(--ink); }
+ .empty p { font-size: 14px; max-width: 60ch; margin: 0 auto 16px; }
 
-  .ns-tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--ink-mute); background: var(--bg-card); }
+ .ns-tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--ink-mute); background: var(--bg-card); }
 
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 80px; }
-  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  footer.site a { color: var(--ink-mute); }
-  footer.site a:hover { color: var(--ink); }
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 80px; }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-mute); }
+ footer.site a:hover { color: var(--ink); }
 
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--bg-card); border: 1px solid var(--line-strong); padding: 10px 16px; border-radius: 8px; font-family: var(--mono); font-size: 12px; color: var(--ink); display: none; z-index: 100; }
-  .toast.on { display: block; }
+ .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--bg-card); border: 1px solid var(--line-strong); padding: 10px 16px; border-radius: 8px; font-family: var(--mono); font-size: 12px; color: var(--ink); display: none; z-index: 100; }
+ .toast.on { display: block; }
 </style>
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Captures &middot; kolm",
-  "description": "Per-tenant capture inbox: keep, discard, or promote each upstream inference. Distill into a signed .kolm artifact at 1,000 pairs.",
-  "url": "https://kolm.ai/captures",
-  "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
+ "@context": "https://schema.org",
+ "@type": "WebPage",
+ "name": "Captures &middot; kolm",
+ "description": "Per-tenant capture inbox: keep, discard, or promote each upstream inference. Distill into a signed .kolm artifact at 1,000 pairs.",
+ "url": "https://kolm.ai/captures",
+ "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:title" content="Captures · kolm.ai">
+<meta name="twitter:description" content="Every inference your agents make, captured and triaged. Keep / discard / promote each observation. When a namespace hits 1,000 pairs, distill it into a...">
 </head>
 <body>
 <a class="skip" href="#main" style="position:absolute;left:-9999px;background:#10b981;color:#fff;padding:8px 14px;z-index:1000" onfocus="this.style.left='8px';this.style.top='8px';this.style.position='fixed'" onblur="this.style.left='-9999px';this.style.position='absolute'">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/dashboard">Dashboard</a>
-        <a href="/captures" aria-current="page">Captures</a>
-        <a href="/audit-log">Audit log</a>
-        <a href="/account">Account</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/docs" class="ghost">Help</a>
-      <a href="/dashboard#dash-compile" class="cta">New compile &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/dashboard">Dashboard</a>
+ <a href="/captures" aria-current="page">Captures</a>
+ <a href="/audit-log">Audit log</a>
+ <a href="/account">Account</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/docs" class="ghost">Help</a>
+ <a href="/dashboard#dash-compile" class="cta">New compile &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <main id="main">
 
 <section class="hero">
-  <div class="wrap-wide">
-    <h1>Your <span class="tone">captures inbox.</span></h1>
-    <p class="lede"><b>Point your provider client at kolm. Every prompt &amp; response lands here.</b> Keep what matters, discard the noise, promote a winner into a recipe. At 1,000 pairs the inbox hands the namespace to the distill bridge, which returns a signed <code>.kolm</code> Specialist you can run on your own hardware.</p>
+ <div class="wrap-wide">
+ <h1>Your <span class="tone">captures inbox.</span></h1>
+ <p class="lede"><b>Point your provider client at kolm. Every prompt &amp; response lands here.</b> Keep what matters, discard the noise, promote a winner into a recipe. At 1,000 pairs the inbox hands the namespace to the distill bridge, which returns a signed <code>.kolm</code> Specialist you can run on your own hardware.</p>
 
-    <div id="signedout" class="panel" style="border-color:var(--accent-strong);background:rgba(126,240,210,0.04)">
-      <h3 style="margin:0 0 8px;color:var(--ink)">Sign in or create an account to see your captures stream live</h3>
-      <p style="margin:0 0 16px">The captures inbox is per-tenant and gated by your API key. Once you sign in, every call to <code>kolm.ai/v1/capture/{openai,anthropic}</code> from your client lands here, namespaced and triage-ready.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <a class="btn primary" href="/signin" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;padding:9px 16px;border-radius:6px;background:var(--good);color:var(--bg);border:1px solid var(--good);font-weight:500;text-decoration:none">Sign in &rarr;</a>
-        <a class="btn" href="/signup" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;padding:9px 16px;border-radius:6px;background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);text-decoration:none">Create a free account &rarr;</a>
-      </div>
-    </div>
+ <div id="signedout" class="panel" style="border-color:var(--accent-strong);background:rgba(126,240,210,0.04)">
+ <h3 style="margin:0 0 8px;color:var(--ink)">Sign in or create an account to see your captures stream live</h3>
+ <p style="margin:0 0 16px">The captures inbox is per-tenant and gated by your API key. Once you sign in, calls to <code>kolm.ai/v1/capture/openai</code>, <code>kolm.ai/v1/capture/anthropic</code>, or <code>kolm.ai/v1/capture/openrouter</code> land here, namespaced and triage-ready.</p>
+ <div style="display:flex;gap:10px;flex-wrap:wrap">
+ <a class="btn primary" href="/signin" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;padding:9px 16px;border-radius:6px;background:var(--good);color:var(--bg);border:1px solid var(--good);font-weight:500;text-decoration:none">Sign in &rarr;</a>
+ <a class="btn" href="/signup" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;padding:9px 16px;border-radius:6px;background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);text-decoration:none">Create a free account &rarr;</a>
+ </div>
+ </div>
 
-    <div id="livewrap" style="display:none">
-      <div class="stats">
-        <div class="stat"><div class="k">Captured</div><div class="v" id="stat-total">0</div></div>
-        <div class="stat ready"><div class="k">Ready to distill</div><div class="v" id="stat-ready">0 <small>&lt; 1,000 pairs / namespace</small></div></div>
-        <div class="stat"><div class="k">Namespaces</div><div class="v" id="stat-ns">0</div></div>
-      </div>
+ <div id="livewrap" style="display:none">
+ <div class="stats">
+ <div class="stat"><div class="k">Captured</div><div class="v" id="stat-total">0</div></div>
+ <div class="stat ready"><div class="k">Ready to distill</div><div class="v" id="stat-ready">0 <small>&lt; 1,000 pairs / namespace</small></div></div>
+ <div class="stat"><div class="k">Namespaces</div><div class="v" id="stat-ns">0</div></div>
+ </div>
 
-      <!-- W259 toolbar: row 1 primary (filter + search), row 2 secondary (live/refresh/replay/csv/distill). -->
-      <div class="toolbar toolbar-primary">
-        <select id="ns-filter"><option value="">All namespaces</option></select>
-        <input id="search-filter" type="search" placeholder="Search prompt / response / template &hellip;" aria-label="Search captures by prompt, response, or template preview" style="flex:1;min-width:220px;max-width:380px;padding:6px 10px;font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)" />
-        <span id="search-count" style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);display:none"></span>
-      </div>
-      <div class="toolbar toolbar-secondary">
-        <label style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="show-discarded"> show discarded</label>
-        <button class="btn" id="live-toggle" type="button" aria-pressed="false" title="Stream new captures over Server-Sent Events">Live tail: off</button>
-        <button class="btn" id="refresh" type="button">Refresh</button>
-        <button class="btn" id="replay" type="button" title="Replay captured prompts against a compiled artifact">Replay &rarr; diff</button>
-        <button class="btn" id="download-csv" type="button" title="Download currently visible rows as CSV">Download CSV</button>
-        <span style="flex:1"></span>
-        <button class="btn primary" id="distill" type="button" disabled>Distill ready namespaces &rarr;</button>
-      </div>
+ <!-- W259 toolbar: row 1 primary (filter + search), row 2 secondary (live/refresh/replay/csv/distill). -->
+ <div class="toolbar toolbar-primary">
+ <select id="ns-filter"><option value="">All namespaces</option></select>
+ <input id="search-filter" type="search" placeholder="Search prompt / response / template &hellip;" aria-label="Search captures by prompt, response, or template preview" style="flex:1;min-width:220px;max-width:380px;padding:6px 10px;font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)" />
+ <span id="search-count" style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);display:none"></span>
+ </div>
+ <div class="toolbar toolbar-secondary">
+ <label style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="show-discarded"> show discarded</label>
+ <button class="btn" id="live-toggle" type="button" aria-pressed="false" title="Stream new captures over Server-Sent Events">Live tail: off</button>
+ <button class="btn" id="refresh" type="button">Refresh</button>
+ <button class="btn" id="replay" type="button" title="Replay captured prompts against a compiled artifact">Replay &rarr; diff</button>
+ <button class="btn" id="download-csv" type="button" title="Download currently visible rows as CSV">Download CSV</button>
+ <span style="flex:1"></span>
+ <button class="btn primary" id="distill" type="button" disabled>Distill ready namespaces &rarr;</button>
+ </div>
 
-      <!-- W316 promote-confirm modal -->
-      <div id="promote-modal" role="dialog" aria-modal="true" aria-labelledby="promote-modal-title" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:50;align-items:center;justify-content:center">
-        <div style="background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:20px 22px;max-width:480px;width:92vw;color:var(--ink);font-family:var(--mono);font-size:13px">
-          <h3 id="promote-modal-title" style="margin:0 0 10px 0;font-size:15px">Promote to playground?</h3>
-          <p style="margin:0 0 14px 0;color:var(--ink-mute);line-height:1.5">This opens the playground with the captured pair pre-loaded as a seed. The original capture row is not modified.</p>
-          <div id="promote-modal-summary" style="background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;font-size:12px;color:var(--ink-mute);margin-bottom:14px;max-height:140px;overflow:auto"></div>
-          <div style="display:flex;gap:8px;justify-content:flex-end">
-            <button class="btn" id="promote-cancel" type="button">Cancel</button>
-            <button class="btn primary" id="promote-confirm" type="button">Open playground &rarr;</button>
-          </div>
-        </div>
-      </div>
+ <!-- W316 promote-confirm modal -->
+ <div id="promote-modal" role="dialog" aria-modal="true" aria-labelledby="promote-modal-title" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:50;align-items:center;justify-content:center">
+ <div style="background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:20px 22px;max-width:480px;width:92vw;color:var(--ink);font-family:var(--mono);font-size:13px">
+ <h3 id="promote-modal-title" style="margin:0 0 10px 0;font-size:15px">Promote to playground?</h3>
+ <p style="margin:0 0 14px 0;color:var(--ink-mute);line-height:1.5">This opens the playground with the captured pair pre-loaded as a seed. The original capture row is not modified.</p>
+ <div id="promote-modal-summary" style="background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;font-size:12px;color:var(--ink-mute);margin-bottom:14px;max-height:140px;overflow:auto"></div>
+ <div style="display:flex;gap:8px;justify-content:flex-end">
+ <button class="btn" id="promote-cancel" type="button">Cancel</button>
+ <button class="btn primary" id="promote-confirm" type="button">Open playground &rarr;</button>
+ </div>
+ </div>
+ </div>
 
-      <div id="replay-drawer" style="display:none;border:1px solid var(--line);border-radius:8px;padding:12px;margin:8px 0 12px;background:var(--bg-elev)">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <strong style="font-family:var(--mono);font-size:13px">Replay diff</strong>
-          <input id="replay-artifact" placeholder="concept_id or ver_…" style="flex:1;min-width:220px;padding:6px 8px;font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)" />
-          <input id="replay-limit" type="number" value="10" min="1" max="200" style="width:80px;padding:6px 8px;font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)" />
-          <button class="btn" id="replay-preview" type="button">Preview</button>
-          <button class="btn primary" id="replay-run" type="button">Run replay</button>
-          <button class="btn" id="replay-close" type="button">Close</button>
-        </div>
-        <div id="replay-summary" style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-bottom:6px"></div>
-        <div id="replay-rows" style="font-family:var(--mono);font-size:11px;max-height:280px;overflow:auto"></div>
-      </div>
+ <div id="replay-drawer" style="display:none;border:1px solid var(--line);border-radius:8px;padding:12px;margin:8px 0 12px;background:var(--bg-elev)">
+ <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+ <strong style="font-family:var(--mono);font-size:13px">Replay diff</strong>
+ <input id="replay-artifact" placeholder="concept_id or ver_…" style="flex:1;min-width:220px;padding:6px 8px;font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)" />
+ <input id="replay-limit" type="number" value="10" min="1" max="200" style="width:80px;padding:6px 8px;font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)" />
+ <button class="btn" id="replay-preview" type="button">Preview</button>
+ <button class="btn primary" id="replay-run" type="button">Run replay</button>
+ <button class="btn" id="replay-close" type="button">Close</button>
+ </div>
+ <div id="replay-summary" style="font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-bottom:6px"></div>
+ <div id="replay-rows" style="font-family:var(--mono);font-size:11px;max-height:280px;overflow:auto"></div>
+ </div>
 
-      <div id="live-strip" style="display:none;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0 12px;background:var(--bg-elev);font-family:var(--mono);font-size:12px">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span id="live-status" class="ns-tag" style="background:var(--bg);border:1px solid var(--line);color:var(--ink-mute)">connecting&hellip;</span>
-          <span id="live-counter" style="color:var(--ink-mute)">0 new captures</span>
-          <span style="flex:1"></span>
-          <button class="btn" id="live-clear" type="button" style="font-size:11px;padding:4px 8px">clear feed</button>
-        </div>
-        <div id="live-feed" style="margin-top:8px;max-height:180px;overflow:auto;display:none;border-top:1px dashed var(--line);padding-top:8px"></div>
-      </div>
+ <div id="live-strip" style="display:none;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0 12px;background:var(--bg-elev);font-family:var(--mono);font-size:12px">
+ <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+ <span id="live-status" class="ns-tag" style="background:var(--bg);border:1px solid var(--line);color:var(--ink-mute)">connecting&hellip;</span>
+ <span id="live-counter" style="color:var(--ink-mute)">0 new captures</span>
+ <span style="flex:1"></span>
+ <button class="btn" id="live-clear" type="button" style="font-size:11px;padding:4px 8px">clear feed</button>
+ </div>
+ <div id="live-feed" style="margin-top:8px;max-height:180px;overflow:auto;display:none;border-top:1px dashed var(--line);padding-top:8px"></div>
+ </div>
 
-      <div class="tbl-scroll"><table class="tbl" id="obs-table">
-        <thead>
-          <tr>
-            <th style="width:14%">Model / NS</th>
-            <th style="width:30%">Input</th>
-            <th style="width:30%">Output</th>
-            <th style="width:10%">Latency</th>
-            <th style="width:16%">Action</th>
-          </tr>
-        </thead>
-        <tbody id="obs-rows"></tbody>
-      </table></div>
+ <div class="tbl-scroll"><table class="tbl" id="obs-table">
+ <thead>
+ <tr>
+ <th style="width:14%">Model / NS</th>
+ <th style="width:30%">Input</th>
+ <th style="width:30%">Output</th>
+ <th style="width:10%">Latency</th>
+ <th style="width:16%">Action</th>
+ </tr>
+ </thead>
+ <tbody id="obs-rows"></tbody>
+ </table></div>
 
-      <div id="empty" class="empty">
-        <h3>No captures yet</h3>
-        <p>Point your provider client at kolm. Every upstream call is hashed and lands here. Triage with one click. Below, the two paths.</p>
-        <div style="text-align:left;max-width:680px;margin:16px auto 0">
-          <p style="margin:0 0 6px;color:var(--ink);font-weight: 500;font-family:var(--mono);font-size:12px">OpenAI clients</p>
-          <pre class="code"><span class="com"># Forward every chat completion through kolm. Your OpenAI key is</span>
+ <div id="empty" class="empty">
+ <h3>No captures yet</h3>
+ <p>Point your provider client at kolm. Every upstream call is hashed and lands here. Triage with one click. Below, the two paths.</p>
+ <div style="text-align:left;max-width:680px;margin:16px auto 0">
+ <p style="margin:0 0 6px;color:var(--ink);font-weight: 500;font-family:var(--mono);font-size:12px">OpenAI clients</p>
+ <pre class="code"><span class="com"># Forward every chat completion through kolm. Your OpenAI key is</span>
 <span class="com"># forwarded once and dropped, never persisted.</span>
-<span class="arg">export</span> OPENAI_BASE_URL=<span class="ok">https://kolm.ai/v1/capture/openai</span></pre>
-          <p style="margin:14px 0 6px;color:var(--ink);font-weight: 500;font-family:var(--mono);font-size:12px">Anthropic clients</p>
-          <pre class="code"><span class="arg">export</span> ANTHROPIC_API_URL=<span class="ok">https://kolm.ai/v1/capture/anthropic</span></pre>
-        </div>
-      </div>
-    </div>
+<span class="arg">export</span> OPENAI_BASE_URL=<span class="ok">https://kolm.ai/v1/capture/openai</span>
+<span class="com"># SDK default header: x-upstream-api-key: $OPENAI_UPSTREAM_API_KEY</span></pre>
+ <p style="margin:14px 0 6px;color:var(--ink);font-weight: 500;font-family:var(--mono);font-size:12px">Anthropic clients</p>
+ <pre class="code"><span class="arg">export</span> ANTHROPIC_API_URL=<span class="ok">https://kolm.ai/v1/capture/anthropic</span></pre>
+ </div>
+ </div>
+ </div>
 
-    <h2>How the loop closes.</h2>
-    <p>Four steps. One screen. Every transition is auditable from the inbox.</p>
-    <ol style="padding-left:24px;margin:0 0 8px;color:var(--ink-mute);font-size:15px;line-height:1.7">
-      <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Capture.</b> Your client hits <code>kolm.ai/v1/capture/{openai,anthropic}</code>. We forward upstream, return the response, and record the pair under your tenant + namespace.</li>
-      <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Triage.</b> Keep, discard, or promote each row. Discards are excluded from <code>/v1/specialists/auto-distill</code>.</li>
-      <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Distill.</b> At 1,000 kept captures the namespace flips <i>ready</i>. One click hands the job to the trainer bridge and returns a signed <code>.kolm</code> Specialist.</li>
-      <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Switch.</b> Re-point the client at your own <code>kolm serve</code>. Per-call cost drops to electricity. Each invocation returns a <code>_kolm</code> block any holder of the tenant secret can re-verify.</li>
-    </ol>
+ <h2>How the loop closes.</h2>
+ <p>Four steps. One screen. Every transition is auditable from the inbox.</p>
+ <ol style="padding-left:24px;margin:0 0 8px;color:var(--ink-mute);font-size:15px;line-height:1.7">
+ <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Capture.</b> Your client hits <code>kolm.ai/v1/capture/openai</code>, <code>kolm.ai/v1/capture/anthropic</code>, or <code>kolm.ai/v1/capture/openrouter</code>. We forward upstream, return the response, and record the pair under your tenant + namespace.</li>
+ <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Triage.</b> Keep, discard, or promote each row. Discards are excluded from <code>/v1/specialists/auto-distill</code>.</li>
+ <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Distill.</b> At 1,000 kept captures the namespace flips <i>ready</i>. One click hands the job to the trainer bridge and returns a signed <code>.kolm</code> Specialist.</li>
+ <li style="margin:14px 0"><b style="color:var(--ink);font-weight:500">Switch.</b> Re-point the client at your own <code>kolm serve</code>. Per-call cost drops to electricity. Each invocation returns a <code>_kolm</code> block any holder of the tenant secret can re-verify.</li>
+ </ol>
 
-    <h2>What we never keep.</h2>
-    <p>Your upstream key is forwarded in <code>x-upstream-api-key</code> and dropped after the call. The inbox is scoped by your API key; cross-tenant rows are never returned. Captured pairs live on your tenant row until you delete them.</p>
-  </div>
+ <h2>What we never keep.</h2>
+ <p>Your upstream key is forwarded in <code>x-upstream-api-key</code> and dropped after the call. The inbox is scoped by your API key; cross-tenant rows are never returned. Captured pairs live on your tenant row until you delete them.</p>
+ </div>
 </section>
 
 <div id="toast" class="toast"></div>
@@ -288,430 +292,430 @@
 </main>
 
 <footer class="site-footer">
-  <div class="wrap">
-    <nav aria-label="kolm.ai marketing" class="footer-nav-marketing" style="margin-top:0;font-size:12px;letter-spacing:0.04em;color:var(--ink-faint);text-align:center">
-      <a href="/product">Product</a> &middot; <a href="/models">Models</a> &middot; <a href="/docs">Docs</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/enterprise">Enterprise</a>
-    </nav>
-    <small class="footer-tag" style="display:block;margin-top:14px;text-align:center;color:var(--ink-faint);font-size:11.5px">
-      kolm.ai &middot; <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/status">status</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a>
-    </small>
-  </div>
+ <div class="wrap">
+ <nav aria-label="kolm.ai marketing" class="footer-nav-marketing" style="margin-top:0;font-size:12px;letter-spacing:0.04em;color:var(--ink-faint);text-align:center">
+ <a href="/product">Product</a> &middot; <a href="/models">Models</a> &middot; <a href="/docs">Docs</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/enterprise">Enterprise</a>
+ </nav>
+ <small class="footer-tag" style="display:block;margin-top:14px;text-align:center;color:var(--ink-faint);font-size:11.5px">
+ kolm.ai &middot; <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/status">status</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a>
+ </small>
+ </div>
 </footer>
 
 <script>
 (function () {
-  function key() {
-    try { return (window.KS && window.KS.apiKey && window.KS.apiKey()) || localStorage.getItem('kolm.api_key') || ''; }
-    catch (_) { return ''; }
-  }
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
-  function toast(msg) {
-    var t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('on');
-    setTimeout(function () { t.classList.remove('on'); }, 2400);
-  }
+ function key() {
+ try { return (window.KS && window.KS.apiKey && window.KS.apiKey()) || localStorage.getItem('kolm.api_key') || ''; }
+ catch (_) { return ''; }
+ }
+ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+ function toast(msg) {
+ var t = document.getElementById('toast');
+ t.textContent = msg;
+ t.classList.add('on');
+ setTimeout(function () { t.classList.remove('on'); }, 2400);
+ }
 
-  // Try cookie-auth hydration first (OAuth users have no localStorage key).
-  (window.KS && window.KS.hydrateSession ? window.KS.hydrateSession() : Promise.resolve('')).then(function () {
-    var apiKey = key();
-    if (!apiKey) return;
-    boot(apiKey);
-  });
+ // Try cookie-auth hydration first (OAuth users have no localStorage key).
+ (window.KS && window.KS.hydrateSession ? window.KS.hydrateSession() : Promise.resolve('')).then(function () {
+ var apiKey = key();
+ if (!apiKey) return;
+ boot(apiKey);
+ });
 
-  function boot(apiKey) {
+ function boot(apiKey) {
 
-  var so = document.getElementById('signedout');
-  if (so) so.style.display = 'none';
-  var lw = document.getElementById('livewrap');
-  lw.style.display = 'block';
+ var so = document.getElementById('signedout');
+ if (so) so.style.display = 'none';
+ var lw = document.getElementById('livewrap');
+ lw.style.display = 'block';
 
-  var state = { ns: '', includeDiscarded: false, ready: [] };
+ var state = { ns: '', includeDiscarded: false, ready: [] };
 
-  // W315 — deep-link namespace from ?namespace=foo on initial load so a
-  // dashboard link can scope the inbox without a click.
-  (function () {
-    try {
-      var params = new URLSearchParams(window.location.search);
-      var deep = params.get('namespace');
-      if (deep) state.ns = String(deep);
-      if (params.get('include_discarded') === '1') state.includeDiscarded = true;
-    } catch (_) {}
-  })();
-  function syncUrl() {
-    try {
-      var url = new URL(window.location.href);
-      if (state.ns) url.searchParams.set('namespace', state.ns); else url.searchParams.delete('namespace');
-      if (state.includeDiscarded) url.searchParams.set('include_discarded', '1'); else url.searchParams.delete('include_discarded');
-      window.history.replaceState(null, '', url.toString());
-    } catch (_) {}
-  }
+ // W315 — deep-link namespace from ?namespace=foo on initial load so a
+ // dashboard link can scope the inbox without a click.
+ (function () {
+ try {
+ var params = new URLSearchParams(window.location.search);
+ var deep = params.get('namespace');
+ if (deep) state.ns = String(deep);
+ if (params.get('include_discarded') === '1') state.includeDiscarded = true;
+ } catch (_) {}
+ })();
+ function syncUrl() {
+ try {
+ var url = new URL(window.location.href);
+ if (state.ns) url.searchParams.set('namespace', state.ns); else url.searchParams.delete('namespace');
+ if (state.includeDiscarded) url.searchParams.set('include_discarded', '1'); else url.searchParams.delete('include_discarded');
+ window.history.replaceState(null, '', url.toString());
+ } catch (_) {}
+ }
 
-  function api(path, opts) {
-    opts = opts || {};
-    opts.headers = Object.assign({ authorization: 'Bearer ' + apiKey, 'content-type': 'application/json' }, opts.headers || {});
-    return fetch(path, opts).then(function (r) {
-      if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || ('http_' + r.status)); }, function () { throw new Error('http_' + r.status); });
-      return r.json();
-    });
-  }
+ function api(path, opts) {
+ opts = opts || {};
+ opts.headers = Object.assign({ authorization: 'Bearer ' + apiKey, 'content-type': 'application/json' }, opts.headers || {});
+ return fetch(path, opts).then(function (r) {
+ if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || ('http_' + r.status)); }, function () { throw new Error('http_' + r.status); });
+ return r.json();
+ });
+ }
 
-  function load() {
-    var qs = 'limit=50';
-    if (state.ns) qs += '&namespace=' + encodeURIComponent(state.ns);
-    if (state.includeDiscarded) qs += '&include_discarded=1';
-    api('/v1/bridges/observations?' + qs).then(function (j) {
-      document.getElementById('stat-total').textContent = j.total || 0;
-      var ready = j.ready_to_distill || [];
-      state.ready = ready;
-      document.getElementById('stat-ready').innerHTML = ready.length + ' <small>' + (ready.length ? ready.map(function (x) { return esc(x.namespace); }).join(', ') : '&lt; 1,000 pairs / namespace') + '</small>';
-      document.getElementById('stat-ns').textContent = (j.namespaces || []).length;
-      var distillBtn = document.getElementById('distill');
-      // W214: unlock the recipe path at >=4 captures (not 1000). Specialist
-      // requires the 1000-pair list; recipe only needs 4 in the largest cluster.
-      var captureCount = (j.observations || []).length;
-      distillBtn.disabled = !(captureCount >= 4 || ready.length > 0);
+ function load() {
+ var qs = 'limit=50';
+ if (state.ns) qs += '&namespace=' + encodeURIComponent(state.ns);
+ if (state.includeDiscarded) qs += '&include_discarded=1';
+ api('/v1/bridges/observations?' + qs).then(function (j) {
+ document.getElementById('stat-total').textContent = j.total || 0;
+ var ready = j.ready_to_distill || [];
+ state.ready = ready;
+ document.getElementById('stat-ready').innerHTML = ready.length + ' <small>' + (ready.length ? ready.map(function (x) { return esc(x.namespace); }).join(', ') : '&lt; 1,000 pairs / namespace') + '</small>';
+ document.getElementById('stat-ns').textContent = (j.namespaces || []).length;
+ var distillBtn = document.getElementById('distill');
+ // W214: unlock the recipe path at >=4 captures (not 1000). Specialist
+ // requires the 1000-pair list; recipe only needs 4 in the largest cluster.
+ var captureCount = (j.observations || []).length;
+ distillBtn.disabled = !(captureCount >= 4 || ready.length > 0);
 
-      var sel = document.getElementById('ns-filter');
-      // Honor state.ns over sel.value so a ?namespace= deep link wins on first paint.
-      var current = state.ns || sel.value;
-      sel.innerHTML = '<option value="">All namespaces</option>' + (j.namespaces || []).map(function (n) {
-        return '<option value="' + esc(n) + '"' + (n === current ? ' selected' : '') + '>' + esc(n) + '</option>';
-      }).join('');
-      if (state.includeDiscarded) {
-        var sd = document.getElementById('show-discarded');
-        if (sd && !sd.checked) sd.checked = true;
-      }
+ var sel = document.getElementById('ns-filter');
+ // Honor state.ns over sel.value so a ?namespace= deep link wins on first paint.
+ var current = state.ns || sel.value;
+ sel.innerHTML = '<option value="">All namespaces</option>' + (j.namespaces || []).map(function (n) {
+ return '<option value="' + esc(n) + '"' + (n === current ? ' selected' : '') + '>' + esc(n) + '</option>';
+ }).join('');
+ if (state.includeDiscarded) {
+ var sd = document.getElementById('show-discarded');
+ if (sd && !sd.checked) sd.checked = true;
+ }
 
-      var rows = document.getElementById('obs-rows');
-      var empty = document.getElementById('empty');
-      var obs = j.observations || [];
-      if (obs.length === 0) {
-        rows.innerHTML = '';
-        empty.classList.add('on');
-      } else {
-        empty.classList.remove('on');
-        rows.innerHTML = obs.map(function (o) {
-          var cls = o.discarded ? 'discarded' : (o.kept ? 'kept' : '');
-          return '<tr class="' + cls + '" data-id="' + esc(o.id) + '">' +
-            '<td><b>' + esc(o.model || '-') + '</b><br><span class="ns-tag">' + esc(o.namespace) + '</span></td>' +
-            '<td class="excerpt">' + esc(o.input_excerpt) + '</td>' +
-            '<td class="excerpt">' + esc(o.output_excerpt) + '</td>' +
-            '<td>' + esc(o.latency_ms) + '&thinsp;ms</td>' +
-            '<td class="actions"><div class="act">' +
-              '<button class="keep" data-act="keep">keep</button>' +
-              '<button class="disc" data-act="discard">discard</button>' +
-              '<a class="prom" href="/captures#' + encodeURIComponent(o.id) + '">promote</a>' +
-            '</div></td>' +
-          '</tr>';
-        }).join('');
-      }
-    }).catch(function (e) { toast('error: ' + e.message); });
-  }
+ var rows = document.getElementById('obs-rows');
+ var empty = document.getElementById('empty');
+ var obs = j.observations || [];
+ if (obs.length === 0) {
+ rows.innerHTML = '';
+ empty.classList.add('on');
+ } else {
+ empty.classList.remove('on');
+ rows.innerHTML = obs.map(function (o) {
+ var cls = o.discarded ? 'discarded' : (o.kept ? 'kept' : '');
+ return '<tr class="' + cls + '" data-id="' + esc(o.id) + '">' +
+ '<td><b>' + esc(o.model || '-') + '</b><br><span class="ns-tag">' + esc(o.namespace) + '</span></td>' +
+ '<td class="excerpt">' + esc(o.input_excerpt) + '</td>' +
+ '<td class="excerpt">' + esc(o.output_excerpt) + '</td>' +
+ '<td>' + esc(o.latency_ms) + '&thinsp;ms</td>' +
+ '<td class="actions"><div class="act">' +
+ '<button class="keep" data-act="keep">keep</button>' +
+ '<button class="disc" data-act="discard">discard</button>' +
+ '<a class="prom" href="/captures#' + encodeURIComponent(o.id) + '">promote</a>' +
+ '</div></td>' +
+ '</tr>';
+ }).join('');
+ }
+ }).catch(function (e) { toast('error: ' + e.message); });
+ }
 
-  document.getElementById('refresh').addEventListener('click', load);
-  document.getElementById('ns-filter').addEventListener('change', function (e) { state.ns = e.target.value; syncUrl(); load(); });
-  document.getElementById('show-discarded').addEventListener('change', function (e) { state.includeDiscarded = e.target.checked; syncUrl(); load(); });
+ document.getElementById('refresh').addEventListener('click', load);
+ document.getElementById('ns-filter').addEventListener('change', function (e) { state.ns = e.target.value; syncUrl(); load(); });
+ document.getElementById('show-discarded').addEventListener('change', function (e) { state.includeDiscarded = e.target.checked; syncUrl(); load(); });
 
-  // W314 — client-side substring filter over prompt/response/template-preview.
-  // Server-side filter would require a new endpoint param; keeping it client
-  // means the filter is instant + works on already-loaded rows + survives
-  // the SSE live-tail stream without round-tripping. Case-insensitive.
-  (function () {
-    var input = document.getElementById('search-filter');
-    var counter = document.getElementById('search-count');
-    if (!input) return;
-    var debounce = null;
-    function applySearch() {
-      var q = (input.value || '').trim().toLowerCase();
-      var rows = document.querySelectorAll('#obs-rows tr[data-id]');
-      var shown = 0, total = rows.length;
-      rows.forEach(function (tr) {
-        if (!q) { tr.style.display = ''; shown++; return; }
-        var hay = tr.textContent.toLowerCase();
-        var hit = hay.indexOf(q) >= 0;
-        tr.style.display = hit ? '' : 'none';
-        if (hit) shown++;
-      });
-      if (q) {
-        counter.style.display = '';
-        counter.textContent = shown + ' / ' + total;
-      } else {
-        counter.style.display = 'none';
-        counter.textContent = '';
-      }
-    }
-    input.addEventListener('input', function () {
-      clearTimeout(debounce);
-      debounce = setTimeout(applySearch, 120);
-    });
-    // Re-apply after each load() repaint so the filter survives refresh + SSE.
-    var rowsContainer = document.getElementById('obs-rows');
-    if (rowsContainer && typeof MutationObserver === 'function') {
-      var mo = new MutationObserver(function () { applySearch(); });
-      mo.observe(rowsContainer, { childList: true });
-    }
-  })();
+ // W314 — client-side substring filter over prompt/response/template-preview.
+ // Server-side filter would require a new endpoint param; keeping it client
+ // means the filter is instant + works on already-loaded rows + survives
+ // the SSE live-tail stream without round-tripping. Case-insensitive.
+ (function () {
+ var input = document.getElementById('search-filter');
+ var counter = document.getElementById('search-count');
+ if (!input) return;
+ var debounce = null;
+ function applySearch() {
+ var q = (input.value || '').trim().toLowerCase();
+ var rows = document.querySelectorAll('#obs-rows tr[data-id]');
+ var shown = 0, total = rows.length;
+ rows.forEach(function (tr) {
+ if (!q) { tr.style.display = ''; shown++; return; }
+ var hay = tr.textContent.toLowerCase();
+ var hit = hay.indexOf(q) >= 0;
+ tr.style.display = hit ? '' : 'none';
+ if (hit) shown++;
+ });
+ if (q) {
+ counter.style.display = '';
+ counter.textContent = shown + ' / ' + total;
+ } else {
+ counter.style.display = 'none';
+ counter.textContent = '';
+ }
+ }
+ input.addEventListener('input', function () {
+ clearTimeout(debounce);
+ debounce = setTimeout(applySearch, 120);
+ });
+ // Re-apply after each load() repaint so the filter survives refresh + SSE.
+ var rowsContainer = document.getElementById('obs-rows');
+ if (rowsContainer && typeof MutationObserver === 'function') {
+ var mo = new MutationObserver(function () { applySearch(); });
+ mo.observe(rowsContainer, { childList: true });
+ }
+ })();
 
-  // W316 — promote-confirm modal. Intercept clicks on the promote anchor so
-  // the user can see what they're about to ship to the playground before the
-  // navigation fires.
-  (function () {
-    var modal = document.getElementById('promote-modal');
-    var summary = document.getElementById('promote-modal-summary');
-    var cancel = document.getElementById('promote-cancel');
-    var confirm = document.getElementById('promote-confirm');
-    if (!modal || !cancel || !confirm) return;
-    var pendingHref = null;
-    function open(href, tr) {
-      pendingHref = href;
-      var model = tr.querySelector('td:first-child b');
-      var ns = tr.querySelector('.ns-tag');
-      var input = tr.querySelectorAll('.excerpt')[0];
-      var output = tr.querySelectorAll('.excerpt')[1];
-      summary.innerHTML =
-        '<div><strong>model</strong> ' + (model ? model.textContent : '-') + '</div>' +
-        '<div><strong>namespace</strong> ' + (ns ? ns.textContent : '-') + '</div>' +
-        '<div style="margin-top:6px"><strong>prompt</strong> ' + (input ? input.textContent : '-').replace(/</g, '&lt;') + '</div>' +
-        '<div style="margin-top:6px"><strong>response</strong> ' + (output ? output.textContent : '-').replace(/</g, '&lt;') + '</div>';
-      modal.style.display = 'flex';
-      confirm.focus();
-    }
-    function close() { modal.style.display = 'none'; pendingHref = null; }
-    cancel.addEventListener('click', close);
-    confirm.addEventListener('click', function () {
-      if (pendingHref) window.location.assign(pendingHref);
-    });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && modal.style.display !== 'none') close();
-    });
-    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
-    document.getElementById('obs-rows').addEventListener('click', function (e) {
-      var a = e.target.closest('a.prom');
-      if (!a) return;
-      var tr = a.closest('tr[data-id]');
-      if (!tr) return;
-      e.preventDefault();
-      open(a.getAttribute('href'), tr);
-    });
-  })();
+ // W316 — promote-confirm modal. Intercept clicks on the promote anchor so
+ // the user can see what they're about to ship to the playground before the
+ // navigation fires.
+ (function () {
+ var modal = document.getElementById('promote-modal');
+ var summary = document.getElementById('promote-modal-summary');
+ var cancel = document.getElementById('promote-cancel');
+ var confirm = document.getElementById('promote-confirm');
+ if (!modal || !cancel || !confirm) return;
+ var pendingHref = null;
+ function open(href, tr) {
+ pendingHref = href;
+ var model = tr.querySelector('td:first-child b');
+ var ns = tr.querySelector('.ns-tag');
+ var input = tr.querySelectorAll('.excerpt')[0];
+ var output = tr.querySelectorAll('.excerpt')[1];
+ summary.innerHTML =
+ '<div><strong>model</strong> ' + (model ? model.textContent : '-') + '</div>' +
+ '<div><strong>namespace</strong> ' + (ns ? ns.textContent : '-') + '</div>' +
+ '<div style="margin-top:6px"><strong>prompt</strong> ' + (input ? input.textContent : '-').replace(/</g, '&lt;') + '</div>' +
+ '<div style="margin-top:6px"><strong>response</strong> ' + (output ? output.textContent : '-').replace(/</g, '&lt;') + '</div>';
+ modal.style.display = 'flex';
+ confirm.focus();
+ }
+ function close() { modal.style.display = 'none'; pendingHref = null; }
+ cancel.addEventListener('click', close);
+ confirm.addEventListener('click', function () {
+ if (pendingHref) window.location.assign(pendingHref);
+ });
+ document.addEventListener('keydown', function (e) {
+ if (e.key === 'Escape' && modal.style.display !== 'none') close();
+ });
+ modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+ document.getElementById('obs-rows').addEventListener('click', function (e) {
+ var a = e.target.closest('a.prom');
+ if (!a) return;
+ var tr = a.closest('tr[data-id]');
+ if (!tr) return;
+ e.preventDefault();
+ open(a.getAttribute('href'), tr);
+ });
+ })();
 
-  // W317 — CSV download of currently visible (post-search-filter) rows.
-  // We export the same five columns the table shows plus id/durable flag
-  // so the downloaded file is auditable on its own.
-  (function () {
-    var btn = document.getElementById('download-csv');
-    if (!btn) return;
-    function csvEscape(v) {
-      var s = String(v == null ? '' : v);
-      if (s.indexOf('"') >= 0 || s.indexOf(',') >= 0 || s.indexOf('\n') >= 0) {
-        return '"' + s.replace(/"/g, '""') + '"';
-      }
-      return s;
-    }
-    btn.addEventListener('click', function () {
-      var rows = document.querySelectorAll('#obs-rows tr[data-id]');
-      var out = ['id,model,namespace,prompt,response,latency_ms'];
-      rows.forEach(function (tr) {
-        if (tr.style.display === 'none') return;
-        var id = tr.getAttribute('data-id') || '';
-        var model = tr.querySelector('td:first-child b');
-        var ns = tr.querySelector('.ns-tag');
-        var excerpts = tr.querySelectorAll('.excerpt');
-        var lat = tr.querySelectorAll('td')[3];
-        out.push([
-          csvEscape(id),
-          csvEscape(model ? model.textContent : ''),
-          csvEscape(ns ? ns.textContent : ''),
-          csvEscape(excerpts[0] ? excerpts[0].textContent : ''),
-          csvEscape(excerpts[1] ? excerpts[1].textContent : ''),
-          csvEscape(lat ? lat.textContent.replace(/[^0-9]/g, '') : ''),
-        ].join(','));
-      });
-      var blob = new Blob([out.join('\n') + '\n'], { type: 'text/csv;charset=utf-8' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'kolm-captures-' + new Date().toISOString().slice(0,10) + (state.ns ? '-' + state.ns : '') + '.csv';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 100);
-    });
-  })();
+ // W317 — CSV download of currently visible (post-search-filter) rows.
+ // We export the same five columns the table shows plus id/durable flag
+ // so the downloaded file is auditable on its own.
+ (function () {
+ var btn = document.getElementById('download-csv');
+ if (!btn) return;
+ function csvEscape(v) {
+ var s = String(v == null ? '' : v);
+ if (s.indexOf('"') >= 0 || s.indexOf(',') >= 0 || s.indexOf('\n') >= 0) {
+ return '"' + s.replace(/"/g, '""') + '"';
+ }
+ return s;
+ }
+ btn.addEventListener('click', function () {
+ var rows = document.querySelectorAll('#obs-rows tr[data-id]');
+ var out = ['id,model,namespace,prompt,response,latency_ms'];
+ rows.forEach(function (tr) {
+ if (tr.style.display === 'none') return;
+ var id = tr.getAttribute('data-id') || '';
+ var model = tr.querySelector('td:first-child b');
+ var ns = tr.querySelector('.ns-tag');
+ var excerpts = tr.querySelectorAll('.excerpt');
+ var lat = tr.querySelectorAll('td')[3];
+ out.push([
+ csvEscape(id),
+ csvEscape(model ? model.textContent : ''),
+ csvEscape(ns ? ns.textContent : ''),
+ csvEscape(excerpts[0] ? excerpts[0].textContent : ''),
+ csvEscape(excerpts[1] ? excerpts[1].textContent : ''),
+ csvEscape(lat ? lat.textContent.replace(/[^0-9]/g, '') : ''),
+ ].join(','));
+ });
+ var blob = new Blob([out.join('\n') + '\n'], { type: 'text/csv;charset=utf-8' });
+ var url = URL.createObjectURL(blob);
+ var a = document.createElement('a');
+ a.href = url;
+ a.download = 'kolm-captures-' + new Date().toISOString().slice(0,10) + (state.ns ? '-' + state.ns : '') + '.csv';
+ document.body.appendChild(a);
+ a.click();
+ setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 100);
+ });
+ })();
 
-  document.getElementById('obs-rows').addEventListener('click', function (e) {
-    var btn = e.target.closest('button[data-act]');
-    if (!btn) return;
-    var tr = btn.closest('tr[data-id]');
-    if (!tr) return;
-    var id = tr.getAttribute('data-id');
-    var act = btn.getAttribute('data-act');
-    var body = act === 'keep' ? { kept: true, discarded: false } : { discarded: true, kept: false };
-    api('/v1/bridges/observations/' + encodeURIComponent(id), { method: 'POST', body: JSON.stringify(body) })
-      .then(function () { toast(act === 'keep' ? 'kept' : 'discarded'); load(); })
-      .catch(function (err) { toast('error: ' + err.message); });
-  });
+ document.getElementById('obs-rows').addEventListener('click', function (e) {
+ var btn = e.target.closest('button[data-act]');
+ if (!btn) return;
+ var tr = btn.closest('tr[data-id]');
+ if (!tr) return;
+ var id = tr.getAttribute('data-id');
+ var act = btn.getAttribute('data-act');
+ var body = act === 'keep' ? { kept: true, discarded: false } : { discarded: true, kept: false };
+ api('/v1/bridges/observations/' + encodeURIComponent(id), { method: 'POST', body: JSON.stringify(body) })
+ .then(function () { toast(act === 'keep' ? 'kept' : 'discarded'); load(); })
+ .catch(function (err) { toast('error: ' + err.message); });
+ });
 
-  document.getElementById('distill').addEventListener('click', function () {
-    // W214: preview-first flow. Always GET /v1/distill/from-captures/preview
-    // before confirming; only POST /v1/distill/from-captures after user OK.
-    var ns = state.ns || (state.ready && state.ready[0] && state.ready[0].namespace) || 'default';
-    var previewUrl = '/v1/distill/from-captures/preview?namespace=' + encodeURIComponent(ns);
-    api(previewUrl).then(function (pv) {
-      var total = pv.total || 0;
-      var hint = pv.mode_hint || 'recipe';
-      var clusters = pv.top_clusters || [];
-      var bestCount = clusters.length ? (clusters[0].count || 0) : 0;
-      var msg = 'Promote ' + total + ' captures from "' + ns + '" -> ' + hint + '?\n' +
-                'best cluster: ' + bestCount + ' pairs';
-      if (!confirm(msg)) return;
-      return api('/v1/distill/from-captures', {
-        method: 'POST',
-        body: JSON.stringify({ namespace: ns }),
-      }).then(function (j) { toast('distill queued: ' + (j.job_id || j.id || 'ok') + ' (' + (j.mode || hint) + ')'); });
-    }).catch(function (err) { toast('error: ' + err.message); });
-  });
+ document.getElementById('distill').addEventListener('click', function () {
+ // W214: preview-first flow. Always GET /v1/distill/from-captures/preview
+ // before confirming; only POST /v1/distill/from-captures after user OK.
+ var ns = state.ns || (state.ready && state.ready[0] && state.ready[0].namespace) || 'default';
+ var previewUrl = '/v1/distill/from-captures/preview?namespace=' + encodeURIComponent(ns);
+ api(previewUrl).then(function (pv) {
+ var total = pv.total || 0;
+ var hint = pv.mode_hint || 'recipe';
+ var clusters = pv.top_clusters || [];
+ var bestCount = clusters.length ? (clusters[0].count || 0) : 0;
+ var msg = 'Promote ' + total + ' captures from "' + ns + '" -> ' + hint + '?\n' +
+ 'best cluster: ' + bestCount + ' pairs';
+ if (!confirm(msg)) return;
+ return api('/v1/distill/from-captures', {
+ method: 'POST',
+ body: JSON.stringify({ namespace: ns }),
+ }).then(function (j) { toast('distill queued: ' + (j.job_id || j.id || 'ok') + ' (' + (j.mode || hint) + ')'); });
+ }).catch(function (err) { toast('error: ' + err.message); });
+ });
 
-  // ---- W216: Replay drawer (preview + run) ----
-  function replayParams() {
-    var ns = state.ns || 'default';
-    var raw = (document.getElementById('replay-artifact').value || '').trim();
-    var limit = Math.max(1, Math.min(200, parseInt(document.getElementById('replay-limit').value, 10) || 10));
-    var body = { namespace: ns, limit: limit };
-    if (raw) {
-      if (raw.indexOf('ver_') === 0) body.version_id = raw;
-      else body.concept_id = raw;
-    }
-    return body;
-  }
-  function renderReplaySummary(j) {
-    var sum = document.getElementById('replay-summary');
-    sum.innerHTML =
-      'ns <b>' + esc(j.namespace || '') + '</b> · ' +
-      'version <b>' + esc(String(j.version_id || '').slice(0, 16)) + '</b> · ' +
-      'replayed ' + (j.replayed || j.will_replay || 0) + ' · ' +
-      (j.k_score_mean !== undefined ? 'k_score ' + Number(j.k_score_mean).toFixed(3) + ' · ' : '') +
-      (j.cost_micro_usd_total !== undefined ? 'cost ' + (j.cost_micro_usd_total || 0) + 'uUSD · ' : '') +
-      (j.elapsed_ms !== undefined ? j.elapsed_ms + 'ms' : '');
-  }
-  function renderReplayRows(diffs) {
-    var rows = document.getElementById('replay-rows');
-    if (!diffs || !diffs.length) { rows.innerHTML = '<i style="color:var(--ink-mute)">no rows</i>'; return; }
-    rows.innerHTML = diffs.map(function (d) {
-      var lat = d.latency_us && d.latency_us.delta || 0;
-      var k = (d.k_score || 0).toFixed(3);
-      return '<div style="border-top:1px dashed var(--line);padding:6px 0">' +
-        '<div><b>k=' + k + '</b> d_lat=' + lat + 'us · <span style="color:var(--ink-faint)">' + esc(d.capture_id || '') + '</span></div>' +
-        '<div style="color:var(--ink-mute);margin-top:4px">prompt: ' + esc(String(d.prompt_head || '').slice(0, 120)) + '</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">' +
-          '<div><div style="color:var(--ink-faint);font-size:10px">upstream_output</div>' + esc(String(d.upstream_output || '').slice(0, 240)) + '</div>' +
-          '<div><div style="color:var(--ink-faint);font-size:10px">local_output</div>' + (d.local_error ? '<span style="color:var(--bad)">' + esc(d.local_error) + '</span>' : esc(String(d.local_output || '').slice(0, 240))) + '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-  }
-  document.getElementById('replay').addEventListener('click', function () {
-    var d = document.getElementById('replay-drawer');
-    d.style.display = (d.style.display === 'none' || !d.style.display) ? 'block' : 'none';
-  });
-  document.getElementById('replay-close').addEventListener('click', function () {
-    document.getElementById('replay-drawer').style.display = 'none';
-  });
-  document.getElementById('replay-preview').addEventListener('click', function () {
-    var body = replayParams();
-    if (!body.concept_id && !body.version_id) { toast('replay: paste a concept or version id'); return; }
-    var q = new URLSearchParams();
-    q.set('namespace', body.namespace);
-    if (body.concept_id) q.set('concept_id', body.concept_id);
-    if (body.version_id) q.set('version_id', body.version_id);
-    q.set('limit', String(body.limit));
-    api('/v1/replay/preview?' + q.toString())
-      .then(function (j) { renderReplaySummary(j); renderReplayRows([]); })
-      .catch(function (err) { toast('error: ' + err.message); });
-  });
-  document.getElementById('replay-run').addEventListener('click', function () {
-    var body = replayParams();
-    if (!body.concept_id && !body.version_id) { toast('replay: paste a concept or version id'); return; }
-    document.getElementById('replay-summary').textContent = 'running...';
-    api('/v1/replay', { method: 'POST', body: JSON.stringify(body) })
-      .then(function (j) { renderReplaySummary(j); renderReplayRows(j.diffs || []); })
-      .catch(function (err) { document.getElementById('replay-summary').textContent = 'error: ' + err.message; });
-  });
+ // ---- W216: Replay drawer (preview + run) ----
+ function replayParams() {
+ var ns = state.ns || 'default';
+ var raw = (document.getElementById('replay-artifact').value || '').trim();
+ var limit = Math.max(1, Math.min(200, parseInt(document.getElementById('replay-limit').value, 10) || 10));
+ var body = { namespace: ns, limit: limit };
+ if (raw) {
+ if (raw.indexOf('ver_') === 0) body.version_id = raw;
+ else body.concept_id = raw;
+ }
+ return body;
+ }
+ function renderReplaySummary(j) {
+ var sum = document.getElementById('replay-summary');
+ sum.innerHTML =
+ 'ns <b>' + esc(j.namespace || '') + '</b> · ' +
+ 'version <b>' + esc(String(j.version_id || '').slice(0, 16)) + '</b> · ' +
+ 'replayed ' + (j.replayed || j.will_replay || 0) + ' · ' +
+ (j.k_score_mean !== undefined ? 'k_score ' + Number(j.k_score_mean).toFixed(3) + ' · ' : '') +
+ (j.cost_micro_usd_total !== undefined ? 'cost ' + (j.cost_micro_usd_total || 0) + 'uUSD · ' : '') +
+ (j.elapsed_ms !== undefined ? j.elapsed_ms + 'ms' : '');
+ }
+ function renderReplayRows(diffs) {
+ var rows = document.getElementById('replay-rows');
+ if (!diffs || !diffs.length) { rows.innerHTML = '<i style="color:var(--ink-mute)">no rows</i>'; return; }
+ rows.innerHTML = diffs.map(function (d) {
+ var lat = d.latency_us && d.latency_us.delta || 0;
+ var k = (d.k_score || 0).toFixed(3);
+ return '<div style="border-top:1px dashed var(--line);padding:6px 0">' +
+ '<div><b>k=' + k + '</b> d_lat=' + lat + 'us · <span style="color:var(--ink-faint)">' + esc(d.capture_id || '') + '</span></div>' +
+ '<div style="color:var(--ink-mute);margin-top:4px">prompt: ' + esc(String(d.prompt_head || '').slice(0, 120)) + '</div>' +
+ '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">' +
+ '<div><div style="color:var(--ink-faint);font-size:10px">upstream_output</div>' + esc(String(d.upstream_output || '').slice(0, 240)) + '</div>' +
+ '<div><div style="color:var(--ink-faint);font-size:10px">local_output</div>' + (d.local_error ? '<span style="color:var(--bad)">' + esc(d.local_error) + '</span>' : esc(String(d.local_output || '').slice(0, 240))) + '</div>' +
+ '</div>' +
+ '</div>';
+ }).join('');
+ }
+ document.getElementById('replay').addEventListener('click', function () {
+ var d = document.getElementById('replay-drawer');
+ d.style.display = (d.style.display === 'none' || !d.style.display) ? 'block' : 'none';
+ });
+ document.getElementById('replay-close').addEventListener('click', function () {
+ document.getElementById('replay-drawer').style.display = 'none';
+ });
+ document.getElementById('replay-preview').addEventListener('click', function () {
+ var body = replayParams();
+ if (!body.concept_id && !body.version_id) { toast('replay: paste a concept or version id'); return; }
+ var q = new URLSearchParams();
+ q.set('namespace', body.namespace);
+ if (body.concept_id) q.set('concept_id', body.concept_id);
+ if (body.version_id) q.set('version_id', body.version_id);
+ q.set('limit', String(body.limit));
+ api('/v1/replay/preview?' + q.toString())
+ .then(function (j) { renderReplaySummary(j); renderReplayRows([]); })
+ .catch(function (err) { toast('error: ' + err.message); });
+ });
+ document.getElementById('replay-run').addEventListener('click', function () {
+ var body = replayParams();
+ if (!body.concept_id && !body.version_id) { toast('replay: paste a concept or version id'); return; }
+ document.getElementById('replay-summary').textContent = 'running...';
+ api('/v1/replay', { method: 'POST', body: JSON.stringify(body) })
+ .then(function (j) { renderReplaySummary(j); renderReplayRows(j.diffs || []); })
+ .catch(function (err) { document.getElementById('replay-summary').textContent = 'error: ' + err.message; });
+ });
 
-  // ---- Live tail via /v1/capture/stream SSE ----
-  var live = { es: null, n: 0, on: false };
-  function setLiveStatus(text, color) {
-    var pill = document.getElementById('live-status');
-    pill.textContent = text;
-    pill.style.color = color || 'var(--ink-mute)';
-  }
-  function appendLiveRow(payload) {
-    var feed = document.getElementById('live-feed');
-    feed.style.display = 'block';
-    var row = document.createElement('div');
-    row.style.cssText = 'padding:4px 0;border-bottom:1px solid var(--line);font-size:11px';
-    var when = new Date().toISOString().slice(11, 19);
-    row.innerHTML =
-      '<span style="color:var(--ink-faint)">' + when + '</span> ' +
-      '<b>' + esc(payload.model || '-') + '</b> ' +
-      '<span class="ns-tag">' + esc(payload.namespace || 'default') + '</span> ' +
-      '<span style="color:var(--ink-mute)">' + esc(String(payload.input_excerpt || '').slice(0, 80)) + '</span>';
-    feed.insertBefore(row, feed.firstChild);
-    while (feed.children.length > 50) feed.removeChild(feed.lastChild);
-    live.n += 1;
-    document.getElementById('live-counter').textContent = live.n + ' new capture' + (live.n === 1 ? '' : 's');
-  }
-  function startLive() {
-    if (live.es) return;
-    var url = '/v1/capture/stream';
-    if (state.ns) url += '?namespace=' + encodeURIComponent(state.ns);
-    var es = new EventSource(url, { withCredentials: true });
-    live.es = es;
-    setLiveStatus('connecting...', 'var(--ink-mute)');
-    es.addEventListener('hello', function (e) {
-      try {
-        var meta = JSON.parse(e.data || '{}');
-        var driver = meta.driver || 'unknown';
-        var durable = meta.durable === true ? 'durable' : 'ephemeral';
-        setLiveStatus(driver + ' / ' + durable, durable === 'durable' ? 'var(--good)' : 'var(--warn)');
-      } catch (_) { setLiveStatus('connected', 'var(--good)'); }
-    });
-    es.addEventListener('capture', function (e) {
-      try { appendLiveRow(JSON.parse(e.data || '{}')); } catch (_) {}
-      load();
-    });
-    es.addEventListener('error', function () {
-      setLiveStatus('disconnected', 'var(--bad)');
-    });
-  }
-  function stopLive() {
-    if (live.es) { try { live.es.close(); } catch (_) {} live.es = null; }
-    setLiveStatus('off', 'var(--ink-mute)');
-  }
-  document.getElementById('live-toggle').addEventListener('click', function () {
-    live.on = !live.on;
-    var btn = document.getElementById('live-toggle');
-    var strip = document.getElementById('live-strip');
-    btn.setAttribute('aria-pressed', String(live.on));
-    btn.textContent = 'Live tail: ' + (live.on ? 'on' : 'off');
-    if (live.on) {
-      strip.style.display = 'block';
-      startLive();
-    } else {
-      stopLive();
-      strip.style.display = 'none';
-    }
-  });
-  document.getElementById('live-clear').addEventListener('click', function () {
-    live.n = 0;
-    document.getElementById('live-counter').textContent = '0 new captures';
-    var feed = document.getElementById('live-feed');
-    feed.innerHTML = '';
-    feed.style.display = 'none';
-  });
+ // ---- Live tail via /v1/capture/stream SSE ----
+ var live = { es: null, n: 0, on: false };
+ function setLiveStatus(text, color) {
+ var pill = document.getElementById('live-status');
+ pill.textContent = text;
+ pill.style.color = color || 'var(--ink-mute)';
+ }
+ function appendLiveRow(payload) {
+ var feed = document.getElementById('live-feed');
+ feed.style.display = 'block';
+ var row = document.createElement('div');
+ row.style.cssText = 'padding:4px 0;border-bottom:1px solid var(--line);font-size:11px';
+ var when = new Date().toISOString().slice(11, 19);
+ row.innerHTML =
+ '<span style="color:var(--ink-faint)">' + when + '</span> ' +
+ '<b>' + esc(payload.model || '-') + '</b> ' +
+ '<span class="ns-tag">' + esc(payload.namespace || 'default') + '</span> ' +
+ '<span style="color:var(--ink-mute)">' + esc(String(payload.input_excerpt || '').slice(0, 80)) + '</span>';
+ feed.insertBefore(row, feed.firstChild);
+ while (feed.children.length > 50) feed.removeChild(feed.lastChild);
+ live.n += 1;
+ document.getElementById('live-counter').textContent = live.n + ' new capture' + (live.n === 1 ? '' : 's');
+ }
+ function startLive() {
+ if (live.es) return;
+ var url = '/v1/capture/stream';
+ if (state.ns) url += '?namespace=' + encodeURIComponent(state.ns);
+ var es = new EventSource(url, { withCredentials: true });
+ live.es = es;
+ setLiveStatus('connecting...', 'var(--ink-mute)');
+ es.addEventListener('hello', function (e) {
+ try {
+ var meta = JSON.parse(e.data || '{}');
+ var driver = meta.driver || 'unknown';
+ var durable = meta.durable === true ? 'durable' : 'ephemeral';
+ setLiveStatus(driver + ' / ' + durable, durable === 'durable' ? 'var(--good)' : 'var(--warn)');
+ } catch (_) { setLiveStatus('connected', 'var(--good)'); }
+ });
+ es.addEventListener('capture', function (e) {
+ try { appendLiveRow(JSON.parse(e.data || '{}')); } catch (_) {}
+ load();
+ });
+ es.addEventListener('error', function () {
+ setLiveStatus('disconnected', 'var(--bad)');
+ });
+ }
+ function stopLive() {
+ if (live.es) { try { live.es.close(); } catch (_) {} live.es = null; }
+ setLiveStatus('off', 'var(--ink-mute)');
+ }
+ document.getElementById('live-toggle').addEventListener('click', function () {
+ live.on = !live.on;
+ var btn = document.getElementById('live-toggle');
+ var strip = document.getElementById('live-strip');
+ btn.setAttribute('aria-pressed', String(live.on));
+ btn.textContent = 'Live tail: ' + (live.on ? 'on' : 'off');
+ if (live.on) {
+ strip.style.display = 'block';
+ startLive();
+ } else {
+ stopLive();
+ strip.style.display = 'none';
+ }
+ });
+ document.getElementById('live-clear').addEventListener('click', function () {
+ live.n = 0;
+ document.getElementById('live-counter').textContent = '0 new captures';
+ var feed = document.getElementById('live-feed');
+ feed.innerHTML = '';
+ feed.style.display = 'none';
+ });
 
-  load();
-  } // end boot()
+ load();
+ } // end boot()
 })();
 </script>
 <script src="/nav.js" defer></script>

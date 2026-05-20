@@ -154,6 +154,7 @@ export async function submitLabel(eventId, opts = {}) {
   const seen = new Set([...priorReviewers, ...(prior && prior.reviewer ? [prior.reviewer] : []), ...coReviewers, reviewer]);
   const label = {
     event_id: eventId,
+    tenant_id: callerTenant || ev.tenant_id || null,
     verdict,
     fixed_output: opts.fixedOutput != null ? String(opts.fixedOutput) : null,
     sensitive: opts.sensitive === true,

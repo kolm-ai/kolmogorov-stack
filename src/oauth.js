@@ -85,6 +85,8 @@ export function oauthConfigured(providerName) {
 }
 
 export function mountOAuth(router) {
+  // GET /v1/oauth/:provider/start begins Google or GitHub OAuth sign-in.
+  // Redirects to the provider when configured; returns 503 with an operator hint otherwise.
   router.get('/v1/oauth/:provider/start', (req, res) => {
     const name = req.params.provider;
     const p = PROVIDERS[name];
@@ -109,6 +111,8 @@ export function mountOAuth(router) {
     res.redirect(302, u.toString());
   });
 
+  // GET /v1/oauth/:provider/callback completes Google or GitHub OAuth sign-in.
+  // Exchanges the provider code, creates or finds the tenant, then sets the session cookie.
   router.get('/v1/oauth/:provider/callback', async (req, res) => {
     const name = req.params.provider;
     const p = PROVIDERS[name];
@@ -184,6 +188,8 @@ export function mountOAuth(router) {
     }
   });
 
+  // GET /v1/oauth/providers reports which hosted OAuth providers are configured.
+  // Signup uses this public route to hide provider buttons until credentials exist.
   router.get('/v1/oauth/providers', (_req, res) => {
     res.json({
       google: oauthConfigured('google'),

@@ -1,6 +1,6 @@
 ---
 title: kolm tune · kolm.ai
-description: Evolve a local LoRA adapter from skeleton to a promoted revision.
+description: Evolve a local student artifact from skeleton to a promoted revision.
 ---
 
 # kolm tune
@@ -10,15 +10,15 @@ description: Evolve a local LoRA adapter from skeleton to a promoted revision.
 ## Usage
 
 ```bash
-kolm tune init        --artifact <art.kolm> --base <model_path_or_id> [--rank 8] [--alpha 16]
-kolm tune capture-on  --artifact <art.kolm>
+kolm tune init --artifact <art.kolm> --base <model_path_or_id> [--rank 8] [--alpha 16]
+kolm tune capture-on --artifact <art.kolm>
 kolm tune capture-off --artifact <art.kolm>
-kolm tune step        --artifact <art.kolm> [--epochs 1] [--airgap] [--batch-size 4] [--lr 2e-4]
-kolm tune eval        --artifact <art.kolm> [--rev vN]
-kolm tune promote     --artifact <art.kolm> --rev vN [--force]
-kolm tune rollback    --artifact <art.kolm>
-kolm tune watch       --artifact <art.kolm> [--interval 30000]
-kolm tune status      --artifact <art.kolm>
+kolm tune step --artifact <art.kolm> [--epochs 1] [--airgap] [--batch-size 4] [--lr 2e-4]
+kolm tune eval --artifact <art.kolm> [--rev vN]
+kolm tune promote --artifact <art.kolm> --rev vN [--force]
+kolm tune rollback --artifact <art.kolm>
+kolm tune watch --artifact <art.kolm> [--interval 30000]
+kolm tune status --artifact <art.kolm>
 ```
 
 ## Pipeline
@@ -51,19 +51,19 @@ kolm tune status      --artifact <art.kolm>
 ## Examples
 
 ```bash
-kolm tune init      --artifact redactor.kolm --base ./qwen2.5-3b
+kolm tune init --artifact redactor.kolm --base ./qwen2.5-3b
 kolm tune capture-on --artifact redactor.kolm
 # ... your app runs the artifact in production for a while ...
-kolm tune step      --artifact redactor.kolm --epochs 2
-kolm tune eval      --artifact redactor.kolm
-kolm tune promote   --artifact redactor.kolm --rev v3
+kolm tune step --artifact redactor.kolm --epochs 2
+kolm tune eval --artifact redactor.kolm
+kolm tune promote --artifact redactor.kolm --rev v3
 ```
 
 ## Dependencies (for `step` only)
 
 ```bash
 pip install 'torch>=2.2' 'transformers>=4.42' 'peft>=0.11' \
-            'datasets>=2.18' 'accelerate>=0.30' 'trl>=0.9'
+ 'datasets>=2.18' 'accelerate>=0.30' 'trl>=0.9'
 ```
 
 ## See also

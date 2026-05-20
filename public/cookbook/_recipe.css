@@ -1,10 +1,10 @@
 :root {
-  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-  --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-  --accent: #faf2e1; --accent-strong: #faf2e1; --good: #7ef0d2; --bad: #ff6b91;
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #faf2e1; --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
@@ -79,12 +79,12 @@ footer.site { padding: 48px 0 36px; border-top: 1px solid var(--line); font-fami
 footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
 
 /* Light-mode parity · mirror brand-refresh.css palette so /cookbook/* pages
-   don't leak the cream-on-cream effect that bit /compile pre-v7.8.10. */
+ don't leak the cream-on-cream effect that bit /compile pre-v7.8.10. */
 [data-theme="light"] {
-  --bg: #fafafa; --bg-elev: #ffffff; --bg-card: #ffffff;
-  --line: rgba(12,14,16,0.08); --line-strong: rgba(12,14,16,0.14);
-  --ink: #0c0e10; --ink-mute: #4b5158; --ink-faint: #6f7681;
-  --accent: #0a8862; --accent-strong: #0a8862;
+ --bg: #fafafa; --bg-elev: #ffffff; --bg-card: #ffffff;
+ --line: rgba(12,14,16,0.08); --line-strong: rgba(12,14,16,0.14);
+ --ink: #0c0e10; --ink-mute: #4b5158; --ink-faint: #6f7681;
+ --accent: #0a8862; --accent-strong: #0a8862;
 }
 [data-theme="light"] body { background: #fafafa; color: #0c0e10; }
 [data-theme="light"] header.site { background: rgba(250,250,250,0.92); border-bottom-color: var(--line); }

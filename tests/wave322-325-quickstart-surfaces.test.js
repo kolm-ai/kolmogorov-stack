@@ -21,6 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REPO = path.resolve(__dirname, '..');
 const QS_DIR = path.resolve(__dirname, '..', 'public', 'quickstart');
 
 const SURFACES = ['cli', 'api', 'sdk', 'embed'];
@@ -82,7 +83,7 @@ test('W322 — /quickstart/cli walks through 5 named verbs in order', () => {
 test('W323 — /quickstart/api shows the curl flow + endpoint cheat sheet', () => {
   const html = read('api');
   // 5 step curl pattern
-  for (const endpoint of ['/v1/auth/anon', '/v1/capture/log', '/v1/distill/from-captures', '/v1/artifacts', '/v1/replay']) {
+  for (const endpoint of ['/v1/anon/bootstrap', '/v1/capture/log', '/v1/distill/from-captures', '/v1/artifacts', '/v1/replay']) {
     assert.ok(html.includes(endpoint), `api quickstart must include endpoint ${endpoint}`);
   }
   // Cheat sheet has the receipt header callout
@@ -94,9 +95,10 @@ test('W323 — /quickstart/api shows the curl flow + endpoint cheat sheet', () =
 // ---------- W324 (sdk) — must show both TS and Python in tabs ----------
 test('W324 — /quickstart/sdk shows TypeScript + Python tabs and the swap-the-import sell', () => {
   const html = read('sdk');
+  const nodePkg = JSON.parse(fs.readFileSync(path.join(REPO, 'sdk', 'node', 'package.json'), 'utf8')).name;
   // Strip syntax-highlight spans before matching import patterns
   const stripped = html.replace(/<[^>]+>/g, ' ').replace(/&apos;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ');
-  assert.match(stripped, /import\s+Kolm\s+from\s+['"]@kolm\/sdk['"]/, 'sdk page must show the TS import');
+  assert.match(stripped, new RegExp(`import\\s+Kolm\\s+from\\s+['"]${nodePkg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]`), 'sdk page must show the canonical TS import');
   assert.match(stripped, /from\s+kolm\s+import\s+Kolm/, 'sdk page must show the Python import');
   assert.match(html, /captureNamespace/, 'sdk page must show capture wiring (TS)');
   assert.match(html, /capture_namespace/, 'sdk page must show capture wiring (Python)');

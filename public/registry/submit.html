@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>Submit a .kolm to the registry &middot; kolm</title>
+<title>Submit a .kolm to the registry · kolm.ai</title>
 <meta name="description" content="Submit a .kolm artifact for review. Community contributions reviewed within 2 business days. CID + signature verify first.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -15,240 +15,250 @@
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--line-strong:rgba(236,231,220,0.16);--bg:#0b0d10;--bg-elev:#101316;--bg-card:#13171b;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.16);--bg:#fdfcf8;--bg-elev:#ffffff;--bg-card:#f7f4ec;--accent:#059669}
-  body.reg{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0;min-height:100vh;display:flex;flex-direction:column}
-  body.reg a{color:inherit;text-decoration:none}
-  .wrap{max-width:760px;margin:0 auto;padding:0 24px;width:100%}
-  @media(max-width:560px){.wrap{padding:0 16px}}
-  header.bar{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.bar .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
-  header.bar nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.bar nav a{color:inherit;text-decoration:none}
-  header.bar nav a.cta{color:var(--accent);font-weight:500}
-  header.bar .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  @media(max-width:560px){header.bar nav a:not(.cta){display:none}}
-  .hero{padding:64px 0 24px;border-bottom:1px solid var(--line)}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  .noindex{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);background:var(--bg-elev);border:1px solid var(--line);padding:3px 8px;border-radius:3px;margin-left:8px;vertical-align:middle}
-  h1{font-size:36px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 14px}
-  .lede{font-size:16.5px;line-height:1.55;color:var(--ink-mute);margin:0;max-width:60ch}
-  @media(max-width:560px){h1{font-size:28px;line-height:1.15} .hero{padding:42px 0 22px}}
-  section.body{padding:32px 0;border-bottom:1px solid var(--line)}
-  h2{margin:0 0 12px;font-size:20px;font-weight:500;letter-spacing:-0.012em}
-  p{color:var(--ink-mute);margin:0 0 14px}
-  form.submit{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0}
-  @media(max-width:620px){form.submit{grid-template-columns:1fr}}
-  form.submit .full{grid-column:1/-1}
-  form.submit label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 6px}
-  form.submit input[type=text],form.submit input[type=email],form.submit input[type=url],form.submit select,form.submit textarea{
-    width:100%;box-sizing:border-box;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:10px 12px;color:var(--ink);font:13.5px/1.5 -apple-system,system-ui,sans-serif;outline:0;transition:border-color 120ms,box-shadow 120ms
-  }
-  form.submit input:focus,form.submit select:focus,form.submit textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,0.18)}
-  form.submit textarea{font-family:var(--mono);font-size:12.5px;min-height:90px;resize:vertical}
-  form.submit input.mono{font-family:var(--mono);font-size:12.5px}
-  form.submit .sub-hint{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:6px 0 0}
-  button.submit-btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#0b0d10;border:0;border-radius:6px;padding:11px 18px;font:500 14px/1 -apple-system,system-ui,sans-serif;cursor:pointer;margin:18px 0 0}
-  button.submit-btn:hover{opacity:0.9}
-  .ghost-link{display:inline-block;margin:18px 0 0 14px;font-size:13px;color:var(--ink-mute);border-bottom:1px dashed var(--line)}
-  .checklist{margin:18px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);padding:6px 0}
-  .checklist .item{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:flex-start}
-  .checklist .item:last-child{border-bottom:0}
-  .checklist .num{font-family:var(--mono);font-size:11px;color:var(--ink-faint);min-width:24px}
-  .checklist .lab{font-size:14.5px;color:var(--ink);font-weight:500;margin:0 0 4px}
-  .checklist .det{font-size:13px;color:var(--ink-mute);margin:0;line-height:1.55}
-  .checklist .det code{font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:1px 5px}
-  pre.example{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.55;color:var(--ink);margin:8px 0 0}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--line-strong:rgba(236,231,220,0.16);--bg:#0b0d10;--bg-elev:#101316;--bg-card:#13171b;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.16);--bg:#fdfcf8;--bg-elev:#ffffff;--bg-card:#f7f4ec;--accent:#059669}
+ body.reg{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0;min-height:100vh;display:flex;flex-direction:column}
+ body.reg a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 24px;width:100%}
+ @media(max-width:560px){.wrap{padding:0 16px}}
+ header.bar{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.bar .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+ header.bar nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.bar nav a{color:inherit;text-decoration:none}
+ header.bar nav a.cta{color:var(--accent);font-weight:500}
+ header.bar .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ @media(max-width:560px){header.bar nav a:not(.cta){display:none}}
+ .hero{padding:64px 0 24px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ .noindex{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);background:var(--bg-elev);border:1px solid var(--line);padding:3px 8px;border-radius:3px;margin-left:8px;vertical-align:middle}
+ h1{font-size:36px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 14px}
+ .lede{font-size:16.5px;line-height:1.55;color:var(--ink-mute);margin:0;max-width:60ch}
+ @media(max-width:560px){h1{font-size:28px;line-height:1.15} .hero{padding:42px 0 22px}}
+ section.body{padding:32px 0;border-bottom:1px solid var(--line)}
+ h2{margin:0 0 12px;font-size:20px;font-weight:500;letter-spacing:-0.012em}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ form.submit{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0}
+ @media(max-width:620px){form.submit{grid-template-columns:1fr}}
+ form.submit .full{grid-column:1/-1}
+ form.submit label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 6px}
+ form.submit input[type=text],form.submit input[type=email],form.submit input[type=url],form.submit select,form.submit textarea{
+ width:100%;box-sizing:border-box;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:10px 12px;color:var(--ink);font:13.5px/1.5 -apple-system,system-ui,sans-serif;outline:0;transition:border-color 120ms,box-shadow 120ms
+ }
+ form.submit input:focus,form.submit select:focus,form.submit textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,0.18)}
+ form.submit textarea{font-family:var(--mono);font-size:12.5px;min-height:90px;resize:vertical}
+ form.submit input.mono{font-family:var(--mono);font-size:12.5px}
+ form.submit .sub-hint{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:6px 0 0}
+ button.submit-btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#0b0d10;border:0;border-radius:6px;padding:11px 18px;font:500 14px/1 -apple-system,system-ui,sans-serif;cursor:pointer;margin:18px 0 0}
+ button.submit-btn:hover{opacity:0.9}
+ .ghost-link{display:inline-block;margin:18px 0 0 14px;font-size:13px;color:var(--ink-mute);border-bottom:1px dashed var(--line)}
+ .checklist{margin:18px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);padding:6px 0}
+ .checklist .item{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:flex-start}
+ .checklist .item:last-child{border-bottom:0}
+ .checklist .num{font-family:var(--mono);font-size:11px;color:var(--ink-faint);min-width:24px}
+ .checklist .lab{font-size:14.5px;color:var(--ink);font-weight:500;margin:0 0 4px}
+ .checklist .det{font-size:13px;color:var(--ink-mute);margin:0;line-height:1.55}
+ .checklist .det code{font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:1px 5px}
+ pre.example{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.55;color:var(--ink);margin:8px 0 0}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta property="og:title" content="Submit a .kolm to the registry · kolm.ai">
+<meta property="og:description" content="Submit a .kolm artifact for review. Community contributions reviewed within 2 business days. CID + signature verify first.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/registry/submit">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Submit a .kolm to the registry · kolm.ai">
+<meta name="twitter:description" content="Submit a .kolm artifact for review. Community contributions reviewed within 2 business days. CID + signature verify first.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body class="reg">
 
 <header class="bar">
-  <div class="wrap">
-    <a href="/" class="logo">kolm</a>
-    <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
-  </div>
+ <div class="wrap">
+ <a href="/" class="logo">kolm</a>
+ <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
+ </div>
 </header>
 
 <section class="hero"><div class="wrap">
-  <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/registry">registry</a> &nbsp;/&nbsp; submit <span class="noindex">noindex</span></p>
-  <h1>Submit a .kolm to the registry.</h1>
-  <p class="lede">Compiled a .kolm worth publishing? Send it in. We verify the CID + the signature + replay the K-score on our hardware, then list it. Most submissions go live within 2 business days.</p>
+ <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/registry">registry</a> &nbsp;/&nbsp; submit <span class="noindex">noindex</span></p>
+ <h1>Submit a .kolm to the registry.</h1>
+ <p class="lede">Compiled a .kolm worth publishing? Send it in. We verify the CID + the signature + replay the K-score on our hardware, then list it. Most submissions go live within 2 business days.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>Submission form</h2>
-  <p>Plaintext mailto submission - same pattern as <a href="/baa" style="color:var(--accent);border-bottom:1px dashed var(--line)">/baa</a>. Your mail client opens with a pre-filled body; you review it before sending. We never see anything until you hit Send.</p>
+ <h2>Submission form</h2>
+ <p>Plaintext mailto submission - same pattern as <a href="/baa" style="color:var(--accent);border-bottom:1px dashed var(--line)">/baa</a>. Your mail client opens with a pre-filled body; you review it before sending. We never see anything until you hit Send.</p>
 
-  <form class="submit" action="mailto:registry@kolm.ai" enctype="text/plain" method="POST">
-    <div class="full">
-      <label for="artifact_name">artifact name</label>
-      <input id="artifact_name" name="artifact_name" type="text" placeholder="phi-redactor-llama-3.1-8b" required>
-      <p class="sub-hint">lowercase, dashes, ideally task-base-size shape</p>
-    </div>
-    <div>
-      <label for="base_model">base model</label>
-      <input id="base_model" name="base_model" type="text" placeholder="Llama 3.1 8B" required>
-    </div>
-    <div>
-      <label for="license">license</label>
-      <select id="license" name="license" required>
-        <option value="Apache-2.0">Apache-2.0</option>
-        <option value="RS-1">RS-1 (for regulated use)</option>
-        <option value="MIT">MIT</option>
-        <option value="other">other (describe below)</option>
-      </select>
-    </div>
-    <div class="full">
-      <label for="task_description">task description</label>
-      <textarea id="task_description" name="task_description" placeholder="One-sentence summary: what does this artifact do, and on what kind of input?" required></textarea>
-    </div>
-    <div>
-      <label for="your_name">your name</label>
-      <input id="your_name" name="your_name" type="text" placeholder="Ada Lovelace" required>
-    </div>
-    <div>
-      <label for="your_org">your org</label>
-      <input id="your_org" name="your_org" type="text" placeholder="Acme Co. (or 'independent')" required>
-    </div>
-    <div>
-      <label for="your_email">your email</label>
-      <input id="your_email" name="your_email" type="email" placeholder="ada@example.com" required>
-    </div>
-    <div>
-      <label for="k_score">expected k-score</label>
-      <input id="k_score" name="k_score" type="text" class="mono" placeholder="0.91" required>
-      <p class="sub-hint">must be &gt;= 0.85 - see pre-flight checklist below</p>
-    </div>
-    <div class="full">
-      <label for="artifact_url">link to your .kolm file</label>
-      <input id="artifact_url" name="artifact_url" type="url" class="mono" placeholder="https://gist.github.com/... or https://your-bucket/path/to/artifact.kolm" required>
-      <p class="sub-hint">a signed URL is fine. A gist with the .kolm attached works. The file is fetched once during review then dropped.</p>
-    </div>
-    <div class="full">
-      <label for="notes">anything we should know (optional)</label>
-      <textarea id="notes" name="notes" placeholder="Compliance pack ID, eval set, related papers, intended audience."></textarea>
-    </div>
-    <div class="full">
-      <button class="submit-btn" type="submit">Open mail draft &rarr;</button>
-      <a class="ghost-link" href="mailto:registry@kolm.ai">or just email registry@kolm.ai</a>
-    </div>
-  </form>
+ <form class="submit" action="mailto:registry@kolm.ai" enctype="text/plain" method="POST">
+ <div class="full">
+ <label for="artifact_name">artifact name</label>
+ <input id="artifact_name" name="artifact_name" type="text" placeholder="phi-redactor-llama-3.1-8b" required>
+ <p class="sub-hint">lowercase, dashes, ideally task-base-size shape</p>
+ </div>
+ <div>
+ <label for="base_model">base model</label>
+ <input id="base_model" name="base_model" type="text" placeholder="Llama 3.1 8B" required>
+ </div>
+ <div>
+ <label for="license">license</label>
+ <select id="license" name="license" required>
+ <option value="Apache-2.0">Apache-2.0</option>
+ <option value="RS-1">RS-1 (for regulated use)</option>
+ <option value="MIT">MIT</option>
+ <option value="other">other (describe below)</option>
+ </select>
+ </div>
+ <div class="full">
+ <label for="task_description">task description</label>
+ <textarea id="task_description" name="task_description" placeholder="One-sentence summary: what does this artifact do, and on what kind of input?" required></textarea>
+ </div>
+ <div>
+ <label for="your_name">your name</label>
+ <input id="your_name" name="your_name" type="text" placeholder="Ada Lovelace" required>
+ </div>
+ <div>
+ <label for="your_org">your org</label>
+ <input id="your_org" name="your_org" type="text" placeholder="Acme Co. (or 'independent')" required>
+ </div>
+ <div>
+ <label for="your_email">your email</label>
+ <input id="your_email" name="your_email" type="email" placeholder="ada@example.com" required>
+ </div>
+ <div>
+ <label for="k_score">expected k-score</label>
+ <input id="k_score" name="k_score" type="text" class="mono" placeholder="0.91" required>
+ <p class="sub-hint">must be &gt;= 0.85 - see pre-flight checklist below</p>
+ </div>
+ <div class="full">
+ <label for="artifact_url">link to your .kolm file</label>
+ <input id="artifact_url" name="artifact_url" type="url" class="mono" placeholder="https://gist.github.com/... or https://your-bucket/path/to/artifact.kolm" required>
+ <p class="sub-hint">a signed URL is fine. A gist with the .kolm attached works. The file is fetched once during review then dropped.</p>
+ </div>
+ <div class="full">
+ <label for="notes">anything we should know (optional)</label>
+ <textarea id="notes" name="notes" placeholder="Compliance pack ID, eval set, related papers, intended audience."></textarea>
+ </div>
+ <div class="full">
+ <button class="submit-btn" type="submit">Open mail draft &rarr;</button>
+ <a class="ghost-link" href="mailto:registry@kolm.ai">or just email registry@kolm.ai</a>
+ </div>
+ </form>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>Pre-flight checklist</h2>
-  <p>Run these six checks before you submit. The faster they all pass, the faster the listing goes live.</p>
-  <div class="checklist">
-    <div class="item">
-      <span class="num">01</span>
-      <div>
-        <p class="lab"> kolm inspect passes locally</p>
-        <p class="det">Run <code> kolm inspect path/to/artifact.kolm</code> and confirm it prints <code>OK</code> on all six steps (manifest, CID, HMAC chain, K-score, provenance, signature). If verify fails on your side, it fails on ours.</p>
-        <pre class="example"> kolm inspect build/phi-redactor.kolm
+ <h2>Pre-flight checklist</h2>
+ <p>Run these six checks before you submit. The faster they all pass, the faster the listing goes live.</p>
+ <div class="checklist">
+ <div class="item">
+ <span class="num">01</span>
+ <div>
+ <p class="lab"> kolm inspect passes locally</p>
+ <p class="det">Run <code> kolm inspect path/to/artifact.kolm</code> and confirm it prints <code>OK</code> on all six steps (manifest, CID, Ed25519 receipt chain, K-score, provenance, signature). If verify fails on your side, it fails on ours.</p>
+ <pre class="example"> kolm inspect build/phi-redactor.kolm
 [1/6] OK manifest parsed (RS-1 v0.2)
 [2/6] OK CID recomputed: cidv1:sha256:7a2c1f8b..
-[3/6] OK HMAC chain intact (4 receipts)
+[3/6] OK Ed25519 receipt chain intact (4 receipts)
 [4/6] OK K-score 0.94 passes gate (&gt;= 0.85)
 [5/6] OK provenance present (base, builder, ts)
 [6/6] OK signature valid (kolm issuer key)</pre>
-      </div>
-    </div>
-    <div class="item">
-      <span class="num">02</span>
-      <div>
-        <p class="lab">K-score &gt;= 0.85 on your eval set</p>
-        <p class="det">Public registry minimum is 0.85. Below that we still accept it but list it under "Experimental." See <a href="/docs/k-score-methodology" style="color:var(--accent);border-bottom:1px dashed var(--line)">K-score methodology</a> for what each weight means and why this threshold matters.</p>
-      </div>
-    </div>
-    <div class="item">
-      <span class="num">03</span>
-      <div>
-        <p class="lab">eval set frozen + checksum'd</p>
-        <p class="det">The manifest must point to a frozen eval set with a sha256. We re-run your eval on listing. If the checksum drifts between submission and listing, the score is rejected.</p>
-      </div>
-    </div>
-    <div class="item">
-      <span class="num">04</span>
-      <div>
-        <p class="lab">compliance pack present if regulated</p>
-        <p class="det">If the task touches PHI / PII / financial / legal / regulated decisions, attach the appropriate compliance pack (HIPAA, SR 11-7, NIST AI RMF, EU AI Act). See <a href="/compliance-packs" style="color:var(--accent);border-bottom:1px dashed var(--line)">/compliance-packs</a> for templates. Without a pack we list it as general-purpose only.</p>
-      </div>
-    </div>
-    <div class="item">
-      <span class="num">05</span>
-      <div>
-        <p class="lab">refusal path declared in manifest</p>
-        <p class="det">Every artifact must declare what it refuses to do and why. <code>manifest.refusal.when</code> + <code>manifest.refusal.reason</code>. If your artifact has no refusal path, list it - empty arrays accepted, but they signal "this model will try to answer anything."</p>
-      </div>
-    </div>
-    <div class="item">
-      <span class="num">06</span>
-      <div>
-        <p class="lab">issuer key matches your org</p>
-        <p class="det">The signature on the manifest must trace to a kolm-issued key under your org. If you signed with a personal key, register it first: <code>kolm key register --org &lt;your-org&gt;</code>. Anonymous submissions are accepted but listed as "unverified author."</p>
-      </div>
-    </div>
-  </div>
+ </div>
+ </div>
+ <div class="item">
+ <span class="num">02</span>
+ <div>
+ <p class="lab">K-score &gt;= 0.85 on your eval set</p>
+ <p class="det">Public registry minimum is 0.85. Below that we still accept it but list it under "Experimental." See <a href="/docs/k-score-methodology" style="color:var(--accent);border-bottom:1px dashed var(--line)">K-score methodology</a> for what each weight means and why this threshold matters.</p>
+ </div>
+ </div>
+ <div class="item">
+ <span class="num">03</span>
+ <div>
+ <p class="lab">eval set frozen + checksum'd</p>
+ <p class="det">The manifest must point to a frozen eval set with a sha256. We re-run your eval on listing. If the checksum drifts between submission and listing, the score is rejected.</p>
+ </div>
+ </div>
+ <div class="item">
+ <span class="num">04</span>
+ <div>
+ <p class="lab">compliance pack present if regulated</p>
+ <p class="det">If the task touches PHI / PII / financial / legal / regulated decisions, attach the appropriate compliance pack (HIPAA, SR 11-7, NIST AI RMF, EU AI Act). See <a href="/compliance-packs" style="color:var(--accent);border-bottom:1px dashed var(--line)">/compliance-packs</a> for templates. Without a pack we list it as general-purpose only.</p>
+ </div>
+ </div>
+ <div class="item">
+ <span class="num">05</span>
+ <div>
+ <p class="lab">refusal path declared in manifest</p>
+ <p class="det">Every artifact must declare what it refuses to do and why. <code>manifest.refusal.when</code> + <code>manifest.refusal.reason</code>. If your artifact has no refusal path, list it - empty arrays accepted, but they signal "this model will try to answer anything."</p>
+ </div>
+ </div>
+ <div class="item">
+ <span class="num">06</span>
+ <div>
+ <p class="lab">issuer key matches your org</p>
+ <p class="det">The signature on the manifest must trace to a kolm-issued key under your org. If you signed with a personal key, register it first: <code>kolm key register --org &lt;your-org&gt;</code>. Anonymous submissions are accepted but listed as "unverified author."</p>
+ </div>
+ </div>
+ </div>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>What happens next</h2>
-  <p>1. We confirm the email arrived. 2. We pull the artifact from your URL and re-run <code> kolm inspect</code> on our build hardware. 3. We replay the eval set against the artifact. 4. If both pass, the listing goes live with your org name + your K-score. 5. If review reveals a problem, we email you - we never publish without your confirmation.</p>
-  <p>Questions? Email <a href="mailto:registry@kolm.ai" style="color:var(--accent);border-bottom:1px dashed var(--line)">registry@kolm.ai</a> directly.</p>
+ <h2>What happens next</h2>
+ <p>1. We confirm the email arrived. 2. We pull the artifact from your URL and re-run <code> kolm inspect</code> on our build hardware. 3. We replay the eval set against the artifact. 4. If both pass, the listing goes live with your org name + your K-score. 5. If review reveals a problem, we email you - we never publish without your confirmation.</p>
+ <p>Questions? Email <a href="mailto:registry@kolm.ai" style="color:var(--accent);border-bottom:1px dashed var(--line)">registry@kolm.ai</a> directly.</p>
 </div></section>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

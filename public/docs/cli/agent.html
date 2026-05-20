@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm agent · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm agent CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/agent">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm agent","description":"Reference for the kolm agent CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/agent","mainEntityOfPage":"https://kolm.ai/docs/cli/agent","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm agent · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm agent CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,26 +176,26 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="agent">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>agent</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>agent</span>
 </nav>
 <h1>kolm agent</h1>
 <p>Build, inspect, merge, and export self-growing Hermes-style tool-use agents from one or more <code>.kolm</code> recipes (W236). The agent blueprint ships as a deterministic signed JSON document so consumers can verify the tool catalog before instantiation.</p>
 <h2>Usage</h2>
 <pre><code>
 kolm agent export &lt;recipe.kolm&gt;... --out &lt;agent.json&gt;
-kolm agent build  --name &lt;slug&gt; --base-model &lt;id&gt; --description &lt;text&gt;
-kolm agent merge  &lt;a.json&gt; &lt;b.json&gt; --out &lt;merged.json&gt;
-kolm agent show   &lt;agent.json&gt;
+kolm agent build --name &lt;slug&gt; --base-model &lt;id&gt; --description &lt;text&gt;
+kolm agent merge &lt;a.json&gt; &lt;b.json&gt; --out &lt;merged.json&gt;
+kolm agent show &lt;agent.json&gt;
 kolm agent verify &lt;agent.json&gt;
 </code></pre>
 <h2>Examples</h2>
 <pre><code>
 kolm agent export billing.kolm support.kolm --out finance-agent.json
 kolm agent build --name ops --base-model NousResearch/Hermes-4.3-36B \
-                 --description &quot;ops triage assistant&quot;
+ --description &quot;ops triage assistant&quot;
 kolm agent merge finance-agent.json ops-agent.json --out combined.json
 kolm agent show combined.json
-kolm agent verify combined.json                # integrity_hash + tool sigs
+kolm agent verify combined.json # integrity_hash + tool sigs
 </code></pre>
 <h2>What an agent blueprint contains</h2>
 <ul>
@@ -209,13 +213,13 @@ kolm agent verify combined.json                # integrity_hash + tool sigs
 <li><code>kolm compile</code> to produce the underlying recipes the agent wraps.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

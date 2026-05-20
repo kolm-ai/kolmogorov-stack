@@ -9,25 +9,25 @@ GGUF files into `~/.kolm/models` (W386).
 ## Catalog
 
 ```
-kolm models frontier                        list verified frontier rows
-kolm models tiers                           list hardware tier presets
-kolm models backends                        list runtime backends
-kolm models show <id>                       single-row inspection
-kolm models verify                          re-fetch source URLs, fail on 4xx/5xx
-kolm models benchmarks                      published scores per row
-kolm models verify-benchmarks               re-run published scores locally
-kolm models add <id> ...                    register a custom base
+kolm models frontier list verified frontier rows
+kolm models tiers list hardware tier presets
+kolm models backends list runtime backends
+kolm models show <id> single-row inspection
+kolm models verify re-fetch source URLs, fail on 4xx/5xx
+kolm models benchmarks published scores per row
+kolm models verify-benchmarks re-run published scores locally
+kolm models add <id> ... register a custom base
 ```
 
 ## Weights (W386)
 
 ```
-kolm models manifest [--tier=<t>] [--json]            print the GGUF manifest
-kolm models pull <id> [--variant=<q>]                 download one variant
-kolm models prefetch [--tier=<t>] [--concurrency N]   pull every variant in a tier
-kolm models cache list [--json]                       what is on disk
-kolm models cache clear [<id>]                        delete one model or all
-kolm models cache rescan                              rebuild index.json from disk
+kolm models manifest [--tier=<t>] [--json] print the GGUF manifest
+kolm models pull <id> [--variant=<q>] download one variant
+kolm models prefetch [--tier=<t>] [--concurrency N] pull every variant in a tier
+kolm models cache list [--json] what is on disk
+kolm models cache clear [<id>] delete one model or all
+kolm models cache rescan rebuild index.json from disk
 ```
 
 ### Tiers
@@ -35,24 +35,24 @@ kolm models cache rescan                              rebuild index.json from di
 Tiers are keyed off the GGUF download size, not the GPU class. Pick the one
 that fits the disk and bandwidth you can spare.
 
-| tier         | typical models                                | rough size |
+| tier | typical models | rough size |
 |--------------|------------------------------------------------|------------|
-| `edge`       | SmolLM2-1.7B, Qwen 2.5 0.5B/1.5B, Phi 3.5 mini | ~7 GB      |
-| `mobile`     | Gemma 2 2B, Phi 3.5 mini, Llama 3.2 3B         | ~6 GB      |
-| `laptop`     | Qwen 2.5 7B, Llama 3.1 8B                      | ~10 GB     |
-| `workstation`| Qwen 2.5 14B / 32B, Llama 3.3 70B Q4           | ~50 GB     |
-| `datacenter` | Qwen 2.5 72B fp16, large MoE variants          | ~140 GB    |
+| `edge` | SmolLM2-1.7B, Qwen 2.5 0.5B/1.5B, Phi 3.5 mini | ~7 GB |
+| `mobile` | Gemma 2 2B, Phi 3.5 mini, Llama 3.2 3B | ~6 GB |
+| `laptop` | Qwen 2.5 7B, Llama 3.1 8B | ~10 GB |
+| `workstation`| Qwen 2.5 14B / 32B, Llama 3.3 70B Q4 | ~50 GB |
+| `datacenter` | Qwen 2.5 72B fp16, large MoE variants | ~140 GB |
 
 ### Examples
 
 ```
-kolm models manifest --tier=edge                   # plain-text table
-kolm models prefetch --tier=edge                   # ~7 GB into ~/.kolm/models
-kolm models pull microsoft/Phi-3.5-mini-instruct   # one model, default quant
+kolm models manifest --tier=edge # plain-text table
+kolm models prefetch --tier=edge # ~7 GB into ~/.kolm/models
+kolm models pull microsoft/Phi-3.5-mini-instruct # one model, default quant
 kolm models pull Qwen/Qwen2.5-7B-Instruct --variant=q4_0
-kolm models cache list                             # what is on disk
+kolm models cache list # what is on disk
 kolm models cache clear Qwen/Qwen2.5-0.5B-Instruct # remove one model
-kolm models cache rescan                           # reconcile after a crash
+kolm models cache rescan # reconcile after a crash
 ```
 
 ### How it works
@@ -74,8 +74,8 @@ The same manifest is served by the backend so other tools can read it:
 - `GET /v1/models/manifest` returns the full table as JSON.
 - `GET /v1/models/manifest?tier=edge` filters by tier.
 - `GET /v1/models/pull?id=<id>&variant=<q>` returns a 302 to the public
-  HuggingFace resolve URL. No auth required; HuggingFace itself enforces any
-  gating on the upstream side.
+ HuggingFace resolve URL. No auth required; HuggingFace itself enforces any
+ gating on the upstream side.
 - `GET /v1/models/cache` returns the local cache index on the API host.
 
 ### Disclosure
@@ -90,6 +90,6 @@ inspect the substitutions.
 ## See also
 
 - `/models` - the public catalog page; the Pre-cached weights section reads
-  `/v1/models/manifest` + `/v1/models/cache` live.
+ `/v1/models/manifest` + `/v1/models/cache` live.
 - `kolm compile --tier=<t>` to compile against the matching base.
 - `kolm doctor --detect-hw` to recommend a tier based on local hardware.

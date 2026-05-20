@@ -2,7 +2,7 @@
 //
 // Usage from the user's POV:
 //
-//   npm install -g kolm
+//   npm install -g github:sneaky-hippo/kolmogorov-stack
 //   kolm connect start
 //   export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
 //   export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
@@ -45,12 +45,20 @@ import { insertCapture, isDurable as captureIsDurable, driverName as captureDriv
 // later bridge call from capture-store.insertCapture for the same row.
 import { appendEvent as eventStoreAppend } from './event-store.js';
 
-const HOME = os.homedir();
-const KOLM_DIR = path.join(HOME, '.kolm');
-const PID_PATH = path.join(KOLM_DIR, 'daemon.pid');
-const CONFIG_PATH = path.join(KOLM_DIR, 'config.json');
-const EVENTS_DIR = path.join(KOLM_DIR, 'events');
-const RAW_DIR = path.join(EVENTS_DIR, 'raw');
+const DEFAULT_HOME = os.homedir();
+const DEFAULT_KOLM_DIR = path.join(DEFAULT_HOME, '.kolm');
+
+function resolveKolmDir(dataDir) {
+  return dataDir
+    || process.env.KOLM_HOME
+    || process.env.KOLM_DATA_DIR
+    || path.join(process.env.HOME || process.env.USERPROFILE || DEFAULT_HOME, '.kolm');
+}
+
+function pidPath(dataDir) { return path.join(resolveKolmDir(dataDir), 'daemon.pid'); }
+function configPath(dataDir) { return path.join(resolveKolmDir(dataDir), 'config.json'); }
+function eventsDir(dataDir) { return path.join(resolveKolmDir(dataDir), 'events'); }
+function rawDir(dataDir) { return path.join(eventsDir(dataDir), 'raw'); }
 
 // W411 — local daemon sentinel tenant_id. Captures from an unauthenticated
 // local proxy still carry a tenant so the lake / opportunities / datasets
@@ -69,30 +77,38 @@ const DEFAULT_PORT = 8787;
 const DEFAULT_HOST = '127.0.0.1';
 
 function ensureDirs(dataDir) {
-  const base = dataDir || KOLM_DIR;
+  const base = resolveKolmDir(dataDir);
   for (const d of [base, path.join(base, 'events'), path.join(base, 'events', 'raw')]) {
     if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
   }
 }
 
-function loadDaemonConfig() {
-  if (!fs.existsSync(CONFIG_PATH)) return {};
-  try { return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8')); } catch { return {}; }
+function loadDaemonConfig(dataDir) {
+  const fp = configPath(dataDir);
+  if (!fs.existsSync(fp)) return {};
+  try { return JSON.parse(fs.readFileSync(fp, 'utf-8')); } catch { return {}; }
 }
 
-function readPidRecord() {
-  if (!fs.existsSync(PID_PATH)) return null;
-  try { return JSON.parse(fs.readFileSync(PID_PATH, 'utf-8')); } catch { return null; }
+function readPidRecord(dataDir) {
+  const fp = pidPath(dataDir);
+  if (!fs.existsSync(fp)) return null;
+  try { return JSON.parse(fs.readFileSync(fp, 'utf-8')); } catch { return null; }
 }
 
-function writePidRecord(rec) {
-  ensureDirs();
-  fs.writeFileSync(PID_PATH, JSON.stringify(rec, null, 2));
-  try { fs.chmodSync(PID_PATH, 0o600); } catch (_) {}
+function writePidRecord(rec, dataDir) {
+  ensureDirs(dataDir);
+  const fp = pidPath(dataDir);
+  try {
+    fs.writeFileSync(fp, JSON.stringify(rec, null, 2));
+    try { fs.chmodSync(fp, 0o600); } catch (_) {}
+    return { ok: true, path: fp };
+  } catch (error) {
+    return { ok: false, path: fp, error };
+  }
 }
 
-function removePidRecord() {
-  try { fs.unlinkSync(PID_PATH); } catch (_) {}
+function removePidRecord(dataDir) {
+  try { fs.unlinkSync(pidPath(dataDir)); } catch (_) {}
 }
 
 // Resolve the upstream key the daemon will forward with. Priority:
@@ -153,7 +169,7 @@ function writeRawSidecar(text, kind /* 'prompt'|'response' */) {
   const hash = crypto.createHash('sha256').update(s, 'utf8').digest('hex');
   const ext = '.txt';
   const filename = `${hash}_${kind}${ext}`;
-  const fp = path.join(RAW_DIR, filename);
+  const fp = path.join(rawDir(), filename);
   try {
     if (!fs.existsSync(fp)) fs.writeFileSync(fp, s, 'utf8');
     try { fs.chmodSync(fp, 0o600); } catch (_) {}
@@ -762,7 +778,7 @@ export function buildDaemonApp({ dataDir } = {}) {
 
   // /v1/health — daemon snapshot for `kolm connect status|doctor`.
   app.get('/v1/health', async (_req, res) => {
-    let storage = path.join(KOLM_DIR, 'events', 'events.sqlite');
+    let storage = path.join(resolveKolmDir(dataDir), 'events', 'events.sqlite');
     let storageHealth = null;
     try { storageHealth = await captureStoreHealth(); } catch (_) {}
     const providers = summarizeProviders();
@@ -892,14 +908,14 @@ export async function startDaemon({ port, host, dataDir } = {}) {
     const server = app.listen(p, h, () => {
       const addr = server.address();
       const actualPort = (typeof addr === 'object' && addr && addr.port) ? addr.port : p;
-      writePidRecord({
+      const pidWrite = writePidRecord({
         pid: process.pid,
         port: actualPort,
         host: h,
         started_at: new Date().toISOString(),
         version: DAEMON_VERSION,
-      });
-      resolve({ server, port: actualPort, host: h, pid: process.pid });
+      }, dataDir);
+      resolve({ server, port: actualPort, host: h, pid: process.pid, pid_file: pidWrite.path, pid_file_written: pidWrite.ok });
     });
     server.on('error', reject);
   });
@@ -933,15 +949,20 @@ export function daemonStatus() {
     process.kill(rec.pid, 0);
     alive = true;
   } catch (_) { alive = false; }
-  return { running: alive, ...rec, pid_file: PID_PATH };
+  return { running: alive, ...rec, pid_file: pidPath() };
 }
 
 export const _internals = {
-  KOLM_DIR,
-  PID_PATH,
-  CONFIG_PATH,
-  EVENTS_DIR,
-  RAW_DIR,
+  KOLM_DIR: DEFAULT_KOLM_DIR,
+  PID_PATH: pidPath(),
+  CONFIG_PATH: configPath(),
+  EVENTS_DIR: eventsDir(),
+  RAW_DIR: rawDir(),
+  resolveKolmDir,
+  pidPath,
+  configPath,
+  eventsDir,
+  rawDir,
   LOCAL_SENTINEL_TENANT,
   proxyOne,
   eventToObservationRow,

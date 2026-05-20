@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Privacy · kolm.ai</title>
-<meta name="description" content="kolm.ai detects 17 PHI/PII/secret classes inline, replaces them with VAR_ placeholders, and enforces allow/redact/block/override policies before traffic leaves your laptop.">
+<title>Privacy guide · kolm.ai</title>
+<meta name="description" content="kolm.ai detects 17 PHI/PII/secret classes inline, replaces them with VAR_ placeholders, and enforces allow/redact/block/override policies before traffic...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Privacy &middot; kolm.ai">
-<meta property="og:description" content="kolm.ai detects 17 PHI/PII/secret classes inline, replaces them with VAR_ placeholders, and enforces allow/redact/block/override policies before traffic leaves your laptop.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Privacy guide · kolm.ai">
+<meta property="og:description" content="kolm.ai detects 17 PHI/PII/secret classes inline, replaces them with VAR_ placeholders, and enforces allow/redact/block/override policies before traffic...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/privacy">
-<meta property="og:image" content="https://kolm.ai/og/docs-privacy.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Privacy &middot; kolm.ai">
-<meta name="twitter:description" content="kolm.ai detects 17 PHI/PII/secret classes inline, replaces them with VAR_ placeholders, and enforces allow/redact/block/override policies before traffic leaves your laptop.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-privacy.svg">
+<meta name="twitter:title" content="Privacy guide · kolm.ai">
+<meta name="twitter:description" content="kolm.ai detects 17 PHI/PII/secret classes inline, replaces them with VAR_ placeholders, and enforces allow/redact/block/override policies before traffic...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/privacy">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Privacy","description":"kolm.ai detects 17 PHI/PII/secret classes inline, replaces them with VAR_ placeholders, and enforces allow/redact/block/override policies before traffic leaves your laptop.","url":"https://kolm.ai/docs/privacy","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -111,37 +112,37 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="policy-json">policy.json schema</h2>
 <p>The policy file lives at <code>~/.kolm/runtime/policy.json</code> and is hot-reloaded on every request. Per-namespace overrides take precedence over the default.</p>
 <pre><code>{
-  "version": 1,
-  "default": {
-    "ssn": "block",
-    "credit_card": "block",
-    "api_key": "block",
-    "jwt": "redact",
-    "email": "redact",
-    "phone": "redact",
-    "mrn": "redact",
-    "npi": "redact",
-    "icd10": "allow",
-    "cpt": "allow",
-    "ip_v4": "allow"
-  },
-  "namespaces": {
-    "billing": {
-      "credit_card": "redact",
-      "iban": "redact"
-    },
-    "support": {
-      "email": "redact",
-      "phone": "redact"
-    }
-  }
+ "version": 1,
+ "default": {
+ "ssn": "block",
+ "credit_card": "block",
+ "api_key": "block",
+ "jwt": "redact",
+ "email": "redact",
+ "phone": "redact",
+ "mrn": "redact",
+ "npi": "redact",
+ "icd10": "allow",
+ "cpt": "allow",
+ "ip_v4": "allow"
+ },
+ "namespaces": {
+ "billing": {
+ "credit_card": "redact",
+ "iban": "redact"
+ },
+ "support": {
+ "email": "redact",
+ "phone": "redact"
+ }
+ }
 }</code></pre>
 
 <h2 id="audit-log">Audit log</h2>
 <p>Every detection, every action, every override is appended to <code>~/.kolm/runtime/audit.log</code> as one JSON line. Rotates daily, never overwritten. <code>kolm privacy audit</code> tails it with structured filters.</p>
 <pre><code>kolm privacy audit --window 24h --class ssn
-# 2026-05-18T09:14:21Z  ns=billing  class=ssn  action=block  count=1
-# 2026-05-18T09:18:02Z  ns=support  class=ssn  action=redact count=2</code></pre>
+# 2026-05-18T09:14:21Z ns=billing class=ssn action=block count=1
+# 2026-05-18T09:18:02Z ns=support class=ssn action=redact count=2</code></pre>
 
 <h2 id="dry-run">Dry-run a policy</h2>
 <p>Before you flip an <code>allow</code> to a <code>block</code>, see what would have been blocked in the last 24 hours.</p>
@@ -151,15 +152,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Once detectors are wired you can safely run <a href="/docs/cloud-sync">cloud sync</a> and <a href="/docs/distillation">distillation</a>. Start from <a href="/docs/quickstart">/docs/quickstart</a> if the proxy is not running yet.</p>
 
 <div class="related">
-  <a href="/docs/lake"><b>Lake &rarr;</b><span>How redacted spans get stored alongside the raw row.</span></a>
-  <a href="/docs/cloud-sync"><b>Cloud sync &rarr;</b><span>Per-class gating before any bytes leave the laptop.</span></a>
-  <a href="/docs/optimizer"><b>Optimizer &rarr;</b><span>Privacy leaks are one of the 11 opportunity types.</span></a>
+ <a href="/docs/lake"><b>Lake &rarr;</b><span>How redacted spans get stored alongside the raw row.</span></a>
+ <a href="/docs/cloud-sync"><b>Cloud sync &rarr;</b><span>Per-class gating before any bytes leave the laptop.</span></a>
+ <a href="/docs/optimizer"><b>Optimizer &rarr;</b><span>Privacy leaks are one of the 11 opportunity types.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

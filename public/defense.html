@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>kolm.ai for Defense - IL5/IL6, ITAR, air-gap · kolm.ai</title>
-<meta name="description" content="Defense-grade AI compilation. IL5/IL6 enclaves, ITAR-bounded training data, air-gapped deployment. The .kolm artifact stays inside the SCIF; the cloud round-trip does not exist.">
+<meta name="description" content="Defense-grade AI compilation. IL5/IL6 enclaves, ITAR-bounded training data, air-gapped deployment. The .kolm artifact stays inside the SCIF; the cloud...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="kolm.ai for Defense">
-<meta property="og:description" content="IL5/IL6, ITAR-bounded, air-gapped AI compilation. The artifact stays inside the SCIF.">
+<meta property="og:title" content="kolm.ai for Defense - IL5/IL6, ITAR, air-gap · kolm.ai">
+<meta property="og:description" content="Defense-grade AI compilation. IL5/IL6 enclaves, ITAR-bounded training data, air-gapped deployment. The .kolm artifact stays inside the SCIF; the cloud...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/defense">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -18,63 +18,68 @@
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #10b981; --accent-soft: rgba(16,185,129,0.10); --accent-strong: #34d399;
-    --good: #7ef0d2; --warn: #ffd07a;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
-  section.hero { padding: 88px 0 32px; }
-  h1 { margin: 22px 0 16px; font-size: clamp(36px, 5.4vw, 56px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
-  h1 .tone { color: var(--accent); }
-  p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
-  .pillrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; }
-  .pill { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 11px; background: var(--bg-elev); }
-  section.body { padding: 28px 0 80px; }
-  .group { margin: 48px 0 0; padding-top: 28px; border-top: 1px solid var(--line); }
-  .group:first-of-type { margin-top: 8px; padding-top: 0; border-top: 0; }
-  .group h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 26px); font-weight: 500; }
-  .group p.kicker { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; max-width: 64ch; }
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
-  .card { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); }
-  .card h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink); }
-  .card p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.55; }
-  .cta-row { display: flex; gap: 12px; margin: 28px 0 0; flex-wrap: wrap; }
-  .cta { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; }
-  .cta.primary { background: var(--accent); color: #0a0d0f; }
-  .cta.ghost { color: var(--ink-mute); border: 1px solid var(--line-strong); }
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); text-align: center; }
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #10b981; --accent-soft: rgba(16,185,129,0.10); --accent-strong: #34d399;
+ --good: #7ef0d2; --warn: #ffd07a;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+ section.hero { padding: 88px 0 32px; }
+ h1 { margin: 22px 0 16px; font-size: clamp(36px, 5.4vw, 56px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
+ h1 .tone { color: var(--accent); }
+ p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
+ .pillrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; }
+ .pill { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 11px; background: var(--bg-elev); }
+ section.body { padding: 28px 0 80px; }
+ .group { margin: 48px 0 0; padding-top: 28px; border-top: 1px solid var(--line); }
+ .group:first-of-type { margin-top: 8px; padding-top: 0; border-top: 0; }
+ .group h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 26px); font-weight: 500; }
+ .group p.kicker { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; max-width: 64ch; }
+ .grid { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); }
+ @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+ .card { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); }
+ .card h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink); }
+ .card p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.55; }
+ .cta-row { display: flex; gap: 12px; margin: 28px 0 0; flex-wrap: wrap; }
+ .cta { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; }
+ .cta.primary { background: var(--accent); color: #0a0d0f; }
+ .cta.ghost { color: var(--ink-mute); border: 1px solid var(--line-strong); }
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); text-align: center; }
 </style>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/defense",
-  "description": "Defense-grade AI compilation. IL5/IL6 enclaves, ITAR-bounded training data, air-gapped deployment. The .kolm artifact stays inside the SCIF; the cloud round-trip does not exist.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/defense",
+ "description": "Defense-grade AI compilation. IL5/IL6 enclaves, ITAR-bounded training data, air-gapped deployment. The .kolm artifact stays inside the SCIF; the cloud round-trip does not exist.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm.ai for Defense - IL5/IL6, ITAR, air-gap · kolm.ai">
+<meta name="twitter:description" content="Defense-grade AI compilation. IL5/IL6 enclaves, ITAR-bounded training data, air-gapped deployment. The .kolm artifact stays inside the SCIF; the cloud...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -82,60 +87,60 @@
 <header class="site"><div class="wrap"><a href="/" class="brand">kolm</a></div></header>
 
 <section class="hero">
-  <div class="wrap">
-    <h1>Defense AI that <span class="tone">never leaves the SCIF.</span></h1>
-    <p class="lede">Compile your tasks into signed local artifacts inside an IL5 or IL6 enclave. ITAR-bounded training data, air-gapped deployment, byte-exact reproducibility on the air-gap side of the diode. The cloud round-trip you were trying to avoid does not exist in this build.</p>
-    <div class="pillrow">
-      <span class="pill">IL5 / IL6</span>
-      <span class="pill">ITAR-bounded</span>
-      <span class="pill">Air-gapped</span>
-      <span class="pill">SCIF-ready</span>
-      <span class="pill">Signed artifacts</span>
-    </div>
-    <div class="cta-row">
-      <a href="/enterprise#demo" class="cta primary">Talk to defense team &rarr;</a>
-      <a href="/defense-v2" class="cta ghost">Defense v2 (full microsite)</a>
-      <a href="/enterprise/self-hosted" class="cta ghost">Self-hosted compile server</a>
-    </div>
-  </div>
+ <div class="wrap">
+ <h1>Defense AI that <span class="tone">never leaves the SCIF.</span></h1>
+ <p class="lede">Compile your tasks into signed local artifacts inside an IL5 or IL6 enclave. ITAR-bounded training data, air-gapped deployment, byte-exact reproducibility on the air-gap side of the diode. The cloud round-trip you were trying to avoid does not exist in this build.</p>
+ <div class="pillrow">
+ <span class="pill">IL5 / IL6</span>
+ <span class="pill">ITAR-bounded</span>
+ <span class="pill">Air-gapped</span>
+ <span class="pill">SCIF-ready</span>
+ <span class="pill">Signed artifacts</span>
+ </div>
+ <div class="cta-row">
+ <a href="/enterprise#demo" class="cta primary">Talk to defense team &rarr;</a>
+ <a href="/defense-v2" class="cta ghost">Defense v2 (full microsite)</a>
+ <a href="/enterprise/self-hosted" class="cta ghost">Self-hosted compile server</a>
+ </div>
+ </div>
 </section>
 
 <section class="body">
-  <div class="wrap">
-    <div class="group">
-      <h2>What the air-gap actually gets you</h2>
-      <p class="kicker">No cloud round-trip, no shared GPUs, no token telemetry. The compile server runs inside your enclave; the .kolm artifact lives in your repo; the receipt chain is verifiable offline.</p>
-      <div class="grid">
-        <div class="card">
-          <h3>IL5/IL6 enclaves</h3>
-          <p>The self-hosted compile server kit ships as a Docker image and Helm chart. Deploy into your IL5 or IL6 enclave, point your build pipeline at it, and never reach back across the diode.</p>
-        </div>
-        <div class="card">
-          <h3>ITAR-bounded data</h3>
-          <p>Training corpus, captured prompts, and the resulting weights all stay inside the export-control boundary you already maintain. No third-party API calls in the build path.</p>
-        </div>
-        <div class="card">
-          <h3>Signed, reproducible artifacts</h3>
-          <p>Every .kolm carries a receipt chain (spec, seeds, split, train, evals, signatures) that re-verifies offline. A different machine on the air-gap side computes the same artifact_hash bit-for-bit.</p>
-        </div>
-      </div>
-    </div>
+ <div class="wrap">
+ <div class="group">
+ <h2>What the air-gap actually gets you</h2>
+ <p class="kicker">No cloud round-trip, no shared GPUs, no token telemetry. The compile server runs inside your enclave; the .kolm artifact lives in your repo; the receipt chain is verifiable offline.</p>
+ <div class="grid">
+ <div class="card">
+ <h3>IL5/IL6 enclaves</h3>
+ <p>The self-hosted compile server kit ships as a Docker image and Helm chart. Deploy into your IL5 or IL6 enclave, point your build pipeline at it, and never reach back across the diode.</p>
+ </div>
+ <div class="card">
+ <h3>ITAR-bounded data</h3>
+ <p>Training corpus, captured prompts, and the resulting weights all stay inside the export-control boundary you already maintain. No third-party API calls in the build path.</p>
+ </div>
+ <div class="card">
+ <h3>Signed, reproducible artifacts</h3>
+ <p>Every .kolm carries a receipt chain (spec, seeds, split, train, evals, signatures) that re-verifies offline. A different machine on the air-gap side computes the same artifact_hash bit-for-bit.</p>
+ </div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>What to read next</h2>
-      <p class="kicker">The longer defense microsite (with the ROI calculator, architecture diagram, and recipe library) is at /defense-v2. The self-hosted compile server kit and air-gap install docs are at /enterprise/self-hosted.</p>
-      <div class="cta-row">
-        <a href="/defense-v2" class="cta primary">/defense-v2 microsite &rarr;</a>
-        <a href="/enterprise/self-hosted" class="cta ghost">Self-hosted kit</a>
-        <a href="/security" class="cta ghost">Security posture</a>
-        <a href="/spec/rs-1" class="cta ghost">RS-1 spec</a>
-      </div>
-    </div>
-  </div>
+ <div class="group">
+ <h2>What to read next</h2>
+ <p class="kicker">The longer defense microsite (with the ROI calculator, architecture diagram, and recipe library) is at /defense-v2. The self-hosted compile server kit and air-gap install docs are at /enterprise/self-hosted.</p>
+ <div class="cta-row">
+ <a href="/defense-v2" class="cta primary">/defense-v2 microsite &rarr;</a>
+ <a href="/enterprise/self-hosted" class="cta ghost">Self-hosted kit</a>
+ <a href="/security" class="cta ghost">Security posture</a>
+ <a href="/spec/rs-1" class="cta ghost">RS-1 spec</a>
+ </div>
+ </div>
+ </div>
 </section>
 
 <footer class="site">
-  <div class="wrap">kolm.ai - the AI compiler. Apache-2.0. Receipts signed in CI.</div>
+ <div class="wrap">kolm.ai - the AI compiler. Apache-2.0. Receipts signed in CI.</div>
 </footer>
 
 <script src="/nav.js" defer></script>

@@ -21,11 +21,11 @@ arrive. `--list` is equivalent to `kolm sessions list`.
 ## Examples
 
 ```
-kolm compile spec.json --detach            # start; prints session_id sess_abc
-kolm resume sess_abc                       # re-attach to live tail
-kolm resume sess_abc --tail 50             # last 50 log lines + exit
-kolm resume sess_abc --follow              # stream until ^C
-kolm resume --list                         # show every detached session
+kolm compile spec.json --detach # start; prints session_id sess_abc
+kolm resume sess_abc # re-attach to live tail
+kolm resume sess_abc --tail 50 # last 50 log lines + exit
+kolm resume sess_abc --follow # stream until ^C
+kolm resume --list # show every detached session
 ```
 
 ## See also

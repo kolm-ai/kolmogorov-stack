@@ -5,445 +5,446 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>SR 11-7 LLM for model risk management · kolm.ai</title>
-<meta name="description" content="Compile a task into a signed local artifact your model-risk team can examine. SR 11-7 alignment, HMAC audit chain, no customer data egress.">
+<meta name="description" content="Compile a task into a signed local artifact your model-risk team can examine. SR 11-7 alignment, Ed25519 audit chain, no customer data egress.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="kolm &middot; financial services AI without the egress">
-<meta property="og:description" content="Customer data never leaves the perimeter. Signed local artifact. HMAC audit chain. Examinable by SEC, FINRA, OCC.">
+<meta property="og:title" content="SR 11-7 LLM for model risk management · kolm.ai">
+<meta property="og:description" content="Compile a task into a signed local artifact your model-risk team can examine. SR 11-7 alignment, Ed25519 audit chain, no customer data egress.">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="kolm &middot; financial services AI without the egress" />
-<meta name="twitter:description" content="Customer data never leaves the perimeter. Signed local artifact. HMAC audit chain. Examinable by SEC, FINRA, OCC." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SR 11-7 LLM for model risk management · kolm.ai">
+<meta name="twitter:description" content="Compile a task into a signed local artifact your model-risk team can examine. SR 11-7 alignment, Ed25519 audit chain, no customer data egress.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/finance">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/finance">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
-    --good: #7ef0d2; --bad: #ff6b91;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 720px) { .wrap { padding: 0 20px; } }
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; letter-spacing: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap { padding: 0 20px; } }
 
-  header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
-  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
-  header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
-  header.site .brand img { height: 18px; width: 18px; }
-  header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
-  header.site nav a:hover { color: var(--ink); }
-  header.site .right { display: flex; align-items: center; gap: 14px; }
-  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
-  header.site .right .cta:hover { background: #fff; }
-  @media (max-width: 720px) { header.site nav { display: none; } }
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); }
+ header.site .brand img { height: 18px; width: 18px; }
+ header.site .brand span { font-weight: 500; font-size: 16px; letter-spacing: 0; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .ghost:hover { color: var(--ink); }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ header.site .right .cta:hover { background: #fff; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
 
-  section.hero { padding: 104px 0 64px; position: relative; overflow: hidden; }
-  section.hero::before {
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background:
-      radial-gradient(ellipse 1100px 540px at 22% 10%, rgba(126,240,210, 0.07), transparent 60%),
-      radial-gradient(ellipse 700px 400px at 88% 90%, rgba(236,231,220, 0.04), transparent 60%);
-  }
-  section.hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.36; background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237ef0d2' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237ef0d2' stop-opacity='0.18'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3C/g%3E%3C/svg%3E"); background-size: cover; background-position: center top; mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%); -webkit-mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%); }
-  section.hero .wrap { position: relative; z-index: 2; }
+ section.hero { padding: 104px 0 64px; position: relative; overflow: hidden; }
+ section.hero::before {
+ content: ""; position: absolute; inset: 0; pointer-events: none;
+ background:
+ radial-gradient(ellipse 1100px 540px at 22% 10%, rgba(126,240,210, 0.07), transparent 60%),
+ radial-gradient(ellipse 700px 400px at 88% 90%, rgba(236,231,220, 0.04), transparent 60%);
+ }
+ section.hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.36; background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237ef0d2' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237ef0d2' stop-opacity='0.18'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3C/g%3E%3C/svg%3E"); background-size: cover; background-position: center top; mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%); -webkit-mask-image: radial-gradient(ellipse 1000px 700px at 50% 80%, #000 0%, rgba(0,0,0,0.4) 50%, transparent 95%); }
+ section.hero .wrap { position: relative; z-index: 2; }
 
-  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 14px; background: rgba(8,9,8,0.62); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 10px #7ef0d2; animation: pulse-dot 2.4s ease-in-out infinite; }
-  @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.3); } }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 14px; background: rgba(8,9,8,0.62); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+ .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #7ef0d2; box-shadow: 0 0 10px #7ef0d2; animation: pulse-dot 2.4s ease-in-out infinite; }
+ @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.3); } }
 
-  h1 { margin: 26px 0 22px; font-size: clamp(48px, 7vw, 104px); line-height: 0.94; font-weight: 500; letter-spacing: -0.04em; max-width: 14ch; }
-  h1 .tone { background: linear-gradient(170deg, #faf2e1 0%, #7ef0d2 50%, #faf2e1 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  p.lede { margin: 0 0 32px; font-size: clamp(16px, 1.3vw, 18.5px); line-height: 1.55; color: var(--ink-mute); max-width: 56ch; }
-  p.lede b { color: var(--ink); font-weight: 500; }
-  p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
+ h1 { margin: 26px 0 22px; font-size: clamp(48px, 7vw, 104px); line-height: 0.94; font-weight: 500; letter-spacing: -0.04em; max-width: 14ch; }
+ h1 .tone { background: linear-gradient(170deg, #faf2e1 0%, #7ef0d2 50%, #faf2e1 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+ p.lede { margin: 0 0 32px; font-size: clamp(16px, 1.3vw, 18.5px); line-height: 1.55; color: var(--ink-mute); max-width: 56ch; }
+ p.lede b { color: var(--ink); font-weight: 500; }
+ p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
 
-  .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 500; transition: background 120ms; }
-  a.btn-primary:hover { background: #fff; }
-  a.btn-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); padding: 11px 14px; font-size: 14px; font-weight: 500; transition: color 120ms; }
-  a.btn-link:hover { color: var(--accent); }
+ .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+ a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 500; transition: background 120ms; }
+ a.btn-primary:hover { background: #fff; }
+ a.btn-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); padding: 11px 14px; font-size: 14px; font-weight: 500; transition: color 120ms; }
+ a.btn-link:hover { color: var(--accent); }
 
-  section { padding: 80px 0; }
-  section + section { border-top: 1px solid var(--line); }
-  .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px; }
-  .eyebrow .num { color: var(--accent); }
-  h2 { margin: 0 0 18px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; font-weight: 500; letter-spacing: 0; max-width: 24ch; }
-  h2 .tone { color: var(--accent); }
-  p.sec-lede { margin: 0 0 40px; font-size: 16px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+ section { padding: 80px 0; }
+ section + section { border-top: 1px solid var(--line); }
+ .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px; }
+ .eyebrow .num { color: var(--accent); }
+ h2 { margin: 0 0 18px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; font-weight: 500; letter-spacing: 0; max-width: 24ch; }
+ h2 .tone { color: var(--accent); }
+ p.sec-lede { margin: 0 0 40px; font-size: 16px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
 
-  .pain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  @media (max-width: 880px) { .pain { grid-template-columns: 1fr; } }
-  .pain-card {
-    background: var(--bg-elev); border: 1px solid var(--line);
-    border-radius: 8px; padding: 22px;
-    display: flex; flex-direction: column; min-height: 184px;
-  }
-  .pain-card .lab { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
-  .pain-card .big { margin: 14px 0 10px; font-size: 36px; font-weight: 500; letter-spacing: 0; line-height: 1; color: var(--ink); }
-  .pain-card .big .u { font-size: 13px; font-weight: 400; color: var(--ink-mute); margin-left: 4px; letter-spacing: 0; }
-  .pain-card p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
-  .pain-card p b { color: var(--accent); font-weight: 500; }
+ .pain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+ @media (max-width: 880px) { .pain { grid-template-columns: 1fr; } }
+ .pain-card {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 8px; padding: 22px;
+ display: flex; flex-direction: column; min-height: 184px;
+ }
+ .pain-card .lab { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
+ .pain-card .big { margin: 14px 0 10px; font-size: 36px; font-weight: 500; letter-spacing: 0; line-height: 1; color: var(--ink); }
+ .pain-card .big .u { font-size: 13px; font-weight: 400; color: var(--ink-mute); margin-left: 4px; letter-spacing: 0; }
+ .pain-card p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
+ .pain-card p b { color: var(--accent); font-weight: 500; }
 
-  .triplets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  @media (max-width: 880px) { .triplets { grid-template-columns: 1fr; } }
-  .trip {
-    background: var(--bg-elev); border: 1px solid var(--line);
-    border-radius: 8px; padding: 24px;
-  }
-  .trip .icn {
-    display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center;
-    border-radius: 6px; background: var(--accent-soft); color: var(--accent);
-    font-family: var(--mono); font-size: 14px; font-weight: 500;
-    margin-bottom: 16px;
-  }
-  .trip h3 { margin: 0 0 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; line-height: 1.3; color: var(--ink); }
-  .trip p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
-  .trip p b { color: var(--ink); font-weight: 500; }
+ .triplets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+ @media (max-width: 880px) { .triplets { grid-template-columns: 1fr; } }
+ .trip {
+ background: var(--bg-elev); border: 1px solid var(--line);
+ border-radius: 8px; padding: 24px;
+ }
+ .trip .icn {
+ display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center;
+ border-radius: 6px; background: var(--accent-soft); color: var(--accent);
+ font-family: var(--mono); font-size: 14px; font-weight: 500;
+ margin-bottom: 16px;
+ }
+ .trip h3 { margin: 0 0 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; line-height: 1.3; color: var(--ink); }
+ .trip p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
+ .trip p b { color: var(--ink); font-weight: 500; }
 
-  .uc {
-    background: var(--bg-elev); border: 1px solid var(--line-strong);
-    border-radius: 10px; overflow: hidden;
-    box-shadow: 0 30px 80px -30px rgba(0,0,0,0.6);
-    max-width: 980px;
-  }
-  .uc .hd { padding: 14px 22px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--ink-mute); }
-  .uc .hd .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
-  .uc .body { padding: 30px 30px 26px; }
-  .uc .body h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: 0; font-weight: 500; color: var(--ink); }
-  .uc .body p.note { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.55; }
-  .uc .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line); }
-  @media (max-width: 720px) { .uc .steps { grid-template-columns: 1fr; } }
-  .uc .step { padding: 22px 22px; border-right: 1px solid var(--line); }
-  .uc .step:last-child { border-right: none; }
-  @media (max-width: 720px) { .uc .step { border-right: none; border-bottom: 1px solid var(--line); } .uc .step:last-child { border-bottom: none; } }
-  .uc .step .n { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; color: var(--accent); }
-  .uc .step h4 { margin: 10px 0 8px; font-size: 14.5px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
-  .uc .step p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
+ .uc {
+ background: var(--bg-elev); border: 1px solid var(--line-strong);
+ border-radius: 10px; overflow: hidden;
+ box-shadow: 0 30px 80px -30px rgba(0,0,0,0.6);
+ max-width: 980px;
+ }
+ .uc .hd { padding: 14px 22px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--ink-mute); }
+ .uc .hd .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
+ .uc .body { padding: 30px 30px 26px; }
+ .uc .body h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: 0; font-weight: 500; color: var(--ink); }
+ .uc .body p.note { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.55; }
+ .uc .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line); }
+ @media (max-width: 720px) { .uc .steps { grid-template-columns: 1fr; } }
+ .uc .step { padding: 22px 22px; border-right: 1px solid var(--line); }
+ .uc .step:last-child { border-right: none; }
+ @media (max-width: 720px) { .uc .step { border-right: none; border-bottom: 1px solid var(--line); } .uc .step:last-child { border-bottom: none; } }
+ .uc .step .n { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0; color: var(--accent); }
+ .uc .step h4 { margin: 10px 0 8px; font-size: 14.5px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
+ .uc .step p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
 
-  .compl-row {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
-  }
-  @media (max-width: 880px) { .compl-row { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 540px) { .compl-row { grid-template-columns: 1fr; } }
-  .compl-row .item {
-    padding: 22px 24px; border-right: 1px solid var(--line); background: var(--bg-elev);
-  }
-  .compl-row .item:last-child { border-right: none; }
-  @media (max-width: 880px) { .compl-row .item:nth-child(2) { border-right: none; } .compl-row .item:nth-child(1), .compl-row .item:nth-child(2) { border-bottom: 1px solid var(--line); } }
-  .compl-row .item .nm { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
-  .compl-row .item .v { margin-top: 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
-  .compl-row .item p { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
-  .compl-row .item .v.acc { color: var(--accent); }
+ .compl-row {
+ display: grid; grid-template-columns: repeat(4, 1fr);
+ border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+ }
+ @media (max-width: 880px) { .compl-row { grid-template-columns: repeat(2, 1fr); } }
+ @media (max-width: 540px) { .compl-row { grid-template-columns: 1fr; } }
+ .compl-row .item {
+ padding: 22px 24px; border-right: 1px solid var(--line); background: var(--bg-elev);
+ }
+ .compl-row .item:last-child { border-right: none; }
+ @media (max-width: 880px) { .compl-row .item:nth-child(2) { border-right: none; } .compl-row .item:nth-child(1), .compl-row .item:nth-child(2) { border-bottom: 1px solid var(--line); } }
+ .compl-row .item .nm { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
+ .compl-row .item .v { margin-top: 10px; font-size: 17px; font-weight: 500; letter-spacing: 0; color: var(--ink); }
+ .compl-row .item p { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
+ .compl-row .item .v.acc { color: var(--accent); }
 
-  .closing { padding: 100px 0; position: relative; }
-  .closing::before {
-    content: ""; position: absolute; inset: 0;
-    background:
-      radial-gradient(ellipse 700px 400px at 30% 50%, rgba(236,231,220, 0.08), transparent 60%),
-      radial-gradient(ellipse 600px 360px at 80% 60%, rgba(236,231,220, 0.04), transparent 60%);
-  }
-  .closing .wrap { position: relative; }
-  .closing h2 { font-size: clamp(32px, 4.6vw, 52px); line-height: 1.06; font-weight: 500; letter-spacing: 0; max-width: 22ch; margin: 0 0 28px; }
+ .closing { padding: 100px 0; position: relative; }
+ .closing::before {
+ content: ""; position: absolute; inset: 0;
+ background:
+ radial-gradient(ellipse 700px 400px at 30% 50%, rgba(236,231,220, 0.08), transparent 60%),
+ radial-gradient(ellipse 600px 360px at 80% 60%, rgba(236,231,220, 0.04), transparent 60%);
+ }
+ .closing .wrap { position: relative; }
+ .closing h2 { font-size: clamp(32px, 4.6vw, 52px); line-height: 1.06; font-weight: 500; letter-spacing: 0; max-width: 22ch; margin: 0 0 28px; }
 
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); }
-  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0; color: var(--ink-faint); }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Service",
-      "name": "kolm for Finance · compiled specialists for the trade desk",
-      "description": "Bring frontier-grade understanding to compliance, disclosure redaction, and trade-decision support. Signed, deterministic, sub-second.",
-      "provider": {
-        "@type": "Organization",
-        "name": "Kolmogorov",
-        "url": "https://kolm.ai"
-      },
-      "url": "https://kolm.ai/finance",
-      "areaServed": "Global"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "kolm",
-          "item": "https://kolm.ai/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Financial services",
-          "item": "https://kolm.ai/finance"
-        }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "Service",
+ "name": "kolm for Finance · compiled specialists for the trade desk",
+ "description": "Bring frontier-grade understanding to compliance, disclosure redaction, and trade-decision support. Signed, deterministic, sub-second.",
+ "provider": {
+ "@type": "Organization",
+ "name": "Kolmogorov",
+ "url": "https://kolm.ai"
+ },
+ "url": "https://kolm.ai/finance",
+ "areaServed": "Global"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Financial services",
+ "item": "https://kolm.ai/finance"
+ }
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site">
-  <div class="wrap row">
-    <div class="left">
-      <a href="/" class="brand" aria-label="kolm"><span>kolm</span>
-      </a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap row">
+ <div class="left">
+ <a href="/" class="brand" aria-label="kolm"><span>kolm</span>
+ </a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <div class="hero-eyebrow"><span class="he-dot"></span>Finance . customer data stays inside the perimeter</div>
-    <h1>Customer data never leaves<br><span class="tone">the bank's perimeter.</span></h1>
-    <p class="lede"><b>kolm</b> compiles your task into a signed local artifact: model, adapter, recipes, recall index, evals. Deploys to a desk, a laptop, or a private cluster behind your egress proxy. <code>kolm serve --mcp</code> exposes it to the agents your analysts already use. The frontier you bring is the teacher; the artifact is the binary; the customer record never moves.</p>
-    <div class="cta-row">
-      <a href="/signup?plan=enterprise" class="btn-primary">Start Enterprise</a>
-      <a href="/security" class="btn-link">Security &amp; compliance posture <span aria-hidden="true">&rarr;</span></a>
-    </div>
-    <div style="margin-top:14px"><a href="mailto:dev@kolm.ai?subject=kolm%20finance%20pilot" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">or talk to founders &rarr;</a></div>
-  </div>
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>Finance . customer data stays inside the perimeter</div>
+ <h1>Customer data never leaves<br><span class="tone">the bank's perimeter.</span></h1>
+ <p class="lede"><b>kolm</b> compiles your task into a signed local artifact: model, adapter, recipes, recall index, evals. Deploys to a desk, a laptop, or a private cluster behind your egress proxy. <code>kolm serve --mcp</code> exposes it to the agents your analysts already use. The frontier you bring is the teacher; the artifact is the binary; the customer record never moves.</p>
+ <div class="cta-row">
+ <a href="/signup?plan=enterprise" class="btn-primary">Start Enterprise</a>
+ <a href="/security" class="btn-link">Security &amp; compliance posture <span aria-hidden="true">&rarr;</span></a>
+ </div>
+ <div style="margin-top:14px"><a href="mailto:dev@kolm.ai?subject=kolm%20finance%20pilot" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:0.02em">or talk to founders &rarr;</a></div>
+ </div>
 </section>
 
 <section>
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">01</span><span>Why this matters</span></div>
-    <h2>Cloud AI on customer records is a<br><span class="tone">permanent examination surface.</span></h2>
-    <p class="sec-lede">Every prompt is potentially examinable by SEC, FINRA, OCC, FCA, BaFin. Every cross-border call is a residency event. Every vendor deprecation is a quarter-cycle re-review at the model risk committee. The risk isn't theoretical.</p>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">01</span><span>Why this matters</span></div>
+ <h2>Cloud AI on customer records is a<br><span class="tone">permanent examination surface.</span></h2>
+ <p class="sec-lede">Every prompt is potentially examinable by SEC, FINRA, OCC, FCA, BaFin. Every cross-border call is a residency event. Every vendor deprecation is a quarter-cycle re-review at the model risk committee. The risk isn't theoretical.</p>
 
-    <div class="pain">
-      <div class="pain-card">
-        <div class="lab">Examination</div>
-        <div class="big">Every<span class="u"> prompt</span></div>
-        <p>is examinable by SEC, FINRA, OCC. <b>kolm receipts are HMAC-chained and reproducible offline.</b></p>
-      </div>
-      <div class="pain-card">
-        <div class="lab">Latency on desk</div>
-        <div class="big">200-500<span class="u">ms</span></div>
-        <p>cloud round trip per query. <b>kolm runs locally, answers in 80 ms.</b></p>
-      </div>
-      <div class="pain-card">
-        <div class="lab">Vendor cycle</div>
-        <div class="big">Quarterly<span class="u"> MRM review</span></div>
-        <p>on every frontier model upgrade. <b>kolm pins the model into the artifact for the life of the deployment.</b></p>
-      </div>
-    </div>
-  </div>
+ <div class="pain">
+ <div class="pain-card">
+ <div class="lab">Examination</div>
+ <div class="big">Every<span class="u"> prompt</span></div>
+ <p>is examinable by SEC, FINRA, OCC. <b>kolm receipts are Ed25519-chained and reproducible offline.</b></p>
+ </div>
+ <div class="pain-card">
+ <div class="lab">Latency on desk</div>
+ <div class="big">200-500<span class="u">ms</span></div>
+ <p>cloud round trip per query. <b>kolm runs locally, answers in 80 ms.</b></p>
+ </div>
+ <div class="pain-card">
+ <div class="lab">Vendor cycle</div>
+ <div class="big">Quarterly<span class="u"> MRM review</span></div>
+ <p>on every frontier model upgrade. <b>kolm pins the model into the artifact for the life of the deployment.</b></p>
+ </div>
+ </div>
+ </div>
 </section>
 
 <section>
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">02</span><span>How it works</span></div>
-    <h2>You compile in your VPC.<br><span class="tone">You ship to the desk.</span></h2>
-    <p class="sec-lede">The compile bridge runs inside your boundary. Customer records never leave. The artifact is a single signed file. The HMAC signature is re-verifiable offline against the manifest hash chain by any holder of your tenant receipt secret (the same way you sign released code today; Ed25519 public-key receipts ship alongside, via the sidecar).</p>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">02</span><span>How it works</span></div>
+ <h2>You compile in your VPC.<br><span class="tone">You ship to the desk.</span></h2>
+ <p class="sec-lede">The compile bridge runs inside your boundary. Customer records never leave. The artifact is a single signed file. The Ed25519 signature is re-verifiable offline against the manifest hash chain by any holder of your tenant receipt secret (the same way you sign released code today; Ed25519 public-key receipts ship alongside, via the sidecar).</p>
 
-    <div class="triplets">
-      <div class="trip">
-        <div class="icn">-</div>
-        <h3>Residency-pinned compile.</h3>
-        <p>Compile region selectable EU, UK, US, APAC. Frontier teacher reachable through your existing egress proxy. <b>The compile pipeline never persists customer data.</b></p>
-      </div>
-      <div class="trip">
-        <div class="icn">-</div>
-        <h3>Examinable receipts.</h3>
-        <p>Every output is reproducible. Every layer is content-addressed. Tampering breaks the chain. Defensible at FINRA exam, useful at deposition, useful at internal audit.</p>
-      </div>
-      <div class="trip">
-        <div class="icn">-</div>
-        <h3>Model-risk artifact.</h3>
-        <p>K-score breakdown, eval set, lineage, base-model hash, adapter delta, recipe pack, recall index. <b>Your MRM dossier is the artifact's manifest.</b></p>
-      </div>
-    </div>
-  </div>
+ <div class="triplets">
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>Residency-pinned compile.</h3>
+ <p>Compile region selectable EU, UK, US, APAC. Frontier teacher reachable through your existing egress proxy. <b>The compile pipeline never persists customer data.</b></p>
+ </div>
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>Examinable receipts.</h3>
+ <p>Every output is reproducible. Every layer is content-addressed. Tampering breaks the chain. Defensible at FINRA exam, useful at deposition, useful at internal audit.</p>
+ </div>
+ <div class="trip">
+ <div class="icn">-</div>
+ <h3>Model-risk artifact.</h3>
+ <p>K-score breakdown, eval set, lineage, base-model hash, adapter delta, recipe pack, recall index. <b>Your MRM dossier is the artifact's manifest.</b></p>
+ </div>
+ </div>
+ </div>
 </section>
 
 <section>
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">03</span><span>Use case</span></div>
-    <h2>Reference deployment:<br><span class="tone">credit memo assistant.</span></h2>
-    <p class="sec-lede">A 42 MB artifact running on the credit officer's laptop. Indexes the borrower file locally, drafts the memo in the desk's house style, defers anything the verifier rejects to a senior. Receipts mirror to your audit log on demand. No cloud calls during the workup.</p>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">03</span><span>Use case</span></div>
+ <h2>Reference deployment:<br><span class="tone">credit memo assistant.</span></h2>
+ <p class="sec-lede">A 42 MB artifact running on the credit officer's laptop. Indexes the borrower file locally, drafts the memo in the desk's house style, defers anything the verifier rejects to a senior. Receipts mirror to your audit log on demand. No cloud calls during the workup.</p>
 
-    <div class="uc" aria-label="Compile pipeline">
-      <div class="hd"><span class="dot"></span><span>compile-bridge - running on prem - region eu-frankfurt-vpc</span></div>
-      <div class="body">
-        <h3>From institutional examples to a signed binary on the desk.</h3>
-        <p class="note">Compile happens once per quarter against the desk's redacted gold set. The artifact is signed, K-scored, and pushed to the MDM. Deployment is a single signed file, not a service to monitor.</p>
-        <div class="steps">
-          <div class="step">
-            <div class="n">01 - gather</div>
-            <h4>Examples + evals</h4>
-            <p>Redacted memo pairs from approved deals. Held-out evaluation drawn separately and never seen at training.</p>
-          </div>
-          <div class="step">
-            <div class="n">02 - compile</div>
-            <h4>kolm compile</h4>
-            <p>Synthesize a verifier from your examples. Specialize a small model on your data. Index your private context. Sign. K-score gate enforces the ship floor.</p>
-          </div>
-          <div class="step">
-            <div class="n">03 - review</div>
-            <h4>MRM sign-off</h4>
-            <p>Hold-out evaluation report goes to the model risk committee. K-score breakdown is part of the artifact, defensible at exam.</p>
-          </div>
-          <div class="step">
-            <div class="n">04 - ship</div>
-            <h4>Push to desk</h4>
-            <p>Single signed file deploys via MDM. Runtime is offline. Receipts mirror to the audit log via Splunk or webhook on demand.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+ <div class="uc" aria-label="Compile pipeline">
+ <div class="hd"><span class="dot"></span><span>compile-bridge - running on prem - region eu-frankfurt-vpc</span></div>
+ <div class="body">
+ <h3>From institutional examples to a signed binary on the desk.</h3>
+ <p class="note">Compile happens once per quarter against the desk's redacted gold set. The artifact is signed, K-scored, and pushed to the MDM. Deployment is a single signed file, not a service to monitor.</p>
+ <div class="steps">
+ <div class="step">
+ <div class="n">01 - gather</div>
+ <h4>Examples + evals</h4>
+ <p>Redacted memo pairs from approved deals. Held-out evaluation drawn separately and never seen at training.</p>
+ </div>
+ <div class="step">
+ <div class="n">02 - compile</div>
+ <h4>kolm compile</h4>
+ <p>Synthesize a verifier from your examples. Specialize a small model on your data. Index your private context. Sign. K-score gate enforces the ship floor.</p>
+ </div>
+ <div class="step">
+ <div class="n">03 - review</div>
+ <h4>MRM sign-off</h4>
+ <p>Hold-out evaluation report goes to the model risk committee. K-score breakdown is part of the artifact, defensible at exam.</p>
+ </div>
+ <div class="step">
+ <div class="n">04 - ship</div>
+ <h4>Push to desk</h4>
+ <p>Single signed file deploys via MDM. Runtime is offline. Receipts mirror to the audit log via Splunk or webhook on demand.</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 </section>
 
 <section>
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">04</span><span>Reference artifacts</span></div>
-    <h2>Three signed <span class="tone">.kolm</span> starting points.</h2>
-    <p class="sec-lede">Pre-built artifacts you can fork in your environment, recompile against your own examples, and ship to the desk. Each is a single signed file with a public K-score.</p>
-    <div class="compl-row">
-      <div class="item">
-        <div class="nm" style="font-family:var(--mono)">finance-disclosure-redact.kolm</div>
-        <div class="v acc">K-score 0.89 &middot; 46&thinsp;MB</div>
-        <p>Strips MNPI and counterparty-confidential terms from drafted client memos. Verifier rejects any output that re-introduces a redacted token. <a href="/cookbook/finance-disclosure-redact" style="color:var(--accent)">Recipe &rarr;</a></p>
-      </div>
-      <div class="item">
-        <div class="nm" style="font-family:var(--mono)">churn-predict.kolm</div>
-        <div class="v acc">K-score 0.83 &middot; 62&thinsp;MB</div>
-        <p>Scores wealth-management book accounts on attrition risk from quarterly contact notes. Local-only. <a href="/cookbook/churn-predict" style="color:var(--accent)">Recipe &rarr;</a></p>
-      </div>
-      <div class="item">
-        <div class="nm" style="font-family:var(--mono)">pricing-quote.kolm</div>
-        <div class="v acc">K-score 0.85 &middot; 51&thinsp;MB</div>
-        <p>Drafts client-facing pricing quotes from a structured deal sheet. Verifier enforces approved disclaimer language verbatim. <a href="/cookbook/pricing-quote" style="color:var(--accent)">Recipe &rarr;</a></p>
-      </div>
-    </div>
-  </div>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">04</span><span>Reference artifacts</span></div>
+ <h2>Three signed <span class="tone">.kolm</span> starting points.</h2>
+ <p class="sec-lede">Pre-built artifacts you can fork in your environment, recompile against your own examples, and ship to the desk. Each is a single signed file with a public K-score.</p>
+ <div class="compl-row">
+ <div class="item">
+ <div class="nm" style="font-family:var(--mono)">finance-disclosure-redact.kolm</div>
+ <div class="v acc">K-score 0.89 &middot; 46&thinsp;MB</div>
+ <p>Strips MNPI and counterparty-confidential terms from drafted client memos. Verifier rejects any output that re-introduces a redacted token. <a href="/cookbook/finance-disclosure-redact" style="color:var(--accent)">Recipe &rarr;</a></p>
+ </div>
+ <div class="item">
+ <div class="nm" style="font-family:var(--mono)">churn-predict.kolm</div>
+ <div class="v acc">K-score 0.83 &middot; 62&thinsp;MB</div>
+ <p>Scores wealth-management book accounts on attrition risk from quarterly contact notes. Local-only. <a href="/cookbook/churn-predict" style="color:var(--accent)">Recipe &rarr;</a></p>
+ </div>
+ <div class="item">
+ <div class="nm" style="font-family:var(--mono)">pricing-quote.kolm</div>
+ <div class="v acc">K-score 0.85 &middot; 51&thinsp;MB</div>
+ <p>Drafts client-facing pricing quotes from a structured deal sheet. Verifier enforces approved disclaimer language verbatim. <a href="/cookbook/pricing-quote" style="color:var(--accent)">Recipe &rarr;</a></p>
+ </div>
+ </div>
+ </div>
 </section>
 
 <section>
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">05</span><span>Compliance posture</span></div>
-    <h2>Compliance posture.<br><span class="tone">Plain table.</span></h2>
-    <p class="sec-lede">Same matrix we publish on <a href="/security" style="color:var(--accent);text-decoration:none;">/security</a>: one source of truth, no marketing edits.</p>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">05</span><span>Compliance posture</span></div>
+ <h2>Compliance posture.<br><span class="tone">Plain table.</span></h2>
+ <p class="sec-lede">Same matrix we publish on <a href="/security" style="color:var(--accent);text-decoration:none;">/security</a>: one source of truth, no marketing edits.</p>
 
-    <div class="compl-row">
-      <div class="item">
-        <div class="nm">SR 11-7 / OCC 2011-12</div>
-        <div class="v">Artifact-level MRM dossier</div>
-        <p>K-score, eval set, lineage, base hash, adapter delta. Designed to drop into your model risk inventory.</p>
-      </div>
-      <div class="item">
-        <div class="nm">EU AI Act</div>
-        <div class="v">documentation path 2027 Q2</div>
-        <p>Artifact logs, verifier gates, and receipts support technical documentation. Risk tier remains use-case-specific.</p>
-      </div>
-      <div class="item">
-        <div class="nm">GDPR - UK GDPR - GLBA</div>
-        <div class="v acc">DPA path</div>
-        <p>EU and UK compile region options are available on Pro and Enterprise. DPA templates and GLBA safeguards mapping are ready for review.</p>
-      </div>
-    </div>
-  </div>
+ <div class="compl-row">
+ <div class="item">
+ <div class="nm">SR 11-7 / OCC 2011-12</div>
+ <div class="v">Artifact-level MRM dossier</div>
+ <p>K-score, eval set, lineage, base hash, adapter delta. Designed to drop into your model risk inventory.</p>
+ </div>
+ <div class="item">
+ <div class="nm">EU AI Act</div>
+ <div class="v">documentation path 2027 Q2</div>
+ <p>Artifact logs, verifier gates, and receipts support technical documentation. Risk tier remains use-case-specific.</p>
+ </div>
+ <div class="item">
+ <div class="nm">GDPR - UK GDPR - GLBA</div>
+ <div class="v acc">DPA path</div>
+ <p>EU and UK compile region options are available on Pro and Enterprise. DPA templates and GLBA safeguards mapping are ready for review.</p>
+ </div>
+ </div>
+ </div>
 </section>
 
 <section class="closing">
-  <div class="wrap">
-    <h2>Ship analyst-side AI<br><span class="tone">that never leaves the desk.</span></h2>
-    <p class="lede" style="max-width:60ch">Provision the Enterprise tier, install the CLI, compile your first AI against your own examples. The customer-hosted compile bridge, SAML/SCIM, BAA path, and signed audit log are all wired to the same dashboard. No scoping call required to start.</p>
-    <div class="cta-row">
-      <a href="/signup?plan=enterprise" class="btn-primary">Start Enterprise</a>
-      <a href="/security" class="btn-link">Read the security page <span aria-hidden="true">&rarr;</span></a>
-    </div>
-  </div>
+ <div class="wrap">
+ <h2>Ship analyst-side AI<br><span class="tone">that never leaves the desk.</span></h2>
+ <p class="lede" style="max-width:60ch">Provision the Enterprise tier, install the CLI, compile your first AI against your own examples. The customer-hosted compile bridge, SAML/SCIM, BAA path, and signed audit log are all wired to the same dashboard. No scoping call required to start.</p>
+ <div class="cta-row">
+ <a href="/signup?plan=enterprise" class="btn-primary">Start Enterprise</a>
+ <a href="/security" class="btn-link">Read the security page <span aria-hidden="true">&rarr;</span></a>
+ </div>
+ </div>
 </section>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

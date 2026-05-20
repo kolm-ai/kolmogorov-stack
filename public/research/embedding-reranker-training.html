@@ -4,21 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Embedding and reranker fine-tuning &middot; Matryoshka and BGE | kolm research</title>
-<meta name="description" content="The recall stack has two heads. InfoNCE with optional Matryoshka loss across nested dims so one model serves four latency tiers. A cross-encoder reranker on top, BCE for binary relevance, MSE for pointwise score. Both feed the registry's recall index.">
+<title>Embedding and reranker fine-tuning Matryoshka and BGE | · kolm.ai</title>
+<meta name="description" content="The recall stack has two heads. InfoNCE with optional Matryoshka loss across nested dims so one model serves four latency tiers. A cross-encoder reranker on...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Embedding and reranker fine-tuning . kolm research">
-<meta property="og:description" content="Two heads, one recall stack. InfoNCE + Matryoshka for the embedder, cross-encoder for the reranker.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Embedding and reranker fine-tuning Matryoshka and BGE | · kolm.ai">
+<meta property="og:description" content="The recall stack has two heads. InfoNCE with optional Matryoshka loss across nested dims so one model serves four latency tiers. A cross-encoder reranker on...">
+<meta property="og:type" content="website">
 <meta property="article:published_time" content="2026-05-14">
 <meta property="article:author" content="Kolmogorov">
 <meta property="article:section" content="retrieval">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Embedding and reranker fine-tuning">
-<meta name="twitter:description" content="One model, four latency tiers. The Matryoshka trick written down.">
+<meta name="twitter:title" content="Embedding and reranker fine-tuning Matryoshka and BGE | · kolm.ai">
+<meta name="twitter:description" content="The recall stack has two heads. InfoNCE with optional Matryoshka loss across nested dims so one model serves four latency tiers. A cross-encoder reranker on...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/embedding-reranker-training">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,316 +27,318 @@
 <script src="/escape.js"></script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Embedding and reranker fine-tuning",
-      "description": "InfoNCE with Matryoshka loss for embeddings; cross-encoder for rerankers. Both feed the registry's recall index.",
-      "url": "https://kolm.ai/research/embedding-reranker-training",
-      "author": {"@type": "Organization", "name": "Kolmogorov"},
-      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
-      "datePublished": "2026-05-14",
-      "articleSection": "retrieval",
-      "keywords": "embedding fine-tuning, reranker, InfoNCE, Matryoshka, BGE, cross-encoder",
-      "citation": [
-        "Oord et al, 2018, arXiv:1807.03748 (InfoNCE)",
-        "Kusupati et al, 2022, arXiv:2205.13147 (Matryoshka)",
-        "Chen et al, 2024, arXiv:2402.03216 (BGE Reranker)"
-      ],
-      "license": "https://creativecommons.org/licenses/by/4.0/"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "Embedding and reranker fine-tuning", "item": "https://kolm.ai/research/embedding-reranker-training"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Embedding and reranker fine-tuning",
+ "description": "InfoNCE with Matryoshka loss for embeddings; cross-encoder for rerankers. Both feed the registry's recall index.",
+ "url": "https://kolm.ai/research/embedding-reranker-training",
+ "author": {"@type": "Organization", "name": "Kolmogorov"},
+ "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-14",
+ "articleSection": "retrieval",
+ "keywords": "embedding fine-tuning, reranker, InfoNCE, Matryoshka, BGE, cross-encoder",
+ "citation": [
+ "Oord et al, 2018, arXiv:1807.03748 (InfoNCE)",
+ "Kusupati et al, 2022, arXiv:2205.13147 (Matryoshka)",
+ "Chen et al, 2024, arXiv:2402.03216 (BGE Reranker)"
+ ],
+ "license": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Embedding and reranker fine-tuning", "item": "https://kolm.ai/research/embedding-reranker-training"}
+ ]
+ }
+ ]
 }
 </script>
 
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
-  a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
-  a:hover{border-bottom-color:var(--ink)}
-  .nb{border:0}
-  ::selection{background:rgba(236,231,220,0.30)}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+ a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+ a:hover{border-bottom-color:var(--ink)}
+ .nb{border:0}
+ ::selection{background:rgba(236,231,220,0.30)}
 
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
-  @media(max-width:720px){.wrap{padding:0 20px}}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.wrap{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){header.site .row{padding:0 20px}}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
-  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){header.site .row{padding:0 20px}}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+ header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site .right .ghost:hover{color:var(--ink)}
+ header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
 
-  main{padding:80px 0 96px;flex:1}
+ main{padding:80px 0 96px;flex:1}
 
-  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
-  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
-  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+ .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+ .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
 
-  h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
-  .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
-  h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
-  h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
-  p{color:var(--ink-mute);margin:0 0 14px}
-  p strong{color:var(--ink);font-weight: 500}
-  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
-  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
-  ul li{margin:6px 0}
+ h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+ .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+ h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+ h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p strong{color:var(--ink);font-weight: 500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+ ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+ ul li{margin:6px 0}
 
-  .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+ .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
 
-  .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
-  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-  .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
-  .table tr:last-child td{border-bottom:0}
+ .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+ .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+ .table tr:last-child td{border-bottom:0}
 
-  .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
-  .citations a{color:var(--ink-mute)}
+ .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+ .citations a{color:var(--ink-mute)}
 
-  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
-  footer a{color:var(--ink-mute);border:0}
-  footer a:hover{color:var(--ink)}
-  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
-  .footer-row a{color:inherit}
+ footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+ footer a{color:var(--ink-mute);border:0}
+ footer a:hover{color:var(--ink)}
+ .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+ .footer-row a{color:inherit}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site">
-  <div class="row">
-    <div class="left">
-      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research" class="active">Research</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="row">
+ <div class="left">
+ <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research" class="active">Research</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main>
-  <div class="wrap">
-    <div class="hero-eyebrow"><span class="he-dot"></span>research . retrieval . 11 min read</div>
-    <h1>The recall stack, fine-tuned.</h1>
-    <p class="lede">A buyer who needs RAG over their own corpus does not need the OpenAI embedding API. They need an embedder that's good at their queries against their docs, plus a reranker that's good at their relevance signal. Both are fine-tunes on the buyer's captures; both land in the recall index alongside the LoRA adapter.</p>
+<main id="main">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>research . retrieval . 11 min read</div>
+ <h1>The recall stack, fine-tuned.</h1>
+ <p class="lede">A buyer who needs RAG over their own corpus does not need the OpenAI embedding API. They need an embedder that's good at their queries against their docs, plus a reranker that's good at their relevance signal. Both are fine-tunes on the buyer's captures; both land in the recall index alongside the LoRA adapter.</p>
 
-    <div class="meta-line">
-      <span>May 14, 2026</span>
-      <span>&middot;</span>
-      <span>Kolmogorov research</span>
-      <span>&middot;</span>
-      <span>apps/trainer/embedding.py + apps/trainer/reranker.py</span>
-    </div>
+ <div class="meta-line">
+ <span>May 14, 2026</span>
+ <span>&middot;</span>
+ <span>Kolmogorov research</span>
+ <span>&middot;</span>
+ <span>apps/trainer/embedding.py + apps/trainer/reranker.py</span>
+ </div>
 
-    <h2>Two stages, two models, one stack</h2>
+ <h2>Two stages, two models, one stack</h2>
 
-    <p>Modern retrieval is two-stage. A fast embedder converts queries and documents to dense vectors; an approximate nearest-neighbour index returns the top-K (typically 50-200) candidates per query in milliseconds. A slower, more accurate reranker then scores each (query, candidate) pair and returns the top-N (typically 5-20) for the LLM to read.</p>
+ <p>Modern retrieval is two-stage. A fast embedder converts queries and documents to dense vectors; an approximate nearest-neighbour index returns the top-K (typically 50-200) candidates per query in milliseconds. A slower, more accurate reranker then scores each (query, candidate) pair and returns the top-N (typically 5-20) for the LLM to read.</p>
 
-    <p>The embedder is a bi-encoder: query and document are encoded independently, then their similarity is cosine. The reranker is a cross-encoder: query and document are concatenated and passed jointly through the model, which scores them in one forward. Bi-encoders are O(N) at index time, O(1) at query time; cross-encoders are O(N) at query time but much more accurate per pair.</p>
+ <p>The embedder is a bi-encoder: query and document are encoded independently, then their similarity is cosine. The reranker is a cross-encoder: query and document are concatenated and passed jointly through the model, which scores them in one forward. Bi-encoders are O(N) at index time, O(1) at query time; cross-encoders are O(N) at query time but much more accurate per pair.</p>
 
-    <h2>The embedder: InfoNCE plus Matryoshka</h2>
+ <h2>The embedder: InfoNCE plus Matryoshka</h2>
 
-    <p>The standard contrastive loss is InfoNCE: given a query, a positive document, and a batch of negatives, the embedding model should produce high similarity for (query, positive) and low similarity for (query, neg_i). With a large batch of in-batch negatives this is the cheapest way to get a competent embedder.</p>
+ <p>The standard contrastive loss is InfoNCE: given a query, a positive document, and a batch of negatives, the embedding model should produce high similarity for (query, positive) and low similarity for (query, neg_i). With a large batch of in-batch negatives this is the cheapest way to get a competent embedder.</p>
 
-    <pre>def info_nce(q, d, temperature):
-    # q, d: [batch, dim], pre-normalised
-    logits = q @ d.T / temperature
-    labels = arange(len(q))  # diagonal: each query's positive is its own row
-    return cross_entropy(logits, labels)</pre>
+ <pre>def info_nce(q, d, temperature):
+ # q, d: [batch, dim], pre-normalised
+ logits = q @ d.T / temperature
+ labels = arange(len(q)) # diagonal: each query's positive is its own row
+ return cross_entropy(logits, labels)</pre>
 
-    <p>Matryoshka Representation Learning (Kusupati et al 2022) layers on top: at every step the loss is computed not just at the full embedding dimension, but at a nested sequence of dimensions (64, 128, 256, 512, 768). The total loss is the sum across all dims. The trained model emits a 768-dim vector whose first 64 entries are themselves a competent 64-dim embedding, whose first 128 are a competent 128-dim, and so on.</p>
+ <p>Matryoshka Representation Learning (Kusupati et al 2022) layers on top: at every step the loss is computed not just at the full embedding dimension, but at a nested sequence of dimensions (64, 128, 256, 512, 768). The total loss is the sum across all dims. The trained model emits a 768-dim vector whose first 64 entries are themselves a competent 64-dim embedding, whose first 128 are a competent 128-dim, and so on.</p>
 
-    <pre>def matryoshka_info_nce(q, d, dims, temperature):
-    total = 0
-    for k in dims:
-        q_k = normalise(q[:, :k])
-        d_k = normalise(d[:, :k])
-        total = total + info_nce(q_k, d_k, temperature)
-    return total / len(dims)</pre>
+ <pre>def matryoshka_info_nce(q, d, dims, temperature):
+ total = 0
+ for k in dims:
+ q_k = normalise(q[:, :k])
+ d_k = normalise(d[:, :k])
+ total = total + info_nce(q_k, d_k, temperature)
+ return total / len(dims)</pre>
 
-    <p>The product: one model serves four latency tiers. A buyer who wants fast in-browser recall can truncate to 64 dims; a buyer who wants best quality uses the full 768. The recall index in the <code>.kolm</code> artifact ships both the full vectors and a marker for which dims are valid, so the runtime can pick the tier per-query.</p>
+ <p>The product: one model serves four latency tiers. A buyer who wants fast in-browser recall can truncate to 64 dims; a buyer who wants best quality uses the full 768. The recall index in the <code>.kolm</code> artifact ships both the full vectors and a marker for which dims are valid, so the runtime can pick the tier per-query.</p>
 
-    <h2>The reranker: cross-encoder, BCE or MSE</h2>
+ <h2>The reranker: cross-encoder, BCE or MSE</h2>
 
-    <p>The reranker is a sequence-classification head on top of any encoder. Inputs are (query, document) concatenated; output is a single scalar score.</p>
+ <p>The reranker is a sequence-classification head on top of any encoder. Inputs are (query, document) concatenated; output is a single scalar score.</p>
 
-    <pre>class Reranker(nn.Module):
-    def __init__(self, base_model_id):
-        self.encoder = AutoModelForSequenceClassification.from_pretrained(
-            base_model_id, num_labels=1
-        )
+ <pre>class Reranker(nn.Module):
+ def __init__(self, base_model_id):
+ self.encoder = AutoModelForSequenceClassification.from_pretrained(
+ base_model_id, num_labels=1
+ )
 
-    def forward(self, query, doc):
-        text = f"{query} [SEP] {doc}"
-        return self.encoder(**tokenize(text)).logits.squeeze(-1)</pre>
+ def forward(self, query, doc):
+ text = f"{query} [SEP] {doc}"
+ return self.encoder(**tokenize(text)).logits.squeeze(-1)</pre>
 
-    <p>Two label shapes are supported. Binary relevance (label in <code>{0, 1}</code>) uses BCE-with-logits loss; the model produces a logit you sigmoid at inference for a probability. Pointwise score (label in <code>[0, 1]</code> or any real) uses MSE; the model produces a raw score.</p>
+ <p>Two label shapes are supported. Binary relevance (label in <code>{0, 1}</code>) uses BCE-with-logits loss; the model produces a logit you sigmoid at inference for a probability. Pointwise score (label in <code>[0, 1]</code> or any real) uses MSE; the model produces a raw score.</p>
 
-    <p>The kolm config picks BCE by default because most buyer captures are binary relevance signals (the user clicked / the answer was correct). Pointwise MSE is the right path when the buyer has explicit relevance scores (e.g., a 1-5 star rating).</p>
+ <p>The kolm config picks BCE by default because most buyer captures are binary relevance signals (the user clicked / the answer was correct). Pointwise MSE is the right path when the buyer has explicit relevance scores (e.g., a 1-5 star rating).</p>
 
-    <h2>The minimal calls</h2>
+ <h2>The minimal calls</h2>
 
-    <pre>from apps.trainer.embedding import EmbeddingTrainer, EmbedConfig
+ <pre>from apps.trainer.embedding import EmbeddingTrainer, EmbedConfig
 from apps.trainer.reranker import RerankerTrainer, RerankConfig
 
 embedder = EmbeddingTrainer(
-    model_id="BAAI/bge-base-en-v1.5",
-    config=EmbedConfig(
-        matryoshka_dims=(64, 128, 256, 512, 768),
-        temperature=0.05,
-        loss_shape="triplet",
-    ),
+ model_id="BAAI/bge-base-en-v1.5",
+ config=EmbedConfig(
+ matryoshka_dims=(64, 128, 256, 512, 768),
+ temperature=0.05,
+ loss_shape="triplet",
+ ),
 )
-embedder.train(triplets_dataset)  # (query, pos, neg) rows
+embedder.train(triplets_dataset) # (query, pos, neg) rows
 
 reranker = RerankerTrainer(
-    model_id="BAAI/bge-reranker-base",
-    config=RerankConfig(shape="binary"),
+ model_id="BAAI/bge-reranker-base",
+ config=RerankConfig(shape="binary"),
 )
-reranker.train(pairs_dataset)     # (query, doc, label) rows</pre>
+reranker.train(pairs_dataset) # (query, doc, label) rows</pre>
 
-    <p>Both models save to the registry alongside the LoRA adapter. The <code>.kolm</code> manifest lists three artifacts: the LoRA, the embedder, and the reranker. The runtime picks the embedder dim per-query and the reranker top-N per-query, both budgeted against latency.</p>
+ <p>Both models save to the registry alongside the LoRA adapter. The <code>.kolm</code> manifest lists three artifacts: the LoRA, the embedder, and the reranker. The runtime picks the embedder dim per-query and the reranker top-N per-query, both budgeted against latency.</p>
 
-    <h2>What lands in the receipt</h2>
+ <h2>What lands in the receipt</h2>
 
-    <pre>"embedding": {
-  "base_model": "BAAI/bge-base-en-v1.5",
-  "papers": ["arXiv:1807.03748", "arXiv:2205.13147"],
-  "matryoshka_dims": [64, 128, 256, 512, 768],
-  "temperature": 0.05,
-  "loss_shape": "triplet",
-  "train_examples": 18432
+ <pre>"embedding": {
+ "base_model": "BAAI/bge-base-en-v1.5",
+ "papers": ["arXiv:1807.03748", "arXiv:2205.13147"],
+ "matryoshka_dims": [64, 128, 256, 512, 768],
+ "temperature": 0.05,
+ "loss_shape": "triplet",
+ "train_examples": 18432
 },
 "reranker": {
-  "base_model": "BAAI/bge-reranker-base",
-  "papers": ["arXiv:2402.03216"],
-  "shape": "binary",
-  "train_examples": 9216
+ "base_model": "BAAI/bge-reranker-base",
+ "papers": ["arXiv:2402.03216"],
+ "shape": "binary",
+ "train_examples": 9216
 }</pre>
 
-    <p>The buyer's auditor can confirm which encoder family and which loss shape produced each model. Both blocks are covered by the artifact's CID and the canonical-JSON manifest hash; swapping either model invalidates the receipt chain.</p>
+ <p>The buyer's auditor can confirm which encoder family and which loss shape produced each model. Both blocks are covered by the artifact's CID and the canonical-JSON manifest hash; swapping either model invalidates the receipt chain.</p>
 
-    <h2>How much capture data is enough</h2>
+ <h2>How much capture data is enough</h2>
 
-    <table class="table">
-      <thead><tr><th>Capture count</th><th>Embedder recipe</th><th>Reranker recipe</th></tr></thead>
-      <tbody>
-        <tr><td>0-200</td><td>Stay with base BGE; do not fine-tune</td><td>Stay with base; do not fine-tune</td></tr>
-        <tr><td>200-2k</td><td>Synth pairs with Magpie, then fine-tune</td><td>Use base; collect more before fine-tuning</td></tr>
-        <tr><td>2k-20k</td><td>Fine-tune with InfoNCE + in-batch negatives</td><td>Fine-tune with BCE; sample hard negatives</td></tr>
-        <tr><td>20k+</td><td>Full Matryoshka recipe with hard-negative mining</td><td>Full BCE with PRM-style hard negatives</td></tr>
-      </tbody>
-    </table>
+ <table class="table">
+ <thead><tr><th>Capture count</th><th>Embedder recipe</th><th>Reranker recipe</th></tr></thead>
+ <tbody>
+ <tr><td>0-200</td><td>Stay with base BGE; do not fine-tune</td><td>Stay with base; do not fine-tune</td></tr>
+ <tr><td>200-2k</td><td>Synth pairs with Magpie, then fine-tune</td><td>Use base; collect more before fine-tuning</td></tr>
+ <tr><td>2k-20k</td><td>Fine-tune with InfoNCE + in-batch negatives</td><td>Fine-tune with BCE; sample hard negatives</td></tr>
+ <tr><td>20k+</td><td>Full Matryoshka recipe with hard-negative mining</td><td>Full BCE with PRM-style hard negatives</td></tr>
+ </tbody>
+ </table>
 
-    <h2>Edge cases worth naming</h2>
+ <h2>Edge cases worth naming</h2>
 
-    <p><strong>Hard-negative mining matters.</strong> In-batch negatives only get you so far. The published recipe for the BGE family mines hard negatives from the index itself: for each (query, positive), retrieve top-50 candidates with the current embedder and label the bottom-ranked but still-in-top-50 as hard negatives. The kolm trainer does this per epoch.</p>
+ <p><strong>Hard-negative mining matters.</strong> In-batch negatives only get you so far. The published recipe for the BGE family mines hard negatives from the index itself: for each (query, positive), retrieve top-50 candidates with the current embedder and label the bottom-ranked but still-in-top-50 as hard negatives. The kolm trainer does this per epoch.</p>
 
-    <p><strong>The reranker should see the embedder's misses.</strong> Reranker training data is most useful when it covers the cases the embedder gets wrong. The capture-loop bridge pre-filters to those: for each ranked retrieval, the bridge logs the queries where the user clicked a result that was not in the top-3 (the embedder ranked it lower). Those pairs go into reranker fine-tuning.</p>
+ <p><strong>The reranker should see the embedder's misses.</strong> Reranker training data is most useful when it covers the cases the embedder gets wrong. The capture-loop bridge pre-filters to those: for each ranked retrieval, the bridge logs the queries where the user clicked a result that was not in the top-3 (the embedder ranked it lower). Those pairs go into reranker fine-tuning.</p>
 
-    <p><strong>Matryoshka does not always pay.</strong> If the buyer has only one latency budget and never plans to truncate, Matryoshka is a small accuracy hit (~1-2% NDCG at full dim) for no real gain. The trainer config defaults Matryoshka on because the buyer rarely knows their latency profile a priori; turning it off via spec is a one-line override.</p>
+ <p><strong>Matryoshka does not always pay.</strong> If the buyer has only one latency budget and never plans to truncate, Matryoshka is a small accuracy hit (~1-2% NDCG at full dim) for no real gain. The trainer config defaults Matryoshka on because the buyer rarely knows their latency profile a priori; turning it off via spec is a one-line override.</p>
 
-    <h2>Where this fits in the kolm compile loop</h2>
+ <h2>Where this fits in the kolm compile loop</h2>
 
-    <p>Embedder and reranker fine-tunes are sibling stages to the LoRA fine-tune. The buyer's spec can name any combination: LoRA-only (the default), LoRA + embedder, LoRA + embedder + reranker, embedder-only, reranker-only. Each named stage runs against its own captures (or the same captures with different label shapes), each lands in the receipt, each gets its own K-score evaluation against a vertical pack (MTEB-style for the embedder, BEIR-style for the reranker).</p>
+ <p>Embedder and reranker fine-tunes are sibling stages to the LoRA fine-tune. The buyer's spec can name any combination: LoRA-only (the default), LoRA + embedder, LoRA + embedder + reranker, embedder-only, reranker-only. Each named stage runs against its own captures (or the same captures with different label shapes), each lands in the receipt, each gets its own K-score evaluation against a vertical pack (MTEB-style for the embedder, BEIR-style for the reranker).</p>
 
-    <p>The combined artifact ships all three. The runtime loads them together; the inference path is embedder &rarr; ANN index &rarr; reranker &rarr; LLM with retrieved context. The 0.85 K-score gate covers the overall accuracy of this pipeline on the buyer's eval pack, not the individual components.</p>
+ <p>The combined artifact ships all three. The runtime loads them together; the inference path is embedder &rarr; ANN index &rarr; reranker &rarr; LLM with retrieved context. The 0.85 K-score gate covers the overall accuracy of this pipeline on the buyer's eval pack, not the individual components.</p>
 
-    <div class="citations">
-      <p><strong>Citations</strong></p>
-      <p>Oord, A. v.d. et al. <em>Representation Learning with Contrastive Predictive Coding</em>. arXiv:1807.03748, 2018 (InfoNCE).</p>
-      <p>Kusupati, A. et al. <em>Matryoshka Representation Learning</em>. arXiv:2205.13147, 2022.</p>
-      <p>Chen, J. et al. <em>BGE M3-Embedding: Multi-Lingual, Multi-Functionality, Multi-Granularity Text Embeddings Through Self-Knowledge Distillation</em>. arXiv:2402.03216, 2024.</p>
-    </div>
+ <div class="citations">
+ <p><strong>Citations</strong></p>
+ <p>Oord, A. v.d. et al. <em>Representation Learning with Contrastive Predictive Coding</em>. arXiv:1807.03748, 2018 (InfoNCE).</p>
+ <p>Kusupati, A. et al. <em>Matryoshka Representation Learning</em>. arXiv:2205.13147, 2022.</p>
+ <p>Chen, J. et al. <em>BGE M3-Embedding: Multi-Lingual, Multi-Functionality, Multi-Granularity Text Embeddings Through Self-Knowledge Distillation</em>. arXiv:2402.03216, 2024.</p>
+ </div>
 
-    <div class="meta-line" style="margin-top:36px">
-      <a class="nb" href="/research">&larr; Back to research</a>
-      <span>&middot;</span>
-      <a class="nb" href="/research#embedding-reranker">Frontier reference &middot; Embedding + Reranker</a>
-      <span>&middot;</span>
-      <a class="nb" href="/spec">RS-1 spec</a>
-    </div>
-  </div>
+ <div class="meta-line" style="margin-top:36px">
+ <a class="nb" href="/research">&larr; Back to research</a>
+ <span>&middot;</span>
+ <a class="nb" href="/research#embedding-reranker">Frontier reference &middot; Embedding + Reranker</a>
+ <span>&middot;</span>
+ <a class="nb" href="/spec">RS-1 spec</a>
+ </div>
+ </div>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 <script src="/nav.js"></script>
 </body>

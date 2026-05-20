@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Self-host · kolm.ai</title>
-<meta name="description" content="Run the entire kolm stack in your environment. Registry, compiler, receipts service. For regulated workloads, classified data, audit-trail requirements, sovereign-cloud mandate.">
+<meta name="description" content="Run the entire kolm stack in your environment. Registry, compiler, receipts service. For regulated workloads, classified data, audit-trail requirements,...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Self-host &middot; kolm">
-<meta property="og:description" content="Run the entire kolm stack in your environment. Registry, compiler, receipts.">
+<meta property="og:title" content="Self-host · kolm.ai">
+<meta property="og:description" content="Run the entire kolm stack in your environment. Registry, compiler, receipts service. For regulated workloads, classified data, audit-trail requirements,...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/self-host">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:title" content="Self-host &middot; kolm">
-<meta name="twitter:description" content="Run the entire kolm stack in your environment. Registry, compiler, receipts.">
+<meta name="twitter:title" content="Self-host · kolm.ai">
+<meta name="twitter:description" content="Run the entire kolm stack in your environment. Registry, compiler, receipts service. For regulated workloads, classified data, audit-trail requirements,...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/self-host">
@@ -24,106 +24,108 @@
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <style>
-  .sh-hero{padding:88px 0 36px;position:relative;overflow:hidden}
-  .sh-hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0.32;background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237ef0d2' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237ef0d2' stop-opacity='0.20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3C/g%3E%3C/svg%3E");background-size:cover;background-position:center top;mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.5) 50%,transparent 78%);-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.5) 50%,transparent 78%);z-index:0}
-  .sh-hero .wrap{position:relative;z-index:2}
-  .sh-hero .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-  .sh-hero .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
-  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
-  .sh-hero h1{font-size:clamp(44px,6.4vw,92px);margin:22px 0 18px;font-weight:500;letter-spacing:-0.035em;line-height:0.96;max-width:14ch}
-  .sh-hero h1 .tone{background:linear-gradient(170deg,#faf2e1 0%,#7ef0d2 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .sh-hero p{max-width:64ch;color:var(--ink-mute,#b5bdb1);font-size:clamp(15.5px,1.3vw,17.5px);line-height:1.6}
+ .sh-hero{padding:88px 0 36px;position:relative;overflow:hidden}
+ .sh-hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0.32;background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237ef0d2' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237ef0d2' stop-opacity='0.20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3C/g%3E%3C/svg%3E");background-size:cover;background-position:center top;mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.5) 50%,transparent 78%);-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.5) 50%,transparent 78%);z-index:0}
+ .sh-hero .wrap{position:relative;z-index:2}
+ .sh-hero .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+ .sh-hero .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+ .sh-hero h1{font-size:clamp(44px,6.4vw,92px);margin:22px 0 18px;font-weight:500;letter-spacing:-0.035em;line-height:0.96;max-width:14ch}
+ .sh-hero h1 .tone{background:linear-gradient(170deg,#faf2e1 0%,#7ef0d2 50%,#faf2e1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+ .sh-hero p{max-width:64ch;color:var(--ink-mute,#b5bdb1);font-size:clamp(15.5px,1.3vw,17.5px);line-height:1.6}
 
-  .sh-wrap{max-width:1180px;margin:0 auto;padding:24px 32px 96px}
-  @media(max-width:720px){.sh-wrap{padding:24px 20px 64px}}
+ .sh-wrap{max-width:1180px;margin:0 auto;padding:24px 32px 96px}
+ @media(max-width:720px){.sh-wrap{padding:24px 20px 64px}}
 
-  .sh-section{margin:0 0 64px}
-  .sh-section .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 12px}
-  .sh-section h2{margin:0 0 14px;font-size:clamp(22px,2.6vw,30px);font-weight:500;letter-spacing:-0.005em;color:var(--ink);max-width:24ch}
-  .sh-section p.lede{color:var(--ink-mute);font-size:14.5px;line-height:1.6;max-width:66ch;margin:0 0 24px}
+ .sh-section{margin:0 0 64px}
+ .sh-section .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 12px}
+ .sh-section h2{margin:0 0 14px;font-size:clamp(22px,2.6vw,30px);font-weight:500;letter-spacing:-0.005em;color:var(--ink);max-width:24ch}
+ .sh-section p.lede{color:var(--ink-mute);font-size:14.5px;line-height:1.6;max-width:66ch;margin:0 0 24px}
 
-  .diagram{border:1px solid var(--line);border-radius:12px;background:var(--bg-2,#11151b);padding:24px 26px;overflow-x:auto}
-  .diagram pre{margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.55;color:var(--ink);white-space:pre;min-width:fit-content}
-  .diagram pre .dim{color:var(--ink-faint)}
-  .diagram pre .acc{color:#7ef0d2}
-  .diagram pre .ok{color:#7ef0d2}
-  @media(max-width:600px){.diagram pre{font-size:11px}}
+ .diagram{border:1px solid var(--line);border-radius:12px;background:var(--bg-2,#11151b);padding:24px 26px;overflow-x:auto}
+ .diagram pre{margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.55;color:var(--ink);white-space:pre;min-width:fit-content}
+ .diagram pre .dim{color:var(--ink-faint)}
+ .diagram pre .acc{color:#7ef0d2}
+ .diagram pre .ok{color:#7ef0d2}
+ @media(max-width:600px){.diagram pre{font-size:11px}}
 
-  .when-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0 0}
-  @media(max-width:760px){.when-grid{grid-template-columns:1fr}}
-  .when{border:1px solid var(--line);border-radius:10px;padding:20px 22px;background:var(--bg-2,#11151b)}
-  .when .nm{font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:#7ef0d2;margin-bottom:8px}
-  .when h3{margin:0 0 8px;font-size:15.5px;font-weight:500;letter-spacing:0;color:var(--ink);max-width:24ch}
-  .when p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-mute)}
-  .when p code{font-family:var(--mono);font-size:0.92em;background:rgba(0,0,0,0.32);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ .when-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0 0}
+ @media(max-width:760px){.when-grid{grid-template-columns:1fr}}
+ .when{border:1px solid var(--line);border-radius:10px;padding:20px 22px;background:var(--bg-2,#11151b)}
+ .when .nm{font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:#7ef0d2;margin-bottom:8px}
+ .when h3{margin:0 0 8px;font-size:15.5px;font-weight:500;letter-spacing:0;color:var(--ink);max-width:24ch}
+ .when p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-mute)}
+ .when p code{font-family:var(--mono);font-size:0.92em;background:rgba(0,0,0,0.32);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
 
-  .req-list{border:1px solid var(--line);border-radius:10px;background:var(--bg-2,#11151b);overflow:hidden}
-  .req-list .row{display:grid;grid-template-columns:140px 1fr;gap:18px;padding:14px 22px;border-bottom:1px solid var(--line);font-size:13.5px}
-  .req-list .row:last-child{border-bottom:none}
-  .req-list .row .k{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.04em}
-  .req-list .row .v{color:var(--ink-mute);line-height:1.55}
-  .req-list .row .v code{font-family:var(--mono);font-size:0.92em;background:rgba(0,0,0,0.32);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
-  @media(max-width:600px){.req-list .row{grid-template-columns:1fr;gap:4px}}
+ .req-list{border:1px solid var(--line);border-radius:10px;background:var(--bg-2,#11151b);overflow:hidden}
+ .req-list .row{display:grid;grid-template-columns:140px 1fr;gap:18px;padding:14px 22px;border-bottom:1px solid var(--line);font-size:13.5px}
+ .req-list .row:last-child{border-bottom:none}
+ .req-list .row .k{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.04em}
+ .req-list .row .v{color:var(--ink-mute);line-height:1.55}
+ .req-list .row .v code{font-family:var(--mono);font-size:0.92em;background:rgba(0,0,0,0.32);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ @media(max-width:600px){.req-list .row{grid-template-columns:1fr;gap:4px}}
 
-  .cta-band{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:28px 30px;border:1px solid var(--line-strong);border-radius:12px;background:linear-gradient(160deg,rgba(126,240,210,0.08) 0%,rgba(8,9,8,0.4) 70%);margin:24px 0 0}
-  .cta-band .text{flex:1;min-width:240px}
-  .cta-band .text h3{margin:0 0 6px;font-size:17px;font-weight:500;color:var(--ink);letter-spacing:0}
-  .cta-band .text p{margin:0;font-size:13.5px;color:var(--ink-mute);max-width:60ch;line-height:1.55}
-  .cta-band a.btn{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:9px 18px;font-size:13.5px;font-weight:500;letter-spacing:0;font-family:var(--mono)}
-  .cta-band a.btn:hover{background:#ffffff}
+ .cta-band{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:28px 30px;border:1px solid var(--line-strong);border-radius:12px;background:linear-gradient(160deg,rgba(126,240,210,0.08) 0%,rgba(8,9,8,0.4) 70%);margin:24px 0 0}
+ .cta-band .text{flex:1;min-width:240px}
+ .cta-band .text h3{margin:0 0 6px;font-size:17px;font-weight:500;color:var(--ink);letter-spacing:0}
+ .cta-band .text p{margin:0;font-size:13.5px;color:var(--ink-mute);max-width:60ch;line-height:1.55}
+ .cta-band a.btn{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:9px 18px;font-size:13.5px;font-weight:500;letter-spacing:0;font-family:var(--mono)}
+ .cta-band a.btn:hover{background:#ffffff}
 
-  .fine{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:16px 0 0;letter-spacing:0.04em}
-  .fine a{color:var(--ink-mute);border-bottom:1px solid var(--line)}
-  .fine a:hover{color:#7ef0d2;border-color:#7ef0d2}
+ .fine{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:16px 0 0;letter-spacing:0.04em}
+ .fine a{color:var(--ink-mute);border-bottom:1px solid var(--line)}
+ .fine a:hover{color:#7ef0d2;border-color:#7ef0d2}
 
-  [data-theme=light] .diagram{background:#ffffff;border-color:rgba(12,14,16,0.08)}
-  [data-theme=light] .diagram pre{color:#0c0e10}
-  [data-theme=light] .diagram pre .dim{color:#737c73}
-  [data-theme=light] .diagram pre .acc{color:#3b62cf}
-  [data-theme=light] .diagram pre .ok{color:#0a8862}
-  [data-theme=light] .when{background:#ffffff;border-color:rgba(12,14,16,0.08);box-shadow:0 1px 2px rgba(12,14,16,0.03)}
-  [data-theme=light] .when .nm{color:#3b62cf}
-  [data-theme=light] .when h3{color:#0c0e10}
-  [data-theme=light] .when p{color:#4b5158}
-  [data-theme=light] .req-list{background:#ffffff;border-color:rgba(12,14,16,0.08)}
-  [data-theme=light] .req-list .row{border-color:rgba(12,14,16,0.06)}
-  [data-theme=light] .req-list .row .k{color:#737c73}
-  [data-theme=light] .req-list .row .v{color:#4b5158}
-  [data-theme=light] .cta-band{background:linear-gradient(160deg,rgba(10,136,98,0.06) 0%,#ffffff 70%);border-color:rgba(10,136,98,0.20)}
-  [data-theme=light] .cta-band .text h3{color:#0c0e10}
-  [data-theme=light] .cta-band .text p{color:#4b5158}
-  [data-theme=light] .cta-band a.btn{background:#0c0e10;color:#ffffff}
-  [data-theme=light] .cta-band a.btn:hover{background:#000000}
-  [data-theme=light] .fine{color:#737c73}
-  [data-theme=light] .fine a{color:#4b5158;border-bottom-color:rgba(12,14,16,0.16)}
+ [data-theme=light] .diagram{background:#ffffff;border-color:rgba(12,14,16,0.08)}
+ [data-theme=light] .diagram pre{color:#0c0e10}
+ [data-theme=light] .diagram pre .dim{color:#737c73}
+ [data-theme=light] .diagram pre .acc{color:#3b62cf}
+ [data-theme=light] .diagram pre .ok{color:#0a8862}
+ [data-theme=light] .when{background:#ffffff;border-color:rgba(12,14,16,0.08);box-shadow:0 1px 2px rgba(12,14,16,0.03)}
+ [data-theme=light] .when .nm{color:#3b62cf}
+ [data-theme=light] .when h3{color:#0c0e10}
+ [data-theme=light] .when p{color:#4b5158}
+ [data-theme=light] .req-list{background:#ffffff;border-color:rgba(12,14,16,0.08)}
+ [data-theme=light] .req-list .row{border-color:rgba(12,14,16,0.06)}
+ [data-theme=light] .req-list .row .k{color:#737c73}
+ [data-theme=light] .req-list .row .v{color:#4b5158}
+ [data-theme=light] .cta-band{background:linear-gradient(160deg,rgba(10,136,98,0.06) 0%,#ffffff 70%);border-color:rgba(10,136,98,0.20)}
+ [data-theme=light] .cta-band .text h3{color:#0c0e10}
+ [data-theme=light] .cta-band .text p{color:#4b5158}
+ [data-theme=light] .cta-band a.btn{background:#0c0e10;color:#ffffff}
+ [data-theme=light] .cta-band a.btn:hover{background:#000000}
+ [data-theme=light] .fine{color:#737c73}
+ [data-theme=light] .fine a{color:#4b5158;border-bottom-color:rgba(12,14,16,0.16)}
 </style>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebPage",
-      "name": "Self-host &middot; kolm",
-      "description": "Run the entire kolm stack in your environment. Registry, compiler, receipts.",
-      "url": "https://kolm.ai/self-host"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
-        { "@type": "ListItem", "position": 2, "name": "Self-host", "item": "https://kolm.ai/self-host" }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "WebPage",
+ "name": "Self-host &middot; kolm",
+ "description": "Run the entire kolm stack in your environment. Registry, compiler, receipts.",
+ "url": "https://kolm.ai/self-host"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Self-host", "item": "https://kolm.ai/self-host" }
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand"><span>kolm</span></a>
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm</span></a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -274,221 +276,221 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="site-actions">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main>
-  <section class="hero sh-hero">
-    <div class="wrap">
-      <div class="eyebrow"><span class="dot"></span>self-host &middot; sovereign-cloud kolm</div>
-      <h1>Run the entire kolm stack <span class="tone">in your environment.</span></h1>
-      <p>Registry, compiler, receipts service. One Helm chart, three pods, your network. No call goes out unless you punt it out. Same <code>.kolm</code> format the open runtime executes. Same K-score floor. Same signed receipts. Your secret, your boundary.</p>
-    </div>
-  </section>
+<main id="main">
+ <section class="hero sh-hero">
+ <div class="wrap">
+ <div class="eyebrow"><span class="dot"></span>self-host &middot; sovereign-cloud kolm</div>
+ <h1>Run the entire kolm stack <span class="tone">in your environment.</span></h1>
+ <p>Registry, compiler, receipts service. One Helm chart, three pods, your network. No call goes out unless you punt it out. Same <code>.kolm</code> format the open runtime executes. Same K-score floor. Same signed receipts. Your secret, your boundary.</p>
+ </div>
+ </section>
 
-  <div class="sh-wrap">
+ <div class="sh-wrap">
 
-    <section class="sh-section" id="arch">
-      <div class="eyebrow">architecture</div>
-      <h2>Three pods. Your network.</h2>
-      <p class="lede">The full kolm control plane fits inside three deployments. None of them reach the public internet unless you let them. The compiler can be air-gapped at runtime; the registry indexes only what you publish to it; the receipts service holds the HMAC secret you rotate.</p>
+ <section class="sh-section" id="arch">
+ <div class="eyebrow">architecture</div>
+ <h2>Three pods. Your network.</h2>
+ <p class="lede">The full kolm control plane fits inside three services. None of them reach the public internet unless you let them. The compiler can be air-gapped at runtime; the registry indexes only what you publish to it; the receipts service holds the Ed25519 private key you rotate.</p>
 
-      <div class="diagram" aria-label="Self-host architecture">
+ <div class="diagram" aria-label="Self-host architecture">
 <pre><span class="dim">+-----------------------------------------------------------------+</span>
-<span class="dim">|</span>                    <span class="acc">customer VPC . your-corp.cloud</span>                  <span class="dim">|</span>
-<span class="dim">|</span>                                                                 <span class="dim">|</span>
-<span class="dim">|</span>   <span class="dim">+----------------+</span>     <span class="dim">+----------------+</span>     <span class="dim">+----------------+</span>  <span class="dim">|</span>
-<span class="dim">|</span>   <span class="dim">|</span>   <span class="ok">registry</span>    <span class="dim">|</span>     <span class="dim">|</span>   <span class="ok">compiler</span>    <span class="dim">|</span>     <span class="dim">|</span>   <span class="ok">receipts</span>    <span class="dim">|</span>  <span class="dim">|</span>
-<span class="dim">|</span>   <span class="dim">|</span>   pod          <span class="dim">|</span> <span class="dim">&lt;-&gt;</span> <span class="dim">|</span>   pod          <span class="dim">|</span> <span class="dim">&lt;-&gt;</span> <span class="dim">|</span>   pod          <span class="dim">|</span>  <span class="dim">|</span>
-<span class="dim">|</span>   <span class="dim">|</span>                <span class="dim">|</span>     <span class="dim">|</span>                <span class="dim">|</span>     <span class="dim">|</span>                <span class="dim">|</span>  <span class="dim">|</span>
-<span class="dim">|</span>   <span class="dim">|</span> indexes .kolm  <span class="dim">|</span>     <span class="dim">|</span> synthesize     <span class="dim">|</span>     <span class="dim">|</span> HMAC-SHA256    <span class="dim">|</span>  <span class="dim">|</span>
-<span class="dim">|</span>   <span class="dim">|</span> signs publish  <span class="dim">|</span>     <span class="dim">|</span> verify, sign   <span class="dim">|</span>     <span class="dim">|</span> rotate, verify <span class="dim">|</span>  <span class="dim">|</span>
-<span class="dim">|</span>   <span class="dim">|</span> manifests      <span class="dim">|</span>     <span class="dim">|</span> bundle .kolm   <span class="dim">|</span>     <span class="dim">|</span> archive logs   <span class="dim">|</span>  <span class="dim">|</span>
-<span class="dim">|</span>   <span class="dim">+--------+-------+</span>     <span class="dim">+--------+-------+</span>     <span class="dim">+--------+-------+</span>  <span class="dim">|</span>
-<span class="dim">|</span>            <span class="dim">|</span>                      <span class="dim">|</span>                      <span class="dim">|</span>          <span class="dim">|</span>
-<span class="dim">|</span>            <span class="dim">+---------+------------+----------+-----------+</span>          <span class="dim">|</span>
-<span class="dim">|</span>                      <span class="dim">|</span>                       <span class="dim">|</span>                     <span class="dim">|</span>
-<span class="dim">|</span>            <span class="dim">+---------v---------+   +---------v---------+</span>             <span class="dim">|</span>
-<span class="dim">|</span>            <span class="dim">|</span>   <span class="acc">object store</span>    <span class="dim">|</span>   <span class="dim">|</span>   <span class="acc">postgres</span>        <span class="dim">|</span>             <span class="dim">|</span>
-<span class="dim">|</span>            <span class="dim">|</span>   S3 / MinIO      <span class="dim">|</span>   <span class="dim">|</span>   tenants, jobs   <span class="dim">|</span>             <span class="dim">|</span>
-<span class="dim">|</span>            <span class="dim">+-------------------+</span>   <span class="dim">+-------------------+</span>             <span class="dim">|</span>
-<span class="dim">|</span>                                                                 <span class="dim">|</span>
-<span class="dim">|</span>   <span class="dim">[no egress]</span>   <span class="dim">[no telemetry]</span>   <span class="dim">[no licence call-home]</span>      <span class="dim">|</span>
-<span class="dim">|</span>                                                                 <span class="dim">|</span>
+<span class="dim">|</span> <span class="acc">customer VPC . your-corp.cloud</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">+----------------+</span> <span class="dim">+----------------+</span> <span class="dim">+----------------+</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span> <span class="ok">registry</span> <span class="dim">|</span> <span class="dim">|</span> <span class="ok">compiler</span> <span class="dim">|</span> <span class="dim">|</span> <span class="ok">receipts</span> <span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span> pod <span class="dim">|</span> <span class="dim">&lt;-&gt;</span> <span class="dim">|</span> pod <span class="dim">|</span> <span class="dim">&lt;-&gt;</span> <span class="dim">|</span> pod <span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span> indexes .kolm <span class="dim">|</span> <span class="dim">|</span> synthesize <span class="dim">|</span> <span class="dim">|</span> Ed25519 <span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span> signs publish <span class="dim">|</span> <span class="dim">|</span> verify, sign <span class="dim">|</span> <span class="dim">|</span> rotate, verify <span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span> manifests <span class="dim">|</span> <span class="dim">|</span> bundle .kolm <span class="dim">|</span> <span class="dim">|</span> archive logs <span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">+--------+-------+</span> <span class="dim">+--------+-------+</span> <span class="dim">+--------+-------+</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">+---------+------------+----------+-----------+</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">+---------v---------+ +---------v---------+</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span> <span class="acc">object store</span> <span class="dim">|</span> <span class="dim">|</span> <span class="acc">postgres</span> <span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span> S3 / MinIO <span class="dim">|</span> <span class="dim">|</span> tenants, jobs <span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">+-------------------+</span> <span class="dim">+-------------------+</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">[no egress]</span> <span class="dim">[no telemetry]</span> <span class="dim">[no licence call-home]</span> <span class="dim">|</span>
+<span class="dim">|</span> <span class="dim">|</span>
 <span class="dim">+--------+----------------------------------+---------------------+</span>
-         <span class="dim">|</span>                                  <span class="dim">|</span>
-         <span class="dim">v</span>                                  <span class="dim">v</span>
-   <span class="ok">internal users</span>                  <span class="ok">CI / Argo / Tekton</span>
-   <span class="dim">kolm CLI</span>                        <span class="dim">push .kolm . pull .kolm</span></pre>
-      </div>
-      <p class="fine">All three pods are stateless. State lives in your object store and your postgres. Egress out of the VPC is off by default; the runtime emits no telemetry to <code>kolm.ai</code>.</p>
-    </section>
+ <span class="dim">|</span> <span class="dim">|</span>
+ <span class="dim">v</span> <span class="dim">v</span>
+ <span class="ok">internal users</span> <span class="ok">CI / Argo / Tekton</span>
+ <span class="dim">kolm CLI</span> <span class="dim">push .kolm . pull .kolm</span></pre>
+ </div>
+ <p class="fine">All three pods are stateless. State lives in your object store and your postgres. Egress out of the VPC is off by default; the runtime emits no telemetry to <code>kolm.ai</code>.</p>
+ </section>
 
-    <section class="sh-section" id="when">
-      <div class="eyebrow">when to self-host</div>
-      <h2>Pick this when the data cannot leave.</h2>
-      <p class="lede">SaaS at <code>kolm.ai</code> is the right call for ninety-five percent of workloads. Self-host kicks in when the compliance or audit boundary says <i>nothing leaves this network</i>, the data the model touches is classified, or the buyer mandates sovereign cloud.</p>
+ <section class="sh-section" id="when">
+ <div class="eyebrow">when to self-host</div>
+ <h2>Pick this when the data cannot leave.</h2>
+ <p class="lede">SaaS at <code>kolm.ai</code> is the right call for ninety-five percent of workloads. Self-host kicks in when the compliance or audit boundary says <i>nothing leaves this network</i>, the data the model touches is classified, or the buyer mandates sovereign cloud.</p>
 
-      <div class="when-grid">
+ <div class="when-grid">
 
-        <div class="when">
-          <div class="nm">regulated workloads</div>
-          <h3>Healthcare with PHI</h3>
-          <p>Hospital systems, payer ops, claims engines. The compiler sits next to your data; the recipe is signed in your network; receipts archive into your audit system. No PHI ever leaves the VPC, including during compile.</p>
-        </div>
+ <div class="when">
+ <div class="nm">regulated workloads</div>
+ <h3>Healthcare with PHI</h3>
+ <p>Hospital systems, payer ops, claims engines. The compiler sits next to your data; the recipe is signed in your network; receipts archive into your audit system. No PHI ever leaves the VPC, including during compile.</p>
+ </div>
 
-        <div class="when">
-          <div class="nm">classified data</div>
-          <h3>Defense and intelligence</h3>
-          <p>Air-gapped enclaves, IL5 / IL6 environments, multi-level security boundaries. The compiler ships as a single static binary plus the registry chart; no external dependency at compile time once the base model is mirrored locally.</p>
-        </div>
+ <div class="when">
+ <div class="nm">classified data</div>
+ <h3>Defense and intelligence</h3>
+ <p>Air-gapped enclaves, IL5 / IL6 environments, multi-level security boundaries. The compiler ships as a single static binary plus the registry chart; no external dependency at compile time once the base model is mirrored locally.</p>
+ </div>
 
-        <div class="when">
-          <div class="nm">audit-trail requirements</div>
-          <h3>Tier 1 finance</h3>
-          <p>Regulators want every model decision attributable to a signed recipe and a signed receipt. Self-host keeps the HMAC secret inside your KMS and the receipt archive inside your bucket. The auditor reads them with the open verifier.</p>
-        </div>
+ <div class="when">
+ <div class="nm">audit-trail requirements</div>
+ <h3>Tier 1 finance</h3>
+ <p>Regulators want every model decision attributable to a signed recipe and a signed receipt. Self-host keeps the Ed25519 private key inside your KMS and the receipt archive inside your bucket. The auditor reads them with the open verifier.</p>
+ </div>
 
-        <div class="when">
-          <div class="nm">sovereign-cloud mandate</div>
-          <h3>EU, UK, AU public sector</h3>
-          <p>Procurement clauses that require data residency, sovereign-cloud hosting, or full source-code escrow. Run the open runtime under your terms. The MIT licence applies to the runtime; the control-plane charts are licensed for self-host use.</p>
-        </div>
+ <div class="when">
+ <div class="nm">sovereign-cloud mandate</div>
+ <h3>EU, UK, AU public sector</h3>
+ <p>Procurement clauses that require data residency, sovereign-cloud hosting, or full source-code escrow. Run the open runtime under your terms. The MIT licence applies to the runtime; the control-plane charts are licensed for self-host use.</p>
+ </div>
 
-      </div>
-    </section>
+ </div>
+ </section>
 
-    <section class="sh-section" id="reqs">
-      <div class="eyebrow">requirements</div>
-      <h2>What you bring.</h2>
-      <p class="lede">Minimum production-grade footprint. The numbers below are targets for the v1 chart; a smaller pilot runs comfortably on a three-node k3s cluster.</p>
+ <section class="sh-section" id="reqs">
+ <div class="eyebrow">requirements</div>
+ <h2>What you bring.</h2>
+ <p class="lede">Minimum production-grade footprint. The numbers below are targets for the v1 chart; a smaller pilot runs comfortably on a three-node k3s cluster.</p>
 
-      <div class="req-list">
-        <div class="row">
-          <div class="k">kubernetes</div>
-          <div class="v">v1.27 or newer. EKS, GKE, AKS, OpenShift, or vanilla k3s. Three pods plus a job-runner namespace.</div>
-        </div>
-        <div class="row">
-          <div class="k">postgres</div>
-          <div class="v">v14 or newer. ~5 GB for the tenant + job ledger at 10k recipes/month. Managed RDS, CloudSQL, or in-cluster Crunchy operator all supported.</div>
-        </div>
-        <div class="row">
-          <div class="k">object store</div>
-          <div class="v">S3 API-compatible. AWS S3, GCS via interop, Azure Blob via gateway, MinIO for fully on-prem. Holds <code>.kolm</code> artifacts and signed receipts.</div>
-        </div>
-        <div class="row">
-          <div class="k">secrets</div>
-          <div class="v">KMS for the HMAC receipt secret. AWS KMS, GCP KMS, HashiCorp Vault, or any KMIP store. Rotated per the policy you define.</div>
-        </div>
-        <div class="row">
-          <div class="k">base models</div>
-          <div class="v">You mirror the base model weights into your network (HuggingFace mirror or air-gap import). The compiler never reaches the public internet at runtime once weights are local.</div>
-        </div>
-        <div class="row">
-          <div class="k">observability</div>
-          <div class="v">Standard Prometheus metrics, OpenTelemetry traces, JSON structured logs. Plug into your existing stack; nothing exfiltrates.</div>
-        </div>
-      </div>
-    </section>
+ <div class="req-list">
+ <div class="row">
+ <div class="k">kubernetes</div>
+ <div class="v">v1.27 or newer. EKS, GKE, AKS, OpenShift, or vanilla k3s. Three pods plus a job-runner namespace.</div>
+ </div>
+ <div class="row">
+ <div class="k">postgres</div>
+ <div class="v">v14 or newer. ~5 GB for the tenant + job ledger at 10k recipes/month. Managed RDS, CloudSQL, or in-cluster Crunchy operator all supported.</div>
+ </div>
+ <div class="row">
+ <div class="k">object store</div>
+ <div class="v">S3 API-compatible. AWS S3, GCS via interop, Azure Blob via gateway, MinIO for fully on-prem. Holds <code>.kolm</code> artifacts and signed receipts.</div>
+ </div>
+ <div class="row">
+ <div class="k">secrets</div>
+ <div class="v">KMS for the Ed25519 receipt secret. AWS KMS, GCP KMS, HashiCorp Vault, or any KMIP store. Rotated per the policy you define.</div>
+ </div>
+ <div class="row">
+ <div class="k">base models</div>
+ <div class="v">You mirror the base model weights into your network (HuggingFace mirror or air-gap import). The compiler never reaches the public internet at runtime once weights are local.</div>
+ </div>
+ <div class="row">
+ <div class="k">observability</div>
+ <div class="v">Standard Prometheus metrics, OpenTelemetry traces, JSON structured logs. Plug into your existing stack; nothing exfiltrates.</div>
+ </div>
+ </div>
+ </section>
 
-    <section class="sh-section" id="diff">
-      <div class="eyebrow">delta from SaaS</div>
-      <h2>What changes when you self-host.</h2>
-      <p class="lede">The runtime, spec, and CLI are unchanged. The artifact format is unchanged. The K-score floor is unchanged. The difference is the boundary.</p>
+ <section class="sh-section" id="diff">
+ <div class="eyebrow">delta from SaaS</div>
+ <h2>What changes when you self-host.</h2>
+ <p class="lede">The runtime, spec, and CLI are unchanged. The artifact format is unchanged. The K-score floor is unchanged. The difference is the boundary.</p>
 
-      <div class="req-list">
-        <div class="row">
-          <div class="k">control plane</div>
-          <div class="v">In your VPC. Endpoint is your DNS, e.g. <code>kolm.internal.your-corp.cloud</code>.</div>
-        </div>
-        <div class="row">
-          <div class="k">receipts</div>
-          <div class="v">Signed with your HMAC secret in your KMS. Independent verification with your secret; same shape as the SaaS receipt.</div>
-        </div>
-        <div class="row">
-          <div class="k">registry</div>
-          <div class="v">Private to your network. Federated pull from the public <code>kolm.ai</code> catalog is optional and opt-in per recipe.</div>
-        </div>
-        <div class="row">
-          <div class="k">support</div>
-          <div class="v">Direct line to engineering. SLA tied to the contract. Quarterly review against the public roadmap.</div>
-        </div>
-        <div class="row">
-          <div class="k">billing</div>
-          <div class="v">Annual license. Per-cluster or per-node. No per-call metering; you run as many compiles as the cluster handles.</div>
-        </div>
-      </div>
-    </section>
+ <div class="req-list">
+ <div class="row">
+ <div class="k">control plane</div>
+ <div class="v">In your VPC. Endpoint is your DNS, e.g. <code>kolm.internal.your-corp.cloud</code>.</div>
+ </div>
+ <div class="row">
+ <div class="k">receipts</div>
+ <div class="v">Signed with your Ed25519 private key in your KMS. Independent verification with your secret; same shape as the SaaS receipt.</div>
+ </div>
+ <div class="row">
+ <div class="k">registry</div>
+ <div class="v">Private to your network. Federated pull from the public <code>kolm.ai</code> catalog is optional and opt-in per recipe.</div>
+ </div>
+ <div class="row">
+ <div class="k">support</div>
+ <div class="v">Direct line to engineering. SLA tied to the contract. Quarterly review against the public roadmap.</div>
+ </div>
+ <div class="row">
+ <div class="k">billing</div>
+ <div class="v">Annual license. Per-cluster or per-node. No per-call metering; you run as many compiles as the cluster handles.</div>
+ </div>
+ </div>
+ </section>
 
-    <section class="sh-section" id="contact">
-      <div class="cta-band">
-        <div class="text">
-          <h3>Talk to a founder.</h3>
-          <p>Sovereign-cloud deployments start with a thirty-minute scope call. We share the chart, the threat model, and the SOC 2 status under NDA. Mention your network, your compliance regime, and the data class.</p>
-        </div>
-        <a class="btn" href="mailto:dev@kolm.ai?subject=Self-host%20scoping%20call">dev@kolm.ai &rarr;</a>
-      </div>
-      <p class="fine">Already running on SaaS? Migration is a one-way export of your tenant artifacts and receipts. <a href="/security">Read security</a> &middot; <a href="/threat-model">read threat model</a> &middot; <a href="/roadmap">read roadmap</a>.</p>
-    </section>
+ <section class="sh-section" id="contact">
+ <div class="cta-band">
+ <div class="text">
+ <h3>Talk to a founder.</h3>
+ <p>Sovereign-cloud deployments start with a thirty-minute scope call. We share the chart, the threat model, and the SOC 2 status under NDA. Mention your network, your compliance regime, and the data class.</p>
+ </div>
+ <a class="btn" href="mailto:dev@kolm.ai?subject=Self-host%20scoping%20call">dev@kolm.ai &rarr;</a>
+ </div>
+ <p class="fine">Already running on SaaS? Migration is a one-way export of your tenant artifacts and receipts. <a href="/security">Read security</a> &middot; <a href="/threat-model">read threat model</a> &middot; <a href="/roadmap">read roadmap</a>.</p>
+ </section>
 
-  </div>
+ </div>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

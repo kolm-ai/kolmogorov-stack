@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Make.com &middot; kolm.ai</title>
+<title>Make.com · kolm.ai</title>
 <meta name="description" content="Call a deployed kolm artifact from a Make.com scenario via the HTTP module. Bearer auth, JSON in, JSON out. Same shape as the REST API.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Make.com &middot; kolm.ai">
-<meta property="og:description" content="Call a deployed kolm artifact from a Make.com scenario via the HTTP module.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Make.com · kolm.ai">
+<meta property="og:description" content="Call a deployed kolm artifact from a Make.com scenario via the HTTP module. Bearer auth, JSON in, JSON out. Same shape as the REST API.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/integrations/make">
-<meta property="og:image" content="https://kolm.ai/og/docs-integrations-make.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Make.com &middot; kolm.ai">
-<meta name="twitter:description" content="Call a kolm artifact from a Make.com scenario.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-integrations-make.svg">
+<meta name="twitter:title" content="Make.com · kolm.ai">
+<meta name="twitter:description" content="Call a deployed kolm artifact from a Make.com scenario via the HTTP module. Bearer auth, JSON in, JSON out. Same shape as the REST API.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/integrations/make">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Make.com","description":"Call a deployed kolm artifact from a Make.com scenario via the HTTP module.","url":"https://kolm.ai/docs/integrations/make","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -64,13 +64,14 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, not the Kolm band, not Petter Kolm.</span>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -81,51 +82,51 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="prereq">Prerequisites</h2>
 <ul>
-  <li>A kolm API key. Get one from <a href="/signup">/signup</a> or via <code>kolm signup --email you@company.com</code>.</li>
-  <li>An artifact you have already compiled and published. The walkthrough below uses <code>&lt;owner&gt;/&lt;name&gt;</code> as the handle.</li>
-  <li>A Make.com account at the free tier or above.</li>
+ <li>A kolm API key. Get one from <a href="/signup">/signup</a> or via <code>kolm signup --email you@company.com</code>.</li>
+ <li>An artifact you have already compiled and published. The walkthrough below uses <code>&lt;owner&gt;/&lt;name&gt;</code> as the handle.</li>
+ <li>A Make.com account at the free tier or above.</li>
 </ul>
 
 <h2 id="walk">Five minutes</h2>
 
 <div class="step">
-  <span class="num">Step 1</span>
-  <h3>Add an HTTP &gt; Make a request module</h3>
-  <p>In a new or existing scenario, click the plus, search for HTTP, and pick <b>Make a request</b>. This is the generic HTTP client; you will set headers, body, and parse the JSON response yourself.</p>
+ <span class="num">Step 1</span>
+ <h3>Add an HTTP &gt; Make a request module</h3>
+ <p>In a new or existing scenario, click the plus, search for HTTP, and pick <b>Make a request</b>. This is the generic HTTP client; you will set headers, body, and parse the JSON response yourself.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 2</span>
-  <h3>Configure the request</h3>
-<pre><code>URL:      https://kolm.ai/v1/artifacts/&lt;owner&gt;/&lt;name&gt;/run
-Method:   POST
-Headers:  Authorization: Bearer kolm_...
-          Content-Type: application/json
+ <span class="num">Step 2</span>
+ <h3>Configure the request</h3>
+<pre><code>URL: https://kolm.ai/v1/artifacts/&lt;owner&gt;/&lt;name&gt;/run
+Method: POST
+Headers: Authorization: Bearer kolm_...
+ Content-Type: application/json
 Body type: Raw
 Content type: JSON (application/json)
 Request content:
 {
-  "input": "{{1.text}}"
+ "input": "{{1.text}}"
 }</code></pre>
-  <p>Replace <code>&lt;owner&gt;/&lt;name&gt;</code> with your artifact handle. The <code>{{1.text}}</code> is the standard Make mapping that pulls a value from the previous module.</p>
+ <p>Replace <code>&lt;owner&gt;/&lt;name&gt;</code> with your artifact handle. The <code>{{1.text}}</code> is the standard Make mapping that pulls a value from the previous module.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 3</span>
-  <h3>Parse the response</h3>
-  <p>Toggle <b>Parse response</b> to Yes so Make treats the body as JSON. Downstream modules can then map <code>{{2.output}}</code>, <code>{{2.k_score}}</code>, and other fields straight out.</p>
+ <span class="num">Step 3</span>
+ <h3>Parse the response</h3>
+ <p>Toggle <b>Parse response</b> to Yes so Make treats the body as JSON. Downstream modules can then map <code>{{2.output}}</code>, <code>{{2.k_score}}</code>, and other fields straight out.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 4</span>
-  <h3>Test the scenario</h3>
-  <p>Click <b>Run once</b>. The HTTP module turns green and the bubble shows the parsed envelope. If you see 401, the bearer header is wrong. If 404, the handle has a typo. If 422, the artifact is missing a required input field.</p>
+ <span class="num">Step 4</span>
+ <h3>Test the scenario</h3>
+ <p>Click <b>Run once</b>. The HTTP module turns green and the bubble shows the parsed envelope. If you see 401, the bearer header is wrong. If 404, the handle has a typo. If 422, the artifact is missing a required input field.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 5</span>
-  <h3>Save and schedule</h3>
-  <p>Save the scenario. Set the trigger (cron, webhook, watch a folder) and turn the scheduler on. Every run logs to the Make execution history; the request and the parsed body are both captured on the Make side.</p>
+ <span class="num">Step 5</span>
+ <h3>Save and schedule</h3>
+ <p>Save the scenario. Set the trigger (cron, webhook, watch a folder) and turn the scheduler on. Every run logs to the Make execution history; the request and the parsed body are both captured on the Make side.</p>
 </div>
 
 <h2 id="webhook">Webhook trigger</h2>
@@ -133,23 +134,23 @@ Request content:
 
 <h2 id="see">Related</h2>
 <div class="related">
-  <a href="/docs/integrations/zapier"><b>/docs/integrations/zapier</b><span>Same pattern in Zapier via the Webhooks integration.</span></a>
-  <a href="/docs/api"><b>/docs/api</b><span>The HTTP API the Make module calls. Full request and response shape.</span></a>
-  <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
-  <a href="/docs/distill"><b>/docs/distill</b><span>Auto-distill a captured namespace into a local LoRA.</span></a>
-  <a href="/docs/connectors"><b>/docs/connectors</b><span>The full connector list with raw env vars per runtime.</span></a>
+ <a href="/docs/integrations/zapier"><b>/docs/integrations/zapier</b><span>Same pattern in Zapier via the Webhooks integration.</span></a>
+ <a href="/docs/api"><b>/docs/api</b><span>The HTTP API the Make module calls. Full request and response shape.</span></a>
+ <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
+ <a href="/docs/distill"><b>/docs/distill</b><span>Auto-distill a captured namespace into a local student artifact.</span></a>
+ <a href="/docs/connectors"><b>/docs/connectors</b><span>The full connector list with raw env vars per runtime.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 kolm.ai</span>
-  &middot;
-  <a href="/security">Security</a>
-  &middot;
-  <a href="/pricing">Pricing</a>
-  &middot;
-  <a href="/docs">Docs</a>
+ <span>&copy; 2026 kolm.ai</span>
+ &middot;
+ <a href="/security">Security</a>
+ &middot;
+ <a href="/pricing">Pricing</a>
+ &middot;
+ <a href="/docs">Docs</a>
 </div></footer>
 
 </body>

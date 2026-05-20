@@ -1,0 +1,248 @@
+/*
+ * Site-wide finish layer.
+ * Low-specificity on purpose: every page keeps its own art direction while
+ * sharing accessibility, mobile containment, and readable technical surfaces.
+ */
+
+:root {
+ color-scheme: dark;
+ --kolm-focus: #9cffb8;
+ --kolm-focus-ink: #06120b;
+ --kolm-code-bg: rgba(255, 255, 255, 0.055);
+ --kolm-code-border: rgba(255, 255, 255, 0.14);
+ --kolm-line: rgba(255, 255, 255, 0.14);
+ --kolm-ink: #faf2e1;
+ --kolm-muted: #b5bdb1;
+ --kolm-faint: #737c73;
+ --kolm-panel: rgba(255, 255, 255, 0.035);
+ --kolm-panel-hover: rgba(255, 255, 255, 0.055);
+ --kolm-ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+*,
+*::before,
+*::after {
+ box-sizing: border-box;
+ min-width: 0;
+}
+
+html {
+ -webkit-text-size-adjust: 100%;
+ text-size-adjust: 100%;
+ scroll-behavior: smooth;
+}
+
+body {
+ min-width: 0;
+ overflow-x: hidden;
+ text-rendering: optimizeLegibility;
+ -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+ background: rgba(156, 255, 184, 0.28);
+ color: var(--kolm-ink);
+}
+
+:where(main) {
+ isolation: isolate;
+}
+
+:where(img, svg, video, canvas, iframe) {
+ max-width: 100%;
+}
+
+:where(img, video, canvas) {
+ height: auto;
+}
+
+:where(main, header, footer, section, article, aside, nav, .wrap, .container, .shell, .panel, .card) {
+ min-width: 0;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+ outline: 2px solid var(--kolm-focus);
+ outline-offset: 3px;
+ box-shadow: 0 0 0 5px rgba(156, 255, 184, 0.16);
+}
+
+:where(a) {
+ text-underline-offset: 3px;
+ text-decoration-thickness: 1px;
+}
+
+:where(button, .btn, .cta, .button, a.btn, a.cta, input[type="button"], input[type="submit"], input[type="reset"], select) {
+ min-height: 44px;
+}
+
+:where(button, .btn, .cta, .button, a.btn, a.cta) {
+ touch-action: manipulation;
+ transition:
+ transform 150ms var(--kolm-ease),
+ border-color 150ms var(--kolm-ease),
+ background-color 150ms var(--kolm-ease),
+ color 150ms var(--kolm-ease),
+ opacity 150ms var(--kolm-ease);
+}
+
+:where(button, .btn, .cta, .button, a.btn, a.cta):active {
+ transform: translateY(1px);
+}
+
+:where(input, select, textarea) {
+ max-width: 100%;
+ border-color: var(--kolm-line);
+ background-color: rgba(0, 0, 0, 0.18);
+ color: inherit;
+}
+
+:where(input, select, textarea)::placeholder {
+ color: color-mix(in srgb, var(--kolm-muted) 58%, transparent);
+}
+
+:where(code, kbd, samp) {
+ overflow-wrap: anywhere;
+ border-color: var(--kolm-code-border);
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, li, dd, dt, figcaption, blockquote, .lede, .summary) {
+ overflow-wrap: anywhere;
+}
+
+:where(pre) {
+ width: 100%;
+ max-width: 100%;
+ overflow: auto;
+ -webkit-overflow-scrolling: touch;
+ border-color: var(--kolm-code-border);
+ background:
+ linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.018)),
+ var(--kolm-code-bg);
+ box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+:where(pre code) {
+ overflow-wrap: normal;
+ white-space: pre;
+}
+
+:where(table) {
+ border-collapse: collapse;
+}
+
+:where(th) {
+ color: var(--kolm-ink);
+}
+
+:where(td, th) {
+ vertical-align: top;
+}
+
+:where(.table-wrap, .scroll-x) {
+ max-width: 100%;
+ overflow-x: auto;
+ -webkit-overflow-scrolling: touch;
+}
+
+:where(.grid, [class*="grid"], [class*="-grid"], [class*="cards"], [class*="-cards"], [class*="list"], [class*="-list"]) > * {
+ min-width: 0;
+}
+
+:where([class*="card"], [class*="-card"], [class*="panel"], [class*="-panel"], [class*="tile"], [class*="-tile"], [class*="box"], [class*="-box"]) {
+ max-width: 100%;
+}
+
+:where(a[class*="card"], a[class*="-card"], button[class*="card"], button[class*="-card"]) {
+ transition:
+ transform 160ms var(--kolm-ease),
+ border-color 160ms var(--kolm-ease),
+ background-color 160ms var(--kolm-ease),
+ box-shadow 160ms var(--kolm-ease);
+}
+
+:where(a[class*="card"], a[class*="-card"], button[class*="card"], button[class*="-card"]):hover {
+ background-color: var(--kolm-panel-hover);
+}
+
+:where(.pill, .badge, .chip, .tag, [class*="-pill"], [class*="-badge"], [class*="-chip"]) {
+ white-space: normal;
+ line-height: 1.25;
+}
+
+:where(.site-footer, footer.site, footer.site-footer) {
+ border-top-color: var(--kolm-line);
+}
+
+:where(.site-footer a, footer.site a, footer.site-footer a) {
+ color: inherit;
+}
+
+:where(.skip-link) {
+ position: absolute;
+ left: 12px;
+ top: 12px;
+ z-index: 9999;
+ transform: translateY(-160%);
+ border: 1px solid var(--kolm-focus);
+ border-radius: 999px;
+ background: var(--kolm-focus);
+ color: var(--kolm-focus-ink);
+ padding: 10px 14px;
+ font: 700 13px/1 system-ui, -apple-system, Segoe UI, sans-serif;
+ text-decoration: none;
+}
+
+:where(.skip-link):focus {
+ transform: translateY(0);
+}
+
+@media (max-width: 760px) {
+ :where(header nav, .nav, .topnav, .site-nav, .main-nav) {
+ max-width: 100%;
+ min-width: 0;
+ overflow: hidden;
+ }
+
+ :where(header nav a:nth-of-type(n + 5), .nav a:nth-of-type(n + 5), .topnav a:nth-of-type(n + 5), .site-nav a:nth-of-type(n + 5), .main-nav a:nth-of-type(n + 5)) {
+ display: none;
+ }
+
+ :where(pre) {
+ border-radius: 12px;
+ font-size: 12px;
+ }
+
+ :where(table) {
+ display: block;
+ width: 100% !important;
+ min-width: 0 !important;
+ max-width: 100%;
+ overflow-x: auto;
+ -webkit-overflow-scrolling: touch;
+ }
+
+ :where(th, td) {
+ white-space: normal;
+ overflow-wrap: anywhere;
+ word-break: normal;
+ }
+
+ :where(.wrap, .wrap-wide, .container, .shell, main > section) {
+ max-width: 100%;
+ }
+
+ :where(.pill, .badge, .chip, .tag) {
+ max-width: 100%;
+ }
+}
+
+@media (prefers-reduced-motion: reduce) {
+ *,
+ *::before,
+ *::after {
+ animation-duration: 0.001ms !important;
+ animation-iteration-count: 1 !important;
+ scroll-behavior: auto !important;
+ transition-duration: 0.001ms !important;
+ }
+}

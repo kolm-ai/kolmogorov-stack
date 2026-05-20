@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Devices · kolm.ai</title>
+<title>Devices guide · kolm.ai</title>
 <meta name="description" content="kolm.ai device transports: DEVICE_KINDS, RUNTIMES, MODALITIES, detectLocalDevice, install transports (local copy, scp, HTTP PUT).">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Devices &middot; kolm.ai">
+<meta property="og:title" content="Devices guide · kolm.ai">
 <meta property="og:description" content="kolm.ai device transports: DEVICE_KINDS, RUNTIMES, MODALITIES, detectLocalDevice, install transports (local copy, scp, HTTP PUT).">
-<meta property="og:type" content="article">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/devices">
-<meta property="og:image" content="https://kolm.ai/og/docs-devices.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Devices &middot; kolm.ai">
+<meta name="twitter:title" content="Devices guide · kolm.ai">
 <meta name="twitter:description" content="kolm.ai device transports: DEVICE_KINDS, RUNTIMES, MODALITIES, detectLocalDevice, install transports (local copy, scp, HTTP PUT).">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-devices.svg">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/devices">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Devices","description":"kolm.ai device transports: DEVICE_KINDS, RUNTIMES, MODALITIES, detectLocalDevice, install transports (local copy, scp, HTTP PUT).","url":"https://kolm.ai/docs/devices","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -113,13 +114,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="detect">detectLocalDevice</h2>
 <p>The shell auto-detects on first run. Output is cached in <code>~/.kolm/device.json</code>.</p>
 <pre><code>kolm device detect
-# kind:       workstation
-# cpu:        AMD Ryzen 9 7950X3D
-# gpu:        NVIDIA RTX 5090, 32 GB VRAM
-# memory:     128 GB
-# runtimes:   js, wasm, onnx, gguf
+# kind: workstation
+# cpu: AMD Ryzen 9 7950X3D
+# gpu: NVIDIA RTX 5090, 32 GB VRAM
+# memory: 128 GB
+# runtimes: js, wasm, onnx, gguf
 # modalities: text, multimodal, structured
-# tier:       5090</code></pre>
+# tier: 5090</code></pre>
 
 <h2 id="install-transports">Install transports</h2>
 <p>Three ways to put a <code>.kolm</code> on a remote device. The device shell normalizes all three so the runtime side does not care.</p>
@@ -134,22 +135,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="list">List installed</h2>
 <pre><code>kolm device list
-# summarizer-v1.kolm   workstation  gguf  registered to namespace=summarizer
-# redactor-v3.kolm     workstation  js    registered to namespace=phi-redact</code></pre>
+# summarizer-v1.kolm workstation gguf registered to namespace=summarizer
+# redactor-v3.kolm workstation js registered to namespace=phi-redact</code></pre>
 
 <h2 id="next">Next steps</h2>
-<p>Read <a href="/docs/runtime">runtime</a> for the decision chain that picks devices and <a href="/docs/storage">storage</a> for where the artifact bytes live. Start from <a href="/docs/quickstart">/docs/quickstart</a> if you have not shipped an artifact yet.</p>
+<p>Read <a href="/docs/runtime">runtime</a> for the decision chain that picks devices and <a href="/docs/storage">storage</a> for where the artifact bytes live. Start from <a href="/docs/quickstart">/docs/quickstart</a> before your first artifact.</p>
 
 <div class="related">
-  <a href="/docs/runtime"><b>Runtime &rarr;</b><span>The decision chain that picks the device.</span></a>
-  <a href="/docs/storage"><b>Storage &rarr;</b><span>Where the artifact bytes live on the device.</span></a>
-  <a href="/docs/distillation"><b>Distillation &rarr;</b><span>How the .kolm gets built before it is installed.</span></a>
+ <a href="/docs/runtime"><b>Runtime &rarr;</b><span>The decision chain that picks the device.</span></a>
+ <a href="/docs/storage"><b>Storage &rarr;</b><span>Where the artifact bytes live on the device.</span></a>
+ <a href="/docs/distillation"><b>Distillation &rarr;</b><span>How the .kolm gets built before it is installed.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

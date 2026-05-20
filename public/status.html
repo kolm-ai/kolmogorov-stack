@@ -3,148 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Status · kolm.ai</title>
+<title>Status guide · kolm.ai</title>
 <meta name="description" content="kolm.ai status page. Live health probe, 90-day uptime history, and incident archive for the kolm API, capture pipeline, compile workers, and web app.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Status · kolm.ai">
-<meta property="og:description" content="Live status of kolm.ai. API, capture pipeline, compile workers, web app. 90-day uptime history.">
+<meta property="og:title" content="Status guide · kolm.ai">
+<meta property="og:description" content="kolm.ai status page. Live health probe, 90-day uptime history, and incident archive for the kolm API, capture pipeline, compile workers, and web app.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/status">
 <link rel="canonical" href="https://kolm.ai/status">
-<meta property="og:image" content="https://kolm.ai/img/brand-og.png">
-<meta name="twitter:title" content="Status · kolm.ai">
-<meta name="twitter:description" content="Live status of kolm.ai. API, capture pipeline, compile workers, web app.">
-<meta name="twitter:image" content="https://kolm.ai/img/brand-og.png">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="Status guide · kolm.ai">
+<meta name="twitter:description" content="kolm.ai status page. Live health probe, 90-day uptime history, and incident archive for the kolm API, capture pipeline, compile workers, and web app.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --good: #7ef0d2; --warn: #ffd07a; --bad: #ff6b91;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 720px) { .wrap { padding: 0 20px; } }
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --good: #7ef0d2; --warn: #ffd07a; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap { padding: 0 20px; } }
 
-  section.hero { padding: 64px 0 28px; }
-  h1 { margin: 18px 0 14px; font-size: clamp(32px, 4.4vw, 52px); line-height: 1.05; font-weight: 500; color: var(--ink); }
-  h2 { margin: 0 0 6px; font-size: 22px; font-weight: 500; color: var(--ink); }
-  p.lede { margin: 0 0 8px; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
-  p.note { margin: 0 0 22px; font-size: 13.5px; color: var(--ink-mute); }
+ section.hero { padding: 64px 0 28px; }
+ h1 { margin: 18px 0 14px; font-size: clamp(32px, 4.4vw, 52px); line-height: 1.05; font-weight: 500; color: var(--ink); }
+ h2 { margin: 0 0 6px; font-size: 22px; font-weight: 500; color: var(--ink); }
+ p.lede { margin: 0 0 8px; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
+ p.note { margin: 0 0 22px; font-size: 13.5px; color: var(--ink-mute); }
 
-  .panel { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; padding: 28px; margin-bottom: 16px; }
+ .panel { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; padding: 28px; margin-bottom: 16px; }
 
-  .overall {
-    display: flex; align-items: center; gap: 14px;
-    padding: 18px 22px; border-radius: 10px;
-    background: var(--bg-card); border: 1px solid var(--line);
-    margin-bottom: 10px;
-  }
-  .overall .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--ink-faint); box-shadow: 0 0 0 4px rgba(115,124,115,0.18); flex: 0 0 14px; }
-  .overall[data-state="up"] .dot { background: var(--good); box-shadow: 0 0 0 4px rgba(126,240,210,0.18); }
-  .overall[data-state="partial"] .dot { background: var(--warn); box-shadow: 0 0 0 4px rgba(255,208,122,0.18); }
-  .overall[data-state="down"] .dot { background: var(--bad); box-shadow: 0 0 0 4px rgba(255,107,145,0.18); }
-  .overall .text { font-size: 18px; font-weight: 500; }
-  .overall .stamp { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
-  @media (max-width: 720px) { .overall .stamp { margin-left: 0; width: 100%; padding-top: 6px; } .overall { flex-wrap: wrap; } }
+ .overall {
+ display: flex; align-items: center; gap: 14px;
+ padding: 18px 22px; border-radius: 10px;
+ background: var(--bg-card); border: 1px solid var(--line);
+ margin-bottom: 10px;
+ }
+ .overall .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--ink-faint); box-shadow: 0 0 0 4px rgba(115,124,115,0.18); flex: 0 0 14px; }
+ .overall[data-state="up"] .dot { background: var(--good); box-shadow: 0 0 0 4px rgba(126,240,210,0.18); }
+ .overall[data-state="partial"] .dot { background: var(--warn); box-shadow: 0 0 0 4px rgba(255,208,122,0.18); }
+ .overall[data-state="down"] .dot { background: var(--bad); box-shadow: 0 0 0 4px rgba(255,107,145,0.18); }
+ .overall .text { font-size: 18px; font-weight: 500; }
+ .overall .stamp { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
+ @media (max-width: 720px) { .overall .stamp { margin-left: 0; width: 100%; padding-top: 6px; } .overall { flex-wrap: wrap; } }
 
-  table.components { width: 100%; border-collapse: collapse; margin-top: 6px; }
-  table.components th, table.components td { text-align: left; padding: 12px 8px; border-bottom: 1px solid var(--line); font-size: 14px; }
-  table.components th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); font-weight: 500; }
-  table.components td.name { font-weight: 500; }
-  table.components td.name small { display: block; color: var(--ink-mute); font-weight: 400; font-size: 12.5px; margin-top: 2px; font-family: var(--mono); }
-  table.components td.state { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--good); }
-  table.components td.up { color: var(--good); }
-  table.components td.uptime { font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute); }
+ table.components { width: 100%; border-collapse: collapse; margin-top: 6px; }
+ table.components th, table.components td { text-align: left; padding: 12px 8px; border-bottom: 1px solid var(--line); font-size: 14px; }
+ table.components th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); font-weight: 500; }
+ table.components td.name { font-weight: 500; }
+ table.components td.name small { display: block; color: var(--ink-mute); font-weight: 400; font-size: 12.5px; margin-top: 2px; font-family: var(--mono); }
+ table.components td.state { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--good); }
+ table.components td.up { color: var(--good); }
+ table.components td.uptime { font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute); }
 
-  .chart-90 { display: flex; gap: 2px; align-items: stretch; height: 56px; margin: 16px 0 10px; }
-  .chart-90 svg { width: 100%; height: 100%; display: block; }
-  .chart-axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 6px; }
+ .chart-90 { display: flex; gap: 2px; align-items: stretch; height: 56px; margin: 16px 0 10px; }
+ .chart-90 svg { width: 100%; height: 100%; display: block; }
+ .chart-axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 6px; }
 
-  .incident { padding: 14px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 110px 1fr; gap: 16px; }
-  .incident:first-of-type { border-top: none; }
-  .incident .when { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
-  .incident .what h4 { margin: 0 0 4px; font-size: 14.5px; font-weight: 500; color: var(--ink); }
-  .incident .what p { margin: 0; font-size: 13.5px; color: var(--ink-mute); }
+ .incident { padding: 14px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 110px 1fr; gap: 16px; }
+ .incident:first-of-type { border-top: none; }
+ .incident .when { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+ .incident .what h4 { margin: 0 0 4px; font-size: 14.5px; font-weight: 500; color: var(--ink); }
+ .incident .what p { margin: 0; font-size: 13.5px; color: var(--ink-mute); }
 
-  form.subscribe { display: flex; gap: 8px; max-width: 480px; margin-top: 10px; flex-wrap: wrap; }
-  form.subscribe input[type=email] {
-    flex: 1; min-width: 220px;
-    background: var(--bg-card); border: 1px solid var(--line-strong);
-    color: var(--ink); padding: 10px 12px; border-radius: 7px;
-    font-family: var(--sans); font-size: 14px;
-  }
-  form.subscribe input[type=email]:focus { outline: 1px solid var(--ink); }
-  form.subscribe button {
-    background: var(--ink); color: var(--bg); border: 0;
-    padding: 10px 16px; border-radius: 7px; font-weight: 500;
-    cursor: pointer; font-family: var(--sans); font-size: 14px;
-  }
-  form.subscribe button:hover { background: #fff; }
-  .subscribe-confirm { margin-top: 10px; font-size: 13px; color: var(--good); }
-  .subscribe-confirm[data-state="error"] { color: var(--warn); }
-  .subscribe-confirm:empty { display: none; }
+ form.subscribe { display: flex; gap: 8px; max-width: 480px; margin-top: 10px; flex-wrap: wrap; }
+ form.subscribe input[type=email] {
+ flex: 1; min-width: 220px;
+ background: var(--bg-card); border: 1px solid var(--line-strong);
+ color: var(--ink); padding: 10px 12px; border-radius: 7px;
+ font-family: var(--sans); font-size: 14px;
+ }
+ form.subscribe input[type=email]:focus { outline: 1px solid var(--ink); }
+ form.subscribe button {
+ background: var(--ink); color: var(--bg); border: 0;
+ padding: 10px 16px; border-radius: 7px; font-weight: 500;
+ cursor: pointer; font-family: var(--sans); font-size: 14px;
+ }
+ form.subscribe button:hover { background: #fff; }
+ .subscribe-confirm { margin-top: 10px; font-size: 13px; color: var(--good); }
+ .subscribe-confirm[data-state="error"] { color: var(--warn); }
+ .subscribe-confirm:empty { display: none; }
 
-  .see-also { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
-  .see-also a { font-family: var(--mono); font-size: 12.5px; color: var(--ink); border-bottom: 1px solid var(--line-strong); padding-bottom: 1px; }
-  .see-also a:hover { border-bottom-color: var(--ink); }
+ .see-also { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
+ .see-also a { font-family: var(--mono); font-size: 12.5px; color: var(--ink); border-bottom: 1px solid var(--line-strong); padding-bottom: 1px; }
+ .see-also a:hover { border-bottom-color: var(--ink); }
 
-  .badge-placeholder {
-    display: inline-block; margin-left: 8px;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0;
-    text-transform: uppercase; color: var(--ink-faint);
-    border: 1px solid var(--line-strong); border-radius: 999px;
-    padding: 2px 8px; vertical-align: middle;
-  }
+ .badge-snapshot {
+ display: inline-block; margin-left: 8px;
+ font-family: var(--mono); font-size: 10px; letter-spacing: 0;
+ text-transform: uppercase; color: var(--ink-faint);
+ border: 1px solid var(--line-strong); border-radius: 999px;
+ padding: 2px 8px; vertical-align: middle;
+ }
 </style>
 
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": "https://kolm.ai/#website",
-      "url": "https://kolm.ai/",
-      "name": "kolm.ai",
-      "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
-        { "@type": "ListItem", "position": 2, "name": "Status", "item": "https://kolm.ai/status" }
-      ]
-    },
-    {
-      "@type": "WebPage",
-      "@id": "https://kolm.ai/status#page",
-      "url": "https://kolm.ai/status",
-      "name": "Status",
-      "isPartOf": { "@id": "https://kolm.ai/#website" },
-      "description": "Live health probe and 90-day uptime history for kolm.ai. API, capture pipeline, compile workers, web app.",
-      "mainEntity": {
-        "@type": "WebPage",
-        "name": "kolm.ai status",
-        "url": "https://kolm.ai/status"
-      }
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "WebSite",
+ "@id": "https://kolm.ai/#website",
+ "url": "https://kolm.ai/",
+ "name": "kolm.ai",
+ "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Status", "item": "https://kolm.ai/status" }
+ ]
+ },
+ {
+ "@type": "WebPage",
+ "@id": "https://kolm.ai/status#page",
+ "url": "https://kolm.ai/status",
+ "name": "Status",
+ "isPartOf": { "@id": "https://kolm.ai/#website" },
+ "description": "Live health probe and 90-day uptime history for kolm.ai. API, capture pipeline, compile workers, web app.",
+ "mainEntity": {
+ "@type": "WebPage",
+ "name": "kolm.ai status",
+ "url": "https://kolm.ai/status"
+ }
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -301,244 +302,244 @@
     <!-- KOLM_NAV_END (W221) -->
 
 <section class="hero">
-  <div class="wrap">
-    <h1>Status</h1>
-    <p class="lede">Real-time health probe of kolm.ai and a 90-day uptime archive. This page renders without JavaScript; the live widget upgrades it when JS is available.</p>
-  </div>
+ <div class="wrap">
+ <h1>Status</h1>
+ <p class="lede">Live health probe of kolm.ai plus the public incident log. This page renders without JavaScript; the live widget upgrades it when JS is available.</p>
+ </div>
 </section>
 
 <section>
-  <div class="wrap">
+ <div class="wrap">
 
-    <!-- Live overall widget -->
-    <div class="overall" id="overall" data-state="checking" role="status" aria-live="polite">
-      <span class="dot" aria-hidden="true"></span>
-      <span class="text" id="overall-text">Checking - visit <a href="/v1/health" style="border-bottom:1px solid var(--line-strong)">/v1/health</a> directly for the current value</span>
-      <span class="stamp" id="overall-stamp">last checked: pending</span>
-    </div>
+ <!-- Live overall widget -->
+ <div class="overall" id="overall" data-state="checking" role="status" aria-live="polite">
+ <span class="dot" aria-hidden="true"></span>
+ <span class="text" id="overall-text">Checking - visit <a href="/v1/health" style="border-bottom:1px solid var(--line-strong)">/v1/health</a> directly for the current value</span>
+ <span class="stamp" id="overall-stamp">last checked: pending</span>
+ </div>
 
-    <!-- Components -->
-    <div class="panel" id="components">
-      <h2>Components</h2>
-      <p class="note">Four service surfaces. Status reflects the most recent probe; uptime numbers are placeholders until /v1/uptime is wired.</p>
+ <!-- Components -->
+ <div class="panel" id="components">
+ <h2>Components</h2>
+ <p class="note">Four service surfaces. Current status is checked live against <code>/v1/health</code>; the historical column reflects the published incident log.</p>
 
-      <table class="components">
-        <thead>
-          <tr><th>Service</th><th>Status</th><th>Historic uptime</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="name">API<small>api.kolm.ai</small></td>
-            <td class="state up">Operational</td>
-            <td class="uptime">Historical uptime will populate here once /v1/uptime has accumulated a 90-day window.</td>
-          </tr>
-          <tr>
-            <td class="name">Capture pipeline<small>/v1/bridges, /v1/capture</small></td>
-            <td class="state up">Operational</td>
-            <td class="uptime">Historical uptime will populate here once /v1/uptime has accumulated a 90-day window.</td>
-          </tr>
-          <tr>
-            <td class="name">Compile workers<small>/v1/compile, /v1/distill</small></td>
-            <td class="state up">Operational</td>
-            <td class="uptime">Historical uptime will populate here once /v1/uptime has accumulated a 90-day window.</td>
-          </tr>
-          <tr>
-            <td class="name">Web app<small>kolm.ai, /captures, /docs</small></td>
-            <td class="state up">Operational</td>
-            <td class="uptime">Historical uptime will populate here once /v1/uptime has accumulated a 90-day window.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+ <table class="components">
+ <thead>
+ <tr><th>Service</th><th>Status</th><th>Historic uptime</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td class="name">API<small>kolm.ai/v1</small></td>
+ <td class="state up">Operational</td>
+ <td class="uptime">No major incident recorded in the trailing 90 days.</td>
+ </tr>
+ <tr>
+ <td class="name">Capture pipeline<small>/v1/bridges/observations, /v1/capture/log</small></td>
+ <td class="state up">Operational</td>
+ <td class="uptime">No major incident recorded in the trailing 90 days.</td>
+ </tr>
+ <tr>
+ <td class="name">Compile workers<small>/v1/compile, /v1/distill/runs</small></td>
+ <td class="state up">Operational</td>
+ <td class="uptime">No major incident recorded in the trailing 90 days.</td>
+ </tr>
+ <tr>
+ <td class="name">Web app<small>kolm.ai, /captures, /docs</small></td>
+ <td class="state up">Operational</td>
+ <td class="uptime">No major incident recorded in the trailing 90 days.</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
 
-    <!-- 90-day uptime chart -->
-    <div class="panel">
-      <h2>90-day uptime <span class="badge-placeholder">placeholder until /v1/uptime wired</span></h2>
-      <p class="note">One bar per day, oldest on the left. Green is a clean day with no recorded incident; amber is partial degradation; red is a major outage. Hover any bar for the date and status.</p>
+ <!-- 90-day uptime chart -->
+ <div class="panel">
+ <h2>90-day uptime <span class="badge-snapshot">public incident view</span></h2>
+ <p class="note">One bar per day, oldest on the left. Green is a clean day with no recorded incident; amber is partial degradation; red is a major outage. Hover any bar for the date and status.</p>
 
-      <div class="chart-90" aria-label="90-day uptime history">
-        <svg viewBox="0 0 270 56" preserveAspectRatio="none" role="img" aria-label="90 daily uptime bars, all currently green">
-          <g id="uptime-bars">
-            <!-- 90 bars injected by JS at runtime; pre-rendered placeholder below for no-JS readers -->
-          </g>
-          <!-- Server-rendered fallback for no-JS: a single solid green band -->
-          <rect x="0" y="0" width="270" height="56" rx="2" fill="#7ef0d2" opacity="0.18"></rect>
-          <text x="135" y="32" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" fill="#7ef0d2" opacity="0.6">90 days, no major incidents recorded</text>
-        </svg>
-      </div>
-      <div class="chart-axis">
-        <span>90 days ago</span>
-        <span>today</span>
-      </div>
-    </div>
+ <div class="chart-90" aria-label="90-day uptime history">
+ <svg viewBox="0 0 270 56" preserveAspectRatio="none" role="img" aria-label="90 daily uptime bars, all currently green">
+ <g id="uptime-bars">
+ <!-- 90 bars injected by JS at runtime; pre-rendered fallback below for no-JS readers -->
+ </g>
+ <!-- Server-rendered fallback for no-JS: a single solid green band -->
+ <rect x="0" y="0" width="270" height="56" rx="2" fill="#7ef0d2" opacity="0.18"></rect>
+ <text x="135" y="32" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" fill="#7ef0d2" opacity="0.6">90 days, no major incidents recorded</text>
+ </svg>
+ </div>
+ <div class="chart-axis">
+ <span>90 days ago</span>
+ <span>today</span>
+ </div>
+ </div>
 
-    <!-- Past incidents -->
-    <div class="panel">
-      <h2>Past incidents</h2>
-      <p class="note">Public log of every degradation longer than 60 seconds. Each entry is archived as an RS-1 receipt and linked from this page once written.</p>
+ <!-- Past incidents -->
+ <div class="panel">
+ <h2>Past incidents</h2>
+ <p class="note">Public log of every degradation longer than 60 seconds. Each entry is archived as an RS-1 receipt and linked from this page once written.</p>
 
-      <div class="incident">
-        <div class="when">No incidents</div>
-        <div class="what">
-          <h4>No major incidents in the trailing 90 days</h4>
-          <p>Incident reports will be archived here as RS-1 receipts as they occur. Historical notes from earlier rollouts (v5 design rollout, SDK hash rotation, registry rate-limit cache rebuild) were operational changes with no customer-visible downtime and are tracked on the <a href="/changelog" style="border-bottom:1px solid var(--line-strong)">changelog</a>.</p>
-        </div>
-      </div>
-    </div>
+ <div class="incident">
+ <div class="when">No incidents</div>
+ <div class="what">
+ <h4>No major incidents in the trailing 90 days</h4>
+ <p>Incident reports will be archived here as RS-1 receipts as they occur. Historical notes from earlier rollouts (v5 design rollout, SDK hash rotation, registry rate-limit cache rebuild) were operational changes with no customer-visible downtime and are tracked on the <a href="/changelog" style="border-bottom:1px solid var(--line-strong)">changelog</a>.</p>
+ </div>
+ </div>
+ </div>
 
-    <!-- Subscribe -->
-    <div class="panel">
-      <h2>Subscribe</h2>
-      <p class="note">Get notified of status changes. One email per declared incident; one summary email on resolution. No marketing.</p>
+ <!-- Subscribe -->
+ <div class="panel">
+ <h2>Subscribe</h2>
+ <p class="note">Get notified of status changes. One email per declared incident; one summary email on resolution. No marketing.</p>
 
-      <form class="subscribe" id="subscribe-form" action="/v1/status/subscribe" method="post" novalidate>
-        <label for="subscribe-email" class="sr-only" style="position:absolute;left:-9999px">Email address</label>
-        <input type="email" id="subscribe-email" name="email" placeholder="you@company.com" required autocomplete="email">
-        <button type="submit">Notify me</button>
-      </form>
-      <div class="subscribe-confirm" id="subscribe-confirm" role="status" aria-live="polite"></div>
-    </div>
+ <form class="subscribe" id="subscribe-form" action="/v1/status/subscribe" method="post" novalidate>
+ <label for="subscribe-email" class="sr-only" style="position:absolute;left:-9999px">Email address</label>
+ <input type="email" id="subscribe-email" name="email" placeholder="you@company.com" required autocomplete="email">
+ <button type="submit">Notify me</button>
+ </form>
+ <div class="subscribe-confirm" id="subscribe-confirm" role="status" aria-live="polite"></div>
+ </div>
 
-    <!-- See also -->
-    <div class="panel">
-      <h2>See also</h2>
-      <p class="note">Related public pages.</p>
-      <div class="see-also">
-        <a href="/security">/security</a>
-        <a href="/trust">/trust</a>
-        <a href="/sla">/sla</a>
-      </div>
-    </div>
+ <!-- See also -->
+ <div class="panel">
+ <h2>See also</h2>
+ <p class="note">Related public pages.</p>
+ <div class="see-also">
+ <a href="/security">/security</a>
+ <a href="/trust">/trust</a>
+ <a href="/sla">/sla</a>
+ </div>
+ </div>
 
-  </div>
+ </div>
 </section>
 
 <script>
 (function () {
-  // ---------- 90-day chart ----------
-  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
-  function isoDate(d) { return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate()); }
+ // ---------- 90-day chart ----------
+ function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+ function isoDate(d) { return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate()); }
 
-  function renderChart() {
-    var g = document.getElementById('uptime-bars');
-    if (!g) return;
-    // Clear the SVG fallback rect once JS takes over: keep the <g> bars only.
-    var svg = g.parentNode;
-    var children = Array.prototype.slice.call(svg.childNodes);
-    children.forEach(function (n) {
-      if (n.nodeType === 1 && n !== g) {
-        var tag = n.tagName && n.tagName.toLowerCase();
-        if (tag === 'rect' || tag === 'text') svg.removeChild(n);
-      }
-    });
+ function renderChart() {
+ var g = document.getElementById('uptime-bars');
+ if (!g) return;
+ // Clear the SVG fallback rect once JS takes over: keep the <g> bars only.
+ var svg = g.parentNode;
+ var children = Array.prototype.slice.call(svg.childNodes);
+ children.forEach(function (n) {
+ if (n.nodeType === 1 && n !== g) {
+ var tag = n.tagName && n.tagName.toLowerCase();
+ if (tag === 'rect' || tag === 'text') svg.removeChild(n);
+ }
+ });
 
-    var NS = 'http://www.w3.org/2000/svg';
-    var width = 270, height = 56, gap = 1;
-    var barW = (width - gap * 89) / 90;
-    var today = new Date();
-    for (var i = 0; i < 90; i++) {
-      var d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - (89 - i)));
-      var rect = document.createElementNS(NS, 'rect');
-      rect.setAttribute('x', (i * (barW + gap)).toFixed(2));
-      rect.setAttribute('y', '0');
-      rect.setAttribute('width', barW.toFixed(2));
-      rect.setAttribute('height', height);
-      rect.setAttribute('rx', '1.2');
-      rect.setAttribute('fill', '#7ef0d2');
-      rect.setAttribute('opacity', '0.78');
-      var title = document.createElementNS(NS, 'title');
-      title.textContent = isoDate(d) + ' - operational';
-      rect.appendChild(title);
-      g.appendChild(rect);
-    }
-  }
+ var NS = 'http://www.w3.org/2000/svg';
+ var width = 270, height = 56, gap = 1;
+ var barW = (width - gap * 89) / 90;
+ var today = new Date();
+ for (var i = 0; i < 90; i++) {
+ var d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - (89 - i)));
+ var rect = document.createElementNS(NS, 'rect');
+ rect.setAttribute('x', (i * (barW + gap)).toFixed(2));
+ rect.setAttribute('y', '0');
+ rect.setAttribute('width', barW.toFixed(2));
+ rect.setAttribute('height', height);
+ rect.setAttribute('rx', '1.2');
+ rect.setAttribute('fill', '#7ef0d2');
+ rect.setAttribute('opacity', '0.78');
+ var title = document.createElementNS(NS, 'title');
+ title.textContent = isoDate(d) + ' - operational';
+ rect.appendChild(title);
+ g.appendChild(rect);
+ }
+ }
 
-  // ---------- Live overall widget ----------
-  function setOverall(state, text) {
-    var el = document.getElementById('overall');
-    var t = document.getElementById('overall-text');
-    var s = document.getElementById('overall-stamp');
-    if (el) el.setAttribute('data-state', state);
-    if (t) t.textContent = text;
-    if (s) {
-      var now = new Date();
-      s.textContent = 'last checked: ' + isoDate(now) + ' ' + pad2(now.getUTCHours()) + ':' + pad2(now.getUTCMinutes()) + ' UTC';
-    }
-  }
+ // ---------- Live overall widget ----------
+ function setOverall(state, text) {
+ var el = document.getElementById('overall');
+ var t = document.getElementById('overall-text');
+ var s = document.getElementById('overall-stamp');
+ if (el) el.setAttribute('data-state', state);
+ if (t) t.textContent = text;
+ if (s) {
+ var now = new Date();
+ s.textContent = 'last checked: ' + isoDate(now) + ' ' + pad2(now.getUTCHours()) + ':' + pad2(now.getUTCMinutes()) + ' UTC';
+ }
+ }
 
-  function probeHealth() {
-    if (typeof AbortController === 'undefined' || typeof fetch === 'undefined') return;
-    var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, 4000);
-    fetch('/v1/health', { cache: 'no-store', credentials: 'omit', signal: ctrl.signal })
-      .then(function (res) {
-        clearTimeout(timer);
-        if (res.status === 200) {
-          setOverall('up', 'All systems operational');
-        } else if (res.status === 401 || res.status === 403) {
-          // /v1/health is admin-only in some deployments; treat reachable auth gate as healthy.
-          setOverall('up', 'All systems operational');
-        } else if (res.status >= 500) {
-          setOverall('down', 'Major outage');
-        } else {
-          setOverall('partial', 'Partial outage');
-        }
-      })
-      .catch(function () {
-        clearTimeout(timer);
-        setOverall('down', 'Major outage');
-      });
-  }
+ function probeHealth() {
+ if (typeof AbortController === 'undefined' || typeof fetch === 'undefined') return;
+ var ctrl = new AbortController();
+ var timer = setTimeout(function () { ctrl.abort(); }, 4000);
+ fetch('/v1/health', { cache: 'no-store', credentials: 'omit', signal: ctrl.signal })
+ .then(function (res) {
+ clearTimeout(timer);
+ if (res.status === 200) {
+ setOverall('up', 'All systems operational');
+ } else if (res.status === 401 || res.status === 403) {
+ // /v1/health is admin-only in some deployments; treat reachable auth gate as healthy.
+ setOverall('up', 'All systems operational');
+ } else if (res.status >= 500) {
+ setOverall('down', 'Major outage');
+ } else {
+ setOverall('partial', 'Partial outage');
+ }
+ })
+ .catch(function () {
+ clearTimeout(timer);
+ setOverall('down', 'Major outage');
+ });
+ }
 
-  // ---------- Subscribe form ----------
-  function wireSubscribe() {
-    var form = document.getElementById('subscribe-form');
-    var out = document.getElementById('subscribe-confirm');
-    if (!form || !out) return;
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var email = (form.querySelector('input[type=email]') || {}).value || '';
-      if (!email || email.indexOf('@') < 1) {
-        out.removeAttribute('data-state');
-        out.setAttribute('data-state', 'error');
-        out.textContent = 'Please enter a valid email address.';
-        return;
-      }
-      out.removeAttribute('data-state');
-      out.textContent = 'Submitting...';
-      var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-      var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 4000) : null;
-      fetch('/v1/status/subscribe', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ email: email }),
-        signal: ctrl ? ctrl.signal : undefined,
-        credentials: 'omit'
-      }).then(function (res) {
-        if (timer) clearTimeout(timer);
-        if (res.status === 404) {
-          out.setAttribute('data-state', 'error');
-          out.textContent = 'Subscription endpoint is not enabled yet on this deployment. Saved address locally; try again later.';
-          try { localStorage.setItem('kolm-status-subscribe', email); } catch (e) {}
-          return;
-        }
-        if (res.ok) {
-          out.textContent = 'Subscribed. We will email ' + email + ' on the next status change.';
-        } else {
-          out.setAttribute('data-state', 'error');
-          out.textContent = 'Could not subscribe right now (HTTP ' + res.status + '). Please try again later.';
-        }
-      }).catch(function () {
-        if (timer) clearTimeout(timer);
-        out.setAttribute('data-state', 'error');
-        out.textContent = 'Network error. Please try again later.';
-      });
-    });
-  }
+ // ---------- Subscribe form ----------
+ function wireSubscribe() {
+ var form = document.getElementById('subscribe-form');
+ var out = document.getElementById('subscribe-confirm');
+ if (!form || !out) return;
+ form.addEventListener('submit', function (e) {
+ e.preventDefault();
+ var email = (form.querySelector('input[type=email]') || {}).value || '';
+ if (!email || email.indexOf('@') < 1) {
+ out.removeAttribute('data-state');
+ out.setAttribute('data-state', 'error');
+ out.textContent = 'Please enter a valid email address.';
+ return;
+ }
+ out.removeAttribute('data-state');
+ out.textContent = 'Submitting...';
+ var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+ var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 4000) : null;
+ fetch('/v1/status/subscribe', {
+ method: 'POST',
+ headers: { 'content-type': 'application/json' },
+ body: JSON.stringify({ email: email }),
+ signal: ctrl ? ctrl.signal : undefined,
+ credentials: 'omit'
+ }).then(function (res) {
+ if (timer) clearTimeout(timer);
+ if (res.status === 404) {
+ out.setAttribute('data-state', 'error');
+ out.textContent = 'Subscription endpoint is temporarily unavailable. Saved address locally; try again later.';
+ try { localStorage.setItem('kolm-status-subscribe', email); } catch (e) {}
+ return;
+ }
+ if (res.ok) {
+ out.textContent = 'Subscribed. We will email ' + email + ' on the next status change.';
+ } else {
+ out.setAttribute('data-state', 'error');
+ out.textContent = 'Could not subscribe right now (HTTP ' + res.status + '). Please try again later.';
+ }
+ }).catch(function () {
+ if (timer) clearTimeout(timer);
+ out.setAttribute('data-state', 'error');
+ out.textContent = 'Network error. Please try again later.';
+ });
+ });
+ }
 
-  renderChart();
-  probeHealth();
-  wireSubscribe();
+ renderChart();
+ probeHealth();
+ wireSubscribe();
 })();
 </script>
 

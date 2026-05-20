@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm inspect · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm inspect CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/inspect">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm inspect","description":"Reference for the kolm inspect CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/inspect","mainEntityOfPage":"https://kolm.ai/docs/cli/inspect","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm inspect · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm inspect CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,15 +176,15 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="inspect">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>inspect</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>inspect</span>
 </nav>
 <p>--- title: kolm inspect · kolm.ai description: Show what a .kolm artifact is in plain text. Manifest, recipes, signature. ---</p>
 <h1>kolm inspect</h1>
 <p>&gt; Show what a .kolm artifact is in plain text. Passive read of the manifest. No chain replay, no secret needed.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm inspect &lt;artifact.kolm&gt;          # human-readable summary
-kolm inspect &lt;artifact.kolm&gt; --json   # full manifest dump
+kolm inspect &lt;artifact.kolm&gt; # human-readable summary
+kolm inspect &lt;artifact.kolm&gt; --json # full manifest dump
 </code></pre>
 <h2>Flags</h2>
 <p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--json</code> | off | full manifest dump (recipe names, pack/index keys, signature mode, etc.) |</p>
@@ -191,7 +195,7 @@ kolm inspect redactor.kolm --json | jq &#39;.k_score&#39;
 </code></pre>
 <h2>Notes</h2>
 <p>Text mode is the default. <code>--json</code> keeps the old behavior for scripts that parse the full manifest.</p>
-<p><code>inspect</code> is a passive read of the artifact&#39;s manifest. For active chain verification (recompute CID, replay HMAC audit chain, check signatures and K-score gate) use <a href="/docs/cli/verify"><code>kolm verify</code></a> instead.</p>
+<p><code>inspect</code> is a passive read of the artifact&#39;s manifest. For active chain verification (recompute CID, replay Ed25519 audit chain, check signatures and K-score gate) use <a href="/docs/cli/verify"><code>kolm verify</code></a> instead.</p>
 <h2>See also</h2>
 <ul>
 <li><a href="/quickstart">Quickstart</a></li>
@@ -200,13 +204,13 @@ kolm inspect redactor.kolm --json | jq &#39;.k_score&#39;
 <li><a href="/docs/cli/artifacts">kolm artifacts</a> for the cloud-side list / show / diff</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

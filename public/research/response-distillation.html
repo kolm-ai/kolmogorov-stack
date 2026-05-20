@@ -4,21 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Response distillation &middot; KL the teacher into the student | kolm research</title>
-<meta name="description" content="Token-level response distillation by KL-matching teacher and student logits. Forward-KL, reverse-KL, and JSD objectives, temperature scaling, top-k logit pruning, on-policy sampling. The compression that gives Kolmogorov its name.">
+<title>Response distillation KL the teacher into the student | · kolm.ai</title>
+<meta name="description" content="Token-level response distillation by KL-matching teacher and student logits. Forward-KL, reverse-KL, and JSD objectives, temperature scaling, top-k logit...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Response distillation . kolm research">
-<meta property="og:description" content="KL-match teacher and student logits at every position. Forward-KL, reverse-KL, JSD, temperature scaling, top-k pruning.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Response distillation KL the teacher into the student | · kolm.ai">
+<meta property="og:description" content="Token-level response distillation by KL-matching teacher and student logits. Forward-KL, reverse-KL, and JSD objectives, temperature scaling, top-k logit...">
+<meta property="og:type" content="website">
 <meta property="article:published_time" content="2026-05-15">
 <meta property="article:author" content="Kolmogorov">
 <meta property="article:section" content="training">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Response distillation">
-<meta name="twitter:description" content="KL the teacher into the student, one token distribution at a time.">
+<meta name="twitter:title" content="Response distillation KL the teacher into the student | · kolm.ai">
+<meta name="twitter:description" content="Token-level response distillation by KL-matching teacher and student logits. Forward-KL, reverse-KL, and JSD objectives, temperature scaling, top-k logit...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/response-distillation">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,296 +27,298 @@
 <script src="/escape.js"></script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Response distillation: KL the teacher into the student",
-      "description": "Token-level response distillation in the kolm compile loop. Forward-KL, reverse-KL, and JSD objectives, temperature scaling, top-k logit pruning, on-policy sampling.",
-      "url": "https://kolm.ai/research/response-distillation",
-      "author": {"@type": "Organization", "name": "Kolmogorov"},
-      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
-      "datePublished": "2026-05-15",
-      "articleSection": "training",
-      "keywords": "knowledge distillation, KL divergence, teacher-student, response distillation, temperature scaling, on-policy distillation, MiniLLM",
-      "citation": [
-        "Hinton, Vinyals & Dean, 2015, arXiv:1503.02531 (soft labels)",
-        "Kim & Rush, 2016, arXiv:1606.07947 (sequence-level KD)",
-        "Gu et al, 2024, arXiv:2306.08543 (MiniLLM reverse-KL)",
-        "Agarwal et al, 2024, arXiv:2306.13649 (on-policy distillation)"
-      ],
-      "license": "https://creativecommons.org/licenses/by/4.0/"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "Response distillation", "item": "https://kolm.ai/research/response-distillation"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Response distillation: KL the teacher into the student",
+ "description": "Token-level response distillation in the kolm compile loop. Forward-KL, reverse-KL, and JSD objectives, temperature scaling, top-k logit pruning, on-policy sampling.",
+ "url": "https://kolm.ai/research/response-distillation",
+ "author": {"@type": "Organization", "name": "Kolmogorov"},
+ "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-15",
+ "articleSection": "training",
+ "keywords": "knowledge distillation, KL divergence, teacher-student, response distillation, temperature scaling, on-policy distillation, MiniLLM",
+ "citation": [
+ "Hinton, Vinyals & Dean, 2015, arXiv:1503.02531 (soft labels)",
+ "Kim & Rush, 2016, arXiv:1606.07947 (sequence-level KD)",
+ "Gu et al, 2024, arXiv:2306.08543 (MiniLLM reverse-KL)",
+ "Agarwal et al, 2024, arXiv:2306.13649 (on-policy distillation)"
+ ],
+ "license": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Response distillation", "item": "https://kolm.ai/research/response-distillation"}
+ ]
+ }
+ ]
 }
 </script>
 
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
-  a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
-  a:hover{border-bottom-color:var(--ink)}
-  .nb{border:0}
-  ::selection{background:rgba(236,231,220,0.30)}
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
-  @media(max-width:720px){.wrap{padding:0 20px}}
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){header.site .row{padding:0 20px}}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
-  header.site .brand span{font-weight:500;font-size:16px;letter-spacing:0}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500;border:0}
-  main{padding:80px 0 96px;flex:1}
-  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
-  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
-  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
-  h1{font-weight:500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
-  .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
-  h2{font-weight:500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
-  h3{font-weight:500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
-  p{color:var(--ink-mute);margin:0 0 14px}
-  p strong{color:var(--ink);font-weight:500}
-  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
-  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
-  ul li{margin:6px 0}
-  .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
-  .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
-  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-  .table th{font-weight:500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
-  .table tr:last-child td{border-bottom:0}
-  .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
-  .citations a{color:var(--ink-mute)}
-  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
-  footer a{color:var(--ink-mute);border:0}
-  footer a:hover{color:var(--ink)}
-  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
-  .footer-row a{color:inherit}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+ a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+ a:hover{border-bottom-color:var(--ink)}
+ .nb{border:0}
+ ::selection{background:rgba(236,231,220,0.30)}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.wrap{padding:0 20px}}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){header.site .row{padding:0 20px}}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+ header.site .brand span{font-weight:500;font-size:16px;letter-spacing:0}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site .right .ghost:hover{color:var(--ink)}
+ header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500;border:0}
+ main{padding:80px 0 96px;flex:1}
+ .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+ .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+ h1{font-weight:500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+ .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+ h2{font-weight:500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+ h3{font-weight:500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p strong{color:var(--ink);font-weight:500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+ ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+ ul li{margin:6px 0}
+ .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+ .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+ .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ .table th{font-weight:500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+ .table tr:last-child td{border-bottom:0}
+ .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+ .citations a{color:var(--ink-mute)}
+ footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+ footer a{color:var(--ink-mute);border:0}
+ footer a:hover{color:var(--ink)}
+ .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+ .footer-row a{color:inherit}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site">
-  <div class="row">
-    <div class="left">
-      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research" class="active">Research</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="row">
+ <div class="left">
+ <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research" class="active">Research</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main>
-  <div class="wrap">
-    <div class="hero-eyebrow"><span class="he-dot"></span>research . training . 10 min read</div>
-    <h1>Response distillation.</h1>
-    <p class="lede">Kolmogorov complexity is about compressing a string into the shortest program that emits it. Response distillation is the same idea for language models: compress a 14B teacher's behavior on the buyer's prompts into a 3B student that emits the same token distribution. The student is the artifact we sign and ship; the teacher never leaves the trainer.</p>
+<main id="main">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>research . training . 10 min read</div>
+ <h1>Response distillation.</h1>
+ <p class="lede">Kolmogorov complexity is about compressing a string into the shortest program that emits it. Response distillation is the same idea for language models: compress a 14B teacher's behavior on the buyer's prompts into a 3B student that emits the same token distribution. The student is the artifact we sign and ship; the teacher never leaves the trainer.</p>
 
-    <div class="meta-line">
-      <span>May 15, 2026</span>
-      <span>&middot;</span>
-      <span>Kolmogorov research</span>
-      <span>&middot;</span>
-      <span>apps/trainer/distill.py</span>
-    </div>
+ <div class="meta-line">
+ <span>May 15, 2026</span>
+ <span>&middot;</span>
+ <span>Kolmogorov research</span>
+ <span>&middot;</span>
+ <span>apps/trainer/distill.py</span>
+ </div>
 
-    <h2>The loss, in one line</h2>
+ <h2>The loss, in one line</h2>
 
-    <p>For every response position, the teacher produces a vocabulary-wide logit vector; the student produces its own. The distillation loss is the KL divergence between the two softmaxes, taken at a shared temperature <code>T</code>, scaled by <code>T<sup>2</sup></code> so the gradient magnitude does not shrink as <code>T</code> grows:</p>
+ <p>For every response position, the teacher produces a vocabulary-wide logit vector; the student produces its own. The distillation loss is the KL divergence between the two softmaxes, taken at a shared temperature <code>T</code>, scaled by <code>T<sup>2</sup></code> so the gradient magnitude does not shrink as <code>T</code> grows:</p>
 
-    <pre>L_kd = KL( softmax(s/T) || softmax(t/T) ) * T^2</pre>
+ <pre>L_kd = KL( softmax(s/T) || softmax(t/T) ) * T^2</pre>
 
-    <p>Plus a small cross-entropy term against the teacher's sampled token so the student also learns the surface form, not only the distribution shape:</p>
+ <p>Plus a small cross-entropy term against the teacher's sampled token so the student also learns the surface form, not only the distribution shape:</p>
 
-    <pre>L = &alpha; * L_kd + (1 - &alpha;) * L_ce</pre>
+ <pre>L = &alpha; * L_kd + (1 - &alpha;) * L_ce</pre>
 
-    <p>The standard recipe is <code>&alpha; = 0.9</code>, <code>T = 2.0</code>. The temperature has two roles. First it dampens the teacher's argmax so the student sees the second and third-most-likely tokens at every position; that is what Hinton called the &quot;dark knowledge&quot; the student would never see from sampled labels alone. Second it shapes the gradient magnitude; <code>T<sup>2</sup></code> is the chain-rule correction.</p>
+ <p>The standard recipe is <code>&alpha; = 0.9</code>, <code>T = 2.0</code>. The temperature has two roles. First it dampens the teacher's argmax so the student sees the second and third-most-likely tokens at every position; that is what Hinton called the &quot;dark knowledge&quot; the student would never see from sampled labels alone. Second it shapes the gradient magnitude; <code>T<sup>2</sup></code> is the chain-rule correction.</p>
 
-    <h2>Three objectives, three failure modes</h2>
+ <h2>Three objectives, three failure modes</h2>
 
-    <table class="table">
-      <thead><tr><th>Objective</th><th>What it minimizes</th><th>When it fails</th></tr></thead>
-      <tbody>
-        <tr><td>Forward KL</td><td><code>KL(s || t)</code>: the student tries to cover all the teacher's mass</td><td>Student spreads probability across modes the teacher rejects (the &quot;mean-seeking&quot; mode)</td></tr>
-        <tr><td>Reverse KL</td><td><code>KL(t || s)</code>: the student concentrates on what the teacher likes most (MiniLLM)</td><td>Student becomes overconfident; misses minority but valid alternatives</td></tr>
-        <tr><td>JSD</td><td>Symmetric mixture: <code>0.5*KL(s||m) + 0.5*KL(t||m)</code></td><td>Most expensive of the three; bounded loss so gradients soften far from the teacher</td></tr>
-      </tbody>
-    </table>
+ <table class="table">
+ <thead><tr><th>Objective</th><th>What it minimizes</th><th>When it fails</th></tr></thead>
+ <tbody>
+ <tr><td>Forward KL</td><td><code>KL(s || t)</code>: the student tries to cover all the teacher's mass</td><td>Student spreads probability across modes the teacher rejects (the &quot;mean-seeking&quot; mode)</td></tr>
+ <tr><td>Reverse KL</td><td><code>KL(t || s)</code>: the student concentrates on what the teacher likes most (MiniLLM)</td><td>Student becomes overconfident; misses minority but valid alternatives</td></tr>
+ <tr><td>JSD</td><td>Symmetric mixture: <code>0.5*KL(s||m) + 0.5*KL(t||m)</code></td><td>Most expensive of the three; bounded loss so gradients soften far from the teacher</td></tr>
+ </tbody>
+ </table>
 
-    <p>The default in <code>apps/trainer/distill.py</code> is forward-KL, but the buyer's spec can request reverse-KL when the task admits one good answer and many wrong ones (PHI redaction, single-label classification), and JSD when the policy needs to remain calibrated for downstream best-of-N selection.</p>
+ <p>The default in <code>apps/trainer/distill.py</code> is forward-KL, but the buyer's spec can request reverse-KL when the task admits one good answer and many wrong ones (PHI redaction, single-label classification), and JSD when the policy needs to remain calibrated for downstream best-of-N selection.</p>
 
-    <h2>The top-k logit-pruning trick</h2>
+ <h2>The top-k logit-pruning trick</h2>
 
-    <p>A full vocabulary KL is <code>(B, T, V)</code> shaped; for Qwen-class tokenizers <code>V &asymp; 152K</code> and the activation memory dominates the GPU. The pruning trick: keep only the top-k teacher tokens (by teacher probability) and aggregate the rest into a single &quot;other&quot; bucket via <code>logsumexp</code> on both sides:</p>
+ <p>A full vocabulary KL is <code>(B, T, V)</code> shaped; for Qwen-class tokenizers <code>V &asymp; 152K</code> and the activation memory dominates the GPU. The pruning trick: keep only the top-k teacher tokens (by teacher probability) and aggregate the rest into a single &quot;other&quot; bucket via <code>logsumexp</code> on both sides:</p>
 
-    <pre>def topk_prune(s_logits, t_logits, k):
-    _, idx = torch.topk(t_logits, k=k, dim=-1)
-    t_top = t_logits.gather(-1, idx); s_top = s_logits.gather(-1, idx)
-    mask = torch.ones_like(t_logits, dtype=torch.bool)
-    mask.scatter_(-1, idx, False)
-    t_other = t_logits.masked_fill(~mask, -inf).logsumexp(-1, keepdim=True)
-    s_other = s_logits.masked_fill(~mask, -inf).logsumexp(-1, keepdim=True)
-    return cat([s_top, s_other], -1), cat([t_top, t_other], -1)</pre>
+ <pre>def topk_prune(s_logits, t_logits, k):
+ _, idx = torch.topk(t_logits, k=k, dim=-1)
+ t_top = t_logits.gather(-1, idx); s_top = s_logits.gather(-1, idx)
+ mask = torch.ones_like(t_logits, dtype=torch.bool)
+ mask.scatter_(-1, idx, False)
+ t_other = t_logits.masked_fill(~mask, -inf).logsumexp(-1, keepdim=True)
+ s_other = s_logits.masked_fill(~mask, -inf).logsumexp(-1, keepdim=True)
+ return cat([s_top, s_other], -1), cat([t_top, t_other], -1)</pre>
 
-    <p>For <code>k = 64</code> on a 152K-token vocabulary the memory drop is &asymp; 2000x; the quality drop is in the third decimal place of the held-out perplexity. Worth it for any teacher larger than the student's VRAM.</p>
+ <p>For <code>k = 64</code> on a 152K-token vocabulary the memory drop is &asymp; 2000x; the quality drop is in the third decimal place of the held-out perplexity. Worth it for any teacher larger than the student's VRAM.</p>
 
-    <h2>Off-policy versus on-policy</h2>
+ <h2>Off-policy versus on-policy</h2>
 
-    <p>Off-policy distillation: the teacher's response (or a captured ground-truth response) is the target sequence; the student's gradients are computed on tokens it did not generate. Cheap because the teacher runs once per row at data-preparation time.</p>
+ <p>Off-policy distillation: the teacher's response (or a captured ground-truth response) is the target sequence; the student's gradients are computed on tokens it did not generate. Cheap because the teacher runs once per row at data-preparation time.</p>
 
-    <p>On-policy distillation (Agarwal 2024): sample the response from the <em>student</em>, then compute the loss between the student's logits and the teacher's logits at the student's positions. Double the forward-pass cost (teacher + student each run on every batch), but resolves the well-known &quot;train/test mismatch&quot; problem where the student is taught on sequences it would never generate. Agarwal shows the on-policy variant beats off-policy by 1-3 points on MMLU for student-teacher gaps larger than 5x.</p>
+ <p>On-policy distillation (Agarwal 2024): sample the response from the <em>student</em>, then compute the loss between the student's logits and the teacher's logits at the student's positions. Double the forward-pass cost (teacher + student each run on every batch), but resolves the well-known &quot;train/test mismatch&quot; problem where the student is taught on sequences it would never generate. Agarwal shows the on-policy variant beats off-policy by 1-3 points on MMLU for student-teacher gaps larger than 5x.</p>
 
-    <p>kolm exposes the choice as <code>DistillConfig.on_policy</code>; the default is off-policy because the typical kolm buyer has a 14B&rarr;3B gap (2-3x) where the lift is small and the doubled cost is not worth it. Buyers with cross-family teachers (e.g. distilling a 70B Llama into a 3B Qwen) should enable on-policy.</p>
+ <p>kolm exposes the choice as <code>DistillConfig.on_policy</code>; the default is off-policy because the typical kolm buyer has a 14B&rarr;3B gap (2-3x) where the lift is small and the doubled cost is not worth it. Buyers with cross-family teachers (e.g. distilling a 70B Llama into a 3B Qwen) should enable on-policy.</p>
 
-    <h2>Why same-family tokenizers</h2>
+ <h2>Why same-family tokenizers</h2>
 
-    <p>Token-level KD requires the teacher and student to share a vocabulary. If they do not, position <code>i</code> in the teacher's logit vector does not correspond to position <code>i</code> in the student's, and the KL is undefined. <code>apps/trainer/distill.py</code> raises explicitly if the tokenizers diverge: <em>&quot;teacher and student tokenizers must share a vocabulary for token-level KD.&quot;</em></p>
+ <p>Token-level KD requires the teacher and student to share a vocabulary. If they do not, position <code>i</code> in the teacher's logit vector does not correspond to position <code>i</code> in the student's, and the KL is undefined. <code>apps/trainer/distill.py</code> raises explicitly if the tokenizers diverge: <em>&quot;teacher and student tokenizers must share a vocabulary for token-level KD.&quot;</em></p>
 
-    <p>For cross-family distillation, the alternative is sequence-level KD (Kim &amp; Rush 2016): the teacher's argmax becomes the student's training target, no logit matching, no shared vocab requirement. This collapses to plain SFT-on-teacher-outputs, which is also a valid path through <code>apps/trainer/trainer_real.py</code>. The trade-off: token-level KD captures the &quot;dark knowledge&quot;; sequence-level does not.</p>
+ <p>For cross-family distillation, the alternative is sequence-level KD (Kim &amp; Rush 2016): the teacher's argmax becomes the student's training target, no logit matching, no shared vocab requirement. This collapses to plain SFT-on-teacher-outputs, which is also a valid path through <code>apps/trainer/trainer_real.py</code>. The trade-off: token-level KD captures the &quot;dark knowledge&quot;; sequence-level does not.</p>
 
-    <h2>What ships</h2>
+ <h2>What ships</h2>
 
-    <p>A distilled student is the same shape as any other kolm artifact: a base-model pointer (the small one), a LoRA adapter trained against the teacher, a manifest, a receipt, a CID. The teacher is not embedded; it is referenced by its own CID in the manifest so a reviewer can re-fetch the teacher and re-run a held-out KL check. The student artifact is what gets signed, what gets gated by the K-score, what gets aliased by the runtime, and what ships to production.</p>
+ <p>A distilled student is the same shape as any other kolm artifact: a base-model pointer (the small one), a LoRA adapter trained against the teacher, a manifest, a receipt, a CID. The teacher is not embedded; it is referenced by its own CID in the manifest so a reviewer can re-fetch the teacher and re-run a held-out KL check. The student artifact is what gets signed, what gets gated by the K-score, what gets aliased by the runtime, and what ships to production.</p>
 
-    <h2>What the receipt records</h2>
+ <h2>What the receipt records</h2>
 
-    <pre>"distill": {
-  "method": "kd_response_distillation",
-  "teacher_model": "Qwen/Qwen2.5-14B-Instruct",
-  "student_model": "Qwen/Qwen2.5-3B-Instruct",
-  "config": {
-    "temperature": 2.0,
-    "alpha": 0.9,
-    "objective": "forward_kl",
-    "top_k": 64,
-    "on_policy": false,
-    "lora_r": 16,
-    "lora_alpha": 32
-  },
-  "n_train_rows": 8200,
-  "n_eval_rows": 432,
-  "loss_final": 0.184,
-  "ppl_eval": 6.21,
-  "papers": [
-    "arXiv:1503.02531",
-    "arXiv:1606.07947",
-    "arXiv:2306.08543",
-    "arXiv:2306.13649"
-  ]
+ <pre>"distill": {
+ "method": "kd_response_distillation",
+ "teacher_model": "Qwen/Qwen2.5-14B-Instruct",
+ "student_model": "Qwen/Qwen2.5-3B-Instruct",
+ "config": {
+ "temperature": 2.0,
+ "alpha": 0.9,
+ "objective": "forward_kl",
+ "top_k": 64,
+ "on_policy": false,
+ "lora_r": 16,
+ "lora_alpha": 32
+ },
+ "n_train_rows": 8200,
+ "n_eval_rows": 432,
+ "loss_final": 0.184,
+ "ppl_eval": 6.21,
+ "papers": [
+ "arXiv:1503.02531",
+ "arXiv:1606.07947",
+ "arXiv:2306.08543",
+ "arXiv:2306.13649"
+ ]
 }</pre>
 
-    <p>The buyer's auditor can re-fetch both models by Hub id, replay the held-out rows, and recompute <code>ppl_eval</code> within float-noise of the receipt. The canonical-JSON manifest covers the block; a tampered receipt invalidates the artifact signature.</p>
+ <p>The buyer's auditor can re-fetch both models by Hub id, replay the held-out rows, and recompute <code>ppl_eval</code> within float-noise of the receipt. The canonical-JSON manifest covers the block; a tampered receipt invalidates the artifact signature.</p>
 
-    <h2>Edge cases worth naming</h2>
+ <h2>Edge cases worth naming</h2>
 
-    <p><strong>Capacity gap.</strong> A 3B student cannot perfectly imitate a 70B teacher; some teacher predictions live on capabilities the student lacks. The held-out KL plateaus above zero. The fix is not more training; it is either a bigger student, a narrower training distribution (fewer modes to compress), or an on-policy switch so the student is taught only on its own reachable trajectories.</p>
+ <p><strong>Capacity gap.</strong> A 3B student cannot perfectly imitate a 70B teacher; some teacher predictions live on capabilities the student lacks. The held-out KL plateaus above zero. The fix is not more training; it is either a bigger student, a narrower training distribution (fewer modes to compress), or an on-policy switch so the student is taught only on its own reachable trajectories.</p>
 
-    <p><strong>Teacher hallucinations.</strong> The student perfectly imitates whatever the teacher does, including the teacher's confident errors. A reward-model gate (<a href="/research/reward-modeling">apps/trainer/reward.py</a>) after distillation filters student responses that score low under an independent judge; alternatively, a verifiable check at the K-score gate catches the hallucination class the buyer cares about most.</p>
+ <p><strong>Teacher hallucinations.</strong> The student perfectly imitates whatever the teacher does, including the teacher's confident errors. A reward-model gate (<a href="/research/reward-modeling">apps/trainer/reward.py</a>) after distillation filters student responses that score low under an independent judge; alternatively, a verifiable check at the K-score gate catches the hallucination class the buyer cares about most.</p>
 
-    <p><strong>Numerical instability at small T.</strong> Temperatures below 1.0 make the softmax peaky and the gradient large; loss spikes and the training run NaNs. Stay above 1.5 unless a held-out perplexity sweep shows otherwise.</p>
+ <p><strong>Numerical instability at small T.</strong> Temperatures below 1.0 make the softmax peaky and the gradient large; loss spikes and the training run NaNs. Stay above 1.5 unless a held-out perplexity sweep shows otherwise.</p>
 
-    <p><strong>Length bias.</strong> Longer responses contribute more positions to the loss, so the gradient is biased toward long-target behavior. We mean-reduce over response positions to flatten this; the alternative (sum-reduce) is what some early KD papers used and what makes some recipes mysteriously prefer terse responses.</p>
+ <p><strong>Length bias.</strong> Longer responses contribute more positions to the loss, so the gradient is biased toward long-target behavior. We mean-reduce over response positions to flatten this; the alternative (sum-reduce) is what some early KD papers used and what makes some recipes mysteriously prefer terse responses.</p>
 
-    <h2>Where this fits in the kolm compile loop</h2>
+ <h2>Where this fits in the kolm compile loop</h2>
 
-    <p>The standard pipeline is <code>capture &rarr; (distill | SFT) &rarr; (preference) &rarr; (GRPO) &rarr; K-score gate &rarr; sign &rarr; ship</code>. Response distillation replaces or augments the SFT stage when a strong frontier teacher is available and the buyer's deployment target is much smaller than that teacher. The downstream stages are unchanged; the K-score gate sees only the student's output and does not care whether the student learned from labels or from teacher logits.</p>
+ <p>The standard pipeline is <code>capture &rarr; (distill | SFT) &rarr; (preference) &rarr; (GRPO) &rarr; K-score gate &rarr; sign &rarr; ship</code>. Response distillation replaces or augments the SFT stage when a strong frontier teacher is available and the buyer's deployment target is much smaller than that teacher. The downstream stages are unchanged; the K-score gate sees only the student's output and does not care whether the student learned from labels or from teacher logits.</p>
 
-    <div class="citations">
-      <p><strong>Citations</strong></p>
-      <p>Hinton, G., Vinyals, O. &amp; Dean, J. <em>Distilling the Knowledge in a Neural Network</em>. arXiv:1503.02531, 2015. The original soft-labels recipe and the <code>T<sup>2</sup></code> chain-rule scaling.</p>
-      <p>Kim, Y. &amp; Rush, A. M. <em>Sequence-Level Knowledge Distillation</em>. arXiv:1606.07947, 2016. The sequence-level variant; teacher's argmax becomes the student's target.</p>
-      <p>Gu, Y. et al. <em>MiniLLM: Knowledge Distillation of Large Language Models</em>. arXiv:2306.08543, 2024. The reverse-KL formulation; keeps the student from spreading mass.</p>
-      <p>Agarwal, R. et al. <em>On-Policy Distillation of Language Models</em>. arXiv:2306.13649, 2024. Why training on the student's own samples beats training on the teacher's when the gap is large.</p>
-      <p>Gou, J. et al. <em>Knowledge Distillation: A Survey</em>. arXiv:2006.05525, 2021. The reference review covering offline, online, and self-distillation variants.</p>
-    </div>
+ <div class="citations">
+ <p><strong>Citations</strong></p>
+ <p>Hinton, G., Vinyals, O. &amp; Dean, J. <em>Distilling the Knowledge in a Neural Network</em>. arXiv:1503.02531, 2015. The original soft-labels recipe and the <code>T<sup>2</sup></code> chain-rule scaling.</p>
+ <p>Kim, Y. &amp; Rush, A. M. <em>Sequence-Level Knowledge Distillation</em>. arXiv:1606.07947, 2016. The sequence-level variant; teacher's argmax becomes the student's target.</p>
+ <p>Gu, Y. et al. <em>MiniLLM: Knowledge Distillation of Large Language Models</em>. arXiv:2306.08543, 2024. The reverse-KL formulation; keeps the student from spreading mass.</p>
+ <p>Agarwal, R. et al. <em>On-Policy Distillation of Language Models</em>. arXiv:2306.13649, 2024. Why training on the student's own samples beats training on the teacher's when the gap is large.</p>
+ <p>Gou, J. et al. <em>Knowledge Distillation: A Survey</em>. arXiv:2006.05525, 2021. The reference review covering offline, online, and self-distillation variants.</p>
+ </div>
 
-    <div class="meta-line" style="margin-top:36px">
-      <a class="nb" href="/research">&larr; Back to research</a>
-      <span>&middot;</span>
-      <a class="nb" href="/research#distillation">Frontier reference &middot; Response distillation</a>
-      <span>&middot;</span>
-      <a class="nb" href="/spec">RS-1 spec</a>
-    </div>
-  </div>
+ <div class="meta-line" style="margin-top:36px">
+ <a class="nb" href="/research">&larr; Back to research</a>
+ <span>&middot;</span>
+ <a class="nb" href="/research#distillation">Frontier reference &middot; Response distillation</a>
+ <span>&middot;</span>
+ <a class="nb" href="/spec">RS-1 spec</a>
+ </div>
+ </div>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 <script src="/nav.js"></script>
 </body>

@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Receipt chains: cryptographic provenance for fine-tuned models &middot; kolm research</title>
-<meta name="description" content="The five-step HMAC receipt chain that binds a fine-tuned model to the task, data, recipes, and evals it was built from. Canonical JSON, CID, TEE attestation, the Rust verifier, and a TOFU model for offline verification.">
+<title>Receipt chains: cryptographic provenance for fine-tuned · kolm.ai</title>
+<meta name="description" content="The five-step HMAC receipt chain that binds a fine-tuned model to the task, data, recipes, and evals it was built from. Canonical JSON, CID, TEE...">
 <meta name="keywords" content="receipt chain, HMAC, canonical JSON, CID, TEE attestation, model provenance, .kolm, verifier">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -14,12 +14,12 @@
 <meta name="author" content="kolm">
 <meta name="robots" content="index,follow,max-snippet:-1">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="Receipt chains: cryptographic provenance for fine-tuned models">
-<meta property="og:description" content="Five HMAC steps, one canonical JSON, one CID, one optional TEE binding. The whole chain re-verifies offline.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Receipt chains: cryptographic provenance for fine-tuned · kolm.ai">
+<meta property="og:description" content="The five-step HMAC receipt chain that binds a fine-tuned model to the task, data, recipes, and evals it was built from. Canonical JSON, CID, TEE...">
+<meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Receipt chains: cryptographic provenance for fine-tuned models">
-<meta name="twitter:description" content="Five HMAC steps, one canonical JSON, one CID, one optional TEE binding.">
+<meta name="twitter:title" content="Receipt chains: cryptographic provenance for fine-tuned · kolm.ai">
+<meta name="twitter:description" content="The five-step HMAC receipt chain that binds a fine-tuned model to the task, data, recipes, and evals it was built from. Canonical JSON, CID, TEE...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/receipt-chains">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,367 +27,368 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Receipt chains: cryptographic provenance for fine-tuned models",
-      "description": "The receipt chain that binds a fine-tuned model to the data and code it came from. Canonical JSON, CID, TEE attestation, the Rust verifier.",
-      "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
-      "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
-      "datePublished": "2026-05-14",
-      "dateModified": "2026-05-14",
-      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/receipt-chains" },
-      "image": "https://kolm.ai/og-card.svg",
-      "keywords": "receipt chain, HMAC, canonical JSON, CID, TEE attestation",
-      "articleSection": "Verification",
-      "wordCount": 2000
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "Receipt chains", "item": "https://kolm.ai/research/receipt-chains"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Receipt chains: cryptographic provenance for fine-tuned models",
+ "description": "The receipt chain that binds a fine-tuned model to the data and code it came from. Canonical JSON, CID, TEE attestation, the Rust verifier.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/receipt-chains" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "receipt chain, HMAC, canonical JSON, CID, TEE attestation",
+ "articleSection": "Verification",
+ "wordCount": 2000
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Receipt chains", "item": "https://kolm.ai/research/receipt-chains"}
+ ]
+ }
+ ]
 }
 </script>
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
-  a{color:inherit;text-decoration:none}
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px}
-  .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
-  header.site .brand span{font-weight:500;font-size:16px}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
-  header.site nav a:hover{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
-  header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
-  @media(max-width:720px){header.site nav{display:none}}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
 
-  section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
-  section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
-  section.hero .wrap{position:relative}
-  .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
-  .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
-  h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
-  h1 .tone{color:#10b981}
-  p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
-  p.lede b{color:var(--ink);font-weight:500}
-  .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .meta b{color:var(--ink-mute);font-weight:500}
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
 
-  article{padding:36px 0 96px}
-  article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
-  article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
-  article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
-  article p b{color:var(--ink);font-weight:500}
-  article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
-  article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
-  article blockquote p{color:var(--ink);margin:0;font-weight:500}
-  article ul{padding-left:0;list-style:none;margin:16px 0 24px}
-  article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
-  article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
-  article ul li b{color:var(--ink);font-weight:500}
-  article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
-  article pre .com{color:var(--ink-faint)}
-  article pre .arg{color:#10b981}
-  article pre .kw{color:#b0bbff}
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
 
-  .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
-  .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
-  .toc ol{margin:0;padding-left:20px}
-  .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
-  .toc li a{color:var(--ink-mute)}
-  .toc li a:hover{color:#10b981}
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
 
-  .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
-  @media(max-width:720px){.signpost{grid-template-columns:1fr}}
-  .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
-  .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
-  .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
-  .signpost a .v .arrow{color:#10b981;margin-left:6px}
-  .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
 
-  footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
-  footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <span class="pill"><span class="dot"></span>Research &middot; Verification &middot; 2026-05-14 &middot; 12 min read</span>
-    <h1>Receipt chains for <span class="tone">fine-tuned models.</span></h1>
-    <p class="lede">A fine-tune is a function of code, data, and a base model. <b>The receipt chain is the proof that the artifact in your hand is that exact function.</b> Five HMAC steps over canonical JSON, one content identifier, one optional TEE binding, one Rust verifier you can run offline.</p>
-    <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;provenance &middot; cryptography &middot; spec</span></div>
-  </div>
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; Verification &middot; 2026-05-14 &middot; 12 min read</span>
+ <h1>Receipt chains for <span class="tone">fine-tuned models.</span></h1>
+ <p class="lede">A fine-tune is a function of code, data, and a base model. <b>The receipt chain is the proof that the artifact in your hand is that exact function.</b> Five HMAC steps over canonical JSON, one content identifier, one optional TEE binding, one Rust verifier you can run offline.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;provenance &middot; cryptography &middot; spec</span></div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="toc">
-      <h5>Contents</h5>
-      <ol>
-        <li><a href="#problem">The provenance problem</a></li>
-        <li><a href="#chain">The five-step chain</a></li>
-        <li><a href="#canonical">Canonical JSON</a></li>
-        <li><a href="#cid">The content identifier</a></li>
-        <li><a href="#tee">TEE attestation as an optional binding</a></li>
-        <li><a href="#verifier">The Rust verifier</a></li>
-        <li><a href="#tofu">TOFU and offline verification</a></li>
-      </ol>
-    </div>
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#problem">The provenance problem</a></li>
+ <li><a href="#chain">The five-step chain</a></li>
+ <li><a href="#canonical">Canonical JSON</a></li>
+ <li><a href="#cid">The content identifier</a></li>
+ <li><a href="#tee">TEE attestation as an optional binding</a></li>
+ <li><a href="#verifier">The Rust verifier</a></li>
+ <li><a href="#tofu">TOFU and offline verification</a></li>
+ </ol>
+ </div>
 
-    <h2 id="problem">The provenance problem.</h2>
-    <p>You hand a fine-tuned model to a regulator. They ask three questions. What data trained it. What code produced it. What base model it descended from. The evidenced answer for most production fine-tunes today is a Slack thread, a Notion page, and a hope that the engineer who ran the job has not switched companies. The model itself is a tarball of weights with a filename and no embedded provenance.</p>
-    <p>A receipt chain solves this at the artifact layer. <b>Every <code>.kolm</code> file carries an in-band proof of how it was built, signed under a tenant key, verifiable from the bytes alone.</b> No network call. No registry lookup. No trust in our continued existence. The verifier is open-source Rust; you can vendor it, embed it, and run it in an air-gapped network.</p>
+ <h2 id="problem">The provenance problem.</h2>
+ <p>You hand a fine-tuned model to a regulator. They ask three questions. What data trained it. What code produced it. What base model it descended from. The evidenced answer for most production fine-tunes today is a Slack thread, a Notion page, and a hope that the engineer who ran the job has not switched companies. The model itself is a tarball of weights with a filename and no embedded provenance.</p>
+ <p>A receipt chain solves this at the artifact layer. <b>Every <code>.kolm</code> file carries an in-band proof of how it was built, signed under a tenant key, verifiable from the bytes alone.</b> No network call. No registry lookup. No trust in our continued existence. The verifier is open-source Rust; you can vendor it, embed it, and run it in an air-gapped network.</p>
 
-    <h2 id="chain">The five-step chain.</h2>
-    <p>The chain is a sequence of five HMAC seals. Each step hashes a canonical-JSON envelope over <code>(step, input_hash, output_hash)</code> and HMACs the result under the tenant receipt secret. The previous step's <code>output_hash</code> is the next step's <code>input_hash</code>; a single mutation anywhere in the build pipeline produces a different chain.</p>
+ <h2 id="chain">The five-step chain.</h2>
+ <p>The chain is a sequence of five HMAC seals. Each step hashes a canonical-JSON envelope over <code>(step, input_hash, output_hash)</code> and HMACs the result under the tenant receipt secret. The previous step's <code>output_hash</code> is the next step's <code>input_hash</code>; a single mutation anywhere in the build pipeline produces a different chain.</p>
 
-    <pre><span class="kw">step 1</span>  task     spec_hash         &rarr;  task_hash
-<span class="kw">step 2</span>  seeds    task_hash         &rarr;  training_stats_hash
-<span class="kw">step 3</span>  recipes  training_stats_hash &rarr; recipes_hash
-<span class="kw">step 4</span>  evals    recipes_hash      &rarr;  eval_set_hash
-<span class="kw">step 5</span>  package  eval_set_hash     &rarr;  artifact_hash</pre>
+ <pre><span class="kw">step 1</span> task spec_hash &rarr; task_hash
+<span class="kw">step 2</span> seeds task_hash &rarr; training_stats_hash
+<span class="kw">step 3</span> recipes training_stats_hash &rarr; recipes_hash
+<span class="kw">step 4</span> evals recipes_hash &rarr; eval_set_hash
+<span class="kw">step 5</span> package eval_set_hash &rarr; artifact_hash</pre>
 
-    <p>Each <code>output_hash</code> is a sha256 over canonical-JSON of the corresponding input. The <code>spec_hash</code> is over the static artifact specification version (so a future format break invalidates old chains). The <code>task_hash</code> is over the user-supplied task description. The <code>training_stats_hash</code> is over the run-level metrics the trainer emitted. The <code>recipes_hash</code> is over the deterministic recipe registry the compiler synthesized. The <code>eval_set_hash</code> is over the held-out cases the K-score was computed against. The <code>artifact_hash</code> is over the canonical join of every emitted file's sha256.</p>
+ <p>Each <code>output_hash</code> is a sha256 over canonical-JSON of the corresponding input. The <code>spec_hash</code> is over the static artifact specification version (so a future format break invalidates old chains). The <code>task_hash</code> is over the user-supplied task description. The <code>training_stats_hash</code> is over the run-level metrics the trainer emitted. The <code>recipes_hash</code> is over the deterministic recipe registry the compiler synthesized. The <code>eval_set_hash</code> is over the held-out cases the K-score was computed against. The <code>artifact_hash</code> is over the canonical join of every emitted file's sha256.</p>
 
-    <p><b>Waves 164-167 extend the chain.</b> The original five-step ladder is unchanged; four additional optional blocks now bind into <code>artifact_hash_input</code> alongside the receipt body: <b>external + adversarial holdouts</b> (RS-1 &sect;7.12, R-axis, shipped wave 164), <b>tenant shadow corpus</b> (&sect;7.13, residency-preserving, wave 165), <b>third-party auditor attestation</b> (&sect;7.14, independent co-signer, wave 166), and <b>drift detection + supersession chain</b> (&sect;7.15, M+3/M+4 lifecycle tiers, wave 167). Verifier checks #20-#24 enforce the new blocks; receipts written before wave 164 still verify because each block is optional and absence is canonical. See <a href="/drift" style="color:#10b981">/drift</a> for the lifecycle ladder and <a href="/spec/rs-1" style="color:#10b981">/spec/rs-1</a> for the per-section schema.</p>
+ <p><b>Waves 164-167 extend the chain.</b> The original five-step ladder is unchanged; four additional optional blocks now bind into <code>artifact_hash_input</code> alongside the receipt body: <b>external + adversarial holdouts</b> (RS-1 &sect;7.12, R-axis, shipped wave 164), <b>tenant shadow corpus</b> (&sect;7.13, residency-preserving, wave 165), <b>third-party auditor attestation</b> (&sect;7.14, independent co-signer, wave 166), and <b>drift detection + supersession chain</b> (&sect;7.15, M+3/M+4 lifecycle tiers, wave 167). Verifier checks #20-#24 enforce the new blocks; receipts written before wave 164 still verify because each block is optional and absence is canonical. See <a href="/drift" style="color:#10b981">/drift</a> for the lifecycle ladder and <a href="/spec/rs-1" style="color:#10b981">/spec/rs-1</a> for the per-section schema.</p>
 
-    <p>The Node reference implementation is short:</p>
+ <p>The Node reference implementation is short:</p>
 
-    <pre><span class="com">// src/artifact.js</span>
+ <pre><span class="com">// src/artifact.js</span>
 <span class="kw">const</span> stepSeal = (step, input_hash, output_hash) =&gt; {
-  <span class="kw">const</span> hmac = crypto.createHmac(<span class="arg">'sha256'</span>, secret)
-    .update(canonicalJson({ step, input_hash, output_hash }))
-    .digest(<span class="arg">'hex'</span>);
-  <span class="kw">return</span> { step, input_hash, output_hash, hmac };
+ <span class="kw">const</span> hmac = crypto.createHmac(<span class="arg">'sha256'</span>, secret)
+ .update(canonicalJson({ step, input_hash, output_hash }))
+ .digest(<span class="arg">'hex'</span>);
+ <span class="kw">return</span> { step, input_hash, output_hash, hmac };
 };
 
 <span class="kw">const</span> chain = [
-  stepSeal(<span class="arg">'task'</span>,    sha256(canonicalJson({ spec: ARTIFACT_SPEC })), taskHash),
-  stepSeal(<span class="arg">'seeds'</span>,   taskHash,    seedsHash),
-  stepSeal(<span class="arg">'recipes'</span>, seedsHash,   recipesHash),
-  stepSeal(<span class="arg">'evals'</span>,   recipesHash, evalsHash),
-  stepSeal(<span class="arg">'package'</span>, evalsHash,   artifact_hash),
+ stepSeal(<span class="arg">'task'</span>, sha256(canonicalJson({ spec: ARTIFACT_SPEC })), taskHash),
+ stepSeal(<span class="arg">'seeds'</span>, taskHash, seedsHash),
+ stepSeal(<span class="arg">'recipes'</span>, seedsHash, recipesHash),
+ stepSeal(<span class="arg">'evals'</span>, recipesHash, evalsHash),
+ stepSeal(<span class="arg">'package'</span>, evalsHash, artifact_hash),
 ];</pre>
 
-    <p>The whole chain plus the body of the receipt is then sealed under one final HMAC, the receipt body signature. A verifier walks the chain forward (every step's <code>hmac</code> must reproduce under the secret), confirms the linkage between steps (each step's <code>input_hash</code> equals the previous step's <code>output_hash</code>), and re-verifies the body HMAC over the canonical-JSON of the receipt body.</p>
+ <p>The whole chain plus the body of the receipt is then sealed under one final HMAC, the receipt body signature. A verifier walks the chain forward (every step's <code>hmac</code> must reproduce under the secret), confirms the linkage between steps (each step's <code>input_hash</code> equals the previous step's <code>output_hash</code>), and re-verifies the body HMAC over the canonical-JSON of the receipt body.</p>
 
-    <blockquote>
-      <p>The chain is not a Merkle tree. It is a linear hash ladder. The trade is simpler verification at the cost of one extra hash per step. For five steps this is free; for fifty steps it would not be.</p>
-    </blockquote>
+ <blockquote>
+ <p>The chain is not a Merkle tree. It is a linear hash ladder. The trade is simpler verification at the cost of one extra hash per step. For five steps this is free; for fifty steps it would not be.</p>
+ </blockquote>
 
-    <h2 id="canonical">Canonical JSON.</h2>
-    <p>The hardest bug in any cross-language verifier is JSON serialization drift. Two implementations that produce semantically identical JSON but format it differently produce different sha256 hashes and a <code>hmac mismatch</code> failure that is excruciating to debug. The fix is canonical JSON: a deterministic serialization with sorted keys and no whitespace.</p>
+ <h2 id="canonical">Canonical JSON.</h2>
+ <p>The hardest bug in any cross-language verifier is JSON serialization drift. Two implementations that produce semantically identical JSON but format it differently produce different sha256 hashes and a <code>hmac mismatch</code> failure that is excruciating to debug. The fix is canonical JSON: a deterministic serialization with sorted keys and no whitespace.</p>
 
-    <p>The kolm canonical form is short enough to memorize:</p>
+ <p>The kolm canonical form is short enough to memorize:</p>
 
-    <pre><span class="com">// src/artifact.js</span>
+ <pre><span class="com">// src/artifact.js</span>
 <span class="kw">function</span> canonicalJson(v) {
-  <span class="kw">if</span> (v === <span class="arg">null</span> || <span class="kw">typeof</span> v !== <span class="arg">'object'</span>) <span class="kw">return</span> JSON.stringify(v);
-  <span class="kw">if</span> (Array.isArray(v)) <span class="kw">return</span> <span class="arg">'['</span> + v.map(canonicalJson).join(<span class="arg">','</span>) + <span class="arg">']'</span>;
-  <span class="kw">const</span> k = Object.keys(v).sort();
-  <span class="kw">return</span> <span class="arg">'{'</span> + k.map(x =&gt; JSON.stringify(x) + <span class="arg">':'</span> + canonicalJson(v[x])).join(<span class="arg">','</span>) + <span class="arg">'}'</span>;
+ <span class="kw">if</span> (v === <span class="arg">null</span> || <span class="kw">typeof</span> v !== <span class="arg">'object'</span>) <span class="kw">return</span> JSON.stringify(v);
+ <span class="kw">if</span> (Array.isArray(v)) <span class="kw">return</span> <span class="arg">'['</span> + v.map(canonicalJson).join(<span class="arg">','</span>) + <span class="arg">']'</span>;
+ <span class="kw">const</span> k = Object.keys(v).sort();
+ <span class="kw">return</span> <span class="arg">'{'</span> + k.map(x =&gt; JSON.stringify(x) + <span class="arg">':'</span> + canonicalJson(v[x])).join(<span class="arg">','</span>) + <span class="arg">'}'</span>;
 }</pre>
 
-    <p>Three rules. Scalars use the host language's default JSON serializer. Arrays recurse element-by-element with no whitespace. Objects sort keys lexicographically, then recurse. The Rust verifier in <code>packages/runtime-rs/</code> implements the same function on the same rule set; the Python reference in <code>apps/trainer/</code> matches; an Ed25519 verifier we are sketching follows the same canonical form.</p>
+ <p>Three rules. Scalars use the host language's default JSON serializer. Arrays recurse element-by-element with no whitespace. Objects sort keys lexicographically, then recurse. The Rust verifier in <code>packages/runtime-rs/</code> implements the same function on the same rule set; the Python reference in <code>apps/trainer/</code> matches; an Ed25519 verifier we are sketching follows the same canonical form.</p>
 
-    <p>The subtle bug we fixed during the infra wave was a missing array recursion. A first implementation passed arrays through with default <code>JSON.stringify</code>, which produced the same bytes for primitive arrays but differed for arrays of objects (key order inside elements was not normalized). The chain verified on round-trip from the same implementation but failed cross-language. The fix was the one line above: <code>v.map(canonicalJson).join</code> instead of <code>JSON.stringify(v)</code>.</p>
+ <p>The subtle bug we fixed during the infra wave was a missing array recursion. A first implementation passed arrays through with default <code>JSON.stringify</code>, which produced the same bytes for primitive arrays but differed for arrays of objects (key order inside elements was not normalized). The chain verified on round-trip from the same implementation but failed cross-language. The fix was the one line above: <code>v.map(canonicalJson).join</code> instead of <code>JSON.stringify(v)</code>.</p>
 
-    <h2 id="cid">The content identifier.</h2>
-    <p>The CID is the artifact's identity. It is a deterministic string of the form <code>cidv1:sha256:&lt;64-hex&gt;</code>, computed over canonical JSON of the manifest's <code>hashes</code> block (which itself holds the sha256 of each emitted file). The receipt chain, the signing key, and the K-score are deliberately <i>not</i> in the CID; those are the seal on the bundle, not the identity of it.</p>
+ <h2 id="cid">The content identifier.</h2>
+ <p>The CID is the artifact's identity. It is a deterministic string of the form <code>cidv1:sha256:&lt;64-hex&gt;</code>, computed over canonical JSON of the manifest's <code>hashes</code> block (which itself holds the sha256 of each emitted file). The receipt chain, the signing key, and the K-score are deliberately <i>not</i> in the CID; those are the seal on the bundle, not the identity of it.</p>
 
-    <pre>{
-  <span class="kw">"cid"</span>: <span class="arg">"cidv1:sha256:a8c5e3...d7f2"</span>,
-  <span class="kw">"hashes"</span>: {
-    <span class="kw">"model_pointer"</span>: <span class="arg">"sha256:1c4f..."</span>,
-    <span class="kw">"recipes_json"</span>: <span class="arg">"sha256:9e02..."</span>,
-    <span class="kw">"lora_bin"</span>:      <span class="arg">"sha256:5d8b..."</span>,
-    <span class="kw">"index_bin"</span>:     <span class="arg">"sha256:bf91..."</span>,
-    <span class="kw">"evals_json"</span>:    <span class="arg">"sha256:e3b0..."</span>
-  }
+ <pre>{
+ <span class="kw">"cid"</span>: <span class="arg">"cidv1:sha256:a8c5e3...d7f2"</span>,
+ <span class="kw">"hashes"</span>: {
+ <span class="kw">"model_pointer"</span>: <span class="arg">"sha256:1c4f..."</span>,
+ <span class="kw">"recipes_json"</span>: <span class="arg">"sha256:9e02..."</span>,
+ <span class="kw">"lora_bin"</span>: <span class="arg">"sha256:5d8b..."</span>,
+ <span class="kw">"index_bin"</span>: <span class="arg">"sha256:bf91..."</span>,
+ <span class="kw">"evals_json"</span>: <span class="arg">"sha256:e3b0..."</span>
+ }
 }</pre>
 
-    <p>The CID is embedded in three places: the manifest, the receipt body, and the audit log row written by the registry. A third party verifier reads any one of those, recomputes the CID from the manifest hashes, and confirms they match. A re-sealed receipt (different signing key, same content) produces the same CID; a re-trained artifact (any byte different) produces a different CID. The public endpoint <code>GET /v1/cid/:cid</code> resolves the CID against the registry for the audit lookup path.</p>
+ <p>The CID is embedded in three places: the manifest, the receipt body, and the audit log row written by the registry. A third party verifier reads any one of those, recomputes the CID from the manifest hashes, and confirms they match. A re-sealed receipt (different signing key, same content) produces the same CID; a re-trained artifact (any byte different) produces a different CID. The public endpoint <code>GET /v1/cid/:cid</code> resolves the CID against the registry for the audit lookup path.</p>
 
-    <p>Two compile jobs that produce the same CID can be deduplicated in storage. The audit log is never deduplicated: every compile remains a distinct event with its own receipt, but the underlying artifact is one row. This is the same trade Git makes between objects and refs.</p>
+ <p>Two compile jobs that produce the same CID can be deduplicated in storage. The audit log is never deduplicated: every compile remains a distinct event with its own receipt, but the underlying artifact is one row. This is the same trade Git makes between objects and refs.</p>
 
-    <h2 id="tee">TEE attestation as an optional binding.</h2>
-    <p>The receipt chain proves the artifact came out of the build pipeline. It does <i>not</i> prove the build pipeline ran on the hardware you think it did. For workloads where that matters (regulated deployments, multi-party compute, supply-chain attestation), TEE attestation adds a fifth optional binding to the receipt body.</p>
+ <h2 id="tee">TEE attestation as an optional binding.</h2>
+ <p>The receipt chain proves the artifact came out of the build pipeline. It does <i>not</i> prove the build pipeline ran on the hardware you think it did. For workloads where that matters (regulated deployments, multi-party compute, supply-chain attestation), TEE attestation adds a fifth optional binding to the receipt body.</p>
 
-    <p>The supported attestation formats live in <code>packages/attestation/</code>:</p>
+ <p>The supported attestation formats live in <code>packages/attestation/</code>:</p>
 
-    <ul>
-      <li><b>AWS Nitro Enclaves.</b> COSE_Sign1 envelope with PCR0 measurement of the enclave image. The parser extracts the measurement; verification matches against the expected PCR0 a deployer registered during enclave provisioning.</li>
-      <li><b>AMD SEV-SNP.</b> 1184-byte binary attestation report. The measurement is the launch digest of the encrypted VM.</li>
-      <li><b>Intel TDX.</b> A TDX quote. Measurement is the MRTD over the trust domain.</li>
-      <li><b>GCP confidential VM and Azure confidential VM.</b> Cloud-provider-mediated attestation flows.</li>
-      <li><b>Docker (sha256 image digest).</b> A software-only measurement labeled as such. Not hardware-attested; useful for parity with the hardware paths during dev.</li>
-    </ul>
+ <ul>
+ <li><b>AWS Nitro Enclaves.</b> COSE_Sign1 envelope with PCR0 measurement of the enclave image. The parser extracts the measurement; verification matches against the expected PCR0 a deployer registered during enclave provisioning.</li>
+ <li><b>AMD SEV-SNP.</b> 1184-byte binary attestation report. The measurement is the launch digest of the encrypted VM.</li>
+ <li><b>Intel TDX.</b> A TDX quote. Measurement is the MRTD over the trust domain.</li>
+ <li><b>GCP confidential VM and Azure confidential VM.</b> Cloud-provider-mediated attestation flows.</li>
+ <li><b>Docker (sha256 image digest).</b> A software-only measurement labeled as such. Not hardware-attested; useful for parity with the hardware paths during dev.</li>
+ </ul>
 
-    <p>An attested receipt extends the receipt body with one extra envelope:</p>
+ <p>An attested receipt extends the receipt body with one extra envelope:</p>
 
-    <pre>{
-  <span class="kw">"attestation"</span>: {
-    <span class="kw">"vendor"</span>:      <span class="arg">"aws-nitro"</span>,
-    <span class="kw">"measurement"</span>: <span class="arg">"PCR0:8f31a4..."</span>,
-    <span class="kw">"signed_at"</span>:   <span class="arg">"2026-05-14T11:02:18Z"</span>,
-    <span class="kw">"raw"</span>:         <span class="arg">"base64:..."</span>
-  }
+ <pre>{
+ <span class="kw">"attestation"</span>: {
+ <span class="kw">"vendor"</span>: <span class="arg">"aws-nitro"</span>,
+ <span class="kw">"measurement"</span>: <span class="arg">"PCR0:8f31a4..."</span>,
+ <span class="kw">"signed_at"</span>: <span class="arg">"2026-05-14T11:02:18Z"</span>,
+ <span class="kw">"raw"</span>: <span class="arg">"base64:..."</span>
+ }
 }</pre>
 
-    <p>The kolm runtime does not verify the attestation against AWS root certificates itself. It stores the parsed envelope and the raw bytes; an external root-of-trust check is the deployer's responsibility. The point of the binding is that the same artifact, re-attested a year from now, will fail if the underlying enclave image has rotated. Drift becomes visible.</p>
+ <p>The kolm runtime does not verify the attestation against AWS root certificates itself. It stores the parsed envelope and the raw bytes; an external root-of-trust check is the deployer's responsibility. The point of the binding is that the same artifact, re-attested a year from now, will fail if the underlying enclave image has rotated. Drift becomes visible.</p>
 
-    <h2 id="verifier">The Rust verifier.</h2>
-    <p>The reference verifier lives in <code>packages/runtime-rs/</code>. It is a Rust 2021 crate, <code>#![forbid(unsafe_code)]</code>, pure-Rust dependencies, no <code>build.rs</code>, no proc macros from foreign crates. <code>Cargo.toml</code> emits three crate types (<code>rlib</code>, <code>cdylib</code>, <code>staticlib</code>) so the same source can produce a Rust library, a shared object for FFI, or a static archive for a C consumer.</p>
+ <h2 id="verifier">The Rust verifier.</h2>
+ <p>The reference verifier lives in <code>packages/runtime-rs/</code>. It is a Rust 2021 crate, <code>#![forbid(unsafe_code)]</code>, pure-Rust dependencies, no <code>build.rs</code>, no proc macros from foreign crates. <code>Cargo.toml</code> emits three crate types (<code>rlib</code>, <code>cdylib</code>, <code>staticlib</code>) so the same source can produce a Rust library, a shared object for FFI, or a static archive for a C consumer.</p>
 
-    <p>The verifier surface is two functions:</p>
+ <p>The verifier surface is two functions:</p>
 
-    <pre><span class="kw">use</span> kolm_runtime::{Artifact, VerifyError};
+ <pre><span class="kw">use</span> kolm_runtime::{Artifact, VerifyError};
 
 <span class="kw">let</span> a = Artifact::load(<span class="arg">"./refund-flagger-1.0.0.kolm"</span>)?;
 <span class="kw">let</span> report = a.verify(secret)?;
 
 <span class="kw">if</span> report.ok {
-    println!(<span class="arg">"verified: cid={}"</span>, report.cid);
-    println!(<span class="arg">"chain steps: {}"</span>, report.chain_steps.len());
-    println!(<span class="arg">"k-score: {}"</span>, report.k_score);
+ println!(<span class="arg">"verified: cid={}"</span>, report.cid);
+ println!(<span class="arg">"chain steps: {}"</span>, report.chain_steps.len());
+ println!(<span class="arg">"k-score: {}"</span>, report.k_score);
 }</pre>
 
-    <p><code>Artifact::load</code> unzips the bundle, parses the manifest, and stages the in-memory hashes. <code>verify</code> does five things: it recomputes the per-file sha256 of every emitted member and matches against the manifest hashes; it walks the chain forward and re-verifies each HMAC under the supplied secret; it confirms the linkage (each step's <code>input_hash</code> is the previous step's <code>output_hash</code>); it recomputes the CID from the manifest's hashes block and confirms it matches the embedded CID; and it re-verifies the body HMAC over canonical JSON of the receipt body.</p>
+ <p><code>Artifact::load</code> unzips the bundle, parses the manifest, and stages the in-memory hashes. <code>verify</code> does five things: it recomputes the per-file sha256 of every emitted member and matches against the manifest hashes; it walks the chain forward and re-verifies each HMAC under the supplied secret; it confirms the linkage (each step's <code>input_hash</code> is the previous step's <code>output_hash</code>); it recomputes the CID from the manifest's hashes block and confirms it matches the embedded CID; and it re-verifies the body HMAC over canonical JSON of the receipt body.</p>
 
-    <p>The whole verifier is under 1500 lines of Rust. Cargo features keep optional dependencies (zip decompression, hex encoding) gated. The release profile uses <code>lto = "fat"</code>, <code>codegen-units = 1</code>, and <code>panic = "abort"</code> so the staticlib drops cleanly into a C++ consumer.</p>
+ <p>The whole verifier is under 1500 lines of Rust. Cargo features keep optional dependencies (zip decompression, hex encoding) gated. The release profile uses <code>lto = "fat"</code>, <code>codegen-units = 1</code>, and <code>panic = "abort"</code> so the staticlib drops cleanly into a C++ consumer.</p>
 
-    <h2 id="tofu">TOFU and offline verification.</h2>
-    <p>The hard part of any cryptographic provenance system is the trust anchor. Who signs the signer's key. Who countersigns that. We could ship an X.509 hierarchy with an OCSP responder and CRLs; we would also ship the operational pain of maintaining one. The kolm receipt chain uses HMAC with a tenant receipt secret instead, and the trust anchor is TOFU (trust on first use).</p>
+ <h2 id="tofu">TOFU and offline verification.</h2>
+ <p>The hard part of any cryptographic provenance system is the trust anchor. Who signs the signer's key. Who countersigns that. We could ship an X.509 hierarchy with an OCSP responder and CRLs; we would also ship the operational pain of maintaining one. The kolm receipt chain uses HMAC with a tenant receipt secret instead, and the trust anchor is TOFU (trust on first use).</p>
 
-    <p>The mechanism is plain. When a tenant compiles their first artifact, the receipt is signed under a secret stored locally. The deployer archives that secret alongside the artifact. Every subsequent verification reuses the same secret. A rotation of the secret produces new receipts but does not invalidate old ones (old receipts remain verifiable under the old secret).</p>
+ <p>The mechanism is plain. When a tenant compiles their first artifact, the receipt is signed under a secret stored locally. The deployer archives that secret alongside the artifact. Every subsequent verification reuses the same secret. A rotation of the secret produces new receipts but does not invalidate old ones (old receipts remain verifiable under the old secret).</p>
 
-    <p>This trade is correct for the workflows we ship into. Healthcare buyers archive the receipt secret in their existing key management. Defense buyers store it in a hardware security module. Solo developers store it in a password manager. The receipt is portable, the verifier is portable, the secret is the deployer's problem. We never see it; we cannot lose it for you; an outage in our infrastructure does not break verification.</p>
+ <p>This trade is correct for the workflows we ship into. Healthcare buyers archive the receipt secret in their existing key management. Defense buyers store it in a hardware security module. Solo developers store it in a password manager. The receipt is portable, the verifier is portable, the secret is the deployer's problem. We never see it; we cannot lose it for you; an outage in our infrastructure does not break verification.</p>
 
-    <blockquote>
-      <p>The point of the chain is not to make us indispensable. It is to make us replaceable. The artifact verifies under your secret on your hardware; we are one of several entities that could have produced it.</p>
-    </blockquote>
+ <blockquote>
+ <p>The point of the chain is not to make us indispensable. It is to make us replaceable. The artifact verifies under your secret on your hardware; we are one of several entities that could have produced it.</p>
+ </blockquote>
 
-    <p>Ed25519 public-key signatures are on the v0.2 roadmap, behind a feature flag, with the same TOFU model for the public key. The chain shape does not change; only the <code>signature_alg</code> field on the receipt body advances from <code>hmac-sha256</code> to <code>ed25519</code> when the field is supplied.</p>
+ <p>Ed25519 public-key signatures are on the v0.2 roadmap, behind a feature flag, with the same TOFU model for the public key. The chain shape does not change; only the <code>signature_alg</code> field on the receipt body advances from <code>hmac-sha256</code> to <code>ed25519</code> when the field is supplied.</p>
 
-    <p>A receipt chain is not a moral position on cryptography; it is the mechanism by which a fine-tuned model gets to be a noun. The artifact is in your hand. The chain says where it came from. The verifier says it has not been tampered with. The CID says no other artifact is this one. That is the entire system.</p>
+ <p>A receipt chain is not a moral position on cryptography; it is the mechanism by which a fine-tuned model gets to be a noun. The artifact is in your hand. The chain says where it came from. The verifier says it has not been tampered with. The CID says no other artifact is this one. That is the entire system.</p>
 
-    <div class="signpost">
-      <a href="/research/compute-backend-selection">
-        <span class="lab">read next</span>
-        <span class="v">Compute backend selection <span class="arrow">&rarr;</span></span>
-        <p>Which of fourteen backends produced your artifact. The receipt records the choice in <code>metrics.compute</code>.</p>
-      </a>
-      <a href="/research/k-score-correlation">
-        <span class="lab">read next</span>
-        <span class="v">K-score correlation <span class="arrow">&rarr;</span></span>
-        <p>The K-score is one of the seven fields the body HMAC seals. What it actually measures.</p>
-      </a>
-      <a href="/spec">
-        <span class="lab">spec</span>
-        <span class="v">RS-1 spec <span class="arrow">&rarr;</span></span>
-        <p>The manifest schema, the receipt schema, the canonical-JSON rule, the chain definition.</p>
-      </a>
-      <a href="https://github.com/sneaky-hippo/kolmogorov-stack">
-        <span class="lab">code</span>
-        <span class="v">runtime-rs on GitHub <span class="arrow">&rarr;</span></span>
-        <p>The Rust verifier source. <code>forbid(unsafe_code)</code>, pure-Rust deps, three crate types.</p>
-      </a>
-    </div>
+ <div class="signpost">
+ <a href="/research/compute-backend-selection">
+ <span class="lab">read next</span>
+ <span class="v">Compute backend selection <span class="arrow">&rarr;</span></span>
+ <p>Which of fourteen backends produced your artifact. The receipt records the choice in <code>metrics.compute</code>.</p>
+ </a>
+ <a href="/research/k-score-correlation">
+ <span class="lab">read next</span>
+ <span class="v">K-score correlation <span class="arrow">&rarr;</span></span>
+ <p>The K-score is one of the seven fields the body HMAC seals. What it actually measures.</p>
+ </a>
+ <a href="/spec">
+ <span class="lab">spec</span>
+ <span class="v">RS-1 spec <span class="arrow">&rarr;</span></span>
+ <p>The manifest schema, the receipt schema, the canonical-JSON rule, the chain definition.</p>
+ </a>
+ <a href="https://github.com/sneaky-hippo/kolmogorov-stack">
+ <span class="lab">code</span>
+ <span class="v">runtime-rs on GitHub <span class="arrow">&rarr;</span></span>
+ <p>The Rust verifier source. <code>forbid(unsafe_code)</code>, pure-Rust deps, three crate types.</p>
+ </a>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

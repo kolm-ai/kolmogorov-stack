@@ -30,7 +30,7 @@ kolm status [--json]
 
 ```bash
 kolm status
-# kolm 7.x.y  base=https://kolm.ai  key=ks_018abcd...wxyz  jobs=1 active 3 done
+# kolm 7.x.y base=https://kolm.ai key=ks_018abcd...wxyz jobs=1 active 3 done
 
 kolm status --json | jq '{key: .key_fingerprint, jobs}'
 ```

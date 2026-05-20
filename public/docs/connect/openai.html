@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Connect OpenAI &middot; kolm.ai</title>
+<title>Connect OpenAI · kolm.ai</title>
 <meta name="description" content="Wire the OpenAI SDK, LangChain, and raw fetch through the kolm.ai local proxy. One env var. Streaming preserved. Captures land in your local lake.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Connect OpenAI &middot; kolm.ai">
-<meta property="og:description" content="Wire the OpenAI SDK, LangChain, and raw fetch through the kolm.ai local proxy.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Connect OpenAI · kolm.ai">
+<meta property="og:description" content="Wire the OpenAI SDK, LangChain, and raw fetch through the kolm.ai local proxy. One env var. Streaming preserved. Captures land in your local lake.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/connect/openai">
-<meta property="og:image" content="https://kolm.ai/og/docs-connect-openai.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Connect OpenAI &middot; kolm.ai">
-<meta name="twitter:description" content="Wire the OpenAI SDK, LangChain, and raw fetch through the kolm.ai local proxy.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-connect-openai.svg">
+<meta name="twitter:title" content="Connect OpenAI · kolm.ai">
+<meta name="twitter:description" content="Wire the OpenAI SDK, LangChain, and raw fetch through the kolm.ai local proxy. One env var. Streaming preserved. Captures land in your local lake.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/connect/openai">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Connect OpenAI","description":"Wire OpenAI SDK, LangChain, and raw fetch through the kolm.ai local proxy.","url":"https://kolm.ai/docs/connect/openai","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -85,8 +86,8 @@ kolm connect start</code></pre>
 client = OpenAI(base_url="http://127.0.0.1:8787/v1")
 
 r = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Summarize this PR diff..."}],
+ model="gpt-4o-mini",
+ messages=[{"role": "user", "content": "Summarize this PR diff..."}],
 )
 print(r.choices[0].message.content)</code></pre>
 
@@ -95,17 +96,17 @@ print(r.choices[0].message.content)</code></pre>
 const client = new OpenAI({ baseURL: "http://127.0.0.1:8787/v1" });
 
 const r = await client.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [{ role: "user", content: "Summarize this PR diff..." }],
+ model: "gpt-4o-mini",
+ messages: [{ role: "user", content: "Summarize this PR diff..." }],
 });
 console.log(r.choices[0].message.content);</code></pre>
 
 <h2 id="streaming">Streaming</h2>
 <p>Streaming is preserved end-to-end. The proxy reads the upstream SSE stream, forwards each <code>data:</code> frame to the client unchanged, and writes the assembled completion to the lake on stream close.</p>
 <pre><code>const stream = await client.chat.completions.create({
-  model: "gpt-4o-mini",
-  stream: true,
-  messages: [{ role: "user", content: "Write a haiku about disk I/O." }],
+ model: "gpt-4o-mini",
+ stream: true,
+ messages: [{ role: "user", content: "Write a haiku about disk I/O." }],
 });
 for await (const chunk of stream) process.stdout.write(chunk.choices[0]?.delta?.content || "");</code></pre>
 
@@ -118,16 +119,16 @@ print(llm.invoke("List three database indexing strategies.").content)</code></pr
 <h2 id="fetch">Raw fetch</h2>
 <p>If you do not use a vendor SDK, the proxy speaks raw HTTP. Identical request body, identical response body.</p>
 <pre><code>curl http://127.0.0.1:8787/v1/chat/completions \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"hello"}]}'</code></pre>
+ -H "Authorization: Bearer $OPENAI_API_KEY" \
+ -H "Content-Type: application/json" \
+ -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"hello"}]}'</code></pre>
 
 <h2 id="namespaces">Namespaces</h2>
 <p>Tag each call with a namespace by adding the <code>x-kolm-namespace</code> header. The lake groups by namespace, the optimizer rolls up costs by namespace, the distiller compiles namespace-scoped artifacts.</p>
 <pre><code>curl http://127.0.0.1:8787/v1/chat/completions \
-  -H "x-kolm-namespace: summarizer-v2" \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -d '...'</code></pre>
+ -H "x-kolm-namespace: summarizer-v2" \
+ -H "Authorization: Bearer $OPENAI_API_KEY" \
+ -d '...'</code></pre>
 
 <h2 id="verify">Verify it works</h2>
 <p>One round trip and one <code>kolm tail captures</code>. You should see the call land within a second.</p>
@@ -137,15 +138,15 @@ print(llm.invoke("List three database indexing strategies.").content)</code></pr
 <p>Now that captures are landing, read the <a href="/docs/lake">lake schema</a> to know what fields you can query, the <a href="/docs/privacy">privacy</a> page to wire detectors, and the <a href="/docs/optimizer">optimizer</a> to find waste. Start from <a href="/docs/quickstart">/docs/quickstart</a> if you skipped the install step.</p>
 
 <div class="related">
-  <a href="/docs/connect/anthropic"><b>Anthropic &rarr;</b><span>Same proxy, /v1/messages surface, claude-* models.</span></a>
-  <a href="/docs/connect/openrouter"><b>OpenRouter &rarr;</b><span>One key, 100+ upstream models, OpenAI-compatible.</span></a>
-  <a href="/docs/connect/gemini"><b>Gemini &rarr;</b><span>Google AI Studio, OpenAI-compat endpoint.</span></a>
+ <a href="/docs/connect/anthropic"><b>Anthropic &rarr;</b><span>Same proxy, /v1/messages surface, claude-* models.</span></a>
+ <a href="/docs/connect/openrouter"><b>OpenRouter &rarr;</b><span>One key, 100+ upstream models, OpenAI-compatible.</span></a>
+ <a href="/docs/connect/gemini"><b>Gemini &rarr;</b><span>Google AI Studio, OpenAI-compat endpoint.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

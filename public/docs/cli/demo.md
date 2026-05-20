@@ -9,21 +9,21 @@ chain never claims this corpus came from production.
 ## Usage
 
 ```
-kolm demo                                     list available demo flows
-kolm demo list                                same as the no-arg form
-kolm demo seed-log-triage [--count N]         seed N events (default 150)
-kolm demo seed-log-triage --namespace foo     override default namespace
-kolm demo reset --confirm                     purge the demo-log-triage namespace
+kolm demo list available demo flows
+kolm demo list same as the no-arg form
+kolm demo seed-log-triage [--count N] seed N events (default 150)
+kolm demo seed-log-triage --namespace foo override default namespace
+kolm demo reset --confirm purge the demo-log-triage namespace
 ```
 
 ## Flags
 
 - `--count N` events to append (clamped to 20..5000, default 150). 100+
-  events sharing one template signature is the threshold that trips
-  `local_replacement_candidate` in `kolm optimize`.
+ events sharing one template signature is the threshold that trips
+ `local_replacement_candidate` in `kolm optimize`.
 - `--namespace n` defaults to `demo-log-triage`. If you change it, the
-  follow-on `kolm dataset create` / `kolm build` commands must use the
-  same value.
+ follow-on `kolm dataset create` / `kolm build` commands must use the
+ same value.
 - `--json` machine-readable output.
 - `--confirm` required by `kolm demo reset` (the only destructive subverb).
 
@@ -43,14 +43,14 @@ kolm what
 ## What it seeds
 
 - 21 log archetypes spanning 6 categories: `db`, `network`, `auth`,
-  `deploy`, `app-bug`, `infra`.
+ `deploy`, `app-bug`, `infra`.
 - 2 premium model labels (`openai/gpt-4o`, `anthropic/claude-sonnet-4-5`)
-  on every event so the cheaper-model and local-replacement detectors
-  both have signal.
+ on every event so the cheaper-model and local-replacement detectors
+ both have signal.
 - First 5 events share a single `request_hash` so `cache_candidate`
-  fires alongside `local_replacement_candidate`.
+ fires alongside `local_replacement_candidate`.
 - Every prompt uses the same shape (`Triage this log line. Reply ... Log: "<body>"`)
-  so `templateSignature()` collapses the corpus to one cluster.
+ so `templateSignature()` collapses the corpus to one cluster.
 
 ## Honest scope
 

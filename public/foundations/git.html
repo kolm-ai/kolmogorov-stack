@@ -4,51 +4,51 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Private git recipe: the cross-agent memory layer · kolm.ai</title>
-<meta name="description" content="A private git repo is the right home for a fleet of compiled .kolm artifacts. Versioned, hashed, distributed, with the receipt chain in source control. One verb wires it.">
+<meta name="description" content="A private git repo is the right home for a fleet of compiled .kolm artifacts. Versioned, hashed, distributed, with the receipt chain in source control. One...">
 <meta name="keywords" content="private git AI, kolm sync git, agent memory git, AI artifact version control, receipt chain git">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="Private git recipe: the cross-agent memory layer">
-<meta property="og:description" content="Versioned, hashed, distributed. The right home for a fleet of compiled .kolm artifacts.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Private git recipe: the cross-agent memory layer · kolm.ai">
+<meta property="og:description" content="A private git repo is the right home for a fleet of compiled .kolm artifacts. Versioned, hashed, distributed, with the receipt chain in source control. One...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/foundations/git">
-<meta property="og:image" content="https://kolm.ai/og/foundations-git.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Private git recipe · kolm.ai">
-<meta name="twitter:description" content="The cross-agent memory layer.">
-<meta name="twitter:image" content="https://kolm.ai/og/foundations-git.svg">
+<meta name="twitter:title" content="Private git recipe: the cross-agent memory layer · kolm.ai">
+<meta name="twitter:description" content="A private git repo is the right home for a fleet of compiled .kolm artifacts. Versioned, hashed, distributed, with the receipt chain in source control. One...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/foundations/git">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "@id": "https://kolm.ai/foundations/git#article",
-      "headline": "Private git recipe: the cross-agent memory layer",
-      "description": "A private git repo is the right home for a fleet of compiled .kolm artifacts.",
-      "author": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
-      "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
-      "image": "https://kolm.ai/og/foundations-git.svg",
-      "datePublished": "2026-05-18",
-      "dateModified": "2026-05-18",
-      "mainEntityOfPage": "https://kolm.ai/foundations/git",
-      "articleSection": "Foundations"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
-        { "@type": "ListItem", "position": 2, "name": "Foundations", "item": "https://kolm.ai/foundations" },
-        { "@type": "ListItem", "position": 3, "name": "Private git", "item": "https://kolm.ai/foundations/git" }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "Article",
+ "@id": "https://kolm.ai/foundations/git#article",
+ "headline": "Private git recipe: the cross-agent memory layer",
+ "description": "A private git repo is the right home for a fleet of compiled .kolm artifacts.",
+ "author": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
+ "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
+ "image": "https://kolm.ai/og/foundations-git.svg",
+ "datePublished": "2026-05-18",
+ "dateModified": "2026-05-18",
+ "mainEntityOfPage": "https://kolm.ai/foundations/git",
+ "articleSection": "Foundations"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Foundations", "item": "https://kolm.ai/foundations" },
+ { "@type": "ListItem", "position": 3, "name": "Private git", "item": "https://kolm.ai/foundations/git" }
+ ]
+ }
+ ]
 }
 </script>
 <style>
@@ -74,6 +74,7 @@ pre{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:16p
 footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
 @media (max-width:560px){main{padding:32px 18px 64px}h1{font-size:30px}h2{font-size:22px}}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>
@@ -101,13 +102,13 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 # 1. compile in tmux, push to the mirror when done
 kolm compile spec.json --out artifact.kolm
 kolm sync push artifact.kolm --git git@host:org/kolm-fleet.git \
-  --subdir tenant-foo/$(date +%Y%m%d) \
-  --message "recipe v3, K-score 0.91, seeds N=4200"
+ --subdir tenant-foo/$(date +%Y%m%d) \
+ --message "recipe v3, K-score 0.91, seeds N=4200"
 
 # 2. on a consumer box, pull the latest
 kolm sync pull --git git@host:org/kolm-fleet.git
 ls /tmp/kolm-sync-*/tenant-foo/
-# 20260514  20260516  20260518
+# 20260514 20260516 20260518
 
 # 3. verify the receipt chain locally (no network call to a registry)
 kolm verify /tmp/kolm-sync-*/tenant-foo/20260518/artifact.kolm
@@ -131,10 +132,10 @@ git -C /tmp/kolm-sync-* log --oneline tenant-foo/
 <p>The W229 sync writes a fixed layout per push. Knowing it lets you build tools on top.</p>
 <pre>
 &lt;subdir&gt;/
-  artifact.kolm        # the compiled binary (LFS-eligible path)
-  manifest.json        # full manifest including signature trailer
-  receipt-chain.json   # Merkle leaves in declared order
-  synced_at.txt        # ISO timestamp of the push
+ artifact.kolm # the compiled binary (LFS-eligible path)
+ manifest.json # full manifest including signature trailer
+ receipt-chain.json # Merkle leaves in declared order
+ synced_at.txt # ISO timestamp of the push
 </pre>
 <p>You can grow the subdir tree however you like (<code>tenant/date/</code>, <code>env/recipe-version/</code>, <code>flat/</code>). The four file names are fixed so downstream consumers always know where to read.</p>
 

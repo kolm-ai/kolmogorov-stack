@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm keys &middot; kolm.ai</title>
+<title>kolm keys command · kolm.ai</title>
 <meta name="description" content="kolm keys is the Ed25519 signing-key rotation lifecycle. list, rotate, fingerprint, export. Hosted KMS targets emit a wrap intent the customer KMS hook applies.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="kolm keys &middot; kolm.ai">
-<meta property="og:description" content="Ed25519 signing-key rotation lifecycle. list, rotate, fingerprint, export.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="kolm keys command · kolm.ai">
+<meta property="og:description" content="kolm keys is the Ed25519 signing-key rotation lifecycle. list, rotate, fingerprint, export. Hosted KMS targets emit a wrap intent the customer KMS hook applies.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/cli/keys">
-<meta property="og:image" content="https://kolm.ai/og/docs-cli-keys.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="kolm keys &middot; kolm.ai">
-<meta name="twitter:description" content="Ed25519 signing-key rotation lifecycle.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-cli-keys.svg">
+<meta name="twitter:title" content="kolm keys command · kolm.ai">
+<meta name="twitter:description" content="kolm keys is the Ed25519 signing-key rotation lifecycle. list, rotate, fingerprint, export. Hosted KMS targets emit a wrap intent the customer KMS hook applies.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/cli/keys">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm keys","description":"Ed25519 signing-key rotation lifecycle. list, rotate, fingerprint, export.","url":"https://kolm.ai/docs/cli/keys","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -61,13 +61,14 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, not the Kolm band, not Petter Kolm.</span>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -77,19 +78,19 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Signing-key rotation lifecycle. Generates Ed25519 keypairs, records rotation receipts, and emits KMS wrap intents. The receipt-chain verifier (<code>kolm verify</code>) re-checks the active fingerprint against the manifest's signing block.</p>
 
 <h2 id="usage">Usage</h2>
-<pre><code>kolm keys list                                  list keys + status + KMS target
+<pre><code>kolm keys list list keys + status + KMS target
 kolm keys rotate [--kms &lt;target&gt;] [--overlap-days &lt;N&gt;]
-kolm keys fingerprint                           print active key short fingerprint
-kolm keys export                                emit the rotation manifest as JSON</code></pre>
+kolm keys fingerprint print active key short fingerprint
+kolm keys export emit the rotation manifest as JSON</code></pre>
 
 <h2 id="flags">Flags</h2>
 <table>
-  <thead><tr><th>Flag</th><th>Effect</th></tr></thead>
-  <tbody>
-    <tr><td><code>--kms &lt;target&gt;</code></td><td>One of <code>local</code>, <code>aws-kms</code>, <code>gcp-kms</code>, <code>azure-kv</code>, <code>hashicorp-vault</code>. Default <code>local</code>. Hosted targets emit a wrap intent; the customer KMS hook applies the wrapping.</td></tr>
-    <tr><td><code>--overlap-days &lt;N&gt;</code></td><td>How long the old key stays valid during rotation. Default 30 days; spec lock at <code>DEFAULT_OVERLAP_DAYS</code>.</td></tr>
-    <tr><td><code>--json</code></td><td>Machine-readable output. Default is human-readable.</td></tr>
-  </tbody>
+ <thead><tr><th>Flag</th><th>Effect</th></tr></thead>
+ <tbody>
+ <tr><td><code>--kms &lt;target&gt;</code></td><td>One of <code>local</code>, <code>aws-kms</code>, <code>gcp-kms</code>, <code>azure-kv</code>, <code>hashicorp-vault</code>. Default <code>local</code>. Hosted targets emit a wrap intent; the customer KMS hook applies the wrapping.</td></tr>
+ <tr><td><code>--overlap-days &lt;N&gt;</code></td><td>How long the old key stays valid during rotation. Default 30 days; spec lock at <code>DEFAULT_OVERLAP_DAYS</code>.</td></tr>
+ <tr><td><code>--json</code></td><td>Machine-readable output. Default is human-readable.</td></tr>
+ </tbody>
 </table>
 
 <h2 id="examples">Examples</h2>
@@ -107,23 +108,23 @@ kolm keys fingerprint</code></pre>
 
 <h2 id="see">Related</h2>
 <div class="related">
-  <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
-  <a href="/docs"><b>/docs</b><span>The full docs index. Spec, API, integrations, install guides.</span></a>
-  <a href="/security"><b>/security</b><span>Threat model, audit posture, and how signing keys fit the verification chain.</span></a>
-  <a href="/docs/cli/models"><b>/docs/cli/models</b><span>Inspect the frontier catalog and pre-cache model weights.</span></a>
-  <a href="/spec"><b>/spec</b><span>RS-1 v2.1 spec including section 7.13 on signing blocks and rotation fields.</span></a>
+ <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
+ <a href="/docs"><b>/docs</b><span>The full docs index. Spec, API, integrations, install guides.</span></a>
+ <a href="/security"><b>/security</b><span>Threat model, audit posture, and how signing keys fit the verification chain.</span></a>
+ <a href="/docs/cli/models"><b>/docs/cli/models</b><span>Inspect the frontier catalog and pre-cache model weights.</span></a>
+ <a href="/spec"><b>/spec</b><span>RS-1 v2.1 spec including section 7.13 on signing blocks and rotation fields.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 kolm.ai</span>
-  &middot;
-  <a href="/security">Security</a>
-  &middot;
-  <a href="/pricing">Pricing</a>
-  &middot;
-  <a href="/docs">Docs</a>
+ <span>&copy; 2026 kolm.ai</span>
+ &middot;
+ <a href="/security">Security</a>
+ &middot;
+ <a href="/pricing">Pricing</a>
+ &middot;
+ <a href="/docs">Docs</a>
 </div></footer>
 
 </body>

@@ -4,21 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>VLM fine-tuning &middot; Qwen2.5-VL and LLaVA on a single A100 | kolm research</title>
-<meta name="description" content="LoRA over the language tower of a vision-language model with the vision encoder frozen. The processor template, image-token padding, target_modules that only touch text projections, and the receipt block that pins which sub-modules saw a gradient.">
+<title>VLM fine-tuning Qwen2.5-VL and LLaVA on a single A100 | · kolm.ai</title>
+<meta name="description" content="LoRA over the language tower of a vision-language model with the vision encoder frozen. The processor template, image-token padding, target_modules that...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="VLM fine-tuning . kolm research">
-<meta property="og:description" content="LoRA over the language tower of Qwen2.5-VL and LLaVA. Single-A100-class hardware.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="VLM fine-tuning Qwen2.5-VL and LLaVA on a single A100 | · kolm.ai">
+<meta property="og:description" content="LoRA over the language tower of a vision-language model with the vision encoder frozen. The processor template, image-token padding, target_modules that...">
+<meta property="og:type" content="website">
 <meta property="article:published_time" content="2026-05-14">
 <meta property="article:author" content="Kolmogorov">
 <meta property="article:section" content="multimodal">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="VLM fine-tuning">
-<meta name="twitter:description" content="One A100, frozen vision encoder, LoRA on the text tower. The boring engineering parts written down.">
+<meta name="twitter:title" content="VLM fine-tuning Qwen2.5-VL and LLaVA on a single A100 | · kolm.ai">
+<meta name="twitter:description" content="LoRA over the language tower of a vision-language model with the vision encoder frozen. The processor template, image-token padding, target_modules that...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/vlm-fine-tuning">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,291 +27,293 @@
 <script src="/escape.js"></script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "VLM fine-tuning: Qwen2.5-VL and LLaVA on a single A100",
-      "description": "LoRA over the language tower of a VLM with the vision encoder frozen. Processor templates, target_modules, and the receipt block.",
-      "url": "https://kolm.ai/research/vlm-fine-tuning",
-      "author": {"@type": "Organization", "name": "Kolmogorov"},
-      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
-      "datePublished": "2026-05-14",
-      "articleSection": "multimodal",
-      "keywords": "VLM, vision-language model, Qwen2.5-VL, LLaVA, LoRA, multimodal fine-tuning",
-      "citation": [
-        "Wang et al, 2025, arXiv:2502.13923 (Qwen2.5-VL)",
-        "Liu et al, 2023, arXiv:2304.08485 (LLaVA)",
-        "Tong et al, 2024, arXiv:2406.16860 (Cambrian-1)"
-      ],
-      "license": "https://creativecommons.org/licenses/by/4.0/"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "VLM fine-tuning", "item": "https://kolm.ai/research/vlm-fine-tuning"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "VLM fine-tuning: Qwen2.5-VL and LLaVA on a single A100",
+ "description": "LoRA over the language tower of a VLM with the vision encoder frozen. Processor templates, target_modules, and the receipt block.",
+ "url": "https://kolm.ai/research/vlm-fine-tuning",
+ "author": {"@type": "Organization", "name": "Kolmogorov"},
+ "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-14",
+ "articleSection": "multimodal",
+ "keywords": "VLM, vision-language model, Qwen2.5-VL, LLaVA, LoRA, multimodal fine-tuning",
+ "citation": [
+ "Wang et al, 2025, arXiv:2502.13923 (Qwen2.5-VL)",
+ "Liu et al, 2023, arXiv:2304.08485 (LLaVA)",
+ "Tong et al, 2024, arXiv:2406.16860 (Cambrian-1)"
+ ],
+ "license": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "VLM fine-tuning", "item": "https://kolm.ai/research/vlm-fine-tuning"}
+ ]
+ }
+ ]
 }
 </script>
 
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
-  a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
-  a:hover{border-bottom-color:var(--ink)}
-  .nb{border:0}
-  ::selection{background:rgba(236,231,220,0.30)}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+ a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+ a:hover{border-bottom-color:var(--ink)}
+ .nb{border:0}
+ ::selection{background:rgba(236,231,220,0.30)}
 
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
-  @media(max-width:720px){.wrap{padding:0 20px}}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.wrap{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){header.site .row{padding:0 20px}}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
-  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){header.site .row{padding:0 20px}}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+ header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site .right .ghost:hover{color:var(--ink)}
+ header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
 
-  main{padding:80px 0 96px;flex:1}
+ main{padding:80px 0 96px;flex:1}
 
-  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
-  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
-  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+ .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+ .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
 
-  h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
-  .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
-  h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
-  h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
-  p{color:var(--ink-mute);margin:0 0 14px}
-  p strong{color:var(--ink);font-weight: 500}
-  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
-  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
-  ul li{margin:6px 0}
+ h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+ .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+ h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+ h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p strong{color:var(--ink);font-weight: 500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+ ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+ ul li{margin:6px 0}
 
-  .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+ .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
 
-  .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
-  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-  .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
-  .table tr:last-child td{border-bottom:0}
+ .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+ .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+ .table tr:last-child td{border-bottom:0}
 
-  .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
-  .citations a{color:var(--ink-mute)}
+ .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+ .citations a{color:var(--ink-mute)}
 
-  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
-  footer a{color:var(--ink-mute);border:0}
-  footer a:hover{color:var(--ink)}
-  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
-  .footer-row a{color:inherit}
+ footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+ footer a{color:var(--ink-mute);border:0}
+ footer a:hover{color:var(--ink)}
+ .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+ .footer-row a{color:inherit}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site">
-  <div class="row">
-    <div class="left">
-      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research" class="active">Research</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="row">
+ <div class="left">
+ <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research" class="active">Research</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main>
-  <div class="wrap">
-    <div class="hero-eyebrow"><span class="he-dot"></span>research . multimodal . 12 min read</div>
-    <h1>VLM fine-tuning on one A100.</h1>
-    <p class="lede">A vision-language model has two towers and a projector. The trick to fine-tuning one cheaply is to keep the vision tower frozen, attach LoRA to the language tower, and let the projector ride along. The trick to fine-tuning one correctly is to remember that the image tokens are real tokens and the collator has to pad them like anything else.</p>
+<main id="main">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>research . multimodal . 12 min read</div>
+ <h1>VLM fine-tuning on one A100.</h1>
+ <p class="lede">A vision-language model has two towers and a projector. The trick to fine-tuning one cheaply is to keep the vision tower frozen, attach LoRA to the language tower, and let the projector ride along. The trick to fine-tuning one correctly is to remember that the image tokens are real tokens and the collator has to pad them like anything else.</p>
 
-    <div class="meta-line">
-      <span>May 14, 2026</span>
-      <span>&middot;</span>
-      <span>Kolmogorov research</span>
-      <span>&middot;</span>
-      <span>apps/trainer/vlm.py</span>
-    </div>
+ <div class="meta-line">
+ <span>May 14, 2026</span>
+ <span>&middot;</span>
+ <span>Kolmogorov research</span>
+ <span>&middot;</span>
+ <span>apps/trainer/vlm.py</span>
+ </div>
 
-    <h2>The three parts of a VLM</h2>
+ <h2>The three parts of a VLM</h2>
 
-    <p>A modern VLM (Qwen2.5-VL, LLaVA-1.6, Cambrian-1, Idefics-3, Phi-3.5-vision) has three components: a vision encoder (typically a ViT or SigLIP, 300M-1B params), a projector (MLP or Q-Former that maps image features to the language model's embedding space, 5-50M params), and a language tower (an autoregressive transformer, 1.5B-72B params). The language tower is the expensive part. The vision encoder is mostly fixed in the post-pretraining era; modern VLMs share encoders across families.</p>
+ <p>A modern VLM (Qwen2.5-VL, LLaVA-1.6, Cambrian-1, Idefics-3, Phi-3.5-vision) has three components: a vision encoder (typically a ViT or SigLIP, 300M-1B params), a projector (MLP or Q-Former that maps image features to the language model's embedding space, 5-50M params), and a language tower (an autoregressive transformer, 1.5B-72B params). The language tower is the expensive part. The vision encoder is mostly fixed in the post-pretraining era; modern VLMs share encoders across families.</p>
 
-    <p>For the typical fine-tuning task (a chart-QA distill, a document-extraction adapter, a screenshot-grounded agent), the work is almost entirely in the language tower. The vision encoder already sees the buyer's images well enough; the projector already maps them to the right subspace. What changes is how the language tower reasons over the result, and that lives in the attention and MLP projections.</p>
+ <p>For the typical fine-tuning task (a chart-QA distill, a document-extraction adapter, a screenshot-grounded agent), the work is almost entirely in the language tower. The vision encoder already sees the buyer's images well enough; the projector already maps them to the right subspace. What changes is how the language tower reasons over the result, and that lives in the attention and MLP projections.</p>
 
-    <h2>What the kolm trainer freezes by default</h2>
+ <h2>What the kolm trainer freezes by default</h2>
 
-    <p><code>VLMTrainConfig.freeze_vision=True</code> walks the named modules and marks any whose name contains <code>vision</code>, <code>visual</code>, or <code>image_encoder</code> as <code>requires_grad=False</code>. This catches the encoder reliably across Qwen2.5-VL (<code>visual</code>), LLaVA (<code>vision_tower</code>), and Idefics (<code>vision_model</code>). The projector stays trainable; LoRA attaches to the language tower's projection matrices only.</p>
+ <p><code>VLMTrainConfig.freeze_vision=True</code> walks the named modules and marks any whose name contains <code>vision</code>, <code>visual</code>, or <code>image_encoder</code> as <code>requires_grad=False</code>. This catches the encoder reliably across Qwen2.5-VL (<code>visual</code>), LLaVA (<code>vision_tower</code>), and Idefics (<code>vision_model</code>). The projector stays trainable; LoRA attaches to the language tower's projection matrices only.</p>
 
-    <p>The LoRA target modules default to <code>q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj</code>, which is the standard set for Qwen and Llama architectures. PEFT's auto-discovery handles cases where the model uses different names; you pass <code>target_modules="all-linear"</code> for that route, and PEFT figures out which leaves are linear layers in the language tower.</p>
+ <p>The LoRA target modules default to <code>q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj</code>, which is the standard set for Qwen and Llama architectures. PEFT's auto-discovery handles cases where the model uses different names; you pass <code>target_modules="all-linear"</code> for that route, and PEFT figures out which leaves are linear layers in the language tower.</p>
 
-    <h2>The processor is the load-bearing piece</h2>
+ <h2>The processor is the load-bearing piece</h2>
 
-    <p>The Hugging Face <code>AutoProcessor</code> for a VLM bundles a tokenizer and an image processor. It exposes <code>apply_chat_template(messages, tokenize=False, add_generation_prompt=False)</code> which knows how to insert image-token placeholders for each image in the messages list, in the format the model expects. Qwen2.5-VL uses <code>&lt;|vision_start|&gt;...&lt;|vision_end|&gt;</code>; LLaVA uses <code>&lt;image&gt;</code>. The trainer does not need to know which.</p>
+ <p>The Hugging Face <code>AutoProcessor</code> for a VLM bundles a tokenizer and an image processor. It exposes <code>apply_chat_template(messages, tokenize=False, add_generation_prompt=False)</code> which knows how to insert image-token placeholders for each image in the messages list, in the format the model expects. Qwen2.5-VL uses <code>&lt;|vision_start|&gt;...&lt;|vision_end|&gt;</code>; LLaVA uses <code>&lt;image&gt;</code>. The trainer does not need to know which.</p>
 
-    <p>The collator builds the batch by rendering each example's chat template, gathering the image list, and calling the processor with both arguments. The processor returns a dict containing <code>input_ids</code>, <code>attention_mask</code>, and one of <code>pixel_values</code> (LLaVA-style) or <code>image_grid_thw</code> + <code>pixel_values</code> (Qwen2.5-VL-style). All of these get passed to the model's <code>forward</code> as kwargs.</p>
+ <p>The collator builds the batch by rendering each example's chat template, gathering the image list, and calling the processor with both arguments. The processor returns a dict containing <code>input_ids</code>, <code>attention_mask</code>, and one of <code>pixel_values</code> (LLaVA-style) or <code>image_grid_thw</code> + <code>pixel_values</code> (Qwen2.5-VL-style). All of these get passed to the model's <code>forward</code> as kwargs.</p>
 
-    <h2>The minimal call</h2>
+ <h2>The minimal call</h2>
 
-    <pre>from apps.trainer.vlm import vlm_trainer, VLMTrainConfig
+ <pre>from apps.trainer.vlm import vlm_trainer, VLMTrainConfig
 
 trainer = vlm_trainer(
-    model_id="Qwen/Qwen2.5-VL-7B-Instruct",
-    train_dataset=chart_qa_dataset,  # rows of (image, prompt, response)
-    config=VLMTrainConfig(
-        lora_r=16,
-        lora_alpha=32,
-        freeze_vision=True,
-        learning_rate=1e-4,
-        max_seq_length=2048,
-        num_train_epochs=1,
-        per_device_train_batch_size=1,
-        gradient_accumulation_steps=8,
-        bf16=True,
-    ),
+ model_id="Qwen/Qwen2.5-VL-7B-Instruct",
+ train_dataset=chart_qa_dataset, # rows of (image, prompt, response)
+ config=VLMTrainConfig(
+ lora_r=16,
+ lora_alpha=32,
+ freeze_vision=True,
+ learning_rate=1e-4,
+ max_seq_length=2048,
+ num_train_epochs=1,
+ per_device_train_batch_size=1,
+ gradient_accumulation_steps=8,
+ bf16=True,
+ ),
 )
 trainer.train()</pre>
 
-    <p>The dataset shape is a list of dicts with keys <code>image</code> (a PIL.Image, a path, or a base64 string), <code>prompt</code> (the user turn), and <code>response</code> (the assistant turn). The collator builds the chat template, hands the rendered text and the image list to the processor, and masks the labels so the loss only flows over the response tokens.</p>
+ <p>The dataset shape is a list of dicts with keys <code>image</code> (a PIL.Image, a path, or a base64 string), <code>prompt</code> (the user turn), and <code>response</code> (the assistant turn). The collator builds the chat template, hands the rendered text and the image list to the processor, and masks the labels so the loss only flows over the response tokens.</p>
 
-    <h2>What lands in the receipt</h2>
+ <h2>What lands in the receipt</h2>
 
-    <pre>"vlm_train": {
-  "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
-  "papers": ["arXiv:2502.13923", "arXiv:2304.08485"],
-  "lora_r": 16,
-  "lora_alpha": 32,
-  "lora_targets": ["q_proj","k_proj","v_proj","o_proj","gate_proj","up_proj","down_proj"],
-  "freeze_vision": true,
-  "frozen_modules": ["visual.patch_embed", "visual.blocks.*", "visual.merger"],
-  "trainable_modules": ["language_model.layers.*.self_attn.q_proj.lora_A", "..."],
-  "learning_rate": 1e-4,
-  "max_seq_length": 2048,
-  "train_examples": 4096
+ <pre>"vlm_train": {
+ "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+ "papers": ["arXiv:2502.13923", "arXiv:2304.08485"],
+ "lora_r": 16,
+ "lora_alpha": 32,
+ "lora_targets": ["q_proj","k_proj","v_proj","o_proj","gate_proj","up_proj","down_proj"],
+ "freeze_vision": true,
+ "frozen_modules": ["visual.patch_embed", "visual.blocks.*", "visual.merger"],
+ "trainable_modules": ["language_model.layers.*.self_attn.q_proj.lora_A", "..."],
+ "learning_rate": 1e-4,
+ "max_seq_length": 2048,
+ "train_examples": 4096
 }</pre>
 
-    <p>The buyer's auditor can confirm which sub-modules saw a gradient and which did not. The trainable-modules list is glob-summarised in the receipt and exact-listed in a sidecar manifest because the verbose form is several hundred entries for a 7B model.</p>
+ <p>The buyer's auditor can confirm which sub-modules saw a gradient and which did not. The trainable-modules list is glob-summarised in the receipt and exact-listed in a sidecar manifest because the verbose form is several hundred entries for a 7B model.</p>
 
-    <h2>Sizing on real hardware</h2>
+ <h2>Sizing on real hardware</h2>
 
-    <table class="table">
-      <thead><tr><th>Model</th><th>VRAM (bf16 + LoRA r=16)</th><th>Step time (A100-80GB)</th></tr></thead>
-      <tbody>
-        <tr><td>Qwen2.5-VL-3B</td><td>~14 GB</td><td>~0.6 s/step at seq_len=2048</td></tr>
-        <tr><td>Qwen2.5-VL-7B</td><td>~32 GB</td><td>~1.4 s/step at seq_len=2048</td></tr>
-        <tr><td>Qwen2.5-VL-72B</td><td>~196 GB</td><td>multi-GPU, FSDP+QLoRA territory</td></tr>
-        <tr><td>LLaVA-Next-7B</td><td>~28 GB</td><td>~1.2 s/step at seq_len=2048</td></tr>
-      </tbody>
-    </table>
+ <table class="table">
+ <thead><tr><th>Model</th><th>VRAM (bf16 + LoRA r=16)</th><th>Step time (A100-80GB)</th></tr></thead>
+ <tbody>
+ <tr><td>Qwen2.5-VL-3B</td><td>~14 GB</td><td>~0.6 s/step at seq_len=2048</td></tr>
+ <tr><td>Qwen2.5-VL-7B</td><td>~32 GB</td><td>~1.4 s/step at seq_len=2048</td></tr>
+ <tr><td>Qwen2.5-VL-72B</td><td>~196 GB</td><td>multi-GPU, FSDP+QLoRA territory</td></tr>
+ <tr><td>LLaVA-Next-7B</td><td>~28 GB</td><td>~1.2 s/step at seq_len=2048</td></tr>
+ </tbody>
+ </table>
 
-    <p>The 7B fits with room to spare on a single A100-80GB at batch size 1, gradient accumulation 8, with the vision tower frozen and bf16 throughout. The 3B is the sweet spot for buyers iterating on a chart-QA or screenshot-grounded distill: cheap enough to retrain hourly, capable enough that the final K-score on the distill exceeds GPT-4-vision on the buyer's narrow distribution.</p>
+ <p>The 7B fits with room to spare on a single A100-80GB at batch size 1, gradient accumulation 8, with the vision tower frozen and bf16 throughout. The 3B is the sweet spot for buyers iterating on a chart-QA or screenshot-grounded distill: cheap enough to retrain hourly, capable enough that the final K-score on the distill exceeds GPT-4-vision on the buyer's narrow distribution.</p>
 
-    <h2>Edge cases worth naming</h2>
+ <h2>Edge cases worth naming</h2>
 
-    <p><strong>The image token count is variable.</strong> Qwen2.5-VL emits a variable number of tokens per image depending on <code>image_grid_thw</code> (typically 64-1280 tokens at 224-1024 pixel sides). The trainer's max_seq_length covers text-plus-image; if the buyer's images are large the text budget shrinks. The collator truncates the text first and warns if it had to.</p>
+ <p><strong>The image token count is variable.</strong> Qwen2.5-VL emits a variable number of tokens per image depending on <code>image_grid_thw</code> (typically 64-1280 tokens at 224-1024 pixel sides). The trainer's max_seq_length covers text-plus-image; if the buyer's images are large the text budget shrinks. The collator truncates the text first and warns if it had to.</p>
 
-    <p><strong>Multi-image prompts.</strong> The processor handles them, but the collator's pad-to-longest path can produce empty image-token slots for examples with fewer images in a batch. The fix is to pad image lists to a fixed max-images-per-example (default 4) at dataset prep time; the documentation is explicit about this in the Qwen2.5-VL README.</p>
+ <p><strong>Multi-image prompts.</strong> The processor handles them, but the collator's pad-to-longest path can produce empty image-token slots for examples with fewer images in a batch. The fix is to pad image lists to a fixed max-images-per-example (default 4) at dataset prep time; the documentation is explicit about this in the Qwen2.5-VL README.</p>
 
-    <p><strong>Vision-tower fine-tuning is rarely worth it.</strong> If the buyer's K-score is missing on a chart-QA task, the cause is almost always the language tower failing to ground; unfreezing the vision encoder doubles VRAM and rarely moves the needle. The only verifiable case for vision fine-tuning is a deeply out-of-distribution image domain (X-rays, satellite imagery, microscopy), and even there the right answer is usually a domain-specific vision encoder swap, not fine-tuning the original.</p>
+ <p><strong>Vision-tower fine-tuning is rarely worth it.</strong> If the buyer's K-score is missing on a chart-QA task, the cause is almost always the language tower failing to ground; unfreezing the vision encoder doubles VRAM and rarely moves the needle. The only verifiable case for vision fine-tuning is a deeply out-of-distribution image domain (X-rays, satellite imagery, microscopy), and even there the right answer is usually a domain-specific vision encoder swap, not fine-tuning the original.</p>
 
-    <p><strong>The projector is fragile.</strong> The trainer leaves the projector trainable by default because freezing it can degrade the alignment between the vision and language towers. If the buyer's K-score is unstable across runs at the same hyperparameters, the projector is the first suspect; a lower learning rate on the projector group (or freezing it after warm-up) usually fixes it.</p>
+ <p><strong>The projector is fragile.</strong> The trainer leaves the projector trainable by default because freezing it can degrade the alignment between the vision and language towers. If the buyer's K-score is unstable across runs at the same hyperparameters, the projector is the first suspect; a lower learning rate on the projector group (or freezing it after warm-up) usually fixes it.</p>
 
-    <h2>Where this fits in the kolm compile loop</h2>
+ <h2>Where this fits in the kolm compile loop</h2>
 
-    <p>VLM fine-tuning lives in the same pipeline as text-only fine-tuning. The trainer plumbing is shared; only the model loader, the collator, and the dataset shape differ. The K-score evaluator runs the same A/S/L/C/V formula against the buyer's eval pack; the only difference is that the eval examples carry images alongside the prompt-response pair. The receipt chain, the CID, the verifier, and the registry surface are identical.</p>
+ <p>VLM fine-tuning lives in the same pipeline as text-only fine-tuning. The trainer plumbing is shared; only the model loader, the collator, and the dataset shape differ. The K-score evaluator runs the same A/S/L/C/V formula against the buyer's eval pack; the only difference is that the eval examples carry images alongside the prompt-response pair. The receipt chain, the CID, the verifier, and the registry surface are identical.</p>
 
-    <p>For the buyer who has a vision-grounded task (chart-QA on financial reports, layout extraction on legal documents, screenshot agents that read web UIs), the workflow is: capture pairs through <code>kolm capture</code> with the image attached, write a spec that names the base VLM, run <code>kolm compile</code>, ship the <code>.kolm</code>. The trainer detects the VLM family from the model id and routes through <code>apps/trainer/vlm.py</code> automatically.</p>
+ <p>For the buyer who has a vision-grounded task (chart-QA on financial reports, layout extraction on legal documents, screenshot agents that read web UIs), the workflow is: capture pairs through <code>kolm capture</code> with the image attached, write a spec that names the base VLM, run <code>kolm compile</code>, ship the <code>.kolm</code>. The trainer detects the VLM family from the model id and routes through <code>apps/trainer/vlm.py</code> automatically.</p>
 
-    <div class="citations">
-      <p><strong>Citations</strong></p>
-      <p>Wang, P. et al. <em>Qwen2.5-VL Technical Report</em>. arXiv:2502.13923, 2025.</p>
-      <p>Liu, H. et al. <em>Visual Instruction Tuning</em>. arXiv:2304.08485, 2023.</p>
-      <p>Tong, S. et al. <em>Cambrian-1: A Fully Open, Vision-Centric Exploration of Multimodal LLMs</em>. arXiv:2406.16860, 2024.</p>
-    </div>
+ <div class="citations">
+ <p><strong>Citations</strong></p>
+ <p>Wang, P. et al. <em>Qwen2.5-VL Technical Report</em>. arXiv:2502.13923, 2025.</p>
+ <p>Liu, H. et al. <em>Visual Instruction Tuning</em>. arXiv:2304.08485, 2023.</p>
+ <p>Tong, S. et al. <em>Cambrian-1: A Fully Open, Vision-Centric Exploration of Multimodal LLMs</em>. arXiv:2406.16860, 2024.</p>
+ </div>
 
-    <div class="meta-line" style="margin-top:36px">
-      <a class="nb" href="/research">&larr; Back to research</a>
-      <span>&middot;</span>
-      <a class="nb" href="/research#vlm">Frontier reference &middot; VLM</a>
-      <span>&middot;</span>
-      <a class="nb" href="/spec">RS-1 spec</a>
-    </div>
-  </div>
+ <div class="meta-line" style="margin-top:36px">
+ <a class="nb" href="/research">&larr; Back to research</a>
+ <span>&middot;</span>
+ <a class="nb" href="/research#vlm">Frontier reference &middot; VLM</a>
+ <span>&middot;</span>
+ <a class="nb" href="/spec">RS-1 spec</a>
+ </div>
+ </div>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 <script src="/nav.js"></script>
 </body>

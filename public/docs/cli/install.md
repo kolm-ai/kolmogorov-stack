@@ -7,10 +7,10 @@ verbs (`kolm run`, `kolm serve`, `kolm replay`) can resolve it by name.
 
 ```
 kolm install <artifact.kolm>
-kolm install <artifact.kolm> --alias <name>     # name for local lookup
-kolm install <artifact.kolm> --force            # overwrite existing alias
-kolm install --list                             # list installed artifacts
-kolm install --remove <name>                    # uninstall by alias
+kolm install <artifact.kolm> --alias <name> # name for local lookup
+kolm install <artifact.kolm> --force # overwrite existing alias
+kolm install --list # list installed artifacts
+kolm install --remove <name> # uninstall by alias
 ```
 
 ## Where things live

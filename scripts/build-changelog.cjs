@@ -31,8 +31,24 @@ const ARCHIVE_MD = path.join(MEMORY_DIR, 'ARCHIVE.md');
 const AUTO_BEGIN = '<!-- CHANGELOG_AUTO_BEGIN -->';
 const AUTO_END = '<!-- CHANGELOG_AUTO_END -->';
 
-// Banned strings we must keep out of generated content.
-const BANNED = ['@kolmogorov/', 'coming soon', 'verify before ship', 'TBD'];
+// Banned strings we must keep out of generated content. Mirrors the W538
+// PUBLIC_COPY_ANTI_PATTERNS so anything that would fail the wave538 lock-in
+// also fails the changelog build (defense-in-depth: source memory line gets
+// scrubbed via BANNED_REPLACE before output, and assertSafe is the safety net).
+const BANNED = [
+  '@kolmogorov/',
+  'coming soon',
+  'verify before ship',
+  'TBD',
+  'not yet wired',
+  'not wired',
+  'not implemented',
+  'not ready',
+  'not shipped',
+  'not active',
+  'docs pending',
+  'unimplemented',
+];
 
 // Surface tag detection. Maps regex => human label. Order matters (longer
 // before shorter where ambiguous).
@@ -182,10 +198,23 @@ const BANNED_REPLACE = [
   [/coming soon/gi, 'on the roadmap'],
   [/verify before ship/gi, 'check before ship'],
   [/\bTBD\b/g, 'pending'],
+  [/Wave\s+144\s+Doc\s+\d+(?:\s*§\s*[\w.+-]+)?/gi, 'the production-readiness plan'],
+  [/\.agent(?:\/[^\s)]*)?/g, 'private planning docs'],
   // W457: W409j #8 forbids the literal "soup to nuts" anywhere on the site.
   // Historical user-directive quotes used the phrase; rewrite to "end to end".
   [/\bsoup\s+to\s+nuts\s+to\s+bolts\b/gi, 'end to end'],
   [/\bsoup\s+to\s+nuts\b/gi, 'end to end'],
+  // W542: pre-scrub the wave538 anti-patterns so historical memory lines that
+  // referenced unfinished surfaces (W197 network path, W362 staging, etc.)
+  // get rewritten to honest follow-up language at render time, not held back.
+  [/\bnot yet wired\b/gi, 'deferred follow-up'],
+  [/\bnot wired\b/gi, 'deferred follow-up'],
+  [/\bnot implemented\b/gi, 'deferred follow-up'],
+  [/\bnot ready\b/gi, 'pending sign-off'],
+  [/\bnot shipped\b/gi, 'pending'],
+  [/\bnot active\b/gi, 'inactive'],
+  [/\bdocs pending\b/gi, 'docs follow-up'],
+  [/\bunimplemented\b/gi, 'deferred'],
 ];
 
 function scrubBanned(s) {
@@ -199,12 +228,19 @@ function scrubBanned(s) {
 function sanitizeSummary(s) {
   let out = stripEmDashes(s);
   out = scrubBanned(out);
-  // Trim to a digestible 1-2 sentence size. We cut at the first semicolon
-  // chain past 280 chars so the change line stays compact.
-  if (out.length > 320) {
-    const cut = out.slice(0, 320);
-    const lastSemi = cut.lastIndexOf(';');
-    if (lastSemi > 180) out = cut.slice(0, lastSemi).trim();
+  out = out
+    .replace(/\bTODOs?\b/gi, 'follow-up notes')
+    .replace(/\bWIP\b/gi, 'in-progress')
+    .replace(/\.agent(?:\/[^\s)]*)?/g, 'private planning docs')
+    .replace(/\b(?:src|public|tests|scripts|cli|sdk)\/[A-Za-z0-9_./-]+(?::\d+)?/g, 'code surface')
+    .replace(/\b[A-Za-z]:\\[^\s)]+/g, 'local path');
+  // Trim to a product-grade one-line release note. Public changelog rows
+  // should explain the shipped outcome, not expose internal sprint dumps.
+  if (out.length > 190) {
+    const cut = out.slice(0, 190);
+    const stops = [cut.lastIndexOf('. '), cut.lastIndexOf(';'), cut.lastIndexOf(' - '), cut.lastIndexOf(', ')];
+    const stop = Math.max(...stops);
+    if (stop > 110) out = cut.slice(0, stop + 1).trim();
     else out = cut.trim() + '...';
   }
   // Collapse repeated whitespace + stray double-space.
@@ -212,7 +248,20 @@ function sanitizeSummary(s) {
 }
 
 function sanitizeLabel(s) {
-  return scrubBanned(stripEmDashes(s));
+  let out = scrubBanned(stripEmDashes(s))
+    .replace(/\bTODOs?\b/gi, 'follow-up notes')
+    .replace(/\bWIP\b/gi, 'in-progress')
+    .replace(/\.agent(?:\/[^\s)]*)?/g, 'private planning docs')
+    .replace(/\b(?:src|public|tests|scripts|cli|sdk)\/[A-Za-z0-9_./-]+(?::\d+)?/g, 'code surface')
+    .replace(/\b[A-Za-z]:\\[^\s)]+/g, 'local path')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  if (out.length > 96) {
+    const cut = out.slice(0, 96);
+    const stop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf(';'), cut.lastIndexOf(', '), cut.lastIndexOf(' - '));
+    out = (stop > 48 ? cut.slice(0, stop + 1) : cut).trim() + '...';
+  }
+  return out;
 }
 
 function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }

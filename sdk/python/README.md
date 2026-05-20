@@ -1,26 +1,50 @@
-# kolmogorov-recipe
+# kolm
 
-> **Recipe.** Show how once. Run forever.
-> The Skills layer of [Kolmogorov Stack](https://kolm.ai).
+> Compile any AI task into a signed `.kolm` file you own. Then run it forever - local, deterministic, no LLM round trip.
 
-A thin Python client for the Recipe HTTP API — replaces repeat LLM-as-judge calls with deterministic JS classifiers that run in microseconds, for free, and always return the same answer.
+Python client for the [kolm.ai](https://kolm.ai) AI compiler. Wraps the public HTTP API. The Node CLI is the canonical interface; this package mirrors its surface for Python users.
+
+Registry status: not published under Kolm control. The `kolm` name on PyPI is an unrelated Korean language-modeling toolkit, so do not install the PyPI `kolm` distribution as this SDK until ownership or a new package name is resolved.
 
 ## Install
 
 ```bash
-pip install kolmogorov-recipe
+cd sdk/python
+pip install -e .
 ```
 
-Zero runtime dependencies. Works on Python 3.8+.
-
 ## 30-second usage
+
+Two surfaces ship in the same package:
+
+### `kolm` - the AI compiler
+
+```python
+from kolm import Kolm
+
+k = Kolm(api_key="k_live_...")  # or KOLM_API_KEY env var
+
+# Compile a task into a signed .kolm artifact
+job = k.compile(
+    task="answer support tickets in my voice",
+    examples_path="./tickets.jsonl",
+    base="qwen2.5-7b-instruct",
+)
+artifact_path = k.wait(job.id)            # downloads the .kolm
+
+# Run it locally - deterministic, no LLM round trip
+out = k.run(artifact_path, input="user can't log in")
+print(out.text)
+```
+
+### `recipe` - the Skills layer
 
 ```python
 from recipe import RecipeClient
 
-c = RecipeClient(api_key="ks_...")
+c = RecipeClient(api_key="ks_...")  # or RECIPE_API_KEY env var
 
-# 1) Show 4-8 examples once
+# Show four examples once
 r = c.synthesize(
     name="is-spam",
     positives=[
@@ -32,10 +56,10 @@ r = c.synthesize(
     output_spec={"type": "boolean"},
 )
 
-# 2) Run it forever
+# Run it forever - typically under 50 us, no API key required on public recipes
 out = c.run(recipe_id=r["concept_id"], input="BUY CRYPTO NOW")
-print(out["output"])     # → True
-print(out["latency_us"]) # → typically < 50 µs
+print(out["output"])     # => True
+print(out["latency_us"]) # => typically under 50
 ```
 
 ## Drop-in replacements for repeat LLM-as-judge calls
@@ -43,47 +67,36 @@ print(out["latency_us"]) # → typically < 50 µs
 ```python
 from recipe import recipe
 
-recipe.is_spam("WIN free Bitcoin")            # → True
-recipe.classify_intent("how do I cancel")     # → "support"
-recipe.detect_language("c'est la vie")        # → "french"
-recipe.classify_issue("the deploy crashed")   # → "bug"
+recipe.is_spam("WIN free Bitcoin")            # => True
+recipe.classify_intent("how do I cancel")     # => "support"
+recipe.detect_language("c'est la vie")        # => "french"
+recipe.classify_issue("the deploy crashed")   # => "bug"
 ```
 
-These hit the public registry of curated Recipes — no API key required.
+These hit the public registry - no API key required.
 
 ## CLI
 
 ```bash
-pip install kolmogorov-recipe
+cd sdk/python
+pip install -e .
 export RECIPE_API_KEY=ks_...
 
 recipe run is-spam "WIN free Bitcoin"
-recipe synthesize examples.json
-recipe list --tag classifier
-recipe stats cpt_xxx
-recipe waitlist you@example.com "extract addresses from emails"
 ```
 
-## Get a key
+## Configuration
 
-Free 10,000 recipe-calls/month, no credit card:
+| Env var          | Default              | Purpose                              |
+|------------------|----------------------|--------------------------------------|
+| `KOLM_API_KEY`   | _(none)_             | Bearer token for the compile/run API |
+| `KOLM_BASE`      | `https://kolm.ai`    | Override base URL (self-hosted)      |
+| `RECIPE_API_KEY` | _(none)_             | Bearer token for the recipe API      |
 
-```bash
-curl -X POST https://kolm.ai/v1/signup \
-  -H "Content-Type: application/json" \
-  -d '{"email":"you@example.com"}'
-```
+## Honest envelope
 
-## Three pillars
-
-| Pillar | What it does | Today |
-|---|---|---|
-| **Skills** | Deterministic JS classifiers, microsecond runs | this package |
-| **Recipes** | Compose skills into pipelines, signed `.kolm` artifacts | shipped — `kolm.ai` |
-| **Specialists** | Distill traffic into a fine-tuned LoRA you keep forever | shipped — `/v1/specialists/auto-distill` |
-
-> Show how once. Run forever.
+The Python client never sugars away non-2xx responses - `KolmError(status, body)` is raised verbatim so you can log the upstream response and decide how to react.
 
 ## License
 
-MIT © [Kolmogorov](https://kolm.ai)
+Apache-2.0.

@@ -4,49 +4,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Account · kolm.ai</title>
+<title>Account guide · kolm.ai</title>
 <meta name="description" content="Manage your kolm account, API key, compile defaults, and provider settings.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <link rel="canonical" href="https://kolm.ai/account">
-<meta property="og:title" content="Account · kolm" />
-<meta property="og:description" content="Plan, usage, API key, provider keys, and defaults. One consistent place." />
-<meta property="og:image" content="https://kolm.ai/og-card.svg" />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary_large_image" />
+<meta property="og:title" content="Account guide · kolm.ai">
+<meta property="og:description" content="Manage your kolm account, API key, compile defaults, and provider settings.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
-  <meta property="og:url" content="https://kolm.ai/account">
+ <meta property="og:url" content="https://kolm.ai/account">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/account",
-  "description": "Manage your kolm account, API key, compile defaults, and provider settings.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/account",
+ "description": "Manage your kolm account, API key, compile defaults, and provider settings.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:title" content="Account guide · kolm.ai">
+<meta name="twitter:description" content="Manage your kolm account, API key, compile defaults, and provider settings.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -197,295 +202,295 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions">
-      <a href="/docs">Help</a>
-      <a class="cta" href="/dashboard#dash-compile">New compile &rarr;</a>
-    </div>
-  </div>
+ <div class="site-actions">
+ <a href="/docs">Help</a>
+ <a class="cta" href="/dashboard#dash-compile">New compile &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main class="page-main">
-  <section class="page-head">
-    <div>
-      <div class="eyebrow"><span class="pulse"></span>account control plane</div>
-      <h1>Account.</h1>
-      <p class="lede">Plan, usage, API key, provider keys, and defaults. One page, every control wired up.</p>
-      <p class="lede" style="margin-top:8px;font-size:13.5px;color:var(--ink-faint)">
-        What this page does: shows your plan, usage, key, and stored defaults; runs sign in, sign out, key rotation, plan change, cancel, and delete. What it does not do: bulk export, seat invites (see <a href="/teams">/teams</a>), or PHI purge (operator-run; email <a href="mailto:dev@kolm.ai?subject=Account%20purge">dev@kolm.ai</a>).
-      </p>
-    </div>
-  </section>
+<main id="main" class="page-main">
+ <section class="page-head">
+ <div>
+ <div class="eyebrow"><span class="pulse"></span>account control plane</div>
+ <h1>Account.</h1>
+ <p class="lede">Plan, usage, API key, provider keys, and defaults. One page, every control wired up.</p>
+ <p class="lede" style="margin-top:8px;font-size:13.5px;color:var(--ink-faint)">
+ What this page does: shows your plan, usage, key, and stored defaults; runs sign in, sign out, key rotation, plan change, cancel, and delete. What it does not do: bulk export, seat invites (see <a href="/teams">/teams</a>), or PHI purge (operator-run; email <a href="mailto:dev@kolm.ai?subject=Account%20purge">dev@kolm.ai</a>).
+ </p>
+ </div>
+ </section>
 
-  <section id="acct-empty" class="card account-auth" hidden>
-    <h2>No key in this browser.</h2>
-    <p>Paste an existing API key or create a free account. The server validates the key before the dashboard loads.</p>
-    <div class="toolbar">
-      <input id="acct-paste" class="grow mono" type="text" placeholder="ks_..." autocomplete="off" spellcheck="false" aria-label="API key">
-      <button id="acct-paste-btn" class="btn primary" type="button">Sign in</button>
-      <a class="btn ghost" href="/signup">Create account</a>
-    </div>
-    <p style="margin:10px 0 0;font-size:12.5px;color:var(--ink-faint);font-family:var(--mono)">
-      Prefer Google or GitHub? <a href="/signin">Sign in with OAuth</a>. New here? <a href="/pricing">Pick a plan</a> first.
-    </p>
-  </section>
+ <section id="acct-empty" class="card account-auth" hidden>
+ <h2>No key in this browser.</h2>
+ <p>Paste an existing API key or create a free account. The server validates the key before the dashboard loads.</p>
+ <div class="toolbar">
+ <input id="acct-paste" class="grow mono" type="text" placeholder="ks_..." autocomplete="off" spellcheck="false" aria-label="API key">
+ <button id="acct-paste-btn" class="btn primary" type="button">Sign in</button>
+ <a class="btn ghost" href="/signup">Create account</a>
+ </div>
+ <p style="margin:10px 0 0;font-size:12.5px;color:var(--ink-faint);font-family:var(--mono)">
+ Prefer Google or GitHub? <a href="/signin">Sign in with OAuth</a>. New here? <a href="/pricing">Pick a plan</a> first.
+ </p>
+ </section>
 
-  <section id="acct-loaded" hidden>
-    <div id="billing-banner" class="card" hidden style="margin-bottom:18px;border-color:var(--accent);background:var(--bg-elev);padding:14px 18px;display:flex;align-items:flex-start;gap:14px">
-      <strong id="billing-banner-title" style="color:var(--accent)">Billing</strong>
-      <div style="flex:1">
-        <p id="billing-banner-msg" style="margin:0;color:var(--ink-mute);font-size:14px"></p>
-        <p style="margin:6px 0 0 0"><a id="billing-banner-cta" href="/pricing" class="btn primary" style="margin-top:6px">Complete payment</a></p>
-      </div>
-    </div>
+ <section id="acct-loaded" hidden>
+ <div id="billing-banner" class="card" hidden style="margin-bottom:18px;border-color:var(--accent);background:var(--bg-elev);padding:14px 18px;display:flex;align-items:flex-start;gap:14px">
+ <strong id="billing-banner-title" style="color:var(--accent)">Billing</strong>
+ <div style="flex:1">
+ <p id="billing-banner-msg" style="margin:0;color:var(--ink-mute);font-size:14px"></p>
+ <p style="margin:6px 0 0 0"><a id="billing-banner-cta" href="/pricing" class="btn primary" style="margin-top:6px">Complete payment</a></p>
+ </div>
+ </div>
 
-    <div class="metric-grid">
-      <div class="metric-card"><div class="label">Plan</div><div class="value" id="acct-plan">...</div><p id="acct-id"></p></div>
-      <div class="metric-card"><div class="label">Used</div><div class="value" id="acct-used">...</div><p id="acct-pct"></p></div>
-      <div class="metric-card"><div class="label">Remaining</div><div class="value" id="acct-remaining">...</div><p id="acct-quota"></p></div>
-    </div>
+ <div class="metric-grid">
+ <div class="metric-card"><div class="label">Plan</div><div class="value" id="acct-plan">...</div><p id="acct-id"></p></div>
+ <div class="metric-card"><div class="label">Used</div><div class="value" id="acct-used">...</div><p id="acct-pct"></p></div>
+ <div class="metric-card"><div class="label">Remaining</div><div class="value" id="acct-remaining">...</div><p id="acct-quota"></p></div>
+ </div>
 
-    <section class="card" style="margin:18px 0;border-color:rgba(126,240,210,0.32);background:linear-gradient(135deg,rgba(126,240,210,0.04),transparent);padding:18px 20px">
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:space-between">
-        <div>
-          <h2 style="margin:0 0 4px;font-size:17px">Run the value loop</h2>
-          <p style="margin:0;color:var(--ink-mute);font-size:14px">Capture &rarr; compile &rarr; verify. Most accounts ship their first Specialist in under twenty minutes.</p>
-        </div>
-        <div class="toolbar" style="gap:8px;flex-wrap:wrap">
-          <a class="btn primary" href="/captures">Open captures inbox</a>
-          <a class="btn" href="/builder">Open builder</a>
-          <a class="btn ghost" href="/value-loop">See the loop</a>
-        </div>
-      </div>
-    </section>
+ <section class="card" style="margin:18px 0;border-color:rgba(126,240,210,0.32);background:linear-gradient(135deg,rgba(126,240,210,0.04),transparent);padding:18px 20px">
+ <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:space-between">
+ <div>
+ <h2 style="margin:0 0 4px;font-size:17px">Run the value loop</h2>
+ <p style="margin:0;color:var(--ink-mute);font-size:14px">Capture &rarr; compile &rarr; verify. Most accounts ship their first Specialist in under twenty minutes.</p>
+ </div>
+ <div class="toolbar" style="gap:8px;flex-wrap:wrap">
+ <a class="btn primary" href="/captures">Open captures inbox</a>
+ <a class="btn" href="/builder">Open builder</a>
+ <a class="btn ghost" href="/value-loop">See the loop</a>
+ </div>
+ </div>
+ </section>
 
-    <div class="settings-grid">
-      <section class="card settings-card">
-        <h2>API key</h2>
-        <p>Treat this like a password. Rotation immediately invalidates the old key.</p>
-        <label class="field">
-          <span class="lbl">Current key</span>
-          <input id="acct-key" class="mono" type="text" readonly>
-        </label>
-        <div class="toolbar">
-          <button id="acct-show" class="btn ghost" type="button">Show</button>
-          <button id="acct-copy" class="btn ghost" type="button">Copy</button>
-          <button id="acct-rotate" class="btn accent" type="button">Rotate</button>
-        </div>
-        <p id="acct-key-status" class="delta" aria-live="polite"></p>
-        <p class="fineprint" style="margin:10px 0 0;font-size:12px;color:var(--ink-faint);font-family:var(--mono);line-height:1.6">
-          API keys are rate-limited per plan. See <a href="/pricing">/pricing</a> for tiers and the <code>X-RateLimit-Remaining</code> response header. Storage and key handling are covered on <a href="/security">/security</a>.
-        </p>
-      </section>
+ <div class="settings-grid">
+ <section class="card settings-card">
+ <h2>API key</h2>
+ <p>Treat this like a password. Rotation immediately invalidates the old key.</p>
+ <label class="field">
+ <span class="lbl">Current key</span>
+ <input id="acct-key" class="mono" type="text" readonly>
+ </label>
+ <div class="toolbar">
+ <button id="acct-show" class="btn ghost" type="button">Show</button>
+ <button id="acct-copy" class="btn ghost" type="button">Copy</button>
+ <button id="acct-rotate" class="btn accent" type="button">Rotate</button>
+ </div>
+ <p id="acct-key-status" class="delta" aria-live="polite"></p>
+ <p class="fineprint" style="margin:10px 0 0;font-size:12px;color:var(--ink-faint);font-family:var(--mono);line-height:1.6">
+ API keys are rate-limited per plan. See <a href="/pricing">/pricing</a> for tiers and the <code>X-RateLimit-Remaining</code> response header. Storage and key handling are covered on <a href="/security">/security</a>.
+ </p>
+ </section>
 
-      <section class="card settings-card">
-        <h2>Compile defaults</h2>
-        <label class="field">
-          <span class="lbl">Base model</span>
-          <select id="cfg-base-model">
-            <option value="qwen2.5-3b-int4">qwen2.5-3b-int4</option>
-            <option value="qwen2.5-7b-int4">qwen2.5-7b-int4</option>
-            <option value="llama-3.2-3b-int4">llama-3.2-3b-int4</option>
-            <option value="phi-3.5-mini-int4">phi-3.5-mini-int4</option>
-          </select>
-        </label>
-        <label class="field">
-          <span class="lbl">Artifact tier</span>
-          <select id="cfg-tier">
-            <option value="recipe">recipe</option>
-            <option value="adapter">adapter</option>
-            <option value="specialist">specialist</option>
-            <option value="bundle">bundle</option>
-          </select>
-        </label>
-        <label class="field">
-          <span class="lbl">K-score floor</span>
-          <input id="cfg-k-threshold" type="text" inputmode="decimal" value="0.90">
-        </label>
-        <!-- W243 compile wizard knobs. The 4 selects mirror /compile.html (mc-*),
-             cmdCompile + cmdDistill (--class, --tier, --target, --multi-device),
-             cmdTui (TUI_VALID_*), and the /v1/compile + /v1/specialists/auto-distill
-             validation contracts. Names are the assertion targets for W243 tests. -->
-        <label class="field">
-          <span class="lbl">Recipe class</span>
-          <select id="cfg-recipe-class">
-            <option value="rule">rule</option>
-            <option value="synthesized_rule">synthesized_rule</option>
-            <option value="compiled_rule">compiled_rule</option>
-            <option value="distilled_model">distilled_model</option>
-          </select>
-        </label>
-        <label class="field">
-          <span class="lbl">Hardware tier</span>
-          <select id="cfg-hw-tier">
-            <option value="auto">auto</option>
-            <option value="cpu-server">cpu-server</option>
-            <option value="3090">3090</option>
-            <option value="4090">4090</option>
-            <option value="5090">5090</option>
-            <option value="m4-max-128">m4-max-128</option>
-            <option value="a100-80">a100-80</option>
-            <option value="h100-80">h100-80</option>
-            <option value="h200-141">h200-141</option>
-            <option value="dgx-spark">dgx-spark</option>
-            <option value="m3-ultra-512">m3-ultra-512</option>
-          </select>
-        </label>
-        <label class="field">
-          <span class="lbl">Output target</span>
-          <select id="cfg-output-target">
-            <option value="gguf">gguf</option>
-            <option value="onnx">onnx</option>
-            <option value="safetensors">safetensors</option>
-            <option value="coreml">coreml</option>
-            <option value="mlx">mlx</option>
-            <option value="executorch">executorch</option>
-            <option value="tensorrt">tensorrt</option>
-            <option value="native-c">native-c</option>
-            <option value="native-rust">native-rust</option>
-            <option value="wasm">wasm</option>
-          </select>
-        </label>
-        <label class="field">
-          <span class="lbl">Multi-device targets</span>
-          <select id="cfg-multi-device" multiple size="4">
-            <option value="phone-ios">phone-ios</option>
-            <option value="phone-android">phone-android</option>
-            <option value="laptop-cpu">laptop-cpu</option>
-            <option value="browser-wasm">browser-wasm</option>
-            <option value="edge-jetson">edge-jetson</option>
-            <option value="server-cuda">server-cuda</option>
-          </select>
-        </label>
-      </section>
+ <section class="card settings-card">
+ <h2>Compile defaults</h2>
+ <label class="field">
+ <span class="lbl">Base model</span>
+ <select id="cfg-base-model">
+ <option value="qwen2.5-3b-int4">qwen2.5-3b-int4</option>
+ <option value="qwen2.5-7b-int4">qwen2.5-7b-int4</option>
+ <option value="llama-3.2-3b-int4">llama-3.2-3b-int4</option>
+ <option value="phi-3.5-mini-int4">phi-3.5-mini-int4</option>
+ </select>
+ </label>
+ <label class="field">
+ <span class="lbl">Artifact tier</span>
+ <select id="cfg-tier">
+ <option value="recipe">recipe</option>
+ <option value="adapter">adapter</option>
+ <option value="specialist">specialist</option>
+ <option value="bundle">bundle</option>
+ </select>
+ </label>
+ <label class="field">
+ <span class="lbl">K-score floor</span>
+ <input id="cfg-k-threshold" type="text" inputmode="decimal" value="0.90">
+ </label>
+ <!-- W243 compile wizard knobs. The 4 selects mirror /compile.html (mc-*),
+ cmdCompile + cmdDistill (--class, --tier, --target, --multi-device),
+ cmdTui (TUI_VALID_*), and the /v1/compile + /v1/specialists/auto-distill
+ validation contracts. Names are the assertion targets for W243 tests. -->
+ <label class="field">
+ <span class="lbl">Recipe class</span>
+ <select id="cfg-recipe-class">
+ <option value="rule">rule</option>
+ <option value="synthesized_rule">synthesized_rule</option>
+ <option value="compiled_rule">compiled_rule</option>
+ <option value="distilled_model">distilled_model</option>
+ </select>
+ </label>
+ <label class="field">
+ <span class="lbl">Hardware tier</span>
+ <select id="cfg-hw-tier">
+ <option value="auto">auto</option>
+ <option value="cpu-server">cpu-server</option>
+ <option value="3090">3090</option>
+ <option value="4090">4090</option>
+ <option value="5090">5090</option>
+ <option value="m4-max-128">m4-max-128</option>
+ <option value="a100-80">a100-80</option>
+ <option value="h100-80">h100-80</option>
+ <option value="h200-141">h200-141</option>
+ <option value="dgx-spark">dgx-spark</option>
+ <option value="m3-ultra-512">m3-ultra-512</option>
+ </select>
+ </label>
+ <label class="field">
+ <span class="lbl">Output target</span>
+ <select id="cfg-output-target">
+ <option value="gguf">gguf</option>
+ <option value="onnx">onnx</option>
+ <option value="safetensors">safetensors</option>
+ <option value="coreml">coreml</option>
+ <option value="mlx">mlx</option>
+ <option value="executorch">executorch</option>
+ <option value="tensorrt">tensorrt</option>
+ <option value="native-c">native-c</option>
+ <option value="native-rust">native-rust</option>
+ <option value="wasm">wasm</option>
+ </select>
+ </label>
+ <label class="field">
+ <span class="lbl">Multi-device targets</span>
+ <select id="cfg-multi-device" multiple size="4">
+ <option value="phone-ios">phone-ios</option>
+ <option value="phone-android">phone-android</option>
+ <option value="laptop-cpu">laptop-cpu</option>
+ <option value="browser-wasm">browser-wasm</option>
+ <option value="edge-jetson">edge-jetson</option>
+ <option value="server-cuda">server-cuda</option>
+ </select>
+ </label>
+ </section>
 
-      <section class="card settings-card">
-        <h2>Providers</h2>
-        <p>Bring your own model gateway. Cleartext keys stay in this browser session; persisted values are hashes.</p>
-        <label class="field">
-          <span class="lbl">Anthropic</span>
-          <input id="byok-anthropic" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
-        </label>
-        <label class="field">
-          <span class="lbl">OpenAI</span>
-          <input id="byok-openai" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
-        </label>
-        <label class="field">
-          <span class="lbl">Provider routing</span>
-          <select id="cfg-routing">
-            <option value="auto">auto</option>
-            <option value="anthropic-only">anthropic-only</option>
-            <option value="openai-only">openai-only</option>
-          </select>
-        </label>
-      </section>
+ <section class="card settings-card">
+ <h2>Providers</h2>
+ <p>Bring your own model gateway. Cleartext keys stay in this browser session; persisted values are hashes.</p>
+ <label class="field">
+ <span class="lbl">Anthropic</span>
+ <input id="byok-anthropic" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+ </label>
+ <label class="field">
+ <span class="lbl">OpenAI</span>
+ <input id="byok-openai" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
+ </label>
+ <label class="field">
+ <span class="lbl">Provider routing</span>
+ <select id="cfg-routing">
+ <option value="auto">auto</option>
+ <option value="anthropic-only">anthropic-only</option>
+ <option value="openai-only">openai-only</option>
+ </select>
+ </label>
+ </section>
 
-      <section class="card settings-card">
-        <h2>Publishing</h2>
-        <label class="field">
-          <span class="lbl">Display name</span>
-          <input id="pub-displayname" type="text" autocomplete="off">
-        </label>
-        <label class="field">
-          <span class="lbl">Public profile</span>
-          <input id="pub-url" type="text" readonly>
-        </label>
-        <label class="field">
-          <span class="lbl">Receipt webhook</span>
-          <input id="pub-webhook" type="url" placeholder="https://example.com/receipts" autocomplete="off">
-        </label>
-      </section>
+ <section class="card settings-card">
+ <h2>Publishing</h2>
+ <label class="field">
+ <span class="lbl">Display name</span>
+ <input id="pub-displayname" type="text" autocomplete="off">
+ </label>
+ <label class="field">
+ <span class="lbl">Public profile</span>
+ <input id="pub-url" type="text" readonly>
+ </label>
+ <label class="field">
+ <span class="lbl">Receipt webhook</span>
+ <input id="pub-webhook" type="url" placeholder="https://example.com/receipts" autocomplete="off">
+ </label>
+ </section>
 
-      <section class="card settings-card">
-        <h2>Plan &amp; billing</h2>
-        <p>Self-serve. Change plans, cancel, or delete the account. Stripe payment links open in a new tab; the plan flips after Stripe confirms.</p>
-        <label class="field">
-          <span class="lbl">Switch plan</span>
-          <select id="plan-select">
-            <option value="free">Developer (free)</option>
-            <option value="starter">Starter . $9 / mo . $90 / yr</option>
-            <option value="pro">Pro . $49 / mo . $490 / yr</option>
-            <option value="teams">Teams . from $149 / mo (2 seats) . $1,490 / yr</option>
-            <option value="business">Business . $1,499 / mo . $14,990 / yr</option>
-            <option value="enterprise">Enterprise . $2,999 / mo . $29,990 / yr</option>
-          </select>
-        </label>
-        <div class="toolbar" style="flex-wrap:wrap;gap:8px">
-          <button id="plan-change" class="btn primary" type="button">Change plan</button>
-          <button id="plan-cancel" class="btn ghost" type="button">Cancel (drop to free)</button>
-        </div>
-        <p id="plan-status" class="delta" aria-live="polite"></p>
-      </section>
+ <section class="card settings-card">
+ <h2>Plan &amp; billing</h2>
+ <p>Self-serve. Change plans, cancel, or delete the account. Stripe payment links open in a new tab; the plan flips after Stripe confirms.</p>
+ <label class="field">
+ <span class="lbl">Switch plan</span>
+ <select id="plan-select">
+ <option value="free">Developer (free)</option>
+ <option value="starter">Starter . $9 / mo . $90 / yr</option>
+ <option value="pro">Pro . $49 / mo . $490 / yr</option>
+ <option value="teams">Teams . from $149 / mo (2 seats) . $1,490 / yr</option>
+ <option value="business">Business . $1,499 / mo . $14,990 / yr</option>
+ <option value="enterprise">Enterprise . $2,999 / mo . $29,990 / yr</option>
+ </select>
+ </label>
+ <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+ <button id="plan-change" class="btn primary" type="button">Change plan</button>
+ <button id="plan-cancel" class="btn ghost" type="button">Cancel (drop to free)</button>
+ </div>
+ <p id="plan-status" class="delta" aria-live="polite"></p>
+ </section>
 
-      <section class="card settings-card danger-card">
-        <h2>Session &amp; account</h2>
-        <p>Sign out clears local browser keys. <b>Delete account</b> deactivates the tenant: the API key is revoked, billing cancels, and the session clears. Concepts, versions, observations, invocations, compile jobs, and artifact zips are retained on the tenant row until you request a hard purge. For an operator-run purge, email <a href="mailto:dev@kolm.ai?subject=Account%20purge">dev@kolm.ai</a>.</p>
-        <div class="toolbar" style="flex-wrap:wrap;gap:8px">
-          <button id="acct-logout" class="btn ghost" type="button">Sign out</button>
-          <button id="acct-delete" class="btn ghost" type="button" style="border-color:rgba(255,107,145,0.32);color:#ff6b91">Delete account</button>
-        </div>
-        <p id="acct-delete-status" class="delta" aria-live="polite"></p>
-      </section>
-    </div>
-  </section>
+ <section class="card settings-card danger-card">
+ <h2>Session &amp; account</h2>
+ <p>Sign out clears local browser keys. <b>Delete account</b> deactivates the tenant: the API key is revoked, billing cancels, and the session clears. Concepts, versions, observations, invocations, compile jobs, and artifact zips are retained on the tenant row until you request a hard purge. For an operator-run purge, email <a href="mailto:dev@kolm.ai?subject=Account%20purge">dev@kolm.ai</a>.</p>
+ <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+ <button id="acct-logout" class="btn ghost" type="button">Sign out</button>
+ <button id="acct-delete" class="btn ghost" type="button" style="border-color:rgba(255,107,145,0.32);color:#ff6b91">Delete account</button>
+ </div>
+ <p id="acct-delete-status" class="delta" aria-live="polite"></p>
+ </section>
+ </div>
+ </section>
 </main>
 
 <footer class="site-footer">
-  <div class="wrap">
-    <div class="meta">
-      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
-    </div>
-    <div class="links">
-      <div>
-        <div class="col-h">build</div>
-        <a href="/captures">captures</a>
-        <a href="/compile">compile</a>
-        <a href="/run">run</a>
-        <a href="/docs">recall</a>
-        <a href="/builder">builder</a>
-        <a href="/sdks">sdks</a>
-        <a href="/quickstart">quickstart</a>
-        <a href="/cli">cli</a>
-      </div>
-      <div>
-        <div class="col-h">deploy</div>
-        <a href="/teams">teams</a>
-        <a href="/tunnels">remote access</a>
-        <a href="/byoc">byoc cloud</a>
-        <a href="/airgap">airgap</a>
-        <a href="/enterprise">enterprise</a>
-      </div>
-      <div>
-        <div class="col-h">proof</div>
-        <a href="/benchmarks">benchmarks</a>
-        <a href="/compare">compare</a>
-        <a href="/research">research</a>
-        <a href="/k-score">k-score</a>
-        <a href="/leaderboard">registry</a>
-        <a href="/spec">rs-1 spec</a>
-        <a href="/case-studies">case studies</a>
-      </div>
-      <div>
-        <div class="col-h">industries</div>
-        <a href="/healthcare">healthcare</a>
-        <a href="/finance">finance</a>
-        <a href="/legal">legal</a>
-        <a href="/device">device</a>
-        <a href="/docs">cookbook</a>
-        <a href="/compliance-packs">compliance packs</a>
-      </div>
-      <div>
-        <div class="col-h">company</div>
-        <a href="/pricing">pricing</a>
-        <a href="/docs">docs</a>
-        <a href="/roadmap">roadmap</a>
-        <a href="/manifesto">manifesto</a>
-        <a href="/roi">roi</a>
-      </div>
-    </div>
-    <small class="footer-tag">
-      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
-    </small>
-  </div>
+ <div class="wrap">
+ <div class="meta">
+ kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+ </div>
+ <div class="links">
+ <div>
+ <div class="col-h">build</div>
+ <a href="/captures">captures</a>
+ <a href="/compile">compile</a>
+ <a href="/run">run</a>
+ <a href="/docs">recall</a>
+ <a href="/builder">builder</a>
+ <a href="/sdks">sdks</a>
+ <a href="/quickstart">quickstart</a>
+ <a href="/cli">cli</a>
+ </div>
+ <div>
+ <div class="col-h">deploy</div>
+ <a href="/teams">teams</a>
+ <a href="/tunnels">remote access</a>
+ <a href="/byoc">byoc cloud</a>
+ <a href="/airgap">airgap</a>
+ <a href="/enterprise">enterprise</a>
+ </div>
+ <div>
+ <div class="col-h">proof</div>
+ <a href="/benchmarks">benchmarks</a>
+ <a href="/compare">compare</a>
+ <a href="/research">research</a>
+ <a href="/k-score">k-score</a>
+ <a href="/leaderboard">registry</a>
+ <a href="/spec">rs-1 spec</a>
+ <a href="/case-studies">case studies</a>
+ </div>
+ <div>
+ <div class="col-h">industries</div>
+ <a href="/healthcare">healthcare</a>
+ <a href="/finance">finance</a>
+ <a href="/legal">legal</a>
+ <a href="/device">device</a>
+ <a href="/docs">cookbook</a>
+ <a href="/compliance-packs">compliance packs</a>
+ </div>
+ <div>
+ <div class="col-h">company</div>
+ <a href="/pricing">pricing</a>
+ <a href="/docs">docs</a>
+ <a href="/roadmap">roadmap</a>
+ <a href="/manifesto">manifesto</a>
+ <a href="/roi">roi</a>
+ </div>
+ </div>
+ <small class="footer-tag">
+ <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+ </small>
+ </div>
 </footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -494,307 +499,307 @@
 <script src="/escape.js"></script>
 <script>
 (function () {
-  var KS = window.KS;
-  var KEY_RE = /^ks_[0-9a-f]{32}$/;
-  var $ = function (id) { return document.getElementById(id); };
+ var KS = window.KS;
+ var KEY_RE = /^ks_[0-9a-f]{32}$/;
+ var $ = function (id) { return document.getElementById(id); };
 
-  function maskKey(key) {
-    if (!key) return 'ks_...';
-    if (key.length <= 14) return key;
-    return key.slice(0, 8) + '...' + key.slice(-4);
-  }
+ function maskKey(key) {
+ if (!key) return 'ks_...';
+ if (key.length <= 14) return key;
+ return key.slice(0, 8) + '...' + key.slice(-4);
+ }
 
-  function fmt(n) {
-    return Number(n || 0).toLocaleString();
-  }
+ function fmt(n) {
+ return Number(n || 0).toLocaleString();
+ }
 
-  function pct(used, quota) {
-    return Math.min(100, Math.round((Number(used || 0) / Math.max(1, Number(quota || 0))) * 100));
-  }
+ function pct(used, quota) {
+ return Math.min(100, Math.round((Number(used || 0) / Math.max(1, Number(quota || 0))) * 100));
+ }
 
-  function lsGet(key, fallback) {
-    try {
-      var value = localStorage.getItem('kolm:account:' + key);
-      return value == null ? fallback : JSON.parse(value);
-    } catch (_) {
-      return fallback;
-    }
-  }
+ function lsGet(key, fallback) {
+ try {
+ var value = localStorage.getItem('kolm:account:' + key);
+ return value == null ? fallback : JSON.parse(value);
+ } catch (_) {
+ return fallback;
+ }
+ }
 
-  function lsSet(key, value) {
-    try { localStorage.setItem('kolm:account:' + key, JSON.stringify(value)); } catch (_) {}
-  }
+ function lsSet(key, value) {
+ try { localStorage.setItem('kolm:account:' + key, JSON.stringify(value)); } catch (_) {}
+ }
 
-  async function hashValue(value) {
-    if (!value || !crypto.subtle) return '';
-    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
-    return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
-  }
+ async function hashValue(value) {
+ if (!value || !crypto.subtle) return '';
+ var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+ return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+ }
 
-  function setStatus(message) {
-    $('acct-key-status').textContent = message || '';
-    if (message) setTimeout(function () { $('acct-key-status').textContent = ''; }, 2600);
-  }
+ function setStatus(message) {
+ $('acct-key-status').textContent = message || '';
+ if (message) setTimeout(function () { $('acct-key-status').textContent = ''; }, 2600);
+ }
 
-  async function loadAccount() {
-    // Try the API call first. Cookie auth (OAuth) works without localStorage.
-    // Only show the empty state if the call actually 401s.
-    try {
-      var account = await KS.api('/v1/account');
-      // Mirror api_key into localStorage so legacy code paths see it.
-      if (account.api_key && !KS.apiKey()) {
-        KS.setApiKey(account.api_key);
-      }
-      var key = account.api_key || KS.apiKey() || '';
-      $('acct-empty').hidden = true;
-      $('acct-loaded').hidden = false;
-      $('acct-plan').textContent = account.plan || (account.admin ? 'admin' : 'free');
-      $('acct-id').textContent = account.id || account.tenant || '';
-      $('acct-used').textContent = fmt(account.used);
-      $('acct-quota').textContent = 'of ' + fmt(account.quota) + ' per month';
-      $('acct-remaining').textContent = fmt(account.remaining == null ? Math.max(0, Number(account.quota || 0) - Number(account.used || 0)) : account.remaining);
-      $('acct-pct').textContent = pct(account.used, account.quota) + '% used';
-      $('acct-key').value = key ? maskKey(key) : '(session . no key exposed)';
-      renderBillingBanner(account);
-      initSettings(account);
-    } catch (e) {
-      if (e && e.status === 401) {
-        KS.clearApiKey();
-        $('acct-empty').hidden = false;
-        $('acct-loaded').hidden = true;
-        KS.toast('Sign in or paste an API key.', 3200);
-      } else {
-        $('acct-empty').hidden = false;
-        $('acct-loaded').hidden = true;
-        KS.toast('Could not reach the server. Try again.', 3200);
-      }
-    }
-  }
+ async function loadAccount() {
+ // Try the API call first. Cookie auth (OAuth) works without localStorage.
+ // Only show the empty state if the call actually 401s.
+ try {
+ var account = await KS.api('/v1/account');
+ // Mirror api_key into localStorage so legacy code paths see it.
+ if (account.api_key && !KS.apiKey()) {
+ KS.setApiKey(account.api_key);
+ }
+ var key = account.api_key || KS.apiKey() || '';
+ $('acct-empty').hidden = true;
+ $('acct-loaded').hidden = false;
+ $('acct-plan').textContent = account.plan || (account.admin ? 'admin' : 'free');
+ $('acct-id').textContent = account.id || account.tenant || '';
+ $('acct-used').textContent = fmt(account.used);
+ $('acct-quota').textContent = 'of ' + fmt(account.quota) + ' per month';
+ $('acct-remaining').textContent = fmt(account.remaining == null ? Math.max(0, Number(account.quota || 0) - Number(account.used || 0)) : account.remaining);
+ $('acct-pct').textContent = pct(account.used, account.quota) + '% used';
+ $('acct-key').value = key ? maskKey(key) : '(session . no key exposed)';
+ renderBillingBanner(account);
+ initSettings(account);
+ } catch (e) {
+ if (e && e.status === 401) {
+ KS.clearApiKey();
+ $('acct-empty').hidden = false;
+ $('acct-loaded').hidden = true;
+ KS.toast('Sign in or paste an API key.', 3200);
+ } else {
+ $('acct-empty').hidden = false;
+ $('acct-loaded').hidden = true;
+ KS.toast('Could not reach the server. Try again.', 3200);
+ }
+ }
+ }
 
-  function renderBillingBanner(account) {
-    var banner = $('billing-banner');
-    var title = $('billing-banner-title');
-    var msg = $('billing-banner-msg');
-    var cta = $('billing-banner-cta');
-    var status = account.billing_status || (account.plan === 'free' ? 'free' : 'active');
-    cta.style.display = 'none';
-    if (account.pending_plan && status === 'pending') {
-      banner.hidden = false;
-      banner.style.borderColor = 'var(--accent)';
-      title.textContent = 'Payment required';
-      title.style.color = 'var(--accent)';
-      msg.textContent = 'Your ' + account.pending_plan + ' tier is on hold until Stripe confirms payment. Complete checkout to activate.';
-      // Re-trigger the change-plan flow to fetch the billing URL.
-      cta.style.display = 'inline-block';
-      cta.textContent = 'Complete payment';
-      cta.onclick = async function (event) {
-        event.preventDefault();
-        try {
-          var body = await KS.api('/v1/account/change-plan', { method: 'POST', body: JSON.stringify({ plan: account.pending_plan }) });
-          if (body.billing_url) window.location.assign(body.billing_url);
-        } catch (_) {}
-      };
-      return;
-    }
-    if (status === 'past_due') {
-      banner.hidden = false;
-      banner.style.borderColor = '#ff6b91';
-      title.textContent = 'Payment failed';
-      title.style.color = '#ff6b91';
-      msg.textContent = 'Stripe could not charge your card for the ' + account.plan + ' tier. We will retry over the next 7 days. Update your payment method or cancel any time.';
-      cta.style.display = 'inline-block';
-      cta.textContent = 'Update payment method';
-      cta.onclick = async function (event) {
-        event.preventDefault();
-        try {
-          var body = await KS.api('/v1/account/change-plan', { method: 'POST', body: JSON.stringify({ plan: account.plan }) });
-          if (body.billing_url) window.location.assign(body.billing_url);
-        } catch (_) {}
-      };
-      return;
-    }
-    if (status === 'cancelled') {
-      banner.hidden = false;
-      banner.style.borderColor = 'var(--line-strong)';
-      title.textContent = 'Subscription cancelled';
-      title.style.color = 'var(--ink-mute)';
-      msg.textContent = 'Your paid plan was cancelled. You are on the Developer (free) tier. Existing artifacts continue to verify.';
-      return;
-    }
-    banner.hidden = true;
-  }
+ function renderBillingBanner(account) {
+ var banner = $('billing-banner');
+ var title = $('billing-banner-title');
+ var msg = $('billing-banner-msg');
+ var cta = $('billing-banner-cta');
+ var status = account.billing_status || (account.plan === 'free' ? 'free' : 'active');
+ cta.style.display = 'none';
+ if (account.pending_plan && status === 'pending') {
+ banner.hidden = false;
+ banner.style.borderColor = 'var(--accent)';
+ title.textContent = 'Payment required';
+ title.style.color = 'var(--accent)';
+ msg.textContent = 'Your ' + account.pending_plan + ' tier is on hold until Stripe confirms payment. Complete checkout to activate.';
+ // Re-trigger the change-plan flow to fetch the billing URL.
+ cta.style.display = 'inline-block';
+ cta.textContent = 'Complete payment';
+ cta.onclick = async function (event) {
+ event.preventDefault();
+ try {
+ var body = await KS.api('/v1/account/change-plan', { method: 'POST', body: JSON.stringify({ plan: account.pending_plan }) });
+ if (body.billing_url) window.location.assign(body.billing_url);
+ } catch (_) {}
+ };
+ return;
+ }
+ if (status === 'past_due') {
+ banner.hidden = false;
+ banner.style.borderColor = '#ff6b91';
+ title.textContent = 'Payment failed';
+ title.style.color = '#ff6b91';
+ msg.textContent = 'Stripe could not charge your card for the ' + account.plan + ' tier. We will retry over the next 7 days. Update your payment method or cancel any time.';
+ cta.style.display = 'inline-block';
+ cta.textContent = 'Update payment method';
+ cta.onclick = async function (event) {
+ event.preventDefault();
+ try {
+ var body = await KS.api('/v1/account/change-plan', { method: 'POST', body: JSON.stringify({ plan: account.plan }) });
+ if (body.billing_url) window.location.assign(body.billing_url);
+ } catch (_) {}
+ };
+ return;
+ }
+ if (status === 'cancelled') {
+ banner.hidden = false;
+ banner.style.borderColor = 'var(--line-strong)';
+ title.textContent = 'Subscription cancelled';
+ title.style.color = 'var(--ink-mute)';
+ msg.textContent = 'Your paid plan was cancelled. You are on the Developer (free) tier. Existing artifacts continue to verify.';
+ return;
+ }
+ banner.hidden = true;
+ }
 
-  function initSettings(account) {
-    if (initSettings.done) return;
-    initSettings.done = true;
+ function initSettings(account) {
+ if (initSettings.done) return;
+ initSettings.done = true;
 
-    $('cfg-base-model').value = lsGet('compile.baseModel', 'qwen2.5-3b-int4');
-    $('cfg-tier').value = lsGet('compile.tier', 'adapter');
-    $('cfg-k-threshold').value = String(lsGet('compile.kThreshold', '0.90'));
-    $('cfg-routing').value = lsGet('byok.routing', 'auto');
-    $('pub-displayname').value = lsGet('publish.displayName', (account.id || account.tenant || 'team').slice(0, 24));
-    $('pub-webhook').value = lsGet('publish.webhook', '');
-    $('pub-url').value = 'kolm.ai/u/' + $('pub-displayname').value;
+ $('cfg-base-model').value = lsGet('compile.baseModel', 'qwen2.5-3b-int4');
+ $('cfg-tier').value = lsGet('compile.tier', 'adapter');
+ $('cfg-k-threshold').value = String(lsGet('compile.kThreshold', '0.90'));
+ $('cfg-routing').value = lsGet('byok.routing', 'auto');
+ $('pub-displayname').value = lsGet('publish.displayName', (account.id || account.tenant || 'team').slice(0, 24));
+ $('pub-webhook').value = lsGet('publish.webhook', '');
+ $('pub-url').value = 'kolm.ai/u/' + $('pub-displayname').value;
 
-    ['cfg-base-model', 'cfg-tier', 'cfg-k-threshold', 'cfg-routing', 'pub-webhook'].forEach(function (id) {
-      $(id).addEventListener('change', function (event) {
-        var map = {
-          'cfg-base-model': 'compile.baseModel',
-          'cfg-tier': 'compile.tier',
-          'cfg-k-threshold': 'compile.kThreshold',
-          'cfg-routing': 'byok.routing',
-          'pub-webhook': 'publish.webhook'
-        };
-        lsSet(map[id], event.target.value);
-        KS.toast('Saved.');
-      });
-    });
+ ['cfg-base-model', 'cfg-tier', 'cfg-k-threshold', 'cfg-routing', 'pub-webhook'].forEach(function (id) {
+ $(id).addEventListener('change', function (event) {
+ var map = {
+ 'cfg-base-model': 'compile.baseModel',
+ 'cfg-tier': 'compile.tier',
+ 'cfg-k-threshold': 'compile.kThreshold',
+ 'cfg-routing': 'byok.routing',
+ 'pub-webhook': 'publish.webhook'
+ };
+ lsSet(map[id], event.target.value);
+ KS.toast('Saved.');
+ });
+ });
 
-    $('pub-displayname').addEventListener('input', function (event) {
-      var next = event.target.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 24);
-      event.target.value = next;
-      $('pub-url').value = 'kolm.ai/u/' + (next || 'team');
-      lsSet('publish.displayName', next || 'team');
-    });
+ $('pub-displayname').addEventListener('input', function (event) {
+ var next = event.target.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 24);
+ event.target.value = next;
+ $('pub-url').value = 'kolm.ai/u/' + (next || 'team');
+ lsSet('publish.displayName', next || 'team');
+ });
 
-    ['anthropic', 'openai'].forEach(function (provider) {
-      var input = $('byok-' + provider);
-      var stored = lsGet('byok.' + provider, null);
-      if (stored && stored.length) input.value = '*'.repeat(Math.min(stored.length, 40));
-      input.addEventListener('change', async function () {
-        var value = input.value.trim();
-        if (!value || /^\*+$/.test(value)) return;
-        var hash = await hashValue(value);
-        lsSet('byok.' + provider, { hash: hash, length: value.length });
-        input.value = '*'.repeat(Math.min(value.length, 40));
-        KS.toast('Saved ' + provider + ' key hash.');
-      });
-    });
-  }
+ ['anthropic', 'openai'].forEach(function (provider) {
+ var input = $('byok-' + provider);
+ var stored = lsGet('byok.' + provider, null);
+ if (stored && stored.length) input.value = '*'.repeat(Math.min(stored.length, 40));
+ input.addEventListener('change', async function () {
+ var value = input.value.trim();
+ if (!value || /^\*+$/.test(value)) return;
+ var hash = await hashValue(value);
+ lsSet('byok.' + provider, { hash: hash, length: value.length });
+ input.value = '*'.repeat(Math.min(value.length, 40));
+ KS.toast('Saved ' + provider + ' key hash.');
+ });
+ });
+ }
 
-  $('acct-paste-btn').addEventListener('click', async function () {
-    var key = $('acct-paste').value.trim();
-    if (!KEY_RE.test(key)) {
-      KS.toast('Enter a valid ks_ API key.', 2600);
-      return;
-    }
-    KS.setApiKey(key);
-    try {
-      await KS.api('/v1/signin', {
-        method: 'POST',
-        body: JSON.stringify({ api_key: key }),
-      });
-    } catch (_) {}
-    loadAccount();
-  });
+ $('acct-paste-btn').addEventListener('click', async function () {
+ var key = $('acct-paste').value.trim();
+ if (!KEY_RE.test(key)) {
+ KS.toast('Enter a valid ks_ API key.', 2600);
+ return;
+ }
+ KS.setApiKey(key);
+ try {
+ await KS.api('/v1/signin', {
+ method: 'POST',
+ body: JSON.stringify({ api_key: key }),
+ });
+ } catch (_) {}
+ loadAccount();
+ });
 
-  $('acct-show').addEventListener('click', function () {
-    var key = KS.apiKey();
-    if (!key) return;
-    var input = $('acct-key');
-    if (input.value === key) {
-      input.value = maskKey(key);
-      $('acct-show').textContent = 'Show';
-    } else {
-      input.value = key;
-      $('acct-show').textContent = 'Hide';
-    }
-  });
+ $('acct-show').addEventListener('click', function () {
+ var key = KS.apiKey();
+ if (!key) return;
+ var input = $('acct-key');
+ if (input.value === key) {
+ input.value = maskKey(key);
+ $('acct-show').textContent = 'Show';
+ } else {
+ input.value = key;
+ $('acct-show').textContent = 'Hide';
+ }
+ });
 
-  $('acct-copy').addEventListener('click', async function () {
-    var key = KS.apiKey();
-    if (!key) return;
-    await navigator.clipboard.writeText(key);
-    setStatus('Copied to clipboard.');
-  });
+ $('acct-copy').addEventListener('click', async function () {
+ var key = KS.apiKey();
+ if (!key) return;
+ await navigator.clipboard.writeText(key);
+ setStatus('Copied to clipboard.');
+ });
 
-  $('acct-rotate').addEventListener('click', async function () {
-    if (!confirm('Rotate your API key? The old key stops working immediately.')) return;
-    try {
-      var body = await KS.api('/v1/account/rotate-key', { method: 'POST' });
-      if (!body.api_key) throw new Error('missing key');
-      KS.setApiKey(body.api_key);
-      $('acct-key').value = body.api_key;
-      $('acct-show').textContent = 'Hide';
-      setStatus('Key rotated. Save the new key.');
-    } catch (_) {
-      KS.toast('Rotate failed. Try again.', 3200);
-    }
-  });
+ $('acct-rotate').addEventListener('click', async function () {
+ if (!confirm('Rotate your API key? The old key stops working immediately.')) return;
+ try {
+ var body = await KS.api('/v1/account/rotate-key', { method: 'POST' });
+ if (!body.api_key) throw new Error('missing key');
+ KS.setApiKey(body.api_key);
+ $('acct-key').value = body.api_key;
+ $('acct-show').textContent = 'Hide';
+ setStatus('Key rotated. Save the new key.');
+ } catch (_) {
+ KS.toast('Rotate failed. Try again.', 3200);
+ }
+ });
 
-  $('acct-logout').addEventListener('click', function () {
-    if (!confirm('Sign out of this browser? Your key still works on other devices until rotated.')) return;
-    fetch('/v1/signout', { method: 'POST', credentials: 'include' }).catch(function () {});
-    KS.clearApiKey();
-    location.href = '/';
-  });
+ $('acct-logout').addEventListener('click', function () {
+ if (!confirm('Sign out of this browser? Your key still works on other devices until rotated.')) return;
+ fetch('/v1/signout', { method: 'POST', credentials: 'include' }).catch(function () {});
+ KS.clearApiKey();
+ location.href = '/';
+ });
 
-  function setPlanStatus(message) {
-    $('plan-status').textContent = message || '';
-    if (message) setTimeout(function () { $('plan-status').textContent = ''; }, 4200);
-  }
+ function setPlanStatus(message) {
+ $('plan-status').textContent = message || '';
+ if (message) setTimeout(function () { $('plan-status').textContent = ''; }, 4200);
+ }
 
-  $('plan-change').addEventListener('click', async function () {
-    var plan = $('plan-select').value;
-    if (!plan) return;
-    var isPaid = plan !== 'free';
-    var msg = isPaid
-      ? 'Continue to Stripe to pay for the ' + plan + ' tier? Your plan activates after payment.'
-      : 'Switch to the free Developer plan?';
-    if (!confirm(msg)) return;
-    try {
-      var body = await KS.api('/v1/account/change-plan', {
-        method: 'POST',
-        body: JSON.stringify({ plan: plan })
-      });
-      if (body.billing_url) {
-        setPlanStatus('Redirecting to Stripe...');
-        window.location.assign(body.billing_url);
-        return;
-      }
-      if (body.error === 'billing_not_configured') {
-        setPlanStatus(body.message || 'Billing not yet enabled for this tier.');
-        return;
-      }
-      setPlanStatus('Plan switched to ' + (body.plan || plan) + '.');
-      setTimeout(loadAccount, 800);
-    } catch (e) {
-      setPlanStatus('Switch failed. Check your network and try again.');
-    }
-  });
+ $('plan-change').addEventListener('click', async function () {
+ var plan = $('plan-select').value;
+ if (!plan) return;
+ var isPaid = plan !== 'free';
+ var msg = isPaid
+ ? 'Continue to Stripe to pay for the ' + plan + ' tier? Your plan activates after payment.'
+ : 'Switch to the free Developer plan?';
+ if (!confirm(msg)) return;
+ try {
+ var body = await KS.api('/v1/account/change-plan', {
+ method: 'POST',
+ body: JSON.stringify({ plan: plan })
+ });
+ if (body.billing_url) {
+ setPlanStatus('Redirecting to Stripe...');
+ window.location.assign(body.billing_url);
+ return;
+ }
+ if (body.error === 'billing_not_configured') {
+ setPlanStatus(body.message || 'Billing not yet enabled for this tier.');
+ return;
+ }
+ setPlanStatus('Plan switched to ' + (body.plan || plan) + '.');
+ setTimeout(loadAccount, 800);
+ } catch (e) {
+ setPlanStatus('Switch failed. Check your network and try again.');
+ }
+ });
 
-  $('plan-cancel').addEventListener('click', async function () {
-    if (!confirm('Cancel paid plan and drop to free immediately? Existing artifacts continue to work; the Stripe subscription is cancelled now and quotas drop to free limits in the same request (no proration today).')) return;
-    try {
-      await KS.api('/v1/account/cancel', { method: 'POST' });
-      setPlanStatus('Plan cancelled. You are on the Developer (free) tier; existing artifacts continue to verify.');
-      setTimeout(loadAccount, 800);
-    } catch (e) {
-      setPlanStatus('Cancel failed. Try again or contact support.');
-    }
-  });
+ $('plan-cancel').addEventListener('click', async function () {
+ if (!confirm('Cancel paid plan and drop to free immediately? Existing artifacts continue to work; the Stripe subscription is cancelled now and quotas drop to free limits in the same request (no proration today).')) return;
+ try {
+ await KS.api('/v1/account/cancel', { method: 'POST' });
+ setPlanStatus('Plan cancelled. You are on the Developer (free) tier; existing artifacts continue to verify.');
+ setTimeout(loadAccount, 800);
+ } catch (e) {
+ setPlanStatus('Cancel failed. Try again or contact support.');
+ }
+ });
 
-  $('acct-delete').addEventListener('click', async function () {
-    var typed = prompt('This deactivates your account: API key is revoked, billing cancels, session clears. Concepts/versions/observations/artifacts remain in storage (email dev@kolm.ai for an operator-run purge). To confirm, type:\n\n  DELETE my-org\n\nReplace my-org with your tenant name.');
-    if (!typed) return;
-    try {
-      var body = await KS.api('/v1/account/delete', {
-        method: 'POST',
-        body: JSON.stringify({ confirm: typed })
-      });
-      if (body && body.ok) {
-        $('acct-delete-status').textContent = 'Account deactivated. Goodbye.';
-        KS.clearApiKey();
-        setTimeout(function () { location.href = '/'; }, 1800);
-      } else {
-        $('acct-delete-status').textContent = 'Confirmation phrase mismatch. Account not deleted.';
-      }
-    } catch (e) {
-      $('acct-delete-status').textContent = 'Delete failed. Confirmation must read DELETE &lt;your-tenant&gt;.';
-    }
-  });
+ $('acct-delete').addEventListener('click', async function () {
+ var typed = prompt('This deactivates your account: API key is revoked, billing cancels, session clears. Concepts/versions/observations/artifacts remain in storage (email dev@kolm.ai for an operator-run purge). To confirm, type:\n\n DELETE my-org\n\nReplace my-org with your tenant name.');
+ if (!typed) return;
+ try {
+ var body = await KS.api('/v1/account/delete', {
+ method: 'POST',
+ body: JSON.stringify({ confirm: typed })
+ });
+ if (body && body.ok) {
+ $('acct-delete-status').textContent = 'Account deactivated. Goodbye.';
+ KS.clearApiKey();
+ setTimeout(function () { location.href = '/'; }, 1800);
+ } else {
+ $('acct-delete-status').textContent = 'Confirmation phrase mismatch. Account not deleted.';
+ }
+ } catch (e) {
+ $('acct-delete-status').textContent = 'Delete failed. Confirmation must read DELETE &lt;your-tenant&gt;.';
+ }
+ });
 
-  loadAccount();
+ loadAccount();
 })();
 </script>
 <script src="/nav.js" defer></script>

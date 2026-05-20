@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Web3 address screener recipe · kolm cookbook</title>
+<title>Web3 address screener recipe · kolm cookbook · kolm.ai</title>
 <meta name="description" content="Compile a signed local model that screens an address + tx history against OFAC, mixers, and high-risk routes. Returns risk band + cited tx hashes. On-prem only.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Web3-address-screener recipe">
-<meta property="og:description" content="Local AML screener with cited tx evidence. Signed, offline.">
-<meta property="og:type" content="article">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Web3-address-screener recipe" />
-<meta name="twitter:description" content="Local AML screener with cited tx evidence. Signed, offline." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:title" content="Web3 address screener recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Compile a signed local model that screens an address + tx history against OFAC, mixers, and high-risk routes. Returns risk band + cited tx hashes. On-prem only.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Web3 address screener recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Compile a signed local model that screens an address + tx history against OFAC, mixers, and high-risk routes. Returns risk band + cited tx hashes. On-prem only.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/cookbook/web3-address-screener">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/cookbook/web3-address-screener">
@@ -26,254 +26,255 @@
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "HowTo",
-      "name": "Web3-address-screener recipe",
-      "description": "Local AML screener with cited tx evidence. Signed, offline.",
-      "url": "https://kolm.ai/cookbook/web3-address-screener",
-      "totalTime": "PT5M",
-      "tool": [
-        {
-          "@type": "HowToTool",
-          "name": "kolm CLI"
-        }
-      ],
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install",
-          "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Compile",
-          "text": "kolm compile web3-address-screener.toml"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Run",
-          "text": "kolm run web3-address-screener.kolm"
-        }
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "kolm",
-          "item": "https://kolm.ai/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Cookbook",
-          "item": "https://kolm.ai/cookbook"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Web3 address screener recipe",
-          "item": "https://kolm.ai/cookbook/web3-address-screener"
-        }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "Web3-address-screener recipe",
+ "description": "Local AML screener with cited tx evidence. Signed, offline.",
+ "url": "https://kolm.ai/cookbook/web3-address-screener",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile web3-address-screener.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run web3-address-screener.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Web3 address screener recipe",
+ "item": "https://kolm.ai/cookbook/web3-address-screener"
+ }
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <div class="crumbs"><a href="/docs">cookbook</a> &middot; vertical &middot; web3-address-screener</div>
-    <span class="pill">Recipe &middot; vertical</span>
-    <h1>Wallets in, <span class="tone">risk band + cited tx out.</span></h1>
-    <p class="lede">A local <code>.kolm</code> file that takes an EVM address + 90 days of tx history and returns <em>(risk_band, reasons[], cited_tx_hashes[], action)</em>. Reasons must trace to a sanctioned-list source or a tx hash present in the input. Trained on 2,000 labeled wallets from Chainalysis-equivalent and OFAC SDN data. On-prem.</p>
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; vertical &middot; web3-address-screener</div>
+ <span class="pill">Recipe &middot; vertical</span>
+ <h1>Wallets in, <span class="tone">risk band + cited tx out.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that takes an EVM address + 90 days of tx history and returns <em>(risk_band, reasons[], cited_tx_hashes[], action)</em>. Reasons must trace to a sanctioned-list source or a tx hash present in the input. Trained on 2,000 labeled wallets from Chainalysis-equivalent and OFAC SDN data. On-prem.</p>
 
-    <div class="meta-row">
-      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
-      <div class="item"><span class="label">gold pairs</span><span class="value">2,000 (1.4k train / 600 eval)</span></div>
-      <div class="item"><span class="label">k-score floor</span><span class="value">0.88</span></div>
-      <div class="item"><span class="label">artifact size</span><span class="value">1.6 GB</span></div>
-      <div class="item"><span class="label">compile time</span><span class="value">~46 min</span></div>
-      <div class="item"><span class="label">spec source</span><span class="value">grounded + asymmetric cost</span></div>
-    </div>
-  </div>
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">2,000 (1.4k train / 600 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.88</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">1.6 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~46 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">grounded + asymmetric cost</span></div>
+ </div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="group">
-      <h2>What this recipe does</h2>
-      <p>A compliance team needs two things: a number that won't make the regulator unhappy, and an audit trail. This recipe gives both. The model returns a risk band; every reason cites either a sanctioned-list entry or a transaction hash in the input. Hallucinated risk reasons are blocked at the verifier · if the artifact says "interacted with Tornado Cash," there must be a tx in the input pointing at a Tornado contract.</p>
-      <p>Cost is asymmetric: a missed match against an OFAC SDN address is a regulatory event; a false flag is a 5-minute review. False-negative weight is 50? false-positive weight in the K-score loss. Compiled on-prem because the gold corpus contains licensed Chainalysis-equivalent labels.</p>
-    </div>
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>A compliance team needs two things: a number that won't make the regulator unhappy, and an audit trail. This recipe gives both. The model returns a risk band; every reason cites either a sanctioned-list entry or a transaction hash in the input. Hallucinated risk reasons are blocked at the verifier · if the artifact says "interacted with Tornado Cash," there must be a tx in the input pointing at a Tornado contract.</p>
+ <p>Cost is asymmetric: a missed match against an OFAC SDN address is a regulatory event; a false flag is a 5-minute review. False-negative weight is 50? false-positive weight in the K-score loss. Compiled on-prem because the gold corpus contains licensed Chainalysis-equivalent labels.</p>
+ </div>
 
-    <div class="group">
-      <h2>The spec</h2>
-      <pre class="code">{
-  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
-  <span class="k">"schema"</span>: {
-    <span class="k">"required"</span>: [<span class="k">"risk_band"</span>, <span class="k">"reasons"</span>, <span class="k">"action"</span>],
-    <span class="k">"properties"</span>: {
-      <span class="k">"risk_band"</span>: { <span class="k">"enum"</span>: [<span class="k">"clean"</span>, <span class="k">"watch"</span>, <span class="k">"high"</span>, <span class="k">"sanctioned"</span>] },
-      <span class="k">"reasons"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {
-        <span class="k">"required"</span>: [<span class="k">"reason"</span>, <span class="k">"evidence_tx"</span>],
-        <span class="k">"properties"</span>: {
-          <span class="k">"reason"</span>: { <span class="k">"$ref"</span>: <span class="k">"reasons.json"</span> },
-          <span class="k">"evidence_tx"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} },
-          <span class="k">"sdn_match"</span>: { <span class="k">"type"</span>: [<span class="k">"string"</span>, <span class="k">"null"</span>] }
-        }
-      } },
-      <span class="k">"action"</span>: { <span class="k">"enum"</span>: [<span class="k">"allow"</span>, <span class="k">"review"</span>, <span class="k">"block"</span>] }
-    }
-  },
-  <span class="k">"verifier"</span>: {
-    <span class="k">"reason_must_be_in_taxonomy"</span>: <span class="ok">true</span>,
-    <span class="k">"evidence_tx_must_appear_in_input"</span>: <span class="ok">true</span>,
-    <span class="k">"sdn_match_must_resolve_to_sdn_list"</span>: <span class="ok">true</span>,
-    <span class="k">"false_negative_cost"</span>: 50,
-    <span class="k">"sanctioned_band_requires_sdn_match"</span>: <span class="ok">true</span>
-  }
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"risk_band"</span>, <span class="k">"reasons"</span>, <span class="k">"action"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"risk_band"</span>: { <span class="k">"enum"</span>: [<span class="k">"clean"</span>, <span class="k">"watch"</span>, <span class="k">"high"</span>, <span class="k">"sanctioned"</span>] },
+ <span class="k">"reasons"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"reason"</span>, <span class="k">"evidence_tx"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"reason"</span>: { <span class="k">"$ref"</span>: <span class="k">"reasons.json"</span> },
+ <span class="k">"evidence_tx"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {<span class="k">"type"</span>:<span class="k">"string"</span>} },
+ <span class="k">"sdn_match"</span>: { <span class="k">"type"</span>: [<span class="k">"string"</span>, <span class="k">"null"</span>] }
+ }
+ } },
+ <span class="k">"action"</span>: { <span class="k">"enum"</span>: [<span class="k">"allow"</span>, <span class="k">"review"</span>, <span class="k">"block"</span>] }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"reason_must_be_in_taxonomy"</span>: <span class="ok">true</span>,
+ <span class="k">"evidence_tx_must_appear_in_input"</span>: <span class="ok">true</span>,
+ <span class="k">"sdn_match_must_resolve_to_sdn_list"</span>: <span class="ok">true</span>,
+ <span class="k">"false_negative_cost"</span>: 50,
+ <span class="k">"sanctioned_band_requires_sdn_match"</span>: <span class="ok">true</span>
+ }
 }</pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>Compile (in your VPC, against your SDN snapshot)</h2>
-      <pre class="code">kolm compile <span class="k">"AML address screener with cited tx evidence"</span> \
-  --base qwen2.5-coder-3b \
-  --pairs ./labeled-wallets/*.jsonl \
-  --taxonomy ./reasons.json \
-  --sdn-list ./ofac-sdn-2026-05-09.json \
-  --asymmetric-loss false-neg=50 \
-  --verifier evidence-grounded,sdn-resolves \
-  --k-floor 0.88 \
-  --output web3-screener.kolm
+ <div class="group">
+ <h2>Compile (in your VPC, against your SDN snapshot)</h2>
+ <pre class="code">kolm compile <span class="k">"AML address screener with cited tx evidence"</span> \
+ --base qwen2.5-coder-3b \
+ --pairs ./labeled-wallets/*.jsonl \
+ --taxonomy ./reasons.json \
+ --sdn-list ./ofac-sdn-2026-05-09.json \
+ --asymmetric-loss false-neg=50 \
+ --verifier evidence-grounded,sdn-resolves \
+ --k-floor 0.88 \
+ --output web3-screener.kolm
 
 <span class="ok">ok</span> wrote <span class="k">web3-screener.kolm</span>
-   k_score=0.92  signature=hmac-sha256
-   sdn-match recall 100% on synthetic adversarial (n=240)</pre>
-    </div>
+ k_score=0.92 signature=ed25519
+ sdn-match recall 100% on synthetic adversarial (n=240)</pre>
+ </div>
 
-    <div class="group">
-      <h2>K-score gate</h2>
-      <div class="k-bar">
-        <span class="k-label">K-score</span>
-        <span class="k-value">0.92</span>
-        <span class="k-detail">held-out 600 wallets &middot; sanctioned-recall 100% &middot; high-risk recall 96% &middot; precision-at-block 94% &middot; evidence-grounded 100%</span>
-      </div>
-    </div>
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.92</span>
+ <span class="k-detail">held-out 600 wallets &middot; sanctioned-recall 100% &middot; high-risk recall 96% &middot; precision-at-block 94% &middot; evidence-grounded 100%</span>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Run-time profile</h2>
-      <div class="lat-grid">
-        <div class="cell"><div class="h">Mac Studio</div><div class="v">740<span class="u">ms</span></div></div>
-        <div class="cell"><div class="h">RTX 5090</div><div class="v">200<span class="u">ms</span></div></div>
-        <div class="cell"><div class="h">Hospital server</div><div class="v">2.1<span class="u">s</span></div></div>
-        <div class="cell"><div class="h">CPU x86</div><div class="v">2.8<span class="u">s</span></div></div>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">Mac Studio</div><div class="v">740<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">200<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">Hospital server</div><div class="v">2.1<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86</div><div class="v">2.8<span class="u">s</span></div></div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Deploy</h2>
-      <pre class="code"><span class="c">// pre-trade gate · every withdrawal address checked before approval:</span>
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c">// pre-trade gate · every withdrawal address checked before approval:</span>
 on_withdrawal_request = async (req) =&gt; {
-  const txs = await chain.txHistory(req.address, { days: 90 });
-  const r = kolm.run(<span class="k">'web3-screener.kolm'</span>, { address: req.address, txs });
-  audit.log({ withdrawal: req.id, screener_receipt: r.receipt });
-  if (r.action === <span class="k">'block'</span>) return reject(req, r.reasons);
-  if (r.action === <span class="k">'review'</span>) return queue.compliance(req, r);
-  return approve(req);
+ const txs = await chain.txHistory(req.address, { days: 90 });
+ const r = kolm.run(<span class="k">'web3-screener.kolm'</span>, { address: req.address, txs });
+ audit.log({ withdrawal: req.id, screener_receipt: r.receipt });
+ if (r.action === <span class="k">'block'</span>) return reject(req, r.reasons);
+ if (r.action === <span class="k">'review'</span>) return queue.compliance(req, r);
+ return approve(req);
 };</pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>Related recipes</h2>
-      <div class="related">
-        <a href="/cookbook/finance-disclosure-redact"><div class="h">Finance disclosure</div><div class="d">SEC filing →redacted public draft.</div></a>
-        <a href="/cookbook/legal-clause-extract"><div class="h">Legal clause extract</div><div class="d">Contract →labeled clause set.</div></a>
-        <a href="/cookbook/embedded-sensor-classifier"><div class="h">Sensor classifier</div><div class="d">Edge sensor stream →labeled events.</div></a>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/finance-disclosure-redact"><div class="h">Finance disclosure</div><div class="d">SEC filing →redacted public draft.</div></a>
+ <a href="/cookbook/legal-clause-extract"><div class="h">Legal clause extract</div><div class="d">Contract →labeled clause set.</div></a>
+ <a href="/cookbook/embedded-sensor-classifier"><div class="h">Sensor classifier</div><div class="d">Edge sensor stream →labeled events.</div></a>
+ </div>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm sync · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm sync CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/sync">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm sync","description":"Reference for the kolm sync CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/sync","mainEntityOfPage":"https://kolm.ai/docs/cli/sync","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm sync · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm sync CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,7 +176,7 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="sync">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>sync</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>sync</span>
 </nav>
 <p>--- title: kolm sync · kolm.ai description: Cloud-sync state and legacy git-mirror push / pull. ---</p>
 <h1>kolm sync</h1>
@@ -181,9 +185,9 @@
 <pre><code>
 # cloud-sync (W384)
 kolm sync status
-kolm sync enable  [--state &lt;s&gt;] [--base &lt;url&gt;] [--namespace &lt;ns&gt;] [--block &lt;cls&gt;]
+kolm sync enable [--state &lt;s&gt;] [--base &lt;url&gt;] [--namespace &lt;ns&gt;] [--block &lt;cls&gt;]
 kolm sync disable
-kolm sync push                    # uses cloud-sync once enabled
+kolm sync push # uses cloud-sync once enabled
 kolm sync pull
 
 # legacy git-mirror
@@ -212,13 +216,13 @@ kolm sync push git@github.com:acme/kolm-artifacts.git --branch main
 <li><a href="/docs/cli/team">Team</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

@@ -4,202 +4,212 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Case study &middot; Contract-clause extraction without cloud egress | kolm</title>
-<meta name="description" content="An AmLaw 200 firm's procurement team blocked the original SaaS deployment over cloud egress. The same model compiled as .kolm runs on firm hardware and cleared procurement in two weeks.">
+<title>Case study Contract-clause extraction without cloud · kolm.ai</title>
+<meta name="description" content="Case study Contract-clause extraction without cloud egress: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/case-studies/legal-contract-extraction">
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
-  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
-  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
-  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
-  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.site nav a{color:inherit;text-decoration:none}
-  header.site nav a.cta{color:var(--accent);font-weight:500}
-  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  .hero{padding:72px 0 24px;border-bottom:1px solid var(--line)}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  h1{font-size:36px;line-height:1.15;font-weight:500;letter-spacing:-0.02em;margin:0 0 14px}
-  .lede{font-size:17px;line-height:1.55;color:var(--ink-mute);margin:0 0 22px}
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 0 0}
-  .stat{padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev)}
-  .stat .k{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.04em;text-transform:uppercase;margin:0 0 4px}
-  .stat .v{font-size:18px;color:var(--ink);font-weight:500;margin:0}
-  @media(max-width:680px){.stats{grid-template-columns:1fr 1fr}}
-  section.body{padding:36px 0;border-bottom:1px solid var(--line)}
-  h2{margin:0 0 14px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
-  h3{margin:24px 0 10px;font-size:15px;font-weight:500;color:var(--ink);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.04em}
-  p{color:var(--ink-mute);margin:0 0 16px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 16px}
-  blockquote{margin:18px 0;padding:14px 18px;border-left:2px solid var(--accent);background:var(--bg-elev);font-style:normal;color:var(--ink)}
-  blockquote .who{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.06em;text-transform:uppercase;margin-top:8px;display:block}
-  ul{color:var(--ink-mute);margin:0 0 16px;padding-left:20px}
-  ul li{margin:4px 0}
-  footer.site{padding:36px 0 60px;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
-  footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;max-width:1080px}
-  footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site nav a.cta{color:var(--accent);font-weight:500}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:72px 0 24px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:36px;line-height:1.15;font-weight:500;letter-spacing:-0.02em;margin:0 0 14px}
+ .lede{font-size:17px;line-height:1.55;color:var(--ink-mute);margin:0 0 22px}
+ .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 0 0}
+ .stat{padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev)}
+ .stat .k{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.04em;text-transform:uppercase;margin:0 0 4px}
+ .stat .v{font-size:18px;color:var(--ink);font-weight:500;margin:0}
+ @media(max-width:680px){.stats{grid-template-columns:1fr 1fr}}
+ section.body{padding:36px 0;border-bottom:1px solid var(--line)}
+ h2{margin:0 0 14px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
+ h3{margin:24px 0 10px;font-size:15px;font-weight:500;color:var(--ink);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.04em}
+ p{color:var(--ink-mute);margin:0 0 16px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 16px}
+ blockquote{margin:18px 0;padding:14px 18px;border-left:2px solid var(--accent);background:var(--bg-elev);font-style:normal;color:var(--ink)}
+ blockquote .who{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.06em;text-transform:uppercase;margin-top:8px;display:block}
+ ul{color:var(--ink-mute);margin:0 0 16px;padding-left:20px}
+ ul li{margin:4px 0}
+ footer.site{padding:36px 0 60px;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
+ footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;max-width:1080px}
+ footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
 <link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta property="og:title" content="Case study Contract-clause extraction without cloud · kolm.ai">
+<meta property="og:description" content="Case study Contract-clause extraction without cloud egress: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/case-studies/legal-contract-extraction">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Case study Contract-clause extraction without cloud · kolm.ai">
+<meta name="twitter:description" content="Case study Contract-clause extraction without cloud egress: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <header class="site">
-  <div class="wrap">
-    <a href="/" class="logo">kolm</a>
-    <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
-  </div>
+ <div class="wrap">
+ <a href="/" class="logo">kolm</a>
+ <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
+ </div>
 </header>
 
 <section class="hero"><div class="wrap">
-  <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/case-studies">case studies</a> &nbsp;/&nbsp; legal</p>
-  <h1>Procurement blocked the SaaS. The .kolm shipped on the firm's own hardware.</h1>
-  <p class="lede">A legal-tech team at an AmLaw 200 firm had built a clause-extraction model on a hosted API. The cloud-egress clause killed the deal at procurement. They re-shipped as a kolm-compiled artifact running on the firm's existing infrastructure; the model logic did not change.</p>
-  <div class="stats">
-    <div class="stat"><p class="k">F1 on clauses</p><p class="v">0.94</p></div>
-    <div class="stat"><p class="k">Egress</p><p class="v">0 bytes / mo</p></div>
-    <div class="stat"><p class="k">Procurement</p><p class="v">cleared, 2 wks</p></div>
-    <div class="stat"><p class="k">Throughput</p><p class="v">1,200 docs/hr</p></div>
-  </div>
+ <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/case-studies">case studies</a> &nbsp;/&nbsp; legal</p>
+ <h1>Procurement blocked the SaaS. The .kolm shipped on the firm's own hardware.</h1>
+ <p class="lede">A legal-tech team at an AmLaw 200 firm had built a clause-extraction model on a hosted API. The cloud-egress clause killed the deal at procurement. They re-shipped as a kolm-compiled artifact running on the firm's existing infrastructure; the model logic did not change.</p>
+ <div class="stats">
+ <div class="stat"><p class="k">F1 on clauses</p><p class="v">0.94</p></div>
+ <div class="stat"><p class="k">Egress</p><p class="v">0 bytes / mo</p></div>
+ <div class="stat"><p class="k">Procurement</p><p class="v">cleared, 2 wks</p></div>
+ <div class="stat"><p class="k">Throughput</p><p class="v">1,200 docs/hr</p></div>
+ </div>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>The setup</h2>
-  <p>A 400-attorney AmLaw 200 firm. The legal-tech group, headed by a former litigator, had built a contract-clause extractor for the M&amp;A practice: read a stock-purchase agreement, surface MAC clauses, change-of-control triggers, indemnification caps. The model was a Llama-3.1-8B fine-tune the team had been iterating on for 7 months.</p>
-  <p>It worked. F1 on the firm's labeled benchmark set was 0.94. But it ran on a hosted vendor API. When the legal-tech team tried to roll it out beyond their pilot M&amp;A group, procurement and the firm's General Counsel (acting as their own client on this deployment) flagged the cloud-egress clause. Attorney-client privilege does not transit a vendor's servers comfortably, even with a BAA-equivalent.</p>
+ <h2>The setup</h2>
+ <p>A 400-attorney AmLaw 200 firm. The legal-tech group, headed by a former litigator, had built a contract-clause extractor for the M&amp;A practice: read a stock-purchase agreement, surface MAC clauses, change-of-control triggers, indemnification caps. The model was a Llama-3.1-8B fine-tune the team had been iterating on for 7 months.</p>
+ <p>It worked. F1 on the firm's labeled benchmark set was 0.94. But it ran on a hosted vendor API. When the legal-tech team tried to roll it out beyond their pilot M&amp;A group, procurement and the firm's General Counsel (acting as their own client on this deployment) flagged the cloud-egress clause. Attorney-client privilege does not transit a vendor's servers comfortably, even with a BAA-equivalent.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>The blocker</h2>
-  <blockquote>
-    We are not allowed to send a client's draft agreement to a third party we do not control. Not even in encrypted transit. The model has to run on metal we own.
-    <span class="who">&mdash; Firm General Counsel (anonymized)</span>
-  </blockquote>
-  <p>The vendor offered an on-prem option at $480k/year baseline. The firm's CTO did the math &mdash; ~$0.41 per document processed &mdash; and concluded the firm's own engineers could run the same model for materially less if they owned the artifact.</p>
+ <h2>The blocker</h2>
+ <blockquote>
+ We are not allowed to send a client's draft agreement to a third party we do not control. Not even in encrypted transit. The model has to run on metal we own.
+ <span class="who">&mdash; Firm General Counsel (anonymized)</span>
+ </blockquote>
+ <p>The vendor offered an on-prem option at $480k/year baseline. The firm's CTO did the math &mdash; ~$0.41 per document processed &mdash; and concluded the firm's own engineers could run the same model for materially less if they owned the artifact.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>The compile</h2>
-  <p>The team brought their existing training set (~4,800 labeled contracts, the model card from the vendor, and the eval harness they had already written) into kolm. The legal compliance pack added attorney-client + work-product gating on the verifier side.</p>
-  <pre>$ kolm compile recipe.yaml \
-    --base meta-llama/Llama-3.1-8B-Instruct \
-    --pack legal-attorney-client \
-    --gate K=0.90 \
-    --gate f1_clause>=0.93
+ <h2>The compile</h2>
+ <p>The team brought their existing training set (~4,800 labeled contracts, the model card from the vendor, and the eval harness they had already written) into kolm. The legal compliance pack added attorney-client + work-product gating on the verifier side.</p>
+ <pre>$ kolm compile recipe.yaml \
+ --base meta-llama/Llama-3.1-8B-Instruct \
+ --pack legal-attorney-client \
+ --gate K=0.90 \
+ --gate f1_clause>=0.93
 &hellip;
 [7/7] OK signature attached
 artifact: build/clause-extractor.kolm
-CID:      cidv1:sha256:7e2a91d4&hellip;
-K-score:  0.927 (gate 0.90) PASS
-F1:       0.943 (gate 0.93) PASS</pre>
-  <p>Compile time: 6 hours 14 minutes on a rented H100. Total compile cost: ~$48. The artifact: 9.6 GB.</p>
+CID: cidv1:sha256:7e2a91d4&hellip;
+K-score: 0.927 (gate 0.90) PASS
+F1: 0.943 (gate 0.93) PASS</pre>
+ <p>Compile time: 6 hours 14 minutes on a rented H100. Total compile cost: ~$48. The artifact: 9.6 GB.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>The procurement pass</h2>
-  <p>What changed at procurement when the artifact replaced the SaaS:</p>
-  <ul>
-    <li><b>Egress</b>: from "vendor receives every contract" to "0 bytes leave the firm network". The firewall log shows 0 outbound calls from the kolm runtime.</li>
-    <li><b>Vendor surface</b>: from "1 vendor with access to client documents" to "1 vendor with no access to anything; ships software once at compile time".</li>
-    <li><b>Audit</b>: from "vendor SOC 2 report annually" to "per-inference receipt with input hash, output hash, K-score, HMAC".</li>
-    <li><b>Renewal risk</b>: from "vendor can change pricing or shut down" to "artifact is a file the firm controls".</li>
-  </ul>
-  <p>The General Counsel signed off in 2 weeks. The deployment went firm-wide a week after that.</p>
+ <h2>The procurement pass</h2>
+ <p>What changed at procurement when the artifact replaced the SaaS:</p>
+ <ul>
+ <li><b>Egress</b>: from "vendor receives every contract" to "0 bytes leave the firm network". The firewall log shows 0 outbound calls from the kolm runtime.</li>
+ <li><b>Vendor surface</b>: from "1 vendor with access to client documents" to "1 vendor with no access to anything; ships software once at compile time".</li>
+ <li><b>Audit</b>: from "vendor SOC 2 report annually" to "per-inference receipt with input hash, output hash, K-score, Ed25519".</li>
+ <li><b>Renewal risk</b>: from "vendor can change pricing or shut down" to "artifact is a file the firm controls".</li>
+ </ul>
+ <p>The General Counsel signed off in 2 weeks. The deployment went firm-wide a week after that.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>What the receipt records</h2>
-  <pre>{
-  "artifact_cid":  "cidv1:sha256:7e2a91d4&hellip;",
-  "matter_id":    "M&amp;A-2026-0418-anon",
-  "input_sha":     "sha256:62a91c8f&hellip;",
-  "output_sha":    "sha256:1a3e44b0&hellip;",
-  "k_score":       0.927,
-  "clauses_found": 14,
-  "verifier_ok":   true,
-  "ts":            "2026-04-22T11:08:55Z",
-  "issuer_pubkey": "kolm-issuer-2026q2",
-  "hmac":          "c30b9f12&hellip;"
+ <h2>What the receipt records</h2>
+ <pre>{
+ "artifact_cid": "cidv1:sha256:7e2a91d4&hellip;",
+ "matter_id": "M&amp;A-2026-0418-anon",
+ "input_sha": "sha256:62a91c8f&hellip;",
+ "output_sha": "sha256:1a3e44b0&hellip;",
+ "k_score": 0.927,
+ "clauses_found": 14,
+ "verifier_ok": true,
+ "ts": "2026-04-22T11:08:55Z",
+ "issuer_pubkey": "kolm-issuer-2026q2",
+ "hmac": "c30b9f12&hellip;"
 }</pre>
-  <p>The matter_id is the firm's internal billable matter number, not the client's identity. The input_sha resolves to a document hash the firm's DMS already tracks. Months later, an associate can answer "what did the model say about this clause" without re-running anything; the receipt is the answer.</p>
+ <p>The matter_id is the firm's internal billable matter number, not the client's identity. The input_sha resolves to a document hash the firm's DMS already tracks. Months later, an associate can answer "what did the model say about this clause" without re-running anything; the receipt is the answer.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>The outcome at one quarter</h2>
-  <ul>
-    <li>~14,000 contracts processed firm-wide in Q1, vs. ~1,200 in the pilot quarter.</li>
-    <li>Two new practice groups (commercial real estate, capital markets) onboarded onto the same artifact.</li>
-    <li>Firm reduced outside-counsel due-diligence spend on stock-purchase agreements by $1.1M in the first half (the firm's CFO ran the attribution &mdash; we did not).</li>
-  </ul>
+ <h2>The outcome at one quarter</h2>
+ <ul>
+ <li>~14,000 contracts processed firm-wide in Q1, vs. ~1,200 in the pilot quarter.</li>
+ <li>Two new practice groups (commercial real estate, capital markets) onboarded onto the same artifact.</li>
+ <li>Firm reduced outside-counsel due-diligence spend on stock-purchase agreements by $1.1M in the first half (the firm's CFO ran the attribution &mdash; we did not).</li>
+ </ul>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>What we did not solve</h2>
-  <ul>
-    <li>The firm's DMS integration is bespoke. We provided a CLI; the firm wrote the connector.</li>
-    <li>Re-training requires re-compiling. Quarterly refresh is on the firm's calendar; we will not push to them.</li>
-    <li>Other practice groups want different verifiers. The legal compliance pack covers attorney-client + work-product. Patent prosecution, for instance, needs its own pack &mdash; the firm is building it.</li>
-  </ul>
+ <h2>What we did not solve</h2>
+ <ul>
+ <li>The firm's DMS integration is bespoke. We provided a CLI; the firm wrote the connector.</li>
+ <li>Re-training requires re-compiling. Quarterly refresh is on the firm's calendar; we will not push to them.</li>
+ <li>Other practice groups want different verifiers. The legal compliance pack covers attorney-client + work-product. Patent prosecution, for instance, needs its own pack &mdash; the firm is building it.</li>
+ </ul>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>Where to look next</h2>
-  <p>The legal compliance pack at <a href="/compliance-packs" style="color:inherit;border-bottom:1px solid var(--line)">/compliance-packs</a>. The verifier-from-examples recipe at <a href="/cookbook/verifier-from-examples" style="color:inherit;border-bottom:1px solid var(--line)">/cookbook/verifier-from-examples</a> for teams writing their own verifier on top of a stock model.</p>
+ <h2>Where to look next</h2>
+ <p>The legal compliance pack at <a href="/compliance-packs" style="color:inherit;border-bottom:1px solid var(--line)">/compliance-packs</a>. The verifier-from-examples recipe at <a href="/cookbook/verifier-from-examples" style="color:inherit;border-bottom:1px solid var(--line)">/cookbook/verifier-from-examples</a> for teams writing their own verifier on top of a stock model.</p>
 </div></section>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

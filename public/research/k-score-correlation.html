@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Why K-score correlates with real-world deployment quality &middot; kolm research</title>
-<meta name="description" content="The K-score is a weighted aggregate of accuracy, size, latency, cost, and coverage. Why the weighting is a calibration choice, what the 0.85 gate gives up, and where the score breaks down across heterogeneous tasks.">
+<title>Why K-score correlates with real-world deployment · kolm.ai</title>
+<meta name="description" content="The K-score is a weighted aggregate of accuracy, size, latency, cost, and coverage. Why the weighting is a calibration choice, what the 0.85 gate gives up,...">
 <meta name="keywords" content="K-score, model evaluation, compile gate, accuracy, latency, coverage, deployment quality">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -14,12 +14,12 @@
 <meta name="author" content="kolm">
 <meta name="robots" content="index,follow,max-snippet:-1">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="Why K-score correlates with real-world deployment quality">
-<meta property="og:description" content="A composite gate is a calibration choice. The score, the weights, the 0.85 threshold, and the failure modes.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Why K-score correlates with real-world deployment · kolm.ai">
+<meta property="og:description" content="The K-score is a weighted aggregate of accuracy, size, latency, cost, and coverage. Why the weighting is a calibration choice, what the 0.85 gate gives up,...">
+<meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Why K-score correlates with real-world deployment quality">
-<meta name="twitter:description" content="A composite gate is a calibration choice. The score, the weights, the 0.85 threshold, and the failure modes.">
+<meta name="twitter:title" content="Why K-score correlates with real-world deployment · kolm.ai">
+<meta name="twitter:description" content="The K-score is a weighted aggregate of accuracy, size, latency, cost, and coverage. Why the weighting is a calibration choice, what the 0.85 gate gives up,...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/k-score-correlation">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,318 +27,319 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Why K-score correlates with real-world deployment quality",
-      "description": "The K-score is a weighted aggregate of accuracy, size, latency, cost, and coverage. The weighting, the 0.85 gate, and the open calibration problem.",
-      "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
-      "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
-      "datePublished": "2026-05-14",
-      "dateModified": "2026-05-14",
-      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/k-score-correlation" },
-      "image": "https://kolm.ai/og-card.svg",
-      "keywords": "K-score, evaluation, deployment quality, compile gate",
-      "articleSection": "Methodology",
-      "wordCount": 1900
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "K-score correlation", "item": "https://kolm.ai/research/k-score-correlation"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Why K-score correlates with real-world deployment quality",
+ "description": "The K-score is a weighted aggregate of accuracy, size, latency, cost, and coverage. The weighting, the 0.85 gate, and the open calibration problem.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/k-score-correlation" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "K-score, evaluation, deployment quality, compile gate",
+ "articleSection": "Methodology",
+ "wordCount": 1900
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "K-score correlation", "item": "https://kolm.ai/research/k-score-correlation"}
+ ]
+ }
+ ]
 }
 </script>
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
-  a{color:inherit;text-decoration:none}
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px}
-  .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
-  header.site .brand span{font-weight:500;font-size:16px}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
-  header.site nav a:hover{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
-  header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
-  @media(max-width:720px){header.site nav{display:none}}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
 
-  section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
-  section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
-  section.hero .wrap{position:relative}
-  .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
-  .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
-  h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
-  h1 .tone{color:#10b981}
-  p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
-  p.lede b{color:var(--ink);font-weight:500}
-  .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .meta b{color:var(--ink-mute);font-weight:500}
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
 
-  article{padding:36px 0 96px}
-  article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
-  article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
-  article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
-  article p b{color:var(--ink);font-weight:500}
-  article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
-  article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
-  article blockquote p{color:var(--ink);margin:0;font-weight:500}
-  article ul{padding-left:0;list-style:none;margin:16px 0 24px}
-  article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
-  article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
-  article ul li b{color:var(--ink);font-weight:500}
-  article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
-  article pre .com{color:var(--ink-faint)}
-  article pre .arg{color:#10b981}
-  article pre .kw{color:#b0bbff}
-  article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
-  article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
-  article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
-  article table td b{color:var(--ink)}
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
+ article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+ article table td b{color:var(--ink)}
 
-  .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
-  .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
-  .toc ol{margin:0;padding-left:20px}
-  .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
-  .toc li a{color:var(--ink-mute)}
-  .toc li a:hover{color:#10b981}
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
 
-  .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
-  @media(max-width:720px){.signpost{grid-template-columns:1fr}}
-  .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
-  .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
-  .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
-  .signpost a .v .arrow{color:#10b981;margin-left:6px}
-  .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
 
-  footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
-  footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <span class="pill"><span class="dot"></span>Research &middot; Methodology &middot; 2026-05-14 &middot; 10 min read</span>
-    <h1>Why K-score correlates with <span class="tone">deployment quality.</span></h1>
-    <p class="lede">A K-score is one number with five inputs. <b>It is a calibration, not a universal truth, and the 0.85 gate is the smallest assertion we are willing to make at compile time.</b> What the score measures, what it does not, and where the open problems are.</p>
-    <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;methodology &middot; evaluation &middot; calibration</span></div>
-  </div>
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; Methodology &middot; 2026-05-14 &middot; 10 min read</span>
+ <h1>Why K-score correlates with <span class="tone">deployment quality.</span></h1>
+ <p class="lede">A K-score is one number with five inputs. <b>It is a calibration, not a universal truth, and the 0.85 gate is the smallest assertion we are willing to make at compile time.</b> What the score measures, what it does not, and where the open problems are.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;methodology &middot; evaluation &middot; calibration</span></div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="toc">
-      <h5>Contents</h5>
-      <ol>
-        <li><a href="#what">What K-score is</a></li>
-        <li><a href="#weights">Why these weights</a></li>
-        <li><a href="#gate">The 0.85 gate</a></li>
-        <li><a href="#fail">When the gate fails</a></li>
-        <li><a href="#open">Open problem: cross-task calibration</a></li>
-        <li><a href="#limits">Verifiable limitations</a></li>
-      </ol>
-    </div>
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#what">What K-score is</a></li>
+ <li><a href="#weights">Why these weights</a></li>
+ <li><a href="#gate">The 0.85 gate</a></li>
+ <li><a href="#fail">When the gate fails</a></li>
+ <li><a href="#open">Open problem: cross-task calibration</a></li>
+ <li><a href="#limits">Verifiable limitations</a></li>
+ </ol>
+ </div>
 
-    <h2 id="what">What K-score is.</h2>
-    <p>K-score v1 (the version that ships in every <code>.kolm</code> today) is a weighted aggregate of five normalized inputs:</p>
+ <h2 id="what">What K-score is.</h2>
+ <p>K-score v1 (the version that ships in every <code>.kolm</code> today) is a weighted aggregate of five normalized inputs:</p>
 
-    <pre>K = 0.40 * A
-  + 0.15 * S
-  + 0.15 * L
-  + 0.15 * C
-  + 0.15 * V</pre>
+ <pre>K = 0.40 * A
+ + 0.15 * S
+ + 0.15 * L
+ + 0.15 * C
+ + 0.15 * V</pre>
 
-    <p>Each input is on [0, 1]. The composite is on [0, 1]. The variable assignment is short:</p>
+ <p>Each input is on [0, 1]. The composite is on [0, 1]. The variable assignment is short:</p>
 
-    <ul>
-      <li><b>A = accuracy on declared positives.</b> The fraction of held-out eval cases where the compiled artifact produced the expected output. Bare accuracy on the eval set the compiler synthesized.</li>
-      <li><b>S = size score.</b> A monotonic decreasing function of artifact bytes: smaller is better. The shipped form is <code>1 - log2(kb) / 30</code>, clamped to [0, 1]. A 3.8 GB artifact (the median compiled <code>.kolm</code>) lands around 0.27 on this axis; a 200 MB artifact lands near 0.45.</li>
-      <li><b>L = latency score.</b> A monotonic decreasing function of p50 latency: faster is better. Shipped form is <code>1 / (1 + lat_us / 100000)</code>. A 10 ms response lands at 0.91 on the axis; a 100 ms response lands at 0.50.</li>
-      <li><b>C = cost score.</b> A monotonic decreasing function of cost per call: free is better. Local artifacts max out at 1.0; any non-zero per-call cost decays as <code>1 / (1 + cost * 1000)</code>.</li>
-      <li><b>V = eval coverage.</b> The fraction of declared eval cases the artifact actually exercised. A perfect-accuracy artifact that only ran one of twelve declared cases scores 1.0 on A but 0.083 on V; the composite gates correctly.</li>
-    </ul>
+ <ul>
+ <li><b>A = accuracy on declared positives.</b> The fraction of held-out eval cases where the compiled artifact produced the expected output. Bare accuracy on the eval set the compiler synthesized.</li>
+ <li><b>S = size score.</b> A monotonic decreasing function of artifact bytes: smaller is better. The shipped form is <code>1 - log2(kb) / 30</code>, clamped to [0, 1]. A 3.8 GB artifact (the median compiled <code>.kolm</code>) lands around 0.27 on this axis; a 200 MB artifact lands near 0.45.</li>
+ <li><b>L = latency score.</b> A monotonic decreasing function of p50 latency: faster is better. Shipped form is <code>1 / (1 + lat_us / 100000)</code>. A 10 ms response lands at 0.91 on the axis; a 100 ms response lands at 0.50.</li>
+ <li><b>C = cost score.</b> A monotonic decreasing function of cost per call: free is better. Local artifacts max out at 1.0; any non-zero per-call cost decays as <code>1 / (1 + cost * 1000)</code>.</li>
+ <li><b>V = eval coverage.</b> The fraction of declared eval cases the artifact actually exercised. A perfect-accuracy artifact that only ran one of twelve declared cases scores 1.0 on A but 0.083 on V; the composite gates correctly.</li>
+ </ul>
 
-    <p>The composite is rounded to four decimal places and embedded in the manifest, the receipt body, and the audit log. The K-score is one of the seven fields the receipt body HMAC seals, so a third party verifier reading a <code>.kolm</code> can confirm the number was produced under the receipt secret and not edited after.</p>
+ <p>The composite is rounded to four decimal places and embedded in the manifest, the receipt body, and the audit log. The K-score is one of the seven fields the receipt body Ed25519 seals, so a third party verifier reading a <code>.kolm</code> can confirm the number was produced under the receipt secret and not edited after.</p>
 
-    <h2 id="weights">Why these weights.</h2>
-    <p>The weights are a stance, not a derivation. They encode three opinions we hold about a compile-time gate.</p>
+ <h2 id="weights">Why these weights.</h2>
+ <p>The weights are a stance, not a derivation. They encode three opinions we hold about a compile-time gate.</p>
 
-    <p><b>Accuracy dominates.</b> 0.40 of the composite is A alone. The other four axes share 0.60. We picked this because the production failures we have actually shipped have always been accuracy regressions; never once has a deploy gone sideways because the artifact was too large or too slow. If you fix the accuracy, the rest is rounding.</p>
+ <p><b>Accuracy dominates.</b> 0.40 of the composite is A alone. The other four axes share 0.60. We picked this because the production failures we have actually shipped have always been accuracy regressions; never once has a deploy gone sideways because the artifact was too large or too slow. If you fix the accuracy, the rest is rounding.</p>
 
-    <p><b>The four non-accuracy axes are balanced.</b> Size, latency, cost, and coverage each get 0.15. We do not weight them differently because the cases where they bite are situational. Size matters most on edge devices; latency matters most in the request loop; cost matters most in unit economics. A single weighting that biases for one task class biases against the others.</p>
+ <p><b>The four non-accuracy axes are balanced.</b> Size, latency, cost, and coverage each get 0.15. We do not weight them differently because the cases where they bite are situational. Size matters most on edge devices; latency matters most in the request loop; cost matters most in unit economics. A single weighting that biases for one task class biases against the others.</p>
 
-    <p><b>The composite is convex.</b> A perfect score on one axis cannot compensate for a zero on another. A 1.0 accuracy artifact with zero coverage scores 0.55 on the composite (0.40 + four times 0.15 times 0.5 average), well below the 0.85 gate. This is the whole point: a degenerate input class is supposed to fail.</p>
+ <p><b>The composite is convex.</b> A perfect score on one axis cannot compensate for a zero on another. A 1.0 accuracy artifact with zero coverage scores 0.55 on the composite (0.40 + four times 0.15 times 0.5 average), well below the 0.85 gate. This is the whole point: a degenerate input class is supposed to fail.</p>
 
-    <p>K-score v2 is on the v0.2 roadmap and adds four optional axes: <b>R</b> (held-out accuracy vs declared accuracy), <b>F</b> (fairness, lowest sub-group accuracy), <b>E</b> (energy, joules per call), and <b>Z</b> (drift vs registry baseline). When a v2 axis is supplied, the v1 weights redistribute proportionally so the composite stays comparable across versions. v1 artifacts continue to verify under v1; the manifest carries <code>spec: 'k-score-1'</code> or <code>spec: 'k-score-2'</code> so a verifier can dispatch.</p>
+ <p>K-score v2 is on the v0.2 roadmap and adds four optional axes: <b>R</b> (held-out accuracy vs declared accuracy), <b>F</b> (fairness, lowest sub-group accuracy), <b>E</b> (energy, joules per call), and <b>Z</b> (drift vs registry baseline). When a v2 axis is supplied, the v1 weights redistribute proportionally so the composite stays comparable across versions. v1 artifacts continue to verify under v1; the manifest carries <code>spec: 'k-score-1'</code> or <code>spec: 'k-score-2'</code> so a verifier can dispatch.</p>
 
-    <pre><span class="com"># v2 (when all four optional axes are supplied)</span>
+ <pre><span class="com"># v2 (when all four optional axes are supplied)</span>
 K2 = 0.30 * A
-   + 0.10 * S + 0.10 * L + 0.10 * C + 0.10 * V
-   + 0.10 * R + 0.10 * F
-   + 0.05 * E + 0.05 * Z</pre>
+ + 0.10 * S + 0.10 * L + 0.10 * C + 0.10 * V
+ + 0.10 * R + 0.10 * F
+ + 0.05 * E + 0.05 * Z</pre>
 
-    <h2 id="gate">The 0.85 gate.</h2>
-    <p>Every compile that does not produce a composite of at least 0.85 fails. <b>No artifact is emitted. The receipt is not signed. The CID is not minted.</b> The compile process exits non-zero, the trainer writes a diagnostic JSON next to where the artifact would have been, and <code>kolm compile</code> prints the failing axes.</p>
+ <h2 id="gate">The 0.85 gate.</h2>
+ <p>Every compile that does not produce a composite of at least 0.85 fails. <b>No artifact is emitted. The receipt is not signed. The CID is not minted.</b> The compile process exits non-zero, the trainer writes a diagnostic JSON next to where the artifact would have been, and <code>kolm compile</code> prints the failing axes.</p>
 
-    <pre><span class="kw">$</span> kolm compile -t spam_classifier -d ./examples.jsonl
-<span class="arg">[compile]</span>     synthesizing recipes (n=42)
-<span class="arg">[compile]</span>     evaluating on 24 held-out cases
-<span class="arg">[K-score]</span>     A=0.875 S=0.412 L=0.834 C=1.000 V=0.667
-<span class="arg">[K-score]</span>     composite=0.808 (gate=0.85)
-<span class="bad">[fail]</span>        coverage below threshold; 8 of 24 cases were not exercised
-<span class="bad">[fail]</span>        no artifact produced
-<span class="bad">[diag]</span>        ./spam_classifier.failed.json   inspect with: kolm diagnose</pre>
+ <pre><span class="kw">$</span> kolm compile -t spam_classifier -d ./examples.jsonl
+<span class="arg">[compile]</span> synthesizing recipes (n=42)
+<span class="arg">[compile]</span> evaluating on 24 held-out cases
+<span class="arg">[K-score]</span> A=0.875 S=0.412 L=0.834 C=1.000 V=0.667
+<span class="arg">[K-score]</span> composite=0.808 (gate=0.85)
+<span class="bad">[fail]</span> coverage below threshold; 8 of 24 cases were not exercised
+<span class="bad">[fail]</span> no artifact produced
+<span class="bad">[diag]</span> ./spam_classifier.failed.json inspect with: kolm diagnose</pre>
 
-    <p>The gate is adjustable per-compile with <code>--gate</code>. A higher gate produces fewer artifacts but stronger guarantees. A lower gate produces more artifacts that may not deserve to ship. The default we chose (0.85) is the median of the empirical accuracy distribution across the first 1,000 compiles we ran during development. We did not derive 0.85 from theory; we observed it from the actual compile histogram and picked the knee point.</p>
+ <p>The gate is adjustable per-compile with <code>--gate</code>. A higher gate produces fewer artifacts but stronger guarantees. A lower gate produces more artifacts that may not deserve to ship. The default we chose (0.85) is the median of the empirical accuracy distribution across the first 1,000 compiles we ran during development. We did not derive 0.85 from theory; we observed it from the actual compile histogram and picked the knee point.</p>
 
-    <blockquote>
-      <p>A failed compile is a successful gate. The artifact you never shipped is the one that never embarrassed you in front of a customer.</p>
-    </blockquote>
+ <blockquote>
+ <p>A failed compile is a successful gate. The artifact you never shipped is the one that never embarrassed you in front of a customer.</p>
+ </blockquote>
 
-    <h2 id="fail">When the gate fails.</h2>
-    <p>Three failure modes account for most of the rejections we see during development.</p>
+ <h2 id="fail">When the gate fails.</h2>
+ <p>Three failure modes account for most of the rejections we see during development.</p>
 
-    <p><b>Mode one: accuracy collapse on a narrow eval set.</b> A small eval set (under 50 cases) is high variance. One mislabeled case can move A by 2 percentage points. The fix is not to lower the gate but to grow the eval set. The synthesizer can generate additional held-out cases on demand; <code>kolm evals expand --target 200</code> doubles the held-out coverage and stabilizes the accuracy estimate.</p>
+ <p><b>Mode one: accuracy collapse on a narrow eval set.</b> A small eval set (under 50 cases) is high variance. One mislabeled case can move A by 2 percentage points. The fix is not to lower the gate but to grow the eval set. The synthesizer can generate additional held-out cases on demand; <code>kolm evals expand --target 200</code> doubles the held-out coverage and stabilizes the accuracy estimate.</p>
 
-    <p><b>Mode two: coverage shortfall.</b> The eval set declared 24 case classes but the compiled artifact only fired on 16 of them. This is almost always a recipe-pack regression: a pattern was synthesized that subsumed several others and the missing classes never produced an output. The fix is to inspect the recipe pack, find the over-greedy pattern, and split it.</p>
+ <p><b>Mode two: coverage shortfall.</b> The eval set declared 24 case classes but the compiled artifact only fired on 16 of them. This is almost always a recipe-pack regression: a pattern was synthesized that subsumed several others and the missing classes never produced an output. The fix is to inspect the recipe pack, find the over-greedy pattern, and split it.</p>
 
-    <p><b>Mode three: size or latency cliff.</b> A LoRA rank that was set too high produced a 12 GB artifact instead of a 4 GB one, and S collapsed to 0.15. A model pointer that picked a larger base than needed produced 200 ms latency instead of 30 ms, and L collapsed to 0.33. These are config errors; the fix is to re-run the compile with a smaller adapter rank or a smaller base.</p>
+ <p><b>Mode three: size or latency cliff.</b> A LoRA rank that was set too high produced a 12 GB artifact instead of a 4 GB one, and S collapsed to 0.15. A model pointer that picked a larger base than needed produced 200 ms latency instead of 30 ms, and L collapsed to 0.33. These are config errors; the fix is to re-run the compile with a smaller adapter rank or a smaller base.</p>
 
-    <h2 id="open">Open problem: cross-task calibration.</h2>
-    <p>The verifiable critique of the K-score is that it is a single number across tasks that have very different distributional shapes. A spam classifier with A = 0.94 and a refund-flagger with A = 0.94 are not the same kind of evidence. The classifier is a balanced two-class problem with a baseline of 0.50; the flagger has a 3% positive class and a baseline of 0.97. Naively, the flagger's 0.94 is <i>worse</i> than the baseline.</p>
+ <h2 id="open">Open problem: cross-task calibration.</h2>
+ <p>The verifiable critique of the K-score is that it is a single number across tasks that have very different distributional shapes. A spam classifier with A = 0.94 and a refund-flagger with A = 0.94 are not the same kind of evidence. The classifier is a balanced two-class problem with a baseline of 0.50; the flagger has a 3% positive class and a baseline of 0.97. Naively, the flagger's 0.94 is <i>worse</i> than the baseline.</p>
 
-    <p>K-score v1 does not correct for this. The accuracy axis is bare top-1 on declared positives. Two artifacts with the same A score on different task distributions are not interchangeable evidence. The K-score gate catches both at the same threshold, which is correct as a budget constraint and wrong as a quality claim.</p>
+ <p>K-score v1 does not correct for this. The accuracy axis is bare top-1 on declared positives. Two artifacts with the same A score on different task distributions are not interchangeable evidence. The K-score gate catches both at the same threshold, which is correct as a budget constraint and wrong as a quality claim.</p>
 
-    <p>This is the v0.2 calibration problem. The proposal we are sketching is task-class-aware normalization: every task declared at compile time carries a <code>task_class</code> field (e.g., <code>binary_classification</code>, <code>extraction</code>, <code>generation</code>), and the A axis is normalized against the baseline expected for that class (F1 over majority-class baseline for skewed classification; exact-match over no-op for extraction; reference-similarity over empty-string for generation). The composite stays on [0, 1] but the accuracy contribution becomes comparable across task classes.</p>
+ <p>This is the v0.2 calibration problem. The proposal we are sketching is task-class-aware normalization: every task declared at compile time carries a <code>task_class</code> field (e.g., <code>binary_classification</code>, <code>extraction</code>, <code>generation</code>), and the A axis is normalized against the baseline expected for that class (F1 over majority-class baseline for skewed classification; exact-match over no-op for extraction; reference-similarity over empty-string for generation). The composite stays on [0, 1] but the accuracy contribution becomes comparable across task classes.</p>
 
-    <p>The cost of this proposal is that the K-score becomes a function of the task_class field, and a deployer can game the gate by mislabeling the class. The receipt chain seals the task_class along with everything else, so the audit trail catches it, but the cost is one more field a third party needs to inspect to know what the K-score actually attests to. We will publish the v0.2 proposal as a separate RS-1 amendment when the calibration data lands.</p>
+ <p>The cost of this proposal is that the K-score becomes a function of the task_class field, and a deployer can game the gate by mislabeling the class. The receipt chain seals the task_class along with everything else, so the audit trail catches it, but the cost is one more field a third party needs to inspect to know what the K-score actually attests to. We will publish the v0.2 proposal as a separate RS-1 amendment when the calibration data lands.</p>
 
-    <h2 id="limits">Verifiable limitations.</h2>
-    <p>Three things the K-score does not do.</p>
+ <h2 id="limits">Verifiable limitations.</h2>
+ <p>Three things the K-score does not do.</p>
 
-    <p><b>It is a compile-time signal, not a production-quality guarantee.</b> The K-score is computed against an eval set the synthesizer generated and the user reviewed. It is not a population estimate. An artifact that scores 0.92 on its embedded eval set can still produce 0.65 accuracy on a real production traffic mix. Deployments need their own eval loops, fed by sampled production traffic, with their own quality dashboards. The K-score answers "did the compile produce a thing worth shipping"; it does not answer "is the thing still good two weeks later".</p>
+ <p><b>It is a compile-time signal, not a production-quality guarantee.</b> The K-score is computed against an eval set the synthesizer generated and the user reviewed. It is not a population estimate. An artifact that scores 0.92 on its embedded eval set can still produce 0.65 accuracy on a real production traffic mix. Deployments need their own eval loops, fed by sampled production traffic, with their own quality dashboards. The K-score answers "did the compile produce a thing worth shipping"; it does not answer "is the thing still good two weeks later".</p>
 
-    <p><b>It does not measure safety.</b> The accuracy axis sees expected outputs; it does not see refusals, jailbreaks, or out-of-distribution behavior. We do not currently embed a safety eval inside the standard K-score envelope. Safety-relevant tasks should layer a dedicated safety classifier on top of the compiled artifact and gate deployment on that classifier separately.</p>
+ <p><b>It does not measure safety.</b> The accuracy axis sees expected outputs; it does not see refusals, jailbreaks, or out-of-distribution behavior. We do not currently embed a safety eval inside the standard K-score envelope. Safety-relevant tasks should layer a dedicated safety classifier on top of the compiled artifact and gate deployment on that classifier separately.</p>
 
-    <p><b>It does not measure user satisfaction.</b> The composite weights what we could measure cheaply at compile time. It does not measure how users felt about the response. For that, ship the artifact, instrument production, and feed the result back to the next compile through <code>kolm capture</code>. The K-score is the smallest assertion the compiler can make about the bytes it produced; the rest is the deployer's job.</p>
+ <p><b>It does not measure user satisfaction.</b> The composite weights what we could measure cheaply at compile time. It does not measure how users felt about the response. For that, ship the artifact, instrument production, and feed the result back to the next compile through <code>kolm capture</code>. The K-score is the smallest assertion the compiler can make about the bytes it produced; the rest is the deployer's job.</p>
 
-    <p>The fact that the K-score is one number with one threshold is its weakness as a research artifact and its strength as an operational tool. <b>One number, one gate, one binary decision: ship or fail.</b> Five inputs go in; one decision comes out; the receipt chain records every step. Across the 10-app smoke pass we run on every release, K-scores cluster between 0.944 and 0.991 for the artifacts that ship. The number is not magic. It is a calibration we chose, an axis we publish, and a gate we are willing to be wrong in front of.</p>
+ <p>The fact that the K-score is one number with one threshold is its weakness as a research artifact and its strength as an operational tool. <b>One number, one gate, one binary decision: ship or fail.</b> Five inputs go in; one decision comes out; the receipt chain records every step. Across the 10-app smoke pass we run on every release, K-scores cluster between 0.944 and 0.991 for the artifacts that ship. The number is not magic. It is a calibration we chose, an axis we publish, and a gate we are willing to be wrong in front of.</p>
 
-    <div class="signpost">
-      <a href="/research/receipt-chains">
-        <span class="lab">read next</span>
-        <span class="v">Receipt chains <span class="arrow">&rarr;</span></span>
-        <p>The K-score is one of seven fields the receipt body HMAC seals. The chain proof.</p>
-      </a>
-      <a href="/research/compute-backend-selection">
-        <span class="lab">read next</span>
-        <span class="v">Compute backend selection <span class="arrow">&rarr;</span></span>
-        <p>The K-score is the same number whether the compile ran on your laptop or a rented H100.</p>
-      </a>
-      <a href="/k-score">
-        <span class="lab">spec</span>
-        <span class="v">K-score reference <span class="arrow">&rarr;</span></span>
-        <p>The published formula, the v1 vs v2 dispatch rule, and the per-axis normalization curves.</p>
-      </a>
-      <a href="/benchmarks">
-        <span class="lab">harness</span>
-        <span class="v">Benchmark methodology <span class="arrow">&rarr;</span></span>
-        <p>The reproducer harness for cross-task comparisons. n=150 SWE-bench Lite, seed=42.</p>
-      </a>
-    </div>
+ <div class="signpost">
+ <a href="/research/receipt-chains">
+ <span class="lab">read next</span>
+ <span class="v">Receipt chains <span class="arrow">&rarr;</span></span>
+ <p>The K-score is one of seven fields the receipt body Ed25519 seals. The chain proof.</p>
+ </a>
+ <a href="/research/compute-backend-selection">
+ <span class="lab">read next</span>
+ <span class="v">Compute backend selection <span class="arrow">&rarr;</span></span>
+ <p>The K-score is the same number whether the compile ran on your laptop or a rented H100.</p>
+ </a>
+ <a href="/k-score">
+ <span class="lab">spec</span>
+ <span class="v">K-score reference <span class="arrow">&rarr;</span></span>
+ <p>The published formula, the v1 vs v2 dispatch rule, and the per-axis normalization curves.</p>
+ </a>
+ <a href="/benchmarks">
+ <span class="lab">harness</span>
+ <span class="v">Benchmark methodology <span class="arrow">&rarr;</span></span>
+ <p>The reproducer harness for cross-task comparisons. n=150 SWE-bench Lite, seed=42.</p>
+ </a>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

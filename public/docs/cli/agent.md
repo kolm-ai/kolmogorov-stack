@@ -9,9 +9,9 @@ the tool catalog before instantiation.
 
 ```
 kolm agent export <recipe.kolm>... --out <agent.json>
-kolm agent build  --name <slug> --base-model <id> --description <text>
-kolm agent merge  <a.json> <b.json> --out <merged.json>
-kolm agent show   <agent.json>
+kolm agent build --name <slug> --base-model <id> --description <text>
+kolm agent merge <a.json> <b.json> --out <merged.json>
+kolm agent show <agent.json>
 kolm agent verify <agent.json>
 ```
 
@@ -20,19 +20,19 @@ kolm agent verify <agent.json>
 ```
 kolm agent export billing.kolm support.kolm --out finance-agent.json
 kolm agent build --name ops --base-model NousResearch/Hermes-4.3-36B \
-                 --description "ops triage assistant"
+ --description "ops triage assistant"
 kolm agent merge finance-agent.json ops-agent.json --out combined.json
 kolm agent show combined.json
-kolm agent verify combined.json                # integrity_hash + tool sigs
+kolm agent verify combined.json # integrity_hash + tool sigs
 ```
 
 ## What an agent blueprint contains
 
 - `id` / `name` / `description` / `base_model` / `chat_template`
 - `tools[]`: one entry per recipe, with `name`, `description`,
-  `input_schema`, `recipe_class`, and `artifact_hash`
+ `input_schema`, `recipe_class`, and `artifact_hash`
 - `capture_namespace`: where invocations capture for the self-growing
-  loop
+ loop
 - `integrity_hash`: sha256 over canonical JSON (excluding the hash itself)
 
 ## See also

@@ -7,23 +7,23 @@ common recipe classes; free-text briefs generate per-class candidate libraries
 ## Usage
 
 ```
-kolm seeds new <template>                       scaffold from a known template
-kolm seeds new "<free text brief>" [flags]      candidate seeds from a brief
-kolm seeds generate --from <file> --count <N>   deterministic mutation expansion
-kolm seeds list                                 list known templates
-kolm seeds bootstrap                            generate a starter project
-kolm seeds validate <file>                      schema-check a seeds.jsonl
+kolm seeds new <template> scaffold from a known template
+kolm seeds new "<free text brief>" [flags] candidate seeds from a brief
+kolm seeds generate --from <file> --count <N> deterministic mutation expansion
+kolm seeds list list known templates
+kolm seeds bootstrap generate a starter project
+kolm seeds validate <file> schema-check a seeds.jsonl
 ```
 
 ## Flags (brief route)
 
 - `--class <c>` force recipe class. One of `rule`, `synthesized_rule`,
-  `compiled_rule`, `distilled_model`.
+ `compiled_rule`, `distilled_model`.
 - `--count <N>` candidate count (default: 10).
 - `--out <path>` write JSONL candidates to `<path>` (with `synthesized:true`).
 - `--json` full JSON output.
 - `--air-gap` deterministic candidates from a per-class library (default).
-- `--no-air-gap` reserved for the networked teacher path. Not yet wired.
+- `--no-air-gap` is reserved for the networked teacher path; the shipped seed command stays deterministic by default.
 
 ## Examples
 

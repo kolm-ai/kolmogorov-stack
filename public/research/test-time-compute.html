@@ -3,229 +3,236 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Test-time compute: best-of-N, self-consistency, reflexion · kolm research</title>
-<meta name="description" content="Three ways to spend more tokens at inference and get a better answer. When each one earns its budget, and how kolm logs the spend." />
-<link rel="canonical" href="https://kolm.ai/research/test-time-compute" />
-<meta property="og:type" content="article" />
-<meta property="og:title" content="Test-time compute: best-of-N, self-consistency, reflexion" />
-<meta property="og:description" content="Three ways to spend more tokens at inference and get a better answer. When each one earns its budget, and how kolm logs the spend." />
-<meta property="og:url" content="https://kolm.ai/research/test-time-compute" />
+<title>Test-time compute: best-of-N, self-consistency, · kolm.ai</title>
+<meta name="description" content="Three ways to spend more tokens at inference and get a better answer. When each one earns its budget, and how kolm logs the spend.">
+<link rel="canonical" href="https://kolm.ai/research/test-time-compute">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Test-time compute: best-of-N, self-consistency, · kolm.ai">
+<meta property="og:description" content="Three ways to spend more tokens at inference and get a better answer. When each one earns its budget, and how kolm logs the spend.">
+<meta property="og:url" content="https://kolm.ai/research/test-time-compute">
 <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Test-time compute: best-of-N, self-consistency, reflexion",
-  "description": "Three ways to spend more tokens at inference and get a better answer. When each one earns its budget, and how kolm logs the spend.",
-  "datePublished": "2026-05-14",
-  "author": { "@type": "Organization", "name": "kolm" },
-  "publisher": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
-  "url": "https://kolm.ai/research/test-time-compute",
-  "keywords": "test-time compute, best-of-N, self-consistency, reflexion, inference scaling, process reward model"
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "Test-time compute: best-of-N, self-consistency, reflexion",
+ "description": "Three ways to spend more tokens at inference and get a better answer. When each one earns its budget, and how kolm logs the spend.",
+ "datePublished": "2026-05-14",
+ "author": { "@type": "Organization", "name": "kolm" },
+ "publisher": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "url": "https://kolm.ai/research/test-time-compute",
+ "keywords": "test-time compute, best-of-N, self-consistency, reflexion, inference scaling, process reward model"
 }</script>
 <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
-    { "@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research" },
-    { "@type": "ListItem", "position": 3, "name": "Test-time compute", "item": "https://kolm.ai/research/test-time-compute" }
-  ]
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research" },
+ { "@type": "ListItem", "position": 3, "name": "Test-time compute", "item": "https://kolm.ai/research/test-time-compute" }
+ ]
 }</script>
 <style>
-  :root{
-    --bg:#fafaf7; --bg-elev:#f3f1ea; --line:#1a1a1a14;
-    --ink:#0c0c0c; --ink-mute:#4a4a4a;
-    --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
-    --serif:"Iowan Old Style","Source Serif Pro",Charter,Georgia,serif;
-    --sans:-apple-system,BlinkMacSystemFont,"Inter","SF Pro Text",system-ui,sans-serif;
-  }
-  *{box-sizing:border-box} html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
-  a{color:inherit;text-underline-offset:3px;text-decoration-thickness:1px}
-  a:hover{color:#0a0a0a}
-  header.site{position:sticky;top:0;z-index:50;background:rgba(250,250,247,.92);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--line)}
-  .site-header{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12.5px;letter-spacing:.02em}
-  .brand{font-weight:600}
-  .nav a{margin-left:22px;opacity:.78}
-  .nav a:hover{opacity:1}
-  main{max-width:760px;margin:0 auto;padding:64px 24px 96px}
-  .hero-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 18px}
-  h1{font-family:var(--serif);font-weight:500;font-size:42px;line-height:1.14;letter-spacing:-0.018em;margin:0 0 22px}
-  .lede{font-family:var(--serif);font-size:21px;line-height:1.5;color:#1d1d1d;margin:0 0 28px}
-  .meta-line{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);letter-spacing:.04em;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;margin:0 0 48px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
-  h2{font-family:var(--sans);font-weight:600;font-size:20px;letter-spacing:-0.005em;margin:48px 0 14px}
-  p{margin:0 0 18px}
-  ul,ol{margin:0 0 18px;padding-left:22px}
-  li{margin:6px 0}
-  code{font-family:var(--mono);font-size:13.5px;background:var(--bg-elev);padding:1px 6px;border-radius:3px}
-  pre{font-family:var(--mono);font-size:13px;line-height:1.55;background:var(--bg-elev);padding:18px 20px;border-radius:6px;overflow-x:auto;margin:0 0 22px}
-  pre code{background:transparent;padding:0}
-  table{width:100%;border-collapse:collapse;margin:0 0 22px;font-size:14.5px}
-  th,td{text-align:left;padding:9px 12px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
-  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute);font-weight:600}
-  .cite{font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);margin:0 0 6px}
-  .cite a{opacity:.78}
-  footer.site{border-top:1px solid var(--line);margin-top:72px;padding:28px 24px;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);text-align:center}
+ :root{
+ --bg:#fafaf7; --bg-elev:#f3f1ea; --line:#1a1a1a14;
+ --ink:#0c0c0c; --ink-mute:#4a4a4a;
+ --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Source Serif Pro",Charter,Georgia,serif;
+ --sans:-apple-system,BlinkMacSystemFont,"Inter","SF Pro Text",system-ui,sans-serif;
+ }
+ *{box-sizing:border-box} html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+ a{color:inherit;text-underline-offset:3px;text-decoration-thickness:1px}
+ a:hover{color:#0a0a0a}
+ header.site{position:sticky;top:0;z-index:50;background:rgba(250,250,247,.92);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--line)}
+ .site-header{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12.5px;letter-spacing:.02em}
+ .brand{font-weight:600}
+ .nav a{margin-left:22px;opacity:.78}
+ .nav a:hover{opacity:1}
+ main{max-width:760px;margin:0 auto;padding:64px 24px 96px}
+ .hero-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 18px}
+ h1{font-family:var(--serif);font-weight:500;font-size:42px;line-height:1.14;letter-spacing:-0.018em;margin:0 0 22px}
+ .lede{font-family:var(--serif);font-size:21px;line-height:1.5;color:#1d1d1d;margin:0 0 28px}
+ .meta-line{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);letter-spacing:.04em;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;margin:0 0 48px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
+ h2{font-family:var(--sans);font-weight:600;font-size:20px;letter-spacing:-0.005em;margin:48px 0 14px}
+ p{margin:0 0 18px}
+ ul,ol{margin:0 0 18px;padding-left:22px}
+ li{margin:6px 0}
+ code{font-family:var(--mono);font-size:13.5px;background:var(--bg-elev);padding:1px 6px;border-radius:3px}
+ pre{font-family:var(--mono);font-size:13px;line-height:1.55;background:var(--bg-elev);padding:18px 20px;border-radius:6px;overflow-x:auto;margin:0 0 22px}
+ pre code{background:transparent;padding:0}
+ table{width:100%;border-collapse:collapse;margin:0 0 22px;font-size:14.5px}
+ th,td{text-align:left;padding:9px 12px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+ th{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute);font-weight:600}
+ .cite{font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);margin:0 0 6px}
+ .cite a{opacity:.78}
+ footer.site{border-top:1px solid var(--line);margin-top:72px;padding:28px 24px;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);text-align:center}
 </style>
 <link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Test-time compute: best-of-N, self-consistency, · kolm.ai">
+<meta name="twitter:description" content="Three ways to spend more tokens at inference and get a better answer. When each one earns its budget, and how kolm logs the spend.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site">
-  <div class="site-header">
-    <a class="brand" href="/">kolm</a>
-    <nav class="nav">
-      <a href="/quickstart">Quickstart</a>
-      <a href="/docs">Docs</a>
-      <a href="/research" aria-current="page">Research</a>
-      <a href="/spec">Spec</a>
-      <a href="/pricing">Pricing</a>
-    </nav>
-  </div>
+ <div class="site-header">
+ <a class="brand" href="/">kolm</a>
+ <nav class="nav">
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/research" aria-current="page">Research</a>
+ <a href="/spec">Spec</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
 </header>
 
-<main>
-  <p class="hero-eyebrow">Research / Decoding</p>
-  <h1>Test-time compute: best-of-N, self-consistency, reflexion</h1>
-  <p class="lede">Three ways to spend more tokens at inference and get a better answer. Each has a regime where it wins, a regime where it wastes money, and a receipt line that tells you which one happened.</p>
-  <div class="meta-line">
-    <span>2026-05-14 · kolm research</span>
-    <span>6 min read</span>
-  </div>
+<main id="main">
+ <p class="hero-eyebrow">Research / Decoding</p>
+ <h1>Test-time compute: best-of-N, self-consistency, reflexion</h1>
+ <p class="lede">Three ways to spend more tokens at inference and get a better answer. Each has a regime where it wins, a regime where it wastes money, and a receipt line that tells you which one happened.</p>
+ <div class="meta-line">
+ <span>2026-05-14 · kolm research</span>
+ <span>6 min read</span>
+ </div>
 
-  <h2>The premise</h2>
-  <p>For a fixed model, the only knob left at inference time is how many tokens you are willing to spend on one answer. The literature calls this <em>test-time compute</em>. The point is not to make the model bigger. The point is to use the same model harder when the task warrants it.</p>
-  <p>Snell 2024 showed that for problems where verification is cheaper than generation, you can match a 14? larger model by spending compute at test time instead of train time. That is the thesis. The three methods below are the most credible ways to cash it in.</p>
+ <h2>The premise</h2>
+ <p>For a fixed model, the only knob left at inference time is how many tokens you are willing to spend on one answer. The literature calls this <em>test-time compute</em>. The point is not to make the model bigger. The point is to use the same model harder when the task warrants it.</p>
+ <p>Snell 2024 showed that for problems where verification is cheaper than generation, you can match a 14? larger model by spending compute at test time instead of train time. That is the thesis. The three methods below are the most credible ways to cash it in.</p>
 
-  <h2>1. Best-of-N</h2>
-  <p>Sample N completions independently. Pick the one with the highest score under some verifier. If you have a process reward model, score per step. If you have an outcome reward model or a unit test, score the final answer.</p>
-  <pre><code>completions = [model.generate(prompt, temperature=0.7, seed=i) for i in range(N)]
+ <h2>1. Best-of-N</h2>
+ <p>Sample N completions independently. Pick the one with the highest score under some verifier. If you have a process reward model, score per step. If you have an outcome reward model or a unit test, score the final answer.</p>
+ <pre><code>completions = [model.generate(prompt, temperature=0.7, seed=i) for i in range(N)]
 scores = [verifier(c) for c in completions]
 return completions[argmax(scores)]</code></pre>
-  <p>Best-of-N is the right tool when the verifier is much cheaper than the generator and the task has a clean notion of correctness. Coding with a test suite. Math with a checker. Tool-call schemas with a validator.</p>
-  <p>What kills it: weak verifiers. If your reward model is noisy at the top of the distribution, best-of-N selects on noise. Cobbe 2021 reported this as the verifier ceiling, and it is the first thing to measure when you scale N.</p>
+ <p>Best-of-N is the right tool when the verifier is much cheaper than the generator and the task has a clean notion of correctness. Coding with a test suite. Math with a checker. Tool-call schemas with a validator.</p>
+ <p>What kills it: weak verifiers. If your reward model is noisy at the top of the distribution, best-of-N selects on noise. Cobbe 2021 reported this as the verifier ceiling, and it is the first thing to measure when you scale N.</p>
 
-  <h2>2. Self-consistency</h2>
-  <p>Sample N completions with chain-of-thought. Majority-vote the final answer. No verifier required, just an answer extractor and an equality predicate.</p>
-  <pre><code>answers = [extract_answer(model.generate(prompt, temperature=0.7, seed=i))
-           for i in range(N)]
+ <h2>2. Self-consistency</h2>
+ <p>Sample N completions with chain-of-thought. Majority-vote the final answer. No verifier required, just an answer extractor and an equality predicate.</p>
+ <pre><code>answers = [extract_answer(model.generate(prompt, temperature=0.7, seed=i))
+ for i in range(N)]
 return Counter(answers).most_common(1)[0][0]</code></pre>
-  <p>Wang 2022 ran this on GSM8K and showed monotone gains up to N=40. The premise: if the model knows the right path, several paths will land on the same answer. Wrong paths disagree on different things.</p>
-  <p>Self-consistency wins when (1) the answer space is small or discrete, (2) you have no verifier, and (3) the model is roughly calibrated. It loses on open-ended generation where there is no canonical answer to vote on.</p>
+ <p>Wang 2022 ran this on GSM8K and showed monotone gains up to N=40. The premise: if the model knows the right path, several paths will land on the same answer. Wrong paths disagree on different things.</p>
+ <p>Self-consistency wins when (1) the answer space is small or discrete, (2) you have no verifier, and (3) the model is roughly calibrated. It loses on open-ended generation where there is no canonical answer to vote on.</p>
 
-  <h2>3. Reflexion</h2>
-  <p>Generate. Critique. Regenerate using the critique. Loop until a stopping condition (verifier passes, max iterations, no further change).</p>
-  <pre><code>output = model.generate(prompt)
+ <h2>3. Reflexion</h2>
+ <p>Generate. Critique. Regenerate using the critique. Loop until a stopping condition (verifier passes, max iterations, no further change).</p>
+ <pre><code>output = model.generate(prompt)
 for _ in range(MAX_ITERS):
-    critique = model.critique(prompt, output)
-    if critique.is_clean:
-        break
-    output = model.generate(prompt, prior=output, critique=critique)
+ critique = model.critique(prompt, output)
+ if critique.is_clean:
+ break
+ output = model.generate(prompt, prior=output, critique=critique)
 return output</code></pre>
-  <p>Shinn 2023 framed reflexion as verbal self-improvement: the model writes notes to itself about what went wrong, and conditions the next attempt on those notes. It works best on tasks where the model can identify its own errors after the fact better than it can avoid them in the first place. Long-horizon agentic tasks. Code with run-time errors. Logical puzzles with check steps.</p>
+ <p>Shinn 2023 framed reflexion as verbal self-improvement: the model writes notes to itself about what went wrong, and conditions the next attempt on those notes. It works best on tasks where the model can identify its own errors after the fact better than it can avoid them in the first place. Long-horizon agentic tasks. Code with run-time errors. Logical puzzles with check steps.</p>
 
-  <h2>When each wins</h2>
-  <table>
-    <tr><th>Setup</th><th>Best fit</th><th>Why</th></tr>
-    <tr><td>Math with checker</td><td>Best-of-N + PRM</td><td>Verifier is exact and per-step</td></tr>
-    <tr><td>Math without checker</td><td>Self-consistency</td><td>Discrete answers, no verifier needed</td></tr>
-    <tr><td>Code with unit tests</td><td>Best-of-N + tests</td><td>Tests are the verifier</td></tr>
-    <tr><td>Code without tests</td><td>Reflexion</td><td>Model critiques compile errors</td></tr>
-    <tr><td>Tool calls</td><td>Best-of-N + schema</td><td>JSON Schema is the verifier</td></tr>
-    <tr><td>Open generation</td><td>None of these</td><td>No notion of correctness</td></tr>
-  </table>
+ <h2>When each wins</h2>
+ <table>
+ <tr><th>Setup</th><th>Best fit</th><th>Why</th></tr>
+ <tr><td>Math with checker</td><td>Best-of-N + PRM</td><td>Verifier is exact and per-step</td></tr>
+ <tr><td>Math without checker</td><td>Self-consistency</td><td>Discrete answers, no verifier needed</td></tr>
+ <tr><td>Code with unit tests</td><td>Best-of-N + tests</td><td>Tests are the verifier</td></tr>
+ <tr><td>Code without tests</td><td>Reflexion</td><td>Model critiques compile errors</td></tr>
+ <tr><td>Tool calls</td><td>Best-of-N + schema</td><td>JSON Schema is the verifier</td></tr>
+ <tr><td>Open generation</td><td>None of these</td><td>No notion of correctness</td></tr>
+ </table>
 
-  <h2>The kolm call</h2>
-  <pre><code>from apps.eval import test_time
+ <h2>The kolm call</h2>
+ <pre><code>from apps.eval import test_time
 result = test_time.best_of_n(
-    model=runtime,
-    prompt=p,
-    n=8,
-    verifier=schema_validator(tool_schema),
-    seed=42,
+ model=runtime,
+ prompt=p,
+ n=8,
+ verifier=schema_validator(tool_schema),
+ seed=42,
 )</code></pre>
-  <p>The verifier is the same object the K-score gate uses. Same scoring function in training, evaluation, and inference. This is the kolm-specific design point: the reward function is the eval is the inference-time picker.</p>
+ <p>The verifier is the same object the K-score gate uses. Same scoring function in training, evaluation, and inference. This is the kolm-specific design point: the reward function is the eval is the inference-time picker.</p>
 
-  <h2>What the receipt records</h2>
-  <pre><code>{
-  "test_time": {
-    "method": "best_of_n",
-    "n": 8,
-    "verifier_id": "schema/tool_call_v1",
-    "scores": [0.97, 0.94, 0.99, 0.21, 0.88, 0.92, 0.99, 0.96],
-    "selected_index": 2,
-    "tokens_total": 4831,
-    "cost_usd": 0.0024
-  }
+ <h2>What the receipt records</h2>
+ <pre><code>{
+ "test_time": {
+ "method": "best_of_n",
+ "n": 8,
+ "verifier_id": "schema/tool_call_v1",
+ "scores": [0.97, 0.94, 0.99, 0.21, 0.88, 0.92, 0.99, 0.96],
+ "selected_index": 2,
+ "tokens_total": 4831,
+ "cost_usd": 0.0024
+ }
 }</code></pre>
-  <p>If a buyer asks "did you spend more compute on the answer I just got than on the one yesterday", the receipt answers exactly that. <code>tokens_total</code> is the full spend across all N samples, not just the selected one.</p>
+ <p>If a buyer asks "did you spend more compute on the answer I just got than on the one yesterday", the receipt answers exactly that. <code>tokens_total</code> is the full spend across all N samples, not just the selected one.</p>
 
-  <h2>Edge cases</h2>
-  <p><strong>Temperature.</strong> Best-of-N and self-consistency need diversity. Temperature=0 collapses them to one-shot. The defaults are 0.7 for reasoning, 0.4 for code, 1.0 for creative.</p>
-  <p><strong>Stopping criteria.</strong> Reflexion needs an upper bound (MAX_ITERS=3 is a good default). Without one, an under-calibrated critic can loop forever on a correct answer.</p>
-  <p><strong>Cost.</strong> N=8 costs 8? tokens. The break-even is the point where (gain ? user willingness to pay) exceeds (8? generation cost). For high-stakes tools (medical triage, legal drafting), it is almost always positive.</p>
-  <p><strong>Verifier-of-the-verifier.</strong> If your PRM is a smaller model, run it through K-score quarterly. PRMs drift the same way generators do.</p>
+ <h2>Edge cases</h2>
+ <p><strong>Temperature.</strong> Best-of-N and self-consistency need diversity. Temperature=0 collapses them to one-shot. The defaults are 0.7 for reasoning, 0.4 for code, 1.0 for creative.</p>
+ <p><strong>Stopping criteria.</strong> Reflexion needs an upper bound (MAX_ITERS=3 is a good default). Without one, an under-calibrated critic can loop forever on a correct answer.</p>
+ <p><strong>Cost.</strong> N=8 costs 8? tokens. The break-even is the point where (gain ? user willingness to pay) exceeds (8? generation cost). For high-stakes tools (medical triage, legal drafting), it is almost always positive.</p>
+ <p><strong>Verifier-of-the-verifier.</strong> If your PRM is a smaller model, run it through K-score quarterly. PRMs drift the same way generators do.</p>
 
-  <h2>Citations</h2>
-  <p class="cite">Cobbe et al. 2021. <em>Training Verifiers to Solve Math Word Problems</em>. <a href="https://arxiv.org/abs/2110.14168">arXiv:2110.14168</a></p>
-  <p class="cite">Wang et al. 2022. <em>Self-Consistency Improves Chain of Thought Reasoning</em>. <a href="https://arxiv.org/abs/2203.11171">arXiv:2203.11171</a></p>
-  <p class="cite">Shinn et al. 2023. <em>Reflexion: Language Agents with Verbal Reinforcement Learning</em>. <a href="https://arxiv.org/abs/2303.11366">arXiv:2303.11366</a></p>
-  <p class="cite">Snell et al. 2024. <em>Scaling LLM Test-Time Compute Optimally Can Be More Effective Than Scaling Model Parameters</em>. <a href="https://arxiv.org/abs/2408.03314">arXiv:2408.03314</a></p>
+ <h2>Citations</h2>
+ <p class="cite">Cobbe et al. 2021. <em>Training Verifiers to Solve Math Word Problems</em>. <a href="https://arxiv.org/abs/2110.14168">arXiv:2110.14168</a></p>
+ <p class="cite">Wang et al. 2022. <em>Self-Consistency Improves Chain of Thought Reasoning</em>. <a href="https://arxiv.org/abs/2203.11171">arXiv:2203.11171</a></p>
+ <p class="cite">Shinn et al. 2023. <em>Reflexion: Language Agents with Verbal Reinforcement Learning</em>. <a href="https://arxiv.org/abs/2303.11366">arXiv:2303.11366</a></p>
+ <p class="cite">Snell et al. 2024. <em>Scaling LLM Test-Time Compute Optimally Can Be More Effective Than Scaling Model Parameters</em>. <a href="https://arxiv.org/abs/2408.03314">arXiv:2408.03314</a></p>
 
-  <div class="meta-line" style="margin-top:48px">
-    <span><a href="/research">← back to research</a></span>
-    <span>kolm.ai/research/test-time-compute</span>
-  </div>
+ <div class="meta-line" style="margin-top:48px">
+ <span><a href="/research">← back to research</a></span>
+ <span>kolm.ai/research/test-time-compute</span>
+ </div>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

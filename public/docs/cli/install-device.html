@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm install-device · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm install-device CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/install-device">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm install-device","description":"Reference for the kolm install-device CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/install-device","mainEntityOfPage":"https://kolm.ai/docs/cli/install-device","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm install-device · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm install-device CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,16 +176,16 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="install-device">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>install-device</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>install-device</span>
 </nav>
 <h1>kolm install-device</h1>
 <p>Sideload a <code>.kolm</code> artifact onto a connected edge device (laptop, DGX Spark, Jetson, phone over USB). Reads device capability from <code>kolm doctor --detect-hw</code> and selects the right quant tier before copying.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm install-device &lt;artifact.kolm&gt;                       # auto-detect
-kolm install-device &lt;artifact.kolm&gt; --target &lt;id&gt;         # explicit device id
-kolm install-device &lt;artifact.kolm&gt; --tier &lt;preset&gt;       # 3090/5090/spark/m3-ultra-512
-kolm install-device --list                                # connected devices
+kolm install-device &lt;artifact.kolm&gt; # auto-detect
+kolm install-device &lt;artifact.kolm&gt; --target &lt;id&gt; # explicit device id
+kolm install-device &lt;artifact.kolm&gt; --tier &lt;preset&gt; # 3090/5090/spark/m3-ultra-512
+kolm install-device --list # connected devices
 </code></pre>
 <h2>What runs on the device</h2>
 <p>The artifact, the receipt chain, the bundled runtime binary, and a device-side verifier. Verification happens on-device before the model is loaded; if the chain breaks, the runtime refuses to start.</p>
@@ -193,13 +197,13 @@ kolm install-device --list                                # connected devices
 <li><code>/docs/cli/runtime</code> for the runtime build matrix.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm config · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm config CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/config">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm config","description":"Reference for the kolm config CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/config","mainEntityOfPage":"https://kolm.ai/docs/cli/config","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm config · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm config CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,17 +176,17 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="config">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>config</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>config</span>
 </nav>
 <h1>kolm config</h1>
 <p>Read and write CLI configuration at <code>~/.kolm/config.json</code>. The CLI reads this file on every invocation to pick up the API key, base URL, and active profile.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm config get [key]              # print one key or the full document
-kolm config set &lt;key&gt; &lt;value&gt;      # write one key
-kolm config unset &lt;key&gt;            # remove one key
-kolm config edit                   # open in $EDITOR
-kolm config path                   # print the file path
+kolm config get [key] # print one key or the full document
+kolm config set &lt;key&gt; &lt;value&gt; # write one key
+kolm config unset &lt;key&gt; # remove one key
+kolm config edit # open in $EDITOR
+kolm config path # print the file path
 </code></pre>
 <h2>Common keys</h2>
 <ul>
@@ -205,13 +209,13 @@ kolm config path                   # print the file path
 <li><code>kolm profile</code> for multi-tenant config sets.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

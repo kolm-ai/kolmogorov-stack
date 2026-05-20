@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>LangChain &middot; kolm.ai</title>
+<title>LangChain · kolm.ai</title>
 <meta name="description" content="Use LangChain ChatOpenAI with a custom base_url to route every call through kolm.ai. Python and JavaScript. Captures, redaction, and signed receipts come along.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="LangChain &middot; kolm.ai">
-<meta property="og:description" content="ChatOpenAI with base_url=kolm. Chains, agents, LangGraph all work.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="LangChain · kolm.ai">
+<meta property="og:description" content="Use LangChain ChatOpenAI with a custom base_url to route every call through kolm.ai. Python and JavaScript. Captures, redaction, and signed receipts come along.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations/langchain">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="LangChain &middot; kolm.ai">
-<meta name="twitter:description" content="ChatOpenAI with a custom base_url. That is the entire change.">
+<meta name="twitter:title" content="LangChain · kolm.ai">
+<meta name="twitter:description" content="Use LangChain ChatOpenAI with a custom base_url to route every call through kolm.ai. Python and JavaScript. Captures, redaction, and signed receipts come along.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/integrations/langchain">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -54,12 +54,13 @@ pre.code{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-ra
 footer{padding:36px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &ndash; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
+ <a class="logo" href="/">kolm.ai</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -215,32 +216,32 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <main id="main">
 
 <section class="hero"><div class="wrap">
-  <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / langchain</div>
-  <h1>LangChain ChatOpenAI, with kolm underneath.</h1>
-  <p class="lede">LangChain&apos;s <code>ChatOpenAI</code> already accepts a custom <code>base_url</code>. Point it at kolm.ai and every node in every chain &ndash; LangGraph, LangServe, RetrievalQA &ndash; runs the same way. Captures, the redaction membrane, and signed receipts come along for free.</p>
+ <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / langchain</div>
+ <h1>LangChain ChatOpenAI, with kolm underneath.</h1>
+ <p class="lede">LangChain&apos;s <code>ChatOpenAI</code> already accepts a custom <code>base_url</code>. Point it at kolm.ai and every node in every chain &ndash; LangGraph, LangServe, RetrievalQA &ndash; runs the same way. Captures, the redaction membrane, and signed receipts come along for free.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>How it works in one paragraph</h2>
-  <p>LangChain&apos;s <code>ChatOpenAI</code> (Python <code>langchain-openai</code>, JS <code>@langchain/openai</code>) takes <code>base_url</code> / <code>configuration.baseURL</code> at construction. kolm.ai speaks the OpenAI Chat Completions wire format, so swapping the URL is the entire integration. Tool calling, streaming, structured outputs, callbacks, and LangSmith tracing keep working. Every call lands as a capture row tagged with the LangChain run-id so you can correlate kolm artifacts back to LangSmith traces.</p>
+ <h2>How it works in one paragraph</h2>
+ <p>LangChain&apos;s <code>ChatOpenAI</code> (Python <code>langchain-openai</code>, JS <code>@langchain/openai</code>) takes <code>base_url</code> / <code>configuration.baseURL</code> at construction. kolm.ai speaks the OpenAI Chat Completions wire format, so swapping the URL is the entire integration. Tool calling, streaming, structured outputs, callbacks, and LangSmith tracing keep working. Every call lands as a capture row tagged with the LangChain run-id so you can correlate kolm artifacts back to LangSmith traces.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Python &ndash; one line</h2>
-  <p>Construct <code>ChatOpenAI</code> with <code>base_url</code> + <code>api_key</code>. Drop it into any chain.</p>
-  <div class="tabs"><span>python &ndash; langchain-openai &gt;= 0.2</span></div>
+ <h2>Python &ndash; one line</h2>
+ <p>Construct <code>ChatOpenAI</code> with <code>base_url</code> + <code>api_key</code>. Drop it into any chain.</p>
+ <div class="tabs"><span>python &ndash; langchain-openai &gt;= 0.2</span></div>
 <pre class="code">from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
 llm = ChatOpenAI(
-    base_url="https://kolm.ai/v1",
-    api_key="ks_live_...",
-    model="qwen-3.5-27b",
+ base_url="https://kolm.ai/v1",
+ api_key="ks_live_...",
+ model="qwen-3.5-27b",
 )
 
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "You summarize pull requests in one sentence."),
-    ("user", "{diff}"),
+ ("system", "You summarize pull requests in one sentence."),
+ ("user", "{diff}"),
 ])
 
 chain = prompt | llm
@@ -248,21 +249,21 @@ print(chain.invoke({"diff": "..."}).content)</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>JavaScript / TypeScript &ndash; one line</h2>
-  <p>Same surface for <code>@langchain/openai</code>. Pass <code>configuration.baseURL</code>.</p>
-  <div class="tabs"><span>node &ndash; @langchain/openai</span></div>
+ <h2>JavaScript / TypeScript &ndash; one line</h2>
+ <p>Same surface for <code>@langchain/openai</code>. Pass <code>configuration.baseURL</code>.</p>
+ <div class="tabs"><span>node &ndash; @langchain/openai</span></div>
 <pre class="code">import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
 const llm = new ChatOpenAI({
-  model: "qwen-3.5-27b",
-  apiKey: process.env.KOLM_API_KEY,
-  configuration: { baseURL: "https://kolm.ai/v1" },
+ model: "qwen-3.5-27b",
+ apiKey: process.env.KOLM_API_KEY,
+ configuration: { baseURL: "https://kolm.ai/v1" },
 });
 
 const prompt = ChatPromptTemplate.fromMessages([
-  ["system", "You summarize pull requests in one sentence."],
-  ["user", "{diff}"],
+ ["system", "You summarize pull requests in one sentence."],
+ ["user", "{diff}"],
 ]);
 
 const chain = prompt.pipe(llm);
@@ -270,18 +271,18 @@ console.log((await chain.invoke({ diff: "..." })).content);</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Where to go next</h2>
-  <div class="related">
-    <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. The wire protocol underneath.</span></a>
-    <a href="/captures"><b>Captures inbox &rarr;</b><span>Filter by namespace. See every chain step land as a row.</span></a>
-    <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
-  </div>
+ <h2>Where to go next</h2>
+ <div class="related">
+ <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. The wire protocol underneath.</span></a>
+ <a href="/captures"><b>Captures inbox &rarr;</b><span>Filter by namespace. See every chain step land as a row.</span></a>
+ <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
+ </div>
 </div></section>
 
 </main>
 
 <footer><div class="wrap">
-  <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
 </div></footer>
 </body>
 </html>

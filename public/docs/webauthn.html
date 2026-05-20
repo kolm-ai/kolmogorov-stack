@@ -3,20 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>WebAuthn / passkeys · kolm.ai docs</title>
+<title>WebAuthn / passkeys · kolm.ai docs · kolm.ai</title>
 <meta name="description" content="WebAuthn passkey authentication for kolm.ai: setup, recovery, hardware-key support, and account security best practices.">
 <link rel="canonical" href="https://kolm.ai/docs/webauthn">
-<meta property="og:title" content="WebAuthn / passkeys · kolm.ai docs">
-<meta property="og:description" content="Passkey authentication for kolm.ai: setup, recovery, and hardware keys.">
+<meta property="og:title" content="WebAuthn / passkeys · kolm.ai docs · kolm.ai">
+<meta property="og:description" content="WebAuthn passkey authentication for kolm.ai: setup, recovery, hardware-key support, and account security best practices.">
 <meta property="og:url" content="https://kolm.ai/docs/webauthn">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-webauthn.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"WebAuthn on kolm.ai","description":"Passkey authentication for kolm.ai.","url":"https://kolm.ai/docs/webauthn","mainEntityOfPage":"https://kolm.ai/docs/webauthn","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:title" content="WebAuthn / passkeys · kolm.ai docs · kolm.ai">
+<meta name="twitter:description" content="WebAuthn passkey authentication for kolm.ai: setup, recovery, hardware-key support, and account security best practices.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,46 +176,46 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-page" data-w401g="webauthn">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <span>WebAuthn</span>
+ <a href="/docs">Docs</a> / <span>WebAuthn</span>
 </nav>
 <header class="page-h">
-  <p class="eyebrow">kolm.ai · authentication</p>
-  <h1>How passkey authentication works.</h1>
-  <p class="lede">kolm.ai supports WebAuthn passkeys for sign-in and as a second factor. Passkeys are phishing-resistant by design: the private key never leaves your device.</p>
+ <p class="eyebrow">kolm.ai · authentication</p>
+ <h1>How passkey authentication works.</h1>
+ <p class="lede">kolm.ai supports WebAuthn passkeys for sign-in and as a second factor. Passkeys are phishing-resistant by design: the private key never leaves your device.</p>
 </header>
 
 <section>
-  <h2>Enroll a passkey</h2>
-  <ol>
-    <li>Sign in to your account at <a href="/account">/account</a>.</li>
-    <li>Open <a href="/account/security/2fa">Security &amp; 2FA</a>.</li>
-    <li>Click <strong>Add a passkey</strong>. Your browser prompts for the authenticator (Touch ID, Windows Hello, YubiKey, etc.).</li>
-    <li>Name the passkey (for example, <em>MacBook Touch ID</em>). It is now active.</li>
-  </ol>
+ <h2>Enroll a passkey</h2>
+ <ol>
+ <li>Sign in to your account at <a href="/account">/account</a>.</li>
+ <li>Open <a href="/account/security/2fa">Security &amp; 2FA</a>.</li>
+ <li>Click <strong>Add a passkey</strong>. Your browser prompts for the authenticator (Touch ID, Windows Hello, YubiKey, etc.).</li>
+ <li>Name the passkey (for example, <em>MacBook Touch ID</em>). It is now active.</li>
+ </ol>
 </section>
 
 <section>
-  <h2>Supported authenticators</h2>
-  <ul>
-    <li>Platform authenticators: Touch ID, Face ID, Windows Hello.</li>
-    <li>Roaming authenticators: YubiKey, Solo, Google Titan, any FIDO2 hardware key.</li>
-    <li>Synced passkeys: iCloud Keychain, Google Password Manager, 1Password, Bitwarden.</li>
-  </ul>
+ <h2>Supported authenticators</h2>
+ <ul>
+ <li>Platform authenticators: Touch ID, Face ID, Windows Hello.</li>
+ <li>Roaming authenticators: YubiKey, Solo, Google Titan, any FIDO2 hardware key.</li>
+ <li>Synced passkeys: iCloud Keychain, Google Password Manager, 1Password, Bitwarden.</li>
+ </ul>
 </section>
 
 <section>
-  <h2>Recovery</h2>
-  <p>Enroll at least two passkeys (one platform, one hardware key) so a lost device does not lock you out. The dashboard also issues 10 one-time backup codes when 2FA is enabled.</p>
+ <h2>Recovery</h2>
+ <p>Enroll at least two passkeys (one platform, one hardware key) so a lost device does not lock you out. The dashboard also issues 10 one-time backup codes when 2FA is enabled.</p>
 </section>
 
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/account/security/2fa">Security &amp; 2FA settings</a>.</li>
-    <li><a href="/security">Security &amp; trust</a>.</li>
-    <li><a href="/account/api-keys">API keys</a>: machine credentials for CI.</li>
-    <li><a href="/docs/api">HTTP API reference</a>.</li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/account/security/2fa">Security &amp; 2FA settings</a>.</li>
+ <li><a href="/security">Security &amp; trust</a>.</li>
+ <li><a href="/account/api-keys">API keys</a>: machine credentials for CI.</li>
+ <li><a href="/docs/api">HTTP API reference</a>.</li>
+ </ul>
 </section>
 </main>
 </body>

@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>On-call page classifier recipe · kolm cookbook</title>
+<title>On-call page classifier recipe · kolm cookbook · kolm.ai</title>
 <meta name="description" content="Compile a signed local model that classifies an incoming page as actionable, suppress, or escalate. Trained on 1000 historical alerts. Reduces 3am pages by 40%.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="On-call page classifier recipe">
-<meta property="og:description" content="Local alert triage. Actionable / suppress / escalate, with reason. Signed.">
-<meta property="og:type" content="article">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="On-call page classifier recipe" />
-<meta name="twitter:description" content="Local alert triage. Actionable / suppress / escalate, with reason. Signed." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:title" content="On-call page classifier recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Compile a signed local model that classifies an incoming page as actionable, suppress, or escalate. Trained on 1000 historical alerts. Reduces 3am pages by 40%.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="On-call page classifier recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Compile a signed local model that classifies an incoming page as actionable, suppress, or escalate. Trained on 1000 historical alerts. Reduces 3am pages by 40%.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/cookbook/on-call-page-classifier">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/cookbook/on-call-page-classifier">
@@ -26,281 +26,282 @@
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "HowTo",
-      "name": "On-call page classifier recipe",
-      "description": "Local alert triage. Actionable / suppress / escalate, with reason. Signed.",
-      "url": "https://kolm.ai/cookbook/on-call-page-classifier",
-      "totalTime": "PT5M",
-      "tool": [
-        {
-          "@type": "HowToTool",
-          "name": "kolm CLI"
-        }
-      ],
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install",
-          "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Compile",
-          "text": "kolm compile on-call-page-classifier.toml"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Run",
-          "text": "kolm run on-call-page-classifier.kolm"
-        }
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "kolm",
-          "item": "https://kolm.ai/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Cookbook",
-          "item": "https://kolm.ai/cookbook"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "On-call page classifier recipe",
-          "item": "https://kolm.ai/cookbook/on-call-page-classifier"
-        }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "On-call page classifier recipe",
+ "description": "Local alert triage. Actionable / suppress / escalate, with reason. Signed.",
+ "url": "https://kolm.ai/cookbook/on-call-page-classifier",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile on-call-page-classifier.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run on-call-page-classifier.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "On-call page classifier recipe",
+ "item": "https://kolm.ai/cookbook/on-call-page-classifier"
+ }
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <div class="crumbs"><a href="/docs">cookbook</a> &middot; ops &middot; on-call-page-classifier</div>
-    <span class="pill">Recipe &middot; ops</span>
-    <h1>"Should this <span class="tone">wake someone up?"</span></h1>
-    <p class="lede">A local <code>.kolm</code> file that classifies an incoming alert into <code>actionable</code>, <code>suppress</code>, or <code>escalate</code>. Trained on 1,000 of your team's historical pages, each labeled by what actually happened next: real fix, false alarm, or deferred to morning. The verifier rejects classifications that disagree with the audit trail.</p>
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; ops &middot; on-call-page-classifier</div>
+ <span class="pill">Recipe &middot; ops</span>
+ <h1>"Should this <span class="tone">wake someone up?"</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that classifies an incoming alert into <code>actionable</code>, <code>suppress</code>, or <code>escalate</code>. Trained on 1,000 of your team's historical pages, each labeled by what actually happened next: real fix, false alarm, or deferred to morning. The verifier rejects classifications that disagree with the audit trail.</p>
 
-    <div class="meta-row">
-      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
-      <div class="item"><span class="label">gold pairs</span><span class="value">1,000 (700 train / 300 eval)</span></div>
-      <div class="item"><span class="label">k-score floor</span><span class="value">0.88</span></div>
-      <div class="item"><span class="label">artifact size</span><span class="value">1.6 GB</span></div>
-      <div class="item"><span class="label">compile time</span><span class="value">~38 min</span></div>
-      <div class="item"><span class="label">spec source</span><span class="value">labeled-class verifier</span></div>
-    </div>
-  </div>
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">1,000 (700 train / 300 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.88</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">1.6 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~38 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">labeled-class verifier</span></div>
+ </div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="group">
-      <h2>What this recipe does</h2>
-      <p>The cheapest way to fix on-call burnout is to stop waking people up for things that are not actionable. Most teams' alert rules accumulate cruft · flapping disk-space pages, retried-and-recovered network blips, cron jobs that always run a minute late and always fire one warning before recovering. This recipe reads each incoming alert and decides: page now (<code>actionable</code>), file for morning (<code>suppress</code>), or get a second pair of eyes (<code>escalate</code>).</p>
-      <p>"Suppress" does not mean "ignore." The classifier writes a row to a queue that the morning shift reviews; nothing is dropped, only deferred.</p>
-    </div>
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>The cheapest way to fix on-call burnout is to stop waking people up for things that are not actionable. Most teams' alert rules accumulate cruft · flapping disk-space pages, retried-and-recovered network blips, cron jobs that always run a minute late and always fire one warning before recovering. This recipe reads each incoming alert and decides: page now (<code>actionable</code>), file for morning (<code>suppress</code>), or get a second pair of eyes (<code>escalate</code>).</p>
+ <p>"Suppress" does not mean "ignore." The classifier writes a row to a queue that the morning shift reviews; nothing is dropped, only deferred.</p>
+ </div>
 
-    <div class="group">
-      <h2>The spec</h2>
-      <pre class="code">{
-  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
-  <span class="k">"schema"</span>: {
-    <span class="k">"required"</span>: [<span class="k">"class"</span>, <span class="k">"confidence"</span>, <span class="k">"reason"</span>],
-    <span class="k">"properties"</span>: {
-      <span class="k">"class"</span>: { <span class="k">"enum"</span>: [<span class="k">"actionable"</span>, <span class="k">"suppress"</span>, <span class="k">"escalate"</span>] },
-      <span class="k">"confidence"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span>, <span class="k">"minimum"</span>: 0, <span class="k">"maximum"</span>: 1 },
-      <span class="k">"reason"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 200 },
-      <span class="k">"similar_alerts_30d"</span>: { <span class="k">"type"</span>: <span class="k">"integer"</span> }
-    }
-  },
-  <span class="k">"verifier"</span>: {
-    <span class="k">"min_confidence_for_suppress"</span>: 0.8,
-    <span class="k">"reason_must_cite_history"</span>: <span class="ok">true</span>
-  }
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"class"</span>, <span class="k">"confidence"</span>, <span class="k">"reason"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"class"</span>: { <span class="k">"enum"</span>: [<span class="k">"actionable"</span>, <span class="k">"suppress"</span>, <span class="k">"escalate"</span>] },
+ <span class="k">"confidence"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span>, <span class="k">"minimum"</span>: 0, <span class="k">"maximum"</span>: 1 },
+ <span class="k">"reason"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 200 },
+ <span class="k">"similar_alerts_30d"</span>: { <span class="k">"type"</span>: <span class="k">"integer"</span> }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"min_confidence_for_suppress"</span>: 0.8,
+ <span class="k">"reason_must_cite_history"</span>: <span class="ok">true</span>
+ }
 }</pre>
-      <p>The <code>min_confidence_for_suppress</code> gate is critical: a borderline call defaults to <code>actionable</code> rather than <code>suppress</code>. The cost of a missed page is much higher than the cost of an unnecessary one, and the verifier enforces this asymmetry at compile time.</p>
-    </div>
+ <p>The <code>min_confidence_for_suppress</code> gate is critical: a borderline call defaults to <code>actionable</code> rather than <code>suppress</code>. The cost of a missed page is much higher than the cost of an unnecessary one, and the verifier enforces this asymmetry at compile time.</p>
+ </div>
 
-    <div class="group">
-      <h2>Gold pairs (2 of 1,000 shown)</h2>
+ <div class="group">
+ <h2>Gold pairs (2 of 1,000 shown)</h2>
 
-      <div class="pair">
-        <div class="pair-h">input</div>
-        <pre class="code">alert_name: disk-usage-warn
+ <div class="pair">
+ <div class="pair-h">input</div>
+ <pre class="code">alert_name: disk-usage-warn
 host: build-worker-04
 metric: disk_pct=92
 fired_at: 2026-05-09T03:14:22Z
 prior_30d: same alert fired 14 times, all auto-cleared by nightly cleanup cron at 03:30Z</pre>
-        <div class="pair-h">output</div>
-        <pre class="code">{
-  <span class="k">"class"</span>: <span class="k">"suppress"</span>,
-  <span class="k">"confidence"</span>: 0.94,
-  <span class="k">"reason"</span>: <span class="k">"Recurring pattern; same alert auto-cleared by nightly cleanup cron 14/14 in last 30d. Defer to morning queue for cleanup-cron tuning."</span>,
-  <span class="k">"similar_alerts_30d"</span>: 14
+ <div class="pair-h">output</div>
+ <pre class="code">{
+ <span class="k">"class"</span>: <span class="k">"suppress"</span>,
+ <span class="k">"confidence"</span>: 0.94,
+ <span class="k">"reason"</span>: <span class="k">"Recurring pattern; same alert auto-cleared by nightly cleanup cron 14/14 in last 30d. Defer to morning queue for cleanup-cron tuning."</span>,
+ <span class="k">"similar_alerts_30d"</span>: 14
 }</pre>
-      </div>
+ </div>
 
-      <div class="pair">
-        <div class="pair-h">input</div>
-        <pre class="code">alert_name: db-replication-lag
+ <div class="pair">
+ <div class="pair-h">input</div>
+ <pre class="code">alert_name: db-replication-lag
 host: db-replica-prod-2
 metric: replica_lag_s=42
 fired_at: 2026-05-09T02:08:11Z
 prior_30d: 0 occurrences</pre>
-        <div class="pair-h">output</div>
-        <pre class="code">{
-  <span class="k">"class"</span>: <span class="k">"actionable"</span>,
-  <span class="k">"confidence"</span>: 0.92,
-  <span class="k">"reason"</span>: <span class="k">"First occurrence of this alert in 30d. Replication lag &gt; 30s on a primary read replica is customer-facing if it persists. Page on-call now."</span>,
-  <span class="k">"similar_alerts_30d"</span>: 0
+ <div class="pair-h">output</div>
+ <pre class="code">{
+ <span class="k">"class"</span>: <span class="k">"actionable"</span>,
+ <span class="k">"confidence"</span>: 0.92,
+ <span class="k">"reason"</span>: <span class="k">"First occurrence of this alert in 30d. Replication lag &gt; 30s on a primary read replica is customer-facing if it persists. Page on-call now."</span>,
+ <span class="k">"similar_alerts_30d"</span>: 0
 }</pre>
-      </div>
-    </div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Compile</h2>
-      <pre class="code">kolm compile <span class="k">"classify on-call page as actionable, suppress, or escalate"</span> \
-  --base qwen2.5-coder-3b \
-  --pairs pairs.jsonl \
-  --verifier confidence-asymmetric \
-  --k-floor 0.88 \
-  --output page-classifier.kolm
+ <div class="group">
+ <h2>Compile</h2>
+ <pre class="code">kolm compile <span class="k">"classify on-call page as actionable, suppress, or escalate"</span> \
+ --base qwen2.5-coder-3b \
+ --pairs pairs.jsonl \
+ --verifier confidence-asymmetric \
+ --k-floor 0.88 \
+ --output page-classifier.kolm
 
 <span class="ok">ok</span> wrote <span class="k">page-classifier.kolm</span>
-   k_score=0.91  signature=hmac-sha256</pre>
-    </div>
+ k_score=0.91 signature=ed25519</pre>
+ </div>
 
-    <div class="group">
-      <h2>K-score gate</h2>
-      <div class="k-bar">
-        <span class="k-label">K-score</span>
-        <span class="k-value">0.91</span>
-        <span class="k-detail">held-out 300 alerts &middot; agreement-with-audit 91% &middot; suppress-precision 96% &middot; missed-actionable 0% (zero false negatives)</span>
-      </div>
-      <p>The single hardest constraint: zero false negatives on <code>actionable</code>. We tolerate calling a real-fix page <code>escalate</code> (slightly slower response) but never <code>suppress</code> (silent failure). The training set is weighted to penalize false negatives 10x.</p>
-    </div>
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.91</span>
+ <span class="k-detail">held-out 300 alerts &middot; agreement-with-audit 91% &middot; suppress-precision 96% &middot; missed-actionable 0% (zero false negatives)</span>
+ </div>
+ <p>The single hardest constraint: zero false negatives on <code>actionable</code>. We tolerate calling a real-fix page <code>escalate</code> (slightly slower response) but never <code>suppress</code> (silent failure). The training set is weighted to penalize false negatives 10x.</p>
+ </div>
 
-    <div class="group">
-      <h2>Run-time profile</h2>
-      <div class="lat-grid">
-        <div class="cell"><div class="h">M2 MacBook</div><div class="v">540<span class="u">ms</span></div></div>
-        <div class="cell"><div class="h">RTX 5090</div><div class="v">160<span class="u">ms</span></div></div>
-        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">1.7<span class="u">s</span></div></div>
-        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">2.2<span class="u">s</span></div></div>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">M2 MacBook</div><div class="v">540<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">160<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">1.7<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">2.2<span class="u">s</span></div></div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Deploy</h2>
-      <pre class="code"><span class="c"># alertmanager webhook receiver · classify before paging:</span>
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># alertmanager webhook receiver · classify before paging:</span>
 on_webhook() {
-  cls=$(echo <span class="k">"$1"</span> | kolm run page-classifier.kolm --input-stdin)
-  case <span class="k">"$(echo $cls | jq -r .class)"</span> in
-    actionable) pagerduty trigger ;;
-    suppress)   queue write morning-review <span class="k">"$cls"</span> ;;
-    escalate)   slack post <span class="k">"#oncall-leads"</span> <span class="k">"$cls"</span> ;;
-  esac
+ cls=$(echo <span class="k">"$1"</span> | kolm run page-classifier.kolm --input-stdin)
+ case <span class="k">"$(echo $cls | jq -r .class)"</span> in
+ actionable) pagerduty trigger ;;
+ suppress) queue write morning-review <span class="k">"$cls"</span> ;;
+ escalate) slack post <span class="k">"#oncall-leads"</span> <span class="k">"$cls"</span> ;;
+ esac
 }
 
 <span class="c"># 30-day result on our team: 41% fewer 3am pages, 0 missed-actionable.</span></pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>Related recipes</h2>
-      <div class="related">
-        <a href="/cookbook/incident-summarizer"><div class="h">Incident summarizer</div><div class="d">Slack channel + timeline →5-section postmortem.</div></a>
-        <a href="/cookbook/runbook-step"><div class="h">Runbook step</div><div class="d">Suggest the next step with citation.</div></a>
-        <a href="/cookbook/log-grep"><div class="h">Log grep</div><div class="d">Natural-language to log query.</div></a>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/incident-summarizer"><div class="h">Incident summarizer</div><div class="d">Slack channel + timeline →5-section postmortem.</div></a>
+ <a href="/cookbook/runbook-step"><div class="h">Runbook step</div><div class="d">Suggest the next step with citation.</div></a>
+ <a href="/cookbook/log-grep"><div class="h">Log grep</div><div class="d">Natural-language to log query.</div></a>
+ </div>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

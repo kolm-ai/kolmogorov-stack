@@ -1,7 +1,7 @@
 // Wave 411 — hosted /v1/* inference auth gate.
 //
 // P0 Core Truth #3 + #4 (W411 audit closer):
-//   - The hosted server (api.kolm.ai) MUST require a Kolm API key on every
+//   - The hosted server (kolm.ai) MUST require a Kolm API key on every
 //     inference passthrough route (/v1/chat/completions, /v1/responses,
 //     /v1/embeddings, /v1/messages, /v1/capture/openai, /v1/capture/anthropic,
 //     /v1/openrouter/*). Anonymous requests get 401 with a structured body.

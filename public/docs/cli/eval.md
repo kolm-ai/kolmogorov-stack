@@ -36,7 +36,7 @@ kolm eval my-redactor.kolm --json > eval-report.json
 
 Use `--examples` to A/B an artifact against real holdout data without recompiling. The score reflects the new corpus; the embedded eval set is ignored for that run.
 
-For an active 7-check audit (manifest signature, content identifier, HMAC chain, receipt body signature, provenance credential, K-score gate, eval coverage) use [`kolm verify`](/docs/cli/verify) instead.
+For an active 7-check audit (manifest signature, content identifier, Ed25519 receipt chain, receipt body signature, provenance credential, K-score gate, eval coverage) use [`kolm verify`](/docs/cli/verify) instead.
 
 ## See also
 

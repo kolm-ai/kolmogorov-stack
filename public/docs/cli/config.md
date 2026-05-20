@@ -7,11 +7,11 @@ active profile.
 ## Usage
 
 ```
-kolm config get [key]              # print one key or the full document
-kolm config set <key> <value>      # write one key
-kolm config unset <key>            # remove one key
-kolm config edit                   # open in $EDITOR
-kolm config path                   # print the file path
+kolm config get [key] # print one key or the full document
+kolm config set <key> <value> # write one key
+kolm config unset <key> # remove one key
+kolm config edit # open in $EDITOR
+kolm config path # print the file path
 ```
 
 ## Common keys

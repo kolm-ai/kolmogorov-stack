@@ -16,9 +16,9 @@ kolm replay --concept-id <id> [--namespace ns] [--limit N]
 kolm replay --version-id <ver_...> [--namespace ns] [--limit N]
 
 # local replay (W371)
-kolm replay trace      <trace_id>     --against <artifact|model> [--json]
-kolm replay namespace  <namespace>    --against <artifact|model> [--limit N] [--json]
-kolm replay dataset    <dataset_id>   --against <artifact|model> [--json]
+kolm replay trace <trace_id> --against <artifact|model> [--json]
+kolm replay namespace <namespace> --against <artifact|model> [--limit N] [--json]
+kolm replay dataset <dataset_id> --against <artifact|model> [--json]
 ```
 
 ## Flags
@@ -53,7 +53,7 @@ kolm replay dataset ds_018a3e --against ./redactor.kolm --json
 | `3` | artifact not found |
 | `5` | network error |
 
-503 with `error: capture_store_unavailable` means the durable capture store is not ready. See [Troubleshooting](/docs/troubleshooting).
+503 with `error: capture_store_unavailable` means the durable capture store is initializing or unreachable. See [Troubleshooting](/docs/troubleshooting).
 
 ## See also
 

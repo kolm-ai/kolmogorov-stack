@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Agent telemetry · Account · kolm.ai</title>
-<meta name="description" content="Per-agent acceptance rate, latency, and cost across your installed dev agents. Pareto front recommendation: cheapest model that still passes. Top failing prompt shapes per agent.">
+<title>Agent telemetry · Account · Account · kolm.ai</title>
+<meta name="description" content="Per-agent acceptance rate, latency, and cost across your installed dev agents. Pareto front recommendation: cheapest model that still passes. Top failing...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/agent-telemetry">
-<meta property="og:title" content="Agent telemetry &middot; Account &middot; kolm.ai" />
-<meta property="og:description" content="Per-agent acceptance rate, latency, cost, and the cheapest model that still passes for each prompt shape." />
-<meta property="og:image" content="https://kolm.ai/og-card.svg" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://kolm.ai/account/agent-telemetry" />
+<meta property="og:title" content="Agent telemetry · Account · Account · kolm.ai">
+<meta property="og:description" content="Per-agent acceptance rate, latency, and cost across your installed dev agents. Pareto front recommendation: cheapest model that still passes. Top failing...">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/agent-telemetry">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
@@ -62,13 +62,18 @@
 .heur{font-size:10.5px;color:var(--ink-faint);font-family:var(--mono);margin-left:6px;padding:1px 5px;border:1px solid var(--line);border-radius:3px}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.agent-row{grid-template-columns:1fr 1fr;gap:4px}.agent-row .num{text-align:left}}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Agent telemetry · Account · Account · kolm.ai">
+<meta name="twitter:description" content="Per-agent acceptance rate, latency, and cost across your installed dev agents. Pareto front recommendation: cheapest model that still passes. Top failing...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -219,8 +224,8 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions"><a href="/docs">Help</a></div>
-  </div>
+ <div class="site-actions"><a href="/docs">Help</a></div>
+ </div>
 </header>
 
 <main id="main">
@@ -231,59 +236,59 @@
 <p class="lede">Which of your dev agents got the work done, how often you accepted the output, what it cost, and the cheapest model that still passes for each kind of prompt you write. Data comes from the kolm proxy &mdash; see <a href="/docs/dev-agents">/docs/dev-agents</a> to install.</p>
 
 <div class="toolbar">
-  <label style="font-size:12px;color:var(--ink-mute);font-family:var(--mono)">Window
-    <select id="window-select" aria-label="Time window">
-      <option value="1d">last 24h</option>
-      <option value="7d" selected>last 7 days</option>
-      <option value="30d">last 30 days</option>
-      <option value="all">all time</option>
-    </select>
-  </label>
-  <a class="pill ok" href="/docs/dev-agents" style="text-decoration:none">Install proxy</a>
+ <label style="font-size:12px;color:var(--ink-mute);font-family:var(--mono)">Window
+ <select id="window-select" aria-label="Time window">
+ <option value="1d">last 24h</option>
+ <option value="7d" selected>last 7 days</option>
+ <option value="30d">last 30 days</option>
+ <option value="all">all time</option>
+ </select>
+ </label>
+ <a class="pill ok" href="/docs/dev-agents" style="text-decoration:none">Install proxy</a>
 </div>
 
 <div class="kpanel">
-  <h2>Per-agent stats</h2>
-  <p class="pdesc">Acceptance is inferred from session sequence: if no correction follows within 90 seconds, the suggestion counts as accepted. Confidence in the heuristic is per-row; click an agent for the inferred sessions list.</p>
-  <div class="agent-row" style="border-bottom:1px solid var(--line);color:var(--ink-faint);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em">
-    <div>Agent</div>
-    <div class="num">Requests</div>
-    <div class="num">Accept %</div>
-    <div class="num">Median ms</div>
-    <div class="num">Total cost</div>
-    <div class="num">Top model</div>
-  </div>
-  <div id="agent-list" aria-busy="true">
-    <div class="agent-row"><div class="skel" style="width:80px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:80px"></div></div>
-    <div class="agent-row"><div class="skel" style="width:80px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:80px"></div></div>
-    <div class="agent-row"><div class="skel" style="width:80px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:80px"></div></div>
-  </div>
+ <h2>Per-agent stats</h2>
+ <p class="pdesc">Acceptance is inferred from session sequence: if no correction follows within 90 seconds, the suggestion counts as accepted. Confidence in the heuristic is per-row; click an agent for the inferred sessions list.</p>
+ <div class="agent-row" style="border-bottom:1px solid var(--line);color:var(--ink-faint);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em">
+ <div>Agent</div>
+ <div class="num">Requests</div>
+ <div class="num">Accept %</div>
+ <div class="num">Median ms</div>
+ <div class="num">Total cost</div>
+ <div class="num">Top model</div>
+ </div>
+ <div id="agent-list" aria-busy="true">
+ <div class="agent-row"><div class="skel" style="width:80px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:80px"></div></div>
+ <div class="agent-row"><div class="skel" style="width:80px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:80px"></div></div>
+ <div class="agent-row"><div class="skel" style="width:80px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:40px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:50px"></div><div class="skel" style="width:80px"></div></div>
+ </div>
 </div>
 
 <div class="kpanel">
-  <h2>Recommended model per prompt shape</h2>
-  <p class="pdesc">Pareto front across (acceptance rate, cost) per prompt-shape cluster. The recommendation is the cheapest model whose acceptance is within 5 points of the best observed acceptance for that shape. Click a shape to see the captures behind it.</p>
-  <div id="rec-list" aria-busy="true">
-    <div class="shape-card"><div class="skel" style="width:120px"></div><div class="skel" style="width:200px;margin-top:6px"></div><div class="skel" style="width:140px;margin-top:6px"></div></div>
-    <div class="shape-card"><div class="skel" style="width:120px"></div><div class="skel" style="width:200px;margin-top:6px"></div><div class="skel" style="width:140px;margin-top:6px"></div></div>
-  </div>
+ <h2>Recommended model per prompt shape</h2>
+ <p class="pdesc">Pareto front across (acceptance rate, cost) per prompt-shape cluster. The recommendation is the cheapest model whose acceptance is within 5 points of the best observed acceptance for that shape. Click a shape to see the captures behind it.</p>
+ <div id="rec-list" aria-busy="true">
+ <div class="shape-card"><div class="skel" style="width:120px"></div><div class="skel" style="width:200px;margin-top:6px"></div><div class="skel" style="width:140px;margin-top:6px"></div></div>
+ <div class="shape-card"><div class="skel" style="width:120px"></div><div class="skel" style="width:200px;margin-top:6px"></div><div class="skel" style="width:140px;margin-top:6px"></div></div>
+ </div>
 </div>
 
 <div class="kpanel">
-  <h2>Top failing prompt shapes</h2>
-  <p class="pdesc">Clusters where current models fail most. These are the highest-value targets for distillation: bring your own labels and compile a tighter artifact that handles the cases the rented models miss.</p>
-  <table class="ktable" aria-busy="true" id="fail-table">
-    <thead><tr><th>Shape</th><th>Sample</th><th class="num">Failures</th><th class="num">Of total</th><th>Suggested action</th></tr></thead>
-    <tbody id="fail-body">
-      <tr><td colspan="5"><div class="skel" style="width:60%"></div></td></tr>
-      <tr><td colspan="5"><div class="skel" style="width:50%"></div></td></tr>
-      <tr><td colspan="5"><div class="skel" style="width:55%"></div></td></tr>
-    </tbody>
-  </table>
+ <h2>Top failing prompt shapes</h2>
+ <p class="pdesc">Clusters where current models fail most. These are the highest-value targets for distillation: bring your own labels and compile a tighter artifact that handles the cases the rented models miss.</p>
+ <table class="ktable" aria-busy="true" id="fail-table">
+ <thead><tr><th>Shape</th><th>Sample</th><th class="num">Failures</th><th class="num">Of total</th><th>Suggested action</th></tr></thead>
+ <tbody id="fail-body">
+ <tr><td colspan="5"><div class="skel" style="width:60%"></div></td></tr>
+ <tr><td colspan="5"><div class="skel" style="width:50%"></div></td></tr>
+ <tr><td colspan="5"><div class="skel" style="width:55%"></div></td></tr>
+ </tbody>
+ </table>
 </div>
 
 <div id="empty-state" class="empty" hidden data-empty-state>
-  <strong>No agent traffic yet.</strong> Install the proxy with <code>kolm install all</code> and your next AI request lands here. See <a href="/docs/dev-agents">/docs/dev-agents</a> for the five-minute setup.
+ <strong>No agent traffic yet.</strong> Install the proxy with <code>kolm install all</code> and your next AI request lands here. See <a href="/docs/dev-agents">/docs/dev-agents</a> for the five-minute setup.
 </div>
 
 </section>
@@ -292,88 +297,88 @@
 
 <script>
 (function(){
-  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
-  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
-  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
-  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
-  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
-  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
-  window.kusd=function(v){if(v==null||isNaN(v))return "-";return "$"+Number(v).toFixed(2);};
-  window.kpct=function(v){if(v==null||isNaN(v))return "-";return (Number(v)*100).toFixed(1)+"%";};
+ var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+ if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
+ window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+ window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+ window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
+ window.kusd=function(v){if(v==null||isNaN(v))return "-";return "$"+Number(v).toFixed(2);};
+ window.kpct=function(v){if(v==null||isNaN(v))return "-";return (Number(v)*100).toFixed(1)+"%";};
 })();
 
 function renderAgents(rows){
-  var box=document.getElementById("agent-list");
-  if(!rows||!rows.length){box.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
-  box.innerHTML=rows.map(function(r){
-    var acc=Number(r.acceptance_rate||r.accept_rate||0);
-    var pillClass=acc>=0.75?"ok":(acc>=0.55?"warn":"bad");
-    var topModel=(r.top_models&&r.top_models[0])||r.top_model||"-";
-    return ""+
-      "<div class=\"agent-row\">"+
-        "<div class=\"agent-name\">"+window.kesc(r.agent_id||r.agent)+
-          (r._heuristic?"<span class=\"heur\" title=\"acceptance is inferred, not observed\">heuristic</span>":"")+"</div>"+
-        "<div class=\"num\">"+window.knum(r.requests||r.count||0)+"</div>"+
-        "<div class=\"num\"><span class=\"pill "+pillClass+"\">"+window.kpct(acc)+"</span><div class=\"accept-bar\"><div class=\"accept-bar-fill\" style=\"width:"+(acc*100).toFixed(0)+"%\"></div></div></div>"+
-        "<div class=\"num\">"+window.knum(r.median_latency_ms||r.latency_ms_p50||0)+"</div>"+
-        "<div class=\"num\">"+window.kusd(r.total_cost_usd||r.cost_usd||0)+"</div>"+
-        "<div class=\"num\" style=\"font-size:11px;text-align:right;color:var(--ink-mute)\">"+window.kesc(topModel)+"</div>"+
-      "</div>";
-  }).join("");
-  box.removeAttribute("aria-busy");
+ var box=document.getElementById("agent-list");
+ if(!rows||!rows.length){box.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
+ box.innerHTML=rows.map(function(r){
+ var acc=Number(r.acceptance_rate||r.accept_rate||0);
+ var pillClass=acc>=0.75?"ok":(acc>=0.55?"warn":"bad");
+ var topModel=(r.top_models&&r.top_models[0])||r.top_model||"-";
+ return ""+
+ "<div class=\"agent-row\">"+
+ "<div class=\"agent-name\">"+window.kesc(r.agent_id||r.agent)+
+ (r._heuristic?"<span class=\"heur\" title=\"acceptance is inferred, not observed\">heuristic</span>":"")+"</div>"+
+ "<div class=\"num\">"+window.knum(r.requests||r.count||0)+"</div>"+
+ "<div class=\"num\"><span class=\"pill "+pillClass+"\">"+window.kpct(acc)+"</span><div class=\"accept-bar\"><div class=\"accept-bar-fill\" style=\"width:"+(acc*100).toFixed(0)+"%\"></div></div></div>"+
+ "<div class=\"num\">"+window.knum(r.median_latency_ms||r.latency_ms_p50||0)+"</div>"+
+ "<div class=\"num\">"+window.kusd(r.total_cost_usd||r.cost_usd||0)+"</div>"+
+ "<div class=\"num\" style=\"font-size:11px;text-align:right;color:var(--ink-mute)\">"+window.kesc(topModel)+"</div>"+
+ "</div>";
+ }).join("");
+ box.removeAttribute("aria-busy");
 }
 
 function renderRecommendations(rows){
-  var box=document.getElementById("rec-list");
-  if(!rows||!rows.length){box.innerHTML="<div class=\"empty\" style=\"margin:0\">No recommendations yet. Send a few more requests so the Pareto front has enough data points.</div>";box.removeAttribute("aria-busy");return;}
-  box.innerHTML=rows.map(function(r){
-    var saving=r.savings_per_month_usd||r.savings_estimate_usd||r.savings;
-    return ""+
-      "<div class=\"shape-card\">"+
-        "<div class=\"shape-name\">"+window.kesc(r.shape||r.cluster_id||"shape")+"</div>"+
-        "<div class=\"shape-rec\">Use <code>"+window.kesc(r.recommended_model||r.model)+"</code> "+
-          (r.current_model?"instead of <code style=\"color:var(--ink-faint)\">"+window.kesc(r.current_model)+"</code>":"")+
-        "</div>"+
-        "<div class=\"shape-meta\">"+
-          "<span><span class=\"k\">acceptance</span> "+window.kpct(r.acceptance_rate||r.accept_rate)+"</span>"+
-          "<span><span class=\"k\">cost/req</span> "+window.kusd(r.cost_per_request_usd||r.unit_cost_usd)+"</span>"+
-          (saving?"<span><span class=\"k\">saves</span> "+window.kusd(saving)+"/mo</span>":"")+
-          "<span><span class=\"k\">samples</span> "+window.knum(r.samples||r.n||0)+"</span>"+
-        "</div>"+
-      "</div>";
-  }).join("");
-  box.removeAttribute("aria-busy");
+ var box=document.getElementById("rec-list");
+ if(!rows||!rows.length){box.innerHTML="<div class=\"empty\" style=\"margin:0\">No recommendations yet. Send a few more requests so the Pareto front has enough data points.</div>";box.removeAttribute("aria-busy");return;}
+ box.innerHTML=rows.map(function(r){
+ var saving=r.savings_per_month_usd||r.savings_estimate_usd||r.savings;
+ return ""+
+ "<div class=\"shape-card\">"+
+ "<div class=\"shape-name\">"+window.kesc(r.shape||r.cluster_id||"shape")+"</div>"+
+ "<div class=\"shape-rec\">Use <code>"+window.kesc(r.recommended_model||r.model)+"</code> "+
+ (r.current_model?"instead of <code style=\"color:var(--ink-faint)\">"+window.kesc(r.current_model)+"</code>":"")+
+ "</div>"+
+ "<div class=\"shape-meta\">"+
+ "<span><span class=\"k\">acceptance</span> "+window.kpct(r.acceptance_rate||r.accept_rate)+"</span>"+
+ "<span><span class=\"k\">cost/req</span> "+window.kusd(r.cost_per_request_usd||r.unit_cost_usd)+"</span>"+
+ (saving?"<span><span class=\"k\">saves</span> "+window.kusd(saving)+"/mo</span>":"")+
+ "<span><span class=\"k\">samples</span> "+window.knum(r.samples||r.n||0)+"</span>"+
+ "</div>"+
+ "</div>";
+ }).join("");
+ box.removeAttribute("aria-busy");
 }
 
 function renderFailing(rows){
-  var body=document.getElementById("fail-body");
-  if(!rows||!rows.length){body.innerHTML="<tr><td colspan=\"5\" style=\"color:var(--ink-mute);text-align:center;padding:18px\">No failure clusters yet.</td></tr>";document.getElementById("fail-table").removeAttribute("aria-busy");return;}
-  body.innerHTML=rows.map(function(r){
-    var pct=Number(r.fail_rate||0);
-    return "<tr>"+
-      "<td style=\"max-width:240px;color:var(--ink-mute);font-family:var(--mono);font-size:11.5px\">"+window.kesc(r.shape||r.cluster_id||"-")+"</td>"+
-      "<td style=\"max-width:380px;color:var(--ink-faint);font-size:11.5px\">"+window.kesc((r.sample_prompt||r.example||"").slice(0,140))+"</td>"+
-      "<td class=\"num\">"+window.knum(r.failures||r.fail_count||0)+"</td>"+
-      "<td class=\"num\">"+window.kpct(pct)+"</td>"+
-      "<td style=\"font-size:11.5px;color:var(--ink-mute)\">"+window.kesc(r.suggested_action||"distill this shape")+
-        " <a class=\"pill warn\" style=\"margin-left:6px;text-decoration:none\" href=\"/account/labeling?shape="+encodeURIComponent(r.shape||"")+"\">label</a></td>"+
-    "</tr>";
-  }).join("");
-  document.getElementById("fail-table").removeAttribute("aria-busy");
+ var body=document.getElementById("fail-body");
+ if(!rows||!rows.length){body.innerHTML="<tr><td colspan=\"5\" style=\"color:var(--ink-mute);text-align:center;padding:18px\">No failure clusters yet.</td></tr>";document.getElementById("fail-table").removeAttribute("aria-busy");return;}
+ body.innerHTML=rows.map(function(r){
+ var pct=Number(r.fail_rate||0);
+ return "<tr>"+
+ "<td style=\"max-width:240px;color:var(--ink-mute);font-family:var(--mono);font-size:11.5px\">"+window.kesc(r.shape||r.cluster_id||"-")+"</td>"+
+ "<td style=\"max-width:380px;color:var(--ink-faint);font-size:11.5px\">"+window.kesc((r.sample_prompt||r.example||"").slice(0,140))+"</td>"+
+ "<td class=\"num\">"+window.knum(r.failures||r.fail_count||0)+"</td>"+
+ "<td class=\"num\">"+window.kpct(pct)+"</td>"+
+ "<td style=\"font-size:11.5px;color:var(--ink-mute)\">"+window.kesc(r.suggested_action||"distill this shape")+
+ " <a class=\"pill warn\" style=\"margin-left:6px;text-decoration:none\" href=\"/account/labeling?shape="+encodeURIComponent(r.shape||"")+"\">label</a></td>"+
+ "</tr>";
+ }).join("");
+ document.getElementById("fail-table").removeAttribute("aria-busy");
 }
 
 function load(){
-  var win=document.getElementById("window-select").value||"7d";
-  Promise.allSettled([
-    window.kfetch("/v1/agents/stats?window="+encodeURIComponent(win)).catch(function(){return {agents:[]};}),
-    window.kfetch("/v1/agents/recommend?window="+encodeURIComponent(win)+"&limit=6").catch(function(){return {recommendations:[]};}),
-    window.kfetch("/v1/agents/failing?window="+encodeURIComponent(win)+"&limit=8").catch(function(){return {shapes:[]};}),
-  ]).then(function(rs){
-    var stats=rs[0].value||{}, recs=rs[1].value||{}, fail=rs[2].value||{};
-    renderAgents(Array.isArray(stats)?stats:(stats.agents||stats.rows||[]));
-    renderRecommendations(Array.isArray(recs)?recs:(recs.recommendations||recs.rows||[]));
-    renderFailing(Array.isArray(fail)?fail:(fail.shapes||fail.rows||[]));
-  });
+ var win=document.getElementById("window-select").value||"7d";
+ Promise.allSettled([
+ window.kfetch("/v1/agents/stats?window="+encodeURIComponent(win)).catch(function(){return {agents:[]};}),
+ window.kfetch("/v1/agents/recommend?window="+encodeURIComponent(win)+"&limit=6").catch(function(){return {recommendations:[]};}),
+ window.kfetch("/v1/agents/failing?window="+encodeURIComponent(win)+"&limit=8").catch(function(){return {shapes:[]};}),
+ ]).then(function(rs){
+ var stats=rs[0].value||{}, recs=rs[1].value||{}, fail=rs[2].value||{};
+ renderAgents(Array.isArray(stats)?stats:(stats.agents||stats.rows||[]));
+ renderRecommendations(Array.isArray(recs)?recs:(recs.recommendations||recs.rows||[]));
+ renderFailing(Array.isArray(fail)?fail:(fail.shapes||fail.rows||[]));
+ });
 }
 
 document.getElementById("window-select").addEventListener("change",load);

@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm bench · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm bench CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/bench">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm bench","description":"Reference for the kolm bench CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/bench","mainEntityOfPage":"https://kolm.ai/docs/cli/bench","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm bench · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm bench CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,16 +176,16 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="bench">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>bench</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>bench</span>
 </nav>
 <p>--- title: kolm bench · kolm.ai description: Reproducible benchmark for a .kolm artifact or a public reproducer suite. ---</p>
 <h1>kolm bench</h1>
 <p>&gt; Reproducible artifact benchmark. Alias: <code>kolm benchmark</code>. Three modes: artifact-local, public reproducer, head-to-head vs an LLM.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm bench &lt;artifact.kolm&gt; [flags]                  # artifact-local benchmark JSON
-kolm bench --reproduce &lt;suite&gt; [flags]              # public-reproducer suite (Docker)
-kolm bench --compare &lt;artifact.kolm&gt; [flags]        # head-to-head: kolm vs LLM
+kolm bench &lt;artifact.kolm&gt; [flags] # artifact-local benchmark JSON
+kolm bench --reproduce &lt;suite&gt; [flags] # public-reproducer suite (Docker)
+kolm bench --compare &lt;artifact.kolm&gt; [flags] # head-to-head: kolm vs LLM
 </code></pre>
 <h2>Flags</h2>
 <h3>Artifact mode</h3>
@@ -208,13 +212,13 @@ kolm bench --reproduce swebench-lite-n150 --api-key $ANTHROPIC_API_KEY
 <li><a href="/docs/api">API reference</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

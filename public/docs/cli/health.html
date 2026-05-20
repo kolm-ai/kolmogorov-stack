@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm health · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm health CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/health">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm health","description":"Reference for the kolm health CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/health","mainEntityOfPage":"https://kolm.ai/docs/cli/health","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm health · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm health CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,27 +176,29 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="health">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>health</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>health</span>
 </nav>
-<p>--- title: kolm health · kolm.ai description: Ping the configured cloud base and report round-trip timing. ---</p>
+<p>--- title: kolm health - kolm.ai description: Ping the configured cloud base, readiness gate, and authenticated capture health. ---</p>
 <h1>kolm health</h1>
-<p>&gt; Ping the configured cloud base and report round-trip timing. Useful for liveness checks in CI, cron, or shell scripts.</p>
+<p>&gt; Ping the configured cloud base, readiness gate, and authenticated capture health. Useful for liveness checks and production smoke gates in CI, cron, or shell scripts.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm health [--json] [--slow-ms &lt;N&gt;] [--timeout-ms &lt;N&gt;]
+kolm health [--json] [--require-ready] [--require-auth] [--require-capture] [--slow-ms &lt;N&gt;] [--timeout-ms &lt;N&gt;]
 </code></pre>
 <h2>Flags</h2>
-<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--slow-ms &lt;n&gt;</code> | <code>2000</code> | RTT threshold above which the run exits 2 | | <code>--timeout-ms &lt;n&gt;</code> | <code>max(slow+500, 5000)</code> | abort RTT | | <code>--json</code> | off | emit a structured report |</p>
+<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--slow-ms &lt;n&gt;</code> | <code>2000</code> | RTT threshold above which the run exits 2 | | <code>--timeout-ms &lt;n&gt;</code> | <code>max(slow+500, 5000)</code> | abort RTT | | <code>--json</code> | off | emit a structured report | | <code>--require-ready</code> | off | require <code>{base}/ready</code> to return 2xx | | <code>--require-auth</code> | off | require the saved API key to validate via <code>/v1/account</code> | | <code>--require-capture</code> | off | require <code>/v1/capture/health</code> to return 2xx with <code>durable:true</code> |</p>
 <h2>Examples</h2>
 <pre><code>
 kolm health
 kolm health --json
+kolm health --require-ready --json
+kolm health --require-ready --require-auth --require-capture --json
 kolm health --slow-ms 1000 --timeout-ms 4000
 </code></pre>
 <h2>Exit codes</h2>
-<p>| Code | Meaning | | ---- | ------- | | <code>0</code> | healthy: <code>{base}/health</code> returned 2xx within <code>--slow-ms</code> | | <code>1</code> | down: unreachable or non-2xx response | | <code>2</code> | slow: reachable but RTT exceeded <code>--slow-ms</code>. CI can alarm on this |</p>
+<p>| Code | Meaning | | ---- | ------- | | <code>0</code> | healthy: <code>{base}/health</code> returned 2xx within <code>--slow-ms</code> | | <code>1</code> | down, still initializing, auth failed, or capture unhealthy when the matching <code>--require-*</code> flag is set | | <code>2</code> | slow: reachable but RTT exceeded <code>--slow-ms</code>. CI can alarm on this |</p>
 <h2>Notes</h2>
-<p>Probes <code>{base}/health</code> (unauthenticated) and <code>{base}/v1/capture/health</code>, reports round-trip ms, and whether the capture driver is durable. The same probe drives the live status badge on <a href="/value-loop">/value-loop</a>.</p>
+<p>Default mode is a public liveness check: it reports <code>/health</code>, <code>/ready</code>, and <code>/v1/capture/health</code> but only fails on <code>/health</code> down or slow. Add <code>--require-ready</code> for production dependency readiness. Add <code>--require-auth --require-capture</code> when the CI job has a real tenant key and must prove authenticated capture durability.</p>
 <h2>See also</h2>
 <ul>
 <li><a href="/quickstart">Quickstart</a></li>
@@ -202,13 +208,13 @@ kolm health --slow-ms 1000 --timeout-ms 4000
 <li><a href="/docs/troubleshooting">Troubleshooting</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Build your own .kolm · any task, any author · kolm.ai</title>
-<meta name="description" content="Anyone - human or AI agent - can author a signed .kolm artifact in 30 seconds. JSON spec in, signed binary out, runs locally, zero egress. Templates for redactor, extractor, classifier, or blank.">
+<meta name="description" content="Anyone - human or AI agent - can author a signed .kolm artifact in 30 seconds. JSON spec in, signed binary out, runs locally, zero egress. Templates for...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Build your own .kolm">
-<meta property="og:description" content="JSON spec in, signed binary out. Anyone (human or AI) can ship a kolm artifact in four commands.">
+<meta property="og:title" content="Build your own .kolm · any task, any author · kolm.ai">
+<meta property="og:description" content="Anyone - human or AI agent - can author a signed .kolm artifact in 30 seconds. JSON spec in, signed binary out, runs locally, zero egress. Templates for...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/build-your-own">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:title" content="Build your own .kolm">
-<meta name="twitter:description" content="JSON spec in, signed binary out. Anyone (human or AI) can ship a kolm artifact in four commands.">
+<meta name="twitter:title" content="Build your own .kolm · any task, any author · kolm.ai">
+<meta name="twitter:description" content="Anyone - human or AI agent - can author a signed .kolm artifact in 30 seconds. JSON spec in, signed binary out, runs locally, zero egress. Templates for...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/build-your-own">
@@ -26,24 +26,24 @@
 <style>
 /* v7.21 . build-your-own (Developers) polish
  * Goals:
- *   1) Lock font inheritance: body sans, code mono, no inline overrides
- *   2) Hero canonical scale clamp(56,8vw,124) + dot-grid backdrop
- *   3) Section rhythm 96/56 with subtle hairline dividers
- *   4) Eyebrow caps mono 11.5px 0.2em
- *   5) Code blocks: ensure mono var + light-mode readable
- *   6) Light mode: ink #1f2429, ink-mute #4b5158, accent #059669
- *   7) Roadmap banner: monochrome emerald, no orange, no pill
- *   8) Tables: 16px radius, 32/24 padding cells
+ * 1) Lock font inheritance: body sans, code mono, no inline overrides
+ * 2) Hero canonical scale clamp(56,8vw,124) + dot-grid backdrop
+ * 3) Section rhythm 96/56 with subtle hairline dividers
+ * 4) Eyebrow caps mono 11.5px 0.2em
+ * 5) Code blocks: ensure mono var + light-mode readable
+ * 6) Light mode: ink #1f2429, ink-mute #4b5158, accent #059669
+ * 7) Roadmap banner: monochrome emerald, no orange, no pill
+ * 8) Tables: 16px radius, 32/24 padding cells
  */
 
 /* Body inherits Geist Sans, all code blocks Geist Mono */
 .bxo-link {
-  color: #10b981 !important;
-  text-decoration: none !important;
-  font-family: var(--mono) !important;
-  font-size: 0.94em !important;
-  border-bottom: 1px solid rgba(16,185,129,0.32) !important;
-  transition: color 120ms, border-color 120ms;
+ color: #10b981 !important;
+ text-decoration: none !important;
+ font-family: var(--mono) !important;
+ font-size: 0.94em !important;
+ border-bottom: 1px solid rgba(16,185,129,0.32) !important;
+ transition: color 120ms, border-color 120ms;
 }
 .bxo-link:hover { color: #34d399 !important; border-color: rgba(52,211,153,0.6) !important; }
 [data-theme=light] .bxo-link { color: #059669 !important; border-bottom-color: rgba(5,150,105,0.32) !important; }
@@ -51,119 +51,119 @@
 
 /* Hero scale + dot-grid backdrop */
 main > section.hero {
-  padding: 144px 0 88px !important;
-  position: relative !important;
-  overflow: hidden !important;
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+ padding: 144px 0 88px !important;
+ position: relative !important;
+ overflow: hidden !important;
+ border-bottom: 1px solid rgba(255,255,255,0.05) !important;
 }
 [data-theme=light] main > section.hero { border-bottom-color: rgba(0,0,0,0.06) !important; }
 main > section.hero::before {
-  content: "";
-  position: absolute; inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse 900px 600px at 18% 30%, #000 0%, rgba(0,0,0,0.4) 55%, transparent 95%);
-  -webkit-mask-image: radial-gradient(ellipse 900px 600px at 18% 30%, #000 0%, rgba(0,0,0,0.4) 55%, transparent 95%);
-  pointer-events: none;
-  z-index: 0;
+ content: "";
+ position: absolute; inset: 0;
+ background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
+ background-size: 32px 32px;
+ mask-image: radial-gradient(ellipse 900px 600px at 18% 30%, #000 0%, rgba(0,0,0,0.4) 55%, transparent 95%);
+ -webkit-mask-image: radial-gradient(ellipse 900px 600px at 18% 30%, #000 0%, rgba(0,0,0,0.4) 55%, transparent 95%);
+ pointer-events: none;
+ z-index: 0;
 }
 [data-theme=light] main > section.hero::before {
-  background-image: radial-gradient(circle, rgba(0,0,0,0.055) 1px, transparent 1px);
+ background-image: radial-gradient(circle, rgba(0,0,0,0.055) 1px, transparent 1px);
 }
 main > section.hero .wrap { position: relative; z-index: 1; }
 @media (max-width: 720px) {
-  main > section.hero { padding: 96px 0 56px !important; }
+ main > section.hero { padding: 96px 0 56px !important; }
 }
 main > section.hero h1 {
-  font-size: clamp(56px, 8vw, 124px) !important;
-  line-height: 0.94 !important;
-  letter-spacing: -0.045em !important;
-  font-weight: 500 !important;
-  max-width: 13ch !important;
+ font-size: clamp(56px, 8vw, 124px) !important;
+ line-height: 0.94 !important;
+ letter-spacing: -0.045em !important;
+ font-weight: 500 !important;
+ max-width: 13ch !important;
 }
 @media (max-width: 720px) {
-  main > section.hero h1 {
-    font-size: clamp(44px, 11vw, 72px) !important;
-    letter-spacing: -0.038em !important;
-    line-height: 0.98 !important;
-  }
+ main > section.hero h1 {
+ font-size: clamp(44px, 11vw, 72px) !important;
+ letter-spacing: -0.038em !important;
+ line-height: 0.98 !important;
+ }
 }
 main > section.hero .lede {
-  font-size: clamp(17px, 1.45vw, 20px) !important;
-  line-height: 1.55 !important;
-  max-width: 60ch !important;
-  color: var(--ink-mute, #b5bdb1) !important;
-  margin: 0 0 32px !important;
+ font-size: clamp(17px, 1.45vw, 20px) !important;
+ line-height: 1.55 !important;
+ max-width: 60ch !important;
+ color: var(--ink-mute, #b5bdb1) !important;
+ margin: 0 0 32px !important;
 }
 [data-theme=light] main > section.hero .lede { color: #4b5158 !important; }
 
 main > section.hero .eyebrow {
-  font-family: var(--mono) !important;
-  font-size: 11.5px !important;
-  letter-spacing: 0.2em !important;
-  text-transform: uppercase !important;
-  color: var(--ink-faint, #737c73) !important;
-  font-weight: 400 !important;
-  margin: 0 0 28px !important;
-  display: inline-flex; align-items: center; gap: 12px;
+ font-family: var(--mono) !important;
+ font-size: 11.5px !important;
+ letter-spacing: 0.2em !important;
+ text-transform: uppercase !important;
+ color: var(--ink-faint, #737c73) !important;
+ font-weight: 400 !important;
+ margin: 0 0 28px !important;
+ display: inline-flex; align-items: center; gap: 12px;
 }
 main > section.hero .eyebrow .pulse {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.6);
-  display: inline-block;
+ width: 6px; height: 6px; border-radius: 50%;
+ background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.6);
+ display: inline-block;
 }
 
 /* Section rhythm 96/56 + hairlines */
 main > section.section {
-  padding: 96px 0 !important;
-  border-top: 1px solid rgba(255,255,255,0.05) !important;
+ padding: 96px 0 !important;
+ border-top: 1px solid rgba(255,255,255,0.05) !important;
 }
 [data-theme=light] main > section.section { border-top-color: rgba(0,0,0,0.06) !important; }
 @media (max-width: 720px) {
-  main > section.section { padding: 56px 0 !important; }
+ main > section.section { padding: 56px 0 !important; }
 }
 
 /* Eyebrows canonical caps mono */
 main > section.section .eyebrow {
-  font-family: var(--mono) !important;
-  font-size: 11.5px !important;
-  letter-spacing: 0.2em !important;
-  text-transform: uppercase !important;
-  color: var(--ink-faint, #737c73) !important;
-  font-weight: 400 !important;
-  margin: 0 0 24px !important;
-  display: inline-flex; align-items: center; gap: 12px;
+ font-family: var(--mono) !important;
+ font-size: 11.5px !important;
+ letter-spacing: 0.2em !important;
+ text-transform: uppercase !important;
+ color: var(--ink-faint, #737c73) !important;
+ font-weight: 400 !important;
+ margin: 0 0 24px !important;
+ display: inline-flex; align-items: center; gap: 12px;
 }
 main > section.section .eyebrow .num {
-  font-family: var(--mono) !important;
-  color: var(--ink-faint, #737c73) !important;
-  letter-spacing: 0.2em !important;
+ font-family: var(--mono) !important;
+ color: var(--ink-faint, #737c73) !important;
+ letter-spacing: 0.2em !important;
 }
 [data-theme=light] main > section.section .eyebrow,
 [data-theme=light] main > section.section .eyebrow .num { color: #737c73 !important; }
 
 /* Section H2 canonical scale */
 main > section.section h2 {
-  font-size: clamp(36px, 4.4vw, 56px) !important;
-  line-height: 1.04 !important;
-  letter-spacing: -0.032em !important;
-  font-weight: 500 !important;
-  margin: 0 0 18px !important;
-  max-width: 22ch;
+ font-size: clamp(36px, 4.4vw, 56px) !important;
+ line-height: 1.04 !important;
+ letter-spacing: -0.032em !important;
+ font-weight: 500 !important;
+ margin: 0 0 18px !important;
+ max-width: 22ch;
 }
 [data-theme=light] main > section.section h2 { color: #1f2429 !important; }
 @media (max-width: 720px) {
-  main > section.section h2 {
-    font-size: clamp(28px, 7.5vw, 38px) !important;
-    letter-spacing: -0.028em !important;
-  }
+ main > section.section h2 {
+ font-size: clamp(28px, 7.5vw, 38px) !important;
+ letter-spacing: -0.028em !important;
+ }
 }
 main > section.section .sec-lede {
-  font-size: 17px !important;
-  line-height: 1.6 !important;
-  max-width: 72ch !important;
-  color: var(--ink-mute, #b5bdb1) !important;
-  margin: 0 0 32px !important;
+ font-size: 17px !important;
+ line-height: 1.6 !important;
+ max-width: 72ch !important;
+ color: var(--ink-mute, #b5bdb1) !important;
+ margin: 0 0 32px !important;
 }
 [data-theme=light] main > section.section .sec-lede { color: #4b5158 !important; }
 [data-theme=light] main > section.section .sec-lede b { color: #1f2429 !important; }
@@ -173,105 +173,105 @@ main p code,
 main .sec-lede code,
 main .lede code,
 main td code {
-  font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace) !important;
-  font-size: 0.9em !important;
-  padding: 2px 6px !important;
-  border-radius: 4px !important;
-  background: rgba(255,255,255,0.05) !important;
-  color: var(--ink, #faf2e1) !important;
+ font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace) !important;
+ font-size: 0.9em !important;
+ padding: 2px 6px !important;
+ border-radius: 4px !important;
+ background: rgba(255,255,255,0.05) !important;
+ color: var(--ink, #faf2e1) !important;
 }
 [data-theme=light] main p code,
 [data-theme=light] main .sec-lede code,
 [data-theme=light] main .lede code,
 [data-theme=light] main td code {
-  background: rgba(0,0,0,0.05) !important;
-  color: #1f2429 !important;
+ background: rgba(0,0,0,0.05) !important;
+ color: #1f2429 !important;
 }
 
 /* Terminal blocks: lock mono font + light-mode readable */
 pre.terminal {
-  font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace) !important;
-  background: #0a0c10 !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  border-radius: 12px !important;
-  padding: 22px 24px !important;
-  font-size: 13px !important;
-  line-height: 1.7 !important;
-  color: #dad8cf !important;
-  overflow-x: auto;
+ font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace) !important;
+ background: #0a0c10 !important;
+ border: 1px solid rgba(255,255,255,0.08) !important;
+ border-radius: 12px !important;
+ padding: 22px 24px !important;
+ font-size: 13px !important;
+ line-height: 1.7 !important;
+ color: #dad8cf !important;
+ overflow-x: auto;
 }
 [data-theme=light] pre.terminal {
-  background: #1a1d24 !important;
-  border-color: rgba(0,0,0,0.12) !important;
-  color: #e6e4dd !important;
+ background: #1a1d24 !important;
+ border-color: rgba(0,0,0,0.12) !important;
+ color: #e6e4dd !important;
 }
 [data-theme=light] pre.terminal .prompt { color: #34d399 !important; }
 [data-theme=light] pre.terminal .ok { color: #34d399 !important; }
 [data-theme=light] pre.terminal .comment,
 [data-theme=light] pre.terminal .dim { color: #9ca3af !important; }
 @media (max-width: 720px) {
-  pre.terminal { font-size: 11.5px !important; padding: 16px !important; border-radius: 10px !important; }
+ pre.terminal { font-size: 11.5px !important; padding: 16px !important; border-radius: 10px !important; }
 }
 
 /* Roadmap chip + banner: monochrome emerald, no pill, no orange */
 .bxo-tag {
-  display: inline-flex; align-items: center;
-  margin-left: 10px;
-  padding: 3px 8px;
-  border: 1px solid rgba(16,185,129,0.4);
-  border-radius: 4px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #10b981;
-  font-weight: 400;
+ display: inline-flex; align-items: center;
+ margin-left: 10px;
+ padding: 3px 8px;
+ border: 1px solid rgba(16,185,129,0.4);
+ border-radius: 4px;
+ font-family: var(--mono);
+ font-size: 10.5px;
+ text-transform: uppercase;
+ letter-spacing: 0.15em;
+ color: #10b981;
+ font-weight: 400;
 }
 [data-theme=light] .bxo-tag { color: #059669; border-color: rgba(5,150,105,0.4); }
 .bxo-roadmap-banner {
-  padding: 16px 20px;
-  border: 1px solid rgba(16,185,129,0.22);
-  border-radius: 12px;
-  background: rgba(16,185,129,0.05);
-  color: var(--ink-mute, #b5bdb1);
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 14px 0 28px;
-  font-family: var(--sans);
+ padding: 16px 20px;
+ border: 1px solid rgba(16,185,129,0.22);
+ border-radius: 12px;
+ background: rgba(16,185,129,0.05);
+ color: var(--ink-mute, #b5bdb1);
+ font-size: 14px;
+ line-height: 1.6;
+ margin: 14px 0 28px;
+ font-family: var(--sans);
 }
 .bxo-roadmap-banner b { color: var(--ink, #faf2e1); font-weight: 500; }
 .bxo-roadmap-banner a {
-  color: #10b981;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(16,185,129,0.32);
+ color: #10b981;
+ text-decoration: none;
+ border-bottom: 1px solid rgba(16,185,129,0.32);
 }
 .bxo-roadmap-banner a:hover { color: #34d399; border-color: rgba(52,211,153,0.6); }
 
 /* btn.accent: emerald monochrome (legacy mint .btn.accent overridden) */
 main .btn.accent {
-  background: rgba(16,185,129, 0.08) !important;
-  color: #10b981 !important;
-  border-color: rgba(16,185,129, 0.32) !important;
+ background: rgba(16,185,129, 0.08) !important;
+ color: #10b981 !important;
+ border-color: rgba(16,185,129, 0.32) !important;
 }
 main .btn.accent:hover {
-  background: rgba(16,185,129, 0.15) !important;
-  color: #34d399 !important;
-  border-color: rgba(16,185,129, 0.5) !important;
-  box-shadow: 0 0 0 1px rgba(16,185,129, 0.10) !important;
+ background: rgba(16,185,129, 0.15) !important;
+ color: #34d399 !important;
+ border-color: rgba(16,185,129, 0.5) !important;
+ box-shadow: 0 0 0 1px rgba(16,185,129, 0.10) !important;
 }
 [data-theme=light] main .btn.accent {
-  background: rgba(5,150,105, 0.06) !important;
-  color: #059669 !important;
-  border-color: rgba(5,150,105, 0.32) !important;
+ background: rgba(5,150,105, 0.06) !important;
+ color: #059669 !important;
+ border-color: rgba(5,150,105, 0.32) !important;
 }
 [data-theme=light] main .btn.accent:hover {
-  background: rgba(5,150,105, 0.12) !important;
-  color: #047857 !important;
+ background: rgba(5,150,105, 0.12) !important;
+ color: #047857 !important;
 }
 [data-theme=light] .bxo-roadmap-banner {
-  background: rgba(5,150,105,0.05);
-  border-color: rgba(5,150,105,0.22);
-  color: #4b5158;
+ background: rgba(5,150,105,0.05);
+ border-color: rgba(5,150,105,0.22);
+ color: #4b5158;
 }
 [data-theme=light] .bxo-roadmap-banner b { color: #1f2429; }
 [data-theme=light] .bxo-roadmap-banner a { color: #059669; border-bottom-color: rgba(5,150,105,0.32); }
@@ -279,86 +279,86 @@ main .btn.accent:hover {
 
 /* Tables: 16px radius, real padding */
 .vs-tbl {
-  border-radius: 16px !important;
-  overflow: hidden;
-  background: rgba(255,255,255,0.02) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+ border-radius: 16px !important;
+ overflow: hidden;
+ background: rgba(255,255,255,0.02) !important;
+ border: 1px solid rgba(255,255,255,0.08) !important;
 }
 [data-theme=light] .vs-tbl {
-  background: #ffffff !important;
-  border-color: rgba(0,0,0,0.08) !important;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+ background: #ffffff !important;
+ border-color: rgba(0,0,0,0.08) !important;
+ box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
 }
 .vs-tbl thead th {
-  font-family: var(--mono) !important;
-  font-size: 11.5px !important;
-  letter-spacing: 0.15em !important;
-  text-transform: uppercase !important;
-  color: var(--ink-faint, #737c73) !important;
-  padding: 18px 20px !important;
-  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-  font-weight: 400 !important;
-  text-align: left !important;
+ font-family: var(--mono) !important;
+ font-size: 11.5px !important;
+ letter-spacing: 0.15em !important;
+ text-transform: uppercase !important;
+ color: var(--ink-faint, #737c73) !important;
+ padding: 18px 20px !important;
+ border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+ font-weight: 400 !important;
+ text-align: left !important;
 }
 [data-theme=light] .vs-tbl thead th {
-  color: #737c73 !important;
-  border-bottom-color: rgba(0,0,0,0.08) !important;
+ color: #737c73 !important;
+ border-bottom-color: rgba(0,0,0,0.08) !important;
 }
 .vs-tbl tbody td {
-  padding: 20px !important;
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-  font-size: 14.5px !important;
-  line-height: 1.6 !important;
-  color: var(--ink-mute, #b5bdb1) !important;
+ padding: 20px !important;
+ border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+ font-size: 14.5px !important;
+ line-height: 1.6 !important;
+ color: var(--ink-mute, #b5bdb1) !important;
 }
 [data-theme=light] .vs-tbl tbody td {
-  color: #4b5158 !important;
-  border-bottom-color: rgba(0,0,0,0.05) !important;
+ color: #4b5158 !important;
+ border-bottom-color: rgba(0,0,0,0.05) !important;
 }
 .vs-tbl tbody td b { color: var(--ink, #faf2e1) !important; }
 [data-theme=light] .vs-tbl tbody td b { color: #1f2429 !important; }
 .vs-tbl tbody td .dim {
-  font-family: var(--mono) !important;
-  font-size: 12px !important;
-  color: var(--ink-faint, #737c73) !important;
+ font-family: var(--mono) !important;
+ font-size: 12px !important;
+ color: var(--ink-faint, #737c73) !important;
 }
 
 /* Bottom CTA polish */
 .bottom-cta {
-  margin-top: 64px;
-  padding: 56px 32px !important;
-  border-radius: 20px !important;
-  background: linear-gradient(180deg, rgba(16,185,129,0.04), transparent) !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  text-align: center;
+ margin-top: 64px;
+ padding: 56px 32px !important;
+ border-radius: 20px !important;
+ background: linear-gradient(180deg, rgba(16,185,129,0.04), transparent) !important;
+ border: 1px solid rgba(255,255,255,0.06) !important;
+ text-align: center;
 }
 [data-theme=light] .bottom-cta {
-  background: linear-gradient(180deg, rgba(5,150,105,0.04), transparent) !important;
-  border-color: rgba(0,0,0,0.06) !important;
+ background: linear-gradient(180deg, rgba(5,150,105,0.04), transparent) !important;
+ border-color: rgba(0,0,0,0.06) !important;
 }
 .bottom-cta h2 {
-  font-size: clamp(36px, 4.4vw, 56px) !important;
-  letter-spacing: -0.032em !important;
-  line-height: 1.04 !important;
-  font-weight: 500 !important;
-  margin: 0 0 16px !important;
-  max-width: none !important;
+ font-size: clamp(36px, 4.4vw, 56px) !important;
+ letter-spacing: -0.032em !important;
+ line-height: 1.04 !important;
+ font-weight: 500 !important;
+ margin: 0 0 16px !important;
+ max-width: none !important;
 }
 .bottom-cta .lead {
-  font-size: 17px !important;
-  line-height: 1.6 !important;
-  max-width: 56ch;
-  margin: 0 auto 28px !important;
-  color: var(--ink-mute, #b5bdb1) !important;
+ font-size: 17px !important;
+ line-height: 1.6 !important;
+ max-width: 56ch;
+ margin: 0 auto 28px !important;
+ color: var(--ink-mute, #b5bdb1) !important;
 }
 [data-theme=light] .bottom-cta .lead { color: #4b5158 !important; }
 .bottom-cta .actions {
-  display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+ display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center;
 }
 
 /* Buttons in hero */
 main > section.hero .actions {
-  display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px;
+ display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px;
 }
 
 /* Tone helper */
@@ -367,51 +367,53 @@ main > section.hero .actions {
 </style>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Build your own .kolm",
-      "description": "Spec-driven authoring: kolm new, kolm compile, kolm publish. Take a recipe to production in one afternoon.",
-      "url": "https://kolm.ai/build-your-own",
-      "author": {
-        "@type": "Organization",
-        "name": "Kolmogorov"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Kolmogorov",
-        "url": "https://kolm.ai"
-      },
-      "keywords": "build AI model, kolm compile, .kolm authoring, custom LLM"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "kolm",
-          "item": "https://kolm.ai/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Build your own .kolm",
-          "item": "https://kolm.ai/build-your-own"
-        }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Build your own .kolm",
+ "description": "Spec-driven authoring: kolm new, kolm compile, kolm publish. Take a recipe to production in one afternoon.",
+ "url": "https://kolm.ai/build-your-own",
+ "author": {
+ "@type": "Organization",
+ "name": "Kolmogorov"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "Kolmogorov",
+ "url": "https://kolm.ai"
+ },
+ "keywords": "build AI model, kolm compile, .kolm authoring, custom LLM"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Build your own .kolm",
+ "item": "https://kolm.ai/build-your-own"
+ }
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand"><span>kolm</span></a>
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm</span></a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -562,67 +564,67 @@ main > section.hero .actions {
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="site-actions">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main>
-  <section class="hero">
-    <div class="wrap">
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="pulse"></span>build your own</div>
-        <h1>Yours, local, signed.</h1>
-        <p class="lede">Anyone (human or AI agent) authors a signed <code>.kolm</code> in four commands. JSON spec in, signed binary out, runs locally with zero egress, every output ships with a byte-walkable receipt chain. No account needed for local builds.</p>
-        <div class="actions">
-          <a href="/quickstart" class="btn primary">quickstart</a>
-          <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/docs/AUTHORING.md" class="btn ghost">authoring guide</a>
-          <a href="/docs" class="btn accent">cookbook</a>
-        </div>
-      </div>
-    </div>
-  </section>
+<main id="main">
+ <section class="hero">
+ <div class="wrap">
+ <div class="hero-copy">
+ <div class="eyebrow"><span class="pulse"></span>build your own</div>
+ <h1>Yours, local, signed.</h1>
+ <p class="lede">Anyone (human or AI agent) authors a signed <code>.kolm</code> in four commands. JSON spec in, signed binary out, runs locally with zero egress, every output ships with a byte-walkable receipt chain. No account needed for local builds.</p>
+ <div class="actions">
+ <a href="/quickstart" class="btn primary">quickstart</a>
+ <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/docs/AUTHORING.md" class="btn ghost">authoring guide</a>
+ <a href="/docs" class="btn accent">cookbook</a>
+ </div>
+ </div>
+ </div>
+ </section>
 
-  <section class="section">
-    <div class="wrap">
-      <div class="eyebrow"><span class="num">01</span>thirty seconds, four commands</div>
-      <h2>Scaffold &rarr; compile &rarr; run &rarr; serve.</h2>
-      <p class="sec-lede">Local builds use a per-user receipt secret at <code>~/.kolm/config.json</code> (mode 0600). Set <code>RECIPE_RECEIPT_SECRET</code> in your environment for a teammate's verifier to accept the same artifact.</p>
+ <section class="section">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">01</span>thirty seconds, four commands</div>
+ <h2>Scaffold &rarr; compile &rarr; run &rarr; serve.</h2>
+ <p class="sec-lede">Local builds use a per-user receipt secret at <code>~/.kolm/config.json</code> (mode 0600). Set <code>RECIPE_RECEIPT_SECRET</code> in your environment for a teammate's verifier to accept the same artifact.</p>
 
 <pre class="terminal"><span class="prompt">$</span> npm i -g github:sneaky-hippo/kolmogorov-stack
 <span class="prompt">$</span> kolm new my-redactor --from redactor
-<span class="ok">wrote</span> ./my-redactor.spec.json    <span class="comment"># a working spec, edit to taste</span>
+<span class="ok">wrote</span> ./my-redactor.spec.json <span class="comment"># a working spec, edit to taste</span>
 
 <span class="prompt">$</span> kolm compile --spec my-redactor.spec.json --out my-redactor.kolm
-<span class="ok">built</span> my-redactor.kolm  <span class="dim">4249 B  k-score 381.61  sha256 867dc0ce&hellip;</span>
+<span class="ok">built</span> my-redactor.kolm <span class="dim">4249 B k-score 381.61 sha256 867dc0ce&hellip;</span>
 
 <span class="prompt">$</span> kolm run my-redactor.kolm '{"text":"call me at 555-123-4567"}'
 { "output": { "redacted": "call me at [PHONE]", "hits": [{ "name": "PHONE", "count": 1 }] } }
 
 <span class="prompt">$</span> kolm serve --mcp --http --port 11455
 <span class="ok">ok</span> serving ~/.kolm/artifacts as local tools</pre>
-    </div>
-  </section>
+ </div>
+ </section>
 
-  <section class="section">
-    <div class="wrap">
-      <div class="eyebrow"><span class="num">02</span>graduate to a project</div>
-      <h2>One <code>kolm.yaml</code> turns the script into a project.</h2>
-      <p class="sec-lede">Optional. Useful when you want one MCP namespace per repo, K-score gates that refuse to serve below a floor, paths globs that auto-attach artifacts when the agent is editing matching files, and a place for compile/run/bench hooks. The schema is published at <a href="/docs/kolm-yaml-v0.1.json" class="bxo-link">kolm.ai/docs/kolm-yaml-v0.1.json</a>.</p>
+ <section class="section">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">02</span>graduate to a project</div>
+ <h2>One <code>kolm.yaml</code> turns the script into a project.</h2>
+ <p class="sec-lede">Optional. Useful when you want one MCP namespace per repo, K-score gates that refuse to serve below a floor, paths globs that auto-attach artifacts when the agent is editing matching files, and a place for compile/run/bench hooks. The schema is published at <a href="/docs/kolm-yaml-v0.1.json" class="bxo-link">kolm.ai/docs/kolm-yaml-v0.1.json</a>.</p>
 
 <pre class="terminal"><span class="prompt">$</span> kolm init
 <span class="ok">wrote</span> kolm.yaml
-<span class="ok">mkdir</span> .kolm/artifacts/  .kolm/skills/
+<span class="ok">mkdir</span> .kolm/artifacts/ .kolm/skills/
 <span class="ok">updated</span> .gitignore (+ .kolm/)
 
 <span class="prompt">$</span> kolm compile --spec my-redactor.spec.json --out .kolm/artifacts/my-redactor.kolm
 <span class="ok">built</span> .kolm/artifacts/my-redactor.kolm
-<span class="ok">skill</span> .kolm/skills/my-redactor.md   <span class="comment"># Claude Code / Cursor / Cline / Continue index this</span></pre>
+<span class="ok">skill</span> .kolm/skills/my-redactor.md <span class="comment"># Claude Code / Cursor / Cline / Continue index this</span></pre>
 
-      <p class="sec-lede" style="margin-top:18px">Every <code>kolm compile</code> now emits a <code>SKILL.md</code> sidecar next to the artifact. The frontmatter follows Claude Code's format (<code>name</code>, <code>description</code>, <code>allowed-tools</code>, <code>disable-model-invocation</code>) so frontier-agent harnesses index it without manual wiring. The MCP tool name resolves to <code>mcp__&lt;project&gt;__&lt;artifact&gt;</code>.</p>
+ <p class="sec-lede" style="margin-top:18px">Every <code>kolm compile</code> now emits a <code>SKILL.md</code> sidecar next to the artifact. The frontmatter follows Claude Code's format (<code>name</code>, <code>description</code>, <code>allowed-tools</code>, <code>disable-model-invocation</code>) so frontier-agent harnesses index it without manual wiring. The MCP tool name resolves to <code>mcp__&lt;project&gt;__&lt;artifact&gt;</code>.</p>
 
 <pre class="terminal" style="margin-top:18px"><span class="comment"># one command per harness. --apply writes; omit to dry-run.</span>
 <span class="prompt">$</span> kolm install claude-code --apply
@@ -640,93 +642,93 @@ main > section.hero .actions {
 <span class="prompt">$</span> kolm doctor
 <span class="ok">ok</span> node >=18 · kolm.yaml · 3 artifacts · ~/.kolm/config.json · git</pre>
 
-      <p class="sec-lede" style="margin-top:18px">One command per harness. <code>kolm doctor</code> verifies the wiring; <code>kolm logs --since 24h</code> tails the run-history JSONL at <code>~/.kolm/logs/runs.jsonl</code>. No daemons, no dashboards, no telemetry leaving the box.</p>
-    </div>
-  </section>
+ <p class="sec-lede" style="margin-top:18px">One command per harness. <code>kolm doctor</code> verifies the wiring; <code>kolm logs --since 24h</code> tails the run-history JSONL at <code>~/.kolm/logs/runs.jsonl</code>. No daemons, no dashboards, no telemetry leaving the box.</p>
+ </div>
+ </section>
 
-  <section class="section">
-    <div class="wrap">
-      <div class="eyebrow"><span class="num">03</span>templates</div>
-      <h2>Four shapes that cover most of the work.</h2>
-      <p class="sec-lede">Each template scaffolds a complete spec: recipes, evals, working pack, index. If none fit, start <code>--from blank</code>. The sandbox is JavaScript with a curated <code>lib</code>.</p>
+ <section class="section">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">03</span>templates</div>
+ <h2>Four shapes that cover most of the work.</h2>
+ <p class="sec-lede">Each template scaffolds a complete spec: recipes, evals, working pack, index. If none fit, start <code>--from blank</code>. The sandbox is JavaScript with a curated <code>lib</code>.</p>
 
-      <div class="vs-tbl">
-        <table>
-          <thead>
-            <tr><th style="width:20%">Template</th><th>Shape of the recipe</th><th>Realistic example</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><b>redactor</b><br><span class="dim">--from redactor</span></td>
-              <td>Replace regex matches with named tokens. Tenants pass <code>extra_patterns</code>/<code>redact_words</code> at run time, no re-signing.</td>
-              <td>Strip phones, emails, MRNs, account numbers, employee ids, codenames.</td>
-            </tr>
-            <tr>
-              <td><b>extractor</b><br><span class="dim">--from extractor</span></td>
-              <td>Pull named fields from free-text. Tenants pass <code>extra_rules</code>.</td>
-              <td>Amount + date + counterparty from a payment; case_id + priority from a triage note.</td>
-            </tr>
-            <tr>
-              <td><b>classifier</b><br><span class="dim">--from classifier</span></td>
-              <td>Score input against weighted keyword categories, return top label. Tenants pass <code>extra_categories</code>.</td>
-              <td>Route tickets billing / bug / feature / rma. Tag sensors nominal / warning / critical.</td>
-            </tr>
-            <tr>
-              <td><b>blank</b><br><span class="dim">--from blank</span></td>
-              <td>One stub recipe + one eval case. 40 lines of JSON.</td>
-              <td>Anything the three above don't cover. Most one-off agent tools start here.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+ <div class="vs-tbl">
+ <table>
+ <thead>
+ <tr><th style="width:20%">Template</th><th>Shape of the recipe</th><th>Realistic example</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td><b>redactor</b><br><span class="dim">--from redactor</span></td>
+ <td>Replace regex matches with named tokens. Tenants pass <code>extra_patterns</code>/<code>redact_words</code> at run time, no re-signing.</td>
+ <td>Strip phones, emails, MRNs, account numbers, employee ids, codenames.</td>
+ </tr>
+ <tr>
+ <td><b>extractor</b><br><span class="dim">--from extractor</span></td>
+ <td>Pull named fields from free-text. Tenants pass <code>extra_rules</code>.</td>
+ <td>Amount + date + counterparty from a payment; case_id + priority from a triage note.</td>
+ </tr>
+ <tr>
+ <td><b>classifier</b><br><span class="dim">--from classifier</span></td>
+ <td>Score input against weighted keyword categories, return top label. Tenants pass <code>extra_categories</code>.</td>
+ <td>Route tickets billing / bug / feature / rma. Tag sensors nominal / warning / critical.</td>
+ </tr>
+ <tr>
+ <td><b>blank</b><br><span class="dim">--from blank</span></td>
+ <td>One stub recipe + one eval case. 40 lines of JSON.</td>
+ <td>Anything the three above don't cover. Most one-off agent tools start here.</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </section>
 
-  <section class="section">
-    <div class="wrap">
-      <div class="eyebrow"><span class="num">04</span>spec is the program</div>
-      <h2>Forty lines of JSON, one signed binary.</h2>
-      <p class="sec-lede">Deterministic over the spec: same spec, same content-hash (zip wrapper varies; signed manifest does not). Each recipe is <code>function generate(input, lib)</code> in a <code>node:vm</code> sandbox, 1&nbsp;MiB input cap, 1&nbsp;000&nbsp;ms timeout.</p>
+ <section class="section">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">04</span>spec is the program</div>
+ <h2>Forty lines of JSON, one signed binary.</h2>
+ <p class="sec-lede">Deterministic over the spec: same spec, same content-hash (zip wrapper varies; signed manifest does not). Each recipe is <code>function generate(input, lib)</code> in a <code>node:vm</code> sandbox, 1&nbsp;MiB input cap, 1&nbsp;000&nbsp;ms timeout.</p>
 
 <pre class="terminal"><span class="comment"># spec.json - this is the entire program</span>
 {
-  "job_id": "job_clinic_redactor",
-  "task": "Strip identifiers from clinical notes before they leave the device",
-  "base_model": "none",
-  "recipes": [{
-    "id": "rcp_redact_v1",
-    "name": "regex redactor",
-    "source": "function generate(input, lib) {\n  var text = String(input.text || '');\n  var hits = [];\n  for (var p of (lib.params.extra_patterns || [])) {\n    var re = new RegExp(p.regex, 'g'); var n = 0;\n    text = text.replace(re, function(){ n++; return p.replacement || '[REDACTED]'; });\n    if (n) hits.push({ name: p.name, count: n });\n  }\n  return { redacted: text, hits: hits };\n}",
-    "schema": { "input": { "text": "string" }, "output": { "redacted": "string", "hits": "array" } }
-  }],
-  "evals": {
-    "spec": "rs-1-evals",
-    "cases": [{ "id": "phone", "input": { "text": "call 555-123-4567" }, "expected": { "redacted": "call [PHONE]" },
-      "params": { "extra_patterns": [{ "name": "PHONE", "regex": "\\d{3}-\\d{3}-\\d{4}", "replacement": "[PHONE]" }] } }]
-  }
+ "job_id": "job_clinic_redactor",
+ "task": "Strip identifiers from clinical notes before they leave the device",
+ "base_model": "none",
+ "recipes": [{
+ "id": "rcp_redact_v1",
+ "name": "regex redactor",
+ "source": "function generate(input, lib) {\n var text = String(input.text || '');\n var hits = [];\n for (var p of (lib.params.extra_patterns || [])) {\n var re = new RegExp(p.regex, 'g'); var n = 0;\n text = text.replace(re, function(){ n++; return p.replacement || '[REDACTED]'; });\n if (n) hits.push({ name: p.name, count: n });\n }\n return { redacted: text, hits: hits };\n}",
+ "schema": { "input": { "text": "string" }, "output": { "redacted": "string", "hits": "array" } }
+ }],
+ "evals": {
+ "spec": "rs-1-evals",
+ "cases": [{ "id": "phone", "input": { "text": "call 555-123-4567" }, "expected": { "redacted": "call [PHONE]" },
+ "params": { "extra_patterns": [{ "name": "PHONE", "regex": "\\d{3}-\\d{3}-\\d{4}", "replacement": "[PHONE]" }] } }]
+ }
 }
 
 <span class="prompt">$</span> cat spec.json | kolm compile --spec - --out clinic-redactor.kolm
 <span class="ok">ok</span> wrote clinic-redactor.kolm
 <span class="prompt">$</span> kolm inspect clinic-redactor.kolm | head
 {
-  "tier": "recipe",
-  "signature_valid": true,
-  "recipes_n": 1,
-  "evals_n": 1,
-  "k_score": 412.7,
-  "size_bytes": 4188
+ "tier": "recipe",
+ "signature_valid": true,
+ "recipes_n": 1,
+ "evals_n": 1,
+ "k_score": 412.7,
+ "size_bytes": 4188
 }</pre>
 
-      <p class="sec-lede" style="margin-top:24px;">Full reference in <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/docs/AUTHORING.md"><code>docs/AUTHORING.md</code></a>: spec field rules, sandbox surface (<code>lib.patterns</code>, <code>lib.parseFloatSafe</code>, <code>lib.pack</code>, <code>lib.index</code>, <code>lib.params</code>), pack/index containers, receipt chain, every compiler error code.</p>
-    </div>
-  </section>
+ <p class="sec-lede" style="margin-top:24px;">Full reference in <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/docs/AUTHORING.md"><code>docs/AUTHORING.md</code></a>: spec field rules, sandbox surface (<code>lib.patterns</code>, <code>lib.parseFloatSafe</code>, <code>lib.pack</code>, <code>lib.index</code>, <code>lib.params</code>), pack/index containers, receipt chain, every compiler error code.</p>
+ </div>
+ </section>
 
-  <section class="section">
-    <div class="wrap">
-      <div class="eyebrow"><span class="num">05</span>AI-friendly authoring</div>
-      <h2>Hand a model the spec; pipe the spec to <code>kolm compile</code>.</h2>
-      <p class="sec-lede">An agent that writes JSON ships a signed artifact. Validation is strict; every recipe type-checks, every eval case runs before sealing. Drop this prompt in, pipe out to <code>kolm compile --spec -</code>.</p>
+ <section class="section">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">05</span>AI-friendly authoring</div>
+ <h2>Hand a model the spec; pipe the spec to <code>kolm compile</code>.</h2>
+ <p class="sec-lede">An agent that writes JSON ships a signed artifact. Validation is strict; every recipe type-checks, every eval case runs before sealing. Drop this prompt in, pipe out to <code>kolm compile --spec -</code>.</p>
 
 <pre class="terminal"><span class="comment"># AI authoring prompt (drop into any frontier model)</span>
 
@@ -735,71 +737,71 @@ You are authoring a kolm spec - a JSON program that compiles to a signed
 
 Output ONLY a single JSON object. Required fields:
 
-  job_id        "job_<slug>"   matches /^job_[a-z0-9_-]+$/i
-  task          one-sentence human description
-  recipes[]     each: { id: "rcp_<slug>", name, source }
-                source is "function generate(input, lib) { ... return {...}; }"
-                lib has: patterns, parseFloatSafe, pack, index, params
-  evals.cases[] each: { id, input, expected, params? }
+ job_id "job_<slug>" matches /^job_[a-z0-9_-]+$/i
+ task one-sentence human description
+ recipes[] each: { id: "rcp_<slug>", name, source }
+ source is "function generate(input, lib) { ... return {...}; }"
+ lib has: patterns, parseFloatSafe, pack, index, params
+ evals.cases[] each: { id, input, expected, params? }
 
 Constraints:
-  - source must be valid JavaScript that compiles under Node's vm module
-  - inputs are capped at 1 MiB, recipes at 1000 ms wall-time
-  - never reach for fs, net, child_process - the sandbox blocks them
-  - return JSON-serialisable objects only
+ - source must be valid JavaScript that compiles under Node's vm module
+ - inputs are capped at 1 MiB, recipes at 1000 ms wall-time
+ - never reach for fs, net, child_process - the sandbox blocks them
+ - return JSON-serialisable objects only
 
 Task: <describe the task in one paragraph>
 
 <span class="comment"># Pipe the model's output straight to the compiler</span>
 <span class="prompt">$</span> claude --message "<your prompt>" \
-    | jq -r '.content' \
-    | kolm compile --spec - --out my-task.kolm
-<span class="ok">ok</span> wrote my-task.kolm  <span class="dim">k-score 387.4  signature valid</span></pre>
+ | jq -r '.content' \
+ | kolm compile --spec - --out my-task.kolm
+<span class="ok">ok</span> wrote my-task.kolm <span class="dim">k-score 387.4 signature valid</span></pre>
 
-      <p class="sec-lede" style="margin-top:24px;">No account, no network. Artifact signed under your local secret. Teammate verification: set <code>RECIPE_RECEIPT_SECRET</code> to the same value, or pin a fleet secret in CI.</p>
-    </div>
-  </section>
+ <p class="sec-lede" style="margin-top:24px;">No account, no network. Artifact signed under your local secret. Teammate verification: set <code>RECIPE_RECEIPT_SECRET</code> to the same value, or pin a fleet secret in CI.</p>
+ </div>
+ </section>
 
-  <section class="section">
-    <div class="wrap">
-      <div class="eyebrow"><span class="num">06</span>sensitive verticals</div>
-      <h2>What kolm <span class="tone">does</span> and <span class="tone">does not</span> promise.</h2>
-      <p class="sec-lede">We ship the runtime substrate: signed rules, zero-egress sandbox, receipt chain, audit log. We do not ship compliance attestation, recipe correctness, or input-handling guarantees outside the runtime.</p>
+ <section class="section">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">06</span>sensitive verticals</div>
+ <h2>What kolm <span class="tone">does</span> and <span class="tone">does not</span> promise.</h2>
+ <p class="sec-lede">We ship the runtime substrate: signed rules, zero-egress sandbox, receipt chain, audit log. We do not ship compliance attestation, recipe correctness, or input-handling guarantees outside the runtime.</p>
 
-      <div class="vs-tbl">
-        <table>
-          <thead>
-            <tr><th style="width:34%">What you get</th><th>What you're still on the hook for</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><b>Zero runtime egress.</b> Benchmark monitor patches <code>fetch</code>, <code>http</code>, <code>https</code>, <code>net</code>, <code>tls</code>, <code>dns</code>. Wire-touching artifacts fail benchmark.</td>
-              <td><b>Recipe correctness.</b> A regex missing a digit pattern still misses. Write evals for your edge cases.</td>
-            </tr>
-            <tr>
-              <td><b>Signed receipt chain.</b> Five HMAC-SHA256 rings (task &rarr; seeds &rarr; recipes &rarr; evals &rarr; package). Byte-walkable; tampering detected at load.</td>
-              <td><b>Compliance attestation.</b> kolm does not hold cert; the artifact gives an auditor what they need. The audit boundary is yours.</td>
-            </tr>
-            <tr>
-              <td><b>Tenant runtime params.</b> Buyers pass <code>extra_patterns</code>, <code>extra_rules</code>, <code>extra_categories</code> per call. Signature unchanged.</td>
-              <td><b>What buyers do with output.</b> A clinic logging PHI post-redaction is a clinic problem. Audit-sink is opt-in.</td>
-            </tr>
-            <tr>
-              <td><b>Audit-sink hook.</b> Every <code>runArtifact</code> emits <code>kolm-audit-1</code>: recipe id, input sha256 prefix, latency, ran_at. SIEM-ready.</td>
-              <td><b>Threat model outside sandbox.</b> Recipe sandboxed; host isn't. Run <code>kolm</code> in your pipeline's trust boundary.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+ <div class="vs-tbl">
+ <table>
+ <thead>
+ <tr><th style="width:34%">What you get</th><th>What you're still on the hook for</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td><b>Zero runtime egress.</b> Benchmark monitor patches <code>fetch</code>, <code>http</code>, <code>https</code>, <code>net</code>, <code>tls</code>, <code>dns</code>. Wire-touching artifacts fail benchmark.</td>
+ <td><b>Recipe correctness.</b> A regex missing a digit pattern still misses. Write evals for your edge cases.</td>
+ </tr>
+ <tr>
+ <td><b>Signed receipt chain.</b> Five Ed25519 rings (task &rarr; seeds &rarr; recipes &rarr; evals &rarr; package). Byte-walkable; tampering detected at load.</td>
+ <td><b>Compliance attestation.</b> kolm does not hold cert; the artifact gives an auditor what they need. The audit boundary is yours.</td>
+ </tr>
+ <tr>
+ <td><b>Tenant runtime params.</b> Buyers pass <code>extra_patterns</code>, <code>extra_rules</code>, <code>extra_categories</code> per call. Signature unchanged.</td>
+ <td><b>What buyers do with output.</b> A clinic logging PHI post-redaction is a clinic problem. Audit-sink is opt-in.</td>
+ </tr>
+ <tr>
+ <td><b>Audit-sink hook.</b> Every <code>runArtifact</code> emits <code>kolm-audit-1</code>: recipe id, input sha256 prefix, latency, ran_at. SIEM-ready.</td>
+ <td><b>Threat model outside sandbox.</b> Recipe sandboxed; host isn't. Run <code>kolm</code> in your pipeline's trust boundary.</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
 
-      <p class="sec-lede" style="margin-top:24px;">Three patterns to start from:</p>
+ <p class="sec-lede" style="margin-top:24px;">Three patterns to start from:</p>
 
 <pre class="terminal"><span class="comment"># clinic redactor - PHI redaction with tenant-specific patterns</span>
 <span class="prompt">$</span> kolm new clinic-redact --from redactor
 <span class="comment"># edit clinic-redact.spec.json: add MRN, DOB, NPI patterns; add evals; compile</span>
 <span class="prompt">$</span> kolm compile --spec clinic-redact.spec.json --out clinic-redact.kolm
 <span class="prompt">$</span> kolm run clinic-redact.kolm '{"text":"pt MRN 0042-A seen 2026-04-01"}' \
-    --params '{"extra_patterns":[{"name":"MRN","regex":"MRN \\d{4}-[A-Z]","replacement":"[MRN]"}]}'
+ --params '{"extra_patterns":[{"name":"MRN","regex":"MRN \\d{4}-[A-Z]","replacement":"[MRN]"}]}'
 
 <span class="comment"># banking extractor - pull amount + date + counterparty out of payment text</span>
 <span class="prompt">$</span> kolm new wire-extract --from extractor
@@ -812,135 +814,135 @@ Task: <describe the task in one paragraph>
 <span class="prompt">$</span> kolm run support-triage.kolm '{"text":"refund please, charge looks wrong"}'
 { "output": { "label": "billing", "score": 2 } }</pre>
 
-      <p class="sec-lede" style="margin-top:24px;">Vertical walkthroughs (<a href="/healthcare">healthcare</a>, <a href="/finance">finance</a>, <a href="/legal">legal</a>, <a href="/device">device</a>, <a href="/defense">defense</a>) with buyer gates (BAA, audit lineage, privilege, RAM/offline) in the cookbook.</p>
-    </div>
-  </section>
+ <p class="sec-lede" style="margin-top:24px;">Vertical walkthroughs (<a href="/healthcare">healthcare</a>, <a href="/finance">finance</a>, <a href="/legal">legal</a>, <a href="/device">device</a>, <a href="/defense">defense</a>) with buyer gates (BAA, audit lineage, privilege, RAM/offline) in the cookbook.</p>
+ </div>
+ </section>
 
-  <section class="section">
-    <div class="wrap">
-      <div class="eyebrow"><span class="num">07</span>tenant params don't re-sign</div>
-      <h2>One artifact, many tenants, no resigning.</h2>
-      <p class="sec-lede">One signed <code>.kolm</code>; buyers configure per call; signature unchanged; audit log records each tenant's params. A healthcare vendor's redactor: 200 clinics customize MRN formats without touching the binary.</p>
+ <section class="section">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">07</span>tenant params don't re-sign</div>
+ <h2>One artifact, many tenants, no resigning.</h2>
+ <p class="sec-lede">One signed <code>.kolm</code>; buyers configure per call; signature unchanged; audit log records each tenant's params. A healthcare vendor's redactor: 200 clinics customize MRN formats without touching the binary.</p>
 
 <pre class="terminal"><span class="comment"># a single signed redactor, two tenants, two configurations, one audit trail</span>
 
 <span class="prompt">tenant-A$</span> kolm run ./redactor.kolm \
-    '{"text":"pt MRN A-100042 reviewed"}' \
-    --params '{"extra_patterns":[{"name":"MRN","regex":"MRN A-\\d{6}","replacement":"[MRN]"}]}'
+ '{"text":"pt MRN A-100042 reviewed"}' \
+ --params '{"extra_patterns":[{"name":"MRN","regex":"MRN A-\\d{6}","replacement":"[MRN]"}]}'
 
 <span class="prompt">tenant-B$</span> kolm run ./redactor.kolm \
-    '{"text":"patient ID 99-7711 admitted"}' \
-    --params '{"extra_patterns":[{"name":"PID","regex":"\\d{2}-\\d{4}","replacement":"[PID]"}]}'
+ '{"text":"patient ID 99-7711 admitted"}' \
+ --params '{"extra_patterns":[{"name":"PID","regex":"\\d{2}-\\d{4}","replacement":"[PID]"}]}'
 
 <span class="comment"># both tenants run the same artifact (same sha256, same signature).
 # both audit logs distinguish which params were applied.</span></pre>
-    </div>
-  </section>
+ </div>
+ </section>
 
-  <section class="section">
-    <div class="wrap">
-      <div class="eyebrow"><span class="num">08</span>buy instead of rent <span class="bxo-tag">available</span></div>
-      <h2>Compound your frontier-API spend into a local artifact.</h2>
-      <div class="bxo-roadmap-banner">
-        <b>Available today.</b> The capture &rarr; aggregate &rarr; distill loop ships in production. Get started at <a href="/signup">/signup</a>.
-      </div>
-      <p class="sec-lede">Spec authoring is the front door. The heavier door: every API call proxied through the capture endpoint writes a verified <code>(input, output)</code> pair into your namespace. Enough pairs distill into a recipe (or LoRA) running locally at zero per-call cost. Frontier API becomes a deposit account, not a forever-bill.</p>
+ <section class="section">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">08</span>buy instead of rent <span class="bxo-tag">available</span></div>
+ <h2>Compound your frontier-API spend into a local artifact.</h2>
+ <div class="bxo-roadmap-banner">
+ <b>Available today.</b> The capture &rarr; aggregate &rarr; distill loop ships in production. Get started at <a href="/signup">/signup</a>.
+ </div>
+ <p class="sec-lede">Spec authoring is the front door. The heavier door: every API call proxied through the capture endpoint writes a reviewed <code>(input, output)</code> pair into your namespace. Enough approved pairs can distill into a recipe or student candidate that runs locally at zero per-call cost. Frontier calls become a reusable dataset, not a permanent dependency.</p>
 
-      <div class="vs-tbl">
-        <table>
-          <thead>
-            <tr><th style="width:24%">Phase</th><th>What will happen</th><th>What you keep</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><b>Day 1</b><br><span class="dim">capture</span></td>
-              <td>Point your client at the capture proxy. Forwards upstream with your key, records verified <code>(input, output, latency)</code> in <code>observations</code>.</td>
-              <td>Same answer, same SLA; traffic now leaves a labelled trail you own.</td>
-            </tr>
-            <tr>
-              <td><b>Day 7-14</b><br><span class="dim">aggregate</span></td>
-              <td>Observations cluster by intent. Bridges surface recommends synthesis past threshold; corpus exports as JSONL or parquet.</td>
-              <td>A clean dataset of your own task to train any model.</td>
-            </tr>
-            <tr>
-              <td><b>Day 14-30</b><br><span class="dim">distill</span></td>
-              <td>Auto-distill compiles the cluster to a recipe (or LoRA if size warrants). Output: a signed <code>.kolm</code> in <code>~/.kolm/artifacts</code>.</td>
-              <td>Offline specialist for the slice you run. Zero per-call cost.</td>
-            </tr>
-            <tr>
-              <td><b>Day 30+</b><br><span class="dim">compound</span></td>
-              <td>Easy 60% to local, hard 40% to frontier (still capturing). Local-share grows; frontier bill shrinks.</td>
-              <td>Latency, privacy, cost. Cancel kolm and the <code>.kolm</code> on disk still runs.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+ <div class="vs-tbl">
+ <table>
+ <thead>
+ <tr><th style="width:24%">Phase</th><th>What will happen</th><th>What you keep</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td><b>Day 1</b><br><span class="dim">capture</span></td>
+ <td>Point your client at the capture proxy. Forwards upstream with your key, records verified <code>(input, output, latency)</code> in <code>observations</code>.</td>
+ <td>Same answer, same SLA; traffic now leaves a labelled trail you own.</td>
+ </tr>
+ <tr>
+ <td><b>Day 7-14</b><br><span class="dim">aggregate</span></td>
+ <td>Observations cluster by intent. Bridges surface recommends synthesis past threshold; corpus exports as JSONL or parquet.</td>
+ <td>A clean dataset of your own task to train any model.</td>
+ </tr>
+ <tr>
+ <td><b>Day 14-30</b><br><span class="dim">distill</span></td>
+ <td>Auto-distill compiles the cluster to a recipe (or LoRA if size warrants). Output: a signed <code>.kolm</code> in <code>~/.kolm/artifacts</code>.</td>
+ <td>Offline specialist for the slice you run. Zero per-call cost.</td>
+ </tr>
+ <tr>
+ <td><b>Day 30+</b><br><span class="dim">compound</span></td>
+ <td>Easy 60% to local, hard 40% to frontier (still capturing). Local-share grows; frontier bill shrinks.</td>
+ <td>Latency, privacy, cost. Cancel kolm and the <code>.kolm</code> on disk still runs.</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
 
-      <p class="sec-lede" style="margin-top:24px;">Illustrative: 50-engineer team, 80&nbsp;000 frontier calls/mo, 30 days capture, 50&nbsp;000 verified labels: a Phi-3-mini-LoRA hits ~78% of Opus quality at &lt;5% latency and zero per-token cost. Capture, synthesis, and auto-distill all ship today alongside sections 01-06.</p>
+ <p class="sec-lede" style="margin-top:24px;">Illustrative: 50-engineer team, 80&nbsp;000 frontier calls/mo, 30 days capture, 50&nbsp;000 verified labels: a Phi-3-mini-LoRA hits ~78% of Opus quality at &lt;5% latency and zero per-token cost. Capture, synthesis, and auto-distill all ship today alongside sections 01-06.</p>
 
-      <div class="bottom-cta">
-        <h2>Ship one. Ship a hundred.</h2>
-        <p class="lead">Four templates, seconds to compile. Spec validator catches wrong-shape before sealing; receipt chain catches the rest. Read the authoring guide, scaffold a template, edit a regex, ship.</p>
-        <div class="actions">
-          <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/docs/AUTHORING.md" class="btn primary">authoring guide</a>
-          <a href="/docs" class="btn ghost">vertical cookbooks</a>
-          <a href="/leaderboard" class="btn accent">browse registry</a>
-        </div>
-      </div>
-    </div>
-  </section>
+ <div class="bottom-cta">
+ <h2>Ship one. Ship a hundred.</h2>
+ <p class="lead">Four templates, seconds to compile. Spec validator catches wrong-shape before sealing; receipt chain catches the rest. Read the authoring guide, scaffold a template, edit a regex, ship.</p>
+ <div class="actions">
+ <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/docs/AUTHORING.md" class="btn primary">authoring guide</a>
+ <a href="/docs" class="btn ghost">vertical cookbooks</a>
+ <a href="/leaderboard" class="btn accent">browse registry</a>
+ </div>
+ </div>
+ </div>
+ </section>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

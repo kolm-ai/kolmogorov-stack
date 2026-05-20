@@ -456,7 +456,7 @@ test('W409b #7 — raw opt-in (x-kolm-raw: true) writes sidecar file + hash to l
       // HOME — so KOLM_DIR there resolved against the original homedir.
       // We assert sidecar existence via daemon-connector._internals.RAW_DIR
       // (the same constant the daemon's writeRawSidecar uses).
-      const RAW_DIR = daemonConnector._internals.RAW_DIR;
+      const RAW_DIR = daemonConnector._internals.rawDir();
       assert.ok(fs.existsSync(RAW_DIR), 'RAW_DIR must exist: ' + RAW_DIR);
       const files = fs.readdirSync(RAW_DIR);
       assert.ok(files.length > 0, 'sidecar dir must contain at least one raw file');

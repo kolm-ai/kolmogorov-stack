@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Verify &middot; kolm.ai</title>
-<meta name="description" content="kolm verify re-hashes every bundled file, re-checks the Ed25519 signature, refuses on train/hold-out leakage, missing binary, or synthetic-only seeds. One CLI command, six closed-enum failure codes.">
+<title>Verify guide · kolm.ai</title>
+<meta name="description" content="kolm verify re-hashes every bundled file, re-checks the Ed25519 signature, refuses on train/hold-out leakage, missing binary, or synthetic-only seeds. One...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Verify &middot; kolm.ai">
-<meta property="og:description" content="kolm verify re-hashes every bundled file, re-checks the Ed25519 signature, refuses on train/hold-out leakage, missing binary, or synthetic-only seeds. One CLI command, six closed-enum failure codes.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Verify guide · kolm.ai">
+<meta property="og:description" content="kolm verify re-hashes every bundled file, re-checks the Ed25519 signature, refuses on train/hold-out leakage, missing binary, or synthetic-only seeds. One...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/verify">
-<meta property="og:image" content="https://kolm.ai/og/docs-verify.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Verify &middot; kolm.ai">
-<meta name="twitter:description" content="kolm verify re-hashes every bundled file, re-checks the Ed25519 signature, refuses on train/hold-out leakage, missing binary, or synthetic-only seeds. One CLI command, six closed-enum failure codes.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-verify.svg">
+<meta name="twitter:title" content="Verify guide · kolm.ai">
+<meta name="twitter:description" content="kolm verify re-hashes every bundled file, re-checks the Ed25519 signature, refuses on train/hold-out leakage, missing binary, or synthetic-only seeds. One...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/verify">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Verify","description":"kolm verify re-hashes every bundled file, re-checks the Ed25519 signature, refuses on train/hold-out leakage, missing binary, or synthetic-only seeds. One CLI command, six closed-enum failure codes.","url":"https://kolm.ai/docs/verify","datePublished":"2026-05-19","dateModified":"2026-05-19","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -77,24 +78,24 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="what">What verify checks</h2>
 <p>A <code>.kolm</code> bundle ships with a signed receipt that pins every load-bearing file by sha256, plus the train/hold-out hashes, source-seed count, runtime target, and Ed25519 signature. <code>kolm verify</code> re-derives all of those and refuses to proceed unless every check passes.</p>
 <ol>
-  <li><b>File hash</b> &mdash; re-sha256 each file in the bundle, compare to the receipt&rsquo;s pinned hash. A single bit-flip aborts.</li>
-  <li><b>Signature</b> &mdash; re-check the Ed25519 signature over the canonical receipt JSON. Refuses if the signing key is unknown or the signature does not validate.</li>
-  <li><b>Hold-out disjointness</b> &mdash; re-derive the holdout sha256-mod buckets from the dataset id, reject if any training row falls inside the holdout slice.</li>
-  <li><b>Runtime binary</b> &mdash; resolve the runtime declared in <code>manifest.runtime</code>. Refuses if the binary is missing or its hash does not match the manifest pin.</li>
-  <li><b>Source seeds</b> &mdash; refuse on a <code>seeds.jsonl</code> that contains zero rows traceable to a real captured event (synthetic-only artifacts fail the production gate).</li>
-  <li><b>Schema</b> &mdash; refuse on a manifest that does not validate against the <a href="/docs/rs-1">RS-1 receipt schema</a>.</li>
+ <li><b>File hash</b> &mdash; re-sha256 each file in the bundle, compare to the receipt&rsquo;s pinned hash. A single bit-flip aborts.</li>
+ <li><b>Signature</b> &mdash; re-check the Ed25519 signature over the canonical receipt JSON. Refuses if the signing key is unknown or the signature does not validate.</li>
+ <li><b>Hold-out disjointness</b> &mdash; re-derive the holdout sha256-mod buckets from the dataset id, reject if any training row falls inside the holdout slice.</li>
+ <li><b>Runtime binary</b> &mdash; resolve the runtime declared in <code>manifest.runtime</code>. Refuses if the binary is missing or its hash does not match the manifest pin.</li>
+ <li><b>Source seeds</b> &mdash; refuse on a <code>seeds.jsonl</code> that contains zero rows traceable to a real captured event (synthetic-only artifacts fail the production gate).</li>
+ <li><b>Schema</b> &mdash; refuse on a manifest that does not validate against the <a href="/docs/rs-1">RS-1 receipt schema</a>.</li>
 </ol>
 
 <h2 id="run">Run it</h2>
 <pre><code>kolm verify ./phi-redactor.kolm
-# verify  phi-redactor.kolm
-#   files     17 / 17   sha256 ok
-#   signature ed25519   ok   key=kolm-prod-2026-04
-#   holdout   buckets 90..99 disjoint from train (4,217 rows)
-#   runtime   gguf 0.3.7 sha256 ok
-#   seeds     2,140 real / 0 synthetic
-#   schema    rs-1 ok
-# OK  receipt=r_2f93...  generated_at=2026-05-19T17:42:08Z</code></pre>
+# verify phi-redactor.kolm
+# files 17 / 17 sha256 ok
+# signature ed25519 ok key=kolm-prod-2026-04
+# holdout buckets 90..99 disjoint from train (4,217 rows)
+# runtime gguf 0.3.7 sha256 ok
+# seeds 2,140 real / 0 synthetic
+# schema rs-1 ok
+# OK receipt=r_2f93... generated_at=2026-05-19T17:42:08Z</code></pre>
 
 <h2 id="failure-codes">The six closed-enum failure codes</h2>
 <p>Every refusal sets <code>exit code 2</code> and prints a single failure code. Failure codes are stable across releases so CI gates can pin on them.</p>
@@ -126,15 +127,15 @@ kolm verify ./v1.2.3.kolm || { rm v1.2.3.kolm; exit 1; }</code></pre>
 <p>If verify passes, <a href="/docs/runtime">runtime</a> dispatches the artifact to the runtime declared in the manifest. If verify fails, the failure code tells you exactly which gate refused &mdash; fix it at the source, re-bundle, re-sign, re-verify.</p>
 
 <div class="related">
-  <a href="/security"><b>Security &rarr;</b><span>Receipts, signatures, threat model.</span></a>
-  <a href="/docs/rs-1"><b>RS-1 spec &rarr;</b><span>Canonical receipt schema (JSON + markdown).</span></a>
-  <a href="/docs/runtime"><b>Runtime &rarr;</b><span>What verify hands off to.</span></a>
+ <a href="/security"><b>Security &rarr;</b><span>Receipts, signatures, threat model.</span></a>
+ <a href="/docs/rs-1"><b>RS-1 spec &rarr;</b><span>Canonical receipt schema (JSON + markdown).</span></a>
+ <a href="/docs/runtime"><b>Runtime &rarr;</b><span>What verify hands off to.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

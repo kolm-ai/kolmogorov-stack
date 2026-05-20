@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Connectors &middot; kolm.ai</title>
-<meta name="description" content="Drop-in connectors that point OpenAI, Anthropic, Ollama, LiteLLM, vLLM, SGLang, TGI, and local-proxy traffic at the kolm capture pipeline. One env var per connector, streaming preserved.">
+<title>Connectors · kolm.ai</title>
+<meta name="description" content="Drop-in connectors that point OpenAI, Anthropic, Ollama, LiteLLM, vLLM, SGLang, TGI, and local-proxy traffic at the kolm capture pipeline. One env var per...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Connectors &middot; kolm.ai">
-<meta property="og:description" content="Drop-in connectors for OpenAI, Anthropic, Ollama, LiteLLM, vLLM, SGLang, TGI, and local-proxy.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Connectors · kolm.ai">
+<meta property="og:description" content="Drop-in connectors that point OpenAI, Anthropic, Ollama, LiteLLM, vLLM, SGLang, TGI, and local-proxy traffic at the kolm capture pipeline. One env var per...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/connectors">
-<meta property="og:image" content="https://kolm.ai/og/docs-connectors.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Connectors &middot; kolm.ai">
-<meta name="twitter:description" content="Drop-in connectors for OpenAI, Anthropic, Ollama, LiteLLM, vLLM, SGLang, TGI, and local-proxy.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-connectors.svg">
+<meta name="twitter:title" content="Connectors · kolm.ai">
+<meta name="twitter:description" content="Drop-in connectors that point OpenAI, Anthropic, Ollama, LiteLLM, vLLM, SGLang, TGI, and local-proxy traffic at the kolm capture pipeline. One env var per...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/connectors">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Connectors","description":"Drop-in connectors that route OpenAI, Anthropic, Ollama, LiteLLM, vLLM, SGLang, TGI, and local-proxy traffic through the kolm capture pipeline.","url":"https://kolm.ai/docs/connectors","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -67,13 +67,14 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, not the Kolm band, not Petter Kolm.</span>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -87,14 +88,14 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="connectors">Supported connectors</h2>
 <div class="connector-grid">
-  <div class="connector-card"><b>OpenAI</b><span>openai SDK / raw fetch</span><code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code></div>
-  <div class="connector-card"><b>Anthropic</b><span>@anthropic-ai/sdk / raw fetch</span><code>ANTHROPIC_BASE_URL=http://127.0.0.1:8787</code></div>
-  <div class="connector-card"><b>Ollama</b><span>ollama serve</span><code>OLLAMA_HOST=http://127.0.0.1:8787</code></div>
-  <div class="connector-card"><b>LiteLLM</b><span>LiteLLM proxy / SDK</span><code>LITELLM_PROXY=http://127.0.0.1:8787</code></div>
-  <div class="connector-card"><b>vLLM</b><span>vllm serve --port</span><code>VLLM_BASE_URL=http://127.0.0.1:8787/v1</code></div>
-  <div class="connector-card"><b>SGLang</b><span>sglang.launch_server</span><code>SGLANG_BASE_URL=http://127.0.0.1:8787/v1</code></div>
-  <div class="connector-card"><b>TGI</b><span>text-generation-inference</span><code>TGI_BASE_URL=http://127.0.0.1:8787</code></div>
-  <div class="connector-card"><b>local-proxy</b><span>generic OpenAI-compatible</span><code>BASE_URL=http://127.0.0.1:8787/v1</code></div>
+ <div class="connector-card"><b>OpenAI</b><span>openai SDK / raw fetch</span><code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code></div>
+ <div class="connector-card"><b>Anthropic</b><span>@anthropic-ai/sdk / raw fetch</span><code>ANTHROPIC_BASE_URL=http://127.0.0.1:8787</code></div>
+ <div class="connector-card"><b>Ollama</b><span>ollama serve</span><code>OLLAMA_HOST=http://127.0.0.1:8787</code></div>
+ <div class="connector-card"><b>LiteLLM</b><span>LiteLLM proxy / SDK</span><code>LITELLM_PROXY=http://127.0.0.1:8787</code></div>
+ <div class="connector-card"><b>vLLM</b><span>vllm serve --port</span><code>VLLM_BASE_URL=http://127.0.0.1:8787/v1</code></div>
+ <div class="connector-card"><b>SGLang</b><span>sglang.launch_server</span><code>SGLANG_BASE_URL=http://127.0.0.1:8787/v1</code></div>
+ <div class="connector-card"><b>TGI</b><span>text-generation-inference</span><code>TGI_BASE_URL=http://127.0.0.1:8787</code></div>
+ <div class="connector-card"><b>local-proxy</b><span>generic OpenAI-compatible</span><code>BASE_URL=http://127.0.0.1:8787/v1</code></div>
 </div>
 
 <h2 id="start">Start the proxy</h2>
@@ -105,7 +106,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="verify">Verify the proxy sees traffic</h2>
 <pre><code>kolm capture status --namespace tickets
-# pairs captured:   38 / 1000
+# pairs captured: 38 / 1000
 # pairs until distill: 962</code></pre>
 <p>Once you cross the threshold (default 1000 pairs), <code>kolm distill --namespace tickets</code> auto-runs the LoRA trainer against the namespace.</p>
 
@@ -117,23 +118,23 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="see">Related</h2>
 <div class="related">
-  <a href="/docs/connect/openai"><b>/docs/connect/openai</b><span>Long-form OpenAI walk-through with SDK and raw fetch examples.</span></a>
-  <a href="/docs/connect/anthropic"><b>/docs/connect/anthropic</b><span>Anthropic-specific notes including Messages API and tool use.</span></a>
-  <a href="/docs/dev-agents"><b>/docs/dev-agents</b><span>One command routes Codex, Claude Code, Cursor, Windsurf, Aider, and Gemini CLI.</span></a>
-  <a href="/docs/distill"><b>/docs/distill</b><span>Auto-distill a captured namespace into a local LoRA.</span></a>
-  <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
+ <a href="/docs/connect/openai"><b>/docs/connect/openai</b><span>Long-form OpenAI walk-through with SDK and raw fetch examples.</span></a>
+ <a href="/docs/connect/anthropic"><b>/docs/connect/anthropic</b><span>Anthropic-specific notes including Messages API and tool use.</span></a>
+ <a href="/docs/dev-agents"><b>/docs/dev-agents</b><span>One command routes Codex, Claude Code, Cursor, Windsurf, Aider, and Gemini CLI.</span></a>
+ <a href="/docs/distill"><b>/docs/distill</b><span>Auto-distill a captured namespace into a local student artifact.</span></a>
+ <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 kolm.ai</span>
-  &middot;
-  <a href="/security">Security</a>
-  &middot;
-  <a href="/pricing">Pricing</a>
-  &middot;
-  <a href="/docs">Docs</a>
+ <span>&copy; 2026 kolm.ai</span>
+ &middot;
+ <a href="/security">Security</a>
+ &middot;
+ <a href="/pricing">Pricing</a>
+ &middot;
+ <a href="/docs">Docs</a>
 </div></footer>
 
 </body>

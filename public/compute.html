@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Compute · rent training and inference across 14 backends · kolm.ai</title>
-<meta name="description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, or your own SSH host. One CLI. Quote before you spend. Receipts pin the backend.">
+<title>Compute · rent training and inference across 14 · kolm.ai</title>
+<meta name="description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, or your own SSH host. One CLI. Quote before you spend. Receipts pin...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Compute · kolm">
-<meta property="og:description" content="The 14-backend compute registry. Local CUDA, MPS, MLX, ROCm, DirectML, plus Modal, RunPod, Together, Vast, Lambda, Replicate, fal, remote-ssh.">
+<meta property="og:title" content="Compute · rent training and inference across 14 · kolm.ai">
+<meta property="og:description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, or your own SSH host. One CLI. Quote before you spend. Receipts pin...">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Compute · kolm">
-<meta name="twitter:description" content="Train and serve across 14 compute backends with one CLI.">
+<meta name="twitter:title" content="Compute · rent training and inference across 14 · kolm.ai">
+<meta name="twitter:description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, or your own SSH host. One CLI. Quote before you spend. Receipts pin...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/compute">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -24,180 +24,182 @@
 <script src="/escape.js"></script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "kolm compute registry",
-      "description": "The 14-backend registry kolm uses to dispatch training and inference jobs. Local CPU/CUDA/MPS/MLX/ROCm/DirectML, plus Modal, RunPod, Together, Vast, Lambda, Replicate, fal, and remote-ssh.",
-      "url": "https://kolm.ai/compute",
-      "author": {"@type": "Organization", "name": "Kolmogorov"},
-      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
-      "datePublished": "2026-05-14",
-      "license": "https://opensource.org/licenses/MIT"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Compute", "item": "https://kolm.ai/compute"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "kolm compute registry",
+ "description": "The 14-backend registry kolm uses to dispatch training and inference jobs. Local CPU/CUDA/MPS/MLX/ROCm/DirectML, plus Modal, RunPod, Together, Vast, Lambda, Replicate, fal, and remote-ssh.",
+ "url": "https://kolm.ai/compute",
+ "author": {"@type": "Organization", "name": "Kolmogorov"},
+ "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-14",
+ "license": "https://opensource.org/licenses/MIT"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Compute", "item": "https://kolm.ai/compute"}
+ ]
+ }
+ ]
 }
 </script>
 
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220,0.10);--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
-  a{color:inherit;text-decoration:none}
-  ::selection{background:rgba(236,231,220,0.30)}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220,0.10);--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+ a{color:inherit;text-decoration:none}
+ ::selection{background:rgba(236,231,220,0.30)}
 
-  .wrap{max-width:980px;margin:0 auto;padding:0 32px;width:100%}
-  @media(max-width:720px){.wrap{padding:0 20px}}
+ .wrap{max-width:980px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.wrap{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){header.site .row{padding:0 20px}}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
-  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
-  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
-  header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){header.site .row{padding:0 20px}}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .ghost:hover{color:var(--ink)}
+ header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
 
-  main{padding:88px 0 96px;flex:1;position:relative;overflow:hidden}
-  main::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0.32;background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237ef0d2' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237ef0d2' stop-opacity='0.20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3Cpath d='M -200 360 Q 440 240 780 340 T 1480 320 T 1700 330'/%3E%3C/g%3E%3C/svg%3E");background-size:cover;background-position:center top;mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%);-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%)}
-  main > .wrap { position: relative; z-index: 2; }
+ main{padding:88px 0 96px;flex:1;position:relative;overflow:hidden}
+ main::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0.32;background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%237ef0d2' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%237ef0d2' stop-opacity='0.20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='0.7'%3E%3Cpath d='M -200 720 Q 200 660 540 700 T 1240 680 T 1700 690'/%3E%3Cpath d='M -200 660 Q 240 590 580 640 T 1280 620 T 1700 630'/%3E%3Cpath d='M -200 600 Q 280 520 620 580 T 1320 560 T 1700 570'/%3E%3Cpath d='M -200 540 Q 320 450 660 520 T 1360 500 T 1700 510'/%3E%3Cpath d='M -200 480 Q 360 380 700 460 T 1400 440 T 1700 450'/%3E%3Cpath d='M -200 420 Q 400 310 740 400 T 1440 380 T 1700 390'/%3E%3Cpath d='M -200 360 Q 440 240 780 340 T 1480 320 T 1700 330'/%3E%3C/g%3E%3C/svg%3E");background-size:cover;background-position:center top;mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%);-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.4) 36%,transparent 60%)}
+ main > .wrap { position: relative; z-index: 2; }
 
-  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
-  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+ .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+ .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
 
-  h1{font-weight: 500;letter-spacing:-0.035em;line-height:0.96;font-size:clamp(48px,6.4vw,92px);margin:0 0 22px;max-width:14ch}
-  .lede{color:var(--ink-mute);font-size:clamp(16px,1.3vw,18px);margin:0 0 48px;max-width:64ch;line-height:1.55}
-  h2{font-weight: 500;letter-spacing:0;font-size:24px;margin:48px 0 16px;border-top:1px solid var(--line);padding-top:32px}
-  h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:28px 0 8px}
-  p{color:var(--ink-mute);margin:0 0 14px}
-  p strong{color:var(--ink);font-weight: 500}
-  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
-  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
-  ul li{margin:6px 0}
-  ul li strong{color:var(--ink);font-weight: 500}
+ h1{font-weight: 500;letter-spacing:-0.035em;line-height:0.96;font-size:clamp(48px,6.4vw,92px);margin:0 0 22px;max-width:14ch}
+ .lede{color:var(--ink-mute);font-size:clamp(16px,1.3vw,18px);margin:0 0 48px;max-width:64ch;line-height:1.55}
+ h2{font-weight: 500;letter-spacing:0;font-size:24px;margin:48px 0 16px;border-top:1px solid var(--line);padding-top:32px}
+ h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:28px 0 8px}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p strong{color:var(--ink);font-weight: 500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+ ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+ ul li{margin:6px 0}
+ ul li strong{color:var(--ink);font-weight: 500}
 
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:24px 0}
-  @media(max-width:720px){.grid{grid-template-columns:1fr}}
-  .card{display:block;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:20px 22px;color:inherit}
-  .card .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
-  .card .name{font-size:15px;font-weight: 500;color:var(--ink)}
-  .card .tag{font-family:var(--mono);font-size:10.5px;color:var(--good);background:rgba(126,240,210,0.10);border:1px solid rgba(126,240,210,0.20);border-radius:4px;padding:2px 6px;letter-spacing:0}
-  .card .tag.alt{color:var(--warn);background:rgba(255,212,121,0.08);border-color:rgba(255,212,121,0.20)}
-  .card .tag.mute{color:var(--ink-faint);background:transparent;border-color:var(--line-strong)}
-  .card .desc{color:var(--ink-mute);font-size:13.5px;line-height:1.55;margin:0}
+ .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:24px 0}
+ @media(max-width:720px){.grid{grid-template-columns:1fr}}
+ .card{display:block;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:20px 22px;color:inherit}
+ .card .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+ .card .name{font-size:15px;font-weight: 500;color:var(--ink)}
+ .card .tag{font-family:var(--mono);font-size:10.5px;color:var(--good);background:rgba(126,240,210,0.10);border:1px solid rgba(126,240,210,0.20);border-radius:4px;padding:2px 6px;letter-spacing:0}
+ .card .tag.alt{color:var(--warn);background:rgba(255,212,121,0.08);border-color:rgba(255,212,121,0.20)}
+ .card .tag.mute{color:var(--ink-faint);background:transparent;border-color:var(--line-strong)}
+ .card .desc{color:var(--ink-mute);font-size:13.5px;line-height:1.55;margin:0}
 
-  .table{width:100%;border-collapse:collapse;margin:16px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
-  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-  .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
-  .table tr:last-child td{border-bottom:0}
-  .table td code{font-size:12px}
-  .table td.num{font-family:var(--mono);color:var(--ink)}
-  .table td.good{color:var(--good)}
-  .table td.warn{color:var(--warn)}
-  .scroll-x{overflow-x:auto;margin:16px -4px}
-  .scroll-x .table{margin:0 4px;min-width:860px}
+ .table{width:100%;border-collapse:collapse;margin:16px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+ .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+ .table tr:last-child td{border-bottom:0}
+ .table td code{font-size:12px}
+ .table td.num{font-family:var(--mono);color:var(--ink)}
+ .table td.good{color:var(--good)}
+ .table td.warn{color:var(--warn)}
+ .scroll-x{overflow-x:auto;margin:16px -4px}
+ .scroll-x .table{margin:0 4px;min-width:860px}
 
-  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
-  footer a{color:var(--ink-mute)}
-  footer a:hover{color:var(--ink)}
-  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
-  .footer-row a{color:inherit}
+ footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+ footer a{color:var(--ink-mute)}
+ footer a:hover{color:var(--ink)}
+ .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+ .footer-row a{color:inherit}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site">
-  <div class="row">
-    <div class="left">
-      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="row">
+ <div class="left">
+ <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main>
-  <div class="wrap">
-    <div class="hero-eyebrow"><span class="he-dot"></span>Compute &amp; rental . v1.0</div>
-    <h1>Rent compute. Train anywhere.</h1>
-    <p class="lede">kolm dispatches training and inference to the box you choose. Local CUDA on your workstation, MPS on a MacBook, Modal for a five-minute serverless burst, Vast for a six-hour H100 rental, or your own SSH host. One CLI surface, one quote-first flow, one receipt that pins the backend it ran on.</p>
+<main id="main">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>Compute &amp; rental . v1.0</div>
+ <h1>Rent compute. Train anywhere.</h1>
+ <p class="lede">kolm dispatches training and inference to the box you choose. Local CUDA on your workstation, MPS on a MacBook, Modal for a five-minute serverless burst, Vast for a six-hour H100 rental, or your own SSH host. One CLI surface, one quote-first flow, one receipt that pins the backend it ran on.</p>
 
-    <h2>The 14 backends</h2>
-    <p>Every backend ships as a uniform adapter: <code>detect()</code>, <code>quote()</code>, <code>run()</code>, <code>teardown()</code>. The CLI verb <code>kolm compute list</code> prints the same shape at the terminal.</p>
-    <div class="scroll-x">
-    <table class="table">
-      <thead><tr><th>Backend</th><th>Kind</th><th>Train</th><th>Infer</th><th>Airgap</th><th>$ / hr</th><th>Cold start</th><th>VRAM cap</th><th>Auth</th></tr></thead>
-      <tbody>
-        <tr><td><code>local-cpu</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>n/a</td><td>none</td></tr>
-        <tr><td><code>local-cuda</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>own</td><td>none</td></tr>
-        <tr><td><code>local-mps</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>shared</td><td>none</td></tr>
-        <tr><td><code>local-mlx</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>shared</td><td>none</td></tr>
-        <tr><td><code>local-rocm</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>own</td><td>none</td></tr>
-        <tr><td><code>local-directml</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>own</td><td>none</td></tr>
-        <tr><td><code>modal</code></td><td>cloud-serverless</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">$2.50</td><td class="num">5s</td><td class="num">80 GB</td><td><code>KOLM_MODAL_TOKEN</code></td></tr>
-        <tr><td><code>runpod</code></td><td>cloud-serverless</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">$1.20</td><td class="num">60s</td><td class="num">80 GB</td><td><code>KOLM_RUNPOD_TOKEN</code></td></tr>
-        <tr><td><code>together</code></td><td>cloud-managed</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">per-token</td><td class="num">0s</td><td>n/a</td><td><code>KOLM_TOGETHER_TOKEN</code></td></tr>
-        <tr><td><code>vast</code></td><td>cloud-marketplace</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">$0.50</td><td class="num">60s</td><td class="num">80 GB</td><td><code>KOLM_VAST_TOKEN</code> + SSH</td></tr>
-        <tr><td><code>lambda</code></td><td>cloud-marketplace</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">$2.00</td><td class="num">90s</td><td class="num">80 GB</td><td><code>KOLM_LAMBDA_TOKEN</code></td></tr>
-        <tr><td><code>replicate</code></td><td>cloud-serverless</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">per-sec</td><td class="num">60s</td><td class="num">80 GB</td><td><code>KOLM_REPLICATE_TOKEN</code></td></tr>
-        <tr><td><code>fal</code></td><td>cloud-serverless</td><td class="warn">no</td><td class="good">yes</td><td class="warn">no</td><td class="num">per-call</td><td class="num">5s</td><td>n/a</td><td><code>KOLM_FAL_TOKEN</code></td></tr>
-        <tr><td><code>remote-ssh</code></td><td>self-hosted</td><td class="good">yes</td><td class="good">yes</td><td>depends</td><td class="num">$0.00</td><td class="num">0s</td><td>own</td><td>SSH key + host</td></tr>
-      </tbody>
-    </table>
-    </div>
-    <p><strong>$ / hr is a reference, not a quote.</strong> The picker uses it to break ties and to gate the <code>--budget</code> flag. The actual invoice comes from the provider on settlement.</p>
+ <h2>The 14 backends</h2>
+ <p>Every backend ships as a uniform adapter: <code>detect()</code>, <code>quote()</code>, <code>run()</code>, <code>teardown()</code>. The CLI verb <code>kolm compute list</code> prints the same shape at the terminal.</p>
+ <div class="scroll-x">
+ <table class="table">
+ <thead><tr><th>Backend</th><th>Kind</th><th>Train</th><th>Infer</th><th>Airgap</th><th>$ / hr</th><th>Cold start</th><th>VRAM cap</th><th>Auth</th></tr></thead>
+ <tbody>
+ <tr><td><code>local-cpu</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>n/a</td><td>none</td></tr>
+ <tr><td><code>local-cuda</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>own</td><td>none</td></tr>
+ <tr><td><code>local-mps</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>shared</td><td>none</td></tr>
+ <tr><td><code>local-mlx</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>shared</td><td>none</td></tr>
+ <tr><td><code>local-rocm</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>own</td><td>none</td></tr>
+ <tr><td><code>local-directml</code></td><td>local</td><td class="good">yes</td><td class="good">yes</td><td class="good">yes</td><td class="num">$0.00</td><td class="num">0s</td><td>own</td><td>none</td></tr>
+ <tr><td><code>modal</code></td><td>cloud-serverless</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">$2.50</td><td class="num">5s</td><td class="num">80 GB</td><td><code>KOLM_MODAL_TOKEN</code></td></tr>
+ <tr><td><code>runpod</code></td><td>cloud-serverless</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">$1.20</td><td class="num">60s</td><td class="num">80 GB</td><td><code>KOLM_RUNPOD_TOKEN</code></td></tr>
+ <tr><td><code>together</code></td><td>cloud-managed</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">per-token</td><td class="num">0s</td><td>n/a</td><td><code>KOLM_TOGETHER_TOKEN</code></td></tr>
+ <tr><td><code>vast</code></td><td>cloud-marketplace</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">$0.50</td><td class="num">60s</td><td class="num">80 GB</td><td><code>KOLM_VAST_TOKEN</code> + SSH</td></tr>
+ <tr><td><code>lambda</code></td><td>cloud-marketplace</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">$2.00</td><td class="num">90s</td><td class="num">80 GB</td><td><code>KOLM_LAMBDA_TOKEN</code></td></tr>
+ <tr><td><code>replicate</code></td><td>cloud-serverless</td><td class="good">yes</td><td class="good">yes</td><td class="warn">no</td><td class="num">per-sec</td><td class="num">60s</td><td class="num">80 GB</td><td><code>KOLM_REPLICATE_TOKEN</code></td></tr>
+ <tr><td><code>fal</code></td><td>cloud-serverless</td><td class="warn">no</td><td class="good">yes</td><td class="warn">no</td><td class="num">per-call</td><td class="num">5s</td><td>n/a</td><td><code>KOLM_FAL_TOKEN</code></td></tr>
+ <tr><td><code>remote-ssh</code></td><td>self-hosted</td><td class="good">yes</td><td class="good">yes</td><td>depends</td><td class="num">$0.00</td><td class="num">0s</td><td>own</td><td>SSH key + host</td></tr>
+ </tbody>
+ </table>
+ </div>
+ <p><strong>$ / hr is a reference, not a quote.</strong> The picker uses it to break ties and to gate the <code>--budget</code> flag. The actual invoice comes from the provider on settlement.</p>
 
-    <h2>Quote before you spend</h2>
-    <p>Every rentable backend goes through a two-step gate: <code>kolm compute quote</code> first, <code>kolm compute rent --confirm</code> second. The quote step is free, runs no code, and prints duration and cost across every backend so you can compare.</p>
-    <pre>$ kolm compute quote --spec demo-phi-redactor.spec.json
+ <h2>Quote before you spend</h2>
+ <p>Every rentable backend goes through a two-step gate: <code>kolm compute quote</code> first, <code>kolm compute rent --confirm</code> second. The quote step is free, runs no code, and prints duration and cost across every backend so you can compare.</p>
+ <pre>$ kolm compute quote --spec demo-phi-redactor.spec.json
 
-BACKEND          DURATION       COST          BASIS
-local-cuda       11s            $0.00         own hardware
-local-cpu        15m 42s        $0.00         own hardware
-modal            38s            $0.03         $2.50/hr x cold-start + train
-runpod           1m 14s         $0.02         $1.20/hr x cold-start + train
-vast             1m 16s         $0.01         $0.50/hr x cold-start + train
-lambda           1m 47s         $0.06         $2.00/hr x cold-start + train
+BACKEND DURATION COST BASIS
+local-cuda 11s $0.00 own hardware
+local-cpu 15m 42s $0.00 own hardware
+modal 38s $0.03 $2.50/hr x cold-start + train
+runpod 1m 14s $0.02 $1.20/hr x cold-start + train
+vast 1m 16s $0.01 $0.50/hr x cold-start + train
+lambda 1m 47s $0.06 $2.00/hr x cold-start + train
 
 $ kolm compute rent --spec demo-phi-redactor.spec.json --backend vast --confirm
 . quote: $0.01 (1m 16s on vast)
 . provisioning: vast bundle 8x A100-80GB ssh ready
-. training: 100% K=0.94 . signing receipt: HMAC-SHA256
+. training: 100% K=0.94 . signing receipt: Ed25519
 . teardown: release vast instance
 . wrote: ./artifacts/job_phi_redactor_v1.kolm</pre>
 
-    <h2>Budget gate</h2>
-    <p>Pass <code>--budget &lt;usd&gt;</code> to refuse any rent whose quote exceeds the cap. The flag composes with <code>--confirm</code>: the budget gate is checked first, then the confirmation prompt.</p>
-    <pre>$ kolm compute rent --spec long-training.spec.json --backend modal --budget 0.50 --confirm
+ <h2>Budget gate</h2>
+ <p>Pass <code>--budget &lt;usd&gt;</code> to refuse any rent whose quote exceeds the cap. The flag composes with <code>--confirm</code>: the budget gate is checked first, then the confirmation prompt.</p>
+ <pre>$ kolm compute rent --spec long-training.spec.json --backend modal --budget 0.50 --confirm
 . quote: $1.83 (estimated 44m on modal)
 . refused: estimate $1.83 exceeds budget $0.50
 . exit 2
@@ -205,78 +207,78 @@ $ kolm compute rent --spec demo-phi-redactor.spec.json --backend vast --confirm
 $ kolm compute rent --spec long-training.spec.json --backend vast --budget 0.50 --confirm
 . quote: $0.37 (estimated 44m on vast)
 . ok: under budget, proceeding</pre>
-    <p>Budget refusal is a hard exit, not a warning. The flag is for unattended jobs, cron, CI, anything that calls <code>kolm</code> without a human at the prompt.</p>
+ <p>Budget refusal is a hard exit, not a warning. The flag is for unattended jobs, cron, CI, anything that calls <code>kolm</code> without a human at the prompt.</p>
 
-    <h2>Picker scoring</h2>
-    <p><code>kolm compute pick</code> ranks every detected backend and writes the winner to the spec. The scoring function:</p>
-    <pre>S = 0.35 . availability
-  + 0.20 . cost_inv         . (1 - cost / max_cost)
-  + 0.15 . latency_inv      . (1 - cold_start / max_cold)
-  + 0.15 . reproducibility  . (1 if airgap or pinned wheel else 0.5)
-  + 0.15 . perf_bias        . local-cuda=1, modal=0.9, runpod=0.85, vast=0.8 ...</pre>
-    <p>The perf bias is the column that breaks the tie between a free local-cpu and a paid local-cuda: CPU scores 1 on availability and 1 on cost-inverse, but 0.1 on perf-bias, which is enough to flip the pick to the GPU even when GPU costs energy.</p>
+ <h2>Picker scoring</h2>
+ <p><code>kolm compute pick</code> ranks every detected backend and writes the winner to the spec. The scoring function:</p>
+ <pre>S = 0.35 . availability
+ + 0.20 . cost_inv . (1 - cost / max_cost)
+ + 0.15 . latency_inv . (1 - cold_start / max_cold)
+ + 0.15 . reproducibility . (1 if airgap or pinned wheel else 0.5)
+ + 0.15 . perf_bias . local-cuda=1, modal=0.9, runpod=0.85, vast=0.8 ...</pre>
+ <p>The perf bias is the column that breaks the tie between a free local-cpu and a paid local-cuda: CPU scores 1 on availability and 1 on cost-inverse, but 0.1 on perf-bias, which is enough to flip the pick to the GPU even when GPU costs energy.</p>
 
-    <h2>Three rental categories</h2>
-    <p>Not every backend rents the same way. The CLI hides the difference, but the contract differs underneath.</p>
-    <div class="grid">
-      <div class="card">
-        <div class="top"><span class="name">platform-managed</span><span class="tag">SDK lifecycle</span></div>
-        <p class="desc"><code>modal</code>, <code>runpod</code>, <code>replicate</code>, <code>together</code>, <code>fal</code>. The provider owns the container lifecycle. kolm calls a submit-and-wait API; teardown is implicit when the function returns. Billing is metered by the provider.</p>
-      </div>
-      <div class="card">
-        <div class="top"><span class="name">kolm-provisioned</span><span class="tag alt">we drive it</span></div>
-        <p class="desc"><code>vast</code>, <code>lambda</code>. kolm posts a bid or a launch request, SSHs into the instance, runs the trainer, then explicitly terminates the rental in a <code>try/finally</code>. The teardown contract is in our code.</p>
-      </div>
-      <div class="card">
-        <div class="top"><span class="name">not-rentable</span><span class="tag mute">your hardware</span></div>
-        <p class="desc">All six <code>local-*</code> backends plus <code>remote-ssh</code>. There is nothing to provision; <code>rent</code> on these falls back to <code>run</code>. Useful as a uniform CLI surface; no money changes hands.</p>
-      </div>
-      <div class="card">
-        <div class="top"><span class="name">self-hosted</span><span class="tag">your SSH</span></div>
-        <p class="desc"><code>remote-ssh</code>. The trainer ships itself to <code>$KOLM_REMOTE_HOST</code> over SSH, runs there, and pulls the artifact back. Useful for an off-rack workstation, a home lab, or a leased bare-metal box.</p>
-      </div>
-    </div>
+ <h2>Three rental categories</h2>
+ <p>Not every backend rents the same way. The CLI hides the difference, but the contract differs underneath.</p>
+ <div class="grid">
+ <div class="card">
+ <div class="top"><span class="name">platform-managed</span><span class="tag">SDK lifecycle</span></div>
+ <p class="desc"><code>modal</code>, <code>runpod</code>, <code>replicate</code>, <code>together</code>, <code>fal</code>. The provider owns the container lifecycle. kolm calls a submit-and-wait API; teardown is implicit when the function returns. Billing is metered by the provider.</p>
+ </div>
+ <div class="card">
+ <div class="top"><span class="name">kolm-provisioned</span><span class="tag alt">we drive it</span></div>
+ <p class="desc"><code>vast</code>, <code>lambda</code>. kolm posts a bid or a launch request, SSHs into the instance, runs the trainer, then explicitly terminates the rental in a <code>try/finally</code>. The teardown contract is in our code.</p>
+ </div>
+ <div class="card">
+ <div class="top"><span class="name">not-rentable</span><span class="tag mute">your hardware</span></div>
+ <p class="desc">All six <code>local-*</code> backends plus <code>remote-ssh</code>. There is nothing to provision; <code>rent</code> on these falls back to <code>run</code>. Useful as a uniform CLI surface; no money changes hands.</p>
+ </div>
+ <div class="card">
+ <div class="top"><span class="name">self-hosted</span><span class="tag">your SSH</span></div>
+ <p class="desc"><code>remote-ssh</code>. The trainer ships itself to <code>$KOLM_REMOTE_HOST</code> over SSH, runs there, and pulls the artifact back. Useful for an off-rack workstation, a home lab, or a leased bare-metal box.</p>
+ </div>
+ </div>
 
-    <h2>Teardown contract</h2>
-    <p>The two backends kolm provisions itself (<code>vast</code>, <code>lambda</code>) follow the same shape:</p>
-    <pre>async function run(spec, opts) {
-  const handle = await provision(spec);          // bid + boot
-  try {
-    await waitForSSH(handle);                    // poll until reachable
-    await uploadSpec(handle, spec);
-    const result = await runTrainer(handle, spec, opts.on_progress);
-    return result;
-  } finally {
-    await release(handle);                       // DELETE the rental
-  }
+ <h2>Teardown contract</h2>
+ <p>The two backends kolm provisions itself (<code>vast</code>, <code>lambda</code>) follow the same shape:</p>
+ <pre>async function run(spec, opts) {
+ const handle = await provision(spec); // bid + boot
+ try {
+ await waitForSSH(handle); // poll until reachable
+ await uploadSpec(handle, spec);
+ const result = await runTrainer(handle, spec, opts.on_progress);
+ return result;
+ } finally {
+ await release(handle); // DELETE the rental
+ }
 }</pre>
-    <p>If the trainer crashes, if the network drops, if Ctrl+C is pressed, the <code>finally</code> block runs and the instance is destroyed. There is no path where kolm leaves a paid box running. Smoke at <code>scripts/test-rent-teardown.mjs</code> proves the four crash cases all release.</p>
+ <p>If the trainer crashes, if the network drops, if Ctrl+C is pressed, the <code>finally</code> block runs and the instance is destroyed. There is no path where kolm leaves a paid box running. Smoke at <code>scripts/test-rent-teardown.mjs</code> proves the four crash cases all release.</p>
 
-    <h2>Receipt provenance</h2>
-    <p>Every artifact carries a <code>compute</code> block in its manifest. The receipt chain signs that block alongside the K-score and the file hashes, so the same artifact can never be claimed to have trained on a different backend after the fact.</p>
-    <pre>{
-  "compute": {
-    "backend": "vast",
-    "device": "a100-80gb",
-    "duration_seconds": 76.4,
-    "cost_usd": 0.011,
-    "provenance": "kolm-provisioned vast bundle 88471203 . sha256 of trainer image: ..."
-  }
+ <h2>Receipt provenance</h2>
+ <p>Every artifact carries a <code>compute</code> block in its manifest. The receipt chain signs that block alongside the K-score and the file hashes, so the same artifact can never be claimed to have trained on a different backend after the fact.</p>
+ <pre>{
+ "compute": {
+ "backend": "vast",
+ "device": "a100-80gb",
+ "duration_seconds": 76.4,
+ "cost_usd": 0.011,
+ "provenance": "kolm-provisioned vast bundle 88471203 . sha256 of trainer image: ..."
+ }
 }</pre>
-    <p>The provenance string includes the bundle id, the docker image hash, and a timestamp. Reproducers can verify the image even after the rental is gone.</p>
+ <p>The provenance string includes the bundle id, the docker image hash, and a timestamp. Reproducers can verify the image even after the rental is gone.</p>
 
-    <h2>CLI</h2>
-    <p>Five verbs cover the surface.</p>
-    <pre>$ kolm compute list
+ <h2>CLI</h2>
+ <p>Five verbs cover the surface.</p>
+ <pre>$ kolm compute list
 14 backends. local-cpu, local-cuda, local-mps, local-mlx, local-rocm,
 local-directml, modal, runpod, together, vast, lambda, replicate, fal,
 remote-ssh.
 
 $ kolm compute detect
 local-cuda . ok (torch.cuda.is_available)
-local-cpu  . ok
-modal      . no token (set KOLM_MODAL_TOKEN to enable)
-vast       . no token (set KOLM_VAST_TOKEN to enable)
+local-cpu . ok
+modal . no token (set KOLM_MODAL_TOKEN to enable)
+vast . no token (set KOLM_VAST_TOKEN to enable)
 
 $ kolm compute pick --spec my.spec.json
 . local-cuda wins (S=0.92)
@@ -286,96 +288,96 @@ $ kolm compute quote --spec my.spec.json
 
 $ kolm compute rent --spec my.spec.json --backend vast --budget 0.50 --confirm
 . provisioning, training, teardown</pre>
-    <p>Full verb tables at <a href="/docs" style="color:var(--ink);text-decoration:underline">/docs</a>. The decision matrix that picks defaults is at <a href="/spec" style="color:var(--ink);text-decoration:underline">/spec</a> under "compute-dispatch".</p>
+ <p>Full verb tables at <a href="/docs" style="color:var(--ink);text-decoration:underline">/docs</a>. The decision matrix that picks defaults is at <a href="/spec" style="color:var(--ink);text-decoration:underline">/spec</a> under "compute-dispatch".</p>
 
-    <h2>Measured throughput</h2>
-    <p>Most kolm artifacts are pattern-match recipes that run as compiled JS in V8. The bench script at <code>scripts/bench-tps.mjs</code> exercises the recipe directly, no model load. On a Windows x64 box (16 logical CPUs, node v24.14.0) against <code>examples/demo-phi-redactor.spec.json</code>:</p>
-    <pre>$ node scripts/bench-tps.mjs --spec examples/demo-phi-redactor.spec.json --n 5000 --warmup 200
+ <h2>Measured throughput</h2>
+ <p>Most kolm artifacts are pattern-match recipes that run as compiled JS in V8. The bench script at <code>scripts/bench-tps.mjs</code> exercises the recipe directly, no model load. On a Windows x64 box (16 logical CPUs, node v24.14.0) against <code>examples/demo-phi-redactor.spec.json</code>:</p>
+ <pre>$ node scripts/bench-tps.mjs --spec examples/demo-phi-redactor.spec.json --n 5000 --warmup 200
 {
-  "mode": "pattern",
-  "job_id": "job_phi_redactor_v1",
-  "n": 5000,
-  "latency": {
-    "min_us":  0,
-    "p50_us":  1,
-    "p95_us":  1,
-    "p99_us":  2,
-    "max_us":  258,
-    "mean_us": 1,
-    "calls_per_sec": 1165990
-  },
-  "note": "Pattern-match recipes run as compiled JS in V8.
-           Numbers are end-to-end (input parse + match + output)."
+ "mode": "pattern",
+ "job_id": "job_phi_redactor_v1",
+ "n": 5000,
+ "latency": {
+ "min_us": 0,
+ "p50_us": 1,
+ "p95_us": 1,
+ "p99_us": 2,
+ "max_us": 258,
+ "mean_us": 1,
+ "calls_per_sec": 1165990
+ },
+ "note": "Pattern-match recipes run as compiled JS in V8.
+ Numbers are end-to-end (input parse + match + output)."
 }</pre>
-    <p>~1.17M calls/sec, p50 of 1&micro;s, p99 of 2&micro;s for the four-pattern PHI redactor. Those are measured numbers from one box; expect variance with V8 JIT warm-up, recipe complexity, and host load. Generative artifacts (those that bundle a LoRA pack and call vLLM or llama.cpp) trade microseconds for tokens-per-second on the same axis. Run <code>node scripts/bench-tps.mjs --generative --url http://localhost:8765 --n 32</code> against a serve endpoint to get that path; numbers depend on the device the serve loop ran on, which the receipt pins.</p>
-    <p>Both modes write a JSON record suitable for committing to <code>docs/bench/</code> and publishing on this page. The raw record from the run above lives at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/docs/bench/tps-phi-redactor.json" rel="noopener" style="color:var(--ink);text-decoration:underline">docs/bench/tps-phi-redactor.json</a>.</p>
+ <p>~1.17M calls/sec, p50 of 1&micro;s, p99 of 2&micro;s for the four-pattern PHI redactor. Those are measured numbers from one box; expect variance with V8 JIT warm-up, recipe complexity, and host load. Generative artifacts (those that bundle a LoRA pack and call vLLM or llama.cpp) trade microseconds for tokens-per-second on the same axis. Run <code>node scripts/bench-tps.mjs --generative --url http://localhost:8765 --n 32</code> against a serve endpoint to get that path; numbers depend on the device the serve loop ran on, which the receipt pins.</p>
+ <p>Both modes write a JSON record suitable for committing to <code>docs/bench/</code> and publishing on this page. The raw record from the run above lives at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/docs/bench/tps-phi-redactor.json" rel="noopener" style="color:var(--ink);text-decoration:underline">docs/bench/tps-phi-redactor.json</a>.</p>
 
-    <h2>Why renting</h2>
-    <ul>
-      <li><strong>Your laptop is enough for a redactor.</strong> A four-pattern PHI redactor takes 11 seconds on local-cuda and 16 minutes on local-cpu. Both produce the same artifact with the same K-score.</li>
-      <li><strong>Your laptop is not enough for a 14B distill.</strong> Train on Vast for $0.50/hr; the artifact runs on the laptop afterward. The rental is for compile-time, not serve-time.</li>
-      <li><strong>Your buyer might require airgap.</strong> Keep <code>local-cpu</code>, <code>local-cuda</code>, <code>local-mps</code>, <code>local-mlx</code>, <code>local-rocm</code>, <code>local-directml</code>, or <code>remote-ssh</code> with airgap enabled and the rental backends fail closed.</li>
-      <li><strong>Your CI runs on a free runner.</strong> Quote-only mode (<code>kolm compute quote</code>) costs nothing and writes a deterministic table that CI can diff against a budget file.</li>
-    </ul>
+ <h2>Why renting</h2>
+ <ul>
+ <li><strong>Your laptop is enough for a redactor.</strong> A four-pattern PHI redactor takes 11 seconds on local-cuda and 16 minutes on local-cpu. Both produce the same artifact with the same K-score.</li>
+ <li><strong>Your laptop is not enough for a 14B distill.</strong> Train on Vast for $0.50/hr; the artifact runs on the laptop afterward. The rental is for compile-time, not serve-time.</li>
+ <li><strong>Your buyer might require airgap.</strong> Keep <code>local-cpu</code>, <code>local-cuda</code>, <code>local-mps</code>, <code>local-mlx</code>, <code>local-rocm</code>, <code>local-directml</code>, or <code>remote-ssh</code> with airgap enabled and the rental backends fail closed.</li>
+ <li><strong>Your CI runs on a free runner.</strong> Quote-only mode (<code>kolm compute quote</code>) costs nothing and writes a deterministic table that CI can diff against a budget file.</li>
+ </ul>
 
-    <h2>What we are not promising</h2>
-    <p>Three things, explicit.</p>
-    <p><strong>We do not resell compute.</strong> Your provider token bills your provider account. kolm sits in front of the SDK; it does not proxy the API call, hold the funds, or take a margin.</p>
-    <p><strong>Quotes are estimates.</strong> Cold-start, network, and a 2x slack factor are folded in; the real invoice can drift. The picker uses quotes as ordering, not as billing.</p>
-    <p><strong>Backends churn.</strong> Provider APIs ship breaking changes; we re-pin the registry on every adapter version bump. The version in the top-left corner of <code>kolm compute list</code> is the registry version, not the kolm version.</p>
-  </div>
+ <h2>What we are not promising</h2>
+ <p>Three things, explicit.</p>
+ <p><strong>We do not resell compute.</strong> Your provider token bills your provider account. kolm sits in front of the SDK; it does not proxy the API call, hold the funds, or take a margin.</p>
+ <p><strong>Quotes are estimates.</strong> Cold-start, network, and a 2x slack factor are folded in; the real invoice can drift. The picker uses quotes as ordering, not as billing.</p>
+ <p><strong>Backends churn.</strong> Provider APIs ship breaking changes; we re-pin the registry on every adapter version bump. The version in the top-left corner of <code>kolm compute list</code> is the registry version, not the kolm version.</p>
+ </div>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

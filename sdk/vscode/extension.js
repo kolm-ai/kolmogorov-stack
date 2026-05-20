@@ -346,7 +346,7 @@ async function cmdReplaceLLMCall(uri, range) {
       : `await kolm.${camelCase(ref)}(input)`;
 
   await editor.edit((eb) => eb.replace(r, replacement));
-  vscode.window.showInformationMessage(`Kolm: swapped LLM call. Add \`import { kolm } from '@kolmogorov/kolm'\` at the top of the file.`);
+  vscode.window.showInformationMessage('Kolm: swapped LLM call. Add a KolmClient instance named `kolm`; see sdk/node/README.md for the local SDK install path.');
 }
 
 function camelCase(name) {

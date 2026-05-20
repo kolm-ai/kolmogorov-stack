@@ -4,21 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Long-context training &middot; YaRN, NTK-aware, and Linear PI | kolm research</title>
-<meta name="description" content="Three RoPE extension methods, one config knob. YaRN for 4-32x at low perplexity, NTK-aware for cheap 2-4x, Linear PI when the base model's config demands it. How kolm patches model.config.rope_scaling and the nested text_config so VLMs extend cleanly.">
+<title>Long-context training YaRN, NTK-aware, and Linear PI | · kolm.ai</title>
+<meta name="description" content="Three RoPE extension methods, one config knob. YaRN for 4-32x at low perplexity, NTK-aware for cheap 2-4x, Linear PI when the base model">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Long-context training . kolm research">
-<meta property="og:description" content="YaRN, NTK-aware, and Linear PI. The RoPE extension knob, written down.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Long-context training YaRN, NTK-aware, and Linear PI | · kolm.ai">
+<meta property="og:description" content="Three RoPE extension methods, one config knob. YaRN for 4-32x at low perplexity, NTK-aware for cheap 2-4x, Linear PI when the base model">
+<meta property="og:type" content="website">
 <meta property="article:published_time" content="2026-05-14">
 <meta property="article:author" content="Kolmogorov">
 <meta property="article:section" content="methods">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Long-context training">
-<meta name="twitter:description" content="Three RoPE extension methods, one config knob.">
+<meta name="twitter:title" content="Long-context training YaRN, NTK-aware, and Linear PI | · kolm.ai">
+<meta name="twitter:description" content="Three RoPE extension methods, one config knob. YaRN for 4-32x at low perplexity, NTK-aware for cheap 2-4x, Linear PI when the base model">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/long-context-training">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,291 +27,293 @@
 <script src="/escape.js"></script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Long-context training: YaRN, NTK-aware, and Linear PI",
-      "description": "Three RoPE extension methods written down with their gating conditions.",
-      "url": "https://kolm.ai/research/long-context-training",
-      "author": {"@type": "Organization", "name": "Kolmogorov"},
-      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
-      "datePublished": "2026-05-14",
-      "articleSection": "methods",
-      "keywords": "long context, RoPE, YaRN, NTK-aware, Linear PI, context extension",
-      "citation": [
-        "Peng et al, 2023, arXiv:2309.00071 (YaRN)",
-        "Chen et al, 2023, arXiv:2306.15595 (Linear PI)",
-        "Liu et al, 2023, arXiv:2310.01889 (Ring Attention)"
-      ],
-      "license": "https://creativecommons.org/licenses/by/4.0/"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "Long-context training", "item": "https://kolm.ai/research/long-context-training"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Long-context training: YaRN, NTK-aware, and Linear PI",
+ "description": "Three RoPE extension methods written down with their gating conditions.",
+ "url": "https://kolm.ai/research/long-context-training",
+ "author": {"@type": "Organization", "name": "Kolmogorov"},
+ "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-14",
+ "articleSection": "methods",
+ "keywords": "long context, RoPE, YaRN, NTK-aware, Linear PI, context extension",
+ "citation": [
+ "Peng et al, 2023, arXiv:2309.00071 (YaRN)",
+ "Chen et al, 2023, arXiv:2306.15595 (Linear PI)",
+ "Liu et al, 2023, arXiv:2310.01889 (Ring Attention)"
+ ],
+ "license": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Long-context training", "item": "https://kolm.ai/research/long-context-training"}
+ ]
+ }
+ ]
 }
 </script>
 
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
-  a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
-  a:hover{border-bottom-color:var(--ink)}
-  .nb{border:0}
-  ::selection{background:rgba(236,231,220,0.30)}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+ a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+ a:hover{border-bottom-color:var(--ink)}
+ .nb{border:0}
+ ::selection{background:rgba(236,231,220,0.30)}
 
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
-  @media(max-width:720px){.wrap{padding:0 20px}}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.wrap{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){header.site .row{padding:0 20px}}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
-  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){header.site .row{padding:0 20px}}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+ header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site .right .ghost:hover{color:var(--ink)}
+ header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
 
-  main{padding:80px 0 96px;flex:1}
+ main{padding:80px 0 96px;flex:1}
 
-  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
-  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
-  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+ .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+ .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
 
-  h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
-  .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
-  h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
-  h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
-  p{color:var(--ink-mute);margin:0 0 14px}
-  p strong{color:var(--ink);font-weight: 500}
-  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
-  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
-  ul li{margin:6px 0}
+ h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+ .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+ h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px}
+ h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p strong{color:var(--ink);font-weight: 500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+ ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+ ul li{margin:6px 0}
 
-  .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+ .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
 
-  .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
-  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-  .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
-  .table tr:last-child td{border-bottom:0}
+ .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+ .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+ .table tr:last-child td{border-bottom:0}
 
-  .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
-  .citations a{color:var(--ink-mute)}
+ .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+ .citations a{color:var(--ink-mute)}
 
-  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
-  footer a{color:var(--ink-mute);border:0}
-  footer a:hover{color:var(--ink)}
-  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
-  .footer-row a{color:inherit}
+ footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+ footer a{color:var(--ink-mute);border:0}
+ footer a:hover{color:var(--ink)}
+ .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+ .footer-row a{color:inherit}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site">
-  <div class="row">
-    <div class="left">
-      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research" class="active">Research</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="row">
+ <div class="left">
+ <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research" class="active">Research</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main>
-  <div class="wrap">
-    <div class="hero-eyebrow"><span class="he-dot"></span>research . methods . 11 min read</div>
-    <h1>Long context, one config knob.</h1>
-    <p class="lede">RoPE extension is the cheapest way to take a 4k or 8k base model to 32k or 128k. Three published methods, three perplexity profiles, one trainer config. The boring part is making sure the patch lands on both the top-level config and the nested text_config when the model is a VLM.</p>
+<main id="main">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>research . methods . 11 min read</div>
+ <h1>Long context, one config knob.</h1>
+ <p class="lede">RoPE extension is the cheapest way to take a 4k or 8k base model to 32k or 128k. Three published methods, three perplexity profiles, one trainer config. The boring part is making sure the patch lands on both the top-level config and the nested text_config when the model is a VLM.</p>
 
-    <div class="meta-line">
-      <span>May 14, 2026</span>
-      <span>&middot;</span>
-      <span>Kolmogorov research</span>
-      <span>&middot;</span>
-      <span>apps/trainer/long_context.py</span>
-    </div>
+ <div class="meta-line">
+ <span>May 14, 2026</span>
+ <span>&middot;</span>
+ <span>Kolmogorov research</span>
+ <span>&middot;</span>
+ <span>apps/trainer/long_context.py</span>
+ </div>
 
-    <h2>Why RoPE needs scaling at all</h2>
+ <h2>Why RoPE needs scaling at all</h2>
 
-    <p>Rotary Position Embedding encodes position as a rotation in the query/key pairs at frequencies that decay along the embedding dimension. The model is trained at some <code>max_position_embeddings</code>; at inference time, positions beyond that window are out-of-distribution and the model degrades sharply. The fix is to remap those longer positions back into the trained band so that the rotations stay in-distribution. That's what context extension is.</p>
+ <p>Rotary Position Embedding encodes position as a rotation in the query/key pairs at frequencies that decay along the embedding dimension. The model is trained at some <code>max_position_embeddings</code>; at inference time, positions beyond that window are out-of-distribution and the model degrades sharply. The fix is to remap those longer positions back into the trained band so that the rotations stay in-distribution. That's what context extension is.</p>
 
-    <p>There are three published mappings, each with a different trade-off between simplicity, perplexity at the new length, and faithfulness to the original short-context behavior.</p>
+ <p>There are three published mappings, each with a different trade-off between simplicity, perplexity at the new length, and faithfulness to the original short-context behavior.</p>
 
-    <h2>The three methods</h2>
+ <h2>The three methods</h2>
 
-    <table class="table">
-      <thead><tr><th>Method</th><th>Mapping</th><th>Strength</th><th>Weakness</th></tr></thead>
-      <tbody>
-        <tr><td>Linear PI</td><td>Compress all positions by factor s</td><td>Trivial to implement, broadly supported</td><td>High perplexity at 4x+; degrades short-context behavior</td></tr>
-        <tr><td>NTK-aware</td><td>Scale the base frequency by s^(d/(d-2))</td><td>Cheap; preserves high-frequency rotations</td><td>Caps out around 2-4x extension</td></tr>
-        <tr><td>YaRN</td><td>Piecewise NTK-by-parts with attention temperature scaling</td><td>Stable at 4-32x; matches or beats trained-long models</td><td>More config; needs the original training window declared</td></tr>
-      </tbody>
-    </table>
+ <table class="table">
+ <thead><tr><th>Method</th><th>Mapping</th><th>Strength</th><th>Weakness</th></tr></thead>
+ <tbody>
+ <tr><td>Linear PI</td><td>Compress all positions by factor s</td><td>Trivial to implement, broadly supported</td><td>High perplexity at 4x+; degrades short-context behavior</td></tr>
+ <tr><td>NTK-aware</td><td>Scale the base frequency by s^(d/(d-2))</td><td>Cheap; preserves high-frequency rotations</td><td>Caps out around 2-4x extension</td></tr>
+ <tr><td>YaRN</td><td>Piecewise NTK-by-parts with attention temperature scaling</td><td>Stable at 4-32x; matches or beats trained-long models</td><td>More config; needs the original training window declared</td></tr>
+ </tbody>
+ </table>
 
-    <p>YaRN (Peng et al 2023) is the production default. It partitions RoPE dimensions into three bands: high-frequency (left untouched, preserves attention-to-nearby), low-frequency (linearly compressed, extends range), and a smooth interpolation between them. An attention-logit temperature also gets scaled to compensate for the increased context length's effect on softmax sharpness.</p>
+ <p>YaRN (Peng et al 2023) is the production default. It partitions RoPE dimensions into three bands: high-frequency (left untouched, preserves attention-to-nearby), low-frequency (linearly compressed, extends range), and a smooth interpolation between them. An attention-logit temperature also gets scaled to compensate for the increased context length's effect on softmax sharpness.</p>
 
-    <h2>The minimal call</h2>
+ <h2>The minimal call</h2>
 
-    <pre>from apps.trainer.long_context import apply_rope_scaling, LongContextConfig
+ <pre>from apps.trainer.long_context import apply_rope_scaling, LongContextConfig
 from transformers import AutoModelForCausalLM
 
 model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B-Instruct")
 apply_rope_scaling(
-    model,
-    LongContextConfig(
-        method="yarn",
-        factor=4.0,                                  # 32k -> 131k
-        original_max_position_embeddings=32768,      # the base's trained window
-    ),
+ model,
+ LongContextConfig(
+ method="yarn",
+ factor=4.0, # 32k -> 131k
+ original_max_position_embeddings=32768, # the base's trained window
+ ),
 )
 # proceed with SFT/DPO/GRPO at the new length</pre>
 
-    <p>The trainer then runs SFT (or any of the other heads) at the new context. The continuation budget is the new factor, but the gradient compute scales as O(L^2) for vanilla attention or O(L) for FlashAttention-2/3. With FA3 on a Hopper, 128k context on a 7B model is tractable on a single H100.</p>
+ <p>The trainer then runs SFT (or any of the other heads) at the new context. The continuation budget is the new factor, but the gradient compute scales as O(L^2) for vanilla attention or O(L) for FlashAttention-2/3. With FA3 on a Hopper, 128k context on a 7B model is tractable on a single H100.</p>
 
-    <h2>The VLM gotcha</h2>
+ <h2>The VLM gotcha</h2>
 
-    <p>VLMs nest their language config inside <code>model.config.text_config</code>. Patching <code>model.config.rope_scaling</code> alone does nothing because the language tower reads its own <code>text_config.rope_scaling</code>. The kolm trainer patches both, with a guard that detects nested text_config and walks into it. This is the difference between a 32k context VLM and a model that silently runs at its base 8k window with confusing degraded outputs.</p>
+ <p>VLMs nest their language config inside <code>model.config.text_config</code>. Patching <code>model.config.rope_scaling</code> alone does nothing because the language tower reads its own <code>text_config.rope_scaling</code>. The kolm trainer patches both, with a guard that detects nested text_config and walks into it. This is the difference between a 32k context VLM and a model that silently runs at its base 8k window with confusing degraded outputs.</p>
 
-    <pre>def _patch(cfg, scaling: dict) -&gt; None:
-    cfg.rope_scaling = dict(scaling)
-    # VLMs and some MoE models nest the language config
-    inner = getattr(cfg, "text_config", None)
-    if inner is not None:
-        inner.rope_scaling = dict(scaling)</pre>
+ <pre>def _patch(cfg, scaling: dict) -&gt; None:
+ cfg.rope_scaling = dict(scaling)
+ # VLMs and some MoE models nest the language config
+ inner = getattr(cfg, "text_config", None)
+ if inner is not None:
+ inner.rope_scaling = dict(scaling)</pre>
 
-    <h2>What lands in the receipt</h2>
+ <h2>What lands in the receipt</h2>
 
-    <pre>"long_context": {
-  "method": "yarn",
-  "factor": 4.0,
-  "original_max_position_embeddings": 32768,
-  "new_max_position_embeddings": 131072,
-  "attn_factor": 1.0,
-  "beta_fast": 32,
-  "beta_slow": 1,
-  "papers": ["arXiv:2309.00071", "arXiv:2306.15595"]
+ <pre>"long_context": {
+ "method": "yarn",
+ "factor": 4.0,
+ "original_max_position_embeddings": 32768,
+ "new_max_position_embeddings": 131072,
+ "attn_factor": 1.0,
+ "beta_fast": 32,
+ "beta_slow": 1,
+ "papers": ["arXiv:2309.00071", "arXiv:2306.15595"]
 }</pre>
 
-    <p>The buyer's auditor can confirm which scaling method ran and at what factor. The receipt also pins the original_max_position_embeddings the trainer believed it was extending from, which catches the case where a buyer's spec accidentally targets a base model that was already long-context-trained upstream (in which case the multiplier compounds and the result is unstable).</p>
+ <p>The buyer's auditor can confirm which scaling method ran and at what factor. The receipt also pins the original_max_position_embeddings the trainer believed it was extending from, which catches the case where a buyer's spec accidentally targets a base model that was already long-context-trained upstream (in which case the multiplier compounds and the result is unstable).</p>
 
-    <h2>Choosing between methods</h2>
+ <h2>Choosing between methods</h2>
 
-    <p><strong>Use Linear PI</strong> only when the upstream model card explicitly demands it (some Llama variants ship with a <code>rope_scaling.type="linear"</code> field and the long-context behaviors only work in that mode).</p>
+ <p><strong>Use Linear PI</strong> only when the upstream model card explicitly demands it (some Llama variants ship with a <code>rope_scaling.type="linear"</code> field and the long-context behaviors only work in that mode).</p>
 
-    <p><strong>Use NTK-aware</strong> for cheap 2-4x extensions when the buyer's spec only needs 16k from an 8k base and there's no time for a long fine-tune. The mapping is closed-form; no extra hyperparameters.</p>
+ <p><strong>Use NTK-aware</strong> for cheap 2-4x extensions when the buyer's spec only needs 16k from an 8k base and there's no time for a long fine-tune. The mapping is closed-form; no extra hyperparameters.</p>
 
-    <p><strong>Use YaRN</strong> for anything 4x and above, and as the default whenever the buyer cares about preserving short-context behavior. YaRN's piecewise mapping leaves the high-frequency band untouched, which means attention-to-recent-tokens (what short prompts depend on) does not degrade.</p>
+ <p><strong>Use YaRN</strong> for anything 4x and above, and as the default whenever the buyer cares about preserving short-context behavior. YaRN's piecewise mapping leaves the high-frequency band untouched, which means attention-to-recent-tokens (what short prompts depend on) does not degrade.</p>
 
-    <h2>How much fine-tuning the extended model actually needs</h2>
+ <h2>How much fine-tuning the extended model actually needs</h2>
 
-    <p>This is the part the published papers underplay. A bare YaRN patch with no fine-tuning works in the sense that it produces coherent output at the new length, but the model has not seen long-context attention patterns and quality lags the trained-long alternative. The kolm default is 200-2000 steps of SFT on long-context data drawn from the buyer's captures (or, if the buyer has no long-context captures yet, the public BookCorpus / Books3 mixture at the new length) before declaring the artifact ready.</p>
+ <p>This is the part the published papers underplay. A bare YaRN patch with no fine-tuning works in the sense that it produces coherent output at the new length, but the model has not seen long-context attention patterns and quality lags the trained-long alternative. The kolm default is 200-2000 steps of SFT on long-context data drawn from the buyer's captures (or, if the buyer has no long-context captures yet, the public BookCorpus / Books3 mixture at the new length) before declaring the artifact ready.</p>
 
-    <p>The K-score evaluator runs the buyer's eval pack at the new length, which is the actual release gate. If the pack does not contain long-context examples, the K-score will be undefined on that dimension and the trainer warns. The fix is to ask the buyer to add 50-200 long examples to their pack before re-running.</p>
+ <p>The K-score evaluator runs the buyer's eval pack at the new length, which is the actual release gate. If the pack does not contain long-context examples, the K-score will be undefined on that dimension and the trainer warns. The fix is to ask the buyer to add 50-200 long examples to their pack before re-running.</p>
 
-    <h2>Edge cases worth naming</h2>
+ <h2>Edge cases worth naming</h2>
 
-    <p><strong>Compounding factors.</strong> If a base model already shipped with <code>rope_scaling={"factor": 8.0}</code> (some Llama 3.1 70B variants), and the buyer's spec asks for 4x, the trainer detects this and refuses to compound silently. The compounded factor would be 32x, which is outside the stable band for YaRN. The error message names the existing factor and asks the buyer to either explicitly request the compounded factor or pick a different base.</p>
+ <p><strong>Compounding factors.</strong> If a base model already shipped with <code>rope_scaling={"factor": 8.0}</code> (some Llama 3.1 70B variants), and the buyer's spec asks for 4x, the trainer detects this and refuses to compound silently. The compounded factor would be 32x, which is outside the stable band for YaRN. The error message names the existing factor and asks the buyer to either explicitly request the compounded factor or pick a different base.</p>
 
-    <p><strong>FlashAttention is mandatory.</strong> Long-context training without FA2 or FA3 is memory-quadratic and unusable past 16k. The trainer's <code>_attn_impl_for()</code> picks FA3 on Hopper and FA2 on Ampere automatically; if neither is available the trainer refuses to extend beyond 16k and recommends a different SKU.</p>
+ <p><strong>FlashAttention is mandatory.</strong> Long-context training without FA2 or FA3 is memory-quadratic and unusable past 16k. The trainer's <code>_attn_impl_for()</code> picks FA3 on Hopper and FA2 on Ampere automatically; if neither is available the trainer refuses to extend beyond 16k and recommends a different SKU.</p>
 
-    <p><strong>Quantization interacts.</strong> int4 weight quantization (AWQ, GPTQ) is fine at long context; FP8 KV cache doubles the effective context per byte and stacks cleanly with YaRN. The combined upper bound on a single H100 with a 7B model is ~128k context at int4 + FP8 KV.</p>
+ <p><strong>Quantization interacts.</strong> int4 weight quantization (AWQ, GPTQ) is fine at long context; FP8 KV cache doubles the effective context per byte and stacks cleanly with YaRN. The combined upper bound on a single H100 with a 7B model is ~128k context at int4 + FP8 KV.</p>
 
-    <h2>Where this fits in the kolm compile loop</h2>
+ <h2>Where this fits in the kolm compile loop</h2>
 
-    <p>Long-context extension is a pre-SFT step. The spec names the target context length; the trainer picks the method (defaults to YaRN), applies the patch before instantiating the data collator, and the K-score gate at 0.85 covers the result. The receipt's <code>long_context</code> block lets a buyer who needs to reproduce the artifact match the exact extension parameters; the verifier ignores the block for signature checks but it's covered by the canonical-JSON manifest hash.</p>
+ <p>Long-context extension is a pre-SFT step. The spec names the target context length; the trainer picks the method (defaults to YaRN), applies the patch before instantiating the data collator, and the K-score gate at 0.85 covers the result. The receipt's <code>long_context</code> block lets a buyer who needs to reproduce the artifact match the exact extension parameters; the verifier ignores the block for signature checks but it's covered by the canonical-JSON manifest hash.</p>
 
-    <div class="citations">
-      <p><strong>Citations</strong></p>
-      <p>Peng, B. et al. <em>YaRN: Efficient Context Window Extension of Large Language Models</em>. arXiv:2309.00071, 2023.</p>
-      <p>Chen, S. et al. <em>Extending Context Window of Large Language Models via Positional Interpolation</em>. arXiv:2306.15595, 2023.</p>
-      <p>Liu, H. et al. <em>Ring Attention with Blockwise Transformers for Near-Infinite Context</em>. arXiv:2310.01889, 2023.</p>
-    </div>
+ <div class="citations">
+ <p><strong>Citations</strong></p>
+ <p>Peng, B. et al. <em>YaRN: Efficient Context Window Extension of Large Language Models</em>. arXiv:2309.00071, 2023.</p>
+ <p>Chen, S. et al. <em>Extending Context Window of Large Language Models via Positional Interpolation</em>. arXiv:2306.15595, 2023.</p>
+ <p>Liu, H. et al. <em>Ring Attention with Blockwise Transformers for Near-Infinite Context</em>. arXiv:2310.01889, 2023.</p>
+ </div>
 
-    <div class="meta-line" style="margin-top:36px">
-      <a class="nb" href="/research">&larr; Back to research</a>
-      <span>&middot;</span>
-      <a class="nb" href="/research#long-context">Frontier reference &middot; Long-context</a>
-      <span>&middot;</span>
-      <a class="nb" href="/spec">RS-1 spec</a>
-    </div>
-  </div>
+ <div class="meta-line" style="margin-top:36px">
+ <a class="nb" href="/research">&larr; Back to research</a>
+ <span>&middot;</span>
+ <a class="nb" href="/research#long-context">Frontier reference &middot; Long-context</a>
+ <span>&middot;</span>
+ <a class="nb" href="/spec">RS-1 spec</a>
+ </div>
+ </div>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 <script src="/nav.js"></script>
 </body>

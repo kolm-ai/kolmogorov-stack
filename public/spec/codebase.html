@@ -4,89 +4,91 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm codebase: the production architecture in one sitting | kolm</title>
+<title>kolm codebase: the production architecture in one · kolm.ai</title>
 <meta name="description" content="The shipped kolm runtime in one page. Modules, trust boundaries, persistence, compile pipeline, CLI surface. Apache-2.0, all source on GitHub.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/spec/codebase">
-<meta property="og:title" content="kolm codebase architecture">
-<meta property="og:description" content="The shipped kolm runtime in one page. Modules, trust boundaries, persistence, compile pipeline, CLI.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="kolm codebase: the production architecture in one · kolm.ai">
+<meta property="og:description" content="The shipped kolm runtime in one page. Modules, trust boundaries, persistence, compile pipeline, CLI surface. Apache-2.0, all source on GitHub.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/spec/codebase">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="kolm codebase architecture" />
-<meta name="twitter:description" content="The shipped kolm runtime in one page. Modules, trust boundaries, persistence, compile pipeline, CLI." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm codebase: the production architecture in one · kolm.ai">
+<meta name="twitter:description" content="The shipped kolm runtime in one page. Modules, trust boundaries, persistence, compile pipeline, CLI surface. Apache-2.0, all source on GitHub.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "kolm codebase: the production architecture in one sitting",
-  "description": "Public-facing technical overview of the shipped kolm runtime. Modules, trust boundaries, persistence model, compile pipeline, CLI surface.",
-  "url": "https://kolm.ai/spec/codebase",
-  "author": {"@type": "Organization", "name": "Kolmogorov"},
-  "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
-  "datePublished": "2026-05-15",
-  "license": "https://www.apache.org/licenses/LICENSE-2.0"
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "kolm codebase: the production architecture in one sitting",
+ "description": "Public-facing technical overview of the shipped kolm runtime. Modules, trust boundaries, persistence model, compile pipeline, CLI surface.",
+ "url": "https://kolm.ai/spec/codebase",
+ "author": {"@type": "Organization", "name": "Kolmogorov"},
+ "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-15",
+ "license": "https://www.apache.org/licenses/LICENSE-2.0"
 }
 </script>
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
-  body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
-  .wrap{max-width:720px;margin:0 auto;padding:0 24px}
-  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
-  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.site nav a{color:inherit;text-decoration:none}
-  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  .paper{padding:80px 0 64px}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  h1{font-size:34px;line-height:1.15;font-weight:500;letter-spacing:-0.018em;margin:0 0 8px;max-width:680px}
-  .subtitle{font-size:16.5px;color:var(--ink-mute);margin:0 0 14px;font-style:italic;line-height:1.55}
-  .authors{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 6px;letter-spacing:0.04em}
-  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:6px 0 0;letter-spacing:0.04em}
-  .abstract{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:rgba(16,185,129,0.04);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
-  .abstract b{color:var(--ink);font-weight:500}
-  h2{font-size:22px;font-weight:500;letter-spacing:-0.012em;margin:48px 0 12px;color:var(--ink)}
-  h3{font-size:17px;font-weight:500;margin:24px 0 8px;color:var(--ink)}
-  p{color:var(--ink-mute);margin:0 0 16px}
-  p b{color:var(--ink);font-weight:500}
-  ul,ol{color:var(--ink-mute);margin:0 0 16px;padding-left:24px}
-  li{margin:0 0 6px}
-  li b{color:var(--ink);font-weight:500}
-  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
-  pre code{background:transparent;border:0;padding:0}
-  table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:14px}
-  th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-  th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);font-weight:500}
-  td code{font-size:12.5px}
-  .tbl-wrap{border:1px solid var(--line);border-radius:8px;overflow-x:auto;margin:0 0 16px}
-  .actions{display:flex;gap:12px;margin:36px 0 0;flex-wrap:wrap}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
-  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .btn:hover{transform:translateY(-1px)}
-  footer.site{padding:32px 0;border-top:1px solid var(--line);color:var(--ink-faint);font-size:13px;margin-top:64px}
-  footer.site .wrap{max-width:1180px}
-  footer.site a{color:var(--ink-mute);text-decoration:none}
-  footer.site a:hover{color:var(--ink)}
-  .footer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin-bottom:24px}
-  @media(max-width:760px){.footer-grid{grid-template-columns:repeat(2,1fr);gap:18px}}
-  .footer-grid h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);font-weight:500;margin:0 0 10px}
-  .footer-grid a{display:block;padding:3px 0;font-size:13px}
-  .footer-tag{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px}
-  .footer-tag span{color:var(--ink-faint)}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:720px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .paper{padding:80px 0 64px}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:34px;line-height:1.15;font-weight:500;letter-spacing:-0.018em;margin:0 0 8px;max-width:680px}
+ .subtitle{font-size:16.5px;color:var(--ink-mute);margin:0 0 14px;font-style:italic;line-height:1.55}
+ .authors{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 6px;letter-spacing:0.04em}
+ .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:6px 0 0;letter-spacing:0.04em}
+ .abstract{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:rgba(16,185,129,0.04);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
+ .abstract b{color:var(--ink);font-weight:500}
+ h2{font-size:22px;font-weight:500;letter-spacing:-0.012em;margin:48px 0 12px;color:var(--ink)}
+ h3{font-size:17px;font-weight:500;margin:24px 0 8px;color:var(--ink)}
+ p{color:var(--ink-mute);margin:0 0 16px}
+ p b{color:var(--ink);font-weight:500}
+ ul,ol{color:var(--ink-mute);margin:0 0 16px;padding-left:24px}
+ li{margin:0 0 6px}
+ li b{color:var(--ink);font-weight:500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
+ pre code{background:transparent;border:0;padding:0}
+ table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:14px}
+ th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);font-weight:500}
+ td code{font-size:12.5px}
+ .tbl-wrap{border:1px solid var(--line);border-radius:8px;overflow-x:auto;margin:0 0 16px}
+ .actions{display:flex;gap:12px;margin:36px 0 0;flex-wrap:wrap}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+ .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+ .btn:hover{transform:translateY(-1px)}
+ footer.site{padding:32px 0;border-top:1px solid var(--line);color:var(--ink-faint);font-size:13px;margin-top:64px}
+ footer.site .wrap{max-width:1180px}
+ footer.site a{color:var(--ink-mute);text-decoration:none}
+ footer.site a:hover{color:var(--ink)}
+ .footer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin-bottom:24px}
+ @media(max-width:760px){.footer-grid{grid-template-columns:repeat(2,1fr);gap:18px}}
+ .footer-grid h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);font-weight:500;margin:0 0 10px}
+ .footer-grid a{display:block;padding:3px 0;font-size:13px}
+ .footer-tag{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px}
+ .footer-tag span{color:var(--ink-faint)}
 </style>
 <link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/quickstart">quickstart</a><a href="/spec">spec</a><a href="/research">research</a><a href="/docs">docs</a></nav></div></header>
-<main>
+<main id="main">
 <section class="paper">
 <div class="wrap">
 
@@ -127,13 +129,13 @@
 <p>A typical inference request crosses these boundaries:</p>
 
 <pre>client (CLI / browser / curl)
-  --> Vercel edge (TLS, HSTS, CSP, X-Forwarded-* headers)
-  --> Railway container (Node 20 process)
-  --> server.js (Express, trust proxy=2, body-parser, route mount)
-  --> src/router.js (auth middleware: parse API key, resolve tenant, rate-limit)
-  --> route handler (compile, run, publish, pull, ...)
-  --> src/store.js (atomic JSON write) | src/artifact.js (zip+hash) | src/receipt.js (HMAC)
-  --> response (JSON or octet-stream)</pre>
+ --> Vercel edge (TLS, HSTS, CSP, X-Forwarded-* headers)
+ --> Railway container (Node 20 process)
+ --> server.js (Express, trust proxy=2, body-parser, route mount)
+ --> src/router.js (auth middleware: parse API key, resolve tenant, rate-limit)
+ --> route handler (compile, run, publish, pull, ...)
+ --> src/store.js (atomic JSON write) | src/artifact.js (zip+hash) | src/receipt.js (HMAC)
+ --> response (JSON or octet-stream)</pre>
 
 <p>The header chain is honored exactly twice: the trust-proxy hop count is <code>2</code> (Vercel + Railway), and <code>X-Forwarded-Host</code> is parsed for URL emission so publish responses show <code>kolm.ai</code>, not the upstream Railway hostname. No request reaches a handler without a tenant resolution; admin endpoints require a separate <code>x-admin-token</code> header.</p>
 
@@ -146,7 +148,7 @@
 <tbody>
 <tr><td><b>Public</b></td><td><code>GET /healthz</code>, <code>GET /v1/spec</code>, <code>GET /favicon.svg</code></td><td>None. No tenant context.</td></tr>
 <tr><td><b>Public + soft-auth</b></td><td><code>GET /v1/hub</code>, <code>GET /v1/hub/:owner/:name</code></td><td>Optional API key. When present, <code>req.tenant</code> populates and the response gains owner-only fields (private artifact visibility, etc.). When absent, the same URL returns the anon-safe shape.</td></tr>
-<tr><td><b>Tenant-scoped</b></td><td><code>POST /v1/compile</code>, <code>POST /v1/run/:id</code>, <code>POST /v1/hub/publish</code></td><td>API key required. All reads and writes scoped to <code>req.tenant.id</code>.</td></tr>
+<tr><td><b>Tenant-scoped</b></td><td><code>POST /v1/compile</code>, <code>POST /v1/run</code>, <code>POST /v1/hub/publish</code></td><td>API key required. All reads and writes scoped to <code>req.tenant.id</code>.</td></tr>
 <tr><td><b>Admin</b></td><td><code>POST /v1/admin/*</code></td><td><code>x-admin-token</code> header. Separate secret; no overlap with tenant API keys.</td></tr>
 </tbody>
 </table>
@@ -239,7 +241,7 @@
 <h2>9. Receipts and the audit trail</h2>
 <p>Every compile and every run emits a receipt. Compile receipts live inside the <code>.kolm</code> (<code>receipt.json</code> + the 4-ring HMAC chain in <code>artifact.kolm/credential.json</code>). Run receipts append to <code>data/invocations.json</code> server-side and are returned in the JSON body to the CLI. Both kinds share the same HMAC-over-canonical-JSON shape defined in RS-1 &sect;3.</p>
 
-<p>The <code>X-Audit-Chain</code> response header on every <code>/v1/run/*</code> response gives a 12-byte prefix of the receipt HMAC so a buyer can grep their proxy logs for forged traffic later. The receipt secret is per-tenant; an issuer or any party with the shared secret can re-verify the chain offline.</p>
+<p>The <code>X-Audit-Chain</code> response header on every <code>POST /v1/run</code> response gives a 12-byte prefix of the receipt HMAC so a buyer can grep their proxy logs for forged traffic later. The receipt secret is per-tenant; an issuer or any party with the shared secret can re-verify the chain offline.</p>
 
 <h2>10. What this codebase is not</h2>
 <p>To be useful, this page has to be transparent about what we do not do today:</p>
@@ -275,55 +277,55 @@
 </section>
 </main>
 <footer class="site">
-  <div class="wrap">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/spec/codebase">Codebase</a>
-        <a href="/openapi.json">OpenAPI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai . Made with .kolm . Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/spec/codebase">Codebase</a>
+ <a href="/openapi.json">OpenAPI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai . Made with .kolm . Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

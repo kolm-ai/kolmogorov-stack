@@ -6,18 +6,18 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Optimizer · kolm.ai</title>
-<meta name="description" content="kolm.ai reads your local lake and surfaces 11 opportunity types ranked by expected dollar savings. Cache, cheaper-model, local-replacement, log-triage, routing-policy, and six more.">
+<meta name="description" content="kolm.ai reads your local lake and surfaces 11 opportunity types ranked by expected dollar savings. Cache, cheaper-model, local-replacement, log-triage,...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Optimizer &middot; kolm.ai">
-<meta property="og:description" content="kolm.ai reads your local lake and surfaces 11 opportunity types ranked by expected dollar savings. Cache, cheaper-model, local-replacement, log-triage, routing-policy, and six more.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Optimizer · kolm.ai">
+<meta property="og:description" content="kolm.ai reads your local lake and surfaces 11 opportunity types ranked by expected dollar savings. Cache, cheaper-model, local-replacement, log-triage,...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/optimizer">
-<meta property="og:image" content="https://kolm.ai/og/docs-optimizer.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Optimizer &middot; kolm.ai">
-<meta name="twitter:description" content="kolm.ai reads your local lake and surfaces 11 opportunity types ranked by expected dollar savings. Cache, cheaper-model, local-replacement, log-triage, routing-policy, and six more.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-optimizer.svg">
+<meta name="twitter:title" content="Optimizer · kolm.ai">
+<meta name="twitter:description" content="kolm.ai reads your local lake and surfaces 11 opportunity types ranked by expected dollar savings. Cache, cheaper-model, local-replacement, log-triage,...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/optimizer">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Optimizer","description":"kolm.ai reads your local lake and surfaces 11 opportunity types ranked by expected dollar savings. Cache, cheaper-model, local-replacement, log-triage, routing-policy, and six more.","url":"https://kolm.ai/docs/optimizer","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -79,9 +80,9 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 # scanning 18,442 events ... 11 detectors ... 7 opportunities found
 # total addressable savings: $312.40 / month
 #
-# 1. [local_replacement]  classifier on gpt-4o-mini, 4,200 calls/day  -> $186/mo
-# 2. [cache]              81% duplicate prompts in /summarize        -> $58/mo
-# 3. [cheaper_model]      gpt-4o on simple_translate                 -> $41/mo
+# 1. [local_replacement] classifier on gpt-4o-mini, 4,200 calls/day -> $186/mo
+# 2. [cache] 81% duplicate prompts in /summarize -> $58/mo
+# 3. [cheaper_model] gpt-4o on simple_translate -> $41/mo
 # ...</code></pre>
 
 <h2 id="types">The 11 opportunity types</h2>
@@ -107,15 +108,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>For piping into your own dashboard, ticket system, or CI gate.</p>
 <pre><code>kolm optimize --window 30d --json | jq '.[0]'
 # {
-#   "type": "local_replacement",
-#   "namespace": "ticket-classifier",
-#   "evidence_event_count": 12640,
-#   "addressable_spend_usd": 186.42,
-#   "confidence": 0.91,
-#   "remediation": {
-#     "command": "kolm distill ticket-classifier --kind classifier",
-#     "estimated_run_minutes": 22
-#   }
+# "type": "local_replacement",
+# "namespace": "ticket-classifier",
+# "evidence_event_count": 12640,
+# "addressable_spend_usd": 186.42,
+# "confidence": 0.91,
+# "remediation": {
+# "command": "kolm distill ticket-classifier --kind classifier",
+# "estimated_run_minutes": 22
+# }
 # }</code></pre>
 
 <h2 id="schedule">Schedule</h2>
@@ -125,26 +126,26 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="thresholds">Thresholds</h2>
 <p>Tune the per-type minimums in <code>~/.kolm/config.json</code> so you do not get noise on a small lake.</p>
 <pre><code>{
-  "optimizer": {
-    "cache_min_repeats": 5,
-    "local_replacement_min_events": 500,
-    "dataset_ready_min_rows": 1000
-  }
+ "optimizer": {
+ "cache_min_repeats": 5,
+ "local_replacement_min_events": 500,
+ "dataset_ready_min_rows": 1000
+ }
 }</code></pre>
 
 <h2 id="next">Next steps</h2>
 <p>The most common follow-on is <a href="/docs/distillation">distillation</a> for <code>local_replacement</code>, or <a href="/docs/runtime">runtime</a> to set up routing for <code>routing_policy</code>. Start from <a href="/docs/quickstart">/docs/quickstart</a> if your lake is still empty.</p>
 
 <div class="related">
-  <a href="/docs/lake"><b>Lake &rarr;</b><span>The 35-field event row the optimizer scans.</span></a>
-  <a href="/docs/distillation"><b>Distillation &rarr;</b><span>Act on local_replacement findings.</span></a>
-  <a href="/docs/datasets"><b>Datasets &rarr;</b><span>Act on dataset_ready findings.</span></a>
+ <a href="/docs/lake"><b>Lake &rarr;</b><span>The 35-field event row the optimizer scans.</span></a>
+ <a href="/docs/distillation"><b>Distillation &rarr;</b><span>Act on local_replacement findings.</span></a>
+ <a href="/docs/datasets"><b>Datasets &rarr;</b><span>Act on dataset_ready findings.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

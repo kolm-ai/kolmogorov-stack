@@ -9,7 +9,7 @@ A small Rust client for the kolm.ai HTTP surface. Covers whoami, account, auth/s
 kolm = "0.2"
 ```
 
-The crate depends only on `ureq`, `serde`, `serde_json`, and `thiserror`. No async runtime needed.
+The crate depends on `ureq` (with `native-tls`), `serde`, `serde_json`, and `thiserror`. No async runtime needed. `native-tls` is used in place of rustls so the build works on stock Windows toolchains without bundling `ring` / `mingw-gcc`; on Linux it uses OpenSSL and on macOS it uses Secure Transport.
 
 ## Hello, kolm
 

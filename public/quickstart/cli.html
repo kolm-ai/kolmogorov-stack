@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>CLI quickstart: kolm.ai &middot; the AI compiler from the terminal · kolm.ai</title>
-<meta name="description" content="Five terminal commands. From `kolm signup` to a signed .kolm artifact serving offline. No editor switch, no web UI, no SaaS handoff. kolm.ai is the AI compiler.">
+<title>CLI quickstart: the AI compiler from the terminal · kolm.ai</title>
+<meta name="description" content="Five terminal commands. From `kolm signup` to a signed .kolm artifact serving offline. No editor switch, no web UI, no SaaS handoff. kolm.ai is">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="CLI quickstart: kolm.ai &middot; the AI compiler from the terminal">
-<meta property="og:description" content="Five terminal commands. From signup to a signed .kolm artifact serving offline.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="CLI quickstart: the AI compiler from the terminal · kolm.ai">
+<meta property="og:description" content="Five terminal commands. From `kolm signup` to a signed .kolm artifact serving offline. No editor switch, no web UI, no SaaS handoff. kolm.ai is">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/quickstart/cli">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CLI quickstart: kolm.ai &middot; the AI compiler from the terminal">
-<meta name="twitter:description" content="Five terminal commands. Signed .kolm artifact serving offline.">
+<meta name="twitter:title" content="CLI quickstart: the AI compiler from the terminal · kolm.ai">
+<meta name="twitter:description" content="Five terminal commands. From `kolm signup` to a signed .kolm artifact serving offline. No editor switch, no web UI, no SaaS handoff. kolm.ai is">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/quickstart/cli">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -61,97 +61,100 @@ pre.terminal .mute{color:var(--ink-faint)}
 footer{padding:36px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <!-- kolm-nav-start --><nav><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav><!-- kolm-nav-end -->
+ <a class="logo" href="/">kolm.ai</a>
+ <!-- kolm-nav-start --><nav><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav><!-- kolm-nav-end -->
 </div></header>
 
 <main id="main">
 
 <section class="hero"><div class="wrap">
-  <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/quickstart">quickstart</a> / cli</div>
-  <h1>The CLI quickstart for kolm.ai &middot; the AI compiler</h1>
-  <p class="lede">Five commands. Signup, login, capture, compile, verify. No editor switch, no web UI, no SaaS handoff. Every command exits with a code your shell can branch on, every artifact carries a signed receipt your auditor can replay, and the whole flow runs on your hardware.</p>
-  <p class="stamp">target time: 90 seconds &middot; prerequisites: node 18+ &middot; works offline after first login</p>
+ <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/quickstart">quickstart</a> / cli</div>
+ <h1>The CLI quickstart for kolm.ai &middot; the AI compiler</h1>
+ <p class="lede">Five commands. Signup, login, capture, compile, verify. No editor switch, no web UI, no SaaS handoff. Every command exits with a code your shell can branch on, every artifact carries a signed receipt your auditor can replay, and the whole flow runs on your hardware.</p>
+ <p class="stamp">target time: 90 seconds &middot; prerequisites: node 18+ &middot; works offline after first login</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Install</h2>
-  <p class="lede">One npm install via the scoped tarball. The CLI ships from the same package the device shell uses, so the SDK and the CLI agree on every wire format.</p>
-  <pre class="terminal"><b>$</b> npm i -g @kolm/cli
+ <h2>Install</h2>
+ <p class="lede">One npm install via the scoped tarball. The CLI ships from the same package the device shell uses, so the SDK and the CLI agree on every wire format.</p>
+ <pre class="terminal"><b>$</b> npm i -g @kolm/cli
 <b>$</b> kolm version
 <span class="mute">kolm 7.2.4 (node 20.10.0, darwin-arm64)</span></pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Five-step flow</h2>
+ <h2>Five-step flow</h2>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 1</span><span class="step-name">Sign up</span><span class="step-cli">kolm signup</span></div>
-    <p>Provisions an anonymous tenant with a free quota. Stashes the key in <code>~/.kolm/config.json</code> at 0600. With <code>--email</code> you also get a paid plan upgrade URL.</p>
-    <pre class="terminal"><b>$</b> kolm signup --email you@example.com
-<span class="mute">tenant:  ten_yc8e9f2a   plan: free   quota: 10000   base: https://kolm.ai
-key:     ks_test_abc...4321</span></pre>
-  </div>
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 1</span><span class="step-name">Sign up</span><span class="step-cli">kolm signup</span></div>
+ <p>Provisions a tenant with a free quota and stores the raw API key in <code>~/.kolm/config.json</code> at 0600. With <code>--email</code> you also get a paid plan upgrade URL.</p>
+ <pre class="terminal"><b>$</b> kolm signup --email you@example.com
+<span class="mute">tenant: ten_yc8e9f2a plan: free quota: 10000 base: https://kolm.ai
+key: ks_test_abc...4321</span></pre>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 2</span><span class="step-name">Verify identity &amp; quota</span><span class="step-cli">kolm whoami --json</span></div>
-    <p>Anytime you want to know which tenant the local CLI is acting as, ask. The <code>--json</code> envelope is the stable script-parseable shape: <code>{logged_in, base, cli_version, key_fingerprint, tenant{id,plan,quota,seats,email}, _raw}</code>.</p>
-    <pre class="terminal"><b>$</b> kolm whoami --json | jq .tenant
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 2</span><span class="step-name">Verify identity &amp; quota</span><span class="step-cli">kolm whoami --json</span></div>
+ <p>Anytime you want to know which tenant the local CLI is acting as, ask. The <code>--json</code> envelope is the stable script-parseable shape: <code>{logged_in, base, cli_version, key_fingerprint, tenant{id,plan,quota,seats,email}, _raw}</code>.</p>
+ <pre class="terminal"><b>$</b> kolm whoami --json | jq .tenant
 <span class="mute">{
-  "id": "ten_yc8e9f2a",
-  "plan": "free",
-  "quota": 10000,
-  "seats": 1,
-  "email": "you@example.com"
+ "id": "ten_yc8e9f2a",
+ "plan": "free",
+ "quota": 10000,
+ "seats": 1,
+ "email": "you@example.com"
 }</span></pre>
-  </div>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 3</span><span class="step-name">Capture from your real traffic</span><span class="step-cli">kolm tail captures</span></div>
-    <p>Point any existing OpenAI-compatible client at the kolm proxy base. Every prompt+response pair lands in your tenant&apos;s durable capture store and streams live to your terminal.</p>
-    <pre class="terminal"><b>$</b> export OPENAI_BASE_URL=https://kolm.ai/v1/bridges/openai
-<b>$</b> export OPENAI_API_KEY=$(kolm key fingerprint --raw)
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 3</span><span class="step-name">Capture from your real traffic</span><span class="step-cli">kolm tail captures</span></div>
+ <p>Point an OpenAI-compatible client at the hosted capture proxy. Use the kolm key for proxy auth, and configure your SDK to send your real OpenAI key in <code>x-upstream-api-key</code>.</p>
+ <pre class="terminal"><b>$</b> export KOLM_API_KEY=$(jq -r .api_key ~/.kolm/config.json)
+<b>$</b> export OPENAI_BASE_URL=https://kolm.ai/v1/capture/openai
+<b>$</b> export OPENAI_API_KEY=$KOLM_API_KEY
+<b>$</b> # SDK default header: x-upstream-api-key: $OPENAI_UPSTREAM_API_KEY
 <b>$</b> kolm tail captures --namespace summarizer
-<span class="mute">[live] cap_018a3e... summarizer    qwen-3.5-27b   234ms  &quot;Summarize this PR:...&quot; -&gt; &quot;This PR refactors...&quot;</span></pre>
-  </div>
+<span class="mute">[live] cap_018a3e... summarizer qwen-3.5-27b 234ms &quot;Summarize this PR:...&quot; -&gt; &quot;This PR refactors...&quot;</span></pre>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 4</span><span class="step-name">Compile from captures</span><span class="step-cli">kolm distill --from-captures</span></div>
-    <p>Once a namespace crosses ~1,000 captured pairs (kolm tells you), compile them into a <code>.kolm</code> artifact. The compiler enforces the receipt chain (<code>spec &rarr; seeds &rarr; split &rarr; train &rarr; recipes &rarr; evals &rarr; export &rarr; signatures &rarr; rekor</code>) and refuses to ship if any link is missing.</p>
-    <pre class="terminal"><b>$</b> kolm distill --from-captures summarizer --tier=3090
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 4</span><span class="step-name">Compile from captures</span><span class="step-cli">kolm distill --from-captures</span></div>
+ <p>Once a namespace crosses ~1,000 captured pairs (kolm tells you), compile them into a <code>.kolm</code> artifact. The compiler enforces the receipt chain (<code>spec &rarr; seeds &rarr; split &rarr; train &rarr; recipes &rarr; evals &rarr; export &rarr; signatures &rarr; rekor</code>) and refuses to ship if any link is missing.</p>
+ <pre class="terminal"><b>$</b> kolm distill --from-captures summarizer --tier=3090
 <span class="mute">job_w8e2 distill running. 64 GPU-min budget. follow with: kolm watch job_w8e2</span>
 <b>$</b> kolm watch job_w8e2
-<span class="mute">[done] artifact_summarizer_v3.kolm  k_score=0.91  size=148MB  receipts:9/9 signed</span></pre>
-  </div>
+<span class="mute">[done] artifact_summarizer_v3.kolm k_score=0.91 size=148MB receipts:9/9 signed</span></pre>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 5</span><span class="step-name">Verify and run</span><span class="step-cli">kolm verify &amp;&amp; kolm run</span></div>
-    <p>Verify replays the receipt chain offline against the artifact bytes &mdash; never trust an artifact you cannot verify. Run dispatches the artifact to the right runtime (JS, WASM, native, GGUF, or ONNX) based on what is inside.</p>
-    <pre class="terminal"><b>$</b> kolm verify artifact_summarizer_v3.kolm
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 5</span><span class="step-name">Verify and run</span><span class="step-cli">kolm verify &amp;&amp; kolm run</span></div>
+ <p>Verify replays the receipt chain offline against the artifact bytes &mdash; never trust an artifact you cannot verify. Run dispatches the artifact to the right runtime (JS, WASM, native, GGUF, or ONNX) based on what is inside.</p>
+ <pre class="terminal"><b>$</b> kolm verify artifact_summarizer_v3.kolm
 <span class="mute">verify OK. 9/9 receipts signed, 0 drift breach, k_score 0.91 within tolerance.</span>
 <b>$</b> kolm run artifact_summarizer_v3.kolm --prompt &quot;Summarize this PR:...&quot;
 <span class="mute">This PR refactors the auth middleware to fail-closed on token expiry...</span></pre>
-  </div>
+ </div>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>The other quickstarts</h2>
-  <p class="lede">Same five-step value loop, different surface. Pick the one that matches how you ship.</p>
-  <div class="related">
-    <a href="/quickstart/api"><b>HTTP API quickstart &rarr;</b><span>Same flow against the kolm.ai REST surface. Five curl commands.</span></a>
-    <a href="/quickstart/sdk"><b>SDK quickstart &rarr;</b><span>Native TypeScript and Python bindings. Drop-in replacement for the OpenAI SDK.</span></a>
-    <a href="/quickstart/embed"><b>Embed quickstart &rarr;</b><span>Ship a signed .kolm inside another product. Browser, Node, edge.</span></a>
-  </div>
+ <h2>The other quickstarts</h2>
+ <p class="lede">Same five-step value loop, different surface. Pick the one that matches how you ship.</p>
+ <div class="related">
+ <a href="/quickstart/api"><b>HTTP API quickstart &rarr;</b><span>Same flow against the kolm.ai REST surface. Five curl commands.</span></a>
+ <a href="/quickstart/sdk"><b>SDK quickstart &rarr;</b><span>Native TypeScript and Python bindings. Drop-in replacement for the OpenAI SDK.</span></a>
+ <a href="/quickstart/embed"><b>Embed quickstart &rarr;</b><span>Ship a signed .kolm inside another product. Browser, Node, edge.</span></a>
+ </div>
 </div></section>
 
 </main>
 
 <footer><div class="wrap">
-  <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
 </div></footer>
 </body>
 </html>

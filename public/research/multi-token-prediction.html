@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Multi-token-per-step prediction: TST, patch-level training, and the LoRA-distill equivalent &middot; kolm research</title>
-<meta name="description" content="Token-superposition (Nous, arXiv 2605.06546) and patch-level training (Shao et al, arXiv 2407.12665, ICLR 2025) speed pre-training by predicting multiple tokens per step. Neither directly applies to LoRA distill, but their inference-side dual is speculative decoding, which kolm ships today.">
+<title>Multi-token-per-step prediction: TST, patch-level · kolm.ai</title>
+<meta name="description" content="Token-superposition (Nous, arXiv 2605.06546) and patch-level training (Shao et al, arXiv 2407.12665, ICLR 2025) speed pre-training by predicting multiple...">
 <meta name="keywords" content="speculative decoding, token superposition, patch-level training, multi-token prediction, vLLM, draft model, LoRA distill, prefix caching, FP8 KV cache">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -14,12 +14,12 @@
 <meta name="author" content="kolm">
 <meta name="robots" content="index,follow,max-snippet:-1">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="Multi-token-per-step prediction: TST, patch-level training, and the LoRA-distill equivalent">
-<meta property="og:description" content="Two recent pre-training speedups, their inference-side dual, and what kolm ships in production.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Multi-token-per-step prediction: TST, patch-level · kolm.ai">
+<meta property="og:description" content="Token-superposition (Nous, arXiv 2605.06546) and patch-level training (Shao et al, arXiv 2407.12665, ICLR 2025) speed pre-training by predicting multiple...">
+<meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Multi-token-per-step prediction at kolm">
-<meta name="twitter:description" content="Two recent pre-training speedups, their inference-side dual, and what kolm ships in production.">
+<meta name="twitter:title" content="Multi-token-per-step prediction: TST, patch-level · kolm.ai">
+<meta name="twitter:description" content="Token-superposition (Nous, arXiv 2605.06546) and patch-level training (Shao et al, arXiv 2407.12665, ICLR 2025) speed pre-training by predicting multiple...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/multi-token-prediction">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,326 +27,327 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Multi-token-per-step prediction: TST, patch-level training, and the LoRA-distill equivalent",
-      "description": "Token-superposition and patch-level training are pre-training speedups. Speculative decoding is the inference-side dual. kolm ships the dual in production.",
-      "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
-      "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
-      "datePublished": "2026-05-14",
-      "dateModified": "2026-05-14",
-      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/multi-token-prediction" },
-      "image": "https://kolm.ai/og-card.svg",
-      "keywords": "multi-token prediction, speculative decoding, token superposition, patch-level training, vLLM",
-      "articleSection": "Frontier",
-      "wordCount": 2400
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "Multi-token prediction", "item": "https://kolm.ai/research/multi-token-prediction"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Multi-token-per-step prediction: TST, patch-level training, and the LoRA-distill equivalent",
+ "description": "Token-superposition and patch-level training are pre-training speedups. Speculative decoding is the inference-side dual. kolm ships the dual in production.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/multi-token-prediction" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "multi-token prediction, speculative decoding, token superposition, patch-level training, vLLM",
+ "articleSection": "Frontier",
+ "wordCount": 2400
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Multi-token prediction", "item": "https://kolm.ai/research/multi-token-prediction"}
+ ]
+ }
+ ]
 }
 </script>
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
-  a{color:inherit;text-decoration:none}
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px}
-  .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
-  header.site .brand span{font-weight:500;font-size:16px}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
-  header.site nav a:hover{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
-  header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
-  @media(max-width:720px){header.site nav{display:none}}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
 
-  section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
-  section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
-  section.hero .wrap{position:relative}
-  .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
-  .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
-  h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
-  h1 .tone{color:#10b981}
-  p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
-  p.lede b{color:var(--ink);font-weight:500}
-  .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .meta b{color:var(--ink-mute);font-weight:500}
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
 
-  article{padding:36px 0 96px}
-  article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
-  article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
-  article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
-  article p b{color:var(--ink);font-weight:500}
-  article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
-  article a.cite{color:var(--ink);text-decoration:underline;text-decoration-color:rgba(16,185,129,0.4);text-underline-offset:3px}
-  article a.cite:hover{text-decoration-color:#10b981}
-  article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
-  article blockquote p{color:var(--ink);margin:0;font-weight:500}
-  article ul{padding-left:0;list-style:none;margin:16px 0 24px}
-  article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
-  article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
-  article ul li b{color:var(--ink);font-weight:500}
-  article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
-  article pre .com{color:var(--ink-faint)}
-  article pre .arg{color:#10b981}
-  article pre .kw{color:#b0bbff}
-  article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
-  article th,article td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
-  article th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;background:var(--bg-elev)}
-  article td b{color:var(--ink);font-weight:500}
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article a.cite{color:var(--ink);text-decoration:underline;text-decoration-color:rgba(16,185,129,0.4);text-underline-offset:3px}
+ article a.cite:hover{text-decoration-color:#10b981}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
+ article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ article th,article td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ article th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;background:var(--bg-elev)}
+ article td b{color:var(--ink);font-weight:500}
 
-  .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
-  .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
-  .toc ol{margin:0;padding-left:20px}
-  .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
-  .toc li a{color:var(--ink-mute)}
-  .toc li a:hover{color:#10b981}
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
 
-  .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
-  @media(max-width:720px){.signpost{grid-template-columns:1fr}}
-  .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
-  .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
-  .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
-  .signpost a .v .arrow{color:#10b981;margin-left:6px}
-  .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
 
-  footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
-  footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <span class="pill"><span class="dot"></span>Research &middot; Frontier &middot; 2026-05-14 &middot; 13 min read</span>
-    <h1>Multi-token-per-step prediction <span class="tone">&middot; pre-training and serving.</span></h1>
-    <p class="lede">Two recent papers speed pre-training by predicting many tokens per step: <b>Nous Token-Superposition Training</b> (2.5x at 10B) and <b>ICLR 2025 Patch-Level Training</b> (0.5x cost at 370M-2.7B). kolm does not pre-train, so neither method ships in the trainer. The <b>inference-side dual is speculative decoding</b>, and the serving runtime ships it today.</p>
-    <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;throughput &middot; speculative &middot; vllm &middot; frontier</span></div>
-  </div>
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; Frontier &middot; 2026-05-14 &middot; 13 min read</span>
+ <h1>Multi-token-per-step prediction <span class="tone">&middot; pre-training and serving.</span></h1>
+ <p class="lede">Two recent papers speed pre-training by predicting many tokens per step: <b>Nous Token-Superposition Training</b> (2.5x at 10B) and <b>ICLR 2025 Patch-Level Training</b> (0.5x cost at 370M-2.7B). kolm does not pre-train, so neither method ships in the trainer. The <b>inference-side dual is speculative decoding</b>, and the serving runtime ships it today.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;throughput &middot; speculative &middot; vllm &middot; frontier</span></div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="toc">
-      <h5>Contents</h5>
-      <ol>
-        <li><a href="#problem">One token per step is the slowest cell on the spreadsheet</a></li>
-        <li><a href="#tst">TST: token superposition in pre-training</a></li>
-        <li><a href="#plt">PLT: patch-level training</a></li>
-        <li><a href="#equiv">Why neither directly applies to LoRA distill</a></li>
-        <li><a href="#spec">Speculative decoding: the inference-side dual</a></li>
-        <li><a href="#stack">What kolm ships today</a></li>
-        <li><a href="#math">Throughput math</a></li>
-        <li><a href="#open">Open work</a></li>
-      </ol>
-    </div>
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#problem">One token per step is the slowest cell on the spreadsheet</a></li>
+ <li><a href="#tst">TST: token superposition in pre-training</a></li>
+ <li><a href="#plt">PLT: patch-level training</a></li>
+ <li><a href="#equiv">Why neither directly applies to LoRA distill</a></li>
+ <li><a href="#spec">Speculative decoding: the inference-side dual</a></li>
+ <li><a href="#stack">What kolm ships today</a></li>
+ <li><a href="#math">Throughput math</a></li>
+ <li><a href="#open">Open work</a></li>
+ </ol>
+ </div>
 
-    <h2 id="problem">One token per step is the slowest cell on the spreadsheet.</h2>
-    <p>Transformer training and serving both treat the autoregressive sequence as the unit of work. Pre-training reads one batch of length <code>L</code> and computes <code>L</code> losses; serving emits one new token per forward pass. <b>The hardware utilizes the same matrix multiplies either way, but the unit of useful output is a single token.</b> Doubling the tokens emitted per step doubles the effective throughput at constant arithmetic cost. The literature has converged on this insight from two directions.</p>
+ <h2 id="problem">One token per step is the slowest cell on the spreadsheet.</h2>
+ <p>Transformer training and serving both treat the autoregressive sequence as the unit of work. Pre-training reads one batch of length <code>L</code> and computes <code>L</code> losses; serving emits one new token per forward pass. <b>The hardware utilizes the same matrix multiplies either way, but the unit of useful output is a single token.</b> Doubling the tokens emitted per step doubles the effective throughput at constant arithmetic cost. The literature has converged on this insight from two directions.</p>
 
-    <h2 id="tst">TST: token superposition in pre-training.</h2>
-    <p><a class="cite" href="https://huggingface.co/papers/2605.06546" rel="noopener">Token-Superposition Training</a> (Nous Research, Peng, Gigant, Quesnelle, May 2026) collapses contiguous tokens into a single embedding "bag" during a superposition phase, then trains the model to predict the next bag with a multi-hot cross-entropy objective. A recovery phase reverts to standard next-token prediction for the final fraction of the schedule, recovering the inference-time shape.</p>
+ <h2 id="tst">TST: token superposition in pre-training.</h2>
+ <p><a class="cite" href="https://huggingface.co/papers/2605.06546" rel="noopener">Token-Superposition Training</a> (Nous Research, Peng, Gigant, Quesnelle, May 2026) collapses contiguous tokens into a single embedding "bag" during a superposition phase, then trains the model to predict the next bag with a multi-hot cross-entropy objective. A recovery phase reverts to standard next-token prediction for the final fraction of the schedule, recovering the inference-time shape.</p>
 
-    <p>The headline result is a <b>2.5x reduction in pre-training time at the 10B A1B mixture-of-experts scale</b>, with parity or improvement on HellaSwag, ARC, and MMLU. The mechanism does not change the optimizer, parallelism, tokenizer, data, or model architecture; it is a drop-in objective swap.</p>
+ <p>The headline result is a <b>2.5x reduction in pre-training time at the 10B A1B mixture-of-experts scale</b>, with parity or improvement on HellaSwag, ARC, and MMLU. The mechanism does not change the optimizer, parallelism, tokenizer, data, or model architecture; it is a drop-in objective swap.</p>
 
-    <h2 id="plt">PLT: patch-level training.</h2>
-    <p><a class="cite" href="https://arxiv.org/abs/2407.12665" rel="noopener">Beyond Next Token Prediction: Patch-Level Training for Large Language Models</a> (Shao, Meng, Zhou; ICLR 2025 Spotlight) aggregates contiguous tokens into "patches" and trains the model to predict whole patches during the early phase. The remaining schedule switches back to token-level prediction so the inference graph stays unchanged. Reported result: <b>0.5x training cost</b> across 370M to 2.7B parameter scales with no quality regression.</p>
+ <h2 id="plt">PLT: patch-level training.</h2>
+ <p><a class="cite" href="https://arxiv.org/abs/2407.12665" rel="noopener">Beyond Next Token Prediction: Patch-Level Training for Large Language Models</a> (Shao, Meng, Zhou; ICLR 2025 Spotlight) aggregates contiguous tokens into "patches" and trains the model to predict whole patches during the early phase. The remaining schedule switches back to token-level prediction so the inference graph stays unchanged. Reported result: <b>0.5x training cost</b> across 370M to 2.7B parameter scales with no quality regression.</p>
 
-    <p>The two papers converge on the same physical insight: <b>the dense matrix multiply does not care whether the supervision target is one token or k tokens; the optimizer signal can carry more bits per step.</b> Nous acknowledges PLT as the prior art for the framing.</p>
+ <p>The two papers converge on the same physical insight: <b>the dense matrix multiply does not care whether the supervision target is one token or k tokens; the optimizer signal can carry more bits per step.</b> Nous acknowledges PLT as the prior art for the framing.</p>
 
-    <h2 id="equiv">Why neither directly applies to LoRA distill.</h2>
-    <p>kolm does not pre-train. A <code>.kolm</code> artifact is a LoRA adapter over a frozen base model, distilled from captures and synthesized recipes. The trainer reads on the order of a few hundred to a few thousand examples and runs a handful of epochs. The pre-training-side techniques live at a different point on the schedule.</p>
+ <h2 id="equiv">Why neither directly applies to LoRA distill.</h2>
+ <p>kolm does not pre-train. A <code>.kolm</code> artifact is a LoRA adapter over a frozen base model, distilled from captures and synthesized recipes. The trainer reads on the order of a few hundred to a few thousand examples and runs a handful of epochs. The pre-training-side techniques live at a different point on the schedule.</p>
 
-    <table>
-      <thead><tr><th>Aspect</th><th>Pre-training (TST, PLT)</th><th>LoRA distill (kolm)</th></tr></thead>
-      <tbody>
-        <tr><td>Examples</td><td class="num">10<sup>11</sup>-10<sup>13</sup> tokens</td><td class="num">10<sup>2</sup>-10<sup>4</sup> examples</td></tr>
-        <tr><td>Wall time</td><td>weeks on a cluster</td><td>seconds to minutes on one GPU</td></tr>
-        <tr><td>Bottleneck</td><td>arithmetic per token</td><td>example efficiency</td></tr>
-        <tr><td>Useful lever</td><td>pack more supervision per step</td><td>find the right examples to begin with</td></tr>
-        <tr><td>Equivalent gain</td><td>2x-2.5x</td><td>sequence packing + Liger fused kernels deliver a smaller win on the same axis</td></tr>
-      </tbody>
-    </table>
+ <table>
+ <thead><tr><th>Aspect</th><th>Pre-training (TST, PLT)</th><th>LoRA distill (kolm)</th></tr></thead>
+ <tbody>
+ <tr><td>Examples</td><td class="num">10<sup>11</sup>-10<sup>13</sup> tokens</td><td class="num">10<sup>2</sup>-10<sup>4</sup> examples</td></tr>
+ <tr><td>Wall time</td><td>weeks on a cluster</td><td>seconds to minutes on one GPU</td></tr>
+ <tr><td>Bottleneck</td><td>arithmetic per token</td><td>example efficiency</td></tr>
+ <tr><td>Useful lever</td><td>pack more supervision per step</td><td>find the right examples to begin with</td></tr>
+ <tr><td>Equivalent gain</td><td>2x-2.5x</td><td>sequence packing + Liger fused kernels deliver a smaller win on the same axis</td></tr>
+ </tbody>
+ </table>
 
-    <p>The LoRA-distill analogue of multi-token-per-step prediction is <b>sequence packing</b>: concatenating short examples into a single sequence with masked attention so a single forward pass supervises many distinct examples. kolm's <code>trainer_real.py</code> uses this with Liger fused kernels (fused-RMSNorm, fused-RoPE, fused-SwiGLU, fused-CE) and paged 8-bit AdamW, which compounds to a 1.6x-2.0x training-time reduction on a 5090 vs a baseline transformers loop. Smaller than 2.5x because the bottleneck has already moved off arithmetic onto example efficiency.</p>
+ <p>The LoRA-distill analogue of multi-token-per-step prediction is <b>sequence packing</b>: concatenating short examples into a single sequence with masked attention so a single forward pass supervises many distinct examples. kolm's <code>trainer_real.py</code> uses this with Liger fused kernels (fused-RMSNorm, fused-RoPE, fused-SwiGLU, fused-CE) and paged 8-bit AdamW, which compounds to a 1.6x-2.0x training-time reduction on a 5090 vs a baseline transformers loop. Smaller than 2.5x because the bottleneck has already moved off arithmetic onto example efficiency.</p>
 
-    <h2 id="spec">Speculative decoding: the inference-side dual.</h2>
-    <p>Inference is where multi-token-per-step has a clean, mature implementation: <b>speculative decoding</b>. A small draft model proposes <code>k</code> tokens; the large target model verifies them in one forward pass. Accepted tokens are committed; the first rejected token is corrected. The expected gain is <code>k</code> times the draft-acceptance rate divided by the per-token verification cost, which lands at 2x-3x on typical chat workloads.</p>
+ <h2 id="spec">Speculative decoding: the inference-side dual.</h2>
+ <p>Inference is where multi-token-per-step has a clean, mature implementation: <b>speculative decoding</b>. A small draft model proposes <code>k</code> tokens; the large target model verifies them in one forward pass. Accepted tokens are committed; the first rejected token is corrected. The expected gain is <code>k</code> times the draft-acceptance rate divided by the per-token verification cost, which lands at 2x-3x on typical chat workloads.</p>
 
-    <p>kolm's serving runtime in <code>apps/runtime/serve.py</code> turns this on automatically when the manifest declares a draft model. The pairings are selected by <code>apps/trainer/speculative.py:pick_draft</code>:</p>
+ <p>kolm's serving runtime in <code>apps/runtime/serve.py</code> turns this on automatically when the manifest declares a draft model. The pairings are selected by <code>apps/trainer/speculative.py:pick_draft</code>:</p>
 
-    <pre><span class="com"># apps/trainer/speculative.py</span>
+ <pre><span class="com"># apps/trainer/speculative.py</span>
 DRAFT_PAIRINGS = {
-    <span class="arg">"Qwen/Qwen2.5-7B-Instruct"</span>:   <span class="arg">"Qwen/Qwen2.5-1.5B-Instruct"</span>,
-    <span class="arg">"Qwen/Qwen2.5-14B-Instruct"</span>:  <span class="arg">"Qwen/Qwen2.5-3B-Instruct"</span>,
-    <span class="arg">"meta-llama/Llama-3.2-3B-Instruct"</span>: <span class="arg">"meta-llama/Llama-3.2-1B-Instruct"</span>,
-    <span class="arg">"meta-llama/Llama-3.1-8B-Instruct"</span>: <span class="arg">"meta-llama/Llama-3.2-1B-Instruct"</span>,
-    <span class="arg">"google/gemma-3-12b-it"</span>:        <span class="arg">"google/gemma-3-1b-it"</span>,
+ <span class="arg">"Qwen/Qwen2.5-7B-Instruct"</span>: <span class="arg">"Qwen/Qwen2.5-1.5B-Instruct"</span>,
+ <span class="arg">"Qwen/Qwen2.5-14B-Instruct"</span>: <span class="arg">"Qwen/Qwen2.5-3B-Instruct"</span>,
+ <span class="arg">"meta-llama/Llama-3.2-3B-Instruct"</span>: <span class="arg">"meta-llama/Llama-3.2-1B-Instruct"</span>,
+ <span class="arg">"meta-llama/Llama-3.1-8B-Instruct"</span>: <span class="arg">"meta-llama/Llama-3.2-1B-Instruct"</span>,
+ <span class="arg">"google/gemma-3-12b-it"</span>: <span class="arg">"google/gemma-3-1b-it"</span>,
 }</pre>
 
-    <p>When the runtime boots vLLM (the preferred engine), it passes <code>speculative_model</code> and <code>num_speculative_tokens=5</code> to the LLM constructor. vLLM handles the verification path in a single fused pass. The transformers fallback uses HuggingFace's <code>assistant_model</code> argument on <code>model.generate()</code>, which implements the same algorithm without batched verification.</p>
+ <p>When the runtime boots vLLM (the preferred engine), it passes <code>speculative_model</code> and <code>num_speculative_tokens=5</code> to the LLM constructor. vLLM handles the verification path in a single fused pass. The transformers fallback uses HuggingFace's <code>assistant_model</code> argument on <code>model.generate()</code>, which implements the same algorithm without batched verification.</p>
 
-    <pre><span class="com"># apps/runtime/serve.py</span>
+ <pre><span class="com"># apps/runtime/serve.py</span>
 llm_kwargs = dict(
-    model=target_model,
-    enable_prefix_caching=<span class="kw">True</span>,
-    kv_cache_dtype=<span class="arg">"fp8"</span>,  <span class="com"># Hopper / Blackwell only</span>
-    dtype=<span class="arg">"auto"</span>,
+ model=target_model,
+ enable_prefix_caching=<span class="kw">True</span>,
+ kv_cache_dtype=<span class="arg">"fp8"</span>, <span class="com"># Hopper / Blackwell only</span>
+ dtype=<span class="arg">"auto"</span>,
 )
 <span class="kw">if</span> draft_model:
-    llm_kwargs[<span class="arg">"speculative_model"</span>] = draft_model
-    llm_kwargs[<span class="arg">"num_speculative_tokens"</span>] = <span class="arg">5</span>
+ llm_kwargs[<span class="arg">"speculative_model"</span>] = draft_model
+ llm_kwargs[<span class="arg">"num_speculative_tokens"</span>] = <span class="arg">5</span>
 llm = LLM(**llm_kwargs)</pre>
 
-    <h2 id="stack">What kolm ships today.</h2>
-    <p>The serving runtime composes five throughput techniques in one path. None of these are research claims; they are <code>pip install</code> away in a real wheelhouse and configured by default when the box supports them.</p>
+ <h2 id="stack">What kolm ships today.</h2>
+ <p>The serving runtime composes five throughput techniques in one path. None of these are research claims; they are <code>pip install</code> away in a real wheelhouse and configured by default when the box supports them.</p>
 
-    <ul>
-      <li><b>Speculative decoding.</b> Draft 1.5B + target 7B, 5 speculative tokens, vLLM-batched verification.</li>
-      <li><b>FP8 KV cache.</b> Auto-enabled on compute capability 9+ (Hopper H100/H200, Blackwell sm_120). Cuts KV memory 2x and accelerates the verify pass on the same hardware.</li>
-      <li><b>PagedAttention + prefix cache.</b> Standard vLLM; the prefix cache compounds for chat workloads where the system prompt repeats.</li>
-      <li><b>AWQ / GPTQ int4 weights.</b> When the artifact ships quantized, vLLM loads it natively. 4x memory reduction over bf16 weights, no measurable quality loss on the standard rubrics.</li>
-      <li><b>NVFP4 detect (training).</b> On a Blackwell box with torch ≥ 2.8, <code>apps/trainer/nvfp4.py:detect</code> returns <code>enabled=True</code> and the trainer can compile in 4-bit float. Opt-in via <code>KOLM_NVFP4=1</code>.</li>
-    </ul>
+ <ul>
+ <li><b>Speculative decoding.</b> Draft 1.5B + target 7B, 5 speculative tokens, vLLM-batched verification.</li>
+ <li><b>FP8 KV cache.</b> Auto-enabled on compute capability 9+ (Hopper H100/H200, Blackwell sm_120). Cuts KV memory 2x and accelerates the verify pass on the same hardware.</li>
+ <li><b>PagedAttention + prefix cache.</b> Standard vLLM; the prefix cache compounds for chat workloads where the system prompt repeats.</li>
+ <li><b>AWQ / GPTQ int4 weights.</b> When the artifact ships quantized, vLLM loads it natively. 4x memory reduction over bf16 weights, no measurable quality loss on the standard rubrics.</li>
+ <li><b>NVFP4 detect (training).</b> On a Blackwell box with torch ≥ 2.8, <code>apps/trainer/nvfp4.py:detect</code> returns <code>enabled=True</code> and the trainer can compile in 4-bit float. Opt-in via <code>KOLM_NVFP4=1</code>.</li>
+ </ul>
 
-    <h2 id="math">Throughput math.</h2>
-    <p>For a Qwen2.5-7B target serving a typical chat workload on a single H100:</p>
+ <h2 id="math">Throughput math.</h2>
+ <p>For a Qwen2.5-7B target serving a typical chat workload on a single H100:</p>
 
-    <table>
-      <thead><tr><th>Path</th><th>Tokens/sec</th><th>Source</th></tr></thead>
-      <tbody>
-        <tr><td>transformers baseline</td><td class="num">~35</td><td>HF reference loop, bf16, no batching</td></tr>
-        <tr><td>vLLM PagedAttention</td><td class="num">~110</td><td>vLLM 0.6 benchmark, bf16, batch=1</td></tr>
-        <tr><td>vLLM + FP8 KV</td><td class="num">~145</td><td>vLLM 0.6 benchmark, fp8 kv</td></tr>
-        <tr><td>vLLM + FP8 KV + spec</td><td class="num">~280</td><td>kolm config (draft 1.5B, 5 tokens)</td></tr>
-        <tr><td>vLLM + FP8 KV + spec + AWQ</td><td class="num">~340</td><td>kolm config (int4 target)</td></tr>
-      </tbody>
-    </table>
+ <table>
+ <thead><tr><th>Path</th><th>Tokens/sec</th><th>Source</th></tr></thead>
+ <tbody>
+ <tr><td>transformers baseline</td><td class="num">~35</td><td>HF reference loop, bf16, no batching</td></tr>
+ <tr><td>vLLM PagedAttention</td><td class="num">~110</td><td>vLLM 0.6 benchmark, bf16, batch=1</td></tr>
+ <tr><td>vLLM + FP8 KV</td><td class="num">~145</td><td>vLLM 0.6 benchmark, fp8 kv</td></tr>
+ <tr><td>vLLM + FP8 KV + spec</td><td class="num">~280</td><td>kolm config (draft 1.5B, 5 tokens)</td></tr>
+ <tr><td>vLLM + FP8 KV + spec + AWQ</td><td class="num">~340</td><td>kolm config (int4 target)</td></tr>
+ </tbody>
+ </table>
 
-    <p>Numbers above 145 tokens/sec are the kolm composition. The exact figure depends on the draft-acceptance rate, which depends on the task; the range we have seen across a half-dozen workloads is 220-360 tok/s on H100. <b>The arithmetic does not care about the marketing; the receipt chain records the engine, the draft model, and the KV dtype so the number is auditable.</b></p>
+ <p>Numbers above 145 tokens/sec are the kolm composition. The exact figure depends on the draft-acceptance rate, which depends on the task; the range we have seen across a half-dozen workloads is 220-360 tok/s on H100. <b>The arithmetic does not care about the marketing; the receipt chain records the engine, the draft model, and the KV dtype so the number is auditable.</b></p>
 
-    <blockquote>
-      <p>Pattern-match recipes are a separate path. Most <code>.kolm</code> artifacts compile to a deterministic JS function. For those, <code>kolm bench</code> on a workstation reports a p50 of 1us and a steady-state throughput north of 1,000,000 calls per second. They are not generative; they are the unfused embedding lookup at the bottom of every distill.</p>
-    </blockquote>
+ <blockquote>
+ <p>Pattern-match recipes are a separate path. Most <code>.kolm</code> artifacts compile to a deterministic JS function. For those, <code>kolm bench</code> on a workstation reports a p50 of 1us and a steady-state throughput north of 1,000,000 calls per second. They are not generative; they are the unfused embedding lookup at the bottom of every distill.</p>
+ </blockquote>
 
-    <h2 id="open">Open work.</h2>
-    <p>Three threads we are watching.</p>
+ <h2 id="open">Open work.</h2>
+ <p>Three threads we are watching.</p>
 
-    <ul>
-      <li><b>Medusa-style multi-head decoding.</b> Train k decoding heads on top of the base, predict k tokens per step without a separate draft model. Lands on the same axis as TST but at the serving side. Practical wrinkle: the head training would have to fit inside the LoRA distill schedule, which constrains the parameter count of the heads.</li>
-      <li><b>EAGLE-2 and Lookahead Decoding.</b> Different proposal mechanisms (tree proposal, n-gram lookahead). The vLLM team has landed EAGLE-2 as an option; we will switch on whichever path the upstream benchmark prefers.</li>
-      <li><b>Patch-level supervision for LoRA distill.</b> If the captures are long enough, patch-level training could apply during the LoRA fine-tune phase, not just pre-training. The risk is overfitting on the patch boundary; the win, if it works, is a 1.5x speedup on top of sequence packing. Out of scope for v1.0; on the radar for v1.2.</li>
-    </ul>
+ <ul>
+ <li><b>Medusa-style multi-head decoding.</b> Train k decoding heads on top of the base, predict k tokens per step without a separate draft model. Lands on the same axis as TST but at the serving side. Practical wrinkle: the head training would have to fit inside the LoRA distill schedule, which constrains the parameter count of the heads.</li>
+ <li><b>EAGLE-2 and Lookahead Decoding.</b> Different proposal mechanisms (tree proposal, n-gram lookahead). The vLLM team has landed EAGLE-2 as an option; we will switch on whichever path the upstream benchmark prefers.</li>
+ <li><b>Patch-level supervision for LoRA distill.</b> If the captures are long enough, patch-level training could apply during the LoRA fine-tune phase, not just pre-training. The risk is overfitting on the patch boundary; the win, if it works, is a 1.5x speedup on top of sequence packing. Out of scope for v1.0; on the radar for v1.2.</li>
+ </ul>
 
-    <p>kolm's job is not to invent new training methods. Our job is to ship the receipt chain that proves the artifact in your hand came out of the build pipeline you authorized, with a K-score that says it beats the alternative on your evals. <b>The frontier techniques are off-the-shelf and we wire them in; the trust layer is what we build.</b></p>
+ <p>kolm's job is not to invent new training methods. Our job is to ship the receipt chain that proves the artifact in your hand came out of the build pipeline you authorized, with a K-score that says it beats the alternative on your evals. <b>The frontier techniques are off-the-shelf and we wire them in; the trust layer is what we build.</b></p>
 
-    <div class="signpost">
-      <a href="/research/k-score-correlation">
-        <span class="lab">previous</span>
-        <span class="v">K-score correlation<span class="arrow">&rarr;</span></span>
-        <p>The composite score on the box. Why 0.85 is the gate.</p>
-      </a>
-      <a href="/research/continual-learning-loop">
-        <span class="lab">next</span>
-        <span class="v">Continual learning loop<span class="arrow">&rarr;</span></span>
-        <p>Capture, train, swap, sign. The cycle that beats frozen models.</p>
-      </a>
-    </div>
+ <div class="signpost">
+ <a href="/research/k-score-correlation">
+ <span class="lab">previous</span>
+ <span class="v">K-score correlation<span class="arrow">&rarr;</span></span>
+ <p>The composite score on the box. Why 0.85 is the gate.</p>
+ </a>
+ <a href="/research/continual-learning-loop">
+ <span class="lab">next</span>
+ <span class="v">Continual learning loop<span class="arrow">&rarr;</span></span>
+ <p>Capture, train, swap, sign. The cycle that beats frozen models.</p>
+ </a>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

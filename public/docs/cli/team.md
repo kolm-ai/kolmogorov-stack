@@ -10,16 +10,16 @@ description: Multi-tenant workspace management. Create teams, invite members, ma
 ## Usage
 
 ```bash
-kolm team create   <name> [--seats N]
+kolm team create <name> [--seats N]
 kolm team list
-kolm team show     <slug>
-kolm team invite   <slug> <email> [--role member|admin|viewer]
-kolm team accept   <token>
-kolm team members  <slug>
-kolm team role     <slug> <tenant_id> <role>
-kolm team remove   <slug> <tenant_id>
+kolm team show <slug>
+kolm team invite <slug> <email> [--role member|admin|viewer]
+kolm team accept <token>
+kolm team members <slug>
+kolm team role <slug> <tenant_id> <role>
+kolm team remove <slug> <tenant_id>
 kolm team transfer <slug> <new_owner_tenant_id>
-kolm team delete   <slug>
+kolm team delete <slug>
 ```
 
 ## Flags

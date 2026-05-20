@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm rescue · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm rescue CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/rescue">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm rescue","description":"Reference for the kolm rescue CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/rescue","mainEntityOfPage":"https://kolm.ai/docs/cli/rescue","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm rescue · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm rescue CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,7 +176,7 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="rescue">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>rescue</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>rescue</span>
 </nav>
 <h1>kolm rescue</h1>
 <p>Re-parent an orphaned kolm child PID under a new controlling tty (reptyr-style, W233). Use this when a <code>--detach</code>ed session lost its tmux host or you want to pull a backgrounded compile into the foreground of a fresh terminal without killing it.</p>
@@ -183,9 +187,9 @@ kolm rescue &lt;pid&gt; [--tty &lt;path&gt;] [--force]
 <p><code>&lt;pid&gt;</code> is the kolm worker process id (visible in <code>kolm sessions list</code> and in the <code>session_id</code>&#39;s on-disk record). <code>--tty</code> defaults to the current terminal. <code>--force</code> skips the safety prompt when the PID does not look like a kolm-owned worker.</p>
 <h2>Examples</h2>
 <pre><code>
-kolm sessions list                         # find the pid: sess_abc pid 4711
-kolm rescue 4711                           # adopt 4711 into this terminal
-kolm rescue 4711 --tty /dev/pts/3 --force  # pin to a specific tty
+kolm sessions list # find the pid: sess_abc pid 4711
+kolm rescue 4711 # adopt 4711 into this terminal
+kolm rescue 4711 --tty /dev/pts/3 --force # pin to a specific tty
 </code></pre>
 <h2>Constraints</h2>
 <ul>
@@ -200,13 +204,13 @@ kolm rescue 4711 --tty /dev/pts/3 --force  # pin to a specific tty
 <li><code>/foundations/tmux</code> for the survives-disconnect runtime pattern.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

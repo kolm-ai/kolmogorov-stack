@@ -4,21 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Constrained decoding and tool calling · JSON that always parses | kolm research</title>
-<meta name="description" content="Outlines plus lm-format-enforcer plus a post-hoc retry shim. JSON-schema, regex, EBNF, and choice modes. Tool calling rendered for Qwen, Llama, Hermes, with a union-schema fallback so every emission validates.">
+<title>Constrained decoding and tool calling · JSON that · kolm.ai</title>
+<meta name="description" content="Outlines plus lm-format-enforcer plus a post-hoc retry shim. JSON-schema, regex, EBNF, and choice modes. Tool calling rendered for Qwen, Llama, Hermes, with...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Constrained decoding and tool calling . kolm research">
-<meta property="og:description" content="Outlines + lm-format-enforcer + post-hoc shim. Tool calling that always parses, no retries.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Constrained decoding and tool calling · JSON that · kolm.ai">
+<meta property="og:description" content="Outlines plus lm-format-enforcer plus a post-hoc retry shim. JSON-schema, regex, EBNF, and choice modes. Tool calling rendered for Qwen, Llama, Hermes, with...">
+<meta property="og:type" content="website">
 <meta property="article:published_time" content="2026-05-14">
 <meta property="article:author" content="Kolmogorov">
 <meta property="article:section" content="runtime">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Constrained decoding and tool calling">
-<meta name="twitter:description" content="JSON-schema, regex, EBNF, and a union-schema tool-calling envelope.">
+<meta name="twitter:title" content="Constrained decoding and tool calling · JSON that · kolm.ai">
+<meta name="twitter:description" content="Outlines plus lm-format-enforcer plus a post-hoc retry shim. JSON-schema, regex, EBNF, and choice modes. Tool calling rendered for Qwen, Llama, Hermes, with...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/constrained-decoding-and-tools">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,253 +27,255 @@
 <script src="/escape.js"></script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Constrained decoding and tool calling: JSON that always parses",
-      "description": "How kolm wires Outlines, lm-format-enforcer, and a post-hoc retry shim for guaranteed-parse outputs, and how the same machinery backs OpenAI-compatible tool calling.",
-      "url": "https://kolm.ai/research/constrained-decoding-and-tools",
-      "author": {"@type": "Organization", "name": "Kolmogorov"},
-      "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
-      "datePublished": "2026-05-14",
-      "articleSection": "runtime",
-      "keywords": "constrained generation, JSON schema, tool calling, function calling, Outlines, lm-format-enforcer",
-      "citation": [
-        "Willard & Louf, 2023, Efficient Guided Generation for Large Language Models",
-        "Beurer-Kellner et al, 2024, lm-format-enforcer"
-      ],
-      "license": "https://creativecommons.org/licenses/by/4.0/"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "Constrained decoding and tools", "item": "https://kolm.ai/research/constrained-decoding-and-tools"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Constrained decoding and tool calling: JSON that always parses",
+ "description": "How kolm wires Outlines, lm-format-enforcer, and a post-hoc retry shim for guaranteed-parse outputs, and how the same machinery backs OpenAI-compatible tool calling.",
+ "url": "https://kolm.ai/research/constrained-decoding-and-tools",
+ "author": {"@type": "Organization", "name": "Kolmogorov"},
+ "publisher": {"@type": "Organization", "name": "Kolmogorov", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-14",
+ "articleSection": "runtime",
+ "keywords": "constrained generation, JSON schema, tool calling, function calling, Outlines, lm-format-enforcer",
+ "citation": [
+ "Willard & Louf, 2023, Efficient Guided Generation for Large Language Models",
+ "Beurer-Kellner et al, 2024, lm-format-enforcer"
+ ],
+ "license": "https://creativecommons.org/licenses/by/4.0/"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Constrained decoding and tools", "item": "https://kolm.ai/research/constrained-decoding-and-tools"}
+ ]
+ }
+ ]
 }
 </script>
 
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
-  a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
-  a:hover{border-bottom-color:var(--ink)}
-  .nb{border:0}
-  ::selection{background:rgba(236,231,220,0.30)}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--good:#7ef0d2;--warn:#ffd479;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.65;letter-spacing:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;min-height:100vh;display:flex;flex-direction:column}
+ a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line-strong)}
+ a:hover{border-bottom-color:var(--ink)}
+ .nb{border:0}
+ ::selection{background:rgba(236,231,220,0.30)}
 
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
-  @media(max-width:720px){.wrap{padding:0 20px}}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.wrap{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){header.site .row{padding:0 20px}}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
-  header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site nav a:hover,header.site nav a.active{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
-  header.site .right .ghost:hover{color:var(--ink)}
-  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px;max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){header.site .row{padding:0 20px}}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);border:0}
+ header.site .brand span{font-weight: 500;font-size:16px;letter-spacing:0}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site nav a:hover,header.site nav a.active{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px;border:0}
+ header.site .right .ghost:hover{color:var(--ink)}
+ header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500;border:0}
 
-  main{padding:80px 0 96px;flex:1}
+ main{padding:80px 0 96px;flex:1}
 
-  .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
-  .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
-  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+ .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 22px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 14px;background:rgba(8,9,8,0.62)}
+ .hero-eyebrow .he-dot{width:6px;height:6px;border-radius:50%;background:#7ef0d2;box-shadow:0 0 10px #7ef0d2;animation:pulse-dot 2.4s ease-in-out infinite}
+ @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
 
-  h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
-  .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
-  h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px;scroll-margin-top:80px}
-  h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
-  p{color:var(--ink-mute);margin:0 0 14px}
-  p strong{color:var(--ink);font-weight: 500}
-  code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
-  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
-  ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
-  ul li{margin:6px 0}
+ h1{font-weight: 500;letter-spacing:-0.03em;line-height:1.04;font-size:clamp(32px,4.2vw,52px);margin:0 0 16px}
+ .lede{color:var(--ink-mute);font-size:17.5px;margin:0 0 36px;line-height:1.55}
+ h2{font-weight: 500;letter-spacing:0;font-size:23px;margin:46px 0 14px;border-top:1px solid var(--line);padding-top:32px;scroll-margin-top:80px}
+ h3{font-weight: 500;letter-spacing:0;font-size:17px;margin:24px 0 6px}
+ p{color:var(--ink-mute);margin:0 0 14px}
+ p strong{color:var(--ink);font-weight: 500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.55}
+ ul{padding-left:22px;margin:0 0 14px;color:var(--ink-mute)}
+ ul li{margin:6px 0}
 
-  .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
+ .meta-line{display:flex;flex-wrap:wrap;gap:14px;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin:0 0 28px}
 
-  .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
-  .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-  .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
-  .table tr:last-child td{border-bottom:0}
+ .table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:13px}
+ .table th,.table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ .table th{font-weight: 500;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg-elev)}
+ .table tr:last-child td{border-bottom:0}
 
-  .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
-  .citations a{color:var(--ink-mute)}
+ .citations{color:var(--ink-faint);font-size:12.5px;font-family:var(--mono);line-height:1.55;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+ .citations a{color:var(--ink-mute)}
 
-  footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
-  footer a{color:var(--ink-mute);border:0}
-  footer a:hover{color:var(--ink)}
-  .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
-  .footer-row a{color:inherit}
+ footer{border-top:1px solid var(--line);padding:32px 32px 28px;color:var(--ink-faint);font-size:12.5px;text-align:center}
+ footer a{color:var(--ink-mute);border:0}
+ footer a:hover{color:var(--ink)}
+ .footer-row{margin-top:14px;font-size:12.5px;gap:18px;flex-wrap:wrap;color:var(--ink-faint);justify-content:center;display:flex}
+ .footer-row a{color:inherit}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site">
-  <div class="row">
-    <div class="left">
-      <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research" class="active">Research</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="row">
+ <div class="left">
+ <a class="brand" href="/" aria-label="kolm home"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research" class="active">Research</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main>
-  <div class="wrap">
-    <div class="hero-eyebrow"><span class="he-dot"></span>research . runtime . 11 min read</div>
-    <h1>Constrained decoding and tool calling.</h1>
-    <p class="lede">If the contract is "the output must be valid JSON," the wrong answer is "ask the model nicely and retry on parse error." The right answer is to make the decoder physically incapable of emitting a string that fails the schema. Same machinery, two surfaces: JSON-mode, and tool calling.</p>
+<main id="main">
+ <div class="wrap">
+ <div class="hero-eyebrow"><span class="he-dot"></span>research . runtime . 11 min read</div>
+ <h1>Constrained decoding and tool calling.</h1>
+ <p class="lede">If the contract is "the output must be valid JSON," the wrong answer is "ask the model nicely and retry on parse error." The right answer is to make the decoder physically incapable of emitting a string that fails the schema. Same machinery, two surfaces: JSON-mode, and tool calling.</p>
 
-    <div class="meta-line">
-      <span>May 14, 2026</span>
-      <span>&middot;</span>
-      <span>Kolmogorov research</span>
-      <span>&middot;</span>
-      <span>apps/runtime/constrained.py, apps/runtime/tools.py</span>
-    </div>
+ <div class="meta-line">
+ <span>May 14, 2026</span>
+ <span>&middot;</span>
+ <span>Kolmogorov research</span>
+ <span>&middot;</span>
+ <span>apps/runtime/constrained.py, apps/runtime/tools.py</span>
+ </div>
 
-    <h2>The mechanism</h2>
+ <h2>The mechanism</h2>
 
-    <p>A logits processor is a function that runs between the model and the sampler. It receives the next-token logits and can zero out any tokens that would violate a constraint. If the constraint is "the output must satisfy this JSON schema," the processor maintains a partial-parse state machine over the generated tokens and masks any next-token that does not extend a valid prefix of the schema's grammar.</p>
+ <p>A logits processor is a function that runs between the model and the sampler. It receives the next-token logits and can zero out any tokens that would violate a constraint. If the constraint is "the output must satisfy this JSON schema," the processor maintains a partial-parse state machine over the generated tokens and masks any next-token that does not extend a valid prefix of the schema's grammar.</p>
 
-    <p>Two production libraries implement this:</p>
+ <p>Two production libraries implement this:</p>
 
-    <ul>
-      <li><strong>Outlines</strong> (Willard &amp; Louf, 2023). Compiles a regex or JSON schema into a finite-state machine over the tokenizer's vocabulary; at decode time, the FSM tracks which states are reachable. Fast, handles JSON schema, regex, and EBNF CFG.</li>
-      <li><strong>lm-format-enforcer</strong>. Same idea, different implementation. Mature, slightly slower in our microbench, but the schema coverage in the long tail is sometimes better.</li>
-    </ul>
+ <ul>
+ <li><strong>Outlines</strong> (Willard &amp; Louf, 2023). Compiles a regex or JSON schema into a finite-state machine over the tokenizer's vocabulary; at decode time, the FSM tracks which states are reachable. Fast, handles JSON schema, regex, and EBNF CFG.</li>
+ <li><strong>lm-format-enforcer</strong>. Same idea, different implementation. Mature, slightly slower in our microbench, but the schema coverage in the long tail is sometimes better.</li>
+ </ul>
 
-    <p>Both ship as logits-processor-compatible objects that drop into vLLM, transformers, and llama.cpp. kolm prefers Outlines when present, falls back to lm-format-enforcer, and finally to a post-hoc parse-and-retry shim when neither is installed.</p>
+ <p>Both ship as logits-processor-compatible objects that drop into vLLM, transformers, and llama.cpp. kolm prefers Outlines when present, falls back to lm-format-enforcer, and finally to a post-hoc parse-and-retry shim when neither is installed.</p>
 
-    <h2>The three modes</h2>
+ <h2>The three modes</h2>
 
-    <h3>JSON schema mode</h3>
-    <p>For structured outputs where the schema is known in advance: classifier labels, extracted entities, function arguments. The schema goes in, a logits processor comes out:</p>
+ <h3>JSON schema mode</h3>
+ <p>For structured outputs where the schema is known in advance: classifier labels, extracted entities, function arguments. The schema goes in, a logits processor comes out:</p>
 
-    <pre>from apps.runtime.constrained import json_schema_processor
+ <pre>from apps.runtime.constrained import json_schema_processor
 
 processor = json_schema_processor({
-    "type": "object",
-    "properties": {
-        "diagnosis_code": {"type": "string", "pattern": "^[A-Z][0-9]{2}\\.[0-9]$"},
-        "confidence": {"type": "number", "minimum": 0, "maximum": 1}
-    },
-    "required": ["diagnosis_code", "confidence"]
+ "type": "object",
+ "properties": {
+ "diagnosis_code": {"type": "string", "pattern": "^[A-Z][0-9]{2}\\.[0-9]$"},
+ "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+ },
+ "required": ["diagnosis_code", "confidence"]
 }, tokenizer=tok)
 
 out = model.generate(..., logits_processor=[processor.processor])</pre>
 
-    <p>The model cannot emit a string that fails to parse, and cannot emit a diagnosis code that fails the regex. No retries.</p>
+ <p>The model cannot emit a string that fails to parse, and cannot emit a diagnosis code that fails the regex. No retries.</p>
 
-    <h3>Regex mode</h3>
-    <p>For free-form structured outputs where a JSON schema is overkill: a single SSN, a date, a UUID, a phone number, a Likert score, a per-call action tag. The regex is the constraint:</p>
+ <h3>Regex mode</h3>
+ <p>For free-form structured outputs where a JSON schema is overkill: a single SSN, a date, a UUID, a phone number, a Likert score, a per-call action tag. The regex is the constraint:</p>
 
-    <pre>from apps.runtime.constrained import regex_processor
+ <pre>from apps.runtime.constrained import regex_processor
 processor = regex_processor(r"^[1-5]$", tokenizer=tok)
 # model can only emit one of "1", "2", "3", "4", "5"</pre>
 
-    <h3>CFG / EBNF mode</h3>
-    <p>For domain DSLs: SQL with a tightened grammar, ICD-10 code expressions, an in-house intent language. Outlines accepts an EBNF grammar string and compiles it. The grammar bounds what the model can emit at every step.</p>
+ <h3>CFG / EBNF mode</h3>
+ <p>For domain DSLs: SQL with a tightened grammar, ICD-10 code expressions, an in-house intent language. Outlines accepts an EBNF grammar string and compiles it. The grammar bounds what the model can emit at every step.</p>
 
-    <h2>The fallback path</h2>
+ <h2>The fallback path</h2>
 
-    <p>Some buyers run on hardware where Outlines does not build (some ROCm, some old Apple silicon). The fallback is a post-hoc retry loop:</p>
+ <p>Some buyers run on hardware where Outlines does not build (some ROCm, some old Apple silicon). The fallback is a post-hoc retry loop:</p>
 
-    <pre>from apps.runtime.constrained import post_hoc_retry_json
+ <pre>from apps.runtime.constrained import post_hoc_retry_json
 
 ok, parsed, err = post_hoc_retry_json(
-    generate_fn=lambda p: model.generate(p, max_new_tokens=256),
-    prompt="Return a diagnosis as JSON: ...",
-    schema=schema,
-    max_retries=3,
+ generate_fn=lambda p: model.generate(p, max_new_tokens=256),
+ prompt="Return a diagnosis as JSON: ...",
+ schema=schema,
+ max_retries=3,
 )
 if not ok:
-    raise RuntimeError(f"model failed schema after retries: {err}")</pre>
+ raise RuntimeError(f"model failed schema after retries: {err}")</pre>
 
-    <p>The retry loop validates the output, and on failure re-prompts with the error message folded in. It is slower and weaker than a real constrained-decode pass, but it keeps the API surface uniform so downstream code does not branch on which backend is available.</p>
+ <p>The retry loop validates the output, and on failure re-prompts with the error message folded in. It is slower and weaker than a real constrained-decode pass, but it keeps the API surface uniform so downstream code does not branch on which backend is available.</p>
 
-    <h2 id="tools">Tool calling</h2>
+ <h2 id="tools">Tool calling</h2>
 
-    <p>OpenAI Chat Completions accepts a <code>tools</code> array of JSON-schema function definitions and emits a <code>tool_calls</code> field with name + arguments. The kolm tool-calling surface is two things stacked:</p>
+ <p>OpenAI Chat Completions accepts a <code>tools</code> array of JSON-schema function definitions and emits a <code>tool_calls</code> field with name + arguments. The kolm tool-calling surface is two things stacked:</p>
 
-    <ol>
-      <li>Render the tools into the prompt in the format the target model expects.</li>
-      <li>Constrain the decoder so the emission parses, regardless of what the model wanted to say.</li>
-    </ol>
+ <ol>
+ <li>Render the tools into the prompt in the format the target model expects.</li>
+ <li>Constrain the decoder so the emission parses, regardless of what the model wanted to say.</li>
+ </ol>
 
-    <h3>Renderers</h3>
+ <h3>Renderers</h3>
 
-    <p>Different model families have different conventions for how tool calls travel in plain text. The renderer detects the right one from the model name:</p>
+ <p>Different model families have different conventions for how tool calls travel in plain text. The renderer detects the right one from the model name:</p>
 
-    <table class="table">
-      <thead><tr><th>Family</th><th>Render</th><th>Detect</th></tr></thead>
-      <tbody>
-        <tr><td>Qwen 2.5 / 3</td><td><code>&lt;tools&gt;...&lt;/tools&gt;</code> + <code>&lt;tool_call&gt;{...}&lt;/tool_call&gt;</code></td><td>name contains &quot;qwen&quot;</td></tr>
-        <tr><td>Llama 3.1 / 3.2</td><td><code>&lt;function=NAME&gt;{...}&lt;/function&gt;</code></td><td>name contains &quot;llama&quot;</td></tr>
-        <tr><td>Hermes-2-Pro</td><td>Qwen-style with a longer system framing</td><td>name contains &quot;hermes&quot; or &quot;nous&quot;</td></tr>
-        <tr><td>Anything else</td><td>Generic JSON envelope: <code>{&quot;tool&quot;:&quot;NAME&quot;,&quot;arguments&quot;:{...}}</code> or <code>{&quot;answer&quot;:&quot;...&quot;}</code></td><td>fallback</td></tr>
-      </tbody>
-    </table>
+ <table class="table">
+ <thead><tr><th>Family</th><th>Render</th><th>Detect</th></tr></thead>
+ <tbody>
+ <tr><td>Qwen 2.5 / 3</td><td><code>&lt;tools&gt;...&lt;/tools&gt;</code> + <code>&lt;tool_call&gt;{...}&lt;/tool_call&gt;</code></td><td>name contains &quot;qwen&quot;</td></tr>
+ <tr><td>Llama 3.1 / 3.2</td><td><code>&lt;function=NAME&gt;{...}&lt;/function&gt;</code></td><td>name contains &quot;llama&quot;</td></tr>
+ <tr><td>Hermes-2-Pro</td><td>Qwen-style with a longer system framing</td><td>name contains &quot;hermes&quot; or &quot;nous&quot;</td></tr>
+ <tr><td>Anything else</td><td>Generic JSON envelope: <code>{&quot;tool&quot;:&quot;NAME&quot;,&quot;arguments&quot;:{...}}</code> or <code>{&quot;answer&quot;:&quot;...&quot;}</code></td><td>fallback</td></tr>
+ </tbody>
+ </table>
 
-    <h3>The union schema</h3>
+ <h3>The union schema</h3>
 
-    <p>Regardless of how the prompt is rendered, the decoder is constrained to emit a string that parses as one of these JSON shapes:</p>
+ <p>Regardless of how the prompt is rendered, the decoder is constrained to emit a string that parses as one of these JSON shapes:</p>
 
-    <pre>{
-  "oneOf": [
-    {"type": "object",
-     "properties": {"tool": {"const": "lookup_user"},
-                    "arguments": {"type": "object", "properties": {...}}},
-     "required": ["tool", "arguments"]},
-    {"type": "object",
-     "properties": {"tool": {"const": "send_email"},
-                    "arguments": {"type": "object", "properties": {...}}},
-     "required": ["tool", "arguments"]},
-    {"type": "object",
-     "properties": {"answer": {"type": "string"}},
-     "required": ["answer"]}
-  ]
+ <pre>{
+ "oneOf": [
+ {"type": "object",
+ "properties": {"tool": {"const": "lookup_user"},
+ "arguments": {"type": "object", "properties": {...}}},
+ "required": ["tool", "arguments"]},
+ {"type": "object",
+ "properties": {"tool": {"const": "send_email"},
+ "arguments": {"type": "object", "properties": {...}}},
+ "required": ["tool", "arguments"]},
+ {"type": "object",
+ "properties": {"answer": {"type": "string"}},
+ "required": ["answer"]}
+ ]
 }</pre>
 
-    <p>One <code>oneOf</code> branch per registered tool, plus an &quot;answer&quot; branch for direct replies. <code>tool_choice</code> tightens the schema:</p>
+ <p>One <code>oneOf</code> branch per registered tool, plus an &quot;answer&quot; branch for direct replies. <code>tool_choice</code> tightens the schema:</p>
 
-    <ul>
-      <li><code>&quot;none&quot;</code> &rarr; only the answer branch is allowed</li>
-      <li><code>&quot;auto&quot;</code> &rarr; tools plus answer (default)</li>
-      <li><code>&quot;required&quot;</code> &rarr; tools only, no answer escape</li>
-      <li><code>{&quot;type&quot;:&quot;function&quot;,&quot;function&quot;:{&quot;name&quot;:&quot;send_email&quot;}}</code> &rarr; exactly that one tool</li>
-    </ul>
+ <ul>
+ <li><code>&quot;none&quot;</code> &rarr; only the answer branch is allowed</li>
+ <li><code>&quot;auto&quot;</code> &rarr; tools plus answer (default)</li>
+ <li><code>&quot;required&quot;</code> &rarr; tools only, no answer escape</li>
+ <li><code>{&quot;type&quot;:&quot;function&quot;,&quot;function&quot;:{&quot;name&quot;:&quot;send_email&quot;}}</code> &rarr; exactly that one tool</li>
+ </ul>
 
-    <h3>Parsing back</h3>
+ <h3>Parsing back</h3>
 
-    <p>After generation, the response is parsed by <code>parse_native_tool_call()</code> for the rendered format, or <code>parse_envelope()</code> for the JSON envelope. Both return a <code>ParsedResponse</code> with either an <code>answer</code> string or a tuple of <code>ToolCall</code>s. Each call has a stable id (<code>call_&lt;24-hex&gt;</code>) so the receipt chain can reference the same call across retries and tool-result follow-ups.</p>
+ <p>After generation, the response is parsed by <code>parse_native_tool_call()</code> for the rendered format, or <code>parse_envelope()</code> for the JSON envelope. Both return a <code>ParsedResponse</code> with either an <code>answer</code> string or a tuple of <code>ToolCall</code>s. Each call has a stable id (<code>call_&lt;24-hex&gt;</code>) so the receipt chain can reference the same call across retries and tool-result follow-ups.</p>
 
-    <p>The end-to-end shape:</p>
+ <p>The end-to-end shape:</p>
 
-    <pre>from apps.runtime.tools import parse_tools_field, union_schema, render_tool_prompt, parse_envelope
+ <pre>from apps.runtime.tools import parse_tools_field, union_schema, render_tool_prompt, parse_envelope
 from apps.runtime.constrained import json_schema_processor
 
 tools = parse_tools_field(request_body["tools"])
@@ -285,90 +287,90 @@ prompt = system_prompt + "\n" + tool_block + "\n" + user_message
 out = model.generate(prompt, logits_processor=[processor])
 parsed = parse_envelope(out)</pre>
 
-    <p>Every emission is guaranteed to parse as <code>{tool, arguments}</code> or <code>{answer}</code>. The receipt records the parsed structure, not the raw bytes, so a buyer auditing the call sees the tool name and arguments directly.</p>
+ <p>Every emission is guaranteed to parse as <code>{tool, arguments}</code> or <code>{answer}</code>. The receipt records the parsed structure, not the raw bytes, so a buyer auditing the call sees the tool name and arguments directly.</p>
 
-    <h2>Why this is the right shape</h2>
+ <h2>Why this is the right shape</h2>
 
-    <p>The alternative is to leave parsing to a try/except + retry loop, which costs latency, doubles tokens on retry, and produces an unbounded tail where the model never converges to valid JSON. The alternative gives up on the constraint at exactly the wrong moment: when production is bursty and the retry budget runs out, the contract breaks.</p>
+ <p>The alternative is to leave parsing to a try/except + retry loop, which costs latency, doubles tokens on retry, and produces an unbounded tail where the model never converges to valid JSON. The alternative gives up on the constraint at exactly the wrong moment: when production is bursty and the retry budget runs out, the contract breaks.</p>
 
-    <p>Constrained decoding makes the contract physical. The model cannot emit a token that breaks the schema, so the parse cannot fail. The receipt records the schema as part of the manifest hash, so the buyer's auditor can prove that the run was bound by a schema and not by a hopeful try/except.</p>
+ <p>Constrained decoding makes the contract physical. The model cannot emit a token that breaks the schema, so the parse cannot fail. The receipt records the schema as part of the manifest hash, so the buyer's auditor can prove that the run was bound by a schema and not by a hopeful try/except.</p>
 
-    <h2>What we are not promising</h2>
+ <h2>What we are not promising</h2>
 
-    <p><strong>Constrained decoding does not improve quality.</strong> It enforces shape, not correctness. A model can emit a perfectly valid JSON object with a wrong answer in it. K-score still gates the artifact, and the judge surface (LLM-as-judge, hallucination detection) still grades the content.</p>
+ <p><strong>Constrained decoding does not improve quality.</strong> It enforces shape, not correctness. A model can emit a perfectly valid JSON object with a wrong answer in it. K-score still gates the artifact, and the judge surface (LLM-as-judge, hallucination detection) still grades the content.</p>
 
-    <p><strong>Performance overhead is not zero.</strong> Maintaining the FSM costs a few microseconds per token in CPU time. On a fast decoder this is invisible; on llama.cpp running on a phone it is measurable. The trade is worth it because the alternative is retries, which cost orders of magnitude more.</p>
+ <p><strong>Performance overhead is not zero.</strong> Maintaining the FSM costs a few microseconds per token in CPU time. On a fast decoder this is invisible; on llama.cpp running on a phone it is measurable. The trade is worth it because the alternative is retries, which cost orders of magnitude more.</p>
 
-    <p><strong>EBNF / CFG modes are heavier.</strong> A complex grammar compiles to a large FSM. For very-large SQL grammars we recommend a JSON-schema constraint over the parameter struct rather than the full SQL grammar.</p>
+ <p><strong>EBNF / CFG modes are heavier.</strong> A complex grammar compiles to a large FSM. For very-large SQL grammars we recommend a JSON-schema constraint over the parameter struct rather than the full SQL grammar.</p>
 
-    <div class="citations">
-      <p><strong>References and source</strong></p>
-      <p>Willard, B. T. &amp; Louf, R. <em>Efficient Guided Generation for Large Language Models</em>. 2023.</p>
-      <p>lm-format-enforcer. <a href="https://github.com/noamgat/lm-format-enforcer" rel="noopener">github.com/noamgat/lm-format-enforcer</a></p>
-      <p>Outlines. <a href="https://github.com/dottxt-ai/outlines" rel="noopener">github.com/dottxt-ai/outlines</a></p>
-      <p>kolm implementation: <code>apps/runtime/constrained.py</code> and <code>apps/runtime/tools.py</code>.</p>
-    </div>
+ <div class="citations">
+ <p><strong>References and source</strong></p>
+ <p>Willard, B. T. &amp; Louf, R. <em>Efficient Guided Generation for Large Language Models</em>. 2023.</p>
+ <p>lm-format-enforcer. <a href="https://github.com/noamgat/lm-format-enforcer" rel="noopener">github.com/noamgat/lm-format-enforcer</a></p>
+ <p>Outlines. <a href="https://github.com/dottxt-ai/outlines" rel="noopener">github.com/dottxt-ai/outlines</a></p>
+ <p>kolm implementation: <code>apps/runtime/constrained.py</code> and <code>apps/runtime/tools.py</code>.</p>
+ </div>
 
-    <div class="meta-line" style="margin-top:36px">
-      <a class="nb" href="/research">&larr; Back to research</a>
-      <span>&middot;</span>
-      <a class="nb" href="/research#constrained">Frontier reference &middot; constrained</a>
-      <span>&middot;</span>
-      <a class="nb" href="/spec">RS-1 spec</a>
-    </div>
-  </div>
+ <div class="meta-line" style="margin-top:36px">
+ <a class="nb" href="/research">&larr; Back to research</a>
+ <span>&middot;</span>
+ <a class="nb" href="/research#constrained">Frontier reference &middot; constrained</a>
+ <span>&middot;</span>
+ <a class="nb" href="/spec">RS-1 spec</a>
+ </div>
+ </div>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 <script src="/nav.js"></script>
 </body>

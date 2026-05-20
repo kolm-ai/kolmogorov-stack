@@ -1,11 +1,11 @@
 ---
 title: kolm distill · kolm.ai
-description: Auto-distill a captured namespace into a local LoRA via the kolm trainer bridge.
+description: Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge.
 ---
 
 # kolm distill
 
-> Auto-distill a captured namespace into a local LoRA via the kolm trainer bridge.
+> Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge.
 
 ## Usage
 
@@ -13,14 +13,14 @@ description: Auto-distill a captured namespace into a local LoRA via the kolm tr
 kolm distill --namespace <n> [--base-model <name>] [--target <size>]
 
 kolm distill --local-worker --spec <file> --seeds <file> --out <dir>
-             [--mode stub|collect|full|doctor]
-             [--teacher <vendor:model>] [--student-base <name>]
-             [--teacher-version <string>]
-             [--student-base-revision <commit-hash>]
-             [--distillation-method lora|qlora|full-ft|prompt-distill]
-             [--allow-unknown-student-base]
-             [--split-seed N] [--redact phi|pci|multi|none|auto]
-             [--no-redact]
+ [--mode stub|collect|full|doctor]
+ [--teacher <vendor:model>] [--student-base <name>]
+ [--teacher-version <string>]
+ [--student-base-revision <commit-hash>]
+ [--distillation-method lora|qlora|full-ft|prompt-distill]
+ [--allow-unknown-student-base]
+ [--split-seed N] [--redact phi|pci|multi|none|auto]
+ [--no-redact]
 
 kolm distill --local-worker --list-catalog
 ```
@@ -60,10 +60,10 @@ kolm distill --namespace tickets
 
 # local-worker path with a cross-vendor teacher
 kolm distill --local-worker \
-  --spec phi.spec.json --seeds seeds.jsonl --out ./out \
-  --teacher anthropic:claude-haiku-4-5-20251001 \
-  --student-base qwen2.5-3b \
-  --mode full --redact phi
+ --spec phi.spec.json --seeds seeds.jsonl --out ./out \
+ --teacher anthropic:claude-haiku-4-5-20251001 \
+ --student-base qwen2.5-3b \
+ --mode full --redact phi
 
 # inspect the catalog
 kolm distill --local-worker --list-catalog

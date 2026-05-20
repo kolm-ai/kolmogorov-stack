@@ -11,44 +11,44 @@
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="Tailscale recipe: push artifacts across your tailnet">
-<meta property="og:description" content="Mirror compiled .kolm artifacts to every device on your tailnet with one kolm sync verb.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Tailscale recipe: push artifacts across your tailnet · kolm.ai">
+<meta property="og:description" content="Use Tailscale + kolm sync to mirror compiled .kolm artifacts to every device on your tailnet. One verb, no port forwarding, no public github repo.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/foundations/tailscale">
-<meta property="og:image" content="https://kolm.ai/og/foundations-tailscale.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Tailscale recipe · kolm.ai">
-<meta name="twitter:description" content="Tailnet-scoped artifact mirror in one verb.">
-<meta name="twitter:image" content="https://kolm.ai/og/foundations-tailscale.svg">
+<meta name="twitter:title" content="Tailscale recipe: push artifacts across your tailnet · kolm.ai">
+<meta name="twitter:description" content="Use Tailscale + kolm sync to mirror compiled .kolm artifacts to every device on your tailnet. One verb, no port forwarding, no public github repo.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/foundations/tailscale">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "@id": "https://kolm.ai/foundations/tailscale#article",
-      "headline": "Tailscale recipe: push artifacts across your tailnet",
-      "description": "Use Tailscale plus kolm sync to mirror compiled .kolm artifacts to every device on your tailnet.",
-      "author": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
-      "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
-      "image": "https://kolm.ai/og/foundations-tailscale.svg",
-      "datePublished": "2026-05-18",
-      "dateModified": "2026-05-18",
-      "mainEntityOfPage": "https://kolm.ai/foundations/tailscale",
-      "articleSection": "Foundations"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
-        { "@type": "ListItem", "position": 2, "name": "Foundations", "item": "https://kolm.ai/foundations" },
-        { "@type": "ListItem", "position": 3, "name": "Tailscale", "item": "https://kolm.ai/foundations/tailscale" }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "Article",
+ "@id": "https://kolm.ai/foundations/tailscale#article",
+ "headline": "Tailscale recipe: push artifacts across your tailnet",
+ "description": "Use Tailscale plus kolm sync to mirror compiled .kolm artifacts to every device on your tailnet.",
+ "author": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
+ "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
+ "image": "https://kolm.ai/og/foundations-tailscale.svg",
+ "datePublished": "2026-05-18",
+ "dateModified": "2026-05-18",
+ "mainEntityOfPage": "https://kolm.ai/foundations/tailscale",
+ "articleSection": "Foundations"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Foundations", "item": "https://kolm.ai/foundations" },
+ { "@type": "ListItem", "position": 3, "name": "Tailscale", "item": "https://kolm.ai/foundations/tailscale" }
+ ]
+ }
+ ]
 }
 </script>
 <style>
@@ -74,6 +74,7 @@ pre{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:16p
 footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
 @media (max-width:560px){main{padding:32px 18px 64px}h1{font-size:30px}h2{font-size:22px}}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>
@@ -103,8 +104,8 @@ kolm compile spec.json --out artifact.kolm
 
 # 2. push to the tailnet-private mirror
 kolm sync push artifact.kolm --git git@hub.tailnet-name.ts.net:/srv/kolm/mirror.git \
-  --subdir prod/$(date +%Y%m%d) \
-  --message "prod recipe v3, K-score 0.91"
+ --subdir prod/$(date +%Y%m%d) \
+ --message "prod recipe v3, K-score 0.91"
 
 # 3. on any consumer box (laptop, phone via Termius, edge VM)
 kolm sync pull --git git@hub.tailnet-name.ts.net:/srv/kolm/mirror.git

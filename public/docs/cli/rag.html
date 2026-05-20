@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm rag · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm rag CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/rag">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm rag","description":"Reference for the kolm rag CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/rag","mainEntityOfPage":"https://kolm.ai/docs/cli/rag","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm rag · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm rag CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,7 +176,7 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="rag">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>rag</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>rag</span>
 </nav>
 <p>--- title: kolm rag · kolm.ai description: Airgapped local retrieval (BM25, no embedder, no network). ---</p>
 <h1>kolm rag</h1>
@@ -197,8 +201,8 @@ kolm rag list
 <p>Inside a recipe:</p>
 <pre><code>
 function generate(input, lib) {
-  var hits = lib.rag ? lib.rag.query(input.q, 3).matches : [];
-  // ...
+ var hits = lib.rag ? lib.rag.query(input.q, 3).matches : [];
+ // ...
 }
 </code></pre>
 <p>The runtime exposes <code>lib.rag.query(q, k)</code> only to recipes that have been attached to an index. Indexes are stored in <code>~/.kolm/rag/&lt;name&gt;/</code>.</p>
@@ -209,13 +213,13 @@ function generate(input, lib) {
 <li><a href="/docs/cli/compile">kolm compile</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

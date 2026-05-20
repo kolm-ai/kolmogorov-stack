@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Vercel AI SDK &middot; kolm.ai</title>
+<title>Vercel AI SDK · kolm.ai</title>
 <meta name="description" content="Use the Vercel AI SDK ai/openai provider with a custom baseURL pointed at kolm.ai. Next.js streaming, server actions, and edge runtime all work unchanged.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Vercel AI SDK &middot; kolm.ai">
-<meta property="og:description" content="ai/openai with baseURL=kolm. Next.js streaming, server actions, edge runtime.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Vercel AI SDK · kolm.ai">
+<meta property="og:description" content="Use the Vercel AI SDK ai/openai provider with a custom baseURL pointed at kolm.ai. Next.js streaming, server actions, and edge runtime all work unchanged.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations/vercel-ai-sdk">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Vercel AI SDK &middot; kolm.ai">
-<meta name="twitter:description" content="ai/openai with a custom baseURL. That is the entire change.">
+<meta name="twitter:title" content="Vercel AI SDK · kolm.ai">
+<meta name="twitter:description" content="Use the Vercel AI SDK ai/openai provider with a custom baseURL pointed at kolm.ai. Next.js streaming, server actions, and edge runtime all work unchanged.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/integrations/vercel-ai-sdk">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -54,12 +54,13 @@ pre.code{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-ra
 footer{padding:36px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &ndash; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
+ <a class="logo" href="/">kolm.ai</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -215,72 +216,72 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <main id="main">
 
 <section class="hero"><div class="wrap">
-  <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / vercel ai sdk</div>
-  <h1>The Vercel AI SDK, with kolm as the provider.</h1>
-  <p class="lede">The <code>ai</code> + <code>@ai-sdk/openai</code> combo already accepts a custom <code>baseURL</code>. Point it at kolm.ai and every <code>generateText</code>, <code>streamText</code>, and server action in your Next.js app keeps working. Captures, redaction, and signed receipts come along.</p>
+ <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / vercel ai sdk</div>
+ <h1>The Vercel AI SDK, with kolm as the provider.</h1>
+ <p class="lede">The <code>ai</code> + <code>@ai-sdk/openai</code> combo already accepts a custom <code>baseURL</code>. Point it at kolm.ai and every <code>generateText</code>, <code>streamText</code>, and server action in your Next.js app keeps working. Captures, redaction, and signed receipts come along.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>How it works in one paragraph</h2>
-  <p>The Vercel AI SDK exposes <code>createOpenAI({ baseURL, apiKey })</code> from <code>@ai-sdk/openai</code>. kolm.ai speaks the OpenAI Chat Completions wire format, so the provider works as a drop-in. Streaming responses (<code>streamText</code>), tool calling, structured outputs (<code>generateObject</code>), and the Next.js edge runtime all behave the same way. Every call lands in your captures inbox and is tagged with the namespace you pass through <code>headers</code>.</p>
+ <h2>How it works in one paragraph</h2>
+ <p>The Vercel AI SDK exposes <code>createOpenAI({ baseURL, apiKey })</code> from <code>@ai-sdk/openai</code>. kolm.ai speaks the OpenAI Chat Completions wire format, so the provider works as a drop-in. Streaming responses (<code>streamText</code>), tool calling, structured outputs (<code>generateObject</code>), and the Next.js edge runtime all behave the same way. Every call lands in your captures inbox and is tagged with the namespace you pass through <code>headers</code>.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Next.js server action &ndash; one line</h2>
-  <p>Create a single provider instance, pass it to <code>generateText</code> or <code>streamText</code>. Works in <code>app/</code> route handlers, server actions, and edge runtime alike.</p>
-  <div class="tabs"><span>next.js &ndash; ai &gt;= 4 &middot; @ai-sdk/openai</span></div>
+ <h2>Next.js server action &ndash; one line</h2>
+ <p>Create a single provider instance, pass it to <code>generateText</code> or <code>streamText</code>. Works in <code>app/</code> route handlers, server actions, and edge runtime alike.</p>
+ <div class="tabs"><span>next.js &ndash; ai &gt;= 4 &middot; @ai-sdk/openai</span></div>
 <pre class="code">// app/api/chat/route.ts
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
 const kolm = createOpenAI({
-  baseURL: "https://kolm.ai/v1",
-  apiKey:  process.env.KOLM_API_KEY,
+ baseURL: "https://kolm.ai/v1",
+ apiKey: process.env.KOLM_API_KEY,
 });
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
-  const result = await streamText({
-    model: kolm("qwen-3.5-27b"),
-    messages,
-  });
-  return result.toDataStreamResponse();
+ const { messages } = await req.json();
+ const result = await streamText({
+ model: kolm("qwen-3.5-27b"),
+ messages,
+ });
+ return result.toDataStreamResponse();
 }</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Server-side &ndash; generateObject with kolm</h2>
-  <p>Structured outputs work the same way. Pass a Zod schema, get a typed object back, see the call in your captures inbox.</p>
-  <div class="tabs"><span>typescript &ndash; ai/generateObject</span></div>
+ <h2>Server-side &ndash; generateObject with kolm</h2>
+ <p>Structured outputs work the same way. Pass a Zod schema, get a typed object back, see the call in your captures inbox.</p>
+ <div class="tabs"><span>typescript &ndash; ai/generateObject</span></div>
 <pre class="code">import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { z } from "zod";
 
 const kolm = createOpenAI({
-  baseURL: "https://kolm.ai/v1",
-  apiKey:  process.env.KOLM_API_KEY,
+ baseURL: "https://kolm.ai/v1",
+ apiKey: process.env.KOLM_API_KEY,
 });
 
 const { object } = await generateObject({
-  model:  kolm("qwen-3.5-27b"),
-  schema: z.object({ severity: z.enum(["low","med","high"]), reason: z.string() }),
-  prompt: "Classify this support ticket: ...",
+ model: kolm("qwen-3.5-27b"),
+ schema: z.object({ severity: z.enum(["low","med","high"]), reason: z.string() }),
+ prompt: "Classify this support ticket: ...",
 });</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Where to go next</h2>
-  <div class="related">
-    <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. The wire protocol underneath.</span></a>
-    <a href="/captures"><b>Captures inbox &rarr;</b><span>See every server-action call land as a row.</span></a>
-    <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
-  </div>
+ <h2>Where to go next</h2>
+ <div class="related">
+ <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. The wire protocol underneath.</span></a>
+ <a href="/captures"><b>Captures inbox &rarr;</b><span>See every server-action call land as a row.</span></a>
+ <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
+ </div>
 </div></section>
 
 </main>
 
 <footer><div class="wrap">
-  <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
 </div></footer>
 </body>
 </html>

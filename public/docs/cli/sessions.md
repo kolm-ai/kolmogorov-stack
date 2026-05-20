@@ -16,12 +16,12 @@ kolm sessions prune [--dead-only] [--older-than 7d]
 ## Examples
 
 ```
-kolm sessions list                         # table of every detached session
-kolm sessions show sess_abc                # full record + recent log tail
-kolm sessions kill sess_abc                # SIGTERM by default
+kolm sessions list # table of every detached session
+kolm sessions show sess_abc # full record + recent log tail
+kolm sessions kill sess_abc # SIGTERM by default
 kolm sessions kill sess_abc --signal SIGKILL
-kolm sessions prune --dead-only            # remove records whose pid is gone
-kolm sessions prune --older-than 7d        # garbage-collect old records
+kolm sessions prune --dead-only # remove records whose pid is gone
+kolm sessions prune --older-than 7d # garbage-collect old records
 ```
 
 ## Output

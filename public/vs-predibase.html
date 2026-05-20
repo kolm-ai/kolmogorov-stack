@@ -10,327 +10,328 @@
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="kolm vs Predibase">
-<meta property="og:description" content="Predibase trains LoRAs and serves them on their cloud. kolm compiles a task into a signed file you keep.">
+<meta property="og:title" content="kolm vs Predibase: managed LoRA cloud vs portable file · kolm.ai">
+<meta property="og:description" content="Predibase is a managed LoRA fine-tune and serve platform. kolm compiles a task into a portable signed artifact you own. When to use each.">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="kolm vs Predibase" />
-<meta name="twitter:description" content="Predibase trains LoRAs and serves them on their cloud. kolm compiles a task into a signed file you keep." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm vs Predibase: managed LoRA cloud vs portable file · kolm.ai">
+<meta name="twitter:description" content="Predibase is a managed LoRA fine-tune and serve platform. kolm compiles a task into a portable signed artifact you own. When to use each.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/vs-predibase">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/vs-predibase">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #faf2e1; --accent-strong: #c9c2b2; --good: #7ef0d2; --bad: #ff6b91;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
-  .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2; --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
 
-  header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
-  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
-  header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
-  header.site nav a:hover { color: var(--ink); }
-  header.site .right { display: flex; align-items: center; gap: 14px; }
-  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
-  @media (max-width: 720px) { header.site nav { display: none; } }
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
 
-  section.hero { padding: 88px 0 32px; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
-  h1 { margin: 22px 0 16px; font-size: clamp(36px, 5vw, 52px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
-  h1 .tone { color: var(--accent); }
-  p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+ section.hero { padding: 88px 0 32px; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ h1 { margin: 22px 0 16px; font-size: clamp(36px, 5vw, 52px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
+ h1 .tone { color: var(--accent); }
+ p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
 
-  .one-line { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 14px; margin: 24px 0 0; align-items: stretch; }
-  @media (max-width: 720px) { .one-line { grid-template-columns: 1fr; } .one-line .arrow { display: none; } }
-  .one-line .col { padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
-  .one-line .col h3 { margin: 0 0 8px; font-size: 15px; font-weight: 500; color: var(--ink); }
-  .one-line .col p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
-  .one-line .arrow { display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: var(--mono); font-size: 22px; }
+ .one-line { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 14px; margin: 24px 0 0; align-items: stretch; }
+ @media (max-width: 720px) { .one-line { grid-template-columns: 1fr; } .one-line .arrow { display: none; } }
+ .one-line .col { padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
+ .one-line .col h3 { margin: 0 0 8px; font-size: 15px; font-weight: 500; color: var(--ink); }
+ .one-line .col p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
+ .one-line .arrow { display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: var(--mono); font-size: 22px; }
 
-  .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
-  .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
-  .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
+ .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
+ .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
+ .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
 
-  table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
-  table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
-  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
-  table.tbl td { color: var(--ink-mute); }
-  table.tbl td b { color: var(--ink); font-weight: 500; }
-  table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; width: 26%; }
-  table.tbl td .ok { color: var(--good); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
-  table.tbl td .no { color: var(--bad); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
-  table.tbl td .partial { color: var(--ink-faint); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
-  @media (max-width: 720px) {
-    table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
-    table.tbl thead { display: none; }
-    table.tbl tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
-    table.tbl td { border: 0; padding: 4px 0; }
-    table.tbl td.row-h { font-size: 12px; margin-bottom: 6px; }
-    table.tbl td::before { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 2px; }
-    table.tbl td[data-l]::before { content: attr(data-l); }
-  }
+ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
+ table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
+ table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
+ table.tbl td { color: var(--ink-mute); }
+ table.tbl td b { color: var(--ink); font-weight: 500; }
+ table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; width: 26%; }
+ table.tbl td .ok { color: var(--good); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+ table.tbl td .no { color: var(--bad); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+ table.tbl td .partial { color: var(--ink-faint); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+ @media (max-width: 720px) {
+ table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
+ table.tbl thead { display: none; }
+ table.tbl tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
+ table.tbl td { border: 0; padding: 4px 0; }
+ table.tbl td.row-h { font-size: 12px; margin-bottom: 6px; }
+ table.tbl td::before { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 2px; }
+ table.tbl td[data-l]::before { content: attr(data-l); }
+ }
 
-  pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 14px 0; white-space: pre; }
-  @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
-  pre.code .c { color: var(--ink-faint); }
-  pre.code .ok { color: var(--good); }
-  pre.code .k { color: var(--accent-strong); }
+ pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 14px 0; white-space: pre; }
+ @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
+ pre.code .c { color: var(--ink-faint); }
+ pre.code .ok { color: var(--good); }
+ pre.code .k { color: var(--accent-strong); }
 
-  .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
-  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
-  .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
-  .verdict p:last-child { margin-bottom: 0; }
-  .verdict b { color: var(--ink); font-weight: 500; }
+ .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
+ .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
+ .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
+ .verdict p:last-child { margin-bottom: 0; }
+ .verdict b { color: var(--ink); font-weight: 500; }
 
-  .concession { margin: 16px 0 0; padding: 18px 22px; border: 1px solid var(--line); border-left: 2px solid var(--ink-mute); border-radius: 0 8px 8px 0; background: var(--bg-elev); }
-  .concession .lab { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
-  .concession p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
+ .concession { margin: 16px 0 0; padding: 18px 22px; border: 1px solid var(--line); border-left: 2px solid var(--ink-mute); border-radius: 0 8px 8px 0; background: var(--bg-elev); }
+ .concession .lab { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+ .concession p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
 
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
-  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  footer.site a { color: var(--ink-mute); }
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-mute); }
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"kolm","description":"kolm vs Predibase: hosted distillation platform vs portable signed artifact you own and run locally.","brand":{"@type":"Brand","name":"Kolmogorov"},"url":"https://kolm.ai/vs-predibase","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","url":"https://kolm.ai/pricing"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://kolm.ai/compare"},{"@type":"ListItem","position":3,"name":"kolm vs Predibase"}]}</script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <span class="pill">vs Predibase</span>
-    <h1>Same task. <span class="tone">Different deliverable.</span></h1>
-    <p class="lede">Predibase is excellent at training and serving many LoRAs on a managed cloud. kolm v0.2 compiles a recipe-class artifact (deterministic code + K-score gate + HMAC-signed manifest + receipt, with optional MoE composition and bundled tokenizer) you keep as a file; loading a trained LoRA adapter into the artifact via the weight-bridge path ships today.</p>
+ <div class="wrap">
+ <span class="pill">vs Predibase</span>
+ <h1>Same task. <span class="tone">Different deliverable.</span></h1>
+ <p class="lede">Predibase is excellent at training and serving many LoRAs on a managed cloud. kolm v0.2 compiles a recipe-class artifact (deterministic code + K-score gate + Ed25519-signed manifest + receipt, with optional MoE composition and bundled tokenizer) you keep as a file; loading a trained LoRA adapter into the artifact via the weight-bridge path ships today.</p>
 
-    <div class="one-line">
-      <div class="col">
-        <h3>Predibase</h3>
-        <p>A <b>fine-tune + serve</b> platform. LoRAX server, multi-tenant LoRA hosting, training pipelines, hosted inference. The output is an endpoint on Predibase cloud.</p>
-      </div>
-      <div class="arrow">vs</div>
-      <div class="col">
-        <h3>kolm</h3>
-        <p>A <b>compiler</b>. In v0.2 it synthesises a deterministic recipe pack from your examples, gates it on K-score against a held-out set, and packages the recipe + examples + evaluator + manifest + HMAC signature (plus an optional byte-level BPE tokenizer and an optional MoE composition block) into one <code>.kolm</code> file you keep. Native LoRA / INT4 / GGUF bundling ships through the runtime bridge.</p>
-      </div>
-    </div>
-  </div>
+ <div class="one-line">
+ <div class="col">
+ <h3>Predibase</h3>
+ <p>A <b>fine-tune + serve</b> platform. LoRAX server, multi-tenant LoRA hosting, training pipelines, hosted inference. The output is an endpoint on Predibase cloud.</p>
+ </div>
+ <div class="arrow">vs</div>
+ <div class="col">
+ <h3>kolm</h3>
+ <p>A <b>compiler</b>. In v0.2 it synthesises a deterministic recipe pack from your examples, gates it on K-score against a held-out set, and packages the recipe + examples + evaluator + manifest + Ed25519 signature (plus an optional byte-level BPE tokenizer and an optional MoE composition block) into one <code>.kolm</code> file you keep. Native LoRA / INT4 / GGUF bundling ships through the runtime bridge.</p>
+ </div>
+ </div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="group">
-      <h2>The job each one does</h2>
-      <p>Predibase optimizes the case where you want to ship many LoRAs behind one inference endpoint and have someone else operate the GPUs. kolm optimizes the case where the deliverable is the artifact - signed, portable, with the evaluator that gated it included in the file - so it can run inside the customer's network or on a phone with proof of what it does.</p>
-      <p>Both are reasonable answers to "I want a small task-specific model." The right answer depends on whether you want a hosted endpoint or a sealed artifact.</p>
-    </div>
+ <div class="group">
+ <h2>The job each one does</h2>
+ <p>Predibase optimizes the case where you want to ship many LoRAs behind one inference endpoint and have someone else operate the GPUs. kolm optimizes the case where the deliverable is the artifact - signed, portable, with the evaluator that gated it included in the file - so it can run inside the customer's network or on a phone with proof of what it does.</p>
+ <p>Both are reasonable answers to "I want a small task-specific model." The right answer depends on whether you want a hosted endpoint or a sealed artifact.</p>
+ </div>
 
-    <div class="group">
-      <h2>Where things stand in 2026</h2>
-      <p><b>Predibase was acquired by Rubrik in July 2025 for a reported $109M.</b> OpenPipe was acquired by CoreWeave two months later. The two strongest distillation-platform companies in this lane are now product lines inside a backup-vendor and a GPU-cloud. The hosted LoRAX endpoints continue to exist, but the independent companies do not.</p>
-      <p>This is a market signal worth reading plainly. Distilling cheaper, task-specific models is a real category - real enough to be acquired twice in three months. It also means the tools you might have stitched together a year ago now have the priorities of the acquiring cloud. <b>kolm is the independent path.</b> A <code>.kolm</code> file does not require any vendor to stay in business. The file works because it is a file.</p>
-    </div>
+ <div class="group">
+ <h2>Where things stand in 2026</h2>
+ <p><b>Predibase was acquired by Rubrik in July 2025 for a reported $109M.</b> OpenPipe was acquired by CoreWeave two months later. The two strongest distillation-platform companies in this lane are now product lines inside a backup-vendor and a GPU-cloud. The hosted LoRAX endpoints continue to exist, but the independent companies do not.</p>
+ <p>This is a market signal worth reading plainly. Distilling cheaper, task-specific models is a real category - real enough to be acquired twice in three months. It also means the tools you might have stitched together a year ago now have the priorities of the acquiring cloud. <b>kolm is the independent path.</b> A <code>.kolm</code> file does not require any vendor to stay in business. The file works because it is a file.</p>
+ </div>
 
-    <div class="concession">
-      <div class="lab">where Predibase (now Rubrik) wins</div>
-      <p>If you operate dozens of LoRAs as a multi-tenant SaaS and the right primitive for you is "one inference endpoint, many adapters," Predibase's LoRAX serving is the better answer. We do not try to compete on multi-LoRA serving infra. The right composition is to use Predibase as a training back-end and ship the LoRA inside a <code>.kolm</code> for the on-device or in-VPC tier.</p>
-    </div>
+ <div class="concession">
+ <div class="lab">where Predibase (now Rubrik) wins</div>
+ <p>If you operate dozens of LoRAs as a multi-tenant SaaS and the right primitive for you is "one inference endpoint, many adapters," Predibase's LoRAX serving is the better answer. We do not try to compete on multi-LoRA serving infra. The right composition is to use Predibase as a training back-end and ship the LoRA inside a <code>.kolm</code> for the on-device or in-VPC tier.</p>
+ </div>
 
-    <div class="group">
-      <h2>Side-by-side</h2>
-      <table class="tbl">
-        <thead>
-          <tr><th></th><th>Predibase</th><th>kolm</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="row-h">What it is</td>
-            <td data-l="Predibase">Hosted LoRA fine-tune + multi-tenant serve</td>
-            <td data-l="kolm">Compiler that produces a signed task artifact</td>
-          </tr>
-          <tr>
-            <td class="row-h">Output</td>
-            <td data-l="Predibase">Inference endpoint on Predibase cloud</td>
-            <td data-l="kolm">A signed <code>.kolm</code> file (&le;3 GB) you own</td>
-          </tr>
-          <tr>
-            <td class="row-h">Where it runs</td>
-            <td data-l="Predibase">Predibase cloud (or BYO inference for the LoRA)</td>
-            <td data-l="kolm">Phone, laptop, server, edge - or any GGUF-compatible runtime</td>
-          </tr>
-          <tr>
-            <td class="row-h">Quality gate</td>
-            <td data-l="Predibase"><span class="partial">user-supplied evals</span></td>
-            <td data-l="kolm"><span class="ok">K-score</span> on a held-out set, gated at 0.85 default, included in the artifact</td>
-          </tr>
-          <tr>
-            <td class="row-h">Receipts / signing</td>
-            <td data-l="Predibase"><span class="no">no</span></td>
-            <td data-l="kolm"><span class="ok">HMAC-SHA256 artifact signature</span> + per-call <code>_kolm</code> run metadata</td>
-          </tr>
-          <tr>
-            <td class="row-h">Multimodal recall</td>
-            <td data-l="Predibase"><span class="partial">bring your own RAG</span></td>
-            <td data-l="kolm"><span class="partial">v0.2 ships a JSON lookup container (KOLMIDX); full sqlite-vec index ships through the runtime bridge</span></td>
-          </tr>
-          <tr>
-            <td class="row-h">Multi-LoRA serve</td>
-            <td data-l="Predibase"><span class="ok">LoRAX, dozens of adapters per host</span></td>
-            <td data-l="kolm"><span class="ok">v0.2 ships MoE compose: <code>kolm moe compose --expert a.kolm --expert b.kolm --router router.json</code> &mdash; N experts, one composite, deterministic router</span></td>
-          </tr>
-          <tr>
-            <td class="row-h">Tokenizer story</td>
-            <td data-l="Predibase">inherits the base model's tokenizer</td>
-            <td data-l="kolm"><span class="ok">v0.2 ships an optional pure-JS byte-level BPE tokenizer (<code>kolm-tokenizer-1</code>) embedded inside the artifact &mdash; deterministic, no native deps</span></td>
-          </tr>
-          <tr>
-            <td class="row-h">Document ingest</td>
-            <td data-l="Predibase">user supplies extracted text</td>
-            <td data-l="kolm"><span class="ok">v0.2 ships <code>kolm extract</code> (PDF text-layer, HTML, JSON/JSONL, opt-in OCR / vision) and <code>kolm doc check</code> for completeness gating</span></td>
-          </tr>
-          <tr>
-            <td class="row-h">Air-gap / private VPC</td>
-            <td data-l="Predibase">VPC deploy is enterprise-tier</td>
-            <td data-l="kolm">artifact runs offline by construction</td>
-          </tr>
-          <tr>
-            <td class="row-h">Pull-out cost</td>
-            <td data-l="Predibase">extracting the LoRA + a comparable runtime is project-sized</td>
-            <td data-l="kolm">the artifact is a file. Mount it. Done.</td>
-          </tr>
-          <tr>
-            <td class="row-h">License</td>
-            <td data-l="Predibase">Predibase commercial; LoRAX OSS</td>
-            <td data-l="kolm">RS-1 spec Apache-2.0, SDK Apache-2.0, paid managed compile</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+ <div class="group">
+ <h2>Side-by-side</h2>
+ <table class="tbl">
+ <thead>
+ <tr><th></th><th>Predibase</th><th>kolm</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td class="row-h">What it is</td>
+ <td data-l="Predibase">Hosted LoRA fine-tune + multi-tenant serve</td>
+ <td data-l="kolm">Compiler that produces a signed task artifact</td>
+ </tr>
+ <tr>
+ <td class="row-h">Output</td>
+ <td data-l="Predibase">Inference endpoint on Predibase cloud</td>
+ <td data-l="kolm">A signed <code>.kolm</code> file (&le;3 GB) you own</td>
+ </tr>
+ <tr>
+ <td class="row-h">Where it runs</td>
+ <td data-l="Predibase">Predibase cloud (or BYO inference for the LoRA)</td>
+ <td data-l="kolm">Phone, laptop, server, edge - or any GGUF-compatible runtime</td>
+ </tr>
+ <tr>
+ <td class="row-h">Quality gate</td>
+ <td data-l="Predibase"><span class="partial">user-supplied evals</span></td>
+ <td data-l="kolm"><span class="ok">K-score</span> on a held-out set, gated at 0.85 default, included in the artifact</td>
+ </tr>
+ <tr>
+ <td class="row-h">Receipts / signing</td>
+ <td data-l="Predibase"><span class="no">no</span></td>
+ <td data-l="kolm"><span class="ok">Ed25519 artifact signature</span> + per-call <code>_kolm</code> run metadata</td>
+ </tr>
+ <tr>
+ <td class="row-h">Multimodal recall</td>
+ <td data-l="Predibase"><span class="partial">bring your own RAG</span></td>
+ <td data-l="kolm"><span class="partial">v0.2 ships a JSON lookup container (KOLMIDX); full sqlite-vec index ships through the runtime bridge</span></td>
+ </tr>
+ <tr>
+ <td class="row-h">Multi-LoRA serve</td>
+ <td data-l="Predibase"><span class="ok">LoRAX, dozens of adapters per host</span></td>
+ <td data-l="kolm"><span class="ok">v0.2 ships MoE compose: <code>kolm moe compose --expert a.kolm --expert b.kolm --router router.json</code> &mdash; N experts, one composite, deterministic router</span></td>
+ </tr>
+ <tr>
+ <td class="row-h">Tokenizer story</td>
+ <td data-l="Predibase">inherits the base model's tokenizer</td>
+ <td data-l="kolm"><span class="ok">v0.2 ships an optional pure-JS byte-level BPE tokenizer (<code>kolm-tokenizer-1</code>) embedded inside the artifact &mdash; deterministic, no native deps</span></td>
+ </tr>
+ <tr>
+ <td class="row-h">Document ingest</td>
+ <td data-l="Predibase">user supplies extracted text</td>
+ <td data-l="kolm"><span class="ok">v0.2 ships <code>kolm extract</code> (PDF text-layer, HTML, JSON/JSONL, opt-in OCR / vision) and <code>kolm doc check</code> for completeness gating</span></td>
+ </tr>
+ <tr>
+ <td class="row-h">Air-gap / private VPC</td>
+ <td data-l="Predibase">VPC deploy is enterprise-tier</td>
+ <td data-l="kolm">artifact runs offline by construction</td>
+ </tr>
+ <tr>
+ <td class="row-h">Pull-out cost</td>
+ <td data-l="Predibase">extracting the LoRA + a comparable runtime is project-sized</td>
+ <td data-l="kolm">the artifact is a file. Mount it. Done.</td>
+ </tr>
+ <tr>
+ <td class="row-h">License</td>
+ <td data-l="Predibase">Predibase commercial; LoRAX OSS</td>
+ <td data-l="kolm">RS-1 spec Apache-2.0, SDK Apache-2.0, paid managed compile</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
 
-    <div class="group">
-      <h2>When to use Predibase</h2>
-      <p>Use Predibase when the problem you have is "I want to fine-tune and operate many LoRAs as a hosted endpoint and not run GPUs."</p>
-      <pre class="code"><span class="c"># predibase: ship a LoRA, hit it via REST</span>
+ <div class="group">
+ <h2>When to use Predibase</h2>
+ <p>Use Predibase when the problem you have is "I want to fine-tune and operate many LoRAs as a hosted endpoint and not run GPUs."</p>
+ <pre class="code"><span class="c"># predibase: ship a LoRA, hit it via REST</span>
 predibase fine-tune --model llama-3-8b --dataset s3://...
 <span class="ok">ok</span> deployed to <span class="k">https://serving.predibase.com/...</span></pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>When to use kolm</h2>
-      <p>Use kolm when the deliverable has to be a portable artifact - because it runs on a phone, in a customer's VPC, on an edge box, or in a regulated environment where the evaluator and signature matter.</p>
-      <pre class="code"><span class="c"># compile a task-specific artifact your customer can audit:</span>
+ <div class="group">
+ <h2>When to use kolm</h2>
+ <p>Use kolm when the deliverable has to be a portable artifact - because it runs on a phone, in a customer's VPC, on an edge box, or in a regulated environment where the evaluator and signature matter.</p>
+ <pre class="code"><span class="c"># compile a task-specific artifact your customer can audit:</span>
 kolm compile <span class="k">"redact PHI from clinical notes"</span> \
-  --examples ./redaction-fixtures.jsonl \
-  --base qwen2.5-7b
+ --examples ./redaction-fixtures.jsonl \
+ --base qwen2.5-7b
 
-<span class="ok">ok</span> wrote <span class="k">phi-redact.kolm</span>  k_score=0.93 signature=hmac-sha256
+<span class="ok">ok</span> wrote <span class="k">phi-redact.kolm</span> k_score=0.93 signature=ed25519
 
 kolm inspect phi-redact.kolm
 kolm run phi-redact.kolm <span class="k">"&lt;clinical-note&gt;"</span> --receipt</pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>Can I use both?</h2>
-      <p>Yes. The cleanest composition: use Predibase (or a comparable trainer) as a training back-end, then wrap the resulting LoRA inside a <code>.kolm</code> with the K-score evaluator and recall index baked in. Same LoRA, but the deliverable is now a signed file with proof of what it does. The Predibase endpoint can stay in place for cloud traffic; the <code>.kolm</code> handles the on-device, VPC, or air-gapped tier.</p>
-    </div>
+ <div class="group">
+ <h2>Can I use both?</h2>
+ <p>Yes. The cleanest composition: use Predibase (or a comparable trainer) as a training back-end, then wrap the resulting LoRA inside a <code>.kolm</code> with the K-score evaluator and recall index baked in. Same LoRA, but the deliverable is now a signed file with proof of what it does. The Predibase endpoint can stay in place for cloud traffic; the <code>.kolm</code> handles the on-device, VPC, or air-gapped tier.</p>
+ </div>
 
-    <div class="verdict">
-      <h3>Verdict</h3>
-      <p><b>If the deliverable is an endpoint</b> on someone else's cloud, Predibase is the better answer. Operating LoRAs at multi-tenant scale is what they are best at.</p>
-      <p><b>If the deliverable is a file the customer keeps</b> - signed, portable, evaluator-included - that is what kolm compiles. The compile step turns a LoRA into a release artifact instead of a checkpoint.</p>
-      <p>Adjacent comparisons: <a href="/vs-ollama" style="color:var(--accent);">vs Ollama</a> &middot; <a href="/vs-fine-tune" style="color:var(--accent);">vs fine-tuning</a> &middot; <a href="/vs-openpipe" style="color:var(--accent);">vs OpenPipe</a> &middot; <a href="/compare" style="color:var(--accent);">full comparison table</a></p>
-    </div>
+ <div class="verdict">
+ <h3>Verdict</h3>
+ <p><b>If the deliverable is an endpoint</b> on someone else's cloud, Predibase is the better answer. Operating LoRAs at multi-tenant scale is what they are best at.</p>
+ <p><b>If the deliverable is a file the customer keeps</b> - signed, portable, evaluator-included - that is what kolm compiles. The compile step turns a LoRA into a release artifact instead of a checkpoint.</p>
+ <p>Adjacent comparisons: <a href="/vs-ollama" style="color:var(--accent);">vs Ollama</a> &middot; <a href="/vs-fine-tune" style="color:var(--accent);">vs fine-tuning</a> &middot; <a href="/vs-openpipe" style="color:var(--accent);">vs OpenPipe</a> &middot; <a href="/compare" style="color:var(--accent);">full comparison table</a></p>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

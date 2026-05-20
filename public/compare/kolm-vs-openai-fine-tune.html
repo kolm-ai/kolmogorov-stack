@@ -4,141 +4,152 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm vs OpenAI fine-tune | axis-by-axis matrix</title>
+<title>kolm vs OpenAI fine-tune | axis-by-axis matrix · kolm.ai</title>
 <meta name="description" content="Ten axes that separate a kolm-compiled signed artifact you own from a closed-weight OpenAI fine-tune that lives inside their cloud.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/compare/kolm-vs-openai-fine-tune">
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
-  body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.site .wrap{display:flex;justify-content:space-between;align-items:center}
-  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.site nav a{color:inherit;text-decoration:none}
-  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  .hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  h1{font-size:46px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:780px}
-  .lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:680px;margin:0}
-  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:20px 0 0;letter-spacing:0.04em}
-  table.matrix{width:100%;border-collapse:collapse;margin:48px 0;font-size:14px}
-  table.matrix th{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);text-align:left;padding:14px 12px;border-bottom:1px solid var(--line);font-weight:400}
-  table.matrix td{padding:18px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
-  table.matrix td.axis{font-weight:500;color:var(--ink);min-width:160px}
-  table.matrix td.kolm{color:var(--ink)}
-  table.matrix td.kolm b{color:var(--accent);font-weight:500}
-  table.matrix td.other{color:var(--ink-mute)}
-  table.matrix td.why{color:var(--ink-mute);font-size:13.5px}
-  table.matrix td.proof a{color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:12.5px;border-bottom:1px dashed rgba(16,185,129,0.32)}
-  table.matrix td.proof a:hover{border-bottom-color:var(--accent)}
-  table.matrix tr.win-kolm td.kolm{background:rgba(16,185,129,0.06)}
-  @media(max-width:880px){table.matrix,table.matrix thead,table.matrix tbody,table.matrix tr,table.matrix td,table.matrix th{display:block}table.matrix th{display:none}table.matrix tr{border-bottom:2px solid var(--line);padding:18px 0}table.matrix td{padding:6px 0;border:none}table.matrix td.axis{font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-family:var(--mono);margin-bottom:6px}}
-  .close{padding:48px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .close h2{font-size:24px;font-weight:500;letter-spacing:-0.012em;margin:0 0 16px}
-  .close p{color:var(--ink-mute);max-width:680px;margin:0 0 16px}
-  .actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
-  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .btn:hover{transform:translateY(-1px)}
-  footer{padding:36px 0;color:var(--ink-faint);font-size:13px}
-  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:88px 0 36px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:46px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:780px}
+ .lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:680px;margin:0}
+ .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:20px 0 0;letter-spacing:0.04em}
+ table.matrix{width:100%;border-collapse:collapse;margin:48px 0;font-size:14px}
+ table.matrix th{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);text-align:left;padding:14px 12px;border-bottom:1px solid var(--line);font-weight:400}
+ table.matrix td{padding:18px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
+ table.matrix td.axis{font-weight:500;color:var(--ink);min-width:160px}
+ table.matrix td.kolm{color:var(--ink)}
+ table.matrix td.kolm b{color:var(--accent);font-weight:500}
+ table.matrix td.other{color:var(--ink-mute)}
+ table.matrix td.why{color:var(--ink-mute);font-size:13.5px}
+ table.matrix td.proof a{color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:12.5px;border-bottom:1px dashed rgba(16,185,129,0.32)}
+ table.matrix td.proof a:hover{border-bottom-color:var(--accent)}
+ table.matrix tr.win-kolm td.kolm{background:rgba(16,185,129,0.06)}
+ @media(max-width:880px){table.matrix,table.matrix thead,table.matrix tbody,table.matrix tr,table.matrix td,table.matrix th{display:block}table.matrix th{display:none}table.matrix tr{border-bottom:2px solid var(--line);padding:18px 0}table.matrix td{padding:6px 0;border:none}table.matrix td.axis{font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-family:var(--mono);margin-bottom:6px}}
+ .close{padding:48px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+ .close h2{font-size:24px;font-weight:500;letter-spacing:-0.012em;margin:0 0 16px}
+ .close p{color:var(--ink-mute);max-width:680px;margin:0 0 16px}
+ .actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
+ .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+ .btn:hover{transform:translateY(-1px)}
+ footer{padding:36px 0;color:var(--ink-faint);font-size:13px}
+ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
 <link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta property="og:title" content="kolm vs OpenAI fine-tune | axis-by-axis matrix · kolm.ai">
+<meta property="og:description" content="Ten axes that separate a kolm-compiled signed artifact you own from a closed-weight OpenAI fine-tune that lives inside their cloud.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/compare/kolm-vs-openai-fine-tune">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm vs OpenAI fine-tune | axis-by-axis matrix · kolm.ai">
+<meta name="twitter:description" content="Ten axes that separate a kolm-compiled signed artifact you own from a closed-weight OpenAI fine-tune that lives inside their cloud.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap"><a class="logo" href="/">k o l m</a><nav><a href="/quickstart">quickstart</a><a href="/pricing">pricing</a><a href="/docs">docs</a><a href="/compare">compare</a></nav></div></header>
-<main>
+<main id="main">
 <section class="hero">
-  <div class="wrap">
-    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; vs OpenAI fine-tune</p>
-    <h1>kolm vs OpenAI fine-tune.</h1>
-    <p class="lede">OpenAI fine-tune produces a closed-weight model that lives inside OpenAI's cloud and bills per token. The kolm artifact is an open-weight signed file on your disk that bills per compile. The deeper difference is what you can audit afterwards.</p>
-    <p class="stamp">Ten axes. Reviewed 2026-05-15.</p>
-  </div>
+ <div class="wrap">
+ <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; vs OpenAI fine-tune</p>
+ <h1>kolm vs OpenAI fine-tune.</h1>
+ <p class="lede">OpenAI fine-tune produces a closed-weight model that lives inside OpenAI's cloud and bills per token. The kolm artifact is an open-weight signed file on your disk that bills per compile. The deeper difference is what you can audit afterwards.</p>
+ <p class="stamp">Ten axes. Reviewed 2026-05-15.</p>
+ </div>
 </section>
 <section>
-  <div class="wrap">
-    <table class="matrix">
-      <thead><tr><th>Axis</th><th>kolm</th><th>OpenAI fine-tune</th><th>Why it matters</th><th>Proof</th></tr></thead>
-      <tbody>
-      <tr class="win-kolm"><td class="axis">Weight access</td><td class="kolm"><b>open</b>, you own the file</td><td class="other">closed, OpenAI keeps the weights</td><td class="why">If you do not have the weights you cannot run, audit, or migrate.</td><td class="proof"><a href="/docs">anatomy &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Run location</td><td class="kolm">anywhere your hardware is</td><td class="other">OpenAI cloud only</td><td class="why">Regulated data and edge devices cannot leave the perimeter.</td><td class="proof"><a href="/device">/device &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Cost</td><td class="kolm"><b>flat compile</b>, $0 to serve</td><td class="other">per-token forever, premium rate</td><td class="why">Fine-tuned token pricing is roughly 8&times; the base. The line crosses at modest volume.</td><td class="proof"><a href="/roi">/roi &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Audit</td><td class="kolm">receipts + manifest + binder</td><td class="other">opaque</td><td class="why">If your auditor asks "what did the model see and what did it return on this date" you need a primitive.</td><td class="proof"><a href="/docs/showcase/receipt.json">receipt JSON &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Algorithms</td><td class="kolm">42 SOTA (DPO, KTO, ORPO, SimPO, GRPO, distillation, MoE-LoRA, federated)</td><td class="other">SFT only</td><td class="why">Different task shapes need different alignment recipes.</td><td class="proof"><a href="/research">/research &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Replay forever</td><td class="kolm"><b>yes</b>, byte-deterministic</td><td class="other">no</td><td class="why">A regulator may ask you to replay a 2024 decision in 2027.</td><td class="proof"><a href="/spec">RS-1 &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Compliance</td><td class="kolm">BAA template + on-prem + HIPAA pack</td><td class="other">enterprise DPA, shared infra</td><td class="why">Healthcare and finance procurement walks if data leaves the perimeter at run time.</td><td class="proof"><a href="/baa">BAA &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Artifact you own</td><td class="kolm">signed .kolm file on your disk; INT4/GGUF/ONNX quantization paths ship through the runtime bridge</td><td class="other">weights stay in OpenAI cloud</td><td class="why">A file is forever; a hosted fine-tune evaporates when the vendor sunsets it.</td><td class="proof"><a href="/docs">anatomy &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">K-score quality gate</td><td class="kolm">0.40&middot;A + 0.15&middot;S + 0.15&middot;L + 0.15&middot;C + 0.15&middot;V</td><td class="other">accuracy in dashboard</td><td class="why">A blocking gate that ships in the receipt is what the procurement officer reads.</td><td class="proof"><a href="/k-score">/k-score &rarr;</a></td></tr>
-      <tr class="win-kolm"><td class="axis">Multi-tenant residency</td><td class="kolm">on-prem per tenant</td><td class="other">OpenAI shared</td><td class="why">Each tenant's data and model in its own perimeter.</td><td class="proof"><a href="/airgap">/airgap &rarr;</a></td></tr>
-      </tbody>
-    </table>
-  </div>
+ <div class="wrap">
+ <table class="matrix">
+ <thead><tr><th>Axis</th><th>kolm</th><th>OpenAI fine-tune</th><th>Why it matters</th><th>Proof</th></tr></thead>
+ <tbody>
+ <tr class="win-kolm"><td class="axis">Weight access</td><td class="kolm"><b>open</b>, you own the file</td><td class="other">closed, OpenAI keeps the weights</td><td class="why">If you do not have the weights you cannot run, audit, or migrate.</td><td class="proof"><a href="/docs">anatomy &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Run location</td><td class="kolm">anywhere your hardware is</td><td class="other">OpenAI cloud only</td><td class="why">Regulated data and edge devices cannot leave the perimeter.</td><td class="proof"><a href="/device">/device &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Cost</td><td class="kolm"><b>flat compile</b>, $0 to serve</td><td class="other">per-token forever, premium rate</td><td class="why">Fine-tuned token pricing is roughly 8&times; the base. The line crosses at modest volume.</td><td class="proof"><a href="/roi">/roi &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Audit</td><td class="kolm">receipts + manifest + binder</td><td class="other">opaque</td><td class="why">If your auditor asks "what did the model see and what did it return on this date" you need a primitive.</td><td class="proof"><a href="/docs/showcase/receipt.json">receipt JSON &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Algorithms</td><td class="kolm">42 SOTA (DPO, KTO, ORPO, SimPO, GRPO, distillation, MoE-LoRA, federated)</td><td class="other">SFT only</td><td class="why">Different task shapes need different alignment recipes.</td><td class="proof"><a href="/research">/research &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Replay forever</td><td class="kolm"><b>yes</b>, byte-deterministic</td><td class="other">no</td><td class="why">A regulator may ask you to replay a 2024 decision in 2027.</td><td class="proof"><a href="/spec">RS-1 &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Compliance</td><td class="kolm">BAA template + on-prem + HIPAA pack</td><td class="other">enterprise DPA, shared infra</td><td class="why">Healthcare and finance procurement walks if data leaves the perimeter at run time.</td><td class="proof"><a href="/baa">BAA &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Artifact you own</td><td class="kolm">signed .kolm file on your disk; INT4/GGUF/ONNX quantization paths ship through the runtime bridge</td><td class="other">weights stay in OpenAI cloud</td><td class="why">A file is forever; a hosted fine-tune evaporates when the vendor sunsets it.</td><td class="proof"><a href="/docs">anatomy &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">K-score quality gate</td><td class="kolm">0.40&middot;A + 0.15&middot;S + 0.15&middot;L + 0.15&middot;C + 0.15&middot;V</td><td class="other">accuracy in dashboard</td><td class="why">A blocking gate that ships in the receipt is what the procurement officer reads.</td><td class="proof"><a href="/k-score">/k-score &rarr;</a></td></tr>
+ <tr class="win-kolm"><td class="axis">Multi-tenant residency</td><td class="kolm">on-prem per tenant</td><td class="other">OpenAI shared</td><td class="why">Each tenant's data and model in its own perimeter.</td><td class="proof"><a href="/airgap">/airgap &rarr;</a></td></tr>
+ </tbody>
+ </table>
+ </div>
 </section>
 <section class="close">
-  <div class="wrap">
-    <h2>When OpenAI fine-tune is the right answer.</h2>
-    <p>You want frontier weights as a starting point, you do not need to run anywhere except their API, and the cost line will not cross. For a small consumer product calling a fine-tuned 4o once a session, this is the path of least resistance.</p>
-    <h2 style="margin-top:32px">When kolm is the right answer.</h2>
-    <p>You operate in a regulated industry, you need to own the weights, you want audit primitives that survive a 2027 audit of a 2024 decision, or your token bill is already structural. The signed file is what every other tier of the company eventually asks for.</p>
-    <div class="actions"><a class="btn primary" href="/quickstart">Compile your first AI &rarr;</a><a class="btn" href="/docs/showcase/receipt.json" target="_blank">Open a receipt &rarr;</a></div>
-  </div>
+ <div class="wrap">
+ <h2>When OpenAI fine-tune is the right answer.</h2>
+ <p>You want frontier weights as a starting point, you do not need to run anywhere except their API, and the cost line will not cross. For a small consumer product calling a fine-tuned 4o once a session, this is the path of least resistance.</p>
+ <h2 style="margin-top:32px">When kolm is the right answer.</h2>
+ <p>You operate in a regulated industry, you need to own the weights, you want audit primitives that survive a 2027 audit of a 2024 decision, or your token bill is already structural. The signed file is what every other tier of the company eventually asks for.</p>
+ <div class="actions"><a class="btn primary" href="/quickstart">Compile your first AI &rarr;</a><a class="btn" href="/docs/showcase/receipt.json" target="_blank">Open a receipt &rarr;</a></div>
+ </div>
 </section>
 </main>
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

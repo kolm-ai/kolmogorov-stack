@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>OpenAI SDK &middot; kolm.ai</title>
+<title>OpenAI SDK · kolm.ai</title>
 <meta name="description" content="Point the OpenAI SDK at kolm with a one-line base URL change. Python and JavaScript. Captures, redaction, and signed receipts come along for free.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="OpenAI SDK &middot; kolm.ai">
-<meta property="og:description" content="One line: change base_url. Your existing OpenAI code now flows through kolm.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="OpenAI SDK · kolm.ai">
+<meta property="og:description" content="Point the OpenAI SDK at kolm with a one-line base URL change. Python and JavaScript. Captures, redaction, and signed receipts come along for free.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations/openai-sdk">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OpenAI SDK &middot; kolm.ai">
-<meta name="twitter:description" content="One config change. Point the OpenAI SDK at kolm.">
+<meta name="twitter:title" content="OpenAI SDK · kolm.ai">
+<meta name="twitter:description" content="Point the OpenAI SDK at kolm with a one-line base URL change. Python and JavaScript. Captures, redaction, and signed receipts come along for free.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/integrations/openai-sdk">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -55,12 +55,13 @@ pre.code .mute{color:var(--ink-faint)}
 footer{padding:36px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &ndash; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
+ <a class="logo" href="/">kolm.ai</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -216,68 +217,68 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <main id="main">
 
 <section class="hero"><div class="wrap">
-  <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / openai sdk</div>
-  <h1>The OpenAI SDK, pointed at kolm.</h1>
-  <p class="lede">Change one line. Your existing OpenAI Python or JavaScript code keeps working &ndash; the calls now flow through kolm.ai, every prompt is captured, the redaction membrane runs in-line, and the response carries a signed receipt header. Same SDK. Same surface. New compiler underneath.</p>
+ <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / openai sdk</div>
+ <h1>The OpenAI SDK, pointed at kolm.</h1>
+ <p class="lede">Change one line. Your existing OpenAI Python or JavaScript code keeps working &ndash; the calls now flow through kolm.ai, every prompt is captured, the redaction membrane runs in-line, and the response carries a signed receipt header. Same SDK. Same surface. New compiler underneath.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>How it works in one paragraph</h2>
-  <p>kolm.ai speaks OpenAI Chat Completions on the wire. The SDK sees a normal HTTPS endpoint at <code>https://kolm.ai/v1</code> with Bearer auth. Set <code>base_url</code> (Python) or <code>baseURL</code> (JS), use your <code>ks_...</code> key as <code>api_key</code>, and every call is forwarded to the model you selected. The capture log writes durably before the response returns, the receipt header shows up as <code>x-kolm-capture-durable: true</code>, and the artifact ID gets emitted when a compile job promotes the namespace.</p>
+ <h2>How it works in one paragraph</h2>
+ <p>kolm.ai speaks OpenAI Chat Completions on the wire. The SDK sees a normal HTTPS endpoint at <code>https://kolm.ai/v1</code> with Bearer auth. Set <code>base_url</code> (Python) or <code>baseURL</code> (JS), use your <code>ks_...</code> key as <code>api_key</code>, and every call is forwarded to the model you selected. The capture log writes durably before the response returns, the receipt header shows up as <code>x-kolm-capture-durable: true</code>, and the artifact ID gets emitted when a compile job promotes the namespace.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Python &ndash; one line</h2>
-  <p>Pip-install the official OpenAI SDK. Pass <code>base_url</code> and <code>api_key</code> at client construction. Everything else &ndash; streaming, function calling, vision, structured outputs &ndash; behaves exactly the way the OpenAI SDK behaves.</p>
-  <div class="tabs"><span>python &ndash; openai &gt;= 1.0</span></div>
+ <h2>Python &ndash; one line</h2>
+ <p>Pip-install the official OpenAI SDK. Pass <code>base_url</code> and <code>api_key</code> at client construction. Everything else &ndash; streaming, function calling, vision, structured outputs &ndash; behaves exactly the way the OpenAI SDK behaves.</p>
+ <div class="tabs"><span>python &ndash; openai &gt;= 1.0</span></div>
 <pre class="code">from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://kolm.ai/v1",
-    api_key="ks_live_...",   # your kolm API key
+ base_url="https://kolm.ai/v1",
+ api_key="ks_live_...", # your kolm API key
 )
 
 resp = client.chat.completions.create(
-    model="qwen-3.5-27b",
-    messages=[{"role": "user", "content": "Summarize this PR: ..."}],
+ model="qwen-3.5-27b",
+ messages=[{"role": "user", "content": "Summarize this PR: ..."}],
 )
 
 print(resp.choices[0].message.content)
-print(resp.response.headers.get("x-kolm-capture-durable"))  # "true"</pre>
+print(resp.response.headers.get("x-kolm-capture-durable")) # "true"</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>JavaScript / TypeScript &ndash; one line</h2>
-  <p>Same idea on Node. Same idea in the browser. The <code>baseURL</code> field is all you need to switch.</p>
-  <div class="tabs"><span>node &ndash; openai &gt;= 4</span></div>
+ <h2>JavaScript / TypeScript &ndash; one line</h2>
+ <p>Same idea on Node. Same idea in the browser. The <code>baseURL</code> field is all you need to switch.</p>
+ <div class="tabs"><span>node &ndash; openai &gt;= 4</span></div>
 <pre class="code">import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://kolm.ai/v1",
-  apiKey: process.env.KOLM_API_KEY,
+ baseURL: "https://kolm.ai/v1",
+ apiKey: process.env.KOLM_API_KEY,
 });
 
 const resp = await client.chat.completions.create({
-  model: "qwen-3.5-27b",
-  messages: [{ role: "user", content: "Summarize this PR: ..." }],
+ model: "qwen-3.5-27b",
+ messages: [{ role: "user", content: "Summarize this PR: ..." }],
 });
 
 console.log(resp.choices[0].message.content);</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Where to go next</h2>
-  <div class="related">
-    <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. Capture, compile, replay, verify.</span></a>
-    <a href="/captures"><b>Captures inbox &rarr;</b><span>See your prompts as they land. Filter by namespace.</span></a>
-    <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
-  </div>
+ <h2>Where to go next</h2>
+ <div class="related">
+ <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. Capture, compile, replay, verify.</span></a>
+ <a href="/captures"><b>Captures inbox &rarr;</b><span>See your prompts as they land. Filter by namespace.</span></a>
+ <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
+ </div>
 </div></section>
 
 </main>
 
 <footer><div class="wrap">
-  <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
 </div></footer>
 </body>
 </html>

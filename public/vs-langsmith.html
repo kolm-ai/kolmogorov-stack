@@ -10,310 +10,311 @@
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="kolm vs LangSmith">
-<meta property="og:description" content="LangSmith is observability. kolm is a compiler. Both start from your LLM traces.">
+<meta property="og:title" content="kolm vs LangSmith: traces for debug vs compile · kolm.ai">
+<meta property="og:description" content="LangSmith captures LLM traffic for debugging and evals. kolm captures the same traffic and compiles a signed task-specific model.">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="kolm vs LangSmith" />
-<meta name="twitter:description" content="LangSmith is observability. kolm is a compiler. Both start from your LLM traces." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm vs LangSmith: traces for debug vs compile · kolm.ai">
+<meta name="twitter:description" content="LangSmith captures LLM traffic for debugging and evals. kolm captures the same traffic and compiles a signed task-specific model.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/vs-langsmith">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/vs-langsmith">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #faf2e1; --accent-strong: #c9c2b2; --good: #7ef0d2; --bad: #ff6b91;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
-  .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2; --good: #7ef0d2; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
 
-  header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
-  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
-  header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
-  header.site nav a:hover { color: var(--ink); }
-  header.site .right { display: flex; align-items: center; gap: 14px; }
-  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
-  @media (max-width: 720px) { header.site nav { display: none; } }
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
 
-  section.hero { padding: 88px 0 32px; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
-  h1 { margin: 22px 0 16px; font-size: clamp(36px, 5vw, 52px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
-  h1 .tone { color: var(--accent); }
-  p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
+ section.hero { padding: 88px 0 32px; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ h1 { margin: 22px 0 16px; font-size: clamp(36px, 5vw, 52px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
+ h1 .tone { color: var(--accent); }
+ p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
 
-  .one-line { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 14px; margin: 24px 0 0; align-items: stretch; }
-  @media (max-width: 720px) { .one-line { grid-template-columns: 1fr; } .one-line .arrow { display: none; } }
-  .one-line .col { padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
-  .one-line .col h3 { margin: 0 0 8px; font-size: 15px; font-weight: 500; color: var(--ink); }
-  .one-line .col p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
-  .one-line .arrow { display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: var(--mono); font-size: 22px; }
+ .one-line { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 14px; margin: 24px 0 0; align-items: stretch; }
+ @media (max-width: 720px) { .one-line { grid-template-columns: 1fr; } .one-line .arrow { display: none; } }
+ .one-line .col { padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
+ .one-line .col h3 { margin: 0 0 8px; font-size: 15px; font-weight: 500; color: var(--ink); }
+ .one-line .col p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
+ .one-line .arrow { display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: var(--mono); font-size: 22px; }
 
-  .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
-  .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
-  .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
+ .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
+ .group h2 { margin: 0 0 14px; font-size: clamp(22px, 2.4vw, 28px); font-weight: 500; }
+ .group p { margin: 0 0 12px; color: var(--ink-mute); font-size: 15px; line-height: 1.65; max-width: 64ch; }
 
-  table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
-  table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
-  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
-  table.tbl td { color: var(--ink-mute); }
-  table.tbl td b { color: var(--ink); font-weight: 500; }
-  table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; width: 26%; }
-  table.tbl td .ok { color: var(--good); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
-  table.tbl td .no { color: var(--bad); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
-  table.tbl td .partial { color: var(--ink-faint); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
-  @media (max-width: 720px) {
-    table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
-    table.tbl thead { display: none; }
-    table.tbl tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
-    table.tbl td { border: 0; padding: 4px 0; }
-    table.tbl td.row-h { font-size: 12px; margin-bottom: 6px; }
-    table.tbl td::before { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 2px; }
-    table.tbl td[data-l]::before { content: attr(data-l); }
-  }
+ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
+ table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
+ table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
+ table.tbl td { color: var(--ink-mute); }
+ table.tbl td b { color: var(--ink); font-weight: 500; }
+ table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; width: 26%; }
+ table.tbl td .ok { color: var(--good); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+ table.tbl td .no { color: var(--bad); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+ table.tbl td .partial { color: var(--ink-faint); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
+ @media (max-width: 720px) {
+ table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
+ table.tbl thead { display: none; }
+ table.tbl tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
+ table.tbl td { border: 0; padding: 4px 0; }
+ table.tbl td.row-h { font-size: 12px; margin-bottom: 6px; }
+ table.tbl td::before { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 2px; }
+ table.tbl td[data-l]::before { content: attr(data-l); }
+ }
 
-  pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 14px 0; white-space: pre; }
-  @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
-  pre.code .c { color: var(--ink-faint); }
-  pre.code .ok { color: var(--good); }
-  pre.code .k { color: var(--accent-strong); }
+ pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 14px 0; white-space: pre; }
+ @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
+ pre.code .c { color: var(--ink-faint); }
+ pre.code .ok { color: var(--good); }
+ pre.code .k { color: var(--accent-strong); }
 
-  .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
-  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
-  .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
-  .verdict p:last-child { margin-bottom: 0; }
-  .verdict b { color: var(--ink); font-weight: 500; }
+ .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(236,231,220, 0.04), rgba(236,231,220, 0.01)); margin: 24px 0 0; }
+ .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
+ .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
+ .verdict p:last-child { margin-bottom: 0; }
+ .verdict b { color: var(--ink); font-weight: 500; }
 
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
-  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  footer.site a { color: var(--ink-mute); }
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-mute); }
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"kolm","description":"kolm vs LangSmith: tracing for debug vs capture for compile. kolm turns captured traces into a signed, portable .kolm artifact.","brand":{"@type":"Brand","name":"Kolmogorov"},"url":"https://kolm.ai/vs-langsmith","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","url":"https://kolm.ai/pricing"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://kolm.ai/compare"},{"@type":"ListItem","position":3,"name":"kolm vs LangSmith"}]}</script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <span class="pill">vs LangSmith</span>
-    <h1>Same trace stream. <span class="tone">Different exits.</span></h1>
-    <p class="lede">LangSmith captures your LLM calls so a human can debug, evaluate, and tune prompts. kolm captures the same calls and turns them into a signed task-specific model. One pipe, two deliverables - traces for humans, artifacts for production.</p>
+ <div class="wrap">
+ <span class="pill">vs LangSmith</span>
+ <h1>Same trace stream. <span class="tone">Different exits.</span></h1>
+ <p class="lede">LangSmith captures your LLM calls so a human can debug, evaluate, and tune prompts. kolm captures the same calls and turns them into a signed task-specific model. One pipe, two deliverables - traces for humans, artifacts for production.</p>
 
-    <div class="one-line">
-      <div class="col">
-        <h3>LangSmith</h3>
-        <p>An <b>observability platform</b>. Every LLM call becomes a trace - inputs, outputs, latency, cost - browsable, taggable, evaluable. The deliverable is a dashboard.</p>
-      </div>
-      <div class="arrow">vs</div>
-      <div class="col">
-        <h3>kolm</h3>
-        <p>A <b>compiler</b>. Captures the same traces and runs them through a verifier, then distills a smaller model. The deliverable is a <code>.kolm</code> file.</p>
-      </div>
-    </div>
-  </div>
+ <div class="one-line">
+ <div class="col">
+ <h3>LangSmith</h3>
+ <p>An <b>observability platform</b>. Every LLM call becomes a trace - inputs, outputs, latency, cost - browsable, taggable, evaluable. The deliverable is a dashboard.</p>
+ </div>
+ <div class="arrow">vs</div>
+ <div class="col">
+ <h3>kolm</h3>
+ <p>A <b>compiler</b>. Captures the same traces and runs them through a verifier, then distills a smaller model. The deliverable is a <code>.kolm</code> file.</p>
+ </div>
+ </div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="group">
-      <h2>The job each one does</h2>
-      <p><b>LangSmith answers "what happened in this LLM call and how do I fix it?"</b> It catches a regression in production, surfaces a slow span, lets you re-run a trace with a different prompt, scores outputs against a rubric, ships the better prompt. Every team running LLMs in production needs something in this lane and LangSmith is the most polished answer.</p>
-      <p><b>kolm answers "given enough of these calls, can the smaller model take over?"</b> The captured pairs aren't only for debug; they're labelled training data. The verifier catches the same regressions LangSmith catches but uses them to filter the training set, not only alert a human. The output isn't a fixed prompt; it's a smaller model that has learned the behavior.</p>
-      <p>You can run them at the same time on the same traffic. They consume the same trace stream and produce non-overlapping deliverables.</p>
-    </div>
+ <div class="group">
+ <h2>The job each one does</h2>
+ <p><b>LangSmith answers "what happened in this LLM call and how do I fix it?"</b> It catches a regression in production, surfaces a slow span, lets you re-run a trace with a different prompt, scores outputs against a rubric, ships the better prompt. Every team running LLMs in production needs something in this lane and LangSmith is the most polished answer.</p>
+ <p><b>kolm answers "given enough of these calls, can the smaller model take over?"</b> The captured pairs aren't only for debug; they're labelled training data. The verifier catches the same regressions LangSmith catches but uses them to filter the training set, not only alert a human. The output isn't a fixed prompt; it's a smaller model that has learned the behavior.</p>
+ <p>You can run them at the same time on the same traffic. They consume the same trace stream and produce non-overlapping deliverables.</p>
+ </div>
 
-    <div class="group">
-      <h2>Where LangSmith wins</h2>
-      <p>Verifiable concession. <b>LangSmith is the better human-in-the-loop tool.</b> The trace UI is mature, the eval harness handles complex multi-step agents, the cost analytics are real, the LangChain integration is native. If your team's bottleneck is "we can't see what the agent is doing in production," LangSmith is the right answer and we're not trying to compete on that surface.</p>
-      <p>kolm captures less detail per trace and never tries to be a debug surface. We expose <code>/v1/bridges/observations</code> for sanity checks and that's it. The capture is task-shaped, not engineer-shaped.</p>
-    </div>
+ <div class="group">
+ <h2>Where LangSmith wins</h2>
+ <p>Verifiable concession. <b>LangSmith is the better human-in-the-loop tool.</b> The trace UI is mature, the eval harness handles complex multi-step agents, the cost analytics are real, the LangChain integration is native. If your team's bottleneck is "we can't see what the agent is doing in production," LangSmith is the right answer and we're not trying to compete on that surface.</p>
+ <p>kolm captures less detail per trace and never tries to be a debug surface. We expose <code>/v1/bridges/observations</code> for sanity checks and that's it. The capture is task-shaped, not engineer-shaped.</p>
+ </div>
 
-    <div class="group">
-      <h2>Side-by-side</h2>
-      <table class="tbl">
-        <thead>
-          <tr><th></th><th>LangSmith</th><th>kolm</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="row-h">What it is</td>
-            <td data-l="LangSmith">LLM observability + eval platform</td>
-            <td data-l="kolm">Capture-then-compile to portable artifact</td>
-          </tr>
-          <tr>
-            <td class="row-h">Capture surface</td>
-            <td data-l="LangSmith">SDK trace ingestion (Python, JS)</td>
-            <td data-l="kolm">Drop-in proxy for OpenAI + Anthropic</td>
-          </tr>
-          <tr>
-            <td class="row-h">Trace UI</td>
-            <td data-l="LangSmith"><span class="ok">first-class</span> - flame graph, span detail, replay</td>
-            <td data-l="kolm"><span class="partial">basic</span> - observation list per namespace</td>
-          </tr>
-          <tr>
-            <td class="row-h">Eval harness</td>
-            <td data-l="LangSmith"><span class="ok">yes</span> - LLM judge + custom evaluators</td>
-            <td data-l="kolm"><span class="ok">yes</span> - K-score on held-out test set</td>
-          </tr>
-          <tr>
-            <td class="row-h">Output</td>
-            <td data-l="LangSmith">A better prompt or chain config</td>
-            <td data-l="kolm">A signed <code>.kolm</code> file (~few GB)</td>
-          </tr>
-          <tr>
-            <td class="row-h">Trains a model</td>
-            <td data-l="LangSmith"><span class="no">no</span> - prompt + chain optimization only</td>
-            <td data-l="kolm"><span class="ok">yes</span> - distillation + LoRA from captured pairs</td>
-          </tr>
-          <tr>
-            <td class="row-h">Runs offline</td>
-            <td data-l="LangSmith"><span class="no">no</span> - hosted dashboard</td>
-            <td data-l="kolm"><span class="ok">yes</span> - the artifact runs anywhere</td>
-          </tr>
-          <tr>
-            <td class="row-h">Receipts / signing</td>
-            <td data-l="LangSmith"><span class="no">no</span> - traces, not artifacts</td>
-            <td data-l="kolm"><span class="ok">HMAC-SHA256 artifact signature</span> + per-call <code>_kolm</code> run metadata</td>
-          </tr>
-          <tr>
-            <td class="row-h">Pricing model</td>
-            <td data-l="LangSmith">Per trace ingested + retained</td>
-            <td data-l="kolm">Flat per compile, then $0 marginal inference</td>
-          </tr>
-          <tr>
-            <td class="row-h">Compose with the other</td>
-            <td data-l="LangSmith"><span class="ok">yes</span> - dual-write traces</td>
-            <td data-l="kolm"><span class="ok">yes</span> - dual-write captures</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+ <div class="group">
+ <h2>Side-by-side</h2>
+ <table class="tbl">
+ <thead>
+ <tr><th></th><th>LangSmith</th><th>kolm</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td class="row-h">What it is</td>
+ <td data-l="LangSmith">LLM observability + eval platform</td>
+ <td data-l="kolm">Capture-then-compile to portable artifact</td>
+ </tr>
+ <tr>
+ <td class="row-h">Capture surface</td>
+ <td data-l="LangSmith">SDK trace ingestion (Python, JS)</td>
+ <td data-l="kolm">Drop-in proxy for OpenAI + Anthropic</td>
+ </tr>
+ <tr>
+ <td class="row-h">Trace UI</td>
+ <td data-l="LangSmith"><span class="ok">first-class</span> - flame graph, span detail, replay</td>
+ <td data-l="kolm"><span class="partial">basic</span> - observation list per namespace</td>
+ </tr>
+ <tr>
+ <td class="row-h">Eval harness</td>
+ <td data-l="LangSmith"><span class="ok">yes</span> - LLM judge + custom evaluators</td>
+ <td data-l="kolm"><span class="ok">yes</span> - K-score on held-out test set</td>
+ </tr>
+ <tr>
+ <td class="row-h">Output</td>
+ <td data-l="LangSmith">A better prompt or chain config</td>
+ <td data-l="kolm">A signed <code>.kolm</code> file (~few GB)</td>
+ </tr>
+ <tr>
+ <td class="row-h">Trains a model</td>
+ <td data-l="LangSmith"><span class="no">no</span> - prompt + chain optimization only</td>
+ <td data-l="kolm"><span class="ok">yes</span> - distillation + LoRA from captured pairs</td>
+ </tr>
+ <tr>
+ <td class="row-h">Runs offline</td>
+ <td data-l="LangSmith"><span class="no">no</span> - hosted dashboard</td>
+ <td data-l="kolm"><span class="ok">yes</span> - the artifact runs anywhere</td>
+ </tr>
+ <tr>
+ <td class="row-h">Receipts / signing</td>
+ <td data-l="LangSmith"><span class="no">no</span> - traces, not artifacts</td>
+ <td data-l="kolm"><span class="ok">Ed25519 artifact signature</span> + per-call <code>_kolm</code> run metadata</td>
+ </tr>
+ <tr>
+ <td class="row-h">Pricing model</td>
+ <td data-l="LangSmith">Per trace ingested + retained</td>
+ <td data-l="kolm">Flat per compile, then $0 marginal inference</td>
+ </tr>
+ <tr>
+ <td class="row-h">Compose with the other</td>
+ <td data-l="LangSmith"><span class="ok">yes</span> - dual-write traces</td>
+ <td data-l="kolm"><span class="ok">yes</span> - dual-write captures</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
 
-    <div class="group">
-      <h2>When to use LangSmith</h2>
-      <p>Use LangSmith when the question is <em>about the calls themselves</em> - debug, replay, prompt iteration, cost analytics, eval. Anything where a human needs to look at a trace and decide what to change.</p>
-      <pre class="code"><span class="c"># trace every call, browse them, score them:</span>
+ <div class="group">
+ <h2>When to use LangSmith</h2>
+ <p>Use LangSmith when the question is <em>about the calls themselves</em> - debug, replay, prompt iteration, cost analytics, eval. Anything where a human needs to look at a trace and decide what to change.</p>
+ <pre class="code"><span class="c"># trace every call, browse them, score them:</span>
 import { Client } from <span class="k">"langsmith"</span>;
 const client = new Client();
 <span class="c"># LangChain auto-traces; or wrap manually with @traceable</span></pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>When to use kolm</h2>
-      <p>Use kolm when the question is <em>about the model</em> - "can a smaller, signed, portable model do this task as well as the frontier?" The captured pairs become labelled training data; the verifier becomes the quality gate.</p>
-      <pre class="code"><span class="c"># point traffic at the kolm capture proxy:</span>
+ <div class="group">
+ <h2>When to use kolm</h2>
+ <p>Use kolm when the question is <em>about the model</em> - "can a smaller, signed, portable model do this task as well as the frontier?" The captured pairs become labelled training data; the verifier becomes the quality gate.</p>
+ <pre class="code"><span class="c"># point traffic at the kolm capture proxy:</span>
 ANTHROPIC_BASE_URL=<span class="k">https://kolm.ai/v1/capture/anthropic</span>
 
 <span class="c"># after enough pairs, compile:</span>
 kolm compile <span class="k">"summarize support tickets"</span> \
-  --namespace support \
-  --base qwen2.5-7b
+ --namespace support \
+ --base qwen2.5-7b
 
-<span class="ok">ok</span> wrote <span class="k">support-summarize.kolm</span>  k_score=0.89 signature=hmac-sha256</pre>
-    </div>
+<span class="ok">ok</span> wrote <span class="k">support-summarize.kolm</span> k_score=0.89 signature=ed25519</pre>
+ </div>
 
-    <div class="group">
-      <h2>Can I use both?</h2>
-      <p>Yes - and for most production teams the right move is to run both. LangSmith on the inbound side for visibility on the frontier calls; kolm on the same calls (or a sampled subset) to accumulate captures into a compileable namespace. When a namespace hits the threshold you compile it, sub in the <code>.kolm</code> for the cheap path, and let LangSmith keep watching the long-tail traffic that still goes to the frontier.</p>
-    </div>
+ <div class="group">
+ <h2>Can I use both?</h2>
+ <p>Yes - and for most production teams the right move is to run both. LangSmith on the inbound side for visibility on the frontier calls; kolm on the same calls (or a sampled subset) to accumulate captures into a compileable namespace. When a namespace hits the threshold you compile it, sub in the <code>.kolm</code> for the cheap path, and let LangSmith keep watching the long-tail traffic that still goes to the frontier.</p>
+ </div>
 
-    <div class="verdict">
-      <h3>Verdict</h3>
-      <p><b>If your problem is "I can't see what the agent is doing,"</b> use LangSmith. It's the right tool. We don't try to compete on trace UI.</p>
-      <p><b>If your problem is "I'd like the model to do this without calling the frontier,"</b> use kolm. The capture loop is the same; the deliverable is a signed file instead of a dashboard.</p>
-      <p>Adjacent comparisons: <a href="/vs-openpipe" style="color:var(--accent);">vs OpenPipe</a> &middot; <a href="/vs-fine-tune" style="color:var(--accent);">vs fine-tuning</a> &middot; <a href="/vs-rag" style="color:var(--accent);">vs RAG</a> &middot; <a href="/compare" style="color:var(--accent);">full comparison table</a></p>
-    </div>
+ <div class="verdict">
+ <h3>Verdict</h3>
+ <p><b>If your problem is "I can't see what the agent is doing,"</b> use LangSmith. It's the right tool. We don't try to compete on trace UI.</p>
+ <p><b>If your problem is "I'd like the model to do this without calling the frontier,"</b> use kolm. The capture loop is the same; the deliverable is a signed file instead of a dashboard.</p>
+ <p>Adjacent comparisons: <a href="/vs-openpipe" style="color:var(--accent);">vs OpenPipe</a> &middot; <a href="/vs-fine-tune" style="color:var(--accent);">vs fine-tuning</a> &middot; <a href="/vs-rag" style="color:var(--accent);">vs RAG</a> &middot; <a href="/compare" style="color:var(--accent);">full comparison table</a></p>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

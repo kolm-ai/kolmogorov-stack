@@ -9,15 +9,15 @@
 <meta name="description" content="Wire the Anthropic Messages SDK and raw fetch through the kolm.ai local proxy. Streaming, tool use, vision all preserved.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Connect Anthropic &middot; kolm.ai">
+<meta property="og:title" content="Connect Anthropic · kolm.ai">
 <meta property="og:description" content="Wire the Anthropic Messages SDK and raw fetch through the kolm.ai local proxy. Streaming, tool use, vision all preserved.">
-<meta property="og:type" content="article">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/connect/anthropic">
-<meta property="og:image" content="https://kolm.ai/og/docs-connect-anthropic.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Connect Anthropic &middot; kolm.ai">
+<meta name="twitter:title" content="Connect Anthropic · kolm.ai">
 <meta name="twitter:description" content="Wire the Anthropic Messages SDK and raw fetch through the kolm.ai local proxy. Streaming, tool use, vision all preserved.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-connect-anthropic.svg">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/connect/anthropic">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Connect Anthropic","description":"Wire the Anthropic Messages SDK and raw fetch through the kolm.ai local proxy. Streaming, tool use, vision all preserved.","url":"https://kolm.ai/docs/connect/anthropic","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -85,9 +86,9 @@ kolm connect start</code></pre>
 client = Anthropic(base_url="http://127.0.0.1:8787")
 
 msg = client.messages.create(
-    model="claude-haiku-4-5",
-    max_tokens=512,
-    messages=[{"role": "user", "content": "Summarize this support ticket."}],
+ model="claude-haiku-4-5",
+ max_tokens=512,
+ messages=[{"role": "user", "content": "Summarize this support ticket."}],
 )
 print(msg.content[0].text)</code></pre>
 
@@ -96,50 +97,50 @@ print(msg.content[0].text)</code></pre>
 const client = new Anthropic({ baseURL: "http://127.0.0.1:8787" });
 
 const msg = await client.messages.create({
-  model: "claude-haiku-4-5",
-  max_tokens: 512,
-  messages: [{ role: "user", content: "Summarize this support ticket." }],
+ model: "claude-haiku-4-5",
+ max_tokens: 512,
+ messages: [{ role: "user", content: "Summarize this support ticket." }],
 });
 console.log(msg.content[0].text);</code></pre>
 
 <h2 id="streaming">Streaming</h2>
 <p>The proxy preserves Anthropic SSE frames exactly. <code>message_start</code>, <code>content_block_delta</code>, <code>message_delta</code>, <code>message_stop</code> all pass through. The assembled message is written to the lake on <code>message_stop</code>.</p>
 <pre><code>const stream = client.messages.stream({
-  model: "claude-haiku-4-5",
-  max_tokens: 1024,
-  messages: [{ role: "user", content: "Walk through this stack trace." }],
+ model: "claude-haiku-4-5",
+ max_tokens: 1024,
+ messages: [{ role: "user", content: "Walk through this stack trace." }],
 });
 for await (const ev of stream) if (ev.type === "content_block_delta") process.stdout.write(ev.delta.text || "");</code></pre>
 
 <h2 id="tools">Tool use</h2>
 <p>Tool definitions, tool calls, and <code>tool_result</code> blocks are captured verbatim. Tool turns count as one event per turn so downstream cost and latency rollups stay accurate.</p>
 <pre><code>const msg = await client.messages.create({
-  model: "claude-haiku-4-5",
-  max_tokens: 1024,
-  tools: [{ name: "get_weather", input_schema: { type: "object" } }],
-  messages: [{ role: "user", content: "What is the weather in Tokyo?" }],
+ model: "claude-haiku-4-5",
+ max_tokens: 1024,
+ tools: [{ name: "get_weather", input_schema: { type: "object" } }],
+ messages: [{ role: "user", content: "What is the weather in Tokyo?" }],
 });</code></pre>
 
 <h2 id="fetch">Raw fetch</h2>
 <pre><code>curl http://127.0.0.1:8787/v1/messages \
-  -H "x-api-key: $ANTHROPIC_API_KEY" \
-  -H "anthropic-version: 2023-06-01" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"claude-haiku-4-5","max_tokens":256,"messages":[{"role":"user","content":"hi"}]}'</code></pre>
+ -H "x-api-key: $ANTHROPIC_API_KEY" \
+ -H "anthropic-version: 2023-06-01" \
+ -H "Content-Type: application/json" \
+ -d '{"model":"claude-haiku-4-5","max_tokens":256,"messages":[{"role":"user","content":"hi"}]}'</code></pre>
 
 <h2 id="next">Next steps</h2>
 <p>Captures are flowing. Read <a href="/docs/lake">the lake schema</a> to know what fields you can query and <a href="/docs/privacy">privacy</a> to wire the detectors before any traffic leaves your machine. Start from <a href="/docs/quickstart">/docs/quickstart</a> if you have not installed the CLI yet.</p>
 
 <div class="related">
-  <a href="/docs/connect/openai"><b>OpenAI &rarr;</b><span>Same proxy, OpenAI /v1 surface.</span></a>
-  <a href="/docs/connect/openrouter"><b>OpenRouter &rarr;</b><span>One key, 100+ models, OpenAI-compatible.</span></a>
-  <a href="/docs/connect/gemini"><b>Gemini &rarr;</b><span>Google AI Studio, OpenAI-compat endpoint.</span></a>
+ <a href="/docs/connect/openai"><b>OpenAI &rarr;</b><span>Same proxy, OpenAI /v1 surface.</span></a>
+ <a href="/docs/connect/openrouter"><b>OpenRouter &rarr;</b><span>One key, 100+ models, OpenAI-compatible.</span></a>
+ <a href="/docs/connect/gemini"><b>Gemini &rarr;</b><span>Google AI Studio, OpenAI-compat endpoint.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

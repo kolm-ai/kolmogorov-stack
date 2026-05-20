@@ -24,16 +24,30 @@
 //     `kolm run` returns useful output even on hosts without llama.cpp.
 //
 // Build:
-//   RECIPE_RECEIPT_SECRET=kolm-public-fixture-v0-1-0 node scripts/build-distilled-model-seed.mjs
+//   node scripts/build-distilled-model-seed.mjs
+//
+// W481 — script signs with the published "kolm-public-fixture-v0-1-0" secret.
+// This is a deterministic, publicly known string baked into the repo so any
+// verifier (any user, any host) can re-verify the in-repo marketplace
+// artifact byte-for-byte. The verifier (src/marketplace-fixture-secret.js,
+// consulted by env.js / binder.js / artifact-runner.js) carries the same
+// string as a known fallback so HMAC verification passes on a fresh checkout
+// without requiring env setup.
+//
+// The fixture secret is NOT a trust gate. Trust gates are Ed25519 (signed
+// over the canonical receipt body) and Sigstore (transparency log). The
+// fixture HMAC is an integrity check on top — tampering with bytes still
+// breaks every signature down the chain even though the HMAC secret is
+// public, because manifest_hash / artifact_hash / chain inputs all change.
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const SECRET = process.env.RECIPE_RECEIPT_SECRET || 'kolm-public-fixture-v0-1-0';
-process.env.RECIPE_RECEIPT_SECRET = SECRET;
-process.env.KOLM_SIGN_SECRET = process.env.KOLM_SIGN_SECRET || SECRET;
+const FIXTURE_SECRET = 'kolm-public-fixture-v0-1-0';
+process.env.RECIPE_RECEIPT_SECRET = FIXTURE_SECRET;
+process.env.KOLM_SIGN_SECRET = FIXTURE_SECRET;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(__dirname, '..');

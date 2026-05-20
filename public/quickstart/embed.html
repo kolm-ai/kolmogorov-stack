@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Embed quickstart &middot; ship a signed .kolm inside another product · kolm.ai</title>
-<meta name="description" content="Ship a signed .kolm artifact inside another product. Browser via SDK.js, Node via @kolm/sdk, edge via Cloudflare Workers / Deno Deploy / Vercel Edge. One artifact, three runtimes, every request a signed receipt.">
+<title>Embed quickstart: ship a signed .kolm inside another · kolm.ai</title>
+<meta name="description" content="Ship a signed .kolm artifact inside another product. Browser via SDK.js, Node via the local Kolm SDK package, edge via Cloudflare Workers / Deno Deploy /...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Embed quickstart &middot; ship a signed .kolm inside another product">
-<meta property="og:description" content="Browser, Node, edge. One artifact, three runtimes, every request a signed receipt.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Embed quickstart: ship a signed .kolm inside another · kolm.ai">
+<meta property="og:description" content="Ship a signed .kolm artifact inside another product. Browser via SDK.js, Node via the local Kolm SDK package, edge via Cloudflare Workers / Deno Deploy /...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/quickstart/embed">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Embed quickstart &middot; ship a signed .kolm inside another product">
-<meta name="twitter:description" content="Browser, Node, edge. One artifact, three runtimes.">
+<meta name="twitter:title" content="Embed quickstart: ship a signed .kolm inside another · kolm.ai">
+<meta name="twitter:description" content="Ship a signed .kolm artifact inside another product. Browser via SDK.js, Node via the local Kolm SDK package, edge via Cloudflare Workers / Deno Deploy /...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/quickstart/embed">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -71,110 +71,111 @@ pre.terminal .fn{color:#9bd1ff}
 footer{padding:36px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <!-- kolm-nav-start --><nav><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav><!-- kolm-nav-end -->
+ <a class="logo" href="/">kolm.ai</a>
+ <!-- kolm-nav-start --><nav><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav><!-- kolm-nav-end -->
 </div></header>
 
 <main id="main">
 
 <section class="hero"><div class="wrap">
-  <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/quickstart">quickstart</a> / embed</div>
-  <h1>The embed quickstart for kolm.ai &middot; ship the AI compiler inside your product</h1>
-  <p class="lede">Ship a signed <code>.kolm</code> artifact inside another product. Browser via SDK.js, Node via the SDK module, edge via Cloudflare Workers / Deno Deploy / Vercel Edge. One artifact, three runtimes, every request a signed receipt the user can verify offline.</p>
-  <p class="stamp">target time: 5 minutes &middot; runtimes: browser, node 18+, cloudflare workers, deno deploy, vercel edge &middot; artifact format: .kolm (zip + manifest + receipt chain)</p>
+ <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/quickstart">quickstart</a> / embed</div>
+ <h1>The embed quickstart for kolm.ai &middot; ship the AI compiler inside your product</h1>
+ <p class="lede">Ship a signed <code>.kolm</code> artifact inside another product. Browser via SDK.js, Node via the SDK module, edge via Cloudflare Workers / Deno Deploy / Vercel Edge. One artifact, three runtimes, every request a signed receipt the user can verify offline.</p>
+ <p class="stamp">target time: 5 minutes &middot; runtimes: browser, node 18+, cloudflare workers, deno deploy, vercel edge &middot; artifact format: .kolm (zip + manifest + receipt chain)</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Pick a target</h2>
-  <p class="lede">Same <code>.kolm</code> file, three host environments. Each one inherits the same verify-before-run contract.</p>
-  <div class="targets">
-    <div class="target-card">
-      <span class="vt">browser</span>
-      <h3>SDK.js + WebAssembly runtime</h3>
-      <p>The artifact loads as a Blob, runs in a worker, and never hits the network after the first fetch. Good for in-app classifiers, redactors, and on-device summarizers.</p>
-    </div>
-    <div class="target-card">
-      <span class="vt">node</span>
-      <h3>@kolm/sdk + native or GGUF</h3>
-      <p>Server-side handler, agent runtime, batch worker. Picks the heavier native dispatch when the host has GPU access.</p>
-    </div>
-    <div class="target-card">
-      <span class="vt">edge</span>
-      <h3>@kolm/sdk + WASM in workers</h3>
-      <p>Cloudflare Workers, Deno Deploy, Vercel Edge. WASM-only artifacts run cold-start friendly. <code>kolm compile --target=wasm-edge</code> picks a quant that fits the per-worker memory budget.</p>
-    </div>
-  </div>
+ <h2>Pick a target</h2>
+ <p class="lede">Same <code>.kolm</code> file, three host environments. Each one inherits the same verify-before-run contract.</p>
+ <div class="targets">
+ <div class="target-card">
+ <span class="vt">browser</span>
+ <h3>SDK.js + WebAssembly runtime</h3>
+ <p>The artifact loads as a Blob, runs in a worker, and never hits the network after the first fetch. Good for in-app classifiers, redactors, and on-device summarizers.</p>
+ </div>
+ <div class="target-card">
+ <span class="vt">node</span>
+ <h3>local @kolmogorov/kolm-sdk + native or GGUF</h3>
+ <p>Server-side handler, agent runtime, batch worker. Picks the heavier native dispatch when the host has GPU access.</p>
+ </div>
+ <div class="target-card">
+ <span class="vt">edge</span>
+ <h3>local @kolmogorov/kolm-sdk + WASM in workers</h3>
+ <p>Cloudflare Workers, Deno Deploy, Vercel Edge. WASM-only artifacts run cold-start friendly. <code>kolm compile --target=wasm-edge</code> picks a quant that fits the per-worker memory budget.</p>
+ </div>
+ </div>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Five-step flow</h2>
+ <h2>Five-step flow</h2>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 1</span><span class="step-name">Compile for the target</span><span class="step-cli">kolm compile --target=...</span></div>
-    <p>The target hint biases the compiler towards a runtime that the host can execute. Browser and edge default to WASM; node defaults to native or GGUF if a GPU is present.</p>
-    <pre class="terminal"><b>$</b> kolm compile recipe.json --target=wasm-browser --tier=tiny
-<span class="mute">artifact_summarizer.kolm  runtime=wasm  size=38MB  k_score=0.91</span></pre>
-  </div>
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 1</span><span class="step-name">Compile for the target</span><span class="step-cli">kolm compile --target=...</span></div>
+ <p>The target hint biases the compiler towards a runtime that the host can execute. Browser and edge default to WASM; node defaults to native or GGUF if a GPU is present.</p>
+ <pre class="terminal"><b>$</b> kolm compile recipe.json --target=wasm-browser --tier=tiny
+<span class="mute">artifact_summarizer.kolm runtime=wasm size=38MB k_score=0.91</span></pre>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 2</span><span class="step-name">Verify before bundling</span><span class="step-cli">kolm verify</span></div>
-    <p>Always verify before you bundle. A broken receipt chain is a wire-format bug, not a runtime bug &mdash; catching it pre-bundle stops it from ever shipping to a customer.</p>
-    <pre class="terminal"><b>$</b> kolm verify artifact_summarizer.kolm
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 2</span><span class="step-name">Verify before bundling</span><span class="step-cli">kolm verify</span></div>
+ <p>Always verify before you bundle. A broken receipt chain is a wire-format bug, not a runtime bug &mdash; catching it pre-bundle stops it from ever shipping to a customer.</p>
+ <pre class="terminal"><b>$</b> kolm verify artifact_summarizer.kolm
 <span class="mute">verify OK. 9/9 receipts signed, 0 drift breach, k_score 0.91 within tolerance.</span></pre>
-  </div>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 3</span><span class="step-name">Mount in the browser</span><span class="step-cli">/sdk.js + new Kolm(...)</span></div>
-    <p>Drop the artifact into your <code>public/</code> dir and reference it from a <code>&lt;script type=&quot;module&quot;&gt;</code>. The SDK does the receipt-verify in the worker before the first <code>run()</code> call resolves.</p>
-    <pre class="terminal"><span class="kw">&lt;script type=&quot;module&quot;&gt;</span>
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 3</span><span class="step-name">Mount in the browser</span><span class="step-cli">/sdk.js + new Kolm(...)</span></div>
+ <p>Drop the artifact into your <code>public/</code> dir and reference it from a <code>&lt;script type=&quot;module&quot;&gt;</code>. The SDK does the receipt-verify in the worker before the first <code>run()</code> call resolves.</p>
+ <pre class="terminal"><span class="kw">&lt;script type=&quot;module&quot;&gt;</span>
 <span class="kw">import</span> Kolm <span class="kw">from</span> <span class="str">&apos;https://kolm.ai/sdk.js&apos;</span>;
 <span class="kw">const</span> kolm = <span class="kw">await</span> Kolm.<span class="fn">load</span>(<span class="str">&apos;/artifact_summarizer.kolm&apos;</span>);
 <span class="kw">const</span> out = <span class="kw">await</span> kolm.<span class="fn">run</span>({ prompt: <span class="str">&apos;Summarize this PR:...&apos;</span> });
 <span class="fn">render</span>(out);
 <span class="kw">&lt;/script&gt;</span></pre>
-  </div>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 4</span><span class="step-name">Mount in a Cloudflare Worker</span><span class="step-cli">@kolm/sdk + env.KOLM_ARTIFACT</span></div>
-    <p>Push the artifact bytes as a Worker static asset; the SDK reads them off the binding. Verify on the first request and cache the verified handle on the global scope so warm starts skip the work.</p>
-    <pre class="terminal"><span class="kw">import</span> Kolm <span class="kw">from</span> <span class="str">&apos;@kolm/sdk&apos;</span>;
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 4</span><span class="step-name">Mount in a Cloudflare Worker</span><span class="step-cli">local SDK package + env.KOLM_ARTIFACT</span></div>
+ <p>Push the artifact bytes as a Worker static asset; the SDK reads them off the binding. Verify on the first request and cache the verified handle on the global scope so warm starts skip the work. Until npm publication is verified, install the Node SDK from the repo checkout.</p>
+ <pre class="terminal"><span class="kw">import</span> Kolm <span class="kw">from</span> <span class="str">&apos;@kolmogorov/kolm-sdk&apos;</span>;
 <span class="kw">let</span> kolm;
 <span class="kw">export default</span> {
-  <span class="kw">async</span> <span class="fn">fetch</span>(req, env) {
-    <span class="kw">if</span> (!kolm) kolm = <span class="kw">await</span> Kolm.<span class="fn">load</span>(env.KOLM_ARTIFACT, { verify: <span class="kw">true</span> });
-    <span class="kw">const</span> body = <span class="kw">await</span> req.<span class="fn">json</span>();
-    <span class="kw">const</span> r = <span class="kw">await</span> kolm.<span class="fn">run</span>({ prompt: body.prompt });
-    <span class="kw">return</span> Response.<span class="fn">json</span>(r);
-  },
+ <span class="kw">async</span> <span class="fn">fetch</span>(req, env) {
+ <span class="kw">if</span> (!kolm) kolm = <span class="kw">await</span> Kolm.<span class="fn">load</span>(env.KOLM_ARTIFACT, { verify: <span class="kw">true</span> });
+ <span class="kw">const</span> body = <span class="kw">await</span> req.<span class="fn">json</span>();
+ <span class="kw">const</span> r = <span class="kw">await</span> kolm.<span class="fn">run</span>({ prompt: body.prompt });
+ <span class="kw">return</span> Response.<span class="fn">json</span>(r);
+ },
 };</pre>
-  </div>
+ </div>
 
-  <div class="step">
-    <div class="step-head"><span class="step-num">step 5</span><span class="step-name">Re-verify on every release</span><span class="step-cli">kolm verify --strict</span></div>
-    <p>Wire <code>kolm verify --strict</code> into your CI before the artifact lands on your CDN. Strict mode fails on any drift snapshot outside tolerance, any missing signature, any unsigned recipe step. This is how a customer&apos;s audit-replay still works six months from now.</p>
-    <pre class="terminal"><b>$</b> kolm verify --strict artifact_summarizer.kolm
+ <div class="step">
+ <div class="step-head"><span class="step-num">step 5</span><span class="step-name">Re-verify on every release</span><span class="step-cli">kolm verify --strict</span></div>
+ <p>Wire <code>kolm verify --strict</code> into your CI before the artifact lands on your CDN. Strict mode fails on any drift snapshot outside tolerance, any missing signature, any unsigned recipe step. This is how a customer&apos;s audit-replay still works six months from now.</p>
+ <pre class="terminal"><b>$</b> kolm verify --strict artifact_summarizer.kolm
 <span class="mute">verify OK (strict). 9/9 signed, drift within tolerance on all 6 axes, rekor inclusion proof valid.</span></pre>
-  </div>
+ </div>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>The other quickstarts</h2>
-  <p class="lede">Same five-step value loop, different surface.</p>
-  <div class="related">
-    <a href="/quickstart/cli"><b>CLI quickstart &rarr;</b><span>Five terminal commands. No editor switch.</span></a>
-    <a href="/quickstart/api"><b>HTTP API quickstart &rarr;</b><span>Same flow over REST. Five curl commands.</span></a>
-    <a href="/quickstart/sdk"><b>SDK quickstart &rarr;</b><span>TypeScript + Python bindings. Drop-in for OpenAI.</span></a>
-  </div>
+ <h2>The other quickstarts</h2>
+ <p class="lede">Same five-step value loop, different surface.</p>
+ <div class="related">
+ <a href="/quickstart/cli"><b>CLI quickstart &rarr;</b><span>Five terminal commands. No editor switch.</span></a>
+ <a href="/quickstart/api"><b>HTTP API quickstart &rarr;</b><span>Same flow over REST. Five curl commands.</span></a>
+ <a href="/quickstart/sdk"><b>SDK quickstart &rarr;</b><span>TypeScript + Python bindings. Drop-in for OpenAI.</span></a>
+ </div>
 </div></section>
 
 </main>
 
 <footer><div class="wrap">
-  <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
 </div></footer>
 </body>
 </html>

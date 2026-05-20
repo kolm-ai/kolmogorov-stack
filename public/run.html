@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Run signed .kolm artifacts locally · kolm.ai</title>
-<meta name="description" content="Run, inspect, evaluate, and serve signed .kolm artifacts with the kolm CLI and MCP runtime on macOS, Linux, and Windows. The same artifact runs on iOS and Android through native adapters.">
+<meta name="description" content="Run, inspect, evaluate, and serve signed .kolm artifacts with the kolm CLI and MCP runtime on macOS, Linux, and Windows. The same artifact runs on iOS and...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="Run signed .kolm artifacts locally">
-<meta property="og:description" content="The current kolm runtime surface: CLI run/eval/inspect and MCP serving, with receipts and manifest verification.">
+<meta property="og:title" content="Run signed .kolm artifacts locally · kolm.ai">
+<meta property="og:description" content="Run, inspect, evaluate, and serve signed .kolm artifacts with the kolm CLI and MCP runtime on macOS, Linux, and Windows. The same artifact runs on iOS and...">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Run signed .kolm artifacts locally" />
-<meta name="twitter:description" content="The current kolm runtime surface: CLI run/eval/inspect and MCP serving, with receipts and manifest verification." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Run signed .kolm artifacts locally · kolm.ai">
+<meta name="twitter:description" content="Run, inspect, evaluate, and serve signed .kolm artifacts with the kolm CLI and MCP runtime on macOS, Linux, and Windows. The same artifact runs on iOS and...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/run">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/run">
@@ -25,13 +25,15 @@
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"kolm","operatingSystem":"macOS, Linux, Windows, iOS, Android","applicationCategory":"DeveloperApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand"><span>kolm</span></a>
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm</span></a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -182,80 +184,80 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="site-actions">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
-<main>
+<main id="main">
 <section class="hero">
-  <div class="wrap">
-    <div class="hero-copy">
-      <div class="eyebrow"><span class="pulse"></span>runtime surface</div>
-      <h1>Run the artifact you can inspect.</h1>
-      <p class="lede">The current production runtime is the open Node CLI: inspect the manifest, verify the HMAC-bound receipt, re-run embedded evals, execute the artifact locally, or expose it to agents through MCP.</p>
-      <div class="actions">
-        <a href="/quickstart" class="btn primary">quickstart</a>
-        <a href="/runtimes" class="btn ghost">serve over MCP</a>
-        <a href="/use-cases/mobile" class="btn accent">on-device targets</a>
-      </div>
-    </div>
-    <div class="hero-proof" aria-label="kolm runtime diagram">
-      <div class="proof-shell">
-        <div class="proof-toolbar">
-          <div class="proof-title"><span>local artifact runner</span></div>
-          <div class="proof-status"><span></span> current: CLI + MCP</div>
-        </div>
-        <div class="proof-workspace">
-          <div class="proof-card artifact-plate">
-            <div class="artifact-title"><span>input</span><strong>signed .kolm</strong></div>
-            <div class="artifact-object">
-              <div class="artifact-icon">.k</div>
-              <div class="artifact-copy">
-                <strong>support-writer.kolm</strong>
-                <small>manifest<br>recipes<br>evals<br>receipt</small>
-              </div>
-            </div>
-            <div class="proof-tags">
-              <span>inspect first</span>
-              <span>run locally</span>
-              <span>verify receipt</span>
-            </div>
-          </div>
-          <div class="proof-card flow-card">
-            <div class="flow-step"><span class="node active"></span><div><strong>inspect</strong><small>read manifest and hashes</small></div></div>
-            <div class="flow-line"></div>
-            <div class="flow-step"><span class="node active"></span><div><strong>eval</strong><small>re-run embedded checks</small></div></div>
-            <div class="flow-line"></div>
-            <div class="flow-step"><span class="node"></span><div><strong>serve</strong><small>expose artifact as MCP tools</small></div></div>
-          </div>
-          <div class="proof-card">
-            <div class="label">three runtimes, one artifact</div>
-            <p>The same signed bytes execute on desktop today and on iOS / Android via native adapters. Each surface verifies the manifest, recipe pack, and receipt locally before any model load.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+ <div class="wrap">
+ <div class="hero-copy">
+ <div class="eyebrow"><span class="pulse"></span>runtime surface</div>
+ <h1>Run the artifact you can inspect.</h1>
+ <p class="lede">The current production runtime is the open Node CLI: inspect the manifest, verify the Ed25519-bound receipt, re-run embedded evals, execute the artifact locally, or expose it to agents through MCP.</p>
+ <div class="actions">
+ <a href="/quickstart" class="btn primary">quickstart</a>
+ <a href="/runtimes" class="btn ghost">serve over MCP</a>
+ <a href="/use-cases/mobile" class="btn accent">on-device targets</a>
+ </div>
+ </div>
+ <div class="hero-proof" aria-label="kolm runtime diagram">
+ <div class="proof-shell">
+ <div class="proof-toolbar">
+ <div class="proof-title"><span>local artifact runner</span></div>
+ <div class="proof-status"><span></span> current: CLI + MCP</div>
+ </div>
+ <div class="proof-workspace">
+ <div class="proof-card artifact-plate">
+ <div class="artifact-title"><span>input</span><strong>signed .kolm</strong></div>
+ <div class="artifact-object">
+ <div class="artifact-icon">.k</div>
+ <div class="artifact-copy">
+ <strong>support-writer.kolm</strong>
+ <small>manifest<br>recipes<br>evals<br>receipt</small>
+ </div>
+ </div>
+ <div class="proof-tags">
+ <span>inspect first</span>
+ <span>run locally</span>
+ <span>verify receipt</span>
+ </div>
+ </div>
+ <div class="proof-card flow-card">
+ <div class="flow-step"><span class="node active"></span><div><strong>inspect</strong><small>read manifest and hashes</small></div></div>
+ <div class="flow-line"></div>
+ <div class="flow-step"><span class="node active"></span><div><strong>eval</strong><small>re-run embedded checks</small></div></div>
+ <div class="flow-line"></div>
+ <div class="flow-step"><span class="node"></span><div><strong>serve</strong><small>expose artifact as MCP tools</small></div></div>
+ </div>
+ <div class="proof-card">
+ <div class="label">three runtimes, one artifact</div>
+ <p>The same signed bytes execute on desktop today and on iOS / Android via native adapters. Each surface verifies the manifest, recipe pack, and receipt locally before any model load.</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 </section>
 
 <section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">01</span>commands</div>
-    <h2>The run loop.</h2>
-    <p class="sec-lede">Five commands. Each maps to shipping code. Each emits a receipt.</p>
-    <div class="grid-2">
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">01</span>commands</div>
+ <h2>The run loop.</h2>
+ <p class="sec-lede">Five commands. Each maps to shipping code. Each emits a receipt.</p>
+ <div class="grid-2">
 <pre class="terminal"><span class="prompt">$</span> npm i -g github:sneaky-hippo/kolmogorov-stack
 <span class="prompt">$</span> kolm config base https://kolm.ai
 <span class="prompt">$</span> kolm login
 
 <span class="prompt">$</span> kolm inspect support-writer.kolm
-  manifest.json    12 KB   1a92c4…aa
-  recipes.json     7.2 MB  ab02f1…7e
-  receipt.json     312 B   <span class="ok">verified</span>
+ manifest.json 12 KB 1a92c4…aa
+ recipes.json 7.2 MB ab02f1…7e
+ receipt.json 312 B <span class="ok">verified</span>
 <span class="prompt">$</span> kolm eval support-writer.kolm
 <span class="prompt">$</span> kolm run support-writer.kolm '{"input":"draft a reply"}'</pre>
 
@@ -265,96 +267,96 @@
 <span class="comment"># Claude Desktop, Cursor, Codex, or an internal agent can call
 # the artifact through localhost while the artifact and receipts
 # stay in your boundary.</span></pre>
-    </div>
-  </div>
+ </div>
+ </div>
 </section>
 
 <section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">02</span>surface map</div>
-    <h2>One artifact. Three surfaces.</h2>
-    <p class="sec-lede">A single signed <code>.kolm</code> file flows from compile to CLI to native runtime: the same bytes everywhere.</p>
-    <div class="grid-3">
-      <div class="card glow">
-        <h3>CLI &middot; Node</h3>
-        <p>Local inspect, eval, run, and MCP serve. Cross-platform: macOS, Linux, Windows. Covered end-to-end by the test suite in this repo.</p>
-      </div>
-      <div class="card glow">
-        <h3>Hosted &middot; HTTPS</h3>
-        <p>Compile, registry, verified wrap, receipt verification, readiness, and tenant-scoped auth ship through the Express API at kolm.ai.</p>
-      </div>
-      <div class="card glow">
-        <h3>Native &middot; mobile</h3>
-        <p>iOS and Android adapters benchmarked on named hardware before each release; latency, memory, battery, and store-policy posture published in the matrix.</p>
-      </div>
-    </div>
-  </div>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">02</span>surface map</div>
+ <h2>One artifact. Three surfaces.</h2>
+ <p class="sec-lede">A single signed <code>.kolm</code> file flows from compile to CLI to native runtime: the same bytes everywhere.</p>
+ <div class="grid-3">
+ <div class="card glow">
+ <h3>CLI &middot; Node</h3>
+ <p>Local inspect, eval, run, and MCP serve. Cross-platform: macOS, Linux, Windows. Covered end-to-end by the test suite in this repo.</p>
+ </div>
+ <div class="card glow">
+ <h3>Hosted &middot; HTTPS</h3>
+ <p>Compile, registry, verified wrap, receipt verification, readiness, and tenant-scoped auth ship through the Express API at kolm.ai.</p>
+ </div>
+ <div class="card glow">
+ <h3>Native &middot; mobile</h3>
+ <p>iOS and Android adapters benchmarked on named hardware before each release; latency, memory, battery, and store-policy posture published in the matrix.</p>
+ </div>
+ </div>
+ </div>
 </section>
 
 <section class="section">
-  <div class="wrap">
-    <div class="eyebrow"><span class="num">03</span>target requirements</div>
-    <h2>What a platform target must prove.</h2>
-    <div class="pillars">
-      <div class="pillar"><div class="verb">signature</div><h3>Verify locally.</h3><p>The adapter must reject manifest, layer, and receipt mismatches before execution.</p></div>
-      <div class="pillar"><div class="verb">policy</div><h3>Declare egress.</h3><p>The runtime must expose its network behavior and fail closed when the artifact forbids egress.</p></div>
-      <div class="pillar"><div class="verb">benchmark</div><h3>Measure devices.</h3><p>Each target needs p50/p95 latency, memory, battery, thermal, and app-size data on named hardware.</p></div>
-      <div class="pillar"><div class="verb">fallback</div><h3>Document degradation.</h3><p>Teams must know exactly what happens when a device cannot run the selected model path.</p></div>
-    </div>
-  </div>
+ <div class="wrap">
+ <div class="eyebrow"><span class="num">03</span>target requirements</div>
+ <h2>What a platform target must prove.</h2>
+ <div class="pillars">
+ <div class="pillar"><div class="verb">signature</div><h3>Verify locally.</h3><p>The adapter must reject manifest, layer, and receipt mismatches before execution.</p></div>
+ <div class="pillar"><div class="verb">policy</div><h3>Declare egress.</h3><p>The runtime must expose its network behavior and fail closed when the artifact forbids egress.</p></div>
+ <div class="pillar"><div class="verb">benchmark</div><h3>Measure devices.</h3><p>Each target needs p50/p95 latency, memory, battery, thermal, and app-size data on named hardware.</p></div>
+ <div class="pillar"><div class="verb">fallback</div><h3>Document degradation.</h3><p>Teams must know exactly what happens when a device cannot run the selected model path.</p></div>
+ </div>
+ </div>
 </section>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

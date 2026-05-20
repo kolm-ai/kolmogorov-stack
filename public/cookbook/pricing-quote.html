@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Pricing quote recipe · kolm cookbook</title>
-<meta name="description" content="Compile a signed local model that generates pricing quotes from a customer profile. Verifier reconciles every price against the canonical price-table at compile time.">
+<title>Pricing quote recipe · kolm cookbook · kolm.ai</title>
+<meta name="description" content="Compile a signed local model that generates pricing quotes from a customer profile. Verifier reconciles every price against the canonical price-table at...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Pricing-quote recipe">
-<meta property="og:description" content="Local quote drafter. Price-table reconciled. Signed, offline.">
-<meta property="og:type" content="article">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Pricing-quote recipe" />
-<meta name="twitter:description" content="Local quote drafter. Price-table reconciled. Signed, offline." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:title" content="Pricing quote recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Compile a signed local model that generates pricing quotes from a customer profile. Verifier reconciles every price against the canonical price-table at...">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pricing quote recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Compile a signed local model that generates pricing quotes from a customer profile. Verifier reconciles every price against the canonical price-table at...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/cookbook/pricing-quote">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/cookbook/pricing-quote">
@@ -26,279 +26,280 @@
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "HowTo",
-      "name": "Pricing-quote recipe",
-      "description": "Local quote drafter. Price-table reconciled. Signed, offline.",
-      "url": "https://kolm.ai/cookbook/pricing-quote",
-      "totalTime": "PT5M",
-      "tool": [
-        {
-          "@type": "HowToTool",
-          "name": "kolm CLI"
-        }
-      ],
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install",
-          "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Compile",
-          "text": "kolm compile pricing-quote.toml"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Run",
-          "text": "kolm run pricing-quote.kolm"
-        }
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "kolm",
-          "item": "https://kolm.ai/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Cookbook",
-          "item": "https://kolm.ai/cookbook"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Pricing quote recipe",
-          "item": "https://kolm.ai/cookbook/pricing-quote"
-        }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "Pricing-quote recipe",
+ "description": "Local quote drafter. Price-table reconciled. Signed, offline.",
+ "url": "https://kolm.ai/cookbook/pricing-quote",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile pricing-quote.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run pricing-quote.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Pricing quote recipe",
+ "item": "https://kolm.ai/cookbook/pricing-quote"
+ }
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <div class="crumbs"><a href="/docs">cookbook</a> &middot; product &middot; pricing-quote</div>
-    <span class="pill">Recipe &middot; product</span>
-    <h1>Quotes that <span class="tone">never lie about price.</span></h1>
-    <p class="lede">A local <code>.kolm</code> file that drafts a pricing quote from a customer profile (seats, usage, term, region, discount tier). The verifier reads your canonical <code>price-table.json</code> at compile time and rejects any output where a line-item price disagrees with the table by more than $0.</p>
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; product &middot; pricing-quote</div>
+ <span class="pill">Recipe &middot; product</span>
+ <h1>Quotes that <span class="tone">never lie about price.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that drafts a pricing quote from a customer profile (seats, usage, term, region, discount tier). The verifier reads your canonical <code>price-table.json</code> at compile time and rejects any output where a line-item price disagrees with the table by more than $0.</p>
 
-    <div class="meta-row">
-      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-7b</span></div>
-      <div class="item"><span class="label">gold pairs</span><span class="value">120 (60 train / 60 eval)</span></div>
-      <div class="item"><span class="label">k-score floor</span><span class="value">0.90</span></div>
-      <div class="item"><span class="label">artifact size</span><span class="value">2.4 GB</span></div>
-      <div class="item"><span class="label">compile time</span><span class="value">~32 min</span></div>
-      <div class="item"><span class="label">spec source</span><span class="value">price-table reconciler</span></div>
-    </div>
-  </div>
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-7b</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">120 (60 train / 60 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.90</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">2.4 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~32 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">price-table reconciler</span></div>
+ </div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="group">
-      <h2>What this recipe does</h2>
-      <p>LLMs make up numbers. Pricing quotes can't have made-up numbers. This recipe is the only way we know to ship a free-form pricing assistant without a chance of hallucinated discounts: every price the model emits is reconciled against your <code>price-table.json</code> at compile time, and any candidate that fails the reconcile is dropped from the training set.</p>
-      <p>The model learns the <em>structure</em> of a quote (line items, tier logic, term math, applicable discounts) but is never asked to invent prices. The verifier confirms every output matches the table to the cent.</p>
-    </div>
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>LLMs make up numbers. Pricing quotes can't have made-up numbers. This recipe is the only way we know to ship a free-form pricing assistant without a chance of hallucinated discounts: every price the model emits is reconciled against your <code>price-table.json</code> at compile time, and any candidate that fails the reconcile is dropped from the training set.</p>
+ <p>The model learns the <em>structure</em> of a quote (line items, tier logic, term math, applicable discounts) but is never asked to invent prices. The verifier confirms every output matches the table to the cent.</p>
+ </div>
 
-    <div class="group">
-      <h2>The spec</h2>
-      <pre class="code">{
-  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
-  <span class="k">"schema"</span>: {
-    <span class="k">"required"</span>: [<span class="k">"line_items"</span>, <span class="k">"subtotal"</span>, <span class="k">"discount"</span>, <span class="k">"total"</span>, <span class="k">"term_months"</span>, <span class="k">"valid_until"</span>],
-    <span class="k">"properties"</span>: {
-      <span class="k">"line_items"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {
-        <span class="k">"required"</span>: [<span class="k">"sku"</span>, <span class="k">"qty"</span>, <span class="k">"unit_price"</span>, <span class="k">"line_total"</span>],
-        <span class="k">"properties"</span>: {
-          <span class="k">"sku"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
-          <span class="k">"qty"</span>: { <span class="k">"type"</span>: <span class="k">"integer"</span> },
-          <span class="k">"unit_price"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> },
-          <span class="k">"line_total"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> }
-        }
-      } },
-      <span class="k">"subtotal"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> },
-      <span class="k">"discount"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> },
-      <span class="k">"total"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> },
-      <span class="k">"term_months"</span>: { <span class="k">"enum"</span>: [12, 24, 36] },
-      <span class="k">"valid_until"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"format"</span>: <span class="k">"date"</span> }
-    }
-  },
-  <span class="k">"verifier"</span>: {
-    <span class="k">"price_table"</span>: <span class="k">"price-table.json"</span>,
-    <span class="k">"reconcile_unit_price"</span>: <span class="ok">true</span>,
-    <span class="k">"reconcile_line_math"</span>: <span class="ok">true</span>,
-    <span class="k">"reconcile_total_math"</span>: <span class="ok">true</span>,
-    <span class="k">"discount_tier_must_match_profile"</span>: <span class="ok">true</span>
-  }
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"line_items"</span>, <span class="k">"subtotal"</span>, <span class="k">"discount"</span>, <span class="k">"total"</span>, <span class="k">"term_months"</span>, <span class="k">"valid_until"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"line_items"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"sku"</span>, <span class="k">"qty"</span>, <span class="k">"unit_price"</span>, <span class="k">"line_total"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"sku"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+ <span class="k">"qty"</span>: { <span class="k">"type"</span>: <span class="k">"integer"</span> },
+ <span class="k">"unit_price"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> },
+ <span class="k">"line_total"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> }
+ }
+ } },
+ <span class="k">"subtotal"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> },
+ <span class="k">"discount"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> },
+ <span class="k">"total"</span>: { <span class="k">"type"</span>: <span class="k">"number"</span> },
+ <span class="k">"term_months"</span>: { <span class="k">"enum"</span>: [12, 24, 36] },
+ <span class="k">"valid_until"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"format"</span>: <span class="k">"date"</span> }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"price_table"</span>: <span class="k">"price-table.json"</span>,
+ <span class="k">"reconcile_unit_price"</span>: <span class="ok">true</span>,
+ <span class="k">"reconcile_line_math"</span>: <span class="ok">true</span>,
+ <span class="k">"reconcile_total_math"</span>: <span class="ok">true</span>,
+ <span class="k">"discount_tier_must_match_profile"</span>: <span class="ok">true</span>
+ }
 }</pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>Gold pairs (1 of 120 shown)</h2>
+ <div class="group">
+ <h2>Gold pairs (1 of 120 shown)</h2>
 
-      <div class="pair">
-        <div class="pair-h">input</div>
-        <pre class="code">{
-  <span class="k">"company"</span>: <span class="k">"Northwind Logistics"</span>,
-  <span class="k">"seats"</span>: 45,
-  <span class="k">"plan"</span>: <span class="k">"team"</span>,
-  <span class="k">"term_months"</span>: 24,
-  <span class="k">"region"</span>: <span class="k">"us-east"</span>,
-  <span class="k">"discount_tier"</span>: <span class="k">"early-renewal"</span>
+ <div class="pair">
+ <div class="pair-h">input</div>
+ <pre class="code">{
+ <span class="k">"company"</span>: <span class="k">"Northwind Logistics"</span>,
+ <span class="k">"seats"</span>: 45,
+ <span class="k">"plan"</span>: <span class="k">"team"</span>,
+ <span class="k">"term_months"</span>: 24,
+ <span class="k">"region"</span>: <span class="k">"us-east"</span>,
+ <span class="k">"discount_tier"</span>: <span class="k">"early-renewal"</span>
 }</pre>
-        <div class="pair-h">output - reconciled to price-table.json</div>
-        <pre class="code">{
-  <span class="k">"line_items"</span>: [
-    {<span class="k">"sku"</span>: <span class="k">"team-seat-monthly"</span>, <span class="k">"qty"</span>: 1080, <span class="k">"unit_price"</span>: 49.00, <span class="k">"line_total"</span>: 52920.00}
-  ],
-  <span class="k">"subtotal"</span>: 52920.00,
-  <span class="k">"discount"</span>: 7938.00,
-  <span class="k">"total"</span>: 44982.00,
-  <span class="k">"term_months"</span>: 24,
-  <span class="k">"valid_until"</span>: <span class="k">"2026-06-09"</span>
+ <div class="pair-h">output - reconciled to price-table.json</div>
+ <pre class="code">{
+ <span class="k">"line_items"</span>: [
+ {<span class="k">"sku"</span>: <span class="k">"team-seat-monthly"</span>, <span class="k">"qty"</span>: 1080, <span class="k">"unit_price"</span>: 49.00, <span class="k">"line_total"</span>: 52920.00}
+ ],
+ <span class="k">"subtotal"</span>: 52920.00,
+ <span class="k">"discount"</span>: 7938.00,
+ <span class="k">"total"</span>: 44982.00,
+ <span class="k">"term_months"</span>: 24,
+ <span class="k">"valid_until"</span>: <span class="k">"2026-06-09"</span>
 }</pre>
-      </div>
-    </div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Compile</h2>
-      <pre class="code">kolm compile <span class="k">"draft pricing quote, reconcile to price-table"</span> \
-  --base qwen2.5-coder-7b \
-  --pairs pairs.jsonl \
-  --price-table price-table.json \
-  --verifier reconcile-strict \
-  --k-floor 0.90 \
-  --output pricing-quote.kolm
+ <div class="group">
+ <h2>Compile</h2>
+ <pre class="code">kolm compile <span class="k">"draft pricing quote, reconcile to price-table"</span> \
+ --base qwen2.5-coder-7b \
+ --pairs pairs.jsonl \
+ --price-table price-table.json \
+ --verifier reconcile-strict \
+ --k-floor 0.90 \
+ --output pricing-quote.kolm
 
 <span class="ok">ok</span> wrote <span class="k">pricing-quote.kolm</span>
-   k_score=0.94  signature=hmac-sha256</pre>
-    </div>
+ k_score=0.94 signature=ed25519</pre>
+ </div>
 
-    <div class="group">
-      <h2>K-score gate</h2>
-      <div class="k-bar">
-        <span class="k-label">K-score</span>
-        <span class="k-value">0.94</span>
-        <span class="k-detail">held-out 60 quotes &middot; price-reconcile 100% &middot; tier-match 100% &middot; line-math 100% &middot; CRO-rated useful 92%</span>
-      </div>
-      <p>The 100% reconcile rate is by construction: the verifier rejects any candidate output whose unit prices don't appear in <code>price-table.json</code> verbatim. We do not let the model have a "creative" pass on numbers · only on which SKUs apply to which customer profile.</p>
-    </div>
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.94</span>
+ <span class="k-detail">held-out 60 quotes &middot; price-reconcile 100% &middot; tier-match 100% &middot; line-math 100% &middot; CRO-rated useful 92%</span>
+ </div>
+ <p>The 100% reconcile rate is by construction: the verifier rejects any candidate output whose unit prices don't appear in <code>price-table.json</code> verbatim. We do not let the model have a "creative" pass on numbers · only on which SKUs apply to which customer profile.</p>
+ </div>
 
-    <div class="group">
-      <h2>Run-time profile</h2>
-      <div class="lat-grid">
-        <div class="cell"><div class="h">M2 MacBook</div><div class="v">1.6<span class="u">s</span></div></div>
-        <div class="cell"><div class="h">RTX 5090</div><div class="v">390<span class="u">ms</span></div></div>
-        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">4.4<span class="u">s</span></div></div>
-        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">5.6<span class="u">s</span></div></div>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">M2 MacBook</div><div class="v">1.6<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">390<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">4.4<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">5.6<span class="u">s</span></div></div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Deploy</h2>
-      <pre class="code"><span class="c"># salesforce flow · runs in the apex action that builds the quote pdf:</span>
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># salesforce flow · runs in the apex action that builds the quote pdf:</span>
 String profile = JSON.serialize(opportunityProfile);
-String quote   = KolmRuntime.run(<span class="k">'pricing-quote.kolm'</span>, profile);
-PriceTable.reconcile(quote, priceTableJson);  <span class="c">// belt-and-suspenders</span>
+String quote = KolmRuntime.run(<span class="k">'pricing-quote.kolm'</span>, profile);
+PriceTable.reconcile(quote, priceTableJson); <span class="c">// belt-and-suspenders</span>
 QuotePdf.fromJson(quote);</pre>
-    </div>
+ </div>
 
-    <div class="group">
-      <h2>Related recipes</h2>
-      <div class="related">
-        <a href="/cookbook/support-reply"><div class="h">Support reply</div><div class="d">Ticket →empathy-tuned, brand-faithful reply.</div></a>
-        <a href="/cookbook/feature-spec-from-issue"><div class="h">Feature spec</div><div class="d">GitHub issue →4-section spec.</div></a>
-        <a href="/cookbook/churn-predict"><div class="h">Churn predict</div><div class="d">Usage telemetry →risk classification.</div></a>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/support-reply"><div class="h">Support reply</div><div class="d">Ticket →empathy-tuned, brand-faithful reply.</div></a>
+ <a href="/cookbook/feature-spec-from-issue"><div class="h">Feature spec</div><div class="d">GitHub issue →4-section spec.</div></a>
+ <a href="/cookbook/churn-predict"><div class="h">Churn predict</div><div class="d">Usage telemetry →risk classification.</div></a>
+ </div>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

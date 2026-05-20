@@ -19,9 +19,9 @@ like a kolm-owned worker.
 ## Examples
 
 ```
-kolm sessions list                         # find the pid: sess_abc pid 4711
-kolm rescue 4711                           # adopt 4711 into this terminal
-kolm rescue 4711 --tty /dev/pts/3 --force  # pin to a specific tty
+kolm sessions list # find the pid: sess_abc pid 4711
+kolm rescue 4711 # adopt 4711 into this terminal
+kolm rescue 4711 --tty /dev/pts/3 --force # pin to a specific tty
 ```
 
 ## Constraints

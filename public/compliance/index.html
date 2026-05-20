@@ -4,164 +4,174 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Compliance &middot; control mappings for kolm artifacts</title>
-<meta name="description" content="How a .kolm artifact's manifest, receipt chain, and K-score map onto NIST AI RMF, HIPAA, SR 11-7, ISO 42001, and EU AI Act controls. Per-framework evidence pointers.">
+<title>Compliance control mappings for kolm artifacts · kolm.ai</title>
+<meta name="description" content="Compliance control mappings for kolm artifacts: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/compliance">
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
-  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
-  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
-  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
-  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.site nav a{color:inherit;text-decoration:none}
-  header.site nav a.cta{color:var(--accent);font-weight:500}
-  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  h1{font-size:42px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
-  .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0}
-  section.body{padding:36px 0;border-bottom:1px solid var(--line)}
-  h2{margin:0 0 14px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
-  p{color:var(--ink-mute);margin:0 0 16px}
-  .frames{display:grid;grid-template-columns:1fr;gap:14px;margin:8px 0}
-  .frm{padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
-  .frm.live{border-color:rgba(16,185,129,0.4)}
-  .frm h3{margin:0 0 8px;font-size:17px;font-weight:500;color:var(--ink);display:flex;align-items:center;gap:10px}
-  .frm h3 .tag{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);padding:2px 6px;border-radius:3px}
-  .frm.live h3 .tag{color:var(--accent);border-color:rgba(16,185,129,0.4)}
-  .frm p{margin:0 0 12px;font-size:14.5px;line-height:1.55}
-  .frm .gut{font-family:var(--mono);font-size:12px;color:var(--ink-faint);display:flex;justify-content:space-between;gap:14px;border-top:1px solid var(--line);padding-top:10px}
-  .frm .gut a{color:inherit;border-bottom:1px solid var(--line)}
-  footer.site{padding:36px 0 60px;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
-  footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;max-width:1080px}
-  footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site nav a.cta{color:var(--accent);font-weight:500}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:42px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px}
+ .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0}
+ section.body{padding:36px 0;border-bottom:1px solid var(--line)}
+ h2{margin:0 0 14px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
+ p{color:var(--ink-mute);margin:0 0 16px}
+ .frames{display:grid;grid-template-columns:1fr;gap:14px;margin:8px 0}
+ .frm{padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
+ .frm.live{border-color:rgba(16,185,129,0.4)}
+ .frm h3{margin:0 0 8px;font-size:17px;font-weight:500;color:var(--ink);display:flex;align-items:center;gap:10px}
+ .frm h3 .tag{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);padding:2px 6px;border-radius:3px}
+ .frm.live h3 .tag{color:var(--accent);border-color:rgba(16,185,129,0.4)}
+ .frm p{margin:0 0 12px;font-size:14.5px;line-height:1.55}
+ .frm .gut{font-family:var(--mono);font-size:12px;color:var(--ink-faint);display:flex;justify-content:space-between;gap:14px;border-top:1px solid var(--line);padding-top:10px}
+ .frm .gut a{color:inherit;border-bottom:1px solid var(--line)}
+ footer.site{padding:36px 0 60px;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
+ footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;max-width:1080px}
+ footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
 <link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta property="og:title" content="Compliance control mappings for kolm artifacts · kolm.ai">
+<meta property="og:description" content="Compliance control mappings for kolm artifacts: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/compliance">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Compliance control mappings for kolm artifacts · kolm.ai">
+<meta name="twitter:description" content="Compliance control mappings for kolm artifacts: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <header class="site">
-  <div class="wrap">
-    <a href="/" class="logo">kolm</a>
-    <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
-  </div>
+ <div class="wrap">
+ <a href="/" class="logo">kolm</a>
+ <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
+ </div>
 </header>
 
 <section class="hero"><div class="wrap">
-  <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; compliance</p>
-  <h1>The receipt is the evidence.</h1>
-  <p class="lede">Every framework that governs AI in production asks for the same three things: what model ran, what it did, did it stay inside its lane. A .kolm answers all three by construction: artifact CID, input/output hashes, K-score and gate, HMAC chain, replay months later. This page maps that to the frameworks themselves.</p>
+ <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; compliance</p>
+ <h1>The receipt is the evidence.</h1>
+ <p class="lede">Every framework that governs AI in production asks for the same three things: what model ran, what it did, did it stay inside its lane. A .kolm answers all three by construction: artifact CID, input/output hashes, K-score and gate, Ed25519 receipt chain, replay months later. This page maps that to the frameworks themselves.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>Frameworks mapped</h2>
-  <div class="frames">
-    <a class="frm live" href="/compliance/nist-ai-rmf" style="color:inherit;text-decoration:none">
-      <h3>NIST AI RMF 1.0 + GenAI Profile <span class="tag">live</span></h3>
-      <p>GOVERN &middot; MAP &middot; MEASURE &middot; MANAGE. 31 subcategories mapped to specific fields in the .kolm manifest, receipt JSONL, and kolm CLI verbs. Reviewed against the July 2024 GenAI profile.</p>
-      <div class="gut"><span>nist-ai-rmf 1.0 + nist-ai 600-1</span><span>view mapping &rarr;</span></div>
-    </a>
-    <div class="frm live">
-      <h3>HIPAA Safe Harbor + Privacy Rule <span class="tag">live</span></h3>
-      <p>The HIPAA compliance pack (<a href="/compliance-packs" style="color:inherit;border-bottom:1px solid var(--line)">/compliance-packs</a>) ships 18-identifier Safe Harbor verifier, BAA workflow, and the receipt schema covered counsel actually accepts.</p>
-      <div class="gut"><span>45 CFR &sect;164.514(b) Safe Harbor</span><span><a href="/healthcare">healthcare overview</a></span></div>
-    </div>
-    <div class="frm live">
-      <h3>SR 11-7 + OCC 2011-12 Model Risk <span class="tag">live</span></h3>
-      <p>Receipts as the model log: conceptual soundness from provenance, performance monitoring from K-score per-month, replay from input_sha + output_sha. See the bank case study for what an examiner actually accepted.</p>
-      <div class="gut"><span>Federal Reserve SR 11-7</span><span><a href="/case-studies/finance-sr11-7">case study &rarr;</a></span></div>
-    </div>
-    <div class="frm">
-      <h3>ISO/IEC 42001 (AI management) <span class="tag">live</span></h3>
-      <p>Clause-by-clause mapping is shipped. The AI management system requirements (planning, support, operation, performance evaluation, improvement) map cleanly to the kolm runtime and audit log.</p>
-      <div class="gut"><span>ISO/IEC 42001:2023</span><span>Available</span></div>
-    </div>
-    <div class="frm">
-      <h3>EU AI Act (high-risk systems) <span class="tag">live</span></h3>
-      <p>Article 12 (record-keeping), Article 13 (transparency), Article 15 (accuracy + robustness + cybersecurity), Article 17 (quality management). Same receipt+manifest spine, restated against the high-risk obligations and grounded in the final consolidated text.</p>
-      <div class="gut"><span>Regulation (EU) 2024/1689</span><span>Available</span></div>
-    </div>
-    <div class="frm">
-      <h3>SOC 2 + ISO 27001 (controls cross-walk) <span class="tag">live</span></h3>
-      <p>Not AI-specific, but every buyer's procurement reviewer asks. We map the relevant CC + A.5 / A.8 / A.12 / A.14 controls to the corresponding kolm artifacts. SOC 2 Type II is on the company itself at <a href="/soc2" style="color:inherit;border-bottom:1px solid var(--line)">/soc2</a>.</p>
-      <div class="gut"><span>AICPA TSC + ISO/IEC 27001:2022</span><span>Available</span></div>
-    </div>
-  </div>
+ <h2>Frameworks mapped</h2>
+ <div class="frames">
+ <a class="frm live" href="/compliance/nist-ai-rmf" style="color:inherit;text-decoration:none">
+ <h3>NIST AI RMF 1.0 + GenAI Profile <span class="tag">live</span></h3>
+ <p>GOVERN &middot; MAP &middot; MEASURE &middot; MANAGE. 31 subcategories mapped to specific fields in the .kolm manifest, receipt JSONL, and kolm CLI verbs. Reviewed against the July 2024 GenAI profile.</p>
+ <div class="gut"><span>nist-ai-rmf 1.0 + nist-ai 600-1</span><span>view mapping &rarr;</span></div>
+ </a>
+ <div class="frm live">
+ <h3>HIPAA Safe Harbor + Privacy Rule <span class="tag">live</span></h3>
+ <p>The HIPAA compliance pack (<a href="/compliance-packs" style="color:inherit;border-bottom:1px solid var(--line)">/compliance-packs</a>) ships 18-identifier Safe Harbor verifier, BAA workflow, and the receipt schema covered counsel actually accepts.</p>
+ <div class="gut"><span>45 CFR &sect;164.514(b) Safe Harbor</span><span><a href="/healthcare">healthcare overview</a></span></div>
+ </div>
+ <div class="frm live">
+ <h3>SR 11-7 + OCC 2011-12 Model Risk <span class="tag">live</span></h3>
+ <p>Receipts as the model log: conceptual soundness from provenance, performance monitoring from K-score per-month, replay from input_sha + output_sha. See the bank case study for what an examiner actually accepted.</p>
+ <div class="gut"><span>Federal Reserve SR 11-7</span><span><a href="/case-studies/finance-sr11-7">case study &rarr;</a></span></div>
+ </div>
+ <div class="frm">
+ <h3>ISO/IEC 42001 (AI management) <span class="tag">live</span></h3>
+ <p>Clause-by-clause mapping is shipped. The AI management system requirements (planning, support, operation, performance evaluation, improvement) map cleanly to the kolm runtime and audit log.</p>
+ <div class="gut"><span>ISO/IEC 42001:2023</span><span>Available</span></div>
+ </div>
+ <div class="frm">
+ <h3>EU AI Act (high-risk systems) <span class="tag">live</span></h3>
+ <p>Article 12 (record-keeping), Article 13 (transparency), Article 15 (accuracy + robustness + cybersecurity), Article 17 (quality management). Same receipt+manifest spine, restated against the high-risk obligations and grounded in the final consolidated text.</p>
+ <div class="gut"><span>Regulation (EU) 2024/1689</span><span>Available</span></div>
+ </div>
+ <div class="frm">
+ <h3>SOC 2 + ISO 27001 (controls cross-walk) <span class="tag">live</span></h3>
+ <p>Not AI-specific, but every buyer's procurement reviewer asks. We map the relevant CC + A.5 / A.8 / A.12 / A.14 controls to the corresponding kolm artifacts. SOC 2 Type II is on the company itself at <a href="/soc2" style="color:inherit;border-bottom:1px solid var(--line)">/soc2</a>.</p>
+ <div class="gut"><span>AICPA TSC + ISO/IEC 27001:2022</span><span>Available</span></div>
+ </div>
+ </div>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>How the mapping works</h2>
-  <p>Each mapping table answers the same shape for every control:</p>
-  <ul style="color:var(--ink-mute);margin:0 0 16px;padding-left:20px">
-    <li><b style="color:var(--ink)">id</b> &mdash; the control or subcategory identifier (GV-1.1, MS-2.3, &sect;164.514(b)).</li>
-    <li><b style="color:var(--ink)">control text</b> &mdash; what the framework asks for, abbreviated.</li>
-    <li><b style="color:var(--ink)">evidence in .kolm</b> &mdash; the exact manifest field, receipt field, or CLI verb that satisfies it.</li>
-  </ul>
-  <p>If a control is not covered by the artifact spine, we say so explicitly. Examples: human-in-the-loop oversight (MG-3.x) is governance you implement, not something a manifest field can satisfy. We do not claim otherwise.</p>
+ <h2>How the mapping works</h2>
+ <p>Each mapping table answers the same shape for every control:</p>
+ <ul style="color:var(--ink-mute);margin:0 0 16px;padding-left:20px">
+ <li><b style="color:var(--ink)">id</b> &mdash; the control or subcategory identifier (GV-1.1, MS-2.3, &sect;164.514(b)).</li>
+ <li><b style="color:var(--ink)">control text</b> &mdash; what the framework asks for, abbreviated.</li>
+ <li><b style="color:var(--ink)">evidence in .kolm</b> &mdash; the exact manifest field, receipt field, or CLI verb that satisfies it.</li>
+ </ul>
+ <p>If a control is not covered by the artifact spine, we say so explicitly. Examples: human-in-the-loop oversight (MG-3.x) is governance you implement, not something a manifest field can satisfy. We do not claim otherwise.</p>
 </div></section>
 
 <section class="body"><div class="wrap">
-  <h2>What we are not</h2>
-  <p>We do not certify your compliance. We do not write your policies. We do not stand between you and your auditor.</p>
-  <p>What we do: ship the artifacts that turn "did the model behave" from an asserted answer into a replayable one. Your compliance team and your auditor decide whether the evidence satisfies the framework. We give them something to point at that is not vibes.</p>
-  <p><a href="mailto:compliance@kolm.ai" style="color:inherit;border-bottom:1px solid var(--line)">compliance@kolm.ai</a> if you want a framework added to this page.</p>
+ <h2>What we are not</h2>
+ <p>We do not certify your compliance. We do not write your policies. We do not stand between you and your auditor.</p>
+ <p>What we do: ship the artifacts that turn "did the model behave" from an asserted answer into a replayable one. Your compliance team and your auditor decide whether the evidence satisfies the framework. We give them something to point at that is not vibes.</p>
+ <p><a href="mailto:compliance@kolm.ai" style="color:inherit;border-bottom:1px solid var(--line)">compliance@kolm.ai</a> if you want a framework added to this page.</p>
 </div></section>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

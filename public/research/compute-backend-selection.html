@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Compute backend selection: local vs cloud &middot; kolm research</title>
-<meta name="description" content="A practical guide to the 14 compute backends kolm dispatches to. When local beats cloud, when cloud beats local, the auto-pick scoring formula, and worked examples with kolm compute pick.">
+<title>Compute backend selection: local vs cloud kolm research · kolm.ai</title>
+<meta name="description" content="A practical guide to the 14 compute backends kolm dispatches to. When local beats cloud, when cloud beats local, the auto-pick scoring formula, and worked...">
 <meta name="keywords" content="compute backend, local vs cloud, GPU dispatch, LoRA training, kolm compute, Modal, RunPod, MPS, MLX">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -14,12 +14,12 @@
 <meta name="author" content="kolm">
 <meta name="robots" content="index,follow,max-snippet:-1">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="Compute backend selection: when to use local vs cloud">
-<meta property="og:description" content="14 backends, one picker. The scoring formula, the tradeoffs, the commands.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Compute backend selection: local vs cloud kolm research · kolm.ai">
+<meta property="og:description" content="A practical guide to the 14 compute backends kolm dispatches to. When local beats cloud, when cloud beats local, the auto-pick scoring formula, and worked...">
+<meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Compute backend selection: local vs cloud">
-<meta name="twitter:description" content="14 backends, one picker. The scoring formula, the tradeoffs, the commands.">
+<meta name="twitter:title" content="Compute backend selection: local vs cloud kolm research · kolm.ai">
+<meta name="twitter:description" content="A practical guide to the 14 compute backends kolm dispatches to. When local beats cloud, when cloud beats local, the auto-pick scoring formula, and worked...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/compute-backend-selection">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,366 +27,367 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Compute backend selection: when to use local vs cloud",
-      "description": "A practical guide to the 14 compute backends kolm dispatches to. The auto-pick scoring formula, when local beats cloud, when cloud beats local, and worked examples.",
-      "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
-      "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
-      "datePublished": "2026-05-14",
-      "dateModified": "2026-05-14",
-      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/compute-backend-selection" },
-      "image": "https://kolm.ai/og-card.svg",
-      "keywords": "compute backend, local vs cloud, kolm compute, GPU dispatch",
-      "articleSection": "Compute",
-      "wordCount": 1900
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "Compute backend selection", "item": "https://kolm.ai/research/compute-backend-selection"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Compute backend selection: when to use local vs cloud",
+ "description": "A practical guide to the 14 compute backends kolm dispatches to. The auto-pick scoring formula, when local beats cloud, when cloud beats local, and worked examples.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/compute-backend-selection" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "compute backend, local vs cloud, kolm compute, GPU dispatch",
+ "articleSection": "Compute",
+ "wordCount": 1900
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Compute backend selection", "item": "https://kolm.ai/research/compute-backend-selection"}
+ ]
+ }
+ ]
 }
 </script>
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
-  a{color:inherit;text-decoration:none}
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px}
-  .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
-  header.site .brand span{font-weight:500;font-size:16px}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
-  header.site nav a:hover{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
-  header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
-  @media(max-width:720px){header.site nav{display:none}}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
 
-  section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
-  section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
-  section.hero .wrap{position:relative}
-  .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
-  .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
-  h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
-  h1 .tone{color:#10b981}
-  p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
-  p.lede b{color:var(--ink);font-weight:500}
-  .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .meta b{color:var(--ink-mute);font-weight:500}
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
 
-  article{padding:36px 0 96px}
-  article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
-  article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
-  article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
-  article p b{color:var(--ink);font-weight:500}
-  article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
-  article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
-  article blockquote p{color:var(--ink);margin:0;font-weight:500}
-  article ul{padding-left:0;list-style:none;margin:16px 0 24px}
-  article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
-  article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
-  article ul li b{color:var(--ink);font-weight:500}
-  article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
-  article pre .com{color:var(--ink-faint)}
-  article pre .arg{color:#10b981}
-  article pre .kw{color:#b0bbff}
-  article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
-  article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
-  article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
-  article table td b{color:var(--ink)}
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
+ article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ article table th,article table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ article table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em}
+ article table td b{color:var(--ink)}
 
-  .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
-  .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
-  .toc ol{margin:0;padding-left:20px}
-  .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
-  .toc li a{color:var(--ink-mute)}
-  .toc li a:hover{color:#10b981}
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
 
-  .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
-  @media(max-width:720px){.signpost{grid-template-columns:1fr}}
-  .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
-  .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
-  .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
-  .signpost a .v .arrow{color:#10b981;margin-left:6px}
-  .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
 
-  footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
-  footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <span class="pill"><span class="dot"></span>Research &middot; Compute &middot; 2026-05-14 &middot; 11 min read</span>
-    <h1>Compute backend selection: <span class="tone">local vs cloud.</span></h1>
-    <p class="lede">Fourteen backends, one picker, one scoring function. <b>The local-first default holds for most compile jobs; cloud earns its slot when the artifact will not fit on your laptop.</b> What the picker rewards, what it punishes, and the commands to override it.</p>
-    <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;compute &middot; dispatch &middot; cost</span></div>
-  </div>
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; Compute &middot; 2026-05-14 &middot; 11 min read</span>
+ <h1>Compute backend selection: <span class="tone">local vs cloud.</span></h1>
+ <p class="lede">Fourteen backends, one picker, one scoring function. <b>The local-first default holds for most compile jobs; cloud earns its slot when the artifact will not fit on your laptop.</b> What the picker rewards, what it punishes, and the commands to override it.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;compute &middot; dispatch &middot; cost</span></div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="toc">
-      <h5>Contents</h5>
-      <ol>
-        <li><a href="#registry">The 14-backend registry</a></li>
-        <li><a href="#picker">The scoring formula</a></li>
-        <li><a href="#local-wins">When local beats cloud</a></li>
-        <li><a href="#cloud-wins">When cloud beats local</a></li>
-        <li><a href="#examples">Worked examples</a></li>
-        <li><a href="#tradeoffs">Verifiable tradeoffs</a></li>
-      </ol>
-    </div>
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#registry">The 14-backend registry</a></li>
+ <li><a href="#picker">The scoring formula</a></li>
+ <li><a href="#local-wins">When local beats cloud</a></li>
+ <li><a href="#cloud-wins">When cloud beats local</a></li>
+ <li><a href="#examples">Worked examples</a></li>
+ <li><a href="#tradeoffs">Verifiable tradeoffs</a></li>
+ </ol>
+ </div>
 
-    <h2 id="registry">The 14-backend registry.</h2>
-    <p>The kolm compute layer dispatches every training and inference job to one of fourteen backends. Six are local. Seven are cloud. One is your own remote box over SSH. Every backend is declared in <code>src/compute/registry.json</code> with the same field set: <code>kind</code>, <code>train</code>, <code>infer</code>, <code>airgap</code>, <code>cost_per_hour_usd</code>, <code>cold_start_seconds</code>, <code>vram_cap_gb</code>, <code>auth</code>, <code>tier</code>. The CLI exposes the picker through <code>kolm compute list|detect|pick|use|info|test|status</code>.</p>
+ <h2 id="registry">The 14-backend registry.</h2>
+ <p>The kolm compute layer dispatches every training and inference job to one of fourteen backends. Six are local. Seven are cloud. One is your own remote box over SSH. Every backend is declared in <code>src/compute/registry.json</code> with the same field set: <code>kind</code>, <code>train</code>, <code>infer</code>, <code>airgap</code>, <code>cost_per_hour_usd</code>, <code>cold_start_seconds</code>, <code>vram_cap_gb</code>, <code>auth</code>, <code>tier</code>. The CLI exposes the picker through <code>kolm compute list|detect|pick|use|info|test|status</code>.</p>
 
-    <pre><span class="com"># every backend the CLI knows about</span>
+ <pre><span class="com"># every backend the CLI knows about</span>
 <span class="kw">$</span> kolm compute list
 <span class="arg">LOCAL</span>
-  local-cpu       tier 1  always available     0 $/hr   torch-cpu
-  local-cuda      tier 1  NVIDIA               0 $/hr   torch-cu12 + unsloth + peft
-  local-mps       tier 1  Apple Silicon        0 $/hr   torch-mps + peft
-  local-mlx       tier 2  Apple Silicon        0 $/hr   mlx-lm
-  local-rocm      tier 2  AMD                  0 $/hr   torch-rocm6 + peft
-  local-directml  tier 2  Windows DX12         0 $/hr   torch-directml
+ local-cpu tier 1 always available 0 $/hr torch-cpu
+ local-cuda tier 1 NVIDIA 0 $/hr torch-cu12 + unsloth + peft
+ local-mps tier 1 Apple Silicon 0 $/hr torch-mps + peft
+ local-mlx tier 2 Apple Silicon 0 $/hr mlx-lm
+ local-rocm tier 2 AMD 0 $/hr torch-rocm6 + peft
+ local-directml tier 2 Windows DX12 0 $/hr torch-directml
 <span class="arg">CLOUD</span>
-  modal           tier 1  KOLM_MODAL_TOKEN     2.50 $/hr   serverless GPU
-  runpod          tier 1  KOLM_RUNPOD_TOKEN    1.20 $/hr   pods / serverless
-  vast            tier 1  KOLM_VAST_TOKEN      0.50 $/hr   marketplace SSH
-  together        tier 1  KOLM_TOGETHER_TOKEN  per-token  managed LoRA
-  lambda          tier 2  KOLM_LAMBDA_TOKEN    2.00 $/hr   on-demand SSH
-  replicate       tier 2  KOLM_REPLICATE_TOKEN per-call   Cog containers
-  fal             tier 2  KOLM_FAL_TOKEN       per-call   inference only
+ modal tier 1 KOLM_MODAL_TOKEN 2.50 $/hr serverless GPU
+ runpod tier 1 KOLM_RUNPOD_TOKEN 1.20 $/hr pods / serverless
+ vast tier 1 KOLM_VAST_TOKEN 0.50 $/hr marketplace SSH
+ together tier 1 KOLM_TOGETHER_TOKEN per-token managed LoRA
+ lambda tier 2 KOLM_LAMBDA_TOKEN 2.00 $/hr on-demand SSH
+ replicate tier 2 KOLM_REPLICATE_TOKEN per-call Cog containers
+ fal tier 2 KOLM_FAL_TOKEN per-call inference only
 <span class="arg">SELF-HOSTED</span>
-  remote-ssh      tier 1  SSH + KOLM_REMOTE_HOST  0 $/hr   your own GPU</pre>
+ remote-ssh tier 1 SSH + KOLM_REMOTE_HOST 0 $/hr your own GPU</pre>
 
-    <p>The split is intentional. Local backends are co-located with the training data and the artifact bytes; they cost nothing per hour, they survive an offline week, and they reproduce bit-for-bit when the toolchain is pinned. Cloud backends rent silicon you cannot afford to keep idle, with cold starts that vary by an order of magnitude across vendors. The <code>remote-ssh</code> backend is a third class: you bring the GPU, kolm drives it from your laptop.</p>
+ <p>The split is intentional. Local backends are co-located with the training data and the artifact bytes; they cost nothing per hour, they survive an offline week, and they reproduce bit-for-bit when the toolchain is pinned. Cloud backends rent silicon you cannot afford to keep idle, with cold starts that vary by an order of magnitude across vendors. The <code>remote-ssh</code> backend is a third class: you bring the GPU, kolm drives it from your laptop.</p>
 
-    <h2 id="picker">The scoring formula.</h2>
-    <p>When you run <code>kolm compute pick</code>, the picker computes a score in [0, 1] for every backend that passes your constraint filter, then returns the top result with the next three runners-up. The score function is intentionally short:</p>
+ <h2 id="picker">The scoring formula.</h2>
+ <p>When you run <code>kolm compute pick</code>, the picker computes a score in [0, 1] for every backend that passes your constraint filter, then returns the top result with the next three runners-up. The score function is intentionally short:</p>
 
-    <pre><span class="com"># src/compute/index.js, scoreBackend()</span>
+ <pre><span class="com"># src/compute/index.js, scoreBackend()</span>
 S = 0.35 * available
-  + 0.20 * cost_inv
-  + 0.15 * latency_inv
-  + 0.15 * repro
-  + 0.15 * perf</pre>
+ + 0.20 * cost_inv
+ + 0.15 * latency_inv
+ + 0.15 * repro
+ + 0.15 * perf</pre>
 
-    <p>Each term lives on [0, 1]. The weights are not load-bearing; they encode a stance.</p>
-    <ul>
-      <li><b>0.35 on availability.</b> A backend that needs a token you have not set, or hardware you do not own, scores zero on this axis. The picker will name it as the best capability match but refuse to dispatch.</li>
-      <li><b>0.20 on cost.</b> Cost is normalized so $0/hr is 1.0 and $5/hr is 0.0. Local backends max out cost; modal at $2.50/hr halves it; vast at $0.50/hr keeps most of it.</li>
-      <li><b>0.15 on latency.</b> Cold-start seconds, normalized so 0s is 1.0 and 120s is 0.0. Modal cold starts in ~5s and dominates serverless; runpod and lambda eat a minute or more.</li>
-      <li><b>0.15 on reproducibility.</b> Local kinds get 1.0, self-hosted SSH gets 0.9, managed cloud gets 0.6. This is the only axis with no detection input: it encodes how confident a third party would be that your second run produces the same artifact bytes as your first.</li>
-      <li><b>0.15 on performance.</b> A per-backend bias, not a benchmark. <code>local-cuda</code> sits at 1.00, <code>local-cpu</code> sits at 0.30. The bias is the tiebreaker that keeps the picker from picking CPU when both CPU and an accelerator are present.</li>
-    </ul>
+ <p>Each term lives on [0, 1]. The weights are not load-bearing; they encode a stance.</p>
+ <ul>
+ <li><b>0.35 on availability.</b> A backend that needs a token you have not set, or hardware you do not own, scores zero on this axis. The picker will name it as the best capability match but refuse to dispatch.</li>
+ <li><b>0.20 on cost.</b> Cost is normalized so $0/hr is 1.0 and $5/hr is 0.0. Local backends max out cost; modal at $2.50/hr halves it; vast at $0.50/hr keeps most of it.</li>
+ <li><b>0.15 on latency.</b> Cold-start seconds, normalized so 0s is 1.0 and 120s is 0.0. Modal cold starts in ~5s and dominates serverless; runpod and lambda eat a minute or more.</li>
+ <li><b>0.15 on reproducibility.</b> Local kinds get 1.0, self-hosted SSH gets 0.9, managed cloud gets 0.6. This is the only axis with no detection input: it encodes how confident a third party would be that your second run produces the same artifact bytes as your first.</li>
+ <li><b>0.15 on performance.</b> A per-backend bias, not a benchmark. <code>local-cuda</code> sits at 1.00, <code>local-cpu</code> sits at 0.30. The bias is the tiebreaker that keeps the picker from picking CPU when both CPU and an accelerator are present.</li>
+ </ul>
 
-    <p>The tightest call the picker makes is <code>local-cpu</code> vs an idle <code>modal</code> token. CPU wins on availability, cost, latency, and reproducibility; modal wins decisively on performance. The 0.15 perf weight breaks that tie in modal's favor only when the per-hour cost normalization stays above 0.5 (so any modal-class GPU under ~$2.50/hr). That math is the whole reason "CPU is not the move" became a default the registry could enforce.</p>
+ <p>The tightest call the picker makes is <code>local-cpu</code> vs an idle <code>modal</code> token. CPU wins on availability, cost, latency, and reproducibility; modal wins decisively on performance. The 0.15 perf weight breaks that tie in modal's favor only when the per-hour cost normalization stays above 0.5 (so any modal-class GPU under ~$2.50/hr). That math is the whole reason "CPU is not the move" became a default the registry could enforce.</p>
 
-    <h2 id="local-wins">When local beats cloud.</h2>
-    <p>The four cases where the local default is right by construction.</p>
+ <h2 id="local-wins">When local beats cloud.</h2>
+ <p>The four cases where the local default is right by construction.</p>
 
-    <p><b>Regulated data.</b> Healthcare, finance, defense. Any training corpus that is subject to HIPAA, GDPR, SR 11-7, or an export-controlled boundary cannot leave the regulated network. A cloud backend implies a Business Associate Agreement or a Standard Contractual Clause exchange before the first byte ships. Local backends ship zero bytes. The constraint is binary; the picker's <code>--airgap</code> flag enforces it:</p>
+ <p><b>Regulated data.</b> Healthcare, finance, defense. Any training corpus that is subject to HIPAA, GDPR, SR 11-7, or an export-controlled boundary cannot leave the regulated network. A cloud backend implies a Business Associate Agreement or a Standard Contractual Clause exchange before the first byte ships. Local backends ship zero bytes. The constraint is binary; the picker's <code>--airgap</code> flag enforces it:</p>
 
-    <pre><span class="kw">$</span> kolm compute pick --airgap
-<span class="arg">picked:</span>  local-mps
-<span class="arg">device:</span>  apple m2 max (38 cores, 64 GB unified)
-<span class="arg">score:</span>   0.842
-<span class="arg">reason:</span>  available; score 0.842 (local)
+ <pre><span class="kw">$</span> kolm compute pick --airgap
+<span class="arg">picked:</span> local-mps
+<span class="arg">device:</span> apple m2 max (38 cores, 64 GB unified)
+<span class="arg">score:</span> 0.842
+<span class="arg">reason:</span> available; score 0.842 (local)
 <span class="arg">runners-up:</span> local-cpu (0.701), local-mlx (0.832 not detected)</pre>
 
-    <p><b>Repeated training.</b> A compile pipeline that runs nightly to incorporate the last 24 hours of captured traffic is a fixed-cost workload. On modal at $2.50/hr times one hour per night, that is $912/year of pure compute rent before the first user sees a benefit. The same 64-core M2 Max already on the engineer's desk amortizes to zero.</p>
+ <p><b>Repeated training.</b> A compile pipeline that runs nightly to incorporate the last 24 hours of captured traffic is a fixed-cost workload. On modal at $2.50/hr times one hour per night, that is $912/year of pure compute rent before the first user sees a benefit. The same 64-core M2 Max already on the engineer's desk amortizes to zero.</p>
 
-    <p><b>Small models.</b> 0.5B to 3B base, LoRA rank 8 or 16, an eval set under 200 cases. The whole compile fits in 12 GB of unified memory on Apple Silicon and finishes in under 20 minutes on a recent M-series chip. Cold-starting a cloud worker takes longer than the local run.</p>
+ <p><b>Small models.</b> 0.5B to 3B base, LoRA rank 8 or 16, an eval set under 200 cases. The whole compile fits in 12 GB of unified memory on Apple Silicon and finishes in under 20 minutes on a recent M-series chip. Cold-starting a cloud worker takes longer than the local run.</p>
 
-    <p><b>Dev iteration.</b> The expensive part of training a fine-tune is the eighteenth attempt, not the first. Local backends keep the loop tight: the recipe pack lives next to the captured corpus, the K-score lands in stdout, the failed compile leaves a directory you can <code>git diff</code>. Pushing every iteration through a cloud queue compounds latency per attempt.</p>
+ <p><b>Dev iteration.</b> The expensive part of training a fine-tune is the eighteenth attempt, not the first. Local backends keep the loop tight: the recipe pack lives next to the captured corpus, the K-score lands in stdout, the failed compile leaves a directory you can <code>git diff</code>. Pushing every iteration through a cloud queue compounds latency per attempt.</p>
 
-    <h2 id="cloud-wins">When cloud beats local.</h2>
-    <p>The three cases where the cloud backend is the right default.</p>
+ <h2 id="cloud-wins">When cloud beats local.</h2>
+ <p>The three cases where the cloud backend is the right default.</p>
 
-    <p><b>One-shot big training.</b> 70B base, full fine-tune, eight-figure parameter count touched. Even with a top-end consumer GPU, the VRAM cap rules out the run. <code>kolm compute pick --min-vram 80</code> filters down to backends with at least 80 GB of accelerator memory, which is the full cloud slate plus any local card a hyperscaler engineer happens to own.</p>
+ <p><b>One-shot big training.</b> 70B base, full fine-tune, eight-figure parameter count touched. Even with a top-end consumer GPU, the VRAM cap rules out the run. <code>kolm compute pick --min-vram 80</code> filters down to backends with at least 80 GB of accelerator memory, which is the full cloud slate plus any local card a hyperscaler engineer happens to own.</p>
 
-    <p><b>70B+ models, occasionally.</b> The pattern is: most artifacts are 3B-7B local compiles, but once a quarter there is a 70B variant for a specific high-stakes task. Provisioning a permanent H100 for one job a quarter is wrong; renting modal for the four-hour compile is right. The picker carries the same constraint set across both: the receipt chain, the K-score gate, the artifact format are identical.</p>
+ <p><b>70B+ models, occasionally.</b> The pattern is: most artifacts are 3B-7B local compiles, but once a quarter there is a 70B variant for a specific high-stakes task. Provisioning a permanent H100 for one job a quarter is wrong; renting modal for the four-hour compile is right. The picker carries the same constraint set across both: the receipt chain, the K-score gate, the artifact format are identical.</p>
 
-    <p><b>Occasional bursts.</b> A demo, a customer evaluation, a one-time data migration. The amortization argument inverts: there is no second run. Cloud cost is a single line item, not a recurring obligation. The picker's <code>--budget</code> flag is the steering wheel:</p>
+ <p><b>Occasional bursts.</b> A demo, a customer evaluation, a one-time data migration. The amortization argument inverts: there is no second run. Cloud cost is a single line item, not a recurring obligation. The picker's <code>--budget</code> flag is the steering wheel:</p>
 
-    <pre><span class="kw">$</span> kolm compute pick --budget 1.00
-<span class="arg">picked:</span>  vast
-<span class="arg">device:</span>  rtx 4090 (24 GB)
-<span class="arg">score:</span>   0.766
-<span class="arg">reason:</span>  available; score 0.766 (cloud-marketplace)
+ <pre><span class="kw">$</span> kolm compute pick --budget 1.00
+<span class="arg">picked:</span> vast
+<span class="arg">device:</span> rtx 4090 (24 GB)
+<span class="arg">score:</span> 0.766
+<span class="arg">reason:</span> available; score 0.766 (cloud-marketplace)
 <span class="arg">filtered out:</span> modal ($2.50/hr > 1.00), runpod ($1.20/hr > 1.00), lambda ($2.00/hr > 1.00)</pre>
 
-    <h2 id="examples">Worked examples.</h2>
-    <p>Three concrete invocations and what they teach.</p>
+ <h2 id="examples">Worked examples.</h2>
+ <p>Three concrete invocations and what they teach.</p>
 
-    <p><b>Example one: airgap mode on a laptop.</b></p>
-    <pre><span class="kw">$</span> kolm compute pick --airgap
-<span class="arg">picked:</span>  local-cuda
-<span class="arg">device:</span>  rtx 4090 laptop (16 GB)
-<span class="arg">score:</span>   0.864
+ <p><b>Example one: airgap mode on a laptop.</b></p>
+ <pre><span class="kw">$</span> kolm compute pick --airgap
+<span class="arg">picked:</span> local-cuda
+<span class="arg">device:</span> rtx 4090 laptop (16 GB)
+<span class="arg">score:</span> 0.864
 <span class="kw">$</span> kolm compute use local-cuda
 <span class="com"># default backend written to ~/.kolm/config.json</span>
 <span class="kw">$</span> kolm compile -t support_ticket_router -d ./tickets.jsonl
-<span class="arg">[trainer]</span>     using local-cuda (env: KOLM_BACKEND=local-cuda)
-<span class="arg">[trainer]</span>     no outbound network calls; airgap mode active
-<span class="arg">[K-score]</span>     0.917 (ships at 0.85 gate)
-<span class="arg">[artifact]</span>    ./support_ticket_router-1.0.0.kolm  3.8 GB</pre>
+<span class="arg">[trainer]</span> using local-cuda (env: KOLM_BACKEND=local-cuda)
+<span class="arg">[trainer]</span> no outbound network calls; airgap mode active
+<span class="arg">[K-score]</span> 0.917 (ships at 0.85 gate)
+<span class="arg">[artifact]</span> ./support_ticket_router-1.0.0.kolm 3.8 GB</pre>
 
-    <p>The picker filtered out every cloud backend on the <code>airgap: false</code> flag and ranked local-cuda above local-mps because the discrete GPU has a higher perf bias. The compile produced a signed artifact, the receipt chain was written, no byte left the laptop.</p>
+ <p>The picker filtered out every cloud backend on the <code>airgap: false</code> flag and ranked local-cuda above local-mps because the discrete GPU has a higher perf bias. The compile produced a signed artifact, the receipt chain was written, no byte left the laptop.</p>
 
-    <p><b>Example two: budget-constrained one-shot.</b></p>
-    <pre><span class="kw">$</span> KOLM_VAST_TOKEN=vk_xx kolm compute pick --budget 5 --min-vram 80
-<span class="arg">picked:</span>  vast
-<span class="arg">device:</span>  h100 80gb
-<span class="arg">score:</span>   0.778
-<span class="arg">reason:</span>  available; score 0.778 (cloud-marketplace)
+ <p><b>Example two: budget-constrained one-shot.</b></p>
+ <pre><span class="kw">$</span> KOLM_VAST_TOKEN=vk_xx kolm compute pick --budget 5 --min-vram 80
+<span class="arg">picked:</span> vast
+<span class="arg">device:</span> h100 80gb
+<span class="arg">score:</span> 0.778
+<span class="arg">reason:</span> available; score 0.778 (cloud-marketplace)
 <span class="arg">runners-up:</span> runpod (0.752), lambda (0.720), modal (0.681)</pre>
 
-    <p>Modal was eligible (under the $5 budget) but lost on the cost axis. Runpod is closer to vast on cost but eats a 60-second cold start. The picker logs every runner-up so you can audit the choice later.</p>
+ <p>Modal was eligible (under the $5 budget) but lost on the cost axis. Runpod is closer to vast on cost but eats a 60-second cold start. The picker logs every runner-up so you can audit the choice later.</p>
 
-    <p><b>Example three: smoke-test a backend before depending on it.</b></p>
-    <pre><span class="kw">$</span> KOLM_MODAL_TOKEN=mk_xx kolm compute test modal
-<span class="arg">[1/4]</span>     auth check                        ok
-<span class="arg">[2/4]</span>     container provision (cold)        4.8s
-<span class="arg">[3/4]</span>     trainer dry run (no weights)      ok
-<span class="arg">[4/4]</span>     receipt round-trip                ok
-<span class="arg">PASS</span>     modal is ready for kolm compile</pre>
+ <p><b>Example three: smoke-test a backend before depending on it.</b></p>
+ <pre><span class="kw">$</span> KOLM_MODAL_TOKEN=mk_xx kolm compute test modal
+<span class="arg">[1/4]</span> auth check ok
+<span class="arg">[2/4]</span> container provision (cold) 4.8s
+<span class="arg">[3/4]</span> trainer dry run (no weights) ok
+<span class="arg">[4/4]</span> receipt round-trip ok
+<span class="arg">PASS</span> modal is ready for kolm compile</pre>
 
-    <p>The test verb exists because the worst failure mode is the one that surfaces inside <code>kolm compile</code> when you have already spent an hour preparing the corpus. <code>kolm compute test</code> exercises auth, provisioning, the trainer entry point, and a receipt round-trip in under thirty seconds.</p>
+ <p>The test verb exists because the worst failure mode is the one that surfaces inside <code>kolm compile</code> when you have already spent an hour preparing the corpus. <code>kolm compute test</code> exercises auth, provisioning, the trainer entry point, and a receipt round-trip in under thirty seconds.</p>
 
-    <h2 id="tradeoffs">Verifiable tradeoffs.</h2>
-    <p>Three real costs the picker cannot abstract away.</p>
+ <h2 id="tradeoffs">Verifiable tradeoffs.</h2>
+ <p>Three real costs the picker cannot abstract away.</p>
 
-    <p><b>Cold-start cost.</b> Cloud cold starts are charged against your wallclock, not the backend's. Modal at 5 seconds is acceptable for a 20-minute compile; runpod at 60 seconds is acceptable for a 4-hour run. The score function encodes this, but the score is on [0, 1]; when you are watching a queue, the difference between 5 seconds and 90 seconds is not 0.1 of a number.</p>
+ <p><b>Cold-start cost.</b> Cloud cold starts are charged against your wallclock, not the backend's. Modal at 5 seconds is acceptable for a 20-minute compile; runpod at 60 seconds is acceptable for a 4-hour run. The score function encodes this, but the score is on [0, 1]; when you are watching a queue, the difference between 5 seconds and 90 seconds is not 0.1 of a number.</p>
 
-    <p><b>Reproducibility risk.</b> A local compile on the same machine with the same pinned toolchain produces the same artifact bytes. A cloud compile on modal at 09:00 versus modal at 09:15 may use a different host kernel, a different CUDA driver, a different scheduler-assigned GPU. The receipt chain still verifies (the K-score and the eval scores are deterministic over the artifact bytes), but the artifact bytes themselves may shift by a hash. This is why the picker scores managed cloud at 0.6 on the repro axis. If you need byte-identical artifacts across runs, the answer is a local backend or a pinned <code>remote-ssh</code>.</p>
+ <p><b>Reproducibility risk.</b> A local compile on the same machine with the same pinned toolchain produces the same artifact bytes. A cloud compile on modal at 09:00 versus modal at 09:15 may use a different host kernel, a different CUDA driver, a different scheduler-assigned GPU. The receipt chain still verifies (the K-score and the eval scores are deterministic over the artifact bytes), but the artifact bytes themselves may shift by a hash. This is why the picker scores managed cloud at 0.6 on the repro axis. If you need byte-identical artifacts across runs, the answer is a local backend or a pinned <code>remote-ssh</code>.</p>
 
-    <p><b>Cost predictability.</b> Per-hour cloud is a budget. Per-token managed services (together, replicate, fal) are not. The same task description, run twice, can produce two compile costs that differ by 3x depending on how the recipe pack tokenizes the eval set. Per-hour is what the picker prefers; per-token comes with a warning in <code>kolm compute info</code>.</p>
+ <p><b>Cost predictability.</b> Per-hour cloud is a budget. Per-token managed services (together, replicate, fal) are not. The same task description, run twice, can produce two compile costs that differ by 3x depending on how the recipe pack tokenizes the eval set. Per-hour is what the picker prefers; per-token comes with a warning in <code>kolm compute info</code>.</p>
 
-    <blockquote>
-      <p>The local-first default is not a religious commitment. It is a stance: dispatch the closest accelerator that meets the constraint, log the alternative the picker would have chosen, and let the receipt chain prove the artifact came out the same either way.</p>
-    </blockquote>
+ <blockquote>
+ <p>The local-first default is not a religious commitment. It is a stance: dispatch the closest accelerator that meets the constraint, log the alternative the picker would have chosen, and let the receipt chain prove the artifact came out the same either way.</p>
+ </blockquote>
 
-    <p>Every compile records the backend that produced it inside <code>metrics.compute</code> on the receipt: backend name, device string, cost in USD, wall duration, and a provenance subfield naming the picker version that chose it. When you re-verify an artifact a year from now, the chain tells you what was built and where.</p>
+ <p>Every compile records the backend that produced it inside <code>metrics.compute</code> on the receipt: backend name, device string, cost in USD, wall duration, and a provenance subfield naming the picker version that chose it. When you re-verify an artifact a year from now, the chain tells you what was built and where.</p>
 
-    <div class="signpost">
-      <a href="/research/receipt-chains">
-        <span class="lab">read next</span>
-        <span class="v">Receipt chains <span class="arrow">&rarr;</span></span>
-        <p>The five-step HMAC chain that binds the compute backend's output to the task spec it was built for.</p>
-      </a>
-      <a href="/research/k-score-correlation">
-        <span class="lab">read next</span>
-        <span class="v">K-score correlation <span class="arrow">&rarr;</span></span>
-        <p>Why the K-score gate is the same number whether the compile ran on your laptop or a rented H100.</p>
-      </a>
-      <a href="/docs">
-        <span class="lab">docs</span>
-        <span class="v">kolm compute reference <span class="arrow">&rarr;</span></span>
-        <p>Full CLI surface for the compute verbs: list, detect, pick, use, info, test, status.</p>
-      </a>
-      <a href="/spec">
-        <span class="lab">spec</span>
-        <span class="v">RS-1 spec <span class="arrow">&rarr;</span></span>
-        <p>The on-disk shape of a <code>.kolm</code> artifact. The compute provenance lives in <code>metrics.compute</code>.</p>
-      </a>
-    </div>
+ <div class="signpost">
+ <a href="/research/receipt-chains">
+ <span class="lab">read next</span>
+ <span class="v">Receipt chains <span class="arrow">&rarr;</span></span>
+ <p>The five-step Ed25519 receipt chain that binds the compute backend's output to the task spec it was built for.</p>
+ </a>
+ <a href="/research/k-score-correlation">
+ <span class="lab">read next</span>
+ <span class="v">K-score correlation <span class="arrow">&rarr;</span></span>
+ <p>Why the K-score gate is the same number whether the compile ran on your laptop or a rented H100.</p>
+ </a>
+ <a href="/docs">
+ <span class="lab">docs</span>
+ <span class="v">kolm compute reference <span class="arrow">&rarr;</span></span>
+ <p>Full CLI surface for the compute verbs: list, detect, pick, use, info, test, status.</p>
+ </a>
+ <a href="/spec">
+ <span class="lab">spec</span>
+ <span class="v">RS-1 spec <span class="arrow">&rarr;</span></span>
+ <p>The on-disk shape of a <code>.kolm</code> artifact. The compute provenance lives in <code>metrics.compute</code>.</p>
+ </a>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

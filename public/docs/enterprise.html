@@ -9,15 +9,15 @@
 <meta name="description" content="kolm.ai enterprise: on-prem deployment, audit log retention, SLA, dedicated support, custom SSO and SCIM scaffolding.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Enterprise &middot; kolm.ai">
+<meta property="og:title" content="Enterprise · kolm.ai">
 <meta property="og:description" content="kolm.ai enterprise: on-prem deployment, audit log retention, SLA, dedicated support, custom SSO and SCIM scaffolding.">
-<meta property="og:type" content="article">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/enterprise">
-<meta property="og:image" content="https://kolm.ai/og/docs-enterprise.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Enterprise &middot; kolm.ai">
+<meta name="twitter:title" content="Enterprise · kolm.ai">
 <meta name="twitter:description" content="kolm.ai enterprise: on-prem deployment, audit log retention, SLA, dedicated support, custom SSO and SCIM scaffolding.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-enterprise.svg">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/enterprise">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Enterprise","description":"kolm.ai enterprise: on-prem deployment, audit log retention, SLA, dedicated support, custom SSO and SCIM scaffolding.","url":"https://kolm.ai/docs/enterprise","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -94,7 +95,7 @@ cd kolm-onprem
 </table>
 <p>Configure with one line in <code>~/.kolm/config.json</code>:</p>
 <pre><code>{
-  "audit_retention_days": 2555
+ "audit_retention_days": 2555
 }</code></pre>
 
 <h2 id="sla">SLA</h2>
@@ -121,17 +122,17 @@ cd kolm-onprem
 <p>OIDC and SAML 2.0 are supported via the control plane. SCIM 2.0 provisions and deprovisions members in lockstep with your IdP.</p>
 <pre><code># In ~/.kolm-control/config.json on the enterprise control plane
 {
-  "auth": {
-    "oidc": {
-      "issuer": "https://login.example.com",
-      "client_id": "kolm-prod",
-      "client_secret_env": "KOLM_OIDC_CLIENT_SECRET"
-    },
-    "scim": {
-      "enabled": true,
-      "bearer_env": "KOLM_SCIM_BEARER"
-    }
-  }
+ "auth": {
+ "oidc": {
+ "issuer": "https://login.example.com",
+ "client_id": "kolm-prod",
+ "client_secret_env": "KOLM_OIDC_CLIENT_SECRET"
+ },
+ "scim": {
+ "enabled": true,
+ "bearer_env": "KOLM_SCIM_BEARER"
+ }
+ }
 }</code></pre>
 
 <h2 id="compliance">Compliance posture</h2>
@@ -146,15 +147,15 @@ cd kolm-onprem
 <p>If you are evaluating, read <a href="/docs/team">team</a> for the RBAC model that scales into the enterprise tier and <a href="/docs/storage">storage</a> for local-first guarantees that still hold on-prem. Start from <a href="/docs/quickstart">/docs/quickstart</a> if you have not yet installed the CLI.</p>
 
 <div class="related">
-  <a href="/docs/team"><b>Team &rarr;</b><span>RBAC + approval queue for multi-member orgs.</span></a>
-  <a href="/docs/cloud-sync"><b>Cloud sync &rarr;</b><span>Self-hosted sync target options.</span></a>
-  <a href="/docs/api"><b>API &rarr;</b><span>The REST surface the enterprise control plane speaks.</span></a>
+ <a href="/docs/team"><b>Team &rarr;</b><span>RBAC + approval queue for multi-member orgs.</span></a>
+ <a href="/docs/cloud-sync"><b>Cloud sync &rarr;</b><span>Self-hosted sync target options.</span></a>
+ <a href="/docs/api"><b>API &rarr;</b><span>The REST surface the enterprise control plane speaks.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

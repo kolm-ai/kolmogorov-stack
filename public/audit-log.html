@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Audit log · kolm.ai</title>
-<meta name="description" content="kolm's per-tenant audit trail. Every capture, label export, distill job, and artifact signing leaves a queryable JSON/CSV entry. Opt-in endpoint + local runner audit hook.">
+<meta name="description" content="Audit log: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="kolm audit log">
-<meta property="og:description" content="Per-tenant audit trail covering capture, label-export, distill-job, artifact-signing. Shipped endpoint + durable per-tenant log.">
+<meta property="og:title" content="Audit log · kolm.ai">
+<meta property="og:description" content="Audit log: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/audit-log">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -21,320 +21,323 @@
 <meta name="robots" content="noindex,follow">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #faf2e1; --accent-strong: #c9c2b2;
-    --good: #7ef0d2; --warn: #ffd07a; --bad: #ff6b91;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 0 32px; }
-  .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --warn: #ffd07a; --bad: #ff6b91;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 980px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
 
-  header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
-  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
-  header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
-  header.site nav a:hover { color: var(--ink); }
-  header.site .right { display: flex; align-items: center; gap: 14px; }
-  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .ghost:hover { color: var(--ink); }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .ghost:hover { color: var(--ink); }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
 
-  section.hero { padding: 88px 0 24px; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
-  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
-  h1 { margin: 22px 0 16px; font-size: clamp(36px, 5.4vw, 56px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
-  h1 .tone { color: var(--good); }
-  p.lede { margin: 0 0 28px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
-  p.lede b { color: var(--ink); font-weight: 500; }
+ section.hero { padding: 88px 0 24px; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+ h1 { margin: 22px 0 16px; font-size: clamp(36px, 5.4vw, 56px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
+ h1 .tone { color: var(--good); }
+ p.lede { margin: 0 0 28px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
+ p.lede b { color: var(--ink); font-weight: 500; }
 
-  h2 { margin: 48px 0 12px; font-size: 22px; font-weight: 500; }
-  p { margin: 0 0 14px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.65; }
-  p code, li code, td code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+ h2 { margin: 48px 0 12px; font-size: 22px; font-weight: 500; }
+ p { margin: 0 0 14px; color: var(--ink-mute); font-size: 14.5px; line-height: 1.65; }
+ p code, li code, td code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
 
-  .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 12px 0 0; border: 1px solid var(--line); border-radius: 8px; }
-  .tbl-scroll table.tbl { margin: 0; border-radius: 0; min-width: 640px; }
-  table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0 0; }
-  table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 12px 14px; text-align: left; vertical-align: top; }
-  table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
-  table.tbl td { color: var(--ink-mute); }
-  table.tbl td b { color: var(--ink); font-weight: 500; }
+ .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 12px 0 0; border: 1px solid var(--line); border-radius: 8px; }
+ .tbl-scroll table.tbl { margin: 0; border-radius: 0; min-width: 640px; }
+ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0 0; }
+ table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 12px 14px; text-align: left; vertical-align: top; }
+ table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
+ table.tbl td { color: var(--ink-mute); }
+ table.tbl td b { color: var(--ink); font-weight: 500; }
 
-  pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 12px 0; white-space: pre; }
-  @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
-  pre.code .com { color: var(--ink-faint); }
-  pre.code .ok { color: var(--good); }
-  pre.code .arg { color: var(--accent-strong); }
+ pre.code { font-family: var(--mono); font-size: 13px; line-height: 1.55; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; overflow-x: auto; color: var(--ink); margin: 12px 0; white-space: pre; }
+ @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
+ pre.code .com { color: var(--ink-faint); }
+ pre.code .ok { color: var(--good); }
+ pre.code .arg { color: var(--accent-strong); }
 
-  .panel { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); margin: 16px 0; }
-  .panel h3, .panel .panel-h { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink); }
-  .panel p { font-size: 14px; }
-  .panel.signed { border-left: 3px solid var(--good); }
+ .panel { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); margin: 16px 0; }
+ .panel h3, .panel .panel-h { margin: 0 0 8px; font-size: 16px; font-weight: 500; color: var(--ink); }
+ .panel p { font-size: 14px; }
+ .panel.signed { border-left: 3px solid var(--good); }
 
-  .live { display: none; padding: 24px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--bg-card); margin: 16px 0; }
-  .live.on { display: block; }
-  .live h3, .live .panel-h { margin: 0 0 14px; font-size: 16px; font-weight: 500; color: var(--ink); }
-  .live .row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
-  .live .row:first-of-type { border-top: 0; }
-  .live .row .k { font-family: var(--mono); color: var(--ink-faint); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .live .row .v { color: var(--ink); font-family: var(--mono); }
+ .live { display: none; padding: 24px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--bg-card); margin: 16px 0; }
+ .live.on { display: block; }
+ .live h3, .live .panel-h { margin: 0 0 14px; font-size: 16px; font-weight: 500; color: var(--ink); }
+ .live .row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
+ .live .row:first-of-type { border-top: 0; }
+ .live .row .k { font-family: var(--mono); color: var(--ink-faint); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; }
+ .live .row .v { color: var(--ink); font-family: var(--mono); }
 
-  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
-  .toolbar .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--ink-mute); cursor: pointer; }
-  .toolbar .btn:hover { color: var(--ink); border-color: var(--line-strong); }
+ .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+ .toolbar .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--ink-mute); cursor: pointer; }
+ .toolbar .btn:hover { color: var(--ink); border-color: var(--line-strong); }
 
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 80px; }
-  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  footer.site a { color: var(--ink-mute); }
-  footer.site a:hover { color: var(--ink); }
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 80px; }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-mute); }
+ footer.site a:hover { color: var(--ink); }
 </style>
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Audit log &middot; kolm",
-  "description": "Per-tenant audit trail: captures, label exports, distill jobs, signed artifacts.",
-  "url": "https://kolm.ai/audit-log",
-  "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
+ "@context": "https://schema.org",
+ "@type": "WebPage",
+ "name": "Audit log &middot; kolm",
+ "description": "Per-tenant audit trail: captures, label exports, distill jobs, signed artifacts.",
+ "url": "https://kolm.ai/audit-log",
+ "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:title" content="Audit log · kolm.ai">
+<meta name="twitter:description" content="Audit log: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/dashboard">Dashboard</a>
-        <a href="/captures">Captures</a>
-        <a href="/audit-log" aria-current="page">Audit log</a>
-        <a href="/account">Account</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/docs" class="ghost">Help</a>
-      <a href="/dashboard#dash-compile" class="cta">New compile &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/dashboard">Dashboard</a>
+ <a href="/captures">Captures</a>
+ <a href="/audit-log" aria-current="page">Audit log</a>
+ <a href="/account">Account</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/docs" class="ghost">Help</a>
+ <a href="/dashboard#dash-compile" class="cta">New compile &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <h1>Every operation. <span class="tone">Reconstructable.</span></h1>
-    <p class="lede"><b>Shipped today:</b> <code>GET /v1/audit/log</code> returns per-tenant entries reconstructed live from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and <code>stripe_events</code>. Filter by <code>?since=&lt;iso&gt;</code>, page with <code>?limit=N</code>, export as <code>?format=jsonl</code> or <code>?format=csv</code>. <b>Also shipping:</b> a single durable <code>audit_events</code> table with HMAC-chained signatures so any tamper detection happens in <code>O(1)</code> instead of cross-table reconstruction.</p>
+ <div class="wrap">
+ <h1>Every operation. <span class="tone">Reconstructable.</span></h1>
+ <p class="lede"><b>Shipped today:</b> <code>GET /v1/audit/log</code> returns per-tenant entries reconstructed live from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and <code>stripe_events</code>. Filter by <code>?since=&lt;iso&gt;</code>, page with <code>?limit=N</code>, export as <code>?format=jsonl</code> or <code>?format=csv</code>. <b>Also shipping:</b> a single durable <code>audit_events</code> table with Ed25519-chained signatures so any tamper detection happens in <code>O(1)</code> instead of cross-table reconstruction.</p>
 
-    <div id="signedout" class="panel">
-      <h2 class="panel-h">Sign in to view your log</h2>
-      <p>Your audit log is gated by your API key. <a href="/signin" style="color:var(--good)">Sign in</a> or <a href="/signup" style="color:var(--good)">get an API key</a> and the live entries land here.</p>
-    </div>
+ <div id="signedout" class="panel">
+ <h2 class="panel-h">Sign in to view your log</h2>
+ <p>Your audit log is gated by your API key. <a href="/signin" style="color:var(--good)">Sign in</a> or <a href="/signup" style="color:var(--good)">get an API key</a> and the live entries land here.</p>
+ </div>
 
-    <div id="livelog" class="live">
-      <h2 class="panel-h">Recent operations</h2>
-      <div id="livelog-rows"></div>
-      <div class="toolbar">
-        <button class="btn" id="export-json" type="button">Export JSON</button>
-        <button class="btn" id="export-csv" type="button">Export CSV</button>
-        <a class="btn" href="/v1/audit/log?format=jsonl" target="_blank" rel="noopener">Raw JSONL</a>
-      </div>
-    </div>
+ <div id="livelog" class="live">
+ <h2 class="panel-h">Recent operations</h2>
+ <div id="livelog-rows"></div>
+ <div class="toolbar">
+ <button class="btn" id="export-json" type="button">Export JSON</button>
+ <button class="btn" id="export-csv" type="button">Export CSV</button>
+ <a class="btn" href="/v1/audit/log?format=jsonl" target="_blank" rel="noopener">Raw JSONL</a>
+ </div>
+ </div>
 
-    <h2>What gets logged <span style="font-family:var(--mono);font-size:12px;color:var(--ink-faint);font-weight:400;text-transform:uppercase;letter-spacing:0.04em;">&middot; live</span></h2>
-    <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-faint)">Reconstructed live from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and <code>stripe_events</code> scoped to your tenant. The durable <code>audit_events</code> table with single normalised schema and HMAC chain ships alongside.</p>
-    <div class="tbl-scroll"><table class="tbl">
-      <thead>
-        <tr><th>Operation</th><th>Endpoint</th><th>Recorded fields</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><b>Capture</b></td>
-          <td><code>POST /v1/capture/{anthropic,openai}</code></td>
-          <td>tenant, namespace, model, input_hash, output_hash, latency_us, ts. <b>Never the upstream API key.</b></td>
-        </tr>
-        <tr>
-          <td><b>Label export</b></td>
-          <td><code>GET /v1/labels/synthesize-corpus</code></td>
-          <td>tenant, namespace, format, row_count, ts</td>
-        </tr>
-        <tr>
-          <td><b>Distill job</b></td>
-          <td><code>POST /v1/specialists/auto-distill</code></td>
-          <td>tenant, namespace, base_model, target_size, job_id, ts</td>
-        </tr>
-        <tr>
-          <td><b>Compile</b></td>
-          <td><code>POST /v1/compile</code></td>
-          <td>tenant, task, model, recipe_hash, manifest_hash, signature, ts</td>
-        </tr>
-        <tr>
-          <td><b>Plan change</b></td>
-          <td><code>POST /v1/account/change-plan</code> + Stripe webhook</td>
-          <td>tenant, prev_plan, new_plan, stripe_event_id, ts</td>
-        </tr>
-        <tr>
-          <td><b>Key rotation</b></td>
-          <td><code>POST /v1/account/rotate-key</code></td>
-          <td>tenant, prev_key_prefix, new_key_prefix, ts. <b>Never full keys.</b></td>
-        </tr>
-      </tbody>
-    </table></div>
+ <h2>What gets logged <span style="font-family:var(--mono);font-size:12px;color:var(--ink-faint);font-weight:400;text-transform:uppercase;letter-spacing:0.04em;">&middot; live</span></h2>
+ <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-faint)">Reconstructed live from <code>invocations</code>, <code>compile_jobs</code>, <code>observations</code>, and <code>stripe_events</code> scoped to your tenant. The durable <code>audit_events</code> table with single normalised schema and Ed25519 receipt chain ships alongside.</p>
+ <div class="tbl-scroll"><table class="tbl">
+ <thead>
+ <tr><th>Operation</th><th>Endpoint</th><th>Recorded fields</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td><b>Capture</b></td>
+ <td><code>POST /v1/capture/anthropic</code> or <code>POST /v1/capture/openai</code></td>
+ <td>tenant, namespace, model, input_hash, output_hash, latency_us, ts. <b>Never the upstream API key.</b></td>
+ </tr>
+ <tr>
+ <td><b>Label export</b></td>
+ <td><code>GET /v1/labels/synthesize-corpus</code></td>
+ <td>tenant, namespace, format, row_count, ts</td>
+ </tr>
+ <tr>
+ <td><b>Distill job</b></td>
+ <td><code>POST /v1/specialists/auto-distill</code></td>
+ <td>tenant, namespace, base_model, target_size, job_id, ts</td>
+ </tr>
+ <tr>
+ <td><b>Compile</b></td>
+ <td><code>POST /v1/compile</code></td>
+ <td>tenant, task, model, recipe_hash, manifest_hash, signature, ts</td>
+ </tr>
+ <tr>
+ <td><b>Plan change</b></td>
+ <td><code>POST /v1/account/change-plan</code> + Stripe webhook</td>
+ <td>tenant, prev_plan, new_plan, stripe_event_id, ts</td>
+ </tr>
+ <tr>
+ <td><b>Key rotation</b></td>
+ <td><code>POST /v1/account/rotate-key</code></td>
+ <td>tenant, prev_key_prefix, new_key_prefix, ts. <b>Never full keys.</b></td>
+ </tr>
+ </tbody>
+ </table></div>
 
-    <h2>One entry, walked</h2>
-    <pre class="code"><span class="com">{</span>
-  <span class="arg">"op"</span>: <span class="ok">"capture.anthropic"</span>,
-  <span class="arg">"tenant"</span>: <span class="ok">"tenant_4f2e..."</span>,
-  <span class="arg">"namespace"</span>: <span class="ok">"support-replies"</span>,
-  <span class="arg">"model"</span>: <span class="ok">"claude-opus-4-7"</span>,
-  <span class="arg">"input_hash"</span>: <span class="ok">"sha256:7c1f...a8e2"</span>,
-  <span class="arg">"output_hash"</span>: <span class="ok">"sha256:2b94...d0e1"</span>,
-  <span class="arg">"latency_us"</span>: <span class="ok">1842318</span>,
-  <span class="arg">"ts"</span>: <span class="ok">"2026-05-09T14:22:08.118Z"</span>,
-  <span class="arg">"receipt"</span>: <span class="ok">"hmac-sha256:e91c...4f72"</span>
+ <h2>One entry, walked</h2>
+ <pre class="code"><span class="com">{</span>
+ <span class="arg">"op"</span>: <span class="ok">"capture.anthropic"</span>,
+ <span class="arg">"tenant"</span>: <span class="ok">"tenant_4f2e..."</span>,
+ <span class="arg">"namespace"</span>: <span class="ok">"support-replies"</span>,
+ <span class="arg">"model"</span>: <span class="ok">"claude-opus-4-7"</span>,
+ <span class="arg">"input_hash"</span>: <span class="ok">"sha256:7c1f...a8e2"</span>,
+ <span class="arg">"output_hash"</span>: <span class="ok">"sha256:2b94...d0e1"</span>,
+ <span class="arg">"latency_us"</span>: <span class="ok">1842318</span>,
+ <span class="arg">"ts"</span>: <span class="ok">"2026-05-09T14:22:08.118Z"</span>,
+ <span class="arg">"receipt"</span>: <span class="ok">"ed25519:e91c...4f72"</span>
 <span class="com">}</span></pre>
-    <p>The <code>receipt</code> field is an HMAC over the entry under a per-tenant key derived from your <code>RECIPE_RECEIPT_SECRET</code>. Tampering with any field breaks the chain; <code>kolm inspect --verify-receipt</code> rejects.</p>
+ <p>The <code>receipt</code> field is an Ed25519 over the entry under a per-tenant key derived from your <code>RECIPE_RECEIPT_SECRET</code>. Tampering with any field breaks the chain; <code>kolm inspect --verify-receipt</code> rejects.</p>
 
-    <h2>What we don't log</h2>
-    <ul style="margin:0 0 14px;padding:0 0 0 18px;color:var(--ink-mute);font-size:14.5px;line-height:1.7;">
-      <li><b>Your upstream API key.</b> The <code>x-upstream-api-key</code> header is forwarded once and dropped. Never persisted.</li>
-      <li><b>Your full prompt or response text.</b> We hash for clustering and dedupe; the raw text lives in <code>observations</code> only if you opt in (and is yours to delete via <code>/v1/observations/purge</code>).</li>
-      <li><b>Cross-tenant data.</b> Your audit log is scoped to your tenant id. There is no path that returns another tenant's entries.</li>
-    </ul>
+ <h2>What we don't log</h2>
+ <ul style="margin:0 0 14px;padding:0 0 0 18px;color:var(--ink-mute);font-size:14.5px;line-height:1.7;">
+ <li><b>Your upstream API key.</b> The <code>x-upstream-api-key</code> header is forwarded once and dropped. Never persisted.</li>
+ <li><b>Your full prompt or response text.</b> We hash for clustering and dedupe; the raw text lives in <code>observations</code> only if you opt in. Self-hosted operators can purge retained local rows with <code>POST /v1/storage/purge</code>.</li>
+ <li><b>Cross-tenant data.</b> Your audit log is scoped to your tenant id. There is no path that returns another tenant's entries.</li>
+ </ul>
 
-    <h2>Calibrated disclosure</h2>
-    <p>The <code>/v1/audit/log</code> endpoint reconstructs entries on the fly from the source tables listed above. JSON, JSONL, and CSV export work today. The unified durable <code>audit_events</code> write path ships alongside: one normalised row per operation, signed in an HMAC chain so tamper detection happens in <code>O(1)</code> rather than via cross-table reconstruction.</p>
-  </div>
+ <h2>Calibrated disclosure</h2>
+ <p>The <code>/v1/audit/log</code> endpoint reconstructs entries on the fly from the source tables listed above. JSON, JSONL, and CSV export work today. The unified durable <code>audit_events</code> write path ships alongside: one normalised row per operation, signed in an Ed25519 receipt chain so tamper detection happens in <code>O(1)</code> rather than via cross-table reconstruction.</p>
+ </div>
 </section>
 
 <footer class="site-footer">
-  <div class="wrap">
-    <div class="meta">
-      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
-    </div>
-    <div class="links">
-      <div>
-        <div class="col-h">build</div>
-        <a href="/captures">captures</a>
-        <a href="/compile">compile</a>
-        <a href="/run">run</a>
-        <a href="/docs">recall</a>
-        <a href="/builder">builder</a>
-        <a href="/sdks">sdks</a>
-        <a href="/quickstart">quickstart</a>
-        <a href="/cli">cli</a>
-      </div>
-      <div>
-        <div class="col-h">deploy</div>
-        <a href="/teams">teams</a>
-        <a href="/tunnels">remote access</a>
-        <a href="/byoc">byoc cloud</a>
-        <a href="/airgap">airgap</a>
-        <a href="/enterprise">enterprise</a>
-      </div>
-      <div>
-        <div class="col-h">proof</div>
-        <a href="/benchmarks">benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/research">research</a>
-        <a href="/k-score">k-score</a>
-        <a href="/leaderboard">registry</a>
-        <a href="/spec">rs-1 spec</a>
-        <a href="/case-studies">case studies</a>
-      </div>
-      <div>
-        <div class="col-h">industries</div>
-        <a href="/healthcare">healthcare</a>
-        <a href="/finance">finance</a>
-        <a href="/legal">legal</a>
-        <a href="/device">device</a>
-        <a href="/docs">cookbook</a>
-        <a href="/compliance-packs">compliance packs</a>
-      </div>
-      <div>
-        <div class="col-h">company</div>
-        <a href="/pricing">pricing</a>
-        <a href="/docs">docs</a>
-        <a href="/roadmap">roadmap</a>
-        <a href="/manifesto">manifesto</a>
-        <a href="/roi">roi</a>
-      </div>
-    </div>
-    <small class="footer-tag">
-      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
-    </small>
-  </div>
+ <div class="wrap">
+ <div class="meta">
+ kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> / <a href="/status">status</a>
+ </div>
+ <div class="links">
+ <div>
+ <div class="col-h">build</div>
+ <a href="/captures">captures</a>
+ <a href="/compile">compile</a>
+ <a href="/run">run</a>
+ <a href="/docs">recall</a>
+ <a href="/builder">builder</a>
+ <a href="/sdks">sdks</a>
+ <a href="/quickstart">quickstart</a>
+ <a href="/cli">cli</a>
+ </div>
+ <div>
+ <div class="col-h">deploy</div>
+ <a href="/teams">teams</a>
+ <a href="/tunnels">remote access</a>
+ <a href="/byoc">byoc cloud</a>
+ <a href="/airgap">airgap</a>
+ <a href="/enterprise">enterprise</a>
+ </div>
+ <div>
+ <div class="col-h">proof</div>
+ <a href="/benchmarks">benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/research">research</a>
+ <a href="/k-score">k-score</a>
+ <a href="/leaderboard">registry</a>
+ <a href="/spec">rs-1 spec</a>
+ <a href="/case-studies">case studies</a>
+ </div>
+ <div>
+ <div class="col-h">industries</div>
+ <a href="/healthcare">healthcare</a>
+ <a href="/finance">finance</a>
+ <a href="/legal">legal</a>
+ <a href="/device">device</a>
+ <a href="/docs">cookbook</a>
+ <a href="/compliance-packs">compliance packs</a>
+ </div>
+ <div>
+ <div class="col-h">company</div>
+ <a href="/pricing">pricing</a>
+ <a href="/docs">docs</a>
+ <a href="/roadmap">roadmap</a>
+ <a href="/manifesto">manifesto</a>
+ <a href="/roi">roi</a>
+ </div>
+ </div>
+ <small class="footer-tag">
+ <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="/glossary">glossary</a> &middot; <a href="/troubleshooting">troubleshooting</a> &middot; <a href="/why-now">why now</a> &middot; <a href="/press">press</a> &middot; <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+ </small>
+ </div>
 </footer>
 
 <script>
 (function () {
-  // If signed in (api key in localStorage via /app.js KS, or fall back to direct fetch),
-  // hydrate the live audit log panel; otherwise leave the signed-out card visible.
-  function key() {
-    try { return (window.KS && window.KS.apiKey && window.KS.apiKey()) || localStorage.getItem('kolm.api_key') || ''; }
-    catch (_) { return ''; }
-  }
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
-  function fmtTs(ts) { var d = new Date(ts); return Number.isFinite(d.getTime()) ? d.toISOString().replace('T', ' ').slice(0, 19) + 'Z' : '-'; }
-  (window.KS && window.KS.hydrateSession ? window.KS.hydrateSession() : Promise.resolve('')).then(function () {
-    var apiKey = key();
-    if (!apiKey) return;
-    loadLog(apiKey);
-  });
+ // If signed in (api key in localStorage via /app.js KS, or fall back to direct fetch),
+ // hydrate the live audit log panel; otherwise leave the signed-out card visible.
+ function key() {
+ try { return (window.KS && window.KS.apiKey && window.KS.apiKey()) || localStorage.getItem('kolm.api_key') || ''; }
+ catch (_) { return ''; }
+ }
+ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+ function fmtTs(ts) { var d = new Date(ts); return Number.isFinite(d.getTime()) ? d.toISOString().replace('T', ' ').slice(0, 19) + 'Z' : '-'; }
+ (window.KS && window.KS.hydrateSession ? window.KS.hydrateSession() : Promise.resolve('')).then(function () {
+ var apiKey = key();
+ if (!apiKey) return;
+ loadLog(apiKey);
+ });
 
-  function loadLog(apiKey) {
-  fetch('/v1/audit/log?limit=20', { headers: { authorization: 'Bearer ' + apiKey }, credentials: 'include' })
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .then(function (j) {
-      if (!j || !Array.isArray(j.entries)) return;
-      var so = document.getElementById('signedout');
-      if (so) so.style.display = 'none';
-      var live = document.getElementById('livelog');
-      live.classList.add('on');
-      var rows = document.getElementById('livelog-rows');
-      rows.innerHTML = j.entries.map(function (e) {
-        return '<div class="row"><span class="k">' + esc(e.op || '') + '</span><span class="v">' + esc(fmtTs(e.ts)) + ' &middot; ' + esc(e.namespace || '-') + '</span></div>';
-      }).join('');
-    })
-    .catch(function () {});
-  } // end loadLog()
+ function loadLog(apiKey) {
+ fetch('/v1/audit/log?limit=20', { headers: { authorization: 'Bearer ' + apiKey }, credentials: 'include' })
+ .then(function (r) { return r.ok ? r.json() : null; })
+ .then(function (j) {
+ if (!j || !Array.isArray(j.entries)) return;
+ var so = document.getElementById('signedout');
+ if (so) so.style.display = 'none';
+ var live = document.getElementById('livelog');
+ live.classList.add('on');
+ var rows = document.getElementById('livelog-rows');
+ rows.innerHTML = j.entries.map(function (e) {
+ return '<div class="row"><span class="k">' + esc(e.op || '') + '</span><span class="v">' + esc(fmtTs(e.ts)) + ' &middot; ' + esc(e.namespace || '-') + '</span></div>';
+ }).join('');
+ })
+ .catch(function () {});
+ } // end loadLog()
 
-  function downloadAuditLog(format) {
-    var apiKey = key();
-    if (!apiKey) { window.location.href = '/signin'; return; }
-    var url = '/v1/audit/log?format=' + encodeURIComponent(format);
-    fetch(url, { headers: { authorization: 'Bearer ' + apiKey }, credentials: 'include' })
-      .then(function (r) { return r.ok ? r.text() : null; })
-      .then(function (text) {
-        if (text == null) return;
-        var mime = format === 'csv' ? 'text/csv' : 'application/x-ndjson';
-        var ext = format === 'csv' ? 'csv' : 'jsonl';
-        var blob = new Blob([text], { type: mime });
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'kolm-audit-' + new Date().toISOString().slice(0, 10) + '.' + ext;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-      })
-      .catch(function () {});
-  }
-  var btnJson = document.getElementById('export-json');
-  if (btnJson) btnJson.addEventListener('click', function () { downloadAuditLog('jsonl'); });
-  var btnCsv = document.getElementById('export-csv');
-  if (btnCsv) btnCsv.addEventListener('click', function () { downloadAuditLog('csv'); });
+ function downloadAuditLog(format) {
+ var apiKey = key();
+ if (!apiKey) { window.location.href = '/signin'; return; }
+ var url = '/v1/audit/log?format=' + encodeURIComponent(format);
+ fetch(url, { headers: { authorization: 'Bearer ' + apiKey }, credentials: 'include' })
+ .then(function (r) { return r.ok ? r.text() : null; })
+ .then(function (text) {
+ if (text == null) return;
+ var mime = format === 'csv' ? 'text/csv' : 'application/x-ndjson';
+ var ext = format === 'csv' ? 'csv' : 'jsonl';
+ var blob = new Blob([text], { type: mime });
+ var a = document.createElement('a');
+ a.href = URL.createObjectURL(blob);
+ a.download = 'kolm-audit-' + new Date().toISOString().slice(0, 10) + '.' + ext;
+ document.body.appendChild(a);
+ a.click();
+ document.body.removeChild(a);
+ setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+ })
+ .catch(function () {});
+ }
+ var btnJson = document.getElementById('export-json');
+ if (btnJson) btnJson.addEventListener('click', function () { downloadAuditLog('jsonl'); });
+ var btnCsv = document.getElementById('export-csv');
+ if (btnCsv) btnCsv.addEventListener('click', function () { downloadAuditLog('csv'); });
 })();
 </script>
 <script src="/nav.js" defer></script>

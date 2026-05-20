@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>Tutorial 05 . Contract clause extraction in 20 minutes | kolm</title>
+<title>Tutorial 05 . Contract clause extraction in 20 minutes · kolm.ai</title>
 <meta name="description" content="Compile a .kolm that pulls arbitration, IP, payment, and non-compete clauses out of MSAs. Base Mistral 7B. K-target 0.91. Step-by-step walkthrough.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="robots" content="index,follow">
-<meta property="og:title" content="Extract contract clauses with a 5.4 KB .kolm in 20 minutes">
-<meta property="og:description" content="Pull arbitration, IP, payment, and non-compete clauses out of MSAs. K-target 0.91. Runs offline, signed receipt.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Tutorial 05 . Contract clause extraction in 20 minutes · kolm.ai">
+<meta property="og:description" content="Compile a .kolm that pulls arbitration, IP, payment, and non-compete clauses out of MSAs. Base Mistral 7B. K-target 0.91. Step-by-step walkthrough.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/tutorials/contract-review">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Extract contract clauses in 20 minutes">
-<meta name="twitter:description" content="Pull arbitration, IP, payment, and non-compete clauses out of MSAs.">
+<meta name="twitter:title" content="Tutorial 05 . Contract clause extraction in 20 minutes · kolm.ai">
+<meta name="twitter:description" content="Compile a .kolm that pulls arbitration, IP, payment, and non-compete clauses out of MSAs. Base Mistral 7B. K-target 0.91. Step-by-step walkthrough.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/tutorials/contract-review">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -28,151 +28,153 @@
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Compile a contract clause extractor in 20 minutes",
-  "description": "Step-by-step: compile a .kolm that pulls arbitration, IP, payment, and non-compete clauses out of MSAs. Base Mistral 7B. K-target 0.91.",
-  "datePublished": "2026-05-15",
-  "dateModified": "2026-05-15",
-  "author": { "@type": "Organization", "name": "kolm" },
-  "publisher": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
-  "mainEntityOfPage": "https://kolm.ai/tutorials/contract-review"
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "Compile a contract clause extractor in 20 minutes",
+ "description": "Step-by-step: compile a .kolm that pulls arbitration, IP, payment, and non-compete clauses out of MSAs. Base Mistral 7B. K-target 0.91.",
+ "datePublished": "2026-05-15",
+ "dateModified": "2026-05-15",
+ "author": { "@type": "Organization", "name": "kolm" },
+ "publisher": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "mainEntityOfPage": "https://kolm.ai/tutorials/contract-review"
 }
 </script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
-    { "@type": "ListItem", "position": 2, "name": "tutorials", "item": "https://kolm.ai/tutorials" },
-    { "@type": "ListItem", "position": 3, "name": "contract review", "item": "https://kolm.ai/tutorials/contract-review" }
-  ]
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "tutorials", "item": "https://kolm.ai/tutorials" },
+ { "@type": "ListItem", "position": 3, "name": "contract review", "item": "https://kolm.ai/tutorials/contract-review" }
+ ]
 }
 </script>
 <style>
-  .t-wrap{max-width:760px;margin:0 auto;padding:0 24px}
-  .t-hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
-  .t-hero .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint,#737c73);margin:0 0 16px}
-  .t-hero .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  .t-hero h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;color:var(--fg,#faf2e1)}
-  .t-hero .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute,#b5bdb1);margin:0}
-  .t-hero .meta{display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint,#737c73);letter-spacing:0.04em;flex-wrap:wrap}
-  .t-hero .meta span b{color:var(--accent,#10b981);font-weight:500}
+ .t-wrap{max-width:760px;margin:0 auto;padding:0 24px}
+ .t-hero{padding:72px 0 32px;border-bottom:1px solid var(--line)}
+ .t-hero .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint,#737c73);margin:0 0 16px}
+ .t-hero .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ .t-hero h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;color:var(--fg,#faf2e1)}
+ .t-hero .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute,#b5bdb1);margin:0}
+ .t-hero .meta{display:flex;gap:18px;margin:20px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint,#737c73);letter-spacing:0.04em;flex-wrap:wrap}
+ .t-hero .meta span b{color:var(--accent,#10b981);font-weight:500}
 
-  .t-step{padding:36px 0;border-bottom:1px solid var(--line)}
-  .t-step h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em;color:var(--fg,#faf2e1)}
-  .t-step .stepno{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent,#10b981);margin:0 0 8px}
-  .t-step p{color:var(--ink-mute,#b5bdb1);margin:0 0 16px;font-size:15px;line-height:1.65}
-  .t-step ul{color:var(--ink-mute,#b5bdb1);margin:0 0 16px;padding-left:20px;font-size:15px;line-height:1.65}
-  pre.term{background:rgba(0,0,0,0.32);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--fg,#faf2e1);white-space:pre}
-  pre.term .c{color:var(--ink-faint,#737c73)}
-  pre.term .g{color:var(--accent,#10b981)}
-  pre.term .k{color:#ec7373}
-  .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(16,185,129,0.32);border-radius:8px;background:rgba(16,185,129,0.05);font-size:13.5px;color:var(--ink-mute,#b5bdb1);margin:0 0 8px}
-  .checkpoint b{color:var(--accent,#10b981);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
-  .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--fg,#faf2e1);transition:all 160ms}
-  .btn.primary{background:var(--accent,#10b981);color:#0b0d10;border-color:var(--accent,#10b981)}
-  .btn:hover{transform:translateY(-1px)}
-  .grad-footer{padding:32px 0;color:var(--ink-faint,#737c73);font-size:13.5px;line-height:1.65}
-  .grad-footer h3{margin:0 0 8px;font-family:var(--mono);font-size:11px;color:var(--accent,#10b981);text-transform:uppercase;letter-spacing:0.05em;font-weight:500}
+ .t-step{padding:36px 0;border-bottom:1px solid var(--line)}
+ .t-step h2{margin:0 0 12px;font-size:22px;font-weight:500;letter-spacing:-0.012em;color:var(--fg,#faf2e1)}
+ .t-step .stepno{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent,#10b981);margin:0 0 8px}
+ .t-step p{color:var(--ink-mute,#b5bdb1);margin:0 0 16px;font-size:15px;line-height:1.65}
+ .t-step ul{color:var(--ink-mute,#b5bdb1);margin:0 0 16px;padding-left:20px;font-size:15px;line-height:1.65}
+ pre.term{background:rgba(0,0,0,0.32);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--fg,#faf2e1);white-space:pre}
+ pre.term .c{color:var(--ink-faint,#737c73)}
+ pre.term .g{color:var(--accent,#10b981)}
+ pre.term .k{color:#ec7373}
+ .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(16,185,129,0.32);border-radius:8px;background:rgba(16,185,129,0.05);font-size:13.5px;color:var(--ink-mute,#b5bdb1);margin:0 0 8px}
+ .checkpoint b{color:var(--accent,#10b981);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
+ .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
+ .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--fg,#faf2e1);transition:all 160ms}
+ .btn.primary{background:var(--accent,#10b981);color:#0b0d10;border-color:var(--accent,#10b981)}
+ .btn:hover{transform:translateY(-1px)}
+ .grad-footer{padding:32px 0;color:var(--ink-faint,#737c73);font-size:13.5px;line-height:1.65}
+ .grad-footer h3{margin:0 0 8px;font-family:var(--mono);font-size:11px;color:var(--accent,#10b981);text-transform:uppercase;letter-spacing:0.05em;font-weight:500}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
-  <div class="wrap">
-    <a class="logo" href="/">k o l m</a>
-    <nav class="primary">
-      <a href="/quickstart">quickstart</a>
-      <a href="/docs">docs</a>
-      <a href="/tutorials">tutorials</a>
-    </nav>
-  </div>
+ <div class="wrap">
+ <a class="logo" href="/">k o l m</a>
+ <nav class="primary">
+ <a href="/quickstart">quickstart</a>
+ <a href="/docs">docs</a>
+ <a href="/tutorials">tutorials</a>
+ </nav>
+ </div>
 </header>
 
-<main>
+<main id="main">
 <section class="t-hero">
-  <div class="t-wrap">
-    <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/tutorials">tutorials</a> &nbsp;/&nbsp; contract review</p>
-    <h1>Compile a contract clause extractor in 20 minutes.</h1>
-    <p class="lede">By the end of this walkthrough you have a 5.4 KB .kolm that reads a Master Services Agreement and returns four named clauses: arbitration, IP assignment, payment terms, non-compete. Each clause comes back with a character-span pointing back at the source PDF. The receipt is HMAC-signed. The model runs offline.</p>
-    <div class="meta">
-      <span>Runtime <b>20 min</b></span>
-      <span>Output <b>contract.kolm</b></span>
-      <span>Base <b>mistral-7b-instruct</b></span>
-      <span>K-target <b>0.91</b></span>
-      <span>Size <b>5.4 KB</b></span>
-    </div>
-  </div>
+ <div class="t-wrap">
+ <p class="crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; <a href="/tutorials">tutorials</a> &nbsp;/&nbsp; contract review</p>
+ <h1>Compile a contract clause extractor in 20 minutes.</h1>
+ <p class="lede">By the end of this walkthrough you have a 5.4 KB .kolm that reads a Master Services Agreement and returns four named clauses: arbitration, IP assignment, payment terms, non-compete. Each clause comes back with a character-span pointing back at the source PDF. The receipt is Ed25519-signed. The model runs offline.</p>
+ <div class="meta">
+ <span>Runtime <b>20 min</b></span>
+ <span>Output <b>contract.kolm</b></span>
+ <span>Base <b>mistral-7b-instruct</b></span>
+ <span>K-target <b>0.91</b></span>
+ <span>Size <b>5.4 KB</b></span>
+ </div>
+ </div>
 </section>
 
 <section class="t-step">
-  <div class="t-wrap">
-    <p class="stepno">Step 1 . 60 seconds</p>
-    <h2>Install and authenticate.</h2>
-<pre class="term">$ npm install -g kolm
+ <div class="t-wrap">
+ <p class="stepno">Step 1 . 60 seconds</p>
+ <h2>Install and authenticate.</h2>
+<pre class="term">$ npm install -g github:sneaky-hippo/kolmogorov-stack
 $ kolm login
 $ kolm version
-<span class="g">  k o l m
-  ------- the private AI compiler</span>
+<span class="g"> k o l m
+ ------- the private AI compiler</span>
 kolm cli v0.1.0
 spec rs-1</pre>
-  </div>
+ </div>
 </section>
 
 <section class="t-step">
-  <div class="t-wrap">
-    <p class="stepno">Step 2 . 3 minutes</p>
-    <h2>Write the recipe.</h2>
-    <p>Four clause types, each with a span pointer. The constrained decoder enforces the schema so the output is always machine-readable. <code>min_k</code> is the floor; the compile fails if the F1 is below it.</p>
+ <div class="t-wrap">
+ <p class="stepno">Step 2 . 3 minutes</p>
+ <h2>Write the recipe.</h2>
+ <p>Four clause types, each with a span pointer. The constrained decoder enforces the schema so the output is always machine-readable. <code>min_k</code> is the floor; the compile fails if the F1 is below it.</p>
 <pre class="term">$ cat &gt; contract.recipe.json &lt;&lt;'JSON'
 {
-  <span class="k">"task"</span>: <span class="g">"extract named clauses from a Master Services Agreement"</span>,
-  <span class="k">"base"</span>: <span class="g">"mistral-7b-instruct"</span>,
-  <span class="k">"objective"</span>: <span class="g">"clause-f1"</span>,
-  <span class="k">"adapter"</span>: <span class="g">"lora + dpo"</span>,
-  <span class="k">"context_window"</span>: 32768,
-  <span class="k">"output_schema"</span>: {
-    <span class="k">"clauses"</span>: [
-      { <span class="k">"type"</span>: <span class="g">"arbitration"</span>,    <span class="k">"start"</span>: <span class="g">"int"</span>, <span class="k">"end"</span>: <span class="g">"int"</span>, <span class="k">"text"</span>: <span class="g">"string"</span> },
-      { <span class="k">"type"</span>: <span class="g">"ip_assignment"</span>,  <span class="k">"start"</span>: <span class="g">"int"</span>, <span class="k">"end"</span>: <span class="g">"int"</span>, <span class="k">"text"</span>: <span class="g">"string"</span> },
-      { <span class="k">"type"</span>: <span class="g">"payment_terms"</span>,  <span class="k">"start"</span>: <span class="g">"int"</span>, <span class="k">"end"</span>: <span class="g">"int"</span>, <span class="k">"text"</span>: <span class="g">"string"</span> },
-      { <span class="k">"type"</span>: <span class="g">"non_compete"</span>,    <span class="k">"start"</span>: <span class="g">"int"</span>, <span class="k">"end"</span>: <span class="g">"int"</span>, <span class="k">"text"</span>: <span class="g">"string"</span> }
-    ]
-  },
-  <span class="k">"target_k"</span>: 0.94,
-  <span class="k">"min_k"</span>:    0.91,
-  <span class="k">"eval_pack"</span>: <span class="g">"msa-clause-extract-v1"</span>
+ <span class="k">"task"</span>: <span class="g">"extract named clauses from a Master Services Agreement"</span>,
+ <span class="k">"base"</span>: <span class="g">"mistral-7b-instruct"</span>,
+ <span class="k">"objective"</span>: <span class="g">"clause-f1"</span>,
+ <span class="k">"adapter"</span>: <span class="g">"lora + dpo"</span>,
+ <span class="k">"context_window"</span>: 32768,
+ <span class="k">"output_schema"</span>: {
+ <span class="k">"clauses"</span>: [
+ { <span class="k">"type"</span>: <span class="g">"arbitration"</span>, <span class="k">"start"</span>: <span class="g">"int"</span>, <span class="k">"end"</span>: <span class="g">"int"</span>, <span class="k">"text"</span>: <span class="g">"string"</span> },
+ { <span class="k">"type"</span>: <span class="g">"ip_assignment"</span>, <span class="k">"start"</span>: <span class="g">"int"</span>, <span class="k">"end"</span>: <span class="g">"int"</span>, <span class="k">"text"</span>: <span class="g">"string"</span> },
+ { <span class="k">"type"</span>: <span class="g">"payment_terms"</span>, <span class="k">"start"</span>: <span class="g">"int"</span>, <span class="k">"end"</span>: <span class="g">"int"</span>, <span class="k">"text"</span>: <span class="g">"string"</span> },
+ { <span class="k">"type"</span>: <span class="g">"non_compete"</span>, <span class="k">"start"</span>: <span class="g">"int"</span>, <span class="k">"end"</span>: <span class="g">"int"</span>, <span class="k">"text"</span>: <span class="g">"string"</span> }
+ ]
+ },
+ <span class="k">"target_k"</span>: 0.94,
+ <span class="k">"min_k"</span>: 0.91,
+ <span class="k">"eval_pack"</span>: <span class="g">"msa-clause-extract-v1"</span>
 }
 JSON</pre>
-    <div class="checkpoint"><b>Checkpoint</b><span>The eval pack <code>msa-clause-extract-v1</code> ships with a held-out test set of 240 MSAs. You do not have to build it.</span></div>
-  </div>
+ <div class="checkpoint"><b>Checkpoint</b><span>The eval pack <code>msa-clause-extract-v1</code> ships with a held-out test set of 240 MSAs. You do not have to build it.</span></div>
+ </div>
 </section>
 
 <section class="t-step">
-  <div class="t-wrap">
-    <p class="stepno">Step 3 . 2 minutes</p>
-    <h2>Add 30 labeled examples.</h2>
-    <p>The eval pack covers the test set. You still want a small in-domain training-side set so the LoRA fits your contract style. Pull 30 of your own MSAs and tag the four clauses with character spans.</p>
+ <div class="t-wrap">
+ <p class="stepno">Step 3 . 2 minutes</p>
+ <h2>Add 30 labeled examples.</h2>
+ <p>The eval pack covers the test set. You still want a small in-domain training-side set so the student fits your contract style. Pull 30 of your own MSAs and tag the four clauses with character spans.</p>
 <pre class="term">$ head -1 contract.examples.jsonl | jq .
 {
-  <span class="k">"input"</span>: <span class="g">"... MASTER SERVICES AGREEMENT ... 12. ARBITRATION. Any dispute arising under this Agreement shall be resolved by binding arbitration administered by JAMS ..."</span>,
-  <span class="k">"expected"</span>: {
-    <span class="k">"clauses"</span>: [
-      { <span class="k">"type"</span>: <span class="g">"arbitration"</span>, <span class="k">"start"</span>: 1842, <span class="k">"end"</span>: 2104,
-        <span class="k">"text"</span>: <span class="g">"Any dispute arising under this Agreement shall be resolved by binding arbitration administered by JAMS ..."</span> }
-    ]
-  }
+ <span class="k">"input"</span>: <span class="g">"... MASTER SERVICES AGREEMENT ... 12. ARBITRATION. Any dispute arising under this Agreement shall be resolved by binding arbitration administered by JAMS ..."</span>,
+ <span class="k">"expected"</span>: {
+ <span class="k">"clauses"</span>: [
+ { <span class="k">"type"</span>: <span class="g">"arbitration"</span>, <span class="k">"start"</span>: 1842, <span class="k">"end"</span>: 2104,
+ <span class="k">"text"</span>: <span class="g">"Any dispute arising under this Agreement shall be resolved by binding arbitration administered by JAMS ..."</span> }
+ ]
+ }
 }</pre>
-    <p>If you already have a contract-extraction labeled set in CUAD or LexGLUE format, kolm reads both directly.</p>
-  </div>
+ <p>If you already have a contract-extraction labeled set in CUAD or LexGLUE format, kolm reads both directly.</p>
+ </div>
 </section>
 
 <section class="t-step">
-  <div class="t-wrap">
-    <p class="stepno">Step 4 . 12 minutes</p>
-    <h2>Compile.</h2>
+ <div class="t-wrap">
+ <p class="stepno">Step 4 . 12 minutes</p>
+ <h2>Compile.</h2>
 <pre class="term">$ kolm compile --from contract.recipe.json --examples contract.examples.jsonl --out contract.kolm
 
 <span class="g">[1/6]</span> synthesizing pairs (Magpie + LegalBench seed) .. 2,420 pairs <span class="c">1m 12s</span>
@@ -182,130 +184,130 @@ JSON</pre>
 <span class="g">[5/6]</span> K-score gate (msa-clause-extract-v1) ............ <span class="g">K = 0.927</span> <span class="c">&gt; 0.91 floor</span>
 <span class="g">[6/6]</span> sign + package .................................. <span class="c">3s</span>
 
-<span class="c">  artifact: ./contract.kolm  (5.4 KB)
-  receipt:  ./contract.receipt.json  (3.2 KB)
-  CID:      cidv1:sha256:74a2c3...</span></pre>
-    <div class="checkpoint"><b>Checkpoint</b><span>Compile cost on our account: <b>$1.84</b>. The K=0.927 number is the held-out F1 the compile measured against the eval pack. Auditable.</span></div>
-  </div>
+<span class="c"> artifact: ./contract.kolm (5.4 KB)
+ receipt: ./contract.receipt.json (3.2 KB)
+ CID: cidv1:sha256:74a2c3...</span></pre>
+ <div class="checkpoint"><b>Checkpoint</b><span>Compile cost on our account: <b>$1.84</b>. The K=0.927 number is the held-out F1 the compile measured against the eval pack. Auditable.</span></div>
+ </div>
 </section>
 
 <section class="t-step">
-  <div class="t-wrap">
-    <p class="stepno">Step 5 . 1 minute</p>
-    <h2>Run it on a real MSA.</h2>
+ <div class="t-wrap">
+ <p class="stepno">Step 5 . 1 minute</p>
+ <h2>Run it on a real MSA.</h2>
 <pre class="term">$ kolm run contract.kolm --file ./acme-msa.pdf
 
 <span class="c">{
-  "clauses": [
-    {
-      "type": "arbitration",
-      "start": 18420, "end": 18762,
-      "text": "Any dispute, claim or controversy arising out of or relating to this Agreement ..."
-    },
-    {
-      "type": "ip_assignment",
-      "start": 22104, "end": 22418,
-      "text": "All inventions, discoveries, developments and improvements ..."
-    },
-    {
-      "type": "payment_terms",
-      "start": 8240, "end": 8512,
-      "text": "Customer shall pay all Fees within thirty (30) days of receipt of invoice ..."
-    },
-    {
-      "type": "non_compete",
-      "start": 26120, "end": 26450,
-      "text": "Provider agrees that, for a period of twelve (12) months ..."
-    }
-  ],
-  "latency_ms": 1840.2,
-  "receipt_cid": "cidv1:sha256:74a2c3..."
+ "clauses": [
+ {
+ "type": "arbitration",
+ "start": 18420, "end": 18762,
+ "text": "Any dispute, claim or controversy arising out of or relating to this Agreement ..."
+ },
+ {
+ "type": "ip_assignment",
+ "start": 22104, "end": 22418,
+ "text": "All inventions, discoveries, developments and improvements ..."
+ },
+ {
+ "type": "payment_terms",
+ "start": 8240, "end": 8512,
+ "text": "Customer shall pay all Fees within thirty (30) days of receipt of invoice ..."
+ },
+ {
+ "type": "non_compete",
+ "start": 26120, "end": 26450,
+ "text": "Provider agrees that, for a period of twelve (12) months ..."
+ }
+ ],
+ "latency_ms": 1840.2,
+ "receipt_cid": "cidv1:sha256:74a2c3..."
 }</span></pre>
-  </div>
+ </div>
 </section>
 
 <section class="t-step">
-  <div class="t-wrap">
-    <p class="stepno">Step 6 . optional</p>
-    <h2>Verify and bind.</h2>
-    <p>The verifier confirms the manifest, the receipt HMAC, and the K-score gate. The binder PDF is the one-pager outside-counsel will sign.</p>
+ <div class="t-wrap">
+ <p class="stepno">Step 6 . optional</p>
+ <h2>Verify and bind.</h2>
+ <p>The verifier confirms the manifest, the receipt Ed25519, and the K-score gate. The binder PDF is the one-pager outside-counsel will sign.</p>
 <pre class="term">$ kolm inspect contract.kolm --binder contract.binder.pdf
 
-<span class="g">  &check; manifest CID matches canonical hash
-  &check; all 11 entries hashed and verified
-  &check; receipt HMAC valid
-  &check; K-score 0.927 (above declared gate 0.91)</span>
-  artifact is valid.
+<span class="g"> &check; manifest CID matches canonical hash
+ &check; all 11 entries hashed and verified
+ &check; receipt signature valid
+ &check; K-score 0.927 (above declared gate 0.91)</span>
+ artifact is valid.
 
 <span class="c"># contract.binder.pdf lists:
-#   CID, base, recipe, compliance, K-score
+# CID, base, recipe, compliance, K-score
 # auditors sign the PDF, not the JSON</span></pre>
-    <div class="actions">
-      <a class="btn primary" href="/tutorials">All tutorials &rarr;</a>
-      <a class="btn" href="/case-studies/legal-contract-extraction">Read the AmLaw case study &rarr;</a>
-      <a class="btn" href="/legal">Legal vertical &rarr;</a>
-    </div>
-  </div>
+ <div class="actions">
+ <a class="btn primary" href="/tutorials">All tutorials &rarr;</a>
+ <a class="btn" href="/case-studies/legal-contract-extraction">Read the AmLaw case study &rarr;</a>
+ <a class="btn" href="/legal">Legal vertical &rarr;</a>
+ </div>
+ </div>
 </section>
 
 <section class="grad-footer">
-  <div class="t-wrap">
-    <h3>What graduates you off this tutorial</h3>
-    <p>You have a contract.kolm that extracts four named clauses with character spans, a receipt for every extraction, and a binder PDF outside-counsel can sign. The next move is wiring it into your DMS upload pipeline so every new MSA gets extracted at file-drop time. The <a href="/integrations/github-actions" style="color:inherit;border-bottom:1px dashed var(--line)">GitHub Actions reference</a> is the closest fit if your DMS hooks emit webhooks; otherwise a one-file Node handler like the one in the <a href="/tutorials/support-triage" style="color:inherit;border-bottom:1px dashed var(--line)">support-triage tutorial</a> is enough.</p>
-  </div>
+ <div class="t-wrap">
+ <h3>What graduates you off this tutorial</h3>
+ <p>You have a contract.kolm that extracts four named clauses with character spans, a receipt for every extraction, and a binder PDF outside-counsel can sign. The next move is wiring it into your DMS upload pipeline so every new MSA gets extracted at file-drop time. The <a href="/integrations/github-actions" style="color:inherit;border-bottom:1px dashed var(--line)">GitHub Actions reference</a> is the closest fit if your DMS hooks emit webhooks; otherwise a one-file Node handler like the one in the <a href="/tutorials/support-triage" style="color:inherit;border-bottom:1px dashed var(--line)">support-triage tutorial</a> is enough.</p>
+ </div>
 </section>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

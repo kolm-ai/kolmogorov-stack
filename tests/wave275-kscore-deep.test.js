@@ -158,9 +158,11 @@ test('W275 public/kscore-leaderboard.html fetches JSON + renders header', () => 
   assert.match(html, /\/kscore-leaderboard\.json/, 'page fetches the leaderboard JSON');
   assert.match(html, /kolm-bench-v1/);
   assert.match(html, /<link rel="canonical" href="https:\/\/kolm\.ai\/kscore-leaderboard"/);
-  // Submission flow surfaced
+  // Manual submission flow surfaced
   assert.match(html, /kolm bench/);
-  assert.match(html, /--submit/);
+  assert.match(html, /bench-receipt\.json/);
+  assert.match(html, /leaderboard@kolm\.ai/);
+  assert.doesNotMatch(html, /--submit/);
 });
 
 test('W275 public/k-score.html documents v2 axes + bench callout', () => {

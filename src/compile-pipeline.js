@@ -41,6 +41,7 @@ import { plan as plannerPlan } from './training-planner.js';
 import { trainTokenizer, DEFAULT_VOCAB_SIZES } from './tokenizer-train.js';
 import { distill, prepareDistillCorpus, selectStudentBackbone, MODES as DISTILL_MODES } from './distill-pipeline.js';
 import { createDataset, splitDataset } from './dataset-workbench.js';
+import { MIN_PRODUCTION_HOLDOUT, MIN_PRODUCTION_TRAIN } from './seeds.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), '..');
@@ -294,6 +295,8 @@ async function _bundlePhase({
     holdout_hash: holdoutHash,
     train_count: trainCount,
     holdout_count: holdoutCount,
+    min_train: MIN_PRODUCTION_TRAIN,
+    min_holdout: MIN_PRODUCTION_HOLDOUT,
     input_overlap_count: overlap.overlap_count,
     output_overlap_count: 0,
     near_duplicate_count: 0,
@@ -553,9 +556,15 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
       approvedOnly,
       seed: splitSeed,
       tenant_id: tenantScope,
+      min_train: MIN_PRODUCTION_TRAIN,
+      min_holdout: MIN_PRODUCTION_HOLDOUT,
     });
     trainId = ds.dataset_id;
-    splitInfo = await splitDataset(trainId, 0.8, { seed: splitSeed });
+    splitInfo = await splitDataset(trainId, 0.8, {
+      seed: splitSeed,
+      min_train: MIN_PRODUCTION_TRAIN,
+      min_holdout: MIN_PRODUCTION_HOLDOUT,
+    });
     // W411 P0 #10 — propagate row-hash dedupe count from createDataset into
     // the splitInfo envelope so the bundle phase can fold it into the
     // seed_provenance receipt.

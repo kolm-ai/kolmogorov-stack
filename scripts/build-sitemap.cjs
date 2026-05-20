@@ -23,9 +23,10 @@ const PUBLIC = path.join(ROOT, 'public');
 const OUT = path.join(PUBLIC, 'sitemap.xml');
 
 const CUT_PATHS = new Set([
-  // W400G: /distill un-cut as a real concept page; keep /edge + /cookbook cut.
+  // W224 cut paths stay out of the sitemap even if a compatibility page
+  // exists locally. This prevents Google from indexing old 301-era surfaces.
   '/agents', '/defense', '/evolve', '/bounty', '/bounties', '/cloud',
-  '/edge', '/cookbook', '/serve', '/playground', '/onboarding',
+  '/distill', '/edge', '/cookbook', '/serve', '/playground', '/onboarding',
   '/recall', '/anatomy', '/showcase', '/openai',
   // W248: cut bloat — duplicate compare pages, thin translation stubs,
   // synonym pages superseded by canonical surfaces.
@@ -81,16 +82,20 @@ function urlPathFor(rel) {
 }
 
 function lastmodFor(full) {
+  let statDate = null;
+  try {
+    statDate = fs.statSync(full).mtime.toISOString().slice(0, 10);
+  } catch (_) {}
   try {
     const iso = execSync(`git log -1 --format=%cI -- "${full}"`,
       { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-    if (iso) return iso.slice(0, 10);
+    if (iso) {
+      const gitDate = iso.slice(0, 10);
+      if (statDate && statDate > gitDate) return statDate;
+      return gitDate;
+    }
   } catch (_) {}
-  try {
-    return fs.statSync(full).mtime.toISOString().slice(0, 10);
-  } catch (_) {
-    return new Date().toISOString().slice(0, 10);
-  }
+  return statDate || new Date().toISOString().slice(0, 10);
 }
 
 function isIncluded(urlPath) {

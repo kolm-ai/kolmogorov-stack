@@ -3,53 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>The .kolm artifact, field by field: a format walkthrough · kolm.ai</title>
-<meta name="description" content="An engineer's tour of the .kolm container. Header magic, manifest blocks, weights section, signed receipt chain, frozen-eval payload, recipe block, signature trailer. With hex examples, JSON snippets, and what each field proves to a verifier.">
+<title>The .kolm artifact, field by field: a format · kolm.ai</title>
+<meta name="description" content="The .kolm artifact, field by field: a format walkthrough: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
 <meta name="keywords" content=".kolm format, kolm artifact, AI artifact format, signed model file, kolm.ai format walkthrough, RS-1 spec, AI compiler artifact">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="The .kolm artifact, field by field: a format walkthrough">
-<meta property="og:description" content="An engineer's tour of the .kolm container: header, manifest, weights, receipt chain, eval, recipe, signature.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="The .kolm artifact, field by field: a format · kolm.ai">
+<meta property="og:description" content="The .kolm artifact, field by field: a format walkthrough: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/articles/kolm-artifact-walkthrough">
-<meta property="og:image" content="https://kolm.ai/og/articles-kolm-artifact-walkthrough.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="The .kolm artifact, field by field · kolm.ai">
-<meta name="twitter:description" content="Header magic, manifest, weights, receipts, eval, recipe, signature.">
-<meta name="twitter:image" content="https://kolm.ai/og/articles-kolm-artifact-walkthrough.svg">
+<meta name="twitter:title" content="The .kolm artifact, field by field: a format · kolm.ai">
+<meta name="twitter:description" content="The .kolm artifact, field by field: a format walkthrough: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/articles/kolm-artifact-walkthrough">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "@id": "https://kolm.ai/articles/kolm-artifact-walkthrough#article",
-      "headline": "The .kolm artifact, field by field: a format walkthrough",
-      "description": "An engineer's tour of the .kolm container: header, manifest, weights, receipt chain, eval, recipe, signature.",
-      "author": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
-      "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
-      "image": "https://kolm.ai/og/articles-kolm-artifact-walkthrough.svg",
-      "datePublished": "2026-05-18",
-      "dateModified": "2026-05-18",
-      "mainEntityOfPage": "https://kolm.ai/articles/kolm-artifact-walkthrough",
-      "articleSection": "Format",
-      "keywords": ".kolm format, RS-1, manifest, receipt chain, signature, frozen eval"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
-        { "@type": "ListItem", "position": 2, "name": "Articles", "item": "https://kolm.ai/articles" },
-        { "@type": "ListItem", "position": 3, "name": ".kolm artifact walkthrough", "item": "https://kolm.ai/articles/kolm-artifact-walkthrough" }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "Article",
+ "@id": "https://kolm.ai/articles/kolm-artifact-walkthrough#article",
+ "headline": "The .kolm artifact, field by field: a format walkthrough",
+ "description": "An engineer's tour of the .kolm container: header, manifest, weights, receipt chain, eval, recipe, signature.",
+ "author": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
+ "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
+ "image": "https://kolm.ai/og/articles-kolm-artifact-walkthrough.svg",
+ "datePublished": "2026-05-18",
+ "dateModified": "2026-05-18",
+ "mainEntityOfPage": "https://kolm.ai/articles/kolm-artifact-walkthrough",
+ "articleSection": "Format",
+ "keywords": ".kolm format, RS-1, manifest, receipt chain, signature, frozen eval"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Articles", "item": "https://kolm.ai/articles" },
+ { "@type": "ListItem", "position": 3, "name": ".kolm artifact walkthrough", "item": "https://kolm.ai/articles/kolm-artifact-walkthrough" }
+ ]
+ }
+ ]
 }
 </script>
 <style>
@@ -78,6 +78,7 @@ th{color:var(--ink-mute);font-weight:600;background:var(--bg-elev)}
 footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
 @media (max-width:560px){main{padding:32px 18px 64px}h1{font-size:30px}h2{font-size:22px}table{font-size:12px}th,td{padding:8px 6px}pre{font-size:11px}}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>
@@ -90,17 +91,17 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 <pre>+------------------------+ offset 0
 | MAGIC "KOLM" + version | 8 bytes
 +------------------------+
-| Manifest block (JSON)  | variable, length-prefixed
+| Manifest block (JSON) | variable, length-prefixed
 +------------------------+
-| Weights section        | tensor-by-tensor, GGUF-compatible
+| Weights section | tensor-by-tensor, GGUF-compatible
 +------------------------+
-| Recipe block (TOML)    | the spec the compile ran
+| Recipe block (TOML) | the spec the compile ran
 +------------------------+
-| Frozen-eval payload    | questions + reference answers + score
+| Frozen-eval payload | questions + reference answers + score
 +------------------------+
-| Receipt chain (JSON)   | Merkle tree of inputs and steps
+| Receipt chain (JSON) | Merkle tree of inputs and steps
 +------------------------+
-| Signature trailer      | Ed25519 over the SHA-256 of all prior bytes
+| Signature trailer | Ed25519 over the SHA-256 of all prior bytes
 +------------------------+ EOF</pre>
 
 <h2>Magic + version</h2>
@@ -109,22 +110,22 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 <h2>Manifest block</h2>
 <p>A length-prefixed JSON object. The manifest is the cheap front matter; the rest of the file is heavy. Indexers, web UIs, and CLI <code>inspect</code> read only the manifest and skip the rest.</p>
 <pre>{
-  "spec_version": "RS-1/2.1",
-  "artifact_id": "my-clinical-summarizer",
-  "artifact_hash": "sha256:8e3f...",
-  "base_model": "qwen3-27b-dense",
-  "base_hash": "sha256:c12a...",
-  "params_b": 27.4,
-  "quant": "Q4_K_M",
-  "context": 8192,
-  "tier": "3090",
-  "recipe_hash": "sha256:91b7...",
-  "eval_score": 0.873,
-  "eval_threshold": 0.85,
-  "build_unix": 1747584321,
-  "signed_by": "kolm-key-id:4f...e2",
-  "supersedes": null,
-  "redactor": "phi-redactor.kolm@sha256:71c4..."
+ "spec_version": "RS-1/2.1",
+ "artifact_id": "my-clinical-summarizer",
+ "artifact_hash": "sha256:8e3f...",
+ "base_model": "qwen3-27b-dense",
+ "base_hash": "sha256:c12a...",
+ "params_b": 27.4,
+ "quant": "Q4_K_M",
+ "context": 8192,
+ "tier": "3090",
+ "recipe_hash": "sha256:91b7...",
+ "eval_score": 0.873,
+ "eval_threshold": 0.85,
+ "build_unix": 1747584321,
+ "signed_by": "kolm-key-id:4f...e2",
+ "supersedes": null,
+ "redactor": "phi-redactor.kolm@sha256:71c4..."
 }</pre>
 <p>Every hash in this block is a Merkle root over the corresponding section. Verification recomputes them from the file body and compares.</p>
 
@@ -164,14 +165,14 @@ signing_key = "kolm-key-id:4f...e2"</pre>
 <h2>Frozen-eval payload</h2>
 <p>The eval was frozen at recipe-spec time. The payload contains the question set, the reference answers, the scoring rubric (k-score by axis), and the score the artifact achieved at build. An auditor re-runs the eval against the shipped weights and verifies the score matches within tolerance.</p>
 <pre>{
-  "eval_hash": "sha256:...",
-  "items": [
-    { "id": 1, "input": "...", "reference": "...", "axes": ["accuracy","brevity"] },
-    ...
-  ],
-  "score_at_build": 0.873,
-  "axis_scores": { "accuracy": 0.91, "brevity": 0.84 },
-  "extractive_baseline": 0.04
+ "eval_hash": "sha256:...",
+ "items": [
+ { "id": 1, "input": "...", "reference": "...", "axes": ["accuracy","brevity"] },
+ ...
+ ],
+ "score_at_build": 0.873,
+ "axis_scores": { "accuracy": 0.91, "brevity": 0.84 },
+ "extractive_baseline": 0.04
 }</pre>
 
 <h2>Receipt chain</h2>

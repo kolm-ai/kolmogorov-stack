@@ -5,514 +5,519 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Integrations · kolm.ai</title>
-<meta name="description" content="kolm ships first-class integrations for Claude Desktop (MCP), Cursor, VS Code, GitHub Actions, Python, Node, brew, npm. One CLI, ten surfaces.">
+<meta name="description" content="kolm integrations for MCP editors, CI, SDKs, framework adapters, and HTTP workflow automation. Source installs stay explicit until registry channels are...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="kolm integrations">
-<meta property="og:description" content="MCP, VS Code, Cursor, GitHub Actions, Python SDK, brew, npm. Where kolm plugs in.">
+<meta property="og:title" content="Integrations · kolm.ai">
+<meta property="og:description" content="kolm integrations for MCP editors, CI, SDKs, framework adapters, and HTTP workflow automation. Source installs stay explicit until registry channels are...">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="kolm integrations" />
-<meta name="twitter:description" content="MCP, VS Code, Cursor, GitHub Actions, Python SDK, brew, npm. Where kolm plugs in." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Integrations · kolm.ai">
+<meta name="twitter:description" content="kolm integrations for MCP editors, CI, SDKs, framework adapters, and HTTP workflow automation. Source installs stay explicit until registry channels are...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/integrations">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/integrations">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
-    --good: #7ef0d2; --warn: #ffd07a;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
-  .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-soft: rgba(236,231,220, 0.10); --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --warn: #ffd07a;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+ }
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+ a { color: inherit; text-decoration: none; }
+ .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+ .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+ @media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 20px; } }
 
-  header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
-  header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
-  header.site .left { display: flex; align-items: center; gap: 36px; }
-  header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
-  header.site nav { display: flex; gap: 22px; }
-  header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
-  header.site nav a:hover { color: var(--ink); }
-  header.site .right { display: flex; align-items: center; gap: 14px; }
-  header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-  header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
-  @media (max-width: 720px) { header.site nav { display: none; } }
+ header.site { position: sticky; top: 0; z-index: 60; background: rgba(8,9,8,0.78); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line); }
+ header.site .row { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 32px; }
+ header.site .left { display: flex; align-items: center; gap: 36px; }
+ header.site .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; font-size: 16px; }
+ header.site nav { display: flex; gap: 22px; }
+ header.site nav a { color: var(--ink-mute); font-size: 13.5px; transition: color 120ms; }
+ header.site nav a:hover { color: var(--ink); }
+ header.site .right { display: flex; align-items: center; gap: 14px; }
+ header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
+ header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+ @media (max-width: 720px) { header.site nav { display: none; } }
 
-  section.hero { padding: 88px 0 32px; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
-  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
-  h1 { margin: 22px 0 16px; font-size: clamp(36px, 5.4vw, 56px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
-  h1 .tone { color: var(--accent); }
-  p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
+ section.hero { padding: 88px 0 32px; }
+ .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
+ .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+ h1 { margin: 22px 0 16px; font-size: clamp(36px, 5.4vw, 56px); line-height: 1.05; font-weight: 500; max-width: 22ch; }
+ h1 .tone { color: var(--accent); }
+ p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
 
-  .kind-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
-  .kind { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--ink-faint); padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; }
+ .kind-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+ .kind { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--ink-faint); padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; }
 
-  section.list { padding: 28px 0 80px; }
-  .group { margin: 48px 0 0; padding-top: 28px; border-top: 1px solid var(--line); }
-  .group:first-of-type { margin-top: 8px; padding-top: 0; border-top: 0; }
-  .group h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 26px); font-weight: 500; }
-  .group p.kicker { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; max-width: 64ch; }
+ section.list { padding: 28px 0 80px; }
+ .group { margin: 48px 0 0; padding-top: 28px; border-top: 1px solid var(--line); }
+ .group:first-of-type { margin-top: 8px; padding-top: 0; border-top: 0; }
+ .group h2 { margin: 0 0 8px; font-size: clamp(22px, 2.4vw, 26px); font-weight: 500; }
+ .group p.kicker { margin: 0 0 22px; color: var(--ink-mute); font-size: 14.5px; max-width: 64ch; }
 
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+ .grid { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); }
+ @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
 
-  .ig { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); transition: border-color 200ms, transform 200ms; }
-  .ig:hover { border-color: var(--line-strong); }
-  .ig .top { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; }
-  .ig h3 { margin: 0; font-size: 16px; font-weight: 500; color: var(--ink); }
-  .ig .stat { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-faint); }
-  .ig .stat.shipped { color: var(--good); border-color: rgba(126,240,210,0.18); }
-  .ig .stat.preview { color: var(--warn); border-color: rgba(255,208,122,0.18); }
-  .ig .stat.beta { color: var(--accent); border-color: rgba(236,231,220, 0.18); }
-  .ig p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
-  .ig pre { margin: 12px 0 0; padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 12.5px; color: var(--ink); overflow-x: auto; }
-  .ig .links { display: flex; gap: 12px; margin: 12px 0 0; flex-wrap: wrap; }
-  .ig .links a { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--accent); }
-  .ig .links a:hover { color: var(--accent-strong); }
+ .ig { border: 1px solid var(--line); border-radius: 10px; padding: 22px; background: var(--bg-elev); transition: border-color 200ms, transform 200ms; }
+ .ig:hover { border-color: var(--line-strong); }
+ .ig .top { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; }
+ .ig h3 { margin: 0; font-size: 16px; font-weight: 500; color: var(--ink); }
+ .ig .stat { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-faint); }
+ .ig .stat.shipped { color: var(--good); border-color: rgba(126,240,210,0.18); }
+ .ig .stat.preview { color: var(--warn); border-color: rgba(255,208,122,0.18); }
+ .ig .stat.beta { color: var(--accent); border-color: rgba(236,231,220, 0.18); }
+ .ig p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
+ .ig pre { margin: 12px 0 0; padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 12.5px; color: var(--ink); overflow-x: auto; }
+ .ig .links { display: flex; gap: 12px; margin: 12px 0 0; flex-wrap: wrap; }
+ .ig .links a { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--accent); }
+ .ig .links a:hover { color: var(--accent-strong); }
 
-  .deep-grid { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); margin: 14px 0 0; }
-  @media (max-width: 900px) { .deep-grid { grid-template-columns: 1fr; } }
-  .deep { display: block; border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px; background: var(--bg-elev); transition: border-color 200ms, transform 200ms; }
-  .deep:hover { border-color: var(--line-strong); }
-  .deep .lbl { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; letter-spacing: 0.04em; }
-  .deep h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
-  .deep p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.55; }
-  .deep .arrow { display: inline-block; margin: 12px 0 0; font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--accent); }
-  .deep:hover .arrow { color: var(--accent-strong); }
+ .deep-grid { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); margin: 14px 0 0; }
+ @media (max-width: 900px) { .deep-grid { grid-template-columns: 1fr; } }
+ .deep { display: block; border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px; background: var(--bg-elev); transition: border-color 200ms, transform 200ms; }
+ .deep:hover { border-color: var(--line-strong); }
+ .deep .lbl { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; letter-spacing: 0.04em; }
+ .deep h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
+ .deep p { margin: 0; font-size: 14px; color: var(--ink-mute); line-height: 1.55; }
+ .deep .arrow { display: inline-block; margin: 12px 0 0; font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; color: var(--accent); }
+ .deep:hover .arrow { color: var(--accent-strong); }
 
-  footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
-  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  footer.site a { color: var(--ink-mute); }
+ footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+ footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+ footer.site a { color: var(--ink-mute); }
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Integrations · kolm",
-  "description": "MCP, claude-code, Cursor, Open MCP client, OpenAI-compatible serve.",
-  "url": "https://kolm.ai/integrations",
-  "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
+ "@context": "https://schema.org",
+ "@type": "WebPage",
+ "name": "Integrations · kolm",
+ "description": "MCP, claude-code, Cursor, Open MCP client, OpenAI-compatible serve.",
+ "url": "https://kolm.ai/integrations",
+ "publisher": {"@type":"Organization","name":"Kolmogorov","url":"https://kolm.ai"}
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <h1>kolm in your stack. <span class="tone">One config change.</span></h1>
-    <p class="lede">Point your existing SDK at <code>https://kolm.ai/v1</code>. The OpenAI client, the Anthropic client, LangChain, Vercel AI, LiteLLM, your editor proxies &ndash; one line each. Captures, redaction, and signed receipts come along for free.</p>
-    <div class="kind-row">
-      <span class="kind">SDK base URL</span>
-      <span class="kind">Editors</span>
-      <span class="kind">Agents</span>
-      <span class="kind">CI / CD</span>
-      <span class="kind">Package managers</span>
-    </div>
-  </div>
+ <div class="wrap">
+ <h1>kolm in your stack. <span class="tone">One config change.</span></h1>
+ <p class="lede">Point your existing SDK at <code>https://kolm.ai/v1</code>. The OpenAI client, the Anthropic client, LangChain, Vercel AI, LiteLLM, your editor proxies &ndash; one line each. Captures, redaction, and signed receipts come along for free.</p>
+ <div class="kind-row">
+ <span class="kind">SDK base URL</span>
+ <span class="kind">Editors</span>
+ <span class="kind">Agents</span>
+ <span class="kind">CI / CD</span>
+ <span class="kind">Runtime setup</span>
+ </div>
+ </div>
 </section>
 
 <section class="list">
-  <div class="wrap">
-    <div class="group" id="copy-paste" style="margin-top:0;padding-top:0;border-top:0;">
-      <h2>The nine copy-paste recipes.</h2>
-      <p class="kicker">One line of config per ecosystem. Each card links to a focused recipe page with a Python + JS snippet you can paste into your app today.</p>
-      <div class="grid">
+ <div class="wrap">
+ <div class="group" id="copy-paste" style="margin-top:0;padding-top:0;border-top:0;">
+ <h2>The nine copy-paste recipes.</h2>
+ <p class="kicker">One line of config per ecosystem. Each card links to a focused recipe page with a Python + JS snippet you can paste into your app today.</p>
+ <div class="grid">
 
-        <a class="ig" href="/integrations/openai-sdk" style="text-decoration:none;color:inherit;display:block;">
-          <div class="top"><h3>OpenAI SDK</h3><span class="stat shipped">one line</span></div>
-          <p>Python <code>OpenAI(base_url=...)</code> or JS <code>new OpenAI({ baseURL: ... })</code>. Streaming, tool calling, vision &ndash; all work unchanged.</p>
-          <pre>OpenAI(base_url="https://kolm.ai/v1", api_key="ks_...")</pre>
-        </a>
+ <a class="ig" href="/integrations/openai-sdk" style="text-decoration:none;color:inherit;display:block;">
+ <div class="top"><h3>OpenAI SDK</h3><span class="stat shipped">one line</span></div>
+ <p>Python <code>OpenAI(base_url=...)</code> or JS <code>new OpenAI({ baseURL: ... })</code>. Streaming, tool calling, vision &ndash; all work unchanged.</p>
+ <pre>OpenAI(base_url="https://kolm.ai/v1", api_key="ks_...")</pre>
+ </a>
 
-        <a class="ig" href="/integrations/anthropic-sdk" style="text-decoration:none;color:inherit;display:block;">
-          <div class="top"><h3>Anthropic SDK</h3><span class="stat shipped">one line</span></div>
-          <p>Python <code>Anthropic(base_url=...)</code> or JS <code>new Anthropic({ baseURL: ... })</code>. The Messages API behaves the same.</p>
-          <pre>Anthropic(base_url="https://kolm.ai/v1/anthropic", api_key="ks_...")</pre>
-        </a>
+ <a class="ig" href="/integrations/anthropic-sdk" style="text-decoration:none;color:inherit;display:block;">
+ <div class="top"><h3>Anthropic SDK</h3><span class="stat shipped">one line</span></div>
+ <p>Python <code>Anthropic(base_url=...)</code> or JS <code>new Anthropic({ baseURL: ... })</code>. The Messages API behaves the same.</p>
+ <pre>Anthropic(base_url="https://kolm.ai/v1/capture/anthropic", api_key="ks_...")</pre>
+ </a>
 
-        <a class="ig" href="/integrations/openrouter" style="text-decoration:none;color:inherit;display:block;">
-          <div class="top"><h3>OpenRouter</h3><span class="stat shipped">routing preserved</span></div>
-          <p>HTTP-Referer + X-Title headers travel end to end and stamp the receipt so app attribution stays correct.</p>
-          <pre>default_headers={"HTTP-Referer": ..., "X-Title": ...}</pre>
-        </a>
+ <a class="ig" href="/integrations/openrouter" style="text-decoration:none;color:inherit;display:block;">
+ <div class="top"><h3>OpenRouter</h3><span class="stat shipped">routing preserved</span></div>
+ <p>HTTP-Referer + X-Title headers travel end to end and stamp the receipt so app attribution stays correct.</p>
+ <pre>default_headers={"HTTP-Referer": ..., "X-Title": ...}</pre>
+ </a>
 
-        <a class="ig" href="/integrations/langchain" style="text-decoration:none;color:inherit;display:block;">
-          <div class="top"><h3>LangChain</h3><span class="stat shipped">drop-in</span></div>
-          <p><code>ChatOpenAI(base_url=...)</code> in Python, <code>ChatOpenAI({ configuration: { baseURL } })</code> in JS. LangGraph + LangServe work too.</p>
-          <pre>ChatOpenAI(base_url="https://kolm.ai/v1", api_key="ks_...")</pre>
-        </a>
+ <a class="ig" href="/integrations/langchain" style="text-decoration:none;color:inherit;display:block;">
+ <div class="top"><h3>LangChain</h3><span class="stat shipped">drop-in</span></div>
+ <p><code>ChatOpenAI(base_url=...)</code> in Python, <code>ChatOpenAI({ configuration: { baseURL } })</code> in JS. LangGraph + LangServe work too.</p>
+ <pre>ChatOpenAI(base_url="https://kolm.ai/v1", api_key="ks_...")</pre>
+ </a>
 
-        <a class="ig" href="/integrations/vercel-ai-sdk" style="text-decoration:none;color:inherit;display:block;">
-          <div class="top"><h3>Vercel AI SDK</h3><span class="stat shipped">next.js</span></div>
-          <p><code>createOpenAI({ baseURL })</code> from <code>@ai-sdk/openai</code>. Streaming, server actions, edge runtime &ndash; all preserved.</p>
-          <pre>createOpenAI({ baseURL: "https://kolm.ai/v1", apiKey })</pre>
-        </a>
+ <a class="ig" href="/integrations/vercel-ai-sdk" style="text-decoration:none;color:inherit;display:block;">
+ <div class="top"><h3>Vercel AI SDK</h3><span class="stat shipped">next.js</span></div>
+ <p><code>createOpenAI({ baseURL })</code> from <code>@ai-sdk/openai</code>. Streaming, server actions, edge runtime &ndash; all preserved.</p>
+ <pre>createOpenAI({ baseURL: "https://kolm.ai/v1", apiKey })</pre>
+ </a>
 
-        <a class="ig" href="/integrations/litellm" style="text-decoration:none;color:inherit;display:block;">
-          <div class="top"><h3>LiteLLM</h3><span class="stat shipped">router</span></div>
-          <p>One <code>config.yaml</code> entry. Fallbacks, retries, budgets work the same. Each model alias becomes a kolm destination.</p>
-          <pre>api_base: https://kolm.ai/v1</pre>
-        </a>
+ <a class="ig" href="/integrations/litellm" style="text-decoration:none;color:inherit;display:block;">
+ <div class="top"><h3>LiteLLM</h3><span class="stat shipped">router</span></div>
+ <p>One <code>config.yaml</code> entry. Fallbacks, retries, budgets work the same. Each model alias becomes a kolm destination.</p>
+ <pre>api_base: https://kolm.ai/v1</pre>
+ </a>
 
-        <a class="ig" href="/integrations/cursor-claude-code" style="text-decoration:none;color:inherit;display:block;">
-          <div class="top"><h3>Cursor + Claude Code</h3><span class="stat shipped">local proxy</span></div>
-          <p>The W403 dogfood pattern. kolm boots on <code>127.0.0.1:7403</code>. Cursor + Claude Code mirror every request without any app-side change.</p>
-          <pre>ANTHROPIC_BASE_URL=http://127.0.0.1:7403</pre>
-        </a>
+ <a class="ig" href="/integrations/cursor-claude-code" style="text-decoration:none;color:inherit;display:block;">
+ <div class="top"><h3>Cursor + Claude Code</h3><span class="stat shipped">local proxy</span></div>
+ <p>The W403 dogfood pattern. kolm boots on <code>127.0.0.1:7403</code>. Cursor + Claude Code mirror every request without any app-side change.</p>
+ <pre>ANTHROPIC_BASE_URL=http://127.0.0.1:7403</pre>
+ </a>
 
-        <a class="ig" href="/integrations/docker-compose" style="text-decoration:none;color:inherit;display:block;">
-          <div class="top"><h3>docker-compose</h3><span class="stat shipped">one yaml</span></div>
-          <p>The kolm daemon, in your existing stack. Peer services talk to <code>http://kolm:7403/v1</code>. SQLite-backed captures land in a volume.</p>
-          <pre>image: ghcr.io/sneaky-hippo/kolm:latest</pre>
-        </a>
+ <a class="ig" href="/integrations/docker-compose" style="text-decoration:none;color:inherit;display:block;">
+ <div class="top"><h3>docker-compose</h3><span class="stat shipped">one yaml</span></div>
+ <p>The kolm daemon, in your existing stack. Peer services talk to <code>http://kolm:7403/v1</code>. SQLite-backed captures land in a volume.</p>
+ <pre>image: ghcr.io/sneaky-hippo/kolm:latest</pre>
+ </a>
 
-        <a class="ig" href="/integrations/env-vars" style="text-decoration:none;color:inherit;display:block;">
-          <div class="top"><h3>Environment variables</h3><span class="stat shipped">reference</span></div>
-          <p>Full table of every <code>KOLM_*</code> variable. <code>KOLM_BASE_URL</code>, <code>KOLM_API_KEY</code>, <code>KOLM_STORE_DRIVER</code>, redaction policy, and friends.</p>
-          <pre>export KOLM_BASE_URL=https://kolm.ai</pre>
-        </a>
+ <a class="ig" href="/integrations/env-vars" style="text-decoration:none;color:inherit;display:block;">
+ <div class="top"><h3>Environment variables</h3><span class="stat shipped">reference</span></div>
+ <p>Full table of every <code>KOLM_*</code> variable. <code>KOLM_BASE_URL</code>, <code>KOLM_API_KEY</code>, <code>KOLM_STORE_DRIVER</code>, redaction policy, and friends.</p>
+ <pre>export KOLM_BASE_URL=https://kolm.ai</pre>
+ </a>
 
-      </div>
-    </div>
-  </div>
+ </div>
+ </div>
+ </div>
 </section>
 
 <section class="list">
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="group" id="one-command" style="margin-top:0;padding-top:0;border-top:0;">
-      <h2>One command. Three editors.</h2>
-      <p class="kicker">If you run one of these every day, you can have your compiled <code>.kolm</code> wired in under 60 seconds. Each landing page is a three-step install.</p>
-      <div class="deep-grid">
-        <a href="/integrations/cursor" class="deep">
-          <p class="lbl">Cursor</p>
-          <h3>Run your .kolm inside Cursor.</h3>
-          <p><code>kolm install cursor --apply</code> writes the MCP entry. Restart. Done.</p>
-          <span class="arrow">Walkthrough &rarr;</span>
-        </a>
-        <a href="/integrations/claude-code" class="deep">
-          <p class="lbl">Claude Code</p>
-          <h3>Compile your AI. Use it in Claude Code.</h3>
-          <p><code>kolm install claude-code --apply</code> merges into <code>~/.claude/settings.json</code>.</p>
-          <span class="arrow">Walkthrough &rarr;</span>
-        </a>
-        <a href="/integrations/continue" class="deep">
-          <p class="lbl">Continue (VS Code)</p>
-          <h3>Run task-compiled AI inside Continue.</h3>
-          <p><code>kolm install continue --apply</code> adds a model entry. Reload. It shows up in the picker.</p>
-          <span class="arrow">Walkthrough &rarr;</span>
-        </a>
-      </div>
-    </div>
+ <div class="group" id="one-command" style="margin-top:0;padding-top:0;border-top:0;">
+ <h2>One command. Three editors.</h2>
+ <p class="kicker">If you run one of these every day, you can have your compiled <code>.kolm</code> wired in under 60 seconds. Each landing page is a three-step install.</p>
+ <div class="deep-grid">
+ <a href="/integrations/cursor" class="deep">
+ <p class="lbl">Cursor</p>
+ <h3>Run your .kolm inside Cursor.</h3>
+ <p><code>kolm install cursor --apply</code> writes the MCP entry. Restart. Done.</p>
+ <span class="arrow">Walkthrough &rarr;</span>
+ </a>
+ <a href="/integrations/claude-code" class="deep">
+ <p class="lbl">Claude Code</p>
+ <h3>Compile your AI. Use it in Claude Code.</h3>
+ <p><code>kolm install claude-code --apply</code> merges into <code>~/.claude/settings.json</code>.</p>
+ <span class="arrow">Walkthrough &rarr;</span>
+ </a>
+ <a href="/integrations/continue" class="deep">
+ <p class="lbl">Continue (VS Code)</p>
+ <h3>Run task-compiled AI inside Continue.</h3>
+ <p><code>kolm install continue --apply</code> adds a model entry. Reload. It shows up in the picker.</p>
+ <span class="arrow">Walkthrough &rarr;</span>
+ </a>
+ </div>
+ </div>
 
-    <div class="group" id="agents">
-      <h2>Agents &amp; editors</h2>
-      <p class="kicker">If your agent speaks MCP, it can drive kolm. If your editor speaks Cursor rules or Claude Code skills, it can drive kolm.</p>
-      <div class="grid">
-        <div class="ig">
-          <div class="top"><h3>Claude Code (MCP)</h3><span class="stat shipped">shipped</span></div>
-          <p>Run <code>kolm install claude-code --apply</code> and the installer writes <code>mcpServers.kolm</code> into <code>~/.claude/settings.json</code>. Claude can then synthesize, run, and inspect recipes as MCP tools over stdio - no manual JSON editing.</p>
-          <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
+ <div class="group" id="agents">
+ <h2>Agents &amp; editors</h2>
+ <p class="kicker">If your agent speaks MCP, it can drive kolm. If your editor speaks Cursor rules or Claude Code skills, it can drive kolm.</p>
+ <div class="grid">
+ <div class="ig">
+ <div class="top"><h3>Claude Code (MCP)</h3><span class="stat shipped">shipped</span></div>
+ <p>Run <code>kolm install claude-code --apply</code> and the installer writes <code>mcpServers.kolm</code> into <code>~/.claude/settings.json</code>. Claude can then synthesize, run, and inspect recipes as MCP tools over stdio - no manual JSON editing.</p>
+ <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
 kolm install claude-code --apply
 # writes ~/.claude/settings.json mcpServers.kolm: { command: "kolm", args: ["serve","--mcp"] }</pre>
-          <div class="links"><a href="/integrations/claude-code">walkthrough</a><a href="/runtimes">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack">source</a></div>
-        </div>
+ <div class="links"><a href="/integrations/claude-code">walkthrough</a><a href="/runtimes">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack">source</a></div>
+ </div>
 
-        <div class="ig">
-          <div class="top"><h3>Cursor</h3><span class="stat shipped">shipped</span></div>
-          <p>One command writes the MCP entry into <code>~/.cursor/mcp.json</code>. Cursor calls <code>kolm.run</code>, <code>kolm.compile</code>, and <code>kolm.inspect</code> as MCP tools over stdio. Drop the <code>.cursorrules</code> template if you want project-level rules too.</p>
-          <pre>kolm install cursor --apply
+ <div class="ig">
+ <div class="top"><h3>Cursor</h3><span class="stat shipped">shipped</span></div>
+ <p>One command writes the MCP entry into <code>~/.cursor/mcp.json</code>. Cursor calls <code>kolm.run</code>, <code>kolm.compile</code>, and <code>kolm.inspect</code> as MCP tools over stdio. Drop the <code>.cursorrules</code> template if you want project-level rules too.</p>
+ <pre>kolm install cursor --apply
 # or: curl -O https://kolm.ai/docs/cursor-rules.txt &amp;&amp; mv cursor-rules.txt .cursorrules</pre>
-          <div class="links"><a href="/integrations/cursor">walkthrough</a><a href="/docs/cursor-rules.txt">cursor-rules.txt</a><a href="/quickstart">quickstart</a></div>
-        </div>
+ <div class="links"><a href="/integrations/cursor">walkthrough</a><a href="/docs/cursor-rules.txt">cursor-rules.txt</a><a href="/quickstart">quickstart</a></div>
+ </div>
 
-        <div class="ig">
-          <div class="top"><h3>Continue (VS Code, JetBrains)</h3><span class="stat shipped">shipped</span></div>
-          <p>One command writes a kolm model entry plus an MCP server into <code>~/.continue/config.json</code>. The kolm recipe shows up in the Continue model picker. Continue agents can call the same MCP tools.</p>
-          <pre>kolm install continue --apply
+ <div class="ig">
+ <div class="top"><h3>Continue (VS Code, JetBrains)</h3><span class="stat shipped">shipped</span></div>
+ <p>One command writes a kolm model entry plus an MCP server into <code>~/.continue/config.json</code>. The kolm recipe shows up in the Continue model picker. Continue agents can call the same MCP tools.</p>
+ <pre>kolm install continue --apply
 # kolm model appears in Continue's picker on reload</pre>
-          <div class="links"><a href="/integrations/continue">walkthrough</a><a href="/quickstart">quickstart</a></div>
-        </div>
+ <div class="links"><a href="/integrations/continue">walkthrough</a><a href="/quickstart">quickstart</a></div>
+ </div>
 
-        <div class="ig">
-          <div class="top"><h3>VS Code extension</h3><span class="stat shipped">shipped</span></div>
-          <p>Marketplace-publishable extension at <code>sdk/vscode/</code>. Selects an LLM-as-judge call, mints a kolm recipe, and swaps the call inline. Requires <code>KOLM_API_KEY</code>. For everyday use, the Continue integration is the recommended path.</p>
-          <pre>cd sdk/vscode &amp;&amp; npm install &amp;&amp; vsce package
-code --install-extension recipe-vscode-0.1.0.vsix</pre>
-          <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/vscode">source</a></div>
-        </div>
+ <div class="ig">
+ <div class="top"><h3>VS Code extension</h3><span class="stat">local VSIX</span></div>
+ <p>Source extension at <code>sdk/vscode/</code>. It is not Marketplace-published yet; build the VSIX from the repo and install it manually. Requires <code>KOLM_API_KEY</code>. For everyday use, the Continue integration is the recommended path.</p>
+ <pre>cd sdk/vscode &amp;&amp; npm install &amp;&amp; npm run package
+code --install-extension kolm-vscode-0.2.0.vsix</pre>
+ <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/vscode">source</a></div>
+ </div>
 
-        <div class="ig">
-          <div class="top"><h3>Claude Code skill</h3><span class="stat shipped">shipped</span></div>
-          <p>Drop <code>CLAUDE.md</code> into your project. Claude Code reads the skill rules, runs <code>kolm compile</code> when it detects a repeated LLM-as-judge pattern, and ships the .kolm to your registry.</p>
-          <pre>curl -O https://kolm.ai/docs/claude-skill.md
+ <div class="ig">
+ <div class="top"><h3>Claude Code skill</h3><span class="stat shipped">shipped</span></div>
+ <p>Drop <code>CLAUDE.md</code> into your project. Claude Code reads the skill rules, runs <code>kolm compile</code> when it detects a repeated LLM-as-judge pattern, and ships the .kolm to your registry.</p>
+ <pre>curl -O https://kolm.ai/docs/claude-skill.md
 mv claude-skill.md CLAUDE.md</pre>
-          <div class="links"><a href="/docs/claude-skill.md">CLAUDE.md template</a></div>
-        </div>
-      </div>
-    </div>
+ <div class="links"><a href="/docs/claude-skill.md">CLAUDE.md template</a></div>
+ </div>
+ </div>
+ </div>
 
-    <div class="group" id="cicd">
-      <h2>CI / CD</h2>
-      <p class="kicker">Compile on every push. Gate the build on K-score. Publish the artifact as a build attachment.</p>
-      <div class="grid">
-        <div class="ig">
-          <div class="top"><h3>GitHub Actions</h3><span class="stat shipped">shipped</span></div>
-          <p>Composite action at <code>.github/actions/kolm-compile</code>. Drops into any workflow; uploads the <code>.kolm</code> as a build artifact.</p>
-          <pre>- uses: sneaky-hippo/kolmogorov-stack/.github/actions/kolm-compile@main
-  with:
-    task: 'classify support tickets'
-    examples: ./labels.jsonl
-    api-key: ${{ secrets.KOLM_API_KEY }}</pre>
-          <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/.github/actions/kolm-compile">source</a></div>
-        </div>
+ <div class="group" id="cicd">
+ <h2>CI / CD</h2>
+ <p class="kicker">Compile on every push. Gate the build on K-score. Publish the artifact as a build attachment.</p>
+ <div class="grid">
+ <div class="ig">
+ <div class="top"><h3>GitHub Actions</h3><span class="stat shipped">shipped</span></div>
+ <p>Composite action at <code>.github/actions/kolm-compile</code>. Drops into any workflow; uploads the <code>.kolm</code> as a build artifact.</p>
+ <pre>- uses: sneaky-hippo/kolmogorov-stack/.github/actions/kolm-compile@main
+ with:
+ task: 'classify support tickets'
+ examples: ./labels.jsonl
+ api-key: ${{ secrets.KOLM_API_KEY }}</pre>
+ <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/.github/actions/kolm-compile">source</a></div>
+ </div>
 
-        <div class="ig">
-          <div class="top"><h3>GitLab CI / CircleCI / Buildkite</h3><span class="stat shipped">shipped</span></div>
-          <p>Bare CLI works in any container. Pin <code>node:20-alpine</code>, run <code>npm i -g github:sneaky-hippo/kolmogorov-stack</code>, then <code>kolm compile</code>.</p>
-          <pre>image: node:20-alpine
+ <div class="ig">
+ <div class="top"><h3>GitLab CI / CircleCI / Buildkite</h3><span class="stat shipped">shipped</span></div>
+ <p>Bare CLI works in any container. Pin <code>node:20-alpine</code>, run <code>npm i -g github:sneaky-hippo/kolmogorov-stack</code>, then <code>kolm compile</code>.</p>
+ <pre>image: node:20-alpine
 script:
-  - npm i -g github:sneaky-hippo/kolmogorov-stack
-  - kolm compile "$TASK" --examples ./labels.jsonl
-  - kolm eval ./artifacts/$ARTIFACT.kolm</pre>
-          <div class="links"><a href="/quickstart">quickstart</a></div>
-        </div>
-      </div>
-    </div>
+ - npm i -g github:sneaky-hippo/kolmogorov-stack
+ - kolm compile "$TASK" --examples ./labels.jsonl
+ - kolm eval ./artifacts/$ARTIFACT.kolm</pre>
+ <div class="links"><a href="/quickstart">quickstart</a></div>
+ </div>
+ </div>
+ </div>
 
-    <div class="group" id="sdks">
-      <h2>SDKs</h2>
-      <p class="kicker">Same compile contract. Different host language. Same byte-exact .kolm artifact.</p>
-      <div class="grid">
-        <div class="ig">
-          <div class="top"><h3>Node / TypeScript</h3><span class="stat shipped">shipped</span></div>
-          <p>Browser-native SDK at <code>/sdk.js</code> + a Node wrapper at <code>sdk/node</code>. TypeScript types included.</p>
-          <pre>npm i github:sneaky-hippo/kolmogorov-stack
+ <div class="group" id="sdks">
+ <h2>SDKs</h2>
+ <p class="kicker">Same compile contract. Different host language. Same byte-exact .kolm artifact.</p>
+ <div class="grid">
+ <div class="ig">
+ <div class="top"><h3>Node / TypeScript</h3><span class="stat shipped">shipped</span></div>
+ <p>Browser-native SDK at <code>/sdk.js</code> + a Node wrapper at <code>sdk/node</code>. TypeScript types included.</p>
+ <pre>npm i github:sneaky-hippo/kolmogorov-stack
 import { RecipeClient } from 'kolmogorov-stack/sdk/node/index.mjs';
 const k = new RecipeClient({ apiKey: process.env.KOLM_API_KEY });
 const job = await k.synthesize({ positives, negatives });</pre>
-          <div class="links"><a href="/sdk.js">/sdk.js</a><a href="/docs">docs</a></div>
-        </div>
+ <div class="links"><a href="/sdk.js">/sdk.js</a><a href="/docs">docs</a></div>
+ </div>
 
-        <div class="ig">
-          <div class="top"><h3>Python</h3><span class="stat shipped">shipped</span></div>
-          <p>Stdlib-only client at <code>sdk/python/kolm</code>. <code>from kolm import Kolm</code> works the same as the Node SDK.</p>
-          <pre>pip install -e sdk/python
+ <div class="ig">
+ <div class="top"><h3>Python</h3><span class="stat shipped">shipped</span></div>
+ <p>Stdlib-only client at <code>sdk/python/kolm</code>. <code>from kolm import Kolm</code> works the same as the Node SDK.</p>
+ <pre>pip install -e sdk/python
 from kolm import Kolm
 k = Kolm(api_key="ks_...")
 job = k.compile(task=..., examples_path="./tickets.jsonl")</pre>
-          <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/python">source</a></div>
-        </div>
+ <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/python">source</a></div>
+ </div>
 
-      </div>
-    </div>
+ </div>
+ </div>
 
-    <div class="group" id="pkg">
-      <h2>Package managers</h2>
-      <p class="kicker">Pick whatever your machine ships with.</p>
-      <div class="grid">
-        <div class="ig">
-          <div class="top"><h3>npm</h3><span class="stat shipped">shipped</span></div>
-          <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
+ <div class="group" id="pkg">
+ <h2>Runtime Setup</h2>
+ <p class="kicker">Install Node with your platform tools, then install the CLI from GitHub via npm.</p>
+ <div class="grid">
+ <div class="ig">
+ <div class="top"><h3>npm</h3><span class="stat shipped">canonical</span></div>
+ <pre>npm i -g github:sneaky-hippo/kolmogorov-stack
 kolm --version</pre>
-          <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a></div>
-        </div>
+ <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack">github</a></div>
+ </div>
 
-        <div class="ig">
-          <div class="top"><h3>Homebrew</h3><span class="stat shipped">shipped</span></div>
-          <p>Node 20 is the runtime. The npm install is the canonical path on macOS and Linux.</p>
-          <pre>brew install node
+ <div class="ig">
+ <div class="top"><h3>Homebrew</h3><span class="stat">node setup</span></div>
+ <p>Node 20 is the runtime. The npm install is the canonical path on macOS and Linux.</p>
+ <pre>brew install node
 npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
-          <div class="links"><a href="/quickstart">quickstart</a></div>
-        </div>
+ <div class="links"><a href="/quickstart">quickstart</a></div>
+ </div>
 
-        <div class="ig">
-          <div class="top"><h3>winget / scoop</h3><span class="stat shipped">shipped</span></div>
-          <p>The Node CLI runs natively on Windows. Install Node, then npm-install the CLI.</p>
-          <pre>winget install OpenJS.NodeJS
+ <div class="ig">
+ <div class="top"><h3>winget / scoop</h3><span class="stat">node setup</span></div>
+ <p>The Node CLI runs natively on Windows. Install Node, then npm-install the CLI.</p>
+ <pre>winget install OpenJS.NodeJS
 npm i -g github:sneaky-hippo/kolmogorov-stack</pre>
-          <div class="links"><a href="/quickstart">quickstart</a></div>
-        </div>
+ <div class="links"><a href="/quickstart">quickstart</a></div>
+ </div>
 
-        <div class="ig">
-          <div class="top"><h3>Docker</h3><span class="stat shipped">shipped</span></div>
-          <p>Reproducible build. Pinned <code>node:22-alpine</code>. Useful for CI where you want a hermetic compile environment.</p>
-          <pre>docker run --rm -v $PWD:/work -w /work \
-  -e KOLM_API_KEY node:22-alpine sh -c \
-  "npm i -g github:sneaky-hippo/kolmogorov-stack \
-   && kolm compile '...' --examples ./labels.jsonl"</pre>
-          <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/Dockerfile">Dockerfile</a></div>
-        </div>
-      </div>
-    </div>
+ <div class="ig">
+ <div class="top"><h3>Docker</h3><span class="stat">source install</span></div>
+ <p>Reproducible build. Pinned <code>node:22-alpine</code>. Useful for CI where you want a hermetic compile environment.</p>
+ <pre>docker run --rm -v $PWD:/work -w /work \
+ -e KOLM_API_KEY node:22-alpine sh -c \
+ "npm i -g github:sneaky-hippo/kolmogorov-stack \
+ && kolm compile '...' --examples ./labels.jsonl"</pre>
+ <div class="links"><a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/Dockerfile">Dockerfile</a></div>
+ </div>
+ </div>
+ </div>
 
-    <div class="group" id="frameworks">
-      <h2>Agent frameworks</h2>
-      <p class="kicker">First-class LangChain and LlamaIndex adapters. Same .kolm artifact, same receipt chain, just wired in the framework your agent already lives in. Every call returns the receipt alongside the text so audit, drift detection, and replay work the same as in the bare CLI.</p>
-      <div class="grid">
-        <div class="ig" id="langchain-js">
-          <div class="top"><h3>LangChain.js</h3><span class="stat shipped">shipped</span></div>
-          <p>Drop-in <code>KolmLLM</code> that satisfies the LangChain LLM interface. <code>invokeWithReceipt(prompt)</code> returns <code>{ text, receipt }</code> so chains keep the receipt chain intact. Subprocess mode for local .kolm files, HTTP mode for hosted artifacts.</p>
-          <pre>npm i @kolm/langchain
+ <div class="group" id="frameworks">
+ <h2>Agent frameworks</h2>
+ <p class="kicker">First-party LangChain and LlamaIndex source adapters live in <code>packages/</code>. Same .kolm artifact, same receipt chain, just wired in the framework your agent already lives in. Every call returns the receipt alongside the text so audit, drift detection, and replay work the same as in the bare CLI.</p>
+ <div class="grid">
+ <div class="ig" id="langchain-js">
+ <div class="top"><h3>LangChain.js</h3><span class="stat">source package</span></div>
+ <p>Drop-in <code>KolmLLM</code> that satisfies the LangChain LLM interface. <code>invokeWithReceipt(prompt)</code> returns <code>{ text, receipt }</code> so chains keep the receipt chain intact. Subprocess mode for local .kolm files, HTTP mode for hosted artifacts.</p>
+ <pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
+npm i ./kolmogorov-stack/packages/langchain-kolm
 import { KolmLLM } from '@kolm/langchain';
 const llm = new KolmLLM({ artifactPath: './ticket-classifier.kolm' });
 const { text, receipt } = await llm.invokeWithReceipt('refund #1234');</pre>
-          <div class="links"><a href="/docs/integrations/langchain-js">walkthrough</a><a href="/spec/rs-1#receipts">receipt schema</a></div>
-        </div>
+ <div class="links"><a href="/docs/integrations/langchain-js">walkthrough</a><a href="/spec/rs-1#receipts">receipt schema</a></div>
+ </div>
 
-        <div class="ig" id="langchain-py">
-          <div class="top"><h3>LangChain (Python)</h3><span class="stat shipped">shipped</span></div>
-          <p>Same surface, Pythonic. <code>invoke_with_receipt(prompt)</code> returns a tuple. Works in LangGraph nodes, LangServe handlers, and plain scripts.</p>
-          <pre>npm i @kolm/langchain
+ <div class="ig" id="langchain-py">
+ <div class="top"><h3>LangChain (Python)</h3><span class="stat">source package</span></div>
+ <p>Same surface, Pythonic. <code>invoke_with_receipt(prompt)</code> returns a tuple. Works in LangGraph nodes, LangServe handlers, and plain scripts.</p>
+ <pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
+pip install -e ./kolmogorov-stack/packages/python-langchain-kolm[langchain]
 from kolm_langchain import KolmLLM
 llm = KolmLLM(artifact_path='./ticket-classifier.kolm')
 text, receipt = llm.invoke_with_receipt('refund #1234')</pre>
-          <div class="links"><a href="/docs/integrations/langchain-py">walkthrough</a><a href="/spec/rs-1#receipts">receipt schema</a></div>
-        </div>
+ <div class="links"><a href="/docs/integrations/langchain-py">walkthrough</a><a href="/spec/rs-1#receipts">receipt schema</a></div>
+ </div>
 
-        <div class="ig" id="llamaindex-js">
-          <div class="top"><h3>LlamaIndex.TS</h3><span class="stat shipped">shipped</span></div>
-          <p>Implements the LlamaIndex LLM protocol. <code>complete(prompt)</code> returns <code>{ text, raw }</code> where <code>raw.receipt</code> carries the kolm receipt chain. Ready to plug into a QueryEngine.</p>
-          <pre>npm i @kolm/llamaindex
+ <div class="ig" id="llamaindex-js">
+ <div class="top"><h3>LlamaIndex.TS</h3><span class="stat">source package</span></div>
+ <p>Implements the LlamaIndex LLM protocol. <code>complete(prompt)</code> returns <code>{ text, raw }</code> where <code>raw.receipt</code> carries the kolm receipt chain. Ready to plug into a QueryEngine.</p>
+ <pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
+npm i ./kolmogorov-stack/packages/llamaindex-kolm
 import { KolmLLM } from '@kolm/llamaindex';
 const llm = new KolmLLM({ baseUrl: 'https://kolm.example', apiKey: 'k_...' });
 const r = await llm.complete('summarize this ticket');</pre>
-          <div class="links"><a href="/docs/integrations/llamaindex-js">walkthrough</a></div>
-        </div>
+ <div class="links"><a href="/docs/integrations/llamaindex-js">walkthrough</a></div>
+ </div>
 
-        <div class="ig" id="llamaindex-py">
-          <div class="top"><h3>LlamaIndex (Python)</h3><span class="stat shipped">shipped</span></div>
-          <p>Python LlamaIndex adapter exposing the same <code>invoke_with_receipt</code> surface as the LangChain one. Lets QueryEngines and SubQuestion agents speak to a compiled .kolm without losing the audit trail.</p>
-          <pre>npm i @kolm/llamaindex
+ <div class="ig" id="llamaindex-py">
+ <div class="top"><h3>LlamaIndex (Python)</h3><span class="stat">source package</span></div>
+ <p>Python LlamaIndex adapter exposing the same <code>invoke_with_receipt</code> surface as the LangChain one. Lets QueryEngines and SubQuestion agents speak to a compiled .kolm without losing the audit trail.</p>
+ <pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
+pip install -e ./kolmogorov-stack/packages/python-llamaindex-kolm[llamaindex]
 from kolm_llamaindex import KolmLLM
 llm = KolmLLM(artifact_path='./classifier.kolm')
-r = llm.complete('summarize this ticket')  # r.raw.receipt is the kolm receipt</pre>
-          <div class="links"><a href="/docs/integrations/llamaindex-py">walkthrough</a></div>
-        </div>
-      </div>
-    </div>
+r = llm.complete('summarize this ticket') # r.raw.receipt is the kolm receipt</pre>
+ <div class="links"><a href="/docs/integrations/llamaindex-py">walkthrough</a></div>
+ </div>
+ </div>
+ </div>
 
-    <div class="group" id="workflow">
-      <h2>Workflow automation</h2>
-      <p class="kicker">No-code triggers and downstream wiring. The MCP-over-HTTP shim already covers webhooks; native Zapier and Make.com modules surface the same receipt chain that the CLI does.</p>
-      <div class="grid">
-        <div class="ig" id="zapier">
-          <div class="top"><h3>Zapier app</h3><span class="stat shipped">shipped</span></div>
-          <p>Native Zapier app with two actions: "Run a kolm artifact" and "Compile a new kolm from captured calls". Output payload includes <code>text</code>, <code>k_score</code>, and the full receipt chain so Zaps can branch on quality. The same flow also works via the kolm HTTP API as a generic webhook in Zapier.</p>
-          <pre># Zapier webhook (also available as a native app):
-POST https://api.kolm.ai/v1/run
+ <div class="group" id="workflow">
+ <h2>Workflow automation</h2>
+ <p class="kicker">No-code triggers and downstream wiring through the HTTP API. Zapier and Make.com do not have native Kolm apps yet; use their generic webhook and HTTP modules.</p>
+ <div class="grid">
+ <div class="ig" id="zapier">
+ <div class="top"><h3>Zapier</h3><span class="stat">webhook</span></div>
+ <p>Zapier has no native Kolm app yet. Use <b>Webhooks by Zapier</b> to call the Kolm HTTP API. Output payload includes <code>text</code>, <code>k_score</code>, and the full receipt chain so Zaps can branch on quality.</p>
+ <pre># Webhooks by Zapier:
+POST https://kolm.ai/v1/run
 authorization: Bearer $KOLM_API_KEY
 { "artifact": "ticket-classifier", "input": "{{trigger.body}}" }</pre>
-          <div class="links"><a href="/docs/integrations/zapier">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">discussions</a></div>
-        </div>
+ <div class="links"><a href="/docs/integrations/zapier">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">discussions</a></div>
+ </div>
 
-        <div class="ig" id="make">
-          <div class="top"><h3>Make.com module</h3><span class="stat shipped">shipped</span></div>
-          <p>Native Make.com (formerly Integromat) module with run + compile actions. Same receipt chain. Make's generic HTTP module also hits the kolm API directly; the body shape below is identical to what the native module accepts.</p>
-          <pre># Make.com HTTP module (also available as a native module):
-POST https://api.kolm.ai/v1/run
+ <div class="ig" id="make">
+ <div class="top"><h3>Make.com</h3><span class="stat">HTTP module</span></div>
+ <p>Make.com has no native Kolm module yet. Use Make's generic HTTP module to call the Kolm API directly. The body shape below is the supported integration contract.</p>
+ <pre># Make.com HTTP module:
+POST https://kolm.ai/v1/run
 authorization: Bearer $KOLM_API_KEY
 { "artifact": "ticket-classifier", "input": "{{1.payload}}" }</pre>
-          <div class="links"><a href="/docs/integrations/make">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">discussions</a></div>
-        </div>
-      </div>
-    </div>
+ <div class="links"><a href="/docs/integrations/make">docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions">discussions</a></div>
+ </div>
+ </div>
+ </div>
 
-    <div class="group" id="cta-row">
-      <h2>Don't see your stack?</h2>
-      <p class="kicker">Open a thread in <a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions" style="color:var(--accent);">GitHub Discussions</a>. RS-1 is open. The HTTP API is stable. The integration you need is usually thirty lines; we'll review the PR.</p>
-    </div>
+ <div class="group" id="cta-row">
+ <h2>Don't see your stack?</h2>
+ <p class="kicker">Open a thread in <a href="https://github.com/sneaky-hippo/kolmogorov-stack/discussions" style="color:var(--accent);">GitHub Discussions</a>. RS-1 is open. The HTTP API is stable. The integration you need is usually thirty lines; we'll review the PR.</p>
+ </div>
 
-  </div>
+ </div>
 </section>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

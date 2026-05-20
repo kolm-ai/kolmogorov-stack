@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm mesh · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm mesh CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/mesh">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm mesh","description":"Reference for the kolm mesh CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/mesh","mainEntityOfPage":"https://kolm.ai/docs/cli/mesh","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm mesh · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm mesh CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,7 +176,7 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="mesh">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>mesh</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>mesh</span>
 </nav>
 <h1>kolm mesh</h1>
 <p>Discover Tailscale-joined kolm nodes, plan a cluster assignment, render the deployment as either a shell script or Kubernetes manifests, and validate that a saved cluster plan still matches its integrity hash (W237).</p>
@@ -181,20 +185,20 @@
 <pre><code>
 kolm mesh discover [--cmd tailscale]
 kolm mesh plan --artifact &lt;name.kolm&gt; [--replicas N]
-kolm mesh deploy &lt;plan.json&gt;                 # POSIX shell over tailscale ssh
-kolm mesh k8s   &lt;plan.json&gt; [--namespace kolm] [--image &lt;repo:tag&gt;]
+kolm mesh deploy &lt;plan.json&gt; # POSIX shell over tailscale ssh
+kolm mesh k8s &lt;plan.json&gt; [--namespace kolm] [--image &lt;repo:tag&gt;]
 kolm mesh validate &lt;plan.json&gt;
 </code></pre>
 <h2>Examples</h2>
 <pre><code>
-kolm mesh discover                                       # tailscale status as JSON
+kolm mesh discover # tailscale status as JSON
 kolm mesh plan --artifact phi-redactor.kolm --replicas 3
-kolm mesh deploy cluster-plan.json                       # tailscale ssh + bash
-kolm mesh k8s   cluster-plan.json --namespace kolm-prod  # GKE/EKS YAML stream
-kolm mesh validate cluster-plan.json                     # integrity check
+kolm mesh deploy cluster-plan.json # tailscale ssh + bash
+kolm mesh k8s cluster-plan.json --namespace kolm-prod # GKE/EKS YAML stream
+kolm mesh validate cluster-plan.json # integrity check
 </code></pre>
 <h2>Role catalog</h2>
-<p><code>coordinator</code> (1) - artifact origin, routing <code>inference</code>   (N) - serves the artifact (<code>--replicas</code> controls N) <code>capture</code>     (1) - durable capture sink <code>mentor</code>      (0+) - teacher fan-out <code>auditor</code>     (1) - integrity attestations</p>
+<p><code>coordinator</code> (1) - artifact origin, routing <code>inference</code> (N) - serves the artifact (<code>--replicas</code> controls N) <code>capture</code> (1) - durable capture sink <code>mentor</code> (0+) - teacher fan-out <code>auditor</code> (1) - integrity attestations</p>
 <h2>See also</h2>
 <ul>
 <li><code>/foundations/tailscale</code> for the network-foundation recipe.</li>
@@ -202,13 +206,13 @@ kolm mesh validate cluster-plan.json                     # integrity check
 <li><code>kolm verify</code> to verify any node-local artifact against the mesh manifest.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

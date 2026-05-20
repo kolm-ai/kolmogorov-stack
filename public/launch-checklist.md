@@ -69,7 +69,7 @@ Stripe (live keys + webhook secret + payment links), Resend (domain + API key), 
 |---|---|---|---|---|
 | OAuth-1 | Google OAuth client ID + secret | Founder | `/v1/oauth/providers` returns `{google:false}` → buttons hidden on /signin | Console → Create OAuth client → set redirect to `https://kolm.ai/v1/oauth/google/callback` → set `GOOGLE_OAUTH_CLIENT_ID` + `GOOGLE_OAUTH_CLIENT_SECRET` on Vercel |
 | OAuth-2 | GitHub OAuth app | Founder | `/v1/oauth/providers` returns `{github:false}` → buttons hidden on /signin | github.com/settings/developers → New OAuth App → callback `https://kolm.ai/v1/oauth/github/callback` → set `GITHUB_OAUTH_CLIENT_ID` + `GITHUB_OAUTH_CLIENT_SECRET` on Vercel |
-| Trainer-bridge | Kolm trainer URL + token for `/v1/specialists/auto-distill` to mint real `.kolm` artifacts (currently returns verifiable "not enough captures" stub) | Founder | E3-E5 close | Set `KOLM_TRAINER_BRIDGE_URL` + `KOLM_TRAINER_BRIDGE_TOKEN` on Vercel once the trainer endpoint is up |
+| Trainer bridge | Kolm trainer URL + token for `/v1/specialists/auto-distill` to mint `.kolm` artifacts from reviewed capture datasets | Founder | Production training | Set `KOLM_TRAINER_BRIDGE_URL` + `KOLM_TRAINER_BRIDGE_TOKEN` on Vercel for hosted training |
 
 When all three are done, the box count moves to 30/30 and the OAuth row auto-renders on /signin (the UI is wired · it auto-shows the button as soon as `/v1/oauth/providers` returns true for that provider).
 
@@ -101,7 +101,7 @@ The launch is **the rent-vs-buy thesis paired with the reproducible-bench number
 ### Show HN draft
 
 ```
-Show HN: kolm · every API call you proxy through us trains a local LoRA you keep forever
+Show HN: kolm · every API call you proxy through us trains a local student artifact you keep forever
 
 Hi HN. I'm shipping kolm.ai, an AI compiler that turns your existing Anthropic / OpenAI traffic into a signed local model.
 
@@ -111,7 +111,7 @@ The math: a 50-engineer team running 80k Opus calls/month at ~$12k/mo. After two
 
 The compiler is verifiable:
 - K-score gate at 0.85; below that, no artifact ships.
-- Receipts are HMAC-SHA256 chains over (corpus hash, eval set, K-score, base model, LoRA delta).
+- Receipts are Ed25519 chains over (corpus hash, eval set, K-score, base model, LoRA delta).
 - Reproducible benchmark: `kolm bench --reproduce swebench-lite-n150 --seed 42` runs the harness locally on the official swebench 4.1.0 evaluator. Headline number lands when the first end-to-end signed run completes.
 
 Try it: https://kolm.ai/use-cases/capture-and-distill
@@ -127,7 +127,7 @@ Roast me.
 1.
 Every dollar you spend on Anthropic or OpenAI is rent on a model you don't own.
 
-We built a proxy that captures the verified (input, output) pairs your team already paid for, then compiles them into a signed local LoRA at threshold.
+We built a proxy that captures the verified (input, output) pairs your team already paid for, then compiles them into a signed local student artifact at threshold.
 
 The frontier bill becomes a deposit account.
 
@@ -156,7 +156,7 @@ https://kolm.ai/articles/how-we-benchmark
 
 ```
 1.
-Three years of frontier-API spend, one local LoRA. Here is the math.
+Three years of frontier-API spend, one local student artifact. Here is the math.
 
 Most of what your engineering team is paying Anthropic or OpenAI to do is a small set of tasks repeated thousands of times. Each repetition produces a verified label. We built a proxy that saves the labels and a compiler that turns them into a signed local model.
 
@@ -184,7 +184,7 @@ https://kolm.ai/articles/how-we-benchmark
 3.
 What is in a .kolm file?
 
-A signed zip carrying, in v0.2: the recipe pack, the eval set, an HMAC-SHA256 receipt chain, a `manifest.json`, an optional `KOLMIDX` lookup container, an optional `kolm-moe-1` composition block, an optional `kolm-tokenizer-1` byte-level BPE tokenizer, and a `model.gguf` base-model pointer record. The full model layer (4-7B base + trained LoRA) and a populated `sqlite-vec` embedding index are the roadmap tier behind the runtime bridge.
+A signed zip carrying the recipe pack, eval set, receipt chain, `manifest.json`, optional lookup container, optional composition block, optional tokenizer metadata, and deployment-specific model or index references. Model-class artifacts can attach trained weights when the selected runtime target and trainer backend provide them.
 
 Why that shape: every claim about the artifact has to be checkable later. "Did we train on PII" becomes a query against the receipt. "Has the model drifted" becomes a comparison of two receipts. "Is this what we deployed" becomes a verify call.
 
@@ -199,11 +199,11 @@ The Hermes community owns the strongest open-source memory + agent harness loop.
 
 ### ProductHunt schedule
 
-Tuesday 8am PT (historically best landing for dev-tool launches; PH algo favors the 12-hour window after first vote). Hunter pre-arranged. Featured tagline: **"The frontier API bill becomes a deposit account."** First-comment script: link to /use-cases/capture-and-distill, /articles/how-we-benchmark, and the GitHub repo.
+Tuesday 8am PT (historically best landing for dev-tool launches; PH algo favors the 12-hour window after first vote). Hunter pre-arranged. Featured tagline: **"The frontier calls become reviewed training data."** First-comment script: link to /use-cases/capture-and-distill, /articles/how-we-benchmark, and the GitHub repo.
 
 ### Hacker News submission
 
-Tuesday 8am PT *or* Wed 8am PT (depending on PH performance). Title: **"Show HN: kolm · every API call you proxy through us trains a local LoRA you keep forever."** Body: see "Show HN draft" above.
+Tuesday 8am PT *or* Wed 8am PT (depending on PH performance). Title: **"Show HN: kolm · every API call you proxy through us trains a local student artifact you keep forever."** Body: see "Show HN draft" above.
 
 ---
 

@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm inspection · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm inspection CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/inspection">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm inspection","description":"Reference for the kolm inspection CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/inspection","mainEntityOfPage":"https://kolm.ai/docs/cli/inspection","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm inspection · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm inspection CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,45 +176,45 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="inspection">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>inspection</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>inspection</span>
 </nav>
 <h1>kolm inspection verbs</h1>
 <p>The five read-only CLI verbs you reach for when something is wrong, when a teammate asks &quot;is it actually working?&quot;, or when you need to file a support ticket. None of them mutate state.</p>
 <p>| Verb | Use it when | |------|-------------| | <code>kolm status</code> | One-line oneliner: am I logged in, what tenant, what base URL | | <code>kolm health</code> | Is the cloud up + how fresh is my key + how many ms is the round trip | | <code>kolm metrics</code> | Aggregate counters for captures / artifacts / jobs in the last 24h | | <code>kolm artifacts</code> | List + show + diff compiled artifacts in your tenant | | <code>kolm support-bundle</code> | Dump env + recent logs + redacted config into a tarball you can attach to a ticket |</p>
 <h2>kolm status</h2>
 <pre><code>
-kolm status                  oneliner: tenant + plan + base
-kolm status --json           machine-readable
+kolm status oneliner: tenant + plan + base
+kolm status --json machine-readable
 </code></pre>
 <p>Exits 0 if logged in and the cloud answers, 3 if not logged in, 1 on network error. Reads only; never mutates config.</p>
 <h2>kolm health</h2>
 <pre><code>
-kolm health                  pings /health and prints the rtt
-kolm health --json           {ok, rtt_ms, build_id, sw_cache}
+kolm health pings /health and prints the rtt
+kolm health --json {ok, rtt_ms, build_id, sw_cache}
 </code></pre>
 <p>The same probe <code>/value-loop</code> uses for its live status badge (W312). Useful to script in CI as a precheck.</p>
 <h2>kolm metrics</h2>
 <pre><code>
-kolm metrics                 24h summary (captures, jobs, artifacts)
-kolm metrics --since 1h      window override
-kolm metrics --json          machine-readable rollup
+kolm metrics 24h summary (captures, jobs, artifacts)
+kolm metrics --since 1h window override
+kolm metrics --json machine-readable rollup
 </code></pre>
 <p>Aggregates by status (<code>running</code> / <code>done</code> / <code>failed</code>) for jobs and by namespace for captures. Mirrors the rollup at <code>/dashboard</code>.</p>
 <h2>kolm artifacts</h2>
 <pre><code>
-kolm artifacts list                       all artifacts visible to your key
-kolm artifacts list --namespace eng       filter by capture namespace
-kolm artifacts list --json                machine-readable
-kolm artifacts show &lt;hash&gt;                full manifest + receipt chain
+kolm artifacts list all artifacts visible to your key
+kolm artifacts list --namespace eng filter by capture namespace
+kolm artifacts list --json machine-readable
+kolm artifacts show &lt;hash&gt; full manifest + receipt chain
 kolm artifacts show &lt;hash&gt; --json
-kolm artifacts diff &lt;hash-a&gt; &lt;hash-b&gt;     side-by-side manifest diff
+kolm artifacts diff &lt;hash-a&gt; &lt;hash-b&gt; side-by-side manifest diff
 </code></pre>
 <p>The <code>diff</code> view suppresses noisy fields (signatures, timestamps) and highlights changes in <code>recipe_class</code>, <code>base_model</code>, <code>eval_score</code>, and <code>k_score.composite</code>. Pair with <code>kolm verify &lt;hash&gt;</code> if you need the full receipt-chain audit.</p>
 <h2>kolm support-bundle</h2>
 <pre><code>
-kolm support-bundle                       writes ./kolm-support-&lt;ts&gt;.tgz
-kolm support-bundle --out ~/Desktop       custom directory
-kolm support-bundle --redact-extra &lt;re&gt;   add a regex to the redactor
+kolm support-bundle writes ./kolm-support-&lt;ts&gt;.tgz
+kolm support-bundle --out ~/Desktop custom directory
+kolm support-bundle --redact-extra &lt;re&gt; add a regex to the redactor
 </code></pre>
 <p>Bundles:</p>
 <ul>
@@ -230,13 +234,13 @@ kolm support-bundle --redact-extra &lt;re&gt;   add a regex to the redactor
 <li><code>/spec/rs-1</code> - the receipt-chain contract these verbs surface.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

@@ -9,15 +9,15 @@
 <meta name="description" content="kolm.ai cloud sync states (disabled, metadata_only, redacted_only, raw_enabled) and per-class privacy gating before bytes leave the laptop.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Cloud sync &middot; kolm.ai">
+<meta property="og:title" content="Cloud sync · kolm.ai">
 <meta property="og:description" content="kolm.ai cloud sync states (disabled, metadata_only, redacted_only, raw_enabled) and per-class privacy gating before bytes leave the laptop.">
-<meta property="og:type" content="article">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/cloud-sync">
-<meta property="og:image" content="https://kolm.ai/og/docs-cloud-sync.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Cloud sync &middot; kolm.ai">
+<meta name="twitter:title" content="Cloud sync · kolm.ai">
 <meta name="twitter:description" content="kolm.ai cloud sync states (disabled, metadata_only, redacted_only, raw_enabled) and per-class privacy gating before bytes leave the laptop.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-cloud-sync.svg">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/cloud-sync">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Cloud sync","description":"kolm.ai cloud sync states (disabled, metadata_only, redacted_only, raw_enabled) and per-class privacy gating before bytes leave the laptop.","url":"https://kolm.ai/docs/cloud-sync","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -88,13 +89,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="per-class-gating">Per-class privacy gating</h2>
 <p>Even with cloud sync on, the privacy policy is the gatekeeper. Each detector class can have a different action for local storage and cloud sync.</p>
 <pre><code>{
-  "default": {
-    "ssn":        { "local": "redact", "sync": "block" },
-    "credit_card":{ "local": "redact", "sync": "block" },
-    "email":      { "local": "redact", "sync": "redact" },
-    "mrn":        { "local": "redact", "sync": "block" },
-    "ip_v4":      { "local": "allow",  "sync": "redact" }
-  }
+ "default": {
+ "ssn": { "local": "redact", "sync": "block" },
+ "credit_card":{ "local": "redact", "sync": "block" },
+ "email": { "local": "redact", "sync": "redact" },
+ "mrn": { "local": "redact", "sync": "block" },
+ "ip_v4": { "local": "allow", "sync": "redact" }
+ }
 }</code></pre>
 <p>If the sync action for a class is <code>block</code>, any row that contained that class is held back from sync entirely, even if the local action redacted it.</p>
 
@@ -102,13 +103,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <pre><code>kolm sync set redacted_only
 kolm sync set disabled
 kolm sync show
-# state:      redacted_only
-# target:     https://kolm.ai/v1/sync
-# pending:    412 rows queued
-# last-sync:  2026-05-18T09:02:14Z (124 rows, 312 KB)</code></pre>
+# state: redacted_only
+# target: https://kolm.ai/v1/sync/inbox
+# pending: 412 rows queued
+# last-sync: 2026-05-18T09:02:14Z (124 rows, 312 KB)</code></pre>
 
 <h2 id="target">Sync target</h2>
-<p>The default target is the hosted kolm.ai sync endpoint. Self-hosted is a single env var pointing at your own S3-compatible bucket or kolm.ai cloud relay.</p>
+<p>The default hosted write target is <code>/v1/sync/inbox</code>. Status and operator views live at <code>/v1/sync/status</code>, <code>/v1/sync/state</code>, <code>/v1/sync/push</code>, <code>/v1/sync/pull</code>, and <code>/v1/sync/audit</code>. Self-hosted is a single env var pointing at your own S3-compatible bucket or kolm.ai cloud relay.</p>
 <pre><code>export KOLM_SYNC_TARGET=s3://my-bucket/kolm-lake
 kolm sync set redacted_only</code></pre>
 
@@ -119,26 +120,26 @@ kolm sync set redacted_only</code></pre>
 <p>Every sync run writes a line to <code>~/.kolm/runtime/sync.log</code> with batch sha, row count, class counts, and the public key fingerprint.</p>
 <pre><code>kolm sync audit --window 7d
 # 2026-05-18T09:02 batch_sha=8f3a... rows=124 classes=email:18,phone:4,jwt:1
-# 2026-05-17T09:01 batch_sha=4d12... rows=98  classes=email:14,phone:3</code></pre>
+# 2026-05-17T09:01 batch_sha=4d12... rows=98 classes=email:14,phone:3</code></pre>
 
 <h2 id="pause">Pause and resume</h2>
 <pre><code>kolm sync pause
 kolm sync resume
-kolm sync flush  # send everything queued now</code></pre>
+kolm sync flush # send everything queued now</code></pre>
 
 <h2 id="next">Next steps</h2>
 <p>Pair sync with <a href="/docs/team">team</a> shared namespaces if other people will read this data, and revisit <a href="/docs/privacy">privacy</a> any time you flip a class to <code>allow</code>. Start from <a href="/docs/quickstart">/docs/quickstart</a> if your lake is still empty.</p>
 
 <div class="related">
-  <a href="/docs/storage"><b>Storage &rarr;</b><span>Decides what local rows exist to sync at all.</span></a>
-  <a href="/docs/privacy"><b>Privacy &rarr;</b><span>The gate that controls what bytes leave the machine.</span></a>
-  <a href="/docs/team"><b>Team &rarr;</b><span>Share synced namespaces with teammates.</span></a>
+ <a href="/docs/storage"><b>Storage &rarr;</b><span>Decides what local rows exist to sync at all.</span></a>
+ <a href="/docs/privacy"><b>Privacy &rarr;</b><span>The gate that controls what bytes leave the machine.</span></a>
+ <a href="/docs/team"><b>Team &rarr;</b><span>Share synced namespaces with teammates.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

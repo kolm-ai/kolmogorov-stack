@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm compile · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm compile CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/compile">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm compile","description":"Reference for the kolm compile CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/compile","mainEntityOfPage":"https://kolm.ai/docs/cli/compile","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm compile · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm compile CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,16 +176,16 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="compile">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>compile</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>compile</span>
 </nav>
 <p>--- title: kolm compile · kolm.ai description: Build a .kolm artifact from a cloud-synthesised task or a local JSON spec. ---</p>
 <h1>kolm compile</h1>
 <p>&gt; Build a .kolm artifact. Cloud-synthesised from a task description, or fully offline from a JSON spec.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm compile &quot;&lt;task&gt;&quot; [flags]                  # cloud compile
-kolm compile --spec &lt;file.json&gt; [--out &lt;p&gt;]    # offline build from a JSON spec
-kolm compile --spec - [--out &lt;p&gt;]              # offline build from JSON on stdin
+kolm compile &quot;&lt;task&gt;&quot; [flags] # cloud compile
+kolm compile --spec &lt;file.json&gt; [--out &lt;p&gt;] # offline build from a JSON spec
+kolm compile --spec - [--out &lt;p&gt;] # offline build from JSON on stdin
 </code></pre>
 <h2>Flags</h2>
 <p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--data &lt;dir&gt;</code> | none | corpus dir that grounds the cloud compile (Recall) | | <code>--base-model &lt;name&gt;</code> | <code>Qwen/Qwen2.5-3B-Instruct</code> | base model embedded in the manifest | | <code>--examples &lt;file.jsonl&gt;</code> | none | seed examples for the verifier | | <code>--out &lt;dir|file.kolm&gt;</code> | <code>~/.kolm/artifacts</code> | where the artifact lands | | <code>--deploy-hook &lt;https-url&gt;</code> | <code>$KOLM_DEPLOY_HOOK_URL</code> | POST <code>{job_id, artifact_url, k_score, ...}</code> after a green compile | | <code>--spec &lt;file|-&gt;</code> | none | offline path: JSON spec on disk or stdin | | <code>--gate &lt;n&gt;</code> | <code>0.85</code> | K-score gate floor. Exit 2 means gate failed but the artifact is still on disk | | <code>--k-min &lt;n&gt;</code> | <code>0.0</code> | per-axis floor on the K-score axes (A/S/L/C/V/T) | | <code>--gate-cve-policy &lt;slug&gt;</code> | <code>balanced</code> | <code>strict</code> | <code>balanced</code> | <code>permissive</code> CVE-policy class | | <code>--gate-stability &lt;n&gt;</code> | <code>0.0</code> | per-axis floor on the K-score Stability axis | | <code>--gate-latency-budget &lt;ms&gt;</code> | none | reject the artifact when measured p95 exceeds this budget | | <code>--license &lt;id|@path&gt;</code> | <code>LicenseRef-kolm-default-1.0</code> | SPDX id, custom LicenseRef, or <code>@path/to/license.json</code> | | <code>--tokenizer &lt;file&gt;</code> | none | bundle <code>tokenizer.json</code> inside the artifact | | <code>--distill-provenance &lt;dir&gt;</code> | none | bind a <code>workers/distill</code> output dir as lineage | | <code>--export-provenance &lt;dir&gt;</code> | none | bind an <code>apps/export</code> output dir as exported targets | | <code>--export &lt;backend&gt;</code> | none | shortcut: bundle one already-built file/dir. <code>gguf|onnx|safetensors|coreml|mlx|executorch|tensorrt</code> | | <code>--export-from &lt;path&gt;</code> | none | path to the file/dir bundled by <code>--export</code> | | <code>--moe-provenance &lt;dir&gt;</code> | none | bind a Mixture-of-Experts composition | | <code>--pretokenize-provenance &lt;dir&gt;</code> | none | bind a pretokenize output dir (KOLMIDX2 + KOLMPCK2) | | <code>--external-holdout &lt;name&gt;</code> | none | score recipe against a public benchmark holdout. Repeatable | | <code>--adversarial-holdout &lt;name&gt;</code> | none | score against an adversarial paraphrase holdout. Repeatable | | <code>--tenant-shadow-corpus &lt;tid&gt;:&lt;cid&gt;</code> | none | score against a tenant-private corpus that never leaves tenant storage | | <code>--auditor-attestation &lt;file&gt;</code> | none | bind a third-party auditor&#39;s Ed25519-signed attestation. Repeatable |</p>
@@ -214,13 +218,13 @@ kolm compile --spec phi.spec.json --gate 0.95 --k-min 0.85 --gate-cve-policy str
 <li><a href="/docs/troubleshooting">Troubleshooting</a> when the gate fails</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

@@ -4,49 +4,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Teams · kolm.ai</title>
+<title>Teams guide · kolm.ai</title>
 <meta name="description" content="Multi-tenant workspaces for kolm. Invite teammates, share artifacts, manage roles. Owner pays once.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta name="robots" content="noindex,follow">
 <link rel="canonical" href="https://kolm.ai/teams">
-<meta property="og:title" content="Teams · kolm">
-<meta property="og:description" content="Multi-tenant workspaces. Invite teammates, share artifacts, manage roles.">
+<meta property="og:title" content="Teams guide · kolm.ai">
+<meta property="og:description" content="Multi-tenant workspaces for kolm. Invite teammates, share artifacts, manage roles. Owner pays once.">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
-  <meta property="og:url" content="https://kolm.ai/teams">
+ <meta property="og:url" content="https://kolm.ai/teams">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/teams",
-  "description": "Multi-tenant workspaces for kolm. Invite teammates, share artifacts, manage roles. Owner pays once.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/teams",
+ "description": "Multi-tenant workspaces for kolm. Invite teammates, share artifacts, manage roles. Owner pays once.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:title" content="Teams guide · kolm.ai">
+<meta name="twitter:description" content="Multi-tenant workspaces for kolm. Invite teammates, share artifacts, manage roles. Owner pays once.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -197,133 +202,133 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions">
-      <a href="/dashboard">dashboard</a>
-      <a href="/account">account</a>
-    </div>
-  </div>
+ <div class="site-actions">
+ <a href="/dashboard">dashboard</a>
+ <a href="/account">account</a>
+ </div>
+ </div>
 </header>
 
-<main class="page-main">
-  <section class="page-head">
-    <div>
-      <div class="eyebrow"><span class="pulse"></span>Workspaces</div>
-      <h1>Teams</h1>
-      <p class="lede">Share artifacts, tunnels, and BYOC deployments across a workspace. Owner pays. Members get access via membership.</p>
-    </div>
-    <div class="page-actions">
-      <a class="btn ghost" href="/docs#deploy-modes">Read the docs</a>
-      <button class="btn primary" id="open-create">New team</button>
-    </div>
-  </section>
+<main id="main" class="page-main">
+ <section class="page-head">
+ <div>
+ <div class="eyebrow"><span class="pulse"></span>Workspaces</div>
+ <h1>Teams</h1>
+ <p class="lede">Share artifacts, tunnels, and BYOC deployments across a workspace. Owner pays. Members get access via membership.</p>
+ </div>
+ <div class="page-actions">
+ <a class="btn ghost" href="/docs#deploy-modes">Read the docs</a>
+ <button class="btn primary" id="open-create">New team</button>
+ </div>
+ </section>
 
-  <section class="dashboard-panel" id="create-panel" hidden>
-    <div class="section-head">
-      <h2>Create a workspace</h2>
-      <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Owner pays. Add members afterwards.</span>
-    </div>
-    <form id="create-form" autocomplete="off" style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
-      <label style="display:flex;flex-direction:column;gap:6px">
-        <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Team name</span>
-        <input id="ct-name" type="text" required maxlength="80" placeholder="Acme Risk Ops" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:6px">
-        <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Seats <em style="font-style:normal;color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">optional · default 5</em></span>
-        <input id="ct-seats" type="number" min="1" max="500" value="5" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px;max-width:160px">
-      </label>
-      <div style="display:flex;gap:12px;align-items:center">
-        <button type="submit" class="btn primary">Create &rarr;</button>
-        <button type="button" class="btn ghost" id="cancel-create">Cancel</button>
-        <span id="ct-status" aria-live="polite" style="font-family:var(--mono);font-size:12px;color:var(--ink-mute)"></span>
-      </div>
-    </form>
-  </section>
+ <section class="dashboard-panel" id="create-panel" hidden>
+ <div class="section-head">
+ <h2>Create a workspace</h2>
+ <span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Owner pays. Add members afterwards.</span>
+ </div>
+ <form id="create-form" autocomplete="off" style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
+ <label style="display:flex;flex-direction:column;gap:6px">
+ <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Team name</span>
+ <input id="ct-name" type="text" required maxlength="80" placeholder="Acme Risk Ops" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px">
+ </label>
+ <label style="display:flex;flex-direction:column;gap:6px">
+ <span style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.04em">Seats <em style="font-style:normal;color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">optional · default 5</em></span>
+ <input id="ct-seats" type="number" min="1" max="500" value="5" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:13.5px;max-width:160px">
+ </label>
+ <div style="display:flex;gap:12px;align-items:center">
+ <button type="submit" class="btn primary">Create &rarr;</button>
+ <button type="button" class="btn ghost" id="cancel-create">Cancel</button>
+ <span id="ct-status" aria-live="polite" style="font-family:var(--mono);font-size:12px;color:var(--ink-mute)"></span>
+ </div>
+ </form>
+ </section>
 
-  <section class="dashboard-panel">
-    <div class="section-head">
-      <h2>Your teams</h2>
-      <span id="list-sub" style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Loading</span>
-    </div>
-    <div id="team-list" style="display:flex;flex-direction:column;gap:10px;margin-top:14px"></div>
-  </section>
+ <section class="dashboard-panel">
+ <div class="section-head">
+ <h2>Your teams</h2>
+ <span id="list-sub" style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">Loading</span>
+ </div>
+ <div id="team-list" style="display:flex;flex-direction:column;gap:10px;margin-top:14px"></div>
+ </section>
 
-  <section class="dashboard-panel" id="detail-panel" hidden>
-    <div class="section-head">
-      <h2 id="dt-name">Team</h2>
-      <span id="dt-role" style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)"></span>
-    </div>
-    <div id="dt-meta" style="margin-top:6px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)"></div>
+ <section class="dashboard-panel" id="detail-panel" hidden>
+ <div class="section-head">
+ <h2 id="dt-name">Team</h2>
+ <span id="dt-role" style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)"></span>
+ </div>
+ <div id="dt-meta" style="margin-top:6px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)"></div>
 
-    <h3 style="margin:24px 0 8px 0;font-size:14px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-mute)">Members</h3>
-    <div id="dt-members" style="display:flex;flex-direction:column;gap:8px;font-family:var(--mono);font-size:13px"></div>
+ <h3 style="margin:24px 0 8px 0;font-size:14px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-mute)">Members</h3>
+ <div id="dt-members" style="display:flex;flex-direction:column;gap:8px;font-family:var(--mono);font-size:13px"></div>
 
-    <h3 style="margin:24px 0 8px 0;font-size:14px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-mute)">Pending invites</h3>
-    <div id="dt-invites" style="display:flex;flex-direction:column;gap:8px;font-family:var(--mono);font-size:13px"></div>
+ <h3 style="margin:24px 0 8px 0;font-size:14px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-mute)">Pending invites</h3>
+ <div id="dt-invites" style="display:flex;flex-direction:column;gap:8px;font-family:var(--mono);font-size:13px"></div>
 
-    <h3 style="margin:24px 0 8px 0;font-size:14px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-mute)">Invite someone</h3>
-    <form id="inv-form" autocomplete="off" style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin-top:6px">
-      <input id="inv-email" type="email" required placeholder="teammate@company.com" style="flex:1;min-width:240px;background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:13px">
-      <select id="inv-role" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:13px">
-        <option value="viewer">viewer (read)</option>
-        <option value="member" selected>member (read + create)</option>
-        <option value="admin">admin (invite + remove)</option>
-      </select>
-      <button type="submit" class="btn primary">Send invite</button>
-    </form>
-    <div id="inv-status" aria-live="polite" style="margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--ink-mute)"></div>
-  </section>
+ <h3 style="margin:24px 0 8px 0;font-size:14px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-mute)">Invite someone</h3>
+ <form id="inv-form" autocomplete="off" style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin-top:6px">
+ <input id="inv-email" type="email" required placeholder="teammate@company.com" style="flex:1;min-width:240px;background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:13px">
+ <select id="inv-role" style="background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-strong);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:13px">
+ <option value="viewer">viewer (read)</option>
+ <option value="member" selected>member (read + create)</option>
+ <option value="admin">admin (invite + remove)</option>
+ </select>
+ <button type="submit" class="btn primary">Send invite</button>
+ </form>
+ <div id="inv-status" aria-live="polite" style="margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--ink-mute)"></div>
+ </section>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -331,232 +336,232 @@
 <script src="/app.js"></script>
 <script>
 (function () {
-  const KS = window.KS;
-  const $ = (id) => document.getElementById(id);
-  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c]);
-  let activeTeam = null;
+ const KS = window.KS;
+ const $ = (id) => document.getElementById(id);
+ const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c]);
+ let activeTeam = null;
 
-  async function ensureAuth() {
-    let key = KS.apiKey();
-    if (!key) { try { key = await KS.hydrateSession(); } catch (_) {} }
-    if (!key) { window.location.href = '/signup?next=' + encodeURIComponent('/teams'); return false; }
-    return true;
-  }
+ async function ensureAuth() {
+ let key = KS.apiKey();
+ if (!key) { try { key = await KS.hydrateSession(); } catch (_) {} }
+ if (!key) { window.location.href = '/signup?next=' + encodeURIComponent('/teams'); return false; }
+ return true;
+ }
 
-  async function refreshList() {
-    $('list-sub').textContent = 'Loading';
-    try {
-      const r = await KS.api('/v1/teams');
-      const list = $('team-list');
-      list.innerHTML = '';
-      if (!r.teams || !r.teams.length) {
-        list.innerHTML = '<p style="color:var(--ink-faint);font-family:var(--mono);font-size:13px">No teams yet. Create one to invite teammates.</p>';
-        $('list-sub').textContent = '0 teams';
-        return;
-      }
-      for (const t of r.teams) {
-        const row = document.createElement('button');
-        row.type = 'button';
-        row.style.cssText = 'text-align:left;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:8px;padding:14px 16px;color:inherit;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;font-family:inherit';
+ async function refreshList() {
+ $('list-sub').textContent = 'Loading';
+ try {
+ const r = await KS.api('/v1/teams');
+ const list = $('team-list');
+ list.innerHTML = '';
+ if (!r.teams || !r.teams.length) {
+ list.innerHTML = '<p style="color:var(--ink-faint);font-family:var(--mono);font-size:13px">No teams yet. Create one to invite teammates.</p>';
+ $('list-sub').textContent = '0 teams';
+ return;
+ }
+ for (const t of r.teams) {
+ const row = document.createElement('button');
+ row.type = 'button';
+ row.style.cssText = 'text-align:left;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:8px;padding:14px 16px;color:inherit;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;font-family:inherit';
 
-        const left = document.createElement('div');
-        const nameDiv = document.createElement('div');
-        nameDiv.style.cssText = 'font-weight:500;font-size:15px';
-        nameDiv.textContent = t.name;
-        left.appendChild(nameDiv);
-        const metaDiv = document.createElement('div');
-        metaDiv.style.cssText = 'font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);margin-top:3px';
-        metaDiv.textContent = '/' + t.slug + ' · plan ' + (t.plan || 'teams') + ' · ' + t.seats_used + '/' + t.seats_max + ' seats';
-        left.appendChild(metaDiv);
+ const left = document.createElement('div');
+ const nameDiv = document.createElement('div');
+ nameDiv.style.cssText = 'font-weight:500;font-size:15px';
+ nameDiv.textContent = t.name;
+ left.appendChild(nameDiv);
+ const metaDiv = document.createElement('div');
+ metaDiv.style.cssText = 'font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);margin-top:3px';
+ metaDiv.textContent = '/' + t.slug + ' · plan ' + (t.plan || 'teams') + ' · ' + t.seats_used + '/' + t.seats_max + ' seats';
+ left.appendChild(metaDiv);
 
-        const roleDiv = document.createElement('div');
-        roleDiv.style.cssText = 'font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em';
-        roleDiv.textContent = t.your_role || '';
+ const roleDiv = document.createElement('div');
+ roleDiv.style.cssText = 'font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em';
+ roleDiv.textContent = t.your_role || '';
 
-        row.appendChild(left);
-        row.appendChild(roleDiv);
-        row.addEventListener('click', () => openTeam(t.slug));
-        list.appendChild(row);
-      }
-      $('list-sub').textContent = r.teams.length + ' team' + (r.teams.length === 1 ? '' : 's');
-    } catch (e) {
-      $('list-sub').textContent = 'error';
-      KS.toast('failed to load teams: ' + (e.message || ''));
-    }
-  }
+ row.appendChild(left);
+ row.appendChild(roleDiv);
+ row.addEventListener('click', () => openTeam(t.slug));
+ list.appendChild(row);
+ }
+ $('list-sub').textContent = r.teams.length + ' team' + (r.teams.length === 1 ? '' : 's');
+ } catch (e) {
+ $('list-sub').textContent = 'error';
+ KS.toast('failed to load teams: ' + (e.message || ''));
+ }
+ }
 
-  async function openTeam(slug) {
-    try {
-      const r = await KS.api('/v1/teams/' + encodeURIComponent(slug));
-      activeTeam = r.team;
-      $('detail-panel').hidden = false;
-      $('dt-name').textContent = r.team.name;
-      $('dt-role').textContent = '/' + r.team.slug;
-      $('dt-meta').textContent = 'plan ' + (r.team.plan || 'teams') + ' · ' + r.team.seats_used + '/' + r.team.seats_max + ' seats · owner ' + (r.team.owner_tenant_id || '');
-      const members = $('dt-members');
-      members.innerHTML = '';
-      for (const m of (r.members || [])) {
-        const row = document.createElement('div');
-        row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 12px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px';
+ async function openTeam(slug) {
+ try {
+ const r = await KS.api('/v1/teams/' + encodeURIComponent(slug));
+ activeTeam = r.team;
+ $('detail-panel').hidden = false;
+ $('dt-name').textContent = r.team.name;
+ $('dt-role').textContent = '/' + r.team.slug;
+ $('dt-meta').textContent = 'plan ' + (r.team.plan || 'teams') + ' · ' + r.team.seats_used + '/' + r.team.seats_max + ' seats · owner ' + (r.team.owner_tenant_id || '');
+ const members = $('dt-members');
+ members.innerHTML = '';
+ for (const m of (r.members || [])) {
+ const row = document.createElement('div');
+ row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 12px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px';
 
-        const left = document.createElement('div');
-        const tidDiv = document.createElement('div');
-        tidDiv.textContent = m.tenant_id;
-        left.appendChild(tidDiv);
-        const joinedDiv = document.createElement('div');
-        joinedDiv.style.cssText = 'color:var(--ink-faint);font-size:11.5px;margin-top:2px';
-        joinedDiv.textContent = 'joined ' + (m.joined_at || '').slice(0, 10);
-        left.appendChild(joinedDiv);
+ const left = document.createElement('div');
+ const tidDiv = document.createElement('div');
+ tidDiv.textContent = m.tenant_id;
+ left.appendChild(tidDiv);
+ const joinedDiv = document.createElement('div');
+ joinedDiv.style.cssText = 'color:var(--ink-faint);font-size:11.5px;margin-top:2px';
+ joinedDiv.textContent = 'joined ' + (m.joined_at || '').slice(0, 10);
+ left.appendChild(joinedDiv);
 
-        const right = document.createElement('div');
-        right.style.cssText = 'display:flex;gap:6px;align-items:center';
-        const roleSpan = document.createElement('span');
-        roleSpan.style.cssText = 'font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-mute)';
-        roleSpan.textContent = m.role;
-        right.appendChild(roleSpan);
-        if (m.role !== 'owner') {
-          const removeBtn = document.createElement('button');
-          removeBtn.className = 'btn ghost';
-          removeBtn.dataset.action = 'remove';
-          removeBtn.dataset.tid = m.tenant_id;
-          removeBtn.style.cssText = 'font-size:11px;padding:4px 8px';
-          removeBtn.textContent = 'remove';
-          right.appendChild(removeBtn);
-        }
+ const right = document.createElement('div');
+ right.style.cssText = 'display:flex;gap:6px;align-items:center';
+ const roleSpan = document.createElement('span');
+ roleSpan.style.cssText = 'font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-mute)';
+ roleSpan.textContent = m.role;
+ right.appendChild(roleSpan);
+ if (m.role !== 'owner') {
+ const removeBtn = document.createElement('button');
+ removeBtn.className = 'btn ghost';
+ removeBtn.dataset.action = 'remove';
+ removeBtn.dataset.tid = m.tenant_id;
+ removeBtn.style.cssText = 'font-size:11px;padding:4px 8px';
+ removeBtn.textContent = 'remove';
+ right.appendChild(removeBtn);
+ }
 
-        row.appendChild(left);
-        row.appendChild(right);
-        members.appendChild(row);
-      }
-      const invites = $('dt-invites');
-      invites.innerHTML = '';
-      const invList = r.invites || [];
-      if (!invList.length) {
-        invites.innerHTML = '<div style="color:var(--ink-faint);font-size:12px">No pending invites.</div>';
-      } else {
-        for (const i of invList) {
-          const row = document.createElement('div');
-          row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 12px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px';
+ row.appendChild(left);
+ row.appendChild(right);
+ members.appendChild(row);
+ }
+ const invites = $('dt-invites');
+ invites.innerHTML = '';
+ const invList = r.invites || [];
+ if (!invList.length) {
+ invites.innerHTML = '<div style="color:var(--ink-faint);font-size:12px">No pending invites.</div>';
+ } else {
+ for (const i of invList) {
+ const row = document.createElement('div');
+ row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 12px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px';
 
-          const left = document.createElement('div');
-          left.appendChild(document.createTextNode(i.email + ' '));
-          const roleSpan = document.createElement('span');
-          roleSpan.style.cssText = 'color:var(--ink-mute)';
-          roleSpan.textContent = 'as ' + i.role;
-          left.appendChild(roleSpan);
+ const left = document.createElement('div');
+ left.appendChild(document.createTextNode(i.email + ' '));
+ const roleSpan = document.createElement('span');
+ roleSpan.style.cssText = 'color:var(--ink-mute)';
+ roleSpan.textContent = 'as ' + i.role;
+ left.appendChild(roleSpan);
 
-          const right = document.createElement('div');
-          right.style.cssText = 'display:flex;gap:6px;align-items:center';
-          const copyBtn = document.createElement('button');
-          copyBtn.className = 'btn ghost';
-          copyBtn.dataset.action = 'copy-invite';
-          copyBtn.dataset.token = i.token;
-          copyBtn.style.cssText = 'font-size:11px;padding:4px 8px';
-          copyBtn.textContent = 'copy link';
-          right.appendChild(copyBtn);
-          const revokeBtn = document.createElement('button');
-          revokeBtn.className = 'btn ghost';
-          revokeBtn.dataset.action = 'revoke';
-          revokeBtn.dataset.iid = i.id;
-          revokeBtn.style.cssText = 'font-size:11px;padding:4px 8px';
-          revokeBtn.textContent = 'revoke';
-          right.appendChild(revokeBtn);
+ const right = document.createElement('div');
+ right.style.cssText = 'display:flex;gap:6px;align-items:center';
+ const copyBtn = document.createElement('button');
+ copyBtn.className = 'btn ghost';
+ copyBtn.dataset.action = 'copy-invite';
+ copyBtn.dataset.token = i.token;
+ copyBtn.style.cssText = 'font-size:11px;padding:4px 8px';
+ copyBtn.textContent = 'copy link';
+ right.appendChild(copyBtn);
+ const revokeBtn = document.createElement('button');
+ revokeBtn.className = 'btn ghost';
+ revokeBtn.dataset.action = 'revoke';
+ revokeBtn.dataset.iid = i.id;
+ revokeBtn.style.cssText = 'font-size:11px;padding:4px 8px';
+ revokeBtn.textContent = 'revoke';
+ right.appendChild(revokeBtn);
 
-          row.appendChild(left);
-          row.appendChild(right);
-          invites.appendChild(row);
-        }
-      }
-      $('detail-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } catch (e) {
-      KS.toast('failed: ' + (e.message || ''));
-    }
-  }
+ row.appendChild(left);
+ row.appendChild(right);
+ invites.appendChild(row);
+ }
+ }
+ $('detail-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+ } catch (e) {
+ KS.toast('failed: ' + (e.message || ''));
+ }
+ }
 
-  document.addEventListener('click', async (ev) => {
-    const t = ev.target;
-    if (!(t instanceof Element)) return;
-    const action = t.getAttribute('data-action');
-    if (!action) return;
-    if (action === 'remove' && activeTeam) {
-      if (!confirm('Remove this member from ' + activeTeam.name + '?')) return;
-      try {
-        await KS.api(`/v1/teams/${encodeURIComponent(activeTeam.slug)}/members/${encodeURIComponent(t.getAttribute('data-tid'))}`, { method: 'DELETE' });
-        KS.toast('member removed');
-        openTeam(activeTeam.slug);
-        refreshList();
-      } catch (e) { KS.toast('failed: ' + e.message); }
-    }
-    if (action === 'revoke' && activeTeam) {
-      try {
-        await KS.api('/v1/teams/invites/' + encodeURIComponent(t.getAttribute('data-iid')), { method: 'DELETE' });
-        KS.toast('invite revoked');
-        openTeam(activeTeam.slug);
-      } catch (e) { KS.toast('failed: ' + e.message); }
-    }
-    if (action === 'copy-invite') {
-      const url = window.location.origin + '/teams/accept?token=' + encodeURIComponent(t.getAttribute('data-token'));
-      try { await navigator.clipboard.writeText(url); KS.toast('invite link copied'); }
-      catch { KS.toast(url); }
-    }
-  });
+ document.addEventListener('click', async (ev) => {
+ const t = ev.target;
+ if (!(t instanceof Element)) return;
+ const action = t.getAttribute('data-action');
+ if (!action) return;
+ if (action === 'remove' && activeTeam) {
+ if (!confirm('Remove this member from ' + activeTeam.name + '?')) return;
+ try {
+ await KS.api(`/v1/teams/${encodeURIComponent(activeTeam.slug)}/members/${encodeURIComponent(t.getAttribute('data-tid'))}`, { method: 'DELETE' });
+ KS.toast('member removed');
+ openTeam(activeTeam.slug);
+ refreshList();
+ } catch (e) { KS.toast('failed: ' + e.message); }
+ }
+ if (action === 'revoke' && activeTeam) {
+ try {
+ await KS.api('/v1/teams/invites/' + encodeURIComponent(t.getAttribute('data-iid')), { method: 'DELETE' });
+ KS.toast('invite revoked');
+ openTeam(activeTeam.slug);
+ } catch (e) { KS.toast('failed: ' + e.message); }
+ }
+ if (action === 'copy-invite') {
+ const url = window.location.origin + '/teams/accept?token=' + encodeURIComponent(t.getAttribute('data-token'));
+ try { await navigator.clipboard.writeText(url); KS.toast('invite link copied'); }
+ catch { KS.toast(url); }
+ }
+ });
 
-  $('open-create').addEventListener('click', () => {
-    $('create-panel').hidden = false;
-    $('ct-name').focus();
-  });
-  $('cancel-create').addEventListener('click', () => { $('create-panel').hidden = true; });
+ $('open-create').addEventListener('click', () => {
+ $('create-panel').hidden = false;
+ $('ct-name').focus();
+ });
+ $('cancel-create').addEventListener('click', () => { $('create-panel').hidden = true; });
 
-  $('create-form').addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    const name = $('ct-name').value.trim();
-    const seats = parseInt($('ct-seats').value) || 5;
-    if (!name) return;
-    $('ct-status').textContent = 'creating...';
-    try {
-      const r = await KS.api('/v1/teams', { method: 'POST', body: JSON.stringify({ name, seats_max: seats }) });
-      $('ct-status').textContent = '';
-      $('create-panel').hidden = true;
-      $('ct-name').value = '';
-      KS.toast('team created: /' + r.team.slug);
-      await refreshList();
-      openTeam(r.team.slug);
-    } catch (e) {
-      $('ct-status').textContent = 'failed: ' + (e.message || '');
-    }
-  });
+ $('create-form').addEventListener('submit', async (ev) => {
+ ev.preventDefault();
+ const name = $('ct-name').value.trim();
+ const seats = parseInt($('ct-seats').value) || 5;
+ if (!name) return;
+ $('ct-status').textContent = 'creating...';
+ try {
+ const r = await KS.api('/v1/teams', { method: 'POST', body: JSON.stringify({ name, seats_max: seats }) });
+ $('ct-status').textContent = '';
+ $('create-panel').hidden = true;
+ $('ct-name').value = '';
+ KS.toast('team created: /' + r.team.slug);
+ await refreshList();
+ openTeam(r.team.slug);
+ } catch (e) {
+ $('ct-status').textContent = 'failed: ' + (e.message || '');
+ }
+ });
 
-  $('inv-form').addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    if (!activeTeam) return;
-    const email = $('inv-email').value.trim();
-    const role = $('inv-role').value;
-    $('inv-status').textContent = 'sending...';
-    try {
-      const r = await KS.api(`/v1/teams/${encodeURIComponent(activeTeam.slug)}/invite`, { method: 'POST', body: JSON.stringify({ email, role }) });
-      $('inv-email').value = '';
-      const statusEl = $('inv-status');
-      statusEl.textContent = '';
-      statusEl.appendChild(document.createTextNode('invited '));
-      const codeEl = document.createElement('code');
-      codeEl.textContent = email;
-      statusEl.appendChild(codeEl);
-      statusEl.appendChild(document.createTextNode('. share link: '));
-      const linkEl = document.createElement('a');
-      linkEl.href = r.accept_url;
-      linkEl.style.cssText = 'color:var(--accent);text-decoration:underline';
-      linkEl.textContent = r.accept_url;
-      statusEl.appendChild(linkEl);
-      openTeam(activeTeam.slug);
-    } catch (e) {
-      $('inv-status').textContent = 'failed: ' + (e.message || '');
-    }
-  });
+ $('inv-form').addEventListener('submit', async (ev) => {
+ ev.preventDefault();
+ if (!activeTeam) return;
+ const email = $('inv-email').value.trim();
+ const role = $('inv-role').value;
+ $('inv-status').textContent = 'sending...';
+ try {
+ const r = await KS.api(`/v1/teams/${encodeURIComponent(activeTeam.slug)}/invite`, { method: 'POST', body: JSON.stringify({ email, role }) });
+ $('inv-email').value = '';
+ const statusEl = $('inv-status');
+ statusEl.textContent = '';
+ statusEl.appendChild(document.createTextNode('invited '));
+ const codeEl = document.createElement('code');
+ codeEl.textContent = email;
+ statusEl.appendChild(codeEl);
+ statusEl.appendChild(document.createTextNode('. share link: '));
+ const linkEl = document.createElement('a');
+ linkEl.href = r.accept_url;
+ linkEl.style.cssText = 'color:var(--accent);text-decoration:underline';
+ linkEl.textContent = r.accept_url;
+ statusEl.appendChild(linkEl);
+ openTeam(activeTeam.slug);
+ } catch (e) {
+ $('inv-status').textContent = 'failed: ' + (e.message || '');
+ }
+ });
 
-  (async () => {
-    if (!(await ensureAuth())) return;
-    await refreshList();
-  })();
+ (async () => {
+ if (!(await ensureAuth())) return;
+ await refreshList();
+ })();
 })();
 </script>
 </body>

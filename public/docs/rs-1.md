@@ -30,28 +30,28 @@ Two compiles with the same `(task, examples, base_model, recipe_registry@version
 
 ```json
 {
-  "spec": "rs-1",
-  "schema": "manifest-v0.1",
-  "task": "summarize support tickets",
-  "compiled_at": "2026-05-08T00:00:00Z",
-  "base_model": {
-    "name": "qwen2.5-coder-7b-instruct-q4_0",
-    "sha256": "…"
-  },
-  "recipe_registry": {
-    "version": "2026-05-01",
-    "url": "https://kolm.ai/v1/registry/export"
-  },
-  "k_score": {
-    "spec": "k-score-1",
-    "composite": 0.71,
-    "accuracy": 0.92,
-    "coverage": 0.41,
-    "size_bytes": 2147483648,
-    "p50_latency_us": 18000,
-    "cost_usd_per_call": 0.0
-  },
-  "compiler": { "name": "kolm", "version": "0.1.0" }
+ "spec": "rs-1",
+ "schema": "manifest-v0.1",
+ "task": "summarize support tickets",
+ "compiled_at": "2026-05-08T00:00:00Z",
+ "base_model": {
+ "name": "qwen2.5-coder-7b-instruct-q4_0",
+ "sha256": "…"
+ },
+ "recipe_registry": {
+ "version": "2026-05-01",
+ "url": "https://kolm.ai/v1/registry/export"
+ },
+ "k_score": {
+ "spec": "k-score-1",
+ "composite": 0.71,
+ "accuracy": 0.92,
+ "coverage": 0.41,
+ "size_bytes": 2147483648,
+ "p50_latency_us": 18000,
+ "cost_usd_per_call": 0.0
+ },
+ "compiler": { "name": "kolm", "version": "0.1.0" }
 }
 ```
 
@@ -63,14 +63,14 @@ Recipes are the deterministic-token subset of the model's behavior. Each recipe 
 
 ```json
 {
-  "recipes": [
-    {
-      "id": "json-array-comma",
-      "shape": "after a value inside an array",
-      "tokens": [","],
-      "coverage": 0.041
-    }
-  ]
+ "recipes": [
+ {
+ "id": "json-array-comma",
+ "shape": "after a value inside an array",
+ "tokens": [","],
+ "coverage": 0.041
+ }
+ ]
 }
 ```
 
@@ -82,20 +82,20 @@ The receipt is an HMAC chain over every member of the archive, in the order list
 
 ```json
 {
-  "spec": "receipt-v0.1",
-  "alg": "HMAC-SHA256",
-  "signed_at": "2026-05-08T00:00:00Z",
-  "signer": "kolm-cloud@kolm.ai",
-  "chain": [
-    { "member": "manifest.json", "sha256": "…" },
-    { "member": "recipes.json",  "sha256": "…" },
-    { "member": "evals.jsonl",   "sha256": "…" },
-    { "member": "model.ptr",     "sha256": "…" },
-    { "member": "lora.bin",      "sha256": "…", "optional": true },
-    { "member": "index.sqlite-vec", "sha256": "…", "optional": true }
-  ],
-  "registry_signature": "…",
-  "signature": "…"
+ "spec": "receipt-v0.1",
+ "alg": "HMAC-SHA256",
+ "signed_at": "2026-05-08T00:00:00Z",
+ "signer": "kolm-cloud@kolm.ai",
+ "chain": [
+ { "member": "manifest.json", "sha256": "…" },
+ { "member": "recipes.json", "sha256": "…" },
+ { "member": "evals.jsonl", "sha256": "…" },
+ { "member": "model.ptr", "sha256": "…" },
+ { "member": "lora.bin", "sha256": "…", "optional": true },
+ { "member": "index.sqlite-vec", "sha256": "…", "optional": true }
+ ],
+ "registry_signature": "…",
+ "signature": "…"
 }
 ```
 
@@ -105,10 +105,10 @@ A runtime MUST verify the signature before loading any model bytes.
 
 ```json
 {
-  "kind": "huggingface",
-  "name": "qwen2.5-coder-7b-instruct-q4_0",
-  "sha256": "…",
-  "url": "https://huggingface.co/…/resolve/main/qwen2.5-coder-7b-instruct.q4_0.gguf"
+ "kind": "huggingface",
+ "name": "qwen2.5-coder-7b-instruct-q4_0",
+ "sha256": "…",
+ "url": "https://huggingface.co/…/resolve/main/qwen2.5-coder-7b-instruct.q4_0.gguf"
 }
 ```
 
@@ -137,4 +137,4 @@ RS-1 is published under MIT. The intent is that any runtime · ours, a competito
 
 `spec` strings are immutable. A breaking change creates `rs-2`. Non-breaking additions get new optional members and bump only the `schema` field on the affected document.
 
- ·  see also: [manifest-v0.1.json](/docs/manifest-v0.1.json), [receipt-v0.1.json](/docs/receipt-v0.1.json).
+ · see also: [manifest-v0.1.json](/docs/manifest-v0.1.json), [receipt-v0.1.json](/docs/receipt-v0.1.json).

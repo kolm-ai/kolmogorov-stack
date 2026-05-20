@@ -12,15 +12,15 @@ kolm nl "<free text request>" [--class <c>] [--out <path>] [--json] [--network|-
 ## Flags
 
 - `--class <c>` force the recipe class. One of `rule`, `synthesized_rule`,
-  `compiled_rule`, `distilled_model`. Default: keyword-inferred from the request.
+ `compiled_rule`, `distilled_model`. Default: keyword-inferred from the request.
 - `--out <path>` write the scaffold to a file (default: stdout).
 - `--json` machine-readable JSON output. Default: human-readable.
 - `--no-network` force the air-gap path (same as `KOLM_AIRGAP=1`). This is the
-  default so every invocation is deterministic by default; pass `--network` to
-  opt into the hosted-LLM drafter.
+ default so every invocation is deterministic by default; pass `--network` to
+ opt into the hosted-LLM drafter.
 - `--network` opt into the hosted-LLM drafter. The CLI POSTs the request to
-  `/v1/nl/scaffold` and the response carries the `x-kolm-nl-source` header so
-  the caller can confirm which branch served.
+ `/v1/nl/scaffold` and the response carries the `x-kolm-nl-source` header so
+ the caller can confirm which branch served.
 
 ## Examples
 
@@ -35,16 +35,16 @@ kolm nl "redact PHI from clinical notes" --class rule --out scaffolds/phi.json
 
 ```
 {
-  "ok": true,
-  "suggested_slug":              "<kebab-case slug>",
-  "suggested_task_description":  "<the request, verbatim>",
-  "recipe_class":                "rule | synthesized_rule | compiled_rule | distilled_model",
-  "suggested_k_score_gate":      0.88,
-  "suggested_seed_examples":     [{ "prompt": "...", "completion": "..." }, ...],   // length 10
-  "next_steps":                  [ "kolm compile --spec ...", "kolm verify ..." ],
-  "class_inference_basis":       "keyword:edi | class_hint | default",
-  "network_status":              "air_gap | wired",
-  "note":                        "scaffolds are starting points. refine + verify before compile."
+ "ok": true,
+ "suggested_slug": "<kebab-case slug>",
+ "suggested_task_description": "<the request, verbatim>",
+ "recipe_class": "rule | synthesized_rule | compiled_rule | distilled_model",
+ "suggested_k_score_gate": 0.88,
+ "suggested_seed_examples": [{ "prompt": "...", "completion": "..." }, ...], // length 10
+ "next_steps": [ "kolm compile --spec ...", "kolm verify ..." ],
+ "class_inference_basis": "keyword:edi | class_hint | default",
+ "network_status": "air_gap | wired",
+ "note": "scaffolds are starting points. refine + verify before compile."
 }
 ```
 
@@ -53,12 +53,12 @@ kolm nl "redact PHI from clinical notes" --class rule --out scaffolds/phi.json
 A keyword match over the request text picks the class in priority order:
 
 1. Generative requests (`draft`, `write a`, `summarize`, `translate`, `appeal letter`)
-   map to `distilled_model` (real model bytes required).
+ map to `distilled_model` (real model bytes required).
 2. Native / wasm / C / Rust mentions map to `compiled_rule`.
 3. Known measures with a spec (`HEDIS`, `compute measure`, `apply spec`) map to
-   `synthesized_rule` (teacher emits the rule code, AST-validated).
+ `synthesized_rule` (teacher emits the rule code, AST-validated).
 4. Deterministic parsing / redacting / validating (`parse`, `redact`, `extract`,
-   `EDI`, `FHIR`, `classify`) map to `rule`.
+ `EDI`, `FHIR`, `classify`) map to `rule`.
 5. No keyword match -> default `rule` (honest floor; upgrade with `--class`).
 
 Pass `--class <c>` to override.
@@ -66,15 +66,15 @@ Pass `--class <c>` to override.
 ## Honest scope
 
 - The air-gap path is deterministic, keyword-based, and ships today. Same input
-  always produces the same scaffold.
+ always produces the same scaffold.
 - The networked LLM-augmented path is opt-in via `--network`. It replaces the
-  placeholder fields (seed examples, task description refinement) with
-  model-generated suggestions, leaves class inference + slug + gate intact,
-  and the response carries the `x-kolm-nl-source` header so a caller can
-  confirm which branch served.
+ seed examples plus task-description refinement with model-generated
+ suggestions, leaves class inference + slug + gate intact,
+ and the response carries the `x-kolm-nl-source` header so a caller can
+ confirm which branch served.
 - Scaffolds are starting points, not finished recipes. Edit the seeds, refine
-  the task description, then run `kolm compile --spec <file>` and
-  `kolm verify <artifact>.kolm` before you ship anything to production.
+ the task description, then run `kolm compile --spec <file>` and
+ `kolm verify <artifact>.kolm` before you ship anything to production.
 
 ## See also
 

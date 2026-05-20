@@ -11,9 +11,9 @@ description: End-to-end compile pipeline. Tokenize, distill, compile, full.
 
 ```bash
 kolm pipeline tokenize <corpus-file-or-text> [--vocab-size N] [--algorithm bpe|unigram|wordpiece]
-kolm pipeline distill  --namespace <n> [--student-base <m>] [--mode kd_softmax|kd_top_k|rejection_sampling] [--max-steps N]
-kolm pipeline compile  --namespace <n> [--strict] [--force] [--no-sign] [--no-install] [--install-target <id>]
-kolm pipeline full     --namespace <n> [--strict] [--force] [--no-sign] [--k-target 0.85] [--max-steps 200] [--vocab-size 4000]
+kolm pipeline distill --namespace <n> [--student-base <m>] [--mode kd_softmax|kd_top_k|rejection_sampling] [--max-steps N]
+kolm pipeline compile --namespace <n> [--strict] [--force] [--no-sign] [--no-install] [--install-target <id>]
+kolm pipeline full --namespace <n> [--strict] [--force] [--no-sign] [--k-target 0.85] [--max-steps 200] [--vocab-size 4000]
 ```
 
 ## Flags
@@ -39,8 +39,8 @@ kolm pipeline full     --namespace <n> [--strict] [--force] [--no-sign] [--k-tar
 ```bash
 # step by step
 kolm pipeline tokenize ./corpus.txt --vocab-size 8000 --algorithm bpe
-kolm pipeline distill  --namespace claims-router --mode kd_softmax --max-steps 500
-kolm pipeline compile  --namespace claims-router --strict
+kolm pipeline distill --namespace claims-router --mode kd_softmax --max-steps 500
+kolm pipeline compile --namespace claims-router --strict
 
 # one shot
 kolm pipeline full --namespace claims-router --k-target 0.92 --strict

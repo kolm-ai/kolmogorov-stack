@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm cloud · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm cloud CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/cloud">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm cloud","description":"Reference for the kolm cloud CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/cloud","mainEntityOfPage":"https://kolm.ai/docs/cli/cloud","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm cloud · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm cloud CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,24 +176,24 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="cloud">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>cloud</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>cloud</span>
 </nav>
 <p>--- title: kolm cloud · kolm.ai description: Real GPU fine-tunes and bring-your-own-cloud deploys. ---</p>
 <h1>kolm cloud</h1>
 <p>&gt; Real GPU fine-tunes and bring-your-own-cloud deploys. The kolm cloud signs the deploy script; weights and receipts live in your account.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm cloud train   &lt;name&gt; [--seeds &lt;f.jsonl&gt;] [--base &lt;model&gt;] [--confirm]
+kolm cloud train &lt;name&gt; [--seeds &lt;f.jsonl&gt;] [--base &lt;model&gt;] [--confirm]
 kolm cloud targets
-kolm cloud deploy  --target &lt;t&gt; --artifact &lt;id&gt; [--region r] [--name n] [--team &lt;id&gt;] [--out &lt;path&gt;]
+kolm cloud deploy --target &lt;t&gt; --artifact &lt;id&gt; [--region r] [--name n] [--team &lt;id&gt;] [--out &lt;path&gt;]
 kolm cloud list
-kolm cloud show    &lt;deployment_id&gt;
+kolm cloud show &lt;deployment_id&gt;
 kolm cloud destroy &lt;deployment_id&gt;
 </code></pre>
 <h2>Flags (train)</h2>
 <p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--seeds &lt;path&gt;</code> | none | jsonl seed pairs | | <code>--base &lt;model&gt;</code> | <code>Qwen/Qwen2.5-3B-Instruct</code> | base model id | | <code>--target-size &lt;s&gt;</code> | <code>7b</code> | student model size | | <code>--epochs &lt;n&gt;</code> | <code>3</code> | training epochs | | <code>--lora-r &lt;n&gt;</code> | <code>16</code> | LoRA rank | | <code>--lora-alpha &lt;n&gt;</code> | <code>32</code> | LoRA alpha | | <code>--backend &lt;b&gt;</code> | <code>together</code> | training backend | | <code>--budget &lt;usd&gt;</code> | none | refuse to start if the quote exceeds this | | <code>--confirm</code> | off | actually run; without it you just get a quote |</p>
 <h2>Train backends</h2>
-<p>| Backend | Notes | | ------- | ----- | | <code>together</code> (default) | managed LoRA fine-tune on Together AI. Requires <code>KOLM_TOGETHER_TOKEN</code>. Cost ~$2-5 for Qwen 2.5 7B on 2k pairs, ~30-45 min | | <code>runpod, lambda, vast</code> | shipping alongside Together. See <code>kolm compute list</code> |</p>
+<p>| Backend | Notes | | ------- | ----- | | <code>together</code> (default) | managed LoRA fine-tune on Together AI. Requires <code>KOLM_TOGETHER_TOKEN</code>. Cost ~$2-5 for Qwen 2.5 7B on 2k pairs, ~30-45 min | | <code>runpod, lambda, vast</code> | available through compute profiles listed by <code>kolm compute list</code> when credentials are configured |</p>
 <h2>Deploy targets</h2>
 <p><code>fly</code>, <code>aws-nitro</code>, <code>gcp-cvm</code>, <code>azure-cvm</code>, <code>docker</code>.</p>
 <h2>Examples</h2>
@@ -215,13 +219,13 @@ kolm cloud destroy dep_018b1f
 <li><a href="/docs/api">API reference</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

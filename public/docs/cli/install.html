@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm install · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm install CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/install">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm install","description":"Reference for the kolm install CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/install","mainEntityOfPage":"https://kolm.ai/docs/cli/install","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm install · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm install CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,17 +176,17 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="install">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>install</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>install</span>
 </nav>
 <h1>kolm install</h1>
 <p>Install a <code>.kolm</code> artifact into the local runtime registry so other verbs (<code>kolm run</code>, <code>kolm serve</code>, <code>kolm replay</code>) can resolve it by name.</p>
 <h2>Usage</h2>
 <pre><code>
 kolm install &lt;artifact.kolm&gt;
-kolm install &lt;artifact.kolm&gt; --alias &lt;name&gt;     # name for local lookup
-kolm install &lt;artifact.kolm&gt; --force            # overwrite existing alias
-kolm install --list                             # list installed artifacts
-kolm install --remove &lt;name&gt;                    # uninstall by alias
+kolm install &lt;artifact.kolm&gt; --alias &lt;name&gt; # name for local lookup
+kolm install &lt;artifact.kolm&gt; --force # overwrite existing alias
+kolm install --list # list installed artifacts
+kolm install --remove &lt;name&gt; # uninstall by alias
 </code></pre>
 <h2>Where things live</h2>
 <p>Artifacts are installed to <code>~/.kolm/registry/&lt;alias&gt;/</code> with the manifest, receipts, and weights laid out side by side. A small JSON index at <code>~/.kolm/registry/index.json</code> maps aliases to paths.</p>
@@ -194,13 +198,13 @@ kolm install --remove &lt;name&gt;                    # uninstall by alias
 <li><code>kolm install-device</code> for sideload to a connected edge device.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

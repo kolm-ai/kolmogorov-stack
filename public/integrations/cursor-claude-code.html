@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Cursor + Claude Code local proxy &middot; kolm.ai</title>
-<meta name="description" content="Run kolm as a local proxy so Cursor and Claude Code capture every request without changing their app code. Working pattern from the W403 dogfood that powers this project.">
+<title>Cursor + Claude Code local proxy · kolm.ai</title>
+<meta name="description" content="Run kolm as a local proxy so Cursor and Claude Code capture every request without changing their app code. Working pattern from the W403 dogfood that powers...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Cursor + Claude Code local proxy &middot; kolm.ai">
-<meta property="og:description" content="Local proxy. Cursor + Claude Code captured without any app-side changes.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Cursor + Claude Code local proxy · kolm.ai">
+<meta property="og:description" content="Run kolm as a local proxy so Cursor and Claude Code capture every request without changing their app code. Working pattern from the W403 dogfood that powers...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations/cursor-claude-code">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Cursor + Claude Code local proxy &middot; kolm.ai">
-<meta name="twitter:description" content="One settings.local.json entry. Cursor + Claude Code routed through kolm.">
+<meta name="twitter:title" content="Cursor + Claude Code local proxy · kolm.ai">
+<meta name="twitter:description" content="Run kolm as a local proxy so Cursor and Claude Code capture every request without changing their app code. Working pattern from the W403 dogfood that powers...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/integrations/cursor-claude-code">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -54,12 +54,13 @@ pre.code{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-ra
 footer{padding:36px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &ndash; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
+ <a class="logo" href="/">kolm.ai</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -215,31 +216,31 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <main id="main">
 
 <section class="hero"><div class="wrap">
-  <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / cursor + claude code</div>
-  <h1>Run kolm as the local proxy for Cursor and Claude Code.</h1>
-  <p class="lede">This is the W403 dogfood pattern: kolm boots on <code>127.0.0.1:7403</code>, Cursor and Claude Code read their base URL from a project-local config, and every request lands in <code>~/.kolm/captures/</code> with PHI redaction applied. No app-side changes &ndash; the editor never knows.</p>
+ <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / cursor + claude code</div>
+ <h1>Run kolm as the local proxy for Cursor and Claude Code.</h1>
+ <p class="lede">This is the W403 dogfood pattern: kolm boots on <code>127.0.0.1:7403</code>, Cursor and Claude Code read their base URL from a project-local config, and every request lands in <code>~/.kolm/captures/</code> with PHI redaction applied. No app-side changes &ndash; the editor never knows.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>How it works in one paragraph</h2>
-  <p>kolm ships a local-proxy mode that listens on <code>127.0.0.1:7403</code> and forwards to the real upstream (<code>api.anthropic.com</code>, <code>api.openai.com</code>, your hosted kolm endpoint, etc). Claude Code reads <code>ANTHROPIC_BASE_URL</code> from <code>.claude/settings.local.json</code>, Cursor reads its proxy from <code>~/.cursor/proxy</code>. Point both at <code>127.0.0.1:7403</code> and every request is mirrored to durable storage as it streams through. PHI redaction (emails, SSNs, MRNs, 21 PHI classes) runs in-line. This is the same pattern that powers the project&apos;s own dogfood &ndash; we shipped it because we use it.</p>
+ <h2>How it works in one paragraph</h2>
+ <p>kolm ships a local-proxy mode that listens on <code>127.0.0.1:7403</code> and forwards to the real upstream (<code>api.anthropic.com</code>, <code>api.openai.com</code>, your hosted kolm endpoint, etc). Claude Code reads <code>ANTHROPIC_BASE_URL</code> from <code>.claude/settings.local.json</code>, Cursor reads its proxy from <code>~/.cursor/proxy</code>. Point both at <code>127.0.0.1:7403</code> and every request is mirrored to durable storage as it streams through. PHI redaction (emails, SSNs, MRNs, 21 PHI classes) runs in-line. This is the same pattern that powers the project&apos;s own dogfood &ndash; we shipped it because we use it.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Claude Code &ndash; project-local settings</h2>
-  <p>Drop this file into your repo. Claude Code reads it at startup. The proxy is project-local so different repos can mirror to different namespaces.</p>
-  <div class="tabs"><span>.claude/settings.local.json</span></div>
+ <h2>Claude Code &ndash; project-local settings</h2>
+ <p>Drop this file into your repo. Claude Code reads it at startup. The proxy is project-local so different repos can mirror to different namespaces.</p>
+ <div class="tabs"><span>.claude/settings.local.json</span></div>
 <pre class="code">{
-  "env": {
-    "ANTHROPIC_BASE_URL": "http://127.0.0.1:7403"
-  }
+ "env": {
+ "ANTHROPIC_BASE_URL": "http://127.0.0.1:7403"
+ }
 }</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Start the proxy</h2>
-  <p>Run the helper script. It pins the upstream, listens on the loopback, and tails durable captures to <code>~/.kolm/captures/claude-code.jsonl</code>.</p>
-  <div class="tabs"><span>powershell &middot; macos &middot; linux</span></div>
+ <h2>Start the proxy</h2>
+ <p>Run the helper script. It pins the upstream, listens on the loopback, and tails durable captures to <code>~/.kolm/captures/claude-code.jsonl</code>.</p>
+ <div class="tabs"><span>powershell &middot; macos &middot; linux</span></div>
 <pre class="code"># start the proxy in the background
 node scripts/dogfood-proxy.ps1 start
 
@@ -254,28 +255,28 @@ node scripts/dogfood-proxy.ps1 stop</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Cursor &ndash; environment variable</h2>
-  <p>Cursor reads <code>OPENAI_BASE_URL</code> + <code>ANTHROPIC_BASE_URL</code> from the user environment. Export both before launching Cursor.</p>
-  <div class="tabs"><span>shell &middot; one-liner</span></div>
+ <h2>Cursor &ndash; environment variable</h2>
+ <p>Cursor reads <code>OPENAI_BASE_URL</code> + <code>ANTHROPIC_BASE_URL</code> from the user environment. Export both before launching Cursor.</p>
+ <div class="tabs"><span>shell &middot; one-liner</span></div>
 <pre class="code">export OPENAI_BASE_URL=http://127.0.0.1:7403
 export ANTHROPIC_BASE_URL=http://127.0.0.1:7403
-open -a Cursor   # macOS
-# or: cursor   # Linux / Windows from a shell with the env exported</pre>
+open -a Cursor # macOS
+# or: cursor # Linux / Windows from a shell with the env exported</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Where to go next</h2>
-  <div class="related">
-    <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. The wire protocol underneath.</span></a>
-    <a href="/captures"><b>Captures inbox &rarr;</b><span>See Cursor + Claude Code calls land as rows.</span></a>
-    <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
-  </div>
+ <h2>Where to go next</h2>
+ <div class="related">
+ <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. The wire protocol underneath.</span></a>
+ <a href="/captures"><b>Captures inbox &rarr;</b><span>See Cursor + Claude Code calls land as rows.</span></a>
+ <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
+ </div>
 </div></section>
 
 </main>
 
 <footer><div class="wrap">
-  <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
 </div></footer>
 </body>
 </html>

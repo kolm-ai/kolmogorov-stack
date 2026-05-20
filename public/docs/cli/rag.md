@@ -42,8 +42,8 @@ Inside a recipe:
 
 ```javascript
 function generate(input, lib) {
-  var hits = lib.rag ? lib.rag.query(input.q, 3).matches : [];
-  // ...
+ var hits = lib.rag ? lib.rag.query(input.q, 3).matches : [];
+ // ...
 }
 ```
 

@@ -126,17 +126,20 @@ test('W268 /integrations.html exists with all 4 adapter cards + Zapier + Make.co
   assert.match(html, /kolm[-_]llamaindex/, 'must mention kolm-llamaindex or kolm_llamaindex (Python adapter)');
 });
 
-test('W268 /integrations.html marks Zapier + Make.com as shipped (W476 closure)', () => {
+test('W268 /integrations.html marks Zapier + Make.com as generic HTTP integrations until native apps are verified', () => {
   const html = read(path.join(PUBLIC, 'integrations.html'));
-  // W476 closure: Zapier + Make.com modules ship alongside the MCP-over-HTTP
-  // shim. The honest-amber "coming Q3 2026" language was retired when both
-  // modules shipped — the cards now carry stat:"shipped" pills.
+  // Native Zapier and Make.com app publication is not verified. The public
+  // page must keep these cards on the generic HTTP/webhook path.
   const zapierCard = html.match(/<div\s+class="ig"\s+id="zapier">[\s\S]*?<\/div>\s*<\/div>/);
   assert.ok(zapierCard, 'integrations.html missing #zapier card body');
-  assert.match(zapierCard[0], /class="stat shipped">shipped</, 'Zapier card must show shipped pill');
+  assert.match(zapierCard[0], /class="stat">webhook</, 'Zapier card must show webhook pill');
+  assert.match(zapierCard[0], /no native Kolm app yet/i, 'Zapier card must not imply native app publication');
+  assert.doesNotMatch(zapierCard[0], /class="stat shipped">shipped</, 'Zapier card must not show shipped pill without marketplace proof');
   const makeCard = html.match(/<div\s+class="ig"\s+id="make">[\s\S]*?<\/div>\s*<\/div>/);
   assert.ok(makeCard, 'integrations.html missing #make card body');
-  assert.match(makeCard[0], /class="stat shipped">shipped</, 'Make.com card must show shipped pill');
+  assert.match(makeCard[0], /class="stat">HTTP module</, 'Make.com card must show HTTP-module pill');
+  assert.match(makeCard[0], /no native Kolm module yet/i, 'Make.com card must not imply native module publication');
+  assert.doesNotMatch(makeCard[0], /class="stat shipped">shipped</, 'Make.com card must not show shipped pill without marketplace proof');
 });
 
 test('W268 /integrations.html title includes kolm.ai', () => {

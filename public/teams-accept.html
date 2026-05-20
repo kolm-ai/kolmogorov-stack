@@ -5,47 +5,53 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Accept invite · kolm teams · kolm.ai</title>
-<meta name="description" content="Accept a kolm team invite and join the workspace.">
+<meta name="description" content="Accept invite · kolm teams: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta name="robots" content="noindex,follow">
-<link rel="canonical" href="https://kolm.ai/teams/accept">
+<link rel="canonical" href="https://kolm.ai/teams-accept">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
-  <meta property="og:title" content="Accept invite · kolm teams · kolm.ai">
-  <meta property="og:description" content="Accept a kolm team invite and join the workspace.">
-  <meta property="og:image" content="https://kolm.ai/og/teams-accept.svg">
-  <meta property="og:url" content="https://kolm.ai/teams-accept">
-  <meta property="og:type" content="website">
+ <meta property="og:title" content="Accept invite · kolm teams · kolm.ai">
+ <meta property="og:description" content="Accept invite · kolm teams: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
+ <meta property="og:image" content="https://kolm.ai/og-card.svg">
+ <meta property="og:url" content="https://kolm.ai/teams-accept">
+ <meta property="og:type" content="website">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/teams-accept",
-  "description": "Accept a kolm team invite and join the workspace.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/teams-accept",
+ "description": "Accept a kolm team invite and join the workspace.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Accept invite · kolm teams · kolm.ai">
+<meta name="twitter:description" content="Accept invite · kolm teams: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -196,90 +202,90 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-  </div>
+ </div>
 </header>
 
-<main class="page-main" style="max-width:640px">
-  <section class="page-head">
-    <div>
-      <div class="eyebrow">Team invite</div>
-      <h1 id="hd">Loading invite&hellip;</h1>
-      <p class="lede" id="sub">Verifying the token.</p>
-    </div>
-  </section>
+<main id="main" class="page-main" style="max-width:640px">
+ <section class="page-head">
+ <div>
+ <div class="eyebrow">Team invite</div>
+ <h1 id="hd">Loading invite&hellip;</h1>
+ <p class="lede" id="sub">Verifying the token.</p>
+ </div>
+ </section>
 
-  <section class="dashboard-panel" id="card">
-    <div id="invite-body" style="display:none">
-      <div style="font-family:var(--mono);font-size:13px;color:var(--ink-mute);margin-bottom:14px">
-        <div><strong style="color:var(--ink)">Team:</strong> <span id="t-name"></span></div>
-        <div><strong style="color:var(--ink)">Role:</strong> <span id="t-role"></span></div>
-        <div><strong style="color:var(--ink)">Invited:</strong> <span id="t-email"></span></div>
-        <div><strong style="color:var(--ink)">Expires:</strong> <span id="t-expires"></span></div>
-      </div>
-      <div id="auth-prompt" hidden style="background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:14px;font-family:var(--mono);font-size:13px;line-height:1.6">
-        Sign in to your kolm account to accept. The invite was sent to <code id="ap-email"></code> &mdash; use that email when signing in.
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn primary" id="accept-btn">Accept invite</button>
-        <a class="btn ghost" id="signin-link" href="/signin">Sign in first</a>
-        <a class="btn ghost" href="/">Decline</a>
-      </div>
-      <p id="acc-status" aria-live="polite" style="margin-top:14px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)"></p>
-    </div>
-    <div id="invite-error" hidden style="font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--ink-mute)"></div>
-  </section>
+ <section class="dashboard-panel" id="card">
+ <div id="invite-body" style="display:none">
+ <div style="font-family:var(--mono);font-size:13px;color:var(--ink-mute);margin-bottom:14px">
+ <div><strong style="color:var(--ink)">Team:</strong> <span id="t-name"></span></div>
+ <div><strong style="color:var(--ink)">Role:</strong> <span id="t-role"></span></div>
+ <div><strong style="color:var(--ink)">Invited:</strong> <span id="t-email"></span></div>
+ <div><strong style="color:var(--ink)">Expires:</strong> <span id="t-expires"></span></div>
+ </div>
+ <div id="auth-prompt" hidden style="background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:14px;font-family:var(--mono);font-size:13px;line-height:1.6">
+ Sign in to your kolm account to accept. The invite was sent to <code id="ap-email"></code> &mdash; use that email when signing in.
+ </div>
+ <div style="display:flex;gap:10px;flex-wrap:wrap">
+ <button class="btn primary" id="accept-btn">Accept invite</button>
+ <a class="btn ghost" id="signin-link" href="/signin">Sign in first</a>
+ <a class="btn ghost" href="/">Decline</a>
+ </div>
+ <p id="acc-status" aria-live="polite" style="margin-top:14px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)"></p>
+ </div>
+ <div id="invite-error" hidden style="font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--ink-mute)"></div>
+ </section>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -287,66 +293,66 @@
 <script src="/app.js"></script>
 <script>
 (function () {
-  const KS = window.KS;
-  const $ = (id) => document.getElementById(id);
-  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c]);
+ const KS = window.KS;
+ const $ = (id) => document.getElementById(id);
+ const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c]);
 
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('token');
-  if (!token) {
-    $('hd').textContent = 'Missing token';
-    $('sub').textContent = 'This page needs a ?token=… parameter from your invite email.';
-    $('card').hidden = true;
-    return;
-  }
+ const params = new URLSearchParams(window.location.search);
+ const token = params.get('token');
+ if (!token) {
+ $('hd').textContent = 'Missing token';
+ $('sub').textContent = 'This page needs a ?token=… parameter from your invite email.';
+ $('card').hidden = true;
+ return;
+ }
 
-  async function show(invite, team) {
-    $('hd').textContent = 'Join ' + (team?.name || 'this team');
-    $('sub').textContent = team?.plan ? ('Workspace on the ' + team.plan + ' plan.') : 'Workspace invite.';
-    $('t-name').textContent = team?.name || '(unknown)';
-    $('t-role').textContent = invite.role;
-    $('t-email').textContent = invite.email;
-    $('t-expires').textContent = new Date(invite.expires_at).toLocaleString();
-    $('ap-email').textContent = invite.email;
-    $('invite-body').style.display = '';
-    let key = KS.apiKey();
-    if (!key) { try { key = await KS.hydrateSession(); } catch (_) {} }
-    if (!key) {
-      $('auth-prompt').hidden = false;
-      $('accept-btn').disabled = true;
-      $('signin-link').href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search);
-    } else {
-      $('auth-prompt').hidden = true;
-      $('signin-link').hidden = true;
-    }
-  }
+ async function show(invite, team) {
+ $('hd').textContent = 'Join ' + (team?.name || 'this team');
+ $('sub').textContent = team?.plan ? ('Workspace on the ' + team.plan + ' plan.') : 'Workspace invite.';
+ $('t-name').textContent = team?.name || '(unknown)';
+ $('t-role').textContent = invite.role;
+ $('t-email').textContent = invite.email;
+ $('t-expires').textContent = new Date(invite.expires_at).toLocaleString();
+ $('ap-email').textContent = invite.email;
+ $('invite-body').style.display = '';
+ let key = KS.apiKey();
+ if (!key) { try { key = await KS.hydrateSession(); } catch (_) {} }
+ if (!key) {
+ $('auth-prompt').hidden = false;
+ $('accept-btn').disabled = true;
+ $('signin-link').href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search);
+ } else {
+ $('auth-prompt').hidden = true;
+ $('signin-link').hidden = true;
+ }
+ }
 
-  async function load() {
-    try {
-      const r = await fetch('/v1/teams/invites/' + encodeURIComponent(token));
-      const body = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(body.error || 'invite not found');
-      await show(body.invite, body.team);
-    } catch (e) {
-      $('hd').textContent = 'Invite unavailable';
-      $('sub').textContent = e.message || 'Token invalid or expired.';
-      $('invite-error').hidden = false;
-      $('invite-error').innerHTML = '<p>' + esc(e.message || 'Token invalid or expired.') + '</p><p>If this is unexpected, ask the team admin to send a fresh invite.</p>';
-    }
-  }
+ async function load() {
+ try {
+ const r = await fetch('/v1/teams/invites/' + encodeURIComponent(token));
+ const body = await r.json().catch(() => ({}));
+ if (!r.ok) throw new Error(body.error || 'invite not found');
+ await show(body.invite, body.team);
+ } catch (e) {
+ $('hd').textContent = 'Invite unavailable';
+ $('sub').textContent = e.message || 'Token invalid or expired.';
+ $('invite-error').hidden = false;
+ $('invite-error').innerHTML = '<p>' + esc(e.message || 'Token invalid or expired.') + '</p><p>If this is unexpected, ask the team admin to send a fresh invite.</p>';
+ }
+ }
 
-  $('accept-btn').addEventListener('click', async () => {
-    $('acc-status').textContent = 'accepting...';
-    try {
-      const r = await KS.api('/v1/teams/invites/' + encodeURIComponent(token) + '/accept', { method: 'POST', body: JSON.stringify({}) });
-      $('acc-status').innerHTML = 'joined <strong>' + esc(r.team?.name || '') + '</strong> as <strong>' + esc(r.role || '') + '</strong>.';
-      setTimeout(() => { window.location.href = '/teams'; }, 900);
-    } catch (e) {
-      $('acc-status').textContent = 'failed: ' + (e.message || '');
-    }
-  });
+ $('accept-btn').addEventListener('click', async () => {
+ $('acc-status').textContent = 'accepting...';
+ try {
+ const r = await KS.api('/v1/teams/invites/' + encodeURIComponent(token) + '/accept', { method: 'POST', body: JSON.stringify({}) });
+ $('acc-status').innerHTML = 'joined <strong>' + esc(r.team?.name || '') + '</strong> as <strong>' + esc(r.role || '') + '</strong>.';
+ setTimeout(() => { window.location.href = '/teams'; }, 900);
+ } catch (e) {
+ $('acc-status').textContent = 'failed: ' + (e.message || '');
+ }
+ });
 
-  load();
+ load();
 })();
 </script>
 <script src="/nav.js" defer></script>

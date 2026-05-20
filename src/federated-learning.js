@@ -123,7 +123,7 @@ export function newRound({ round_id, model_hash, base_artifact_version, target_s
 // Compute the round hash that goes into every participant's receipt so the
 // aggregator + verifier can confirm everyone trained against the same base.
 export function roundHash(round) {
-  return _shortHash(_canonicalize(round));
+  return _shortHash(_canonicalize(_roundHashPayload(round)));
 }
 
 // PARTICIPANT SIDE -------------------------------------------------------
@@ -396,6 +396,11 @@ export function clipNorm(array, max_norm) {
 // INTERNALS --------------------------------------------------------------
 
 function _shortHash(s) { return crypto.createHash('sha256').update(s).digest('hex').slice(0, 16); }
+function _roundHashPayload(round) {
+  if (!round || typeof round !== 'object') return round;
+  const { issued_at, ...semanticRound } = round;
+  return semanticRound;
+}
 function _canonicalize(v) {
   if (v === null || typeof v !== 'object') return JSON.stringify(v);
   if (Array.isArray(v)) return '[' + v.map(_canonicalize).join(',') + ']';

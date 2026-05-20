@@ -3,7 +3,7 @@
 // Exposes synthesis, run, search, label-corpus, and specialist tooling as MCP tools
 // so agents can replace repeat LLM-as-judge calls with deterministic JS.
 //
-// Install: npm i -g @kolmogorov/recipe-mcp
+// Install: run from a repo checkout until the MCP package is published.
 // Add to .mcp.json:
 //   { "mcpServers": { "recipe": { "command": "recipe-mcp" } } }
 //

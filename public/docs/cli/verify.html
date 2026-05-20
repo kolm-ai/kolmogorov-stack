@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm verify · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm verify CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/verify">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm verify","description":"Reference for the kolm verify CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/verify","mainEntityOfPage":"https://kolm.ai/docs/cli/verify","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm verify · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm verify CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,21 +176,21 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="verify">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>verify</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>verify</span>
 </nav>
 <h1>kolm verify</h1>
-<p>Run the 7-check audit on a <code>.kolm</code> artifact: manifest signature, content identifier (CID), HMAC chain, receipt body signatures, provenance credential, K-score gate, and eval coverage. Use this before promoting an artifact to production.</p>
+<p>Run the 7-check audit on a <code>.kolm</code> artifact: manifest signature, content identifier (CID), Ed25519 receipt chain, receipt body signatures, provenance credential, K-score gate, and eval coverage. Use this before promoting an artifact to production.</p>
 <h2>Usage</h2>
 <pre><code>
 kolm verify &lt;artifact.kolm&gt;
-kolm verify &lt;artifact.kolm&gt; --strict        # also re-runs the frozen eval set
-kolm verify &lt;artifact.kolm&gt; --json          # machine-readable result
+kolm verify &lt;artifact.kolm&gt; --strict # also re-runs the frozen eval set
+kolm verify &lt;artifact.kolm&gt; --json # machine-readable result
 </code></pre>
 <h2>What gets checked</h2>
 <ol>
 <li>**Manifest signature**: the top-level Ed25519 signature over the manifest.</li>
 <li>**Content identifier**: recompute the artifact CID, compare to the manifest.</li>
-<li>**HMAC chain**: every receipt is bound to its predecessor.</li>
+<li>**Ed25519 receipt chain**: every receipt is bound to its predecessor.</li>
 <li>**Receipt body signatures**: each receipt is individually signed.</li>
 <li>**Provenance credential**: the actor key fingerprint matches the manifest.</li>
 <li>**K-score gate**: frozen-eval result meets or exceeds the declared gate.</li>
@@ -205,13 +209,13 @@ kolm verify &lt;artifact.kolm&gt; --json          # machine-readable result
 <li><code>kolm inspect</code> for a passive manifest read without re-checking signatures.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

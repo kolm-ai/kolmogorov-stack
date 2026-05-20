@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm loop · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm loop CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/loop">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm loop","description":"Reference for the kolm loop CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/loop","mainEntityOfPage":"https://kolm.ai/docs/cli/loop","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm loop · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm loop CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,17 +176,17 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="loop">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>loop</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>loop</span>
 </nav>
 <p>--- title: kolm loop · kolm.ai description: Run the value-loop smoke against an in-process router. Five rungs, green or red. ---</p>
 <h1>kolm loop</h1>
 <p>&gt; Run the value-loop smoke against an in-process router. Five rungs. Green or red.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm loop                  # human-readable [PASS]/[FAIL] rung table
-kolm loop --json           # structured report keyed by rung name
-kolm loop --remote         # walk the same rungs against your configured cloud
-kolm loop --remote --json  # remote run, JSON output
+kolm loop # human-readable [PASS]/[FAIL] rung table
+kolm loop --json # structured report keyed by rung name
+kolm loop --remote # walk the same rungs against your configured cloud
+kolm loop --remote --json # remote run, JSON output
 </code></pre>
 <h2>Flags</h2>
 <p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--json</code> | off | structured report keyed by rung name | | <code>--remote</code> | off | walk the same rungs against your configured cloud base using your saved api_key |</p>
@@ -217,13 +221,13 @@ kolm loop --remote --json  # remote run, JSON output
 <li><a href="/docs/troubleshooting">Troubleshooting</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

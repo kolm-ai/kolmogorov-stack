@@ -30,7 +30,7 @@ kolm what [--json]
 
 ```bash
 kolm what
-# artifacts: 5  captures: 2348 (4 namespaces, 1 distill-ready)
+# artifacts: 5 captures: 2348 (4 namespaces, 1 distill-ready)
 # jobs: 1 running, 3 done
 # next: kolm distill --namespace claims-router
 

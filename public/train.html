@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Train a .kolm in your account · kolm.ai</title>
+<title>Train a .kolm in your · kolm.ai</title>
 <meta name="description" content="The in-account console for compiling a .kolm. Pick a base model, upload examples, set K-score gate, watch the run, receive the signed artifact. No CLI required.">
-<meta property="og:title" content="Train a .kolm in your account | kolm">
-<meta property="og:description" content="In-account console to compile a .kolm. Pick base, upload data, set gate, watch the run, receive the signed artifact.">
+<meta property="og:title" content="Train a .kolm in your · kolm.ai">
+<meta property="og:description" content="The in-account console for compiling a .kolm. Pick a base model, upload examples, set K-score gate, watch the run, receive the signed artifact. No CLI required.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/train">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
@@ -15,737 +15,742 @@
 <meta name="robots" content="noindex">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#5b5853;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
-  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
-  header.site .wrap{display:flex;justify-content:space-between;align-items:center}
-  header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  header.site nav a{color:inherit;text-decoration:none}
-  header.site nav a.cta{color:var(--accent);font-weight:500}
-  header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  .hero{padding:48px 0 24px;border-bottom:1px solid var(--line)}
-  .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
-  .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  h1{font-size:30px;line-height:1.15;font-weight:500;letter-spacing:-0.02em;margin:0 0 10px}
-  .lede{font-size:15.5px;line-height:1.5;color:var(--ink-mute);margin:0 0 4px;max-width:640px}
-  .gridmain{display:grid;grid-template-columns:1fr 360px;gap:32px;padding:32px 0 80px}
-  @media(max-width:920px){.gridmain{grid-template-columns:1fr}}
-  .panel{border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);padding:20px 22px;margin:0 0 18px}
-  .panel h3{font-size:13px;font-weight:500;color:var(--ink);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 12px;display:flex;align-items:center;gap:10px}
-  .panel h3 .step{display:inline-block;font-size:10.5px;color:var(--ink-faint);border:1px solid var(--line);padding:2px 6px;border-radius:3px}
-  .panel p{font-size:13.5px;color:var(--ink-mute);margin:0 0 10px;line-height:1.55}
-  label.field{display:block;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 6px}
-  select,input[type=text],input[type=number],textarea{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;color:var(--ink);font:13.5px/1.5 -apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
-  textarea{font-family:var(--mono);font-size:12.5px;min-height:84px;resize:vertical}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  @media(max-width:560px){.row2{grid-template-columns:1fr}}
-  .drop{border:1px dashed var(--line);border-radius:8px;padding:22px;text-align:center;color:var(--ink-mute);font-size:13px;cursor:pointer;background:var(--bg);transition:border-color 120ms,background 120ms}
-  .drop:hover,.drop.over{border-color:var(--accent);background:rgba(16,185,129,0.04)}
-  .drop input{display:none}
-  .drop .pri{color:var(--ink);font-size:14px;margin:0 0 4px}
-  .picks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 0}
-  @media(max-width:680px){.picks{grid-template-columns:1fr}}
-  .pick{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer;text-align:left;color:inherit;font:inherit}
-  .pick.sel{border-color:var(--accent);background:rgba(16,185,129,0.04)}
-  .pick .n{font-size:13.5px;color:var(--ink);font-weight:500;margin:0 0 3px}
-  .pick .d{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:0}
-  .pick .p{font-family:var(--mono);font-size:11px;color:var(--accent);margin:6px 0 0}
-  button.cta-btn{background:var(--accent);color:#0b0d10;border:none;border-radius:6px;padding:11px 18px;font:500 14px/1 -apple-system,system-ui,sans-serif;cursor:pointer;width:100%;margin:18px 0 0;transition:opacity 120ms}
-  button.cta-btn:hover{opacity:0.88}
-  button.cta-btn:disabled{background:var(--line);color:var(--ink-faint);cursor:not-allowed}
-  .quote{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)}
-  .quote dt{color:var(--ink-faint)}
-  .quote dd{margin:0;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
-  .log{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-family:var(--mono);font-size:12px;color:var(--ink-mute);max-height:240px;overflow-y:auto;line-height:1.6}
-  .log .ts{color:var(--ink-faint)}
-  .log .ok{color:var(--accent)}
-  .gate{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
-  .gate:last-child{border-bottom:none}
-  .gate .l{color:var(--ink-mute)}
-  .gate .v{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink)}
-  .gate .v.pass{color:var(--accent)}
-  .badge-noindex{font-family:var(--mono);font-size:11px;color:var(--ink-faint);background:var(--bg-elev);border:1px solid var(--line);padding:3px 8px;border-radius:3px;letter-spacing:0.04em;text-transform:uppercase}
-  .info-strip{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:8px 0 0}
-  .info-strip a{color:inherit;border-bottom:1px dashed var(--line);text-decoration:none}
-  footer.site{padding:36px 0 60px;border-top:1px solid var(--line);color:var(--ink-faint);font-family:var(--mono);font-size:12px}
-  footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
-  footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#5b5853;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site nav a.cta{color:var(--accent);font-weight:500}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .hero{padding:48px 0 24px;border-bottom:1px solid var(--line)}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:30px;line-height:1.15;font-weight:500;letter-spacing:-0.02em;margin:0 0 10px}
+ .lede{font-size:15.5px;line-height:1.5;color:var(--ink-mute);margin:0 0 4px;max-width:640px}
+ .gridmain{display:grid;grid-template-columns:1fr 360px;gap:32px;padding:32px 0 80px}
+ @media(max-width:920px){.gridmain{grid-template-columns:1fr}}
+ .panel{border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);padding:20px 22px;margin:0 0 18px}
+ .panel h3{font-size:13px;font-weight:500;color:var(--ink);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+ .panel h3 .step{display:inline-block;font-size:10.5px;color:var(--ink-faint);border:1px solid var(--line);padding:2px 6px;border-radius:3px}
+ .panel p{font-size:13.5px;color:var(--ink-mute);margin:0 0 10px;line-height:1.55}
+ label.field{display:block;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 6px}
+ select,input[type=text],input[type=number],textarea{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;color:var(--ink);font:13.5px/1.5 -apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+ textarea{font-family:var(--mono);font-size:12.5px;min-height:84px;resize:vertical}
+ .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+ @media(max-width:560px){.row2{grid-template-columns:1fr}}
+ .drop{border:1px dashed var(--line);border-radius:8px;padding:22px;text-align:center;color:var(--ink-mute);font-size:13px;cursor:pointer;background:var(--bg);transition:border-color 120ms,background 120ms}
+ .drop:hover,.drop.over{border-color:var(--accent);background:rgba(16,185,129,0.04)}
+ .drop input{display:none}
+ .drop .pri{color:var(--ink);font-size:14px;margin:0 0 4px}
+ .picks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 0}
+ @media(max-width:680px){.picks{grid-template-columns:1fr}}
+ .pick{padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer;text-align:left;color:inherit;font:inherit}
+ .pick.sel{border-color:var(--accent);background:rgba(16,185,129,0.04)}
+ .pick .n{font-size:13.5px;color:var(--ink);font-weight:500;margin:0 0 3px}
+ .pick .d{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:0}
+ .pick .p{font-family:var(--mono);font-size:11px;color:var(--accent);margin:6px 0 0}
+ button.cta-btn{background:var(--accent);color:#0b0d10;border:none;border-radius:6px;padding:11px 18px;font:500 14px/1 -apple-system,system-ui,sans-serif;cursor:pointer;width:100%;margin:18px 0 0;transition:opacity 120ms}
+ button.cta-btn:hover{opacity:0.88}
+ button.cta-btn:disabled{background:var(--line);color:var(--ink-faint);cursor:not-allowed}
+ .quote{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)}
+ .quote dt{color:var(--ink-faint)}
+ .quote dd{margin:0;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+ .log{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-family:var(--mono);font-size:12px;color:var(--ink-mute);max-height:240px;overflow-y:auto;line-height:1.6}
+ .log .ts{color:var(--ink-faint)}
+ .log .ok{color:var(--accent)}
+ .gate{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+ .gate:last-child{border-bottom:none}
+ .gate .l{color:var(--ink-mute)}
+ .gate .v{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink)}
+ .gate .v.pass{color:var(--accent)}
+ .badge-noindex{font-family:var(--mono);font-size:11px;color:var(--ink-faint);background:var(--bg-elev);border:1px solid var(--line);padding:3px 8px;border-radius:3px;letter-spacing:0.04em;text-transform:uppercase}
+ .info-strip{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:8px 0 0}
+ .info-strip a{color:inherit;border-bottom:1px dashed var(--line);text-decoration:none}
+ footer.site{padding:36px 0 60px;border-top:1px solid var(--line);color:var(--ink-faint);font-family:var(--mono);font-size:12px}
+ footer.site .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+ footer.site a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
-  <link rel="canonical" href="https://kolm.ai/train">
-  <meta property="og:image" content="https://kolm.ai/og/train.svg">
+ <link rel="canonical" href="https://kolm.ai/train">
+ <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/train",
-  "description": "The in-account console for compiling a .kolm. Pick a base model, upload examples, set K-score gate, watch the run, receive the signed artifact. No CLI required.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/train",
+ "description": "The in-account console for compiling a .kolm. Pick a base model, upload examples, set K-score gate, watch the run, receive the signed artifact. No CLI required.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Train a .kolm in your · kolm.ai">
+<meta name="twitter:description" content="The in-account console for compiling a .kolm. Pick a base model, upload examples, set K-score gate, watch the run, receive the signed artifact. No CLI required.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <header class="site">
-  <div class="wrap">
-    <a href="/" class="logo">kolm</a>
-    <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/enterprise">Enterprise</a><a href="/pricing">Pricing</a><a href="/dashboard" class="cta">Dashboard &rarr;</a></nav>
-  </div>
+ <div class="wrap">
+ <a href="/" class="logo">kolm</a>
+ <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/enterprise">Enterprise</a><a href="/pricing">Pricing</a><a href="/dashboard" class="cta">Dashboard &rarr;</a></nav>
+ </div>
 </header>
 
 <section class="hero"><div class="wrap">
-  <p class="crumbs"><a href="/dashboard">dashboard</a> &nbsp;/&nbsp; train</p>
-  <h1>Compile a .kolm in your account.</h1>
-  <p class="lede">Pick a base. Drop in your examples. Set the K-score gate (per-artifact, not per-model). Hit compile. The artifact and receipt land in your account when it passes its own gate.</p>
-  <div class="info-strip"><span class="badge-noindex">private</span><span>signed in as <a href="/account">your-account</a></span><span>&middot;</span><span>compile credits: <a href="/pricing">view balance</a></span></div>
+ <p class="crumbs"><a href="/dashboard">dashboard</a> &nbsp;/&nbsp; train</p>
+ <h1>Compile a .kolm in your account.</h1>
+ <p class="lede">Pick a base. Drop in your examples. Set the K-score gate (per-artifact, not per-model). Hit compile. The artifact and receipt land in your account when it passes its own gate.</p>
+ <div class="info-strip"><span class="badge-noindex">private</span><span>signed in as <a href="/account">your-account</a></span><span>&middot;</span><span>compile credits: <a href="/pricing">view balance</a></span></div>
 </div></section>
 
 <div class="wrap"><div class="gridmain">
-  <div>
+ <div>
 
-    <div class="panel" style="border-color:rgba(126,240,210,0.28)">
-      <h3><span class="step">Quick</span>One sentence. We pick the rest.</h3>
-      <p>Describe what you want your AI to do. We pick a base, distill from Claude / GPT / Gemini, and set the K-score gate. You can still customize below.</p>
-      <textarea id="quick-desc" placeholder="Example: classify support emails as billing / technical / refund / other, return JSON" style="min-height:60px"></textarea>
-      <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="cta-btn" id="quick-compile" type="button" style="width:auto;padding:11px 22px">Compile with defaults &rarr;</button>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint)">defaults &middot; Llama 3.1 8B base &middot; Claude Sonnet teacher distill &middot; K-score 0.90 &middot; frontier prompt cache on</span>
-      </div>
-    </div>
+ <div class="panel" style="border-color:rgba(126,240,210,0.28)">
+ <h3><span class="step">Quick</span>One sentence. We pick the rest.</h3>
+ <p>Describe what you want your AI to do. We pick a base, distill from Claude / GPT / Gemini, and set the K-score gate. You can still customize below.</p>
+ <textarea id="quick-desc" placeholder="Example: classify support emails as billing / technical / refund / other, return JSON" style="min-height:60px"></textarea>
+ <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+ <button class="cta-btn" id="quick-compile" type="button" style="width:auto;padding:11px 22px">Compile with defaults &rarr;</button>
+ <span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint)">defaults &middot; Llama 3.1 8B base &middot; Claude Sonnet teacher distill &middot; K-score 0.90 &middot; frontier prompt cache on</span>
+ </div>
+ </div>
 
-    <div class="panel">
-      <h3><span class="step">Step 1</span>Pick a base model</h3>
-      <p>The pretrained weights you start from. Recipe is portable; you can swap the base later.</p>
-      <div class="picks" id="picks-base">
-        <button class="pick sel" data-name="meta-llama/Llama-3.1-8B-Instruct" data-params="8B" type="button"><div class="n">Llama 3.1 8B Instruct</div><div class="d">Meta &middot; chat-tuned</div><div class="p">~$8 compile</div></button>
-        <button class="pick" data-name="Qwen/Qwen2.5-7B-Instruct" data-params="7B" type="button"><div class="n">Qwen 2.5 7B Instruct</div><div class="d">Alibaba &middot; multilingual</div><div class="p">~$7 compile</div></button>
-        <button class="pick" data-name="google/gemma-2-9b-it" data-params="9B" type="button"><div class="n">Gemma 2 9B IT</div><div class="d">Google &middot; small + strong</div><div class="p">~$9 compile</div></button>
-        <button class="pick" data-name="microsoft/Phi-3.5-mini-instruct" data-params="3.8B" type="button"><div class="n">Phi 3.5 Mini</div><div class="d">Microsoft &middot; edge / on-device</div><div class="p">~$4 compile</div></button>
-        <button class="pick" data-name="meta-llama/Llama-3.1-70B-Instruct" data-params="70B" type="button"><div class="n">Llama 3.1 70B Instruct</div><div class="d">Meta &middot; reasoning class</div><div class="p">~$48 compile</div></button>
-        <button class="pick" data-name="mistralai/Mixtral-8x22B-Instruct-v0.1" data-params="141B" type="button"><div class="n">Mixtral 8x22B</div><div class="d">Mistral &middot; sparse MoE</div><div class="p">~$72 compile</div></button>
-      </div>
-    </div>
+ <div class="panel">
+ <h3><span class="step">Step 1</span>Pick a base model</h3>
+ <p>The pretrained weights you start from. Recipe is portable; you can swap the base later.</p>
+ <div class="picks" id="picks-base">
+ <button class="pick sel" data-name="meta-llama/Llama-3.1-8B-Instruct" data-params="8B" type="button"><div class="n">Llama 3.1 8B Instruct</div><div class="d">Meta &middot; chat-tuned</div><div class="p">~$8 compile</div></button>
+ <button class="pick" data-name="Qwen/Qwen2.5-7B-Instruct" data-params="7B" type="button"><div class="n">Qwen 2.5 7B Instruct</div><div class="d">Alibaba &middot; multilingual</div><div class="p">~$7 compile</div></button>
+ <button class="pick" data-name="google/gemma-2-9b-it" data-params="9B" type="button"><div class="n">Gemma 2 9B IT</div><div class="d">Google &middot; small + strong</div><div class="p">~$9 compile</div></button>
+ <button class="pick" data-name="microsoft/Phi-3.5-mini-instruct" data-params="3.8B" type="button"><div class="n">Phi 3.5 Mini</div><div class="d">Microsoft &middot; edge / on-device</div><div class="p">~$4 compile</div></button>
+ <button class="pick" data-name="meta-llama/Llama-3.1-70B-Instruct" data-params="70B" type="button"><div class="n">Llama 3.1 70B Instruct</div><div class="d">Meta &middot; reasoning class</div><div class="p">~$48 compile</div></button>
+ <button class="pick" data-name="mistralai/Mixtral-8x22B-Instruct-v0.1" data-params="141B" type="button"><div class="n">Mixtral 8x22B</div><div class="d">Mistral &middot; sparse MoE</div><div class="p">~$72 compile</div></button>
+ </div>
+ </div>
 
-    <div class="panel">
-      <h3><span class="step">Step 2</span>Upload your examples</h3>
-      <p>JSONL, CSV, or a folder of text files. The compiler will dedupe, split, and report this artifact's K-score on its own held-out fold.</p>
-      <label class="drop" id="drop">
-        <div class="pri">Drop files here, or click to choose</div>
-        <div>Accepts <code>.jsonl</code> &middot; <code>.csv</code> &middot; <code>.zip</code> up to 2 GB</div>
-        <input type="file" id="file" multiple accept=".jsonl,.csv,.zip,.txt">
-      </label>
-      <label class="field" for="recipe">Recipe (advanced &mdash; optional)</label>
-      <textarea id="recipe" placeholder="task: classification&#10;splits: { train: 0.85, eval: 0.15 }&#10;objective: sft&#10;adapter: lora-r-32"></textarea>
-    </div>
+ <div class="panel">
+ <h3><span class="step">Step 2</span>Upload your examples</h3>
+ <p>JSONL, CSV, or a folder of text files. The compiler will dedupe, split, and report this artifact's K-score on its own held-out fold.</p>
+ <label class="drop" id="drop">
+ <div class="pri">Drop files here, or click to choose</div>
+ <div>Accepts <code>.jsonl</code> &middot; <code>.csv</code> &middot; <code>.zip</code> up to 2 GB</div>
+ <input type="file" id="file" multiple accept=".jsonl,.csv,.zip,.txt">
+ </label>
+ <label class="field" for="recipe">Recipe (advanced &mdash; optional)</label>
+ <textarea id="recipe" placeholder="task: classification&#10;splits: { train: 0.85, eval: 0.15 }&#10;objective: sft&#10;adapter: lora-r-32"></textarea>
+ </div>
 
-    <div class="panel">
-      <h3><span class="step">Step 3</span>Set the gate</h3>
-      <p>The artifact will not sign if these thresholds fail. They go in the manifest and travel with every receipt.</p>
-      <div class="row2">
-        <div><label class="field" for="kgate">K-score minimum</label><input type="number" id="kgate" step="0.01" min="0" max="1" value="0.90"></div>
-        <div><label class="field" for="taskgate">Task metric minimum</label><input type="number" id="taskgate" step="0.01" min="0" max="1" value="0.85"></div>
-      </div>
-      <div class="row2" style="margin-top:14px">
-        <div><label class="field" for="pack">Compliance pack</label>
-          <select id="pack">
-            <option value="">none</option>
-            <option value="hipaa-safe-harbor">HIPAA Safe Harbor</option>
-            <option value="finance-sr11-7">Finance SR 11-7</option>
-            <option value="legal-attorney-client">Legal attorney-client</option>
-            <option value="nist-ai-rmf">NIST AI RMF</option>
-          </select>
-        </div>
-        <div><label class="field" for="backend">Backend</label>
-          <select id="backend">
-            <option value="">auto-pick</option>
-            <option value="local-cuda">local-cuda</option>
-            <option value="modal">modal</option>
-            <option value="runpod">runpod</option>
-            <option value="lambda">lambda</option>
-            <option value="vast">vast</option>
-            <option value="vllm">vllm</option>
-            <option value="sglang">sglang</option>
-            <option value="trt-llm">trt-llm</option>
-          </select>
-        </div>
-      </div>
-    </div>
+ <div class="panel">
+ <h3><span class="step">Step 3</span>Set the gate</h3>
+ <p>The artifact will not sign if these thresholds fail. They go in the manifest and travel with every receipt.</p>
+ <div class="row2">
+ <div><label class="field" for="kgate">K-score minimum</label><input type="number" id="kgate" step="0.01" min="0" max="1" value="0.90"></div>
+ <div><label class="field" for="taskgate">Task metric minimum</label><input type="number" id="taskgate" step="0.01" min="0" max="1" value="0.85"></div>
+ </div>
+ <div class="row2" style="margin-top:14px">
+ <div><label class="field" for="pack">Compliance pack</label>
+ <select id="pack">
+ <option value="">none</option>
+ <option value="hipaa-safe-harbor">HIPAA Safe Harbor</option>
+ <option value="finance-sr11-7">Finance SR 11-7</option>
+ <option value="legal-attorney-client">Legal attorney-client</option>
+ <option value="nist-ai-rmf">NIST AI RMF</option>
+ </select>
+ </div>
+ <div><label class="field" for="backend">Backend</label>
+ <select id="backend">
+ <option value="">auto-pick</option>
+ <option value="local-cuda">local-cuda</option>
+ <option value="modal">modal</option>
+ <option value="runpod">runpod</option>
+ <option value="lambda">lambda</option>
+ <option value="vast">vast</option>
+ <option value="vllm">vllm</option>
+ <option value="sglang">sglang</option>
+ <option value="trt-llm">trt-llm</option>
+ </select>
+ </div>
+ </div>
+ </div>
 
-    <div class="panel">
-      <h3><span class="step">Step 4</span>Watch the run</h3>
-      <p>Live training log streams here once you start. Preview run is a simulated walkthrough; Run for real hits <code>POST /v1/compile</code> against this account and streams the receipt chain back.</p>
-      <div class="log" id="log"><div><span class="ts">[--:--:--]</span> waiting to start&hellip;</div></div>
-      <div id="result" hidden style="margin-top:14px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg)">
-          <div style="color:var(--ink-faint)">Job</div><div id="r-job" style="color:var(--ink);text-align:right;word-break:break-all"></div>
-          <div style="color:var(--ink-faint)">Status</div><div id="r-status" style="color:var(--ink);text-align:right"></div>
-          <div style="color:var(--ink-faint)">K-score</div><div id="r-k" style="color:var(--ink);text-align:right;font-variant-numeric:tabular-nums"></div>
-          <div style="color:var(--ink-faint)">CID</div><div id="r-cid" style="color:var(--ink);text-align:right;word-break:break-all"></div>
-          <div style="color:var(--ink-faint)">Artifact hash</div><div id="r-hash" style="color:var(--ink);text-align:right;word-break:break-all"></div>
-          <div style="color:var(--ink-faint)">Bytes</div><div id="r-bytes" style="color:var(--ink);text-align:right;font-variant-numeric:tabular-nums"></div>
-        </div>
-        <div id="r-chain" style="margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);font-family:var(--mono);font-size:12px;color:var(--ink-mute);line-height:1.7"></div>
-        <div id="r-actions" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px"></div>
-      </div>
-    </div>
+ <div class="panel">
+ <h3><span class="step">Step 4</span>Watch the run</h3>
+ <p>Live training log streams here once you start. Preview run is a simulated walkthrough; Run for real hits <code>POST /v1/compile</code> against this account and streams the receipt chain back.</p>
+ <div class="log" id="log"><div><span class="ts">[--:--:--]</span> waiting to start&hellip;</div></div>
+ <div id="result" hidden style="margin-top:14px">
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg)">
+ <div style="color:var(--ink-faint)">Job</div><div id="r-job" style="color:var(--ink);text-align:right;word-break:break-all"></div>
+ <div style="color:var(--ink-faint)">Status</div><div id="r-status" style="color:var(--ink);text-align:right"></div>
+ <div style="color:var(--ink-faint)">K-score</div><div id="r-k" style="color:var(--ink);text-align:right;font-variant-numeric:tabular-nums"></div>
+ <div style="color:var(--ink-faint)">CID</div><div id="r-cid" style="color:var(--ink);text-align:right;word-break:break-all"></div>
+ <div style="color:var(--ink-faint)">Artifact hash</div><div id="r-hash" style="color:var(--ink);text-align:right;word-break:break-all"></div>
+ <div style="color:var(--ink-faint)">Bytes</div><div id="r-bytes" style="color:var(--ink);text-align:right;font-variant-numeric:tabular-nums"></div>
+ </div>
+ <div id="r-chain" style="margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);font-family:var(--mono);font-size:12px;color:var(--ink-mute);line-height:1.7"></div>
+ <div id="r-actions" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px"></div>
+ </div>
+ </div>
 
-  </div>
+ </div>
 
-  <aside>
-    <div class="panel" style="position:sticky;top:18px">
-      <h3>Quote</h3>
-      <dl class="quote">
-        <dt>Base</dt><dd id="q-base">Llama 3.1 8B</dd>
-        <dt>Hardware</dt><dd id="q-hw">1x A100-80GB</dd>
-        <dt>Examples</dt><dd id="q-ex">&mdash;</dd>
-        <dt>Est. wall time</dt><dd id="q-wall">~38 min</dd>
-        <dt>Est. cost</dt><dd id="q-cost">~$8.20</dd>
-      </dl>
-      <button class="cta-btn" id="compile" disabled type="button">Run for real</button>
-      <button class="cta-btn" id="preview" type="button" style="background:transparent;color:var(--ink);border:1px solid var(--line);margin-top:8px">Preview run (simulated)</button>
-      <p style="font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);margin:14px 0 0;line-height:1.5">Run for real calls <code>POST /v1/compile</code> in this account and streams the 5-step HMAC receipt back. Charged on success only. If the K-score gate fails, you pay $0 and we keep the partial trace for diagnosis.</p>
-    </div>
+ <aside>
+ <div class="panel" style="position:sticky;top:18px">
+ <h3>Quote</h3>
+ <dl class="quote">
+ <dt>Base</dt><dd id="q-base">Llama 3.1 8B</dd>
+ <dt>Hardware</dt><dd id="q-hw">1x A100-80GB</dd>
+ <dt>Examples</dt><dd id="q-ex">&mdash;</dd>
+ <dt>Est. wall time</dt><dd id="q-wall">~38 min</dd>
+ <dt>Est. cost</dt><dd id="q-cost">~$8.20</dd>
+ </dl>
+ <button class="cta-btn" id="compile" disabled type="button">Run for real</button>
+ <button class="cta-btn" id="preview" type="button" style="background:transparent;color:var(--ink);border:1px solid var(--line);margin-top:8px">Preview run (simulated)</button>
+ <p style="font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);margin:14px 0 0;line-height:1.5">Run for real calls <code>POST /v1/compile</code> in this account and streams the 5-step Ed25519 receipt back. Charged on success only. If the K-score gate fails, you pay $0 and we keep the partial trace for diagnosis.</p>
+ </div>
 
-    <div class="panel">
-      <h3>Gate preview</h3>
-      <div class="gate"><span class="l">K-score</span><span class="v" id="gate-k">&ge; 0.90</span></div>
-      <div class="gate"><span class="l">Task metric</span><span class="v" id="gate-t">&ge; 0.85</span></div>
-      <div class="gate"><span class="l">Compliance pack</span><span class="v" id="gate-p">none</span></div>
-      <div class="gate"><span class="l">Receipt</span><span class="v">HMAC-SHA256</span></div>
-      <div class="gate"><span class="l">CID</span><span class="v">cidv1:sha256</span></div>
-    </div>
+ <div class="panel">
+ <h3>Gate preview</h3>
+ <div class="gate"><span class="l">K-score</span><span class="v" id="gate-k">&ge; 0.90</span></div>
+ <div class="gate"><span class="l">Task metric</span><span class="v" id="gate-t">&ge; 0.85</span></div>
+ <div class="gate"><span class="l">Compliance pack</span><span class="v" id="gate-p">none</span></div>
+ <div class="gate"><span class="l">Receipt</span><span class="v">Ed25519</span></div>
+ <div class="gate"><span class="l">CID</span><span class="v">cidv1:sha256</span></div>
+ </div>
 
-    <div class="panel">
-      <h3>What ships</h3>
-      <p style="margin:0;font-size:13px">A signed <code>build/&lt;name&gt;.kolm</code> artifact, a JSON manifest with the recipe + gate + 42 enabled techniques, a per-step receipt log, and a one-page model card.</p>
-    </div>
-  </aside>
+ <div class="panel">
+ <h3>What ships</h3>
+ <p style="margin:0;font-size:13px">A signed <code>build/&lt;name&gt;.kolm</code> artifact, a JSON manifest with the recipe + gate + 42 enabled techniques, a per-step receipt log, and a one-page model card.</p>
+ </div>
+ </aside>
 
 </div></div>
 
 <footer class="site"><div class="wrap">
-  <div>kolm v0.1.0 &middot; <a href="/docs">docs</a> &middot; <a href="/spec/rs-1">RS-1 spec</a> &middot; <a href="/research">research</a></div>
-  <div><a href="/dashboard">&larr; back to dashboard</a></div>
+ <div>kolm v0.1.0 &middot; <a href="/docs">docs</a> &middot; <a href="/spec/rs-1">RS-1 spec</a> &middot; <a href="/research">research</a></div>
+ <div><a href="/dashboard">&larr; back to dashboard</a></div>
 </div></footer>
 
 <script>
 (function(){
-  var picks = document.querySelectorAll('#picks-base .pick');
-  var qBase = document.getElementById('q-base');
-  var qWall = document.getElementById('q-wall');
-  var qCost = document.getElementById('q-cost');
-  var qEx = document.getElementById('q-ex');
-  var compile = document.getElementById('compile');
-  var preview = document.getElementById('preview');
-  var fileInput = document.getElementById('file');
-  var drop = document.getElementById('drop');
-  var log = document.getElementById('log');
-  var kgate = document.getElementById('kgate');
-  var taskgate = document.getElementById('taskgate');
-  var pack = document.getElementById('pack');
-  var backendSel = document.getElementById('backend');
-  var recipeBox = document.getElementById('recipe');
-  var gK = document.getElementById('gate-k');
-  var gT = document.getElementById('gate-t');
-  var gP = document.getElementById('gate-p');
-  var result = document.getElementById('result');
-  var rJob = document.getElementById('r-job');
-  var rStatus = document.getElementById('r-status');
-  var rK = document.getElementById('r-k');
-  var rCid = document.getElementById('r-cid');
-  var rHash = document.getElementById('r-hash');
-  var rBytes = document.getElementById('r-bytes');
-  var rChain = document.getElementById('r-chain');
-  var rActions = document.getElementById('r-actions');
+ var picks = document.querySelectorAll('#picks-base .pick');
+ var qBase = document.getElementById('q-base');
+ var qWall = document.getElementById('q-wall');
+ var qCost = document.getElementById('q-cost');
+ var qEx = document.getElementById('q-ex');
+ var compile = document.getElementById('compile');
+ var preview = document.getElementById('preview');
+ var fileInput = document.getElementById('file');
+ var drop = document.getElementById('drop');
+ var log = document.getElementById('log');
+ var kgate = document.getElementById('kgate');
+ var taskgate = document.getElementById('taskgate');
+ var pack = document.getElementById('pack');
+ var backendSel = document.getElementById('backend');
+ var recipeBox = document.getElementById('recipe');
+ var gK = document.getElementById('gate-k');
+ var gT = document.getElementById('gate-t');
+ var gP = document.getElementById('gate-p');
+ var result = document.getElementById('result');
+ var rJob = document.getElementById('r-job');
+ var rStatus = document.getElementById('r-status');
+ var rK = document.getElementById('r-k');
+ var rCid = document.getElementById('r-cid');
+ var rHash = document.getElementById('r-hash');
+ var rBytes = document.getElementById('r-bytes');
+ var rChain = document.getElementById('r-chain');
+ var rActions = document.getElementById('r-actions');
 
-  var selectedBase = picks[0].dataset.name;
-  var selectedParams = picks[0].dataset.params;
-  var costByParams = {'3.8B': 4.0, '7B': 7.0, '8B': 8.2, '9B': 9.4, '70B': 48, '141B': 72};
-  var wallByParams = {'3.8B': '~22 min', '7B': '~34 min', '8B': '~38 min', '9B': '~42 min', '70B': '~3 hr 50 min', '141B': '~6 hr 10 min'};
-  var nExamples = 0;
+ var selectedBase = picks[0].dataset.name;
+ var selectedParams = picks[0].dataset.params;
+ var costByParams = {'3.8B': 4.0, '7B': 7.0, '8B': 8.2, '9B': 9.4, '70B': 48, '141B': 72};
+ var wallByParams = {'3.8B': '~22 min', '7B': '~34 min', '8B': '~38 min', '9B': '~42 min', '70B': '~3 hr 50 min', '141B': '~6 hr 10 min'};
+ var nExamples = 0;
 
-  // signup.html writes the API key under multiple aliases; kolm_api_key is the
-  // canonical name. We read the canonical and fall back so a user who signed in
-  // via /signin (which only sets kolm_api_key) still gets through.
-  var KEY_NAMES = ['kolm_api_key', 'apiKey', 'recipeApiKey', 'ks_api_key'];
-  function readKey(){
-    for (var i = 0; i < KEY_NAMES.length; i++) {
-      try { var v = localStorage.getItem(KEY_NAMES[i]); if (v && /^ks_[0-9a-f]{32}$/.test(v)) return v; } catch (_) {}
-    }
-    return null;
-  }
-  function maskKey(k){ return k ? (k.slice(0, 6) + '...' + k.slice(-4)) : ''; }
+ // signup.html writes the API key under multiple aliases; kolm_api_key is the
+ // canonical name. We read the canonical and fall back so a user who signed in
+ // via /signin (which only sets kolm_api_key) still gets through.
+ var KEY_NAMES = ['kolm_api_key', 'apiKey', 'recipeApiKey', 'ks_api_key'];
+ function readKey(){
+ for (var i = 0; i < KEY_NAMES.length; i++) {
+ try { var v = localStorage.getItem(KEY_NAMES[i]); if (v && /^ks_[0-9a-f]{32}$/.test(v)) return v; } catch (_) {}
+ }
+ return null;
+ }
+ function maskKey(k){ return k ? (k.slice(0, 6) + '...' + k.slice(-4)) : ''; }
 
-  function updateQuote(){
-    qBase.textContent = selectedBase.split('/').pop();
-    qWall.textContent = wallByParams[selectedParams] || '~30 min';
-    qCost.textContent = '~$' + (costByParams[selectedParams] || 7).toFixed(2);
-    qEx.textContent = nExamples ? (nExamples.toLocaleString() + ' files') : '-';
-    compile.disabled = nExamples === 0;
-  }
-  function updateGates(){
-    gK.textContent = '≥ ' + (parseFloat(kgate.value) || 0.90).toFixed(2);
-    gT.textContent = '≥ ' + (parseFloat(taskgate.value) || 0.85).toFixed(2);
-    gP.textContent = pack.value || 'none';
-  }
+ function updateQuote(){
+ qBase.textContent = selectedBase.split('/').pop();
+ qWall.textContent = wallByParams[selectedParams] || '~30 min';
+ qCost.textContent = '~$' + (costByParams[selectedParams] || 7).toFixed(2);
+ qEx.textContent = nExamples ? (nExamples.toLocaleString() + ' files') : '-';
+ compile.disabled = nExamples === 0;
+ }
+ function updateGates(){
+ gK.textContent = '≥ ' + (parseFloat(kgate.value) || 0.90).toFixed(2);
+ gT.textContent = '≥ ' + (parseFloat(taskgate.value) || 0.85).toFixed(2);
+ gP.textContent = pack.value || 'none';
+ }
 
-  picks.forEach(function(p){
-    p.addEventListener('click', function(){
-      picks.forEach(function(x){x.classList.remove('sel')});
-      p.classList.add('sel');
-      selectedBase = p.dataset.name;
-      selectedParams = p.dataset.params;
-      updateQuote();
-    });
-  });
+ picks.forEach(function(p){
+ p.addEventListener('click', function(){
+ picks.forEach(function(x){x.classList.remove('sel')});
+ p.classList.add('sel');
+ selectedBase = p.dataset.name;
+ selectedParams = p.dataset.params;
+ updateQuote();
+ });
+ });
 
-  fileInput.addEventListener('change', function(e){
-    nExamples = e.target.files.length;
-    updateQuote();
-  });
-  drop.addEventListener('dragover', function(e){e.preventDefault(); drop.classList.add('over');});
-  drop.addEventListener('dragleave', function(){drop.classList.remove('over');});
-  drop.addEventListener('drop', function(e){
-    e.preventDefault();
-    drop.classList.remove('over');
-    if(e.dataTransfer && e.dataTransfer.files){
-      nExamples = e.dataTransfer.files.length;
-      updateQuote();
-    }
-  });
+ fileInput.addEventListener('change', function(e){
+ nExamples = e.target.files.length;
+ updateQuote();
+ });
+ drop.addEventListener('dragover', function(e){e.preventDefault(); drop.classList.add('over');});
+ drop.addEventListener('dragleave', function(){drop.classList.remove('over');});
+ drop.addEventListener('drop', function(e){
+ e.preventDefault();
+ drop.classList.remove('over');
+ if(e.dataTransfer && e.dataTransfer.files){
+ nExamples = e.dataTransfer.files.length;
+ updateQuote();
+ }
+ });
 
-  kgate.addEventListener('input', updateGates);
-  taskgate.addEventListener('input', updateGates);
-  pack.addEventListener('change', updateGates);
+ kgate.addEventListener('input', updateGates);
+ taskgate.addEventListener('input', updateGates);
+ pack.addEventListener('change', updateGates);
 
-  function ts(){
-    var d = new Date();
-    return d.toTimeString().slice(0,8);
-  }
-  function logLine(line, cls){
-    var d = document.createElement('div');
-    d.innerHTML = '<span class="ts">['+ts()+']</span> '+(cls?'<span class="'+cls+'">'+line+'</span>':line);
-    log.appendChild(d);
-    log.scrollTop = log.scrollHeight;
-  }
-  function escapeHtml(s){
-    return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  }
+ function ts(){
+ var d = new Date();
+ return d.toTimeString().slice(0,8);
+ }
+ function logLine(line, cls){
+ var d = document.createElement('div');
+ d.innerHTML = '<span class="ts">['+ts()+']</span> '+(cls?'<span class="'+cls+'">'+line+'</span>':line);
+ log.appendChild(d);
+ log.scrollTop = log.scrollHeight;
+ }
+ function escapeHtml(s){
+ return String(s == null ? '' : s)
+ .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+ .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+ }
 
-  // ---- Preview path (clearly labeled simulated walkthrough) ----
-  // The PREVIEW_SEQ array is the OLD hardcoded log; it survives only behind
-  // the "Preview run (simulated)" button so users can dry-run the wizard
-  // before they spend credits. Run for real is the live /v1/compile path.
-  var PREVIEW_SEQ_BUILDER = function(){
-    return [
-      ['preview mode: this is a simulated walkthrough, no compute is spent', 'ok', 100],
-      ['validating recipe + manifest', null, 200],
-      ['materializing examples ('+nExamples+' files)', null, 400],
-      ['picking backend: '+(backendSel.value || 'local-cuda'), null, 350],
-      ['provisioning A100-80GB', null, 800],
-      ['warmup + LoRA init (r=32, alpha=64)', null, 600],
-      ['SFT step 250 / 2000 &middot; loss 1.84', null, 800],
-      ['SFT step 1000 / 2000 &middot; loss 1.21', null, 900],
-      ['SFT step 2000 / 2000 &middot; loss 0.87', null, 700],
-      ['eval &middot; K-score 0.93 (gate ≥ '+ (parseFloat(kgate.value)||0.9).toFixed(2)+')', 'ok', 700],
-      ['signing manifest &middot; HMAC-SHA256', null, 350],
-      ['artifact: build/my-model.kolm &middot; 9.4 GB', 'ok', 300],
-      ['preview complete. click Run for real to compile against your account.', 'ok', 100],
-    ];
-  };
+ // ---- Preview path (clearly labeled simulated walkthrough) ----
+ // The PREVIEW_SEQ array is the OLD hardcoded log; it survives only behind
+ // the "Preview run (simulated)" button so users can dry-run the wizard
+ // before they spend credits. Run for real is the live /v1/compile path.
+ var PREVIEW_SEQ_BUILDER = function(){
+ return [
+ ['preview mode: this is a simulated walkthrough, no compute is spent', 'ok', 100],
+ ['validating recipe + manifest', null, 200],
+ ['materializing examples ('+nExamples+' files)', null, 400],
+ ['picking backend: '+(backendSel.value || 'local-cuda'), null, 350],
+ ['provisioning A100-80GB', null, 800],
+ ['warmup + LoRA init (r=32, alpha=64)', null, 600],
+ ['SFT step 250 / 2000 &middot; loss 1.84', null, 800],
+ ['SFT step 1000 / 2000 &middot; loss 1.21', null, 900],
+ ['SFT step 2000 / 2000 &middot; loss 0.87', null, 700],
+ ['eval &middot; K-score 0.93 (gate ≥ '+ (parseFloat(kgate.value)||0.9).toFixed(2)+')', 'ok', 700],
+ ['signing manifest &middot; Ed25519', null, 350],
+ ['artifact: build/my-model.kolm &middot; 9.4 GB', 'ok', 300],
+ ['preview complete. click Run for real to compile against your account.', 'ok', 100],
+ ];
+ };
 
-  preview.addEventListener('click', function(){
-    preview.disabled = true;
-    compile.disabled = true;
-    preview.textContent = 'Previewing…';
-    log.innerHTML = '';
-    result.hidden = true;
-    var seq = PREVIEW_SEQ_BUILDER();
-    var i = 0;
-    function next(){
-      if(i >= seq.length){
-        preview.textContent = 'Preview run (simulated)';
-        preview.disabled = false;
-        compile.disabled = nExamples === 0;
-        return;
-      }
-      var s = seq[i++];
-      logLine(s[0], s[1]);
-      setTimeout(next, s[2]);
-    }
-    setTimeout(next, 200);
-  });
+ preview.addEventListener('click', function(){
+ preview.disabled = true;
+ compile.disabled = true;
+ preview.textContent = 'Previewing…';
+ log.innerHTML = '';
+ result.hidden = true;
+ var seq = PREVIEW_SEQ_BUILDER();
+ var i = 0;
+ function next(){
+ if(i >= seq.length){
+ preview.textContent = 'Preview run (simulated)';
+ preview.disabled = false;
+ compile.disabled = nExamples === 0;
+ return;
+ }
+ var s = seq[i++];
+ logLine(s[0], s[1]);
+ setTimeout(next, s[2]);
+ }
+ setTimeout(next, 200);
+ });
 
-  // ---- Live path: POST /v1/compile + poll GET /v1/compile/{id} ----
-  function buildTaskDescription(){
-    // Compose a single task string from the wizard fields. Server accepts
-    // task + base_model + k_threshold as first-class params; everything
-    // else (pack, backend, recipe textarea) gets embedded in task text so
-    // it travels in the manifest under the task field.
-    var parts = [];
-    parts.push('In-account training run from /train wizard.');
-    parts.push('base=' + selectedBase);
-    if (backendSel.value) parts.push('backend=' + backendSel.value);
-    if (pack.value) parts.push('compliance_pack=' + pack.value);
-    var taskMin = parseFloat(taskgate.value); if (Number.isFinite(taskMin)) parts.push('task_metric_min=' + taskMin.toFixed(2));
-    if (nExamples) parts.push('uploaded_files=' + nExamples);
-    var recipe = (recipeBox.value || '').trim();
-    if (recipe) parts.push('recipe=' + recipe.replace(/\s+/g, ' ').slice(0, 1200));
-    return parts.join(' ');
-  }
+ // ---- Live path: POST /v1/compile + poll GET /v1/compile/{id} ----
+ function buildTaskDescription(){
+ // Compose a single task string from the wizard fields. Server accepts
+ // task + base_model + k_threshold as first-class params; everything
+ // else (pack, backend, recipe textarea) gets embedded in task text so
+ // it travels in the manifest under the task field.
+ var parts = [];
+ parts.push('In-account training run from /train wizard.');
+ parts.push('base=' + selectedBase);
+ if (backendSel.value) parts.push('backend=' + backendSel.value);
+ if (pack.value) parts.push('compliance_pack=' + pack.value);
+ var taskMin = parseFloat(taskgate.value); if (Number.isFinite(taskMin)) parts.push('task_metric_min=' + taskMin.toFixed(2));
+ if (nExamples) parts.push('uploaded_files=' + nExamples);
+ var recipe = (recipeBox.value || '').trim();
+ if (recipe) parts.push('recipe=' + recipe.replace(/\s+/g, ' ').slice(0, 1200));
+ return parts.join(' ');
+ }
 
-  function setResultRow(job){
-    rJob.textContent = job.job_id || job.id || '';
-    rStatus.textContent = job.status || '';
-    rK.textContent = (typeof job.k_score === 'number') ? job.k_score.toFixed(4) : '-';
-    rCid.textContent = job.cid || '-';
-    rHash.textContent = job.artifact_hash || '-';
-    rBytes.textContent = (typeof job.artifact_bytes === 'number') ? job.artifact_bytes.toLocaleString() : '-';
-  }
+ function setResultRow(job){
+ rJob.textContent = job.job_id || job.id || '';
+ rStatus.textContent = job.status || '';
+ rK.textContent = (typeof job.k_score === 'number') ? job.k_score.toFixed(4) : '-';
+ rCid.textContent = job.cid || '-';
+ rHash.textContent = job.artifact_hash || '-';
+ rBytes.textContent = (typeof job.artifact_bytes === 'number') ? job.artifact_bytes.toLocaleString() : '-';
+ }
 
-  function renderChain(receipt){
-    if (!receipt || !Array.isArray(receipt.chain)) { rChain.innerHTML = ''; return; }
-    var rows = receipt.chain.map(function(step, idx){
-      var num = idx + 1;
-      var hmacShort = step.hmac ? (step.hmac.slice(0, 12) + '…') : '';
-      return '<div><span class="ok">[step ' + num + '/5]</span> ' +
-        '<span style="color:var(--ink)">' + escapeHtml(step.step) + '</span> ' +
-        '<span style="color:var(--ink-faint)">HMAC ' + escapeHtml(hmacShort) + '</span></div>';
-    }).join('');
-    var meta = '';
-    if (receipt.signature_alg) {
-      meta = '<div style="margin-top:6px;color:var(--ink-faint)">alg=' + escapeHtml(receipt.signature_alg) +
-        (receipt.signed_by ? ' &middot; signed_by=' + escapeHtml(receipt.signed_by) : '') +
-        (receipt.receipt_id ? ' &middot; receipt_id=' + escapeHtml(receipt.receipt_id) : '') + '</div>';
-    }
-    rChain.innerHTML = rows + meta;
-  }
+ function renderChain(receipt){
+ if (!receipt || !Array.isArray(receipt.chain)) { rChain.innerHTML = ''; return; }
+ var rows = receipt.chain.map(function(step, idx){
+ var num = idx + 1;
+ var hmacShort = step.hmac ? (step.hmac.slice(0, 12) + '…') : '';
+ return '<div><span class="ok">[step ' + num + '/5]</span> ' +
+ '<span style="color:var(--ink)">' + escapeHtml(step.step) + '</span> ' +
+ '<span style="color:var(--ink-faint)">Ed25519 ' + escapeHtml(hmacShort) + '</span></div>';
+ }).join('');
+ var meta = '';
+ if (receipt.signature_alg) {
+ meta = '<div style="margin-top:6px;color:var(--ink-faint)">alg=' + escapeHtml(receipt.signature_alg) +
+ (receipt.signed_by ? ' &middot; signed_by=' + escapeHtml(receipt.signed_by) : '') +
+ (receipt.receipt_id ? ' &middot; receipt_id=' + escapeHtml(receipt.receipt_id) : '') + '</div>';
+ }
+ rChain.innerHTML = rows + meta;
+ }
 
-  function renderActions(job){
-    rActions.innerHTML = '';
-    if (job.status === 'completed' && job.artifact_url) {
-      var a = document.createElement('a');
-      a.className = 'cta-btn';
-      a.style.width = 'auto';
-      a.style.margin = '0';
-      a.style.padding = '10px 16px';
-      a.style.textDecoration = 'none';
-      a.style.display = 'inline-block';
-      a.href = job.artifact_url;
-      a.download = (job.job_id || job.id || 'artifact') + '.kolm';
-      a.textContent = 'Download .kolm';
-      rActions.appendChild(a);
+ function renderActions(job){
+ rActions.innerHTML = '';
+ if (job.status === 'completed' && job.artifact_url) {
+ var a = document.createElement('a');
+ a.className = 'cta-btn';
+ a.style.width = 'auto';
+ a.style.margin = '0';
+ a.style.padding = '10px 16px';
+ a.style.textDecoration = 'none';
+ a.style.display = 'inline-block';
+ a.href = job.artifact_url;
+ a.download = (job.job_id || job.id || 'artifact') + '.kolm';
+ a.textContent = 'Download .kolm';
+ rActions.appendChild(a);
 
-      var v = document.createElement('a');
-      v.className = 'cta-btn';
-      v.style.width = 'auto';
-      v.style.margin = '0';
-      v.style.padding = '10px 16px';
-      v.style.background = 'transparent';
-      v.style.color = 'var(--ink)';
-      v.style.border = '1px solid var(--line)';
-      v.style.textDecoration = 'none';
-      v.style.display = 'inline-block';
-      v.href = '/verify-prod';
-      v.textContent = 'Verify in browser →';
-      rActions.appendChild(v);
+ var v = document.createElement('a');
+ v.className = 'cta-btn';
+ v.style.width = 'auto';
+ v.style.margin = '0';
+ v.style.padding = '10px 16px';
+ v.style.background = 'transparent';
+ v.style.color = 'var(--ink)';
+ v.style.border = '1px solid var(--line)';
+ v.style.textDecoration = 'none';
+ v.style.display = 'inline-block';
+ v.href = '/verify-prod';
+ v.textContent = 'Verify in browser →';
+ rActions.appendChild(v);
 
-      var d = document.createElement('a');
-      d.className = 'cta-btn';
-      d.style.width = 'auto';
-      d.style.margin = '0';
-      d.style.padding = '10px 16px';
-      d.style.background = 'transparent';
-      d.style.color = 'var(--ink)';
-      d.style.border = '1px solid var(--line)';
-      d.style.textDecoration = 'none';
-      d.style.display = 'inline-block';
-      d.href = '/dashboard';
-      d.textContent = 'Open dashboard';
-      rActions.appendChild(d);
-    } else if (job.status === 'failed') {
-      var r = document.createElement('button');
-      r.type = 'button';
-      r.className = 'cta-btn';
-      r.style.width = 'auto';
-      r.style.margin = '0';
-      r.style.padding = '10px 16px';
-      r.textContent = 'Retry';
-      r.addEventListener('click', function(){
-        result.hidden = true;
-        log.innerHTML = '';
-        runLive();
-      });
-      rActions.appendChild(r);
-    }
-  }
+ var d = document.createElement('a');
+ d.className = 'cta-btn';
+ d.style.width = 'auto';
+ d.style.margin = '0';
+ d.style.padding = '10px 16px';
+ d.style.background = 'transparent';
+ d.style.color = 'var(--ink)';
+ d.style.border = '1px solid var(--line)';
+ d.style.textDecoration = 'none';
+ d.style.display = 'inline-block';
+ d.href = '/dashboard';
+ d.textContent = 'Open dashboard';
+ rActions.appendChild(d);
+ } else if (job.status === 'failed') {
+ var r = document.createElement('button');
+ r.type = 'button';
+ r.className = 'cta-btn';
+ r.style.width = 'auto';
+ r.style.margin = '0';
+ r.style.padding = '10px 16px';
+ r.textContent = 'Retry';
+ r.addEventListener('click', function(){
+ result.hidden = true;
+ log.innerHTML = '';
+ runLive();
+ });
+ rActions.appendChild(r);
+ }
+ }
 
-  var polling = false;
-  var pollTimer = null;
-  var seenStages = {};
+ var polling = false;
+ var pollTimer = null;
+ var seenStages = {};
 
-  function stopPolling(){ polling = false; if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; } }
+ function stopPolling(){ polling = false; if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; } }
 
-  function pollJob(jobId, key){
-    if (!polling) return;
-    fetch('/v1/compile/' + encodeURIComponent(jobId), {
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' },
-      credentials: 'include',
-    }).then(function(res){
-      return res.json().catch(function(){ return {}; }).then(function(body){ return { ok: res.ok, status: res.status, body: body }; });
-    }).then(function(r){
-      if (!polling) return;
-      if (r.status === 401 || r.status === 403) {
-        stopPolling();
-        return failAuth();
-      }
-      if (r.status === 429) {
-        stopPolling();
-        return failQuota();
-      }
-      if (r.status >= 500) {
-        stopPolling();
-        return failServer('GET /v1/compile/' + jobId + ' returned ' + r.status);
-      }
-      if (!r.ok) {
-        stopPolling();
-        return failServer((r.body && r.body.error) ? r.body.error : ('status ' + r.status));
-      }
-      var j = r.body || {};
-      // Stream new stages
-      if (Array.isArray(j.stages)) {
-        for (var i = 0; i < j.stages.length; i++) {
-          var s = j.stages[i];
-          var key2 = (s.name || '') + '@' + (s.at || i);
-          if (!seenStages[key2]) {
-            seenStages[key2] = true;
-            var extras = [];
-            if (typeof s.bytes === 'number') extras.push(s.bytes.toLocaleString() + ' bytes');
-            if (typeof s.k_score === 'number') extras.push('K=' + s.k_score.toFixed(4));
-            if (typeof s.recipes_n === 'number') extras.push(s.recipes_n + ' recipes');
-            if (typeof s.chunks_n === 'number') extras.push(s.chunks_n + ' chunks');
-            if (typeof s.pass_rate === 'number') extras.push('pass=' + s.pass_rate.toFixed(3));
-            if (s.error) extras.push('error: ' + s.error);
-            var line = s.name + (extras.length ? ' &middot; ' + extras.join(' &middot; ') : '');
-            logLine(line, /error/i.test(s.name) ? null : 'ok');
-          }
-        }
-      }
-      // Update progress line if changed
-      if (typeof j.progress === 'number' && j.progress > 0 && j.progress < 100) {
-        // progress is already implied by stages; suppress redundant lines
-      }
-      // Update result panel live
-      result.hidden = false;
-      setResultRow(j);
-      if (j.receipt) renderChain(j.receipt);
+ function pollJob(jobId, key){
+ if (!polling) return;
+ fetch('/v1/compile/' + encodeURIComponent(jobId), {
+ method: 'GET',
+ headers: { 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' },
+ credentials: 'include',
+ }).then(function(res){
+ return res.json().catch(function(){ return {}; }).then(function(body){ return { ok: res.ok, status: res.status, body: body }; });
+ }).then(function(r){
+ if (!polling) return;
+ if (r.status === 401 || r.status === 403) {
+ stopPolling();
+ return failAuth();
+ }
+ if (r.status === 429) {
+ stopPolling();
+ return failQuota();
+ }
+ if (r.status >= 500) {
+ stopPolling();
+ return failServer('GET /v1/compile/' + jobId + ' returned ' + r.status);
+ }
+ if (!r.ok) {
+ stopPolling();
+ return failServer((r.body && r.body.error) ? r.body.error : ('status ' + r.status));
+ }
+ var j = r.body || {};
+ // Stream new stages
+ if (Array.isArray(j.stages)) {
+ for (var i = 0; i < j.stages.length; i++) {
+ var s = j.stages[i];
+ var key2 = (s.name || '') + '@' + (s.at || i);
+ if (!seenStages[key2]) {
+ seenStages[key2] = true;
+ var extras = [];
+ if (typeof s.bytes === 'number') extras.push(s.bytes.toLocaleString() + ' bytes');
+ if (typeof s.k_score === 'number') extras.push('K=' + s.k_score.toFixed(4));
+ if (typeof s.recipes_n === 'number') extras.push(s.recipes_n + ' recipes');
+ if (typeof s.chunks_n === 'number') extras.push(s.chunks_n + ' chunks');
+ if (typeof s.pass_rate === 'number') extras.push('pass=' + s.pass_rate.toFixed(3));
+ if (s.error) extras.push('error: ' + s.error);
+ var line = s.name + (extras.length ? ' &middot; ' + extras.join(' &middot; ') : '');
+ logLine(line, /error/i.test(s.name) ? null : 'ok');
+ }
+ }
+ }
+ // Update progress line if changed
+ if (typeof j.progress === 'number' && j.progress > 0 && j.progress < 100) {
+ // progress is already implied by stages; suppress redundant lines
+ }
+ // Update result panel live
+ result.hidden = false;
+ setResultRow(j);
+ if (j.receipt) renderChain(j.receipt);
 
-      if (j.status === 'completed') {
-        stopPolling();
-        logLine('completed &middot; K=' + (typeof j.k_score === 'number' ? j.k_score.toFixed(4) : '-') +
-          ' &middot; cid=' + (j.cid || '-'), 'ok');
-        compile.textContent = 'Run for real';
-        compile.disabled = nExamples === 0;
-        preview.disabled = false;
-        renderActions(j);
-      } else if (j.status === 'failed') {
-        stopPolling();
-        logLine('failed: ' + (j.error || 'unknown error'), null);
-        compile.textContent = 'Run for real';
-        compile.disabled = nExamples === 0;
-        preview.disabled = false;
-        renderActions(j);
-      } else {
-        pollTimer = setTimeout(function(){ pollJob(jobId, key); }, 500);
-      }
-    }).catch(function(){
-      if (!polling) return;
-      // Transient network error: keep polling, but slow down. The job is
-      // running server-side regardless; we just lost a snapshot.
-      logLine('network hiccup while polling; retrying in 2s', null);
-      pollTimer = setTimeout(function(){ pollJob(jobId, key); }, 2000);
-    });
-  }
+ if (j.status === 'completed') {
+ stopPolling();
+ logLine('completed &middot; K=' + (typeof j.k_score === 'number' ? j.k_score.toFixed(4) : '-') +
+ ' &middot; cid=' + (j.cid || '-'), 'ok');
+ compile.textContent = 'Run for real';
+ compile.disabled = nExamples === 0;
+ preview.disabled = false;
+ renderActions(j);
+ } else if (j.status === 'failed') {
+ stopPolling();
+ logLine('failed: ' + (j.error || 'unknown error'), null);
+ compile.textContent = 'Run for real';
+ compile.disabled = nExamples === 0;
+ preview.disabled = false;
+ renderActions(j);
+ } else {
+ pollTimer = setTimeout(function(){ pollJob(jobId, key); }, 500);
+ }
+ }).catch(function(){
+ if (!polling) return;
+ // Transient network error: keep polling, but slow down. The job is
+ // running server-side regardless; we just lost a snapshot.
+ logLine('network hiccup while polling; retrying in 2s', null);
+ pollTimer = setTimeout(function(){ pollJob(jobId, key); }, 2000);
+ });
+ }
 
-  function failAuth(){
-    logLine('your API key was rejected. sign in again to continue.', null);
-    compile.textContent = 'Run for real';
-    compile.disabled = nExamples === 0;
-    preview.disabled = false;
-    rActions.innerHTML = '';
-    var a = document.createElement('a');
-    a.className = 'cta-btn';
-    a.style.width = 'auto';
-    a.style.margin = '0';
-    a.style.padding = '10px 16px';
-    a.style.textDecoration = 'none';
-    a.style.display = 'inline-block';
-    a.href = '/signup?return=/train';
-    a.textContent = 'Sign in again';
-    rActions.appendChild(a);
-    result.hidden = false;
-  }
+ function failAuth(){
+ logLine('your API key was rejected. sign in again to continue.', null);
+ compile.textContent = 'Run for real';
+ compile.disabled = nExamples === 0;
+ preview.disabled = false;
+ rActions.innerHTML = '';
+ var a = document.createElement('a');
+ a.className = 'cta-btn';
+ a.style.width = 'auto';
+ a.style.margin = '0';
+ a.style.padding = '10px 16px';
+ a.style.textDecoration = 'none';
+ a.style.display = 'inline-block';
+ a.href = '/signup?return=/train';
+ a.textContent = 'Sign in again';
+ rActions.appendChild(a);
+ result.hidden = false;
+ }
 
-  function failQuota(){
-    logLine('daily compile quota reached on this plan. upgrade to keep going.', null);
-    compile.textContent = 'Run for real';
-    compile.disabled = nExamples === 0;
-    preview.disabled = false;
-    rActions.innerHTML = '';
-    var a = document.createElement('a');
-    a.className = 'cta-btn';
-    a.style.width = 'auto';
-    a.style.margin = '0';
-    a.style.padding = '10px 16px';
-    a.style.textDecoration = 'none';
-    a.style.display = 'inline-block';
-    a.href = '/pricing';
-    a.textContent = 'View plans';
-    rActions.appendChild(a);
-    result.hidden = false;
-  }
+ function failQuota(){
+ logLine('daily compile quota reached on this plan. upgrade to keep going.', null);
+ compile.textContent = 'Run for real';
+ compile.disabled = nExamples === 0;
+ preview.disabled = false;
+ rActions.innerHTML = '';
+ var a = document.createElement('a');
+ a.className = 'cta-btn';
+ a.style.width = 'auto';
+ a.style.margin = '0';
+ a.style.padding = '10px 16px';
+ a.style.textDecoration = 'none';
+ a.style.display = 'inline-block';
+ a.href = '/pricing';
+ a.textContent = 'View plans';
+ rActions.appendChild(a);
+ result.hidden = false;
+ }
 
-  function failServer(detail){
-    logLine('kolm.ai had a hiccup. try again in a minute. ' + (detail ? '(' + detail + ')' : ''), null);
-    compile.textContent = 'Run for real';
-    compile.disabled = nExamples === 0;
-    preview.disabled = false;
-    rActions.innerHTML = '';
-    var r = document.createElement('button');
-    r.type = 'button';
-    r.className = 'cta-btn';
-    r.style.width = 'auto';
-    r.style.margin = '0';
-    r.style.padding = '10px 16px';
-    r.textContent = 'Retry';
-    r.addEventListener('click', function(){
-      result.hidden = true;
-      log.innerHTML = '';
-      runLive();
-    });
-    rActions.appendChild(r);
-    result.hidden = false;
-  }
+ function failServer(detail){
+ logLine('kolm.ai had a hiccup. try again in a minute. ' + (detail ? '(' + detail + ')' : ''), null);
+ compile.textContent = 'Run for real';
+ compile.disabled = nExamples === 0;
+ preview.disabled = false;
+ rActions.innerHTML = '';
+ var r = document.createElement('button');
+ r.type = 'button';
+ r.className = 'cta-btn';
+ r.style.width = 'auto';
+ r.style.margin = '0';
+ r.style.padding = '10px 16px';
+ r.textContent = 'Retry';
+ r.addEventListener('click', function(){
+ result.hidden = true;
+ log.innerHTML = '';
+ runLive();
+ });
+ rActions.appendChild(r);
+ result.hidden = false;
+ }
 
-  function runLive(){
-    var key = readKey();
-    if (!key) {
-      // Preserve a return path so the user lands back here after signup.
-      try { window.location.href = '/signup?return=/train'; } catch (_) { window.location = '/signup?return=/train'; }
-      return;
-    }
-    compile.disabled = true;
-    preview.disabled = true;
-    compile.textContent = 'Compiling…';
-    log.innerHTML = '';
-    result.hidden = true;
-    rChain.innerHTML = '';
-    rActions.innerHTML = '';
-    seenStages = {};
+ function runLive(){
+ var key = readKey();
+ if (!key) {
+ // Preserve a return path so the user lands back here after signup.
+ try { window.location.href = '/signup?return=/train'; } catch (_) { window.location = '/signup?return=/train'; }
+ return;
+ }
+ compile.disabled = true;
+ preview.disabled = true;
+ compile.textContent = 'Compiling…';
+ log.innerHTML = '';
+ result.hidden = true;
+ rChain.innerHTML = '';
+ rActions.innerHTML = '';
+ seenStages = {};
 
-    var threshold = parseFloat(kgate.value);
-    if (!Number.isFinite(threshold)) threshold = 0.90;
-    threshold = Math.max(0.50, Math.min(0.99, threshold));
+ var threshold = parseFloat(kgate.value);
+ if (!Number.isFinite(threshold)) threshold = 0.90;
+ threshold = Math.max(0.50, Math.min(0.99, threshold));
 
-    var body = {
-      task: buildTaskDescription(),
-      base_model: selectedBase,
-      k_threshold: threshold,
-      examples: [],
-    };
+ var body = {
+ task: buildTaskDescription(),
+ base_model: selectedBase,
+ k_threshold: threshold,
+ examples: [],
+ };
 
-    logLine('signed in as ' + maskKey(key) + ' &middot; posting /v1/compile', 'ok');
-    logLine('base=' + selectedBase + ' &middot; k_threshold=' + threshold.toFixed(2) +
-      ' &middot; backend=' + (backendSel.value || 'auto') +
-      ' &middot; pack=' + (pack.value || 'none'), null);
+ logLine('signed in as ' + maskKey(key) + ' &middot; posting /v1/compile', 'ok');
+ logLine('base=' + selectedBase + ' &middot; k_threshold=' + threshold.toFixed(2) +
+ ' &middot; backend=' + (backendSel.value || 'auto') +
+ ' &middot; pack=' + (pack.value || 'none'), null);
 
-    fetch('/v1/compile', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + key,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(body),
-    }).then(function(res){
-      return res.json().catch(function(){ return {}; }).then(function(b){ return { ok: res.ok, status: res.status, body: b }; });
-    }).then(function(r){
-      if (r.status === 401 || r.status === 403) return failAuth();
-      if (r.status === 429) return failQuota();
-      if (r.status >= 500) return failServer('POST /v1/compile returned ' + r.status);
-      if (!r.ok) {
-        return failServer((r.body && r.body.error) ? r.body.error : ('status ' + r.status));
-      }
-      var jobId = r.body && (r.body.job_id || r.body.id);
-      if (!jobId) return failServer('no job_id in response');
-      logLine('job queued: ' + jobId + ' &middot; polling /v1/compile/' + jobId + ' every 500ms', 'ok');
-      result.hidden = false;
-      setResultRow({ job_id: jobId, status: r.body.status || 'queued' });
-      polling = true;
-      pollJob(jobId, key);
-    }).catch(function(){
-      failServer('network error reaching /v1/compile');
-    });
-  }
+ fetch('/v1/compile', {
+ method: 'POST',
+ headers: {
+ 'Authorization': 'Bearer ' + key,
+ 'Content-Type': 'application/json',
+ 'Accept': 'application/json',
+ },
+ credentials: 'include',
+ body: JSON.stringify(body),
+ }).then(function(res){
+ return res.json().catch(function(){ return {}; }).then(function(b){ return { ok: res.ok, status: res.status, body: b }; });
+ }).then(function(r){
+ if (r.status === 401 || r.status === 403) return failAuth();
+ if (r.status === 429) return failQuota();
+ if (r.status >= 500) return failServer('POST /v1/compile returned ' + r.status);
+ if (!r.ok) {
+ return failServer((r.body && r.body.error) ? r.body.error : ('status ' + r.status));
+ }
+ var jobId = r.body && (r.body.job_id || r.body.id);
+ if (!jobId) return failServer('no job_id in response');
+ logLine('job queued: ' + jobId + ' &middot; polling /v1/compile/' + jobId + ' every 500ms', 'ok');
+ result.hidden = false;
+ setResultRow({ job_id: jobId, status: r.body.status || 'queued' });
+ polling = true;
+ pollJob(jobId, key);
+ }).catch(function(){
+ failServer('network error reaching /v1/compile');
+ });
+ }
 
-  compile.addEventListener('click', runLive);
+ compile.addEventListener('click', runLive);
 
-  // Quick path: one sentence → defaults → compile. Smart defaults are Llama 3.1 8B base
-  // (selectedBase[0]), Claude Sonnet teacher distill (via task text), K-score gate 0.90,
-  // task gate 0.85.  Without uploaded files, the server's synthesis path is triggered
-  // by embedding the description in the recipe field; the compiler will synthesize a
-  // teacher-distill corpus from the description and run SFT against the chosen base.
-  var quickDesc = document.getElementById('quick-desc');
-  var quickCompile = document.getElementById('quick-compile');
-  if (quickCompile && quickDesc) {
-    quickCompile.addEventListener('click', function () {
-      var desc = (quickDesc.value || '').trim();
-      if (!desc) {
-        quickDesc.focus();
-        logLine('describe what you want your AI to do, in one sentence.', 'ok');
-        return;
-      }
-      // Carry the description into the recipe textarea so buildTaskDescription picks it up.
-      recipeBox.value = (recipeBox.value ? recipeBox.value + '\n' : '') +
-        'task_description: ' + desc + '\n' +
-        'teacher_distill: claude-sonnet-4-6\n' +
-        'frontier_cache: on';
-      // Force the gates to defaults (idempotent if user has not touched them).
-      if (!parseFloat(kgate.value)) kgate.value = '0.90';
-      if (!parseFloat(taskgate.value)) taskgate.value = '0.85';
-      updateGates();
-      // Quick mode does not require file upload — server will synthesize from description.
-      compile.disabled = false;
-      logLine('quick mode: defaults applied (Llama 3.1 8B + Claude Sonnet distill + K≥0.90)', 'ok');
-      runLive();
-    });
-  }
+ // Quick path: one sentence → defaults → compile. Smart defaults are Llama 3.1 8B base
+ // (selectedBase[0]), Claude Sonnet teacher distill (via task text), K-score gate 0.90,
+ // task gate 0.85. Without uploaded files, the server's synthesis path is triggered
+ // by embedding the description in the recipe field; the compiler will synthesize a
+ // teacher-distill corpus from the description and run SFT against the chosen base.
+ var quickDesc = document.getElementById('quick-desc');
+ var quickCompile = document.getElementById('quick-compile');
+ if (quickCompile && quickDesc) {
+ quickCompile.addEventListener('click', function () {
+ var desc = (quickDesc.value || '').trim();
+ if (!desc) {
+ quickDesc.focus();
+ logLine('describe what you want your AI to do, in one sentence.', 'ok');
+ return;
+ }
+ // Carry the description into the recipe textarea so buildTaskDescription picks it up.
+ recipeBox.value = (recipeBox.value ? recipeBox.value + '\n' : '') +
+ 'task_description: ' + desc + '\n' +
+ 'teacher_distill: claude-sonnet-4-6\n' +
+ 'frontier_cache: on';
+ // Force the gates to defaults (idempotent if user has not touched them).
+ if (!parseFloat(kgate.value)) kgate.value = '0.90';
+ if (!parseFloat(taskgate.value)) taskgate.value = '0.85';
+ updateGates();
+ // Quick mode does not require file upload — server will synthesize from description.
+ compile.disabled = false;
+ logLine('quick mode: defaults applied (Llama 3.1 8B + Claude Sonnet distill + K≥0.90)', 'ok');
+ runLive();
+ });
+ }
 
-  updateQuote();
-  updateGates();
+ updateQuote();
+ updateGates();
 
-  // Auth hint: if the user lands here without a key, surface it in the log
-  // (don't auto-redirect, because they may want to preview-run first).
-  if (!readKey()) {
-    logLine('no API key stored in this browser. preview mode works; Run for real will route you through /signup.', null);
-  }
+ // Auth hint: if the user lands here without a key, surface it in the log
+ // (don't auto-redirect, because they may want to preview-run first).
+ if (!readKey()) {
+ logLine('no API key stored in this browser. preview mode works; Run for real will route you through /signup.', null);
+ }
 })();
 </script>
 <script src="/nav.js" defer></script>

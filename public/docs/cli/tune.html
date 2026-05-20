@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm tune · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm tune CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/tune">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm tune","description":"Reference for the kolm tune CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/tune","mainEntityOfPage":"https://kolm.ai/docs/cli/tune","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm tune · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm tune CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,22 +176,22 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="tune">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>tune</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>tune</span>
 </nav>
-<p>--- title: kolm tune · kolm.ai description: Evolve a local LoRA adapter from skeleton to a promoted revision. ---</p>
+<p>--- title: kolm tune · kolm.ai description: Evolve a local student artifact from skeleton to a promoted revision. ---</p>
 <h1>kolm tune</h1>
 <p>&gt; Evolve an artifact&#39;s local adapter from a skeleton LoRA into a living model. Init, capture, step, eval, promote.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm tune init        --artifact &lt;art.kolm&gt; --base &lt;model_path_or_id&gt; [--rank 8] [--alpha 16]
-kolm tune capture-on  --artifact &lt;art.kolm&gt;
+kolm tune init --artifact &lt;art.kolm&gt; --base &lt;model_path_or_id&gt; [--rank 8] [--alpha 16]
+kolm tune capture-on --artifact &lt;art.kolm&gt;
 kolm tune capture-off --artifact &lt;art.kolm&gt;
-kolm tune step        --artifact &lt;art.kolm&gt; [--epochs 1] [--airgap] [--batch-size 4] [--lr 2e-4]
-kolm tune eval        --artifact &lt;art.kolm&gt; [--rev vN]
-kolm tune promote     --artifact &lt;art.kolm&gt; --rev vN [--force]
-kolm tune rollback    --artifact &lt;art.kolm&gt;
-kolm tune watch       --artifact &lt;art.kolm&gt; [--interval 30000]
-kolm tune status      --artifact &lt;art.kolm&gt;
+kolm tune step --artifact &lt;art.kolm&gt; [--epochs 1] [--airgap] [--batch-size 4] [--lr 2e-4]
+kolm tune eval --artifact &lt;art.kolm&gt; [--rev vN]
+kolm tune promote --artifact &lt;art.kolm&gt; --rev vN [--force]
+kolm tune rollback --artifact &lt;art.kolm&gt;
+kolm tune watch --artifact &lt;art.kolm&gt; [--interval 30000]
+kolm tune status --artifact &lt;art.kolm&gt;
 </code></pre>
 <h2>Pipeline</h2>
 <p>| Verb | Effect | | ---- | ------ | | <code>init</code> | v0 skeleton (PEFT config, zero weights). Required first step | | <code>capture-on</code> | every <code>kolm run</code> writes (input, output) to <code>captures.jsonl</code> | | <code>step</code> | SFT on captures (Python: torch + peft + transformers). Writes <code>vN+1</code> | | <code>eval</code> | recompute K-score for the candidate | | <code>promote</code> | if K-score(vN) &gt;= gate (default 0.85) AND &gt;= current head, flip HEAD | | <code>rollback</code> | restore the prior HEAD revision from <code>head.prev</code> | | <code>watch</code> | daemon: when captures grow past threshold, auto step then eval then promote |</p>
@@ -195,17 +199,17 @@ kolm tune status      --artifact &lt;art.kolm&gt;
 <p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--base &lt;path|id&gt;</code> | none | base model path or HuggingFace id (required for init) | | <code>--rank &lt;n&gt;</code> | <code>8</code> | LoRA rank | | <code>--alpha &lt;n&gt;</code> | <code>16</code> | LoRA alpha | | <code>--epochs &lt;n&gt;</code> | <code>1</code> | training epochs | | <code>--batch-size &lt;n&gt;</code> | <code>4</code> | training batch size | | <code>--lr &lt;rate&gt;</code> | <code>2e-4</code> | learning rate | | <code>--airgap</code> | off | sets <code>TRANSFORMERS_OFFLINE=1</code>, <code>HF_DATASETS_OFFLINE=1</code>, <code>HF_HUB_OFFLINE=1</code>. Refuses any <code>base_model</code> that is not a local path | | <code>--rev vN</code> | latest | revision id | | <code>--force</code> | off | promote even when K-score is below current head | | <code>--interval &lt;ms&gt;</code> | <code>30000</code> | watch daemon poll interval |</p>
 <h2>Examples</h2>
 <pre><code>
-kolm tune init      --artifact redactor.kolm --base ./qwen2.5-3b
+kolm tune init --artifact redactor.kolm --base ./qwen2.5-3b
 kolm tune capture-on --artifact redactor.kolm
 # ... your app runs the artifact in production for a while ...
-kolm tune step      --artifact redactor.kolm --epochs 2
-kolm tune eval      --artifact redactor.kolm
-kolm tune promote   --artifact redactor.kolm --rev v3
+kolm tune step --artifact redactor.kolm --epochs 2
+kolm tune eval --artifact redactor.kolm
+kolm tune promote --artifact redactor.kolm --rev v3
 </code></pre>
 <h2>Dependencies (for <code>step</code> only)</h2>
 <pre><code>
 pip install &#39;torch&gt;=2.2&#39; &#39;transformers&gt;=4.42&#39; &#39;peft&gt;=0.11&#39; \
-            &#39;datasets&gt;=2.18&#39; &#39;accelerate&gt;=0.30&#39; &#39;trl&gt;=0.9&#39;
+ &#39;datasets&gt;=2.18&#39; &#39;accelerate&gt;=0.30&#39; &#39;trl&gt;=0.9&#39;
 </code></pre>
 <h2>See also</h2>
 <ul>
@@ -215,13 +219,13 @@ pip install &#39;torch&gt;=2.2&#39; &#39;transformers&gt;=4.42&#39; &#39;peft&gt
 <li><a href="/docs/training">Training guide</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

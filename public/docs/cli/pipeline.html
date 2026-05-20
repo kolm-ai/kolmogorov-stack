@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm pipeline · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm pipeline CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/pipeline">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm pipeline","description":"Reference for the kolm pipeline CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/pipeline","mainEntityOfPage":"https://kolm.ai/docs/cli/pipeline","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm pipeline · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm pipeline CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,7 +176,7 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="pipeline">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>pipeline</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>pipeline</span>
 </nav>
 <p>--- title: kolm pipeline · kolm.ai description: End-to-end compile pipeline. Tokenize, distill, compile, full. ---</p>
 <h1>kolm pipeline</h1>
@@ -180,9 +184,9 @@
 <h2>Usage</h2>
 <pre><code>
 kolm pipeline tokenize &lt;corpus-file-or-text&gt; [--vocab-size N] [--algorithm bpe|unigram|wordpiece]
-kolm pipeline distill  --namespace &lt;n&gt; [--student-base &lt;m&gt;] [--mode kd_softmax|kd_top_k|rejection_sampling] [--max-steps N]
-kolm pipeline compile  --namespace &lt;n&gt; [--strict] [--force] [--no-sign] [--no-install] [--install-target &lt;id&gt;]
-kolm pipeline full     --namespace &lt;n&gt; [--strict] [--force] [--no-sign] [--k-target 0.85] [--max-steps 200] [--vocab-size 4000]
+kolm pipeline distill --namespace &lt;n&gt; [--student-base &lt;m&gt;] [--mode kd_softmax|kd_top_k|rejection_sampling] [--max-steps N]
+kolm pipeline compile --namespace &lt;n&gt; [--strict] [--force] [--no-sign] [--no-install] [--install-target &lt;id&gt;]
+kolm pipeline full --namespace &lt;n&gt; [--strict] [--force] [--no-sign] [--k-target 0.85] [--max-steps 200] [--vocab-size 4000]
 </code></pre>
 <h2>Flags</h2>
 <p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--vocab-size &lt;n&gt;</code> | <code>4000</code> | tokenizer vocab size | | <code>--algorithm &lt;a&gt;</code> | <code>bpe</code> | <code>bpe</code>, <code>unigram</code>, or <code>wordpiece</code> | | <code>--namespace &lt;n&gt;</code> | required | which captured namespace to compile | | <code>--student-base &lt;m&gt;</code> | auto-pick | student model id | | <code>--mode &lt;m&gt;</code> | <code>kd_softmax</code> | <code>kd_softmax</code>, <code>kd_top_k</code>, or <code>rejection_sampling</code> | | <code>--max-steps &lt;n&gt;</code> | <code>200</code> | training step cap | | <code>--k-target &lt;f&gt;</code> | <code>0.85</code> | K-score gate for the final compile | | <code>--strict</code> | off | refuse to ship below <code>--k-target</code> | | <code>--force</code> | off | ship even when production gates fail | | <code>--no-sign</code> | off | skip sigstore signing | | <code>--no-install</code> | off | skip the final install step | | <code>--install-target &lt;id&gt;</code> | none | install onto a registered device after compile | | <code>--json</code> | off | NDJSON event stream |</p>
@@ -190,8 +194,8 @@ kolm pipeline full     --namespace &lt;n&gt; [--strict] [--force] [--no-sign] [-
 <pre><code>
 # step by step
 kolm pipeline tokenize ./corpus.txt --vocab-size 8000 --algorithm bpe
-kolm pipeline distill  --namespace claims-router --mode kd_softmax --max-steps 500
-kolm pipeline compile  --namespace claims-router --strict
+kolm pipeline distill --namespace claims-router --mode kd_softmax --max-steps 500
+kolm pipeline compile --namespace claims-router --strict
 
 # one shot
 kolm pipeline full --namespace claims-router --k-target 0.92 --strict
@@ -209,13 +213,13 @@ kolm pipeline full --namespace claims-router --json
 <li><a href="/docs/training">Training guide</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

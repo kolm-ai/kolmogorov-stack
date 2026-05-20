@@ -103,6 +103,26 @@ function withServer(app, fn) {
   });
 }
 
+// W492 — when /v1/capture/log returns 207 (some items failed) the bare
+// `assert.equal(r.status, 201)` line tells you the status but NOT which
+// failures the server saw. In the documented full-suite flake the failures
+// array is the only hint about which prior test's leftover state poisoned
+// the run. Clone-and-read here so the assertion message carries it forward.
+async function assertCreated(r, expected = 201, hint = '') {
+  if (r.status === expected) return;
+  let body = null;
+  try {
+    const clone = r.clone();
+    body = await clone.json();
+  } catch (_) {}
+  const failuresMsg = body && Array.isArray(body.failures) && body.failures.length
+    ? ' failures=' + JSON.stringify(body.failures.slice(0, 5))
+    : '';
+  const ok = body && typeof body.ok === 'boolean' ? ' ok=' + body.ok : '';
+  const count = body && body.count != null ? ' count=' + body.count : '';
+  assert.fail(`expected status ${expected} got ${r.status}${hint ? ' (' + hint + ')' : ''}${ok}${count}${failuresMsg}`);
+}
+
 // =============================================================================
 // 1) Proxy POST -> capture-store AND event-store both contain matching row
 // =============================================================================
@@ -123,7 +143,7 @@ test('W409a #1 — POST through /v1/capture/log writes BOTH capture-store and ev
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + apiKey },
         body: JSON.stringify({ namespace: ns, items, provider: 'manual', model: 'kolm-w409a' }),
       });
-      assert.equal(r.status, 201, 'capture/log must accept all 2 items');
+      await assertCreated(r, 201, 'W409a #1: all 2 items');
       const body = await r.json();
       assert.equal(body.ok, true);
       assert.equal(body.count, 2);
@@ -212,7 +232,7 @@ test('W409a #2 — /v1/lake/stats counts the bridged event', async () => {
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + apiKey },
         body: JSON.stringify({ namespace: ns, items, provider: 'openai', model: 'gpt-4o-mini' }),
       });
-      assert.equal(r.status, 201);
+      await assertCreated(r, 201, 'W409a #2: 6 items');
 
       const stats = await fetch(base + '/v1/lake/stats?namespace=' + encodeURIComponent(ns) + '&since=1h', {
         headers: { authorization: 'Bearer ' + apiKey },
@@ -259,7 +279,7 @@ test('W409a #3 — opportunity engine finds cache_candidate over bridged events'
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + apiKey },
         body: JSON.stringify({ namespace: ns, items, provider: 'openai', model: 'gpt-4o' }),
       });
-      assert.equal(r.status, 201);
+      await assertCreated(r, 201, 'W409a #3: opportunity engine seed');
 
       // Confirm event-store sees them
       const evRows = await eventStore.listEvents({ namespace: ns, limit: 50 });
@@ -314,7 +334,7 @@ test('W409a #4 — dataset workbench builds a dataset over bridged events', asyn
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + apiKey },
         body: JSON.stringify({ namespace: ns, items, provider: 'kolm', model: 'phi-redactor' }),
       });
-      assert.equal(r.status, 201);
+      await assertCreated(r, 201, 'W409a #4: dataset workbench seed');
 
       // Confirm bridge: createDataset reads via listEvents which is the
       // event-store API. If the bridge is broken, dataset creation fails
@@ -363,7 +383,7 @@ test('W409a #5 — label queue surfaces bridged events as undecided candidates',
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + apiKey },
         body: JSON.stringify({ namespace: ns, items, provider: 'kolm', model: 'log-classifier' }),
       });
-      assert.equal(r.status, 201);
+      await assertCreated(r, 201, 'W409a #5: label queue seed');
 
       // nextToLabel reads via listEvents from event-store. If the bridge is
       // dead it returns [] — the queue starves and the human reviewer never
@@ -406,7 +426,7 @@ test('W409a #6 — training planner consumes a dataset built from bridged events
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + apiKey },
         body: JSON.stringify({ namespace: ns, items, provider: 'openai', model: 'gpt-4o-mini' }),
       });
-      assert.equal(r.status, 201);
+      await assertCreated(r, 201, 'W409a #6: training planner seed (12 items)');
 
       // Build the inline rows from the event-store and feed them to the
       // training planner. If the bridge is dead, listEvents returns [], the
@@ -453,7 +473,7 @@ test('W409a #7 — bridge is idempotent (re-running migration does not duplicate
           model: 'kolm-w409a',
         }),
       });
-      assert.equal(r.status, 201);
+      await assertCreated(r, 201, 'W409a #7: idempotency seed');
       const before = await eventStore.countEvents({ namespace: ns });
       assert.equal(before, 1, 'event-store starts with 1 row after the capture-log post');
 

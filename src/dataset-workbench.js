@@ -265,8 +265,9 @@ export async function splitDataset(datasetId, train_ratio = 0.8, opts = {}) {
     : (ds.seed != null ? String(ds.seed) : datasetId);
   const train = [];
   const holdout = [];
+  const bucketFor = (eid) => parseInt(crypto.createHash('sha256').update(seed + ':' + String(eid)).digest('hex').slice(0, 8), 16) % 100;
   for (const eid of ds.source_event_ids) {
-    const bucket = parseInt(crypto.createHash('sha256').update(seed + ':' + String(eid)).digest('hex').slice(0, 8), 16) % 100;
+    const bucket = bucketFor(eid);
     if (bucket < cutoff) train.push(eid); else holdout.push(eid);
   }
   // Honor approval holdout_only flags: any event flagged holdout_only goes
@@ -278,12 +279,42 @@ export async function splitDataset(datasetId, train_ratio = 0.8, opts = {}) {
       if (!holdout.includes(eid)) holdout.push(eid);
     }
   }
+  const minHoldout = Math.max(0, Number(opts.min_holdout ?? opts.minHoldout ?? 0) || 0);
+  const minTrain = Math.max(0, Number(opts.min_train ?? opts.minTrain ?? 0) || 0);
+  const canSatisfyFloors = ds.source_event_ids.length >= (minTrain + minHoldout);
+  if (canSatisfyFloors && minHoldout > 0 && holdout.length < minHoldout) {
+    const candidates = train
+      .map((eid) => ({ eid, bucket: bucketFor(eid) }))
+      .sort((a, b) => b.bucket - a.bucket || String(a.eid).localeCompare(String(b.eid)));
+    for (const c of candidates) {
+      if (holdout.length >= minHoldout || train.length <= minTrain) break;
+      const idx = train.indexOf(c.eid);
+      if (idx >= 0) {
+        train.splice(idx, 1);
+        if (!holdout.includes(c.eid)) holdout.push(c.eid);
+      }
+    }
+  }
+  if (canSatisfyFloors && minTrain > 0 && train.length < minTrain) {
+    const candidates = holdout
+      .filter((eid) => !(approvals[eid] && approvals[eid].holdout_only))
+      .map((eid) => ({ eid, bucket: bucketFor(eid) }))
+      .sort((a, b) => a.bucket - b.bucket || String(a.eid).localeCompare(String(b.eid)));
+    for (const c of candidates) {
+      if (train.length >= minTrain || holdout.length <= minHoldout) break;
+      const idx = holdout.indexOf(c.eid);
+      if (idx >= 0) {
+        holdout.splice(idx, 1);
+        if (!train.includes(c.eid)) train.push(c.eid);
+      }
+    }
+  }
   // Disjointness assertion.
   const t = new Set(train);
   for (const h of holdout) {
     if (t.has(h)) throw new Error('split_invariant_violation: ' + h + ' in both buckets');
   }
-  const sig = crypto.createHash('sha256').update(JSON.stringify({ datasetId, ratio, seed, train, holdout })).digest('hex').slice(0, 16);
+  const sig = crypto.createHash('sha256').update(JSON.stringify({ datasetId, ratio, seed, minTrain, minHoldout, train, holdout })).digest('hex').slice(0, 16);
   const out = {
     dataset_id: datasetId,
     train_count: train.length,
@@ -292,6 +323,8 @@ export async function splitDataset(datasetId, train_ratio = 0.8, opts = {}) {
     holdout_ids: holdout,
     split_signature: 'sha256:' + sig,
     ratio,
+    min_train: minTrain || null,
+    min_holdout: minHoldout || null,
     seed: opts.seed != null ? Number(opts.seed) : (ds.seed != null ? ds.seed : null),
   };
   // Persist the split into the dataset record so future inspects see it.
@@ -300,6 +333,8 @@ export async function splitDataset(datasetId, train_ratio = 0.8, opts = {}) {
   ds.split_signature = out.split_signature;
   ds.train_ids = train;
   ds.holdout_ids = holdout;
+  ds.min_train = out.min_train;
+  ds.min_holdout = out.min_holdout;
   if (opts.seed != null) ds.seed = Number(opts.seed);
   fs.writeFileSync(file, JSON.stringify(ds, null, 2));
   return out;
@@ -463,7 +498,11 @@ export async function createDataset(namespace, opts = {}) {
     from_namespace: opts.fromNamespace || null,
   };
   fs.writeFileSync(file, JSON.stringify(record, null, 2));
-  const split = await splitDataset(datasetId, train_ratio, { seed: opts.seed });
+  const split = await splitDataset(datasetId, train_ratio, {
+    seed: opts.seed,
+    min_train: opts.min_train ?? opts.minTrain,
+    min_holdout: opts.min_holdout ?? opts.minHoldout,
+  });
   return {
     dataset_id: datasetId,
     // W411 — surface the stamped tenant_id in the return envelope so the

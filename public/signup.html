@@ -1,102 +1,107 @@
 <!DOCTYPE html>
 <!--
-  Dual-purpose page: serves both /signup and /signin via vercel.json rewrites
-  (signin.html does NOT exist as a separate file). The H1, copy, and form CTA
-  swap based on document.location.pathname at load time (see #signin-swap and
-  the auth-swap script below). If you "refactor" by splitting these into two
-  files, the URL-aware swap script becomes dead code — keep them merged unless
-  you also rewrite the route handlers in vercel.json.
+ Dual-purpose page: serves both /signup and /signin via vercel.json rewrites
+ (signin.html does NOT exist as a separate file). The H1, copy, and form CTA
+ swap based on document.location.pathname at load time (see #signin-swap and
+ the auth-swap script below). If you "refactor" by splitting these into two
+ files, the URL-aware swap script becomes dead code — keep them merged unless
+ you also rewrite the route handlers in vercel.json.
 -->
 <html lang="en" style="background:#08090c;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Sign in · kolm.ai</title>
+<title>Sign in guide · kolm.ai</title>
 <meta name="description" content="Sign in to kolm with Google or GitHub. Or create an account on any plan in under a minute. Fully self-serve, including Enterprise.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<link rel="canonical" href="https://kolm.ai/signin">
-<meta property="og:title" content="Sign in ·kolm" />
-<meta property="og:description" content="Sign in with Google or GitHub. Or create an account on any plan in under a minute." />
-<meta property="og:image" content="https://kolm.ai/og-card.svg" />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary_large_image" />
+<link rel="canonical" href="https://kolm.ai/signup">
+<meta property="og:title" content="Sign in guide · kolm.ai">
+<meta property="og:description" content="Sign in to kolm with Google or GitHub. Or create an account on any plan in under a minute. Fully self-serve, including Enterprise.">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <style>
-  [hidden]{display:none !important}
-  .plan-banner{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--bg-elev);margin-bottom:20px}
-  .plan-banner .plan-name{font-weight: 500;color:var(--ink)}
-  .plan-banner .plan-price{font-family:var(--mono);color:var(--accent);font-size:13px}
-  .plan-banner .plan-meta{color:var(--ink-mute);font-size:13px;margin-top:4px;line-height:1.5}
-  .plan-banner .plan-switch{margin-left:auto;font-size:12px}
-  .plan-banner .plan-switch a{color:var(--ink-faint);text-decoration:none}
-  .plan-banner .plan-switch a:hover{color:var(--ink)}
-  .auth-brand{display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;color:var(--accent,#7ef0d2);font-family:var(--mono);font-size:13px;font-weight: 500;letter-spacing:-0.01em}
-  [data-theme="light"] .auth-brand{color:var(--accent,#0a8862)}
-  .auth-brand svg{display:block}
-  .oauth-row{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
-  .oauth-row .oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;font-size:14px;font-weight: 500;background:var(--bg-2,#0e1014) !important;background-image:none !important;color:var(--ink,#faf2e1) !important;border:1px solid var(--line-2,rgba(236,231,220,0.22)) !important;border-radius:10px;cursor:pointer;transition:border-color 140ms,background 140ms,transform 140ms}
-  .oauth-row .oauth-btn:hover{border-color:var(--accent,#7ef0d2) !important;transform:translateY(-1px)}
-  [data-theme="light"] .oauth-row .oauth-btn{background:#ffffff !important;color:#0c0e10 !important;border-color:rgba(12,14,16,0.18) !important}
-  [data-theme="light"] .oauth-row .oauth-btn:hover{border-color:rgba(10,136,98,0.40) !important}
-  .oauth-row .oauth-divider{text-align:center;color:var(--ink-faint);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:8px 0;position:relative}
-  .oauth-row .oauth-divider::before,.oauth-row .oauth-divider::after{content:'';position:absolute;top:50%;width:35%;height:1px;background:var(--line)}
-  .oauth-row .oauth-divider::before{left:0}
-  .oauth-row .oauth-divider::after{right:0}
-  .advanced-toggle{display:block;text-align:center;margin:14px 0 0;color:var(--ink-faint);font-size:12px;text-decoration:none;cursor:pointer;background:none;border:0;width:100%;padding:6px}
-  .advanced-toggle:hover{color:var(--ink)}
-  .advanced-panel{margin-top:12px;padding-top:14px;border-top:1px solid var(--line)}
-  .advanced-panel[hidden]{display:none !important}
-  .auth-tabs[hidden]{display:none !important}
-  .post-key-cta{display:flex;flex-direction:column;gap:10px;margin:14px 0 4px}
-  .post-key-cta .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 16px;font-size:14px;font-weight:500;text-decoration:none;border-radius:10px;transition:border-color 140ms,background 140ms,transform 140ms}
-  .post-key-cta .btn:hover{transform:translateY(-1px)}
-  .post-key-cta .btn .arr{font-family:var(--mono);font-size:13px;opacity:0.85}
-  .cli-details{margin-top:14px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);overflow:hidden}
-  .cli-details > summary{cursor:pointer;list-style:none;padding:11px 14px;font-family:var(--mono);font-size:12px;letter-spacing:0.04em;color:var(--ink-mute);display:flex;align-items:center;gap:8px;user-select:none}
-  .cli-details > summary::-webkit-details-marker{display:none}
-  .cli-details > summary::before{content:'+';display:inline-block;width:14px;color:var(--ink-faint);transition:transform 140ms}
-  .cli-details[open] > summary::before{content:'-'}
-  .cli-details > summary:hover{color:var(--ink)}
-  .cli-details-body{padding:0 14px 14px}
-  @media (prefers-reduced-motion: reduce){
-    .post-key-cta .btn,.cli-details > summary::before{transition:none}
-    .post-key-cta .btn:hover{transform:none}
-  }
+ [hidden]{display:none !important}
+ .plan-banner{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border:1px solid var(--line-strong);border-radius:12px;background:var(--bg-elev);margin-bottom:20px}
+ .plan-banner .plan-name{font-weight: 500;color:var(--ink)}
+ .plan-banner .plan-price{font-family:var(--mono);color:var(--accent);font-size:13px}
+ .plan-banner .plan-meta{color:var(--ink-mute);font-size:13px;margin-top:4px;line-height:1.5}
+ .plan-banner .plan-switch{margin-left:auto;font-size:12px}
+ .plan-banner .plan-switch a{color:var(--ink-faint);text-decoration:none}
+ .plan-banner .plan-switch a:hover{color:var(--ink)}
+ .auth-brand{display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;color:var(--accent,#7ef0d2);font-family:var(--mono);font-size:13px;font-weight: 500;letter-spacing:-0.01em}
+ [data-theme="light"] .auth-brand{color:var(--accent,#0a8862)}
+ .auth-brand svg{display:block}
+ .oauth-row{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+ .oauth-row .oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;font-size:14px;font-weight: 500;background:var(--bg-2,#0e1014) !important;background-image:none !important;color:var(--ink,#faf2e1) !important;border:1px solid var(--line-2,rgba(236,231,220,0.22)) !important;border-radius:10px;cursor:pointer;transition:border-color 140ms,background 140ms,transform 140ms}
+ .oauth-row .oauth-btn:hover{border-color:var(--accent,#7ef0d2) !important;transform:translateY(-1px)}
+ [data-theme="light"] .oauth-row .oauth-btn{background:#ffffff !important;color:#0c0e10 !important;border-color:rgba(12,14,16,0.18) !important}
+ [data-theme="light"] .oauth-row .oauth-btn:hover{border-color:rgba(10,136,98,0.40) !important}
+ .oauth-row .oauth-divider{text-align:center;color:var(--ink-faint);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:8px 0;position:relative}
+ .oauth-row .oauth-divider::before,.oauth-row .oauth-divider::after{content:'';position:absolute;top:50%;width:35%;height:1px;background:var(--line)}
+ .oauth-row .oauth-divider::before{left:0}
+ .oauth-row .oauth-divider::after{right:0}
+ .advanced-toggle{display:block;text-align:center;margin:14px 0 0;color:var(--ink-faint);font-size:12px;text-decoration:none;cursor:pointer;background:none;border:0;width:100%;padding:6px}
+ .advanced-toggle:hover{color:var(--ink)}
+ .advanced-panel{margin-top:12px;padding-top:14px;border-top:1px solid var(--line)}
+ .advanced-panel[hidden]{display:none !important}
+ .auth-tabs[hidden]{display:none !important}
+ .post-key-cta{display:flex;flex-direction:column;gap:10px;margin:14px 0 4px}
+ .post-key-cta .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 16px;font-size:14px;font-weight:500;text-decoration:none;border-radius:10px;transition:border-color 140ms,background 140ms,transform 140ms}
+ .post-key-cta .btn:hover{transform:translateY(-1px)}
+ .post-key-cta .btn .arr{font-family:var(--mono);font-size:13px;opacity:0.85}
+ .cli-details{margin-top:14px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);overflow:hidden}
+ .cli-details > summary{cursor:pointer;list-style:none;padding:11px 14px;font-family:var(--mono);font-size:12px;letter-spacing:0.04em;color:var(--ink-mute);display:flex;align-items:center;gap:8px;user-select:none}
+ .cli-details > summary::-webkit-details-marker{display:none}
+ .cli-details > summary::before{content:'+';display:inline-block;width:14px;color:var(--ink-faint);transition:transform 140ms}
+ .cli-details[open] > summary::before{content:'-'}
+ .cli-details > summary:hover{color:var(--ink)}
+ .cli-details-body{padding:0 14px 14px}
+ @media (prefers-reduced-motion: reduce){
+ .post-key-cta .btn,.cli-details > summary::before{transition:none}
+ .post-key-cta .btn:hover{transform:none}
+ }
 </style>
-  <meta property="og:url" content="https://kolm.ai/signup">
+ <meta property="og:url" content="https://kolm.ai/signup">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/signup",
-  "description": "Sign in to kolm with Google or GitHub. Or create an account on any plan in under a minute. Fully self-serve, including Enterprise.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "kolm",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Linux, macOS, Windows (WSL)",
+ "url": "https://kolm.ai/signup",
+ "description": "Sign in to kolm with Google or GitHub. Or create an account on any plan in under a minute. Fully self-serve, including Enterprise.",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "publisher": {
+ "@type": "Organization",
+ "name": "kolm.ai",
+ "@id": "https://kolm.ai/#org"
+ }
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:title" content="Sign in guide · kolm.ai">
+<meta name="twitter:description" content="Sign in to kolm with Google or GitHub. Or create an account on any plan in under a minute. Fully self-serve, including Enterprise.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand"><span>kolm</span></a>
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm</span></a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -247,444 +252,444 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions"><a href="/">home</a></div>
-  </div>
+ <div class="site-actions"><a href="/">home</a></div>
+ </div>
 </header>
 
-<main class="auth-main">
-  <section class="auth-card" aria-labelledby="auth-title">
-    <div class="auth-brand" aria-hidden="true">
-      <svg width="22" height="22" viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4" fill="currentColor"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4" fill="currentColor"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4" fill="currentColor"/>
-      </svg>
-      <span>kolm</span>
-    </div>
-    <div class="eyebrow"><span class="pulse"></span>account</div>
-    <h1 id="auth-title">Sign in to kolm.</h1>
-    <p class="lede" id="auth-sub">One click with Google or GitHub. Every plan, including Enterprise, is fully self-serve.</p>
+<main id="main" class="auth-main">
+ <section class="auth-card" aria-labelledby="auth-title">
+ <div class="auth-brand" aria-hidden="true">
+ <svg width="22" height="22" viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm">
+ <rect x="4" y="6" width="4.5" height="20" rx="0.4" fill="currentColor"/>
+ <rect x="13" y="9" width="4.5" height="14" rx="0.4" fill="currentColor"/>
+ <rect x="22" y="12" width="4.5" height="8" rx="0.4" fill="currentColor"/>
+ </svg>
+ <span>kolm</span>
+ </div>
+ <div class="eyebrow"><span class="pulse"></span>account</div>
+ <h1 id="auth-title">Sign in to kolm.</h1>
+ <p class="lede" id="auth-sub">One click with Google or GitHub. Every plan, including Enterprise, is fully self-serve.</p>
 
-    <div id="plan-banner" class="plan-banner" hidden>
-      <div>
-        <div><span class="plan-name" id="plan-name">Developer</span> &middot; <span class="plan-price" id="plan-price">$0</span></div>
-        <div class="plan-meta" id="plan-meta">No card. No email approval. Your account works the second sign-in returns.</div>
-      </div>
-      <div class="plan-switch"><a href="/pricing">change plan</a></div>
-    </div>
+ <div id="plan-banner" class="plan-banner" hidden>
+ <div>
+ <div><span class="plan-name" id="plan-name">Developer</span> &middot; <span class="plan-price" id="plan-price">$0</span></div>
+ <div class="plan-meta" id="plan-meta">No card. No email approval. Your account works the second sign-in returns.</div>
+ </div>
+ <div class="plan-switch"><a href="/pricing">change plan</a></div>
+ </div>
 
-    <div id="oauth-row" class="oauth-row">
-      <button id="oauth-google" class="btn primary oauth-btn" type="button">
-        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.227c0-.673-.06-1.32-.173-1.946H12v3.68h5.385c-.232 1.244-.937 2.298-1.997 3.005v2.498h3.232c1.892-1.741 2.98-4.305 2.98-7.237z"/><path fill="#34A853" d="M12 22c2.7 0 4.965-.894 6.62-2.422l-3.232-2.498c-.894.6-2.04.954-3.388.954-2.604 0-4.81-1.755-5.598-4.116H3.07v2.582A9.997 9.997 0 0 0 12 22z"/><path fill="#FBBC04" d="M6.402 13.918a5.998 5.998 0 0 1 0-3.836V7.5H3.07a9.998 9.998 0 0 0 0 9l3.332-2.582z"/><path fill="#EA4335" d="M12 5.882c1.468 0 2.787.504 3.823 1.495l2.866-2.866C16.96 2.99 14.696 2 12 2A9.997 9.997 0 0 0 3.07 7.5l3.332 2.582C7.19 7.637 9.396 5.882 12 5.882z"/></svg>
-        Continue with Google
-      </button>
-      <button id="oauth-github" class="btn primary oauth-btn" type="button">
-        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.46-1.11-1.46-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>
-        Continue with GitHub
-      </button>
-      <div id="oauth-divider" class="oauth-divider">or</div>
-    </div>
+ <div id="oauth-row" class="oauth-row">
+ <button id="oauth-google" class="btn primary oauth-btn" type="button">
+ <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.227c0-.673-.06-1.32-.173-1.946H12v3.68h5.385c-.232 1.244-.937 2.298-1.997 3.005v2.498h3.232c1.892-1.741 2.98-4.305 2.98-7.237z"/><path fill="#34A853" d="M12 22c2.7 0 4.965-.894 6.62-2.422l-3.232-2.498c-.894.6-2.04.954-3.388.954-2.604 0-4.81-1.755-5.598-4.116H3.07v2.582A9.997 9.997 0 0 0 12 22z"/><path fill="#FBBC04" d="M6.402 13.918a5.998 5.998 0 0 1 0-3.836V7.5H3.07a9.998 9.998 0 0 0 0 9l3.332-2.582z"/><path fill="#EA4335" d="M12 5.882c1.468 0 2.787.504 3.823 1.495l2.866-2.866C16.96 2.99 14.696 2 12 2A9.997 9.997 0 0 0 3.07 7.5l3.332 2.582C7.19 7.637 9.396 5.882 12 5.882z"/></svg>
+ Continue with Google
+ </button>
+ <button id="oauth-github" class="btn primary oauth-btn" type="button">
+ <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.46-1.11-1.46-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>
+ Continue with GitHub
+ </button>
+ <div id="oauth-divider" class="oauth-divider">or</div>
+ </div>
 
-    <div id="msg" class="auth-msg" role="status" aria-live="polite"></div>
+ <div id="msg" class="auth-msg" role="status" aria-live="polite"></div>
 
-    <form id="form-up" autocomplete="on" novalidate>
-      <label class="field">
-        <span class="lbl">Email</span>
-        <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
-      </label>
-      <label class="field">
-        <span class="lbl">Name optional</span>
-        <input id="name" name="name" type="text" autocomplete="name" placeholder="Your name">
-      </label>
-      <input id="plan-input" type="hidden" name="plan" value="free">
-      <button id="submit-up" class="btn ghost" type="submit">Sign up with email</button>
-      <p class="auth-note">Free tiers activate instantly. Paid tiers return a Stripe payment link in the same response.</p>
-    </form>
+ <form id="form-up" autocomplete="on" novalidate>
+ <label class="field">
+ <span class="lbl">Email</span>
+ <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
+ </label>
+ <label class="field">
+ <span class="lbl">Name optional</span>
+ <input id="name" name="name" type="text" autocomplete="name" placeholder="Your name">
+ </label>
+ <input id="plan-input" type="hidden" name="plan" value="free">
+ <button id="submit-up" class="btn ghost" type="submit">Sign up with email</button>
+ <p class="auth-note">Free tiers activate instantly. Paid tiers return a Stripe payment link in the same response.</p>
+ </form>
 
-    <button id="advanced-toggle" class="advanced-toggle" type="button" aria-expanded="false">Already have an API key? &rarr;</button>
+ <button id="advanced-toggle" class="advanced-toggle" type="button" aria-expanded="false">Already have an API key? &rarr;</button>
 
-    <div id="advanced-panel" class="advanced-panel" hidden>
-      <form id="form-in" autocomplete="on" novalidate>
-        <label class="field">
-          <span class="lbl">API key</span>
-          <input id="api_key" name="api_key" type="text" autocomplete="off" placeholder="ks_..." spellcheck="false">
-        </label>
-        <button id="submit-in" class="btn ghost" type="submit">Sign in with API key</button>
-        <p class="auth-note">Use the API key from a previous /v1/signup response. Or, if you're new here, pick Google / GitHub / email above.</p>
-      </form>
-    </div>
+ <div id="advanced-panel" class="advanced-panel" hidden>
+ <form id="form-in" autocomplete="on" novalidate>
+ <label class="field">
+ <span class="lbl">API key</span>
+ <input id="api_key" name="api_key" type="text" autocomplete="off" placeholder="ks_..." spellcheck="false">
+ </label>
+ <button id="submit-in" class="btn ghost" type="submit">Sign in with API key</button>
+ <p class="auth-note">Use the API key from a previous /v1/signup response. Or, if you're new here, pick Google / GitHub / email above.</p>
+ </form>
+ </div>
 
-    <div id="key-display" class="key-display" hidden>
-      <div class="lbl">Your API key</div>
-      <div class="key" id="key-value"></div>
-      <div class="actions">
-        <button class="btn ghost" id="copy-key" type="button">Copy key</button>
-      </div>
-      <p><strong>Save this key.</strong> It is shown once. You can rotate it from your dashboard or via <code>POST /v1/account/rotate-key</code>.</p>
+ <div id="key-display" class="key-display" hidden>
+ <div class="lbl">Your API key</div>
+ <div class="key" id="key-value"></div>
+ <div class="actions">
+ <button class="btn ghost" id="copy-key" type="button">Copy key</button>
+ </div>
+ <p><strong>Save this key.</strong> It is shown once. You can rotate it from your dashboard or via <code>POST /v1/account/rotate-key</code>.</p>
 
-      <div class="post-key-cta" id="post-key-cta">
-        <a class="btn primary" href="/train" id="cta-train" rel="noopener">Train your first model in your browser <span class="arr">&rarr;</span></a>
-        <a class="btn ghost" href="/onboard" id="cta-onboard" rel="noopener">Pick your guided path <span class="arr">&rarr;</span></a>
-        <a class="btn ghost" href="/dashboard" id="cta-dashboard" rel="noopener">Go to dashboard</a>
-      </div>
-      <p style="margin:10px 2px 0 2px;color:var(--ink-mute);font-size:12.5px;line-height:1.5">
-        Not sure where to start? <a href="/onboard" style="color:var(--accent);text-decoration:underline">Pick a four-step guided path</a> based on whether you are a CTO, developer, compliance lead, or researcher.
-      </p>
+ <div class="post-key-cta" id="post-key-cta">
+ <a class="btn primary" href="/train" id="cta-train" rel="noopener">Train your first model in your browser <span class="arr">&rarr;</span></a>
+ <a class="btn ghost" href="/onboard" id="cta-onboard" rel="noopener">Pick your guided path <span class="arr">&rarr;</span></a>
+ <a class="btn ghost" href="/dashboard" id="cta-dashboard" rel="noopener">Go to dashboard</a>
+ </div>
+ <p style="margin:10px 2px 0 2px;color:var(--ink-mute);font-size:12.5px;line-height:1.5">
+ Not sure where to start? <a href="/onboard" style="color:var(--accent);text-decoration:underline">Pick a four-step guided path</a> based on whether you are a CTO, developer, compliance lead, or researcher.
+ </p>
 
-      <details class="cli-details" id="cli-details">
-        <summary>Or set up the CLI</summary>
-        <div class="cli-details-body">
-          <div id="cli-bridge">
-            <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Use it from the CLI</div>
-            <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:#0b0d10;border:1px solid var(--line);border-radius:8px;color:#7ef0d2;font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:sneaky-hippo/kolmogorov-stack
+ <details class="cli-details" id="cli-details">
+ <summary>Or set up the CLI</summary>
+ <div class="cli-details-body">
+ <div id="cli-bridge">
+ <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Use it from the CLI</div>
+ <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:#0b0d10;border:1px solid var(--line);border-radius:8px;color:#7ef0d2;font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:sneaky-hippo/kolmogorov-stack
 kolm login --key ks_...
 kolm init
 kolm new my-skill --from classifier
 kolm compile --spec my-skill.spec.json</code></pre>
-            <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
-              <button class="btn ghost" id="copy-cli" type="button">Copy commands</button>
-              <a class="btn ghost" href="/quickstart" rel="noopener">Quickstart &rarr;</a>
-              <a class="btn ghost" href="/docs" rel="noopener">Cookbook &rarr;</a>
-            </div>
-            <p style="margin:10px 0 0 0;color:var(--ink-mute);font-size:13px">The key above is already pasted into the snippet. Run the commands in any terminal; no further web step is needed.</p>
-          </div>
-        </div>
-      </details>
+ <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+ <button class="btn ghost" id="copy-cli" type="button">Copy commands</button>
+ <a class="btn ghost" href="/quickstart" rel="noopener">Quickstart &rarr;</a>
+ <a class="btn ghost" href="/docs" rel="noopener">Cookbook &rarr;</a>
+ </div>
+ <p style="margin:10px 0 0 0;color:var(--ink-mute);font-size:13px">The key above is already pasted into the snippet. Run the commands in any terminal; no further web step is needed.</p>
+ </div>
+ </div>
+ </details>
 
-      <div id="billing-row" hidden style="margin-top:14px;padding:12px 14px;border:1px solid var(--accent);border-radius:10px;background:var(--bg-elev)">
-        <strong style="color:var(--accent)">Payment required.</strong>
-        <p style="margin:6px 0 10px 0;color:var(--ink-mute);font-size:13px">Your API key is on the free Developer tier until payment is confirmed. Redirecting to Stripe&hellip; If the redirect doesn&rsquo;t fire, click below.</p>
-        <a id="billing-link" class="btn primary" href="/account" rel="noopener">Pay with Stripe &rarr;</a>
-      </div>
-    </div>
-  </section>
+ <div id="billing-row" hidden style="margin-top:14px;padding:12px 14px;border:1px solid var(--accent);border-radius:10px;background:var(--bg-elev)">
+ <strong style="color:var(--accent)">Payment required.</strong>
+ <p style="margin:6px 0 10px 0;color:var(--ink-mute);font-size:13px">Your API key is on the free Developer tier until payment is confirmed. Redirecting to Stripe&hellip; If the redirect doesn&rsquo;t fire, click below.</p>
+ <a id="billing-link" class="btn primary" href="/account" rel="noopener">Pay with Stripe &rarr;</a>
+ </div>
+ </div>
+ </section>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
  &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">kolm.ai vs Kolm therapeutics</a></footer>
 
 <script>
 (function(){
-  // ks_api_key is the only key we write going forward (wave 100 P1-3: dedup
-  // to cut XSS exfil surface 75%). The 3 legacy aliases are still in the
-  // READ_FALLBACK below so pages that loaded before the migration still work,
-  // and saveKey() proactively removes them on every save to drain the old keys.
-  var WRITE_KEY = 'ks_api_key';
-  var READ_FALLBACK = ['kolm_api_key', 'apiKey', 'recipeApiKey', 'ks_api_key'];
-  var LEGACY_KEYS = ['kolm_api_key', 'apiKey', 'recipeApiKey'];
-  var PLANS = {
-    free:       { label: 'Developer',  price: '$0 forever',          meta: 'No card. Your API key works the second this form returns.' },
-    starter:    { label: 'Starter',    price: '$9 / month',          meta: 'Provisioned instantly. Stripe payment link returned in the same response. Complete billing within 30 days to stay on Starter.' },
-    pro:        { label: 'Pro',        price: '$49 / month',         meta: 'Provisioned instantly. Stripe payment link returned in the same response. Complete billing within 30 days to stay on Pro.' },
-    teams:      { label: 'Teams',      price: '$149 / month',        meta: 'Provisioned instantly with 5 seats. Stripe payment link returned in the same response. Complete billing within 30 days to stay on Teams.' },
-    enterprise: { label: 'Enterprise', price: '$2,999 / month',      meta: 'Provisioned instantly. SSO/SCIM/BAA paths via /trust. Stripe payment link returned in the same response. DPA available without contacting sales.' },
-  };
-  function $(id){ return document.getElementById(id); }
-  function saveKey(key){
-    try {
-      localStorage.setItem(WRITE_KEY, key);
-      LEGACY_KEYS.forEach(function(name){ localStorage.removeItem(name); });
-    } catch (_) {}
-  }
-  function show(kind, text){
-    var el = $('msg');
-    el.className = 'auth-msg ' + kind;
-    el.textContent = text;
-  }
-  function getQueryPlan(){
-    var match = location.search.match(/[?&]plan=([a-z0-9_-]+)/i);
-    if (!match) return null;
-    var v = match[1].toLowerCase();
-    return PLANS[v] ? v : null;
-  }
-  function applyPlanBanner(){
-    var planId = getQueryPlan();
-    if (!planId) { $('plan-banner').hidden = true; return; }
-    var p = PLANS[planId];
-    $('plan-name').textContent = p.label;
-    $('plan-price').textContent = p.price;
-    $('plan-meta').innerHTML = p.meta;
-    $('plan-input').value = planId;
-    $('plan-banner').hidden = false;
-  }
-  applyPlanBanner();
+ // ks_api_key is the only key we write going forward (wave 100 P1-3: dedup
+ // to cut XSS exfil surface 75%). The 3 legacy aliases are still in the
+ // READ_FALLBACK below so pages that loaded before the migration still work,
+ // and saveKey() proactively removes them on every save to drain the old keys.
+ var WRITE_KEY = 'ks_api_key';
+ var READ_FALLBACK = ['kolm_api_key', 'apiKey', 'recipeApiKey', 'ks_api_key'];
+ var LEGACY_KEYS = ['kolm_api_key', 'apiKey', 'recipeApiKey'];
+ var PLANS = {
+ free: { label: 'Developer', price: '$0 forever', meta: 'No card. Your API key works the second this form returns.' },
+ starter: { label: 'Starter', price: '$9 / month', meta: 'Provisioned instantly. Stripe payment link returned in the same response. Complete billing within 30 days to stay on Starter.' },
+ pro: { label: 'Pro', price: '$49 / month', meta: 'Provisioned instantly. Stripe payment link returned in the same response. Complete billing within 30 days to stay on Pro.' },
+ teams: { label: 'Teams', price: '$149 / month', meta: 'Provisioned instantly with 5 seats. Stripe payment link returned in the same response. Complete billing within 30 days to stay on Teams.' },
+ enterprise: { label: 'Enterprise', price: '$2,999 / month', meta: 'Provisioned instantly. SSO/SCIM/BAA paths via /trust. Stripe payment link returned in the same response. DPA available without contacting sales.' },
+ };
+ function $(id){ return document.getElementById(id); }
+ function saveKey(key){
+ try {
+ localStorage.setItem(WRITE_KEY, key);
+ LEGACY_KEYS.forEach(function(name){ localStorage.removeItem(name); });
+ } catch (_) {}
+ }
+ function show(kind, text){
+ var el = $('msg');
+ el.className = 'auth-msg ' + kind;
+ el.textContent = text;
+ }
+ function getQueryPlan(){
+ var match = location.search.match(/[?&]plan=([a-z0-9_-]+)/i);
+ if (!match) return null;
+ var v = match[1].toLowerCase();
+ return PLANS[v] ? v : null;
+ }
+ function applyPlanBanner(){
+ var planId = getQueryPlan();
+ if (!planId) { $('plan-banner').hidden = true; return; }
+ var p = PLANS[planId];
+ $('plan-name').textContent = p.label;
+ $('plan-price').textContent = p.price;
+ $('plan-meta').innerHTML = p.meta;
+ $('plan-input').value = planId;
+ $('plan-banner').hidden = false;
+ }
+ applyPlanBanner();
 
-  // URL-aware H1. /signup invites account creation; /signin invites return.
-  // Both URLs serve this HTML; the canonical points to /signin so SEO stays
-  // consolidated, but the on-page heading should match user intent.
-  (function applyAuthTitle(){
-    var isSignup = /\/signup(\/|$)/.test(location.pathname);
-    var t = $('auth-title');
-    var s = $('auth-sub');
-    if (isSignup) {
-      if (t) t.textContent = 'Create your account.';
-      if (s) s.textContent = 'One click with Google or GitHub. Every plan, including Enterprise, is fully self-serve.';
-      try { document.title = 'Sign up ·kolm'; } catch (_) {}
-    } else {
-      if (t) t.textContent = 'Sign in to kolm.';
-      if (s) s.textContent = 'Welcome back. One click with Google or GitHub, or paste your API key.';
-      try { document.title = 'Sign in ·kolm'; } catch (_) {}
-    }
-  })();
+ // URL-aware H1. /signup invites account creation; /signin invites return.
+ // Both URLs serve this HTML; the canonical points to /signin so SEO stays
+ // consolidated, but the on-page heading should match user intent.
+ (function applyAuthTitle(){
+ var isSignup = /\/signup(\/|$)/.test(location.pathname);
+ var t = $('auth-title');
+ var s = $('auth-sub');
+ if (isSignup) {
+ if (t) t.textContent = 'Create your account.';
+ if (s) s.textContent = 'One click with Google or GitHub. Every plan, including Enterprise, is fully self-serve.';
+ try { document.title = 'Sign up ·kolm'; } catch (_) {}
+ } else {
+ if (t) t.textContent = 'Sign in to kolm.';
+ if (s) s.textContent = 'Welcome back. One click with Google or GitHub, or paste your API key.';
+ try { document.title = 'Sign in ·kolm'; } catch (_) {}
+ }
+ })();
 
-  // Advanced toggle: reveal API-key sign-in only on demand. SSO + email is the
-  // default surface; api-key sign-in lives behind a small text link below.
-  $('advanced-toggle').addEventListener('click', function(){
-    var panel = $('advanced-panel');
-    var expanded = !panel.hidden;
-    panel.hidden = expanded;
-    $('advanced-toggle').setAttribute('aria-expanded', expanded ? 'false' : 'true');
-    $('advanced-toggle').textContent = expanded
-      ? 'Already have an API key?'
-      : 'Hide API-key sign-in';
-    if (!expanded) {
-      try { $('api_key').focus(); } catch (_) {}
-    }
-  });
-  if (location.hash === '#apikey') {
-    $('advanced-panel').hidden = false;
-    $('advanced-toggle').textContent = 'Hide API-key sign-in';
-    $('advanced-toggle').setAttribute('aria-expanded', 'true');
-  }
+ // Advanced toggle: reveal API-key sign-in only on demand. SSO + email is the
+ // default surface; api-key sign-in lives behind a small text link below.
+ $('advanced-toggle').addEventListener('click', function(){
+ var panel = $('advanced-panel');
+ var expanded = !panel.hidden;
+ panel.hidden = expanded;
+ $('advanced-toggle').setAttribute('aria-expanded', expanded ? 'false' : 'true');
+ $('advanced-toggle').textContent = expanded
+ ? 'Already have an API key?'
+ : 'Hide API-key sign-in';
+ if (!expanded) {
+ try { $('api_key').focus(); } catch (_) {}
+ }
+ });
+ if (location.hash === '#apikey') {
+ $('advanced-panel').hidden = false;
+ $('advanced-toggle').textContent = 'Hide API-key sign-in';
+ $('advanced-toggle').setAttribute('aria-expanded', 'true');
+ }
 
-  // Surface OAuth provider availability and errors. Hide the row entirely if
-  // neither provider is configured so we don't show a dead UI.
-  (function setupOAuth(){
-    var planParam = getQueryPlan();
-    var redirect = (planParam && planParam !== 'free') ? '/account' : '/dashboard';
-    function gotoOAuth(provider){
-      // For paid plans, route OAuth users back through change-plan after sign-in.
-      var qp = '?redirect=' + encodeURIComponent(redirect);
-      if (planParam && planParam !== 'free') qp += '&plan=' + encodeURIComponent(planParam);
-      location.href = '/v1/oauth/' + provider + '/start' + qp;
-    }
-    // Check provider availability once, gate the click. No HEAD probe race:
-    // the /start endpoint sets state cookies, so HEAD-then-GET wrote them twice
-    // and could leak a stale state on rapid clicks. One source of truth.
-    var providerOk = { google: true, github: true };
-    function tryOAuth(provider){
-      if (providerOk[provider] === false) {
-        show('err', provider + ' sign-in is being set up. Use email signup below.');
-        return;
-      }
-      gotoOAuth(provider);
-    }
-    $('oauth-google').addEventListener('click', function(){ tryOAuth('google'); });
-    $('oauth-github').addEventListener('click', function(){ tryOAuth('github'); });
-    fetch('/v1/oauth/providers').then(function(r){ return r.json(); }).then(function(p){
-      if (!p) return;
-      providerOk.google = p.google !== false;
-      providerOk.github = p.github !== false;
-      if (p.google === false) $('oauth-google').style.opacity = '0.55';
-      if (p.github === false) $('oauth-github').style.opacity = '0.55';
-    }).catch(function(){});
+ // Surface OAuth provider availability and errors. Hide the row entirely if
+ // neither provider is configured so we don't show a dead UI.
+ (function setupOAuth(){
+ var planParam = getQueryPlan();
+ var redirect = (planParam && planParam !== 'free') ? '/account' : '/dashboard';
+ function gotoOAuth(provider){
+ // For paid plans, route OAuth users back through change-plan after sign-in.
+ var qp = '?redirect=' + encodeURIComponent(redirect);
+ if (planParam && planParam !== 'free') qp += '&plan=' + encodeURIComponent(planParam);
+ location.href = '/v1/oauth/' + provider + '/start' + qp;
+ }
+ // Check provider availability once, gate the click. No HEAD probe race:
+ // the /start endpoint sets state cookies, so HEAD-then-GET wrote them twice
+ // and could leak a stale state on rapid clicks. One source of truth.
+ var providerOk = { google: true, github: true };
+ function tryOAuth(provider){
+ if (providerOk[provider] === false) {
+ show('err', provider + ' sign-in is being set up. Use email signup below.');
+ return;
+ }
+ gotoOAuth(provider);
+ }
+ $('oauth-google').addEventListener('click', function(){ tryOAuth('google'); });
+ $('oauth-github').addEventListener('click', function(){ tryOAuth('github'); });
+ fetch('/v1/oauth/providers').then(function(r){ return r.json(); }).then(function(p){
+ if (!p) return;
+ providerOk.google = p.google !== false;
+ providerOk.github = p.github !== false;
+ if (p.google === false) $('oauth-google').style.opacity = '0.55';
+ if (p.github === false) $('oauth-github').style.opacity = '0.55';
+ }).catch(function(){});
 
-    var err = (location.search.match(/[?&]oauth_error=([^&]+)/) || [])[1];
-    if (err) {
-      var pretty = decodeURIComponent(err).replace(/_/g, ' ');
-      var hint = '';
-      if (/state_mismatch/.test(err)) {
-        hint = ' (your browser dropped the state cookie. Try in a fresh window without strict tracking protection)';
-      } else if (/no_email_returned/.test(err)) {
-        hint = ' (the provider did not return a verified email. Make sure your account has one)';
-      } else if (/token_exchange_failed/.test(err)) {
-        hint = ' (the provider rejected the code. Usually means the consent step was cancelled or the redirect URI is not authorized in the provider console)';
-      } else if (/access_denied/.test(err)) {
-        hint = ' (you cancelled at the consent screen. Pick a different account or use email)';
-      }
-      show('err', 'Sign in failed: ' + pretty + '.' + hint + ' Use email below if it keeps failing.');
-    }
-    var ok = (location.search.match(/[?&]oauth=(signup|signin)/) || [])[1];
-    if (ok === 'signup') show('ok', 'Account created. Redirecting...');
-    if (ok === 'signin') show('ok', 'Signed in. Redirecting...');
-    if (ok) setTimeout(function(){ location.href = redirect; }, 600);
-  })();
+ var err = (location.search.match(/[?&]oauth_error=([^&]+)/) || [])[1];
+ if (err) {
+ var pretty = decodeURIComponent(err).replace(/_/g, ' ');
+ var hint = '';
+ if (/state_mismatch/.test(err)) {
+ hint = ' (your browser dropped the state cookie. Try in a fresh window without strict tracking protection)';
+ } else if (/no_email_returned/.test(err)) {
+ hint = ' (the provider did not return a verified email. Make sure your account has one)';
+ } else if (/token_exchange_failed/.test(err)) {
+ hint = ' (the provider rejected the code. Usually means the consent step was cancelled or the redirect URI is not authorized in the provider console)';
+ } else if (/access_denied/.test(err)) {
+ hint = ' (you cancelled at the consent screen. Pick a different account or use email)';
+ }
+ show('err', 'Sign in failed: ' + pretty + '.' + hint + ' Use email below if it keeps failing.');
+ }
+ var ok = (location.search.match(/[?&]oauth=(signup|signin)/) || [])[1];
+ if (ok === 'signup') show('ok', 'Account created. Redirecting...');
+ if (ok === 'signin') show('ok', 'Signed in. Redirecting...');
+ if (ok) setTimeout(function(){ location.href = redirect; }, 600);
+ })();
 
-  $('form-in').addEventListener('submit', function(event){
-    event.preventDefault();
-    var key = $('api_key').value.trim();
-    if (!/^ks_[0-9a-f]{32}$/.test(key)) return show('err', 'Enter a valid ks_ API key.');
-    $('submit-in').disabled = true;
-    show('info', 'Signing in...');
-    fetch('/v1/signin', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ api_key: key })
-    }).then(function(res){
-      return res.json().catch(function(){ return {}; }).then(function(body){ return { ok: res.ok, status: res.status, body: body }; });
-    }).then(function(result){
-      $('submit-in').disabled = false;
-      if (!result.ok) return show('err', result.body.error || 'Sign-in failed.');
-      saveKey(key);
-      show('ok', 'Signed in. Redirecting...');
-      setTimeout(function(){ location.href = '/dashboard'; }, 400);
-    }).catch(function(){
-      $('submit-in').disabled = false;
-      show('err', 'Network error. Try again.');
-    });
-  });
+ $('form-in').addEventListener('submit', function(event){
+ event.preventDefault();
+ var key = $('api_key').value.trim();
+ if (!/^ks_[0-9a-f]{32}$/.test(key)) return show('err', 'Enter a valid ks_ API key.');
+ $('submit-in').disabled = true;
+ show('info', 'Signing in...');
+ fetch('/v1/signin', {
+ method: 'POST',
+ headers: { 'content-type': 'application/json' },
+ credentials: 'include',
+ body: JSON.stringify({ api_key: key })
+ }).then(function(res){
+ return res.json().catch(function(){ return {}; }).then(function(body){ return { ok: res.ok, status: res.status, body: body }; });
+ }).then(function(result){
+ $('submit-in').disabled = false;
+ if (!result.ok) return show('err', result.body.error || 'Sign-in failed.');
+ saveKey(key);
+ show('ok', 'Signed in. Redirecting...');
+ setTimeout(function(){ location.href = '/dashboard'; }, 400);
+ }).catch(function(){
+ $('submit-in').disabled = false;
+ show('err', 'Network error. Try again.');
+ });
+ });
 
-  $('form-up').addEventListener('submit', function(event){
-    event.preventDefault();
-    var email = $('email').value.trim();
-    var name = $('name').value.trim();
-    var plan = $('plan-input').value || 'free';
-    if (!/.+@.+\..+/.test(email)) return show('err', 'Enter a valid email.');
-    $('submit-up').disabled = true;
-    show('info', 'Creating account...');
-    fetch('/v1/signup', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email: email, name: name || undefined, plan: plan })
-    }).then(function(res){
-      return res.json().catch(function(){ return {}; }).then(function(body){ return { ok: res.ok, status: res.status, body: body }; });
-    }).then(function(result){
-      $('submit-up').disabled = false;
-      if (!result.ok || !result.body.api_key) return show('err', result.body.error || 'Account creation failed.');
-      var key = result.body.api_key;
-      saveKey(key);
-      $('key-value').textContent = key;
-      $('key-display').hidden = false;
-      // Bridge to CLI: paste the real key into the snippet so it is one copy away
-      // from a working `kolm login`. HD got stuck here without this.
-      try {
-        var snippet = $('cli-snippet-code');
-        if (snippet) {
-          snippet.textContent =
-            'npm i -g github:sneaky-hippo/kolmogorov-stack\n' +
-            'kolm login --key ' + key + '\n' +
-            'kolm init\n' +
-            'kolm new my-skill --from classifier\n' +
-            'kolm compile --spec my-skill.spec.json';
-        }
-      } catch (_) {}
-      var planLabel = (PLANS[plan] || PLANS.free).label;
-      // Background sign-in so the dashboard recognizes the new key.
-      fetch('/v1/signin', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ api_key: key })
-      }).catch(function(){});
-      if (result.body.billing_url) {
-        // Paid plan: account is provisioned on the free tier; payment is
-        // required to activate the requested tier. Redirect immediately.
-        $('billing-link').href = result.body.billing_url;
-        $('billing-row').hidden = false;
-        // Demote browser CTAs while the user is being routed to Stripe so the
-        // post-key surface stays focused on payment completion.
-        var trainBtn = $('cta-train');
-        var dashBtn = $('cta-dashboard');
-        if (trainBtn) trainBtn.textContent = 'Skip for now →';
-        if (dashBtn) dashBtn.hidden = true;
-        show('ok', planLabel + ' account on hold. Save your key, then complete payment.');
-        setTimeout(function(){
-          window.location.assign(result.body.billing_url);
-        }, 1500);
-      } else {
-        show('ok', planLabel + ' account live. Save your key.');
-      }
-    }).catch(function(){
-      $('submit-up').disabled = false;
-      show('err', 'Network error. Try again.');
-    });
-  });
+ $('form-up').addEventListener('submit', function(event){
+ event.preventDefault();
+ var email = $('email').value.trim();
+ var name = $('name').value.trim();
+ var plan = $('plan-input').value || 'free';
+ if (!/.+@.+\..+/.test(email)) return show('err', 'Enter a valid email.');
+ $('submit-up').disabled = true;
+ show('info', 'Creating account...');
+ fetch('/v1/signup', {
+ method: 'POST',
+ headers: { 'content-type': 'application/json' },
+ credentials: 'include',
+ body: JSON.stringify({ email: email, name: name || undefined, plan: plan })
+ }).then(function(res){
+ return res.json().catch(function(){ return {}; }).then(function(body){ return { ok: res.ok, status: res.status, body: body }; });
+ }).then(function(result){
+ $('submit-up').disabled = false;
+ if (!result.ok || !result.body.api_key) return show('err', result.body.error || 'Account creation failed.');
+ var key = result.body.api_key;
+ saveKey(key);
+ $('key-value').textContent = key;
+ $('key-display').hidden = false;
+ // Bridge to CLI: paste the real key into the snippet so it is one copy away
+ // from a working `kolm login`. HD got stuck here without this.
+ try {
+ var snippet = $('cli-snippet-code');
+ if (snippet) {
+ snippet.textContent =
+ 'npm i -g github:sneaky-hippo/kolmogorov-stack\n' +
+ 'kolm login --key ' + key + '\n' +
+ 'kolm init\n' +
+ 'kolm new my-skill --from classifier\n' +
+ 'kolm compile --spec my-skill.spec.json';
+ }
+ } catch (_) {}
+ var planLabel = (PLANS[plan] || PLANS.free).label;
+ // Background sign-in so the dashboard recognizes the new key.
+ fetch('/v1/signin', {
+ method: 'POST',
+ headers: { 'content-type': 'application/json' },
+ credentials: 'include',
+ body: JSON.stringify({ api_key: key })
+ }).catch(function(){});
+ if (result.body.billing_url) {
+ // Paid plan: account is provisioned on the free tier; payment is
+ // required to activate the requested tier. Redirect immediately.
+ $('billing-link').href = result.body.billing_url;
+ $('billing-row').hidden = false;
+ // Demote browser CTAs while the user is being routed to Stripe so the
+ // post-key surface stays focused on payment completion.
+ var trainBtn = $('cta-train');
+ var dashBtn = $('cta-dashboard');
+ if (trainBtn) trainBtn.textContent = 'Skip for now →';
+ if (dashBtn) dashBtn.hidden = true;
+ show('ok', planLabel + ' account on hold. Save your key, then complete payment.');
+ setTimeout(function(){
+ window.location.assign(result.body.billing_url);
+ }, 1500);
+ } else {
+ show('ok', planLabel + ' account live. Save your key.');
+ }
+ }).catch(function(){
+ $('submit-up').disabled = false;
+ show('err', 'Network error. Try again.');
+ });
+ });
 
-  $('copy-key').addEventListener('click', function(){
-    var key = $('key-value').textContent;
-    if (!key) return;
-    navigator.clipboard.writeText(key).then(function(){
-      $('copy-key').textContent = 'Copied';
-      setTimeout(function(){ $('copy-key').textContent = 'Copy key'; }, 1200);
-    }).catch(function(){ show('err', 'Copy failed. Select the key manually.'); });
-  });
+ $('copy-key').addEventListener('click', function(){
+ var key = $('key-value').textContent;
+ if (!key) return;
+ navigator.clipboard.writeText(key).then(function(){
+ $('copy-key').textContent = 'Copied';
+ setTimeout(function(){ $('copy-key').textContent = 'Copy key'; }, 1200);
+ }).catch(function(){ show('err', 'Copy failed. Select the key manually.'); });
+ });
 
-  var copyCli = $('copy-cli');
-  if (copyCli) {
-    copyCli.addEventListener('click', function(){
-      var snippet = $('cli-snippet-code');
-      if (!snippet) return;
-      navigator.clipboard.writeText(snippet.textContent).then(function(){
-        copyCli.textContent = 'Copied';
-        setTimeout(function(){ copyCli.textContent = 'Copy commands'; }, 1200);
-      }).catch(function(){ show('err', 'Copy failed. Select the commands manually.'); });
-    });
-  }
+ var copyCli = $('copy-cli');
+ if (copyCli) {
+ copyCli.addEventListener('click', function(){
+ var snippet = $('cli-snippet-code');
+ if (!snippet) return;
+ navigator.clipboard.writeText(snippet.textContent).then(function(){
+ copyCli.textContent = 'Copied';
+ setTimeout(function(){ copyCli.textContent = 'Copy commands'; }, 1200);
+ }).catch(function(){ show('err', 'Copy failed. Select the commands manually.'); });
+ });
+ }
 
-  // Browser-first CTAs: re-save the key right before the navigation in case
-  // the initial saveKey() lost the write (private windows, full storage,
-  // extension interference). The key text in #key-value is the source of
-  // truth on this page once a signup has succeeded.
-  function persistThenGo(href){
-    var key = ($('key-value').textContent || '').trim();
-    if (key && /^ks_[0-9a-f]{32}$/.test(key)) saveKey(key);
-    window.location.href = href;
-  }
-  var ctaTrain = $('cta-train');
-  if (ctaTrain) {
-    ctaTrain.addEventListener('click', function(ev){
-      ev.preventDefault();
-      persistThenGo('/train');
-    });
-  }
-  var ctaDashboard = $('cta-dashboard');
-  if (ctaDashboard) {
-    ctaDashboard.addEventListener('click', function(ev){
-      ev.preventDefault();
-      persistThenGo('/dashboard');
-    });
-  }
+ // Browser-first CTAs: re-save the key right before the navigation in case
+ // the initial saveKey() lost the write (private windows, full storage,
+ // extension interference). The key text in #key-value is the source of
+ // truth on this page once a signup has succeeded.
+ function persistThenGo(href){
+ var key = ($('key-value').textContent || '').trim();
+ if (key && /^ks_[0-9a-f]{32}$/.test(key)) saveKey(key);
+ window.location.href = href;
+ }
+ var ctaTrain = $('cta-train');
+ if (ctaTrain) {
+ ctaTrain.addEventListener('click', function(ev){
+ ev.preventDefault();
+ persistThenGo('/train');
+ });
+ }
+ var ctaDashboard = $('cta-dashboard');
+ if (ctaDashboard) {
+ ctaDashboard.addEventListener('click', function(ev){
+ ev.preventDefault();
+ persistThenGo('/dashboard');
+ });
+ }
 })();
 </script>
 <script src="/nav.js" defer></script>

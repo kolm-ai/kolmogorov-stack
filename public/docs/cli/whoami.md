@@ -7,26 +7,26 @@ tenant, plan, and quota.
 
 ```
 kolm whoami
-kolm whoami --json    # stable envelope: logged_in, base, cli_version,
-                      # key_fingerprint, tenant{id,name,plan,quota,seats,email}
+kolm whoami --json # stable envelope: logged_in, base, cli_version,
+ # key_fingerprint, tenant{id,name,plan,quota,seats,email}
 ```
 
 ## Stable JSON envelope
 
 ```json
 {
-  "logged_in": true,
-  "base": "https://kolm.ai",
-  "cli_version": "11.x",
-  "key_fingerprint": "kolm-XXXX...YYYY",
-  "tenant": {
-    "id": "tnt_...",
-    "name": "Acme Health",
-    "plan": "team",
-    "quota": { "captures_per_month": 1000000, "compiles_per_month": 100 },
-    "seats": 12,
-    "email": "ops@acme.example"
-  }
+ "logged_in": true,
+ "base": "https://kolm.ai",
+ "cli_version": "11.x",
+ "key_fingerprint": "kolm-XXXX...YYYY",
+ "tenant": {
+ "id": "tnt_...",
+ "name": "Acme Health",
+ "plan": "team",
+ "quota": { "captures_per_month": 1000000, "compiles_per_month": 100 },
+ "seats": 12,
+ "email": "ops@acme.example"
+ }
 }
 ```
 

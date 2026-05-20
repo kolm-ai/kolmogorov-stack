@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Continual learning loop: capture, train, swap, sign &middot; kolm research</title>
-<meta name="description" content="Frozen frontier models is a real failure mode for buyers with industry-specific tails. The kolm answer is the captures loop: proxy live traffic, distill into a .kolm, hot-swap the adapter, K-score-gate the swap.">
+<title>Continual learning loop: capture, train, swap, sign · kolm.ai</title>
+<meta name="description" content="Frozen frontier models is a real failure mode for buyers with industry-specific tails. The kolm answer is the captures loop: proxy live traffic, distill...">
 <meta name="keywords" content="continual learning, captures, LoRA hot-swap, K-score gate, online learning, adaption labs, model drift">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -14,12 +14,12 @@
 <meta name="author" content="kolm">
 <meta name="robots" content="index,follow,max-snippet:-1">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="Continual learning loop: capture, train, swap, sign">
-<meta property="og:description" content="Capture live traffic, distill into a .kolm, hot-swap the adapter. The K-score gate refuses to ship a worse one.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Continual learning loop: capture, train, swap, sign · kolm.ai">
+<meta property="og:description" content="Frozen frontier models is a real failure mode for buyers with industry-specific tails. The kolm answer is the captures loop: proxy live traffic, distill...">
+<meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Continual learning loop at kolm">
-<meta name="twitter:description" content="Capture, train, swap, sign. The cycle that beats frozen frontier models.">
+<meta name="twitter:title" content="Continual learning loop: capture, train, swap, sign · kolm.ai">
+<meta name="twitter:description" content="Frozen frontier models is a real failure mode for buyers with industry-specific tails. The kolm answer is the captures loop: proxy live traffic, distill...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/research/continual-learning-loop">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -27,169 +27,170 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "TechArticle",
-      "headline": "Continual learning loop: capture, train, swap, sign",
-      "description": "The captures loop: live traffic feeds a LoRA distill, the K-score gates the swap, the receipt chain signs the change.",
-      "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
-      "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
-      "datePublished": "2026-05-14",
-      "dateModified": "2026-05-14",
-      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/continual-learning-loop" },
-      "image": "https://kolm.ai/og-card.svg",
-      "keywords": "continual learning, captures, LoRA, hot-swap, K-score",
-      "articleSection": "Applied",
-      "wordCount": 2200
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
-        {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
-        {"@type": "ListItem", "position": 3, "name": "Continual learning loop", "item": "https://kolm.ai/research/continual-learning-loop"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "TechArticle",
+ "headline": "Continual learning loop: capture, train, swap, sign",
+ "description": "The captures loop: live traffic feeds a LoRA distill, the K-score gates the swap, the receipt chain signs the change.",
+ "author": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "publisher": { "@type": "Organization", "name": "kolm", "logo": { "@type": "ImageObject", "url": "https://kolm.ai/favicon.svg" } },
+ "datePublished": "2026-05-14",
+ "dateModified": "2026-05-14",
+ "mainEntityOfPage": { "@type": "WebPage", "@id": "https://kolm.ai/research/continual-learning-loop" },
+ "image": "https://kolm.ai/og-card.svg",
+ "keywords": "continual learning, captures, LoRA, hot-swap, K-score",
+ "articleSection": "Applied",
+ "wordCount": 2200
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/"},
+ {"@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research"},
+ {"@type": "ListItem", "position": 3, "name": "Continual learning loop", "item": "https://kolm.ai/research/continual-learning-loop"}
+ ]
+ }
+ ]
 }
 </script>
 <style>
-  :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
-  a{color:inherit;text-decoration:none}
-  .wrap{max-width:760px;margin:0 auto;padding:0 32px}
-  .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
-  @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
+ :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#faf2e1;--ink-mute:#b5bdb1;--ink-faint:#737c73;--accent:#faf2e1;--accent-soft:rgba(236,231,220, 0.10);--good:#7ef0d2;--bad:#ff6b91;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;font-synthesis:none}
+ a{color:inherit;text-decoration:none}
+ .wrap{max-width:760px;margin:0 auto;padding:0 32px}
+ .wrap-wide{max-width:1180px;margin:0 auto;padding:0 32px}
+ @media(max-width:720px){.wrap,.wrap-wide{padding:0 20px}}
 
-  header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
-  header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
-  header.site .left{display:flex;align-items:center;gap:36px}
-  header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
-  header.site .brand span{font-weight:500;font-size:16px}
-  header.site nav{display:flex;gap:22px}
-  header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
-  header.site nav a:hover{color:var(--ink)}
-  header.site .right{display:flex;align-items:center;gap:14px}
-  header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
-  header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
-  @media(max-width:720px){header.site nav{display:none}}
+ header.site{position:sticky;top:0;z-index:60;background:rgba(8,9,8,0.78);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+ header.site .row{display:flex;align-items:center;justify-content:space-between;height:60px;gap:32px}
+ header.site .left{display:flex;align-items:center;gap:36px}
+ header.site .brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink)}
+ header.site .brand span{font-weight:500;font-size:16px}
+ header.site nav{display:flex;gap:22px}
+ header.site nav a{color:var(--ink-mute);font-size:13.5px;transition:color 120ms}
+ header.site nav a:hover{color:var(--ink)}
+ header.site .right{display:flex;align-items:center;gap:14px}
+ header.site .right .ghost{color:var(--ink-mute);font-size:13.5px}
+ header.site .right .cta{color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500}
+ @media(max-width:720px){header.site nav{display:none}}
 
-  section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
-  section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
-  section.hero .wrap{position:relative}
-  .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
-  .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
-  h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
-  h1 .tone{color:#10b981}
-  p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
-  p.lede b{color:var(--ink);font-weight:500}
-  .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .meta b{color:var(--ink-mute);font-weight:500}
+ section.hero{padding:80px 0 36px;position:relative;overflow:hidden}
+ section.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 900px 460px at 22% 12%,rgba(236,231,220, 0.10),transparent 60%)}
+ section.hero .wrap{position:relative}
+ .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;background:var(--bg-elev)}
+ .pill .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+ h1{margin:22px 0 18px;font-size:clamp(34px,5.4vw,54px);line-height:1.05;font-weight:500;max-width:22ch}
+ h1 .tone{color:#10b981}
+ p.lede{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink-mute);max-width:60ch}
+ p.lede b{color:var(--ink);font-weight:500}
+ .meta{display:flex;gap:18px;margin-top:22px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .meta b{color:var(--ink-mute);font-weight:500}
 
-  article{padding:36px 0 96px}
-  article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
-  article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
-  article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
-  article p b{color:var(--ink);font-weight:500}
-  article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
-  article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
-  article blockquote p{color:var(--ink);margin:0;font-weight:500}
-  article ul{padding-left:0;list-style:none;margin:16px 0 24px}
-  article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
-  article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
-  article ul li b{color:var(--ink);font-weight:500}
-  article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
-  article pre .com{color:var(--ink-faint)}
-  article pre .arg{color:#10b981}
-  article pre .kw{color:#b0bbff}
-  article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
-  article th,article td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
-  article th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;background:var(--bg-elev)}
-  article td b{color:var(--ink);font-weight:500}
+ article{padding:36px 0 96px}
+ article h2{margin:56px 0 14px;font-size:clamp(24px,2.6vw,30px);line-height:1.2;font-weight:500;color:var(--ink)}
+ article h3{margin:36px 0 10px;font-size:18px;font-weight:500;color:var(--ink)}
+ article p{margin:0 0 16px;font-size:16.5px;line-height:1.7;color:var(--ink-mute)}
+ article p b{color:var(--ink);font-weight:500}
+ article p code,article li code,article td code{font-family:var(--mono);font-size:0.92em;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink)}
+ article blockquote{margin:28px 0;padding:16px 22px;border-left:2px solid #10b981;background:var(--bg-elev);border-radius:0 8px 8px 0;font-size:17px;line-height:1.6;color:var(--ink)}
+ article blockquote p{color:var(--ink);margin:0;font-weight:500}
+ article ul{padding-left:0;list-style:none;margin:16px 0 24px}
+ article ul li{padding:8px 0 8px 22px;position:relative;font-size:16px;line-height:1.6;color:var(--ink-mute)}
+ article ul li::before{content:"-";color:#10b981;position:absolute;left:6px;font-weight:500}
+ article ul li b{color:var(--ink);font-weight:500}
+ article pre{margin:18px 0 24px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--ink)}
+ article pre .com{color:var(--ink-faint)}
+ article pre .arg{color:#10b981}
+ article pre .kw{color:#b0bbff}
+ article table{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14px}
+ article th,article td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-mute)}
+ article th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);font-weight:500;background:var(--bg-elev)}
+ article td b{color:var(--ink);font-weight:500}
 
-  .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
-  .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
-  .toc ol{margin:0;padding-left:20px}
-  .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
-  .toc li a{color:var(--ink-mute)}
-  .toc li a:hover{color:#10b981}
+ .toc{margin:28px 0 36px;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px}
+ .toc h5{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px;font-weight:500}
+ .toc ol{margin:0;padding-left:20px}
+ .toc li{padding:4px 0;font-size:14px;color:var(--ink-mute)}
+ .toc li a{color:var(--ink-mute)}
+ .toc li a:hover{color:#10b981}
 
-  .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
-  @media(max-width:720px){.signpost{grid-template-columns:1fr}}
-  .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
-  .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
-  .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
-  .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
-  .signpost a .v .arrow{color:#10b981;margin-left:6px}
-  .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
+ .signpost{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:48px 0 0}
+ @media(max-width:720px){.signpost{grid-template-columns:1fr}}
+ .signpost a{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;transition:border-color 120ms,background 120ms}
+ .signpost a:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .signpost a .lab{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-faint)}
+ .signpost a .v{color:var(--ink);font-weight:500;font-size:16px}
+ .signpost a .v .arrow{color:#10b981;margin-left:6px}
+ .signpost a p{margin:4px 0 0;font-size:13.5px;color:var(--ink-mute);line-height:1.5}
 
-  footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
-  footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+ footer.site{padding:56px 0 40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+ footer.site .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 </style>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <span class="pill"><span class="dot"></span>Research &middot; Applied &middot; 2026-05-14 &middot; 11 min read</span>
-    <h1>Continual learning <span class="tone">&middot; capture, train, swap, sign.</span></h1>
-    <p class="lede">Frontier models are frozen at the cutoff. <b>The buyer with an industry-specific tail does not get one.</b> kolm closes the loop with captures: live traffic feeds a LoRA distill, the K-score gate refuses to ship a worse one, the receipt chain signs the swap. Four commands, no platform lock-in.</p>
-    <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;captures &middot; lora &middot; online &middot; applied</span></div>
-  </div>
+ <div class="wrap">
+ <span class="pill"><span class="dot"></span>Research &middot; Applied &middot; 2026-05-14 &middot; 11 min read</span>
+ <h1>Continual learning <span class="tone">&middot; capture, train, swap, sign.</span></h1>
+ <p class="lede">Frontier models are frozen at the cutoff. <b>The buyer with an industry-specific tail does not get one.</b> kolm closes the loop with captures: live traffic feeds a LoRA distill, the K-score gate refuses to ship a worse one, the receipt chain signs the swap. Four commands, no platform lock-in.</p>
+ <div class="meta"><span><b>By</b>&nbsp;kolm</span><span><b>Tag</b>&nbsp;captures &middot; lora &middot; online &middot; applied</span></div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="toc">
-      <h5>Contents</h5>
-      <ol>
-        <li><a href="#problem">The frozen-model problem</a></li>
-        <li><a href="#loop">The four-step loop</a></li>
-        <li><a href="#gate">The K-score gate</a></li>
-        <li><a href="#swap">Hot-swap mechanics</a></li>
-        <li><a href="#provenance">Provenance, every swap</a></li>
-        <li><a href="#cadence">Cadence and cost</a></li>
-        <li><a href="#failure">Failure modes</a></li>
-      </ol>
-    </div>
+ <div class="toc">
+ <h5>Contents</h5>
+ <ol>
+ <li><a href="#problem">The frozen-model problem</a></li>
+ <li><a href="#loop">The four-step loop</a></li>
+ <li><a href="#gate">The K-score gate</a></li>
+ <li><a href="#swap">Hot-swap mechanics</a></li>
+ <li><a href="#provenance">Provenance, every swap</a></li>
+ <li><a href="#cadence">Cadence and cost</a></li>
+ <li><a href="#failure">Failure modes</a></li>
+ </ol>
+ </div>
 
-    <h2 id="problem">The frozen-model problem.</h2>
-    <p>A frontier model is trained on a snapshot of the web ending some months ago. Its weights are fixed; its tokenizer is fixed; the policy that ranks responses is fixed. For most consumer chat this is fine. For a buyer with an industry-specific tail (clinical workflows, regulatory deadlines, internal jargon, customer-name vocabulary), <b>the tail does not exist in the training distribution.</b> The model is competent on the long shoulder and merely plausible on the tail.</p>
+ <h2 id="problem">The frozen-model problem.</h2>
+ <p>A frontier model is trained on a snapshot of the web ending some months ago. Its weights are fixed; its tokenizer is fixed; the policy that ranks responses is fixed. For most consumer chat this is fine. For a buyer with an industry-specific tail (clinical workflows, regulatory deadlines, internal jargon, customer-name vocabulary), <b>the tail does not exist in the training distribution.</b> The model is competent on the long shoulder and merely plausible on the tail.</p>
 
-    <p>The conventional answer is RAG: paste the buyer's documents into the prompt at inference time and hope the model uses them. RAG works for a class of retrieval-shaped queries and fails for anything that needs the model to have internalized a vocabulary or a policy. <b>The model never learns.</b> Every new shipment of buyer-specific knowledge is a context-window expense, not an asset.</p>
+ <p>The conventional answer is RAG: paste the buyer's documents into the prompt at inference time and hope the model uses them. RAG works for a class of retrieval-shaped queries and fails for anything that needs the model to have internalized a vocabulary or a policy. <b>The model never learns.</b> Every new shipment of buyer-specific knowledge is a context-window expense, not an asset.</p>
 
-    <p>The right answer is a distill that converts the buyer's traffic into weights. The traffic exists already: it is the captures the buyer is sending to a frontier API today. The distill is short: a LoRA over a small base. The risk is regression: the distill is worse than the model it replaces. The fix is a gate.</p>
+ <p>The right answer is a distill that converts the buyer's traffic into weights. The traffic exists already: it is the captures the buyer is sending to a frontier API today. The distill is short: a LoRA over a small base. The risk is regression: the distill is worse than the model it replaces. The fix is a gate.</p>
 
-    <h2 id="loop">The four-step loop.</h2>
-    <p>The kolm loop is four CLI verbs and one assertion. The buyer runs each step manually, on a schedule (nightly, weekly), or on an event (volume threshold, semantic drift detected).</p>
+ <h2 id="loop">The four-step loop.</h2>
+ <p>The kolm loop is four CLI verbs and one assertion. The buyer runs each step manually, on a schedule (nightly, weekly), or on an event (volume threshold, semantic drift detected).</p>
 
-    <pre><span class="com"># 1. Capture: proxy live traffic, tag, redact, store.</span>
+ <pre><span class="com"># 1. Capture: proxy live traffic, tag, redact, store.</span>
 $ kolm capture --tenant acme --tag clinical-intake
 
 <span class="com"># 2. Train: distill the captures into a new .kolm adapter.</span>
@@ -201,143 +202,143 @@ $ kolm eval --artifact ./out/intake_v2.kolm --suite clinical-intake-evals
 <span class="com"># 4. Swap: hot-swap the adapter only if it K-scores higher than the current one.</span>
 $ kolm swap --artifact ./out/intake_v2.kolm --strategy higher-k-wins</pre>
 
-    <p>The four verbs map to four files in the source tree: <code>src/capture.js</code>, <code>src/spec-compile.js</code>, <code>src/benchmark.js</code>, <code>src/serve.js</code>. The connecting state is the receipt chain: every step writes a receipt that references the previous step's CID. A swap that ships also writes a registry row with the from-CID and the to-CID so a deployer can roll back the adapter on the fly.</p>
+ <p>The four verbs map to four files in the source tree: <code>src/capture.js</code>, <code>src/spec-compile.js</code>, <code>src/benchmark.js</code>, <code>src/serve.js</code>. The connecting state is the receipt chain: every step writes a receipt that references the previous step's CID. A swap that ships also writes a registry row with the from-CID and the to-CID so a deployer can roll back the adapter on the fly.</p>
 
-    <h2 id="gate">The K-score gate.</h2>
-    <p>The K-score is a weighted aggregate of accuracy, size, latency, cost, and coverage. <code>K = 0.40 . A + 0.15 . S + 0.15 . L + 0.15 . C + 0.15 . V</code>. The default ship threshold is 0.85, but in the continual-learning loop the threshold is dynamic: <b>the new artifact must beat the current artifact's K-score, plus a margin.</b></p>
+ <h2 id="gate">The K-score gate.</h2>
+ <p>The K-score is a weighted aggregate of accuracy, size, latency, cost, and coverage. <code>K = 0.40 . A + 0.15 . S + 0.15 . L + 0.15 . C + 0.15 . V</code>. The default ship threshold is 0.85, but in the continual-learning loop the threshold is dynamic: <b>the new artifact must beat the current artifact's K-score, plus a margin.</b></p>
 
-    <table>
-      <thead><tr><th>Current K</th><th>New K</th><th>Margin</th><th>Action</th></tr></thead>
-      <tbody>
-        <tr><td class="num">0.871</td><td class="num">0.889</td><td class="num">+0.018</td><td><b>swap</b></td></tr>
-        <tr><td class="num">0.871</td><td class="num">0.872</td><td class="num">+0.001</td><td>refuse (within noise)</td></tr>
-        <tr><td class="num">0.871</td><td class="num">0.850</td><td class="num">-0.021</td><td>refuse (regression)</td></tr>
-        <tr><td class="num">0.871</td><td class="num">0.823</td><td class="num">-0.048</td><td>refuse + alert</td></tr>
-      </tbody>
-    </table>
+ <table>
+ <thead><tr><th>Current K</th><th>New K</th><th>Margin</th><th>Action</th></tr></thead>
+ <tbody>
+ <tr><td class="num">0.871</td><td class="num">0.889</td><td class="num">+0.018</td><td><b>swap</b></td></tr>
+ <tr><td class="num">0.871</td><td class="num">0.872</td><td class="num">+0.001</td><td>refuse (within noise)</td></tr>
+ <tr><td class="num">0.871</td><td class="num">0.850</td><td class="num">-0.021</td><td>refuse (regression)</td></tr>
+ <tr><td class="num">0.871</td><td class="num">0.823</td><td class="num">-0.048</td><td>refuse + alert</td></tr>
+ </tbody>
+ </table>
 
-    <p>The margin defaults to <code>+0.01</code> so noise alone does not flip the adapter. The alert threshold defaults to <code>-0.03</code> so a meaningful regression pages the engineer who owns the recipe.</p>
+ <p>The margin defaults to <code>+0.01</code> so noise alone does not flip the adapter. The alert threshold defaults to <code>-0.03</code> so a meaningful regression pages the engineer who owns the recipe.</p>
 
-    <h2 id="swap">Hot-swap mechanics.</h2>
-    <p>The serving runtime loads <code>.kolm</code> artifacts via a versioned adapter registry. A hot-swap is two file renames and one HUP signal. There is no model restart, no service interruption, no cold cache.</p>
+ <h2 id="swap">Hot-swap mechanics.</h2>
+ <p>The serving runtime loads <code>.kolm</code> artifacts via a versioned adapter registry. A hot-swap is two file renames and one HUP signal. There is no model restart, no service interruption, no cold cache.</p>
 
-    <pre><span class="com"># The current adapter symlink points at v1.</span>
+ <pre><span class="com"># The current adapter symlink points at v1.</span>
 adapters/clinical-intake -&gt; adapters/clinical-intake_v1.kolm
 
 <span class="com"># The swap atomically repoints the symlink.</span>
 ln -sf adapters/clinical-intake_v2.kolm adapters/clinical-intake.swap
-mv -f  adapters/clinical-intake.swap    adapters/clinical-intake
+mv -f adapters/clinical-intake.swap adapters/clinical-intake
 
 <span class="com"># The runtime polls the symlink every second; on change, it loads the new adapter.</span>
 <span class="com"># In-flight requests finish on the old one; new requests use the new one.</span></pre>
 
-    <p>The trade is that two adapters live in memory briefly. For LoRA adapters at <code>r=16</code> on a 7B base, that is two adapters of about 30 MB each, which is negligible against the 14 GB base weights. The window is bounded by the longest in-flight request; on a typical chat path with <code>max_tokens=512</code> at 200 tok/s that is 2.5 seconds.</p>
+ <p>The trade is that two adapters live in memory briefly. For LoRA adapters at <code>r=16</code> on a 7B base, that is two adapters of about 30 MB each, which is negligible against the 14 GB base weights. The window is bounded by the longest in-flight request; on a typical chat path with <code>max_tokens=512</code> at 200 tok/s that is 2.5 seconds.</p>
 
-    <h2 id="provenance">Provenance, every swap.</h2>
-    <p>Every artifact carries a receipt chain over <code>task &rarr; seeds &rarr; recipes &rarr; evals &rarr; package</code>, signed under the tenant key, with the CID embedded. Every swap writes a registry row that names the from-CID and the to-CID. The deployer can answer five questions without leaving the registry:</p>
+ <h2 id="provenance">Provenance, every swap.</h2>
+ <p>Every artifact carries a receipt chain over <code>task &rarr; seeds &rarr; recipes &rarr; evals &rarr; package</code>, signed under the tenant key, with the CID embedded. Every swap writes a registry row that names the from-CID and the to-CID. The deployer can answer five questions without leaving the registry:</p>
 
-    <ul>
-      <li><b>What task is this model trained for?</b> The task field in the manifest.</li>
-      <li><b>What data trained it?</b> The capture namespace and the seed range.</li>
-      <li><b>What code produced it?</b> The deterministic recipe bytes and the trainer version.</li>
-      <li><b>What does it score?</b> The K-score from the evals.json block.</li>
-      <li><b>What did it replace?</b> The from-CID column in the swap log.</li>
-    </ul>
+ <ul>
+ <li><b>What task is this model trained for?</b> The task field in the manifest.</li>
+ <li><b>What data trained it?</b> The capture namespace and the seed range.</li>
+ <li><b>What code produced it?</b> The deterministic recipe bytes and the trainer version.</li>
+ <li><b>What does it score?</b> The K-score from the evals.json block.</li>
+ <li><b>What did it replace?</b> The from-CID column in the swap log.</li>
+ </ul>
 
-    <p>A regulator who asks "show me the trail" gets all five from one query. <b>None of those answers depend on us being alive.</b> The verifier is Rust, <code>forbid(unsafe_code)</code>, dependency-pinned, and ships as a 4 MB binary the deployer can vendor.</p>
+ <p>A regulator who asks "show me the trail" gets all five from one query. <b>None of those answers depend on us being alive.</b> The verifier is Rust, <code>forbid(unsafe_code)</code>, dependency-pinned, and ships as a 4 MB binary the deployer can vendor.</p>
 
-    <h2 id="cadence">Cadence and cost.</h2>
-    <p>Three cadences cover most production patterns.</p>
+ <h2 id="cadence">Cadence and cost.</h2>
+ <p>Three cadences cover most production patterns.</p>
 
-    <table>
-      <thead><tr><th>Cadence</th><th>Trigger</th><th>Typical cost</th><th>Suits</th></tr></thead>
-      <tbody>
-        <tr><td>Nightly</td><td>cron at 02:00 local</td><td class="num">$0.05-$0.50</td><td>chat, support, internal tools</td></tr>
-        <tr><td>Volume-gated</td><td>10k new captures</td><td class="num">$0.10-$1.00</td><td>variable workloads, seasonal traffic</td></tr>
-        <tr><td>Drift-detected</td><td>embedding distance &gt; threshold</td><td class="num">$0.10-$2.00</td><td>regulated workflows, compliance-sensitive</td></tr>
-      </tbody>
-    </table>
+ <table>
+ <thead><tr><th>Cadence</th><th>Trigger</th><th>Typical cost</th><th>Suits</th></tr></thead>
+ <tbody>
+ <tr><td>Nightly</td><td>cron at 02:00 local</td><td class="num">$0.05-$0.50</td><td>chat, support, internal tools</td></tr>
+ <tr><td>Volume-gated</td><td>10k new captures</td><td class="num">$0.10-$1.00</td><td>variable workloads, seasonal traffic</td></tr>
+ <tr><td>Drift-detected</td><td>embedding distance &gt; threshold</td><td class="num">$0.10-$2.00</td><td>regulated workflows, compliance-sensitive</td></tr>
+ </tbody>
+ </table>
 
-    <p>The dollar figures are the median LoRA-distill cost for a Qwen2.5-3B target on a rented A100 via the kolm compute picker (see <a href="/compute" style="color:var(--ink);text-decoration:underline">/compute</a> for the per-backend rates). The total is dominated by the cold-start of the rental container; the actual training pass usually takes 30-90 seconds.</p>
+ <p>The dollar figures are the median LoRA-distill cost for a Qwen2.5-3B target on a rented A100 via the kolm compute picker (see <a href="/compute" style="color:var(--ink);text-decoration:underline">/compute</a> for the per-backend rates). The total is dominated by the cold-start of the rental container; the actual training pass usually takes 30-90 seconds.</p>
 
-    <h2 id="failure">Failure modes.</h2>
-    <p>The verifiable list of ways this loop breaks.</p>
+ <h2 id="failure">Failure modes.</h2>
+ <p>The verifiable list of ways this loop breaks.</p>
 
-    <ul>
-      <li><b>Catastrophic forgetting.</b> A LoRA distill that overweights the new captures forgets the long shoulder. The mitigation is the held-out evals: if the new artifact scores worse on the broad rubric, the K-score gate refuses.</li>
-      <li><b>Eval-set drift.</b> If the held-out evals were authored months ago, they may no longer reflect what the buyer cares about. The mitigation is to mark a fraction of captures as "evaluator" examples in the capture step (<code>kolm capture --tag eval-candidate</code>); the trainer rotates them into the held-out set on the next compile.</li>
-      <li><b>Capture pollution.</b> A user types nonsense; the captures absorb it; the next distill regresses on a clean prompt. The mitigation is the receipt chain plus the swap log: roll back to a known-good CID.</li>
-      <li><b>Provider deprecation.</b> The frontier API the captures came from raises rates or sunsets. The mitigation is that the captures already exist in your registry; the next distill does not need the API.</li>
-    </ul>
+ <ul>
+ <li><b>Catastrophic forgetting.</b> A LoRA distill that overweights the new captures forgets the long shoulder. The mitigation is the held-out evals: if the new artifact scores worse on the broad rubric, the K-score gate refuses.</li>
+ <li><b>Eval-set drift.</b> If the held-out evals were authored months ago, they may no longer reflect what the buyer cares about. The mitigation is to mark a fraction of captures as "evaluator" examples in the capture step (<code>kolm capture --tag eval-candidate</code>); the trainer rotates them into the held-out set on the next compile.</li>
+ <li><b>Capture pollution.</b> A user types nonsense; the captures absorb it; the next distill regresses on a clean prompt. The mitigation is the receipt chain plus the swap log: roll back to a known-good CID.</li>
+ <li><b>Provider deprecation.</b> The frontier API the captures came from raises rates or sunsets. The mitigation is that the captures already exist in your registry; the next distill does not need the API.</li>
+ </ul>
 
-    <p>The loop is not a silver bullet. It is the only structural answer to the frozen-model failure mode that does not require trusting a vendor to retrain on your schedule. <b>kolm ships the loop; you own the captures; the receipt chain proves both.</b></p>
+ <p>The loop is not a silver bullet. It is the only structural answer to the frozen-model failure mode that does not require trusting a vendor to retrain on your schedule. <b>kolm ships the loop; you own the captures; the receipt chain proves both.</b></p>
 
-    <div class="signpost">
-      <a href="/research/multi-token-prediction">
-        <span class="lab">previous</span>
-        <span class="v">Multi-token-per-step prediction<span class="arrow">&rarr;</span></span>
-        <p>Pre-training papers, serving-side dual, throughput math.</p>
-      </a>
-      <a href="/research/receipt-chains">
-        <span class="lab">next</span>
-        <span class="v">Receipt chains<span class="arrow">&rarr;</span></span>
-        <p>The five-step HMAC ladder over canonical JSON.</p>
-      </a>
-    </div>
+ <div class="signpost">
+ <a href="/research/multi-token-prediction">
+ <span class="lab">previous</span>
+ <span class="v">Multi-token-per-step prediction<span class="arrow">&rarr;</span></span>
+ <p>Pre-training papers, serving-side dual, throughput math.</p>
+ </a>
+ <a href="/research/receipt-chains">
+ <span class="lab">next</span>
+ <span class="v">Receipt chains<span class="arrow">&rarr;</span></span>
+ <p>The five-step Ed25519 ladder over canonical JSON.</p>
+ </a>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

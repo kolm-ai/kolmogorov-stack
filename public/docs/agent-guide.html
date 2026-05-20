@@ -5,99 +5,100 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#050607;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Agent guide · kolm.ai</title>
-<meta name="description" content="kolm.ai agent guide for AI assistants. The natural-language verbs do / what / next / explain / fix, the AGENT_GUIDE.md generator, and the rules every Claude, Cursor, or Devin agent needs before it edits a kolm workspace.">
+<meta name="description" content="kolm.ai agent guide for AI assistants. The natural-language verbs do / what / next / explain / fix, the AGENT_GUIDE.md generator, and the rules every...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Agent guide &middot; kolm.ai">
-<meta property="og:description" content="kolm.ai agent guide for AI assistants. The natural-language verbs, the AGENT_GUIDE.md generator, and the rules every coding agent needs before it edits a kolm workspace.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Agent guide · kolm.ai">
+<meta property="og:description" content="kolm.ai agent guide for AI assistants. The natural-language verbs do / what / next / explain / fix, the AGENT_GUIDE.md generator, and the rules every...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/agent-guide">
-<meta property="og:image" content="https://kolm.ai/og/docs.svg">
-<meta name="twitter:title" content="Agent guide &middot; kolm.ai">
-<meta name="twitter:description" content="kolm.ai agent guide for AI assistants. Natural-language verbs, AGENT_GUIDE.md generator, and rules for Claude / Cursor / Devin.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:title" content="Agent guide · kolm.ai">
+<meta name="twitter:description" content="kolm.ai agent guide for AI assistants. The natural-language verbs do / what / next / explain / fix, the AGENT_GUIDE.md generator, and the rules every...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/docs/agent-guide">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <style>
-  :root {
-    --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
-    --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
-    --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
-    --accent: #faf2e1; --accent-strong: #c9c2b2;
-    --good: #7ef0d2; --warn: #d6a65a; --stop: #d77;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  }
-  .ag-wrap{max-width:1100px;margin:0 auto;padding:48px 28px 96px}
-  .ag-wrap .crumbs{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.08em;text-transform:uppercase;margin:0 0 22px}
-  .ag-wrap .crumbs a{color:var(--ink-mute);text-decoration:none}
-  .ag-wrap h1{font-size:34px;font-weight:500;letter-spacing:-0.01em;margin:0 0 12px;color:var(--ink)}
-  .ag-wrap .lede{font-size:16px;line-height:1.55;color:var(--ink-mute);max-width:72ch;margin:0 0 30px}
-  .ag-wrap h2{font-size:22px;font-weight:500;margin:48px 0 14px;letter-spacing:-0.005em;color:var(--ink);scroll-margin-top:80px}
-  .ag-wrap h3{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin:22px 0 8px}
-  .ag-wrap p{color:var(--ink-mute);font-size:14.5px;line-height:1.65;max-width:72ch;margin:0 0 12px}
-  .ag-wrap code{font-family:var(--mono);font-size:12.5px;background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--ink)}
-  .ag-wrap pre{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;font-family:var(--mono);font-size:12.5px;color:var(--ink);overflow-x:auto;line-height:1.55;margin:6px 0 14px}
-  .ag-wrap a{color:var(--ink);border-bottom:1px solid var(--line-strong);text-decoration:none}
-  .ag-wrap a:hover{color:var(--accent)}
-  .ag-verb{border:1px solid var(--line);border-radius:10px;padding:18px 20px;background:var(--bg-elev);margin:12px 0}
-  .ag-verb h3{margin:0 0 6px;font-family:var(--mono);font-size:13px;color:var(--ink);letter-spacing:0.01em;text-transform:none}
-  .ag-verb p{margin:0 0 6px;font-size:13.5px}
-  .ag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin:14px 0 18px}
-  .ag-rule{border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:6px;padding:12px 14px;background:var(--bg-elev);margin:10px 0;font-size:13.5px;color:var(--ink-mute)}
-  .ag-rule b{color:var(--ink);font-weight:500}
-  .ag-related{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:22px;margin-top:42px}
-  .ag-related h2{margin:0 0 12px;font-size:14px;font-family:var(--mono);letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
-  .ag-related ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 18px}
-  .ag-related ul li a{font-size:13.5px;color:var(--accent);border-bottom:1px solid var(--line-strong);text-decoration:none}
-  [data-theme=light] .ag-wrap{color:#0c0e10}
-  [data-theme=light] .ag-wrap .crumbs{color:#737c73}
-  [data-theme=light] .ag-wrap .crumbs a{color:#4b5158}
-  [data-theme=light] .ag-wrap h1,[data-theme=light] .ag-wrap h2{color:#0c0e10}
-  [data-theme=light] .ag-wrap h3{color:#737c73}
-  [data-theme=light] .ag-wrap p{color:#4b5158}
-  [data-theme=light] .ag-wrap code{background:#f4f5f3;border-color:rgba(12,14,16,0.08);color:#0c0e10}
-  [data-theme=light] .ag-wrap pre{background:#f4f5f3;border-color:rgba(12,14,16,0.08);color:#0c0e10}
-  [data-theme=light] .ag-wrap a{color:#0c0e10;border-bottom-color:rgba(12,14,16,0.16)}
-  [data-theme=light] .ag-wrap a:hover{color:#0a8862}
-  [data-theme=light] .ag-verb{background:#ffffff;border-color:rgba(12,14,16,0.08)}
-  [data-theme=light] .ag-rule{background:#ffffff;border-color:rgba(12,14,16,0.08);border-left-color:#d6a65a;color:#4b5158}
-  [data-theme=light] .ag-related{background:#ffffff;border-color:rgba(12,14,16,0.08)}
+ :root {
+ --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --ink: #faf2e1; --ink-mute: #b5bdb1; --ink-faint: #737c73;
+ --accent: #faf2e1; --accent-strong: #c9c2b2;
+ --good: #7ef0d2; --warn: #d6a65a; --stop: #d77;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ }
+ .ag-wrap{max-width:1100px;margin:0 auto;padding:48px 28px 96px}
+ .ag-wrap .crumbs{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.08em;text-transform:uppercase;margin:0 0 22px}
+ .ag-wrap .crumbs a{color:var(--ink-mute);text-decoration:none}
+ .ag-wrap h1{font-size:34px;font-weight:500;letter-spacing:-0.01em;margin:0 0 12px;color:var(--ink)}
+ .ag-wrap .lede{font-size:16px;line-height:1.55;color:var(--ink-mute);max-width:72ch;margin:0 0 30px}
+ .ag-wrap h2{font-size:22px;font-weight:500;margin:48px 0 14px;letter-spacing:-0.005em;color:var(--ink);scroll-margin-top:80px}
+ .ag-wrap h3{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin:22px 0 8px}
+ .ag-wrap p{color:var(--ink-mute);font-size:14.5px;line-height:1.65;max-width:72ch;margin:0 0 12px}
+ .ag-wrap code{font-family:var(--mono);font-size:12.5px;background:var(--bg-card);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--ink)}
+ .ag-wrap pre{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;font-family:var(--mono);font-size:12.5px;color:var(--ink);overflow-x:auto;line-height:1.55;margin:6px 0 14px}
+ .ag-wrap a{color:var(--ink);border-bottom:1px solid var(--line-strong);text-decoration:none}
+ .ag-wrap a:hover{color:var(--accent)}
+ .ag-verb{border:1px solid var(--line);border-radius:10px;padding:18px 20px;background:var(--bg-elev);margin:12px 0}
+ .ag-verb h3{margin:0 0 6px;font-family:var(--mono);font-size:13px;color:var(--ink);letter-spacing:0.01em;text-transform:none}
+ .ag-verb p{margin:0 0 6px;font-size:13.5px}
+ .ag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin:14px 0 18px}
+ .ag-rule{border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:6px;padding:12px 14px;background:var(--bg-elev);margin:10px 0;font-size:13.5px;color:var(--ink-mute)}
+ .ag-rule b{color:var(--ink);font-weight:500}
+ .ag-related{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:22px;margin-top:42px}
+ .ag-related h2{margin:0 0 12px;font-size:14px;font-family:var(--mono);letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+ .ag-related ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 18px}
+ .ag-related ul li a{font-size:13.5px;color:var(--accent);border-bottom:1px solid var(--line-strong);text-decoration:none}
+ [data-theme=light] .ag-wrap{color:#0c0e10}
+ [data-theme=light] .ag-wrap .crumbs{color:#737c73}
+ [data-theme=light] .ag-wrap .crumbs a{color:#4b5158}
+ [data-theme=light] .ag-wrap h1,[data-theme=light] .ag-wrap h2{color:#0c0e10}
+ [data-theme=light] .ag-wrap h3{color:#737c73}
+ [data-theme=light] .ag-wrap p{color:#4b5158}
+ [data-theme=light] .ag-wrap code{background:#f4f5f3;border-color:rgba(12,14,16,0.08);color:#0c0e10}
+ [data-theme=light] .ag-wrap pre{background:#f4f5f3;border-color:rgba(12,14,16,0.08);color:#0c0e10}
+ [data-theme=light] .ag-wrap a{color:#0c0e10;border-bottom-color:rgba(12,14,16,0.16)}
+ [data-theme=light] .ag-wrap a:hover{color:#0a8862}
+ [data-theme=light] .ag-verb{background:#ffffff;border-color:rgba(12,14,16,0.08)}
+ [data-theme=light] .ag-rule{background:#ffffff;border-color:rgba(12,14,16,0.08);border-left-color:#d6a65a;color:#4b5158}
+ [data-theme=light] .ag-related{background:#ffffff;border-color:rgba(12,14,16,0.08)}
 </style>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Agent guide",
-  "description": "kolm.ai agent guide for AI assistants. Natural-language verbs, AGENT_GUIDE.md generator, and rules for Claude / Cursor / Devin.",
-  "url": "https://kolm.ai/docs/agent-guide",
-  "mainEntityOfPage": "https://kolm.ai/docs/agent-guide",
-  "author": { "@type": "Organization", "name": "kolm.ai" }
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "Agent guide",
+ "description": "kolm.ai agent guide for AI assistants. Natural-language verbs, AGENT_GUIDE.md generator, and rules for Claude / Cursor / Devin.",
+ "url": "https://kolm.ai/docs/agent-guide",
+ "mainEntityOfPage": "https://kolm.ai/docs/agent-guide",
+ "author": { "@type": "Organization", "name": "kolm.ai" }
 }
 </script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
-    { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://kolm.ai/docs" },
-    { "@type": "ListItem", "position": 3, "name": "Agent guide", "item": "https://kolm.ai/docs/agent-guide" }
-  ]
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://kolm.ai/docs" },
+ { "@type": "ListItem", "position": 3, "name": "Agent guide", "item": "https://kolm.ai/docs/agent-guide" }
+ ]
 }
 </script>
 <script src="/nav.js" defer></script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <span style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden" aria-hidden="true">kolm.ai</span>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand"><span>kolm</span></a>
+ <div class="wrap">
+ <a href="/" class="brand"><span>kolm</span></a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -248,91 +249,91 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-  </div>
+ </div>
 </header>
 <main id="main" class="ag-wrap">
-  <nav aria-label="Breadcrumb" class="crumbs">
-    <a href="/docs">Docs</a> / <span>Agent guide</span>
-  </nav>
-  <h1>Agent guide</h1>
-  <p class="lede">kolm.ai exposes natural-language verbs so coding agents can drive the product without a custom integration. This page is what every Claude / Cursor / Devin / Aider session should read before its first edit in a kolm workspace.</p>
+ <nav aria-label="Breadcrumb" class="crumbs">
+ <a href="/docs">Docs</a> / <span>Agent guide</span>
+ </nav>
+ <h1>Agent guide</h1>
+ <p class="lede">kolm.ai exposes natural-language verbs so coding agents can drive the product without a custom integration. This page is what every Claude / Cursor / Devin / Aider session should read before its first edit in a kolm workspace.</p>
 
-  <h2 id="verbs">Natural-language verbs</h2>
-  <p>Five top-level verbs cover the agentic surface. Each one is intent-classified by <code>src/intent.js</code> and dispatches into the right code path. None of them require an API key for read-only use.</p>
-  <div class="ag-grid">
-    <div class="ag-verb">
-      <h3>kolm do</h3>
-      <p>Plain-English requests that map to one or more verbs. <code>kolm do "compile a privacy redactor and verify it"</code> resolves into <code>compile</code> + <code>verify</code>.</p>
-    </div>
-    <div class="ag-verb">
-      <h3>kolm what</h3>
-      <p>State summary. Lists artifacts, jobs, captures, and pending receipts. <code>kolm what is broken</code> filters to failures only.</p>
-    </div>
-    <div class="ag-verb">
-      <h3>kolm next</h3>
-      <p>Suggests the next concrete step against the current workspace. Reads <code>kolm.yaml</code>, the seeds dir, and the last receipt to decide.</p>
-    </div>
-    <div class="ag-verb">
-      <h3>kolm explain</h3>
-      <p>Reads an artifact, a receipt, or a failed gate and returns plain English plus the file:line pointer.</p>
-    </div>
-    <div class="ag-verb">
-      <h3>kolm fix</h3>
-      <p>Applies a one-shot remediation. Idempotent. Prints the exact diff before touching disk so the calling agent can review.</p>
-    </div>
-    <div class="ag-verb">
-      <h3>kolm agent guide</h3>
-      <p>Writes <code>AGENT_GUIDE.md</code> at the project root. Pin this in the agent context window so it sees the local rules every turn.</p>
-    </div>
-  </div>
+ <h2 id="verbs">Natural-language verbs</h2>
+ <p>Five top-level verbs cover the agentic surface. Each one is intent-classified by <code>src/intent.js</code> and dispatches into the right code path. None of them require an API key for read-only use.</p>
+ <div class="ag-grid">
+ <div class="ag-verb">
+ <h3>kolm do</h3>
+ <p>Plain-English requests that map to one or more verbs. <code>kolm do "compile a privacy redactor and verify it"</code> resolves into <code>compile</code> + <code>verify</code>.</p>
+ </div>
+ <div class="ag-verb">
+ <h3>kolm what</h3>
+ <p>State summary. Lists artifacts, jobs, captures, and pending receipts. <code>kolm what is broken</code> filters to failures only.</p>
+ </div>
+ <div class="ag-verb">
+ <h3>kolm next</h3>
+ <p>Suggests the next concrete step against the current workspace. Reads <code>kolm.yaml</code>, the seeds dir, and the last receipt to decide.</p>
+ </div>
+ <div class="ag-verb">
+ <h3>kolm explain</h3>
+ <p>Reads an artifact, a receipt, or a failed gate and returns plain English plus the file:line pointer.</p>
+ </div>
+ <div class="ag-verb">
+ <h3>kolm fix</h3>
+ <p>Applies a one-shot remediation. Idempotent. Prints the exact diff before touching disk so the calling agent can review.</p>
+ </div>
+ <div class="ag-verb">
+ <h3>kolm agent guide</h3>
+ <p>Writes <code>AGENT_GUIDE.md</code> at the project root. Pin this in the agent context window so it sees the local rules every turn.</p>
+ </div>
+ </div>
 
-  <h2 id="generator">The AGENT_GUIDE.md generator</h2>
-  <p>Run once per workspace, then commit:</p>
-  <pre><code>kolm agent guide                # writes ./AGENT_GUIDE.md
-kolm agent guide --out docs/AI.md  # custom path
-kolm agent guide --check           # exit 1 if guide is stale or absent</code></pre>
-  <p>The generator inspects <code>kolm.yaml</code>, the recipe set, the privacy membrane configuration, and any frozen-eval pointers, then emits a focused 1-2 page brief. Agents that read it before editing avoid the most common failure modes (re-running <code>kolm compile</code> on every save, editing inside <code>.kolm/</code>, writing receipts by hand).</p>
+ <h2 id="generator">The AGENT_GUIDE.md generator</h2>
+ <p>Run once per workspace, then commit:</p>
+ <pre><code>kolm agent guide # writes ./AGENT_GUIDE.md
+kolm agent guide --out docs/AI.md # custom path
+kolm agent guide --check # exit 1 if guide is stale or absent</code></pre>
+ <p>The generator inspects <code>kolm.yaml</code>, the recipe set, the privacy membrane configuration, and any frozen-eval pointers, then emits a focused 1-2 page brief. Agents that read it before editing avoid the most common failure modes (re-running <code>kolm compile</code> on every save, editing inside <code>.kolm/</code>, writing receipts by hand).</p>
 
-  <h2 id="rules">Rules every agent should follow</h2>
-  <div class="ag-rule"><b>Never edit inside <code>.kolm/</code> or <code>.kolm-state/</code>.</b> These directories are write-once + signed. Tampering invalidates every downstream receipt. Use <code>kolm checkpoint</code> if you need a new revision.</div>
-  <div class="ag-rule"><b>Run <code>kolm verify</code> before claiming an artifact is shipped.</b> The 7-check audit catches manifest-mismatch, broken HMAC chains, missing receipts, and K-score gate regressions in under a second.</div>
-  <div class="ag-rule"><b>Do not invent CLI flags.</b> Every flag is enumerated in <code>cli/kolm.js</code> under <code>HELP.&lt;verb&gt;</code>. Read it before writing a shell call.</div>
-  <div class="ag-rule"><b>Treat seeds as the only training input.</b> <code>kolm compile</code> reads exactly <code>seeds.jsonl</code> + the recipe file. Editing the artifact directly is undefined behavior.</div>
-  <div class="ag-rule"><b>Never paste a real API key into the chat.</b> Use <code>kolm login</code> (writes <code>~/.kolm/config.json</code>) or set <code>KOLM_KEY</code> in the shell. The CLI accepts neither stdin keys nor argv keys.</div>
-  <div class="ag-rule"><b>Capture before optimizing.</b> The capture loop is the moat. Compiling without at least 50 captured pairs in the namespace usually fails the K-score gate.</div>
+ <h2 id="rules">Rules every agent should follow</h2>
+ <div class="ag-rule"><b>Never edit inside <code>.kolm/</code> or <code>.kolm-state/</code>.</b> These directories are write-once + signed. Tampering invalidates every downstream receipt. Use <code>kolm checkpoint</code> if you need a new revision.</div>
+ <div class="ag-rule"><b>Run <code>kolm verify</code> before claiming an artifact is shipped.</b> The 7-check audit catches manifest-mismatch, broken Ed25519 receipt chains, missing receipts, and K-score gate regressions in under a second.</div>
+ <div class="ag-rule"><b>Do not invent CLI flags.</b> Every flag is enumerated in <code>cli/kolm.js</code> under <code>HELP.&lt;verb&gt;</code>. Read it before writing a shell call.</div>
+ <div class="ag-rule"><b>Treat seeds as the only training input.</b> <code>kolm compile</code> reads exactly <code>seeds.jsonl</code> + the recipe file. Editing the artifact directly is undefined behavior.</div>
+ <div class="ag-rule"><b>Never paste a real API key into the chat.</b> Use <code>kolm login</code> (writes <code>~/.kolm/config.json</code>) or set <code>KOLM_KEY</code> in the shell. The CLI accepts neither stdin keys nor argv keys.</div>
+ <div class="ag-rule"><b>Capture before optimizing.</b> The capture loop is the moat. Compiling without at least 50 captured pairs in the namespace usually fails the K-score gate.</div>
 
-  <h2 id="workflow">Suggested workflow for autonomous agents</h2>
-  <ol style="color:var(--ink-mute);font-size:14.5px;line-height:1.7;max-width:72ch">
-    <li>Read <code>AGENT_GUIDE.md</code> if it exists. If not, run <code>kolm agent guide</code> and commit it.</li>
-    <li>Run <code>kolm what</code> to learn the workspace state.</li>
-    <li>Run <code>kolm next</code> to get a concrete suggestion. If the user gave you a goal, run <code>kolm do "&lt;goal&gt;"</code> instead.</li>
-    <li>Make the smallest reversible change. Avoid editing <code>.kolm/</code> or <code>kolm.yaml</code> unless the user asked.</li>
-    <li>Run <code>kolm verify</code> on any touched artifact. Report the exit code verbatim. Do not paraphrase.</li>
-    <li>If you compiled a new artifact, run <code>kolm replay &lt;namespace&gt; &lt;artifact&gt; --limit 25</code> to spot regressions against recent captures.</li>
-  </ol>
+ <h2 id="workflow">Suggested workflow for autonomous agents</h2>
+ <ol style="color:var(--ink-mute);font-size:14.5px;line-height:1.7;max-width:72ch">
+ <li>Read <code>AGENT_GUIDE.md</code> if it exists. If not, run <code>kolm agent guide</code> and commit it.</li>
+ <li>Run <code>kolm what</code> to learn the workspace state.</li>
+ <li>Run <code>kolm next</code> to get a concrete suggestion. If the user gave you a goal, run <code>kolm do "&lt;goal&gt;"</code> instead.</li>
+ <li>Make the smallest reversible change. Avoid editing <code>.kolm/</code> or <code>kolm.yaml</code> unless the user asked.</li>
+ <li>Run <code>kolm verify</code> on any touched artifact. Report the exit code verbatim. Do not paraphrase.</li>
+ <li>If you compiled a new artifact, run <code>kolm replay &lt;namespace&gt; &lt;artifact&gt; --limit 25</code> to spot regressions against recent captures.</li>
+ </ol>
 
-  <h2 id="env">Environment for agents</h2>
-  <p>Set these so the CLI behaves predictably in non-interactive sessions:</p>
-  <pre><code>export KOLM_NO_REST_HINT=1         # suppress the "REST equivalent" suggestion
-export KOLM_DEBUG=                 # leave empty unless debugging
-export KOLM_KEY=&lt;your token&gt;     # CI safe-fail: empty string exits 3
-export KOLM_PROFILE=default        # pick a saved profile if the user has many
+ <h2 id="env">Environment for agents</h2>
+ <p>Set these so the CLI behaves predictably in non-interactive sessions:</p>
+ <pre><code>export KOLM_NO_REST_HINT=1 # suppress the "REST equivalent" suggestion
+export KOLM_DEBUG= # leave empty unless debugging
+export KOLM_KEY=&lt;your token&gt; # CI safe-fail: empty string exits 3
+export KOLM_PROFILE=default # pick a saved profile if the user has many
 </code></pre>
 
-  <h2 id="see-also">Related</h2>
-  <p>The <a href="/docs/cli">CLI reference</a> documents every verb in depth. The <a href="/docs/state">state docs</a> cover <code>kolm checkpoint</code> + <code>kolm import-chat</code> + <code>kolm merge</code>, which agents use when sharing context across sessions. The <a href="/docs/api">HTTP API</a> is what the verbs call under the hood. For UX, the <a href="/tui">terminal UI</a> is the human-mode equivalent.</p>
+ <h2 id="see-also">Related</h2>
+ <p>The <a href="/docs/cli">CLI reference</a> documents every verb in depth. The <a href="/docs/state">state docs</a> cover <code>kolm checkpoint</code> + <code>kolm import-chat</code> + <code>kolm merge</code>, which agents use when sharing context across sessions. The <a href="/docs/api">HTTP API</a> is what the verbs call under the hood. For UX, the <a href="/tui">terminal UI</a> is the human-mode equivalent.</p>
 
-  <section class="ag-related" aria-labelledby="see-also-h">
-    <h2 id="see-also-h">See also</h2>
-    <ul>
-      <li><a href="/docs/cli">CLI reference</a></li>
-      <li><a href="/docs/state">State + sync</a></li>
-      <li><a href="/docs/api">HTTP API</a></li>
-      <li><a href="/tui">Terminal UI</a></li>
-      <li><a href="/quickstart">Quickstart</a></li>
-      <li><a href="/foundations">Foundations</a></li>
-    </ul>
-  </section>
+ <section class="ag-related" aria-labelledby="see-also-h">
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">CLI reference</a></li>
+ <li><a href="/docs/state">State + sync</a></li>
+ <li><a href="/docs/api">HTTP API</a></li>
+ <li><a href="/tui">Terminal UI</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/foundations">Foundations</a></li>
+ </ul>
+ </section>
 </main>
 </body>
 </html>

@@ -1,81 +1,81 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kolm.ai/docs/receipt-v0.1.json",
-  "title": "kolm receipt",
-  "description": "HMAC chain that signs a .kolm artifact end-to-end. Part of RS-1 (https://kolm.ai/docs/rs-1.md).",
-  "type": "object",
-  "required": ["spec", "alg", "signed_at", "signer", "chain", "signature"],
-  "additionalProperties": false,
-  "properties": {
-    "spec": {
-      "const": "receipt-v0.1",
-      "description": "Receipt schema version. Immutable string."
-    },
-    "alg": {
-      "enum": ["HMAC-SHA256"],
-      "description": "Signature algorithm. Only HMAC-SHA256 is defined for v0.1."
-    },
-    "signed_at": {
-      "type": "string",
-      "format": "date-time",
-      "description": "ISO-8601 UTC timestamp of signing."
-    },
-    "signer": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Identity of the signing party (e.g. \"kolm-cloud@kolm.ai\")."
-    },
-    "chain": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": ["member", "sha256"],
-        "additionalProperties": false,
-        "properties": {
-          "member": {
-            "type": "string",
-            "description": "Path inside the .kolm zip archive."
-          },
-          "sha256": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$",
-            "description": "SHA-256 of the member bytes after canonicalization."
-          },
-          "optional": {
-            "type": "boolean",
-            "description": "If true, the member may be absent without invalidating the chain."
-          },
-          "size_bytes": {
-            "type": "integer",
-            "minimum": 0
-          }
-        }
-      }
-    },
-    "registry_signature": {
-      "type": "string",
-      "description": "Detached signature from the recipe-registry over the recipes.json hash. Optional but recommended."
-    },
-    "signature": {
-      "type": "string",
-      "description": "Final HMAC-SHA256 over the canonical chain JSON."
-    },
-    "anchors": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["kind", "uri"],
-        "additionalProperties": false,
-        "properties": {
-          "kind": {
-            "enum": ["http", "arweave", "btc-op-return", "ots"]
-          },
-          "uri": { "type": "string" },
-          "anchored_at": { "type": "string", "format": "date-time" }
-        }
-      },
-      "description": "External durability anchors. v0.1 runtimes MAY ignore this field."
-    }
-  }
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://kolm.ai/docs/receipt-v0.1.json",
+ "title": "kolm receipt",
+ "description": "HMAC chain that signs a .kolm artifact end-to-end. Part of RS-1 (https://kolm.ai/docs/rs-1.md).",
+ "type": "object",
+ "required": ["spec", "alg", "signed_at", "signer", "chain", "signature"],
+ "additionalProperties": false,
+ "properties": {
+ "spec": {
+ "const": "receipt-v0.1",
+ "description": "Receipt schema version. Immutable string."
+ },
+ "alg": {
+ "enum": ["HMAC-SHA256"],
+ "description": "Signature algorithm. Only HMAC-SHA256 is defined for v0.1."
+ },
+ "signed_at": {
+ "type": "string",
+ "format": "date-time",
+ "description": "ISO-8601 UTC timestamp of signing."
+ },
+ "signer": {
+ "type": "string",
+ "minLength": 1,
+ "description": "Identity of the signing party (e.g. \"kolm-cloud@kolm.ai\")."
+ },
+ "chain": {
+ "type": "array",
+ "minItems": 1,
+ "items": {
+ "type": "object",
+ "required": ["member", "sha256"],
+ "additionalProperties": false,
+ "properties": {
+ "member": {
+ "type": "string",
+ "description": "Path inside the .kolm zip archive."
+ },
+ "sha256": {
+ "type": "string",
+ "pattern": "^[a-f0-9]{64}$",
+ "description": "SHA-256 of the member bytes after canonicalization."
+ },
+ "optional": {
+ "type": "boolean",
+ "description": "If true, the member may be absent without invalidating the chain."
+ },
+ "size_bytes": {
+ "type": "integer",
+ "minimum": 0
+ }
+ }
+ }
+ },
+ "registry_signature": {
+ "type": "string",
+ "description": "Detached signature from the recipe-registry over the recipes.json hash. Optional but recommended."
+ },
+ "signature": {
+ "type": "string",
+ "description": "Final HMAC-SHA256 over the canonical chain JSON."
+ },
+ "anchors": {
+ "type": "array",
+ "items": {
+ "type": "object",
+ "required": ["kind", "uri"],
+ "additionalProperties": false,
+ "properties": {
+ "kind": {
+ "enum": ["http", "arweave", "btc-op-return", "ots"]
+ },
+ "uri": { "type": "string" },
+ "anchored_at": { "type": "string", "format": "date-time" }
+ }
+ },
+ "description": "External durability anchors. v0.1 runtimes MAY ignore this field."
+ }
+ }
 }

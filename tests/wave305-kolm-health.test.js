@@ -45,15 +45,22 @@ function spawnAsync(args, env) {
   });
 }
 
-// Spin a tiny express app exposing only /health and /v1/capture/health so
+// Spin a tiny express app exposing /health, /ready, and /v1/capture/health so
 // cmdHealth has a real target without booting the full router. delayMs lets
 // us simulate slow-server scenarios; downCode 0 means do not respond (we
 // listen on a closed port instead).
-function spinServer({ delayMs = 0, captureDurable = true, captureDriver = 'sqlite' } = {}) {
+function spinServer({ delayMs = 0, readyStatus = 200, readyBody = null, captureDurable = true, captureDriver = 'sqlite' } = {}) {
   const app = express();
   app.get('/health', async (_req, res) => {
     if (delayMs) await new Promise((r) => setTimeout(r, delayMs));
     res.json({ ok: true });
+  });
+  app.get('/ready', (_req, res) => {
+    res.status(readyStatus).json(readyBody || {
+      status: readyStatus >= 200 && readyStatus < 300 ? 'ready' : 'not_ready',
+      production_like: true,
+      checks: [],
+    });
   });
   app.get('/v1/capture/health', (_req, res) => {
     res.json({ ok: true, driver: captureDriver, durable: captureDurable, subscriber_count: 0, thresholds: [100, 500, 1000] });
@@ -105,6 +112,8 @@ test('W305 #4 — --json mode emits structured payload with thresholds', async (
     assert.equal(payload.summary, 'healthy');
     assert.equal(payload.base, base);
     assert.equal(typeof payload.root.rtt_ms, 'number');
+    assert.equal(payload.ready.status, 200);
+    assert.equal(payload.ready_required, false);
     assert.equal(payload.capture.driver, 'sqlite');
     assert.equal(payload.capture.durable, true);
     assert.equal(payload.thresholds.slow_ms, 2000);
@@ -118,6 +127,7 @@ test('W305 #5 — --help prints HELP.health body', async () => {
   assert.equal(out.code, 0);
   assert.match(out.stdout, /kolm health - ping/);
   assert.match(out.stdout, /--slow-ms/);
+  assert.match(out.stdout, /--require-ready/);
 });
 
 test('W305 #6 — "health" registered in COMPLETION_VERBS and main dispatcher', () => {

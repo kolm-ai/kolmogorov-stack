@@ -31,6 +31,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import os from 'node:os';
 
 export const TEAM_EVENTS_VERSION = 'team-events-v2';
 
@@ -120,7 +121,10 @@ function _validateTeam(team) {
 
 function _teamDir(team) {
   const home = process.env.KOLM_HOME
-    || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
+    || process.env.KOLM_DATA_DIR
+    || (process.env.NODE_ENV === 'test'
+      ? path.join(os.tmpdir(), `kolm-team-events-test-${process.pid}`)
+      : path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm'));
   return path.join(home, 'teams', team);
 }
 

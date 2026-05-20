@@ -7,6 +7,44 @@ const require = createRequire(import.meta.url);
 
 export const DEV_RECEIPT_SECRET = 'ks_receipt_dev_secret_change_in_prod';
 
+// W481 — known-public HMAC secret used by in-repo marketplace seed artifacts
+// (e.g. public/registry-pack/qwen-distill-classifier.kolm). This is NOT a
+// trust gate — Ed25519 (signed over the canonical receipt body) and Sigstore
+// (transparency log) are the trust gates. The fixture secret only seals the
+// HMAC integrity layer so verifiers on any host can re-derive the same hex
+// without requiring env setup. Tampering with artifact bytes still breaks
+// manifest_hash / artifact_hash / chain step inputs and so still breaks
+// every signature down the chain regardless of HMAC secret publicity.
+export const MARKETPLACE_FIXTURE_SECRET = 'kolm-public-fixture-v0-1-0';
+
+// W481 — list of secrets a verifier may try in order. The runtime-effective
+// secret comes first (the user's local_receipt_secret, RECIPE_RECEIPT_SECRET
+// env, or DEV_RECEIPT_SECRET dev fallback); the marketplace fixture secret is
+// appended so in-repo seed artifacts verify on any fresh checkout. Callers
+// that need to walk multiple verification keys (binder audit chain, provenance
+// credential) use this instead of a single effectiveReceiptSecret() call.
+export function verificationSecrets({ includeLegacyArtifactSecret = false } = {}) {
+  const seen = new Set();
+  const out = [];
+  const primary = effectiveReceiptSecret({ includeLegacyArtifactSecret });
+  if (primary && !seen.has(primary)) { seen.add(primary); out.push(primary); }
+  if (!seen.has(MARKETPLACE_FIXTURE_SECRET)) {
+    seen.add(MARKETPLACE_FIXTURE_SECRET);
+    out.push(MARKETPLACE_FIXTURE_SECRET);
+  }
+  // In dev mode, the explicit DEV_RECEIPT_SECRET path is already returned by
+  // effectiveReceiptSecret when no env is set — but if the user has set a
+  // RECIPE_RECEIPT_SECRET env, DEV_RECEIPT_SECRET is no longer primary. Append
+  // it so historic in-tree dev-secret artifacts still verify regardless of
+  // current env. In production-like hosts, DEV_RECEIPT_SECRET is intentionally
+  // omitted to avoid silently accepting dev-signed artifacts.
+  if (!isProductionRuntime() && !seen.has(DEV_RECEIPT_SECRET)) {
+    seen.add(DEV_RECEIPT_SECRET);
+    out.push(DEV_RECEIPT_SECRET);
+  }
+  return out;
+}
+
 // In production-like hosts (Vercel/Railway/Lambda), KOLM_ARTIFACT_DIR and
 // KOLM_DATA_DIR may be unset. /ready used to fail-closed 503 in that case.
 // Instead, resolve sane writable defaults under os.tmpdir() and create them

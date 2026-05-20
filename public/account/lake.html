@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Telemetry lake &middot; Account &middot; kolm.ai</title>
-<meta name="description" content="Telemetry lake on kolm.ai: canonical event store totals, spend, tokens, redactions, providers, models, repeated clusters. Reads /v1/lake/stats, tails /v1/lake/tail, exports /v1/lake/export.">
+<title>Telemetry lake Account · Account · kolm.ai</title>
+<meta name="description" content="Telemetry lake on kolm.ai: canonical event store totals, spend, tokens, redactions, providers, models, repeated clusters. Reads /v1/lake/stats, tails...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/lake">
-<meta property="og:title" content="Telemetry lake &middot; Account &middot; kolm.ai" />
-<meta property="og:description" content="Telemetry lake on kolm.ai: canonical event store totals, spend, tokens, redactions, providers, models, repeated clusters. Reads /v1/lake/stats, tails /v1/lake/tail, exports /v1/lake/export." />
-<meta property="og:image" content="https://kolm.ai/og-card.svg" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://kolm.ai/account/lake" />
+<meta property="og:title" content="Telemetry lake Account · Account · kolm.ai">
+<meta property="og:description" content="Telemetry lake on kolm.ai: canonical event store totals, spend, tokens, redactions, providers, models, repeated clusters. Reads /v1/lake/stats, tails...">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/lake">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
@@ -59,13 +59,18 @@
 .kbd{font-family:var(--mono);font-size:11px;background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--ink-mute);border:1px solid var(--line)}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Telemetry lake Account · Account · kolm.ai">
+<meta name="twitter:description" content="Telemetry lake on kolm.ai: canonical event store totals, spend, tokens, redactions, providers, models, repeated clusters. Reads /v1/lake/stats, tails...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -216,8 +221,8 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions"><a href="/docs">Help</a></div>
-  </div>
+ <div class="site-actions"><a href="/docs">Help</a></div>
+ </div>
 </header>
 
 <main id="main">
@@ -228,50 +233,50 @@
 <p class="lede">The canonical event store on this device. Every captured request lives at <code>~/.kolm/events/</code> first; cloud sync is explicit opt-in. This page reads <code>/v1/lake/stats</code>, tails <code>/v1/lake/tail</code>, and exports through <code>/v1/lake/export</code>.</p>
 
 <div class="metric-grid" id="lake-metrics">
-  <div class="metric-card"><div class="label">Total events</div><div class="value" id="m-total"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-total-d">last 30d</div></div>
-  <div class="metric-card"><div class="label">Total spend</div><div class="value" id="m-spend"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-spend-d">last 30d</div></div>
-  <div class="metric-card"><div class="label">Total tokens</div><div class="value" id="m-tokens"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-tokens-d">prompt + completion</div></div>
-  <div class="metric-card"><div class="label">Sensitive events</div><div class="value" id="m-sensitive"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-sensitive-d">redactions fired</div></div>
+ <div class="metric-card"><div class="label">Total events</div><div class="value" id="m-total"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-total-d">last 30d</div></div>
+ <div class="metric-card"><div class="label">Total spend</div><div class="value" id="m-spend"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-spend-d">last 30d</div></div>
+ <div class="metric-card"><div class="label">Total tokens</div><div class="value" id="m-tokens"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-tokens-d">prompt + completion</div></div>
+ <div class="metric-card"><div class="label">Sensitive events</div><div class="value" id="m-sensitive"><div class="skel" style="width:80px"></div></div><div class="delta" id="m-sensitive-d">redactions fired</div></div>
 </div>
 
 <div class="kpanel">
-  <h2>Local storage</h2>
-  <p class="pdesc">The event-store lives on this device. Cloud sync is off unless you opt in via <code>kolm config set cloud_sync=on</code>.</p>
-  <div id="lake-storage" data-storage-root>
-    <div class="skel" style="width:60%;height:14px"></div>
-  </div>
+ <h2>Local storage</h2>
+ <p class="pdesc">The event-store lives on this device. Cloud sync is off unless you opt in via <code>kolm config set cloud_sync=on</code>.</p>
+ <div id="lake-storage" data-storage-root>
+ <div class="skel" style="width:60%;height:14px"></div>
+ </div>
 </div>
 
 <div class="kpanel" data-lake-providers>
-  <h2>Providers</h2>
-  <p class="pdesc">Calls + spend + avg latency by upstream provider. Reads canonical events.</p>
-  <table class="ktable"><thead><tr><th>Provider</th><th>Calls</th><th>Spend</th><th>Avg latency</th></tr></thead><tbody id="prov-rows"><tr><td colspan="4"><div class="skel" style="width:180px"></div></td></tr></tbody></table>
+ <h2>Providers</h2>
+ <p class="pdesc">Calls + spend + avg latency by upstream provider. Reads canonical events.</p>
+ <table class="ktable"><thead><tr><th>Provider</th><th>Calls</th><th>Spend</th><th>Avg latency</th></tr></thead><tbody id="prov-rows"><tr><td colspan="4"><div class="skel" style="width:180px"></div></td></tr></tbody></table>
 </div>
 
 <div class="kpanel" data-lake-models>
-  <h2>Models</h2>
-  <p class="pdesc">Per-model totals, sorted by spend.</p>
-  <table class="ktable"><thead><tr><th>Model</th><th>Calls</th><th>Spend</th><th>Avg latency</th></tr></thead><tbody id="model-rows"><tr><td colspan="4"><div class="skel" style="width:180px"></div></td></tr></tbody></table>
+ <h2>Models</h2>
+ <p class="pdesc">Per-model totals, sorted by spend.</p>
+ <table class="ktable"><thead><tr><th>Model</th><th>Calls</th><th>Spend</th><th>Avg latency</th></tr></thead><tbody id="model-rows"><tr><td colspan="4"><div class="skel" style="width:180px"></div></td></tr></tbody></table>
 </div>
 
 <div class="kpanel" data-lake-clusters>
-  <h2>Repeated clusters</h2>
-  <p class="pdesc">Templated prompts that recur most often. These feed the opportunity engine and the dataset workbench.</p>
-  <table class="ktable"><thead><tr><th>Template</th><th>Count</th><th>Providers</th><th>Avg cost</th></tr></thead><tbody id="cluster-rows"><tr><td colspan="4"><div class="skel" style="width:180px"></div></td></tr></tbody></table>
+ <h2>Repeated clusters</h2>
+ <p class="pdesc">Templated prompts that recur most often. These feed the opportunity engine and the dataset workbench.</p>
+ <table class="ktable"><thead><tr><th>Template</th><th>Count</th><th>Providers</th><th>Avg cost</th></tr></thead><tbody id="cluster-rows"><tr><td colspan="4"><div class="skel" style="width:180px"></div></td></tr></tbody></table>
 </div>
 
 <div class="kpanel" data-lake-tail>
-  <h2>Recent events</h2>
-  <p class="pdesc">Most recent 50 canonical events. Each row links to its full envelope for inspection.</p>
-  <div class="toolbar">
-    <input id="tail-search" type="search" placeholder="Filter by namespace, model, prompt..." aria-label="Filter events" style="min-width:260px;flex:1">
-    <a id="export-jsonl" class="btn" href="/v1/lake/export?format=jsonl">Export JSONL</a>
-    <a id="export-csv" class="btn" href="/v1/lake/export?format=csv">Export CSV</a>
-  </div>
-  <table class="ktable"><thead><tr><th>When</th><th>Namespace</th><th>Model</th><th>Status</th><th>Latency</th><th>Cost</th></tr></thead><tbody id="tail-rows" data-tail-rows><tr><td colspan="6"><div class="skel" style="width:200px"></div></td></tr></tbody></table>
-  <div id="tail-empty" class="empty" hidden data-empty-state>
-    <strong>No events yet.</strong> Point a connector at <code>http://127.0.0.1:8787/v1</code> or run <code>kolm capture --once</code> to seed the lake. Storage path: <code>~/.kolm/events/</code>.
-  </div>
+ <h2>Recent events</h2>
+ <p class="pdesc">Most recent 50 canonical events. Each row links to its full envelope for inspection.</p>
+ <div class="toolbar">
+ <input id="tail-search" type="search" placeholder="Filter by namespace, model, prompt..." aria-label="Filter events" style="min-width:260px;flex:1">
+ <a id="export-jsonl" class="btn" href="/v1/lake/export?format=jsonl">Export JSONL</a>
+ <a id="export-csv" class="btn" href="/v1/lake/export?format=csv">Export CSV</a>
+ </div>
+ <table class="ktable"><thead><tr><th>When</th><th>Namespace</th><th>Model</th><th>Status</th><th>Latency</th><th>Cost</th></tr></thead><tbody id="tail-rows" data-tail-rows><tr><td colspan="6"><div class="skel" style="width:200px"></div></td></tr></tbody></table>
+ <div id="tail-empty" class="empty" hidden data-empty-state>
+ <strong>No events yet.</strong> Point a connector at <code>http://127.0.0.1:8787/v1</code> or run <code>kolm capture --once</code> to seed the lake. Storage path: <code>~/.kolm/events/</code>.
+ </div>
 </div>
 
 </section>
@@ -280,97 +285,97 @@
 
 <script>
 (function(){
-  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
-  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
-  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
-  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
-  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
-  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
-  window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
-  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+ var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+ if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
+ window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+ window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+ window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
+ window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
+ window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
 })();
 
 function paintStats(stats){
-  document.getElementById("m-total").textContent=window.knum(stats.total_calls||0);
-  document.getElementById("m-spend").textContent=window.kusd(stats.total_spend_usd||0);
-  document.getElementById("m-tokens").textContent=window.knum(stats.total_tokens||0);
-  document.getElementById("m-sensitive").textContent=window.knum(stats.sensitive_events||0);
-  // providers
-  var provs=stats.providers||{};
-  var pkeys=Object.keys(provs).sort(function(a,b){return (provs[b].spend||0)-(provs[a].spend||0);});
-  var provRows=document.getElementById("prov-rows");
-  if(!pkeys.length){provRows.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--ink-faint)\">No providers yet</td></tr>";}
-  else{provRows.innerHTML=pkeys.map(function(p){var r=provs[p]||{};return "<tr><td><b>"+window.kesc(p)+"</b></td><td>"+window.knum(r.calls)+"</td><td>"+window.kusd(r.spend)+"</td><td>"+window.knum(r.avg_latency)+"&thinsp;ms</td></tr>";}).join("");}
-  // models
-  var mods=stats.models||{};
-  var mkeys=Object.keys(mods).sort(function(a,b){return (mods[b].spend||0)-(mods[a].spend||0);});
-  var modRows=document.getElementById("model-rows");
-  if(!mkeys.length){modRows.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--ink-faint)\">No models yet</td></tr>";}
-  else{modRows.innerHTML=mkeys.map(function(m){var r=mods[m]||{};return "<tr><td><b>"+window.kesc(m)+"</b></td><td>"+window.knum(r.calls)+"</td><td>"+window.kusd(r.spend)+"</td><td>"+window.knum(r.avg_latency)+"&thinsp;ms</td></tr>";}).join("");}
-  // clusters
-  var clusters=stats.repeated_clusters||[];
-  var cRows=document.getElementById("cluster-rows");
-  if(!clusters.length){cRows.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--ink-faint)\">No repeated templates yet</td></tr>";}
-  else{cRows.innerHTML=clusters.slice(0,10).map(function(c){return "<tr><td><code style=\"max-width:340px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+window.kesc((c.normalized||"").slice(0,80))+"</code></td><td><b>"+window.knum(c.count)+"</b></td><td>"+window.kesc((c.providers||[]).join(", "))+"</td><td>"+window.kusd(c.avg_cost)+"</td></tr>";}).join("");}
+ document.getElementById("m-total").textContent=window.knum(stats.total_calls||0);
+ document.getElementById("m-spend").textContent=window.kusd(stats.total_spend_usd||0);
+ document.getElementById("m-tokens").textContent=window.knum(stats.total_tokens||0);
+ document.getElementById("m-sensitive").textContent=window.knum(stats.sensitive_events||0);
+ // providers
+ var provs=stats.providers||{};
+ var pkeys=Object.keys(provs).sort(function(a,b){return (provs[b].spend||0)-(provs[a].spend||0);});
+ var provRows=document.getElementById("prov-rows");
+ if(!pkeys.length){provRows.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--ink-faint)\">No providers yet</td></tr>";}
+ else{provRows.innerHTML=pkeys.map(function(p){var r=provs[p]||{};return "<tr><td><b>"+window.kesc(p)+"</b></td><td>"+window.knum(r.calls)+"</td><td>"+window.kusd(r.spend)+"</td><td>"+window.knum(r.avg_latency)+"&thinsp;ms</td></tr>";}).join("");}
+ // models
+ var mods=stats.models||{};
+ var mkeys=Object.keys(mods).sort(function(a,b){return (mods[b].spend||0)-(mods[a].spend||0);});
+ var modRows=document.getElementById("model-rows");
+ if(!mkeys.length){modRows.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--ink-faint)\">No models yet</td></tr>";}
+ else{modRows.innerHTML=mkeys.map(function(m){var r=mods[m]||{};return "<tr><td><b>"+window.kesc(m)+"</b></td><td>"+window.knum(r.calls)+"</td><td>"+window.kusd(r.spend)+"</td><td>"+window.knum(r.avg_latency)+"&thinsp;ms</td></tr>";}).join("");}
+ // clusters
+ var clusters=stats.repeated_clusters||[];
+ var cRows=document.getElementById("cluster-rows");
+ if(!clusters.length){cRows.innerHTML="<tr><td colspan=\"4\" style=\"color:var(--ink-faint)\">No repeated templates yet</td></tr>";}
+ else{cRows.innerHTML=clusters.slice(0,10).map(function(c){return "<tr><td><code style=\"max-width:340px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+window.kesc((c.normalized||"").slice(0,80))+"</code></td><td><b>"+window.knum(c.count)+"</b></td><td>"+window.kesc((c.providers||[]).join(", "))+"</td><td>"+window.kusd(c.avg_cost)+"</td></tr>";}).join("");}
 }
 
 function paintStorage(s){
-  if(!s)return;
-  var el=document.getElementById("lake-storage");
-  var bytes=s.size_bytes!=null?s.size_bytes:(s.bytes||0);
-  el.innerHTML="<table class=\"ktable\"><tr><td>Driver</td><td><b>"+window.kesc(s.driver||"jsonl")+"</b></td></tr>"+
-    "<tr><td>Path</td><td><code>"+window.kesc(s.path||s.file||"~/.kolm/events/")+"</code></td></tr>"+
-    "<tr><td>Total events</td><td>"+window.knum(s.total_events||s.rows||0)+"</td></tr>"+
-    "<tr><td>Size</td><td>"+window.kbytes(bytes)+"</td></tr>"+
-    "<tr><td>Cloud sync</td><td>"+(s.cloud_sync?"<span class=\"pill ok\">on</span>":"<span class=\"pill mute\">off</span>")+"</td></tr>"+
-    "</table>";
+ if(!s)return;
+ var el=document.getElementById("lake-storage");
+ var bytes=s.size_bytes!=null?s.size_bytes:(s.bytes||0);
+ el.innerHTML="<table class=\"ktable\"><tr><td>Driver</td><td><b>"+window.kesc(s.driver||"jsonl")+"</b></td></tr>"+
+ "<tr><td>Path</td><td><code>"+window.kesc(s.path||s.file||"~/.kolm/events/")+"</code></td></tr>"+
+ "<tr><td>Total events</td><td>"+window.knum(s.total_events||s.rows||0)+"</td></tr>"+
+ "<tr><td>Size</td><td>"+window.kbytes(bytes)+"</td></tr>"+
+ "<tr><td>Cloud sync</td><td>"+(s.cloud_sync?"<span class=\"pill ok\">on</span>":"<span class=\"pill mute\">off</span>")+"</td></tr>"+
+ "</table>";
 }
 
 function paintTail(events){
-  var rows=document.getElementById("tail-rows");
-  var q=(document.getElementById("tail-search").value||"").toLowerCase();
-  var filtered=(events||[]).filter(function(e){
-    if(!q)return true;
-    var hay=((e.namespace||"")+" "+(e.model||"")+" "+(e.provider||"")+" "+(e.prompt_redacted||"")).toLowerCase();
-    return hay.indexOf(q)>=0;
-  });
-  if(!filtered.length){
-    rows.innerHTML="";
-    document.getElementById("tail-empty").hidden=false;
-    return;
-  }
-  document.getElementById("tail-empty").hidden=true;
-  rows.innerHTML=filtered.slice(0,50).map(function(e){
-    var when=(e.created_at||"").slice(11,19)||"-";
-    var statusClass=e.status==="ok"?"ok":e.status==="error"||e.status==="timeout"?"bad":"warn";
-    return "<tr>"+
-      "<td>"+window.kesc(when)+"</td>"+
-      "<td><code>"+window.kesc(e.namespace||"default")+"</code></td>"+
-      "<td><b>"+window.kesc(e.model||"-")+"</b></td>"+
-      "<td><span class=\"pill "+statusClass+"\">"+window.kesc(e.status||"ok")+"</span></td>"+
-      "<td>"+window.knum(e.latency_ms)+"&thinsp;ms</td>"+
-      "<td>"+window.kusd(e.estimated_cost_usd)+"</td>"+
-    "</tr>";
-  }).join("");
+ var rows=document.getElementById("tail-rows");
+ var q=(document.getElementById("tail-search").value||"").toLowerCase();
+ var filtered=(events||[]).filter(function(e){
+ if(!q)return true;
+ var hay=((e.namespace||"")+" "+(e.model||"")+" "+(e.provider||"")+" "+(e.prompt_redacted||"")).toLowerCase();
+ return hay.indexOf(q)>=0;
+ });
+ if(!filtered.length){
+ rows.innerHTML="";
+ document.getElementById("tail-empty").hidden=false;
+ return;
+ }
+ document.getElementById("tail-empty").hidden=true;
+ rows.innerHTML=filtered.slice(0,50).map(function(e){
+ var when=(e.created_at||"").slice(11,19)||"-";
+ var statusClass=e.status==="ok"?"ok":e.status==="error"||e.status==="timeout"?"bad":"warn";
+ return "<tr>"+
+ "<td>"+window.kesc(when)+"</td>"+
+ "<td><code>"+window.kesc(e.namespace||"default")+"</code></td>"+
+ "<td><b>"+window.kesc(e.model||"-")+"</b></td>"+
+ "<td><span class=\"pill "+statusClass+"\">"+window.kesc(e.status||"ok")+"</span></td>"+
+ "<td>"+window.knum(e.latency_ms)+"&thinsp;ms</td>"+
+ "<td>"+window.kusd(e.estimated_cost_usd)+"</td>"+
+ "</tr>";
+ }).join("");
 }
 
 (function load(){
-  // /v1/lake/stats — required for the canonical totals
-  window.kfetch("/v1/lake/stats").catch(function(){return null;}).then(function(j){
-    if(j)paintStats(j);
-  });
-  // /v1/lake/storage — driver + path
-  window.kfetch("/v1/lake/storage").catch(function(){return null;}).then(function(j){
-    if(j)paintStorage(j);
-  });
-  // /v1/lake/tail — recent events
-  var allEvents=[];
-  window.kfetch("/v1/lake/tail?limit=50").catch(function(){return null;}).then(function(j){
-    if(!j)return;
-    allEvents=(j&&j.events)||[];
-    paintTail(allEvents);
-  });
-  document.getElementById("tail-search").addEventListener("input",function(){paintTail(allEvents);});
+ // /v1/lake/stats — required for the canonical totals
+ window.kfetch("/v1/lake/stats").catch(function(){return null;}).then(function(j){
+ if(j)paintStats(j);
+ });
+ // /v1/lake/storage — driver + path
+ window.kfetch("/v1/lake/storage").catch(function(){return null;}).then(function(j){
+ if(j)paintStorage(j);
+ });
+ // /v1/lake/tail — recent events
+ var allEvents=[];
+ window.kfetch("/v1/lake/tail?limit=50").catch(function(){return null;}).then(function(j){
+ if(!j)return;
+ allEvents=(j&&j.events)||[];
+ paintTail(allEvents);
+ });
+ document.getElementById("tail-search").addEventListener("input",function(){paintTail(allEvents);});
 })();
 </script>
 </body>

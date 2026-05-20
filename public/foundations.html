@@ -4,50 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>The 5 foundations: kolm in the agentic stack · kolm.ai</title>
-<meta name="description" content="kolm.ai slots into the agentic stack alongside Tailscale, Termius, tmux, a private git repo, and script-everything. We document the seam, not a new abstraction layer.">
+<meta name="description" content="kolm.ai slots into the agentic stack alongside Tailscale, Termius, tmux, a private git repo, and script-everything. We document the seam, not a new...">
 <meta name="keywords" content="agentic stack, Tailscale kolm, Termius kolm, tmux kolm, private git AI, kolm foundations, AI compiler stack">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="The 5 foundations: kolm in the agentic stack">
-<meta property="og:description" content="Tailscale + Termius + tmux + private git + script-everything. kolm fits between these, not above them.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="The 5 foundations: kolm in the agentic stack · kolm.ai">
+<meta property="og:description" content="kolm.ai slots into the agentic stack alongside Tailscale, Termius, tmux, a private git repo, and script-everything. We document the seam, not a new...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/foundations">
-<meta property="og:image" content="https://kolm.ai/og/foundations.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="The 5 foundations · kolm.ai">
-<meta name="twitter:description" content="How kolm slots into Tailscale + Termius + tmux + private git + script-everything.">
-<meta name="twitter:image" content="https://kolm.ai/og/foundations.svg">
+<meta name="twitter:title" content="The 5 foundations: kolm in the agentic stack · kolm.ai">
+<meta name="twitter:description" content="kolm.ai slots into the agentic stack alongside Tailscale, Termius, tmux, a private git repo, and script-everything. We document the seam, not a new...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/foundations">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "@id": "https://kolm.ai/foundations#article",
-      "headline": "The 5 foundations: kolm in the agentic stack",
-      "description": "kolm.ai slots into the agentic stack alongside Tailscale, Termius, tmux, a private git repo, and script-everything.",
-      "author": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
-      "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
-      "image": "https://kolm.ai/og/foundations.svg",
-      "datePublished": "2026-05-18",
-      "dateModified": "2026-05-18",
-      "mainEntityOfPage": "https://kolm.ai/foundations",
-      "articleSection": "AI Compiler"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
-        { "@type": "ListItem", "position": 2, "name": "Foundations", "item": "https://kolm.ai/foundations" }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "Article",
+ "@id": "https://kolm.ai/foundations#article",
+ "headline": "The 5 foundations: kolm in the agentic stack",
+ "description": "kolm.ai slots into the agentic stack alongside Tailscale, Termius, tmux, a private git repo, and script-everything.",
+ "author": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
+ "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" },
+ "image": "https://kolm.ai/og/foundations.svg",
+ "datePublished": "2026-05-18",
+ "dateModified": "2026-05-18",
+ "mainEntityOfPage": "https://kolm.ai/foundations",
+ "articleSection": "AI Compiler"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm.ai", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Foundations", "item": "https://kolm.ai/foundations" }
+ ]
+ }
+ ]
 }
 </script>
 <style>
@@ -83,6 +83,7 @@ pre{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:16p
 footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
 @media (max-width:560px){main{padding:32px 18px 64px}h1{font-size:32px}h2{font-size:22px}.matrix{font-size:12px}.matrix th,.matrix td{padding:8px 6px}}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>
@@ -93,11 +94,11 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 <p class="lede">kolm.ai slots into the agentic stack alongside five tools that already work. Tailscale gives every machine a stable address. Termius keeps a shell in your pocket. tmux survives every disconnect. A private git repo is the cross-agent memory layer. Scripts replace ad-hoc commands. kolm is the AI compiler that fits between these, not above them.</p>
 
 <div class="grid">
-  <div class="card"><div class="tool">Network</div><h3><a href="/foundations/tailscale">Tailscale</a></h3><p>Push artifacts to every device on your tailnet with one command.</p><a href="/foundations/tailscale">Read the recipe &rarr;</a></div>
-  <div class="card"><div class="tool">Mobile shell</div><h3><a href="/foundations/termius">Termius</a></h3><p>Tail captures and trigger distills from your phone.</p><a href="/foundations/termius">Read the recipe &rarr;</a></div>
-  <div class="card"><div class="tool">Persistence</div><h3><a href="/foundations/tmux">tmux</a></h3><p>Detach compiles. Watch jobs across reboots.</p><a href="/foundations/tmux">Read the recipe &rarr;</a></div>
-  <div class="card"><div class="tool">Memory</div><h3><a href="/foundations/git">Private git</a></h3><p>The shared memory layer for a fleet of agents.</p><a href="/foundations/git">Read the recipe &rarr;</a></div>
-  <div class="card"><div class="tool">Automation</div><h3><a href="/foundations/scripts">Scripts</a></h3><p>kolmrc + profiles + doctor. Everything reproducible from day one.</p><a href="/foundations/scripts">Read the recipe &rarr;</a></div>
+ <div class="card"><div class="tool">Network</div><h3><a href="/foundations/tailscale">Tailscale</a></h3><p>Push artifacts to every device on your tailnet with one command.</p><a href="/foundations/tailscale">Read the recipe &rarr;</a></div>
+ <div class="card"><div class="tool">Mobile shell</div><h3><a href="/foundations/termius">Termius</a></h3><p>Tail captures and trigger distills from your phone.</p><a href="/foundations/termius">Read the recipe &rarr;</a></div>
+ <div class="card"><div class="tool">Persistence</div><h3><a href="/foundations/tmux">tmux</a></h3><p>Detach compiles. Watch jobs across reboots.</p><a href="/foundations/tmux">Read the recipe &rarr;</a></div>
+ <div class="card"><div class="tool">Memory</div><h3><a href="/foundations/git">Private git</a></h3><p>The shared memory layer for a fleet of agents.</p><a href="/foundations/git">Read the recipe &rarr;</a></div>
+ <div class="card"><div class="tool">Automation</div><h3><a href="/foundations/scripts">Scripts</a></h3><p>kolmrc + profiles + doctor. Everything reproducible from day one.</p><a href="/foundations/scripts">Read the recipe &rarr;</a></div>
 </div>
 
 <h2>Why these five</h2>

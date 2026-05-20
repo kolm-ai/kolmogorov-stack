@@ -27,22 +27,36 @@ const sri = 'sha384-' + crypto.createHash('sha384').update(body).digest('base64'
 const out = path.join(publicDir, `sdk-${sha}.js`);
 fs.writeFileSync(out, body);
 
+function validVersionEntry(entry) {
+  if (!entry || typeof entry !== 'object') return false;
+  if (!/^\/sdk-[a-f0-9]{12}\.js$/.test(String(entry.url || ''))) return false;
+  const file = path.join(publicDir, path.basename(entry.url));
+  if (!fs.existsSync(file)) return false;
+  const entryBody = fs.readFileSync(file);
+  const entrySha = crypto.createHash('sha256').update(entryBody).digest('hex').slice(0, 12);
+  const entrySri = 'sha384-' + crypto.createHash('sha384').update(entryBody).digest('base64');
+  return entry.sha === entrySha &&
+    entry.url === `/sdk-${entrySha}.js` &&
+    entry.sri === entrySri &&
+    entry.bytes === entryBody.length;
+}
+
 const manifestPath = path.join(publicDir, 'sdk-versions.json');
 let manifest = { spec: 'rs-1', versions: [] };
 if (fs.existsSync(manifestPath)) {
   try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch {}
 }
-const existing = manifest.versions.find(v => v.sha === sha);
-if (!existing) {
-  manifest.versions.unshift({
-    sha,
-    sri,
-    bytes: body.length,
-    url: `/sdk-${sha}.js`,
-    published_at: new Date().toISOString(),
-  });
-  manifest.versions = manifest.versions.slice(0, 30); // keep last 30
-}
+manifest.versions = Array.isArray(manifest.versions) ? manifest.versions.filter(validVersionEntry) : [];
+const existingIndex = manifest.versions.findIndex(v => v.sha === sha);
+const existing = existingIndex >= 0 ? manifest.versions.splice(existingIndex, 1)[0] : null;
+manifest.versions.unshift({
+  sha,
+  sri,
+  bytes: body.length,
+  url: `/sdk-${sha}.js`,
+  published_at: existing?.published_at || new Date().toISOString(),
+});
+manifest.versions = manifest.versions.slice(0, 30); // keep last 30
 manifest.current = { sha, sri, url: `/sdk-${sha}.js`, bytes: body.length };
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 

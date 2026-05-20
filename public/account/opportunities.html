@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Opportunities · Account · kolm.ai</title>
-<meta name="description" content="Detected opportunities on kolm.ai across 11 types: cache_candidate, cheaper_model_candidate, local_replacement_candidate, privacy_leak, prompt_compression, repeated_extraction, repeated_classification, log_triage, routing_policy, dataset_ready, training_ready.">
+<title>Opportunities · Account · Account · kolm.ai</title>
+<meta name="description" content="Detected opportunities on kolm.ai across 11 types: cache_candidate, cheaper_model_candidate, local_replacement_candidate, privacy_leak, prompt_compression,...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/opportunities">
-<meta property="og:title" content="Opportunities &middot; Account &middot; kolm.ai" />
-<meta property="og:description" content="Detected opportunities on kolm.ai across 11 types: cache_candidate, cheaper_model_candidate, local_replacement_candidate, privacy_leak, prompt_compression, repeated_extraction, repeated_classification, log_triage, routing_policy, dataset_ready, training_ready." />
-<meta property="og:image" content="https://kolm.ai/og-card.svg" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://kolm.ai/account/opportunities" />
+<meta property="og:title" content="Opportunities · Account · Account · kolm.ai">
+<meta property="og:description" content="Detected opportunities on kolm.ai across 11 types: cache_candidate, cheaper_model_candidate, local_replacement_candidate, privacy_leak, prompt_compression,...">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/account/opportunities">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
@@ -61,13 +61,18 @@
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
 
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Opportunities · Account · Account · kolm.ai">
+<meta name="twitter:description" content="Detected opportunities on kolm.ai across 11 types: cache_candidate, cheaper_model_candidate, local_replacement_candidate, privacy_leak, prompt_compression,...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand" aria-label="kolm home">kolm</a>
+ <div class="wrap">
+ <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -218,8 +223,8 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
-    <div class="site-actions"><a href="/docs">Help</a></div>
-  </div>
+ <div class="site-actions"><a href="/docs">Help</a></div>
+ </div>
 </header>
 
 <main id="main">
@@ -243,11 +248,11 @@
 <tr><td><code>training_ready</code></td><td>Dataset ready and a candidate holdout exists. Kick off training.</td></tr>
 </tbody></table></div>
 <table class="ktable">
-  <thead><tr><th>Type</th><th>Reason</th><th>Saving</th><th>Risk</th><th>Calls</th><th></th></tr></thead>
-  <tbody id="opp-rows"><tr><td colspan="6"><div class="skel" style="width:260px"></div></td></tr></tbody>
+ <thead><tr><th>Type</th><th>Reason</th><th>Saving</th><th>Risk</th><th>Calls</th><th></th></tr></thead>
+ <tbody id="opp-rows"><tr><td colspan="6"><div class="skel" style="width:260px"></div></td></tr></tbody>
 </table>
 <div id="empty-state" class="empty" hidden data-empty-state>
-  <strong>Nothing surfaced yet.</strong> Opportunities show up once the engine has enough signal (typically 50+ events per namespace). Send more traffic through the <a href="/account/captured">capture proxy</a> and re-check.
+ <strong>Nothing surfaced yet.</strong> Opportunities show up once the engine has enough signal (typically 50+ events per namespace). Send more traffic through the <a href="/account/captured">capture proxy</a> and re-check.
 </div>
 </section>
 </div>
@@ -255,39 +260,39 @@
 
 <script>
 (function(){
-  var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+ var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
 
-  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
-  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
-  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
-  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
-  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
-  window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
-  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+ if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
+ window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+ window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+ window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
+ window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
+ window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
 })();
 var rows=document.getElementById("opp-rows");
 function riskPill(r){return r==="low"?"<span class=\"pill ok\">low</span>":r==="medium"?"<span class=\"pill warn\">medium</span>":r==="high"?"<span class=\"pill bad\">high</span>":"<span class=\"pill mute\">"+window.kesc(r||"-")+"</span>";}
 function paint(list){
-  if(!list.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
-  rows.innerHTML=list.map(function(o){
-    return "<tr data-id=\""+window.kesc(o.id||"")+"\">"+
-      "<td><code>"+window.kesc(o.type||"-")+"</code></td>"+
-      "<td style=\"max-width:340px;color:var(--ink-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+window.kesc(o.reason||o.pattern||"")+"</td>"+
-      "<td>"+window.kusd(o.estimated_savings_usd||o.savings_estimate)+"/mo</td>"+
-      "<td>"+riskPill(o.risk)+"</td>"+
-      "<td>"+window.knum(o.call_count)+"</td>"+
-      "<td><button class=\"btn primary\" data-act=\"accept\">accept</button> <button class=\"btn\" data-act=\"dismiss\">dismiss</button></td>"+
-    "</tr>";
-  }).join("");
+ if(!list.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
+ rows.innerHTML=list.map(function(o){
+ return "<tr data-id=\""+window.kesc(o.id||"")+"\">"+
+ "<td><code>"+window.kesc(o.type||"-")+"</code></td>"+
+ "<td style=\"max-width:340px;color:var(--ink-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+window.kesc(o.reason||o.pattern||"")+"</td>"+
+ "<td>"+window.kusd(o.estimated_savings_usd||o.savings_estimate)+"/mo</td>"+
+ "<td>"+riskPill(o.risk)+"</td>"+
+ "<td>"+window.knum(o.call_count)+"</td>"+
+ "<td><button class=\"btn primary\" data-act=\"accept\">accept</button> <button class=\"btn\" data-act=\"dismiss\">dismiss</button></td>"+
+ "</tr>";
+ }).join("");
 }
 window.kfetch("/v1/opportunities").catch(function(){return {opportunities:[]};}).then(function(j){
-  paint((j&&j.opportunities)||(Array.isArray(j)?j:[]));
+ paint((j&&j.opportunities)||(Array.isArray(j)?j:[]));
 });
 rows.addEventListener("click",function(e){
-  var btn=e.target.closest("button[data-act]"); if(!btn)return;
-  var tr=btn.closest("tr[data-id]"); var id=tr.getAttribute("data-id");
-  var act=btn.getAttribute("data-act");
-  window.kfetch("/v1/opportunities/"+encodeURIComponent(id)+"/"+act,{method:"POST"}).then(function(){tr.style.opacity=0.45;tr.querySelectorAll("button").forEach(function(b){b.disabled=true;});}).catch(function(){btn.textContent="error";});
+ var btn=e.target.closest("button[data-act]"); if(!btn)return;
+ var tr=btn.closest("tr[data-id]"); var id=tr.getAttribute("data-id");
+ var act=btn.getAttribute("data-act");
+ window.kfetch("/v1/opportunities/"+encodeURIComponent(id)+"/"+act,{method:"POST"}).then(function(){tr.style.opacity=0.45;tr.querySelectorAll("button").forEach(function(b){b.disabled=true;});}).catch(function(){btn.textContent="error";});
 });
 </script>
 </body>

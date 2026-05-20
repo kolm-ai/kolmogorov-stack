@@ -224,7 +224,7 @@ import {
   testInstall as devTestInstall,
 } from './device-install.js';
 import { storeBlob as mediaStoreBlob, mimeToExt as mediaMimeToExt } from './media-store.js';
-import { appendEvent as eventAppend, listEvents as eventList, countEvents as eventCount, purgeEvents as eventPurge, storeInfo as eventStoreInfo } from './event-store.js';
+import { appendEvent as eventAppend, listEvents as eventList, getEvent as eventGet, countEvents as eventCount, purgeEvents as eventPurge, storeInfo as eventStoreInfo } from './event-store.js';
 import { MEDIA_KINDS as EVENT_MEDIA_KINDS } from './event-schema.js';
 
 // W409y — real billing-units metering. Counters live in JSON files under
@@ -330,6 +330,15 @@ const waitlistLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate-limited — waitlist caps at 10/hr/ip' },
+  validate: { trustProxy: false },
+});
+
+const statusSubscribeLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate-limited — status subscribe caps at 60/hr/ip' },
   validate: { trustProxy: false },
 });
 
@@ -691,6 +700,35 @@ export function buildRouter() {
     stats: storeStats(),
   }));
 
+  // Status subscribe - email opt-in from the /status page. Validates the address,
+  // dedupes by email (returns duplicate:true on re-subscribe), inserts into
+  // status_subscribers with source:'status_page', and is rate-limited.
+  r.post('/v1/status/subscribe', statusSubscribeLimiter, (req, res) => {
+    const email = String((req.body && req.body.email) || '').trim().toLowerCase();
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return res.status(400).json({ error: 'valid email required' });
+    }
+    const existing = findOne('status_subscribers', x => x.email === email);
+    const now = new Date().toISOString();
+    if (existing) {
+      update('status_subscribers', x => x.id === existing.id, {
+        updated_at: now,
+        source: 'status_page',
+        active: true,
+      });
+      return res.json({ ok: true, subscribed: true, duplicate: true, email });
+    }
+    insert('status_subscribers', {
+      id: 'status_sub_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+      email,
+      source: 'status_page',
+      active: true,
+      created_at: now,
+      updated_at: now,
+    });
+    return res.status(201).json({ ok: true, subscribed: true, email });
+  });
+
   // W313 — public anonymous "try it" demo of the capture-receipt shape.
   // No auth, no write side-effects; visitors on /value-loop POST a prompt+response
   // and see the exact same receipt envelope a real authenticated /v1/bridges/observe
@@ -736,6 +774,8 @@ export function buildRouter() {
     });
   });
 
+  // Pricing - public price catalog in USD per billable unit (tokens, compile,
+  // replay, bakeoff, redact). Read by /pricing and the SDK shapers.
   r.get('/v1/pricing', (_req, res) => res.json({ currency: 'USD', units: PRICING }));
 
   // ---------- Plan catalog ----------
@@ -761,6 +801,9 @@ export function buildRouter() {
     return appendCheckoutParams(url, opts);
   }
 
+  // Plans - self-serve plan catalog (free/starter/pro/teams/business/enterprise)
+  // with id, label, price_usd_month, quota, seats, and billing_link_configured
+  // (true when the Stripe Payment Link env var is set for that plan).
   r.get('/v1/plans', (_req, res) => {
     const plans = Object.values(PLAN_CATALOG).map(p => ({
       id: p.id,
@@ -963,15 +1006,17 @@ export function buildRouter() {
     });
   });
 
+  // Signout - clears the kolm_session cookie and returns 204. Legacy alias for
+  // /v1/session/logout; kept so older clients that POST /v1/signout still work.
   r.post('/v1/signout', (req, res) => {
     res.clearCookie('kolm_session', { path: '/' });
     res.status(204).end();
   });
 
   // ---------- Session cookie (S7) ----------
-  // POST a key here to set an httpOnly `kolm_session` cookie. Browsers can
-  // then call /v1/* without exposing the key to JavaScript. The legacy
-  // localStorage path still works, but new pages should call /v1/session/login
+  // POST /v1/session/login sets an httpOnly `kolm_session` cookie. Browsers can
+  // then call authenticated API routes without exposing the key to JavaScript. The legacy
+  // localStorage path still works, but new pages should use this route
   // and rely on the cookie.
   r.post('/v1/session/login', signinLimiter, (req, res) => {
     const { api_key } = req.body || {};
@@ -993,6 +1038,8 @@ export function buildRouter() {
     res.json({ ok: true, tenant: t ? { id: t.id, name: t.name, plan: t.plan } : { admin: true } });
   });
 
+  // Session logout - clears the kolm_session cookie set by /v1/session/login.
+  // Returns {ok:true}; safe to call repeatedly (no-op when no cookie present).
   r.post('/v1/session/logout', (req, res) => {
     res.clearCookie('kolm_session', { path: '/' });
     res.json({ ok: true });
@@ -1019,6 +1066,9 @@ export function buildRouter() {
     res.json({ concepts });
   });
 
+  // Public concept detail - returns one public-visibility concept by id (no
+  // auth required). 404 when the concept is missing or visibility != 'public'.
+  // Pairs with /v1/public/run for unauth try-it traffic.
   r.get('/v1/public/concepts/:id', (req, res) => {
     const c = registry.getConcept(req.params.id, '__public__');
     if (!c || c.visibility !== 'public') return res.status(404).json({ error: 'not found' });
@@ -1208,6 +1258,8 @@ export function buildRouter() {
   // the private key. The DELETE requires admin because key removal would
   // otherwise let an attacker invalidate a tenant's receipt verification
   // by deleting their published key.
+
+  // Public keys list - returns registered Ed25519 verification keys and directory stats.
   r.get('/v1/keys/public', (_req, res) => {
     try {
       return res.json({ keys: pubkeyDir.listKeys(), stats: pubkeyDir.stats() });
@@ -1215,6 +1267,8 @@ export function buildRouter() {
       return res.status(500).json({ error: 'pubkey directory unavailable', detail: e.message });
     }
   });
+
+  // Public key lookup - fetches one registered Ed25519 key by short or full fingerprint.
   r.get('/v1/keys/public/:fingerprint', (req, res) => {
     const fp = String(req.params.fingerprint || '').trim();
     if (!/^[0-9a-fA-F]{8,64}$/.test(fp)) {
@@ -1224,6 +1278,8 @@ export function buildRouter() {
     if (!entry) return res.status(404).json({ error: 'fingerprint not registered', code: 'KEY_NOT_FOUND' });
     return res.json(entry);
   });
+
+  // Key challenge - issues a proof-of-control nonce for Ed25519 key registration.
   r.post('/v1/keys/challenge', (req, res) => {
     const body = req.body || {};
     try {
@@ -1236,6 +1292,8 @@ export function buildRouter() {
       return res.status(500).json({ error: 'cannot issue challenge', detail: e.message });
     }
   });
+
+  // Key register - verifies a signed challenge nonce and publishes the Ed25519 public key.
   r.post('/v1/keys/register', (req, res) => {
     const body = req.body || {};
     try {
@@ -1251,6 +1309,8 @@ export function buildRouter() {
       return res.status(400).json({ ok: false, error: e.message, code: 'REGISTER_FAILED' });
     }
   });
+
+  // Public key delete - admin-only removal of a registered verification key.
   r.delete('/v1/keys/public/:fingerprint', (req, res) => {
     const adminKey = adminApiKey();
     const supplied = String(req.headers['x-admin-key'] || '').trim();
@@ -1287,6 +1347,9 @@ export function buildRouter() {
       mode: sigstoreRekorUrl() ? 'rekor-pinned' : 'dry-run',
     });
   });
+  // Sigstore entry fetch - forwards to the configured Rekor instance and
+  // returns the raw entry by logIndex. Public (Rekor itself is public).
+  // 503 when no KOLM_SIGSTORE_REKOR_URL is configured; 404 when Rekor 404s.
   r.get('/v1/sigstore/entry/:logIndex', async (req, res) => {
     const raw = String(req.params.logIndex || '').trim();
     const idx = Number(raw);
@@ -1304,6 +1367,10 @@ export function buildRouter() {
       return res.status(502).json({ error: 'rekor fetch failed', detail: e.message });
     }
   });
+  // Sigstore attest - forwards a caller-signed receipt bundle to the
+  // configured Rekor instance and returns the merged bundle. The caller MUST
+  // pre-sign with their own key (server has no private key); receipt must
+  // already carry signature_ed25519 + dry-run signature_sigstore (Wave 150+).
   r.post('/v1/sigstore/attest', async (req, res) => {
     const body = req.body || {};
     const receipt = body.receipt;
@@ -1374,6 +1441,8 @@ export function buildRouter() {
     }
   });
 
+  // Public receipt lookup - resolves a receipt, artifact, CID, or signature hash without auth.
+  // Tenant identity is hidden unless the tenant opted into public receipts.
   r.get('/v1/receipts/:hash/public', (req, res) => {
     const raw = String(req.params.hash || '').trim();
     if (!raw || !/^[A-Za-z0-9._\-]{8,128}$/.test(raw)) {
@@ -2560,24 +2629,34 @@ export function buildRouter() {
   // (KOLM_LOCAL_DAEMON=1 or developer laptop) stays unauthenticated; the gate
   // stamps req.tenant = 'local:<hostname>' so captures still carry a tenant.
   r.post('/v1/chat/completions', __w411HostedAuthGate, (req, res) => __hostedInferenceWrapper('openai', '/v1/chat/completions', req, res));
+  // OpenAI-compatible passthrough for the responses, embeddings, and
+  // moderations endpoints. Each routes through __connectorProxy('openai', ...)
+  // so the upstream OpenAI API is reached with the configured key, and the
+  // request/response is captured into the tenant lake.
   for (const p of ['/v1/responses', '/v1/embeddings', '/v1/moderations']) {
     r.post(p, __w411HostedAuthGate, (req, res) => __connectorProxy('openai', p, req, res));
   }
   // W409k — audio routes. Real proxy when configured; fixture returns deterministic
   // bodies; otherwise honest 501 with a structured "not yet supported" envelope so
-  // SDKs see something better than 404. Same __connectorProxy → audio paths hit
-  // OpenAI's /v1/audio/* upstream directly when a key is present.
+  // SDKs see something better than 404. These concrete audio endpoints use
+  // the OpenAI connector when a key is present.
   for (const p of ['/v1/audio/transcriptions', '/v1/audio/translations', '/v1/audio/speech']) {
     r.post(p, __w411HostedAuthGate, (req, res) => __connectorProxy('openai', p, req, res));
   }
   // Anthropic direct + alias.
   r.post('/v1/messages', __w411HostedAuthGate, (req, res) => __connectorProxy('anthropic', '/v1/messages', req, res));
+  // Anthropic messages alias - same connector as /v1/messages, mounted under
+  // /anthropic/v1/messages so SDKs that point BASE_URL at https://kolm.ai/anthropic
+  // continue to work without rewriting the path.
   r.post('/anthropic/v1/messages', __w411HostedAuthGate, (req, res) => __connectorProxy('anthropic', '/v1/messages', req, res));
-  // OpenRouter — three aliases. W409k adds a direct /v1/openrouter/* path so
-  // SDKs that point their BASE_URL at https://kolm.ai/v1/openrouter just work.
+  // OpenRouter capture and base-URL aliases. The direct base-URL forms support
+  // SDKs that point BASE_URL at https://kolm.ai/v1/openrouter.
   r.post('/v1/capture/openrouter', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
+  // OpenRouter capture alias for SDKs that append the OpenAI chat-completions path.
   r.post('/v1/capture/openrouter/v1/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
+  // OpenRouter base-URL alias for SDKs that append /v1/chat/completions.
   r.post('/v1/openrouter/v1/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
+  // OpenRouter chat-completions alias without the extra /v1 segment.
   r.post('/v1/openrouter/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
 
   // W409k — GET /v1/models is mounted after authMiddleware by W409g so it can
@@ -2613,6 +2692,9 @@ export function buildRouter() {
     }
   });
 
+  // Models pull - 302-redirects to a resolved Hugging Face download URL for
+  // the requested model id+variant (default variant: q4_k_m). 404 for unknown
+  // variants, 410 when the variant exists but is marked unavailable.
   r.get('/v1/models/pull', async (req, res) => {
     try {
       const id = String(req.query.id || '');
@@ -2632,6 +2714,9 @@ export function buildRouter() {
     }
   });
 
+  // Models cache - returns the local model-weights cache index for the API
+  // host (cache_dir, total_bytes, per-entry rows). Used by `kolm models cache`
+  // and the device-detect picker to know which weights are already on disk.
   r.get('/v1/models/cache', async (_req, res) => {
     try {
       const P = await import('./model-weights-puller.js');
@@ -2685,6 +2770,8 @@ export function buildRouter() {
   const VALID_CHAT_TEMPLATES = new Set([
     'chatml', 'qwen-3-thinking', 'llama-3', 'phi-3', 'deepseek-v4', 'plain',
   ]);
+  // Compile job creation - queues a tenant-scoped build and returns job_id, status, and poll URL.
+  // Validates task/model/output options, bills usage, and writes the compile audit record.
   r.post('/v1/compile', async (req, res) => {
     const { task, examples = [], corpus_namespace, base_model, deploy_hook, preset, lora_rank, k_threshold,
             chat_template, thinking_mode, recipe_class, hw_tier, output_target, multi_device } = req.body || {};
@@ -2821,10 +2908,12 @@ export function buildRouter() {
     res.status(202).json({ job_id: job.id, status: job.status, poll: `/v1/compile/${job.id}` });
   });
 
+  // Compile job list - returns the caller's recent tenant-scoped compile jobs.
   r.get('/v1/compile', (req, res) => {
     res.json({ jobs: listJobs(req.tenant, 50) });
   });
 
+  // Compile job status - returns a safe tenant-scoped snapshot plus artifact_url when complete.
   r.get('/v1/compile/:id', (req, res) => {
     const j = getJob(req.params.id, req.is_admin ? null : req.tenant);
     if (!j) return res.status(404).json({ error: 'job not found' });
@@ -2838,6 +2927,7 @@ export function buildRouter() {
     });
   });
 
+  // Compile artifact download - streams the completed .kolm zip or reports readiness/expiry.
   r.get('/v1/compile/:id/.kolm', (req, res) => {
     const j = getJob(req.params.id, req.is_admin ? null : req.tenant);
     if (!j) return res.status(404).json({ error: 'job not found' });
@@ -2953,17 +3043,20 @@ export function buildRouter() {
     };
   }
 
+  // Artifact list - exposes completed compile jobs as artifact records with hashes and downloads.
   r.get('/v1/artifacts', (req, res) => {
     const jobs = listJobs(req.tenant, 50).filter(j => j.status === 'completed');
     res.json({ artifacts: jobs.map(jobToArtifact), n: jobs.length });
   });
 
+  // Artifact detail - returns one tenant-scoped compile artifact by job id.
   r.get('/v1/artifacts/:id', (req, res) => {
     const j = getJob(req.params.id, req.is_admin ? null : req.tenant);
     if (!j) return res.status(404).json({ error: 'artifact not found' });
     res.json(jobToArtifact(j));
   });
 
+  // Artifact download - streams the completed artifact zip by id with readiness/expiry errors.
   r.get('/v1/artifacts/:id/download', (req, res) => {
     const j = getJob(req.params.id, req.is_admin ? null : req.tenant);
     if (!j) return res.status(404).json({ error: 'artifact not found' });
@@ -2994,7 +3087,7 @@ export function buildRouter() {
     });
   });
 
-  // /v1/recipes/* — SDK-conventional aliases over the artifact/job surface.
+  // Recipe artifact aliases over the artifact/job surface.
   // POST /v1/compile returns a job_id of shape `job_*`. Conventional SDKs
   // expect GET /v1/recipes/{id} to return the recipe (artifact) and POST
   // /v1/recipes/{id}/run to invoke it. We alias the existing handlers so
@@ -3011,6 +3104,7 @@ export function buildRouter() {
     res.status(404).json({ error: 'recipe not found' });
   });
 
+  // Recipe artifact download alias. Streams the completed .kolm artifact for a job id.
   r.get('/v1/recipes/:id/download', (req, res) => {
     const j = getJob(req.params.id, req.is_admin ? null : req.tenant);
     if (!j) return res.status(404).json({ error: 'recipe not found' });
@@ -3624,6 +3718,7 @@ export function buildRouter() {
     });
   });
 
+  // Account API key rotation - rotates the tenant's primary API key and returns the new secret.
   r.post('/v1/account/rotate-key', (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot rotate' });
     const k = rotateTenantKey(req.tenant_record.id);
@@ -3733,6 +3828,8 @@ export function buildRouter() {
   // never wired). These endpoints expose a one-row "keys" table that mirrors
   // that reality. When a true multi-key model lands these should grow to
   // list/insert/delete rows from a dedicated table.
+
+  // Account API key list - returns the tenant primary key metadata without the raw secret.
   r.get('/v1/account/keys', (req, res) => {
     if (!req.tenant_record) return res.json({ keys: [] });
     const t = req.tenant_record;
@@ -3747,6 +3844,8 @@ export function buildRouter() {
       }],
     });
   });
+
+  // Account API key create - rotates the tenant primary key and audits the requested label.
   r.post('/v1/account/keys', (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'cannot mint keys without a tenant context' });
     const k = rotateTenantKey(req.tenant_record.id);
@@ -3759,6 +3858,8 @@ export function buildRouter() {
     });
     res.json({ api_key: k, label: (req.body && req.body.label) || null });
   });
+
+  // Account API key revoke - rotates away a key prefix and returns the replacement secret.
   r.delete('/v1/account/keys/:prefix', (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'cannot revoke keys without a tenant context' });
     const k = rotateTenantKey(req.tenant_record.id);
@@ -3858,6 +3959,8 @@ export function buildRouter() {
     // a backfill migration.
     return { ...SETTINGS_DEFAULTS, ...row, tenant_id: tenantId };
   }
+
+  // Account settings read - returns tenant settings merged with current defaults.
   r.get('/v1/account/settings', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     try {
@@ -3867,6 +3970,8 @@ export function buildRouter() {
       res.status(500).json({ error: 'settings_read_error', detail: String(e && e.message || e) });
     }
   });
+
+  // Account settings update - persists whitelisted tenant settings and audits changed fields.
   r.put('/v1/account/settings', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     const tenantId = req.tenant_record.id;
@@ -3954,6 +4059,10 @@ export function buildRouter() {
     if (m === 'application/pdf') return { kind: 'pdf', worker: 'pdf-text', hint: 'extract text via pdfplumber/pdftotext, then POST the extracted text to /v1/redact' };
     return { kind: 'binary', worker: null, hint: 'binary content; redactor only operates on extracted text' };
   }
+  // Redact - applies the tenant privacy policy to a text input and returns
+  // the redacted text plus class counters and a map_hash so callers can pin
+  // reinjection without exposing PHI. Body: { text (required), dry_run }.
+  // 413 when text exceeds _REDACT_TEXT_LIMIT; 409 on policy_block.
   r.post('/v1/redact', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
@@ -3996,6 +4105,11 @@ export function buildRouter() {
       res.status(500).json({ error: 'redact_error', detail: String(e && e.message || e) });
     }
   });
+  // Media redact - text-extractable media redactor. Accepts {media_uri | text,
+  // mime} and either redacts inline text or loads the blob, sniffs mime, and
+  // routes text-extractable kinds (text/json/yaml/xml) through /v1/redact.
+  // Non-text kinds (image/audio/video/pdf) return {deferred:true, deferral}
+  // with a worker hint instead of attempting heavy ML in-process.
   r.post('/v1/media/redact', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
@@ -4540,6 +4654,8 @@ export function buildRouter() {
   // req.is_admin (ADMIN_KEY in env). Returns scrubbed views — no raw api_keys,
   // no per-tenant secrets — just operational shape: who, what plan, how much
   // they've used, what they're running. Cross-tenant by design.
+
+  // Admin tenant list - scrubbed cross-tenant view with q/limit filters.
   r.get('/v1/admin/tenants', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     const q = String(req.query.q || '').toLowerCase().trim();
@@ -4567,6 +4683,7 @@ export function buildRouter() {
     res.json({ total: rows.length, tenants: rows });
   });
 
+  // Admin stats - aggregate tenants, usage, compile jobs, and audit-event counts.
   r.get('/v1/admin/stats', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     const tenants = all('tenants');
@@ -4594,6 +4711,7 @@ export function buildRouter() {
     });
   });
 
+  // Admin audit feed - newest audit events with tenant and operation metadata.
   r.get('/v1/admin/audit', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     const limit = Math.max(1, Math.min(parseInt(req.query.limit, 10) || 200, 1000));
@@ -4613,6 +4731,7 @@ export function buildRouter() {
     res.json({ total: rows.length, events: rows });
   });
 
+  // Admin compile job feed - newest compile jobs with tenant, task, status, and score.
   r.get('/v1/admin/compile-jobs', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     const limit = Math.max(1, Math.min(parseInt(req.query.limit, 10) || 100, 500));
@@ -4632,6 +4751,7 @@ export function buildRouter() {
     res.json({ total: rows.length, jobs: rows });
   });
 
+  // Admin health snapshot - process, store, memory, region, and integration flags.
   r.get('/v1/admin/health', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     let store_stats = null;
@@ -5133,6 +5253,10 @@ export function buildRouter() {
     res.json({ results, total: results.length, accepted: results.filter(r => r.accepted).length });
   });
 
+  // Verify - compiles caller-supplied source and runs the verify suite against
+  // positive/negative examples. Returns the verify result block (per-case
+  // pass/fail + summary). Rate-limited via publishLimiter. Body: { source
+  // (required), positives, negatives }.
   r.post('/v1/verify', publishLimiter, (req, res) => {
     const { source, positives = [], negatives = [] } = req.body || {};
     if (!source) return res.status(400).json({ error: 'source is required' });
@@ -5345,6 +5469,7 @@ export function buildRouter() {
     }
   });
 
+  // Tenant holdout list - returns the authenticated tenant's retained shadow corpus metadata.
   r.get('/v1/eval/tenant_holdout', (req, res) => {
     try {
       const tenantId = req.tenant_record?.id;
@@ -5356,6 +5481,7 @@ export function buildRouter() {
     }
   });
 
+  // Tenant holdout detail - returns hash and size metadata without exposing corpus rows.
   r.get('/v1/eval/tenant_holdout/:corpus_id', (req, res) => {
     try {
       const tenantId = req.tenant_record?.id;
@@ -5381,6 +5507,7 @@ export function buildRouter() {
     }
   });
 
+  // Tenant holdout delete - removes one authenticated tenant corpus and audits the deletion.
   r.delete('/v1/eval/tenant_holdout/:corpus_id', (req, res) => {
     try {
       const tenantId = req.tenant_record?.id;
@@ -5454,12 +5581,14 @@ export function buildRouter() {
     res.json({ concepts });
   });
 
+  // Concept detail - returns a readable concept with versions after tenant, team, or public visibility checks.
   r.get('/v1/concepts/:id', (req, res) => {
     const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'not found' });
     res.json(c);
   });
 
+  // Concept delete - removes an owned concept and its versions; forbidden tenants receive 403.
   r.delete('/v1/concepts/:id', (req, res) => {
     try {
       const n = registry.deleteConcept(req.params.id, req.tenant);
@@ -5467,6 +5596,7 @@ export function buildRouter() {
     } catch (e) { res.status(403).json({ error: String(e.message || e) }); }
   });
 
+  // Concept lineage - returns upstream and downstream head-version lineage after visibility checks.
   r.get('/v1/concepts/:id/lineage', (req, res) => {
     const lineage = registry.lineageOf(req.params.id, req.tenant, req.tenant_record?.id);
     if (!lineage) return res.status(404).json({ error: 'not found' });
@@ -5495,6 +5625,10 @@ export function buildRouter() {
     });
   });
 
+  // Search - registry similarity search across the caller's tenant artifacts.
+  // Returns top-k matches with embedding-distance scores. Body: { query
+  // (required), k=10, tag }. 500 errors are wrapped in {error, detail,
+  // matches:[]} so SDKs never see a raw 500 (W470 P0-2).
   r.post('/v1/search', (req, res) => {
     try {
       const { query, k = 10, tag } = req.body || {};
@@ -5539,6 +5673,8 @@ export function buildRouter() {
     }
   }
 
+  // Runtime run - executes a concept_id or version_id against input and returns the output.
+  // Includes a signed receipt by default; pass receipt:false to skip receipt generation.
   r.post('/v1/run', (req, res) => handleRun(req, res));
 
   // SDK-conventional REST alias: POST /v1/recipes/:id/run mirrors /v1/run
@@ -5546,6 +5682,9 @@ export function buildRouter() {
   // still wins so callers can pin a specific revision.
   r.post('/v1/recipes/:id/run', (req, res) => handleRun(req, res, { concept_id: req.params.id }));
 
+  // Compose - dispatches one query across the top-k matching kolm artifacts and
+  // returns each artifact's output. Billable per non-cache, non-error dispatch.
+  // Body: { query, input, k=5, strategy='attention', tag }.
   r.post('/v1/compose', async (req, res) => {
     const { query, input, k = 5, strategy = 'attention', tag } = req.body || {};
     if (!query) return res.status(400).json({ error: 'query is required' });
@@ -5647,10 +5786,14 @@ export function buildRouter() {
     });
   });
 
+  // Library - returns the bundled kolm runtime library version and a human
+  // description string. Used by the SDKs and `kolm version` for the
+  // runtime-library identifier (separate from the API/server version).
   r.get('/v1/library', (_req, res) => {
     res.json({ version: LIBRARY_VERSION, description: libraryDescription() });
   });
 
+  // Admin tenant provision - creates a tenant with quota and returns its API key.
   r.post('/v1/admin/tenant', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     const { name, quota } = req.body || {};
@@ -5661,6 +5804,7 @@ export function buildRouter() {
 
   // /v1/admin/tenants — defined above with rich q/limit/scrub. Keep diagnostics here.
 
+  // Admin diagnostics - checks data/artifact directories and selected runtime env flags.
   r.get('/v1/admin/diagnostics', async (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     const fs = await import('node:fs');
@@ -5719,6 +5863,7 @@ export function buildRouter() {
     if (!c) return res.status(404).json({ error: 'not found' });
     res.json({ ...c, recipe_id: c.id });
   });
+  // Recipe stats alias for concept invocation counts, cache hit rate, and latency.
   r.get('/v1/recipes/:id/stats', (req, res) => {
     const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'not found' });
@@ -5869,8 +6014,9 @@ export function buildRouter() {
     return res.status(404).json({ error: 'job not found' });
   });
 
-  // ---------- Specialists (Phase D — Day 60-120 in roadmap) ----------
-  // Public waitlist endpoint — gathers email + task interest before the product launches.
+  // ---------- Specialists ----------
+
+  // Specialist waitlist - captures guided-training interest from teams before onboarding.
   r.post('/v1/specialists/waitlist', waitlistLimiter, (req, res) => {
     const { email, task } = req.body || {};
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'valid email required' });
@@ -5880,7 +6026,7 @@ export function buildRouter() {
     if (existing) {
       // Update task without changing position
       update('waitlist', x => x.id === existing.id, { task: String(task).slice(0, 500), updated_at: new Date().toISOString() });
-      return res.json({ position: existing.position, message: 'already reserved — task updated', email });
+      return res.json({ position: existing.position, message: 'already reserved - task updated', email });
     }
     const entry = {
       id: 'wl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
@@ -5888,7 +6034,7 @@ export function buildRouter() {
       created_at: new Date().toISOString(),
     };
     insert('waitlist', entry);
-    res.json({ position, message: 'reserved — first 50 teams get a Specialist trained on us', email });
+    res.json({ position, message: 'reserved - guided specialist training request received', email });
   });
 
   // ---------- Enterprise inquiry intake (KOLM-102) ----------
@@ -6004,6 +6150,7 @@ export function buildRouter() {
     res.json(rec);
   });
 
+  // Specialist train - queues tenant specialist training from an existing recipe and optional corpus.
   r.post('/v1/specialists/train', (req, res) => {
     const { name, recipe_id, corpus, base_model = 'Qwen/Qwen2.5-3B-Instruct', rank = 16 } = req.body || {};
     if (!name) return res.status(400).json({ error: 'name required' });
@@ -6024,11 +6171,13 @@ export function buildRouter() {
     res.status(202).json({ specialist_id: id, status: 'queued', est_minutes: 47, name, recipe_id, base_model, rank, pipeline: spec.pipeline });
   });
 
+  // Specialists list - returns tenant-visible specialist jobs without inline corpus rows.
   r.get('/v1/specialists', (req, res) => {
     const specs = all('specialists').filter(s => req.is_admin || s.tenant === req.tenant);
     res.json({ specialists: specs.map(({ corpus, ...rest }) => rest) });
   });
 
+  // Specialist detail - returns one accessible specialist record for the tenant or admin.
   r.get('/v1/specialists/:id', (req, res) => {
     const spec = findOne('specialists', x => x.id === req.params.id);
     if (!spec) return res.status(404).json({ error: 'not found' });
@@ -6036,16 +6185,18 @@ export function buildRouter() {
     res.json(spec);
   });
 
+  // Specialist weights - returns completed weight metadata or 503 while training is pending.
   r.get('/v1/specialists/:id/weights', (req, res) => {
     const spec = findOne('specialists', x => x.id === req.params.id);
     if (!spec) return res.status(404).json({ error: 'not found' });
     if (spec.tenant !== req.tenant && !req.is_admin) return res.status(403).json({ error: 'not your specialist' });
     if (spec.status !== 'completed') {
-      return res.status(503).json({ error: 'training not complete', status: spec.status, message: 'Specialists training pipeline ships Day 60-120. Recipe is the labeler today; weights export becomes live with the LoRA pipeline.' });
+      return res.status(503).json({ error: 'training not complete', status: spec.status, message: 'Weights export is available after this specialist training job completes.' });
     }
     res.json({ weights_url: spec.weights_url, sha256: spec.weights_sha256, base_model: spec.base_model, rank: spec.rank });
   });
 
+  // Specialist run - executes the specialist preview through its source recipe fallback.
   r.post('/v1/specialists/:id/run', async (req, res) => {
     const spec = findOne('specialists', x => x.id === req.params.id);
     if (!spec) return res.status(404).json({ error: 'not found' });
@@ -6233,6 +6384,9 @@ export function buildRouter() {
     }
   });
 
+  // Public featured - hand-curated list of the most useful public recipes for
+  // the home registry view (classify-issue-type, is-spam, extract-emails,
+  // classify-toxicity, etc.). Returns id, name, description, tags, head_version.
   r.get('/v1/public/featured', (_req, res) => {
     // Hand-pick the most useful public recipes for the home registry view.
     const featured_names = ['classify-issue-type','is-spam','extract-emails','classify-toxicity','extract-prices','classify-intent','sentiment','detect-pii','classify-language','is-question'];
@@ -6245,10 +6399,13 @@ export function buildRouter() {
   });
 
   // Admin: list waitlist + submissions for triage
+
+  // Admin waitlist list - returns all waitlist rows for founder triage.
   r.get('/v1/admin/waitlist', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     res.json({ waitlist: all('waitlist'), total: all('waitlist').length });
   });
+  // Admin submissions list - returns all submitted project/contact records.
   r.get('/v1/admin/submissions', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     res.json({ submissions: all('submissions'), total: all('submissions').length });
@@ -6474,6 +6631,11 @@ export function buildRouter() {
       specialist_eligible: total >= 1000,
     });
   });
+  // Distill from captures - turns the caller's namespace captures into either
+  // a recipe (template-cluster >=4 captures) or a specialist distill job (when
+  // total captures >=1000 or mode='specialist' is forced). Returns the synth
+  // result for recipes, {job_id, poll_url, bridge_source} (202) for specialists.
+  // Body: { namespace, min_pairs, mode, name }.
   r.post('/v1/distill/from-captures', authMiddleware, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const body = req.body || {};
@@ -6609,6 +6771,9 @@ export function buildRouter() {
       return res.status(500).json({ error: 'distill_runs_list_failed', message: String(e.message || e) });
     }
   });
+  // Distill run detail - reads ~/.kolm/distill-runs/run_<id>/{run-meta.json,
+  // progress.jsonl, manifest.json} for one run. Tenant-scoped — 404 when run
+  // belongs to another tenant or id doesn't match /^run_[a-z0-9_]+$/i.
   r.get('/v1/distill/runs/:id', authMiddleware, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const id = String(req.params.id || '');
@@ -6623,6 +6788,110 @@ export function buildRouter() {
       return res.json({ ok: true, run });
     } catch (e) {
       return res.status(500).json({ error: 'distill_run_read_failed', message: String(e.message || e) });
+    }
+  });
+
+  // ===== W480: on-policy + preference + spec-decode distill routes ==========
+  // Three thin orchestration shells over external trainers. Each returns an
+  // honest no_trainer_installed envelope when the corresponding $KOLM_*_TRAINER
+  // is not on PATH, mirroring the W454/W462 install-hint contract.
+
+  // W480 - Thinking Machines on-policy distillation doctor. Reports whether
+  // $KOLM_ONPOLICY_TRAINER is resolvable; returns install_hint when absent.
+  // No auth required so tooling can probe before signing in.
+  r.get('/v1/distill/onpolicy/doctor', async (_req, res) => {
+    try {
+      const { doctor } = await import('./distill-onpolicy.js');
+      return res.json(doctor());
+    } catch (e) {
+      return res.status(500).json({ error: 'onpolicy_doctor_failed', message: String(e.message || e) });
+    }
+  });
+  // W480 - Run an on-policy distillation against a teacher-student pair via the
+  // tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path,
+  // out_dir, namespace, max_steps }. Returns trainer envelope or no_trainer_installed.
+  r.post('/v1/distill/onpolicy', authMiddleware, async (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    try {
+      const { trainOnPolicy } = await import('./distill-onpolicy.js');
+      const tenant_id = req.tenant_record?.id || req.tenant || 'local';
+      const body = req.body || {};
+      const out = trainOnPolicy({
+        pairsPath: body.pairs_path,
+        studentPath: body.student_path,
+        outDir: body.out_dir || null,
+        tenant_id,
+        namespace: body.namespace || 'default',
+        maxSteps: Number(body.max_steps) || 100,
+      });
+      return res.json(out);
+    } catch (e) {
+      return res.status(500).json({ error: 'onpolicy_failed', message: String(e.message || e) });
+    }
+  });
+  // W480 - Preference-pair trainer doctor (DPO / SimPO / KTO / ORPO). Reports
+  // whether $KOLM_PREFERENCE_TRAINER is resolvable; honest install_hint when not.
+  r.get('/v1/distill/preference/doctor', async (_req, res) => {
+    try {
+      const { doctor } = await import('./distill-preference.js');
+      return res.json(doctor());
+    } catch (e) {
+      return res.status(500).json({ error: 'preference_doctor_failed', message: String(e.message || e) });
+    }
+  });
+  // W480 - Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant-
+  // installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path,
+  // objective, out_dir, namespace, beta }. Returns trainer envelope.
+  r.post('/v1/distill/preference', authMiddleware, async (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    try {
+      const { trainPreference } = await import('./distill-preference.js');
+      const tenant_id = req.tenant_record?.id || req.tenant || 'local';
+      const body = req.body || {};
+      const out = trainPreference({
+        pairsPath: body.pairs_path,
+        studentPath: body.student_path,
+        objective: body.objective || 'dpo',
+        outDir: body.out_dir || null,
+        tenant_id,
+        namespace: body.namespace || 'default',
+        beta: Number(body.beta) || 0.1,
+      });
+      return res.json(out);
+    } catch (e) {
+      return res.status(500).json({ error: 'preference_failed', message: String(e.message || e) });
+    }
+  });
+  // W480 - Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa).
+  // Reports whether $KOLM_SPECDECODE_TRAINER is resolvable; install_hint when not.
+  r.get('/v1/spec-decode/doctor', async (_req, res) => {
+    try {
+      const { doctor } = await import('./spec-decode.js');
+      return res.json(doctor());
+    } catch (e) {
+      return res.status(500).json({ error: 'specdecode_doctor_failed', message: String(e.message || e) });
+    }
+  });
+  // W480 - Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa)
+  // via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path,
+  // base_path, draft_kind, out_dir, namespace }. Returns trainer envelope.
+  r.post('/v1/spec-decode', authMiddleware, async (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    try {
+      const { trainSpecDecode } = await import('./spec-decode.js');
+      const tenant_id = req.tenant_record?.id || req.tenant || 'local';
+      const body = req.body || {};
+      const out = trainSpecDecode({
+        pairsPath: body.pairs_path,
+        basePath: body.base_path,
+        draftKind: body.draft_kind || 'eagle3',
+        outDir: body.out_dir || null,
+        tenant_id,
+        namespace: body.namespace || 'default',
+      });
+      return res.json(out);
+    } catch (e) {
+      return res.status(500).json({ error: 'specdecode_failed', message: String(e.message || e) });
     }
   });
 
@@ -6669,6 +6938,9 @@ export function buildRouter() {
     return { namespace, version_id: resolvedVersionId, limit };
   }
 
+  // Replay preview - dry-run for /v1/replay. Resolves the artifact + namespace
+  // + clamped limit (1..200) and reports how many captures would be replayed,
+  // without running them. Query: ?concept_id|version_id, ?namespace, ?limit.
   r.get('/v1/replay/preview', authMiddleware, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const plan = await replayPlan({ tenant: req.tenant, body: {
@@ -6697,6 +6969,10 @@ export function buildRouter() {
     });
   });
 
+  // Replay - reruns a tenant's recent captures through the chosen artifact and
+  // returns per-row diffs (upstream output vs local output), K-score (Jaccard),
+  // success/failure counts, and cost delta. Body: { concept_id|version_id
+  // (one required), namespace, limit (1..200, default 25) }.
   r.post('/v1/replay', authMiddleware, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const t0 = Date.now();
@@ -7118,14 +7394,18 @@ export function buildRouter() {
   //   DELETE /v1/notifications/push-subscriptions → remove by endpoint
   //   POST   /v1/notifications/test               → fire a dummy threshold alert (preview)
   //   GET    /v1/notifications/state              → { last_threshold_fired, fired_at } per namespace
+
+  // Notifications config - public VAPID/email capability flags and alert thresholds.
   r.get('/v1/notifications/config', (req, res) => {
     res.json(notifPublicConfig());
   });
+  // Notification preferences - returns tenant alert opt-in settings plus public config.
   r.get('/v1/notifications/preferences', authMiddleware, (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const prefs = notifGetPreferences(req.tenant);
     res.json({ preferences: prefs, public: notifPublicConfig() });
   });
+  // Notification preferences update - sets threshold alert opt-in and optional email.
   r.put('/v1/notifications/preferences', authMiddleware, (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     try {
@@ -7135,6 +7415,7 @@ export function buildRouter() {
       res.status(400).json({ error: String(e.message || e) });
     }
   });
+  // Push subscription list - returns registered WebPush endpoints without secret keys.
   r.get('/v1/notifications/push-subscriptions', authMiddleware, (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const subs = notifListPushSubscriptions(req.tenant).map((s) => ({
@@ -7142,6 +7423,7 @@ export function buildRouter() {
     }));
     res.json({ subscriptions: subs, count: subs.length });
   });
+  // Push subscription registration - stores an allowlisted HTTPS WebPush endpoint.
   r.post('/v1/notifications/push-subscriptions', authMiddleware, (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     try {
@@ -7151,6 +7433,7 @@ export function buildRouter() {
       res.status(400).json({ error: String(e.message || e) });
     }
   });
+  // Push subscription removal - deletes a subscription by endpoint from body or query.
   r.delete('/v1/notifications/push-subscriptions', authMiddleware, (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const endpoint = String((req.body || {}).endpoint || req.query?.endpoint || '');
@@ -7158,6 +7441,7 @@ export function buildRouter() {
     const removed = notifRemovePushSubscription(req.tenant, endpoint);
     res.json({ ok: true, removed });
   });
+  // Notification test alert - fires a synthetic threshold alert for a namespace.
   r.post('/v1/notifications/test', authMiddleware, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const namespace = sanitizeNamespace((req.body || {}).namespace || req.query?.namespace || 'default');
@@ -7172,6 +7456,7 @@ export function buildRouter() {
       res.status(500).json({ ok: false, error: String(e.message || e) });
     }
   });
+  // Notification threshold state - returns per-namespace alert state and readiness.
   r.get('/v1/notifications/state', authMiddleware, (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const namespace = req.query?.namespace ? sanitizeNamespace(String(req.query.namespace)) : 'default';
@@ -7186,7 +7471,7 @@ export function buildRouter() {
   // `/v1/chat/completions` keep working:
   //   ANTHROPIC_BASE_URL=https://kolm.ai/v1/capture/anthropic  →  POST .../v1/messages
   //   OPENAI_BASE_URL=https://kolm.ai/v1/capture/openai        →  POST .../v1/chat/completions
-  // The tail is discarded; the same handler runs as the flat /v1/capture/<provider> route.
+  // The suffix is discarded; the flat provider-specific capture endpoints use the same handler.
   // Express's `?` makes the suffix optional, and the wildcard absorbs any depth.
   // POST /v1/capture/anthropic — proxy to Anthropic, capture the round-trip.
   // The body is the upstream Anthropic Messages payload, unmodified.
@@ -7331,6 +7616,9 @@ export function buildRouter() {
   // non-2xx / unreachable, we fall through to the in-tree distill worker
   // (src/distill-bridge.js → workers/distill/distill.mjs) so the tenant
   // always gets a real job_id + poll_url. Never silent, never 503.
+
+  // Specialist auto-distill - turns 1,000+ kept namespace captures into a distill job.
+  // Returns a job id and poll URL from the trainer bridge or the local distill worker.
   r.post('/v1/specialists/auto-distill', authMiddleware, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const namespace = sanitizeNamespace((req.body || {}).namespace || req.query?.namespace || 'default');
@@ -7479,6 +7767,7 @@ export function buildRouter() {
   const requireTunnelsPlan = requirePlan(['pro', 'teams', 'business', 'enterprise'], 'remote-access tunnels');
   const requireByocPlan = requirePlan(['business', 'enterprise'], 'bring-your-own-cloud deploy');
 
+  // Team creation - creates a paid-plan workspace and makes the caller the owner.
   r.post('/v1/teams', requireTeamsPlan, (req, res) => {
     const t = tenantOf(req);
     if (!t.id) return res.status(401).json({ error: 'tenant required' });
@@ -7491,12 +7780,14 @@ export function buildRouter() {
     }
   });
 
+  // Team list - returns active teams for the signed-in tenant with their role.
   r.get('/v1/teams', (req, res) => {
     const t = tenantOf(req);
     if (!t.id) return res.status(401).json({ error: 'tenant required' });
     res.json({ teams: teams.listTeamsForTenant(t.id) });
   });
 
+  // Team detail - returns team, member, and pending-invite data for members or admins.
   r.get('/v1/teams/:idOrSlug', (req, res) => {
     const t = tenantOf(req);
     const team = teams.getTeam(req.params.idOrSlug);
@@ -7509,6 +7800,7 @@ export function buildRouter() {
     res.json({ team, members, invites });
   });
 
+  // Team update - admin-only rename, plan, and seat-limit updates.
   r.patch('/v1/teams/:idOrSlug', (req, res) => {
     const t = tenantOf(req);
     const team = teams.getTeam(req.params.idOrSlug);
@@ -7521,6 +7813,7 @@ export function buildRouter() {
     }
   });
 
+  // Team delete - owner-only soft delete that removes members and pending invites.
   r.delete('/v1/teams/:idOrSlug', (req, res) => {
     const t = tenantOf(req);
     const team = teams.getTeam(req.params.idOrSlug);
@@ -7533,6 +7826,7 @@ export function buildRouter() {
     }
   });
 
+  // Team ownership transfer - owner-only handoff to an existing team member.
   r.post('/v1/teams/:idOrSlug/transfer', (req, res) => {
     const t = tenantOf(req);
     const team = teams.getTeam(req.params.idOrSlug);
@@ -7547,6 +7841,7 @@ export function buildRouter() {
     }
   });
 
+  // Team invite - admin-only invite that enforces seat limits and returns an accept URL.
   r.post('/v1/teams/:idOrSlug/invite', (req, res) => {
     const t = tenantOf(req);
     const team = teams.getTeam(req.params.idOrSlug);
@@ -7562,6 +7857,7 @@ export function buildRouter() {
     }
   });
 
+  // Team invite preview - public token lookup with invite role, expiry, and team summary.
   r.get('/v1/teams/invites/:token', (req, res) => {
     const inv = teams.findInvite(req.params.token);
     if (!inv) return res.status(404).json({ error: 'invite not found or already used' });
@@ -7572,6 +7868,7 @@ export function buildRouter() {
     });
   });
 
+  // Team invite acceptance - signed-in tenant accepts a valid invite for their email.
   r.post('/v1/teams/invites/:token/accept', (req, res) => {
     const t = tenantOf(req);
     if (!t.id) return res.status(401).json({ error: 'sign in to accept the invite' });
@@ -7580,6 +7877,7 @@ export function buildRouter() {
     res.json(result);
   });
 
+  // Team invite revoke - admin-only deletion of an outstanding invite by invite id.
   r.delete('/v1/teams/invites/:invite_id', (req, res) => {
     const t = tenantOf(req);
     try {
@@ -7590,6 +7888,7 @@ export function buildRouter() {
     }
   });
 
+  // Team member role update - admin-only role changes, with owner changes routed via transfer.
   r.patch('/v1/teams/:idOrSlug/members/:tenant_id', (req, res) => {
     const t = tenantOf(req);
     const team = teams.getTeam(req.params.idOrSlug);
@@ -7603,6 +7902,7 @@ export function buildRouter() {
     }
   });
 
+  // Team member removal - members may leave; admins may remove non-owner members.
   r.delete('/v1/teams/:idOrSlug/members/:tenant_id', (req, res) => {
     const t = tenantOf(req);
     const team = teams.getTeam(req.params.idOrSlug);
@@ -7642,6 +7942,9 @@ export function buildRouter() {
     });
   });
 
+  // Tunnels list - returns the caller's active tenant tunnels (or team tunnels
+  // when ?team_id is supplied). Each row carries token, public_url, expires_at,
+  // and agent attach status. Used by the dashboard + `kolm tunnel list`.
   r.get('/v1/tunnels', (req, res) => {
     const t = tenantOf(req);
     if (!t.id) return res.status(401).json({ error: 'tenant required' });
@@ -7649,6 +7952,9 @@ export function buildRouter() {
     res.json({ tunnels: tunnel.listTunnelsForTenant(t.id, { teamId: team_id }) });
   });
 
+  // Tunnel close - tears down one tunnel by token. Tenant-fenced (closeTunnel
+  // throws code:'forbidden' for cross-tenant tokens → 403). Disconnects the
+  // attached agent SSE stream.
   r.delete('/v1/tunnels/:token', (req, res) => {
     const t = tenantOf(req);
     if (!t.id) return res.status(401).json({ error: 'tenant required' });
@@ -7741,13 +8047,18 @@ export function buildRouter() {
     }
   });
 
+  // BYOC deployments list - returns tenant deployments, optionally team-scoped after membership check.
   r.get('/v1/byoc/deployments', (req, res) => {
     const t = tenantOf(req);
     if (!t.id) return res.status(401).json({ error: 'tenant required' });
     const team_id = req.query.team_id ? String(req.query.team_id) : null;
+    if (team_id && !teams.isMember(team_id, t.id)) {
+      return res.status(403).json({ error: 'not a member of that team' });
+    }
     res.json({ deployments: byoc.listDeploymentsForTenant(t.id, { teamId: team_id }) });
   });
 
+  // BYOC deployment detail - returns one deployment owned by the tenant or one of their teams.
   r.get('/v1/byoc/deployments/:id', (req, res) => {
     const t = tenantOf(req);
     const d = byoc.getDeployment(req.params.id);
@@ -7758,6 +8069,7 @@ export function buildRouter() {
     res.json({ deployment: d });
   });
 
+  // BYOC deployment teardown - marks an owned deployment torn down and hides it from listings.
   r.delete('/v1/byoc/deployments/:id', (req, res) => {
     const t = tenantOf(req);
     try {
@@ -7782,6 +8094,7 @@ export function buildRouter() {
     res.json({ ok: true, registered_at: new Date().toISOString() });
   });
 
+  // BYOC targets - lists supported deploy targets for the public form and CLI.
   r.get('/v1/byoc/targets', (_req, res) => {
     res.json({ targets: byoc.TARGETS });
   });
@@ -7833,6 +8146,8 @@ export function buildRouter() {
   // tenant B even when B obtains the trace_id. authMiddleware still runs
   // (rate-limit, anon-tenant resolution) but the explicit tenant_record
   // gate makes the cross-tenant fence visible at this layer.
+
+  // Trace stats - returns tenant-scoped span counts and timing stats for a 32-hex trace id.
   r.get('/v1/trace/:trace_id/stats', wave144Limiter, authMiddleware, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -7843,6 +8158,7 @@ export function buildRouter() {
     } catch (e) { _http500(res, e); }
   });
 
+  // Trace chain - returns tenant-scoped parent/child span chain for a 32-hex trace id.
   r.get('/v1/trace/:trace_id/chain', wave144Limiter, authMiddleware, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -7853,6 +8169,7 @@ export function buildRouter() {
     } catch (e) { _http500(res, e); }
   });
 
+  // Trace export - returns tenant-scoped raw spans for a 32-hex trace id.
   r.get('/v1/trace/:trace_id/export', wave144Limiter, authMiddleware, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -7863,6 +8180,7 @@ export function buildRouter() {
     } catch (e) { _http500(res, e); }
   });
 
+  // Trace append - validates and stores one span under the authenticated tenant.
   r.post('/v1/trace/append', wave144Limiter, authMiddleware, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -7916,6 +8234,7 @@ export function buildRouter() {
     }
   });
 
+  // IR stats - validates a body-supplied workflow IR and returns node, edge, seed, kind, and hash counts.
   r.post('/v1/ir/stats', wave144Limiter, (req, res) => {
     try {
       const ir = _unwrapIrBody(req.body || {});
@@ -7924,6 +8243,7 @@ export function buildRouter() {
     } catch (e) { _http400(res, e.message || e); }
   });
 
+  // IR validate - checks body-supplied workflow IR structure and returns its receipt-bound hash.
   r.post('/v1/ir/validate', wave144Limiter, (req, res) => {
     try {
       const ir = _unwrapIrBody(req.body || {});
@@ -7932,6 +8252,7 @@ export function buildRouter() {
     } catch (e) { res.json({ ok: false, error: String(e.message || e) }); }
   });
 
+  // IR replay - replays every workflow IR seed and reports deterministic mismatches.
   r.post('/v1/ir/replay', wave144Limiter, async (req, res) => {
     try {
       const ir = _unwrapIrBody(req.body || {});
@@ -7949,6 +8270,7 @@ export function buildRouter() {
   // Both routes are tenant-fenced — the route forces tenant_id to the
   // authenticated tenant; callers cannot spoof scope via the body.
 
+  // Trace compile - converts a tenant trace into replayable workflow IR seeds.
   r.post('/v1/trace/compile', wave144Limiter, authMiddleware, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -7970,6 +8292,7 @@ export function buildRouter() {
     }
   });
 
+  // Trace replay verify - checks compiled replay outputs against captured trace spans.
   r.post('/v1/trace/verify', wave144Limiter, authMiddleware, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -7997,11 +8320,14 @@ export function buildRouter() {
   // against one vendor's contract can be replayed against another's
   // runtime. Tool nodes pass through unchanged because compile-ir.js
   // already normalises tool_use/tool_calls into a single TOOL kind.
+
+  // Trace translate providers - lists supported cross-provider trace rewrite targets.
   r.get('/v1/trace/translate/providers', wave144Limiter, authMiddleware, (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     res.json({ ok: true, providers: TRACE_KNOWN_PROVIDERS });
   });
 
+  // Trace provider detect - detects source provider/model metadata for a tenant trace.
   r.get('/v1/trace/translate/detect', wave144Limiter, authMiddleware, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -8021,6 +8347,7 @@ export function buildRouter() {
     }
   });
 
+  // Trace translate - rewrites trace IR provider/model fields for replay on another provider.
   r.post('/v1/trace/translate', wave144Limiter, authMiddleware, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -8059,17 +8386,19 @@ export function buildRouter() {
     }
   });
 
-  // ----- device -----
+  // Device capability profiles - list static target profiles for artifact compatibility checks.
   r.get('/v1/device/profiles', wave144Limiter, (_req, res) => {
     res.json({ spec: deviceCaps.CAPABILITY_VERSION, profiles: deviceCaps.allProfiles() });
   });
 
+  // Device capability profile detail - returns one static profile or 404 for unknown device ids.
   r.get('/v1/device/profiles/:device_id', wave144Limiter, (req, res) => {
     const p = deviceCaps.profileFor(String(req.params.device_id || ''));
     if (!p) return res.status(404).json({ error: 'unknown device' });
     res.json(p);
   });
 
+  // Device requirement check - compares a target profile against a named host profile.
   r.post('/v1/device/check', wave144Limiter, (req, res) => {
     try {
       const { target, device_id } = req.body || {};
@@ -8079,6 +8408,7 @@ export function buildRouter() {
     } catch (e) { _http400(res, e.message || e); }
   });
 
+  // Device host probe - detects this server's local profile using best-effort hardware probes.
   r.post('/v1/device/probe', wave144Limiter, async (_req, res) => {
     try { res.json(await deviceCaps.probeHost()); }
     catch (e) { _http500(res, e); }
@@ -8089,6 +8419,9 @@ export function buildRouter() {
     res.json({ spec: confidentialCompute.ATTESTATION_SPEC_VERSION, kinds: Object.values(confidentialCompute.KINDS) });
   });
 
+  // Confidential-compute shape - returns the expected JSON shape for an
+  // attestation report of the given kind (pccs, snp-report, nitro-attestation,
+  // nras). 404 if the kind is unknown. Lets callers validate before /v1/cc/verify.
   r.get('/v1/cc/shape/:kind', wave144Limiter, (req, res) => {
     const k = String(req.params.kind || '');
     const shape = confidentialCompute.REPORT_SHAPES[k];
@@ -8096,6 +8429,10 @@ export function buildRouter() {
     res.json({ kind: k, shape });
   });
 
+  // Confidential-compute verify - validates an attestation report against its
+  // declared kind. Returns {state:'shape_ok'|...,verified:false} until a tenant
+  // registers a real crypto verifier via registerAttestationVerifier. Body:
+  // { kind, report, opts }.
   r.post('/v1/cc/verify', wave144Limiter, async (req, res) => {
     try {
       const { kind, report, opts } = req.body || {};
@@ -8110,6 +8447,7 @@ export function buildRouter() {
     res.json({ spec: federatedLearning.FL_SPEC_VERSION, strategies: Object.values(federatedLearning.STRATEGIES) });
   });
 
+  // Federated round create - creates a foundation-state round and returns its stable round hash.
   r.post('/v1/fl/round/new', wave144Limiter, authMiddleware, (req, res) => {
     try {
       const round = federatedLearning.newRound(req.body || {});
@@ -8117,6 +8455,7 @@ export function buildRouter() {
     } catch (e) { _http400(res, e.message || e); }
   });
 
+  // Federated contribution verify - checks a client update receipt against the announced round.
   r.post('/v1/fl/contribution/verify', wave144Limiter, authMiddleware, (req, res) => {
     try {
       const { contribution, round, public_key } = req.body || {};
@@ -8126,6 +8465,7 @@ export function buildRouter() {
     } catch (e) { _http400(res, e.message || e); }
   });
 
+  // Federated aggregate - folds verified client deltas into one foundation-state aggregate receipt.
   r.post('/v1/fl/aggregate', wave144Limiter, authMiddleware, (req, res) => {
     try {
       const { round, contributions } = req.body || {};
@@ -8141,6 +8481,9 @@ export function buildRouter() {
     catch (e) { _http400(res, e.message || e); }
   });
 
+  // Lineage validate - checks an artifact-lineage block for structural
+  // consistency (parent links, build steps, version pins). Returns
+  // {ok:true, block} when the lineage is well-formed, {ok:false, error} otherwise.
   r.post('/v1/lineage/validate', wave144Limiter, (req, res) => {
     try {
       const out = artifactLineage.validateLineage(req.body || {});
@@ -8148,11 +8491,17 @@ export function buildRouter() {
     } catch (e) { res.json({ ok: false, error: String(e.message || e) }); }
   });
 
+  // Capability build - constructs a capability descriptor block from an
+  // artifact manifest, declaring what the artifact can do (modalities,
+  // budgets, K-floor, attestation requirements). Pairs with /v1/lineage/build.
   r.post('/v1/capability/build', wave144Limiter, (req, res) => {
     try { res.json(artifactLineage.buildCapability(req.body || {})); }
     catch (e) { _http400(res, e.message || e); }
   });
 
+  // Capability validate - checks a capability descriptor block for structural
+  // consistency and that declared budgets/K-floor are internally coherent.
+  // Returns {ok:true, block} on success, {ok:false, error} otherwise.
   r.post('/v1/capability/validate', wave144Limiter, (req, res) => {
     try {
       const out = artifactLineage.validateCapability(req.body || {});
@@ -8217,6 +8566,7 @@ export function buildRouter() {
     }
     return out;
   }
+  // Marketplace catalog manifest - returns the signed catalog with live production-ready verdicts.
   r.get('/v1/marketplace/catalog.json', async (req, res) => {
     try {
       res.set('Cache-Control', 'public, max-age=300');
@@ -8226,6 +8576,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json({ error: 'marketplace_catalog_error', detail: String(e.message || e) }); }
   });
 
+  // Marketplace list - filters artifacts and overlays live verification before returning rows.
   r.get('/v1/marketplace', async (req, res) => {
     try {
       const filter = {};
@@ -8251,6 +8602,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json({ error: 'marketplace_list_error', detail: String(e.message || e) }); }
   });
 
+  // Marketplace publish request - queues an artifact proposal for manual review without publishing bytes.
   r.post('/v1/marketplace/publish-request', (req, res) => {
     try {
       const body = req.body || {};
@@ -8271,6 +8623,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json({ error: 'marketplace_publish_error', detail: String(e.message || e) }); }
   });
 
+  // Marketplace detail - returns one artifact with live verification state or 404 for unknown slugs.
   r.get('/v1/marketplace/:slug', async (req, res) => {
     try {
       const a = marketplaceGetArtifact(String(req.params.slug || ''));
@@ -8871,6 +9224,8 @@ export function buildRouter() {
   // Tenant scope is required on every route. Raw input/output bytes never
   // leave the tenant; only sha256(namespace+input_hash+decision_kind) crosses
   // the wire. Aggregation noises peer counts with Laplace ε=1.0 by default.
+
+  // Federated opt-in - records tenant namespaces and peers for hash-only approval sharing.
   r.post('/v1/federated/opt-in', (req, res) => {
     try {
       const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
@@ -8886,6 +9241,7 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'federated_optin_error')); }
   });
 
+  // Federated opt-out - clears tenant approval-sharing opt-in state and records the reason.
   r.post('/v1/federated/opt-out', (req, res) => {
     try {
       const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
@@ -8896,6 +9252,7 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'federated_optout_error')); }
   });
 
+  // Federated approval share - emits hash-only approval rows for an opted-in namespace.
   r.post('/v1/federated/share-approvals', async (req, res) => {
     try {
       const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
@@ -8915,6 +9272,7 @@ export function buildRouter() {
     }
   });
 
+  // Federated approval aggregate - returns DP-noised counts across local and peer approval hashes.
   r.post('/v1/federated/aggregate', (req, res) => {
     try {
       const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
@@ -8929,6 +9287,7 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'federated_aggregate_error')); }
   });
 
+  // Federated peers - lists other opted-in approval-sharing peers visible to the tenant.
   r.get('/v1/federated/peers', (req, res) => {
     try {
       const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
@@ -8938,6 +9297,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'federated_peers_error')); }
   });
 
+  // Federated audit - returns recent hash-only approval-share envelopes for the tenant.
   r.get('/v1/federated/audit', (req, res) => {
     try {
       const tenant_id = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
@@ -9208,6 +9568,9 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'drift_snapshot_error')); }
   });
 
+  // Drift detect - compares two drift snapshots (baseline vs current) and
+  // returns signals + verdict ('within' | 'drift' | 'breach') with breach/drift
+  // counts. Body: { baseline_snapshot, current_snapshot, tolerances }.
   r.post('/v1/drift/detect', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -9227,6 +9590,9 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'drift_detect_error')); }
   });
 
+  // Drift report - builds a full drift report (signals + narrative + tolerance
+  // block + caller notes) from two snapshots. Same inputs as /v1/drift/detect
+  // but returns the formatted report ready for archival or UI rendering.
   r.post('/v1/drift/report', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -9248,7 +9614,7 @@ export function buildRouter() {
   });
 
   // ============== W384: agent telemetry ==============
-  // W424 — every /v1/agents/* route fences on req.tenant_record and forwards
+  // W424 — agent telemetry routes fence on req.tenant_record and forward
   // req.tenant_record.id as tenant_id into the helper so cross-tenant rows
   // never appear in the rollup. _tenantScope() returns null for admin
   // (cross-tenant reads allowed) and the canonical tenant_id otherwise.
@@ -9264,6 +9630,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'agents_list_error')); }
   });
 
+  // Agent sessions list for the caller's tenant.
   r.get('/v1/agents/sessions', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -9277,6 +9644,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'agents_sessions_error')); }
   });
 
+  // Agent session detail scoped to the caller's tenant.
   r.get('/v1/agents/sessions/:id', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -9288,6 +9656,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'agent_session_error')); }
   });
 
+  // Agent model recommendation for a tenant-scoped application and task hint.
   r.get('/v1/agents/recommend', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -9302,6 +9671,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'agents_recommend_error')); }
   });
 
+  // Top failing agent sessions for the caller's tenant.
   r.get('/v1/agents/failing', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -9315,6 +9685,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'agents_failing_error')); }
   });
 
+  // Agent telemetry aggregate stats for the caller's tenant.
   r.get('/v1/agents/stats', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -9333,6 +9704,9 @@ export function buildRouter() {
     return (req && req.tenant_record && req.tenant_record.id) || null;
   }
 
+  // Lake stats - per-tenant event-store roll-up: row counts, byte size, oldest
+  // and newest timestamps, namespace breakdown. Accepts ?namespace + ?since
+  // filters. Scoped via _tenantScope; admin sees cross-tenant aggregate.
   r.get('/v1/lake/stats', async (req, res) => {
     try {
       const stats = await lakeStatsFn({
@@ -9344,6 +9718,9 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'lake_stats_error')); }
   });
 
+  // Lake repeated - finds clusters of repeated workflow inputs in the event
+  // store (the W384 "repeated workflows" surface). Returns up to ?limit (max
+  // 200, default 20) clusters with their representative input + member count.
   r.get('/v1/lake/repeated', async (req, res) => {
     try {
       const evs = await eventList({
@@ -9381,6 +9758,9 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'opportunities_error')); }
   });
 
+  // Opportunity accept - marks one optimization opportunity (cache candidate,
+  // repeated-prompt cluster, replacement) as accepted by the tenant. Tenant-
+  // scoped; cross-tenant ids 404. Body: { reason }. Recorded for audit log.
   r.post('/v1/opportunities/:id/accept', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -9410,6 +9790,9 @@ export function buildRouter() {
     }
   });
 
+  // Opportunity ignore - tenant-scoped synonym for /dismiss; marks the
+  // opportunity as ignored so it stops surfacing on the dashboard. Body:
+  // { reason }. Cross-tenant ids 404.
   r.post('/v1/opportunities/:id/ignore', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -9503,6 +9886,7 @@ export function buildRouter() {
   });
 
   // ============== W384: datasets ==============
+  // Datasets list - returns tenant-scoped dataset summaries for captured rows.
   r.get('/v1/datasets', async (req, res) => {
     try {
       // W411 — tenant-scoped listing.
@@ -9511,6 +9895,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'datasets_list_error')); }
   });
 
+  // Dataset create - builds a tenant-stamped dataset from a namespace of captured events.
   r.post('/v1/datasets', async (req, res) => {
     try {
       const body = req.body || {};
@@ -9522,6 +9907,7 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'dataset_create_error')); }
   });
 
+  // Dataset detail - inspects one dataset and hides cross-tenant records as not found.
   r.get('/v1/datasets/:id', async (req, res) => {
     try {
       const result = await dsInspectDataset(req.params.id);
@@ -9536,6 +9922,7 @@ export function buildRouter() {
     } catch (e) { res.status(404).json(_w384Err(e, 'dataset_not_found')); }
   });
 
+  // Dataset split - recomputes a deterministic train/holdout split for an owned dataset.
   r.post('/v1/datasets/:id/split', async (req, res) => {
     try {
       // W411 — same cross-tenant fence on split. The split mutates the
@@ -9552,6 +9939,7 @@ export function buildRouter() {
   });
 
   // ============== W384: label queue ==============
+  // Labels next - returns tenant-scoped unlabeled events with optional namespace/workflow filters.
   r.get('/v1/labels/next', async (req, res) => {
     try {
       const events = await lblNextToLabel({
@@ -9564,6 +9952,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'labels_next_error')); }
   });
 
+  // Label submit - records a reviewer verdict for one event and blocks cross-tenant decisions.
   r.post('/v1/labels', async (req, res) => {
     try {
       const body = req.body || {};
@@ -9588,6 +9977,7 @@ export function buildRouter() {
     }
   });
 
+  // Labels stats - returns tenant-scoped pending, approved, rejected, and edited counts.
   r.get('/v1/labels/stats', async (req, res) => {
     try {
       const result = await lblStats({ tenant_id: _tenantScope(req) });
@@ -9595,8 +9985,14 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'labels_stats_error')); }
   });
 
-  r.get('/v1/labels/:event_id', (req, res) => {
+  // Label detail - fetches one persisted decision and hides cross-tenant event ids.
+  r.get('/v1/labels/:event_id', async (req, res) => {
     try {
+      const scope = _tenantScope(req);
+      if (scope) {
+        const ev = await eventGet(req.params.event_id);
+        if (!ev || ev.tenant_id !== scope) return res.status(404).json({ error: 'label_not_found' });
+      }
       const result = lblGetLabel(req.params.event_id);
       if (!result) return res.status(404).json({ error: 'label_not_found' });
       res.json({ ok: true, label: result });
@@ -9604,10 +10000,10 @@ export function buildRouter() {
   });
 
   // ============== W409o: label-queue aliases ==============
-  // The /account/labeling.html UI was wired against /v1/label-queue/* before
-  // the canonical surface settled at /v1/labels/*. Rather than chase the
-  // legacy page (and break any client polling the old path), we alias the
-  // three endpoints. The shapes also tolerate the older field names
+  // The /account/labeling.html UI uses concrete label-queue aliases for the
+  // canonical labels routes. Rather than chase the legacy page (and break any
+  // client polling the old paths), we alias the known endpoints. The shapes
+  // also tolerate the older field names
   // (label vs verdict, accepted vs approved, pending vs decided).
   r.get('/v1/label-queue/next', async (req, res) => {
     try {
@@ -9638,6 +10034,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'labels_next_error')); }
   });
 
+  // Label-queue stats alias; adapts canonical labels stats names for the legacy UI.
   r.get('/v1/label-queue/stats', async (req, res) => {
     try {
       const result = await lblStats({ tenant_id: _tenantScope(req) });
@@ -9658,6 +10055,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'labels_stats_error')); }
   });
 
+  // Label-queue submit alias; accepts legacy label names and stores canonical verdicts.
   r.post('/v1/label-queue/submit', async (req, res) => {
     try {
       const body = req.body || {};
@@ -9705,6 +10103,7 @@ export function buildRouter() {
   });
 
   // ============== W384: simulation ==============
+  // Sim run - creates a workflow simulation and emits synthetic events into its saved run record.
   r.post('/v1/sim/run', async (req, res) => {
     try {
       const body = req.body || {};
@@ -9719,6 +10118,7 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'sim_run_error')); }
   });
 
+  // Sim list - returns saved workflow simulations plus the supported simulator type catalog.
   r.get('/v1/sim', (req, res) => {
     try {
       const rows = simListSims();
@@ -9726,6 +10126,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'sim_list_error')); }
   });
 
+  // Sim detail - returns one saved workflow simulation record by simulation id.
   r.get('/v1/sim/:id', (req, res) => {
     try {
       const sim = simReadRaw(req.params.id);
@@ -9735,6 +10136,9 @@ export function buildRouter() {
   });
 
   // ============== W384: bakeoff ==============
+  // Bakeoff run - evaluates a set of contestant models against a dataset and
+  // returns ranked rows + winner. Body: { dataset_id (required), contestants,
+  // opts }. Used by /account/bakeoffs and `kolm bakeoff run`.
   r.post('/v1/bakeoff/run', async (req, res) => {
     try {
       const body = req.body || {};
@@ -9749,6 +10153,9 @@ export function buildRouter() {
   });
 
   // ============== W384: training planner ==============
+  // Training plan - drafts a training plan (model class, dataset split, eval
+  // protocol, expected K-floor) for a given dataset. Body: { dataset_id, plus
+  // optional model_class, holdout, budget }. Used by `kolm training plan`.
   r.post('/v1/training/plan', async (req, res) => {
     try {
       const body = req.body || {};
@@ -9760,6 +10167,7 @@ export function buildRouter() {
   });
 
   // ============== W384: runtime policy ==============
+  // Runtime policy read - returns the active runtime policy and available policy names.
   r.get('/v1/runtime/policy', (req, res) => {
     try {
       const pol = runtimeGetPolicy();
@@ -9767,6 +10175,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'runtime_policy_read_error')); }
   });
 
+  // Runtime policy update - admin-only mutation of the active runtime routing policy.
   r.put('/v1/runtime/policy', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin_only' });
     try {
@@ -9775,6 +10184,7 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'runtime_policy_set_error')); }
   });
 
+  // Runtime decision - executes the policy ladder for one request and records the decision.
   r.post('/v1/runtime/decide', async (req, res) => {
     try {
       const body = req.body || {};
@@ -9783,6 +10193,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'runtime_decide_error')); }
   });
 
+  // Runtime decision history - returns the most recent recorded runtime decisions.
   r.get('/v1/runtime/decisions', (req, res) => {
     try {
       const n = req.query.n ? Number(req.query.n) : 50;
@@ -9791,6 +10202,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'runtime_decisions_error')); }
   });
 
+  // Runtime replacement stats - summarizes replacement rate, savings, and spend over a window.
   r.get('/v1/runtime/replacement-stats', (req, res) => {
     try {
       const stats = runtimeReplacementStats({ since: req.query.since });
@@ -9799,6 +10211,7 @@ export function buildRouter() {
   });
 
   // ============== W384: devices ==============
+  // Device fleet list - enumerates operator-registered device profiles newest first.
   r.get('/v1/devices', async (req, res) => {
     try {
       const rows = await devListDevices();
@@ -9806,6 +10219,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'devices_list_error')); }
   });
 
+  // Device fleet detect - probes local hardware and persists the local fleet profile.
   r.get('/v1/devices/detect', async (req, res) => {
     try {
       const result = await devDetectLocal();
@@ -9818,6 +10232,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'devices_detect_error')); }
   });
 
+  // Device fleet registration - validates and stores a canonical profile for a device id.
   r.post('/v1/devices/:id/register', async (req, res) => {
     try {
       const body = req.body || {};
@@ -9826,6 +10241,7 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'device_register_error')); }
   });
 
+  // Device fleet test - probes reachability and runtime status for a registered device.
   r.post('/v1/devices/:id/test', async (req, res) => {
     try {
       const result = await devTestDevice(req.params.id);
@@ -9833,6 +10249,7 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'device_test_error')); }
   });
 
+  // Device install list - returns staged artifact installs, optionally filtered by device_id.
   r.get('/v1/devices/installed', async (req, res) => {
     try {
       const rows = await devListInstalled({
@@ -9842,6 +10259,7 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'devices_installed_error')); }
   });
 
+  // Device artifact install - stages a .kolm artifact by path or hash onto a registered device.
   r.post('/v1/devices/:id/install', async (req, res) => {
     try {
       const body = req.body || {};
@@ -9864,6 +10282,7 @@ export function buildRouter() {
     }
   });
 
+  // Device artifact uninstall - removes a staged artifact install for one registered device.
   r.delete('/v1/devices/:id/install/:artifact_id', async (req, res) => {
     try {
       const result = await devUninstall(req.params.id, req.params.artifact_id);
@@ -9879,6 +10298,8 @@ export function buildRouter() {
   // refusal codes (no_profile / no_compatible_target / artifact_exceeds_device
   // _memory / offline_required_but_device_not_offline_capable) survive across
   // the API boundary — they're the actionable bit.
+
+  // Device recommendation - chooses runtime target and quantization for profile/artifact inputs.
   r.post('/v1/devices/recommend', async (req, res) => {
     try {
       const body = req.body || {};
@@ -9890,6 +10311,7 @@ export function buildRouter() {
       res.json(result);
     } catch (e) { res.status(400).json(_w384Err(e, 'device_recommend_error')); }
   });
+  // Device recommendation default - recommends target and quantization for the detected profile.
   r.get('/v1/devices/recommend', async (req, res) => {
     try {
       const result = await devRecommendForProfile({});
@@ -9972,6 +10394,9 @@ export function buildRouter() {
     });
   }
 
+  // Capture media - multipart upload endpoint for image/audio/video/blob
+  // captures. Streams parts through mediaStoreBlob and appends one event per
+  // blob to the tenant-scoped lake. Requires Content-Type: multipart/form-data.
   r.post('/v1/capture/media', async (req, res) => {
     try {
       const ct = String(req.headers['content-type'] || '');
@@ -10162,6 +10587,9 @@ export function buildRouter() {
   });
 
   // ============== W384: connectors ==============
+  // Connectors - lists upstream provider connectors (openai, anthropic,
+  // openrouter, etc.) with per-provider config status (key present, base URL,
+  // last reachable check). Read by /docs/connectors and `kolm connectors`.
   r.get('/v1/connectors', (req, res) => {
     try {
       const summary = connectorSummarizeProviders();
@@ -10170,6 +10598,9 @@ export function buildRouter() {
   });
 
   // ============== W384: storage ==============
+  // Storage config - returns the event-store driver info + media blob base
+  // directory + supported media kinds. The config itself is env-var driven
+  // (KOLM_DATA_DIR, KOLM_MEDIA_DIR, KOLM_EVENT_STORE_DRIVER).
   r.get('/v1/storage/config', (req, res) => {
     try {
       const info = eventStoreInfo();
@@ -10182,6 +10613,10 @@ export function buildRouter() {
     } catch (e) { res.status(500).json(_w384Err(e, 'storage_config_error')); }
   });
 
+  // Storage config update - admin-only echo endpoint that does NOT mutate
+  // runtime config (storage settings live in env vars and require a daemon
+  // restart). Returns {ok, proposed, note, env_vars} so the dashboard can
+  // show what would change and which vars to set.
   r.put('/v1/storage/config', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin_only' });
     // We treat this as a hint/echo — actual config lives in env vars; we
@@ -10196,6 +10631,9 @@ export function buildRouter() {
     });
   });
 
+  // Storage purge - destructive admin-only event-store purge. Requires
+  // {confirm:true} in the body; supports {before} timestamp + {namespace}
+  // filters. Returns purge counts. Used for lake-retention cleanups.
   r.post('/v1/storage/purge', async (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin_only' });
     const body = req.body || {};
@@ -10217,7 +10655,7 @@ export function buildRouter() {
   //
   // public/account/*.html ship inline scripts that fetch a stable set of
   // /v1/* paths. Several pages used noun-plural URLs (/v1/bakeoffs,
-  // /v1/simulations, /v1/label-queue/*) that did not match the existing
+  // /v1/simulations, label-queue aliases) that did not match the existing
   // server verbs (/v1/bakeoff/run, /v1/sim, /v1/labels/next). The pages
   // were silently returning empty arrays via .catch() handlers and showing
   // blank tables.
@@ -10295,6 +10733,9 @@ export function buildRouter() {
   r.get('/v1/bakeoffs', (req, res) => {
     res.json({ ok: true, total: 0, bakeoffs: [] });
   });
+  // Bakeoffs run alias - SDK-friendly synonym for /v1/bakeoff/run with the
+  // added W411 tenant fence at the dataset boundary (cross-tenant dataset_id
+  // returns 404). Same body: { dataset_id, contestants, opts }.
   r.post('/v1/bakeoffs', async (req, res) => {
     try {
       const body = req.body || {};
@@ -10314,7 +10755,7 @@ export function buildRouter() {
     } catch (e) { res.status(400).json(_w384Err(e, 'bakeoff_error')); }
   });
 
-  // /v1/label-queue/* aliases are already wired by W409o above (~line 7670):
+  // Label-queue aliases are already wired by W409o above (~line 7670):
   //   /v1/label-queue/next, /v1/label-queue/stats, /v1/label-queue/submit,
   //   /v1/label-queue/audit/:event_id. Express first-match: the earlier
   //   handlers win, so re-defining them here is dead code. The route-walker
@@ -10330,6 +10771,9 @@ export function buildRouter() {
       res.json({ ok: true, total: rows.length, simulations: rows, types: SIM_TYPES });
     } catch (e) { res.status(500).json(_w384Err(e, 'simulations_list_error')); }
   });
+  // Simulations create+run - REST alias of /v1/sim/run that creates a
+  // workflow simulation and immediately runs it. Body: { workflow_id, type, n,
+  // personas, opts, toLake (default true) }. Returns sim_id + emitted events.
   r.post('/v1/simulations', async (req, res) => {
     try {
       const body = req.body || {};
@@ -10343,6 +10787,8 @@ export function buildRouter() {
       res.json({ ok: true, sim_id: sim.sim_id, type: sim.type, ...result });
     } catch (e) { res.status(400).json(_w384Err(e, 'simulations_run_error')); }
   });
+  // Simulation detail - REST alias of /v1/sim/:id. Returns one saved workflow
+  // simulation record. 404 when the id is unknown.
   r.get('/v1/simulations/:id', (req, res) => {
     try {
       const sim = simReadRaw(req.params.id);
@@ -10350,6 +10796,10 @@ export function buildRouter() {
       res.json({ ok: true, sim });
     } catch (e) { res.status(500).json(_w384Err(e, 'simulations_get_error')); }
   });
+  // Simulation promote - mirrors the "promote to holdout" button on
+  // simulations.html. Calls simulation.generateDatasetFromSim to convert a sim
+  // into a dataset (synthetic rows + optional holdout). Body: { name,
+  // holdoutFromSim (default true) }. Returns the dataset id on success.
   r.post('/v1/simulations/:id/promote', async (req, res) => {
     try {
       const body = req.body || {};
@@ -10369,6 +10819,8 @@ export function buildRouter() {
   // body) to ask the daemon to refresh the local hardware inventory. The
   // existing GET handler covers read-only callers; add a POST handler that
   // accepts an optional device-hints body and forwards to devDetectLocal.
+
+  // Device fleet detect with hints - refreshes local inventory using optional device hints.
   r.post('/v1/devices/detect', async (req, res) => {
     try {
       const hints = req.body && typeof req.body === 'object' ? req.body : {};

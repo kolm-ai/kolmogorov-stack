@@ -109,25 +109,26 @@ test('5. page cites src/tune.js, src/synthesis.js, src/assistant.js, src/recipe-
   }
 });
 
-test('6. page cites distill-onpolicy.js, distill-preference.js, spec-decode.js as roadmap-only', () => {
+test('6. page cites distill-onpolicy.js, distill-preference.js, spec-decode.js as shipped (W480)', () => {
+  // W480 turned the three modules from roadmap into shipped orchestration
+  // shells. The shells run real Node code; the gradient-computing trainer is
+  // a tenant-installed plug-in resolved through $KOLM_*_TRAINER. The page
+  // must now name each module AND its env-var trainer hook so readers can
+  // see the honest contract (no silent passthrough when trainer absent).
   const html = read(PAGE);
-  const ROADMAP = [
+  const MODULES = [
     'distill-onpolicy.js',
     'distill-preference.js',
     'spec-decode.js',
   ];
-  for (const f of ROADMAP) {
+  for (const f of MODULES) {
     assert.ok(html.includes(f),
-      `methods-2026-q2.html missing roadmap module "${f}"`);
+      `methods-2026-q2.html missing module "${f}"`);
   }
-  // The phrase "not yet shipped" must appear so readers cannot misread
-  // the roadmap modules as shipped.
-  assert.ok(html.includes('not yet shipped') || html.includes('Not yet shipped') || html.includes('roadmap'),
-    'methods-2026-q2.html must label roadmap modules as "not yet shipped" or "roadmap"');
-  // Stronger: assert "Not yet shipped" appears at least three times (one per roadmap card)
-  const occurrences = (html.match(/Not yet shipped/g) || []).length;
-  assert.ok(occurrences >= 3,
-    `methods-2026-q2.html should label all three roadmap modules as "Not yet shipped"; found ${occurrences} occurrence(s)`);
+  for (const envVar of ['$KOLM_ONPOLICY_TRAINER', '$KOLM_PREFERENCE_TRAINER', '$KOLM_SPECDECODE_TRAINER']) {
+    assert.ok(html.includes(envVar),
+      `methods-2026-q2.html must name the trainer-hook env var ${envVar} for W480 honesty contract`);
+  }
 });
 
 test('7. vercel.json has the /research/methods-2026-q2 rewrite', () => {
@@ -197,17 +198,17 @@ test('10. seven-section structure is rendered in order (TOC matches headings)', 
   }
 });
 
-test('11. closing "what ships today" section separates shipped from roadmap', () => {
+test('11. closing "what ships today" section visually marks all 7 modules as shipped (W480 flip)', () => {
   const html = read(PAGE);
   assert.ok(html.includes('id="what-ships"'),
     'methods-2026-q2.html missing closing #what-ships section');
-  // The section must visually mark shipped vs roadmap with the ships-card pattern.
+  // After W480, the three previously-roadmap modules ship as orchestration
+  // shells (real Node code; external trainer plug-in via $KOLM_*_TRAINER).
+  // Total shipped-cards now >= 7 across tune / synthesis / assistant / recipe-class /
+  // distill-onpolicy / distill-preference / spec-decode.
   const shippedCards = (html.match(/ships-card shipped/g) || []).length;
-  const roadmapCards = (html.match(/ships-card roadmap/g) || []).length;
-  assert.ok(shippedCards >= 4,
-    `methods-2026-q2.html should mark 4 shipped modules; found ${shippedCards}`);
-  assert.ok(roadmapCards >= 3,
-    `methods-2026-q2.html should mark 3 roadmap modules; found ${roadmapCards}`);
+  assert.ok(shippedCards >= 7,
+    `methods-2026-q2.html should mark >=7 shipped modules after W480; found ${shippedCards}`);
 });
 
 test('12. footer signpost grid cross-links to /training, /research/eval-set-drift, /research/provenance-data-generation, /spec/rs-1, /drift', () => {

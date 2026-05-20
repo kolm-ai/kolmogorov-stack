@@ -9,14 +9,18 @@
 <meta property="og:title" content="kolm demo · CLI reference · kolm.ai">
 <meta property="og:description" content="Reference for the kolm demo CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/demo">
-<meta property="og:type" content="article">
-<meta property="og:image" content="/og/docs-cli.svg">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm demo","description":"Reference for the kolm demo CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/demo","mainEntityOfPage":"https://kolm.ai/docs/cli/demo","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
+<meta name="twitter:title" content="kolm demo · CLI reference · kolm.ai">
+<meta name="twitter:description" content="Reference for the kolm demo CLI verb: usage, flags, examples, and links to related docs.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -172,24 +176,24 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="demo">
 <nav aria-label="Breadcrumb" class="crumbs">
-  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>demo</span>
+ <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>demo</span>
 </nav>
 <h1>kolm demo</h1>
 <p>The canonical close-the-loop demo. Seeds the local event lake with ~150 synthetic log-triage events so <code>optimize</code>, <code>dataset</code>, <code>bakeoff</code>, <code>build</code>, <code>run</code>, and <code>what</code> all have real data to chew on without you having to wire a proxy first. Every event is tagged <code>source_type=simulated</code>, so the receipt chain never claims this corpus came from production.</p>
 <h2>Usage</h2>
 <pre><code>
-kolm demo                                     list available demo flows
-kolm demo list                                same as the no-arg form
-kolm demo seed-log-triage [--count N]         seed N events (default 150)
-kolm demo seed-log-triage --namespace foo     override default namespace
-kolm demo reset --confirm                     purge the demo-log-triage namespace
+kolm demo list available demo flows
+kolm demo list same as the no-arg form
+kolm demo seed-log-triage [--count N] seed N events (default 150)
+kolm demo seed-log-triage --namespace foo override default namespace
+kolm demo reset --confirm purge the demo-log-triage namespace
 </code></pre>
 <h2>Flags</h2>
 <ul>
 <li><code>--count N</code> events to append (clamped to 20..5000, default 150). 100+</li>
-<p>events sharing one template signature is the threshold that trips   <code>local_replacement_candidate</code> in <code>kolm optimize</code>.</p>
+<p>events sharing one template signature is the threshold that trips <code>local_replacement_candidate</code> in <code>kolm optimize</code>.</p>
 <li><code>--namespace n</code> defaults to <code>demo-log-triage</code>. If you change it, the</li>
-<p>follow-on <code>kolm dataset create</code> / <code>kolm build</code> commands must use the   same value.</p>
+<p>follow-on <code>kolm dataset create</code> / <code>kolm build</code> commands must use the same value.</p>
 <li><code>--json</code> machine-readable output.</li>
 <li><code>--confirm</code> required by <code>kolm demo reset</code> (the only destructive subverb).</li>
 </ul>
@@ -209,7 +213,7 @@ kolm what
 <li>21 log archetypes spanning 6 categories: <code>db</code>, <code>network</code>, <code>auth</code>,</li>
 <p><code>deploy</code>, <code>app-bug</code>, <code>infra</code>.</p>
 <li>2 premium model labels (<code>openai/gpt-4o</code>, <code>anthropic/claude-sonnet-4-5</code>)</li>
-<p>on every event so the cheaper-model and local-replacement detectors   both have signal.</p>
+<p>on every event so the cheaper-model and local-replacement detectors both have signal.</p>
 <li>First 5 events share a single <code>request_hash</code> so <code>cache_candidate</code></li>
 <p>fires alongside <code>local_replacement_candidate</code>.</p>
 <li>Every prompt uses the same shape (<code>Triage this log line. Reply ... Log: &quot;&lt;body&gt;&quot;</code>)</li>
@@ -226,13 +230,13 @@ kolm what
 <li><code>/k-score-explained</code> covers the production gate the built artifact passes.</li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
-  <h2 id="see-also-h">See also</h2>
-  <ul>
-    <li><a href="/docs/cli">All CLI verbs</a></li>
-    <li><a href="/quickstart">Quickstart</a></li>
-    <li><a href="/docs/api">HTTP API reference</a></li>
-    <li><a href="/docs/sdk">SDK reference</a></li>
-  </ul>
+ <h2 id="see-also-h">See also</h2>
+ <ul>
+ <li><a href="/docs/cli">All CLI verbs</a></li>
+ <li><a href="/quickstart">Quickstart</a></li>
+ <li><a href="/docs/api">HTTP API reference</a></li>
+ <li><a href="/docs/sdk">SDK reference</a></li>
+ </ul>
 </section>
 </main>
 </body>

@@ -1,13 +1,15 @@
 # @kolmogorov/recipe-mcp
 
-> MCP server for [Recipe](https://kolm.ai) — show your AI agent how once, run forever.
+> Preview MCP server for [kolm.ai](https://kolm.ai). Registry publication is pending; run it from a checkout.
 
 Adds 13 tools to Claude Code (or any MCP client) for synthesizing, running, searching, and composing deterministic JS classifiers. Use these inside an agent loop instead of paying for repeat LLM-as-judge calls.
 
 ## Install
 
+This package is not published on npm under Kolm control yet. From a repo checkout, point your MCP client at the local server:
+
 ```bash
-npm i -g @kolmogorov/recipe-mcp
+node /absolute/path/to/kolmogorov-stack/sdk/mcp/server.mjs
 ```
 
 Add to `~/.config/claude-code/.mcp.json` (or your project's `.mcp.json`):
@@ -16,9 +18,10 @@ Add to `~/.config/claude-code/.mcp.json` (or your project's `.mcp.json`):
 {
   "mcpServers": {
     "recipe": {
-      "command": "recipe-mcp",
+      "command": "node",
+      "args": ["/absolute/path/to/kolmogorov-stack/sdk/mcp/server.mjs"],
       "env": {
-        "KOLM_API_KEY": "ks_…"
+        "KOLM_API_KEY": "ks_..."
       }
     }
   }
@@ -27,11 +30,11 @@ Add to `~/.config/claude-code/.mcp.json` (or your project's `.mcp.json`):
 
 ## Tools exposed
 
-| Tool | Use it when… |
+| Tool | Use it when |
 |---|---|
 | `recipe_synthesize` | The agent sees itself about to call an LLM the same tiny question over and over. |
 | `recipe_run` | Run a recipe by id or curated name (e.g. `is-spam`). |
-| `recipe_search` | Before synthesizing — there might already be one. |
+| `recipe_search` | Before synthesizing - there might already be one. |
 | `recipe_compose` | Combine the top-k matched recipes for a query. |
 | `recipe_list` / `recipe_get` / `recipe_stats` | Browse and inspect. |
 | `recipe_label_corpus` | Auto-label a HuggingFace dataset with a recipe. |
@@ -45,12 +48,12 @@ Add to `~/.config/claude-code/.mcp.json` (or your project's `.mcp.json`):
 USER: detect spam in these 200 support tickets
 
 AGENT (cold call to LLM, ~$0.20):
-  → recipe_search { query: "detect spam in support tickets" }
-  → recipe_run { recipe: "is-spam", input: <each ticket> }   # 200×, ~$0
-  → done.
+  -> recipe_search { query: "detect spam in support tickets" }
+  -> recipe_run { recipe: "is-spam", input: <each ticket> }   # 200x, ~$0
+  -> done.
 ```
 
-Compared to 200 LLM calls (~$0.20 + 200×600ms latency), the agent finishes in milliseconds for free.
+Compared to 200 LLM calls (~$0.20 + 200-600ms latency), the agent finishes in milliseconds for free.
 
 ## Environment
 
@@ -63,4 +66,4 @@ The server still accepts `RECIPE_API_KEY`, `RECIPE_BASE_URL`, and `KOLMOGOROV_AP
 
 ## License
 
-Apache-2.0 © [Kolmogorov](https://kolm.ai)
+Apache-2.0 - [Kolmogorov](https://kolm.ai)

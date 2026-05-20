@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// W400D - generate public/docs/api.html from real route definitions in src/router.js.
+// W400D - generate public/docs/api.html from real route definitions.
 //
 // Idempotent: re-running produces byte-identical output unless router.js changed.
 // Single source of truth: do NOT hand-edit api.html. Re-run this script.
 //
 // What it does:
-//   1. Reads src/router.js end-to-end.
-//   2. Parses r.<method>('<path>', ...) call sites (Express-style).
+//   1. Reads src/router.js and mounted route modules end-to-end.
+//   2. Parses r.<method>('<path>', ...) and router.<method>('<path>', ...) call sites (Express-style).
 //   3. Pulls the 5 lines of comments immediately above each route.
 //   4. Resolves the one for-loop array-literal expansion at line 1835.
 //   5. Groups by /v1/<prefix> and sorts inside each group.
@@ -18,26 +18,42 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const ROUTER = path.join(ROOT, 'src', 'router.js');
+const ROUTE_SOURCES = [
+  { label: 'src/router.js', file: path.join(ROOT, 'src', 'router.js') },
+  { label: 'src/oauth.js', file: path.join(ROOT, 'src', 'oauth.js') },
+];
 const OUT_HTML = path.join(ROOT, 'public', 'docs', 'api.html');
 const OUT_JSON = path.join(ROOT, 'public', 'docs', 'api-routes.json');
 
-const TODAY = '2026-05-18';
+const TODAY = '2026-05-20';
 
 // ----------------- 1. PARSE ROUTER.JS -----------------
 
-function extractRoutes(source) {
+function normalizeExpressRoutePath(routePath) {
+  // Express supports `:id(*)` to capture a wildcard tail. Public API
+  // contracts should expose the stable parameter name, not path-to-regexp
+  // implementation syntax that OpenAPI cannot represent.
+  return String(routePath).replace(/:([a-zA-Z_][a-zA-Z0-9_]*)\(\*\)/g, ':$1');
+}
+
+function extractRoutes(source, sourceLabel) {
   const lines = source.split('\n');
   const routes = [];
 
   // Regex for r.<method>('<path>', ...) — path must be a single-quoted or
   // double-quoted string literal that starts with /. Template-literal and
   // identifier paths are handled separately.
-  const literalRe = /^\s*r\.(get|post|put|delete|patch)\s*\(\s*(['"])(\/[^'"]*?)\2/;
+  const literalRe = /^\s*(?:r|router)\.(get|post|put|delete|patch)\s*\(\s*(['"])(\/[^'"]*?)\2/;
+
+  // Regex route literals for drop-in provider bases such as:
+  //   r.post(/^\/v1\/capture\/anthropic(?:\/.*)?$/, ...)
+  // These accept SDK-appended suffixes at runtime, but the public contract is
+  // the stable base path documented in API refs and OpenAPI.
+  const regexLiteralRe = /^\s*(?:r|router)\.(get|post|put|delete|patch)\s*\(\s*\/\^((?:\\\/[^\\/(]+)+)(?:\(\?:\\\/\.\*\)\?)?\$\/,/;
 
   // The one for-loop expansion: `for (const p of [...]) { r.post(p, ...) }`
   // We capture the array literal and emit one route per element.
-  const variableRe = /^\s*r\.(get|post|put|delete|patch)\s*\(\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*,/;
+  const variableRe = /^\s*(?:r|router)\.(get|post|put|delete|patch)\s*\(\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*,/;
 
   const unparseable = [];
 
@@ -46,14 +62,31 @@ function extractRoutes(source) {
     const lit = line.match(literalRe);
     if (lit) {
       const method = lit[1].toUpperCase();
-      const routePath = lit[3];
+      const routePath = normalizeExpressRoutePath(lit[3]);
       const comments = harvestComments(lines, i);
       routes.push({
         method,
         path: routePath,
         line: i + 1,
+        source: sourceLabel,
         comments,
         stub: comments.length === 0,
+      });
+      continue;
+    }
+    const regexLit = line.match(regexLiteralRe);
+    if (regexLit) {
+      const method = regexLit[1].toUpperCase();
+      const routePath = regexLit[2].replace(/\\\//g, '/');
+      const comments = harvestComments(lines, i);
+      routes.push({
+        method,
+        path: routePath,
+        line: i + 1,
+        source: sourceLabel,
+        comments,
+        stub: comments.length === 0,
+        expandedFrom: 'regex-literal',
       });
       continue;
     }
@@ -68,15 +101,16 @@ function extractRoutes(source) {
         for (const p of loopHit.paths) {
           routes.push({
             method,
-            path: p,
+            path: normalizeExpressRoutePath(p),
             line: i + 1,
+            source: sourceLabel,
             comments,
             stub: comments.length === 0,
             expandedFrom: ident,
           });
         }
       } else {
-        unparseable.push({ line: i + 1, snippet: line.trim() });
+        unparseable.push({ source: sourceLabel, line: i + 1, snippet: line.trim() });
       }
     }
   }
@@ -106,12 +140,21 @@ function harvestComments(lines, routeLineIdx) {
     // Stop on first non-comment line.
     break;
   }
-  // Drop section dividers like `// ---------- Plan catalog ----------`
-  // and rewrite em-dashes to ndash (hard page-level constraint).
+  // Drop decorative section dividers and rewrite em-dashes to ndash
+  // (hard page-level constraint).
   return collected
     .map((c) => c.replace(/^-+\s*/, '').replace(/\s*-+$/, '').trim())
+    .filter((c) => !isDecorativeComment(c))
     .map((c) => c.replace(/—/g, '–')) // em-dash to en-dash
     .filter((c) => c.length > 0);
+}
+
+function isDecorativeComment(c) {
+  const s = String(c || '').trim();
+  if (!s) return false;
+  if (/^=+$/.test(s)) return true;
+  if (/^=+\s*[^=].*?=+$/.test(s)) return true;
+  return false;
 }
 
 function findEnclosingArrayLoop(lines, routeLineIdx, ident) {
@@ -237,6 +280,8 @@ function stubResponseFor(route) {
 function shortDescriptionFor(route) {
   // Take the first comment line that looks like a description (not a wave
   // marker like `W213` alone, not a bare divider).
+  const routeSpecific = route.comments.find((c) => String(c || '').includes(route.path));
+  if (routeSpecific) return routeSpecific.replace(/\s+/g, ' ').trim();
   for (const c of route.comments) {
     const cleaned = c.replace(/\s+/g, ' ').trim();
     if (!cleaned) continue;
@@ -308,6 +353,7 @@ function groupLabelFor(key) {
     metrics: 'Metrics',
     moderations: 'Moderations',
     notifications: 'Notifications',
+    oauth: 'OAuth',
     optimize: 'Optimize',
     pings: 'Pings',
     plans: 'Plans',
@@ -357,16 +403,18 @@ function renderRouteSection(route) {
   const shortDesc = shortDescriptionFor(route);
   const fullDesc = fullDescriptionFor(route);
   const stubBadge = route.stub
-    ? ' <span class="route-stub" title="No inline documentation. Route is wired in router.js but the comment block is empty.">preview</span>'
-    : ' <span class="route-live" title="Has inline documentation in router.js.">live</span>';
+      ? ' <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span>'
+    : ' <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span>';
   const expandedNote = route.expandedFrom
-    ? ' <span class="route-stub">array-literal expansion</span>'
+    ? ' <span class="route-stub">' +
+      (route.expandedFrom === 'regex-literal' ? 'regex route' : 'array-literal expansion') +
+      '</span>'
     : '';
   const descBlock = shortDesc
     ? '<p class="route-desc">' + escapeHtml(shortDesc) + '</p>'
     : '<p class="route-desc">' +
       escapeHtml(
-        'No inline description in router.js. Path inferred from route file.'
+        'Route contract generated from source. Request and response use the shared JSON envelope.'
       ) +
       '</p>';
   const fullBlock =
@@ -388,7 +436,7 @@ function renderRouteSection(route) {
       expandedNote +
       '</h3>',
     '  ' + descBlock,
-    '  ' + fullBlock,
+    fullBlock ? '  ' + fullBlock : '',
     '  <pre><code>' + escapeHtml(curlFor(route)) + '</code></pre>',
     '  <pre><code>' + escapeHtml(stubResponseFor(route)) + '</code></pre>',
     '</section>',
@@ -415,7 +463,7 @@ function renderGroupIntro(key, routes) {
   // One-paragraph note about auth + base URL conventions per group. Same
   // text for every group to keep the page consistent.
   const authNote =
-    key === 'system' || key === 'anon' || key === 'signup' || key === 'signin' || key === 'public' || key === 'loop' || key === 'plans' || key === 'pricing' || key === 'spec' || key === 'keys' || key === 'sigstore' || key === 'health'
+    key === 'system' || key === 'anon' || key === 'signup' || key === 'signin' || key === 'public' || key === 'loop' || key === 'plans' || key === 'pricing' || key === 'spec' || key === 'keys' || key === 'sigstore' || key === 'health' || key === 'oauth'
       ? 'Public surface. No auth header required. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).'
       : 'Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).';
   return (
@@ -425,11 +473,35 @@ function renderGroupIntro(key, routes) {
   );
 }
 
+function canonicalNavBlockForApi() {
+  const begin = '<!-- KOLM_NAV_BEGIN (W221) -->';
+  const end = '<!-- KOLM_NAV_END (W221) -->';
+  try {
+    const home = fs.readFileSync(path.join(ROOT, 'public', 'index.html'), 'utf8');
+    const start = home.indexOf(begin);
+    const finish = home.indexOf(end, start);
+    if (start >= 0 && finish > start) {
+      const lineStart = home.lastIndexOf('\n', start) + 1;
+      return home.slice(lineStart, finish + end.length);
+    }
+  } catch (_) {}
+  return [
+    begin,
+    '<nav class="site-nav" aria-label="Primary">',
+    '<a href="/product">Product</a>',
+    '<a href="/models">Models</a>',
+    '<a href="/docs">Docs</a>',
+    '<a href="/pricing">Pricing</a>',
+    '<a href="/enterprise">Enterprise</a>',
+    '</nav>',
+    end,
+  ].join('\n');
+}
+
 function renderPage(grouped, totalCount, unparseable) {
   const groupKeys = Array.from(grouped.keys()).sort();
-  // P0-7 partition counts — surface live vs preview at the top of the page so
-  // the docs surface tells the truth about which routes are documented vs.
-  // auto-extracted without inline docs. Both counts are real, wired routes.
+  // P0-7 partition counts: surface reference-ready vs source-indexed routes at
+  // the top of the page. Both counts are real, wired routes.
   let liveCount = 0;
   let previewCount = 0;
   for (const k of groupKeys) {
@@ -456,14 +528,15 @@ function renderPage(grouped, totalCount, unparseable) {
   const groupsHtml = groupKeys
     .map((k) => renderGroup(k, grouped.get(k)))
     .join('\n\n');
+  const navBlock = canonicalNavBlockForApi();
   const title = 'API reference · kolm.ai';
   const titleEntity = 'API reference &middot; kolm.ai';
   const description =
     'Auto-generated REST API reference for kolm.ai. ' +
     totalCount +
-    ' documented routes across ' +
+    ' wired routes across ' +
     groupKeys.length +
-    ' groups, sourced directly from src/router.js.';
+    ' groups, sourced directly from route source files.';
 
   const jsonLd = JSON.stringify({
     '@context': 'https://schema.org',
@@ -516,6 +589,7 @@ function renderPage(grouped, totalCount, unparseable) {
 <link rel="canonical" href="https://kolm.ai/docs/api">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">${jsonLd}</script>
 <script type="application/ld+json">${breadcrumbLd}</script>
 <style>
@@ -523,8 +597,8 @@ function renderPage(grouped, totalCount, unparseable) {
 [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
-.skip-link{position:absolute;left:-9999px}
-.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.skip-link{position:absolute;left:12px;top:12px;z-index:9999;transform:translateY(-160%);border:1px solid var(--accent);border-radius:999px;background:var(--accent);color:#06120b;padding:10px 14px;font:700 13px/1 var(--mono);text-decoration:none}
+.skip-link:focus{transform:translateY(0)}
 .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
 header.site-header{padding:18px 0;border-bottom:1px solid var(--line)}
 header.site-header .wrap{display:flex;justify-content:space-between;align-items:center}
@@ -576,13 +650,13 @@ body[data-api-filter="live"] .api-group:not(:has(.route-live)){display:none}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap">
   <a class="logo" href="/">kolm.ai</a>
-  <!-- KOLM_NAV_BEGIN (W221) -->
-  <!-- KOLM_NAV_END (W221) -->
+${navBlock}
 </div></header>
 <script defer src="/nav.js"></script>
 
@@ -590,15 +664,16 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / api</div>
 <h1>API reference</h1>
-<p class="lede">The kolm.ai REST surface. ${totalCount} documented routes across ${groupKeys.length} groups, auto-extracted from <code>src/router.js</code> and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
+<p class="lede">The kolm.ai REST surface. ${totalCount} wired routes across ${groupKeys.length} groups, auto-extracted from route source files and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
 
-<p class="totals"><strong>${totalCount} documented routes</strong> &middot; <span class="route-live">${liveCount} live</span> &middot; <span class="route-stub">${previewCount} preview</span> &middot; ${groupKeys.length} groups &middot; generated ${TODAY} &middot; source <code>src/router.js</code></p>
+<p class="totals"><strong>${totalCount} wired routes</strong> &middot; <span class="route-live">${liveCount} reference-ready</span> &middot; <span class="route-stub">${previewCount} source-indexed</span> &middot; ${groupKeys.length} groups &middot; generated ${TODAY} &middot; source <code>src/router.js</code></p>
 
-<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview" onclick="document.body.setAttribute('data-api-filter', this.checked ? 'live' : 'all')"> Hide preview routes (show only routes with inline documentation)</label></div>
+<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview" onclick="document.body.setAttribute('data-api-filter', this.checked ? 'live' : 'all')"> Show reference-ready routes only</label></div>
 
 ${unparseableNote}
 
 <h2 id="base">Base URL &amp; auth</h2>
+<p>Start with the guided setup at <a href="/docs/quickstart">/docs/quickstart</a>, then keep this API reference open for exact endpoints and payloads. Runtime behavior is covered in <a href="/docs/runtime">/docs/runtime</a> and acceptance gates are covered in <a href="/docs/evals">/docs/evals</a>.</p>
 <p>Local proxy: <code>http://localhost:8787</code>. Hosted: <code>https://kolm.ai</code>. Self-hosted enterprise: your domain.</p>
 <p>Public routes (such as <code>/health</code>, <code>/v1/loop/try</code>, <code>/v1/anon/bootstrap</code>) need no auth header. Every other <code>/v1/*</code> route accepts either:</p>
 <ul>
@@ -651,8 +726,12 @@ ${groupsHtml}
 // ----------------- 4. MAIN -----------------
 
 function main() {
-  const source = fs.readFileSync(ROUTER, 'utf8');
-  const { routes, unparseable } = extractRoutes(source);
+  const parsed = ROUTE_SOURCES.map((src) => {
+    const source = fs.readFileSync(src.file, 'utf8');
+    return extractRoutes(source, src.label);
+  });
+  const routes = parsed.flatMap((p) => p.routes);
+  const unparseable = parsed.flatMap((p) => p.unparseable);
   const grouped = groupRoutes(routes);
 
   // Total documented = sum of de-duplicated grouped routes (the "X documented
@@ -664,6 +743,7 @@ function main() {
   const manifest = {
     generated: TODAY,
     source: 'src/router.js',
+    sources: ROUTE_SOURCES.map((src) => src.label),
     total_routes: total,
     group_count: grouped.size,
     groups: Array.from(grouped.keys())
@@ -675,6 +755,7 @@ function main() {
           method: r.method,
           path: r.path,
           line: r.line,
+          source: r.source,
           short: shortDescriptionFor(r),
           comments: r.comments,
           stub: r.stub,

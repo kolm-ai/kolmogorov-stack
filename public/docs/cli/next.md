@@ -23,9 +23,9 @@ kolm next [--json]
 
 ```bash
 kolm next
-# 1. kolm distill --namespace claims-router    (1248 pairs ready, 1000 threshold cleared)
-# 2. kolm watch job_018b1f                     (compile in progress)
-# 3. kolm doctor --loop                        (5 rungs, ensure cloud reachable)
+# 1. kolm distill --namespace claims-router (1248 pairs ready, 1000 threshold cleared)
+# 2. kolm watch job_018b1f (compile in progress)
+# 3. kolm doctor --loop (5 rungs, ensure cloud reachable)
 
 kolm next --json | jq '.[0]'
 ```

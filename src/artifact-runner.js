@@ -34,6 +34,8 @@ import { runWasmTarget } from './runners/wasm-runner.js';
 import { runNativeTarget } from './runners/native-runner.js';
 import { runGgufTarget, ggufRuntimeAvailable } from './runners/gguf-runner.js';
 import { runOnnxTarget, onnxRuntimeAvailable } from './runners/onnx-runner.js';
+import { verifySignatureBlock as verifyEd25519Block } from './ed25519.js';
+import { canonicalJson } from './cid.js';
 
 // W287 — supported runtime_target values for dispatchRuntime. The historical
 // default is 'js' (every artifact built before W287 had no runtime_target
@@ -221,6 +223,48 @@ function structuralIntegrityOk(manifest_json, signature) {
   } catch (e) { return { ok: false, reason: String(e.message || e) }; }
 }
 
+// W481 — Ed25519 structural-integrity fallback. Used when HMAC verification
+// fails (caller does not hold the matching RECIPE_RECEIPT_SECRET) AND the
+// artifact is not in the local cloud-trust list. This is the path that lets
+// PUBLISHED artifacts (marketplace, fleet-shared, registry-pack) verify on
+// any host: the receipt carries its own Ed25519 public key + signature, so a
+// verifier can confirm "the holder of THIS key signed THIS receipt body"
+// without a shared secret. Returns ok when:
+//   (a) the signature envelope binds to the manifest bytes (manifest_hash),
+//   (b) receipt.json exists and carries a signature_ed25519 block, AND
+//   (c) the Ed25519 signature verifies against the canonical receipt body
+//       (stripped of signature_ed25519 + signature_sigstore, matching the
+//       sign-time canonicalization in src/artifact.js).
+// This is structural integrity — it proves the receipt has not been mangled
+// since signing — but it does NOT claim the signing key is the original kolm
+// builder's key. binder.js check #17 ("Signature policy (Ed25519)") is where
+// callers opt in to the stronger "must be signed by Ed25519" policy gate.
+function ed25519IntegrityOk(manifest_json, signature, receipt_json) {
+  try {
+    const integrity = structuralIntegrityOk(manifest_json, signature);
+    if (!integrity.ok) return integrity;
+    if (!receipt_json) {
+      return { ok: false, reason: 'no receipt.json found — Ed25519 fallback requires a v0.1+ receipt block' };
+    }
+    let receipt;
+    try { receipt = JSON.parse(receipt_json); }
+    catch (e) { return { ok: false, reason: `receipt JSON parse failed: ${e.message}` }; }
+    if (!receipt || typeof receipt !== 'object' || !receipt.signature_ed25519) {
+      return { ok: false, reason: 'receipt has no signature_ed25519 block — re-sign with Ed25519 (unset KOLM_ED25519_DISABLE) or set RECIPE_RECEIPT_SECRET locally to match the issuer' };
+    }
+    // Match the sign-time canonicalization (src/artifact.js + binder.js check
+    // #5): Ed25519 was signed over canonical(receipt WITH HMAC, WITHOUT
+    // ed25519 + sigstore blocks). Strip both before verifying.
+    const { signature_ed25519, signature_sigstore, ...payload } = receipt;
+    void signature_sigstore;
+    const result = verifyEd25519Block(signature_ed25519, canonicalJson(payload));
+    if (!result.ok) return { ok: false, reason: `Ed25519 verification failed: ${result.reason}` };
+    return { ok: true, key_fingerprint: result.key_fingerprint };
+  } catch (e) {
+    return { ok: false, reason: String(e.message || e) };
+  }
+}
+
 function kolmError(code, message) {
   const e = new Error(message);
   e.code = code;
@@ -285,7 +329,29 @@ export function loadArtifact(artifactPath) {
       }
       signatureMode = 'cloud-trusted';
     } else {
-      throw kolmError('KOLM_E_SIGNATURE_INVALID', `signature invalid: ${verification.reason}. If this artifact was downloaded via \`kolm compile\` (cloud), make sure the download finished and re-run \`kolm compile\` to refresh the local trust entry. Set KOLM_TRUST_CLOUD_ARTIFACTS=0 to disable the cloud-trust fallback.`);
+      // W481 — Ed25519 structural-integrity fallback. The artifact carries a
+      // self-describing Ed25519 receipt: signature + public key both bundled
+      // inside receipt.json. When the local HMAC secret does not match
+      // (verifier didn't sign this artifact themselves; bytes weren't
+      // downloaded via `kolm compile` so cloud-trust didn't fire either),
+      // attempt to verify the Ed25519 signature against the embedded public
+      // key over the canonical receipt body. This is the path that lets
+      // marketplace/registry-pack artifacts verify on any host without
+      // RECIPE_RECEIPT_SECRET in env. Structural integrity (manifest_hash
+      // binds to the signature envelope) is enforced in the same check so a
+      // tampered manifest still fails. Callers that demand a stronger
+      // identity contract (must be signed by the original kolm builder key)
+      // set KOLM_REQUIRE_ED25519=1 or manifest.policy.require_ed25519=true;
+      // binder.js check #17 enforces that.
+      const ed25519Result = ed25519IntegrityOk(manifest_json, signature, receipt_json);
+      if (ed25519Result.ok) {
+        signatureMode = 'ed25519-public-key';
+      } else {
+        throw kolmError(
+          'KOLM_E_SIGNATURE_INVALID',
+          `signature invalid: ${verification.reason}. Ed25519 fallback also failed: ${ed25519Result.reason}. If this artifact was downloaded via \`kolm compile\` (cloud), make sure the download finished and re-run \`kolm compile\` to refresh the local trust entry. Set KOLM_TRUST_CLOUD_ARTIFACTS=0 to disable the cloud-trust fallback.`
+        );
+      }
     }
   }
 

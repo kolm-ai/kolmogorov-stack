@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Team · kolm.ai</title>
+<title>Team guide · kolm.ai</title>
 <meta name="description" content="kolm.ai team: shared namespaces, RBAC (admin, reviewer, contributor, viewer), approval queue for sensitive operations.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Team &middot; kolm.ai">
+<meta property="og:title" content="Team guide · kolm.ai">
 <meta property="og:description" content="kolm.ai team: shared namespaces, RBAC (admin, reviewer, contributor, viewer), approval queue for sensitive operations.">
-<meta property="og:type" content="article">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/team">
-<meta property="og:image" content="https://kolm.ai/og/docs-team.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Team &middot; kolm.ai">
+<meta name="twitter:title" content="Team guide · kolm.ai">
 <meta name="twitter:description" content="kolm.ai team: shared namespaces, RBAC (admin, reviewer, contributor, viewer), approval queue for sensitive operations.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-team.svg">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/team">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Team","description":"kolm.ai team: shared namespaces, RBAC (admin, reviewer, contributor, viewer), approval queue for sensitive operations.","url":"https://kolm.ai/docs/team","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -60,12 +60,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -109,17 +110,17 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </table>
 
 <pre><code>kolm team approvals list
-# req_018i  publish summarizer-v2.kolm  proposed by alice  age=4m
-# req_018j  policy change on /billing   proposed by bob    age=22m
+# req_018i publish summarizer-v2.kolm proposed by alice age=4m
+# req_018j policy change on /billing proposed by bob age=22m
 
 kolm team approvals approve req_018i
-kolm team approvals reject  req_018j --reason "lowered ssn from block to redact"</code></pre>
+kolm team approvals reject req_018j --reason "lowered ssn from block to redact"</code></pre>
 
 <h2 id="audit">Team audit log</h2>
 <p>Every team operation is mirrored into <code>~/.kolm/runtime/team-audit.log</code> on every member&apos;s machine. The audit is content-addressed so members can compare hashes and detect divergence.</p>
 <pre><code>kolm team audit --window 7d
-# 2026-05-18T09:14  alice  publish artifact summarizer-v2 (req_018i)
-# 2026-05-17T16:02  bob    invite carol@ as contributor</code></pre>
+# 2026-05-18T09:14 alice publish artifact summarizer-v2 (req_018i)
+# 2026-05-17T16:02 bob invite carol@ as contributor</code></pre>
 
 <h2 id="rotate">Rotate signing keys</h2>
 <p>When a member leaves, their public key is removed from the team trust file and any future sync from their device is rejected.</p>
@@ -130,15 +131,15 @@ kolm team approvals reject  req_018j --reason "lowered ssn from block to redact"
 <p>Once a team is wired, read <a href="/docs/enterprise">enterprise</a> for on-prem deployment, SSO, and SLA, and <a href="/docs/cloud-sync">cloud sync</a> for the sync states. Start from <a href="/docs/quickstart">/docs/quickstart</a> if you have not yet captured anything.</p>
 
 <div class="related">
-  <a href="/docs/enterprise"><b>Enterprise &rarr;</b><span>On-prem, SSO, SCIM, SLA.</span></a>
-  <a href="/docs/cloud-sync"><b>Cloud sync &rarr;</b><span>The sync states team mode runs on top of.</span></a>
-  <a href="/docs/privacy"><b>Privacy &rarr;</b><span>Policy changes on shared namespaces need approval.</span></a>
+ <a href="/docs/enterprise"><b>Enterprise &rarr;</b><span>On-prem, SSO, SCIM, SLA.</span></a>
+ <a href="/docs/cloud-sync"><b>Cloud sync &rarr;</b><span>The sync states team mode runs on top of.</span></a>
+ <a href="/docs/privacy"><b>Privacy &rarr;</b><span>Policy changes on shared namespaces need approval.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+ kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
 </div></footer>
 
 </body>

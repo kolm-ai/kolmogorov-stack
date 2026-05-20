@@ -3,214 +3,221 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Serving 1,000 LoRAs from one model · kolm research</title>
-<meta name="description" content="Why a base model with a bag of adapters beats a fleet of fully fine-tuned models. S-LoRA, Punica, and the kolm registry that fronts them." />
-<link rel="canonical" href="https://kolm.ai/research/multi-lora-serving" />
-<meta property="og:type" content="article" />
-<meta property="og:title" content="Serving 1,000 LoRAs from one model" />
-<meta property="og:description" content="Why a base model with a bag of adapters beats a fleet of fully fine-tuned models. S-LoRA, Punica, and the kolm registry that fronts them." />
-<meta property="og:url" content="https://kolm.ai/research/multi-lora-serving" />
+<title>Serving 1,000 LoRAs from one model · kolm research · kolm.ai</title>
+<meta name="description" content="Why a base model with a bag of adapters beats a fleet of fully fine-tuned models. S-LoRA, Punica, and the kolm registry that fronts them.">
+<link rel="canonical" href="https://kolm.ai/research/multi-lora-serving">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Serving 1,000 LoRAs from one model · kolm research · kolm.ai">
+<meta property="og:description" content="Why a base model with a bag of adapters beats a fleet of fully fine-tuned models. S-LoRA, Punica, and the kolm registry that fronts them.">
+<meta property="og:url" content="https://kolm.ai/research/multi-lora-serving">
 <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Serving 1,000 LoRAs from one model",
-  "description": "Why a base model with a bag of adapters beats a fleet of fully fine-tuned models. S-LoRA, Punica, and the kolm registry that fronts them.",
-  "datePublished": "2026-05-14",
-  "author": { "@type": "Organization", "name": "kolm" },
-  "publisher": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
-  "url": "https://kolm.ai/research/multi-lora-serving",
-  "keywords": "multi-LoRA serving, S-LoRA, Punica, adapter serving, vLLM, base model sharing"
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "Serving 1,000 LoRAs from one model",
+ "description": "Why a base model with a bag of adapters beats a fleet of fully fine-tuned models. S-LoRA, Punica, and the kolm registry that fronts them.",
+ "datePublished": "2026-05-14",
+ "author": { "@type": "Organization", "name": "kolm" },
+ "publisher": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
+ "url": "https://kolm.ai/research/multi-lora-serving",
+ "keywords": "multi-LoRA serving, S-LoRA, Punica, adapter serving, vLLM, base model sharing"
 }</script>
 <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
-    { "@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research" },
-    { "@type": "ListItem", "position": 3, "name": "Multi-LoRA serving", "item": "https://kolm.ai/research/multi-lora-serving" }
-  ]
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
+ { "@type": "ListItem", "position": 2, "name": "Research", "item": "https://kolm.ai/research" },
+ { "@type": "ListItem", "position": 3, "name": "Multi-LoRA serving", "item": "https://kolm.ai/research/multi-lora-serving" }
+ ]
 }</script>
 <style>
-  :root{
-    --bg:#fafaf7; --bg-elev:#f3f1ea; --line:#1a1a1a14;
-    --ink:#0c0c0c; --ink-mute:#4a4a4a;
-    --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
-    --serif:"Iowan Old Style","Source Serif Pro",Charter,Georgia,serif;
-    --sans:-apple-system,BlinkMacSystemFont,"Inter","SF Pro Text",system-ui,sans-serif;
-  }
-  *{box-sizing:border-box} html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
-  a{color:inherit;text-underline-offset:3px;text-decoration-thickness:1px}
-  a:hover{color:#0a0a0a}
-  header.site{position:sticky;top:0;z-index:50;background:rgba(250,250,247,.92);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--line)}
-  .site-header{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12.5px;letter-spacing:.02em}
-  .brand{font-weight:600}
-  .nav a{margin-left:22px;opacity:.78}
-  .nav a:hover{opacity:1}
-  main{max-width:760px;margin:0 auto;padding:64px 24px 96px}
-  .hero-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 18px}
-  h1{font-family:var(--serif);font-weight:500;font-size:42px;line-height:1.14;letter-spacing:-0.018em;margin:0 0 22px}
-  .lede{font-family:var(--serif);font-size:21px;line-height:1.5;color:#1d1d1d;margin:0 0 28px}
-  .meta-line{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);letter-spacing:.04em;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;margin:0 0 48px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
-  h2{font-family:var(--sans);font-weight:600;font-size:20px;letter-spacing:-0.005em;margin:48px 0 14px}
-  p{margin:0 0 18px}
-  ul,ol{margin:0 0 18px;padding-left:22px}
-  li{margin:6px 0}
-  code{font-family:var(--mono);font-size:13.5px;background:var(--bg-elev);padding:1px 6px;border-radius:3px}
-  pre{font-family:var(--mono);font-size:13px;line-height:1.55;background:var(--bg-elev);padding:18px 20px;border-radius:6px;overflow-x:auto;margin:0 0 22px}
-  pre code{background:transparent;padding:0}
-  table{width:100%;border-collapse:collapse;margin:0 0 22px;font-size:14.5px}
-  th,td{text-align:left;padding:9px 12px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
-  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute);font-weight:600}
-  .cite{font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);margin:0 0 6px}
-  .cite a{opacity:.78}
-  footer.site{border-top:1px solid var(--line);margin-top:72px;padding:28px 24px;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);text-align:center}
+ :root{
+ --bg:#fafaf7; --bg-elev:#f3f1ea; --line:#1a1a1a14;
+ --ink:#0c0c0c; --ink-mute:#4a4a4a;
+ --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Source Serif Pro",Charter,Georgia,serif;
+ --sans:-apple-system,BlinkMacSystemFont,"Inter","SF Pro Text",system-ui,sans-serif;
+ }
+ *{box-sizing:border-box} html,body{margin:0;padding:0}
+ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+ a{color:inherit;text-underline-offset:3px;text-decoration-thickness:1px}
+ a:hover{color:#0a0a0a}
+ header.site{position:sticky;top:0;z-index:50;background:rgba(250,250,247,.92);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--line)}
+ .site-header{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12.5px;letter-spacing:.02em}
+ .brand{font-weight:600}
+ .nav a{margin-left:22px;opacity:.78}
+ .nav a:hover{opacity:1}
+ main{max-width:760px;margin:0 auto;padding:64px 24px 96px}
+ .hero-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-mute);margin:0 0 18px}
+ h1{font-family:var(--serif);font-weight:500;font-size:42px;line-height:1.14;letter-spacing:-0.018em;margin:0 0 22px}
+ .lede{font-family:var(--serif);font-size:21px;line-height:1.5;color:#1d1d1d;margin:0 0 28px}
+ .meta-line{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);letter-spacing:.04em;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;margin:0 0 48px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
+ h2{font-family:var(--sans);font-weight:600;font-size:20px;letter-spacing:-0.005em;margin:48px 0 14px}
+ p{margin:0 0 18px}
+ ul,ol{margin:0 0 18px;padding-left:22px}
+ li{margin:6px 0}
+ code{font-family:var(--mono);font-size:13.5px;background:var(--bg-elev);padding:1px 6px;border-radius:3px}
+ pre{font-family:var(--mono);font-size:13px;line-height:1.55;background:var(--bg-elev);padding:18px 20px;border-radius:6px;overflow-x:auto;margin:0 0 22px}
+ pre code{background:transparent;padding:0}
+ table{width:100%;border-collapse:collapse;margin:0 0 22px;font-size:14.5px}
+ th,td{text-align:left;padding:9px 12px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+ th{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute);font-weight:600}
+ .cite{font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);margin:0 0 6px}
+ .cite a{opacity:.78}
+ footer.site{border-top:1px solid var(--line);margin-top:72px;padding:28px 24px;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);text-align:center}
 </style>
 <link rel="stylesheet" href="/styles.css">
+ <link rel="stylesheet" href="/surface-polish.css">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Serving 1,000 LoRAs from one model · kolm research · kolm.ai">
+<meta name="twitter:description" content="Why a base model with a bag of adapters beats a fleet of fully fine-tuned models. S-LoRA, Punica, and the kolm registry that fronts them.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site">
-  <div class="site-header">
-    <a class="brand" href="/">kolm</a>
-    <nav class="nav">
-      <a href="/quickstart">Quickstart</a>
-      <a href="/docs">Docs</a>
-      <a href="/research" aria-current="page">Research</a>
-      <a href="/spec">Spec</a>
-      <a href="/pricing">Pricing</a>
-    </nav>
-  </div>
+ <div class="site-header">
+ <a class="brand" href="/">kolm</a>
+ <nav class="nav">
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/research" aria-current="page">Research</a>
+ <a href="/spec">Spec</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
 </header>
 
-<main>
-  <p class="hero-eyebrow">Research / Serving</p>
-  <h1>Serving 1,000 LoRAs from one model</h1>
-  <p class="lede">A LoRA adapter is roughly 1% the size of the base model. If serving one model costs you 80 GB of VRAM, serving a thousand adapters on top of it should not cost you another 80,000 GB. That is the entire premise.</p>
-  <div class="meta-line">
-    <span>2026-05-14 · kolm research</span>
-    <span>5 min read</span>
-  </div>
+<main id="main">
+ <p class="hero-eyebrow">Research / Serving</p>
+ <h1>Serving 1,000 LoRAs from one model</h1>
+ <p class="lede">A LoRA adapter is roughly 1% the size of the base model. If serving one model costs you 80 GB of VRAM, serving a thousand adapters on top of it should not cost you another 80,000 GB. That is the entire premise.</p>
+ <div class="meta-line">
+ <span>2026-05-14 · kolm research</span>
+ <span>5 min read</span>
+ </div>
 
-  <h2>The shape of the problem</h2>
-  <p>Kolm artifacts are LoRA adapters. A buyer with twenty captures gets one adapter. A buyer with twenty thousand captures still gets one adapter. After a year, the same tenant has dozens of adapters: one per task, per skill, per persona. Across all tenants, the count is in the thousands.</p>
-  <p>The naive way to serve them is to pre-merge each adapter into the base and run a separate model server per artifact. This works at the scale of "ten" and falls over at "a thousand": the base model is duplicated thousands of times, VRAM goes linear with tenant count, and a cold artifact pays the full warm-up cost.</p>
+ <h2>The shape of the problem</h2>
+ <p>Kolm artifacts are LoRA adapters. A buyer with twenty captures gets one adapter. A buyer with twenty thousand captures still gets one adapter. After a year, the same tenant has dozens of adapters: one per task, per skill, per persona. Across all tenants, the count is in the thousands.</p>
+ <p>The naive way to serve them is to pre-merge each adapter into the base and run a separate model server per artifact. This works at the scale of "ten" and falls over at "a thousand": the base model is duplicated thousands of times, VRAM goes linear with tenant count, and a cold artifact pays the full warm-up cost.</p>
 
-  <h2>What S-LoRA changed</h2>
-  <p>Sheng 2023 (S-LoRA) made the observation that the base model and the adapters live on different time-scales. The base is hot all the time. Any given adapter is hot for the seconds while a request is in flight. So load the base once, and stream adapters in and out of GPU memory on demand.</p>
-  <p>The hard part is the kernel. A single batch may have requests bound to different adapters. You cannot run one matmul for the whole batch; you need a kernel that applies <code>x · W_base + x · (A_i · B_i)</code> where <code>i</code> varies row by row. S-LoRA wrote that kernel. Punica (Chen 2023) wrote a sibling kernel optimized for the heterogeneous case.</p>
+ <h2>What S-LoRA changed</h2>
+ <p>Sheng 2023 (S-LoRA) made the observation that the base model and the adapters live on different time-scales. The base is hot all the time. Any given adapter is hot for the seconds while a request is in flight. So load the base once, and stream adapters in and out of GPU memory on demand.</p>
+ <p>The hard part is the kernel. A single batch may have requests bound to different adapters. You cannot run one matmul for the whole batch; you need a kernel that applies <code>x · W_base + x · (A_i · B_i)</code> where <code>i</code> varies row by row. S-LoRA wrote that kernel. Punica (Chen 2023) wrote a sibling kernel optimized for the heterogeneous case.</p>
 
-  <h2>The math</h2>
-  <p>For a base of size B and adapter of size a (where a ≈ 0.01·B):</p>
-  <table>
-    <tr><th>Strategy</th><th>VRAM (N adapters)</th><th>Time-to-first-token</th></tr>
-    <tr><td>One server per adapter</td><td>N·B</td><td>0 (always warm)</td></tr>
-    <tr><td>Pre-merge on demand</td><td>1·B + warm copies</td><td>seconds (full merge)</td></tr>
-    <tr><td>S-LoRA / Punica</td><td>1·B + 峉a_i (~1.01·B)</td><td>milliseconds (adapter stream)</td></tr>
-  </table>
-  <p>For 1,000 adapters on Qwen2.5-7B (14 GB base, ~80 MB per adapter), the math is 14,000 GB versus 94 GB. The latter is one A100. The former is a cluster.</p>
+ <h2>The math</h2>
+ <p>For a base of size B and adapter of size a (where a ≈ 0.01·B):</p>
+ <table>
+ <tr><th>Strategy</th><th>VRAM (N adapters)</th><th>Time-to-first-token</th></tr>
+ <tr><td>One server per adapter</td><td>N·B</td><td>0 (always warm)</td></tr>
+ <tr><td>Pre-merge on demand</td><td>1·B + warm copies</td><td>seconds (full merge)</td></tr>
+ <tr><td>S-LoRA / Punica</td><td>1·B + 峉a_i (~1.01·B)</td><td>milliseconds (adapter stream)</td></tr>
+ </table>
+ <p>For 1,000 adapters on Qwen2.5-7B (14 GB base, ~80 MB per adapter), the math is 14,000 GB versus 94 GB. The latter is one A100. The former is a cluster.</p>
 
-  <h2>The kolm pattern</h2>
-  <pre><code>POST /v1/run
+ <h2>The kolm pattern</h2>
+ <pre><code>POST /v1/run
 {
-  "artifact": "alice/refund-flagger@1.4.2",
-  "input": "ticket text..."
+ "artifact": "alice/refund-flagger@1.4.2",
+ "input": "ticket text..."
 }</code></pre>
-  <p>The runtime looks up the artifact's <code>base_model</code>, finds the server that already has that base loaded, queues the request, and streams in the adapter weights at the position where the request is in the batch. The base server handles requests for any artifact that shares the same base.</p>
-  <pre><code>from apps.runtime.adapter_pool import AdapterPool
+ <p>The runtime looks up the artifact's <code>base_model</code>, finds the server that already has that base loaded, queues the request, and streams in the adapter weights at the position where the request is in the batch. The base server handles requests for any artifact that shares the same base.</p>
+ <pre><code>from apps.runtime.adapter_pool import AdapterPool
 pool = AdapterPool(
-    base="qwen2.5-7b-instruct",
-    max_active_adapters=64,
-    eviction="lru",
+ base="qwen2.5-7b-instruct",
+ max_active_adapters=64,
+ eviction="lru",
 )
 pool.serve(request, adapter_cid="cidv1:sha256:...")</code></pre>
-  <p><code>max_active_adapters</code> caps how many sit in GPU memory at once. <code>eviction="lru"</code> drops the least-recently-used when a new one comes in. Cold misses pay the adapter load time (~50 ms for an 80 MB LoRA on PCIe Gen4), not the base warm-up (~3 s).</p>
+ <p><code>max_active_adapters</code> caps how many sit in GPU memory at once. <code>eviction="lru"</code> drops the least-recently-used when a new one comes in. Cold misses pay the adapter load time (~50 ms for an 80 MB LoRA on PCIe Gen4), not the base warm-up (~3 s).</p>
 
-  <h2>How adapters are addressed</h2>
-  <p>An artifact's identity is its CID: <code>cidv1:sha256:&lt;hex&gt;</code> over the canonical-JSON of its manifest. The pool keys on CID, not on tenant slug. Two different tenants who happen to have identical artifacts share the same in-memory copy. This rarely happens with private adapters but matters for distill-from-base templates that ship pinned.</p>
+ <h2>How adapters are addressed</h2>
+ <p>An artifact's identity is its CID: <code>cidv1:sha256:&lt;hex&gt;</code> over the canonical-JSON of its manifest. The pool keys on CID, not on tenant slug. Two different tenants who happen to have identical artifacts share the same in-memory copy. This rarely happens with private adapters but matters for distill-from-base templates that ship pinned.</p>
 
-  <h2>What the receipt records</h2>
-  <pre><code>{
-  "serving": {
-    "base_model": "qwen2.5-7b-instruct@a1b2c3d",
-    "adapter_cid": "cidv1:sha256:7f3a...",
-    "pool_id": "us-west-2/h100-pool-3",
-    "cold_miss": false,
-    "queue_depth": 4,
-    "latency_ms": 142
-  }
+ <h2>What the receipt records</h2>
+ <pre><code>{
+ "serving": {
+ "base_model": "qwen2.5-7b-instruct@a1b2c3d",
+ "adapter_cid": "cidv1:sha256:7f3a...",
+ "pool_id": "us-west-2/h100-pool-3",
+ "cold_miss": false,
+ "queue_depth": 4,
+ "latency_ms": 142
+ }
 }</code></pre>
-  <p>If a buyer's latency spikes, the receipt tells you why: cold miss, deep queue, or unrelated (model itself). This is the lever for an SLO conversation that does not devolve into telemetry archaeology.</p>
+ <p>If a buyer's latency spikes, the receipt tells you why: cold miss, deep queue, or unrelated (model itself). This is the lever for an SLO conversation that does not devolve into telemetry archaeology.</p>
 
-  <h2>Edge cases</h2>
-  <p><strong>Mixed ranks.</strong> Adapters trained with different LoRA ranks (8/16/64/128) can share a pool. The kernel pads to the max rank in the active batch. Wider ranks cost a hair more per token; narrower ones are free-riders.</p>
-  <p><strong>Target-module differences.</strong> Some adapters touch <code>q_proj, k_proj, v_proj, o_proj</code>; others add <code>gate_proj, up_proj, down_proj</code>. The pool handles this by computing each target module independently. The mismatch is invisible to the caller.</p>
-  <p><strong>Quantization.</strong> S-LoRA was written for fp16 bases. With AWQ int4 bases, the same idea works but the kernel changes (you are dequantizing the base on the fly, then adding the LoRA contribution). vLLM supports this in the <code>punica</code> backend as of v0.6.</p>
-  <p><strong>Hot vs cold.</strong> Pre-warm the top 10 adapters per pool at startup. Use a small in-cluster cache (Redis or in-memory) keyed on CID. This is what kolm does in production.</p>
+ <h2>Edge cases</h2>
+ <p><strong>Mixed ranks.</strong> Adapters trained with different LoRA ranks (8/16/64/128) can share a pool. The kernel pads to the max rank in the active batch. Wider ranks cost a hair more per token; narrower ones are free-riders.</p>
+ <p><strong>Target-module differences.</strong> Some adapters touch <code>q_proj, k_proj, v_proj, o_proj</code>; others add <code>gate_proj, up_proj, down_proj</code>. The pool handles this by computing each target module independently. The mismatch is invisible to the caller.</p>
+ <p><strong>Quantization.</strong> S-LoRA was written for fp16 bases. With AWQ int4 bases, the same idea works but the kernel changes (you are dequantizing the base on the fly, then adding the LoRA contribution). vLLM supports this in the <code>punica</code> backend as of v0.6.</p>
+ <p><strong>Hot vs cold.</strong> Pre-warm the top 10 adapters per pool at startup. Use a small in-cluster cache (Redis or in-memory) keyed on CID. This is what kolm does in production.</p>
 
-  <h2>Where this sits in the kolm loop</h2>
-  <p>Capture, compile, evaluate, swap. The swap step writes a new artifact CID into the registry. The runtime watches the registry and, on the next request for that tenant slug, looks up the new CID and pulls the new adapter into the pool. Old adapters age out via LRU. No restarts, no warmup waits.</p>
+ <h2>Where this sits in the kolm loop</h2>
+ <p>Capture, compile, evaluate, swap. The swap step writes a new artifact CID into the registry. The runtime watches the registry and, on the next request for that tenant slug, looks up the new CID and pulls the new adapter into the pool. Old adapters age out via LRU. No restarts, no warmup waits.</p>
 
-  <h2>Citations</h2>
-  <p class="cite">Sheng et al. 2023. <em>S-LoRA: Serving Thousands of Concurrent LoRA Adapters</em>. <a href="https://arxiv.org/abs/2311.03285">arXiv:2311.03285</a></p>
-  <p class="cite">Chen et al. 2023. <em>Punica: Multi-Tenant LoRA Serving</em>. <a href="https://arxiv.org/abs/2310.18547">arXiv:2310.18547</a></p>
-  <p class="cite">Hu et al. 2021. <em>LoRA: Low-Rank Adaptation of Large Language Models</em>. <a href="https://arxiv.org/abs/2106.09685">arXiv:2106.09685</a></p>
+ <h2>Citations</h2>
+ <p class="cite">Sheng et al. 2023. <em>S-LoRA: Serving Thousands of Concurrent LoRA Adapters</em>. <a href="https://arxiv.org/abs/2311.03285">arXiv:2311.03285</a></p>
+ <p class="cite">Chen et al. 2023. <em>Punica: Multi-Tenant LoRA Serving</em>. <a href="https://arxiv.org/abs/2310.18547">arXiv:2310.18547</a></p>
+ <p class="cite">Hu et al. 2021. <em>LoRA: Low-Rank Adaptation of Large Language Models</em>. <a href="https://arxiv.org/abs/2106.09685">arXiv:2106.09685</a></p>
 
-  <div class="meta-line" style="margin-top:48px">
-    <span><a href="/research">← back to research</a></span>
-    <span>kolm.ai/research/multi-lora-serving</span>
-  </div>
+ <div class="meta-line" style="margin-top:48px">
+ <span><a href="/research">← back to research</a></span>
+ <span>kolm.ai/research/multi-lora-serving</span>
+ </div>
 </main>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 </body>
 </html>

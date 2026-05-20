@@ -12,9 +12,9 @@ description: Cloud-sync state and legacy git-mirror push / pull.
 ```bash
 # cloud-sync (W384)
 kolm sync status
-kolm sync enable  [--state <s>] [--base <url>] [--namespace <ns>] [--block <cls>]
+kolm sync enable [--state <s>] [--base <url>] [--namespace <ns>] [--block <cls>]
 kolm sync disable
-kolm sync push                    # uses cloud-sync once enabled
+kolm sync push # uses cloud-sync once enabled
 kolm sync pull
 
 # legacy git-mirror

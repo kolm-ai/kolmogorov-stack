@@ -10,10 +10,10 @@ description: Multi-tenant config switcher. Save and activate per-tenant kolm set
 ## Usage
 
 ```bash
-kolm profile list                                       # default when no subverb
-kolm profile save   <name> [--base-model M] [--default-target T]
-kolm profile use    <name>
-kolm profile show   [<name>]
+kolm profile list # default when no subverb
+kolm profile save <name> [--base-model M] [--default-target T]
+kolm profile use <name>
+kolm profile show [<name>]
 kolm profile delete <name>
 ```
 

@@ -5,508 +5,509 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>The .kolm registry &middot; signed, verifiable AI artifacts · kolm.ai</title>
-<meta name="description" content="The .kolm registry. Signed, verifiable AI artifacts. Search by task, base model, hardware, license. Every entry carries a CID, a K-score, and a provenance trail.">
+<title>The .kolm registry signed, verifiable AI artifacts · kolm.ai</title>
+<meta name="description" content="The .kolm registry. Signed, verifiable AI artifacts. Search by task, base model, hardware, license. Every entry carries a CID, a K-score, and a provenance...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="The .kolm registry">
-<meta property="og:description" content="Signed, verifiable AI artifacts. Search by task, base model, hardware, license. Drop one in your stack.">
+<meta property="og:title" content="The .kolm registry signed, verifiable AI artifacts · kolm.ai">
+<meta property="og:description" content="The .kolm registry. Signed, verifiable AI artifacts. Search by task, base model, hardware, license. Every entry carries a CID, a K-score, and a provenance...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/registry">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="The .kolm registry">
-<meta name="twitter:description" content="Signed, verifiable AI artifacts. Drop one in your stack.">
+<meta name="twitter:title" content="The .kolm registry signed, verifiable AI artifacts · kolm.ai">
+<meta name="twitter:description" content="The .kolm registry. Signed, verifiable AI artifacts. Search by task, base model, hardware, license. Every entry carries a CID, a K-score, and a provenance...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/registry">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
 <style>
-  :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--line-strong:rgba(236,231,220,0.16);--bg:#0b0d10;--bg-elev:#101316;--bg-card:#13171b;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.16);--bg:#fdfcf8;--bg-elev:#ffffff;--bg-card:#f7f4ec;--accent:#059669}
-  body.reg{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0;min-height:100vh;display:flex;flex-direction:column}
-  body.reg a{color:inherit;text-decoration:none}
-  .reg-wrap{max-width:1180px;margin:0 auto;padding:0 32px;width:100%}
-  @media(max-width:720px){.reg-wrap{padding:0 20px}}
-  .reg-head-bar{padding:18px 0;border-bottom:1px solid var(--line)}
-  .reg-head-bar .reg-wrap{display:flex;justify-content:space-between;align-items:center}
-  .reg-head-bar nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
-  .reg-head-bar nav a{color:inherit;text-decoration:none}
-  .reg-head-bar nav a.cta{color:var(--accent);font-weight:500}
-  .reg-head-bar .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-  @media(max-width:560px){.reg-head-bar nav a:not(.cta){display:none}}
-  .reg-hero{padding:72px 0 28px;border-bottom:1px solid var(--line)}
-  .reg-crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
-  .reg-crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-  .reg-hero h1{font-size:42px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 16px}
-  .reg-hero .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0 0 0;max-width:62ch}
-  @media(max-width:560px){.reg-hero h1{font-size:30px;line-height:1.15} .reg-hero{padding:48px 0 22px}}
-  .reg-section{padding:36px 0;border-bottom:1px solid var(--line)}
-  .reg-section h2{margin:0 0 6px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
-  .reg-section .sub{margin:0 0 18px;color:var(--ink-mute);font-size:14.5px}
-  .reg-section h3{margin:0;font-size:15px;font-weight:500}
-  .reg-search-row{display:flex;gap:12px;margin:6px 0 16px;flex-wrap:wrap;align-items:center}
-  .reg-search{flex:1;min-width:240px;position:relative}
-  .reg-search input{width:100%;box-sizing:border-box;padding:10px 12px 10px 36px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;color:var(--ink);font-family:var(--mono);font-size:13px;outline:0;transition:border-color 120ms,box-shadow 120ms}
-  .reg-search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,0.18)}
-  .reg-search input::placeholder{color:var(--ink-faint)}
-  .reg-search .icn{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-faint);font-family:var(--mono);font-size:12px}
-  .reg-count{font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
-  .reg-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 22px}
-  @media(max-width:760px){.reg-filters{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:420px){.reg-filters{grid-template-columns:1fr}}
-  .reg-filter-group{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg-elev)}
-  .reg-filter-group .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 6px}
-  .reg-chip-row{display:flex;flex-wrap:wrap;gap:6px}
-  .reg-chip{appearance:none;cursor:pointer;background:transparent;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-family:var(--mono);font-size:11px;color:var(--ink-mute);transition:border-color 120ms,color 120ms,background 120ms}
-  .reg-chip:hover{color:var(--ink);border-color:var(--line-strong)}
-  .reg-chip.on{background:rgba(16,185,129,0.12);color:var(--accent);border-color:var(--accent)}
-  .reg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  @media(max-width:920px){.reg-grid{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:620px){.reg-grid{grid-template-columns:1fr}}
-  .reg-card{display:block;background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:18px 20px;transition:border-color 120ms,background 120ms;color:inherit;text-decoration:none}
-  .reg-card:hover{border-color:var(--line-strong);background:var(--bg-card)}
-  .reg-card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin:0 0 8px}
-  .reg-card .name{font-size:14.5px;font-weight:500;color:var(--ink);line-height:1.3;word-break:break-word}
-  .reg-card .k{font-family:var(--mono);font-size:11px;color:var(--accent);border:1px solid rgba(16,185,129,0.25);background:rgba(16,185,129,0.06);border-radius:4px;padding:2px 7px;white-space:nowrap}
-  .reg-card .desc{font-size:13px;color:var(--ink-mute);margin:0 0 12px;line-height:1.5;min-height:2.8em}
-  .reg-card .meta{font-family:var(--mono);font-size:11px;color:var(--ink-faint);display:flex;flex-wrap:wrap;gap:8px;align-items:center;line-height:1.6}
-  .reg-card .meta b{color:var(--ink-mute);font-weight:400}
-  .reg-card .meta .pill{padding:2px 7px;border:1px solid var(--line);border-radius:4px;color:var(--ink-mute)}
-  .reg-card .cid{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);margin:10px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .reg-card.feat{border-color:var(--line-strong);background:var(--bg-card)}
-  .reg-card .badge{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(16,185,129,0.25);background:rgba(16,185,129,0.06);padding:2px 7px;border-radius:4px;margin:0 0 10px;display:inline-block}
-  .reg-trending-row{display:flex;font-family:var(--mono);font-size:11px;color:var(--ink-faint);gap:10px;margin:6px 0 0}
-  .reg-empty{padding:48px 22px;text-align:center;border:1px dashed var(--line-strong);border-radius:10px;color:var(--ink-mute);font-size:14px;grid-column:1/-1}
-  .reg-empty .glyph{font-family:var(--mono);color:var(--ink-faint);font-size:22px;margin:0 0 10px}
-  .reg-cta-box{margin:18px 0 0;padding:22px 24px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
-  .reg-cta-box .lab{font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 4px}
-  .reg-cta-box .lead{margin:0;font-size:15px;color:var(--ink)}
-  .reg-cta-box .lead-sub{margin:4px 0 0;font-size:13px;color:var(--ink-mute)}
-  .reg-cta-btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#0b0d10;border-radius:6px;padding:9px 16px;font-size:13.5px;font-weight:500}
-  pre.reg-pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 14px}
-  .reg-api-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:14px 0 0}
-  @media(max-width:920px){.reg-api-row{grid-template-columns:1fr}}
-  .reg-api-row .api-cell{border:1px solid var(--line);border-radius:8px;padding:14px 16px;background:var(--bg-elev)}
-  .reg-api-row .api-cell h4{margin:0 0 6px;font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em;font-weight:500}
-  .reg-api-row .api-cell pre{margin:0;background:transparent;border:0;padding:0;font-size:12px;color:var(--ink);overflow-x:auto;font-family:var(--mono);line-height:1.55;white-space:pre-wrap;word-break:break-all}
+ :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--line-strong:rgba(236,231,220,0.16);--bg:#0b0d10;--bg-elev:#101316;--bg-card:#13171b;--accent:#10b981;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.16);--bg:#fdfcf8;--bg-elev:#ffffff;--bg-card:#f7f4ec;--accent:#059669}
+ body.reg{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0;min-height:100vh;display:flex;flex-direction:column}
+ body.reg a{color:inherit;text-decoration:none}
+ .reg-wrap{max-width:1180px;margin:0 auto;padding:0 32px;width:100%}
+ @media(max-width:720px){.reg-wrap{padding:0 20px}}
+ .reg-head-bar{padding:18px 0;border-bottom:1px solid var(--line)}
+ .reg-head-bar .reg-wrap{display:flex;justify-content:space-between;align-items:center}
+ .reg-head-bar nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ .reg-head-bar nav a{color:inherit;text-decoration:none}
+ .reg-head-bar nav a.cta{color:var(--accent);font-weight:500}
+ .reg-head-bar .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ @media(max-width:560px){.reg-head-bar nav a:not(.cta){display:none}}
+ .reg-hero{padding:72px 0 28px;border-bottom:1px solid var(--line)}
+ .reg-crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+ .reg-crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ .reg-hero h1{font-size:42px;line-height:1.1;font-weight:500;letter-spacing:-0.02em;margin:0 0 16px}
+ .reg-hero .lede{font-size:17.5px;line-height:1.55;color:var(--ink-mute);margin:0 0 0;max-width:62ch}
+ @media(max-width:560px){.reg-hero h1{font-size:30px;line-height:1.15} .reg-hero{padding:48px 0 22px}}
+ .reg-section{padding:36px 0;border-bottom:1px solid var(--line)}
+ .reg-section h2{margin:0 0 6px;font-size:22px;font-weight:500;letter-spacing:-0.012em}
+ .reg-section .sub{margin:0 0 18px;color:var(--ink-mute);font-size:14.5px}
+ .reg-section h3{margin:0;font-size:15px;font-weight:500}
+ .reg-search-row{display:flex;gap:12px;margin:6px 0 16px;flex-wrap:wrap;align-items:center}
+ .reg-search{flex:1;min-width:240px;position:relative}
+ .reg-search input{width:100%;box-sizing:border-box;padding:10px 12px 10px 36px;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:6px;color:var(--ink);font-family:var(--mono);font-size:13px;outline:0;transition:border-color 120ms,box-shadow 120ms}
+ .reg-search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,0.18)}
+ .reg-search input::placeholder{color:var(--ink-faint)}
+ .reg-search .icn{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-faint);font-family:var(--mono);font-size:12px}
+ .reg-count{font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
+ .reg-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 22px}
+ @media(max-width:760px){.reg-filters{grid-template-columns:repeat(2,1fr)}}
+ @media(max-width:420px){.reg-filters{grid-template-columns:1fr}}
+ .reg-filter-group{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg-elev)}
+ .reg-filter-group .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 6px}
+ .reg-chip-row{display:flex;flex-wrap:wrap;gap:6px}
+ .reg-chip{appearance:none;cursor:pointer;background:transparent;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-family:var(--mono);font-size:11px;color:var(--ink-mute);transition:border-color 120ms,color 120ms,background 120ms}
+ .reg-chip:hover{color:var(--ink);border-color:var(--line-strong)}
+ .reg-chip.on{background:rgba(16,185,129,0.12);color:var(--accent);border-color:var(--accent)}
+ .reg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+ @media(max-width:920px){.reg-grid{grid-template-columns:repeat(2,1fr)}}
+ @media(max-width:620px){.reg-grid{grid-template-columns:1fr}}
+ .reg-card{display:block;background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:18px 20px;transition:border-color 120ms,background 120ms;color:inherit;text-decoration:none}
+ .reg-card:hover{border-color:var(--line-strong);background:var(--bg-card)}
+ .reg-card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin:0 0 8px}
+ .reg-card .name{font-size:14.5px;font-weight:500;color:var(--ink);line-height:1.3;word-break:break-word}
+ .reg-card .k{font-family:var(--mono);font-size:11px;color:var(--accent);border:1px solid rgba(16,185,129,0.25);background:rgba(16,185,129,0.06);border-radius:4px;padding:2px 7px;white-space:nowrap}
+ .reg-card .desc{font-size:13px;color:var(--ink-mute);margin:0 0 12px;line-height:1.5;min-height:2.8em}
+ .reg-card .meta{font-family:var(--mono);font-size:11px;color:var(--ink-faint);display:flex;flex-wrap:wrap;gap:8px;align-items:center;line-height:1.6}
+ .reg-card .meta b{color:var(--ink-mute);font-weight:400}
+ .reg-card .meta .pill{padding:2px 7px;border:1px solid var(--line);border-radius:4px;color:var(--ink-mute)}
+ .reg-card .cid{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);margin:10px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .reg-card.feat{border-color:var(--line-strong);background:var(--bg-card)}
+ .reg-card .badge{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(16,185,129,0.25);background:rgba(16,185,129,0.06);padding:2px 7px;border-radius:4px;margin:0 0 10px;display:inline-block}
+ .reg-trending-row{display:flex;font-family:var(--mono);font-size:11px;color:var(--ink-faint);gap:10px;margin:6px 0 0}
+ .reg-empty{padding:48px 22px;text-align:center;border:1px dashed var(--line-strong);border-radius:10px;color:var(--ink-mute);font-size:14px;grid-column:1/-1}
+ .reg-empty .glyph{font-family:var(--mono);color:var(--ink-faint);font-size:22px;margin:0 0 10px}
+ .reg-cta-box{margin:18px 0 0;padding:22px 24px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+ .reg-cta-box .lab{font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 4px}
+ .reg-cta-box .lead{margin:0;font-size:15px;color:var(--ink)}
+ .reg-cta-box .lead-sub{margin:4px 0 0;font-size:13px;color:var(--ink-mute)}
+ .reg-cta-btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#0b0d10;border-radius:6px;padding:9px 16px;font-size:13.5px;font-weight:500}
+ pre.reg-pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:0 0 14px}
+ .reg-api-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:14px 0 0}
+ @media(max-width:920px){.reg-api-row{grid-template-columns:1fr}}
+ .reg-api-row .api-cell{border:1px solid var(--line);border-radius:8px;padding:14px 16px;background:var(--bg-elev)}
+ .reg-api-row .api-cell h4{margin:0 0 6px;font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em;font-weight:500}
+ .reg-api-row .api-cell pre{margin:0;background:transparent;border:0;padding:0;font-size:12px;color:var(--ink);overflow-x:auto;font-family:var(--mono);line-height:1.55;white-space:pre-wrap;word-break:break-all}
 </style>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebPage",
-      "name": "The .kolm registry",
-      "description": "Signed, verifiable AI artifacts. Search by task, base model, hardware, license. Every entry carries a CID, a K-score, and a provenance trail.",
-      "url": "https://kolm.ai/registry"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type":"ListItem","position":1,"name":"kolm","item":"https://kolm.ai/"},
-        {"@type":"ListItem","position":2,"name":"Registry","item":"https://kolm.ai/registry"}
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "WebPage",
+ "name": "The .kolm registry",
+ "description": "Signed, verifiable AI artifacts. Search by task, base model, hardware, license. Every entry carries a CID, a K-score, and a provenance trail.",
+ "url": "https://kolm.ai/registry"
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {"@type":"ListItem","position":1,"name":"kolm","item":"https://kolm.ai/"},
+ {"@type":"ListItem","position":2,"name":"Registry","item":"https://kolm.ai/registry"}
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body class="reg">
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="reg-head-bar">
-  <div class="reg-wrap">
-    <a href="/" class="logo">kolm</a>
-    <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/enterprise">Enterprise</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
-  </div>
+ <div class="reg-wrap">
+ <a href="/" class="logo">kolm</a>
+ <nav><a href="/use-cases">Use cases</a><a href="/docs">Docs</a><a href="/research">Research</a><a href="/enterprise">Enterprise</a><a href="/pricing">Pricing</a><a href="/signup" class="cta">Get API key &rarr;</a></nav>
+ </div>
 </header>
 
 <section class="reg-hero"><div class="reg-wrap">
-  <p class="reg-crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; registry</p>
-  <h1>The .kolm registry.</h1>
-  <p class="lede">Signed, verifiable AI artifacts. Drop one in your stack. Every entry ships its manifest, its CID, its K-score, and its provenance chain - so a procurement reviewer can replay the build months from now and get the same bytes.</p>
+ <p class="reg-crumbs"><a href="/">kolm</a> &nbsp;/&nbsp; registry</p>
+ <h1>The .kolm registry.</h1>
+ <p class="lede">Signed, verifiable AI artifacts. Drop one in your stack. Every entry ships its manifest, its CID, its K-score, and its provenance chain - so a procurement reviewer can replay the build months from now and get the same bytes.</p>
 </div></section>
 
 <!-- wave 128 · social proof: live counts + K-score histogram computed from the DATA below. -->
 <section class="reg-section reg-proof"><div class="reg-wrap">
-  <div class="rp-grid">
-    <div class="rp-stat"><b id="rp-count">&mdash;</b><span>artifacts published</span></div>
-    <div class="rp-stat"><b id="rp-runs">&mdash;</b><span>total downloads</span></div>
-    <div class="rp-stat"><b id="rp-passing">&mdash;</b><span>passing K&nbsp;&ge;&nbsp;0.85 gate</span></div>
-    <div class="rp-stat"><b id="rp-tasks">&mdash;</b><span>distinct task types</span></div>
-  </div>
-  <div class="rp-hist">
-    <p class="rp-hist-lab">K-score distribution &mdash; every artifact in the registry</p>
-    <svg id="rp-hist-svg" viewBox="0 0 720 160" role="img" aria-label="K-score distribution histogram" style="width:100%;height:auto;font-family:var(--mono,ui-monospace);overflow:visible">
-      <g id="rp-hist-bars"></g>
-      <g id="rp-hist-axis"></g>
-    </svg>
-    <p class="rp-hist-fine">Bins of 0.05. Bars below the 0.85 gate are dimmed &mdash; those artifacts don't ship.</p>
-  </div>
-  <style>
-    .reg-proof { padding-top: 8px; }
-    .rp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 0 0 28px; }
-    .rp-stat {
-      display: flex; flex-direction: column; gap: 4px;
-      padding: 18px 22px; border: 1px solid var(--line, rgba(255,255,255,0.08));
-      border-radius: 10px; background: rgba(255,255,255,0.02);
-    }
-    .rp-stat b { font-family: var(--mono); font-size: 28px; color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; line-height: 1; }
-    .rp-stat span { font-size: 12px; color: var(--ink-faint); font-family: var(--mono); letter-spacing: 0.04em; }
-    .rp-hist { padding: 18px 22px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 10px; background: rgba(255,255,255,0.02); }
-    .rp-hist-lab { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 12px; }
-    .rp-hist-fine { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); margin: 8px 0 0; letter-spacing: 0.02em; }
-    .rp-hist rect { transition: opacity 160ms; }
-    [data-theme=light] .rp-stat, [data-theme=light] .rp-hist { background: rgba(0,0,0,0.02); }
-  </style>
+ <div class="rp-grid">
+ <div class="rp-stat"><b id="rp-count">&mdash;</b><span>artifacts published</span></div>
+ <div class="rp-stat"><b id="rp-runs">&mdash;</b><span>total downloads</span></div>
+ <div class="rp-stat"><b id="rp-passing">&mdash;</b><span>passing K&nbsp;&ge;&nbsp;0.85 gate</span></div>
+ <div class="rp-stat"><b id="rp-tasks">&mdash;</b><span>distinct task types</span></div>
+ </div>
+ <div class="rp-hist">
+ <p class="rp-hist-lab">K-score distribution &mdash; every artifact in the registry</p>
+ <svg id="rp-hist-svg" viewBox="0 0 720 160" role="img" aria-label="K-score distribution histogram" style="width:100%;height:auto;font-family:var(--mono,ui-monospace);overflow:visible">
+ <g id="rp-hist-bars"></g>
+ <g id="rp-hist-axis"></g>
+ </svg>
+ <p class="rp-hist-fine">Bins of 0.05. Bars below the 0.85 gate are dimmed &mdash; those artifacts don't ship.</p>
+ </div>
+ <style>
+ .reg-proof { padding-top: 8px; }
+ .rp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 0 0 28px; }
+ .rp-stat {
+ display: flex; flex-direction: column; gap: 4px;
+ padding: 18px 22px; border: 1px solid var(--line, rgba(255,255,255,0.08));
+ border-radius: 10px; background: rgba(255,255,255,0.02);
+ }
+ .rp-stat b { font-family: var(--mono); font-size: 28px; color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; line-height: 1; }
+ .rp-stat span { font-size: 12px; color: var(--ink-faint); font-family: var(--mono); letter-spacing: 0.04em; }
+ .rp-hist { padding: 18px 22px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 10px; background: rgba(255,255,255,0.02); }
+ .rp-hist-lab { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 12px; }
+ .rp-hist-fine { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); margin: 8px 0 0; letter-spacing: 0.02em; }
+ .rp-hist rect { transition: opacity 160ms; }
+ [data-theme=light] .rp-stat, [data-theme=light] .rp-hist { background: rgba(0,0,0,0.02); }
+ </style>
 </div></section>
 
 <section class="reg-section"><div class="reg-wrap">
-  <h2>Search the registry</h2>
-  <p class="sub">Filters and search run client-side. Nothing leaves your browser.</p>
-  <div class="reg-search-row">
-    <div class="reg-search">
-      <span class="icn">/</span>
-      <input id="q" type="text" placeholder="Search by name, task, base model, or task tag" autocomplete="off" spellcheck="false" aria-label="Search registry">
-    </div>
-    <span class="reg-count" id="count">- / -</span>
-  </div>
-  <div class="reg-filters" id="filters">
-    <div class="reg-filter-group" data-group="task">
-      <div class="lab">task</div>
-      <div class="reg-chip-row">
-        <button class="reg-chip" data-v="phi-redact">phi-redact</button>
-        <button class="reg-chip" data-v="classify">classify</button>
-        <button class="reg-chip" data-v="extract">extract</button>
-        <button class="reg-chip" data-v="route">route</button>
-        <button class="reg-chip" data-v="summarize">summarize</button>
-        <button class="reg-chip" data-v="rewrite">rewrite</button>
-        <button class="reg-chip" data-v="predict">predict</button>
-      </div>
-    </div>
-    <div class="reg-filter-group" data-group="size">
-      <div class="lab">size</div>
-      <div class="reg-chip-row">
-        <button class="reg-chip" data-v="lt-2gb">&lt; 2 GB</button>
-        <button class="reg-chip" data-v="2-5gb">2 - 5 GB</button>
-        <button class="reg-chip" data-v="5-15gb">5 - 15 GB</button>
-        <button class="reg-chip" data-v="gt-15gb">&gt; 15 GB</button>
-      </div>
-    </div>
-    <div class="reg-filter-group" data-group="hardware">
-      <div class="lab">hardware</div>
-      <div class="reg-chip-row">
-        <button class="reg-chip" data-v="cpu">cpu</button>
-        <button class="reg-chip" data-v="gpu-8gb">gpu-8gb</button>
-        <button class="reg-chip" data-v="gpu-24gb">gpu-24gb</button>
-      </div>
-    </div>
-    <div class="reg-filter-group" data-group="license">
-      <div class="lab">license</div>
-      <div class="reg-chip-row">
-        <button class="reg-chip" data-v="Apache-2.0">Apache-2.0</button>
-        <button class="reg-chip" data-v="RS-1">RS-1</button>
-      </div>
-    </div>
-  </div>
+ <h2>Search the registry</h2>
+ <p class="sub">Filters and search run client-side. Nothing leaves your browser.</p>
+ <div class="reg-search-row">
+ <div class="reg-search">
+ <span class="icn">/</span>
+ <input id="q" type="text" placeholder="Search by name, task, base model, or task tag" autocomplete="off" spellcheck="false" aria-label="Search registry">
+ </div>
+ <span class="reg-count" id="count">- / -</span>
+ </div>
+ <div class="reg-filters" id="filters">
+ <div class="reg-filter-group" data-group="task">
+ <div class="lab">task</div>
+ <div class="reg-chip-row">
+ <button class="reg-chip" data-v="phi-redact">phi-redact</button>
+ <button class="reg-chip" data-v="classify">classify</button>
+ <button class="reg-chip" data-v="extract">extract</button>
+ <button class="reg-chip" data-v="route">route</button>
+ <button class="reg-chip" data-v="summarize">summarize</button>
+ <button class="reg-chip" data-v="rewrite">rewrite</button>
+ <button class="reg-chip" data-v="predict">predict</button>
+ </div>
+ </div>
+ <div class="reg-filter-group" data-group="size">
+ <div class="lab">size</div>
+ <div class="reg-chip-row">
+ <button class="reg-chip" data-v="lt-2gb">&lt; 2 GB</button>
+ <button class="reg-chip" data-v="2-5gb">2 - 5 GB</button>
+ <button class="reg-chip" data-v="5-15gb">5 - 15 GB</button>
+ <button class="reg-chip" data-v="gt-15gb">&gt; 15 GB</button>
+ </div>
+ </div>
+ <div class="reg-filter-group" data-group="hardware">
+ <div class="lab">hardware</div>
+ <div class="reg-chip-row">
+ <button class="reg-chip" data-v="cpu">cpu</button>
+ <button class="reg-chip" data-v="gpu-8gb">gpu-8gb</button>
+ <button class="reg-chip" data-v="gpu-24gb">gpu-24gb</button>
+ </div>
+ </div>
+ <div class="reg-filter-group" data-group="license">
+ <div class="lab">license</div>
+ <div class="reg-chip-row">
+ <button class="reg-chip" data-v="Apache-2.0">Apache-2.0</button>
+ <button class="reg-chip" data-v="RS-1">RS-1</button>
+ </div>
+ </div>
+ </div>
 </div></section>
 
 <section class="reg-section"><div class="reg-wrap">
-  <h2>Featured</h2>
-  <p class="sub">Hand-picked artifacts. K-score and provenance audited by the kolm team.</p>
-  <div class="reg-grid" id="featured-grid"></div>
+ <h2>Featured</h2>
+ <p class="sub">Hand-picked artifacts. K-score and provenance audited by the kolm team.</p>
+ <div class="reg-grid" id="featured-grid"></div>
 </div></section>
 
 <section class="reg-section"><div class="reg-wrap">
-  <h2>Trending this week</h2>
-  <p class="sub">Sorted by 7-day run count. Reflects what teams are pulling now.</p>
-  <div class="reg-grid" id="trending-grid"></div>
+ <h2>Trending this week</h2>
+ <p class="sub">Sorted by 7-day run count. Reflects what teams are pulling now.</p>
+ <div class="reg-grid" id="trending-grid"></div>
 </div></section>
 
 <section class="reg-section"><div class="reg-wrap">
-  <h2>All artifacts</h2>
-  <p class="sub">Filtered by search bar and chips above. Each card links to its manifest and CID-verified download.</p>
-  <div class="reg-grid" id="all-grid"></div>
+ <h2>All artifacts</h2>
+ <p class="sub">Filtered by search bar and chips above. Each card links to CID verification JSON for the artifact.</p>
+ <div class="reg-grid" id="all-grid"></div>
 </div></section>
 
 <section class="reg-section"><div class="reg-wrap">
-  <h2>Submit your artifact</h2>
-  <div class="reg-cta-box">
-    <div>
-      <p class="lab">community contributions</p>
-      <p class="lead">Compiled a .kolm worth publishing? Send it in for review.</p>
-      <p class="lead-sub">Pre-flight checklist takes about 5 minutes. Listings go live within 2 business days after CID + signature verify.</p>
-    </div>
-    <a href="/registry/submit" class="reg-cta-btn">Submit an artifact &rarr;</a>
-  </div>
+ <h2>Submit your artifact</h2>
+ <div class="reg-cta-box">
+ <div>
+ <p class="lab">community contributions</p>
+ <p class="lead">Compiled a .kolm worth publishing? Send it in for review.</p>
+ <p class="lead-sub">Pre-flight checklist takes about 5 minutes. Listings go live within 2 business days after CID + signature verify.</p>
+ </div>
+ <a href="/registry/submit" class="reg-cta-btn">Submit an artifact &rarr;</a>
+ </div>
 </div></section>
 
 <section class="reg-section"><div class="reg-wrap">
-  <h2>Programmatic API</h2>
-  <p class="sub">Same registry, no browser. CID-verified responses, JSON only. Auth is optional for public artifacts.</p>
-  <div class="reg-api-row">
-    <div class="api-cell">
-      <h4>search by task</h4>
+ <h2>Programmatic API</h2>
+ <p class="sub">Same registry, no browser. Public discovery and CID verification are JSON-only. Auth is optional for public artifacts.</p>
+ <div class="reg-api-row">
+ <div class="api-cell">
+ <h4>search by task</h4>
 <pre>curl -s https://kolm.ai/v1/registry/search?task=phi-redact \
-  -H "Accept: application/json"</pre>
-    </div>
-    <div class="api-cell">
-      <h4>get one by CID</h4>
-<pre>curl -s https://kolm.ai/v1/registry/get/cidv1:sha256:7a2c1f8b9d4e \
-  -o phi-redactor.kolm</pre>
-    </div>
-    <div class="api-cell">
-      <h4>list page (paginated)</h4>
-<pre>wget -qO- "https://kolm.ai/v1/registry/list?page=1&per=25&sort=trending"</pre>
-    </div>
-  </div>
-  <p class="sub" style="margin:14px 0 0;font-size:13px">Every response ships an <code>X-Kolm-Receipt</code> header so the response itself is replayable. See <a href="/docs/k-score-methodology" style="color:var(--accent);border-bottom:1px dashed var(--line)">K-score methodology</a> for what each score means.</p>
+ -H "Accept: application/json"</pre>
+ </div>
+ <div class="api-cell">
+ <h4>verify one by CID</h4>
+<pre>curl -s https://kolm.ai/v1/verify/cidv1:sha256:7a2c1f8b9d4e \
+ | jq '.verified'</pre>
+ </div>
+ <div class="api-cell">
+ <h4>list public artifacts</h4>
+<pre>wget -qO- "https://kolm.ai/v1/registry/public"</pre>
+ </div>
+ </div>
+ <p class="sub" style="margin:14px 0 0;font-size:13px">Use <code>/v1/verify/:cid</code> when you need a signed provenance verdict for a specific CID. See <a href="/docs/k-score-methodology" style="color:var(--accent);border-bottom:1px dashed var(--line)">K-score methodology</a> for what each score means.</p>
 </div></section>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script type="application/json" id="registry-data">
 [
-  {"id":"phi-redactor-llama-3.1-8b","name":"phi-redactor-llama-3.1-8b","base_model":"Llama 3.1 8B","task":"phi-redact","size_gb":4.7,"k_score":0.94,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":18420,"last_run":"2026-05-15","provenance":"cidv1:sha256:7a2c1f8b9d4e2c6a3f0e1d7b8c5a9f2e1c8d4b7a","description":"HIPAA-grade PHI redaction over free-text clinical notes. F1=0.971 on i2b2 2014 holdout."},
-  {"id":"sr11-7-claims-router-mistral-7b","name":"sr11-7-claims-router-mistral-7b","base_model":"Mistral 7B v0.3","task":"route","size_gb":3.9,"k_score":0.91,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":4310,"last_run":"2026-05-14","provenance":"cidv1:sha256:b6d3e1c8f7a2b4d9e0c1f8a3b7e2c5d1a8f4b6e2","description":"Insurance claims routing built for SR 11-7 / OCC model-risk review. Refusal path baked in."},
-  {"id":"support-triage-qwen-2.5-3b","name":"support-triage-qwen-2.5-3b","base_model":"Qwen 2.5 3B","task":"classify","size_gb":1.8,"k_score":0.88,"hardware":"cpu","downloads":9270,"license":"Apache-2.0","last_run":"2026-05-15","provenance":"cidv1:sha256:3f8a1b2c5d9e4f7a6b8c2d3e1f5a9b4c7d8e0f2a","description":"DevOps incident triage. Routes P0/P1/P2/P3 from raw alert text. Runs CPU-only."},
-  {"id":"legal-clause-extract-llama-3.1-8b","name":"legal-clause-extract-llama-3.1-8b","base_model":"Llama 3.1 8B","task":"extract","size_gb":4.9,"k_score":0.92,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":3540,"last_run":"2026-05-13","provenance":"cidv1:sha256:d2e7a8b1c4f6e3d5a9b2c8f1e4d7a3b6c9e0f5d2","description":"M&A and commercial contract clause extraction. 14 clause types, JSONL out."},
-  {"id":"code-review-deepseek-coder-6.7b","name":"code-review-deepseek-coder-6.7b","base_model":"DeepSeek Coder 6.7B","task":"rewrite","size_gb":3.6,"k_score":0.87,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":7820,"last_run":"2026-05-15","provenance":"cidv1:sha256:91a4f7d3b8c6e2a1d5f9b4c7e3a8d1b6c2e5f8a4","description":"Inline code review. Surfaces logic errors, missing tests, suspicious null paths. PR-comment shape."},
-  {"id":"churn-predict-mistral-7b","name":"churn-predict-mistral-7b","base_model":"Mistral 7B v0.3","task":"predict","size_gb":3.8,"k_score":0.89,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":2150,"last_run":"2026-05-12","provenance":"cidv1:sha256:5c8e1f3a7b2d4e6c9a1f5b8e3d7a2c4f6e9b1d3a","description":"30-day churn prediction from support transcripts + product usage signals. Refusal on low-signal."},
-  {"id":"intake-triage-qwen-2.5-3b","name":"intake-triage-qwen-2.5-3b","base_model":"Qwen 2.5 3B","task":"classify","size_gb":1.8,"k_score":0.86,"hardware":"cpu","license":"Apache-2.0","downloads":4730,"last_run":"2026-05-14","provenance":"cidv1:sha256:e1a7b3c5d8f2e4a6b9c1d3f7a2b5c8e0f4d6a8b1","description":"Customer support intake triage. CPU-only, sub-200ms p95 on a M2 laptop."},
-  {"id":"slack-thread-summarizer-phi-3-mini","name":"slack-thread-summarizer-phi-3-mini","base_model":"Phi-3 Mini 3.8B","task":"summarize","size_gb":2.3,"k_score":0.85,"hardware":"cpu","license":"Apache-2.0","downloads":11240,"last_run":"2026-05-15","provenance":"cidv1:sha256:a4f8c1d3e5b7a9c2f4d6e8b1a3c5f7d9e2b4a6c8","description":"Slack channel daily-digest. Summarizes a thread + names the open question + flags decisions."},
-  {"id":"invoice-extract-llama-3.1-8b","name":"invoice-extract-llama-3.1-8b","base_model":"Llama 3.1 8B","task":"extract","size_gb":4.7,"k_score":0.93,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":5810,"last_run":"2026-05-15","provenance":"cidv1:sha256:c7d2e4f8a1b3c5e7d9f2a4b6c8d1e3a5b7c9d2e4","description":"Invoice line-item extraction. 11 fields, schema-locked output, refusal on low confidence."},
-  {"id":"meeting-action-items-qwen-2.5-7b","name":"meeting-action-items-qwen-2.5-7b","base_model":"Qwen 2.5 7B","task":"extract","size_gb":4.2,"k_score":0.88,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":6940,"last_run":"2026-05-14","provenance":"cidv1:sha256:f3a6b8c1d4e7a9b2c5f8d1e3a6b9c2f5d8e1a4b7","description":"Meeting transcripts to action items + owners + due dates. Refusal if speaker labels missing."},
-  {"id":"sec-filing-summarize-llama-3.1-70b","name":"sec-filing-summarize-llama-3.1-70b","base_model":"Llama 3.1 70B","task":"summarize","size_gb":38.5,"k_score":0.91,"hardware":"gpu-24gb","license":"Apache-2.0","downloads":1890,"last_run":"2026-05-13","provenance":"cidv1:sha256:8b2d4f6a9c1e3b5d7a9c2f4e6b8d1a3c5f7e9b2d","description":"10-K / 10-Q section summarizer with citation lookup. Refuses if cite chain breaks."},
-  {"id":"radiology-report-classify-mistral-7b","name":"radiology-report-classify-mistral-7b","base_model":"Mistral 7B v0.3","task":"classify","size_gb":3.9,"k_score":0.90,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":1320,"last_run":"2026-05-12","provenance":"cidv1:sha256:2e5a7c9b1d4f6a8c2e5d7a9b1c4f6e8a2d5b7c9e","description":"BI-RADS / Lung-RADS classification from free-text radiology reports. PHI redacted pre-inference."},
-  {"id":"resume-screen-qwen-2.5-3b","name":"resume-screen-qwen-2.5-3b","base_model":"Qwen 2.5 3B","task":"classify","size_gb":1.8,"k_score":0.84,"hardware":"cpu","license":"RS-1","downloads":2980,"last_run":"2026-05-15","provenance":"cidv1:sha256:6d1f4a7c3b9e2d5a8c1f4b7e3d6a9c2f5b8e1d4a","description":"Resume screening with documented refusal-on-bias-signal. RS-1 license for regulated hiring."},
-  {"id":"prompt-injection-detect-phi-3-mini","name":"prompt-injection-detect-phi-3-mini","base_model":"Phi-3 Mini 3.8B","task":"classify","size_gb":2.3,"k_score":0.92,"hardware":"cpu","license":"Apache-2.0","downloads":15780,"last_run":"2026-05-15","provenance":"cidv1:sha256:9f2c5e8a1b4d7f0a3c6e9b2d5f8a1c4e7b0d3f6a","description":"Prompt-injection classifier as a guardrail. CPU-only, runs ahead of any downstream model."},
-  {"id":"ticket-priority-classify-llama-3.1-8b","name":"ticket-priority-classify-llama-3.1-8b","base_model":"Llama 3.1 8B","task":"classify","size_gb":4.7,"k_score":0.89,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":8210,"last_run":"2026-05-14","provenance":"cidv1:sha256:4a8c2e5f7b1d3a6c9f2e5b8d1a4c7f0e3b6d9a2c","description":"Ticket priority classifier. P0 / P1 / P2 / P3 with confidence + refusal-below-threshold."}
+ {"id":"phi-redactor-llama-3.1-8b","name":"phi-redactor-llama-3.1-8b","base_model":"Llama 3.1 8B","task":"phi-redact","size_gb":4.7,"k_score":0.94,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":18420,"last_run":"2026-05-15","provenance":"cidv1:sha256:7a2c1f8b9d4e2c6a3f0e1d7b8c5a9f2e1c8d4b7a","description":"HIPAA-grade PHI redaction over free-text clinical notes. F1=0.971 on i2b2 2014 holdout."},
+ {"id":"sr11-7-claims-router-mistral-7b","name":"sr11-7-claims-router-mistral-7b","base_model":"Mistral 7B v0.3","task":"route","size_gb":3.9,"k_score":0.91,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":4310,"last_run":"2026-05-14","provenance":"cidv1:sha256:b6d3e1c8f7a2b4d9e0c1f8a3b7e2c5d1a8f4b6e2","description":"Insurance claims routing built for SR 11-7 / OCC model-risk review. Refusal path baked in."},
+ {"id":"support-triage-qwen-2.5-3b","name":"support-triage-qwen-2.5-3b","base_model":"Qwen 2.5 3B","task":"classify","size_gb":1.8,"k_score":0.88,"hardware":"cpu","downloads":9270,"license":"Apache-2.0","last_run":"2026-05-15","provenance":"cidv1:sha256:3f8a1b2c5d9e4f7a6b8c2d3e1f5a9b4c7d8e0f2a","description":"DevOps incident triage. Routes P0/P1/P2/P3 from raw alert text. Runs CPU-only."},
+ {"id":"legal-clause-extract-llama-3.1-8b","name":"legal-clause-extract-llama-3.1-8b","base_model":"Llama 3.1 8B","task":"extract","size_gb":4.9,"k_score":0.92,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":3540,"last_run":"2026-05-13","provenance":"cidv1:sha256:d2e7a8b1c4f6e3d5a9b2c8f1e4d7a3b6c9e0f5d2","description":"M&A and commercial contract clause extraction. 14 clause types, JSONL out."},
+ {"id":"code-review-deepseek-coder-6.7b","name":"code-review-deepseek-coder-6.7b","base_model":"DeepSeek Coder 6.7B","task":"rewrite","size_gb":3.6,"k_score":0.87,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":7820,"last_run":"2026-05-15","provenance":"cidv1:sha256:91a4f7d3b8c6e2a1d5f9b4c7e3a8d1b6c2e5f8a4","description":"Inline code review. Surfaces logic errors, missing tests, suspicious null paths. PR-comment shape."},
+ {"id":"churn-predict-mistral-7b","name":"churn-predict-mistral-7b","base_model":"Mistral 7B v0.3","task":"predict","size_gb":3.8,"k_score":0.89,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":2150,"last_run":"2026-05-12","provenance":"cidv1:sha256:5c8e1f3a7b2d4e6c9a1f5b8e3d7a2c4f6e9b1d3a","description":"30-day churn prediction from support transcripts + product usage signals. Refusal on low-signal."},
+ {"id":"intake-triage-qwen-2.5-3b","name":"intake-triage-qwen-2.5-3b","base_model":"Qwen 2.5 3B","task":"classify","size_gb":1.8,"k_score":0.86,"hardware":"cpu","license":"Apache-2.0","downloads":4730,"last_run":"2026-05-14","provenance":"cidv1:sha256:e1a7b3c5d8f2e4a6b9c1d3f7a2b5c8e0f4d6a8b1","description":"Customer support intake triage. CPU-only, sub-200ms p95 on a M2 laptop."},
+ {"id":"slack-thread-summarizer-phi-3-mini","name":"slack-thread-summarizer-phi-3-mini","base_model":"Phi-3 Mini 3.8B","task":"summarize","size_gb":2.3,"k_score":0.85,"hardware":"cpu","license":"Apache-2.0","downloads":11240,"last_run":"2026-05-15","provenance":"cidv1:sha256:a4f8c1d3e5b7a9c2f4d6e8b1a3c5f7d9e2b4a6c8","description":"Slack channel daily-digest. Summarizes a thread + names the open question + flags decisions."},
+ {"id":"invoice-extract-llama-3.1-8b","name":"invoice-extract-llama-3.1-8b","base_model":"Llama 3.1 8B","task":"extract","size_gb":4.7,"k_score":0.93,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":5810,"last_run":"2026-05-15","provenance":"cidv1:sha256:c7d2e4f8a1b3c5e7d9f2a4b6c8d1e3a5b7c9d2e4","description":"Invoice line-item extraction. 11 fields, schema-locked output, refusal on low confidence."},
+ {"id":"meeting-action-items-qwen-2.5-7b","name":"meeting-action-items-qwen-2.5-7b","base_model":"Qwen 2.5 7B","task":"extract","size_gb":4.2,"k_score":0.88,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":6940,"last_run":"2026-05-14","provenance":"cidv1:sha256:f3a6b8c1d4e7a9b2c5f8d1e3a6b9c2f5d8e1a4b7","description":"Meeting transcripts to action items + owners + due dates. Refusal if speaker labels missing."},
+ {"id":"sec-filing-summarize-llama-3.1-70b","name":"sec-filing-summarize-llama-3.1-70b","base_model":"Llama 3.1 70B","task":"summarize","size_gb":38.5,"k_score":0.91,"hardware":"gpu-24gb","license":"Apache-2.0","downloads":1890,"last_run":"2026-05-13","provenance":"cidv1:sha256:8b2d4f6a9c1e3b5d7a9c2f4e6b8d1a3c5f7e9b2d","description":"10-K / 10-Q section summarizer with citation lookup. Refuses if cite chain breaks."},
+ {"id":"radiology-report-classify-mistral-7b","name":"radiology-report-classify-mistral-7b","base_model":"Mistral 7B v0.3","task":"classify","size_gb":3.9,"k_score":0.90,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":1320,"last_run":"2026-05-12","provenance":"cidv1:sha256:2e5a7c9b1d4f6a8c2e5d7a9b1c4f6e8a2d5b7c9e","description":"BI-RADS / Lung-RADS classification from free-text radiology reports. PHI redacted pre-inference."},
+ {"id":"resume-screen-qwen-2.5-3b","name":"resume-screen-qwen-2.5-3b","base_model":"Qwen 2.5 3B","task":"classify","size_gb":1.8,"k_score":0.84,"hardware":"cpu","license":"RS-1","downloads":2980,"last_run":"2026-05-15","provenance":"cidv1:sha256:6d1f4a7c3b9e2d5a8c1f4b7e3d6a9c2f5b8e1d4a","description":"Resume screening with documented refusal-on-bias-signal. RS-1 license for regulated hiring."},
+ {"id":"prompt-injection-detect-phi-3-mini","name":"prompt-injection-detect-phi-3-mini","base_model":"Phi-3 Mini 3.8B","task":"classify","size_gb":2.3,"k_score":0.92,"hardware":"cpu","license":"Apache-2.0","downloads":15780,"last_run":"2026-05-15","provenance":"cidv1:sha256:9f2c5e8a1b4d7f0a3c6e9b2d5f8a1c4e7b0d3f6a","description":"Prompt-injection classifier as a guardrail. CPU-only, runs ahead of any downstream model."},
+ {"id":"ticket-priority-classify-llama-3.1-8b","name":"ticket-priority-classify-llama-3.1-8b","base_model":"Llama 3.1 8B","task":"classify","size_gb":4.7,"k_score":0.89,"hardware":"gpu-8gb","license":"Apache-2.0","downloads":8210,"last_run":"2026-05-14","provenance":"cidv1:sha256:4a8c2e5f7b1d3a6c9f2e5b8d1a4c7f0e3b6d9a2c","description":"Ticket priority classifier. P0 / P1 / P2 / P3 with confidence + refusal-below-threshold."}
 ]
 </script>
 
 <script>
 (function(){
-  function $(id){return document.getElementById(id);}
-  function escText(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
-  var raw = document.getElementById('registry-data').textContent;
-  var DATA = JSON.parse(raw);
-  var STATE = {q:'', task:null, size:null, hardware:null, license:null};
+ function $(id){return document.getElementById(id);}
+ function escText(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+ var raw = document.getElementById('registry-data').textContent;
+ var DATA = JSON.parse(raw);
+ var STATE = {q:'', task:null, size:null, hardware:null, license:null};
 
-  // wave 128 · live social proof: counts + K-score histogram from DATA.
-  function renderProof(){
-    var count = DATA.length;
-    var totalDl = 0, passing = 0, tasks = {};
-    for (var i = 0; i < DATA.length; i++){
-      var a = DATA[i];
-      totalDl += (+a.downloads) || 0;
-      if (typeof a.k_score === 'number' && a.k_score >= 0.85) passing++;
-      if (a.task) tasks[a.task] = true;
-    }
-    var rpCount = $('rp-count'), rpRuns = $('rp-runs'), rpPassing = $('rp-passing'), rpTasks = $('rp-tasks');
-    if (rpCount)   rpCount.textContent = String(count);
-    if (rpRuns)    rpRuns.textContent = totalDl >= 10000 ? (totalDl/1000).toFixed(0) + 'k' : totalDl.toLocaleString();
-    if (rpPassing) rpPassing.textContent = passing + ' / ' + count;
-    if (rpTasks)   rpTasks.textContent = String(Object.keys(tasks).length);
+ // wave 128 · live social proof: counts + K-score histogram from DATA.
+ function renderProof(){
+ var count = DATA.length;
+ var totalDl = 0, passing = 0, tasks = {};
+ for (var i = 0; i < DATA.length; i++){
+ var a = DATA[i];
+ totalDl += (+a.downloads) || 0;
+ if (typeof a.k_score === 'number' && a.k_score >= 0.85) passing++;
+ if (a.task) tasks[a.task] = true;
+ }
+ var rpCount = $('rp-count'), rpRuns = $('rp-runs'), rpPassing = $('rp-passing'), rpTasks = $('rp-tasks');
+ if (rpCount) rpCount.textContent = String(count);
+ if (rpRuns) rpRuns.textContent = totalDl >= 10000 ? (totalDl/1000).toFixed(0) + 'k' : totalDl.toLocaleString();
+ if (rpPassing) rpPassing.textContent = passing + ' / ' + count;
+ if (rpTasks) rpTasks.textContent = String(Object.keys(tasks).length);
 
-    var bars = $('rp-hist-bars'), axis = $('rp-hist-axis');
-    if (!bars || !axis) return;
-    var bins = [0,0,0,0,0,0,0]; // 0.70-.74, .75-.79, .80-.84, .85-.89, .90-.94, .95-1.00, .65-.69 (overflow low)
-    var labels = ['<.75','.75','.80','.85','.90','.95','1.0'];
-    for (var j = 0; j < DATA.length; j++){
-      var k = DATA[j].k_score;
-      if (typeof k !== 'number') continue;
-      if (k < 0.75) bins[0]++;
-      else if (k < 0.80) bins[1]++;
-      else if (k < 0.85) bins[2]++;
-      else if (k < 0.90) bins[3]++;
-      else if (k < 0.95) bins[4]++;
-      else if (k < 1.00) bins[5]++;
-      else bins[6]++;
-    }
-    var max = Math.max.apply(null, bins) || 1;
-    var W = 720, H = 160, padL = 32, padR = 16, padT = 10, padB = 26;
-    var iw = W - padL - padR, ih = H - padT - padB;
-    var bw = iw / bins.length;
-    var GATE_BIN = 3; // first ship-passing bin (.85-.89)
-    var barsHTML = '', axisHTML = '';
-    for (var b = 0; b < bins.length; b++){
-      var h = (bins[b] / max) * ih;
-      var x = padL + b * bw + 4;
-      var y = padT + ih - h;
-      var w = bw - 8;
-      var below = b < GATE_BIN;
-      var fill = below ? 'currentColor' : '#10b981';
-      var op = below ? '0.22' : '0.85';
-      barsHTML += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" ry="2" fill="' + fill + '" opacity="' + op + '"></rect>';
-      if (bins[b] > 0) {
-        barsHTML += '<text x="' + (x + w/2).toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.7" font-variant-numeric="tabular-nums">' + bins[b] + '</text>';
-      }
-      axisHTML += '<text x="' + (x + w/2).toFixed(1) + '" y="' + (padT + ih + 16).toFixed(1) + '" text-anchor="middle" font-size="9.5" letter-spacing="0.04em" fill="currentColor" opacity="0.55">' + labels[b] + '</text>';
-    }
-    // gate line at the boundary between bin 2 and bin 3 (between .80-.84 and .85-.89)
-    var gateX = padL + GATE_BIN * bw;
-    axisHTML += '<line x1="' + gateX.toFixed(1) + '" y1="' + padT.toFixed(1) + '" x2="' + gateX.toFixed(1) + '" y2="' + (padT + ih).toFixed(1) + '" stroke="#10b981" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"></line>';
-    axisHTML += '<text x="' + (gateX + 4).toFixed(1) + '" y="' + (padT + 10).toFixed(1) + '" font-size="9.5" fill="#10b981" opacity="0.85" letter-spacing="0.04em">gate 0.85</text>';
-    bars.innerHTML = barsHTML;
-    axis.innerHTML = axisHTML;
-  }
-  renderProof();
+ var bars = $('rp-hist-bars'), axis = $('rp-hist-axis');
+ if (!bars || !axis) return;
+ var bins = [0,0,0,0,0,0,0]; // 0.70-.74, .75-.79, .80-.84, .85-.89, .90-.94, .95-1.00, .65-.69 (overflow low)
+ var labels = ['<.75','.75','.80','.85','.90','.95','1.0'];
+ for (var j = 0; j < DATA.length; j++){
+ var k = DATA[j].k_score;
+ if (typeof k !== 'number') continue;
+ if (k < 0.75) bins[0]++;
+ else if (k < 0.80) bins[1]++;
+ else if (k < 0.85) bins[2]++;
+ else if (k < 0.90) bins[3]++;
+ else if (k < 0.95) bins[4]++;
+ else if (k < 1.00) bins[5]++;
+ else bins[6]++;
+ }
+ var max = Math.max.apply(null, bins) || 1;
+ var W = 720, H = 160, padL = 32, padR = 16, padT = 10, padB = 26;
+ var iw = W - padL - padR, ih = H - padT - padB;
+ var bw = iw / bins.length;
+ var GATE_BIN = 3; // first ship-passing bin (.85-.89)
+ var barsHTML = '', axisHTML = '';
+ for (var b = 0; b < bins.length; b++){
+ var h = (bins[b] / max) * ih;
+ var x = padL + b * bw + 4;
+ var y = padT + ih - h;
+ var w = bw - 8;
+ var below = b < GATE_BIN;
+ var fill = below ? 'currentColor' : '#10b981';
+ var op = below ? '0.22' : '0.85';
+ barsHTML += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" ry="2" fill="' + fill + '" opacity="' + op + '"></rect>';
+ if (bins[b] > 0) {
+ barsHTML += '<text x="' + (x + w/2).toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.7" font-variant-numeric="tabular-nums">' + bins[b] + '</text>';
+ }
+ axisHTML += '<text x="' + (x + w/2).toFixed(1) + '" y="' + (padT + ih + 16).toFixed(1) + '" text-anchor="middle" font-size="9.5" letter-spacing="0.04em" fill="currentColor" opacity="0.55">' + labels[b] + '</text>';
+ }
+ // gate line at the boundary between bin 2 and bin 3 (between .80-.84 and .85-.89)
+ var gateX = padL + GATE_BIN * bw;
+ axisHTML += '<line x1="' + gateX.toFixed(1) + '" y1="' + padT.toFixed(1) + '" x2="' + gateX.toFixed(1) + '" y2="' + (padT + ih).toFixed(1) + '" stroke="#10b981" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"></line>';
+ axisHTML += '<text x="' + (gateX + 4).toFixed(1) + '" y="' + (padT + 10).toFixed(1) + '" font-size="9.5" fill="#10b981" opacity="0.85" letter-spacing="0.04em">gate 0.85</text>';
+ bars.innerHTML = barsHTML;
+ axis.innerHTML = axisHTML;
+ }
+ renderProof();
 
-  var FEATURED_IDS = ['phi-redactor-llama-3.1-8b','sr11-7-claims-router-mistral-7b','support-triage-qwen-2.5-3b'];
+ var FEATURED_IDS = ['phi-redactor-llama-3.1-8b','sr11-7-claims-router-mistral-7b','support-triage-qwen-2.5-3b'];
 
-  function sizeBucket(g){
-    if (g < 2) return 'lt-2gb';
-    if (g <= 5) return '2-5gb';
-    if (g <= 15) return '5-15gb';
-    return 'gt-15gb';
-  }
-  function cidShort(c){
-    if (!c) return '';
-    var i = c.lastIndexOf(':');
-    var prefix = c.substring(0, i+1);
-    var hex = c.substring(i+1);
-    if (hex.length <= 16) return c;
-    return prefix + hex.substring(0,12) + '...';
-  }
-  function fmtDownloads(n){
-    if (n >= 1000) return (n/1000).toFixed(1) + 'k';
-    return String(n);
-  }
+ function sizeBucket(g){
+ if (g < 2) return 'lt-2gb';
+ if (g <= 5) return '2-5gb';
+ if (g <= 15) return '5-15gb';
+ return 'gt-15gb';
+ }
+ function cidShort(c){
+ if (!c) return '';
+ var i = c.lastIndexOf(':');
+ var prefix = c.substring(0, i+1);
+ var hex = c.substring(i+1);
+ if (hex.length <= 16) return c;
+ return prefix + hex.substring(0,12) + '...';
+ }
+ function fmtDownloads(n){
+ if (n >= 1000) return (n/1000).toFixed(1) + 'k';
+ return String(n);
+ }
 
-  function pass(a){
-    if (STATE.q){
-      var hay = ((a.name||'') + ' ' + (a.task||'') + ' ' + (a.base_model||'') + ' ' + (a.description||'')).toLowerCase();
-      if (!hay.includes(STATE.q)) return false;
-    }
-    if (STATE.task && a.task !== STATE.task) return false;
-    if (STATE.size && sizeBucket(a.size_gb) !== STATE.size) return false;
-    if (STATE.hardware && a.hardware !== STATE.hardware) return false;
-    if (STATE.license && a.license !== STATE.license) return false;
-    return true;
-  }
+ function pass(a){
+ if (STATE.q){
+ var hay = ((a.name||'') + ' ' + (a.task||'') + ' ' + (a.base_model||'') + ' ' + (a.description||'')).toLowerCase();
+ if (!hay.includes(STATE.q)) return false;
+ }
+ if (STATE.task && a.task !== STATE.task) return false;
+ if (STATE.size && sizeBucket(a.size_gb) !== STATE.size) return false;
+ if (STATE.hardware && a.hardware !== STATE.hardware) return false;
+ if (STATE.license && a.license !== STATE.license) return false;
+ return true;
+ }
 
-  function renderCard(a, opts){
-    opts = opts || {};
-    var k = typeof a.k_score === 'number' ? 'K ' + a.k_score.toFixed(2) : 'K -';
-    var badge = opts.featured ? '<span class="badge">featured</span>' : '';
-    var meta = ''
-      + '<span class="pill">' + escText(a.task) + '</span>'
-      + '<span>' + escText(a.size_gb.toFixed(1)) + ' GB</span>'
-      + '<span>' + escText(a.hardware) + '</span>'
-      + '<span>' + escText(a.license) + '</span>';
-    var trend = opts.trending
-      ? '<div class="reg-trending-row"><span>' + fmtDownloads(a.downloads) + ' downloads</span><span>&middot;</span><span>last run ' + escText(a.last_run) + '</span></div>'
-      : '';
-    return ''
-      + '<a class="reg-card' + (opts.featured?' feat':'') + '" href="/v1/registry/get/' + escText(a.provenance) + '" data-id="' + escText(a.id) + '">'
-      +   badge
-      +   '<div class="top">'
-      +     '<div class="name">' + escText(a.name) + '</div>'
-      +     '<span class="k">' + escText(k) + '</span>'
-      +   '</div>'
-      +   '<p class="desc">' + escText(a.description) + '</p>'
-      +   '<div class="meta">' + meta + '</div>'
-      +   '<div class="cid">' + escText(cidShort(a.provenance)) + '</div>'
-      +   trend
-      + '</a>';
-  }
+ function renderCard(a, opts){
+ opts = opts || {};
+ var k = typeof a.k_score === 'number' ? 'K ' + a.k_score.toFixed(2) : 'K -';
+ var badge = opts.featured ? '<span class="badge">featured</span>' : '';
+ var meta = ''
+ + '<span class="pill">' + escText(a.task) + '</span>'
+ + '<span>' + escText(a.size_gb.toFixed(1)) + ' GB</span>'
+ + '<span>' + escText(a.hardware) + '</span>'
+ + '<span>' + escText(a.license) + '</span>';
+ var trend = opts.trending
+ ? '<div class="reg-trending-row"><span>' + fmtDownloads(a.downloads) + ' downloads</span><span>&middot;</span><span>last run ' + escText(a.last_run) + '</span></div>'
+ : '';
+ return ''
+ + '<a class="reg-card' + (opts.featured?' feat':'') + '" href="/v1/verify/' + encodeURIComponent(a.provenance || '') + '" data-id="' + escText(a.id) + '">'
+ + badge
+ + '<div class="top">'
+ + '<div class="name">' + escText(a.name) + '</div>'
+ + '<span class="k">' + escText(k) + '</span>'
+ + '</div>'
+ + '<p class="desc">' + escText(a.description) + '</p>'
+ + '<div class="meta">' + meta + '</div>'
+ + '<div class="cid">' + escText(cidShort(a.provenance)) + '</div>'
+ + trend
+ + '</a>';
+ }
 
-  function renderFeatured(){
-    var rows = FEATURED_IDS.map(function(id){
-      return DATA.find(function(a){return a.id===id;});
-    }).filter(Boolean);
-    $('featured-grid').innerHTML = rows.map(function(a){return renderCard(a,{featured:true});}).join('');
-  }
-  function renderTrending(){
-    var rows = DATA.slice().sort(function(a,b){return (b.downloads||0)-(a.downloads||0);}).slice(0,5);
-    $('trending-grid').innerHTML = rows.map(function(a){return renderCard(a,{trending:true});}).join('');
-  }
-  function renderAll(){
-    var rows = DATA.filter(pass);
-    $('count').textContent = rows.length + ' / ' + DATA.length + ' artifact' + (DATA.length===1?'':'s');
-    if (!rows.length){
-      $('all-grid').innerHTML = '<div class="reg-empty"><div class="glyph">.kolm</div>No artifact matches this filter. Clear chips or broaden the search.</div>';
-      return;
-    }
-    $('all-grid').innerHTML = rows.map(function(a){return renderCard(a,{});}).join('');
-  }
+ function renderFeatured(){
+ var rows = FEATURED_IDS.map(function(id){
+ return DATA.find(function(a){return a.id===id;});
+ }).filter(Boolean);
+ $('featured-grid').innerHTML = rows.map(function(a){return renderCard(a,{featured:true});}).join('');
+ }
+ function renderTrending(){
+ var rows = DATA.slice().sort(function(a,b){return (b.downloads||0)-(a.downloads||0);}).slice(0,5);
+ $('trending-grid').innerHTML = rows.map(function(a){return renderCard(a,{trending:true});}).join('');
+ }
+ function renderAll(){
+ var rows = DATA.filter(pass);
+ $('count').textContent = rows.length + ' / ' + DATA.length + ' artifact' + (DATA.length===1?'':'s');
+ if (!rows.length){
+ $('all-grid').innerHTML = '<div class="reg-empty"><div class="glyph">.kolm</div>No artifact matches this filter. Clear chips or broaden the search.</div>';
+ return;
+ }
+ $('all-grid').innerHTML = rows.map(function(a){return renderCard(a,{});}).join('');
+ }
 
-  document.querySelectorAll('#filters .reg-chip').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var group = btn.parentElement.parentElement.dataset.group;
-      var val = btn.dataset.v;
-      var same = STATE[group] === val;
-      btn.parentElement.querySelectorAll('.reg-chip').forEach(function(b){b.classList.remove('on');});
-      if (!same){
-        btn.classList.add('on');
-        STATE[group] = val;
-      } else {
-        STATE[group] = null;
-      }
-      renderAll();
-    });
-  });
-  $('q').addEventListener('input', function(e){
-    STATE.q = e.target.value.trim().toLowerCase();
-    renderAll();
-  });
+ document.querySelectorAll('#filters .reg-chip').forEach(function(btn){
+ btn.addEventListener('click', function(){
+ var group = btn.parentElement.parentElement.dataset.group;
+ var val = btn.dataset.v;
+ var same = STATE[group] === val;
+ btn.parentElement.querySelectorAll('.reg-chip').forEach(function(b){b.classList.remove('on');});
+ if (!same){
+ btn.classList.add('on');
+ STATE[group] = val;
+ } else {
+ STATE[group] = null;
+ }
+ renderAll();
+ });
+ });
+ $('q').addEventListener('input', function(e){
+ STATE.q = e.target.value.trim().toLowerCase();
+ renderAll();
+ });
 
-  renderFeatured();
-  renderTrending();
-  renderAll();
+ renderFeatured();
+ renderTrending();
+ renderAll();
 })();
 </script>
 

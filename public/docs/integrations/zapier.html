@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Zapier &middot; kolm.ai</title>
+<title>Zapier guide · kolm.ai</title>
 <meta name="description" content="Call a deployed kolm artifact from a Zap via the Webhooks by Zapier action. Bearer auth, JSON in, JSON out. Same shape as the REST API.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Zapier &middot; kolm.ai">
-<meta property="og:description" content="Call a deployed kolm artifact from a Zap via the Webhooks by Zapier action.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Zapier guide · kolm.ai">
+<meta property="og:description" content="Call a deployed kolm artifact from a Zap via the Webhooks by Zapier action. Bearer auth, JSON in, JSON out. Same shape as the REST API.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/integrations/zapier">
-<meta property="og:image" content="https://kolm.ai/og/docs-integrations-zapier.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Zapier &middot; kolm.ai">
-<meta name="twitter:description" content="Call a kolm artifact from a Zap.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-integrations-zapier.svg">
+<meta name="twitter:title" content="Zapier guide · kolm.ai">
+<meta name="twitter:description" content="Call a deployed kolm artifact from a Zap via the Webhooks by Zapier action. Bearer auth, JSON in, JSON out. Same shape as the REST API.">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/integrations/zapier">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Zapier","description":"Call a deployed kolm artifact from a Zap via the Webhooks by Zapier action.","url":"https://kolm.ai/docs/integrations/zapier","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -64,13 +64,14 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, not the Kolm band, not Petter Kolm.</span>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -81,52 +82,52 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="prereq">Prerequisites</h2>
 <ul>
-  <li>A kolm API key. Get one from <a href="/signup">/signup</a> or via <code>kolm signup --email you@company.com</code>.</li>
-  <li>An artifact you have already compiled and published. The walk-through uses <code>&lt;owner&gt;/&lt;name&gt;</code> as the handle.</li>
-  <li>A Zapier account on a Starter plan or above (Webhooks is a premium action).</li>
+ <li>A kolm API key. Get one from <a href="/signup">/signup</a> or via <code>kolm signup --email you@company.com</code>.</li>
+ <li>An artifact you have already compiled and published. The walk-through uses <code>&lt;owner&gt;/&lt;name&gt;</code> as the handle.</li>
+ <li>A Zapier account on a Starter plan or above (Webhooks is a premium action).</li>
 </ul>
 
 <h2 id="walk">Five minutes</h2>
 
 <div class="step">
-  <span class="num">Step 1</span>
-  <h3>Add a Webhooks by Zapier action</h3>
-  <p>In a new or existing Zap, click the plus to add an action, search for <b>Webhooks by Zapier</b>, and pick <b>Custom Request</b>. This is the generic HTTP client; you set the URL, headers, and JSON body yourself.</p>
+ <span class="num">Step 1</span>
+ <h3>Add a Webhooks by Zapier action</h3>
+ <p>In a new or existing Zap, click the plus to add an action, search for <b>Webhooks by Zapier</b>, and pick <b>Custom Request</b>. This is the generic HTTP client; you set the URL, headers, and JSON body yourself.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 2</span>
-  <h3>Configure the request</h3>
-<pre><code>Method:        POST
-URL:           https://kolm.ai/v1/artifacts/&lt;owner&gt;/&lt;name&gt;/run
-Data Pass-Through?  No
-Data:          {"input": "{{step_1__text}}"}
-Wrap Request In Array?  No
-File:          (leave blank)
-Unflatten:     Yes
-Basic Auth:    (leave blank)
+ <span class="num">Step 2</span>
+ <h3>Configure the request</h3>
+<pre><code>Method: POST
+URL: https://kolm.ai/v1/artifacts/&lt;owner&gt;/&lt;name&gt;/run
+Data Pass-Through? No
+Data: {"input": "{{step_1__text}}"}
+Wrap Request In Array? No
+File: (leave blank)
+Unflatten: Yes
+Basic Auth: (leave blank)
 Headers:
-  Authorization: Bearer kolm_...
-  Content-Type:  application/json</code></pre>
-  <p>Replace <code>&lt;owner&gt;/&lt;name&gt;</code> with your artifact handle. The <code>{{step_1__text}}</code> token is whatever the upstream step exposes; click the plus on the field to pick from the Zap's data sources.</p>
+ Authorization: Bearer kolm_...
+ Content-Type: application/json</code></pre>
+ <p>Replace <code>&lt;owner&gt;/&lt;name&gt;</code> with your artifact handle. The <code>{{step_1__text}}</code> token is whatever the upstream step exposes; click the plus on the field to pick from the Zap's data sources.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 3</span>
-  <h3>Test the action</h3>
-  <p>Click <b>Test &amp; Continue</b>. Zapier shows the parsed JSON response in a tree view. Downstream actions can then reference <code>output</code>, <code>k_score</code>, and other fields with the standard Zapier mapping picker.</p>
+ <span class="num">Step 3</span>
+ <h3>Test the action</h3>
+ <p>Click <b>Test &amp; Continue</b>. Zapier shows the parsed JSON response in a tree view. Downstream actions can then reference <code>output</code>, <code>k_score</code>, and other fields with the standard Zapier mapping picker.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 4</span>
-  <h3>Wire to a downstream step</h3>
-  <p>Add the next action (Gmail, Slack, Airtable, whatever) and map the kolm output into its fields. Zapier remembers the response shape from the test, so the picker shows the top-level keys directly.</p>
+ <span class="num">Step 4</span>
+ <h3>Wire to a downstream step</h3>
+ <p>Add the next action (Gmail, Slack, Airtable, whatever) and map the kolm output into its fields. Zapier remembers the response shape from the test, so the picker shows the top-level keys directly.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 5</span>
-  <h3>Turn on the Zap</h3>
-  <p>Once the steps look right, toggle the Zap on. Every trigger fires the chain. Zapier logs the request and parsed response per run; failures land in the Zap history with the upstream status code (401 means bad bearer, 404 means wrong handle, 422 means missing required input).</p>
+ <span class="num">Step 5</span>
+ <h3>Turn on the Zap</h3>
+ <p>Once the steps look right, toggle the Zap on. Every trigger fires the chain. Zapier logs the request and parsed response per run; failures land in the Zap history with the upstream status code (401 means bad bearer, 404 means wrong handle, 422 means missing required input).</p>
 </div>
 
 <h2 id="trigger">Trigger from a webhook</h2>
@@ -134,23 +135,23 @@ Headers:
 
 <h2 id="see">Related</h2>
 <div class="related">
-  <a href="/docs/integrations/make"><b>/docs/integrations/make</b><span>Same pattern in Make.com via the HTTP module.</span></a>
-  <a href="/docs/api"><b>/docs/api</b><span>The HTTP API the Webhooks action calls. Full request and response shape.</span></a>
-  <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
-  <a href="/docs/distill"><b>/docs/distill</b><span>Auto-distill a captured namespace into a local LoRA.</span></a>
-  <a href="/docs/connectors"><b>/docs/connectors</b><span>The full connector list with raw env vars per runtime.</span></a>
+ <a href="/docs/integrations/make"><b>/docs/integrations/make</b><span>Same pattern in Make.com via the HTTP module.</span></a>
+ <a href="/docs/api"><b>/docs/api</b><span>The HTTP API the Webhooks action calls. Full request and response shape.</span></a>
+ <a href="/docs/cli"><b>/docs/cli</b><span>Full CLI reference index. Every verb the local kolm CLI ships.</span></a>
+ <a href="/docs/distill"><b>/docs/distill</b><span>Auto-distill a captured namespace into a local student artifact.</span></a>
+ <a href="/docs/connectors"><b>/docs/connectors</b><span>The full connector list with raw env vars per runtime.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 kolm.ai</span>
-  &middot;
-  <a href="/security">Security</a>
-  &middot;
-  <a href="/pricing">Pricing</a>
-  &middot;
-  <a href="/docs">Docs</a>
+ <span>&copy; 2026 kolm.ai</span>
+ &middot;
+ <a href="/security">Security</a>
+ &middot;
+ <a href="/pricing">Pricing</a>
+ &middot;
+ <a href="/docs">Docs</a>
 </div></footer>
 
 </body>

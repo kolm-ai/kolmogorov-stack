@@ -12,21 +12,21 @@ description: Per-call policy decider plus the runtime-target builder for cross-c
 ### Policy ladder (W372)
 
 ```bash
-kolm runtime status                                # current policy + 7d decision stats
-kolm runtime policy   [--set key=value]            # inspect or tune the policy
-kolm runtime start    [--policy <name>]            # switch policy
-kolm runtime install  <art.kolm>                   # install a .kolm into the local runtime cache
-kolm runtime decisions [--limit N]                 # recent per-call decisions
-kolm runtime stats     [--since 7d]                # rolled-up stats
+kolm runtime status # current policy + 7d decision stats
+kolm runtime policy [--set key=value] # inspect or tune the policy
+kolm runtime start [--policy <name>] # switch policy
+kolm runtime install <art.kolm> # install a .kolm into the local runtime cache
+kolm runtime decisions [--limit N] # recent per-call decisions
+kolm runtime stats [--since 7d] # rolled-up stats
 ```
 
 ### Source-build (W219)
 
 ```bash
-kolm runtime targets                               # list cross-compile targets
-kolm runtime info <target>                         # target spec
-kolm runtime doctor                                # toolchain check across all targets
-kolm runtime build-from-source <target>            # compile llama.cpp from source
+kolm runtime targets # list cross-compile targets
+kolm runtime info <target> # target spec
+kolm runtime doctor # toolchain check across all targets
+kolm runtime build-from-source <target> # compile llama.cpp from source
 ```
 
 ## Policy names

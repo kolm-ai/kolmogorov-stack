@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>OpenRouter &middot; kolm.ai</title>
+<title>OpenRouter · kolm.ai</title>
 <meta name="description" content="Use kolm.ai with the OpenRouter routing conventions. HTTP-Referer and X-Title headers are preserved end to end so analytics still attribute traffic correctly.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="OpenRouter &middot; kolm.ai">
-<meta property="og:description" content="Drop-in OpenRouter base URL. HTTP-Referer + X-Title preserved.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="OpenRouter · kolm.ai">
+<meta property="og:description" content="Use kolm.ai with the OpenRouter routing conventions. HTTP-Referer and X-Title headers are preserved end to end so analytics still attribute traffic correctly.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations/openrouter">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OpenRouter &middot; kolm.ai">
-<meta name="twitter:description" content="One config change. OpenRouter-compatible routing through kolm.">
+<meta name="twitter:title" content="OpenRouter · kolm.ai">
+<meta name="twitter:description" content="Use kolm.ai with the OpenRouter routing conventions. HTTP-Referer and X-Title headers are preserved end to end so analytics still attribute traffic correctly.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/integrations/openrouter">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -54,12 +54,13 @@ pre.code{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-ra
 footer{padding:36px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &ndash; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
+ <a class="logo" href="/">kolm.ai</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -215,73 +216,73 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <main id="main">
 
 <section class="hero"><div class="wrap">
-  <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / openrouter</div>
-  <h1>OpenRouter-compatible routing through kolm.</h1>
-  <p class="lede">If your app already talks to OpenRouter, point it at kolm and keep the routing semantics. The <code>HTTP-Referer</code> and <code>X-Title</code> headers travel with the request, get stamped onto the receipt, and show up in your captures inbox so app-attribution still works end to end.</p>
+ <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/integrations">integrations</a> / openrouter</div>
+ <h1>OpenRouter-compatible routing through kolm.</h1>
+ <p class="lede">If your app already talks to OpenRouter, point it at kolm and keep the routing semantics. The <code>HTTP-Referer</code> and <code>X-Title</code> headers travel with the request, get stamped onto the receipt, and show up in your captures inbox so app-attribution still works end to end.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>How it works in one paragraph</h2>
-  <p>kolm.ai exposes the OpenRouter routing conventions at <code>https://kolm.ai/v1</code>. The request body is OpenAI-shaped chat completions, but kolm honors the two OpenRouter-specific headers: <code>HTTP-Referer</code> (used by OpenRouter to identify the calling app) and <code>X-Title</code> (the app&apos;s display name). Both are persisted with the capture row so downstream analytics see the same attribution string they always did. Provider preferences and fallback semantics map onto kolm&apos;s router config.</p>
+ <h2>How it works in one paragraph</h2>
+ <p>kolm.ai exposes the OpenRouter routing conventions at <code>https://kolm.ai/v1</code>. The request body is OpenAI-shaped chat completions, but kolm honors the two OpenRouter-specific headers: <code>HTTP-Referer</code> (used by OpenRouter to identify the calling app) and <code>X-Title</code> (the app&apos;s display name). Both are persisted with the capture row so downstream analytics see the same attribution string they always did. Provider preferences and fallback semantics map onto kolm&apos;s router config.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Python &ndash; routing headers preserved</h2>
-  <p>Send the same headers you would send to OpenRouter. kolm forwards them to the upstream model and stamps them onto the receipt.</p>
-  <div class="tabs"><span>python &ndash; openai &gt;= 1.0</span></div>
+ <h2>Python &ndash; routing headers preserved</h2>
+ <p>Send the same headers you would send to OpenRouter. kolm forwards them to the upstream model and stamps them onto the receipt.</p>
+ <div class="tabs"><span>python &ndash; openai &gt;= 1.0</span></div>
 <pre class="code">from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://kolm.ai/v1",
-    api_key="ks_live_...",
-    default_headers={
-        "HTTP-Referer": "https://your-app.example.com",
-        "X-Title":      "your-app",
-    },
+ base_url="https://kolm.ai/v1",
+ api_key="ks_live_...",
+ default_headers={
+ "HTTP-Referer": "https://your-app.example.com",
+ "X-Title": "your-app",
+ },
 )
 
 resp = client.chat.completions.create(
-    model="anthropic/claude-3.5-sonnet",
-    messages=[{"role": "user", "content": "Summarize this PR: ..."}],
+ model="anthropic/claude-3.5-sonnet",
+ messages=[{"role": "user", "content": "Summarize this PR: ..."}],
 )
 
 print(resp.choices[0].message.content)</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>JavaScript / TypeScript &ndash; routing headers preserved</h2>
-  <p>Same surface in Node. Set <code>defaultHeaders</code> at client construction.</p>
-  <div class="tabs"><span>node &ndash; openai &gt;= 4</span></div>
+ <h2>JavaScript / TypeScript &ndash; routing headers preserved</h2>
+ <p>Same surface in Node. Set <code>defaultHeaders</code> at client construction.</p>
+ <div class="tabs"><span>node &ndash; openai &gt;= 4</span></div>
 <pre class="code">import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://kolm.ai/v1",
-  apiKey: process.env.KOLM_API_KEY,
-  defaultHeaders: {
-    "HTTP-Referer": "https://your-app.example.com",
-    "X-Title":      "your-app",
-  },
+ baseURL: "https://kolm.ai/v1",
+ apiKey: process.env.KOLM_API_KEY,
+ defaultHeaders: {
+ "HTTP-Referer": "https://your-app.example.com",
+ "X-Title": "your-app",
+ },
 });
 
 const resp = await client.chat.completions.create({
-  model: "anthropic/claude-3.5-sonnet",
-  messages: [{ role: "user", content: "Summarize this PR: ..." }],
+ model: "anthropic/claude-3.5-sonnet",
+ messages: [{ role: "user", content: "Summarize this PR: ..." }],
 });</pre>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>Where to go next</h2>
-  <div class="related">
-    <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. Capture, compile, replay, verify.</span></a>
-    <a href="/captures"><b>Captures inbox &rarr;</b><span>See HTTP-Referer + X-Title attribution land per row.</span></a>
-    <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
-  </div>
+ <h2>Where to go next</h2>
+ <div class="related">
+ <a href="/quickstart/api"><b>API quickstart &rarr;</b><span>Five curl commands. Capture, compile, replay, verify.</span></a>
+ <a href="/captures"><b>Captures inbox &rarr;</b><span>See HTTP-Referer + X-Title attribution land per row.</span></a>
+ <a href="/security"><b>Security &rarr;</b><span>Redaction membrane, receipts, BYOC, air-gap.</span></a>
+ </div>
 </div></section>
 
 </main>
 
 <footer><div class="wrap">
-  <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
+ <span>kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a></span>
 </div></footer>
 </body>
 </html>

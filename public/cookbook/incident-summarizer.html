@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Incident summarizer recipe · kolm cookbook</title>
-<meta name="description" content="Compile a signed local model that turns a Slack incident channel + Datadog timeline into a 5-section postmortem draft. 80 gold pairs, runs offline, redacts secrets at compile time.">
+<title>Incident summarizer recipe · kolm cookbook · kolm.ai</title>
+<meta name="description" content="Compile a signed local model that turns a Slack incident channel + Datadog timeline into a 5-section postmortem draft. 80 gold pairs, runs offline, redacts...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Incident summarizer recipe">
-<meta property="og:description" content="Local incident-to-postmortem writer. Redacts secrets, signed, offline.">
-<meta property="og:type" content="article">
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Incident summarizer recipe" />
-<meta name="twitter:description" content="Local incident-to-postmortem writer. Redacts secrets, signed, offline." />
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:title" content="Incident summarizer recipe · kolm cookbook · kolm.ai">
+<meta property="og:description" content="Compile a signed local model that turns a Slack incident channel + Datadog timeline into a 5-section postmortem draft. 80 gold pairs, runs offline, redacts...">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Incident summarizer recipe · kolm cookbook · kolm.ai">
+<meta name="twitter:description" content="Compile a signed local model that turns a Slack incident channel + Datadog timeline into a 5-section postmortem draft. 80 gold pairs, runs offline, redacts...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/cookbook/incident-summarizer">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/cookbook/incident-summarizer">
@@ -26,150 +26,151 @@
 <link rel="stylesheet" href="/brand-refresh.css">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "HowTo",
-      "name": "Incident summarizer recipe",
-      "description": "Local incident-to-postmortem writer. Redacts secrets, signed, offline.",
-      "url": "https://kolm.ai/cookbook/incident-summarizer",
-      "totalTime": "PT5M",
-      "tool": [
-        {
-          "@type": "HowToTool",
-          "name": "kolm CLI"
-        }
-      ],
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install",
-          "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Compile",
-          "text": "kolm compile incident-summarizer.toml"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Run",
-          "text": "kolm run incident-summarizer.kolm"
-        }
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "kolm",
-          "item": "https://kolm.ai/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Cookbook",
-          "item": "https://kolm.ai/cookbook"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Incident summarizer recipe",
-          "item": "https://kolm.ai/cookbook/incident-summarizer"
-        }
-      ]
-    }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+ {
+ "@type": "HowTo",
+ "name": "Incident summarizer recipe",
+ "description": "Local incident-to-postmortem writer. Redacts secrets, signed, offline.",
+ "url": "https://kolm.ai/cookbook/incident-summarizer",
+ "totalTime": "PT5M",
+ "tool": [
+ {
+ "@type": "HowToTool",
+ "name": "kolm CLI"
+ }
+ ],
+ "step": [
+ {
+ "@type": "HowToStep",
+ "name": "Install",
+ "text": "npm i -g github:sneaky-hippo/kolmogorov-stack"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Compile",
+ "text": "kolm compile incident-summarizer.toml"
+ },
+ {
+ "@type": "HowToStep",
+ "name": "Run",
+ "text": "kolm run incident-summarizer.kolm"
+ }
+ ]
+ },
+ {
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+ {
+ "@type": "ListItem",
+ "position": 1,
+ "name": "kolm",
+ "item": "https://kolm.ai/"
+ },
+ {
+ "@type": "ListItem",
+ "position": 2,
+ "name": "Cookbook",
+ "item": "https://kolm.ai/cookbook"
+ },
+ {
+ "@type": "ListItem",
+ "position": 3,
+ "name": "Incident summarizer recipe",
+ "item": "https://kolm.ai/cookbook/incident-summarizer"
+ }
+ ]
+ }
+ ]
 }
 </script>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
 <header class="site">
-  <div class="wrap-wide row">
-    <div class="left">
-      <a href="/" class="brand"><span>kolm</span></a>
-      <nav>
-        <a href="/use-cases">Use cases</a>
-        <a href="/docs">Docs</a>
-        <a href="/research">Research</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-    </div>
-    <div class="right">
-      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <a href="/signin" class="ghost">sign in</a>
-      <a href="/signup" class="cta">Get API key &rarr;</a>
-    </div>
-  </div>
+ <div class="wrap-wide row">
+ <div class="left">
+ <a href="/" class="brand"><span>kolm</span></a>
+ <nav>
+ <a href="/use-cases">Use cases</a>
+ <a href="/docs">Docs</a>
+ <a href="/research">Research</a>
+ <a href="/enterprise">Enterprise</a>
+ <a href="/pricing">Pricing</a>
+ </nav>
+ </div>
+ <div class="right">
+ <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+ <a href="/signin" class="ghost">sign in</a>
+ <a href="/signup" class="cta">Get API key &rarr;</a>
+ </div>
+ </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <div class="crumbs"><a href="/docs">cookbook</a> &middot; ops &middot; incident-summarizer</div>
-    <span class="pill">Recipe &middot; ops</span>
-    <h1>Incidents in, <span class="tone">postmortems out.</span></h1>
-    <p class="lede">A local <code>.kolm</code> file that takes the raw Slack thread plus the relevant Datadog / Grafana / PagerDuty timeline and writes a 5-section postmortem draft: <em>summary, timeline, impact, root cause, follow-ups</em>. Trained on 80 of your past postmortems. Runs in your environment; no incident text ever leaves.</p>
+ <div class="wrap">
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; ops &middot; incident-summarizer</div>
+ <span class="pill">Recipe &middot; ops</span>
+ <h1>Incidents in, <span class="tone">postmortems out.</span></h1>
+ <p class="lede">A local <code>.kolm</code> file that takes the raw Slack thread plus the relevant Datadog / Grafana / PagerDuty timeline and writes a 5-section postmortem draft: <em>summary, timeline, impact, root cause, follow-ups</em>. Trained on 80 of your past postmortems. Runs in your environment; no incident text ever leaves.</p>
 
-    <div class="meta-row">
-      <div class="item"><span class="label">base model</span><span class="value">qwen2.5-7b-instruct</span></div>
-      <div class="item"><span class="label">gold pairs</span><span class="value">80 (40 train / 40 eval)</span></div>
-      <div class="item"><span class="label">k-score floor</span><span class="value">0.82</span></div>
-      <div class="item"><span class="label">artifact size</span><span class="value">2.6 GB</span></div>
-      <div class="item"><span class="label">compile time</span><span class="value">~28 min</span></div>
-      <div class="item"><span class="label">spec source</span><span class="value">JSON Schema + redactor</span></div>
-    </div>
-  </div>
+ <div class="meta-row">
+ <div class="item"><span class="label">base model</span><span class="value">qwen2.5-7b-instruct</span></div>
+ <div class="item"><span class="label">gold pairs</span><span class="value">80 (40 train / 40 eval)</span></div>
+ <div class="item"><span class="label">k-score floor</span><span class="value">0.82</span></div>
+ <div class="item"><span class="label">artifact size</span><span class="value">2.6 GB</span></div>
+ <div class="item"><span class="label">compile time</span><span class="value">~28 min</span></div>
+ <div class="item"><span class="label">spec source</span><span class="value">JSON Schema + redactor</span></div>
+ </div>
+ </div>
 </section>
 
 <article>
-  <div class="wrap">
+ <div class="wrap">
 
-    <div class="group">
-      <h2>What this recipe does</h2>
-      <p>SREs spend 20-40 minutes after every incident copying messages from #incident-* into a Notion template. The same five sections every time. The same redaction every time (paste tokens, customer ids, internal hostnames). This recipe automates the whole pass: paste the channel transcript and the metrics dump, get back a structured draft you can refine in 5 minutes.</p>
-      <p>The verifier enforces (a) all five sections are present, (b) the timeline rows are ISO-8601 timestamps in chronological order, (c) the redactor pass scrubs anything matching your <code>secrets.regex</code> file before the model ever sees it.</p>
-    </div>
+ <div class="group">
+ <h2>What this recipe does</h2>
+ <p>SREs spend 20-40 minutes after every incident copying messages from #incident-* into a Notion template. The same five sections every time. The same redaction every time (paste tokens, customer ids, internal hostnames). This recipe automates the whole pass: paste the channel transcript and the metrics dump, get back a structured draft you can refine in 5 minutes.</p>
+ <p>The verifier enforces (a) all five sections are present, (b) the timeline rows are ISO-8601 timestamps in chronological order, (c) the redactor pass scrubs anything matching your <code>secrets.regex</code> file before the model ever sees it.</p>
+ </div>
 
-    <div class="group">
-      <h2>The spec</h2>
-      <pre class="code">{
-  <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
-  <span class="k">"schema"</span>: {
-    <span class="k">"required"</span>: [<span class="k">"summary"</span>, <span class="k">"timeline"</span>, <span class="k">"impact"</span>, <span class="k">"root_cause"</span>, <span class="k">"follow_ups"</span>],
-    <span class="k">"properties"</span>: {
-      <span class="k">"summary"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 280 },
-      <span class="k">"timeline"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {
-        <span class="k">"required"</span>: [<span class="k">"ts"</span>, <span class="k">"event"</span>],
-        <span class="k">"properties"</span>: {
-          <span class="k">"ts"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"format"</span>: <span class="k">"date-time"</span> },
-          <span class="k">"event"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> }
-        }
-      } },
-      <span class="k">"impact"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
-      <span class="k">"root_cause"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
-      <span class="k">"follow_ups"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> } }
-    }
-  },
-  <span class="k">"verifier"</span>: {
-    <span class="k">"redact_before_train"</span>: <span class="ok">true</span>,
-    <span class="k">"redact_pattern_file"</span>: <span class="k">"secrets.regex"</span>,
-    <span class="k">"timeline_chronological"</span>: <span class="ok">true</span>,
-    <span class="k">"min_follow_ups"</span>: 1
-  }
+ <div class="group">
+ <h2>The spec</h2>
+ <pre class="code">{
+ <span class="k">"output_kind"</span>: <span class="k">"json"</span>,
+ <span class="k">"schema"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"summary"</span>, <span class="k">"timeline"</span>, <span class="k">"impact"</span>, <span class="k">"root_cause"</span>, <span class="k">"follow_ups"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"summary"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"maxLength"</span>: 280 },
+ <span class="k">"timeline"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: {
+ <span class="k">"required"</span>: [<span class="k">"ts"</span>, <span class="k">"event"</span>],
+ <span class="k">"properties"</span>: {
+ <span class="k">"ts"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span>, <span class="k">"format"</span>: <span class="k">"date-time"</span> },
+ <span class="k">"event"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> }
+ }
+ } },
+ <span class="k">"impact"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+ <span class="k">"root_cause"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> },
+ <span class="k">"follow_ups"</span>: { <span class="k">"type"</span>: <span class="k">"array"</span>, <span class="k">"items"</span>: { <span class="k">"type"</span>: <span class="k">"string"</span> } }
+ }
+ },
+ <span class="k">"verifier"</span>: {
+ <span class="k">"redact_before_train"</span>: <span class="ok">true</span>,
+ <span class="k">"redact_pattern_file"</span>: <span class="k">"secrets.regex"</span>,
+ <span class="k">"timeline_chronological"</span>: <span class="ok">true</span>,
+ <span class="k">"min_follow_ups"</span>: 1
+ }
 }</pre>
-      <p>The redactor runs <em>at compile time</em> against every gold pair and every candidate output, so the model never learns to leak. <code>secrets.regex</code> is a one-line-per-pattern file; ours hits 14 patterns (Stripe keys, JWT shapes, internal hostname suffixes, raw IPv4, etc.).</p>
-    </div>
+ <p>The redactor runs <em>at compile time</em> against every gold pair and every candidate output, so the model never learns to leak. <code>secrets.regex</code> is a one-line-per-pattern file; ours hits 14 patterns (Stripe keys, JWT shapes, internal hostname suffixes, raw IPv4, etc.).</p>
+ </div>
 
-    <div class="group">
-      <h2>Gold pairs (1 of 80 shown)</h2>
+ <div class="group">
+ <h2>Gold pairs (1 of 80 shown)</h2>
 
-      <div class="pair">
-        <div class="pair-h">input - slack transcript + datadog timeline</div>
-        <pre class="code">[14:02] @oncall: paging · checkout p95 latency 8.2s, normal 240ms
+ <div class="pair">
+ <div class="pair-h">input - slack transcript + datadog timeline</div>
+ <pre class="code">[14:02] @oncall: paging · checkout p95 latency 8.2s, normal 240ms
 [14:03] @oncall: alert id PD-AC8FR2, datadog board attached
 [14:05] @sara: looking · db pool saturated, 200/200 in use
 [14:06] @luis: just deployed v3.41.0 at 13:55, rolling back now
@@ -179,135 +180,135 @@
 
 datadog: db.connections.active 14:00 →200 sustained 14:01-14:09 →drop 14:09
 deploys: v3.41.0 deployed-prod 13:55:18Z, rolled-back 14:06:47Z</pre>
-        <div class="pair-h">output</div>
-        <pre class="code">{
-  <span class="k">"summary"</span>: <span class="k">"v3.41.0 deploy held db connections open without releasing them, saturating the pool within 6 minutes and pushing checkout p95 from 240ms to 8.2s. Rollback restored baseline at 14:09."</span>,
-  <span class="k">"timeline"</span>: [
-    {<span class="k">"ts"</span>: <span class="k">"2026-05-09T13:55:18Z"</span>, <span class="k">"event"</span>: <span class="k">"v3.41.0 deployed"</span>},
-    {<span class="k">"ts"</span>: <span class="k">"2026-05-09T14:00:00Z"</span>, <span class="k">"event"</span>: <span class="k">"db.connections.active reaches pool ceiling (200)"</span>},
-    {<span class="k">"ts"</span>: <span class="k">"2026-05-09T14:02:00Z"</span>, <span class="k">"event"</span>: <span class="k">"PagerDuty fires; on-call paged"</span>},
-    {<span class="k">"ts"</span>: <span class="k">"2026-05-09T14:06:47Z"</span>, <span class="k">"event"</span>: <span class="k">"v3.41.0 rolled back"</span>},
-    {<span class="k">"ts"</span>: <span class="k">"2026-05-09T14:09:00Z"</span>, <span class="k">"event"</span>: <span class="k">"connections drain; latency recovering"</span>},
-    {<span class="k">"ts"</span>: <span class="k">"2026-05-09T14:14:00Z"</span>, <span class="k">"event"</span>: <span class="k">"p95 returns to 280ms baseline"</span>}
-  ],
-  <span class="k">"impact"</span>: <span class="k">"~12 min of degraded checkout for all customers; estimated 4.1k abandoned carts based on baseline conversion."</span>,
-  <span class="k">"root_cause"</span>: <span class="k">"v3.41.0 introduced a code path that opened a per-request db connection but missed the close on the success branch. Connection pool saturated 6 min after deploy."</span>,
-  <span class="k">"follow_ups"</span>: [
-    <span class="k">"Add connection-leak test to checkout integration suite"</span>,
-    <span class="k">"Wire pool-utilization alert at 80% (currently fires at 100%)"</span>,
-    <span class="k">"Confirm rollback budget documented for deploys after 13:00 PT"</span>
-  ]
+ <div class="pair-h">output</div>
+ <pre class="code">{
+ <span class="k">"summary"</span>: <span class="k">"v3.41.0 deploy held db connections open without releasing them, saturating the pool within 6 minutes and pushing checkout p95 from 240ms to 8.2s. Rollback restored baseline at 14:09."</span>,
+ <span class="k">"timeline"</span>: [
+ {<span class="k">"ts"</span>: <span class="k">"2026-05-09T13:55:18Z"</span>, <span class="k">"event"</span>: <span class="k">"v3.41.0 deployed"</span>},
+ {<span class="k">"ts"</span>: <span class="k">"2026-05-09T14:00:00Z"</span>, <span class="k">"event"</span>: <span class="k">"db.connections.active reaches pool ceiling (200)"</span>},
+ {<span class="k">"ts"</span>: <span class="k">"2026-05-09T14:02:00Z"</span>, <span class="k">"event"</span>: <span class="k">"PagerDuty fires; on-call paged"</span>},
+ {<span class="k">"ts"</span>: <span class="k">"2026-05-09T14:06:47Z"</span>, <span class="k">"event"</span>: <span class="k">"v3.41.0 rolled back"</span>},
+ {<span class="k">"ts"</span>: <span class="k">"2026-05-09T14:09:00Z"</span>, <span class="k">"event"</span>: <span class="k">"connections drain; latency recovering"</span>},
+ {<span class="k">"ts"</span>: <span class="k">"2026-05-09T14:14:00Z"</span>, <span class="k">"event"</span>: <span class="k">"p95 returns to 280ms baseline"</span>}
+ ],
+ <span class="k">"impact"</span>: <span class="k">"~12 min of degraded checkout for all customers; estimated 4.1k abandoned carts based on baseline conversion."</span>,
+ <span class="k">"root_cause"</span>: <span class="k">"v3.41.0 introduced a code path that opened a per-request db connection but missed the close on the success branch. Connection pool saturated 6 min after deploy."</span>,
+ <span class="k">"follow_ups"</span>: [
+ <span class="k">"Add connection-leak test to checkout integration suite"</span>,
+ <span class="k">"Wire pool-utilization alert at 80% (currently fires at 100%)"</span>,
+ <span class="k">"Confirm rollback budget documented for deploys after 13:00 PT"</span>
+ ]
 }</pre>
-      </div>
-    </div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Compile</h2>
-      <pre class="code">kolm compile <span class="k">"summarize incident channel into 5-section postmortem draft"</span> \
-  --base qwen2.5-7b-instruct \
-  --pairs pairs.jsonl \
-  --redactor secrets.regex \
-  --verifier schema:postmortem.json \
-  --k-floor 0.82 \
-  --output incident-summarizer.kolm
+ <div class="group">
+ <h2>Compile</h2>
+ <pre class="code">kolm compile <span class="k">"summarize incident channel into 5-section postmortem draft"</span> \
+ --base qwen2.5-7b-instruct \
+ --pairs pairs.jsonl \
+ --redactor secrets.regex \
+ --verifier schema:postmortem.json \
+ --k-floor 0.82 \
+ --output incident-summarizer.kolm
 
 <span class="ok">ok</span> wrote <span class="k">incident-summarizer.kolm</span>
-   k_score=0.86  signature=hmac-sha256</pre>
-    </div>
+ k_score=0.86 signature=ed25519</pre>
+ </div>
 
-    <div class="group">
-      <h2>K-score gate</h2>
-      <div class="k-bar">
-        <span class="k-label">K-score</span>
-        <span class="k-value">0.86</span>
-        <span class="k-detail">held-out 40 pairs &middot; schema-pass 100% &middot; chronological 98% &middot; redactor catches 100% &middot; SRE-rated useful 88%</span>
-      </div>
-      <p>"SRE-rated useful" was a manual pass: an oncall engineer rated each output 1-5; the model needs a mean of 3.5 or higher across the held-out set. We landed at 4.1.</p>
-    </div>
+ <div class="group">
+ <h2>K-score gate</h2>
+ <div class="k-bar">
+ <span class="k-label">K-score</span>
+ <span class="k-value">0.86</span>
+ <span class="k-detail">held-out 40 pairs &middot; schema-pass 100% &middot; chronological 98% &middot; redactor catches 100% &middot; SRE-rated useful 88%</span>
+ </div>
+ <p>"SRE-rated useful" was a manual pass: an oncall engineer rated each output 1-5; the model needs a mean of 3.5 or higher across the held-out set. We landed at 4.1.</p>
+ </div>
 
-    <div class="group">
-      <h2>Run-time profile</h2>
-      <div class="lat-grid">
-        <div class="cell"><div class="h">M2 MacBook</div><div class="v">2.4<span class="u">s</span></div></div>
-        <div class="cell"><div class="h">RTX 5090</div><div class="v">540<span class="u">ms</span></div></div>
-        <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">6.1<span class="u">s</span></div></div>
-        <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">7.8<span class="u">s</span></div></div>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Run-time profile</h2>
+ <div class="lat-grid">
+ <div class="cell"><div class="h">M2 MacBook</div><div class="v">2.4<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">RTX 5090</div><div class="v">540<span class="u">ms</span></div></div>
+ <div class="cell"><div class="h">iPhone 15 Pro</div><div class="v">6.1<span class="u">s</span></div></div>
+ <div class="cell"><div class="h">CPU x86 (server)</div><div class="v">7.8<span class="u">s</span></div></div>
+ </div>
+ </div>
 
-    <div class="group">
-      <h2>Deploy</h2>
-      <pre class="code"><span class="c"># slack slash command · runs inside the security boundary you control:</span>
+ <div class="group">
+ <h2>Deploy</h2>
+ <pre class="code"><span class="c"># slack slash command · runs inside the security boundary you control:</span>
 /postmortem #incident-2026-05-09-checkout
 
 <span class="c"># or pipe straight from the cli:</span>
 slack export #incident-2026-05-09-checkout \
-  | kolm run incident-summarizer.kolm --input-stdin \
-  &gt; postmortem-draft.json</pre>
-    </div>
+ | kolm run incident-summarizer.kolm --input-stdin \
+ &gt; postmortem-draft.json</pre>
+ </div>
 
-    <div class="group">
-      <h2>Related recipes</h2>
-      <div class="related">
-        <a href="/cookbook/runbook-step"><div class="h">Runbook step</div><div class="d">Suggest the next runbook step from a paging context.</div></a>
-        <a href="/cookbook/log-grep"><div class="h">Log grep</div><div class="d">Natural-language to log query, structured output.</div></a>
-        <a href="/cookbook/on-call-page-classifier"><div class="h">Page classifier</div><div class="d">Triage paging signal vs noise before it wakes someone.</div></a>
-      </div>
-    </div>
+ <div class="group">
+ <h2>Related recipes</h2>
+ <div class="related">
+ <a href="/cookbook/runbook-step"><div class="h">Runbook step</div><div class="d">Suggest the next runbook step from a paging context.</div></a>
+ <a href="/cookbook/log-grep"><div class="h">Log grep</div><div class="d">Natural-language to log query, structured output.</div></a>
+ <a href="/cookbook/on-call-page-classifier"><div class="h">Page classifier</div><div class="d">Triage paging signal vs noise before it wakes someone.</div></a>
+ </div>
+ </div>
 
-  </div>
+ </div>
 </article>
 
 <footer class="site">
-  <div class="wrap" style="max-width: 1180px;">
-    <div class="footer-grid">
-      <div>
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/spec/rs-1">RS-1 spec</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/cli">CLI</a>
-      </div>
-      <div>
-        <h4>Deploy</h4>
-        <a href="/compute">Backends</a>
-        <a href="/airgap">Air-gap</a>
-        <a href="/integrations/cloudflare">Cloudflare</a>
-        <a href="/integrations/github-actions">GitHub Actions</a>
-        <a href="/integrations/gitlab-ci">GitLab CI</a>
-      </div>
-      <div>
-        <h4>Proof</h4>
-        <a href="/verify-prod">Verify a .kolm</a>
-        <a href="/badge">Embed badge</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/registry">Registry</a>
-        <a href="/case-studies">Case studies</a>
-      </div>
-      <div>
-        <h4>Industries</h4>
-        <a href="/healthcare">Healthcare</a>
-        <a href="/finance">Finance</a>
-        <a href="/legal">Legal</a>
-        <a href="/compliance">Compliance</a>
-        <a href="/insure">Insurance</a>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/security">Security</a>
-        <a href="/community">Community</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="footer-tag">
-      <span>kolm.ai - Made with .kolm - Apache-2.0</span>
-      <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
-    </div>
-  </div>
+ <div class="wrap" style="max-width: 1180px;">
+ <div class="footer-grid">
+ <div>
+ <h4>Build</h4>
+ <a href="/quickstart">Quickstart</a>
+ <a href="/docs">Docs</a>
+ <a href="/spec/rs-1">RS-1 spec</a>
+ <a href="/openapi.json">OpenAPI</a>
+ <a href="/cli">CLI</a>
+ </div>
+ <div>
+ <h4>Deploy</h4>
+ <a href="/compute">Backends</a>
+ <a href="/airgap">Air-gap</a>
+ <a href="/integrations/cloudflare">Cloudflare</a>
+ <a href="/integrations/github-actions">GitHub Actions</a>
+ <a href="/integrations/gitlab-ci">GitLab CI</a>
+ </div>
+ <div>
+ <h4>Proof</h4>
+ <a href="/verify-prod">Verify a .kolm</a>
+ <a href="/badge">Embed badge</a>
+ <a href="/benchmarks">Benchmarks</a>
+ <a href="/compare">Compare</a>
+ <a href="/registry">Registry</a>
+ <a href="/case-studies">Case studies</a>
+ </div>
+ <div>
+ <h4>Industries</h4>
+ <a href="/healthcare">Healthcare</a>
+ <a href="/finance">Finance</a>
+ <a href="/legal">Legal</a>
+ <a href="/compliance">Compliance</a>
+ <a href="/insure">Insurance</a>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <a href="/pricing">Pricing</a>
+ <a href="/changelog">Changelog</a>
+ <a href="/security">Security</a>
+ <a href="/community">Community</a>
+ <a href="/contact">Contact</a>
+ </div>
+ </div>
+ <div class="footer-tag">
+ <span>kolm.ai - Made with .kolm - Apache-2.0</span>
+ <span>Receipts signed in CI. Verify any artifact at /verify-prod.</span>
+ </div>
+ </div>
 </footer>
 
 <script src="/nav.js" defer></script>

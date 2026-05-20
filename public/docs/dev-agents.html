@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Dev-agent proxy install &middot; kolm.ai</title>
-<meta name="description" content="One command sets every dev agent (Codex, Claude Code, Cursor, Windsurf, Aider, Gemini CLI) to route through the local kolm proxy. Captures every prompt, tracks acceptance rate per agent, recommends the cheapest model that still passes.">
+<title>Dev-agent proxy install · kolm.ai</title>
+<meta name="description" content="One command sets every dev agent (Codex, Claude Code, Cursor, Windsurf, Aider, Gemini CLI) to route through the local kolm proxy. Captures every prompt,...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Dev-agent proxy install &middot; kolm.ai">
-<meta property="og:description" content="One command routes Codex, Claude Code, Cursor, Windsurf, Aider, and Gemini CLI through the kolm proxy so you can see what every agent is doing.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Dev-agent proxy install · kolm.ai">
+<meta property="og:description" content="One command sets every dev agent (Codex, Claude Code, Cursor, Windsurf, Aider, Gemini CLI) to route through the local kolm proxy. Captures every prompt,...">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/dev-agents">
-<meta property="og:image" content="https://kolm.ai/og/docs-dev-agents.svg">
+<meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Dev-agent proxy install &middot; kolm.ai">
-<meta name="twitter:description" content="One command routes Codex, Claude Code, Cursor, Windsurf, Aider, and Gemini CLI through the kolm proxy.">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-dev-agents.svg">
+<meta name="twitter:title" content="Dev-agent proxy install · kolm.ai">
+<meta name="twitter:description" content="One command sets every dev agent (Codex, Claude Code, Cursor, Windsurf, Aider, Gemini CLI) to route through the local kolm proxy. Captures every prompt,...">
+<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/docs/dev-agents">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Dev-agent proxy install","description":"Install the kolm proxy for every dev agent (Codex, Claude Code, Cursor, Windsurf, Aider, Gemini CLI) with a single command. Track acceptance rate per agent, find the cheapest model that still passes.","url":"https://kolm.ai/docs/dev-agents","datePublished":"2026-05-18","dateModified":"2026-05-18","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
@@ -69,12 +69,13 @@ td code{font-size:12px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
+ <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
-  <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
+ <a class="logo" href="/">kolm.ai</a>
+ <nav aria-label="Primary"><a href="/product">Product</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav>
 </div></header>
 
 <main id="main" tabindex="-1"><div class="wrap">
@@ -88,67 +89,67 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="supported">Supported agents</h2>
 <div class="agent-grid">
-  <div class="agent-card"><b>Codex CLI</b><span>openai</span><code>kolm install codex</code></div>
-  <div class="agent-card"><b>Claude Code</b><span>anthropic</span><code>kolm install claude-code</code></div>
-  <div class="agent-card"><b>Cursor</b><span>openai-compatible</span><code>kolm install cursor</code></div>
-  <div class="agent-card"><b>Windsurf</b><span>openai-compatible</span><code>kolm install windsurf</code></div>
-  <div class="agent-card"><b>Aider</b><span>openai / anthropic</span><code>kolm install aider</code></div>
-  <div class="agent-card"><b>Gemini CLI</b><span>google</span><code>kolm install gemini-cli</code></div>
+ <div class="agent-card"><b>Codex CLI</b><span>openai</span><code>kolm install codex</code></div>
+ <div class="agent-card"><b>Claude Code</b><span>anthropic</span><code>kolm install claude-code</code></div>
+ <div class="agent-card"><b>Cursor</b><span>openai-compatible</span><code>kolm install cursor</code></div>
+ <div class="agent-card"><b>Windsurf</b><span>openai-compatible</span><code>kolm install windsurf</code></div>
+ <div class="agent-card"><b>Aider</b><span>openai / anthropic</span><code>kolm install aider</code></div>
+ <div class="agent-card"><b>Gemini CLI</b><span>google</span><code>kolm install gemini-cli</code></div>
 </div>
 <p>Every install writes a timestamped backup of the original config (<code>.kolm-backup-&lt;ts&gt;</code>) and registers a marker so you can later run <code>kolm uninstall &lt;agent&gt;</code> and the proxy step disappears cleanly. <code>kolm install all</code> covers the lot in one shot.</p>
 
 <h2 id="quick">Five minutes</h2>
 
 <div class="step">
-  <span class="num">Step 1</span>
-  <h3>Start the proxy</h3>
-  <p>Boot the local daemon so the proxy is listening on <code>127.0.0.1:8787</code>. The first run picks a free port if 8787 is taken and prints what it actually used.</p>
+ <span class="num">Step 1</span>
+ <h3>Start the proxy</h3>
+ <p>Boot the local daemon so the proxy is listening on <code>127.0.0.1:8787</code>. The first run picks a free port if 8787 is taken and prints what it actually used.</p>
 <pre><code>kolm connect
 # kolm proxy listening on http://127.0.0.1:8787
 # state dir: ~/.kolm</code></pre>
 </div>
 
 <div class="step">
-  <span class="num">Step 2</span>
-  <h3>Install for every agent at once</h3>
+ <span class="num">Step 2</span>
+ <h3>Install for every agent at once</h3>
 <pre><code>kolm install all
-# patched codex      (~/.codex/config.toml)
-# patched claude     (~/.claude/settings.json)
-# patched aider      (~/.aider.conf.yml)
+# patched codex (~/.codex/config.toml)
+# patched claude (~/.claude/settings.json)
+# patched aider (~/.aider.conf.yml)
 # patched gemini-cli (~/.gemini/cli.json)
-# cursor             (manual: paste env vars into Settings &raquo; Advanced)
-# windsurf           (manual: paste env vars into Settings &raquo; Models)</code></pre>
-  <p>Two of the IDE agents (Cursor and Windsurf) don't expose a documented config file for the base URL, so we print the two env vars you paste in. The CLI also drops shell wrappers in <code>~/.kolm/bin/</code> as a fallback so you can always launch them through <code>kolm-cursor</code> / <code>kolm-windsurf</code> and skip the IDE settings step.</p>
+# cursor (manual: paste env vars into Settings &raquo; Advanced)
+# windsurf (manual: paste env vars into Settings &raquo; Models)</code></pre>
+ <p>Two of the IDE agents (Cursor and Windsurf) don't expose a documented config file for the base URL, so we print the two env vars you paste in. The CLI also drops shell wrappers in <code>~/.kolm/bin/</code> as a fallback so you can always launch them through <code>kolm-cursor</code> / <code>kolm-windsurf</code> and skip the IDE settings step.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 3</span>
-  <h3>Wrap an ad-hoc command</h3>
-  <p>For anything you forgot to install, or a tool that isn't on the supported list yet, <code>kolm wrap</code> exports the right env vars and execs the command. Same effect, no permanent file edit.</p>
+ <span class="num">Step 3</span>
+ <h3>Wrap an ad-hoc command</h3>
+ <p>For anything you forgot to install, or a tool that isn't on the supported list yet, <code>kolm wrap</code> exports the right env vars and execs the command. Same effect, no permanent file edit.</p>
 <pre><code>kolm wrap claude --print "explain this stack trace"
 kolm wrap aider --model gpt-4o-mini src/router.js</code></pre>
 </div>
 
 <div class="step">
-  <span class="num">Step 4</span>
-  <h3>Confirm the proxy sees traffic</h3>
+ <span class="num">Step 4</span>
+ <h3>Confirm the proxy sees traffic</h3>
 <pre><code>kolm tail captures --limit 5
-# 14:02:13  claude-3.5  anthropic   324 tok  1.2s  ok
-# 14:02:31  gpt-4o      openai      181 tok  0.6s  ok
+# 14:02:13 claude-3.5 anthropic 324 tok 1.2s ok
+# 14:02:31 gpt-4o openai 181 tok 0.6s ok
 # ...</code></pre>
-  <p>If you see your last 5 prompts there, the proxy is wired. If not, restart the agent and try again &mdash; most CLIs cache the old base URL until you re-source your shell.</p>
+ <p>If you see your last 5 prompts there, the proxy is wired. If not, restart the agent and try again &mdash; most CLIs cache the old base URL until you re-source your shell.</p>
 </div>
 
 <div class="step">
-  <span class="num">Step 5</span>
-  <h3>See which agent is winning</h3>
+ <span class="num">Step 5</span>
+ <h3>See which agent is winning</h3>
 <pre><code>kolm agents stats --window 7d
-# agent          requests  accept%  median_latency  total_cost
-# claude-code        421     82.7%      980 ms        $2.41
-# codex              198     71.2%      640 ms        $0.88
-# cursor             612     64.3%      710 ms        $4.10
-# aider              57      88.6%     1.4 s          $0.31</code></pre>
-  <p>Acceptance is inferred from the next event in the same session: if you didn't follow up with a correction inside 90 seconds, it counts as accepted. Confidence in the heuristic is exposed under <code>--json</code> for the dashboard.</p>
+# agent requests accept% median_latency total_cost
+# claude-code 421 82.7% 980 ms $2.41
+# codex 198 71.2% 640 ms $0.88
+# cursor 612 64.3% 710 ms $4.10
+# aider 57 88.6% 1.4 s $0.31</code></pre>
+ <p>Acceptance is inferred from the next event in the same session: if you didn't follow up with a correction inside 90 seconds, it counts as accepted. Confidence in the heuristic is exposed under <code>--json</code> for the dashboard.</p>
 </div>
 
 <h2 id="shell">Shell init alternative</h2>
@@ -175,21 +176,21 @@ kolm uninstall all
 
 <h2 id="see">Related</h2>
 <div class="related">
-  <a href="/account/agent-telemetry"><b>/account/agent-telemetry</b><span>Live dashboard for per-agent acceptance and the recommended-model Pareto front.</span></a>
-  <a href="/docs/quickstart"><b>/docs/quickstart</b><span>Five minute kolm.ai onboarding from npm install to first artifact.</span></a>
-  <a href="/docs/privacy"><b>/docs/privacy</b><span>How the 17-class membrane redacts before anything is logged or synced.</span></a>
+ <a href="/account/agent-telemetry"><b>/account/agent-telemetry</b><span>Live dashboard for per-agent acceptance and the recommended-model Pareto front.</span></a>
+ <a href="/docs/quickstart"><b>/docs/quickstart</b><span>Five minute kolm.ai onboarding from npm install to first artifact.</span></a>
+ <a href="/docs/privacy"><b>/docs/privacy</b><span>How the 17-class membrane redacts before anything is logged or synced.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 kolm.ai</span>
-  &middot;
-  <a href="/security">Security</a>
-  &middot;
-  <a href="/pricing">Pricing</a>
-  &middot;
-  <a href="/docs">Docs</a>
+ <span>&copy; 2026 kolm.ai</span>
+ &middot;
+ <a href="/security">Security</a>
+ &middot;
+ <a href="/pricing">Pricing</a>
+ &middot;
+ <a href="/docs">Docs</a>
 </div></footer>
 
 </body>

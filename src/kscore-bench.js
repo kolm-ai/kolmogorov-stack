@@ -3,8 +3,8 @@
 // W275 — K-score deep work. The public bench is the answer to:
 //   "Is K-score a real metric or an internal vanity number?"
 // Anyone with kolm installed can run `kolm bench`, get axis-level scores
-// against a frozen 30-case suite, and post the resulting receipt to
-// /kscore-leaderboard. The suite is deterministic + reproducible: same
+// against a frozen 30-case suite, and send the resulting signed receipt for
+// manual leaderboard review. The suite is deterministic + reproducible: same
 // inputs, same scorer, same outputs forever. Version-pinned via
 // BENCH_SPEC_ID so an axis tweak rolls into bench v2 without breaking
 // historical receipts.
@@ -21,9 +21,8 @@
 //   teacher_holdout_accuracy?, joules_per_call?, eval_set_drift?}`.
 // - The summarizer computes per-class and overall K-score using
 //   the same V1/V2 path the production gate uses.
-// - Leaderboard rows are read-only here; submissions are signed
-//   client-side (see cli/kolm.js cmdBench --submit) and processed by
-//   src/router.js POST /v1/bench/submit.
+// - Leaderboard rows are read-only here. Public automated submission is not
+//   shipped; reviewers ingest signed bench-receipt.json files manually.
 
 import { computeKScoreV2 } from './kscore.js';
 
@@ -202,10 +201,9 @@ export function referenceScorer(c) {
 }
 
 // Public leaderboard view. The JSON file lives at public/kscore-leaderboard.json
-// and is the canonical read-only artifact. Submissions go through
-// /v1/bench/submit and are appended server-side after signature check.
-// Loader is fs-based so the CLI can read without HTTP; the page reads via
-// fetch.
+// and is the canonical read-only artifact. Submissions are signed receipt
+// files reviewed manually until a public submission API ships. Loader is
+// fs-based so the CLI can read without HTTP; the page reads via fetch.
 export async function loadLeaderboard(filePath) {
   const fs = await import('node:fs');
   const path = await import('node:path');
