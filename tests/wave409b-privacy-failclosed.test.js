@@ -312,6 +312,45 @@ test('W409b #3 — malformed SSN surfaces as noncompliant_identifiers tag on the
 // =============================================================================
 // Test 4 — server-direct proxy (router.js) defaults to 'redact', NOT 'allow'.
 // =============================================================================
+test('W409b #3b - malformed payment card surfaces as noncompliant_identifiers tag on the row + header', async () => {
+  const HOME = mkHome();
+  const prev = snapEnv();
+  setIsolatedHome(HOME);
+  delete process.env.KOLM_PRIVACY_POLICY;
+  process.env.OPENAI_API_KEY = 'sk-fake-for-test';
+  try {
+    const up = await spinMockUpstream();
+    const t = await startTestDaemon({ KOLM_UPSTREAM_OPENAI_BASE: up.base });
+    try {
+      const prompt = 'bad payment card 4111 1111 1111 1112';
+      const r = await postJson(t.base + '/v1/chat/completions', {
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+      });
+      assert.equal(r.status, 200);
+      const hdr = String(r.headers['x-kolm-noncompliant-identifiers'] || '');
+      assert.ok(
+        hdr.includes('malformed_payment_card'),
+        'x-kolm-noncompliant-identifiers must include malformed_payment_card; got: ' + hdr,
+      );
+      const sens = String(r.headers['x-kolm-sensitive-classes'] || '');
+      assert.ok(sens.includes('malformed_payment_card'), 'sensitive_classes must include malformed_payment_card; got: ' + sens);
+      const evid = r.headers['x-kolm-event-id'];
+      const ev = await eventStore.getEvent(evid);
+      assert.ok(ev);
+      assert.ok(
+        Array.isArray(ev.noncompliant_identifiers) && ev.noncompliant_identifiers.includes('malformed_payment_card'),
+        'row.noncompliant_identifiers must include malformed_payment_card; got: ' + JSON.stringify(ev.noncompliant_identifiers),
+      );
+    } finally {
+      await new Promise((r) => t.server.close(() => r()));
+      await new Promise((r) => up.server.close(() => r()));
+    }
+  } finally {
+    restoreEnv(prev, HOME);
+  }
+});
+
 test('W409b #4 — router.js server-direct proxy defaults redaction_policy to "redact" not "allow"', async () => {
   // Read the source and assert that the hard-coded 'allow' is gone. This is a
   // static-source assertion because exercising the router connector path

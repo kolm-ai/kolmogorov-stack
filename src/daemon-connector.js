@@ -346,12 +346,10 @@ async function proxyOne({ provider, upstreamPath, req }) {
   const rawAllowed = isRawAllowed(req);
   const promptText = extractPromptText(body, provider);
   const scan = privacyScan(promptText);
-  // W409b — surface "noncompliant identifier detected" so the warning is not
-  // swallowed. malformed_ssn = regex matched 9 digits but the SSA format check
-  // failed (000-area, 666-area, 9xx-area, 00-group, 0000-serial). The class
-  // flows through as a normal sensitive_class AND lights up the dedicated tag
-  // so dashboards can call out broken-but-not-validated identifiers.
-  const noncompliantIds = Array.from(new Set((scan.classes || []).filter((c) => c === 'malformed_ssn')));
+  // W409b/W550 — surface "noncompliant identifier detected" so the warning is
+  // not swallowed. malformed_* classes flow through as normal sensitive_class
+  // values AND light up this dedicated tag for dashboards/auditors.
+  const noncompliantIds = Array.from(new Set((scan.classes || []).filter((c) => String(c).startsWith('malformed_'))));
   if (policy === 'block' && scan.sensitive && req.headers['x-kolm-privacy-override'] !== 'true') {
     return {
       status: 451,
@@ -441,7 +439,9 @@ async function proxyOne({ provider, upstreamPath, req }) {
   // OpenRouter helpful headers (referer + title) for ranking.
   if (provider === 'openrouter') {
     headers['http-referer'] = req.headers['http-referer'] || 'https://kolm.ai';
-    headers['x-title'] = req.headers['x-title'] || 'kolm.ai';
+    headers['x-title'] = req.headers['x-title'] || req.headers['x-openrouter-title'] || 'kolm.ai';
+    if (req.headers['x-openrouter-title']) headers['x-openrouter-title'] = req.headers['x-openrouter-title'];
+    if (req.headers['x-openrouter-categories']) headers['x-openrouter-categories'] = req.headers['x-openrouter-categories'];
   }
   let upstreamResp;
   if (fixtureMode && !upstreamKey) {
@@ -726,8 +726,24 @@ export function buildDaemonApp({ dataDir } = {}) {
   // points window.OPENAI_BASE_URL at the local daemon).
   app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key, X-Upstream-Api-Key, anthropic-version, x-kolm-privacy-override, x-kolm-raw');
-    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', [
+      'Content-Type',
+      'Authorization',
+      'X-API-Key',
+      'X-Upstream-API-Key',
+      'X-Anthropic-API-Key',
+      'Anthropic-Version',
+      'OpenAI-Beta',
+      'HTTP-Referer',
+      'X-Title',
+      'X-OpenRouter-Title',
+      'X-OpenRouter-Categories',
+      'X-Kolm-Namespace',
+      'X-Kolm-Privacy-Policy',
+      'X-Kolm-Raw',
+      'X-Kolm-Privacy-Override',
+    ].join(', '));
+    res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     if (req.method === 'OPTIONS') return res.status(204).end();
     next();
   });
@@ -763,6 +779,7 @@ export function buildDaemonApp({ dataDir } = {}) {
 
   // OpenRouter direct + capture alias for SDKs whose base URL is .../v1.
   app.post('/v1/capture/openrouter', (req, res) => handlePassthrough('openrouter', '/v1/chat/completions', req, res));
+  app.post('/v1/capture/openrouter/chat/completions', (req, res) => handlePassthrough('openrouter', '/v1/chat/completions', req, res));
   app.post('/v1/capture/openrouter/v1/chat/completions', (req, res) => handlePassthrough('openrouter', '/v1/chat/completions', req, res));
   app.post('/openrouter/v1/chat/completions', (req, res) => handlePassthrough('openrouter', '/v1/chat/completions', req, res));
 

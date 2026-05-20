@@ -9,12 +9,9 @@
 // `verified: false` is recorded so the UI cannot show a green badge for an
 // artifact whose bytes are gone.
 //
-// The catalog manifest's `signature` field is a deterministic sha256 of the
-// canonical JSON (sorted keys, signature/signed_at/signature_algo stripped
-// before hashing). This is an anchor, not an ed25519 signature; the
-// signature_algo string is "sha256-anchor" so a future wave can swap it for
-// real ed25519 without breaking callers. Verifiers should recompute the
-// canonical hash and compare.
+// The catalog manifest carries a deterministic sha256 anchor plus an Ed25519
+// sidecar signature. The sha256 anchor stays for older clients; Ed25519 is
+// the third-party-verifiable provenance layer.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,6 +19,11 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { productionReady, productionReadySync } from './production-ready.js';
+import {
+  buildSignatureBlock,
+  loadOrCreateDefaultSigner,
+  verifySignatureBlock,
+} from './ed25519.js';
 
 // adm-zip is CommonJS; pull it through createRequire so hydrate() can stay
 // synchronous (W342 callers — getCatalogManifest, listArtifacts, getArtifact —
@@ -726,10 +728,8 @@ const CATALOG_SPEC_VERSION = 'kolm-marketplace-1';
 const SIGNATURE_ALGO = 'sha256-anchor';
 
 // getCatalogManifest() — returns the full signed catalog. Signature is a
-// deterministic sha256 over the canonical JSON of the manifest body (with
-// signature/signed_at/signature_algo stripped). Future wave will swap this
-// for an ed25519 signature; the signature_algo field carries the swap
-// breadcrumb.
+// deterministic sha256 over the canonical JSON of the manifest body. The
+// Ed25519 sidecar signs the anchored envelope for public provenance.
 export function getCatalogManifest() {
   const artifacts = hydrateAll();
   const body = {
@@ -738,12 +738,28 @@ export function getCatalogManifest() {
     artifacts,
   };
   const signature = crypto.createHash('sha256').update(canonicalJson(body)).digest('hex');
-  return {
+  const anchored = {
     ...body,
     signed_at: new Date(0).toISOString(), // stable timestamp for deterministic hash; callers stamp real time on the wire.
     signature_algo: SIGNATURE_ALGO,
     signature,
   };
+  let signatureEd25519 = null;
+  try {
+    const signer = loadOrCreateDefaultSigner();
+    if (signer) {
+      signatureEd25519 = buildSignatureBlock({
+        privateKey: signer.privateKey,
+        publicKey: signer.publicKey,
+        key_fingerprint: signer.key_fingerprint,
+        payloadCanonical: canonicalJson(anchored),
+        signed_at: anchored.signed_at,
+      });
+    }
+  } catch {
+    signatureEd25519 = null;
+  }
+  return signatureEd25519 ? { ...anchored, signature_ed25519: signatureEd25519 } : anchored;
 }
 
 // Helper for the download endpoint — returns an absolute path to the
@@ -761,9 +777,23 @@ export function resolveArtifactPath(slug) {
 // mismatch.
 export function verifyCatalogManifest(manifest) {
   if (!manifest || typeof manifest !== 'object') return { ok: false, error: 'not an object' };
-  const { signature, signed_at: _sa, signature_algo: _sal, ...body } = manifest;
+  const { signature, signed_at, signature_algo, signature_ed25519: signatureEd25519, ...body } = manifest;
   const expected = crypto.createHash('sha256').update(canonicalJson(body)).digest('hex');
-  return { ok: expected === signature, expected, got: signature };
+  const anchorOk = expected === signature;
+  let ed25519 = null;
+  if (signatureEd25519) {
+    ed25519 = verifySignatureBlock(
+      signatureEd25519,
+      canonicalJson({ ...body, signed_at, signature_algo, signature })
+    );
+  }
+  return {
+    ok: anchorOk && (!signatureEd25519 || ed25519.ok === true),
+    expected,
+    got: signature,
+    anchor_ok: anchorOk,
+    ed25519,
+  };
 }
 
 export const SPEC = Object.freeze({

@@ -145,10 +145,26 @@ test('W457 #4 — capture status --json falls back to local count on cloud failu
       path.join(captureDir, 'default.jsonl'),
       '{"input":"hi","output":"hello"}\n{"input":"bye","output":"see you"}\n',
     );
+    // Also seed a partial canonical event-store row. The CLI must reconcile
+    // event-store + legacy jsonl by max(counts), not return the first non-zero
+    // event-store count and hide rows the user can see on disk.
+    const eventsDir = path.join(tmp, '.kolm', 'events');
+    fs.mkdirSync(eventsDir, { recursive: true });
+    fs.writeFileSync(path.join(eventsDir, 'events.jsonl'), JSON.stringify({
+      event_id: 'evt_w457_partial_1',
+      tenant_id: 'local',
+      namespace: 'default',
+      created_at: new Date().toISOString(),
+      schema_version: 1,
+    }) + '\n');
     const r = await runCli(['capture', 'status', '--json'], {
       base: 'http://127.0.0.1:1',         // cloud unreachable
       apiKey: 'ks_test_w457_4_zzzz',
       home: tmp,
+      env: {
+        KOLM_DATA_DIR: path.join(tmp, '.kolm'),
+        KOLM_EVENT_STORE_DRIVER: 'jsonl',
+      },
     });
     assert.equal(r.code, 0,
       'capture status must exit 0 with offline fallback (was: AggregateError -> non-zero). stderr: ' + r.stderr);
@@ -161,6 +177,62 @@ test('W457 #4 — capture status --json falls back to local count on cloud failu
     assert.equal(env.count, 2, 'count must reflect the local jsonl rows (got: ' + env.count + ')');
     assert.equal(env.threshold, 1000, 'threshold must default to 1000 in the fallback');
     assert.ok(env.hint, 'hint must point users at starting the capture daemon');
+  } finally {
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
+test('W547 #1 - capture setup --json emits a parseable, redacted setup envelope', async () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w547-capture-json-'));
+  const apiKey = 'ks_test_w547_capture_json_secret_1234567890';
+  try {
+    const r = await runCli(
+      ['capture', '--provider', 'openai', '--as', 'ticket-router', '--namespace', 'tickets', '--json'],
+      {
+        base: 'https://kolm.ai',
+        apiKey,
+        home: tmp,
+      },
+    );
+    assert.equal(r.code, 0, 'capture setup --json must exit 0. stderr: ' + r.stderr);
+    assert.equal(r.stderr.trim(), '', 'capture setup --json should not write stderr on success');
+    const env = JSON.parse(r.stdout.trim());
+    assert.equal(env.ok, true);
+    assert.equal(env.provider, 'openai');
+    assert.equal(env.task, 'ticket-router');
+    assert.equal(env.namespace, 'tickets');
+    assert.equal(env.base_url, 'https://kolm.ai/v1/capture/openai');
+    assert.equal(env.upstream_key_env, 'OPENAI_API_KEY');
+    assert.equal(env.client_env.OPENAI_BASE_URL, env.base_url);
+    assert.equal(env.required_headers['x-kolm-namespace'], 'tickets');
+    assert.ok(env.key_fingerprint.startsWith('ks_test_w5'), 'must expose only the standard key fingerprint');
+    assert.ok(!r.stdout.includes(apiKey), 'JSON stdout must not leak the full API key');
+    assert.ok(fs.existsSync(env.config_path), 'capture config file must be written');
+    const diskCfg = JSON.parse(fs.readFileSync(env.config_path, 'utf8'));
+    assert.equal(diskCfg.kolm_api_key, apiKey, 'private config file still needs the real key for local setup');
+  } finally {
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
+test('W547 #3 - capture setup supports OpenRouter as a first-class provider', async () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w547-openrouter-json-'));
+  const apiKey = 'ks_test_w547_openrouter_capture_secret_1234567890';
+  try {
+    const r = await runCli(
+      ['capture', '--provider', 'openrouter', '--as', 'router-lake', '--namespace', 'router', '--json'],
+      { base: 'https://kolm.ai', apiKey, home: tmp },
+    );
+    assert.equal(r.code, 0, 'openrouter capture setup --json must exit 0. stderr: ' + r.stderr);
+    const env = JSON.parse(r.stdout.trim());
+    assert.equal(env.ok, true);
+    assert.equal(env.provider, 'openrouter');
+    assert.equal(env.base_url, 'https://kolm.ai/v1/capture/openrouter/v1');
+    assert.equal(env.upstream_key_env, 'OPENROUTER_API_KEY');
+    assert.equal(env.client_env.OPENAI_BASE_URL, env.base_url);
+    assert.equal(env.client_env.OPENROUTER_BASE_URL, env.base_url);
+    assert.equal(env.required_headers['x-upstream-api-key'], 'sk-or-...');
+    assert.ok(!r.stdout.includes(apiKey), 'JSON stdout must not leak the full API key');
   } finally {
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
   }

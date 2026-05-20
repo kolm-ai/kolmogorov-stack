@@ -192,6 +192,7 @@ import {
   runSim as simRunSim,
   listSims as simListSims,
   _readSimRaw as simReadRaw,
+  generateDatasetFromSim as simGenerateDatasetFromSim,
 } from './simulation.js';
 import { bakeoff as bakeoffRun, DEFAULT_CONTESTANTS as BAKEOFF_DEFAULTS } from './bakeoff.js';
 import { plan as trainingPlanFn } from './training-planner.js';
@@ -673,8 +674,24 @@ export function buildRouter() {
   // CORS — allow SDKs from any origin to hit the API
   r.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key');
-    res.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+    res.set('Access-Control-Allow-Headers', [
+      'Content-Type',
+      'Authorization',
+      'X-API-Key',
+      'X-Upstream-API-Key',
+      'X-Anthropic-API-Key',
+      'Anthropic-Version',
+      'OpenAI-Beta',
+      'HTTP-Referer',
+      'X-Title',
+      'X-OpenRouter-Title',
+      'X-OpenRouter-Categories',
+      'X-Kolm-Namespace',
+      'X-Kolm-Privacy-Policy',
+      'X-Kolm-Raw',
+      'X-Kolm-Privacy-Override',
+    ].join(', '));
+    res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.set('Access-Control-Max-Age', '86400');
     if (req.method === 'OPTIONS') return res.status(204).end();
     next();
@@ -1921,28 +1938,65 @@ export function buildRouter() {
     const cfg = llmDescribeConfig();
     res.json({
       available: !!cfg.configured,
+      local_fallback_available: true,
       provider: cfg.provider,
       model: cfg.model,
       base_url: cfg.base_url || null,
       has_key: !!cfg.has_key,
       hint: cfg.configured
         ? null
-        : 'set KOLM_LLM_PROVIDER=openai|anthropic|ollama and KOLM_LLM_KEY (ollama also accepts no key against a local base_url)',
+        : 'LLM fanout is not configured; POST /v1/seeds/from-nl will use deterministic local seed expansion. Set KOLM_LLM_PROVIDER=openai|anthropic|ollama and KOLM_LLM_KEY for model-generated variants.',
     });
   });
 
   // W347 — POST /v1/seeds/from-nl. Fan out a single seed (or short prompt)
-  // into N variations via the configured LLM. Returns 501 with a documented
-  // error code when no backend is configured, so the UI can degrade
-  // gracefully and the operator sees the exact env var to set.
-  r.post('/v1/seeds/from-nl', builderLimiter, async (req, res) => {
-    if (!llmIsConfigured()) {
-      return res.status(501).json({
-        error: 'nl_seeds_requires_backend',
-        hint: 'set KOLM_LLM_PROVIDER=openai|anthropic|ollama and KOLM_LLM_KEY',
-        provider: llmDescribeConfig().provider,
+  // into N variations via the configured LLM. When no LLM backend is
+  // configured, return deterministic local seed variants instead of failing.
+  function localSeedVariations(seed, count, hint = '') {
+    const input = typeof seed.input === 'string' ? seed.input : JSON.stringify(seed.input);
+    const output = typeof seed.output === 'string' ? seed.output : JSON.stringify(seed.output);
+    const trimmedHint = String(hint || '').replace(/\s+/g, ' ').trim();
+    const prefixes = [
+      '',
+      'Please ',
+      'Can you ',
+      'For this record, ',
+      'Given the following input, ',
+      'Normalize this: ',
+      'Classify this: ',
+      'Extract from this: ',
+      'Handle this case: ',
+      'In production traffic, ',
+    ];
+    const suffixes = [
+      '',
+      '.',
+      ' now.',
+      ' and return the same output shape.',
+      ' using the configured schema.',
+      trimmedHint ? ` (${trimmedHint.slice(0, 80)})` : '',
+    ];
+    const rows = [];
+    const seen = new Set();
+    for (let i = 0; rows.length < count && i < count * 4 + 20; i++) {
+      const prefix = prefixes[i % prefixes.length];
+      const suffix = suffixes[Math.floor(i / prefixes.length) % suffixes.length];
+      const candidate = `${prefix}${input}${suffix}`.replace(/\s+/g, ' ').trim();
+      if (!candidate || seen.has(candidate)) continue;
+      seen.add(candidate);
+      rows.push({
+        input: candidate,
+        output,
+        source: 'local_deterministic',
+        variant_index: rows.length,
       });
     }
+    return rows;
+  }
+
+  // POST /v1/seeds/from-nl - expand a seed into variants via the configured
+  // LLM, or deterministic local fallback when no LLM backend is configured.
+  r.post('/v1/seeds/from-nl', builderLimiter, async (req, res) => {
     try {
       const body = req.body || {};
       // Accept either an explicit seed {input, output} OR a free-form
@@ -1960,7 +2014,21 @@ export function buildRouter() {
       }
       const count = Math.max(1, Math.min(50, Number(body.count) || 10));
       const hint = typeof body.hint === 'string' ? body.hint.slice(0, 800) : '';
-      const variations = await llmGenerateVariations({ seed, count, hint });
+      const cfg = llmDescribeConfig();
+      let variations = [];
+      let source = 'local_deterministic';
+      let warning = null;
+      if (llmIsConfigured()) {
+        variations = await llmGenerateVariations({ seed, count, hint });
+        source = 'llm';
+      }
+      if (!variations.length) {
+        variations = localSeedVariations(seed, count, hint);
+        source = 'local_deterministic';
+        warning = cfg.configured
+          ? 'configured LLM returned no usable rows; deterministic local seed expansion was used'
+          : 'LLM fanout is not configured; deterministic local seed expansion was used';
+      }
       const jsonl = variations.map((v) => JSON.stringify({ input: v.input, output: v.output })).join('\n');
       res.json({
         ok: true,
@@ -1968,13 +2036,38 @@ export function buildRouter() {
         requested: count,
         seeds: variations,
         seeds_jsonl_text: jsonl,
-        provider: llmDescribeConfig().provider,
-        model: llmDescribeConfig().model,
+        source,
+        warning,
+        provider: source === 'llm' ? cfg.provider : 'local',
+        model: source === 'llm' ? cfg.model : 'deterministic-seed-expander-v1',
       });
     } catch (e) {
       const msg = String(e && e.message ? e.message : e);
       if (msg === 'llm_not_configured') {
-        return res.status(501).json({ error: 'nl_seeds_requires_backend', hint: 'set KOLM_LLM_PROVIDER and KOLM_LLM_KEY' });
+        const body = req.body || {};
+        const seed = body.seed && typeof body.seed === 'object'
+          ? body.seed
+          : (body.prompt && body.example_output
+              ? { input: String(body.prompt), output: String(body.example_output) }
+              : null);
+        if (!seed || !seed.input || !seed.output) {
+          return res.status(400).json({ error: 'invalid_seed', detail: 'provide {seed:{input,output}} or {prompt, example_output}' });
+        }
+        const count = Math.max(1, Math.min(50, Number(body.count) || 10));
+        const hint = typeof body.hint === 'string' ? body.hint.slice(0, 800) : '';
+        const variations = localSeedVariations(seed, count, hint);
+        const jsonl = variations.map((v) => JSON.stringify({ input: v.input, output: v.output })).join('\n');
+        return res.json({
+          ok: true,
+          count: variations.length,
+          requested: count,
+          seeds: variations,
+          seeds_jsonl_text: jsonl,
+          source: 'local_deterministic',
+          warning: 'LLM fanout is not configured; deterministic local seed expansion was used',
+          provider: 'local',
+          model: 'deterministic-seed-expander-v1',
+        });
       }
       return res.status(502).json({ error: 'nl_seeds_failed', detail: msg });
     }
@@ -1982,10 +2075,10 @@ export function buildRouter() {
 
   // W368 — connector daemon passthrough routes. Mounted BEFORE authMiddleware
   // so SDKs that point OPENAI_BASE_URL / ANTHROPIC_BASE_URL / OPENROUTER_BASE_URL
-  // at this server work with just the user's own upstream key (no kolm.ai
-  // tenant key required). Upstream credentials resolve in this order:
-  //   1. Authorization: Bearer <upstream-key>     (e.g. sk-... for OpenAI)
-  //   2. x-upstream-api-key: <upstream-key>       (legacy)
+  // at this server work with either hosted kolm auth + x-upstream-api-key,
+  // or a local/drop-in provider key. Upstream credentials resolve in this order:
+  //   1. x-upstream-api-key: <upstream-key>
+  //   2. Authorization: Bearer <upstream-key>     (only when it is not ks_*/kao_*)
   //   3. process.env[<PROVIDER>_API_KEY]          (server-side env)
   // If none AND KOLM_CONNECTOR_FIXTURE=1, we return a deterministic mock
   // shaped like the provider's real response (so tests + offline dev can
@@ -2009,12 +2102,17 @@ export function buildRouter() {
     }
     const pcfg = CONNECTOR_PROVIDERS[provider];
     if (!pcfg) return res.status(400).json({ error: { type: 'unknown_provider', message: provider } });
-    // Resolve upstream key.
+    // Resolve upstream key. A hosted request carries the kolm tenant key in
+    // Authorization, so that credential must never be reused as the upstream
+    // provider key. Prefer the explicit upstream header, then provider keys
+    // in Authorization for local/drop-in clients, then server-side env.
     let upstreamKey = '';
     const authH = String(req.headers.authorization || '');
     const m = authH.match(/^Bearer\s+(\S+)$/i);
-    if (m) upstreamKey = m[1];
-    if (!upstreamKey && req.headers['x-upstream-api-key']) upstreamKey = String(req.headers['x-upstream-api-key']);
+    const bearerKey = m ? m[1] : '';
+    const tenantAuthKey = String(req.api_key || '');
+    if (req.headers['x-upstream-api-key']) upstreamKey = String(req.headers['x-upstream-api-key']);
+    if (!upstreamKey && bearerKey && bearerKey !== tenantAuthKey && !bearerKey.startsWith('ks_') && !bearerKey.startsWith('kao_')) upstreamKey = bearerKey;
     if (!upstreamKey && pcfg.env_key && process.env[pcfg.env_key]) upstreamKey = process.env[pcfg.env_key];
     const fixtureMode = (process.env.KOLM_CONNECTOR_FIXTURE === '1' || process.env.KOLM_CONNECTOR_FIXTURE === 'true');
     if (!upstreamKey && !fixtureMode) {
@@ -2073,9 +2171,10 @@ export function buildRouter() {
     const rawEnv = String(process.env.KOLM_ALLOW_RAW || '').toLowerCase();
     const rawAllowed = (rawEnv === 'true' || rawEnv === '1' || rawEnv === 'yes'
       || rawHdr === 'true' || rawHdr === '1' || rawHdr === 'yes');
-    // W409b — "noncompliant identifier detected" surfaced as a tag so dashboards
-    // can flag broken-but-not-validated identifiers (e.g. malformed SSN).
-    const noncompliantIds = Array.from(new Set((scan.classes || []).filter((c) => c === 'malformed_ssn')));
+    // W409b/W550 — "noncompliant identifier detected" surfaced as a tag so
+    // dashboards can flag broken-but-not-validated identifiers (e.g. malformed
+    // SSN or card-context invalid PANs).
+    const noncompliantIds = Array.from(new Set((scan.classes || []).filter((c) => String(c).startsWith('malformed_'))));
     // Fail-closed: enforce policy=block BEFORE forwarding.
     if (policy === 'block' && scan.sensitive && req.headers['x-kolm-privacy-override'] !== 'true') {
       return res.status(451).json({
@@ -2181,7 +2280,9 @@ export function buildRouter() {
     }
     if (provider === 'openrouter') {
       headers['http-referer'] = req.headers['http-referer'] || 'https://kolm.ai';
-      headers['x-title'] = req.headers['x-title'] || 'kolm.ai';
+      headers['x-title'] = req.headers['x-title'] || req.headers['x-openrouter-title'] || 'kolm.ai';
+      if (req.headers['x-openrouter-title']) headers['x-openrouter-title'] = req.headers['x-openrouter-title'];
+      if (req.headers['x-openrouter-categories']) headers['x-openrouter-categories'] = req.headers['x-openrouter-categories'];
     }
     let upstreamResp;
     const t0 = Date.now();
@@ -2652,6 +2753,9 @@ export function buildRouter() {
   // OpenRouter capture and base-URL aliases. The direct base-URL forms support
   // SDKs that point BASE_URL at https://kolm.ai/v1/openrouter.
   r.post('/v1/capture/openrouter', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
+  // OpenRouter capture chat completions alias for clients whose base URL is
+  // https://kolm.ai/v1/capture/openrouter and which append /chat/completions.
+  r.post('/v1/capture/openrouter/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
   // OpenRouter capture alias for SDKs that append the OpenAI chat-completions path.
   r.post('/v1/capture/openrouter/v1/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
   // OpenRouter base-URL alias for SDKs that append /v1/chat/completions.
@@ -2741,6 +2845,8 @@ export function buildRouter() {
     }
   });
 
+  // Preference distillation doctor - unauthenticated capability report for the
+  // DPO/SIMPO/ORPO/KTO training path and its local dependency hints.
   r.get('/v1/distill/preference/doctor', async (_req, res) => {
     try {
       const { doctor } = await import('./distill-preference.js');
@@ -4033,7 +4139,7 @@ export function buildRouter() {
     }
   });
 
-  // W452 — multimodal redactor surface. The 17-class fail-closed redactor in
+  // W452 — multimodal redactor surface. The fail-closed redactor in
   // src/privacy-membrane.js + src/phi-redactor.js has shipped since the v7
   // refactor, but it was only reachable via the connector proxy's implicit
   // redact-on-capture hook. There was no first-class /v1/redact route for
@@ -8510,7 +8616,7 @@ export function buildRouter() {
   });
 
   // W263 marketplace — signed public catalog of .kolm artifacts.
-  // GET /v1/marketplace/catalog.json — signed manifest (sha256-anchor).
+  // GET /v1/marketplace/catalog.json — signed manifest (sha256 anchor + Ed25519 sidecar).
   // GET /v1/marketplace — raw artifact array (unsigned, convenience).
   // POST /v1/marketplace/publish-request — queued for manual review.
   // GET /v1/marketplace/:slug — single artifact entry, 404 if unknown.
@@ -10825,11 +10931,7 @@ export function buildRouter() {
   r.post('/v1/simulations/:id/promote', async (req, res) => {
     try {
       const body = req.body || {};
-      const mod = await import('./simulation.js');
-      if (typeof mod.generateDatasetFromSim !== 'function') {
-        return res.status(501).json({ error: 'promote_unsupported', hint: 'simulation.generateDatasetFromSim is not exported in this build' });
-      }
-      const result = await mod.generateDatasetFromSim(req.params.id, {
+      const result = await simGenerateDatasetFromSim(req.params.id, {
         name: body.name || null,
         holdoutFromSim: body.holdoutFromSim !== false,
       });

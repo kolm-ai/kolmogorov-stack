@@ -125,6 +125,17 @@ export function estimateCost({ pairCount, baseModel, epochs = 3, avgTokensPerPai
 //   spec.epochs            — default 3
 //   spec.lora_r            — default 16
 //   spec.lora_alpha        — default 32
+export function buildTrainingFileForm(jsonlPath) {
+  const fileName = path.basename(jsonlPath) || 'corpus.jsonl';
+  const fileBlob = new Blob([fs.readFileSync(jsonlPath)], { type: 'application/x-ndjson' });
+  const form = new FormData();
+  form.append('purpose', 'fine-tune');
+  form.append('file_name', fileName);
+  form.append('file', fileBlob, fileName);
+  form.append('file_type', 'jsonl');
+  return form;
+}
+
 export async function run(spec, { on_progress = null } = {}) {
   _ensureToken();
   const progress = (stage, pct) => { if (on_progress) on_progress({ stage, pct }); };
@@ -132,7 +143,7 @@ export async function run(spec, { on_progress = null } = {}) {
   progress('together:loading_corpus', 5);
   const pairs = _extractPairs(spec);
   if (pairs.length < 10) {
-    throw new Error(`together: need ≥10 training pairs, got ${pairs.length}. Add seeds via 'kolm seeds new' or pass --seeds <jsonl>.`);
+    throw new Error(`together: need >=10 training pairs, got ${pairs.length}. Add seeds via 'kolm seeds new' or pass --seeds <jsonl>.`);
   }
 
   // Build the chat-format JSONL Together expects.
@@ -154,13 +165,10 @@ export async function run(spec, { on_progress = null } = {}) {
   const suffix = (spec.id || spec.name || 'kolm').replace(/[^a-z0-9-]/gi, '').slice(0, 32) || 'kolm';
 
   progress('together:uploading', 15);
-  // Together's file upload uses multipart/form-data. The standard fetch API
-  // FormData works fine in Node 20+.
-  const fileBlob = new Blob([fs.readFileSync(jsonlPath)], { type: 'application/json' });
-  const form = new FormData();
-  form.append('file', fileBlob, 'corpus.jsonl');
-  form.append('purpose', 'fine-tune');
-  const up = await _fetch(`${API_BASE}/files`, { method: 'POST', body: form });
+  // Together's file upload endpoint requires multipart/form-data with
+  // purpose, file_name, file, and file_type.
+  const form = buildTrainingFileForm(jsonlPath);
+  const up = await _fetch(`${API_BASE}/files/upload`, { method: 'POST', body: form });
   const fileId = up.id;
   if (!fileId) throw new Error(`together: upload returned no file id: ${JSON.stringify(up)}`);
 
@@ -174,6 +182,8 @@ export async function run(spec, { on_progress = null } = {}) {
     lora_alpha: loraAlpha,
     suffix,
   };
+  if (spec.validation_file) ftBody.validation_file = spec.validation_file;
+  if (Number.isFinite(Number(spec.n_evals))) ftBody.n_evals = Number(spec.n_evals);
   const ft = await _fetch(`${API_BASE}/fine-tunes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -185,10 +195,13 @@ export async function run(spec, { on_progress = null } = {}) {
   const startedAt = new Date().toISOString();
   progress('together:training', 40);
   const deadline = Date.now() + DEFAULT_TIMEOUT_MS;
-  let ftData = null;
+  const pollIntervalMs = Math.max(0, Number(spec.poll_interval_ms ?? process.env.KOLM_TOGETHER_POLL_MS ?? POLL_INTERVAL_MS));
+  let ftData = ft.status ? ft : null;
   while (Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
-    ftData = await _fetch(`${API_BASE}/fine-tunes/${jobId}`);
+    if (!ftData || ftData.status !== 'completed') {
+      if (ftData) await new Promise((r) => setTimeout(r, pollIntervalMs));
+      ftData = await _fetch(`${API_BASE}/fine-tunes/${jobId}`);
+    }
     const status = ftData.status;
     if (status === 'completed') break;
     if (['failed', 'cancelled', 'error'].includes(status)) {
@@ -243,6 +256,11 @@ export async function run(spec, { on_progress = null } = {}) {
       backend: 'together',
       device: 'together-managed',
       cost_usd: ftData.total_price ?? null,
+      provider_price: {
+        total_price: ftData.total_price ?? null,
+        currency: ftData.currency || null,
+        token_count: ftData.token_count ?? null,
+      },
       started_at: startedAt,
       finished_at: finishedAt,
       duration_seconds: Math.round((new Date(finishedAt) - new Date(startedAt)) / 1000),
@@ -255,4 +273,4 @@ export async function run(spec, { on_progress = null } = {}) {
   };
 }
 
-export default { detect, test, run, estimateCost };
+export default { detect, test, run, estimateCost, buildTrainingFileForm };

@@ -1,4 +1,8 @@
-// Three-tier cache: L1 in-memory (LRU), L2 disk-persistent, L3 stub for object storage.
+// Two-tier local cache: L1 in-memory (LRU), L2 disk-persistent.
+// Object-storage caching is intentionally not claimed from this module; a
+// production deployment should put durable blob/object storage behind the
+// caller's artifact/event-store layer instead of treating cache hits as source
+// of truth.
 // Keyed on (generator_version_id, input_hash).
 
 import fs from 'node:fs';

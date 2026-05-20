@@ -87,6 +87,7 @@ export const HIPAA_SAFE_HARBOR = Object.freeze({
   SSN:   ['ssn', 'malformed_ssn'],
   MRN:   ['mrn'],
   ACCT:  ['account_number', 'customer_id'],
+  PCI:   ['payment_card', 'malformed_payment_card'],
   IP:    ['ip_address'],
   URL:   ['database_url'],
   KEYS:  ['api_key', 'bearer_token', 'private_key'],

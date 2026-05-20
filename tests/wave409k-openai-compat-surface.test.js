@@ -235,6 +235,31 @@ test('W409k #8 — server POST /v1/openrouter/v1/chat/completions accepts OpenRo
   });
 });
 
+test('W547 #4 - OpenRouter capture base-url alias works without an extra /v1 segment', async () => {
+  const appS = await makeServerApp();
+  await withServer(appS, async (base) => {
+    const r = await fetch(base + '/v1/capture/openrouter/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ model: 'openai/gpt-4o-mini', messages: [{ role: 'user', content: 'capture alias' }] }),
+    });
+    assert.notEqual(r.status, 404, 'server OpenRouter capture alias must not 404');
+    assert.equal(r.status, 200);
+    assert.equal(r.headers.get('x-kolm-provider'), 'openrouter');
+  });
+  const appD = await makeDaemonApp();
+  await withServer(appD, async (base) => {
+    const r = await fetch(base + '/v1/capture/openrouter/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ model: 'openai/gpt-4o-mini', messages: [{ role: 'user', content: 'daemon alias' }] }),
+    });
+    assert.notEqual(r.status, 404, 'daemon OpenRouter capture alias must not 404');
+    assert.equal(r.status, 200);
+    assert.equal(r.headers.get('x-kolm-provider'), 'openrouter');
+  });
+});
+
 test('W409k #9 — server connector calls emit canonical events (event-store delta ≥ 1)', async () => {
   const app = await makeServerApp();
   const before = await eventsCountSnapshot();
@@ -378,6 +403,7 @@ test('W409k #15 — no connector route returns 404 (every required route is regi
     ['POST', '/v1/audio/transcriptions'],
     ['POST', '/v1/audio/speech'],
     ['POST', '/v1/messages'],
+    ['POST', '/v1/capture/openrouter/chat/completions'],
     ['POST', '/v1/openrouter/v1/chat/completions'],
     ['GET',  '/v1/models'],
   ];
@@ -388,6 +414,7 @@ test('W409k #15 — no connector route returns 404 (every required route is regi
     ['POST', '/v1/audio/transcriptions'],
     ['POST', '/v1/audio/speech'],
     ['POST', '/v1/messages'],
+    ['POST', '/v1/capture/openrouter/chat/completions'],
     ['GET',  '/v1/models'],
   ];
   async function probe(app, method, p) {

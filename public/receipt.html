@@ -117,10 +117,10 @@
 }
 </script>
  <link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/surface-polish.css">
 <meta name="twitter:title" content="Verify a receipt signed compile + run records · kolm.ai">
 <meta name="twitter:description" content="Every kolm compile and run emits a signed receipt. Paste the receipt URL or hash to verify which artifact produced an output, on which device, with what...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 
@@ -240,7 +240,7 @@
 
  <div class="verify-box">
  <input id="rcpt" type="text" placeholder="kolm.ai/r/abc123 &middot;or&middot; receipt hash (64 hex)" value="kolm.ai/r/e176bc2f720b94a8" autocomplete="off" aria-label="Receipt URL or 64-character hash">
- <button id="verifybtn" type="button" onclick="verifyReceipt()">Verify</button>
+ <button id="verifybtn" type="button">Verify</button>
  </div>
 
  <p style="font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-top:8px">
@@ -382,6 +382,7 @@ function verifyReceipt(){
 document.getElementById('rcpt').addEventListener('keydown', function(e){
  if (e.key === 'Enter') { e.preventDefault(); verifyReceipt(); }
 });
+document.getElementById('verifybtn').addEventListener('click', verifyReceipt);
 </script>
 
 <script src="/nav.js" defer></script>

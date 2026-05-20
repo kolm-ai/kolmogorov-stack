@@ -191,8 +191,21 @@ async function api(c, method, path_, body) {
       res.on('data', (d) => { buf += d; });
       res.on('end', () => resolve({ status: res.statusCode, text: buf }));
     });
-    req.setTimeout(30_000, () => { try { req.destroy(new Error('http_timeout')); } catch (_) {} });
-    req.on('error', reject);
+    req.setTimeout(30_000, () => {
+      try {
+        const err = new Error('http_timeout');
+        err.code = 'ETIMEDOUT';
+        reject(err);
+        req.destroy(err);
+      } catch (_) {}
+    });
+    req.on('error', (err) => {
+      if (err && (!err.message || String(err.message).trim() === '')) {
+        const code = err.code || err.cause?.code || 'NETWORK_ERROR';
+        err.message = `${code} while requesting ${parsed.hostname}`;
+      }
+      reject(err);
+    });
     if (payload) req.write(payload);
     req.end();
   });
@@ -354,7 +367,7 @@ COMMANDS
   publish <art.kolm> [--public]    push a .kolm to the verifiable hub (handle: <owner>/<name>)
   pull <owner>/<name>[@sha:...]    download a published artifact (SHA-256 pin verified if given)
   hub list|show                    browse the public artifact gallery (alias: kolm hub)
-  capture --provider <p> --as <t>  configure a drop-in proxy for OpenAI/Anthropic
+  capture --provider <p> --as <t>  configure a drop-in proxy for OpenAI/Anthropic/OpenRouter (--json)
   capture status [--namespace <n>] pairs captured / pairs until distill
   labels [--namespace <n>] [--out] download the captured corpus as JSONL
   distill --namespace <n>          auto-distill the namespace into a local LoRA
@@ -1721,7 +1734,7 @@ EXIT CODES
   0 ok   1 user error   2 server error   4 productionReady() gate failed (install only)
 
 The marketplace mirrors /v1/marketplace and /marketplace.html. The catalog is
-deterministic + signed (sha256-anchor); a tampered artifact fails install even
+deterministic + signed (sha256 anchor + Ed25519 sidecar); a tampered artifact fails install even
 in --force mode.
 `,
   sdk: `kolm sdk - introspect, install, and bootstrap the official Kolm SDKs.
@@ -1763,19 +1776,19 @@ NOTES
   verified as published under Kolm control. Until then, \`source:\` is the
   supported install path from a repo checkout.
 `,
-  capture: `kolm capture - drop-in proxy for OpenAI / Anthropic that captures (input, output) pairs.
+  capture: `kolm capture - drop-in proxy for OpenAI / Anthropic / OpenRouter that captures (input, output) pairs.
 
 USAGE
-  kolm capture --provider <openai|anthropic> --as <task-name> [--namespace <n>]
+  kolm capture --provider <openai|anthropic|openrouter> --as <task-name> [--namespace <n>] [--json]
   kolm capture status [--namespace <n>]
 
 The first form writes ~/.kolm/capture/<task>.json with the upstream URL and the
-headers your app should send. Point OPENAI_BASE_URL or ANTHROPIC_API_URL at us
-and your existing SDK calls Just Work — every round-trip is captured into the
-namespace's corpus.
+headers your app should send. Point OPENAI_BASE_URL, ANTHROPIC_BASE_URL, or
+OPENROUTER_BASE_URL at us and your existing SDK calls Just Work — every
+round-trip is captured into the namespace's corpus.
 
-Pass your real OpenAI / Anthropic key in the x-upstream-api-key header on each
-request. The kolm api key goes in Authorization: Bearer kolm_… as usual.
+Pass your real OpenAI / Anthropic / OpenRouter key in the x-upstream-api-key header on each
+request. The Kolm API key goes in Authorization: Bearer ks_* or kao_* as usual.
 
 The status form prints how many pairs have been captured and how many are
 needed before \`kolm distill\` is unlocked (default threshold: 1000 pairs).
@@ -1841,7 +1854,7 @@ REDACT CLASSES (wave 157, Q+3a)
            Receipt chain captures redaction_map_hash + teacher_call_log_hash +
            reinjection_log_hash so verifier check #14 can replay the redactor
            offline and prove raw PHI never left the tenant boundary.
-  pci    — payment-card masking profile (placeholder; same receipt chain).
+  pci    — payment-card masking profile with valid PAN redaction and invalid-card tagging.
   multi  — phi + pci combined.
   auto   — choose based on the spec's declared redact_class field.
 
@@ -2259,7 +2272,6 @@ MODELS
   kolm-path:<path>      an absolute path to a .kolm file
   anthropic:<id>        Anthropic Claude model (requires ANTHROPIC_API_KEY)
   openai:<id>           OpenAI GPT model (requires OPENAI_API_KEY)
-
 COMMANDS (inside the TUI)
   /help                 list available commands
   /model <id>           switch model
@@ -2279,6 +2291,11 @@ NOTES
     sha256 / recipe / k-score / latency.
   - The TUI shares the kolm registry with kolm run / kolm chat and the
     OpenAI-compatible completions server.
+
+EXAMPLES
+  kolm chat-tui --model=anthropic:claude-sonnet-4-6
+  kolm chat-tui --model=openai:gpt-5
+  kolm chat-tui --model=kolm:phi-redactor --open=./phi-redactor.kolm
 `,
   tui: `kolm tui - interactive shell for .kolm artifacts.
 
@@ -2290,6 +2307,7 @@ COMMANDS (inside the REPL)
   inspect                              show the manifest + receipt summary in an ANSI box
   run <text>                           inference against the loaded artifact (uses /v1/run/inline)
   verify                               re-verify the receipt chain (POST /v1/receipts/verify)
+  :connectors                          show OpenAI / Claude / OpenRouter connector status
   rest                                 reprint the equivalent REST call for the last action
   help                                 show this command list
   quit                                 exit
@@ -2663,12 +2681,14 @@ KIND FILTERS
   inference, training, both
 
 PROVIDERS (W250 catalog)
-  fireworks, together, openrouter, modal, runpod, predibase, replicate, lambda
+  inference: fireworks, together, anthropic, openrouter, replicate
+  training:  modal, runpod, predibase, lambda
 
 EXAMPLES
   kolm remote list --kind=inference
   kolm remote rank inference --in-M=2 --out-M=2 --json
   kolm remote plan inference --provider=fireworks --model=accounts/fireworks/models/qwen2p5-72b-instruct --message="hello"
+  kolm remote plan inference --provider=anthropic --model=claude-sonnet-4-6 --message="hello"
   kolm remote plan training  --provider=lambda --recipe=./r --base-model=qwen3-7b --gpu=H100 --hours=4
 `,
   mesh: `kolm mesh - multi-node Tailscale mesh + GKE-scale recipe (single box -> cluster).
@@ -4300,6 +4320,24 @@ async function cmdBuild(args) {
   const examplesFlag = pickFlag(args, '--examples') || pickFlag(args, '--seeds');
   const outFlag = pickFlag(args, '--out');
   const autoYes = args.includes('--yes') || args.includes('-y') || process.env.KOLM_AUTO_YES === '1';
+  const wantJson = args.includes('--json');
+  const buildLogs = [];
+  const originalConsoleLog = console.log;
+  const previousRestHint = process.env.KOLM_NO_REST_HINT;
+  const captureBuildLog = (...parts) => { buildLogs.push(parts.map(p => typeof p === 'string' ? p : JSON.stringify(p)).join(' ')); };
+  const restoreBuildLog = () => {
+    if (wantJson && console.log === captureBuildLog) console.log = originalConsoleLog;
+    if (wantJson) {
+      if (previousRestHint === undefined) delete process.env.KOLM_NO_REST_HINT;
+      else process.env.KOLM_NO_REST_HINT = previousRestHint;
+    }
+  };
+  if (wantJson) {
+    console.log = captureBuildLog;
+    process.env.KOLM_NO_REST_HINT = '1';
+  }
+
+  try {
 
   const specPath = path.resolve(process.cwd(), `${name}.spec.json`);
   const artPath = outFlag
@@ -4341,7 +4379,7 @@ async function cmdBuild(args) {
   const useCurated = curated
     && (!fromFlagExplicit || examplesPointsAtCurated)
     && (!fs.existsSync(specPath) || args.includes('--force'));
-  if (examplesPointsAtCurated && fromFlagExplicit) {
+  if (useCurated && examplesPointsAtCurated && fromFlagExplicit) {
     console.error(`[kolm build] WARNING: --from ${fromFlagExplicit} overridden by curated baseline ${name} — pass --no-baseline to disable.`);
   }
 
@@ -4506,7 +4544,49 @@ async function cmdBuild(args) {
   console.log(`  - tune recipes[0].source in ${path.basename(specPath)} (the regex / logic)`);
   console.log(`  - rerun:  kolm compile --spec ${path.basename(specPath)} --seeds ${path.basename(seedsPath)} --out ${path.basename(artPath)}`);
   console.log('  - eval each failing case:  kolm eval ' + path.basename(artPath) + ' --trace');
+  if (wantJson) {
+    let manifest = null;
+    let readiness = null;
+    let stat = null;
+    try {
+      const mod = await import('../src/artifact-runner.js');
+      manifest = mod.loadArtifact(artPath).manifest || null;
+    } catch (_) {}
+    try {
+      const pr = await import('../src/production-ready.js');
+      readiness = await pr.productionReady(artPath);
+    } catch (e) {
+      readiness = { ok: false, reasons: ['production_ready_probe_failed: ' + String(e.message || e)] };
+    }
+    try { stat = fs.statSync(artPath); } catch (_) {}
+    const envelope = {
+      ok: !verifyErr && readiness && readiness.ok === true,
+      artifact: artPath,
+      artifact_rel: path.relative(process.cwd(), artPath) || artPath,
+      name,
+      from: fromFlag,
+      used_curated_baseline: !!useCurated,
+      used_curated_seeds: !!usedCuratedSeeds,
+      used_placeholder_seeds: !!usedPlaceholderSeeds,
+      spec: specPath,
+      seeds: seedsPath,
+      size_bytes: stat ? stat.size : null,
+      k_score: manifest && manifest.k_score ? manifest.k_score : null,
+      production_ready: readiness ? readiness.ok === true : false,
+      gate_reasons: readiness && Array.isArray(readiness.reasons) ? readiness.reasons : [],
+      verify_ok: !verifyErr,
+      logs: buildLogs,
+    };
+    restoreBuildLog();
+    originalConsoleLog(JSON.stringify(envelope, null, 2));
+    if (verifyErr) throw verifyErr;
+    return;
+  }
   if (verifyErr) throw verifyErr;
+  } catch (e) {
+    restoreBuildLog();
+    throw e;
+  }
 }
 
 async function cmdLogin(args) {
@@ -4639,6 +4719,11 @@ async function cmdWhoami(args) {
     serverErr = e;
   }
   if (serverErr) {
+    const transportCode = serverErr.code || serverErr.cause?.code || null;
+    const isTransport = !!transportCode && serverErr.status == null;
+    const hint = isTransport
+      ? 'cloud validation could not reach the server. check network/firewall/proxy settings, then rerun `kolm whoami`.'
+      : 'the key may have been rotated or revoked. run: kolm login --key ks_...';
     if (jsonOut) {
       console.log(JSON.stringify({
         logged_in: false,
@@ -4649,13 +4734,15 @@ async function cmdWhoami(args) {
         cli_version: VERSION,
         key_fingerprint: fp,
         error: serverErr.message,
-        hint: 'the key may have been rotated or revoked. run: kolm login --key ks_...',
+        error_code: transportCode,
+        error_type: isTransport ? 'transport_error' : 'auth_rejected',
+        hint,
       }));
     } else {
-      console.error('cloud rejected the saved key:', serverErr.message);
+      console.error(isTransport ? 'cloud validation failed:' : 'cloud rejected the saved key:', serverErr.message);
       console.error('  config_has_key:   true');
       console.error('  server_validated: false');
-      console.error('hint: the key may have been rotated or revoked. run `kolm login --key ks_...` again.');
+      console.error('hint: ' + hint);
     }
     if (allowLoggedOut) return;
     process.exit(2);
@@ -11342,23 +11429,33 @@ async function cmdBootstrap(args) {
 }
 
 // W242 — kolm proxy. Enterprise drop-in proxy CLI surface.
-const PROXY_SDKS = ['anthropic', 'fireworks', 'generic', 'openai', 'together', 'vllm'];
+const PROXY_SDKS = ['anthropic', 'fireworks', 'generic', 'openai', 'openrouter', 'together', 'vllm'];
 const PROXY_LANGS = ['env', 'python', 'node', 'bash'];
 
 function renderProxyConfig({ sdk = 'openai', lang = 'env', port = 7403, namespace = 'default' } = {}) {
   const base = 'http://127.0.0.1:' + port + '/v1';
+  const openaiLikeBase = sdk === 'openrouter' ? base + '/capture/openrouter' : base;
+  const openaiLikeModel = sdk === 'openrouter' ? 'openai/gpt-4o-mini' : 'gpt-4o-mini';
+  const openaiLikeKey = sdk === 'openrouter' ? 'sk-or-...' : 'sk-...';
   const headerComment = '# kolm proxy sdk=' + sdk + ' lang=' + lang + ' port=' + port + ' namespace=' + namespace + '\n';
   let snippet = '';
   if (lang === 'env') {
     if (sdk === 'openai') {
       snippet = headerComment +
         'export OPENAI_BASE_URL="' + base + '"\n' +
-        'export OPENAI_API_KEY="ks_..."  # your kolm tenant key\n' +
+        'export OPENAI_API_KEY="sk-..."  # your real upstream OpenAI key\n' +
+        'export KOLM_NAMESPACE="' + namespace + '"\n';
+    } else if (sdk === 'openrouter') {
+      snippet = headerComment +
+        'export OPENAI_BASE_URL="' + openaiLikeBase + '"\n' +
+        'export OPENROUTER_BASE_URL="' + openaiLikeBase + '"\n' +
+        'export OPENAI_API_KEY="sk-or-..."  # your real upstream OpenRouter key\n' +
+        'export OPENROUTER_API_KEY="sk-or-..."\n' +
         'export KOLM_NAMESPACE="' + namespace + '"\n';
     } else if (sdk === 'anthropic') {
       snippet = headerComment +
         'export ANTHROPIC_BASE_URL="' + base + '"\n' +
-        'export ANTHROPIC_API_KEY="ks_..."\n' +
+        'export ANTHROPIC_API_KEY="sk-ant-..."  # your real upstream Anthropic key\n' +
         'export KOLM_NAMESPACE="' + namespace + '"\n';
     } else if (sdk === 'together') {
       snippet = headerComment +
@@ -11399,12 +11496,12 @@ function renderProxyConfig({ sdk = 'openai', lang = 'env', port = 7403, namespac
       snippet = headerComment +
         'from openai import OpenAI\n' +
         'client = OpenAI(\n' +
-        '    base_url="' + base + '",\n' +
-        '    api_key="ks_...",\n' +
+        '    base_url="' + openaiLikeBase + '",\n' +
+        '    api_key="' + openaiLikeKey + '",\n' +
         '    default_headers={"x-kolm-namespace": "' + namespace + '"},\n' +
         ')\n' +
         'resp = client.chat.completions.create(\n' +
-        '    model="gpt-4o-mini",\n' +
+        '    model="' + openaiLikeModel + '",\n' +
         '    messages=[{"role": "user", "content": "Hello"}],\n' +
         ')\n' +
         'print(resp)  # capture-id available in the HTTP response headers\n';
@@ -11427,12 +11524,12 @@ function renderProxyConfig({ sdk = 'openai', lang = 'env', port = 7403, namespac
       snippet = headerComment +
         'import OpenAI from "openai";\n' +
         'const client = new OpenAI({\n' +
-        '  baseURL: "' + base + '",\n' +
-        '  apiKey: "ks_...",\n' +
+        '  baseURL: "' + openaiLikeBase + '",\n' +
+        '  apiKey: "' + openaiLikeKey + '",\n' +
         '  defaultHeaders: { "x-kolm-namespace": "' + namespace + '" },\n' +
         '});\n' +
         'const resp = await client.chat.completions.create({\n' +
-        '  model: "gpt-4o-mini",\n' +
+        '  model: "' + openaiLikeModel + '",\n' +
         '  messages: [{ role: "user", content: "Hello" }],\n' +
         '});\n' +
         'console.log(resp);  // capture-id surfaces in response headers\n';
@@ -11440,7 +11537,7 @@ function renderProxyConfig({ sdk = 'openai', lang = 'env', port = 7403, namespac
   } else if (lang === 'bash') {
     snippet = headerComment +
       'curl -sS ' + base + '/chat/completions \\\n' +
-      '  -H "Authorization: Bearer ks_..." \\\n' +
+      '  -H "Authorization: Bearer ' + openaiLikeKey + '" \\\n' +
       '  -H "Content-Type: application/json" \\\n' +
       '  -H "x-kolm-namespace: ' + namespace + '" \\\n' +
       '  -d \'{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}\'\n' +
@@ -12500,10 +12597,11 @@ async function cmdDriftVerify(args) {
   }
 }
 
-// kolm capture --provider <openai|anthropic> --as <task> --namespace <n>
+// kolm capture --provider <openai|anthropic|openrouter> --as <task> --namespace <n>
 //   Writes ~/.kolm/capture/<task>.json with the upstream URL + headers the
-//   customer should use. Customer points OPENAI_BASE_URL or ANTHROPIC_API_URL
-//   at us; we proxy the call and record the (input, output) tuple.
+//   customer should use. Customer points OPENAI_BASE_URL, ANTHROPIC_BASE_URL,
+//   or OPENROUTER_BASE_URL at us; we proxy the call and record the
+//   (input, output) tuple.
 //
 // kolm capture status [--namespace <n>]
 //   Calls /v1/labels/synthesize-corpus?count_only=1 and prints
@@ -12511,6 +12609,7 @@ async function cmdDriftVerify(args) {
 async function cmdCapture(args) {
   if (maybeHelp('capture', args)) return;
   const sub = args[0];
+  const jsonOut = args.includes('--json');
   if (sub === 'image') {
     // kolm capture image <path-or-url> [--prompt "..."] [--response "..."] [--ocr] [--namespace n] [--label l]
     const rest = args.slice(1);
@@ -12545,6 +12644,17 @@ async function cmdCapture(args) {
     const ts = new Date().toISOString().replace(/[:.]/g, '-');
     const out = path.join(captureDir, `${namespace}-${ts}.jsonl`);
     fs.appendFileSync(out, r.stdout.trim() + '\n');
+    if (jsonOut) {
+      console.log(JSON.stringify({
+        ok: true,
+        type: 'image',
+        namespace,
+        out,
+        ocr,
+        label,
+      }));
+      return;
+    }
     console.log(`captured: ${out}`);
     console.log(`namespace: ${namespace}`);
     console.log('hint: kolm distill --namespace ' + namespace);
@@ -12558,7 +12668,6 @@ async function cmdCapture(args) {
     // on ANY network/transport failure, fall back to counting local capture
     // files under ~/.kolm/capture/ and print an offline marker + actionable
     // hint instead of crashing.
-    const jsonOut = args.includes('--json');
     const c = loadConfig();
     const ns = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
     const localCaptureCount = async () => {
@@ -12568,13 +12677,13 @@ async function cmdCapture(args) {
       // walking ~/.kolm/capture/ + ~/.kolm/captures/ jsonl files when the
       // event-store is empty (machines that never bridged + truly-empty
       // first-run state).
+      let eventStoreCount = 0;
       try {
         const es = await import('../src/event-store.js');
         if (typeof es.countEvents === 'function') {
           // Event-store treats 'default' as a real namespace value; respect
           // the per-namespace filter the user passed (or implicit default).
-          const n = await es.countEvents(ns ? { namespace: ns } : {});
-          if (n > 0) return n;
+          eventStoreCount = await es.countEvents(ns ? { namespace: ns } : {});
         }
       } catch (_) { /* event-store not available; fall through */ }
       let count = 0;
@@ -12607,11 +12716,16 @@ async function cmdCapture(args) {
           count += text.split('\n').filter(Boolean).length;
         }
       } catch (_) {}
-      return count;
+      // Event-store is canonical for new captures, but legacy jsonl files are
+      // still supported. Use max rather than sum so mirrored rows do not get
+      // double-counted while stale/partial event-store state cannot hide local
+      // captures the user can see on disk.
+      return Math.max(eventStoreCount || 0, count);
     };
     const offlineFallback = async (reason) => {
       const localCount = await localCaptureCount();
       const remaining = Math.max(0, 1000 - localCount);
+      const hint = 'capture daemon not running or cloud unreachable; counts come from ~/.kolm/capture/. start the daemon with `kolm capture --provider <openai|anthropic|openrouter> --as <task>`';
       if (jsonOut) {
         console.log(JSON.stringify({
           ok: true,
@@ -12621,19 +12735,20 @@ async function cmdCapture(args) {
           count: localCount,
           threshold: 1000,
           ready_to_distill: localCount >= 1000,
-          hint: 'capture daemon not running or cloud unreachable — counts come from ~/.kolm/capture/. start the daemon with `kolm capture --provider <openai|anthropic> --as <task>`',
+          hint,
           reason: String(reason || ''),
         }));
-      } else {
-        const nsLabel = ns === 'default' ? 'namespace default (the auto-assigned bucket — pass --namespace <n> to scope)' : `namespace ${ns}`;
-        console.log(`${nsLabel}: ${localCount} pair${localCount === 1 ? '' : 's'} captured (offline · local count)`);
-        console.log(`distill threshold: 1000`);
-        if (localCount >= 1000) console.log('  ready to distill — run: kolm distill --namespace ' + ns);
-        else console.log(`  ${remaining} more pair${remaining === 1 ? '' : 's'} until distill is unlocked`);
-        console.log('');
-        console.log('hint: cloud capture status unavailable (' + (reason || 'no api key / network down') + ').');
-        console.log('  to start the capture daemon: kolm capture --provider <openai|anthropic> --as <task>');
+        return;
       }
+      const nsLabelClean = ns === 'default' ? 'namespace default (the auto-assigned bucket; pass --namespace <n> to scope)' : `namespace ${ns}`;
+      console.log(`${nsLabelClean}: ${localCount} pair${localCount === 1 ? '' : 's'} captured (offline local count)`);
+      console.log(`distill threshold: 1000`);
+      if (localCount >= 1000) console.log('  ready to distill; run: kolm distill --namespace ' + ns);
+      else console.log(`  ${remaining} more pair${remaining === 1 ? '' : 's'} until distill is unlocked`);
+      console.log('');
+      console.log('hint: cloud capture status unavailable (' + (reason || 'no api key / network down') + ').');
+      console.log('  to start the capture daemon: kolm capture --provider <openai|anthropic|openrouter> --as <task>');
+      return;
     };
     if (!c.api_key) {
       // No key on disk: skip the cloud round-trip entirely and report local
@@ -12653,6 +12768,16 @@ async function cmdCapture(args) {
       return;
     }
     const remaining = Math.max(0, (j.threshold || 1000) - (j.count || 0));
+    if (!jsonOut) {
+      const cloudNsLabel = (j.namespace || ns) === 'default'
+        ? 'namespace default (the auto-assigned bucket; pass --namespace <n> to scope)'
+        : `namespace ${j.namespace || ns}`;
+      console.log(`${cloudNsLabel}: ${j.count} pair${j.count === 1 ? '' : 's'} captured`);
+      console.log(`distill threshold: ${j.threshold}`);
+      if (j.ready_to_distill) console.log('  ready to distill; run: kolm distill --namespace ' + (j.namespace || ns));
+      else console.log(`  ${remaining} more pair${remaining === 1 ? '' : 's'} until distill is unlocked`);
+      return;
+    }
     if (jsonOut) {
       console.log(JSON.stringify({
         ok: true,
@@ -12665,47 +12790,91 @@ async function cmdCapture(args) {
       }));
       return;
     }
-    const jnsLabel = j.namespace === 'default' ? 'namespace default (the auto-assigned bucket — pass --namespace <n> to scope)' : `namespace ${j.namespace}`;
-    console.log(`${jnsLabel}: ${j.count} pair${j.count === 1 ? '' : 's'} captured`);
-    console.log(`distill threshold: ${j.threshold}`);
-    if (j.ready_to_distill) console.log('  ready to distill — run: kolm distill --namespace ' + j.namespace);
-    else console.log(`  ${remaining} more pair${remaining === 1 ? '' : 's'} until distill is unlocked`);
-    return;
   }
   // Default subcommand: write capture config.
   const provider = (pickFlag(args, '--provider') || pickFlag(args, '-p') || '').toLowerCase();
   const taskName = pickFlag(args, '--as') || args.find(a => !a.startsWith('-') && !['capture', 'status'].includes(a));
   const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || taskName || 'default';
-  if (!provider || !['openai', 'anthropic'].includes(provider)) {
-    console.error('error: --provider <openai|anthropic> required');
-    console.error('usage: kolm capture --provider <openai|anthropic> --as <task-name> [--namespace <n>]');
+  if (!provider || !['openai', 'anthropic', 'openrouter'].includes(provider)) {
+    if (jsonOut) {
+      console.log(JSON.stringify({
+        ok: false,
+        error: 'provider_required',
+        hint: 'usage: kolm capture --provider <openai|anthropic|openrouter> --as <task-name> [--namespace <n>]',
+      }));
+      process.exit(EXIT.BAD_ARGS);
+    }
+    console.error('error: --provider <openai|anthropic|openrouter> required');
+    console.error('usage: kolm capture --provider <openai|anthropic|openrouter> --as <task-name> [--namespace <n>]');
     process.exit(EXIT.BAD_ARGS);
   }
   if (!taskName) {
+    if (jsonOut) {
+      console.log(JSON.stringify({
+        ok: false,
+        error: 'task_name_required',
+        hint: 'pass --as <task-name>',
+      }));
+      process.exit(EXIT.BAD_ARGS);
+    }
     console.error('error: --as <task-name> required');
     process.exit(EXIT.BAD_ARGS);
   }
   const c = loadConfig();
   if (!c.api_key) {
+    if (jsonOut) {
+      console.log(JSON.stringify({
+        ok: false,
+        error: 'not_logged_in',
+        hint: 'run: kolm login',
+      }));
+      process.exit(EXIT.MISSING_PREREQ);
+    }
     console.error('not logged in. run: kolm login');
     process.exit(EXIT.MISSING_PREREQ);
   }
   const captureDir = path.join(KOLM_DIR, 'capture');
   fs.mkdirSync(captureDir, { recursive: true });
   const base = (c.base || 'https://kolm.ai').replace(/\/+$/, '');
-  const baseUrl = `${base}/v1/capture/${provider}`;
+  const baseUrl = provider === 'openrouter'
+    ? `${base}/v1/capture/openrouter/v1`
+    : `${base}/v1/capture/${provider}`;
   const cfg = {
     provider,
     task: taskName,
     namespace,
     base_url: baseUrl,
     kolm_api_key: c.api_key,
-    upstream_key_env: provider === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY',
+    upstream_key_env: provider === 'openai' ? 'OPENAI_API_KEY' : (provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENROUTER_API_KEY'),
     created_at: new Date().toISOString(),
   };
   const cfgPath = path.join(captureDir, `${taskName}.json`);
   fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
   fs.chmodSync(cfgPath, 0o600);
+  const keyFingerprint = c.api_key ? (c.api_key.slice(0, 10) + '...' + c.api_key.slice(-4)) : null;
+  if (jsonOut) {
+    console.log(JSON.stringify({
+      ok: true,
+      provider,
+      task: taskName,
+      namespace,
+      config_path: cfgPath,
+      base_url: baseUrl,
+      upstream_key_env: cfg.upstream_key_env,
+      key_fingerprint: keyFingerprint,
+      client_env: provider === 'openai'
+        ? { OPENAI_BASE_URL: baseUrl }
+        : (provider === 'anthropic'
+          ? { ANTHROPIC_BASE_URL: baseUrl, ANTHROPIC_API_URL: baseUrl }
+          : { OPENAI_BASE_URL: baseUrl, OPENROUTER_BASE_URL: baseUrl }),
+      required_headers: {
+        Authorization: keyFingerprint ? ('Bearer ' + keyFingerprint) : 'Bearer <kolm-api-key>',
+        'x-upstream-api-key': provider === 'openai' ? 'sk-...' : (provider === 'anthropic' ? 'sk-ant-...' : 'sk-or-...'),
+        'x-kolm-namespace': namespace,
+      },
+    }));
+    return;
+  }
   console.log(`saved capture config: ${cfgPath}`);
   console.log('');
   console.log('to start capturing, set in your app:');
@@ -12714,12 +12883,18 @@ async function cmdCapture(args) {
     console.log(`  # then per request:`);
     console.log(`  #   Authorization: Bearer ${c.api_key.slice(0, 8)}...    (your kolm key)`);
     console.log(`  #   x-upstream-api-key: sk-...                           (your real OpenAI key)`);
-  } else {
+  } else if (provider === 'anthropic') {
     console.log(`  export ANTHROPIC_BASE_URL="${baseUrl}"     # SDKs >=0.18`);
     console.log(`  export ANTHROPIC_API_URL="${baseUrl}"      # older SDKs`);
     console.log(`  # then per request:`);
     console.log(`  #   Authorization: Bearer ${c.api_key.slice(0, 8)}...    (your kolm key)`);
     console.log(`  #   x-upstream-api-key: sk-ant-...                       (your real Anthropic key)`);
+  } else {
+    console.log(`  export OPENAI_BASE_URL="${baseUrl}"       # OpenAI-compatible OpenRouter clients`);
+    console.log(`  export OPENROUTER_BASE_URL="${baseUrl}"   # if your wrapper reads it`);
+    console.log(`  # then per request:`);
+    console.log(`  #   Authorization: Bearer ${c.api_key.slice(0, 8)}...    (your kolm key)`);
+    console.log(`  #   x-upstream-api-key: sk-or-...                       (your real OpenRouter key)`);
   }
   console.log(`  #   x-kolm-namespace: ${namespace}`);
   console.log('');
@@ -19290,11 +19465,12 @@ async function cmdWrapAgent(args) {
 // ---------- kolm models ----------
 async function cmdModels(args) {
     if (maybeHelp('models', args)) return;
-    const sub = args[0];
-    const rest = args.slice(1);
+    const jsonOut = args.includes('--json');
+    const positional = args.filter((a) => a !== '--json');
+    const sub = positional[0];
+    const rest = positional.slice(1);
     const M = await import('../src/models.js');
     const D = await import('../src/devices.js');
-    const jsonOut = rest.includes('--json');
 
     switch (sub) {
         case undefined:
@@ -19469,7 +19645,7 @@ async function cmdModels(args) {
             const results = R.verifyAll();
             if (jsonOut) { console.log(JSON.stringify(results, null, 2)); return; }
             let fail = 0;
-            for (const r of results) {
+            for (const r of (results.results || [])) {
                 console.log(`${r.ok ? 'OK  ' : 'FAIL'} ${r.id}${r.ok ? '' : ' — ' + r.reason}`);
                 if (!r.ok) fail++;
             }
@@ -19708,11 +19884,12 @@ async function cmdModels(args) {
                 console.log(`pull failed: ${r.reason}${r.detail ? ' ' + JSON.stringify(r.detail) : ''}`);
                 process.exit(EXIT.NOT_FOUND);
             }
-            console.log(`pulled: ${r.id}`);
+            console.log(`${r.weights_verified ? 'pulled' : 'metadata cached'}: ${r.id}`);
             console.log(`  local_path:   ${r.local_path}`);
             console.log(`  bytes:        ${r.bytes}`);
             console.log(`  pull_status:  ${r.pull_status}`);
             console.log(`  verified_at:  ${r.verified_at}`);
+            if (!r.weights_verified) console.log('  note:         no local weights verified; rerun with --real to pull model bytes');
             return;
         }
         default: {
@@ -23732,6 +23909,11 @@ async function cmdTui(args) {
     // W450 — Settings view. Closes the new /account/settings triangle: page,
     // CLI (`kolm settings show / set k=v`), and TUI all read /v1/account/settings.
     { id: 'settings',           key: 'F', endpoint: '/v1/account/settings',      kind: 'get',   label: 'account settings (read-only)' },
+    // W552 - provider connectors view. This keeps OpenAI, Claude, and
+    // OpenRouter discoverable from the operator TUI, not only the web console.
+    // It has no keybind to avoid adding another crowded hotkey; use
+    // :connectors or :providers from command mode.
+    { id: 'connectors',          key: null, endpoint: '/v1/account',              kind: 'get',   label: 'connectors (OpenAI / Claude / OpenRouter)' },
     // W465 — Billing breakdown view. Closes the per-namespace cost
     // attribution triangle: page panel, CLI (`kolm billing breakdown`), TUI.
     { id: 'billing-breakdown',  key: 'J', endpoint: '/v1/billing/breakdown',     kind: 'get',   label: 'billing breakdown (by namespace)' },
@@ -23772,7 +23954,15 @@ async function cmdTui(args) {
             const data = JSON.parse(buf);
             // Common envelope shapes: array, {items}, {rows}, {data}, {<id>:[...]}.
             // W414 also unwraps {recommendations:[...]} from /v1/intent/next.
-            const rows = Array.isArray(data) ? data
+            const rows = viewId === 'connectors' && data && data.connectors
+              ? ['openai', 'anthropic', 'openrouter'].map((provider) => ({
+                provider: provider === 'anthropic' ? 'Claude' : provider === 'openrouter' ? 'OpenRouter' : 'OpenAI',
+                endpoint: provider === 'openrouter' ? '/v1/capture/openrouter/v1' : '/v1/capture/' + provider,
+                status: data.connectors[provider]?.status || (data.connectors[provider]?.configured ? 'ready' : 'unconfigured'),
+                configured: !!data.connectors[provider]?.configured,
+                last_event_at: data.connectors[provider]?.last_event_at || null,
+              }))
+              : Array.isArray(data) ? data
               : Array.isArray(data.items) ? data.items
               : Array.isArray(data.rows) ? data.rows
               : Array.isArray(data.data) ? data.data
@@ -23917,6 +24107,7 @@ async function cmdTui(args) {
       lines.push('      4=spend 5=privacy-events 6=repeated-workflows');
       lines.push('      7=opportunities 8=labeling-queue 9=datasets');
       lines.push('      0=builds A=bakeoffs B=devices C=storage-sync D=agent-telemetry N=next');
+      lines.push('      :connectors provider status  :providers alias');
       lines.push('      / filter  : command  r refresh  ? help  q quit');
       lines.push('      d distill  R replay  v verify  Enter open');
     } else if (state.leftSource === 'view') {
@@ -24088,6 +24279,10 @@ async function cmdTui(args) {
       'settings':      'settings',
       'preferences':   'settings',
       'prefs':         'settings',
+      // W552 - provider connector aliases (OpenAI, Claude, OpenRouter).
+      'connectors':    'connectors',
+      'providers':     'connectors',
+      'provider':      'connectors',
       // W465 — billing breakdown view aliases (CLI `kolm billing breakdown` + TUI `:breakdown` + web).
       'breakdown':     'billing-breakdown',
       'billing-breakdown':'billing-breakdown',
@@ -24607,7 +24802,13 @@ async function cmdWhat(args) {
     console.log(`  captures:     ${snap.counts.captures} across ${snap.counts.namespaces} namespace${snap.counts.namespaces === 1 ? '' : 's'}`);
     console.log(`  jobs:         ${snap.counts.jobs}`);
     if (snap.config) console.log(`  base:         ${snap.config.base || 'https://kolm.ai'}`);
-    if (snap.current_tenant) console.log(`  tenant:       ${snap.current_tenant.name || snap.current_tenant.id || snap.current_tenant}`);
+    if (snap.current_tenant) {
+      const t = snap.current_tenant;
+      const label = (t && typeof t === 'object')
+        ? (t.name || t.id || t.key_fingerprint || t.source || 'configured')
+        : t;
+      console.log(`  tenant:       ${label}`);
+    }
     console.log('');
     if (snap.artifacts.length) {
       console.log('artifacts');

@@ -1,6 +1,6 @@
 // tests/wave370-privacy.test.js
 //
-// W370 - Lock in the full 17-class privacy membrane behavior contract.
+// W370 - Lock in the full privacy membrane behavior contract.
 //
 // Each test gets a fresh KOLM_DATA_DIR so policy + vault persistence
 // state never leaks across cases. We re-import privacy-membrane.js
@@ -50,8 +50,8 @@ describe('W370 privacy membrane', () => {
     delete process.env.KOLM_PRIVACY_POLICY;
   });
 
-  // 1. Each of 17 classes detected on a positive sample
-  it('detects all 17 classes on positive samples', async () => {
+  // 1. Each privacy class detected on a positive sample
+  it('detects all privacy classes on positive samples', async () => {
     const { scan } = await freshImport();
 
     // Seed proprietary terms so detector has data.
@@ -73,6 +73,8 @@ describe('W370 privacy membrane', () => {
       dob:              'born 1985-07-04 according to record',
       mrn:              'MRN: 0012345 admitted yesterday',
       account_number:    'wire to account 12345678 confirmed',
+      payment_card:      'charge card 4111 1111 1111 1111 today',
+      malformed_payment_card: 'payment card 4111 1111 1111 1112 failed validation',
       api_key:           'set OPENAI_KEY=sk_test_abcdefghijklmnopqrst now',
       bearer_token:      'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.abcdefghij',
       private_key:       '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w\n-----END PRIVATE KEY-----',
@@ -203,6 +205,7 @@ describe('W370 privacy membrane', () => {
     mod.setPolicy({ class: 'api_key', action: 'redact' });
     // Avoid name collisions etc.
     for (const c of ['name', 'phone', 'address', 'dob', 'mrn', 'account_number',
+                     'payment_card', 'malformed_payment_card',
                      'bearer_token', 'private_key', 'database_url', 'internal_hostname',
                      'customer_id', 'proprietary_term', 'ip_address', 'malformed_ssn']) {
       mod.setPolicy({ class: c, action: 'allow' });
@@ -228,6 +231,19 @@ describe('W370 privacy membrane', () => {
     assert.ok(classes.has('ssn'));
     assert.ok(classes.has('email'));
     assert.ok(classes.has('api_key'));
+    assert.equal(reinsert(r.redacted, r.vault), text);
+  });
+
+  it('redacts valid payment cards and tags card-context invalid PANs', async () => {
+    const { scan, redact, reinsert } = await freshImport();
+    const text = 'valid card 4111 1111 1111 1111 and bad payment card 4111 1111 1111 1112';
+    const s = scan(text);
+    const classes = new Set(s.matches.map((m) => m.class));
+    assert.ok(classes.has('payment_card'));
+    assert.ok(classes.has('malformed_payment_card'));
+    const r = redact(text);
+    assert.ok(r.redacted.includes('VAR_PAYMENT_CARD_1'), r.redacted);
+    assert.ok(r.redacted.includes('VAR_MALFORMED_PAYMENT_CARD_1'), r.redacted);
     assert.equal(reinsert(r.redacted, r.vault), text);
   });
 

@@ -2712,6 +2712,33 @@
         }
       }
     },
+    "/v1/capture/openrouter/chat/completions": {
+      "post": {
+        "tags": [
+          "capture"
+        ],
+        "operationId": "postV1CaptureOpenrouterChatCompletions",
+        "summary": "OpenRouter capture chat completions alias for clients whose base URL is",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "OpenRouter capture chat completions alias for clients whose base URL is https://kolm.ai/v1/capture/openrouter and which append /chat/completions."
+      }
+    },
     "/v1/capture/openrouter/v1/chat/completions": {
       "post": {
         "tags": [

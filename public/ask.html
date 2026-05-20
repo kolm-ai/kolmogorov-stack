@@ -140,11 +140,11 @@
 }
 </script>
  <link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/surface-polish.css">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Ask kolm to compile a .kolm from a description · kolm.ai">
 <meta name="twitter:description" content="Type a plain-English description of what you want. kolm parses it, runs a compile against your account, and ships a signed .kolm artifact with a K-score...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -350,6 +350,7 @@
  function maskKey(k){ return k ? (k.slice(0, 6) + '...' + k.slice(-4)) : ''; }
 
  // ---------- Tooltip ----------
+ if (tipBtn && tipBox) {
  tipBtn.addEventListener('click', function(){
  var open = tipBox.hasAttribute('hidden') === false;
  if (open) { tipBox.setAttribute('hidden', ''); tipBtn.setAttribute('aria-expanded', 'false'); }
@@ -361,6 +362,7 @@
  tipBox.setAttribute('hidden', '');
  tipBtn.setAttribute('aria-expanded', 'false');
  });
+ }
 
  // ---------- Composer ----------
  var PLACEHOLDERS = [

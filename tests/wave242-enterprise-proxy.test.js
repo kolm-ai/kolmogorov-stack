@@ -49,7 +49,7 @@ test('W242 #2 — kolm proxy sdks lists exactly the supported SDKs', () => {
   const r = runCli(['proxy', 'sdks']);
   assert.equal(r.code, 0);
   const lines = r.stdout.trim().split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-  assert.deepEqual(lines.sort(), ['anthropic', 'fireworks', 'generic', 'openai', 'together', 'vllm'].sort());
+  assert.deepEqual(lines.sort(), ['anthropic', 'fireworks', 'generic', 'openai', 'openrouter', 'together', 'vllm'].sort());
 });
 
 test('W242 #3 — kolm proxy config --sdk=openai --lang=env emits OPENAI_BASE_URL', () => {
@@ -149,4 +149,13 @@ test('W242 #15 — config --namespace=team-a is reflected in snippet header + KO
   assert.equal(r.code, 0);
   assert.match(r.stdout, /namespace=team-a/);
   assert.match(r.stdout, /KOLM_NAMESPACE="team-a"/);
+});
+
+test('W549 #1 - proxy config supports OpenRouter as a first-class OpenAI-compatible SDK', () => {
+  const r = runCli(['proxy', 'config', '--sdk=openrouter', '--lang=env']);
+  assert.equal(r.code, 0);
+  assert.match(r.stdout, /OPENAI_BASE_URL="http:\/\/127\.0\.0\.1:7403\/v1\/capture\/openrouter"/);
+  assert.match(r.stdout, /OPENROUTER_BASE_URL="http:\/\/127\.0\.0\.1:7403\/v1\/capture\/openrouter"/);
+  assert.match(r.stdout, /OPENROUTER_API_KEY="sk-or-\.\.\."/);
+  assert.match(r.stdout, /KOLM_NAMESPACE/);
 });

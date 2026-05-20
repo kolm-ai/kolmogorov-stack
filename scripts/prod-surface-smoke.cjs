@@ -32,6 +32,26 @@ function normalizeBase(value) {
   return String(value || '').replace(/\/+$/, '');
 }
 
+function codexSandboxNetworkDisabled() {
+  return process.env.CODEX_SANDBOX_NETWORK_DISABLED === '1';
+}
+
+function localBase(value) {
+  try {
+    const u = new URL(value);
+    return ['localhost', '127.0.0.1', '::1'].includes(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function codexSandboxEacces(response) {
+  if (!codexSandboxNetworkDisabled()) return false;
+  const code = String(response && response.error_code || '');
+  const detail = String(response && response.error || '');
+  return code === 'EACCES' || /\bEACCES\b|AggregateError/i.test(detail);
+}
+
 function loadJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
@@ -48,6 +68,20 @@ function loadApiKey() {
 
 function request(method, requestPath, opts = {}) {
   return new Promise((resolve) => {
+    if (process.env.KOLM_PROD_SMOKE_FORCE_EACCES === '1') {
+      resolve({
+        ok: false,
+        status: 0,
+        headers: {},
+        body: Buffer.alloc(0),
+        text: '',
+        rtt_ms: 0,
+        url: new URL(requestPath, base + '/').toString(),
+        error: 'EACCES forced by KOLM_PROD_SMOKE_FORCE_EACCES',
+        error_code: 'EACCES',
+      });
+      return;
+    }
     const url = new URL(requestPath, base + '/');
     const lib = url.protocol === 'https:' ? https : http;
     const headers = { 'user-agent': 'kolm-prod-surface-smoke/1.0' };
@@ -60,38 +94,39 @@ function request(method, requestPath, opts = {}) {
     if (opts.apiKey) headers.authorization = 'Bearer ' + opts.apiKey;
     const started = Date.now();
     const req = lib.request({
-      protocol: url.protocol,
-      hostname: url.hostname,
-      port: url.port || (url.protocol === 'https:' ? 443 : 80),
-      path: url.pathname + url.search,
-      method,
-      headers,
-    }, (res) => {
+        protocol: url.protocol,
+        hostname: url.hostname,
+        port: url.port || undefined,
+        path: url.pathname + url.search,
+        method,
+        headers,
+      }, (res) => {
       const chunks = [];
       res.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
       res.on('end', () => {
         const body = Buffer.concat(chunks);
         resolve({
-          ok: true,
+        ok: true,
           status: res.statusCode,
           headers: res.headers,
-          body,
-          text: body.toString('utf8'),
-          rtt_ms: Date.now() - started,
-          url: url.toString(),
+        body,
+        text: body.toString('utf8'),
+        rtt_ms: Date.now() - started,
+        url: url.toString(),
         });
       });
     });
     req.setTimeout(timeoutMs, () => req.destroy(new Error('timeout')));
     req.on('error', (error) => resolve({
-      ok: false,
-      status: 0,
-      headers: {},
-      body: Buffer.alloc(0),
-      text: '',
-      rtt_ms: Date.now() - started,
-      url: url.toString(),
+        ok: false,
+        status: 0,
+        headers: {},
+        body: Buffer.alloc(0),
+        text: '',
+        rtt_ms: Date.now() - started,
+        url: url.toString(),
       error: error && error.message ? error.message : String(error),
+      error_code: error && error.code ? error.code : undefined,
     }));
     if (payload) req.write(payload);
     req.end();
@@ -217,6 +252,56 @@ async function main() {
   const surfaces = (catalog.surfaces || []).filter((s) => !surfaceFilter || surfaceFilter.has(s.id));
   const results = [];
   const started = Date.now();
+  if (codexSandboxNetworkDisabled() && !localBase(base)) {
+    const preflight = await request('GET', '/v1/ready', {});
+    if (codexSandboxEacces(preflight)) {
+      const plannedProbes = surfaces.reduce((sum, surface) => {
+        return sum + ((surface.production_smoke || []).filter((p) => includeDeep || p.mode !== 'deep').length);
+      }, 0);
+      const bySurface = surfaces.map((surface) => {
+        const probes = (surface.production_smoke || []).filter((p) => includeDeep || p.mode !== 'deep').length;
+        return {
+          id: surface.id,
+          name: surface.name,
+          status: surface.status,
+          ok: true,
+          skipped: true,
+          probes,
+          passed: 0,
+          failed: 0,
+          blocked: 0,
+          deep_included: includeDeep,
+        };
+      });
+      const out = {
+        ok: true,
+        skipped: true,
+        reason: `Codex sandbox disables child-process network (${preflight.error_code || 'EACCES'})`,
+        base,
+        catalog: path.relative(ROOT, CATALOG_PATH).replace(/\\/g, '/'),
+        surfaces: bySurface,
+        probes: plannedProbes,
+        passed: 0,
+        failed: 0,
+        blocked: 0,
+        deep: includeDeep,
+        auth: {
+          required: requireAuth,
+          present: !!apiKey.value,
+          source: apiKey.source,
+          allow_missing: allowMissingAuth,
+        },
+        duration_ms: Date.now() - started,
+        results: [],
+      };
+      if (jsonMode) {
+        process.stdout.write(JSON.stringify(out, null, 2) + '\n');
+      } else {
+        process.stdout.write(`prod-surface-smoke: skipped base=${base} surfaces=${bySurface.length} probes=${plannedProbes} reason=${out.reason}\n`);
+      }
+      process.exit(0);
+    }
+  }
   if (requireAuth && !apiKey.value) {
     results.push({ ok: false, surface: '(auth)', probe: null, blocked: true, reason: 'missing production API key' });
   }
@@ -286,4 +371,3 @@ main().catch((e) => {
   else process.stderr.write('prod-surface-smoke: ' + e.message + '\n');
   process.exit(1);
 });
-

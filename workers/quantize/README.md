@@ -32,7 +32,9 @@ node quantize.mjs --doctor
 kolm quantize --local-worker --doctor
 ```
 
-Exits 0 when python3 + torch + bitsandbytes are all importable; 1 otherwise.
+Exits 0 when at least one supported method is runnable. The JSON report includes
+`ready_by_method` and `missing_by_method`, so operators can distinguish an
+int4/int8 bitsandbytes install from a GPTQ or AWQ install.
 
 ## Supported methods
 
@@ -45,12 +47,15 @@ Exits 0 when python3 + torch + bitsandbytes are all importable; 1 otherwise.
 
 ## Honest scope
 
-kolm ships the quantization scaffolding (this Node entrypoint, dep detection,
-honest manifest emission). The Python heavy lifting (scripts/quantize.py) is
-the customer's opt-in: drop in a script that takes `--method --in --out` and
-runs the chosen quantizer. The worker handles the absence gracefully: running
-the verb today returns a "scaffolding present, python script not yet shipped"
-manifest with exit 0 and no crash.
+kolm ships the quantization substrate: this Node entrypoint, method-specific
+dependency detection, honest manifest emission, and the Python implementation
+at `scripts/quantize.py`.
+
+The heavy Python packages are still customer's opt-in. Running a quantization
+method without the method's required Python stack writes a manifest with
+`api_status: "toolchain_not_ready"` and exits 2. `--doctor` is the inspection
+path; it exits 0 only when at least one method is ready, or when the requested
+`--method` is ready.
 
 The root `kolm` install has zero torch / bitsandbytes / auto-gptq deps. They
 only enter the tree when an operator runs `npm install` + `pip install` inside

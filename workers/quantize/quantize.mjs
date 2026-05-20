@@ -54,11 +54,19 @@ if (args.doctor) {
     console.log(`  node_version:    ${report.node_version}`);
     console.log(`  python_ok:       ${report.python_ok}` + (report.python_version ? ` (${report.python_version})` : ''));
     console.log(`  torch_ok:        ${report.torch_ok}` + (report.torch_version ? ` (${report.torch_version})` : ''));
+    console.log(`  transformers_ok: ${report.transformers_ok}` + (report.transformers_version ? ` (${report.transformers_version})` : ''));
+    console.log(`  accelerate_ok:   ${report.accelerate_ok}`);
     console.log(`  bitsandbytes_ok: ${report.bitsandbytes_ok}`);
+    console.log(`  auto_gptq_ok:    ${report.auto_gptq_ok}`);
+    console.log(`  optimum_ok:      ${report.optimum_ok}`);
+    console.log(`  autoawq_ok:      ${report.autoawq_ok}`);
+    console.log(`  ready_by_method: ${JSON.stringify(report.ready_by_method)}`);
     console.log(`  ready:           ${report.ready_for_quantize}`);
     if (report.hint) console.log(`  hint:            ${report.hint}`);
   }
-  process.exit(report.ready_for_quantize ? 0 : 1);
+  const doctorMethod = VALID_METHODS.includes(args.method) ? args.method : null;
+  const ready = doctorMethod ? report.ready_by_method[doctorMethod] : report.ready_for_quantize;
+  process.exit(ready ? 0 : 1);
 }
 
 const method = args.method || 'int4';
@@ -73,8 +81,9 @@ const report = await doctor();
 const pyScript = path.join(__dirname, 'scripts', 'quantize.py');
 const pyScriptExists = fs.existsSync(pyScript);
 
-if (!report.ready_for_quantize || !pyScriptExists) {
-  // Honest manifest: scaffolding present, python path NOT YET WIRED.
+if (!report.ready_by_method?.[method] || !pyScriptExists) {
+  // Honest manifest: the Node substrate is present, but this method cannot
+  // run until its Python stack is importable.
   const manifest = {
     worker: WORKER_NAME,
     worker_version: WORKER_VERSION,
@@ -82,11 +91,12 @@ if (!report.ready_for_quantize || !pyScriptExists) {
     in:  inDir,
     out: outDir,
     ml_pipeline_run: false,
-    api_status: 'not_yet_wired',
+    api_status: pyScriptExists ? 'toolchain_not_ready' : 'not_yet_wired',
     python_script_present: pyScriptExists,
+    missing_pieces: report.missing_by_method?.[method] || [],
     doctor: report,
     note: pyScriptExists
-      ? 'python stack missing; install workers/quantize/requirements.txt in a venv'
+      ? `python stack missing for ${method}; install workers/quantize/requirements.txt in a venv`
       : 'scripts/quantize.py missing — reinstall workers/quantize/ from upstream',
     next: pyScriptExists
       ? 'cd workers/quantize && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt'
@@ -133,29 +143,90 @@ process.exit(res.status ?? 1);
 async function doctor() {
   const python = spawnSync('python3', ['--version'], { encoding: 'utf8' });
   const python_ok = python.status === 0;
-  let torch_ok = false;
-  let torch_version = null;
-  if (python_ok) {
-    const t = spawnSync('python3', ['-c', 'import torch; print(torch.__version__)'], { encoding: 'utf8' });
-    torch_ok = t.status === 0;
-    torch_version = torch_ok ? (t.stdout || '').trim() : null;
-  }
-  let bitsandbytes_ok = false;
-  if (python_ok) {
-    const bnb = spawnSync('python3', ['-c', 'import bitsandbytes; print(bitsandbytes.__version__)'], { encoding: 'utf8' });
-    bitsandbytes_ok = bnb.status === 0;
-  }
+  const torch = probePythonModule('torch', '__version__', python_ok);
+  const transformers = probePythonModule('transformers', '__version__', python_ok);
+  const accelerate = probePythonModule('accelerate', '__version__', python_ok);
+  const bitsandbytes = probePythonModule('bitsandbytes', '__version__', python_ok);
+  const autoGptq = probePythonModule('auto_gptq', '__version__', python_ok);
+  const optimum = probePythonModule('optimum', '__version__', python_ok);
+  const autoawq = probePythonModule('awq', '__version__', python_ok);
+
+  const baseOk = python_ok && torch.ok && transformers.ok && accelerate.ok;
+  const ready_by_method = {
+    int4: baseOk && bitsandbytes.ok,
+    int8: baseOk && bitsandbytes.ok,
+    gptq: baseOk && autoGptq.ok && optimum.ok,
+    awq: baseOk && autoawq.ok,
+  };
+  const missing_by_method = Object.fromEntries(
+    Object.entries({
+      int4: [
+        ['python3', python_ok],
+        ['torch', torch.ok],
+        ['transformers', transformers.ok],
+        ['accelerate', accelerate.ok],
+        ['bitsandbytes', bitsandbytes.ok],
+      ],
+      int8: [
+        ['python3', python_ok],
+        ['torch', torch.ok],
+        ['transformers', transformers.ok],
+        ['accelerate', accelerate.ok],
+        ['bitsandbytes', bitsandbytes.ok],
+      ],
+      gptq: [
+        ['python3', python_ok],
+        ['torch', torch.ok],
+        ['transformers', transformers.ok],
+        ['accelerate', accelerate.ok],
+        ['auto-gptq', autoGptq.ok],
+        ['optimum', optimum.ok],
+      ],
+      awq: [
+        ['python3', python_ok],
+        ['torch', torch.ok],
+        ['transformers', transformers.ok],
+        ['accelerate', accelerate.ok],
+        ['autoawq', autoawq.ok],
+      ],
+    }).map(([methodName, deps]) => [methodName, deps.filter(([, ok]) => !ok).map(([name]) => name)])
+  );
+  const ready_for_quantize = Object.values(ready_by_method).some(Boolean);
+
   return {
     node_version: process.versions.node,
     python_ok,
     python_version: python_ok ? (python.stdout || '').trim() : null,
-    torch_ok,
-    torch_version,
-    bitsandbytes_ok,
-    ready_for_quantize: python_ok && torch_ok && bitsandbytes_ok,
-    hint: (python_ok && torch_ok && bitsandbytes_ok)
+    torch_ok: torch.ok,
+    torch_version: torch.version,
+    transformers_ok: transformers.ok,
+    transformers_version: transformers.version,
+    accelerate_ok: accelerate.ok,
+    accelerate_version: accelerate.version,
+    bitsandbytes_ok: bitsandbytes.ok,
+    bitsandbytes_version: bitsandbytes.version,
+    auto_gptq_ok: autoGptq.ok,
+    auto_gptq_version: autoGptq.version,
+    optimum_ok: optimum.ok,
+    optimum_version: optimum.version,
+    autoawq_ok: autoawq.ok,
+    autoawq_version: autoawq.version,
+    ready_by_method,
+    missing_by_method,
+    ready_for_quantize,
+    hint: ready_for_quantize
       ? null
       : 'install Python 3.10+ then: cd workers/quantize && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt',
+  };
+}
+
+function probePythonModule(moduleName, versionAttr, python_ok) {
+  if (!python_ok) return { ok: false, version: null };
+  const code = `import ${moduleName}; print(getattr(${moduleName}, '${versionAttr}', 'unknown'))`;
+  const res = spawnSync('python3', ['-c', code], { encoding: 'utf8' });
+  return {
+    ok: res.status === 0,
+    version: res.status === 0 ? (res.stdout || '').trim() : null,
   };
 }
 

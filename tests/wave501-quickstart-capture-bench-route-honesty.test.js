@@ -56,6 +56,8 @@ test('W501 #3 - capture guidance names concrete shipped capture endpoints', () =
   const cookbook = read('public/cookbook/recipe-from-observations.html');
   const captures = read('public/captures.html');
   const audit = read('public/audit-log.html');
+  const connectors = read('public/docs/connectors.html');
+  const captureCli = read('public/docs/cli/capture.html');
 
   assert.ok(hasRoute('POST', '/v1/capture/openai'));
   assert.ok(hasRoute('POST', '/v1/capture/anthropic'));
@@ -71,6 +73,14 @@ test('W501 #3 - capture guidance names concrete shipped capture endpoints', () =
   assert.match(captures, /\/v1\/capture\/openrouter/);
   assert.match(captures, /x-upstream-api-key/);
   assert.match(cookbook, /\/v1\/capture\/log/);
+  assert.match(connectors, /OpenRouter/);
+  assert.match(connectors, /x-upstream-api-key/);
+  assert.match(connectors, /Bearer ks_\*/);
+  assert.doesNotMatch(connectors, /Bearer kolm_/);
+  assert.match(captureCli, /openrouter/);
+  assert.match(captureCli, /OPENROUTER_BASE_URL/);
+  assert.match(captureCli, /Bearer ks_\*/);
+  assert.doesNotMatch(captureCli, /Bearer kolm_/);
 });
 
 test('W501 #4 - benchmark and troubleshooting docs do not advertise unshipped batch or submit endpoints', () => {

@@ -160,3 +160,24 @@ test('W250 #15 — CLI dispatch + completion + HELP wiring for remote', () => {
   assert.match(txt, /remote: \['list', 'info', 'rank', 'recommend', 'plan', 'env'\]/);
   assert.match(txt, /remote: `kolm remote - rent compute/);
 });
+
+test('W250 #16 - Anthropic remote inference uses native Messages API, not OpenAI chat path', async () => {
+  const RC = await import(RC_URL);
+  const plan = RC.planInference({
+    providerId: 'anthropic',
+    model: 'claude-sonnet-4-6',
+    messages: [
+      { role: 'system', content: 'Return terse answers.' },
+      { role: 'user', content: 'hello' },
+    ],
+    max_tokens: 64,
+  });
+  assert.equal(plan.protocol, 'anthropic-messages');
+  assert.match(plan.url, /\/v1\/messages$/);
+  assert.equal(plan.headers['x-api-key'], '$ANTHROPIC_API_KEY');
+  assert.equal(plan.headers['anthropic-version'], '2023-06-01');
+  assert.equal(plan.headers.Authorization, undefined);
+  assert.equal(plan.body.model, 'claude-sonnet-4-6');
+  assert.equal(plan.body.system, 'Return terse answers.');
+  assert.deepEqual(plan.body.messages, [{ role: 'user', content: 'hello' }]);
+});

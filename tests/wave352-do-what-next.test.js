@@ -120,6 +120,43 @@ test('W352 #6 - kolm what --json on empty HOME returns 0 counts + structured env
   assert.equal(typeof env.generated_at, 'string');
 });
 
+test('W549 #3 - kolm what --json surfaces local API-key presence as current_tenant', async () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w549-what-'));
+  try {
+    fs.mkdirSync(path.join(tmp, '.kolm'), { recursive: true });
+    fs.writeFileSync(path.join(tmp, '.kolm', 'config.json'), JSON.stringify({
+      base: 'https://kolm.ai',
+      api_key: 'ks_w549_current_tenant_probe_1234567890',
+    }, null, 2));
+    const r = await runCli(['what', '--json'], { home: tmp });
+    assert.equal(r.code, 0);
+    const env = firstJson(r.stdout);
+    assert.equal(env.config.api_key, 'ks_w54...');
+    assert.equal(env.current_tenant.source, 'local_config');
+    assert.equal(env.current_tenant.server_validated, false);
+    assert.equal(env.current_tenant.key_fingerprint, 'ks_w54...');
+  } finally {
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
+test('W549 #4 - kolm what human-mode does not print [object Object] for config-only tenant', async () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w549-what-human-'));
+  try {
+    fs.mkdirSync(path.join(tmp, '.kolm'), { recursive: true });
+    fs.writeFileSync(path.join(tmp, '.kolm', 'config.json'), JSON.stringify({
+      base: 'https://kolm.ai',
+      api_key: 'ks_w549_human_tenant_probe_1234567890',
+    }, null, 2));
+    const r = await runCli(['what'], { home: tmp });
+    assert.equal(r.code, 0);
+    assert.doesNotMatch(r.stdout, /\[object Object\]/);
+    assert.match(r.stdout, /tenant:\s+ks_w54\.\.\./);
+  } finally {
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
 test('W352 #7 - kolm what human-mode prints a snapshot header + the next section', async () => {
   const r = await runCli(['what']);
   assert.equal(r.code, 0, `stderr=${r.stderr.slice(0, 400)}`);

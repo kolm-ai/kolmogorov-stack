@@ -2,9 +2,9 @@
 //
 // The builder's "describe in natural language, generate seeds" button used
 // to crash or return empty. W347 wires it to the real LLM abstraction in
-// src/llm-call.js. Crucially, when no LLM backend is configured the route
-// returns a clean 501 with a documented error code so the UI can degrade
-// gracefully (hide the button) and the operator sees the exact env var.
+// src/llm-call.js. W547 closes the last production gap: when no LLM backend
+// is configured, the route returns deterministic local seed expansion instead
+// of failing with 501.
 //
 // Test environment: by default tests are run with no LLM env vars set, so
 // the unconfigured path is the deterministic one we lock in. We do not
@@ -17,8 +17,8 @@
 //   2. GET /v1/seeds/from-nl/health returns {available, provider, model,
 //      base_url, has_key, hint}. When unconfigured, available is false and
 //      hint mentions both KOLM_LLM_PROVIDER and KOLM_LLM_KEY.
-//   3. POST /v1/seeds/from-nl with no backend → 501 with
-//      error:'nl_seeds_requires_backend' and hint mentioning both env vars.
+//   3. POST /v1/seeds/from-nl with no backend returns 200 with
+//      source:'local_deterministic', count rows, and JSONL text.
 //   4. POST /v1/seeds/from-nl with a bad seed body → 400 invalid_seed.
 //   5. Health endpoint round-trip is JSON, never HTML (would never collide
 //      with W346's static fallback).
@@ -97,7 +97,7 @@ test('W347 NL #2 - health reports unavailable + hint when no backend configured'
   });
 });
 
-test('W347 NL #3 - POST returns 501 with documented error when unconfigured', async () => {
+test('W347/W547 NL #3 - POST returns local deterministic seeds when unconfigured', async () => {
   const app = await bootApp();
   await withServer(app, async (base) => {
     const r = await fetch(base + '/v1/seeds/from-nl', {
@@ -108,19 +108,28 @@ test('W347 NL #3 - POST returns 501 with documented error when unconfigured', as
         count: 5,
       }),
     });
-    assert.equal(r.status, 501, 'unconfigured backend must return 501');
+    assert.equal(r.status, 200, 'unconfigured backend must still generate deterministic local seeds');
     const j = await r.json();
-    assert.equal(j.error, 'nl_seeds_requires_backend');
-    assert.ok(typeof j.hint === 'string');
-    assert.match(j.hint, /KOLM_LLM_PROVIDER/);
-    assert.match(j.hint, /KOLM_LLM_KEY/);
+    assert.equal(j.ok, true);
+    assert.equal(j.source, 'local_deterministic');
+    assert.equal(j.provider, 'local');
+    assert.equal(j.model, 'deterministic-seed-expander-v1');
+    assert.equal(j.count, 5);
+    assert.equal(Array.isArray(j.seeds), true);
+    assert.equal(j.seeds.length, 5);
+    assert.ok(j.seeds_jsonl_text.split('\n').length >= 5);
+    assert.match(j.warning, /deterministic local seed expansion/);
+    for (const row of j.seeds) {
+      assert.equal(row.output, '2026-05-18');
+      assert.equal(row.source, 'local_deterministic');
+    }
   });
 });
 
 test('W347 NL #4 - POST returns 400 invalid_seed when body is malformed', async () => {
-  // Spin up with a configured backend so the 501 short-circuit does not
-  // mask the validation check. We point at ollama with a localhost base
-  // that won't be touched because validation fails first.
+  // Spin up with a configured backend so validation still fires before any
+  // networked generation path. We point at ollama with a localhost base that
+  // won't be touched because validation fails first.
   process.env.KOLM_LLM_PROVIDER = 'ollama';
   process.env.KOLM_LLM_BASE_URL = 'http://127.0.0.1:1';
   delete process.env.KOLM_LLM_KEY;

@@ -213,6 +213,21 @@
       "summary": "Fast inference. Limited training surface."
     },
     {
+      "name": "anthropic",
+      "kind": "cloud-managed",
+      "train": false,
+      "infer": true,
+      "airgap": false,
+      "cost_per_hour_usd": null,
+      "cold_start_seconds": 0,
+      "vram_cap_gb": null,
+      "auth": "ANTHROPIC_API_KEY",
+      "tier": 1,
+      "detect": "env var present",
+      "framework": "Anthropic Messages API",
+      "summary": "Direct Claude inference via native /v1/messages API."
+    },
+    {
       "name": "vllm",
       "kind": "serving-engine",
       "train": false,

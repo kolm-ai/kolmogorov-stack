@@ -1,8 +1,9 @@
 // Capture proxy — drop-in replacement for Anthropic / OpenAI APIs that
 // records (input, output, latency_us, model, namespace, tenant) tuples on
-// every call. The customer points OPENAI_BASE_URL or ANTHROPIC_API_URL at
-// `https://kolm.ai/v1/capture/<provider>` and passes their own provider key
-// in the `x-upstream-api-key` header (we strip + forward it).
+// every call. The customer points OPENAI_BASE_URL, ANTHROPIC_BASE_URL, or
+// OPENROUTER_BASE_URL at `https://kolm.ai/v1/capture/<provider>` and passes
+// their own provider key in the `x-upstream-api-key` header (we strip +
+// forward it).
 //
 // The captured corpus is queryable via `/v1/labels/synthesize-corpus` as
 // JSONL or parquet, then promoted to a recipe via the existing
@@ -16,6 +17,7 @@ import crypto from 'node:crypto';
 
 const ANTHROPIC_DEFAULT = 'https://api.anthropic.com/v1/messages';
 const OPENAI_DEFAULT = 'https://api.openai.com/v1/chat/completions';
+const OPENROUTER_DEFAULT = 'https://openrouter.ai/api/v1/chat/completions';
 
 export function pickAnthropicUpstream() {
   return process.env.ANTHROPIC_UPSTREAM_URL || ANTHROPIC_DEFAULT;
@@ -23,6 +25,10 @@ export function pickAnthropicUpstream() {
 
 export function pickOpenAIUpstream() {
   return process.env.OPENAI_UPSTREAM_URL || OPENAI_DEFAULT;
+}
+
+export function pickOpenRouterUpstream() {
+  return process.env.OPENROUTER_UPSTREAM_URL || OPENROUTER_DEFAULT;
 }
 
 // Sanitize the namespace label. We allow a-z, 0-9, dash, dot, underscore;
@@ -55,7 +61,7 @@ export function extractPromptForCapture(body, provider) {
     }).filter(Boolean).join('\n\n');
     return [sys ? `system: ${sys}` : '', turns].filter(Boolean).join('\n\n');
   }
-  if (provider === 'openai') {
+  if (provider === 'openai' || provider === 'openrouter') {
     const messages = Array.isArray(body.messages) ? body.messages : [];
     return messages.map(m => {
       const role = m && m.role || 'user';
@@ -77,7 +83,7 @@ export function extractCompletionText(json, provider) {
     const blocks = Array.isArray(json.content) ? json.content : [];
     return blocks.map(b => (b && b.text) || '').join('').trim();
   }
-  if (provider === 'openai') {
+  if (provider === 'openai' || provider === 'openrouter') {
     const choices = Array.isArray(json.choices) ? json.choices : [];
     const first = choices[0] || {};
     const msg = first.message || {};
@@ -93,7 +99,7 @@ export function extractCompletionText(json, provider) {
 export function modelFromBody(body, provider) {
   if (!body || typeof body !== 'object') return '';
   if (provider === 'anthropic') return String(body.model || '').slice(0, 128);
-  if (provider === 'openai') return String(body.model || '').slice(0, 128);
+  if (provider === 'openai' || provider === 'openrouter') return String(body.model || '').slice(0, 128);
   return '';
 }
 
@@ -131,6 +137,31 @@ export async function forwardOpenAI({ url, body, upstreamKey }) {
       'authorization': `Bearer ${upstreamKey}`,
       'content-type': 'application/json',
     },
+    body: JSON.stringify(body),
+  });
+  const text = await res.text();
+  let json;
+  try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
+  const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
+  return { status: res.status, json, elapsed_us };
+}
+
+export async function forwardOpenRouter({ url, body, upstreamKey, referer = 'https://kolm.ai', title = 'kolm.ai', categories = '' }) {
+  if (!upstreamKey) {
+    return { status: 401, json: { error: { type: 'no_upstream_key', message: 'pass your OpenRouter key in x-upstream-api-key' } } };
+  }
+  const t0 = process.hrtime.bigint();
+  const headers = {
+    'authorization': `Bearer ${upstreamKey}`,
+    'content-type': 'application/json',
+    'http-referer': referer,
+    'x-title': title,
+  };
+  if (title) headers['x-openrouter-title'] = title;
+  if (categories) headers['x-openrouter-categories'] = categories;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
     body: JSON.stringify(body),
   });
   const text = await res.text();

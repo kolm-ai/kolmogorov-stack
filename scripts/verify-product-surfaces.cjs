@@ -113,10 +113,16 @@ function main() {
     if (!surface.certification || typeof surface.certification !== 'object') {
       fail(failures, 'surface_missing_certification', `${surface.id} missing certification`);
     } else {
-      for (const field of ['local_gates', 'prod_gates', 'blockers']) {
+      for (const field of ['local_gates', 'prod_gates']) {
         if (!Array.isArray(surface.certification[field]) || surface.certification[field].length === 0) {
           fail(failures, 'surface_missing_cert_field', `${surface.id} certification.${field} is empty`);
         }
+      }
+      if (!Array.isArray(surface.certification.blockers)) {
+        fail(failures, 'surface_missing_cert_field', `${surface.id} certification.blockers must be an array`);
+      }
+      if (surface.status !== 'certified' && surface.certification.blockers.length === 0) {
+        fail(failures, 'surface_missing_cert_field', `${surface.id} non-certified surfaces must name at least one blocker`);
       }
       if (!Array.isArray(surface.certification.local_gates) ||
           !surface.certification.local_gates.some((gate) => String(gate).includes(LOCAL_SURFACE_SMOKE))) {

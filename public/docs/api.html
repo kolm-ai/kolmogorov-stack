@@ -6,23 +6,23 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>API reference · kolm.ai</title>
-<meta name="description" content="Auto-generated REST API reference for kolm.ai. 356 wired routes across 108 groups, sourced directly from route source files.">
+<meta name="description" content="Auto-generated REST API reference for kolm.ai. 357 wired routes across 108 groups, sourced directly from route source files.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="API reference &middot; kolm.ai">
-<meta property="og:description" content="Auto-generated REST API reference for kolm.ai. 356 wired routes across 108 groups, sourced directly from route source files.">
+<meta property="og:description" content="Auto-generated REST API reference for kolm.ai. 357 wired routes across 108 groups, sourced directly from route source files.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/docs/api">
 <meta property="og:image" content="https://kolm.ai/og/docs-api.svg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="API reference &middot; kolm.ai">
-<meta name="twitter:description" content="Auto-generated REST API reference for kolm.ai. 356 wired routes across 108 groups, sourced directly from route source files.">
+<meta name="twitter:description" content="Auto-generated REST API reference for kolm.ai. 357 wired routes across 108 groups, sourced directly from route source files.">
 <meta name="twitter:image" content="https://kolm.ai/og/docs-api.svg">
 <link rel="canonical" href="https://kolm.ai/docs/api">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"API reference","description":"Auto-generated REST API reference for kolm.ai. 356 wired routes across 108 groups, sourced directly from route source files.","url":"https://kolm.ai/docs/api","datePublished":"2026-05-20","dateModified":"2026-05-20","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"API reference","description":"Auto-generated REST API reference for kolm.ai. 357 wired routes across 108 groups, sourced directly from route source files.","url":"https://kolm.ai/docs/api","datePublished":"2026-05-20","dateModified":"2026-05-20","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://kolm.ai/docs"},{"@type":"ListItem","position":3,"name":"API reference","item":"https://kolm.ai/docs/api"}]}</script>
 <style>
 :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -88,7 +88,6 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap">
   <a class="logo" href="/">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -193,11 +192,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / api</div>
 <h1>API reference</h1>
-<p class="lede">The kolm.ai REST surface. 356 wired routes across 108 groups, auto-extracted from route source files and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
+<p class="lede">The kolm.ai REST surface. 357 wired routes across 108 groups, auto-extracted from route source files and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
 
-<p class="totals"><strong>356 wired routes</strong> &middot; <span class="route-live">356 reference-ready</span> &middot; <span class="route-stub">0 source-indexed</span> &middot; 108 groups &middot; generated 2026-05-20 &middot; source <code>src/router.js</code></p>
+<p class="totals"><strong>357 wired routes</strong> &middot; <span class="route-live">357 reference-ready</span> &middot; <span class="route-stub">0 source-indexed</span> &middot; 108 groups &middot; generated 2026-05-20 &middot; source <code>src/router.js</code></p>
 
-<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview" onclick="document.body.setAttribute('data-api-filter', this.checked ? 'live' : 'all')"> Show reference-ready routes only</label></div>
+<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview"> Show reference-ready routes only</label></div>
 
 
 
@@ -234,7 +233,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <li><a href="#group-builds">Builds</a> <span class="toc-count">1</span></li>
   <li><a href="#group-byoc">Bring-your-own-cloud</a> <span class="toc-count">6</span></li>
   <li><a href="#group-capability">Capability</a> <span class="toc-count">2</span></li>
-  <li><a href="#group-capture">Capture</a> <span class="toc-count">8</span></li>
+  <li><a href="#group-capture">Capture</a> <span class="toc-count">9</span></li>
   <li><a href="#group-cc">Cc</a> <span class="toc-count">3</span></li>
   <li><a href="#group-changelog">Changelog</a> <span class="toc-count">1</span></li>
   <li><a href="#group-chat">OpenAI-compatible chat</a> <span class="toc-count">1</span></li>
@@ -1258,7 +1257,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-group" id="group-capture">
-<h2>Capture <span class="group-count">(8)</span></h2>
+<h2>Capture <span class="group-count">(9)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-capture-anthropic">
   <h3><span class="m m-post">POST</span> <code>/v1/capture/anthropic</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">regex route</span></h3>
@@ -1332,6 +1331,20 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <p class="route-desc">OpenRouter capture and base-URL aliases. The direct base-URL forms support</p>
   <details class="route-detail"><summary>Full comment</summary><p>OpenRouter capture and base-URL aliases. The direct base-URL forms support SDKs that point BASE_URL at https://kolm.ai/v1/openrouter.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/capture/openrouter&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="POST-v1-capture-openrouter-chat-completions">
+  <h3><span class="m m-post">POST</span> <code>/v1/capture/openrouter/chat/completions</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
+  <p class="route-desc">OpenRouter capture chat completions alias for clients whose base URL is</p>
+  <details class="route-detail"><summary>Full comment</summary><p>OpenRouter capture chat completions alias for clients whose base URL is https://kolm.ai/v1/capture/openrouter and which append /chat/completions.</p></details>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/capture/openrouter/chat/completions&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
   -d &#39;{}&#39;</code></pre>
@@ -1891,8 +1904,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-distill-onpolicy-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/distill/onpolicy/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W480 - Thinking Machines on-policy distillation doctor. Reports whether</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W480 - Thinking Machines on-policy distillation doctor. Reports whether $KOLM_ONPOLICY_TRAINER is resolvable; returns install_hint when absent. No auth required so tooling can probe before signing in.</p></details>
+  <p class="route-desc">Public trainer doctors. These report only local trainer availability and</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Public trainer doctors. These report only local trainer availability and install hints, so CLIs can decide whether a host is train-capable before a tenant exists. Training jobs themselves remain authenticated below.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/distill/onpolicy/doctor&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -1917,8 +1930,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-distill-preference-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/distill/preference/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W480 - Preference-pair trainer doctor (DPO / SimPO / KTO / ORPO). Reports</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W480 - Preference-pair trainer doctor (DPO / SimPO / KTO / ORPO). Reports whether $KOLM_PREFERENCE_TRAINER is resolvable; honest install_hint when not.</p></details>
+  <p class="route-desc">Preference distillation doctor - unauthenticated capability report for the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Preference distillation doctor - unauthenticated capability report for the DPO/SIMPO/ORPO/KTO training path and its local dependency hints.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/distill/preference/doctor&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -3964,8 +3977,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-seeds-from-nl">
   <h3><span class="m m-post">POST</span> <code>/v1/seeds/from-nl</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W347 – POST /v1/seeds/from-nl. Fan out a single seed (or short prompt)</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W347 – POST /v1/seeds/from-nl. Fan out a single seed (or short prompt) into N variations via the configured LLM. Returns 501 with a documented error code when no backend is configured, so the UI can degrade gracefully and the operator sees the exact env var to set.</p></details>
+  <p class="route-desc">POST /v1/seeds/from-nl - expand a seed into variants via the configured</p>
+  <details class="route-detail"><summary>Full comment</summary><p>POST /v1/seeds/from-nl - expand a seed into variants via the configured LLM, or deterministic local fallback when no LLM backend is configured.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/seeds/from-nl&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \

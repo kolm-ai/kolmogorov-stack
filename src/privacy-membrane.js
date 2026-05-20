@@ -1,6 +1,6 @@
 // src/privacy-membrane.js
 //
-// W370 - Full privacy membrane: 17-class detector + redactor + reinserter +
+// W370 - Full privacy membrane: detector + redactor + reinserter +
 // policy engine, JS-only (node:fs / node:path / node:crypto) with the small
 // FIRST/LAST name table living in src/data/names-list.js for the
 // proper-noun bigram heuristic.
@@ -37,7 +37,7 @@ import crypto from 'node:crypto';
 
 import { FIRST_NAMES, LAST_NAMES } from './data/names-list.js';
 
-export const DETECTOR_VERSION = '2026-05-18.1';
+export const DETECTOR_VERSION = '2026-05-20.1';
 
 // -----------------------------------------------------------------------
 // Storage paths (honour KOLM_DATA_DIR for test isolation)
@@ -90,6 +90,8 @@ export const ALL_CLASSES = Object.freeze([
   'dob',
   'mrn',
   'account_number',
+  'payment_card',
+  'malformed_payment_card',
   'api_key',
   'bearer_token',
   'private_key',
@@ -371,6 +373,72 @@ function detectAccountNumber(text) {
   return out;
 }
 
+// Payment card / PAN ------------------------------------------------------
+//
+// PCI-oriented detector. Valid card-like numbers are redacted even without an
+// anchor because leaking a PAN has high blast radius. Invalid card-like values
+// are tagged only when payment/card context is nearby so random long IDs do
+// not become noisy "noncompliant" findings.
+
+const PAYMENT_CARD_CANDIDATE_RE = /(?<![\dA-Za-z])(?:\d[ -]?){12,18}\d(?![\dA-Za-z])/g;
+const PAYMENT_CONTEXT_RE = /\b(?:card|cardholder|cc|credit|debit|pan|payment|visa|mastercard|amex|discover)\b/i;
+
+function _cardDigits(value) {
+  return String(value || '').replace(/\D/g, '');
+}
+
+function _allSameDigit(digits) {
+  return /^(\d)\1+$/.test(digits);
+}
+
+function _luhnValid(digits) {
+  if (!/^\d{13,19}$/.test(digits)) return false;
+  if (_allSameDigit(digits)) return false;
+  let sum = 0;
+  let doubleIt = false;
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let n = digits.charCodeAt(i) - 48;
+    if (doubleIt) {
+      n *= 2;
+      if (n > 9) n -= 9;
+    }
+    sum += n;
+    doubleIt = !doubleIt;
+  }
+  return sum % 10 === 0;
+}
+
+function _hasPaymentContext(text, start, end) {
+  const lo = Math.max(0, start - 32);
+  const hi = Math.min(text.length, end + 32);
+  return PAYMENT_CONTEXT_RE.test(text.slice(lo, hi));
+}
+
+function detectPaymentCards(text) {
+  const valid = [];
+  const malformed = [];
+  for (const m of text.matchAll(PAYMENT_CARD_CANDIDATE_RE)) {
+    const start = m.index;
+    const end = start + m[0].length;
+    const digits = _cardDigits(m[0]);
+    if (digits.length < 13 || digits.length > 19) continue;
+    if (_luhnValid(digits)) {
+      valid.push({ start, end, value: m[0], confidence: 0.93, brand: _cardBrand(digits) });
+    } else if (_hasPaymentContext(text, start, end)) {
+      malformed.push({ start, end, value: m[0], confidence: 0.45 });
+    }
+  }
+  return { valid, malformed };
+}
+
+function _cardBrand(digits) {
+  if (/^4/.test(digits)) return 'visa';
+  if (/^(5[1-5]|2[2-7])/.test(digits)) return 'mastercard';
+  if (/^3[47]/.test(digits)) return 'amex';
+  if (/^(6011|65|64[4-9])/.test(digits)) return 'discover';
+  return 'unknown';
+}
+
 // API key -----------------------------------------------------------------
 
 const API_KEY_RE = /\b(?:sk_[A-Za-z0-9_]{16,}|sk-[A-Za-z0-9_\-]{16,}|ant-[A-Za-z0-9_\-]{16,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z\-_]{16,}|ghp_[A-Za-z0-9]{16,}|gho_[A-Za-z0-9]{16,}|glpat-[A-Za-z0-9\-_]{16,}|xox[baprs]-[A-Za-z0-9\-]{10,})\b/g;
@@ -578,6 +646,7 @@ function detectIp(text) {
 function _runAllDetectors(text) {
   const ssn = detectSSN(text);
   const malformed = detectMalformedSSN(text, ssn);
+  const paymentCards = detectPaymentCards(text);
   const all = [
     ...ssn.map((m) => ({ ...m, class: 'ssn' })),
     ...malformed.map((m) => ({ ...m, class: 'malformed_ssn' })),
@@ -588,6 +657,8 @@ function _runAllDetectors(text) {
     ...detectDOB(text).map((m) => ({ ...m, class: 'dob' })),
     ...detectMRN(text).map((m) => ({ ...m, class: 'mrn' })),
     ...detectAccountNumber(text).map((m) => ({ ...m, class: 'account_number' })),
+    ...paymentCards.valid.map((m) => ({ ...m, class: 'payment_card' })),
+    ...paymentCards.malformed.map((m) => ({ ...m, class: 'malformed_payment_card' })),
     ...detectApiKey(text).map((m) => ({ ...m, class: 'api_key' })),
     ...detectBearer(text).map((m) => ({ ...m, class: 'bearer_token' })),
     ...detectPrivateKey(text).map((m) => ({ ...m, class: 'private_key' })),
@@ -609,6 +680,8 @@ function _runAllDetectors(text) {
     'ssn',
     'malformed_ssn',
     'email',
+    'payment_card',
+    'malformed_payment_card',
     'mrn',
     'account_number',
     'customer_id',

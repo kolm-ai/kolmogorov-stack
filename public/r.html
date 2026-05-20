@@ -124,10 +124,10 @@
 }
 </script>
  <link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/surface-polish.css">
 <meta name="twitter:title" content="Receipt verification · kolm.ai">
 <meta name="twitter:description" content="Public verification for any kolm receipt. Paste or share a hash and anyone can confirm the Ed25519 receipt chain is intact, when the receipt was signed, and...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -398,10 +398,10 @@
  function copyableCell(full){
  if (!full) return '<span class="private">not available</span>';
  var safe = escapeHtml(full);
- return '<span data-full="' + safe + '" onclick="copyFull(this)">' + escapeHtml(shorten(full)) + '<span class="copy-hint">click to copy</span></span>';
+ return '<span class="js-copy-full" role="button" tabindex="0" aria-label="Copy full receipt value" data-full="' + safe + '">' + escapeHtml(shorten(full)) + '<span class="copy-hint">click to copy</span></span>';
  }
 
- window.copyFull = function(el){
+ function copyFull(el){
  var full = el.getAttribute('data-full') || '';
  if (!full) return;
  var done = function(){
@@ -418,7 +418,19 @@
  try { document.execCommand('copy'); done(); } catch (_) {}
  document.body.removeChild(ta);
  }
- };
+ }
+ window.copyFull = copyFull;
+ document.addEventListener('click', function(e){
+ var el = e.target && e.target.closest ? e.target.closest('.js-copy-full[data-full]') : null;
+ if (el) copyFull(el);
+ });
+ document.addEventListener('keydown', function(e){
+ if (e.key !== 'Enter' && e.key !== ' ') return;
+ var el = e.target && e.target.closest ? e.target.closest('.js-copy-full[data-full]') : null;
+ if (!el) return;
+ e.preventDefault();
+ copyFull(el);
+ });
 
  function renderEmpty(message, hint){
  setBadge('warn', 'Receipt not found');

@@ -72,11 +72,11 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 @media (max-width:560px){main{padding:32px 18px 64px}h1{font-size:30px}h2{font-size:20px}.cmdbox pre{font-size:13px}}
 </style>
  <link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/surface-polish.css">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
-<a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>
+<a href="#main" class="skip-link" style="position:absolute;left:-9999px">Skip to content</a>
 <header class="site-header">
  <div class="wrap">
  <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
@@ -192,7 +192,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 <h2>Install command</h2>
 <div class="cmdbox">
  <div class="label">copy &middot; paste &middot; run</div>
- <button class="copy" onclick="navigator.clipboard.writeText('node scripts/install-mcp.cjs claude-desktop').then(()=>{this.textContent='copied'})">copy</button>
+ <button class="copy" type="button" data-copy-text="node scripts/install-mcp.cjs claude-desktop" data-copy-label="copy">copy</button>
  <pre>node scripts/install-mcp.cjs claude-desktop</pre>
 </div>
 <p class="muted">Already have kolm installed globally? Run <code>kolm install claude-desktop</code> instead. Pass <code>--dry-run</code> to preview the JSON without touching disk.</p>

@@ -339,7 +339,10 @@ test('W378 #8 — validateClass accepts every one of the canonical privacy class
   try {
     const cs = await loadCloudSync();
     assert.ok(Array.isArray(cs.PRIVACY_CLASSES));
-    assert.equal(cs.PRIVACY_CLASSES.length, 17, 'PRIVACY_CLASSES must have 17 entries');
+    assert.ok(cs.PRIVACY_CLASSES.length >= 19, 'PRIVACY_CLASSES must include membrane + PCI classes');
+    for (const required of ['ssn', 'malformed_ssn', 'payment_card', 'malformed_payment_card']) {
+      assert.ok(cs.PRIVACY_CLASSES.includes(required), 'PRIVACY_CLASSES must include ' + required);
+    }
     for (const cls of cs.PRIVACY_CLASSES) {
       assert.equal(cs.validateClass(cls), true, 'validateClass must accept ' + cls);
     }

@@ -315,3 +315,16 @@ test('W409i #15 - :events colon-verb routes to the live-calls view (W213 SSE cha
   assert.match(TUI_BODY, /events:\s*['"]live-calls['"]/,
     'VIEW_ALIAS must map events -> live-calls');
 });
+
+test('W409i #16 - TUI exposes provider connectors as a command-mode view', () => {
+  const TUI_START = CLI_SRC.indexOf('async function cmdTui(args)');
+  const NEXT_FN = CLI_SRC.indexOf('\nasync function ', TUI_START + 1);
+  const TUI_BODY = NEXT_FN > TUI_START ? CLI_SRC.slice(TUI_START, NEXT_FN) : CLI_SRC.slice(TUI_START);
+  assert.match(TUI_BODY, /id:\s*'connectors'/, 'TUI_VIEWS must include connectors');
+  assert.match(TUI_BODY, /endpoint:\s*'\/v1\/account'/, 'connectors view must read the account envelope');
+  assert.match(TUI_BODY, /'connectors':\s*'connectors'/, ':connectors must route to connectors view');
+  assert.match(TUI_BODY, /'providers':\s*'connectors'/, ':providers must route to connectors view');
+  assert.match(TUI_BODY, /OpenAI/);
+  assert.match(TUI_BODY, /Claude/);
+  assert.match(TUI_BODY, /OpenRouter/);
+});

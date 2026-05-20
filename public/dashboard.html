@@ -42,10 +42,10 @@
  }
 }
 </script>
- <link rel="stylesheet" href="/surface-polish.css">
 <meta name="twitter:title" content="Dashboard · kolm.ai">
 <meta name="twitter:description" content="Your kolm compile jobs, signed artifacts, K-scores, and account usage.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -991,7 +991,7 @@
  }
  function handleServerFail(detail){
  appendTurn('kolm', 'kolm.ai had a hiccup. Try again in a minute.' + (detail ? ' (' + detail + ')' : ''), {
- nextSteps: [ { label: 'Retry', href: '#' } ]
+ nextSteps: [ { label: 'Retry', href: '/dashboard' } ]
  });
  enableSend();
  }
@@ -1176,7 +1176,7 @@
  if (history.length === 0) {
  appendTurn('kolm', 'Hi. I can manage your builds, status, usage, plan, and start compiles from here. Try the prompts below, or open /ask for the full surface.', {
  nextSteps: [
- { label: 'show my builds', href: '#' },
+ { label: 'show my builds', href: '/account/builds' },
  { label: 'open /ask', href: '/ask' }
  ]
  });

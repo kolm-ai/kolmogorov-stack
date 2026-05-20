@@ -989,8 +989,19 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
   if (fs.existsSync(CONFIG_PATH)) {
     try {
       const c = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-      out.config = { base: c.base || null, api_key: c.api_key ? c.api_key.slice(0, 6) + '...' : null };
-      if (c.tenant) out.current_tenant = c.tenant;
+      const keyPrefix = c.api_key ? c.api_key.slice(0, 6) + '...' : null;
+      out.config = { base: c.base || null, api_key: keyPrefix };
+      if (c.tenant) {
+        out.current_tenant = c.tenant;
+      } else if (c.api_key) {
+        out.current_tenant = {
+          id: null,
+          name: null,
+          key_fingerprint: keyPrefix,
+          source: 'local_config',
+          server_validated: false,
+        };
+      }
     } catch (_) {}
   }
 
@@ -1023,7 +1034,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
       // the legacy path. tenant_id scoping mirrors the capture-store path so
       // HTTP callers under /v1/intent/next still see only their tenant.
       const tenantForFilter = _explicitTenant
-        || (out.current_tenant && (out.current_tenant.id || out.current_tenant))
+        || currentTenantFilterValue(out.current_tenant)
         || null;
       let evRows = [];
       try {
@@ -1044,7 +1055,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
       try {
         const captureStore = await import('./capture-store.js');
         const tenant = _explicitTenant
-          || (out.current_tenant && (out.current_tenant.id || out.current_tenant))
+          || currentTenantFilterValue(out.current_tenant)
           || 'local';
         let rows = [];
         try { rows = await captureStore.allCapturesForTenant(tenant, 50000); } catch (_) {}
@@ -1163,6 +1174,13 @@ function aggregateNamespaces(rows) {
     agg.set(ns, cur);
   }
   return [...agg.values()].sort((a, b) => b.count - a.count);
+}
+
+function currentTenantFilterValue(currentTenant) {
+  if (!currentTenant) return null;
+  if (typeof currentTenant === 'string') return currentTenant;
+  if (typeof currentTenant === 'object') return currentTenant.id || currentTenant.name || null;
+  return null;
 }
 
 // Recommend the next best action. Returns an array of {action, command, why,

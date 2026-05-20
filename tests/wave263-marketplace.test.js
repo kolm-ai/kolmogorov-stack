@@ -155,24 +155,37 @@ test('W263 #11 getArtifact returns the entry for a known slug, null for unknown'
   assert.equal(mod.getArtifact(null), null);
 });
 
-test('W263 #12 getCatalogManifest returns a signed manifest with sha256-anchor signature that verifies', async () => {
+test('W263 #12 getCatalogManifest returns a signed manifest with sha256 anchor + Ed25519 sidecar that verifies', async () => {
   const mod = await import(pathToFileURL(path.join(ROOT, 'src', 'marketplace.js')).href);
   const mani = mod.getCatalogManifest();
   assert.equal(mani.spec, 'kolm-marketplace-1');
   assert.equal(mani.signature_algo, 'sha256-anchor');
   assert.match(mani.signature, /^[0-9a-f]{64}$/);
+  assert.equal(mani.signature_ed25519?.alg, 'ed25519');
+  assert.match(mani.signature_ed25519?.signature || '', /^[A-Za-z0-9_-]{80,}$/);
+  assert.match(mani.signature_ed25519?.key_fingerprint || '', /^[0-9a-f]{32}$/);
   assert.ok(Array.isArray(mani.artifacts));
   assert.equal(mani.artifacts.length, SLUGS.length);
 
   // Recompute the signature and confirm it matches what the manifest carries.
   const ver = mod.verifyCatalogManifest(mani);
   assert.equal(ver.ok, true, `signature should verify; expected=${ver.expected} got=${ver.got}`);
+  assert.equal(ver.anchor_ok, true, 'sha256 anchor should verify');
+  assert.equal(ver.ed25519?.ok, true, 'Ed25519 sidecar should verify');
 
   // Tamper: flipping a single byte must invalidate the signature.
   const tampered = JSON.parse(JSON.stringify(mani));
   tampered.artifacts[0].sha256 = '0'.repeat(64);
   const verT = mod.verifyCatalogManifest(tampered);
   assert.equal(verT.ok, false, 'tampered manifest must NOT verify');
+
+  const tamperedSidecar = JSON.parse(JSON.stringify(mani));
+  const sig0 = mani.signature_ed25519.signature[0] === 'A' ? 'B' : 'A';
+  tamperedSidecar.signature_ed25519.signature = sig0 + mani.signature_ed25519.signature.slice(1);
+  const verSidecar = mod.verifyCatalogManifest(tamperedSidecar);
+  assert.equal(verSidecar.ok, false, 'tampered Ed25519 sidecar must NOT verify');
+  assert.equal(verSidecar.anchor_ok, true, 'sha256 anchor should still isolate sidecar tampering');
+  assert.equal(verSidecar.ed25519?.ok, false, 'Ed25519 verifier must reject sidecar tamper');
 });
 
 test('W263 #13 resolveArtifactPath returns an existing absolute path for known slugs', async () => {
@@ -272,7 +285,7 @@ test('W263 #23 catalog manifest sha256 anchor matches a re-computation', async (
   const mani = mod.getCatalogManifest();
   // Replicate the canonical-json + hash recipe end to end here so the test
   // does not depend on the module's own helper.
-  const { signature, signed_at: _sa, signature_algo: _sal, ...body } = mani;
+  const { signature, signed_at: _sa, signature_algo: _sal, signature_ed25519: _se, ...body } = mani;
   const sortRecursive = (x) => {
     if (Array.isArray(x)) return x.map(sortRecursive);
     if (x && typeof x === 'object') {

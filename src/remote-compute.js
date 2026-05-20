@@ -34,6 +34,7 @@
 //   notes        — short string about pitfalls / quotas
 
 const _UNVERIFIED = '2026-05-18';
+const ANTHROPIC_VERSION = '2023-06-01';
 
 export const PROVIDERS = Object.freeze([
   {
@@ -92,6 +93,24 @@ export const PROVIDERS = Object.freeze([
     region: ['global'],
     verified_at: _UNVERIFIED,
     notes: 'Routes to many providers via one key. Useful for teacher selection.',
+  },
+  {
+    id: 'anthropic',
+    name: 'Anthropic Claude',
+    kind: 'inference',
+    homepage: 'https://claude.ai',
+    docs: 'https://docs.anthropic.com/en/api/overview',
+    auth_env: 'ANTHROPIC_API_KEY',
+    base_url: 'https://api.anthropic.com/v1',
+    models: [
+      'claude-opus-4-7',
+      'claude-sonnet-4-6',
+      'claude-haiku-4-5',
+    ],
+    billing: { unit: 'token', currency: 'USD', rate_in: 3.0, rate_out: 15.0 },
+    region: ['global'],
+    verified_at: _UNVERIFIED,
+    notes: 'Native Messages API. Best teacher/evaluator path when Claude behavior is desired.',
   },
   {
     id: 'modal',
@@ -208,10 +227,52 @@ export function rankByTrainingCost({ gpu = 'A100' } = {}) {
 // Build a launch plan for an inference call. Pure function — returns an
 // object the CLI can either render as a curl command or hand to a runtime
 // HTTP client. Does NOT make a network call.
+function _anthropicMessagesPayload({ model, messages, max_tokens, temperature }) {
+  const system = [];
+  const turns = [];
+  for (const msg of Array.isArray(messages) ? messages : []) {
+    if (!msg || typeof msg !== 'object') continue;
+    const role = String(msg.role || 'user').toLowerCase();
+    const content = msg.content == null ? '' : msg.content;
+    if (role === 'system') {
+      if (content) system.push(typeof content === 'string' ? content : JSON.stringify(content));
+      continue;
+    }
+    turns.push({
+      role: role === 'assistant' ? 'assistant' : 'user',
+      content,
+    });
+  }
+  const body = {
+    model,
+    max_tokens,
+    temperature,
+    messages: turns.length ? turns : [{ role: 'user', content: '' }],
+  };
+  if (system.length) body.system = system.join('\n\n');
+  return body;
+}
+
 export function planInference({ providerId, model, messages, max_tokens = 256, temperature = 0.7 }) {
   const p = findProvider(providerId);
   if (!p) throw new Error(`unknown provider: ${providerId}`);
   if (p.kind === 'training') throw new Error(`provider ${providerId} is training-only`);
+  if (p.id === 'anthropic') {
+    const url = (p.base_url || '').replace(/\/$/, '') + '/messages';
+    return {
+      provider: p.id,
+      protocol: 'anthropic-messages',
+      method: 'POST',
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': `$${p.auth_env}`,
+        'anthropic-version': ANTHROPIC_VERSION,
+      },
+      body: _anthropicMessagesPayload({ model, messages, max_tokens, temperature }),
+      auth_env: p.auth_env,
+    };
+  }
   const url = (p.base_url || '').replace(/\/$/, '') + '/chat/completions';
   const headers = {
     'Content-Type': 'application/json',
@@ -220,6 +281,7 @@ export function planInference({ providerId, model, messages, max_tokens = 256, t
   const body = { model, messages, max_tokens, temperature };
   return {
     provider: p.id,
+    protocol: 'openai-chat-completions',
     method: 'POST',
     url,
     headers,

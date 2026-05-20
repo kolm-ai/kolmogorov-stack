@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <title>Distill runs Account · Account · kolm.ai</title>
 <meta name="description" content="Per-prompt loss telemetry for every local distill run on kolm.ai. Reads ~/.kolm/distill-runs/run_*/{run-meta.json,progress.jsonl,manifest.json} and renders...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
@@ -58,11 +59,11 @@
 .meta-grid .k{color:var(--ink-faint);text-transform:uppercase;font-size:10.5px;letter-spacing:0.06em;margin-bottom:3px}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.curve-card{grid-template-columns:1fr}.meta-grid{grid-template-columns:1fr}}
 </style>
- <link rel="stylesheet" href="/surface-polish.css">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Distill runs Account · Account · kolm.ai">
 <meta name="twitter:description" content="Per-prompt loss telemetry for every local distill run on kolm.ai. Reads ~/.kolm/distill-runs/run_*/{run-meta.json,progress.jsonl,manifest.json} and renders...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body data-page="distill-runs" data-wave="455">
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -229,8 +230,8 @@ straight from <code>progress.jsonl</code>. Tenant-scoped &mdash; we only show yo
 
 <script>
 (function(){
- var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
- if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ var key=null; try{key=localStorage.getItem("ks_api_key")||localStorage.getItem("kolm-key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("apiKey")||localStorage.getItem("recipeApiKey");}catch(_){}
+ if(!key){window.kfetch=function(){return Promise.reject(new Error("missing api key"));};location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};

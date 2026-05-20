@@ -207,30 +207,14 @@ export async function appendEvent(partial = {}) {
     );
   } else {
     _ensureDirs();
-    // W411 P0 #6 — JSONL dedupe by event_id. Re-appending the same event_id
-    // must be idempotent: SQLite path uses INSERT OR REPLACE; the JSONL fallback
-    // previously appended blindly so a re-emit (network retry, replay) would
-    // double-count in listEvents(). Now: scan the file for any pre-existing
-    // row with this event_id; if present, rewrite the file in place (last
-    // write wins). If absent, append. Both paths keep the file durable.
-    if (fs.existsSync(_jsonlPath)) {
-      const existing = _jsonlAll();
-      let found = false;
-      for (let i = 0; i < existing.length; i++) {
-        if (existing[i] && existing[i].event_id === ev.event_id) {
-          existing[i] = ev;
-          found = true;
-          break;
-        }
-      }
-      if (found) {
-        fs.writeFileSync(_jsonlPath, existing.map(e => JSON.stringify(e)).join('\n') + '\n', 'utf8');
-      } else {
-        fs.appendFileSync(_jsonlPath, JSON.stringify(ev) + '\n', 'utf8');
-      }
-    } else {
-      fs.appendFileSync(_jsonlPath, JSON.stringify(ev) + '\n', 'utf8');
-    }
+    // W552 — JSONL fallback stays append-only on write. Earlier W411 code
+    // scanned and rewrote the whole file when the same event_id appeared,
+    // which made connector capture O(n^2) because capture-store bridge +
+    // canonical event append intentionally re-emit the same event_id. Read
+    // paths already dedupe with last-write-wins in _jsonlAll(), so appending
+    // preserves the public INSERT-OR-REPLACE contract without turning every
+    // production capture into a full-file rewrite.
+    fs.appendFileSync(_jsonlPath, JSON.stringify(ev) + '\n', 'utf8');
   }
   _emitter.emit('event', ev);
   return ev;

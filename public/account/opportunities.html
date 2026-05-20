@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <title>Opportunities · Account · Account · kolm.ai</title>
 <meta name="description" content="Detected opportunities on kolm.ai across 11 types: cache_candidate, cheaper_model_candidate, local_replacement_candidate, privacy_leak, prompt_compression,...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
@@ -61,11 +62,11 @@
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
 
 </style>
- <link rel="stylesheet" href="/surface-polish.css">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Opportunities · Account · Account · kolm.ai">
 <meta name="twitter:description" content="Detected opportunities on kolm.ai across 11 types: cache_candidate, cheaper_model_candidate, local_replacement_candidate, privacy_leak, prompt_compression,...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -208,9 +209,9 @@
 
 <script>
 (function(){
- var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+ var key=null; try{key=localStorage.getItem("ks_api_key")||localStorage.getItem("kolm-key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("apiKey")||localStorage.getItem("recipeApiKey");}catch(_){}
 
- if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ if(!key){window.kfetch=function(){return Promise.reject(new Error("missing api key"));};location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
  window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};

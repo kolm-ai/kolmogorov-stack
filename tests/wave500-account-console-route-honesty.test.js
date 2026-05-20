@@ -46,6 +46,9 @@ test('W500 #1 - account connector and key pages use shipped capture routes only'
   assert.equal(OPENAPI.paths['/v1/capture/gemini'], undefined);
 
   assert.match(connectors, /var PROVIDERS=\["openai","anthropic","openrouter"\]/);
+  assert.match(connectors, /Connectors · Account · kolm\.ai/);
+  assert.match(connectors, /var LABELS=\{openai:"OpenAI",anthropic:"Claude",openrouter:"OpenRouter"\}/);
+  assert.match(connectors, /var ENDPOINTS=\{openai:"\/v1\/capture\/openai",anthropic:"\/v1\/capture\/anthropic",openrouter:"\/v1\/capture\/openrouter\/v1"\}/);
   assert.match(connectors, /x-upstream-api-key/);
   assert.match(connectors, /\/docs\/connect\/openai/);
   assert.match(connectors, /\/docs\/connect\/anthropic/);

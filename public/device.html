@@ -47,7 +47,7 @@
  }
 }
 </script>
- <link rel="stylesheet" href="/surface-polish.css">
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <header class="site-header">
@@ -392,7 +392,7 @@ async function verifyRecipeMeta(meta) {
  const computed = await _sha256Hex(meta.source);
  const declared = String(meta.source_hash);
  const matches = declared.length === 16
- - computed.startsWith(declared)
+ ? computed.startsWith(declared)
  : computed === declared;
  if (!matches) return { ok: false, reason: 'source_hash mismatch' };
  } catch (e) {
@@ -426,9 +426,9 @@ function fmt(out) {
  if (out === undefined) return 'undefined';
  if (out === null) return 'null';
  if (typeof out === 'boolean') return out ? 'true' : 'false';
- if (typeof out === 'string') return out.length > 80 - out.slice(0, 80) + '…' : out;
+ if (typeof out === 'string') return out.length > 80 ? out.slice(0, 80) + '...' : out;
  if (typeof out === 'number') return String(out);
- try { const s = JSON.stringify(out); return s.length > 200 - s.slice(0, 200) + '…' : s; }
+ try { const s = JSON.stringify(out); return s.length > 200 ? s.slice(0, 200) + '...' : s; }
  catch { return String(out); }
 }
 

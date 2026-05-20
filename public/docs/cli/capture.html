@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>kolm capture · CLI reference · kolm.ai</title>
@@ -14,7 +15,6 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
-<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm capture","description":"Reference for the kolm capture CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/capture","mainEntityOfPage":"https://kolm.ai/docs/cli/capture","author":{"@type":"Organization","name":"kolm.ai"}}
@@ -22,6 +22,7 @@
 <meta name="twitter:title" content="kolm capture · CLI reference · kolm.ai">
 <meta name="twitter:description" content="Reference for the kolm capture CLI verb: usage, flags, examples, and links to related docs.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <header class="site-header">
@@ -243,7 +244,7 @@ kolm capture --provider &lt;openai|anthropic&gt; --as &lt;task-name&gt; [--names
 kolm capture status [--namespace &lt;n&gt;]
 </code></pre>
 <h2>Flags</h2>
-<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--provider &lt;p&gt;</code> | required | <code>openai</code> or <code>anthropic</code> | | <code>--as &lt;task-name&gt;</code> | required | logical task name (used as filename under <code>~/.kolm/capture/</code>) | | <code>--namespace &lt;n&gt;</code> | <code>default</code> | corpus namespace. The threshold for <code>kolm distill</code> is per-namespace |</p>
+<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--provider &lt;p&gt;</code> | required | <code>openai</code>, <code>anthropic</code>, or <code>openrouter</code> | | <code>--as &lt;task-name&gt;</code> | required | logical task name (used as filename under <code>~/.kolm/capture/</code>) | | <code>--namespace &lt;n&gt;</code> | <code>default</code> | corpus namespace. The threshold for <code>kolm distill</code> is per-namespace |</p>
 <h2>Examples</h2>
 <pre><code>
 kolm capture --provider openai --as ticket-classifier --namespace tickets
@@ -252,8 +253,8 @@ kolm capture status --namespace tickets
 kolm distill --namespace tickets
 </code></pre>
 <h2>Notes</h2>
-<p>The first form writes <code>~/.kolm/capture/&lt;task&gt;.json</code> with the upstream URL and the headers your app should send. Point <code>OPENAI_BASE_URL</code> or <code>ANTHROPIC_API_URL</code> at the proxy and your existing SDK keeps working. Every round-trip is captured into the namespace&#39;s corpus.</p>
-<p>Pass your real OpenAI / Anthropic key in the <code>x-upstream-api-key</code> header on each request. The kolm api key goes in <code>Authorization: Bearer kolm_...</code> as usual.</p>
+<p>The first form writes <code>~/.kolm/capture/&lt;task&gt;.json</code> with the upstream URL and the headers your app should send. Point <code>OPENAI_BASE_URL</code>, <code>ANTHROPIC_BASE_URL</code>, or <code>OPENROUTER_BASE_URL</code> at the proxy and your existing SDK keeps working. Every round-trip is captured into the namespace&#39;s corpus.</p>
+<p>Pass your real OpenAI / Anthropic / OpenRouter key in the <code>x-upstream-api-key</code> header on each request. The Kolm API key goes in <code>Authorization: Bearer ks_*</code> or <code>Authorization: Bearer kao_*</code> as usual.</p>
 <p>The status form prints how many pairs have been captured and how many are needed before <code>kolm distill</code> is unlocked (default threshold: 1000 pairs).</p>
 <h2>See also</h2>
 <ul>

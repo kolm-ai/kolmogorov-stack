@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+
 // W217 (origin) + W295 (split). The frontier-model catalog kolm targets for
 // `kolm compile --tier=<hw>` (W218) and the /models page.
 //
@@ -744,7 +746,7 @@ export const CANDIDATE_MODELS = [
 //   runtime_compatibility      array of ['js','wasm','gguf','onnx','native']
 //   device_constraints         { min_ram_gb, gpu_class, mobile_ok }
 //   quantization_support       array of ['Q2','Q4','Q6','Q8','fp16','bf16']
-//   pull_status                'registered' | 'pulled_and_verified'
+//   pull_status                'registered' | 'metadata_cached' | 'pulled_and_verified'
 //   local_path                 absolute path on disk OR null
 //   recommended_for_target     [] until pulled+tested, e.g. ['rtx-3090','dgx-spark','iphone']
 //   verified_at                'YYYY-MM-DD' OR null
@@ -753,7 +755,8 @@ export const CANDIDATE_MODELS = [
 // The honest contract: `recommended_for_target` is empty until the model is
 // actually pulled AND a downstream smoke test confirmed it loads on the
 // claimed device. `pullBackbone()` flips `pull_status` to 'pulled_and_verified'
-// and sets `local_path`, but the user/runtime adds entries to
+// only after local weight bytes exist. Metadata-only dry runs become
+// 'metadata_cached'. The user/runtime adds entries to
 // `recommended_for_target` after running a real benchmark.
 // ---------------------------------------------------------------------------
 export const BACKBONES = [
@@ -1074,7 +1077,7 @@ export const BACKBONES = [
 const BACKBONE_LICENSES = ['Apache-2.0', 'MIT', 'Llama-3-Community', 'Llama-4-Community', 'Gemma-TOU', 'Qwen-License', 'Mistral-Research'];
 const BACKBONE_RUNTIMES = ['js', 'wasm', 'gguf', 'onnx', 'native'];
 const BACKBONE_QUANTS = ['Q2', 'Q4', 'Q6', 'Q8', 'fp16', 'bf16'];
-const BACKBONE_PULL_STATUSES = ['registered', 'pulled_and_verified'];
+const BACKBONE_PULL_STATUSES = ['registered', 'metadata_cached', 'pulled_and_verified'];
 
 export function listBackbones(filter = {}) {
   let out = BACKBONES.slice();
@@ -1106,7 +1109,6 @@ export async function pullBackbone(id, opts = {}) {
     return { ok: false, id, reason: 'unknown_id' };
   }
   // Lazy imports — avoid heavy fs/os at module load.
-  const fs = await import('node:fs');
   const path = await import('node:path');
   const os = await import('node:os');
 
@@ -1132,6 +1134,9 @@ export async function pullBackbone(id, opts = {}) {
       const P = await import('./model-weights-puller.js');
       const variant = opts.variant || 'q4_k_m';
       const wRow = W.getVariant(id, variant);
+      if (!wRow) {
+        return { ok: false, id, reason: 'no_weight_manifest', detail: `no downloadable weight manifest row for ${id}` };
+      }
       if (wRow) {
         const dir = P.ensureCacheDir(cacheDir);
         const result = await P.pullVariant({ row: wRow, cacheDir: dir, probe: opts.probe !== false });
@@ -1139,16 +1144,19 @@ export async function pullBackbone(id, opts = {}) {
         // Pick the first downloaded file as the canonical local_path.
         const firstFile = (result.files || []).find(f => f.ok);
         if (firstFile) {
-          // model-weights-puller stores at <dir>/<slug>/<filename>. Map that.
+          // model-weights-puller returns the exact path it wrote. Fall back to
+          // the deterministic cache path only if that file actually exists.
           const candidate = path.join(dir, `${id.replace(/\//g, '__')}__${variant}`, path.basename(firstFile.file));
-          filePath = fs.existsSync(candidate) ? candidate : path.join(outDir, 'weights.bin');
+          filePath = firstFile.path && fs.existsSync(firstFile.path)
+            ? firstFile.path
+            : (fs.existsSync(candidate) ? candidate : null);
           bytes = result.total_bytes || 0;
         }
       } else {
         // No manifest row — write a manifest stub so the registry reflects
         // the operator's intent without lying about a pulled binary.
         filePath = path.join(outDir, 'backbone.json');
-        const stub = { id, family: row.family, pulled_at: new Date().toISOString(), source: 'registry-stub' };
+        const stub = { id, family: row.family, cached_at: new Date().toISOString(), source: 'registry-metadata-only' };
         fs.writeFileSync(filePath, JSON.stringify(stub, null, 2));
         bytes = fs.statSync(filePath).size;
       }
@@ -1159,15 +1167,22 @@ export async function pullBackbone(id, opts = {}) {
     // Default offline path — write a stub manifest. The runtime can later
     // replace this with a real weights file.
     filePath = path.join(outDir, 'backbone.json');
-    const stub = { id, family: row.family, pulled_at: new Date().toISOString(), source: 'registry-stub' };
+    const stub = { id, family: row.family, cached_at: new Date().toISOString(), source: 'registry-metadata-only' };
     fs.writeFileSync(filePath, JSON.stringify(stub, null, 2));
     bytes = fs.statSync(filePath).size;
   }
 
+  if (!filePath || !fs.existsSync(filePath)) {
+    return { ok: false, id, reason: 'no_weight_file', detail: 'pull completed without a local file path' };
+  }
+
   // Mutate the in-memory row. Persistent state is the on-disk cache itself.
-  row.pull_status = 'pulled_and_verified';
+  const verifiedWeights = !!(opts.fixtureBytes || opts.useRealPuller)
+    && !/backbone\.json$/.test(String(filePath))
+    && fs.statSync(filePath).size > 0;
+  row.pull_status = verifiedWeights ? 'pulled_and_verified' : 'metadata_cached';
   row.local_path = filePath;
-  row.verified_at = new Date().toISOString().slice(0, 10);
+  row.verified_at = verifiedWeights ? new Date().toISOString().slice(0, 10) : null;
 
   return {
     ok: true,
@@ -1177,6 +1192,7 @@ export async function pullBackbone(id, opts = {}) {
     pull_status: row.pull_status,
     verified_at: row.verified_at,
     cache_dir: cacheDir,
+    weights_verified: verifiedWeights,
   };
 }
 
@@ -1203,6 +1219,9 @@ export function verifyBackbone(id) {
   if (!BACKBONE_PULL_STATUSES.includes(row.pull_status)) problems.push('bad_pull_status');
   if (row.pull_status === 'pulled_and_verified') {
     if (!row.local_path) problems.push('pulled_without_local_path');
+    else if (/backbone\.json$/.test(String(row.local_path))) problems.push('pulled_points_to_metadata_stub');
+    else if (!fs.existsSync(row.local_path)) problems.push('pulled_local_path_missing');
+    else if (fs.statSync(row.local_path).size <= 0) problems.push('pulled_local_path_empty');
   }
   if (!Array.isArray(row.recommended_for_target)) problems.push('bad_recommended_for_target');
   if (row.verified_at != null && !/^\d{4}-\d{2}-\d{2}$/.test(row.verified_at)) problems.push('bad_verified_at');

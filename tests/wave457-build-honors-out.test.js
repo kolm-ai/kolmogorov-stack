@@ -147,3 +147,46 @@ test('W457b #3 — curated-baseline override prints a stderr warning naming --no
   assert.ok(/template: redactor/.test(textB),
     `expected generic redactor template banner under --no-baseline. tail:\n${textB.slice(-1500)}`);
 });
+
+test('W549 #5 - `kolm build --json` emits one parseable envelope on stdout', () => {
+  const cwd = freshDir('json-envelope');
+  const outPath = path.join(cwd, 'json-redactor.kolm');
+  const r = runBuild(cwd, [
+    'claims-redactor',
+    '--from', 'redactor',
+    '--examples', CURATED_SEEDS,
+    '--out', outPath,
+    '--json',
+  ]);
+  assert.equal(r.code, 0, `expected exit 0, got ${r.code}. stderr:\n${r.stderr.slice(-1500)}\nstdout:\n${r.stdout.slice(-1500)}`);
+  const env = JSON.parse(r.stdout);
+  assert.equal(env.ok, true);
+  assert.equal(env.artifact, outPath);
+  assert.equal(env.artifact_rel, 'json-redactor.kolm');
+  assert.equal(env.production_ready, true);
+  assert.equal(env.verify_ok, true);
+  assert.ok(env.k_score && env.k_score.composite >= 0.85);
+  assert.ok(Array.isArray(env.logs) && env.logs.some((line) => /\[3\/4\] compile/.test(line)));
+  assert.match(r.stdout.trimStart(), /^\{/);
+  assert.ok(fs.existsSync(outPath), 'artifact should still be written');
+});
+
+test('W550 #6 - existing spec reuse does not claim curated baseline override', () => {
+  const cwd = freshDir('existing-spec-no-false-warning');
+  const outPath = path.join(cwd, 'existing-spec.kolm');
+  fs.copyFileSync(path.join(ROOT, 'claims-redactor.spec.json'), path.join(cwd, 'claims-redactor.spec.json'));
+  const r = runBuild(cwd, [
+    'claims-redactor',
+    '--from', 'redactor',
+    '--examples', CURATED_SEEDS,
+    '--out', outPath,
+    '--json',
+  ]);
+  assert.equal(r.code, 0, `expected exit 0, got ${r.code}. stderr:\n${r.stderr.slice(-1500)}\nstdout:\n${r.stdout.slice(-1500)}`);
+  const env = JSON.parse(r.stdout);
+  assert.equal(env.ok, true);
+  assert.equal(env.used_curated_baseline, false, 'existing spec reuse should not be reported as a curated scaffold copy');
+  assert.ok(!/\[kolm build\] WARNING:.*overridden by curated baseline/.test(r.stderr),
+    `existing spec reuse must not print a false curated-override warning. stderr:\n${r.stderr.slice(-1500)}`);
+  assert.ok(fs.existsSync(outPath), 'artifact should still be written from existing spec');
+});

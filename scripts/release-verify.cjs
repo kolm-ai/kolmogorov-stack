@@ -110,6 +110,10 @@ function runSync(cmd, argv, opts = {}) {
   return { status: r.status, signal: r.signal, stdout: r.stdout || '', stderr: r.stderr || '', error: r.error ? { code: r.error.code, message: r.error.message } : null };
 }
 
+function codexSandboxNetworkDisabled() {
+  return process.env.CODEX_SANDBOX_NETWORK_DISABLED === '1';
+}
+
 function nodeTestCount(out, label) {
   const re = new RegExp('(?:^|\\r?\\n)[^\\r\\n]*\\b' + label + '\\s+(\\d+)', 'gi');
   const matches = Array.from(String(out || '').matchAll(re));
@@ -631,6 +635,12 @@ function gateCli(name, argv, validator) {
     if (typeof parsed.logged_in !== 'boolean') return { ok: false, reason: 'envelope missing logged_in' };
     if (allowLoggedOut) return { ok: true, reason: '--allow-logged-out (logged_in=' + parsed.logged_in + ')' };
     if (parsed.logged_in === true) return { ok: true, reason: 'logged_in:true' };
+    if (parsed.error_type === 'transport_error') {
+      if (codexSandboxNetworkDisabled()) {
+        return { ok: true, reason: `skipped live whoami: Codex sandbox disables child-process network (${parsed.error_code || 'transport_error'})` };
+      }
+      return { ok: false, reason: `cloud transport error (${parsed.error_code || 'unknown'}): ${parsed.error || 'unable to validate api key'}` };
+    }
     return { ok: false, reason: 'logged_in:false (rerun with --allow-logged-out to ignore)' };
   });
 

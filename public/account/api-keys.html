@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <title>API keys · Account · Account · kolm.ai</title>
 <meta name="description" content="List, rotate, and revoke kolm.ai API keys. Real keys are never shown in full - only the prefix and last 4 characters. CLI mirror: kolm keys list / rotate /...">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
@@ -55,11 +56,11 @@
 .help{font-size:12px;color:var(--ink-faint);margin:6px 0 0;line-height:1.55}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
 </style>
- <link rel="stylesheet" href="/surface-polish.css">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="API keys · Account · Account · kolm.ai">
 <meta name="twitter:description" content="List, rotate, and revoke kolm.ai API keys. Real keys are never shown in full - only the prefix and last 4 characters. CLI mirror: kolm keys list / rotate /...">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
+<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai &middot; the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
@@ -267,7 +268,7 @@ kolm keys list --format json
 
 <script>
 (function(){
- var key=null; try{key=localStorage.getItem("kolm-key");}catch(_){}
+ var key=null; try{key=localStorage.getItem("ks_api_key")||localStorage.getItem("kolm-key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("apiKey")||localStorage.getItem("recipeApiKey");}catch(_){}
  var rows=document.getElementById("keys-rows");
  var empty=document.getElementById("empty-state");
 
@@ -315,7 +316,7 @@ kolm keys list --format json
  }
 
  document.getElementById("btn-create").addEventListener("click",function(){
- if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+ if(!key){window.kfetch=function(){return Promise.reject(new Error("missing api key"));};location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
  var label=prompt("Label for the new key (e.g. ci-runner, laptop-2026):");
  if(!label)return;
  fetch("/v1/account/keys",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},headers()),body:JSON.stringify({label:label})}).then(function(r){return r.json();}).then(function(j){

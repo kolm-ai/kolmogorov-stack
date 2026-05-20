@@ -2,8 +2,8 @@
 //
 // W409r locks in the BACKBONES registry shape (Gemma + Gemma 3n + Qwen +
 // Llama + Phi + Mistral + SmolLM), the `kolm models pull-backbone` CLI verb,
-// and the pull-then-mutate contract (pull_status flips from 'registered'
-// to 'pulled_and_verified' and the local cache holds the file).
+// and the pull-then-mutate contract (real weights flip to
+// 'pulled_and_verified'; metadata-only dry runs flip to 'metadata_cached').
 //
 // W409s locks in the PROFILES registry shape (mobile-ios / mobile-android
 // marked runtime_status:'foundation' until a real runtime ships), the
@@ -108,7 +108,7 @@ test('W409r #3 — every backbone row carries the full W409r contract shape', as
     for (const q of b.quantization_support) {
       assert.ok(['Q2', 'Q4', 'Q6', 'Q8', 'fp16', 'bf16'].includes(q), `bad quant on ${b.id}: ${q}`);
     }
-    assert.ok(['registered', 'pulled_and_verified'].includes(b.pull_status), `bad pull_status on ${b.id}: ${b.pull_status}`);
+    assert.ok(['registered', 'metadata_cached', 'pulled_and_verified'].includes(b.pull_status), `bad pull_status on ${b.id}: ${b.pull_status}`);
     assert.ok(Array.isArray(b.recommended_for_target), `bad recommended_for_target on ${b.id}`);
     assert.ok('local_path' in b, `missing local_path on ${b.id}`);
     assert.ok('verified_at' in b, `missing verified_at on ${b.id}`);
@@ -162,6 +162,31 @@ test('W409r #7 — `kolm models pull-backbone <id>` writes a file + flips regist
     assert.equal(after.pull_status, 'pulled_and_verified', 'pull_status must flip');
     assert.ok(after.local_path && after.local_path.length > 0, 'local_path must be set');
     assert.match(after.verified_at, /^\d{4}-\d{2}-\d{2}$/, 'verified_at must be YYYY-MM-DD');
+    assert.equal(R.verifyBackbone(id).ok, true, 'pulled row with existing weights must verify');
+    fs.unlinkSync(r.local_path);
+    const missing = R.verifyBackbone(id);
+    assert.equal(missing.ok, false, 'pulled row with missing weights must not verify');
+    assert.ok(missing.problems.includes('pulled_local_path_missing'), `missing file problem not reported: ${JSON.stringify(missing)}`);
+    fs.writeFileSync(r.local_path, fixture);
+  } finally { cleanup(tmp); }
+});
+
+test('W409r #7b - pullBackbone without real weights caches metadata, not verified weights', async () => {
+  const R = await import('../src/model-registry.js');
+  const id = 'google/gemma-3n-E2B-it';
+  const tmp = mkTmp();
+  try {
+    const r = await R.pullBackbone(id, { cacheDir: tmp });
+    assert.equal(r.ok, true, `pullBackbone metadata cache failed: ${JSON.stringify(r)}`);
+    assert.equal(r.pull_status, 'metadata_cached');
+    assert.equal(r.weights_verified, false);
+    assert.equal(r.verified_at, null);
+    assert.ok(fs.existsSync(r.local_path), 'metadata file must exist on disk');
+    const row = R.showBackbone(id);
+    assert.equal(row.pull_status, 'metadata_cached');
+    assert.match(fs.readFileSync(r.local_path, 'utf8'), /registry-metadata-only/);
+    const v = R.verifyBackbone(id);
+    assert.equal(v.ok, true, `metadata-cached row should be valid but not verified: ${JSON.stringify(v)}`);
   } finally { cleanup(tmp); }
 });
 
@@ -186,6 +211,27 @@ test('W409r #9 — `kolm models backbones --json` lists the registry via the CLI
   }
   assert.ok(Array.isArray(parsed) && parsed.length > 0, 'expected non-empty backbone array');
   cleanup(r.home);
+});
+
+test('W547 #2 - `kolm models verify --json` treats --json as a flag, not a model id', async () => {
+  const forms = [
+    ['models', 'verify', '--json'],
+    ['models', '--json', 'verify'],
+  ];
+  for (const args of forms) {
+    const r = await runCli(args);
+    assert.equal(r.code, 0, `${args.join(' ')} exited ${r.code}; stderr=${r.stderr}`);
+    const parsed = JSON.parse(r.stdout);
+    assert.equal(typeof parsed.total, 'number', 'verify JSON must include total');
+    assert.equal(typeof parsed.failed, 'number', 'verify JSON must include failed');
+    assert.ok(Array.isArray(parsed.results), 'verify JSON must include results array');
+    assert.equal(parsed.failed, 0, 'verified registry must be clean');
+    cleanup(r.home);
+  }
+  const plain = await runCli(['models', 'verify']);
+  assert.equal(plain.code, 0, `plain models verify exited ${plain.code}; stderr=${plain.stderr}`);
+  assert.match(plain.stdout, /OK\s+Qwen\/Qwen2\.5-7B-Instruct/, 'plain verify must print per-row OK output');
+  cleanup(plain.home);
 });
 
 // ===========================================================================

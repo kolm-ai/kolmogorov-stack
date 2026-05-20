@@ -67,16 +67,18 @@ test('W271 #1 - hero H1 leads with a concrete pain beat (W387: relaxed from lite
     'H1 region must carry an action-verb-led pain beat (any phrasing — copy is editorial after W387)');
 });
 
-test('W271 #2 - hero H1 includes an ownership outcome beat (W387: relaxed phrasing; W546: also accepts imperative "Own X" framing)', () => {
+test('W271 #2 - hero H1 includes an ownership outcome beat (W387: relaxed phrasing; W546/W547: accepts owned/local-control framing)', () => {
   // W387: relaxed from "Ship your own model|own it forever" to any ownership
   // outcome phrasing. W546: the imperative-led rewrite ("Own the AI loop")
   // carries the same ownership beat in verb form, so the regex now also
-  // accepts "Own the X" / "Own your X" imperative ownership.
+  // accepts "Own the X" / "Own your X" imperative ownership. W547 also
+  // accepts "owned AI" so editorial copy can prefer product nouns over
+  // second-person phrasing.
   // Memory pattern: feedback-tests-assert-behavior-not-page-copy.
   const HERO = heroSlice(2000);
   const h1Match = HERO.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
   assert.ok(h1Match, 'H1 must exist');
-  assert.match(h1Match[1], /\b(you own|own forever|own it|your own|local model|your hardware|own the|own your)\b/i,
+  assert.match(h1Match[1], /\b(you own|own forever|own it|your own|local model|your hardware|own the|own your|owned ai)\b/i,
     'H1 region must carry an ownership / local-control outcome beat');
 });
 

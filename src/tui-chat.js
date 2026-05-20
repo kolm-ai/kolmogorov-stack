@@ -258,7 +258,7 @@ export const COMMANDS = {
     return { reply: helpText() };
   },
   model(state, args) {
-    if (!args) return { error: 'usage: /model <selector>  (e.g. kolm:echo, claude-sonnet-4-6, gpt-5)' };
+    if (!args) return { error: 'usage: /model <selector>  (e.g. kolm:echo, anthropic:claude-sonnet-4-6, openai:gpt-5)' };
     state.model = args;
     return { reply: `model set to ${args}` };
   },
@@ -328,8 +328,12 @@ function helpText() {
     'model selectors (any of):',
     '  kolm:<name>                 local artifact by short name (uses registry)',
     '  kolm-path:<absolute>        local artifact by absolute path',
-    '  claude-* / anthropic:<id>   bridge to Anthropic (needs ANTHROPIC_API_KEY)',
-    '  gpt-*    / openai:<id>      bridge to OpenAI   (needs OPENAI_API_KEY)',
+    '  anthropic:<id> / claude-*   Claude via Anthropic (needs ANTHROPIC_API_KEY)',
+    '  openai:<id>    / gpt-*      GPT via OpenAI (needs OPENAI_API_KEY)',
+    '',
+    'examples:',
+    '  /model anthropic:claude-sonnet-4-6',
+    '  /model openai:gpt-5',
     '',
     'any line not starting with / is a chat turn.',
   ].join('\n');
