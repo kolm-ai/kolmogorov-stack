@@ -12349,7 +12349,7 @@ async function cmdAuditorKeygen(args) {
     console.error(`refused: ${outFlag} already exists. pass --force to overwrite.`);
     process.exit(EXIT.ALREADY_EXISTS || 2);
   }
-  const { publicKey, privateKey, fingerprint } = generateAuditorKeyPair();
+  const { publicKey, privateKey, key_fingerprint: fingerprint } = generateAuditorKeyPair();
   try {
     fsMod.default.mkdirSync(pathMod.default.dirname(pathMod.default.resolve(outFlag)), { recursive: true, mode: 0o700 });
     fsMod.default.writeFileSync(outFlag, privateKey, { mode: 0o600 });
