@@ -393,7 +393,13 @@ const PUBLIC_API = (p) =>
   // W384 — accept-invite is invite-token-authenticated (the URL token IS the
   // credential); the workspace lookup happens inside team.js with explicit
   // expiry + consumed checks. Public so a new member with no api_key can join.
-  p === '/v1/team/accept-invite';
+  p === '/v1/team/accept-invite' ||
+  // W560 — SAML SP metadata + SCIM SP config are spec-mandated public
+  // documents (RFC 7644 §4 + SAML 2.0 §5.2). IdPs MUST be able to fetch them
+  // without an API key during federation setup. The tenant-scoped SSO
+  // configure + SCIM Users endpoints stay auth-gated.
+  p === '/v1/account/saml/metadata' ||
+  p === '/v1/scim/v2/ServiceProviderConfig';
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || null;

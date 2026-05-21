@@ -243,8 +243,26 @@
     <tbody id="class-rows"></tbody>
   </table>
 </section>
+<section class="kpanel" data-panel="object-readiness">
+  <h2>4. Artifact object storage</h2>
+  <p class="pdesc">The hosted artifact plane must be explicit before any cloud train, distill, compile, registry push, or enterprise handoff. This panel reads the backend contract directly and never renders secret values.</p>
+  <div id="object-readiness-summary" class="metric-grid" style="grid-template-columns:repeat(4,1fr)" aria-busy="true">
+    <div class="metric-card"><div class="label">Selected</div><div class="value">...</div><div class="delta">storage provider</div></div>
+    <div class="metric-card"><div class="label">Cloud ready</div><div class="value">...</div><div class="delta">R2/S3/Supabase</div></div>
+    <div class="metric-card"><div class="label">Configured</div><div class="value">...</div><div class="delta">provider groups</div></div>
+    <div class="metric-card"><div class="label">Secrets</div><div class="value">false</div><div class="delta">values returned</div></div>
+  </div>
+  <table class="ktable" aria-label="Artifact storage providers">
+    <thead><tr><th>Provider</th><th>Status</th><th>Missing</th><th>Limit</th><th>Capabilities</th></tr></thead>
+    <tbody id="object-readiness-rows"><tr><td colspan="5"><div class="skel" style="width:220px"></div></td></tr></tbody>
+  </table>
+  <pre><code>GET /v1/storage/object-readiness
+kolm cloud storage --json
+kolm cloud storage --provider cloudflare-r2-s3 --smoke --json</code></pre>
+  <p id="object-readiness-note" class="pdesc" style="margin-top:10px">Loading storage readiness...</p>
+</section>
 <section class="kpanel" data-panel="cloud-readiness">
-  <h2>4. Cloud readiness</h2>
+  <h2>5. Cloud readiness</h2>
   <p class="pdesc">Check hosted GPU, storage, and enterprise controls before a remote train, distill, compile, or registry push leaves the local machine.</p>
   <div class="toolbar">
     <a class="btn" href="/docs/storage">Storage docs</a>
@@ -291,6 +309,36 @@ function renderClassRows(policy){
     "</tr>";
   }).join("");
 }
+function bytes(b){return b ? window.kbytes(Number(b)) : "-";}
+function renderObjectReadiness(out){
+  out=(out&&out.storage)||out||{};
+  var rows=document.getElementById("object-readiness-rows");
+  var summary=document.getElementById("object-readiness-summary");
+  var providers=Array.isArray(out.providers)?out.providers:[];
+  var selected=out.selected_provider||"(none)";
+  var configured=providers.filter(function(p){return !!p.configured;}).length;
+  var cloudOk=out.cloud_ok===true;
+  summary.setAttribute("aria-busy","false");
+  summary.innerHTML=[
+    '<div class="metric-card"><div class="label">Selected</div><div class="value">'+window.kesc(selected)+'</div><div class="delta">storage provider</div></div>',
+    '<div class="metric-card"><div class="label">Cloud ready</div><div class="value">'+(cloudOk?"yes":"no")+'</div><div class="delta">'+(out.ok?"local fallback ready":"needs config")+'</div></div>',
+    '<div class="metric-card"><div class="label">Configured</div><div class="value">'+configured+'/'+providers.length+'</div><div class="delta">provider groups</div></div>',
+    '<div class="metric-card"><div class="label">Secrets</div><div class="value">'+(out.secret_values_included===false?"false":"unknown")+'</div><div class="delta">values returned</div></div>'
+  ].join("");
+  rows.innerHTML=providers.length?providers.map(function(p){
+    var missing=Array.isArray(p.missing)&&p.missing.length?p.missing.join(", "):"-";
+    var caps=Array.isArray(p.capabilities)&&p.capabilities.length?p.capabilities.join(", "):"-";
+    var max=p.max_single_object_bytes?bytes(p.max_single_object_bytes):"-";
+    return '<tr><td>'+window.kesc(p.label||p.id)+'</td><td>'+(p.configured?'<span class="pill ok">ready</span>':'<span class="pill warn">missing</span>')+'</td><td>'+window.kesc(missing)+'</td><td>'+window.kesc(max)+'</td><td>'+window.kesc(caps)+'</td></tr>';
+  }).join(""):'<tr><td colspan="5">No provider inventory returned.</td></tr>';
+  var note=document.getElementById("object-readiness-note");
+  note.textContent=cloudOk?"Artifact cloud storage is configured. Run a local smoke test on the credentialed machine before large production artifacts.":"Configure R2 S3, AWS S3, generic S3, or Supabase S3 before claiming hosted artifact storage. R2 REST is for smaller objects; use S3-compatible paths for large artifacts.";
+}
+window.kfetch("/v1/storage/object-readiness").then(renderObjectReadiness).catch(function(e){
+  document.getElementById("object-readiness-summary").setAttribute("aria-busy","false");
+  document.getElementById("object-readiness-rows").innerHTML='<tr><td colspan="5"><span class="pill bad">error</span> '+window.kesc(e.message||e)+'</td></tr>';
+  document.getElementById("object-readiness-note").textContent="Storage readiness could not be loaded for this session.";
+});
 window.kfetch("/v1/storage/config").catch(function(){return null;}).then(function(cfg){
   if(!cfg){document.getElementById("empty-state").hidden=false;renderClassRows({});return;}
   var mode=cfg.storage_mode||"redacted_local";

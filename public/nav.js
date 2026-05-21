@@ -10,11 +10,12 @@
  '.site-actions .theme-toggle{width:44px!important;min-width:44px!important;min-height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;}',
  '@media (min-width:921px){.nav-toggle{display:none!important;}}@media (max-width:920px){.nav-toggle{width:44px!important;min-width:44px!important;min-height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;}}',
  '@media (min-width:721px){.site-actions>a:not(.cta):not(.kolm-auth-pill){min-height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding-left:8px!important;padding-right:8px!important;}.kolm-auth-pill{min-height:38px!important;display:inline-flex!important;align-items:center!important;}}',
- '@media (max-width:720px){.site-actions>a:not(.cta),header.site .right>a:not(.cta){display:none!important;}.site-actions,header.site .right{gap:6px!important;min-width:0!important;}.site-actions .cta,header.site .right .cta{position:relative!important;width:78px!important;flex:0 0 78px!important;min-width:0!important;padding-left:8px!important;padding-right:8px!important;overflow:hidden!important;white-space:nowrap!important;font-size:0!important;color:transparent!important;-webkit-text-fill-color:transparent!important;}.site-actions .cta::before,header.site .right .cta::before{content:"Start"!important;position:absolute!important;inset:0!important;display:flex!important;align-items:center!important;justify-content:center!important;color:#08090c!important;-webkit-text-fill-color:#08090c!important;font:600 12px/1 system-ui,sans-serif!important;}[data-theme="light"] .site-actions .cta::before,[data-theme="light"] header.site .right .cta::before{color:#fff3df!important;-webkit-text-fill-color:#fff3df!important;}}'
+ '@media (max-width:720px){.site-actions>a:not(.cta),header.site .right>a:not(.cta){display:none!important;}.site-actions,header.site .right{gap:6px!important;min-width:0!important;}.site-actions .cta,header.site .right .cta{position:relative!important;width:82px!important;flex:0 0 82px!important;min-width:0!important;padding-left:8px!important;padding-right:8px!important;overflow:hidden!important;white-space:nowrap!important;font-size:0!important;color:transparent!important;-webkit-text-fill-color:transparent!important;}.site-actions .cta::before,header.site .right .cta::before{content:attr(data-mobile-label)!important;position:absolute!important;inset:0!important;display:flex!important;align-items:center!important;justify-content:center!important;color:#08090c!important;-webkit-text-fill-color:#08090c!important;font:650 12px/1 system-ui,sans-serif!important;}[data-theme="light"] .site-actions .cta::before,[data-theme="light"] header.site .right .cta::before{color:#fff3df!important;-webkit-text-fill-color:#fff3df!important;}}'
  ].join('');
  document.head.appendChild(style);
  }
  installSurfaceGuard();
+ document.documentElement.classList.add('kolm-sota-ui-v560');
 
  // Two header conventions in the repo:
  // newer: <header class="site-header"> + .site-nav + .site-actions
@@ -25,6 +26,10 @@
  // every navigation as the DOM mutated mid-paint.
  var header = document.querySelector('header.site-header, header.site');
  if (!header) return;
+ var brandLink = header.querySelector('a.brand, a.logo');
+ if (brandLink && brandLink.textContent.replace(/\s+/g, '').toLowerCase() === 'kolm') {
+ brandLink.textContent = 'kolm.ai';
+ }
 
  var isLegacy = header.classList.contains('site') && !header.classList.contains('site-header');
  var nav = isLegacy ? header.querySelector('.left nav, nav') : header.querySelector('.site-nav');
@@ -243,13 +248,29 @@
  signIn.textContent = 'sign in';
  actions.appendChild(signIn);
  }
+ var isAccountShell = /^\/(account|dashboard)(\/|$)/.test(path);
  if (!isLegacy && !actions.querySelector('.cta')) {
  var cta = document.createElement('a');
- cta.href = '/signup';
+ cta.href = isAccountShell ? '/account/builds' : '/signup';
  cta.className = 'cta';
- cta.textContent = 'Start free';
+ cta.textContent = isAccountShell ? 'New build' : 'Get API key';
  actions.appendChild(cta);
  }
+ (function normalizeHeaderCtas() {
+ var ctas = actions.querySelectorAll('.cta');
+ for (var ci = 0; ci < ctas.length; ci++) {
+ var item = ctas[ci];
+ if (isAccountShell) {
+ item.href = item.getAttribute('href') || '/account/builds';
+ if (/start\s+free|get api key|get a key|sign up/i.test(item.textContent || '')) item.textContent = 'New build';
+ item.setAttribute('data-mobile-label', 'Build');
+ } else {
+ item.href = item.getAttribute('href') || '/signup';
+ item.textContent = 'Get API key';
+ item.setAttribute('data-mobile-label', 'API key');
+ }
+ }
+ })();
 
  // Auth-aware status pill. Validates the session before showing anything;
  // localStorage alone is not trusted (stale keys from deleted tenants would
@@ -280,6 +301,18 @@
  pill.setAttribute('aria-label', 'Signed in - open dashboard');
  pill.innerHTML = '<span class="dot"></span><span class="lbl">signed in</span>';
  actions.insertBefore(pill, actions.firstChild);
+ var signLink = actions.querySelector('a[href="/signin"]');
+ if (signLink) {
+ signLink.hidden = true;
+ signLink.setAttribute('aria-hidden', 'true');
+ signLink.style.setProperty('display', 'none', 'important');
+ }
+ var primary = actions.querySelector('.cta');
+ if (primary && !isAccountShell) {
+ primary.href = '/dashboard';
+ primary.textContent = 'Dashboard';
+ primary.setAttribute('data-mobile-label', 'Dash');
+ }
  }
  (function validateSession() {
  var localKey = readKey();
@@ -381,12 +414,12 @@
  spine.className = 'kolm-product-spine';
  spine.setAttribute('aria-label', 'kolm product operating map');
  spine.innerHTML =
- '<a href="/capture"' + spineActive(/^\/(capture|captures|quickstart|api|integrations|docs\/connect|sdks|migrate)(\/|$)/) + '><span>01</span><b>Wrap</b><em>one base URL</em></a>' +
- '<a href="/captures"' + spineActive(/^\/(captures|docs\/lake|lake|privacy|datasets|labeling)(\/|$)/) + '><span>02</span><b>Review</b><em>AI calls to data</em></a>' +
- '<a href="/training"' + spineActive(/^\/(training|train|benchmarks|leaderboard|kscore|research|distill|compile|models|registry|marketplace|compare|vs-)(\/|$)/) + '><span>03</span><b>Build</b><em>train, distill, sign</em></a>' +
- '<a href="/runtimes"' + spineActive(/^\/(runtimes|run|device|device-transfer|compute|setup|install)(\/|$)/) + '><span>04</span><b>Run</b><em>cloud, edge, device</em></a>' +
- '<a href="/use-cases"' + spineActive(/^\/(use-cases|healthcare|finance|legal|defense|edge|devtools|insure|saas|eu|gov)(\/|$)/) + '><span>05</span><b>Solutions</b><em>buyer proof</em></a>' +
- '<a href="/enterprise"' + spineActive(/^\/(enterprise|trust|security|compliance|baa|soc2|slsa|sbom|self-host|airgap|byoc|teams|status|sla)(\/|$)/) + '><span>06</span><b>Govern</b><em>SSO, BAA, audit</em></a>';
+ '<a href="/capture"' + spineActive(/^\/(capture|captures|quickstart|api|integrations|docs\/connect|sdks|migrate)(\/|$)/) + '><span>01</span><b>API</b><em>one endpoint</em></a>' +
+ '<a href="/captures"' + spineActive(/^\/(captures|docs\/lake|lake|privacy|datasets|labeling)(\/|$)/) + '><span>02</span><b>Data</b><em>capture + review</em></a>' +
+ '<a href="/training"' + spineActive(/^\/(training|train|benchmarks|leaderboard|kscore|research|distill|compile|models|registry|marketplace|compare|vs-)(\/|$)/) + '><span>03</span><b>Build</b><em>train + distill</em></a>' +
+ '<a href="/runtimes"' + spineActive(/^\/(runtimes|run|device|device-transfer|compute|setup|install)(\/|$)/) + '><span>04</span><b>Run</b><em>edge + devices</em></a>' +
+ '<a href="/use-cases"' + spineActive(/^\/(use-cases|healthcare|finance|legal|defense|edge|devtools|insure|saas|eu|gov)(\/|$)/) + '><span>05</span><b>Cases</b><em>buyers + workflows</em></a>' +
+ '<a href="/enterprise"' + spineActive(/^\/(enterprise|trust|security|compliance|baa|soc2|slsa|sbom|self-host|airgap|byoc|teams|status|sla)(\/|$)/) + '><span>06</span><b>Trust</b><em>security + audit</em></a>';
  main.parentNode.insertBefore(spine, main);
  })();
 
@@ -445,29 +478,29 @@
  '<div class="kac-copy">' +
  '<p class="kac-kicker">operator console</p>' +
  '<h1>' + escAccount(current) + '</h1>' +
- '<p>Control the full .kolm loop in one place: connect model APIs, capture AI calls, review data, compile signed artifacts, run everywhere, and prove governance.</p>' +
+ '<p>Your AI operations console: API gateway, data lake, training, artifacts, devices, storage, billing, and governance.</p>' +
  '</div>' +
  '<div class="kac-console" role="img" aria-label="Account product loop">' +
  '<div class="kac-top"><span></span><span></span><span></span><b>' + escAccount(command) + '</b></div>' +
  '<div class="kac-steps">' +
- '<a href="/account/connectors"><span>01</span><b>Wrap</b><em>providers + SDKs</em></a>' +
- '<a href="/account/captured"><span>02</span><b>Capture</b><em>AI calls + traces</em></a>' +
- '<a href="/account/lake"><span>03</span><b>Protect</b><em>privacy + replay</em></a>' +
- '<a href="/account/datasets"><span>04</span><b>Review</b><em>labels + holdouts</em></a>' +
- '<a href="/account/builds"><span>05</span><b>Build</b><em>train + distill</em></a>' +
- '<a href="/account/artifacts"><span>06</span><b>Sign</b><em>.kolm + K-score</em></a>' +
- '<a href="/account/devices"><span>07</span><b>Run</b><em>device + edge</em></a>' +
+ '<a href="/account/connectors"><span>01</span><b>Gateway</b><em>providers + keys</em></a>' +
+ '<a href="/account/captured"><span>02</span><b>Capture</b><em>calls + cost</em></a>' +
+ '<a href="/account/privacy-events"><span>03</span><b>Privacy</b><em>policy + vault</em></a>' +
+ '<a href="/account/datasets"><span>04</span><b>Datasets</b><em>labels + holdouts</em></a>' +
+ '<a href="/account/builds"><span>05</span><b>Train</b><em>distill + eval</em></a>' +
+ '<a href="/account/artifacts"><span>06</span><b>Artifacts</b><em>.kolm + receipt</em></a>' +
+ '<a href="/account/devices"><span>07</span><b>Devices</b><em>edge + fleet</em></a>' +
  '<a href="/account/audit-log"><span>08</span><b>Govern</b><em>audit + billing</em></a>' +
  '</div>' +
  '<div class="kac-matrix" aria-label="Complete account product matrix">' +
- '<a href="/account/connectors"><b>API wrapper</b><span>Base URL, providers, keys, and routing.</span></a>' +
- '<a href="/account/privacy-events"><b>Privacy</b><span>PII, PHI, consent, and policy events.</span></a>' +
- '<a href="/account/multimodal-bakeoff"><b>Multimodal</b><span>Image, audio, video, PDF bakeoffs.</span></a>' +
+ '<a href="/account/connectors"><b>API wrapper</b><span>One key, base URLs, routing, BYOK.</span></a>' +
+ '<a href="/account/privacy-events"><b>Privacy</b><span>PII, PHI, consent, policy, vault.</span></a>' +
+ '<a href="/account/multimodal-bakeoff"><b>Multimodal</b><span>Image, audio, video, PDF evals.</span></a>' +
  '<a href="/models"><b>Models</b><span>Gemma, Qwen, Phi, Llama, Mistral.</span></a>' +
- '<a href="/compute"><b>Compute</b><span>Local, SSH, BYOC, GPU, managed train.</span></a>' +
+ '<a href="/compute"><b>Compute</b><span>Local, SSH, BYOC, GPU, managed.</span></a>' +
  '<a href="/account/distill-runs"><b>Distill</b><span>Teacher, student, adapter, gates.</span></a>' +
  '<a href="/account/agent-telemetry"><b>Agents</b><span>Claude, Cursor, MCP, tool logs.</span></a>' +
- '<a href="/account/storage"><b>Enterprise</b><span>Storage truth, audit, BAA, air-gap.</span></a>' +
+ '<a href="/account/storage"><b>Enterprise</b><span>Storage, audit, BAA, air-gap.</span></a>' +
  '</div>' +
  '</div>';
  main.insertBefore(band, main.firstElementChild || main.firstChild);
@@ -495,66 +528,66 @@
  }
  function surfaceFor(p) {
  if (/^\/(integrations|docs\/connect|sdks|migrate)(\/|$)/.test(p)) {
- return profile('integrations', 'Surface 07 / Integrations', 'Keep your SDK. Change the endpoint.', 'Kolm should feel like infrastructure, not a migration project. Integration pages show the one-line swap for SDKs, agents, CI, MCP, Docker, and IDE workflows.',
+ return profile('integrations', 'Surface 07 / Integrations', 'Keep your SDK. Change one endpoint.', 'Kolm fits existing SDKs, agents, CI, MCP, Docker, and IDE workflows with one routed endpoint.',
  'kolm capture --port 7402',
  [['Swap', 'Point existing clients at kolm', 'OpenAI, Anthropic, OpenRouter, LangChain'], ['Wire', 'Install into agents and CI', 'Cursor, Claude Code, GitHub, GitLab'], ['Capture', 'Record AI calls with policy', 'Namespace, redact, replay'], ['Compile', 'Promote repeated work', 'Artifact path stays the same']],
  [['sdks', 'ready'], ['agents', 'MCP'], ['ci', 'gated']], '/integrations');
  }
  if (/^\/(use-cases|healthcare|finance|legal|defense|edge|devtools|insure|saas|eu|gov)(\/|$)/.test(p)) {
- return profile('solutions', 'Surface 06 / Solutions', 'Vertical pages sell the outcome.', 'Each solution must name the pain, the first artifact, the compliance frame, and the economic reason to compile instead of renting APIs forever.',
+ return profile('solutions', 'Surface 06 / Solutions', 'Sell the first artifact.', 'Each vertical page names the pain, artifact, compliance proof, and next step.',
  'kolm solution inspect --vertical current',
  [['Pain', 'Cost, latency, privacy, lock-in', 'Say the buyer problem first'], ['Artifact', 'Show the first .kolm', 'PHI redactor, clause extractor, invoice parser'], ['Control', 'Map compliance and review', 'BAA, SOC 2, audit, air-gap'], ['Proof', 'Show benchmark and next step', 'K-score, receipt, quickstart']],
  [['verticals', 'mapped'], ['artifact', 'visible'], ['proof', 'ready']], '/use-cases');
  }
  if (/^\/(capture|captures|quickstart|api|docs\/api|tutorials\/openai-drop-in)(\/|$)/.test(p)) {
- return profile('gateway', 'Surface 01 / API gateway', 'One base URL becomes the capture layer.', 'Every OpenAI-compatible call can route through kolm without rewriting the app. The generated flow shows routing, trace capture, cost, latency, redaction, and reviewed promotion.',
+ return profile('gateway', 'Surface 01 / API gateway', 'One endpoint captures the work.', 'OpenAI-compatible calls route through Kolm with cost, latency, privacy, and review state attached.',
  'OPENAI_BASE_URL=/v1',
  [['Route', 'Provider calls enter one gateway', 'OpenAI, Anthropic, OpenRouter, local, internal'], ['Observe', 'Trace cost, latency, tools, failures', 'Every event is queryable and replayable'], ['Protect', 'Redact before promotion', 'Secrets and PHI stay out of train rows'], ['Promote', 'Create eval and train candidates', 'Only reviewed rows move forward']],
  [['providers', '5+'], ['trace rows', 'live'], ['review gate', 'on']], '/quickstart');
  }
  if (/^\/(training|train|docs\/training|docs\/eval|docs\/datasets|docs\/tickets|benchmarks|leaderboard|kscore|kscore-bench|kscore-leaderboard|labeling|research)(\/|$)/.test(p)) {
- return profile('training', 'Surface 02 / Training and evals', 'AI calls become governed learning data.', 'Training is only credible when the data path is visible. This media regenerates the training loop as a staged console: capture, sanitize, label, split, score, compare, approve, and ship.',
+ return profile('training', 'Surface 02 / Training and evals', 'Reviewed data becomes training signal.', 'Capture only matters when reviewed rows, frozen holdouts, evals, and approvals stay visible.',
  'kolm train --from lake --gate k-score',
  [['Mine', 'Find repeated workflows', 'Cluster by namespace, template, and outcome'], ['Review', 'Human-approved labels only', 'Reject noisy or unsafe rows before training'], ['Evaluate', 'Frozen holdouts and bakeoffs', 'Compare candidates against real work'], ['Promote', 'Publish only above threshold', 'Receipts bind data, model, and score']],
  [['holdout', 'frozen'], ['rows', 'approved'], ['score', 'gated']], '/training');
  }
  if (/^\/(distill|compile|build-your-own|models|registry|marketplace|spec|spec-grammar|vs-fine-tune|compare)(\/|$)/.test(p)) {
- return profile('distill', 'Surface 03 / Distill and compile', 'Repeated work turns into a signed artifact.', 'The distillation surface needs to look like an actual build system, not a diagram. The generated panel follows teacher outputs into a smaller specialist, a K-score gate, quantization, signing, and artifact handoff.',
+ return profile('distill', 'Surface 03 / Distill and compile', 'Repeated work becomes a .kolm file.', 'Teacher outputs, smaller specialists, eval gates, quantization, signing, and handoff belong in one build system.',
  'kolm distill namespace --target edge',
  [['Teacher', 'Use frontier outputs as supervision', 'Cross-provider answers can be compared'], ['Student', 'Train a smaller specialist', 'LoRA, adapters, rules, or compiled recipes'], ['Gate', 'Measure against holdout', 'No score, no promotion'], ['Sign', 'Emit a verified .kolm', 'Receipt chain and runtime metadata included']],
  [['artifact', '.kolm'], ['gate', 'K>=0.85'], ['receipt', 'signed']], '/distill');
  }
  if (/^\/(runtimes|run|device|device-transfer|compute|download|hub|setup|install)(\/|$)/.test(p)) {
- return profile('runtime', 'Surface 04 / Runtime targets', 'One artifact runs where the work happens.', 'Runtime pages now get media that matches the product promise: the same signed artifact moving across browser, WASM, native, GPU, edge, mobile, and air-gapped targets with explicit compatibility state.',
+ return profile('runtime', 'Surface 04 / Runtime targets', 'Run the artifact where the work happens.', 'The same signed artifact moves across browser, WASM, native, GPU, edge, mobile, and air-gap targets.',
  'kolm runtime build --target wasm',
  [['Package', 'Bind model, verifier, and target', 'No ambiguous deployment bundle'], ['Transfer', 'Move through registry or air-gap media', 'Hashes survive the handoff'], ['Run', 'Execute locally or at edge', 'JS, WASM, native, GGUF, ONNX'], ['Report', 'Return receipts and drift signals', 'Operators can prove what ran']],
  [['targets', '6'], ['offline', 'yes'], ['drift', 'tracked']], '/runtimes');
  }
  if (/^\/(enterprise|self-host|airgap|byoc|baa|soc2|slsa|sbom|security|trust|threat-model|compliance|teams|tunnels|status|sla)(\/|$)/.test(p)) {
- return profile('enterprise', 'Surface 08 / Enterprise control', 'Governed AI with receipts instead of promises.', 'Enterprise buyers need evidence, not atmospherics. This control room shows tenancy, RBAC, redaction policy, audit trail, self-host, air-gap, billing, and compliance evidence.',
+ return profile('enterprise', 'Surface 08 / Enterprise control', 'Governed AI with receipts.', 'Tenancy, RBAC, redaction policy, audit, self-host, air-gap, billing, and evidence stay explicit.',
  'kolm enterprise verify --tenant acme',
  [['Govern', 'Tenant, role, and key policy', 'Team controls are visible before deploy'], ['Comply', 'BAA, audit log, SBOM, SLSA', 'Evidence links back to runs'], ['Isolate', 'Self-host and air-gap paths', 'No hidden cloud dependency'], ['Attest', 'Receipts for every artifact', 'Who built what, from which data, for which target']],
  [['rbac', 'on'], ['audit', 'append-only'], ['deploy', 'self-host']], '/enterprise');
  }
  if (/^\/(pricing|roi|upgrade|nonprofits)(\/|$)/.test(p)) {
- return profile('pricing', 'Surface 06 / Commercial model', 'Price the loop, not mystery usage.', 'Pricing surfaces should make value visible. The panel translates AI calls into savings opportunities, reviewed training inventory, runtime replacement, team seats, and enterprise controls.',
+ return profile('pricing', 'Surface 06 / Commercial model', 'Price the loop clearly.', 'Plans map to captured spend, reviewed training inventory, runtime replacement, seats, and controls.',
  'kolm billing tiers',
  [['Measure', 'See spend before changing models', 'Provider and workflow cost by route'], ['Estimate', 'Find repeatable replacement candidates', 'Savings tied to actual captured volume'], ['Choose', 'Match plan to team controls', 'Free, Pro, Team, Enterprise'], ['Expand', 'Add governance when risk grows', 'Seats, audit, BAA, self-host']],
  [['plans', '4'], ['billing', 'usage-aware'], ['controls', 'tiered']], '/pricing');
  }
  if (/^\/(docs|articles|cookbook|tutorials|learn|faq|glossary|whitepaper|why|what-is|how-it-works|changelog|press|community)(\/|$)/.test(p)) {
- return profile('docs', 'Surface 07 / Docs and recipes', 'Documentation follows the actual product loop.', 'Docs and articles should reinforce the same mental model. The generated visual maps each page back to the gateway, lake, training, distillation, runtime, and verification chain.',
+ return profile('docs', 'Surface 07 / Docs and recipes', 'Docs follow the product loop.', 'Every doc maps back to gateway, lake, training, distillation, runtime, and verification.',
  'kolm docs open --surface current',
  [['Explain', 'Route-specific concept first', 'No orphan content islands'], ['Show', 'Concrete commands and payloads', 'Readers can copy the real path'], ['Verify', 'Link claims to product evidence', 'Receipts, API docs, and examples stay close'], ['Continue', 'Next best action is explicit', 'Docs lead back to a working surface']],
  [['routes', 'indexed'], ['recipes', 'ready'], ['refs', 'linked']], '/docs');
  }
  if (/^\/(vs-|how-vs|migrate|use-cases|case-studies|saas|frontier-stack|sovereign-ai|why-now|why-kolm)(\/|$)/.test(p)) {
- return profile('comparison', 'Surface 08 / Differentiation', 'The comparison is a product path, not a claim.', 'Comparison and use-case pages now render the same asset logic: where incumbent tools stop at tracing, prompts, or hosted fine-tunes, kolm continues into reviewed data, signed artifacts, local runtimes, and enterprise evidence.',
+ return profile('comparison', 'Surface 08 / Differentiation', 'Comparisons map to migration.', 'Show where alternatives stop and where Kolm continues into data, artifacts, runtimes, and evidence.',
  'kolm compare --path current',
  [['Contrast', 'Name what the alternative owns', 'Gateway, evals, fine-tune, or observability'], ['Prove', 'Show what kolm owns end-to-end', 'Calls to artifact to runtime to receipt'], ['Migrate', 'Map the first switch', 'Base URL, import, or dataset bridge'], ['Close', 'Give the next route', 'Quickstart, product, enterprise, docs']],
  [['gap', 'named'], ['path', 'mapped'], ['proof', 'receipt']], '/product');
  }
- return profile('platform', 'Surface / Product context', 'Every page belongs to the same owned-AI loop.', 'This generated media keeps long-tail pages aligned with the core product: wrap AI calls, capture evidence, improve repeated work, ship verified artifacts, and operate them with governance.',
+ return profile('platform', 'Surface / Product context', 'Every page maps to the owned-AI loop.', 'Wrap calls, capture evidence, improve repeated work, ship artifacts, and operate with governance.',
  'kolm surface inspect',
  [['Wrap', 'One gateway for model calls', 'Start without rewriting the application'], ['Capture', 'Create replayable product evidence', 'Trace, redact, and review'], ['Improve', 'Train or distill what repeats', 'Use reviewed calls and frozen evals'], ['Operate', 'Run and audit the artifact', 'Receipts close the loop']],
  [['loop', 'closed'], ['surface', 'mapped'], ['proof', 'visible']], '/product');

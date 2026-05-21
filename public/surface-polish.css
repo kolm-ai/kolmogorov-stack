@@ -2792,3 +2792,417 @@ body:has(.w373-pricing-block) .plans-header .sec-lede {
   font-size: 40px !important;
  }
 }
+
+/* W560: final shared product UI shell.
+   A single visual contract for nav, buttons, cards, generated product media,
+   and post-auth account pages. Concise, dense, enterprise-grade. */
+:root {
+ --kolm-page-max: 1180px;
+ --kolm-radius: 8px;
+ --kolm-green: #7ef0d2;
+ --kolm-dark: #08090c;
+ --kolm-panel-strong: #0b0f12;
+ --kolm-ink-0: #fff7e8;
+ --kolm-ink-1: #d8dfd5;
+ --kolm-ink-2: #aeb8ae;
+ --kolm-ink-3: #737c73;
+ --kolm-border: rgba(255, 247, 232, 0.10);
+ --kolm-border-strong: rgba(255, 247, 232, 0.16);
+}
+
+html.kolm-sota-ui-v560 body {
+ letter-spacing: 0 !important;
+}
+
+html.kolm-sota-ui-v560 :where(h1, h2, h3, h4, h5, h6) {
+ letter-spacing: 0 !important;
+}
+
+html.kolm-sota-ui-v560 :where(.site-header, header.site, nav.top) {
+ min-height: 60px !important;
+ background: rgba(8, 10, 12, 0.94) !important;
+ border-bottom: 1px solid var(--kolm-border) !important;
+ box-shadow: none !important;
+}
+
+html.kolm-sota-ui-v560 :where(.site-header > .wrap, header.site > .wrap, header.site > .wrap.row) {
+ height: 60px !important;
+ max-width: var(--kolm-page-max) !important;
+ gap: 22px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.brand, .logo) {
+ min-height: 44px !important;
+ color: var(--kolm-ink-0) !important;
+ font: 650 13.5px/1 var(--kolm-mono, ui-monospace, monospace) !important;
+ letter-spacing: 0 !important;
+}
+
+html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top, .site-nav > a, header.site nav a) {
+ min-height: 38px !important;
+ padding: 0 11px !important;
+ border: 1px solid transparent !important;
+ border-radius: 8px !important;
+ color: var(--kolm-ink-2) !important;
+ font: 650 12.5px/1 var(--kolm-sans, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif) !important;
+ text-decoration: none !important;
+}
+
+html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top::after, .site-nav > a::after, header.site nav a::after) {
+ display: none !important;
+ content: none !important;
+}
+
+html.kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top:hover, .site-nav .nav-item > .nav-top:focus-visible, .site-nav .nav-item > .nav-top.active, .site-nav .nav-item > .nav-top[aria-current="page"], .site-nav > a:hover, .site-nav > a.active, header.site nav a:hover, header.site nav a.active, header.site nav a[aria-current="page"]) {
+ color: var(--kolm-ink-0) !important;
+ background: rgba(126, 240, 210, 0.08) !important;
+ border-color: rgba(126, 240, 210, 0.18) !important;
+}
+
+html.kolm-sota-ui-v560 :where(.site-nav .mega-menu) {
+ top: 58px !important;
+ border-radius: 8px !important;
+ background: #0b0f12 !important;
+ border-color: var(--kolm-border-strong) !important;
+ box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48) !important;
+}
+
+html.kolm-sota-ui-v560 :where(.site-nav .mega-col) {
+ border-radius: 6px !important;
+ border-color: rgba(255, 247, 232, 0.08) !important;
+}
+
+html.kolm-sota-ui-v560 :where(.site-nav .mega-h) {
+ color: var(--kolm-green) !important;
+ font: 750 10px/1.2 var(--kolm-mono, ui-monospace, monospace) !important;
+ letter-spacing: 0.05em !important;
+}
+
+html.kolm-sota-ui-v560 :where(.site-nav .mega-menu a) {
+ min-height: 38px !important;
+ border-radius: 6px !important;
+ color: var(--kolm-ink-2) !important;
+ font-size: 12.5px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.site-actions .cta, header.site .right .cta, .btn.primary, .btn-primary, a.cta, button.primary) {
+ min-height: 44px !important;
+ border-radius: 8px !important;
+ padding: 0 15px !important;
+ display: inline-flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ background: var(--kolm-ink-0) !important;
+ border: 1px solid var(--kolm-ink-0) !important;
+ color: #08090c !important;
+ font: 700 12.5px/1 var(--kolm-sans, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif) !important;
+ letter-spacing: 0 !important;
+ white-space: nowrap !important;
+ text-decoration: none !important;
+}
+
+html.kolm-sota-ui-v560 :where(.btn, .btn-ghost, .btn-secondary, .button, button:not(.nav-toggle):not(.theme-toggle), a.btn) {
+ min-height: 44px !important;
+ border-radius: 8px !important;
+ padding: 0 14px !important;
+ display: inline-flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ gap: 8px !important;
+ font-weight: 650 !important;
+ letter-spacing: 0 !important;
+}
+
+html.kolm-sota-ui-v560 :where(.btn.ghost, .btn-ghost, .btn-secondary) {
+ background: rgba(255, 247, 232, 0.035) !important;
+ border-color: var(--kolm-border-strong) !important;
+ color: var(--kolm-ink-1) !important;
+}
+
+html.kolm-sota-ui-v560 :where(.card, .kpanel, .metric-card, .journey-card, .ksm-console, .ksm-copy, .kolm-product-spine, #account-sidebar, .acct-shell .empty) {
+ border-radius: 8px !important;
+ border-color: var(--kolm-border) !important;
+ box-shadow: none !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-product-spine) {
+ max-width: var(--kolm-page-max) !important;
+ margin: 14px auto 0 !important;
+ padding: 0 !important;
+ display: grid !important;
+ grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+ gap: 1px !important;
+ overflow: hidden !important;
+ background: var(--kolm-border) !important;
+ border: 1px solid var(--kolm-border) !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-product-spine a) {
+ min-height: 72px !important;
+ padding: 12px !important;
+ border: 0 !important;
+ border-radius: 0 !important;
+ background: var(--kolm-panel-strong) !important;
+ text-align: left !important;
+ align-items: flex-start !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-product-spine a[aria-current="page"]) {
+ background: rgba(126, 240, 210, 0.09) !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-product-spine a span) {
+ color: var(--kolm-green) !important;
+ font-size: 10px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-product-spine a b) {
+ color: var(--kolm-ink-0) !important;
+ font-size: 13px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-product-spine a em) {
+ color: var(--kolm-ink-3) !important;
+ font-size: 11.5px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-surface-media) {
+ padding: 16px var(--kolm-page-pad, 32px) !important;
+ margin-top: 14px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-shell) {
+ max-width: var(--kolm-page-max) !important;
+ grid-template-columns: minmax(260px, 0.42fr) minmax(0, 1fr) !important;
+ gap: 12px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-copy) {
+ padding: 18px !important;
+ background: rgba(255, 247, 232, 0.035) !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-copy h2) {
+ max-width: 14ch !important;
+ font-size: clamp(26px, 3vw, 38px) !important;
+ line-height: 1.02 !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-copy p:not(.ksm-kicker)) {
+ max-width: 44ch !important;
+ font-size: 13px !important;
+ line-height: 1.45 !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-flow) {
+ grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+ gap: 1px !important;
+ background: var(--kolm-border) !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-step) {
+ min-height: 104px !important;
+ border: 0 !important;
+ border-radius: 0 !important;
+ background: #0b0f12 !important;
+ padding: 12px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-step em) {
+ display: none !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kolm-account-command) {
+ max-width: 1280px !important;
+ margin: 0 auto !important;
+ padding: 18px 24px 0 !important;
+ grid-template-columns: minmax(250px, 0.42fr) minmax(0, 1fr) !important;
+ gap: 12px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kac-copy, .kac-console) {
+ border-radius: 8px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kac-copy) {
+ padding: 20px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kac-copy h1) {
+ max-width: 11ch !important;
+ font-size: clamp(40px, 5vw, 58px) !important;
+ line-height: 0.96 !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kac-copy p:not(.kac-kicker)) {
+ max-width: 38ch !important;
+ font-size: 14px !important;
+ line-height: 1.42 !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kac-steps, .kac-matrix) {
+ gap: 1px !important;
+ background: var(--kolm-border) !important;
+}
+
+html.kolm-sota-ui-v560 :where(.kac-steps a, .kac-matrix a) {
+ border-radius: 0 !important;
+ background: var(--kolm-panel-strong) !important;
+}
+
+html.kolm-sota-ui-v560 :where(body.kolm-account-surface .acct-shell) {
+ max-width: 1280px !important;
+ padding: 18px 24px 40px !important;
+ gap: 16px !important;
+}
+
+html.kolm-sota-ui-v560 :where(body.kolm-account-surface #account-sidebar) {
+ top: 78px !important;
+ padding: 12px !important;
+ background: #0b0f12 !important;
+}
+
+html.kolm-sota-ui-v560 :where(body.kolm-account-surface #account-sidebar a) {
+ min-height: 36px !important;
+ border-radius: 6px !important;
+ display: flex !important;
+ align-items: center !important;
+ padding: 0 10px !important;
+ font-size: 12px !important;
+}
+
+html.kolm-sota-ui-v560 :where(body.kolm-account-surface #account-sidebar a[aria-current="page"]) {
+ background: rgba(126, 240, 210, 0.10) !important;
+ color: var(--kolm-green) !important;
+ border-left: 0 !important;
+ padding-left: 10px !important;
+}
+
+html.kolm-sota-ui-v560 :where(body.kolm-account-surface .acct-content h1) {
+ font-size: clamp(34px, 4vw, 54px) !important;
+ line-height: 1 !important;
+}
+
+html.kolm-sota-ui-v560 :where(body.kolm-account-surface .acct-content .lede) {
+ max-width: 58ch !important;
+ font-size: 14.5px !important;
+ line-height: 1.45 !important;
+}
+
+html.kolm-sota-ui-v560 :where(.journey-grid) {
+ grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+ gap: 1px !important;
+ background: var(--kolm-border) !important;
+ border: 1px solid var(--kolm-border) !important;
+ border-radius: 8px !important;
+ overflow: hidden !important;
+}
+
+html.kolm-sota-ui-v560 :where(.journey-card) {
+ min-height: 126px !important;
+ border: 0 !important;
+ border-radius: 0 !important;
+ background: #0b0f12 !important;
+ padding: 14px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.journey-card span) {
+ color: var(--kolm-green) !important;
+ font-size: 10px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.journey-card b) {
+ font-size: 13.5px !important;
+}
+
+html.kolm-sota-ui-v560 :where(.journey-card small) {
+ font-size: 11.5px !important;
+ line-height: 1.34 !important;
+}
+
+html.kolm-sota-ui-v560 body:has(.hero-panel .pipeline) main > .hero.wrap {
+ min-height: auto !important;
+ padding-top: clamp(48px, 5vw, 72px) !important;
+ padding-bottom: clamp(56px, 6vw, 84px) !important;
+ align-items: center !important;
+}
+
+html.kolm-sota-ui-v560 body.kolm-account-surface .acct-content [data-postauth-product-command-center] {
+ display: none !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v560 body {
+ background: #f7f4ec !important;
+ color: #111418 !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v560 :where(.site-header, header.site, nav.top) {
+ background: rgba(247, 244, 236, 0.96) !important;
+ border-bottom-color: rgba(16, 24, 32, 0.12) !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v560 :where(.brand, .logo) {
+ color: #111418 !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top, .site-nav > a, header.site nav a) {
+ color: #3d4640 !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v560 :where(.site-nav .nav-item > .nav-top:hover, .site-nav .nav-item > .nav-top:focus-visible, .site-nav .nav-item > .nav-top.active, .site-nav .nav-item > .nav-top[aria-current="page"], .site-nav > a:hover, .site-nav > a.active, header.site nav a:hover, header.site nav a.active, header.site nav a[aria-current="page"]) {
+ color: #0b342b !important;
+ background: rgba(8, 127, 104, 0.08) !important;
+ border-color: rgba(8, 127, 104, 0.18) !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v560 :where(.site-nav .mega-menu, .kolm-product-spine a, .kolm-surface-media .ksm-step, .kac-steps a, .kac-matrix a, body.kolm-account-surface #account-sidebar, .journey-card) {
+ background: #ffffff !important;
+ color: #111418 !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-copy, .card, .kpanel, .metric-card, .acct-shell .empty) {
+ background: rgba(255, 255, 255, 0.78) !important;
+ color: #111418 !important;
+}
+
+[data-theme="light"].kolm-sota-ui-v560 :where(.site-actions .cta, header.site .right .cta, .btn.primary, .btn-primary, a.cta, button.primary) {
+ background: #111418 !important;
+ border-color: #111418 !important;
+ color: #fff7e8 !important;
+}
+
+@media (max-width: 980px) {
+ html.kolm-sota-ui-v560 :where(.kolm-product-spine) {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+ }
+ html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-shell, .kolm-account-command) {
+  grid-template-columns: 1fr !important;
+ }
+ html.kolm-sota-ui-v560 :where(.journey-grid) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+ }
+}
+
+@media (max-width: 720px) {
+ html.kolm-sota-ui-v560 :where(.site-header > .wrap, header.site > .wrap, header.site > .wrap.row) {
+  padding-left: 18px !important;
+  padding-right: 18px !important;
+ }
+ html.kolm-sota-ui-v560 :where(.site-actions .cta, header.site .right .cta) {
+  min-height: 44px !important;
+  border-radius: 8px !important;
+ }
+ html.kolm-sota-ui-v560 :where(.kolm-surface-media .ksm-flow) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+ }
+}
+
+@media (max-width: 560px) {
+ html.kolm-sota-ui-v560 :where(.kolm-product-spine, .kolm-surface-media .ksm-flow, .journey-grid) {
+  grid-template-columns: 1fr !important;
+ }
+ html.kolm-sota-ui-v560 :where(body.kolm-account-surface .acct-shell, .kolm-account-command) {
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+ }
+}

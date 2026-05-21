@@ -4375,6 +4375,163 @@ export function buildRouter() {
     }
   });
 
+  // W560 — SSO / SAML / SCIM honest-envelope surface.
+  //
+  // public/enterprise.html advertises "SSO, audit logs, SBOM/SLSA, private
+  // registry, architecture review" but the router carried ZERO route
+  // definitions for sso/saml/scim until this wave — meaning every probe
+  // (GET /v1/account/sso/status, POST /v1/account/sso/configure,
+  // HEAD /v1/scim/v2/Users) fell through to either the global auth middleware
+  // (401) or the not-found HTML fallthrough (404 text/html). Enterprise
+  // buyers checking the API for SSO readiness found nothing.
+  //
+  // These routes ship the honesty contract: they EXIST and return well-formed
+  // JSON envelopes. For non-enterprise plans they return
+  // {ok:false, error:'enterprise_only', plan:<cur>, contact:'sales@kolm.ai'}
+  // with HTTP 200 (a routable envelope, not a wall). The metadata + SP-config
+  // endpoints are real static documents an IdP can fetch to start federation.
+  //
+  // The actual SAML assertion + SCIM provisioning loops are not implemented;
+  // the configure POST persists nothing today. When that ships, these stubs
+  // are the public contract it has to honor.
+  function _ssoEntitled(plan) {
+    return plan === 'enterprise' || plan === 'business';
+  }
+  r.get('/v1/account/sso/status', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const plan = req.tenant_record.plan || 'free';
+    const entitled = _ssoEntitled(plan);
+    res.json({
+      ok: true,
+      enabled: false,
+      plan,
+      entitled,
+      providers_supported: ['google-workspace', 'okta', 'azure-ad', 'onelogin', 'jumpcloud', 'saml-generic', 'oidc-generic'],
+      enterprise_only: !entitled,
+      upgrade_path: entitled ? null : '/v1/account/change-plan',
+      contact: entitled ? null : 'sales@kolm.ai',
+      docs: 'https://kolm.ai/enterprise#sso',
+      sp_metadata_url: '/v1/account/saml/metadata',
+      scim_endpoint: '/v1/scim/v2/',
+      note: entitled
+        ? 'SSO entitlement present; POST /v1/account/sso/configure with {provider, metadata_url} to start federation.'
+        : 'SSO is available on Business and Enterprise plans. The endpoint envelope ships today; the federation loop is not yet implemented and is gated to entitled tenants.',
+    });
+  });
+  r.post('/v1/account/sso/configure', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const plan = req.tenant_record.plan || 'free';
+    if (!_ssoEntitled(plan)) {
+      return res.status(402).json({
+        ok: false,
+        error: 'enterprise_only',
+        plan,
+        upgrade: '/v1/account/change-plan',
+        contact: 'sales@kolm.ai',
+        docs: 'https://kolm.ai/enterprise#sso',
+      });
+    }
+    return res.status(503).json({
+      ok: false,
+      error: 'sso_federation_not_yet_implemented',
+      plan,
+      note: 'Entitlement check passed but the SAML/OIDC federation loop is not yet wired. Contact dev@kolm.ai to coordinate a manual provisioning + early-access rollout.',
+      contact: 'dev@kolm.ai',
+      tracking: 'W560',
+    });
+  });
+  // SP metadata is a static document an IdP fetches at federation-config
+  // time. It does NOT depend on entitlement (publishing the SP entity ID
+  // is fine even for tenants who can't yet bind to it).
+  r.get('/v1/account/saml/metadata', (req, res) => {
+    const host = req.get('host') || 'kolm.ai';
+    const entityId = `https://${host}/saml/sp`;
+    const acsUrl = `https://${host}/v1/account/saml/acs`;
+    const sloUrl = `https://${host}/v1/account/saml/slo`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"
+                  entityID="${entityId}">
+  <SPSSODescriptor AuthnRequestsSigned="false"
+                   WantAssertionsSigned="true"
+                   protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                         Location="${sloUrl}"/>
+    <NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>
+    <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                              Location="${acsUrl}"
+                              index="0"
+                              isDefault="true"/>
+  </SPSSODescriptor>
+</EntityDescriptor>`;
+    res.setHeader('Content-Type', 'application/samlmetadata+xml; charset=utf-8');
+    res.send(xml);
+  });
+  // SCIM 2.0 Service Provider Configuration — RFC 7644 §5. IdPs read this
+  // to discover what SCIM operations the SP supports. Empty/false flags are
+  // honest signals to the IdP that bulk/patch/etag are not yet implemented.
+  r.get('/v1/scim/v2/ServiceProviderConfig', (req, res) => {
+    const host = req.get('host') || 'kolm.ai';
+    res.json({
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig'],
+      documentationUri: `https://${host}/enterprise#scim`,
+      patch: { supported: false },
+      bulk: { supported: false, maxOperations: 0, maxPayloadSize: 0 },
+      filter: { supported: true, maxResults: 200 },
+      changePassword: { supported: false },
+      sort: { supported: false },
+      etag: { supported: false },
+      authenticationSchemes: [
+        {
+          name: 'Bearer Token',
+          description: 'kolm tenant API key in Authorization: Bearer header',
+          specUri: 'https://datatracker.ietf.org/doc/html/rfc6750',
+          type: 'oauthbearertoken',
+          primary: true,
+        },
+      ],
+    });
+  });
+  r.get('/v1/scim/v2/Users', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const plan = req.tenant_record.plan || 'free';
+    if (!_ssoEntitled(plan)) {
+      return res.status(402).json({
+        ok: false,
+        error: 'enterprise_only',
+        plan,
+        upgrade: '/v1/account/change-plan',
+        contact: 'sales@kolm.ai',
+      });
+    }
+    // SCIM ListResponse shape (RFC 7644 §3.4.2). Empty list when entitled
+    // but no provisioning has occurred yet.
+    res.json({
+      schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
+      totalResults: 0,
+      startIndex: 1,
+      itemsPerPage: 0,
+      Resources: [],
+    });
+  });
+  r.post('/v1/scim/v2/Users', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const plan = req.tenant_record.plan || 'free';
+    if (!_ssoEntitled(plan)) {
+      return res.status(402).json({
+        ok: false,
+        error: 'enterprise_only',
+        plan,
+        upgrade: '/v1/account/change-plan',
+        contact: 'sales@kolm.ai',
+      });
+    }
+    return res.status(503).json({
+      schemas: ['urn:ietf:params:scim:api:messages:2.0:Error'],
+      status: '503',
+      detail: 'scim_provisioning_not_yet_implemented; tracking W560',
+    });
+  });
+
   // W452 — multimodal redactor surface. The fail-closed redactor in
   // src/privacy-membrane.js + src/phi-redactor.js has shipped since the v7
   // refactor, but it was only reachable via the connector proxy's implicit
