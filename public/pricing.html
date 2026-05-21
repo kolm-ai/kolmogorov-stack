@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>kolm pricing · four plans, twelve meters · kolm.ai</title>
-<meta name="description" content="kolm pricing: Free Local runs forever on your machine. Pro $29/mo adds cloud sync and the optimizer. Team $99/mo per seat adds shared workspace + RBAC....">
+<meta name="description" content="kolm pricing: Free, Pro $49, Team $499, and Enterprise custom. Compile signed .kolm artifacts, keep local runtime free, and prove ROI before upgrade.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="kolm pricing · four plans, twelve meters · kolm.ai">
-<meta property="og:description" content="kolm pricing: Free Local runs forever on your machine. Pro $29/mo adds cloud sync and the optimizer. Team $99/mo per seat adds shared workspace + RBAC....">
+<meta property="og:description" content="kolm pricing: Free, Pro $49, Team $499, and Enterprise custom. Compile signed .kolm artifacts, keep local runtime free, and prove ROI before upgrade.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/pricing">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="kolm pricing · four plans, twelve meters · kolm.ai">
-<meta name="twitter:description" content="kolm pricing: Free Local runs forever on your machine. Pro $29/mo adds cloud sync and the optimizer. Team $99/mo per seat adds shared workspace + RBAC....">
+<meta name="twitter:description" content="kolm pricing: Free, Pro $49, Team $499, and Enterprise custom. Compile signed .kolm artifacts, keep local runtime free, and prove ROI before upgrade.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/pricing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -29,15 +29,15 @@
  "@type": "Product",
  "@id": "https://kolm.ai/pricing#product",
  "name": "kolm",
- "description": "kolm has four plans. Free Local runs the CLI, the optimizer, and any .kolm artifact on your hardware forever. Pro adds cloud sync, advanced optimizer, synthetic data, CI hooks. Team adds shared workspace, approval queue, and reviewer / admin / builder RBAC. Enterprise adds SSO, SAML, SCIM, BAA, VPC, and a private support SLA.",
+ "description": "kolm has four plans: Free, Pro, Team, and Enterprise. The local runtime stays free; paid plans add cloud compile workflow, private registry, audit logs, SSO, BAA/DPA, and deployment review.",
  "brand": {"@type": "Brand", "name": "Kolmogorov"},
  "image": "https://kolm.ai/og-card.svg",
  "url": "https://kolm.ai/pricing",
  "offers": [
  {"@type": "Offer", "name": "Free Local", "price": "0", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=free", "availability": "https://schema.org/InStock", "description": "Free forever. Local CLI, local lake, local privacy detector, local optimizer, local runtime. No cloud sync."},
- {"@type": "Offer", "name": "Pro", "price": "29", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=pro", "availability": "https://schema.org/InStock", "description": "Solo dev shipping to production. Cloud backup of redacted captures, advanced optimizer (cost / latency / privacy / repetition), synthetic data, CI hooks, multiple device profiles."},
- {"@type": "Offer", "name": "Team", "price": "99", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=team", "availability": "https://schema.org/InStock", "description": "Per seat. Shared workspace, approval queue with reviewer roles, shared datasets, artifact sharing, reviewer / admin / builder RBAC."},
- {"@type": "Offer", "name": "Enterprise", "price": "0", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=enterprise", "availability": "https://schema.org/InStock", "description": "Contact us. SSO, SAML, SCIM, audit log with retention policy, VPC and on-prem, BAA and SOC 2 compliance pack, custom provider policy, private support SLA."}
+ {"@type": "Offer", "name": "Pro", "price": "49", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=pro", "availability": "https://schema.org/InStock", "description": "Solo dev shipping to production. Cloud backup of redacted captures, advanced optimizer (cost / latency / privacy / repetition), synthetic data, CI hooks, multiple device profiles."},
+ {"@type": "Offer", "name": "Team", "price": "499", "priceCurrency": "USD", "url": "https://kolm.ai/signup?plan=team", "availability": "https://schema.org/InStock", "description": "Five seats, private registry, approval queue, CI/CD integration, audit logs, shared datasets, artifact sharing, and reviewer / admin / builder RBAC."},
+ {"@type": "Offer", "name": "Enterprise", "price": "0", "priceCurrency": "USD", "url": "https://kolm.ai/enterprise/inquiry", "availability": "https://schema.org/InStock", "description": "Contact us. SSO, SAML, SCIM, audit log with retention policy, VPC and on-prem, BAA and SOC 2 compliance pack, custom provider policy, private support SLA."}
  ]
  },
  {
@@ -795,7 +795,7 @@
  <div data-w260="three-tier" data-w273="tier-summary">
  <div>W273 &middot; Three ways to use kolm</div>
  <div><b>Free</b> Local CLI + runtime for individual developers, MIT / Apache licensed, with a 100 compiles/mo cap.</div>
- <div><b>Starter $9 / mo</b> Solo developer + email support, 1k compiles/mo, 10k captures/mo, 10 GB storage.</div>
+ <div><b>Pro $49 / mo</b> Solo developer + priority K-score, unlimited compiles, and email support.</div>
  <div><b>Team, Business, Enterprise</b> 5 to unlimited seats, SSO, audit log, BAA, on-prem and air-gap by contract.</div>
  </div>
 
@@ -818,16 +818,14 @@
  raw_cloud_synced_bytes, community support.
  </div>
  <div data-tier="starter">
- Starter $9 / mo: 1k compiles / mo, 10k captures / mo, 10 GB
- storage, email support.
+ Legacy starter alias maps to Pro $49 / mo with unlimited compiles,
+ priority K-score, 10 GB artifacts, and email support.
  </div>
  <div data-tier="team">
- Team $99 / mo per seat: 10k compiles / mo (pooled), 100k captures
- / mo, 100 GB storage, 5 seats included, SSO.
+ Team $499 / mo: five-seat workspace with private registry, approvals, audit log, CI/CD, and team controls.
  </div>
  <div data-tier="business">
- Business $999 / mo: 100k compiles / mo (pooled), 1M captures / mo,
- 1 TB storage, 25 seats, SAML, BAA available.
+ Legacy business alias maps to Enterprise custom: BAA, SAML/SCIM SSO, customer-hosted bridge, air-gap, and dedicated architecture review.
  </div>
  <div data-tier="enterprise" data-w260="enterprise-baa">
  Enterprise Custom: unlimited by contract, on-prem and air-gap and
@@ -850,7 +848,7 @@
  level by entering it below.
  <input id="ov-spend" type="number" value="3000" aria-hidden="true">
  Here is your kolm cost on <span id="ov-tier-name">Team</span>:
- <span id="ov-kolm">$99 / mo</span> &middot; you save
+ <span id="ov-kolm">$499 / mo</span> &middot; you save
  <span id="ov-save">$2,901 / mo</span>.
  </div>
  </div>
@@ -922,7 +920,7 @@
  <div class="w395-tag">Pro</div>
  <h3 class="w395-name">Ship to production.</h3>
  <p class="w395-pitch">Everything in Free Local, plus cloud backup of redacted metadata, the advanced optimizer, synthetic data, and CI hooks.</p>
- <div class="w395-price">$29<span class="per">/ mo</span></div>
+ <div class="w395-price">$49<span class="per">/ mo</span></div>
  <ul class="w395-list">
  <li><b>Cloud backup &amp; sync</b> metadata and redacted captures</li>
  <li><b>Advanced optimizer</b> cost, latency, privacy, repetition</li>
@@ -938,7 +936,7 @@
  <div class="w395-tag">Team</div>
  <h3 class="w395-name">Build together with review.</h3>
  <p class="w395-pitch">A shared workspace, an approval queue with reviewer roles, and RBAC so reviewers, admins, and builders each have the right keys.</p>
- <div class="w395-price">$99<span class="per">/ seat / mo</span></div>
+ <div class="w395-price">$499<span class="per">/ mo</span></div>
  <ul class="w395-list">
  <li><b>Shared workspace</b> one home for the team</li>
  <li><b>Approval queue</b> reviewer roles, blocking sign-off</li>
@@ -963,7 +961,7 @@
  <li><b>Custom provider policy</b> route per tenant, per artifact</li>
  <li><b>Private support SLA</b> dedicated CSM, white-glove onboarding</li>
  </ul>
- <a href="/upgrade?plan=enterprise" class="w395-cta">Talk to sales &rarr;</a>
+ <a href="/enterprise/inquiry" class="w395-cta">Talk to sales &rarr;</a>
  <p class="tier-foot" style="margin:10px 0 0;font-size:11.5px;color:var(--ink-faint);line-height:1.5">Need a BAA? <a href="/baa" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">Founder-signed within 48h</a>. <a href="/enterprise#sla" style="color:#7ef0d2;border-bottom:1px solid rgba(126,240,210,0.32)">SLA terms</a>.</p>
  </div>
  </div>
@@ -1025,10 +1023,9 @@
  <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">kolm tier</span>
  <select id="w273-tier" aria-label="kolm tier for ROI" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px">
  <option value="0">Free ($0)</option>
- <option value="9">Starter ($9)</option>
- <option value="99" selected>Team ($99)</option>
- <option value="999">Business ($999)</option>
- <option value="5000">Enterprise (est. $5k)</option>
+ <option value="49">Pro ($49)</option>
+ <option value="499" selected>Team ($499)</option>
+ <option value="2000">Enterprise (custom)</option>
  </select>
  </label>
  <label style="display:flex;flex-direction:column;gap:5px">
@@ -1038,7 +1035,7 @@
  </div>
  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:rgba(126,240,210,0.04)">
  <div><span style="color:var(--ink-mute);font-size:12.5px">Rent / mo</span><br><b id="w273-rent" style="color:var(--ink);font-family:var(--mono);font-size:18px;font-variant-numeric:tabular-nums">$72,000</b></div>
- <div><span style="color:var(--ink-mute);font-size:12.5px">kolm / mo</span><br><b id="w273-kolm" style="color:var(--ink);font-family:var(--mono);font-size:18px;font-variant-numeric:tabular-nums">$99</b></div>
+ <div><span style="color:var(--ink-mute);font-size:12.5px">kolm / mo</span><br><b id="w273-kolm" style="color:var(--ink);font-family:var(--mono);font-size:18px;font-variant-numeric:tabular-nums">$499</b></div>
  <div><span style="color:var(--ink-mute);font-size:12.5px">Monthly savings vs renting</span><br><b id="w273-savings" style="color:#7ef0d2;font-family:var(--mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">$72,401</b></div>
  <div><span style="color:var(--ink-mute);font-size:12.5px">Payback months</span><br><b id="w273-payback" style="color:#7ef0d2;font-family:var(--mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">0.0</b></div>
  </div>
@@ -1074,11 +1071,10 @@
  function calcOpenAI(){
  var spend = +$('ov-spend').value || 0;
  var tier;
- if (spend < 30) tier = { name: 'Free', price: 0 };
- else if (spend < 200) tier = { name: 'Starter', price: 9 };
- else if (spend < 2000) tier = { name: 'Team', price: 99 };
- else if (spend < 20000) tier = { name: 'Business', price: 999 };
- else tier = { name: 'Enterprise', price: 5000 };
+ if (spend < 50) tier = { name: 'Free', price: 0 };
+ else if (spend < 1000) tier = { name: 'Pro', price: 49 };
+ else if (spend < 20000) tier = { name: 'Team', price: 499 };
+ else tier = { name: 'Enterprise', price: 2000 };
  $('ov-tier-name').textContent = tier.name;
  $('ov-kolm').textContent = fmt(tier.price) + ' / mo';
  $('ov-save').textContent = fmt(Math.max(0, spend - tier.price)) + ' / mo';
@@ -1133,7 +1129,7 @@
  <div class="roi-row"><span class="lbl">Retained captures (%)</span><span class="val" id="w400-roi-keep-out">100%</span></div>
  <div class="roi-row"><span class="lbl">Tokens served local</span><span class="val" id="w400-roi-local-tokens">80M</span></div>
  <div class="roi-row"><span class="lbl">Rate ($ / M tokens)</span><span class="val" id="w400-roi-rate-kolm">$0.30</span></div>
- <div class="roi-row"><span class="lbl">One-time compile</span><span class="val" id="w400-roi-compile-out">$29 (Pro)</span></div>
+ <div class="roi-row"><span class="lbl">One-time compile</span><span class="val" id="w400-roi-compile-out">$49 (Pro)</span></div>
  <div class="roi-row tot"><span class="lbl">kolm cost / mo</span><span class="val" id="w400-roi-kolm">$24</span></div>
  </div>
  <div class="roi-rows" style="margin-top:14px;border-top:1px solid var(--line);padding-top:14px">
@@ -1161,7 +1157,7 @@
  </label>
  <label style="display:flex;flex-direction:column;gap:5px">
  <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)">Compile cost / mo (kolm plan)</span>
- <input id="w400-roi-compile" type="number" value="29" min="0" step="10" inputmode="numeric" aria-label="Monthly kolm plan cost" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
+ <input id="w400-roi-compile" type="number" value="49" min="0" step="10" inputmode="numeric" aria-label="Monthly kolm plan cost" style="background:var(--bg-card);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:6px;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums">
  </label>
  </div>
  <p style="margin:14px 0 0;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);line-height:1.6">Math: <code>rent = volume &times; tokens &times; ($3 / 1,000,000)</code> &middot; <code>kolm = volume &times; tokens &times; retain% &times; ($0.30 / 1,000,000) + compile_cost</code>. Verify the numbers before you trust the percent.</p>
@@ -1210,7 +1206,7 @@
  $('w400-roi-local-tokens').textContent = fmtTokens(localTokens);
  $('w400-roi-rate-rent').textContent = '$' + RENT_RATE.toFixed(2);
  $('w400-roi-rate-kolm').textContent = '$' + KOLM_RATE.toFixed(2);
- $('w400-roi-compile-out').textContent = fmtMoney(compile) + (compile === 0 ? ' (Free Local)' : compile === 29 ? ' (Pro)' : compile === 99 ? ' (Team)' : '');
+ $('w400-roi-compile-out').textContent = fmtMoney(compile) + (compile === 0 ? ' (Free Local)' : compile === 49 ? ' (Pro)' : compile === 499 ? ' (Team)' : '');
  $('w400-roi-rent').textContent = fmtMoney(rentCost);
  $('w400-roi-kolm').textContent = fmtMoney(kolmCost);
  $('w400-roi-savings').textContent = fmtMoney(savings) + ' / mo';
@@ -1351,7 +1347,7 @@
  </div>
  <div class="faq-card">
  <h3>Do Teams really start at two seats?</h3>
- <p>Yes. Teams is $149/mo flat for any team between 2 and 10 seats. Past 10, it's +$30/extra seat. No five-seat minimum, no pretending two-person teams are an edge case.</p>
+ <p>Yes. Team is $499/mo flat for any team between 2 and 10 seats. Past 10, it's +$30/extra seat. No five-seat minimum, no pretending two-person teams are an edge case.</p>
  </div>
  <div class="faq-card">
  <h3>Is annual billing cheaper?</h3>

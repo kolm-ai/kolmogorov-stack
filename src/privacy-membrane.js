@@ -937,6 +937,82 @@ export function statePaths() {
   };
 }
 
+function _normalizeEpsilon(epsilon) {
+  const n = Number(epsilon);
+  if (!Number.isFinite(n) || n <= 0) return 8;
+  return Math.min(100, Math.max(0.01, n));
+}
+
+function _seededUnit(seedMaterial) {
+  const h = crypto.createHash('sha256').update(String(seedMaterial), 'utf8').digest();
+  const n = h.readUInt32BE(0);
+  return (n + 0.5) / 0x100000000;
+}
+
+function _laplace(scale, seedMaterial) {
+  const u = _seededUnit(seedMaterial) - 0.5;
+  const sign = u < 0 ? -1 : 1;
+  return -scale * sign * Math.log(1 - 2 * Math.abs(u));
+}
+
+function _noisyCount(value, epsilon, sensitivity, seedMaterial) {
+  const base = Math.max(0, Number(value) || 0);
+  const scale = sensitivity / epsilon;
+  return Math.max(0, Math.round(base + _laplace(scale, seedMaterial)));
+}
+
+function _cloneJson(obj) {
+  return JSON.parse(JSON.stringify(obj || {}));
+}
+
+// Differential-privacy envelope for aggregate lake stats. This intentionally
+// operates on already-aggregated counts, not raw rows: regulated customers can
+// expose trend dashboards without leaking whether one person's event appears
+// in a tiny slice. Raw capture/export paths stay governed by retention policy.
+export function differentialPrivacyStats(stats, opts = {}) {
+  const epsilon = _normalizeEpsilon(opts.epsilon);
+  const delta = Number.isFinite(Number(opts.delta)) && Number(opts.delta) > 0 ? Number(opts.delta) : 1e-6;
+  const sensitivity = Number.isFinite(Number(opts.sensitivity)) && Number(opts.sensitivity) > 0
+    ? Number(opts.sensitivity)
+    : 1;
+  const seed = opts.seed || [
+    'kolm-dp-stats-v1',
+    stats?.window?.tenant_id || 'tenant',
+    stats?.window?.namespace || 'all',
+    stats?.window?.since || 'window',
+    epsilon,
+    delta,
+  ].join('|');
+  const out = _cloneJson(stats);
+  out.total_calls = _noisyCount(out.total_calls, epsilon, sensitivity, seed + '|total_calls');
+  out.sensitive_events = _noisyCount(out.sensitive_events, epsilon, sensitivity, seed + '|sensitive_events');
+  for (const [k, v] of Object.entries(out.redactions_by_class || {})) {
+    out.redactions_by_class[k] = _noisyCount(v, epsilon, sensitivity, seed + '|redactions|' + k);
+  }
+  for (const [k, v] of Object.entries(out.providers || {})) {
+    if (v && typeof v === 'object') v.calls = _noisyCount(v.calls, epsilon, sensitivity, seed + '|providers|' + k);
+  }
+  for (const [k, v] of Object.entries(out.models || {})) {
+    if (v && typeof v === 'object') v.calls = _noisyCount(v.calls, epsilon, sensitivity, seed + '|models|' + k);
+  }
+  for (const [i, c] of (out.repeated_clusters || []).entries()) {
+    c.count = _noisyCount(c.count, epsilon, sensitivity, seed + '|clusters|' + i);
+  }
+  for (const [i, w] of (out.top_workflows || []).entries()) {
+    w.calls = _noisyCount(w.calls, epsilon, sensitivity, seed + '|workflows|' + i);
+  }
+  out.privacy = {
+    mode: 'differential_privacy',
+    mechanism: 'laplace',
+    epsilon,
+    delta,
+    sensitivity,
+    seed_hash: crypto.createHash('sha256').update(String(seed), 'utf8').digest('hex'),
+    note: 'Counts are noisy; raw rows are not included in this response.',
+  };
+  return out;
+}
+
 // Reset the in-memory caches. Tests that swap KOLM_DATA_DIR call this
 // to force a re-read from disk.
 export function _resetCacheForTests() {

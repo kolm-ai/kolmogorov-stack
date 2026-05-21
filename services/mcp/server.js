@@ -19,6 +19,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
+import crypto from 'node:crypto';
 import { runArtifact, inspectArtifact } from '../../src/artifact-runner.js';
 import { findProjectConfig, resolveArtifactPaths } from '../../src/project.js';
 
@@ -33,6 +34,35 @@ function listArtifactsInDir(artifactsDir) {
 
 function safeName(filename) {
   return path.basename(filename, '.kolm').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 64);
+}
+
+function kolmHome() {
+  return process.env.KOLM_HOME
+    || process.env.KOLM_DATA_DIR
+    || (process.env.HOME ? path.join(process.env.HOME, '.kolm') : null)
+    || (process.env.USERPROFILE ? path.join(process.env.USERPROFILE, '.kolm') : null)
+    || path.resolve('.kolm');
+}
+
+function hashJson(value) {
+  let s;
+  try { s = JSON.stringify(value ?? null); }
+  catch { s = String(value); }
+  return crypto.createHash('sha256').update(s).digest('hex');
+}
+
+function appendMcpRunLog(row) {
+  try {
+    const dir = path.join(kolmHome(), 'logs');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.appendFileSync(path.join(dir, 'runs.jsonl'), JSON.stringify({
+      ts: new Date().toISOString(),
+      surface: 'mcp',
+      ...row,
+    }) + '\n');
+  } catch {
+    // MCP calls must never fail because local telemetry is unavailable.
+  }
 }
 
 // Source = a discovery root: either the user-global artifacts dir or a
@@ -163,6 +193,17 @@ async function handleRpc(req, ctx) {
       if (!ap) return fail(-32602, 'no such tool: ' + name);
       try {
         const r = await runArtifact(ap, args?.input, { params: args?.params });
+        appendMcpRunLog({
+          tool: name,
+          artifact_path: ap,
+          input_hash: hashJson(args?.input),
+          params_hash: args?.params == null ? null : hashJson(args.params),
+          output_hash: hashJson(r.output),
+          recipe_id: r.recipe_id,
+          latency_us: r.latency_us,
+          k_score: r.k_score || null,
+          receipt_hash: r.receipt ? hashJson(r.receipt) : null,
+        });
         return reply({
           content: [{
             type: 'text',

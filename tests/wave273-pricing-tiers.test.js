@@ -1,8 +1,10 @@
 // W273 - pricing tiers restructure.
 //
-// Outside audit gap: missing mid-market tiers between Free and Enterprise.
-// This wave restructures public/pricing.html into a five-tier grid
-// (Free / Starter / Team / Business / Enterprise) and adds:
+// Historical pricing lock-ins, now aligned to the current four-plan model.
+// public/pricing.html keeps legacy starter/business data-tier aliases for
+// backwards compatibility, but the buyer-facing model is:
+//   Free Local / Pro $49 / Team $499 / Enterprise Custom
+// and adds:
 //   - a usage-based credits row (post-cap pricing)
 //   - a client-side ROI calculator widget
 //   - a "currently doing $X/mo on OpenAI" comparison strip
@@ -87,40 +89,41 @@ test('W273 #7 - Free tier names 100 compiles / 1k captures / 1 GB / community su
   assert.match(block, /community/i, 'Free tier must name community support');
 });
 
-test('W273 #8 - Starter tier names $9, 1k compiles, 10k captures, 10 GB, email support', () => {
+test('W273 #8 - legacy Starter alias maps to Pro $49 with email support', () => {
   const m = PRICING.match(/data-tier="starter"[\s\S]{0,2000}/);
   assert.ok(m, 'starter tier block must be findable');
   const block = m[0];
-  assert.match(block, /\$9\b/, 'Starter tier must name $9');
-  assert.match(block, /\b1k\b/i, 'Starter tier must name 1k compiles');
-  assert.match(block, /\b10k\b/i, 'Starter tier must name 10k captures');
+  assert.match(block, /maps to Pro/i, 'Starter alias must explicitly map to Pro');
+  assert.match(block, /\$49\b/, 'Pro alias must name $49');
+  assert.match(block, /unlimited compiles/i, 'Pro alias must name unlimited compiles');
   assert.match(block, /10\s*GB/i, 'Starter tier must name 10 GB storage');
+  assert.match(block, /priority K-score/i, 'Pro alias must name priority K-score');
   assert.match(block, /email/i, 'Starter tier must name email support');
 });
 
-test('W273 #9 - Team tier names $99, 10k compiles, 100k captures, 100 GB, 5 seats, SSO', () => {
+test('W273 #9 - Team tier names $499, five seats, registry, approvals, audit log, and CI/CD', () => {
   const m = PRICING.match(/data-tier="team"[\s\S]{0,2500}/);
   assert.ok(m, 'team tier block must be findable');
   const block = m[0];
-  assert.match(block, /\$99\b/, 'Team tier must name $99');
-  assert.match(block, /\b10k\b/i, 'Team tier must name 10k compiles');
-  assert.match(block, /\b100k\b/i, 'Team tier must name 100k captures');
-  assert.match(block, /100\s*GB/i, 'Team tier must name 100 GB storage');
-  assert.match(block, /\b5\b[\s\S]{0,60}seats?/i, 'Team tier must name 5 seats');
-  assert.match(block, /SSO/, 'Team tier must name SSO');
+  assert.match(block, /\$499\b/, 'Team tier must name $499');
+  assert.match(block, /five-seat|\b5\b[\s\S]{0,80}seats?/i, 'Team tier must name five seats');
+  assert.match(block, /private registry/i, 'Team tier must name private registry');
+  assert.match(block, /approvals/i, 'Team tier must name approvals');
+  assert.match(block, /audit log/i, 'Team tier must name audit log');
+  assert.match(block, /CI\/CD/i, 'Team tier must name CI/CD');
 });
 
-test('W273 #10 - Business tier names $999, 100k compiles, 1M captures, 1 TB, 25 seats, SAML, BAA', () => {
+test('W273 #10 - legacy Business alias maps to Enterprise custom with regulated controls', () => {
   const m = PRICING.match(/data-tier="business"[\s\S]{0,2500}/);
   assert.ok(m, 'business tier block must be findable');
   const block = m[0];
-  assert.match(block, /\$999\b/, 'Business tier must name $999');
-  assert.match(block, /\b100k\b/i, 'Business tier must name 100k compiles');
-  assert.match(block, /\b1M\b/i, 'Business tier must name 1M captures');
-  assert.match(block, /1\s*TB/i, 'Business tier must name 1 TB storage');
-  assert.match(block, /\b25\b[\s\S]{0,60}seats?/i, 'Business tier must name 25 seats');
-  assert.match(block, /SAML/, 'Business tier must name SAML');
-  assert.match(block, /BAA/, 'Business tier must name BAA');
+  assert.match(block, /maps to Enterprise custom/i, 'Business alias must explicitly map to Enterprise custom');
+  assert.match(block, /BAA/, 'Business alias must name BAA');
+  assert.match(block, /SAML\/SCIM|SAML[\s\S]{0,20}SCIM/i, 'Business alias must name SAML/SCIM');
+  assert.match(block, /SSO/, 'Business alias must name SSO');
+  assert.match(block, /customer-hosted bridge/i, 'Business alias must name customer-hosted bridge');
+  assert.match(block, /air-gap/i, 'Business alias must name air-gap');
+  assert.match(block, /architecture review/i, 'Business alias must name architecture review');
 });
 
 test('W273 #11 - Enterprise tier names Custom, unlimited, on-prem/air-gap, BAA, dedicated CSM', () => {

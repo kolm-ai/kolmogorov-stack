@@ -314,11 +314,11 @@
 
  <div class="tk-card" id="KOLM-101">
  <div class="row"><span class="id">KOLM-101</span><span class="st open">Open</span></div>
- <h3>Self-serve Business plan upgrade flow.</h3>
+ <h3>Self-serve Enterprise plan upgrade flow.</h3>
  <div class="blk"><div class="lbl">Goal</div><p>Customer can upgrade from Pro to Business in <code>/enterprise/console</code> without contacting sales.</p></div>
- <div class="blk"><div class="lbl">Why now</div><p>Buyer review surfaced friction. Business plan currently requires email back and forth. Self-serve unlocks roughly $6K to $12K MRR per month at current funnel rate.</p></div>
+ <div class="blk"><div class="lbl">Why now</div><p>Buyer review surfaced friction. Enterprise plan currently requires email back and forth. Self-serve unlocks roughly $6K to $12K MRR per month at current funnel rate.</p></div>
  <div class="blk"><div class="lbl">Acceptance</div><ul>
- <li>Stripe Checkout flow for $999/mo Business plan reachable from the enterprise console.</li>
+ <li>Sales-reviewed Enterprise plan inquiry reachable from the enterprise console.</li>
  <li>Webhook updates plan tier in <code>tenant_record</code>.</li>
  <li>Gated <code>/v1/*</code> endpoints respect the new tier within 60 seconds of webhook receipt.</li>
  <li>Receipt sent via Resend.</li>

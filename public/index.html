@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>kolm.ai - Own the AI loop · kolm.ai</title>
-<meta name="description" content="kolm wraps every model API, captures and redacts traffic, promotes reviewed rows into datasets and evals, trains or distills repeated work, and ships signed AI artifacts for cloud, edge, desktop, browser, and enterprise.">
+<title>The AI Compiler for Owned Models · kolm.ai</title>
+<meta name="description" content="Replace repeated AI API calls with signed .kolm artifacts your team owns. Wrap model APIs, capture traffic, distill specialists, run anywhere, and prove every artifact.">
 <meta name="keywords" content="AI compiler, .kolm artifact, build your own AI, train your own AI, on-device AI, private AI, local AI, fine-tuning, own your model, HIPAA AI, edge AI, regulated AI">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -14,7 +14,7 @@
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="kolm.ai - Turn model traffic into owned AI">
+<meta property="og:title" content="The AI Compiler for Owned Models · kolm.ai">
 <meta property="og:description" content="Wrap model APIs, capture traffic, build reviewed datasets, run evals, distill specialists, ship signed runtimes, and prove the result to enterprise operators.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
@@ -24,7 +24,7 @@
 <meta property="og:image:alt" content="kolm.ai: the AI compiler. Capture, compile, ship, audit.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="kolm.ai - Turn model traffic into owned AI">
+<meta name="twitter:title" content="The AI Compiler for Owned Models · kolm.ai">
 <meta name="twitter:description" content="API gateway, capture lake, training loop, distillation, local runtimes, CLI/TUI, and enterprise evidence in one AI control plane.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="canonical" href="https://kolm.ai/">
@@ -980,12 +980,10 @@
  "Frontier-API fallback when the local model is uncertain"
  ],
  "offers": [
- { "@type": "Offer", "name": "Developer", "price": "0", "priceCurrency": "USD", "category": "free", "description": "3 compiles/mo, local-only, no plan." },
- { "@type": "Offer", "name": "Starter", "price": "9", "priceCurrency": "USD", "category": "starter", "description": "Solo developer plan. 50 compiles/mo." },
- { "@type": "Offer", "name": "Pro", "price": "49", "priceCurrency": "USD", "category": "pro", "description": "200k compile credits, private registry, 10M-vector recall pool." },
- { "@type": "Offer", "name": "Teams", "price": "149", "priceCurrency": "USD", "category": "teams", "description": "5 seats, shared artifact cache, SSO via Google Workspace, audit log, 30M-vector recall pool." },
- { "@type": "Offer", "name": "Business", "price": "1499","priceCurrency": "USD", "category": "business", "description": "25 seats, BAA on request, dedicated registry, priority compile queue." },
- { "@type": "Offer", "name": "Enterprise","price": "2999","priceCurrency": "USD", "category": "enterprise","description": "Self-serve enterprise: VPC peering on request, custom retention, signed pilots." }
+ { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD", "category": "free", "description": "Local CLI, local lake, local optimizer, local privacy detector, and local runtime." },
+ { "@type": "Offer", "name": "Pro", "price": "49", "priceCurrency": "USD", "category": "pro", "description": "Cloud sync, advanced optimizer, synthetic data, CI hooks, and multiple device profiles." },
+ { "@type": "Offer", "name": "Team", "price": "499", "priceCurrency": "USD", "category": "team", "description": "Five seats, shared workspace, approval queue, artifact sharing, RBAC, and audit evidence." },
+ { "@type": "Offer", "name": "Enterprise", "price": "0", "priceCurrency": "USD", "category": "enterprise", "url": "https://kolm.ai/enterprise/inquiry", "description": "Custom SSO/SAML/SCIM, BAA, SOC 2 package, VPC, on-prem, air-gap, custom policy, and SLA." }
  ],
  "aggregateRating": null
  },
@@ -1039,7 +1037,7 @@
  {
  "@type": "Question",
  "name": "What does kolm cost?",
- "acceptedAnswer": { "@type": "Answer", "text": "The CLI runtime is free and Apache-2.0. Cloud compile and the registry start at $9/month for the Starter tier; team and enterprise tiers add seats, BAA, and SLAs." }
+ "acceptedAnswer": { "@type": "Answer", "text": "The CLI runtime is free and Apache-2.0. Pro is $49/month, Team is $499/month with 5 seats, and Enterprise is custom for BAA, SSO/SAML/SCIM, air-gap, and private SLA." }
  }
  ]
  }
@@ -2779,7 +2777,7 @@ OPENROUTER_API_KEY=sk-kolm-...</code></pre>
  </div>
  <div>
  <dt class="hf-q">What does it cost?</dt>
- <dd class="hf-a">CLI + runtime + local lake are free and MIT. Cloud compile and hosted registry start at $9 / mo. Team and Enterprise tiers add seats, BAA, SCCs, SOC 2 Type I, and SLAs. <a href="/pricing">see pricing &rarr;</a></dd>
+ <dd class="hf-a">CLI, runtime, and local lake are free. Pro is $49 / mo, Team is $499 / mo with 5 seats, and Enterprise is custom for BAA, SCCs, SOC 2 Type I, SSO/SAML/SCIM, air-gap, and private SLAs. <a href="/pricing">see pricing &rarr;</a></dd>
  </div>
  </dl>
 

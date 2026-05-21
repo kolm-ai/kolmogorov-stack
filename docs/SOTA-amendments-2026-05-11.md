@@ -84,7 +84,7 @@ K-score: <composite>. Runtime egress is patched at the process boundary…
 Discovery rules:
 
 - If a `kolm.yaml` is found by walking up from the artifact's directory, the sidecar lands in `<projectRoot>/<skills_dir>/<artifact>.md` and the MCP tool name uses `<project name>`.
-- Otherwise, the sidecar lands next to the artifact and the MCP tool name defaults to `mcp__kolm__<artifact>`.
+- Otherwise, the sidecar lands next to the artifact and the MCP tool name defaults to `<artifact>`.
 
 ### 4. Dockerfile digest pinning
 

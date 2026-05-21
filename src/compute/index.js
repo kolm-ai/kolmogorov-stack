@@ -91,6 +91,8 @@ const PERF_BIAS = {
   'local-mps': 0.85,
   'local-rocm': 0.85,
   'local-directml': 0.70,
+  'local-openvino': 0.72,
+  'local-qnn': 0.72,
   'modal': 0.95,
   'runpod': 0.92,
   'lambda': 0.90,

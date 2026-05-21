@@ -1,18 +1,18 @@
 ---
-title: kolm rag · kolm.ai
-description: Airgapped local retrieval (BM25, no embedder, no network).
+title: kolm rag - kolm.ai
+description: Build and query air-gapped local retrieval indexes for Kolm recipes.
 ---
 
 # kolm rag
 
-> Airgapped local retrieval. BM25 only. No embedder. No network. Recipes attach an index and query it through `lib.rag.query(q, k)`.
+Build and query air-gapped local retrieval indexes. Kolm RAG uses BM25 only, has no embedder, and does not require network access.
 
 ## Usage
 
 ```bash
 kolm rag index <dir> [--name <slug>] [--ext txt,md,json] [--max-bytes 4194304]
 kolm rag query <name> "<question>" [--top-k 5] [--json]
-kolm rag attach <art.kolm> --index <name>
+kolm rag attach <artifact.kolm> --index <name>
 kolm rag list
 ```
 
@@ -20,37 +20,21 @@ kolm rag list
 
 | Flag | Default | Description |
 | ---- | ------- | ----------- |
-| `--name <slug>` | dir basename | index name |
-| `--ext <list>` | `txt,md,json` | comma-separated file extensions to ingest |
-| `--max-bytes <n>` | `4194304` (4 MiB) | per-file size cap |
-| `--top-k <n>` | `5` | how many hits to return |
-| `--json` | off | machine-readable output |
-| `--index <name>` | required for attach | which index to bind to the artifact |
+| `--name <slug>` | directory name | Index name. |
+| `--ext <list>` | `txt,md,json` | Comma-separated file extensions to ingest. |
+| `--max-bytes <n>` | `4194304` | Per-file size cap. |
+| `--top-k <n>` | `5` | Number of hits returned by query. |
+| `--json` | off | Emit machine-readable query output. |
+| `--index <name>` | required for attach | Bind an existing index to an artifact. |
 
-## Examples
+## Runtime Contract
+
+Recipes attached to an index can call `lib.rag.query(q, k)` during local execution. Indexes are stored under `~/.kolm/rag/<name>/` and stay local unless the operator explicitly moves the artifact and index.
+
+## Example
 
 ```bash
 kolm rag index ./docs --name internal-docs
 kolm rag query internal-docs "how does the K-score gate work" --top-k 3
 kolm rag attach ./artifacts/help-bot.kolm --index internal-docs
-kolm rag list
 ```
-
-## Notes
-
-Inside a recipe:
-
-```javascript
-function generate(input, lib) {
- var hits = lib.rag ? lib.rag.query(input.q, 3).matches : [];
- // ...
-}
-```
-
-The runtime exposes `lib.rag.query(q, k)` only to recipes that have been attached to an index. Indexes are stored in `~/.kolm/rag/<name>/`.
-
-## See also
-
-- [Quickstart](/quickstart)
-- [API reference](/docs/api)
-- [kolm compile](/docs/cli/compile)

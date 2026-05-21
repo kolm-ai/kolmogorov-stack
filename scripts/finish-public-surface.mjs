@@ -8,8 +8,8 @@ const site = 'https://kolm.ai';
 
 const overrides = new Map([
   ['index.html', {
-    title: 'kolm.ai - Capture, distill, run locally',
-    description: 'kolm is the local AI stack: capture model traffic, build reviewed datasets, distill repeated workflows, and run signed artifacts on your devices.'
+    title: 'The AI Compiler for Owned Models',
+    description: 'Replace repeated AI API calls with signed .kolm artifacts your team owns. Wrap model APIs, capture traffic, distill specialists, run anywhere, and prove every artifact.'
   }],
   ['capture.html', {
     title: 'kolm capture - OpenAI-compatible AI gateway',
@@ -109,10 +109,15 @@ function firstParagraph(html) {
 }
 
 function normalizeTitle(raw, relativePath) {
+  if (relativePath.startsWith('docs/cli/') && relativePath.endsWith('.html')) {
+    const verb = path.basename(relativePath, '.html');
+    return `kolm ${verb} | CLI reference | kolm.ai`;
+  }
   let base = decodeHtml(raw || '').replace(/\s+/g, ' ').trim();
   base = base.replace(/\s*&\s*/g, ' and ');
   base = base
-    .replace(/\s*(?:[|·-]\s*)?Account\s*·\s*kolm\.ai\s*$/i, '')
+    .replace(/\s*(?:[|·-]\s*)?Account\s*(?:·|&middot;)\s*kolm\.ai\s*$/i, '')
+    .replace(/\s*(?:·|&middot;|\|)?\s*Account\s*$/i, '')
     .replace(/\s*[|·-]\s*kolm(?:\.ai)?\s*$/i, '')
     .replace(/\s+kolm(?:\.ai)?\s*$/i, '')
     .trim();
@@ -134,8 +139,8 @@ function normalizeDescription(raw, fallbackTitle) {
   desc = desc.replace(/\bThe AI compiler\.\s*/gi, '');
   if (desc.length < 60) {
     const subject = fallbackTitle
-      .replace(/\s+·\s+Account\s+·\s+kolm\.ai$/i, '')
-      .replace(/\s+·\s+kolm\.ai$/i, '')
+      .replace(/\s+(?:·|&middot;)\s+Account\s+(?:·|&middot;)\s+kolm\.ai$/i, '')
+      .replace(/\s+(?:·|&middot;)\s+kolm\.ai$/i, '')
       .replace(/\s+\|\s+kolm(?:\.ai)?$/i, '')
       .replace(/^kolm\.ai\s*-\s*/i, '');
     desc = `${subject}: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.`;

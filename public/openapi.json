@@ -119,6 +119,10 @@
       "description": "Cid"
     },
     {
+      "name": "cloud",
+      "description": "Cloud"
+    },
+    {
       "name": "compile",
       "description": "Compile"
     },
@@ -177,6 +181,10 @@
     {
       "name": "fl",
       "description": "Fl"
+    },
+    {
+      "name": "gemini",
+      "description": "Gemini"
     },
     {
       "name": "health",
@@ -295,6 +303,10 @@
       "description": "Privacy"
     },
     {
+      "name": "product",
+      "description": "Product"
+    },
+    {
       "name": "public",
       "description": "Public"
     },
@@ -393,6 +405,10 @@
     {
       "name": "storage",
       "description": "Storage"
+    },
+    {
+      "name": "streaming",
+      "description": "Streaming"
     },
     {
       "name": "stripe",
@@ -1500,6 +1516,33 @@
         "description": "Artifact list - exposes completed compile jobs as artifact records with hashes and downloads."
       }
     },
+    "/v1/artifacts/dependency-graph": {
+      "post": {
+        "tags": [
+          "artifacts"
+        ],
+        "operationId": "postV1ArtifactsDependencygraph",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/artifacts/{id}": {
       "get": {
         "tags": [
@@ -2577,6 +2620,87 @@
         }
       }
     },
+    "/v1/capture/gemini": {
+      "post": {
+        "tags": [
+          "capture"
+        ],
+        "operationId": "postV1CaptureGemini",
+        "summary": "base_url=https://kolm.ai/v1/capture/gemini and keep using chat.completions.",
+        "description": "Gemini capture and OpenAI-compatible aliases. These route to Google's /v1beta/openai compatibility surface so OpenAI SDK clients can set base_url=https://kolm.ai/v1/capture/gemini and keep using chat.completions.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/capture/gemini/chat/completions": {
+      "post": {
+        "tags": [
+          "capture"
+        ],
+        "operationId": "postV1CaptureGeminiChatCompletions",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/capture/gemini/v1/chat/completions": {
+      "post": {
+        "tags": [
+          "capture"
+        ],
+        "operationId": "postV1CaptureGeminiV1ChatCompletions",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/capture/health": {
       "get": {
         "tags": [
@@ -2764,6 +2888,60 @@
           }
         },
         "description": "OpenRouter capture alias for SDKs that append the OpenAI chat-completions path."
+      }
+    },
+    "/v1/capture/rbac/evaluate": {
+      "post": {
+        "tags": [
+          "capture"
+        ],
+        "operationId": "postV1CaptureRbacEvaluate",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/capture/rbac/policy": {
+      "get": {
+        "tags": [
+          "capture"
+        ],
+        "operationId": "getV1CaptureRbacPolicy",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/capture/stream": {
@@ -2958,6 +3136,87 @@
             "description": "cid path parameter"
           }
         ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/cloud/deploy-plan": {
+      "post": {
+        "tags": [
+          "cloud"
+        ],
+        "operationId": "postV1CloudDeployplan",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/cloud/deploy-targets": {
+      "get": {
+        "tags": [
+          "cloud"
+        ],
+        "operationId": "getV1CloudDeploytargets",
+        "summary": "Secret-safe deploy catalog for account UI, CLI, CI, and unauthenticated",
+        "description": "Secret-safe deploy catalog for account UI, CLI, CI, and unauthenticated evaluators. This does not create infrastructure and never returns secret values; it returns the concrete commands and env-secret references needed for BYOC, edge, GPU, and self-hosted deployments.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/cloud/readiness": {
+      "get": {
+        "tags": [
+          "cloud"
+        ],
+        "operationId": "getV1CloudReadiness",
+        "summary": "Cloud readiness is exposed directly for account UI, CI, and self-hosted",
+        "description": "Cloud readiness is exposed directly for account UI, CI, and self-hosted operators. It reports configured categories and missing variable names, but never returns secret values.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4705,6 +4964,60 @@
         }
       }
     },
+    "/v1/gemini/chat/completions": {
+      "post": {
+        "tags": [
+          "gemini"
+        ],
+        "operationId": "postV1GeminiChatCompletions",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/gemini/v1/chat/completions": {
+      "post": {
+        "tags": [
+          "gemini"
+        ],
+        "operationId": "postV1GeminiV1ChatCompletions",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/health": {
       "get": {
         "tags": [
@@ -6238,6 +6551,44 @@
         "description": "Models cache - returns the local model-weights cache index for the API host (cache_dir, total_bytes, per-entry rows). Used by `kolm models cache` and the device-detect picker to know which weights are already on disk."
       }
     },
+    "/v1/models/info/{id}": {
+      "get": {
+        "tags": [
+          "models"
+        ],
+        "operationId": "getV1ModelsInfoId",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/models/manifest": {
       "get": {
         "tags": [
@@ -6290,6 +6641,33 @@
           }
         },
         "description": "Models pull - 302-redirects to a resolved Hugging Face download URL for the requested model id+variant (default variant: q4_k_m). 404 for unknown variants, 410 when the variant exists but is marked unavailable."
+      }
+    },
+    "/v1/models/recommend": {
+      "get": {
+        "tags": [
+          "models"
+        ],
+        "operationId": "getV1ModelsRecommend",
+        "summary": "Model recommendation + model info. Public and secret-free: this powers the",
+        "description": "Model recommendation + model info. Public and secret-free: this powers the post-auth model picker, CLI parity, and \"which backbone should I use?\" flows without requiring a tenant before the user understands the catalog.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/moderations": {
@@ -6460,6 +6838,60 @@
         "operationId": "getV1MultimodalRedactimageDoctor",
         "summary": "W462 – image-redact worker self-doctor, proxied so the CLI's",
         "description": "W462 – image-redact worker self-doctor, proxied so the CLI's `kolm media image-doctor --remote` can ask the server.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/multimodal/tokenize": {
+      "post": {
+        "tags": [
+          "multimodal"
+        ],
+        "operationId": "postV1MultimodalTokenize",
+        "summary": "POST /v1/multimodal/tokenize tokenizes one local file path or directory",
+        "description": "POST /v1/multimodal/tokenize tokenizes one local file path or directory on an authenticated local daemon or explicitly trusted self-hosted server. Hosted deployments deny server-side file access unless the operator sets KOLM_ALLOW_SERVER_FILE_TOKENIZE=1.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/multimodal/tokenize/doctor": {
+      "get": {
+        "tags": [
+          "multimodal"
+        ],
+        "operationId": "getV1MultimodalTokenizeDoctor",
+        "summary": "W554 - multimodal sidecar tokenizer. API mirror of",
+        "description": "W554 - multimodal sidecar tokenizer. API mirror of `kolm media tokenize`: local-safe by default, hosted-disabled unless the operator explicitly allows server-side file access. Creates compile-ready Markdown sidecars using deterministic local feature tokens, with optional provider captions/transcripts when configured.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -7242,7 +7674,7 @@
           "plans"
         ],
         "operationId": "getV1Plans",
-        "summary": "Plans - self-serve plan catalog (free/starter/pro/teams/business/enterprise)",
+        "summary": "Plans - public plan catalog (Free / Pro / Team / Enterprise)",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -7260,7 +7692,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "Plans - self-serve plan catalog (free/starter/pro/teams/business/enterprise) with id, label, price_usd_month, quota, seats, and billing_link_configured (true when the Stripe Payment Link env var is set for that plan)."
+        "description": "Plans - public plan catalog for Free, Pro, Team, and Enterprise with id, label, price_usd_month, price_label, quota, seats, self_serve, contact_sales, and billing_link_configured. Enterprise is contact-sales unless an operator supplies a custom checkout link."
       }
     },
     "/v1/pricing": {
@@ -7444,6 +7876,33 @@
         "operationId": "postV1PrivacyTest",
         "summary": "POST /v1/privacy/test – apply the current policy to body.text and",
         "description": "POST /v1/privacy/test – apply the current policy to body.text and return { redacted, findings, policy_actions }. May 403 if policy says block on a class present.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/product/experience": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "operationId": "getV1ProductExperience",
+        "summary": "Product-experience contract. Public and secret-safe: this is the same",
+        "description": "Product-experience contract. Public and secret-safe: this is the same source of truth exposed by `kolm surfaces --json` and `kolm tui --views`. Frontend/account/docs can consume it to avoid drifting from CLI/TUI/API.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -8293,6 +8752,60 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/registry/verified-publishers/evaluate": {
+      "post": {
+        "tags": [
+          "registry"
+        ],
+        "operationId": "postV1RegistryVerifiedpublishersEvaluate",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/registry/verified-publishers/policy": {
+      "get": {
+        "tags": [
+          "registry"
+        ],
+        "operationId": "getV1RegistryVerifiedpublishersPolicy",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
@@ -9460,6 +9973,33 @@
         "description": "Storage config update - admin-only echo endpoint that does NOT mutate runtime config (storage settings live in env vars and require a daemon restart). Returns {ok, proposed, note, env_vars} so the dashboard can show what would change and which vars to set."
       }
     },
+    "/v1/storage/object-readiness": {
+      "get": {
+        "tags": [
+          "storage"
+        ],
+        "operationId": "getV1StorageObjectreadiness",
+        "summary": "Artifact object-store readiness for account UI and CI. This is split out",
+        "description": "Artifact object-store readiness for account UI and CI. This is split out from generic cloud readiness because large .kolm/model bundles require a real object path (R2 S3, AWS S3, generic S3, Supabase S3, or local disk), not only provider env detection.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/storage/purge": {
       "post": {
         "tags": [
@@ -9485,6 +10025,60 @@
           }
         },
         "description": "Storage purge - destructive admin-only event-store purge. Requires {confirm:true} in the body; supports {before} timestamp + {namespace} filters. Returns purge counts. Used for lake-retention cleanups."
+      }
+    },
+    "/v1/streaming/capabilities": {
+      "get": {
+        "tags": [
+          "streaming"
+        ],
+        "operationId": "getV1StreamingCapabilities",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/streaming/normalize": {
+      "post": {
+        "tags": [
+          "streaming"
+        ],
+        "operationId": "postV1StreamingNormalize",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/stripe/webhook": {

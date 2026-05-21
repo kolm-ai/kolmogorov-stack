@@ -42,6 +42,11 @@ import {
 import * as teams from './teams.js';
 import * as tunnel from './tunnel.js';
 import * as byoc from './byoc.js';
+import { buildDeployPlan, deploymentMatrix } from './deployment-plans.js';
+import { dependencyBlastRadius, dependencyGraphFromManifest } from './artifact-dependency-graph.js';
+import { authorizeCaptureAction, captureRbacPolicy } from './team-capture-rbac.js';
+import { evaluatePublisherVerification, verifiedPublisherPolicy } from './publisher-verification.js';
+import { normalizeStreamChunk, streamingCapabilities, streamingReadiness } from './streaming-contract.js';
 import * as traceCapture from './trace-capture.js';
 import * as workflowIr from './workflow-ir.js';
 import * as compileIr from './compile-ir.js';
@@ -110,6 +115,14 @@ import { PROVIDERS as CONNECTOR_PROVIDERS, summarizeProviders as connectorSummar
 import { estimateCost as connectorEstimateCost, extractUsage as connectorExtractUsage } from './cost-estimator.js';
 import { newEvent as connectorNewEvent, hashContent as connectorHashContent } from './event-schema.js';
 import { scan as connectorPrivacyScan, redact as connectorPrivacyRedact, reinsert as connectorPrivacyReinsert } from './privacy-membrane.js';
+import {
+  USER_CONTROL_DIMENSIONS as PRODUCT_CONTROL_DIMENSIONS,
+  listProductExperience,
+  tuiViews as productTuiViews,
+  validateProductExperience,
+} from './product-experience.js';
+import { cloudReadinessSummary, listPlatformCapabilities } from './platform-capabilities.js';
+import { objectStorageReadiness } from './object-storage.js';
 
 // =====================================================================
 // W384 — backend wiring imports for /v1/* routes that expose the W369–
@@ -122,6 +135,7 @@ import {
   redactWithPolicy as privacyRedactWithPolicy,
   getFullPolicy as privacyGetFullPolicy,
   setPolicy as privacySetPolicy,
+  differentialPrivacyStats as privacyDifferentialPrivacyStats,
   DETECTOR_VERSION as PRIVACY_DETECTOR_VERSION,
   ALL_CLASSES as PRIVACY_ALL_CLASSES,
   PolicyBlockError,
@@ -250,6 +264,11 @@ import {
 
 // W466 — multimodal bake-off harness (image/audio/video).
 import { runMultimodalBakeoff } from './multimodal-bakeoff.js';
+import {
+  detectModality as multimodalDetectModality,
+  tokenize as multimodalTokenize,
+  tokenizeDir as multimodalTokenizeDir,
+} from '../services/embed/multimodal.js';
 
 // W467 — cross-provider trace IR translator.
 import {
@@ -447,8 +466,8 @@ function __w411LocalSentinelTenant() {
 
 // W411 — hosted-auth gate. Mounted BEFORE the connector passthrough routes
 // (/v1/chat/completions, /v1/responses, /v1/embeddings, /v1/messages,
-// /v1/capture/openai, /v1/capture/anthropic, /v1/capture/openrouter, plus
-// the openrouter aliases). On hosted servers, requires a valid kolm tenant
+// /v1/capture/openai, /v1/capture/anthropic, /v1/capture/openrouter,
+// /v1/capture/gemini, plus the provider aliases). On hosted servers, requires a valid kolm tenant
 // key (ks_*/kao_*) OR the admin key; returns 401 with structured body
 // otherwise. On the local daemon, stamps req.tenant + req.tenant_record
 // with a sentinel ('local:<hostname>') so the downstream connector proxy
@@ -795,42 +814,161 @@ export function buildRouter() {
   // replay, bakeoff, redact). Read by /pricing and the SDK shapers.
   r.get('/v1/pricing', (_req, res) => res.json({ currency: 'USD', units: PRICING }));
 
+  // Product-experience contract. Public and secret-safe: this is the same
+  // source of truth exposed by `kolm surfaces --json` and `kolm tui --views`.
+  // Frontend/account/docs can consume it to avoid drifting from CLI/TUI/API.
+  r.get('/v1/product/experience', (_req, res) => {
+    const cloud = cloudReadinessSummary(process.env);
+    res.json({
+      ok: true,
+      contract: validateProductExperience(),
+      customization_dimensions: PRODUCT_CONTROL_DIMENSIONS,
+      surfaces: listProductExperience(),
+      tui_views: productTuiViews(),
+      platform_capabilities: listPlatformCapabilities(),
+      cloud_readiness: cloud,
+      secret_values_included: false,
+    });
+  });
+
+  // Cloud readiness is exposed directly for account UI, CI, and self-hosted
+  // operators. It reports configured categories and missing variable names,
+  // but never returns secret values.
+  r.get('/v1/cloud/readiness', (_req, res) => {
+    const readiness = cloudReadinessSummary(process.env);
+    res.json({
+      ok: true,
+      readiness,
+      platform_matrix: readiness.platform_matrix,
+      cloud: readiness.cloud,
+      blockers: readiness.blockers,
+      secret_values_included: false,
+    });
+  });
+
+  // Artifact object-store readiness for account UI and CI. This is split out
+  // from generic cloud readiness because large .kolm/model bundles require a
+  // real object path (R2 S3, AWS S3, generic S3, Supabase S3, or local disk),
+  // not only provider env detection.
+  r.get('/v1/storage/object-readiness', (_req, res) => {
+    res.json({
+      ok: true,
+      storage: objectStorageReadiness(process.env),
+      secret_values_included: false,
+    });
+  });
+
+  // Secret-safe deploy catalog for account UI, CLI, CI, and unauthenticated
+  // evaluators. This does not create infrastructure and never returns secret
+  // values; it returns the concrete commands and env-secret references needed
+  // for BYOC, edge, GPU, and self-hosted deployments.
+  r.get('/v1/cloud/deploy-targets', (_req, res) => {
+    res.json(deploymentMatrix());
+  });
+
+  r.post('/v1/cloud/deploy-plan', (req, res) => {
+    try {
+      const plan = buildDeployPlan({
+        target: req.body?.target,
+        artifactId: req.body?.artifact_id || req.body?.artifactId,
+        region: req.body?.region,
+        name: req.body?.name,
+        baseUrl: req.body?.base_url || req.body?.baseUrl || `${req.protocol}://${req.get('host')}`,
+        storage: req.body?.storage,
+      });
+      res.json(plan);
+    } catch (e) {
+      res.status(e.code === 'bad_target' ? 400 : 500).json({ ok: false, error: String(e.message || e), code: e.code || 'deploy_plan_error' });
+    }
+  });
+
+  r.get('/v1/capture/rbac/policy', (_req, res) => {
+    res.json(captureRbacPolicy());
+  });
+
+  r.post('/v1/capture/rbac/evaluate', (req, res) => {
+    res.json(authorizeCaptureAction(req.body || {}));
+  });
+
+  r.get('/v1/registry/verified-publishers/policy', (_req, res) => {
+    res.json(verifiedPublisherPolicy());
+  });
+
+  r.post('/v1/registry/verified-publishers/evaluate', (req, res) => {
+    res.json(evaluatePublisherVerification(req.body || {}));
+  });
+
+  r.post('/v1/artifacts/dependency-graph', (req, res) => {
+    const graph = dependencyGraphFromManifest(req.body?.manifest || req.body || {}, {
+      artifactId: req.body?.artifact_id || req.body?.artifactId || null,
+    });
+    const changed = Array.isArray(req.body?.changed) ? req.body.changed : [];
+    res.json({ ...graph, blast_radius: dependencyBlastRadius(graph, changed) });
+  });
+
+  r.get('/v1/streaming/capabilities', (_req, res) => {
+    res.json({ ...streamingCapabilities(), readiness: streamingReadiness() });
+  });
+
+  r.post('/v1/streaming/normalize', (req, res) => {
+    const provider = req.body?.provider;
+    const chunk = req.body?.chunk;
+    res.json({ ok: true, normalized: normalizeStreamChunk(provider, chunk), secret_values_included: false });
+  });
+
   // ---------- Plan catalog ----------
   // Single source of truth for self-serve signup + plan-change. Mirrors
   // /pricing exactly. STRIPE_PAYMENT_LINK_<PLAN> env vars wire each paid
   // plan to a Stripe Payment Link (operator-supplied; absent => billing_url
   // is null and the tenant is provisioned with a 30-day trial banner).
   const PLAN_CATALOG = {
-    free:       { id: 'free',       label: 'Developer',  price_usd_month: 0,    quota: 10000,    seats: 1,   billing_env: null,                          stripe_link_env: null },
-    starter:    { id: 'starter',    label: 'Starter',    price_usd_month: 9,    quota: 50000,    seats: 1,   billing_env: 'STRIPE_PAYMENT_LINK_STARTER', stripe_link_env: 'STRIPE_PAYMENT_LINK_STARTER' },
-    pro:        { id: 'pro',        label: 'Pro',        price_usd_month: 49,   quota: 200000,   seats: 1,   billing_env: 'STRIPE_PAYMENT_LINK_PRO',     stripe_link_env: 'STRIPE_PAYMENT_LINK_PRO' },
-    teams:      { id: 'teams',      label: 'Teams',      price_usd_month: 149,  quota: 1000000,  seats: 5,   billing_env: 'STRIPE_PAYMENT_LINK_TEAMS',     stripe_link_env: 'STRIPE_PAYMENT_LINK_TEAMS' },
-    business:   { id: 'business',   label: 'Business',   price_usd_month: 1499, quota: 5000000,  seats: 25,  billing_env: 'STRIPE_PAYMENT_LINK_BUSINESS', stripe_link_env: 'STRIPE_PAYMENT_LINK_BUSINESS' },
-    enterprise: { id: 'enterprise', label: 'Enterprise', price_usd_month: 2999, quota: 10000000, seats: 25,  billing_env: 'STRIPE_PAYMENT_LINK_ENT',       stripe_link_env: 'STRIPE_PAYMENT_LINK_ENT' },
+    free:       { id: 'free',       label: 'Free',       price_usd_month: 0,    price_label: '$0/mo',    quota: 10000,    seats: 1,  self_serve: true,  billing_env: null,                       stripe_link_env: null },
+    pro:        { id: 'pro',        label: 'Pro',        price_usd_month: 49,   price_label: '$49/mo',   quota: 200000,   seats: 1,  self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_PRO',  stripe_link_env: 'STRIPE_PAYMENT_LINK_PRO' },
+    teams:      { id: 'teams',      label: 'Team',       price_usd_month: 499,  price_label: '$499/mo',  quota: 1000000,  seats: 5,  self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_TEAM', stripe_link_env: 'STRIPE_PAYMENT_LINK_TEAM', stripe_link_envs: ['STRIPE_PAYMENT_LINK_TEAMS'] },
+    enterprise: { id: 'enterprise', label: 'Enterprise', price_usd_month: null, price_label: 'Custom',   quota: 10000000, seats: 25, self_serve: false, billing_env: null,                       stripe_link_env: 'STRIPE_PAYMENT_LINK_ENT' },
+  };
+  const PLAN_ALIASES = {
+    developer: 'free',
+    starter: 'pro',
+    team: 'teams',
+    teams: 'teams',
+    business: 'enterprise',
   };
   const PLAN_IDS = new Set(Object.keys(PLAN_CATALOG));
-
-  function billingLinkFor(planId, opts = {}) {
-    const env = PLAN_CATALOG[planId]?.stripe_link_env;
-    if (!env) return null;
-    const url = process.env[env];
-    if (!url || !/^https?:\/\//.test(url)) return null;
-    return appendCheckoutParams(url, opts);
+  function canonicalPlanId(raw) {
+    const id = String(raw || 'free').toLowerCase().replace(/[^a-z0-9_-]+/g, '').trim();
+    return PLAN_CATALOG[id] ? id : (PLAN_ALIASES[id] || null);
   }
-
-  // Plans - self-serve plan catalog (free/starter/pro/teams/business/enterprise)
-  // with id, label, price_usd_month, quota, seats, and billing_link_configured
-  // (true when the Stripe Payment Link env var is set for that plan).
-  r.get('/v1/plans', (_req, res) => {
-    const plans = Object.values(PLAN_CATALOG).map(p => ({
+  function serializePlan(p) {
+    return {
       id: p.id,
       label: p.label,
       price_usd_month: p.price_usd_month,
+      price_label: p.price_label,
       quota: p.quota,
       seats: p.seats,
-      self_serve: true,
+      self_serve: p.self_serve !== false,
+      contact_sales: p.self_serve === false,
       billing_link_configured: !!billingLinkFor(p.id),
-    }));
+    };
+  }
+
+  function billingLinkFor(planId, opts = {}) {
+    const p = PLAN_CATALOG[planId];
+    const envs = [p?.stripe_link_env].concat(p?.stripe_link_envs || []).filter(Boolean);
+    for (const env of envs) {
+      const url = process.env[env];
+      if (url && /^https?:\/\//.test(url)) return appendCheckoutParams(url, opts);
+    }
+    return null;
+  }
+
+  // Plans - public plan catalog (Free / Pro / Team / Enterprise). Historical
+  // aliases still canonicalize server-side, but the public contract stays on
+  // the current four-plan model. Enterprise is contact-sales unless a custom
+  // checkout link is supplied by the operator.
+  r.get('/v1/plans', (_req, res) => {
+    const plans = Object.values(PLAN_CATALOG).map(serializePlan);
     res.json({ plans });
   });
 
@@ -839,18 +977,10 @@ export function buildRouter() {
   // requiring auth. Includes a billing_configured flag tied to the actual
   // STRIPE_PAYMENT_LINK_* env presence so the UI can demote when unwired.
   r.get('/v1/billing/tiers', (_req, res) => {
-    const plans = Object.values(PLAN_CATALOG).map(p => ({
-      id: p.id,
-      label: p.label,
-      price_usd_month: p.price_usd_month,
-      quota: p.quota,
-      seats: p.seats,
-      self_serve: true,
-      billing_link_configured: !!billingLinkFor(p.id),
-    }));
+    const plans = Object.values(PLAN_CATALOG).map(serializePlan);
     const configured = plans.filter(p => p.billing_link_configured).length;
-    const paidConfigured = plans.filter(p => p.price_usd_month > 0 && p.billing_link_configured).length;
-    const paidTotal = plans.filter(p => p.price_usd_month > 0).length;
+    const paidConfigured = plans.filter(p => p.self_serve && p.price_usd_month > 0 && p.billing_link_configured).length;
+    const paidTotal = plans.filter(p => p.self_serve && p.price_usd_month > 0).length;
     res.json({
       source: 'cloud',
       plans,
@@ -932,9 +1062,9 @@ export function buildRouter() {
     // `pending_plan` flag; the Stripe webhook flips the plan to the requested
     // tier on `checkout.session.completed`. This means nobody gets paid
     // features without paying.
-    const planLower = (rawPlan || 'free').toString().toLowerCase();
-    const requestedPlan = PLAN_IDS.has(planLower) ? planLower : 'free';
+    const requestedPlan = canonicalPlanId(rawPlan) || 'free';
     const requestedMeta = PLAN_CATALOG[requestedPlan];
+    const requiresBilling = requestedMeta.price_usd_month > 0 || requestedMeta.self_serve === false;
     const isPaid = requestedMeta.price_usd_month > 0;
     const slug = (name || email.split('@')[0]).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 32) || 'user';
     const uniq = `${slug}-${Date.now().toString(36).slice(-4)}`;
@@ -945,7 +1075,7 @@ export function buildRouter() {
     const t = provisionTenant(uniq, { quota: provisionedMeta.quota, plan: provisionedPlan, email });
 
     let billingUrl = null;
-    if (isPaid) {
+    if (requiresBilling) {
       billingUrl = billingLinkFor(requestedPlan, { tenantId: t.id, email });
       try { update('tenants', x => x.id === t.id, { pending_plan: requestedPlan, billing_status: 'pending' }); } catch (_) {}
     }
@@ -974,16 +1104,17 @@ export function buildRouter() {
         plan: provisionedPlan,
         quota: provisionedMeta.quota,
         seats: provisionedMeta.seats,
-        pending_plan: isPaid ? requestedPlan : null,
+        pending_plan: requiresBilling ? requestedPlan : null,
       },
       api_key: t.api_key,
       billing_url: billingUrl,
-      billing_required: isPaid,
-      message: !isPaid
+      billing_required: requiresBilling,
+      sales_required: requestedMeta.self_serve === false && !billingUrl,
+      message: !requiresBilling
         ? 'Save this key. You can rotate it from /v1/account/rotate-key or upgrade with /v1/account/change-plan.'
         : (billingUrl
-            ? `Save this key. Complete payment at ${billingUrl} to activate your ${requestedMeta.label} tier. Until payment is confirmed your account is on the Developer (free) tier.`
-            : `Save this key. Billing for the ${requestedMeta.label} tier is not yet enabled by the operator; your account is on the Developer (free) tier.`),
+            ? `Save this key. Complete payment at ${billingUrl} to activate your ${requestedMeta.label} tier. Until payment is confirmed your account is on the Free tier.`
+            : `Save this key. ${requestedMeta.label} requires an architecture review; your account is on the Free tier until sales activates it.`),
     });
   });
 
@@ -2084,6 +2215,40 @@ export function buildRouter() {
   // shaped like the provider's real response (so tests + offline dev can
   // exercise the connector surface without real upstream keys). Otherwise
   // 401 with a hint pointing to env setup.
+  function __isZeroRetentionRequest(req, body = {}) {
+    const header = String(
+      req.headers['x-kolm-retention']
+      || req.headers['x-kolm-no-store']
+      || req.headers['x-kolm-zero-retention']
+      || ''
+    ).toLowerCase();
+    const meta = body && typeof body === 'object' && body.metadata && typeof body.metadata === 'object'
+      ? body.metadata
+      : {};
+    const bodyRetention = String(
+      body.kolm_retention
+      || body.retention
+      || meta.kolm_retention
+      || meta.retention
+      || ''
+    ).toLowerCase();
+    return header === 'none'
+      || header === 'no-store'
+      || header === 'true'
+      || header === '1'
+      || bodyRetention === 'none'
+      || bodyRetention === 'zero-retention'
+      || body.no_store === true
+      || meta.no_store === true;
+  }
+
+  function __setZeroRetentionHeaders(res, namespace = 'default') {
+    res.set('x-kolm-retention', 'none');
+    res.set('x-kolm-no-store', 'true');
+    res.set('x-kolm-namespace', namespace);
+    res.set('x-kolm-event-durable', 'false');
+  }
+
   async function __connectorProxy(provider, upstreamPath, req, res) {
     // W418 — defense-in-depth: every connector-proxy entry MUST carry a
     // resolved tenant_record by the time we reach this point. The W411
@@ -2124,6 +2289,7 @@ export function buildRouter() {
       });
     }
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const zeroRetention = __isZeroRetentionRequest(req, body);
     const model = String(body.model || '').slice(0, 128);
     // W465 — per-namespace cost attribution. Connector callers can scope a
     // capture to a corpus namespace via `x-kolm-namespace:` header (preferred)
@@ -2253,7 +2419,7 @@ export function buildRouter() {
     }
     let rawPromptHash = null;
     let rawResponseHash = null;
-    if (rawAllowed && promptText) {
+    if (!zeroRetention && rawAllowed && promptText) {
       const sc = await writeRawSidecar(promptText, 'prompt');
       rawPromptHash = sc.hash;
     }
@@ -2270,13 +2436,16 @@ export function buildRouter() {
       if (Array.isArray(msg.content)) return msg.content.map((c) => (c && c.text) || '').join('');
       return String(first.text || '');
     }
-    const upstreamUrl = pcfg.upstream.replace(/\/+$/, '') + upstreamPath;
+    let upstreamUrl = pcfg.upstream.replace(/\/+$/, '') + upstreamPath;
     // Forward via node:http(s) directly (avoids global fetch dispatcher pinning sockets).
     const headers = { 'content-type': 'application/json' };
-    if (pcfg.auth === 'bearer') headers['authorization'] = `Bearer ${upstreamKey}`;
+    if (pcfg.auth === 'bearer' || (provider === 'gemini' && upstreamPath.startsWith('/v1beta/openai/'))) headers['authorization'] = `Bearer ${upstreamKey}`;
     else if (pcfg.auth === 'x-api-key') {
       headers['x-api-key'] = upstreamKey;
       headers['anthropic-version'] = req.headers['anthropic-version'] || '2023-06-01';
+    } else if (pcfg.auth === 'key-param') {
+      const sep = upstreamUrl.includes('?') ? '&' : '?';
+      upstreamUrl = `${upstreamUrl}${sep}key=${encodeURIComponent(upstreamKey)}`;
     }
     if (provider === 'openrouter') {
       headers['http-referer'] = req.headers['http-referer'] || 'https://kolm.ai';
@@ -2320,6 +2489,10 @@ export function buildRouter() {
         // W409b — FAIL-CLOSED error path. The lake row gets the redacted
         // prompt (via deriveLakePrompt()), never raw `promptText`. Same bug
         // pattern as the historical daemon-connector.js error path leak.
+        if (zeroRetention) {
+          __setZeroRetentionHeaders(res, callerNamespace);
+          return res.status(502).json({ error: { type: 'upstream_error', message: String(e.message || e) } });
+        }
         const lakePromptOnError = deriveLakePrompt();
         const promptRedactedFieldErr = scan.sensitive
           ? (redactedPromptText != null ? redactedPromptText : (connectorPrivacyRedact(promptText).redacted_text || null))
@@ -2418,6 +2591,10 @@ export function buildRouter() {
         };
         bodyForCaller = walkResp(bodyForCaller);
       } catch (_) { bodyForCaller = upstreamResp.body; }
+    }
+    if (zeroRetention) {
+      __setZeroRetentionHeaders(res, callerNamespace);
+      return res.status(upstreamResp.status).json(bodyForCaller);
     }
     if (rawAllowed && respText) {
       const sc = await writeRawSidecar(respText, 'response');
@@ -2762,6 +2939,14 @@ export function buildRouter() {
   r.post('/v1/openrouter/v1/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
   // OpenRouter chat-completions alias without the extra /v1 segment.
   r.post('/v1/openrouter/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('openrouter', '/v1/chat/completions', req, res));
+  // Gemini capture and OpenAI-compatible aliases. These route to Google's
+  // /v1beta/openai compatibility surface so OpenAI SDK clients can set
+  // base_url=https://kolm.ai/v1/capture/gemini and keep using chat.completions.
+  r.post('/v1/capture/gemini', __w411HostedAuthGate, (req, res) => __connectorProxy('gemini', '/v1beta/openai/chat/completions', req, res));
+  r.post('/v1/capture/gemini/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('gemini', '/v1beta/openai/chat/completions', req, res));
+  r.post('/v1/capture/gemini/v1/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('gemini', '/v1beta/openai/chat/completions', req, res));
+  r.post('/v1/gemini/v1/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('gemini', '/v1beta/openai/chat/completions', req, res));
+  r.post('/v1/gemini/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('gemini', '/v1beta/openai/chat/completions', req, res));
 
   // W409k — GET /v1/models is mounted after authMiddleware by W409g so it can
   // combine the connector registry, FRONTIER_MODELS, AND the tenant's compiled
@@ -2830,6 +3015,44 @@ export function buildRouter() {
       res.json({ cache_dir: dir, total_bytes, entries });
     } catch (e) {
       res.status(500).json({ error: 'cache_error', detail: String(e.message || e) });
+    }
+  });
+
+  // Model recommendation + model info. Public and secret-free: this powers the
+  // post-auth model picker, CLI parity, and "which backbone should I use?"
+  // flows without requiring a tenant before the user understands the catalog.
+  r.get('/v1/models/recommend', async (req, res) => {
+    try {
+      const M = await import('./models.js');
+      const D = await import('./devices.js');
+      const target_device = req.query.device ? D.info(String(req.query.device)) : null;
+      const out = M.recommend({
+        use: req.query.use ? String(req.query.use) : undefined,
+        vram_gb: req.query.vram_gb != null ? Number(req.query.vram_gb) : undefined,
+        license: req.query.license ? String(req.query.license) : undefined,
+        permissive: req.query.permissive === '1' || req.query.permissive === 'true',
+        english_only: req.query.english_only === '1' || req.query.english_only === 'true',
+        tool_use: req.query.tool_use ? String(req.query.tool_use) : undefined,
+        context_tokens: req.query.context_tokens != null ? Number(req.query.context_tokens) : undefined,
+        target_device,
+      });
+      res.set('Cache-Control', 'public, max-age=120');
+      res.json({ ok: true, recommendation: out, target_device });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'model_recommend_error', message: String(e.message || e) });
+    }
+  });
+
+  r.get('/v1/models/info/:id(*)', async (req, res) => {
+    try {
+      const M = await import('./models.js');
+      const id = String(req.params.id || '');
+      const row = M.info(id);
+      if (!row) return res.status(404).json({ ok: false, error: 'model_not_found', id });
+      res.set('Cache-Control', 'public, max-age=300');
+      res.json({ ok: true, model: row });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'model_info_error', message: String(e.message || e) });
     }
   });
 
@@ -3397,7 +3620,7 @@ export function buildRouter() {
     // Team-scoped publish (wave 57): if the caller passes `team`, resolve it to
     // a team record, verify membership, and use the team slug as the artifact
     // owner namespace. Private team artifacts are readable by any member, not
-    // just the publisher — that's the Teams-tier ($149/mo) unlock.
+    // just the publisher; that is the Team-tier collaboration unlock.
     const teamArg = body.team ? String(body.team).trim() : null;
     let teamRow = null;
     if (teamArg) {
@@ -3733,11 +3956,24 @@ export function buildRouter() {
           return getJob(job_id, req.is_admin ? null : req.tenant);
         },
         changePlan: async ({ tenant, target }) => {
+          target = canonicalPlanId(target);
           const meta = PLAN_CATALOG[target];
           if (!meta) return { error: 'invalid_plan' };
           if (meta.price_usd_month === 0) {
             update('tenants', x => x.id === tenant.id, { plan: 'free', quota: PLAN_CATALOG.free.quota, pending_plan: null });
             return { ok: true, plan: 'free' };
+          }
+          if (meta.self_serve === false && !billingLinkFor(target, { tenantId: tenant.id, email: tenant.email })) {
+            update('tenants', x => x.id === tenant.id, { pending_plan: target, billing_status: 'sales_required' });
+            return {
+              ok: true,
+              plan: tenant.plan,
+              pending_plan: target,
+              billing_required: true,
+              sales_required: true,
+              contact_url: '/enterprise/inquiry',
+              message: `${meta.label} requires a 30-minute architecture review.`,
+            };
           }
           update('tenants', x => x.id === tenant.id, { pending_plan: target });
           // Resolve a real checkout URL via four fallback paths (W363). Every
@@ -4578,6 +4814,78 @@ export function buildRouter() {
   // contestants + winner. The compute is pure string scoring — heavy ML
   // (CLIP, embedding similarity) stays in workers/multimodal-bakeoff/
   // and is opt-in via env override.
+  // W554 - multimodal sidecar tokenizer. API mirror of
+  // `kolm media tokenize`: local-safe by default, hosted-disabled unless the
+  // operator explicitly allows server-side file access. Creates compile-ready
+  // Markdown sidecars using deterministic local feature tokens, with optional
+  // provider captions/transcripts when configured.
+  r.get('/v1/multimodal/tokenize/doctor', async (_req, res) => {
+    return res.json({
+      ok: true,
+      enabled: !!(process.env.KOLM_LOCAL_DAEMON || process.env.KOLM_ALLOW_SERVER_FILE_TOKENIZE),
+      local_daemon: !!process.env.KOLM_LOCAL_DAEMON,
+      server_file_tokenize_enabled: !!process.env.KOLM_ALLOW_SERVER_FILE_TOKENIZE,
+      tokenizer: 'kolm-local-multimodal-features-v1',
+      modalities: ['text', 'code', 'image', 'audio', 'video', 'pdf', 'unknown'],
+      provider_caption_optional: ['ANTHROPIC_API_KEY'],
+      local_transcript_commands: ['KOLM_AUDIO_TRANSCRIBE_CMD', 'KOLM_VIDEO_TRANSCRIBE_CMD', 'KOLM_WHISPER_CMD'],
+      secret_values_included: false,
+    });
+  });
+
+  // POST /v1/multimodal/tokenize tokenizes one local file path or directory
+  // on an authenticated local daemon or explicitly trusted self-hosted server.
+  // Hosted deployments deny server-side file access unless the operator sets
+  // KOLM_ALLOW_SERVER_FILE_TOKENIZE=1.
+  r.post('/v1/multimodal/tokenize', async (req, res) => {
+    try {
+      if (!process.env.KOLM_LOCAL_DAEMON && !process.env.KOLM_ALLOW_SERVER_FILE_TOKENIZE) {
+        return res.status(403).json({
+          ok: false,
+          error: 'server_file_tokenize_disabled',
+          hint: 'Run `kolm media tokenize --path <file>` locally, or set KOLM_ALLOW_SERVER_FILE_TOKENIZE=1 on a trusted self-hosted daemon.',
+        });
+      }
+      const body = req.body || {};
+      const filePath = body.path || body.file || body.file_path;
+      const dirPath = body.dir || body.directory;
+      const force = !!body.force;
+      if (!!filePath === !!dirPath) {
+        return res.status(400).json({ ok: false, error: 'path_or_dir_required', hint: 'send exactly one of {path} or {dir}' });
+      }
+      if (filePath) {
+        const out = await multimodalTokenize(String(filePath), { force });
+        return res.json({
+          ok: true,
+          mode: 'file',
+          modality: out.modality,
+          skipped: !!out.skipped,
+          reason: out.reason || null,
+          sidecar_path: out.sidecarPath || null,
+          tokenizer: 'kolm-local-multimodal-features-v1',
+          detected_modality: multimodalDetectModality(String(filePath)),
+        });
+      }
+      const out = await multimodalTokenizeDir(String(dirPath), { force });
+      return res.json({
+        ok: out.errors.length === 0,
+        mode: 'directory',
+        added: out.added,
+        skipped: out.skipped,
+        errors: out.errors,
+        by_modality: out.by_modality,
+        tokenizer: 'kolm-local-multimodal-features-v1',
+      });
+    } catch (e) {
+      const msg = String((e && e.message) || e);
+      const status = /not found|ENOENT/i.test(msg) ? 404 : 500;
+      return res.status(status).json({ ok: false, error: 'multimodal_tokenize_error', message: msg });
+    }
+  });
+
+  // POST /v1/multimodal/bakeoff runs an authenticated tenant's captured
+  // image/audio/video/PDF rows through selected .kolm artifacts and returns
+  // ranked contestants with token-overlap scoring and winner metadata.
   r.post('/v1/multimodal/bakeoff', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
@@ -4724,10 +5032,10 @@ export function buildRouter() {
   // tenant cannot get paid features without paying.
   r.post('/v1/account/change-plan', (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot change plan' });
-    const target = String((req.body || {}).plan || '').toLowerCase();
-    if (!PLAN_IDS.has(target)) return res.status(400).json({ error: 'invalid plan', allowed: Array.from(PLAN_IDS) });
+    const target = canonicalPlanId((req.body || {}).plan);
+    if (!target || !PLAN_IDS.has(target)) return res.status(400).json({ error: 'invalid plan', allowed: Array.from(PLAN_IDS), aliases: PLAN_ALIASES });
     const meta = PLAN_CATALOG[target];
-    const isUpgrade = meta.price_usd_month > 0;
+    const isUpgrade = meta.price_usd_month > 0 || meta.self_serve === false;
 
     if (!isUpgrade) {
       update('tenants', x => x.id === req.tenant_record.id, {
@@ -4743,7 +5051,7 @@ export function buildRouter() {
         seats: PLAN_CATALOG.free.seats,
         billing_url: null,
         billing_required: false,
-        message: 'Plan changed to Developer (free).',
+        message: 'Plan changed to Free.',
       });
     }
 
@@ -4751,6 +5059,21 @@ export function buildRouter() {
       tenantId: req.tenant_record.id,
       email: req.tenant_record.email,
     });
+    if (meta.self_serve === false && !billingUrl) {
+      update('tenants', x => x.id === req.tenant_record.id, {
+        pending_plan: target,
+        billing_status: 'sales_required',
+      });
+      return res.json({
+        ok: true,
+        plan: req.tenant_record.plan,
+        pending_plan: target,
+        billing_required: true,
+        sales_required: true,
+        contact_url: '/enterprise/inquiry',
+        message: 'Enterprise requires a 30-minute architecture review. Your current plan stays active until the contract is approved.',
+      });
+    }
     if (!billingUrl) {
       return res.status(503).json({
         ok: false,
@@ -5069,7 +5392,7 @@ export function buildRouter() {
       ok: true,
       plan: 'free',
       stripe_cancelled,
-      message: 'Subscription cancelled. Your tenant is now on the Developer (free) plan; existing artifacts and registry data are untouched.',
+      message: 'Subscription cancelled. Your tenant is now on the Free plan; existing artifacts and registry data are untouched.',
     });
   });
 
@@ -5176,7 +5499,7 @@ export function buildRouter() {
         return_or_destroy_days: 30,
       },
       baa: {
-        status: t.plan === 'business' || t.plan === 'enterprise' ? 'eligible' : 'available on Business or Enterprise plan',
+        status: ['teams', 'business', 'enterprise'].includes(t.plan) ? 'eligible' : 'available on Team or Enterprise plan',
         execution_path: 'mailto:dev@kolm.ai with org + signatory; 48-hour countersign target',
         phi_schedule: 'https://kolm.ai/baa#phi-schedule',
       },
@@ -7348,12 +7671,24 @@ export function buildRouter() {
   // but lets pipelines and tests seed the corpus without proxying.
   r.post('/v1/capture/log', async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
-    const { namespace = 'default', items, provider = 'manual', model = '' } = req.body || {};
+    const body = req.body || {};
+    const { namespace = 'default', items, provider = 'manual', model = '' } = body;
+    const cleanNs = sanitizeNamespace(namespace);
+    if (__isZeroRetentionRequest(req, body)) {
+      __setZeroRetentionHeaders(res, cleanNs);
+      return res.status(202).json({
+        ok: true,
+        retention: 'none',
+        namespace: cleanNs,
+        count: 0,
+        ids: [],
+        message: 'zero-retention requested; no capture rows were persisted',
+      });
+    }
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'items must be a non-empty array of {input, output}' });
     }
     if (items.length > 200) return res.status(400).json({ error: 'items must be ≤200 per request' });
-    const cleanNs = sanitizeNamespace(namespace);
     const ids = [];
     const failures = [];
     let anyDurable = true;
@@ -7591,11 +7926,25 @@ export function buildRouter() {
     }
     const url = pickAnthropicUpstream();
     const anthropicVersion = req.header('anthropic-version') || '2023-06-01';
+    const fixtureMode = (process.env.KOLM_CONNECTOR_FIXTURE === '1' || process.env.KOLM_CONNECTOR_FIXTURE === 'true');
     let result;
-    try {
-      result = await forwardAnthropic({ url, body, upstreamKey, anthropicVersion });
-    } catch (e) {
-      return res.status(502).json({ error: { type: 'upstream_error', message: String(e.message || e) } });
+    if (fixtureMode) {
+      result = {
+        status: 200,
+        json: __connectorFixtureBody('anthropic', '/v1/messages', body, extractPromptForCapture(body, 'anthropic')),
+        elapsed_us: 0,
+      };
+      res.set('x-kolm-fixture', 'true');
+    } else {
+      try {
+        result = await forwardAnthropic({ url, body, upstreamKey, anthropicVersion });
+      } catch (e) {
+        return res.status(502).json({ error: { type: 'upstream_error', message: String(e.message || e) } });
+      }
+    }
+    if (__isZeroRetentionRequest(req, body)) {
+      __setZeroRetentionHeaders(res, namespace);
+      return res.status(result.status).json(result.json);
     }
     const prompt = extractPromptForCapture(body, 'anthropic');
     const completion = result.status >= 200 && result.status < 300
@@ -7639,11 +7988,25 @@ export function buildRouter() {
       return res.status(400).json({ error: { type: 'invalid_request', message: 'messages array required' } });
     }
     const url = pickOpenAIUpstream();
+    const fixtureMode = (process.env.KOLM_CONNECTOR_FIXTURE === '1' || process.env.KOLM_CONNECTOR_FIXTURE === 'true');
     let result;
-    try {
-      result = await forwardOpenAI({ url, body, upstreamKey });
-    } catch (e) {
-      return res.status(502).json({ error: { type: 'upstream_error', message: String(e.message || e) } });
+    if (fixtureMode) {
+      result = {
+        status: 200,
+        json: __connectorFixtureBody('openai', '/v1/chat/completions', body, extractPromptForCapture(body, 'openai')),
+        elapsed_us: 0,
+      };
+      res.set('x-kolm-fixture', 'true');
+    } else {
+      try {
+        result = await forwardOpenAI({ url, body, upstreamKey });
+      } catch (e) {
+        return res.status(502).json({ error: { type: 'upstream_error', message: String(e.message || e) } });
+      }
+    }
+    if (__isZeroRetentionRequest(req, body)) {
+      __setZeroRetentionHeaders(res, namespace);
+      return res.status(result.status).json(result.json);
     }
     const prompt = extractPromptForCapture(body, 'openai');
     const completion = result.status >= 200 && result.status < 300
@@ -9811,15 +10174,32 @@ export function buildRouter() {
   }
 
   // Lake stats - per-tenant event-store roll-up: row counts, byte size, oldest
-  // and newest timestamps, namespace breakdown. Accepts ?namespace + ?since
-  // filters. Scoped via _tenantScope; admin sees cross-tenant aggregate.
+  // and newest timestamps, namespace breakdown. Accepts ?namespace, ?since,
+  // ?provider, ?model, ?status, ?min_latency_ms, ?max_latency_ms, and
+  // ?exclude_errors filters. Scoped via _tenantScope; admin sees cross-tenant
+  // aggregate.
   r.get('/v1/lake/stats', async (req, res) => {
     try {
       const stats = await lakeStatsFn({
         namespace: req.query.namespace ? String(req.query.namespace) : undefined,
         since: req.query.since,
         tenant_id: _tenantScope(req),
+        provider: req.query.provider ? String(req.query.provider) : undefined,
+        model: req.query.model ? String(req.query.model) : undefined,
+        status: req.query.status ? String(req.query.status) : undefined,
+        min_latency_ms: req.query.min_latency_ms != null ? Number(req.query.min_latency_ms) : undefined,
+        max_latency_ms: req.query.max_latency_ms != null ? Number(req.query.max_latency_ms) : undefined,
+        exclude_errors: req.query.exclude_errors === '1' || req.query.exclude_errors === 'true',
       });
+      const dpRequested = req.query.dp === '1'
+        || req.query.dp === 'true'
+        || req.query.privacy === 'dp'
+        || req.query.privacy === 'differential';
+      if (dpRequested) {
+        const epsilon = req.query.epsilon != null ? Number(req.query.epsilon) : 8;
+        const delta = req.query.delta != null ? Number(req.query.delta) : 1e-6;
+        return res.json({ ok: true, ...privacyDifferentialPrivacyStats(stats, { epsilon, delta }) });
+      }
       res.json({ ok: true, ...stats });
     } catch (e) { res.status(500).json(_w384Err(e, 'lake_stats_error')); }
   });

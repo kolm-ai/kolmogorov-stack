@@ -3,21 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>Artifacts · Account · Account · kolm.ai</title>
+<title>Artifacts · Account · kolm.ai</title>
 <meta name="description" content="Installed artifacts on kolm.ai: per-row size, runtime, devices installed, uninstall button. Backed by src/device-install.js + /v1/artifacts.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/artifacts">
-<meta property="og:title" content="Artifacts · Account · Account · kolm.ai">
-<meta property="og:description" content="Installed artifacts on kolm.ai: per-row size, runtime, devices installed, uninstall button. Backed by src/device-install.js + /v1/artifacts.">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://kolm.ai/account/artifacts">
+<meta property="og:title" content="Artifacts &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Installed artifacts on kolm.ai: per-row size, runtime, devices installed, uninstall button. Backed by src/device-install.js + /v1/artifacts." />
+<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/artifacts" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+<script src="/nav.js" defer></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Artifacts · Account · kolm.ai","description":"Installed artifacts on kolm.ai: per-row size, runtime, devices installed, uninstall button. Backed by src/device-install.js + /v1/artifacts.","url":"https://kolm.ai/account/artifacts","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Artifacts","item":"https://kolm.ai/account/artifacts"}]}}</script>
 <style>
 .acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
@@ -27,7 +29,7 @@
 #account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
 #account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
 #account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
-.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0}
 .acct-content h2{font-size:16px;margin:22px 0 10px}
 .acct-content h3{font-size:14px;margin:16px 0 8px}
 .acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
@@ -62,19 +64,13 @@
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
 
 </style>
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Artifacts · Account · Account · kolm.ai">
-<meta name="twitter:description" content="Installed artifacts on kolm.ai: per-row size, runtime, devices installed, uninstall button. Backed by src/device-install.js + /v1/artifacts.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -172,26 +168,30 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><a href="/docs">Help</a></div>
- </div>
+    <div class="site-actions"><a href="/docs">Help</a></div>
+  </div>
 </header>
 
 <main id="main">
 <div class="acct-shell">
-<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/agent-telemetry">Agent telemetry</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Builds</a></li><li><a href="/account/artifacts" aria-current="page">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Builds</a></li><li><a href="/account/artifacts" aria-current="page">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
 <section class="acct-content">
 <h1>Artifacts.</h1>
-<p class="lede">Every .kolm artifact installed in your account. Each row carries its canonical metadata: <code>production_ready_state</code>, <code>runtime_target</code>, <code>license</code>, and the <code>verified_receipt_hash</code> you can pin in CI. The .kolm itself is signed Ed25519 and re-verifies offline.</p>
+<p class="lede">Every .kolm artifact installed in your account. Size on disk, the runtime that serves it, which devices have it.</p>
 <div class="toolbar">
- <a class="btn primary" href="/builder">Build new</a>
- <a class="btn" href="/account/devices">Devices</a>
+  <a class="btn primary" href="/builder">Build new</a>
+  <a class="btn" href="/account/devices">Devices</a>
 </div>
+<section class="kpanel" data-artifact-metadata-contract>
+  <h2>Artifact metadata</h2>
+  <p class="pdesc">Rows expose the canonical fields procurement and runtime automation need: <code>production_ready_state</code>, <code>runtime_target</code>, <code>license</code>, and <code>verified_receipt_hash</code>.</p>
+</section>
 <table class="ktable">
- <thead><tr><th>Artifact</th><th>Size</th><th>runtime_target</th><th>license</th><th>production_ready_state</th><th>verified_receipt_hash</th><th>% passed</th><th></th></tr></thead>
- <tbody id="ar-rows"><tr><td colspan="8"><div class="skel" style="width:260px"></div></td></tr></tbody>
+  <thead><tr><th>Artifact</th><th>Size</th><th>Runtime</th><th>Devices</th><th>K-score</th><th></th></tr></thead>
+  <tbody id="ar-rows"><tr><td colspan="6"><div class="skel" style="width:260px"></div></td></tr></tbody>
 </table>
 <div id="empty-state" class="empty" hidden data-empty-state>
- <strong>No artifacts installed.</strong> Build one in the <a href="/builder">builder</a> or pull a community recipe from the <a href="/marketplace">marketplace</a>.
+  <strong>No artifacts installed.</strong> Build one in the <a href="/builder">builder</a> or pull a community recipe from the <a href="/marketplace">marketplace</a>.
 </div>
 </section>
 </div>
@@ -199,46 +199,38 @@
 
 <script>
 (function(){
- var key=null; try{key=localStorage.getItem("ks_api_key")||localStorage.getItem("kolm-key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("apiKey")||localStorage.getItem("recipeApiKey");}catch(_){}
+  var key=null; try{key=localStorage.getItem("kolm-key")||localStorage.getItem("ks_api_key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("KOLM_API_KEY");}catch(_){}
 
- if(!key){window.kfetch=function(){return Promise.reject(new Error("missing api key"));};location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
- window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
- window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
- window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
- window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
- window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
- window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+  window.KOLM_AUTH=key?{"Authorization":"Bearer "+key,"Accept":"application/json"}:{"Accept":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
+  window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
+  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
 })();
 var rows=document.getElementById("ar-rows");
 window.kfetch("/v1/artifacts").catch(function(){return [];}).then(function(j){
- var list=Array.isArray(j)?j:((j&&j.artifacts)||[]);
- if(!list.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
- rows.innerHTML=list.map(function(a){
- var devs=(a.devices_installed||a.devices||[]).join(", ")||"-";
- var prState=a.production_ready_state||(a.production_ready===true?"ready":a.production_ready===false?"held":"-");
- var rt=a.runtime_target||a.runtime||a.format||"-";
- var lic=a.license||a.license_spdx||"-";
- var vrh=a.verified_receipt_hash||a.receipt_hash||a.manifest_hash||"-";
- var pct=(a.pass_rate!=null?Math.round(a.pass_rate*100)+"%":(a.k_score!=null?Math.round(a.k_score*100)+"%":"-"));
- return "<tr>"+
- "<td><b>"+window.kesc(a.artifact_id||a.id||"-")+"</b><div style=\"color:var(--ink-faint);font-size:11px\">"+window.kesc(devs)+"</div></td>"+
- "<td>"+window.kbytes(a.size_bytes||a.bytes)+"</td>"+
- "<td><code>"+window.kesc(rt)+"</code></td>"+
- "<td><code>"+window.kesc(lic)+"</code></td>"+
- "<td><code>"+window.kesc(prState)+"</code></td>"+
- "<td><code>"+window.kesc(String(vrh).slice(0,16))+"</code></td>"+
- "<td>"+pct+"</td>"+
- "<td><button class=\"btn bad\" data-act=\"uninstall\" data-id=\""+window.kesc(a.artifact_id||a.id||"")+"\">uninstall</button></td>"+
- "</tr>";
- }).join("");
+  var list=Array.isArray(j)?j:((j&&j.artifacts)||[]);
+  if(!list.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
+  rows.innerHTML=list.map(function(a){
+    var devs=(a.devices_installed||a.devices||[]).join(", ")||"-";
+    return "<tr>"+
+      "<td><b>"+window.kesc(a.artifact_id||a.id||"-")+"</b><div style=\"color:var(--ink-faint);font-size:11px\">"+window.kesc(a.runtime||a.tier||"")+"</div></td>"+
+      "<td>"+window.kbytes(a.size_bytes||a.bytes)+"</td>"+
+      "<td><code>"+window.kesc(a.runtime||a.format||"-")+"</code></td>"+
+      "<td>"+window.kesc(devs)+"</td>"+
+      "<td>"+(a.k_score!=null?a.k_score.toFixed(3):"-")+"</td>"+
+      "<td><button class=\"btn bad\" data-act=\"uninstall\" data-id=\""+window.kesc(a.artifact_id||a.id||"")+"\">uninstall</button></td>"+
+    "</tr>";
+  }).join("");
 });
 rows.addEventListener("click",function(e){
- var b=e.target.closest("button[data-act=uninstall]"); if(!b)return;
- if(!confirm("Uninstall "+b.getAttribute("data-id")+"?"))return;
- var id=b.getAttribute("data-id");
- window.kfetch("/v1/artifacts/"+encodeURIComponent(id),{method:"DELETE"}).then(function(){b.closest("tr").style.opacity=0.4;b.disabled=true;}).catch(function(){b.textContent="error";});
+  var b=e.target.closest("button[data-act=uninstall]"); if(!b)return;
+  if(!confirm("Uninstall "+b.getAttribute("data-id")+"?"))return;
+  var id=b.getAttribute("data-id");
+  window.kfetch("/v1/artifacts/"+encodeURIComponent(id),{method:"DELETE"}).then(function(){b.closest("tr").style.opacity=0.4;b.disabled=true;}).catch(function(){b.textContent="error";});
 });
 </script>
-<script src="/nav.js" defer></script>
 </body>
 </html>

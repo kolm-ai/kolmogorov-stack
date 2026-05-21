@@ -25,8 +25,36 @@ const OUT = path.join(ROOT, 'public', 'openapi.json');
 
 function loadJson(p) { return JSON.parse(fs.readFileSync(p, 'utf8')); }
 
+function baseOpenapi() {
+  return {
+    openapi: '3.0.3',
+    info: {
+      title: 'Kolm API',
+      version: '1.0.0',
+      description: 'HTTP contract for the kolm compiler. Auto-generated from src/router.js via scripts/build-openapi.cjs.',
+      license: { name: 'Apache-2.0', url: 'https://www.apache.org/licenses/LICENSE-2.0' },
+    },
+    servers: [
+      { url: 'https://kolm.ai', description: 'Managed production' },
+      { url: 'http://localhost:8080', description: 'Local dev (kolm serve)' },
+    ],
+    paths: {},
+    components: {},
+  };
+}
+
+function loadExistingOpenapi(p) {
+  if (!fs.existsSync(p)) return baseOpenapi();
+  try {
+    return loadJson(p);
+  } catch (err) {
+    console.warn(`build-openapi: existing ${path.relative(ROOT, p)} is not valid JSON (${err.message}); rebuilding from route manifest`);
+    return baseOpenapi();
+  }
+}
+
 const routes = loadJson(API_ROUTES);
-const existing = fs.existsSync(OUT) ? loadJson(OUT) : { openapi: '3.0.3', paths: {} };
+const existing = loadExistingOpenapi(OUT);
 
 // Convert Express-style :param to OpenAPI {param}.
 function publicRoutePath(p) {

@@ -354,12 +354,10 @@
  <label class="field">
  <span class="lbl">Switch plan</span>
  <select id="plan-select">
- <option value="free">Developer (free)</option>
- <option value="starter">Starter . $9 / mo . $90 / yr</option>
- <option value="pro">Pro . $49 / mo . $490 / yr</option>
- <option value="teams">Teams . from $149 / mo (2 seats) . $1,490 / yr</option>
- <option value="business">Business . $1,499 / mo . $14,990 / yr</option>
- <option value="enterprise">Enterprise . $2,999 / mo . $29,990 / yr</option>
+ <option value="free">Free . $0 . 3 compiles/mo</option>
+ <option value="pro">Pro . $49 / mo . unlimited compiles</option>
+ <option value="teams">Team . $499 / mo . 5 seats + private registry</option>
+ <option value="enterprise">Enterprise . custom . architecture review</option>
  </select>
  </label>
  <div class="toolbar" style="flex-wrap:wrap;gap:8px">
@@ -571,7 +569,7 @@
  banner.style.borderColor = 'var(--line-strong)';
  title.textContent = 'Subscription cancelled';
  title.style.color = 'var(--ink-mute)';
- msg.textContent = 'Your paid plan was cancelled. You are on the Developer (free) tier. Existing artifacts continue to verify.';
+ msg.textContent = 'Your paid plan was cancelled. You are on the Free tier. Existing artifacts continue to verify.';
  return;
  }
  banner.hidden = true;
@@ -693,7 +691,7 @@
  var isPaid = plan !== 'free';
  var msg = isPaid
  ? 'Continue to Stripe to pay for the ' + plan + ' tier? Your plan activates after payment.'
- : 'Switch to the free Developer plan?';
+ : 'Switch to the Free plan?';
  if (!confirm(msg)) return;
  try {
  var body = await KS.api('/v1/account/change-plan', {
@@ -720,7 +718,7 @@
  if (!confirm('Cancel paid plan and drop to free immediately? Existing artifacts continue to work; the Stripe subscription is cancelled now and quotas drop to free limits in the same request (no proration today).')) return;
  try {
  await KS.api('/v1/account/cancel', { method: 'POST' });
- setPlanStatus('Plan cancelled. You are on the Developer (free) tier; existing artifacts continue to verify.');
+ setPlanStatus('Plan cancelled. You are on the Free tier; existing artifacts continue to verify.');
  setTimeout(loadAccount, 800);
  } catch (e) {
  setPlanStatus('Cancel failed. Try again or contact support.');

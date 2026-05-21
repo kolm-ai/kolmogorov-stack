@@ -130,10 +130,10 @@ test('W375 #7 - every page has a data-empty-state element', () => {
   }
 });
 
-// ----- 8) Storage truth panel: 3 panels -----
-test('W375 #8 - storage.html has the 3 truth panels', () => {
+// ----- 8) Storage truth panel: core panels -----
+test('W375 #8 - storage.html has the storage and cloud truth panels', () => {
   const html = read('storage');
-  for (const p of ['local-paths', 'storage-mode', 'cloud-sync']) {
+  for (const p of ['local-paths', 'storage-mode', 'cloud-sync', 'cloud-readiness']) {
     const re = new RegExp('data-panel=["\']' + p + '["\']');
     assert.ok(re.test(html), 'storage.html missing data-panel="' + p + '"');
   }

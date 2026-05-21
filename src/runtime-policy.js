@@ -33,6 +33,12 @@ import crypto from 'node:crypto';
 
 import { scan, policy as privacyPolicy, redact } from './privacy-membrane.js';
 import { newEvent } from './event-schema.js';
+import {
+  enforceTokenBudget,
+  estimateTokens,
+  semanticFingerprint,
+  semanticSimilarity,
+} from './optimization.js';
 
 // Lazy imports: event-store + cost-estimator + llm-call + artifact-runner
 // are all heavy modules. We only require them when a rung actually fires
@@ -44,10 +50,10 @@ async function _artifactRunner() { return import('./artifact-runner.js'); }
 async function _bundleRunner() { return import('./bundle-runner.js'); }
 
 export const POLICIES = Object.freeze({
-  local_first:     ['privacy_check', 'cache', 'local_artifact', 'cheaper_model', 'frontier'],
-  frontier_first:  ['privacy_check', 'frontier'],
-  cost_optimized:  ['privacy_check', 'cache', 'local_artifact', 'cheaper_model', 'frontier'],
-  privacy_only:    ['privacy_check', 'local_artifact', 'cache'],
+  local_first:     ['token_budget', 'privacy_check', 'cache', 'semantic_cache', 'local_artifact', 'cheaper_model', 'frontier'],
+  frontier_first:  ['token_budget', 'privacy_check', 'frontier'],
+  cost_optimized:  ['token_budget', 'privacy_check', 'cache', 'semantic_cache', 'local_artifact', 'cheaper_model', 'frontier'],
+  privacy_only:    ['token_budget', 'privacy_check', 'local_artifact', 'cache'],
 });
 
 export const DEFAULT_POLICY = {
@@ -60,6 +66,13 @@ export const DEFAULT_POLICY = {
   // wins. Caller can override per-request via context.frontier_cost_usd.
   frontier_cost_usd: 0.012,
   cheaper_cost_usd: 0.0012,
+  max_input_tokens: 8192,
+  max_output_tokens: 1024,
+  token_budget_action: 'compress',
+  prompt_compression_enabled: true,
+  semantic_cache_enabled: true,
+  semantic_cache_threshold: 0.86,
+  semantic_cache_ttl_s: 3600,
 };
 
 function _home() { return process.env.HOME || process.env.USERPROFILE || os.homedir(); }
@@ -71,6 +84,7 @@ function _ensureDir(p) { fs.mkdirSync(p, { recursive: true }); return p; }
 
 function _policyPath()    { return path.join(_ensureDir(_runtimeDir()), 'policy.json'); }
 function _cacheDir()      { return _ensureDir(path.join(_runtimeDir(), 'cache')); }
+function _semanticCachePath() { return path.join(_ensureDir(_runtimeDir()), 'semantic-cache.jsonl'); }
 function _decisionsPath() { return path.join(_ensureDir(_runtimeDir()), 'decisions.jsonl'); }
 function _installedDir()  { return _ensureDir(path.join(_runtimeDir(), 'installed', 'local')); }
 
@@ -128,6 +142,80 @@ function _writeCache(hash, response) {
   const f = path.join(_cacheDir(), hash + '.json');
   const row = { ts: Date.now(), response };
   try { fs.writeFileSync(f, JSON.stringify(row)); } catch {}
+}
+
+function _semanticCacheRows() {
+  const f = _semanticCachePath();
+  if (!fs.existsSync(f)) return [];
+  const rows = [];
+  try {
+    for (const line of fs.readFileSync(f, 'utf8').split('\n')) {
+      if (!line.trim()) continue;
+      try { rows.push(JSON.parse(line)); } catch {}
+    }
+  } catch {}
+  return rows.slice(-500);
+}
+
+function _readSemanticCache(request, pol) {
+  if (!pol.semantic_cache_enabled) return null;
+  const ttl = Number(pol.semantic_cache_ttl_s || pol.cache_ttl_s || 3600);
+  const threshold = Number(pol.semantic_cache_threshold || 0.86);
+  const fp = semanticFingerprint(request?.body ?? request?.input ?? request);
+  const model = String(request?.model || '');
+  const intent = String(request?.intent || '');
+  let best = null;
+  const now = Date.now();
+  for (const row of _semanticCacheRows()) {
+    if (!row || !Array.isArray(row.tokens) || !row.response) continue;
+    if (model && row.model && row.model !== model) continue;
+    if (intent && row.intent && row.intent !== intent) continue;
+    if (ttl && row.ts && (now - row.ts) / 1000 > ttl) continue;
+    const similarity = semanticSimilarity(fp.tokens, row.tokens);
+    if (similarity >= threshold && (!best || similarity > best.similarity)) {
+      best = { ...row, similarity, fingerprint: fp.hash };
+    }
+  }
+  return best;
+}
+
+function _writeSemanticCache(request, response, meta = {}) {
+  const fp = semanticFingerprint(request?.body ?? request?.input ?? request);
+  if (!fp.tokens.length) return;
+  const row = {
+    ts: Date.now(),
+    request_hash: _hashRequest(request),
+    model: String(request?.model || ''),
+    intent: String(request?.intent || ''),
+    fingerprint: fp.hash,
+    tokens: fp.tokens.slice(0, 512),
+    token_count: fp.token_count,
+    response,
+    meta,
+  };
+  try { fs.appendFileSync(_semanticCachePath(), JSON.stringify(row) + '\n', 'utf8'); } catch {}
+}
+
+function _prepareRequestForPolicy(request, pol) {
+  const maxTokens = Number(pol.max_input_tokens || 0);
+  if (!maxTokens) {
+    return {
+      request,
+      budget: { action: 'pass', original_tokens: estimateTokens(request?.body ?? request?.input ?? request), final_tokens: estimateTokens(request?.body ?? request?.input ?? request), compressed: false },
+    };
+  }
+  const source = request?.body ?? request?.input ?? request;
+  const budget = enforceTokenBudget(source, {
+    maxTokens,
+    action: pol.prompt_compression_enabled === false ? 'reject' : (pol.token_budget_action || 'compress'),
+  });
+  if (!budget.ok) return { request, budget };
+  if (budget.input === source) return { request, budget };
+  const next = { ...request };
+  if (Object.prototype.hasOwnProperty.call(next, 'body')) next.body = budget.input;
+  else if (Object.prototype.hasOwnProperty.call(next, 'input')) next.input = budget.input;
+  else return { request: budget.input, budget };
+  return { request: next, budget };
 }
 
 // local-artifact discovery
@@ -249,40 +337,94 @@ export async function decide(request = {}, context = {}) {
   const policyName = context.policyName || pol.name;
   const rungs = POLICIES[policyName] || POLICIES.local_first;
   const decision_chain = [];
+  let workingRequest = request;
+  let tokenBudget = null;
 
   for (const rung of rungs) {
+    if (rung === 'token_budget') {
+      const prepared = _prepareRequestForPolicy(workingRequest, pol);
+      workingRequest = prepared.request;
+      tokenBudget = prepared.budget;
+      if (!prepared.budget.ok) {
+        decision_chain.push({
+          rung,
+          status: 'block',
+          original_tokens: prepared.budget.original_tokens,
+          final_tokens: prepared.budget.final_tokens,
+          max_input_tokens: Number(pol.max_input_tokens || 0),
+        });
+        return {
+          action: 'blocked',
+          target: null,
+          confidence: 1,
+          reason: prepared.budget.reason || 'token_budget_exceeded',
+          decision_chain,
+          token_budget: prepared.budget,
+          effective_request: workingRequest,
+        };
+      }
+      decision_chain.push({
+        rung,
+        status: prepared.budget.compressed ? 'compressed' : 'pass',
+        original_tokens: prepared.budget.original_tokens,
+        final_tokens: prepared.budget.final_tokens,
+        max_input_tokens: Number(pol.max_input_tokens || 0),
+      });
+      continue;
+    }
+
     if (rung === 'privacy_check') {
-      const body = typeof request.body === 'string' ? request.body : JSON.stringify(request.body || '');
+      const body = typeof workingRequest.body === 'string' ? workingRequest.body : JSON.stringify(workingRequest.body || '');
       const findings = scan(body);
       const p = privacyPolicy();
       if (findings.sensitive && p.default === 'block') {
         decision_chain.push({ rung, status: 'block', findings: findings.classes });
-        return { action: 'blocked', target: null, confidence: 1, reason: 'privacy_block', decision_chain, sensitive_classes: findings.classes };
+        return { action: 'blocked', target: null, confidence: 1, reason: 'privacy_block', decision_chain, sensitive_classes: findings.classes, token_budget: tokenBudget, effective_request: workingRequest };
       }
       decision_chain.push({ rung, status: 'pass', findings: findings.classes });
       continue;
     }
 
     if (rung === 'cache') {
-      const hash = _hashRequest(request);
+      const hash = _hashRequest(workingRequest);
       const hit = _readCache(hash, pol.cache_ttl_s);
       if (hit) {
         decision_chain.push({ rung, status: 'hit', hash });
-        return { action: 'cache_hit', target: hash, confidence: 1, reason: 'cache_within_ttl', decision_chain, cached: hit.response };
+        return { action: 'cache_hit', target: hash, confidence: 1, reason: 'cache_within_ttl', decision_chain, cached: hit.response, token_budget: tokenBudget, effective_request: workingRequest };
       }
       decision_chain.push({ rung, status: 'miss', hash });
       continue;
     }
 
+    if (rung === 'semantic_cache') {
+      const hit = _readSemanticCache(workingRequest, pol);
+      if (hit) {
+        decision_chain.push({ rung, status: 'hit', similarity: hit.similarity, request_hash: hit.request_hash });
+        return {
+          action: 'semantic_cache_hit',
+          target: hit.request_hash,
+          confidence: hit.similarity,
+          reason: `semantic_similarity_${hit.similarity}`,
+          decision_chain,
+          cached: hit.response,
+          semantic_cache: { similarity: hit.similarity, request_hash: hit.request_hash, fingerprint: hit.fingerprint },
+          token_budget: tokenBudget,
+          effective_request: workingRequest,
+        };
+      }
+      decision_chain.push({ rung, status: pol.semantic_cache_enabled ? 'miss' : 'disabled' });
+      continue;
+    }
+
     if (rung === 'local_artifact') {
-      const arts = _findMatchingArtifacts(request.intent || '');
+      const arts = _findMatchingArtifacts(workingRequest.intent || '');
       if (arts.length === 0) {
         decision_chain.push({ rung, status: 'no_artifacts' });
         continue;
       }
       // Try each artifact; first one whose confidence clears the gate wins.
       for (const a of arts) {
-        const r = await _tryArtifact(a.path, request);
+        const r = await _tryArtifact(a.path, workingRequest);
         if (r.ok && r.confidence >= pol.local_confidence_threshold) {
           decision_chain.push({ rung, status: 'served', target: a.name, confidence: r.confidence });
           return {
@@ -294,6 +436,8 @@ export async function decide(request = {}, context = {}) {
             artifact_path: a.path,
             local_output: r.output,
             recipe_id: r.recipe_id,
+            token_budget: tokenBudget,
+            effective_request: workingRequest,
           };
         }
       }
@@ -309,6 +453,8 @@ export async function decide(request = {}, context = {}) {
         confidence: 0.7,
         reason: 'no_local_match_route_cheaper',
         decision_chain,
+        token_budget: tokenBudget,
+        effective_request: workingRequest,
       };
     }
 
@@ -320,6 +466,8 @@ export async function decide(request = {}, context = {}) {
         confidence: 0.9,
         reason: 'frontier_fallback',
         decision_chain,
+        token_budget: tokenBudget,
+        effective_request: workingRequest,
       };
     }
   }
@@ -332,6 +480,8 @@ export async function decide(request = {}, context = {}) {
     confidence: 0.9,
     reason: 'no_rung_owned_request',
     decision_chain,
+    token_budget: tokenBudget,
+    effective_request: workingRequest,
   };
 }
 
@@ -340,20 +490,21 @@ export async function applyPolicy(request = {}, { policyName, opts = {} } = {}) 
   const effectivePolicy = policyName || pol.name;
   const t0 = Date.now();
   const d = await decide(request, { policyName: effectivePolicy });
+  const effectiveRequest = d.effective_request || request;
   const event_id = _shortId('evt_');
   let result = null;
   let cost_usd = 0;
   let saved_usd = 0;
 
   if (d.action === 'blocked') {
-    result = { blocked: true, reason: 'privacy_block', classes: d.sensitive_classes || [] };
-  } else if (d.action === 'cache_hit') {
+    result = { blocked: true, reason: d.reason || 'privacy_block', classes: d.sensitive_classes || [] };
+  } else if (d.action === 'cache_hit' || d.action === 'semantic_cache_hit') {
     result = d.cached;
   } else if (d.action === 'local_artifact') {
     result = d.local_output;
     saved_usd = opts.frontier_cost_usd != null ? Number(opts.frontier_cost_usd) : Number(pol.frontier_cost_usd || 0);
   } else if (d.action === 'cheaper_model') {
-    const r = await _callModel(pol.cheaper_model, request);
+    const r = await _callModel(pol.cheaper_model, effectiveRequest);
     result = r.ok ? r.output : { error: r.reason };
     try {
       const { estimateCost } = await _costEstimator();
@@ -366,9 +517,12 @@ export async function applyPolicy(request = {}, { policyName, opts = {} } = {}) 
     } catch {}
     saved_usd = Math.max(0, Number(pol.frontier_cost_usd || 0) - cost_usd);
     // Write to cache so future identical calls go free.
-    if (r.ok) _writeCache(_hashRequest(request), result);
+    if (r.ok) {
+      _writeCache(_hashRequest(effectiveRequest), result);
+      _writeSemanticCache(effectiveRequest, result, { action: d.action, target: d.target });
+    }
   } else if (d.action === 'frontier_model') {
-    const r = await _callModel(pol.frontier_model, request);
+    const r = await _callModel(pol.frontier_model, effectiveRequest);
     result = r.ok ? r.output : { error: r.reason };
     try {
       const { estimateCost } = await _costEstimator();
@@ -379,7 +533,10 @@ export async function applyPolicy(request = {}, { policyName, opts = {} } = {}) 
         completion_tokens: r.raw?.usage?.completion_tokens || 0,
       });
     } catch {}
-    if (r.ok) _writeCache(_hashRequest(request), result);
+    if (r.ok) {
+      _writeCache(_hashRequest(effectiveRequest), result);
+      _writeSemanticCache(effectiveRequest, result, { action: d.action, target: d.target });
+    }
   }
 
   const latency_ms = Date.now() - t0;
@@ -396,7 +553,10 @@ export async function applyPolicy(request = {}, { policyName, opts = {} } = {}) 
     saved_usd,
     decision_chain: d.decision_chain,
     request_hash: _hashRequest(request),
+    effective_request_hash: _hashRequest(effectiveRequest),
     policy: effectivePolicy,
+    token_budget: d.token_budget || null,
+    semantic_cache: d.semantic_cache || null,
   };
   try {
     fs.appendFileSync(_decisionsPath(), JSON.stringify(decisionRow) + '\n', 'utf8');
@@ -407,10 +567,10 @@ export async function applyPolicy(request = {}, { policyName, opts = {} } = {}) 
       event_id,
       provider: 'kolm-runtime',
       model: d.target || effectivePolicy,
-      request_hash: decisionRow.request_hash,
+      request_hash: decisionRow.effective_request_hash,
       estimated_cost_usd: cost_usd,
       latency_ms,
-      cache_hit: d.action === 'cache_hit',
+      cache_hit: d.action === 'cache_hit' || d.action === 'semantic_cache_hit',
       status: d.action === 'blocked' ? 'blocked' : 'ok',
     }));
   } catch {}
@@ -424,6 +584,8 @@ export async function applyPolicy(request = {}, { policyName, opts = {} } = {}) 
     saved_usd,
     event_id,
     decision_chain: d.decision_chain,
+    token_budget: d.token_budget || null,
+    semantic_cache: d.semantic_cache || null,
   };
 }
 
@@ -454,7 +616,7 @@ export function replacementStats({ since } = {}) {
   const f = _decisionsPath();
   const out = {
     total_decisions: 0,
-    by_action: { cache_hit: 0, local_artifact: 0, cheaper_model: 0, frontier_model: 0, blocked: 0 },
+    by_action: { cache_hit: 0, semantic_cache_hit: 0, local_artifact: 0, cheaper_model: 0, frontier_model: 0, blocked: 0 },
     replacement_rate: 0,
     savings_usd: 0,
     spent_usd: 0,
@@ -474,7 +636,7 @@ export function replacementStats({ since } = {}) {
     out.savings_usd += Number(row.saved_usd || 0);
     out.spent_usd += Number(row.cost_usd || 0);
   }
-  const replaced = out.by_action.cache_hit + out.by_action.local_artifact + out.by_action.cheaper_model;
+  const replaced = out.by_action.cache_hit + out.by_action.semantic_cache_hit + out.by_action.local_artifact + out.by_action.cheaper_model;
   out.replacement_rate = out.total_decisions ? Number((replaced / out.total_decisions).toFixed(3)) : 0;
   out.savings_usd = Number(out.savings_usd.toFixed(4));
   out.spent_usd = Number(out.spent_usd.toFixed(4));
@@ -483,7 +645,7 @@ export function replacementStats({ since } = {}) {
 
 // Helpers exposed for tests / install path
 export function _internals() {
-  return { hashRequest: _hashRequest, runtimeDir: _runtimeDir, cacheDir: _cacheDir, installedDir: _installedDir, decisionsPath: _decisionsPath, policyPath: _policyPath };
+  return { hashRequest: _hashRequest, runtimeDir: _runtimeDir, cacheDir: _cacheDir, semanticCachePath: _semanticCachePath, installedDir: _installedDir, decisionsPath: _decisionsPath, policyPath: _policyPath };
 }
 
 export default {

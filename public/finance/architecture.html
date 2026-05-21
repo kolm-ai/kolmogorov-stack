@@ -70,6 +70,7 @@
 <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site-header">
  <div class="wrap">
@@ -178,6 +179,7 @@
  </div>
  </div>
 </header>
+<main id="main">
 
 <section class="hero">
  <div class="wrap-tight">
@@ -258,7 +260,7 @@
 
  <ol class="steps">
  <li><b>Vendor onboarding (asynchronously, no sales call)</b><span>InfoSec questionnaire: paste our <a href="/security" style="color:var(--good)">/security</a>, <a href="/subprocessors" style="color:var(--good)">/subprocessors</a>, <a href="/soc2" style="color:var(--good)">/soc2</a> URLs into their procurement portal. SOC 2 Type I attestation available.</span></li>
- <li><b>Sign the MSA + DPA (self-serve)</b><span>E-sign at <a href="/upgrade?plan=enterprise" style="color:var(--good)">/upgrade?plan=enterprise</a>. Optional PCI addendum for processor scope.</span></li>
+ <li><b>Scope the MSA + DPA</b><span>Book the Enterprise review at <a href="/enterprise/inquiry" style="color:var(--good)">/enterprise/inquiry</a>. Optional PCI addendum for processor scope.</span></li>
  <li><b>Deploy the bridge inside the CDE</b><span>Terraform module deploys behind the CDE perimeter. Egress controlled at the SG layer. Heartbeat to kolm.ai is HTTPS, payload-free.</span></li>
  <li><b>Wire FIPS-validated KMS</b><span>HSM-backed CMK (AWS CloudHSM or Azure Key Vault HSM tier). Every receipt signs with the customer key.</span></li>
  <li><b>Run the KYC document classifier (45 min)</b><span>Seed JSONL: 200 anonymised onboarding packets. Compile produces <code>kyc-classifier.kolm</code> at K&ge;0.92 with stable PAN/SSN placeholders.</span></li>
@@ -295,6 +297,8 @@
  </div>
 </section>
 
+
+</main>
 <footer class="site">
  <div class="wrap row">
  <div>&copy; 2026 kolm</div>

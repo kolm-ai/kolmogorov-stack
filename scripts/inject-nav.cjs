@@ -202,5 +202,11 @@ function walk(dir) {
   }
 }
 
-walk(ROOT);
-console.log(`nav inject (W221): ${touched} touched, ${already} idempotent-noop, ${missing} have site-header but no site-nav, ${skipped} legacy (no site-header).`);
+function main() {
+  walk(ROOT);
+  console.log(`nav inject (W221): ${touched} touched, ${already} idempotent-noop, ${missing} have site-header but no site-nav, ${skipped} legacy (no site-header).`);
+}
+
+module.exports = { canonicalBlock, BEGIN, END };
+
+if (require.main === module) main();

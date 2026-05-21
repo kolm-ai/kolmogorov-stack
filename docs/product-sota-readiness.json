@@ -1,0 +1,440 @@
+{
+  "schema_version": "2026-05-21",
+  "purpose": "Atomic readiness ledger for the backend/product requirements required to make Kolm a production-grade AI artifact, gateway, compile, runtime, registry, and governance platform.",
+  "status_legend": {
+    "shipped": "Local code and tests exist in this repository.",
+    "implemented": "Local implementation exists; may still need production keys, deployment, or package publication.",
+    "partial": "Foundational implementation exists, but the full product claim must remain scoped.",
+    "needs_public_benchmark_data": "Implementation needs public reproducible benchmark data before marketing as best-in-class.",
+    "needs_package_release": "Code/package skeleton exists locally but public package/channel release is external.",
+    "needs_external_partner": "Requires an outside platform, standards body, marketplace, or hardware partner.",
+    "needs_live_certification": "Requires formal compliance certification, auditor, or live production proof."
+  },
+  "surfaces": [
+    {
+      "id": "format-standard",
+      "requirements": [
+        {
+          "id": "kolm-format-spec",
+          "priority": "P0",
+          "title": "Publish version-pinned .kolm v1/RS-1 format specification with ZIP members and compatibility rules.",
+          "status": "shipped",
+          "evidence_paths": ["docs/kolm-format-v1.md", "docs/rs-1.md", "docs/manifest-v0.1.json", "docs/receipt-v0.1.json", "public/spec.html"]
+        },
+        {
+          "id": "standalone-verify",
+          "priority": "P0",
+          "title": "Offline verifier can validate artifact signatures without hosted Kolm.",
+          "status": "implemented",
+          "evidence_paths": ["cli/kolm.js", "src/artifact-runner.js", "docs/kolm-format-v1.md"]
+        },
+        {
+          "id": "foundation-standardization",
+          "priority": "P1",
+          "title": "Submit or steward the .kolm format through a neutral standards/foundation process.",
+          "status": "needs_external_partner",
+          "evidence_paths": ["docs/kolm-format-v1.md", "public/spec.html"]
+        },
+        {
+          "id": "ecosystem-runtime-adoption",
+          "priority": "P1",
+          "title": "Get third-party runtime support from Hugging Face, Ollama, llama.cpp, ONNX/GGUF tooling, and hardware vendors.",
+          "status": "needs_external_partner",
+          "evidence_paths": ["docs/kolm-format-v1.md", "src/compute/registry.json", "public/runtimes.html"]
+        }
+      ]
+    },
+    {
+      "id": "compile-train-distill",
+      "requirements": [
+        {
+          "id": "k-score-calibration",
+          "priority": "P0",
+          "title": "K-score is computed per artifact, gates composite and axes, and needs public calibration methodology before broad claims.",
+          "status": "needs_public_benchmark_data",
+          "evidence_paths": ["src/artifact.js", "src/production-ready.js", "docs/PRODUCT.md", "public/spec.html"]
+        },
+        {
+          "id": "holdout-independence",
+          "priority": "P0",
+          "title": "Train/eval split integrity is locked by row hashes, holdout gates, and production-ready checks.",
+          "status": "shipped",
+          "evidence_paths": ["src/compile-pipeline.js", "src/distill-pipeline.js", "tests/wave411-p0-train-holdout-and-metadata.test.js"]
+        },
+        {
+          "id": "incremental-compile",
+          "priority": "P1",
+          "title": "Recompile against new captured data without rebuilding the whole namespace.",
+          "status": "implemented",
+          "evidence_paths": ["cli/kolm.js", "src/compile-pipeline.js"]
+        },
+        {
+          "id": "compile-failure-diagnostics",
+          "priority": "P0",
+          "title": "When K-score or gates fail, CLI/API prints failing cases, gate reasons, and next actions.",
+          "status": "shipped",
+          "evidence_paths": ["cli/kolm.js", "src/production-ready.js", "tests/wave552-gemma-multimodal-account.test.js"]
+        },
+        {
+          "id": "async-compile-webhooks",
+          "priority": "P0",
+          "title": "Hosted compile is async, returns job ids, and supports deploy/webhook notification hooks.",
+          "status": "implemented",
+          "evidence_paths": ["src/router.js", "src/compile.js", "cli/kolm.js"]
+        },
+        {
+          "id": "compile-cache",
+          "priority": "P1",
+          "title": "Repeated compile/runtime work uses deterministic cache keys where safe.",
+          "status": "implemented",
+          "evidence_paths": ["src/cache.js", "src/runtime.js", "src/runtime-policy.js", "src/optimization.js", "cli/kolm.js"]
+        },
+        {
+          "id": "export-quantize-targets",
+          "priority": "P1",
+          "title": "Compiler binds exported GGUF/ONNX/Safetensors/CoreML/MLX/ExecuTorch/TensorRT targets with provenance.",
+          "status": "implemented",
+          "evidence_paths": ["cli/kolm.js", "src/export-provenance.js", "workers/quantize/README.md", "tests/wave551-compute-training-contract.test.js"]
+        }
+      ]
+    },
+    {
+      "id": "capture-gateway-lake",
+      "requirements": [
+        {
+          "id": "openai-anthropic-gateway",
+          "priority": "P0",
+          "title": "OpenAI-compatible and Anthropic-native gateway/capture paths both exist and are not OpenAI-only.",
+          "status": "shipped",
+          "evidence_paths": ["src/router.js", "src/daemon-connector.js", "src/completions-api.js", "src/compute/backends/anthropic.js", "tests/wave551-compute-training-contract.test.js"]
+        },
+        {
+          "id": "zero-retention-mode",
+          "priority": "P0",
+          "title": "Per-request zero-retention/no-store mode forwards calls without persisting capture/event rows.",
+          "status": "shipped",
+          "evidence_paths": ["src/router.js", "src/daemon-connector.js", "tests/wave552-gemma-multimodal-account.test.js"]
+        },
+        {
+          "id": "capture-filtering",
+          "priority": "P1",
+          "title": "Operators can reduce lake noise by filtering captured events by provider/model/status/latency/namespace.",
+          "status": "shipped",
+          "evidence_paths": ["src/router.js", "src/lake.js", "public/account/lake.html", "tests/wave552-gemma-multimodal-account.test.js"]
+        },
+        {
+          "id": "event-lake-schema",
+          "priority": "P0",
+          "title": "Local event lake has canonical schema, spend, latency, redaction, provider, and exportable rows.",
+          "status": "implemented",
+          "evidence_paths": ["src/event-schema.js", "src/event-store.js", "src/lake.js", "public/account/lake.html"]
+        },
+        {
+          "id": "redaction-quality",
+          "priority": "P0",
+          "title": "PII/PHI redaction is fail-closed and class-counted; public F1 methodology still needs published benchmark data.",
+          "status": "needs_public_benchmark_data",
+          "evidence_paths": ["src/privacy-membrane.js", "src/phi-redactor.js", "src/router.js", "public/account/privacy-events.html"]
+        },
+        {
+          "id": "differential-privacy",
+          "priority": "P1",
+          "title": "Lake aggregates can be returned with deterministic Laplace differential privacy noise.",
+          "status": "shipped",
+          "evidence_paths": ["src/privacy-membrane.js", "src/router.js", "tests/wave552-gemma-multimodal-account.test.js"]
+        },
+        {
+          "id": "opentelemetry",
+          "priority": "P1",
+          "title": "OTLP/OpenTelemetry hooks exist for request/artifact telemetry.",
+          "status": "implemented",
+          "evidence_paths": ["src/otel.js", "src/router.js"]
+        },
+        {
+          "id": "team-capture-rbac",
+          "priority": "P0",
+          "title": "Team capture, tenant fencing, and role/key scope controls are represented across auth, account, and audit surfaces.",
+          "status": "implemented",
+          "evidence_paths": ["src/auth.js", "src/team-capture-rbac.js", "src/audit.js", "src/router.js", "public/account/api-keys.html", "public/account/audit-log.html", "public/account/overview.html"]
+        }
+      ]
+    },
+    {
+      "id": "runtime-compute",
+      "requirements": [
+        {
+          "id": "runtime-local-artifact",
+          "priority": "P0",
+          "title": "Signed .kolm artifacts run locally and expose receipts through CLI/API/MCP.",
+          "status": "shipped",
+          "evidence_paths": ["src/artifact-runner.js", "src/runtime.js", "services/mcp/server.js", "cli/kolm.js"]
+        },
+        {
+          "id": "runtime-wasm",
+          "priority": "P1",
+          "title": "Browser/WASM runtime is packaged for web embedding.",
+          "status": "needs_package_release",
+          "evidence_paths": ["public/sdk.js", "public/recipe-worker.js", "packages/sdk-ts"]
+        },
+        {
+          "id": "runtime-edge",
+          "priority": "P1",
+          "title": "Edge/serverless runtime story exists for Cloudflare/Vercel/Deno-style deployments.",
+          "status": "implemented",
+          "evidence_paths": ["src/runtime.js", "src/deployment-plans.js", "public/runtimes.html", "packages/sdk-ts"]
+        },
+        {
+          "id": "ios-android-sdk",
+          "priority": "P1",
+          "title": "Mobile SDK source exists for iOS/Android/React Native; package publication remains external.",
+          "status": "needs_package_release",
+          "evidence_paths": ["packages/sdk-swift", "packages/sdk-kotlin", "packages/sdk-rn"]
+        },
+        {
+          "id": "compute-openvino-qnn",
+          "priority": "P1",
+          "title": "Local compute matrix covers OpenVINO and Qualcomm QNN/Hexagon in addition to CPU/CUDA/MPS/ROCm/DirectML.",
+          "status": "shipped",
+          "evidence_paths": ["src/compute/registry.json", "src/compute/backends/local-openvino.js", "src/compute/backends/local-qnn.js", "tests/wave552-gemma-multimodal-account.test.js"]
+        },
+        {
+          "id": "runtime-telemetry-opt-in",
+          "priority": "P1",
+          "title": "Runtime telemetry can be emitted through local logs and OTEL when explicitly enabled.",
+          "status": "implemented",
+          "evidence_paths": ["services/mcp/server.js", "src/otel.js", "cli/kolm.js"]
+        },
+        {
+          "id": "runtime-lts",
+          "priority": "P2",
+          "title": "Runtime compatibility and LTS policy is documented for v1 artifacts.",
+          "status": "implemented",
+          "evidence_paths": ["docs/kolm-format-v1.md", "public/spec.html"]
+        }
+      ]
+    },
+    {
+      "id": "registry-marketplace",
+      "requirements": [
+        {
+          "id": "registry-search",
+          "priority": "P1",
+          "title": "Registry/marketplace exposes artifact search/discovery by category, license, verified state, and K-score.",
+          "status": "implemented",
+          "evidence_paths": ["src/marketplace.js", "cli/kolm.js", "public/marketplace.html"]
+        },
+        {
+          "id": "version-diff",
+          "priority": "P1",
+          "title": "Artifact/version diff and rollback surfaces exist for governance.",
+          "status": "implemented",
+          "evidence_paths": ["cli/kolm.js", "src/registry.js", "public/account/artifacts.html"]
+        },
+        {
+          "id": "deploy-buttons",
+          "priority": "P2",
+          "title": "One-click deploy plans and button metadata exist for BYOC, edge, SSH, GPU, and managed training targets.",
+          "status": "implemented",
+          "evidence_paths": ["cli/kolm.js", "src/deployment-plans.js", "src/router.js", "src/device-install.js", "public/device-transfer.html"]
+        },
+        {
+          "id": "verified-publishers",
+          "priority": "P1",
+          "title": "Registry supports publisher badge policy, verification evaluation, and artifact-level readiness metadata.",
+          "status": "implemented",
+          "evidence_paths": ["src/marketplace.js", "src/publisher-verification.js", "src/router.js", "public/marketplace.html", "cli/kolm.js"]
+        },
+        {
+          "id": "private-registry",
+          "priority": "P0",
+          "title": "Private tenant registry/account artifact inventory exists; air-gapped/private registry productization needs deployment proof.",
+          "status": "implemented",
+          "evidence_paths": ["src/registry.js", "src/router.js", "public/account/artifacts.html"]
+        },
+        {
+          "id": "dependency-graphs",
+          "priority": "P2",
+          "title": "Artifact dependency graph and blast-radius inspection are generated from manifest/provenance metadata.",
+          "status": "implemented",
+          "evidence_paths": ["docs/kolm-format-v1.md", "src/artifact.js", "src/artifact-dependency-graph.js", "src/router.js", "public/account/artifacts.html"]
+        }
+      ]
+    },
+    {
+      "id": "infrastructure-enterprise",
+      "requirements": [
+        {
+          "id": "artifact-signing-pipeline",
+          "priority": "P0",
+          "title": "Artifact signing, receipts, verification, rotation, auditor attestations, and Sigstore hooks exist.",
+          "status": "shipped",
+          "evidence_paths": ["src/artifact.js", "src/artifact-runner.js", "src/sigstore.js", "cli/kolm.js"]
+        },
+        {
+          "id": "model-routing",
+          "priority": "P1",
+          "title": "Provider/model routing exists across OpenAI, Anthropic, OpenRouter, Gemini, local, and compute backends.",
+          "status": "implemented",
+          "evidence_paths": ["src/provider-registry.js", "src/completions-api.js", "src/compute/registry.json", "src/remote-compute.js"]
+        },
+        {
+          "id": "benchmarking-infra",
+          "priority": "P0",
+          "title": "Benchmark harness and hardware/model catalog exist; public reproducible leaderboard data needs publication.",
+          "status": "needs_public_benchmark_data",
+          "evidence_paths": ["src/benchmarks.js", "scripts/bench-compare.mjs", "public/benchmarks.html", "docs/benchmark-results-v0.1.0.md"]
+        },
+        {
+          "id": "shadow-mode",
+          "priority": "P1",
+          "title": "Replay, bakeoff, trace, and eval surfaces can compare candidates before promotion.",
+          "status": "implemented",
+          "evidence_paths": ["src/replay.js", "src/bakeoff.js", "src/trace-compile.js", "public/account/bakeoffs.html"]
+        },
+        {
+          "id": "cost-attribution",
+          "priority": "P0",
+          "title": "Spend attribution by tenant/namespace/provider/model/billing period exists.",
+          "status": "implemented",
+          "evidence_paths": ["src/cost-estimator.js", "src/billing-breakdown.js", "src/lake.js", "public/account/billing.html"]
+        },
+        {
+          "id": "rate-limits-quotas",
+          "priority": "P0",
+          "title": "Per-tenant rate limiting and quota enforcement are in the auth middleware.",
+          "status": "shipped",
+          "evidence_paths": ["src/auth.js", "tests/auth.test.js"]
+        },
+        {
+          "id": "webhooks-events",
+          "priority": "P1",
+          "title": "Compile/deploy hooks, billing webhook handling, and event/audit surfaces exist.",
+          "status": "implemented",
+          "evidence_paths": ["src/router.js", "src/audit.js", "public/account/api-keys.html"]
+        },
+        {
+          "id": "sdk-depth",
+          "priority": "P1",
+          "title": "Node, Python, MCP, VS Code, C, Rust, TypeScript package, Swift, Kotlin, and React Native SDK surfaces exist locally.",
+          "status": "needs_package_release",
+          "evidence_paths": ["sdk/node", "sdk/python", "sdk/mcp", "sdk/vscode", "sdk/c", "sdk/rust", "packages/sdk-ts", "packages/sdk-swift", "packages/sdk-kotlin", "packages/sdk-rn"]
+        },
+        {
+          "id": "secrets-management",
+          "priority": "P0",
+          "title": "API keys are scoped/hashed, local BYOK secrets are encrypted, and external Vault/1Password/AWS/GCP/Azure refs stay out of artifacts.",
+          "status": "implemented",
+          "evidence_paths": ["src/auth.js", "src/secrets-vault.js", "public/account/api-keys.html", "docs/kolm-format-v1.md"]
+        },
+        {
+          "id": "compliance-certifications",
+          "priority": "P0",
+          "title": "SOC 2, ISO 27001, HIPAA BAA, GDPR, FedRAMP, and formal SLSA/SBOM evidence require live certification/auditor process.",
+          "status": "needs_live_certification",
+          "evidence_paths": ["public/security.html", "public/baa.html", "docs/kolm-format-v1.md", ".github/workflows/sdk-c-rust.yml"]
+        }
+      ]
+    },
+    {
+      "id": "ai-ml-optimizer",
+      "requirements": [
+        {
+          "id": "prompt-compression",
+          "priority": "P2",
+          "title": "Deterministic prompt compression is wired into runtime policy while public performance claims remain benchmark-scoped.",
+          "status": "implemented",
+          "evidence_paths": ["src/optimization.js", "src/runtime-policy.js", "public/research/prompt-cache.html", "apps/trainer/inference_cache.py"]
+        },
+        {
+          "id": "semantic-cache",
+          "priority": "P1",
+          "title": "Exact and semantic runtime caches are wired into gateway decisions with TTL, threshold, and policy controls.",
+          "status": "implemented",
+          "evidence_paths": ["src/cache.js", "src/runtime.js", "src/runtime-policy.js", "src/optimization.js", "public/account/repeated-workflows.html"]
+        },
+        {
+          "id": "fallback-chains",
+          "priority": "P1",
+          "title": "Fallback/provider chains exist in connectors, model routing, and runtime copy; explicit per-artifact policy needs tighter enforcement.",
+          "status": "implemented",
+          "evidence_paths": ["src/provider-registry.js", "src/completions-api.js", "src/router.js", "cli/kolm.js", "tests/wave552-gemma-multimodal-account.test.js"]
+        },
+        {
+          "id": "quality-scoring",
+          "priority": "P0",
+          "title": "K-score, bakeoff, eval, and production-ready verdicts score artifact quality; per-call judge quality needs calibration data.",
+          "status": "needs_public_benchmark_data",
+          "evidence_paths": ["src/artifact.js", "src/bakeoff.js", "src/production-ready.js", "cli/kolm.js"]
+        },
+        {
+          "id": "rag-artifact",
+          "priority": "P1",
+          "title": "RAG/index sidecars are available to artifact recipes through the runtime; dense/rerank variants remain dependency-gated.",
+          "status": "implemented",
+          "evidence_paths": ["src/rag.js", "src/artifact-runner.js", "docs/RAG.md", "services/embed/multimodal.js", "docs/kolm-format-v1.md"]
+        },
+        {
+          "id": "streaming",
+          "priority": "P1",
+          "title": "Streaming/SSE support has a provider parity contract, normalizer, capture live tail, and route-level capability endpoint.",
+          "status": "implemented",
+          "evidence_paths": ["src/router.js", "src/capture-stream.js", "src/streaming-contract.js", "public/account/lake.html"]
+        },
+        {
+          "id": "token-budget",
+          "priority": "P0",
+          "title": "Runtime policy and artifact execution enforce explicit token/input budgets before model calls or recipe execution.",
+          "status": "implemented",
+          "evidence_paths": ["src/runtime-policy.js", "src/artifact-runner.js", "src/optimization.js", "cli/kolm.js"]
+        },
+        {
+          "id": "evals-ab",
+          "priority": "P0",
+          "title": "A/B bakeoff, replay, trace verification, evals, and statistical comparison surfaces exist.",
+          "status": "implemented",
+          "evidence_paths": ["src/bakeoff.js", "src/replay.js", "src/trace-compile.js", "public/account/bakeoffs.html"]
+        }
+      ]
+    },
+    {
+      "id": "developer-experience",
+      "requirements": [
+        {
+          "id": "cli-world-class",
+          "priority": "P0",
+          "title": "CLI exposes the full product loop with compile, train, distill, verify, run, TUI, doctor, cache, models, compute, MCP, billing, and deploy paths.",
+          "status": "shipped",
+          "evidence_paths": ["cli/kolm.js", "tests/wave552-gemma-multimodal-account.test.js"]
+        },
+        {
+          "id": "compile-as-mcp",
+          "priority": "P0",
+          "title": "`kolm compile --as-mcp` creates project-local MCP config and skill sidecars for agents.",
+          "status": "shipped",
+          "evidence_paths": ["cli/kolm.js", "services/mcp/server.js", "tests/wave552-gemma-multimodal-account.test.js"]
+        },
+        {
+          "id": "local-account-ui",
+          "priority": "P0",
+          "title": "Account UI covers the gateway, capture, lake, privacy, repeated workflows, opportunities, labels, datasets, simulations, bakeoffs, builds, artifacts, devices, storage, billing, and settings surfaces.",
+          "status": "implemented",
+          "evidence_paths": ["public/account/overview.html", "public/account/connectors.html", "public/account/lake.html", "public/account/billing.html"]
+        },
+        {
+          "id": "doctor-diagnostics",
+          "priority": "P0",
+          "title": "`kolm doctor` diagnoses environment, keys, toolchain, project, and K-score issues.",
+          "status": "shipped",
+          "evidence_paths": ["cli/kolm.js", "tests/wave298-doctor-loop.test.js"]
+        },
+        {
+          "id": "one-line-install",
+          "priority": "P1",
+          "title": "Install scripts exist; public package-manager channels need release-backed publication.",
+          "status": "needs_package_release",
+          "evidence_paths": ["scripts/install.sh", "scripts/install.ps1", "packages/homebrew", "packages/winget"]
+        }
+      ]
+    }
+  ]
+}

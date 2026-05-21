@@ -274,7 +274,7 @@
  <h1>Your team's AI. <span class="tone">In your boundary.</span></h1>
  <p class="lede">One file. One signature. One auditor-ready receipt chain. kolm compiles a team-private model inside your network, publishes it to a registry only your team can pull, and proves every run with a verifiable receipt. Founder-direct procurement underneath.</p>
  <div class="actions">
- <a href="/upgrade?plan=enterprise" class="btn primary electric">Checkout &ndash; Enterprise plan &rarr;</a>
+ <a href="/enterprise/inquiry" class="btn primary electric">Book architecture review &rarr;</a>
  <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" class="btn ghost">Contact us</a>
  <a href="/baa" class="btn ghost">BAA / DPA template</a>
  <a href="/security" class="btn accent">Security posture</a>
@@ -374,34 +374,34 @@ verdict: <span class="ok">audit clean</span></pre>
  </div>
  </div>
  <div class="ed-side">
- <div class="ed-tabs" role="tablist">
- <button type="button" class="ed-tab is-active" data-target="1" role="tab" aria-selected="true"><span class="ed-num">01</span>compile</button>
- <button type="button" class="ed-tab" data-target="2" role="tab" aria-selected="false"><span class="ed-num">02</span>verify</button>
- <button type="button" class="ed-tab" data-target="3" role="tab" aria-selected="false"><span class="ed-num">03</span>publish</button>
- <button type="button" class="ed-tab" data-target="4" role="tab" aria-selected="false"><span class="ed-num">04</span>audit</button>
+ <div class="ed-tabs" role="tablist" aria-label="Enterprise artifact flow">
+ <button type="button" id="ed-tab-1" class="ed-tab is-active" data-target="1" role="tab" aria-selected="true" aria-controls="ed-detail-1"><span class="ed-num">01</span>compile</button>
+ <button type="button" id="ed-tab-2" class="ed-tab" data-target="2" role="tab" aria-selected="false" aria-controls="ed-detail-2"><span class="ed-num">02</span>verify</button>
+ <button type="button" id="ed-tab-3" class="ed-tab" data-target="3" role="tab" aria-selected="false" aria-controls="ed-detail-3"><span class="ed-num">03</span>publish</button>
+ <button type="button" id="ed-tab-4" class="ed-tab" data-target="4" role="tab" aria-selected="false" aria-controls="ed-detail-4"><span class="ed-num">04</span>audit</button>
  </div>
- <div class="ed-detail" data-detail="1">
+ <div id="ed-detail-1" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-1" data-detail="1">
  <div class="ed-d-eye">step 01 &middot; compile</div>
  <h3>The model is born inside your boundary.</h3>
  <p>kolm reads a JSON spec plus your gold examples and produces a single .kolm file. The compile runs on your hardware. The bytes never leave the host.</p>
  <p>The K-score is the gate. 0.85 is the default floor. CI exits non-zero on a fail so the artifact never gets promoted by accident.</p>
  <span class="ed-d-pill">no cloud roundtrip &middot; no training data leak</span>
  </div>
- <div class="ed-detail" data-detail="2" hidden>
+ <div id="ed-detail-2" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-2" data-detail="2" hidden>
  <div class="ed-d-eye">step 02 &middot; verify</div>
  <h3>The artifact carries its own proof.</h3>
  <p>Every .kolm has a SHA-256, an Ed25519-signed receipt chain, and the K-score it passed at. Inspection is offline. You don't need our infrastructure to trust the file.</p>
  <p>The signature also pins the recipe source and the spec evals: if anything inside the artifact changes, the signature breaks.</p>
  <span class="ed-d-pill">verifiable offline &middot; signature breaks on tamper</span>
  </div>
- <div class="ed-detail" data-detail="3" hidden>
+ <div id="ed-detail-3" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-3" data-detail="3" hidden>
  <div class="ed-d-eye">step 03 &middot; publish</div>
  <h3>Share with the team. Nobody else.</h3>
  <p>Publish with <code>--team &lt;handle&gt;</code> and the artifact is owned by the team, not a person. Members pull it. Non-members get 404. We don't even confirm the name exists.</p>
- <p>Storage and bandwidth are billed on the Teams plan ($149/mo, 5 seats). Visibility defaults to private; <code>--public</code> is opt-in.</p>
- <span class="ed-d-pill">private by default &middot; 5 seats &middot; $149/mo</span>
+ <p>Storage and bandwidth are governed by the Team plan at $499/mo for 5 seats or an Enterprise contract. Visibility defaults to private; <code>--public</code> is opt-in.</p>
+ <span class="ed-d-pill">private by default &middot; Team $499 &middot; Enterprise custom</span>
  </div>
- <div class="ed-detail" data-detail="4" hidden>
+ <div id="ed-detail-4" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-4" data-detail="4" hidden>
  <div class="ed-d-eye">step 04 &middot; audit</div>
  <h3>Receipts your auditor will accept.</h3>
  <p>Each pull and each run appends to a receipt chain. The K-score is checked against the publish-time value to detect drift. External calls are counted (and forbidden by default).</p>
@@ -489,9 +489,9 @@ verdict: <span class="ok">audit clean</span></pre>
  <div class="wrap">
  <div class="eyebrow"><span class="num">05</span>talk to founders</div>
  <h2>One call. No SDR.</h2>
- <p class="sec-lede">kolm has no sales team. If you are evaluating, you talk to the people who write the code. Self-serve checkout for Enterprise is at <a href="/upgrade?plan=enterprise" style="color:var(--accent)">/upgrade?plan=enterprise</a>. Or mail <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" style="color:var(--accent)">dev@kolm.ai</a> directly &ndash; we reply within one business day. If we are not the right fit we will say so on the first call.</p>
+ <p class="sec-lede">kolm has no sales team. If you are evaluating, you talk to the people who write the code. Enterprise starts with a 30-minute architecture review at <a href="/enterprise/inquiry" style="color:var(--accent)">/enterprise/inquiry</a>. Or mail <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" style="color:var(--accent)">dev@kolm.ai</a> directly &ndash; we reply within one business day. If we are not the right fit we will say so on the first call.</p>
  <div class="actions">
- <a href="/upgrade?plan=enterprise" class="btn primary">Checkout &ndash; Enterprise plan &rarr;</a>
+ <a href="/enterprise/inquiry" class="btn primary">Book architecture review &rarr;</a>
  <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" class="btn ghost">Contact us</a>
  <a href="/baa" class="btn ghost">BAA / DPA template</a>
  <a href="/security" class="btn accent">Security posture</a>

@@ -7,6 +7,8 @@
 //
 // Reference: https://developers.cloudflare.com/api/operations/r2-list-buckets
 
+import { objectStorageReadiness, resolveObjectStore } from './object-storage.js';
+
 const ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID || process.env.cloudflare_account_id || '';
 const API_TOKEN = process.env.CLOUDFLARE_API_TOKEN || process.env.Cloudflare_api_token || '';
 const DEFAULT_BUCKET = process.env.R2_BUCKET || 'kolm-assets';
@@ -23,10 +25,17 @@ function apiBase() {
 }
 
 export function r2Configured() {
-  return Boolean(ACCOUNT_ID && API_TOKEN);
+  if (ACCOUNT_ID && API_TOKEN) return true;
+  return objectStorageReadiness(process.env).providers
+    .some((p) => p.id === 'cloudflare-r2-s3' && p.configured);
 }
 
 export async function listBuckets() {
+  if (!ACCOUNT_ID || !API_TOKEN) {
+    const r2s3 = objectStorageReadiness(process.env).providers
+      .find((p) => p.id === 'cloudflare-r2-s3' && p.configured);
+    if (r2s3) return [{ name: r2s3.bucket || DEFAULT_BUCKET, source: 'cloudflare-r2-s3' }];
+  }
   const r = await fetch(`${apiBase()}/r2/buckets`, { headers: authHeaders() });
   const j = await r.json();
   if (!j.success) throw new Error(`r2 listBuckets failed: ${JSON.stringify(j.errors)}`);
@@ -34,6 +43,13 @@ export async function listBuckets() {
 }
 
 export async function createBucket(name = DEFAULT_BUCKET) {
+  if (!ACCOUNT_ID || !API_TOKEN) {
+    return {
+      name,
+      skipped: true,
+      reason: 'bucket management requires CLOUDFLARE_API_TOKEN; object reads/writes are available through cloudflare-r2-s3',
+    };
+  }
   const r = await fetch(`${apiBase()}/r2/buckets`, {
     method: 'POST',
     headers: authHeaders({ 'Content-Type': 'application/json' }),
@@ -47,6 +63,10 @@ export async function createBucket(name = DEFAULT_BUCKET) {
 }
 
 export async function putObject(key, body, opts = {}) {
+  if (!ACCOUNT_ID || !API_TOKEN) {
+    const store = resolveObjectStore({ provider: 'cloudflare-r2-s3' });
+    return store.putObject(key, body, opts);
+  }
   const bucket = opts.bucket || DEFAULT_BUCKET;
   const contentType = opts.contentType || 'application/octet-stream';
   const url = `${apiBase()}/r2/buckets/${encodeURIComponent(bucket)}/objects/${encodeURI(key)}`;
@@ -63,6 +83,19 @@ export async function putObject(key, body, opts = {}) {
 }
 
 export async function getObject(key, opts = {}) {
+  if (!ACCOUNT_ID || !API_TOKEN) {
+    const store = resolveObjectStore({ provider: 'cloudflare-r2-s3' });
+    const got = await store.getObject(key, opts);
+    if (!got) return null;
+    return new Response(got.body, {
+      status: 200,
+      headers: {
+        'Content-Type': got.content_type || 'application/octet-stream',
+        'Content-Length': String(got.size || got.body.length || 0),
+        ...(got.etag ? { ETag: got.etag } : {}),
+      },
+    });
+  }
   const bucket = opts.bucket || DEFAULT_BUCKET;
   const url = `${apiBase()}/r2/buckets/${encodeURIComponent(bucket)}/objects/${encodeURI(key)}`;
   const r = await fetch(url, { headers: authHeaders() });
@@ -72,6 +105,10 @@ export async function getObject(key, opts = {}) {
 }
 
 export async function deleteObject(key, opts = {}) {
+  if (!ACCOUNT_ID || !API_TOKEN) {
+    const store = resolveObjectStore({ provider: 'cloudflare-r2-s3' });
+    return store.deleteObject(key, opts);
+  }
   const bucket = opts.bucket || DEFAULT_BUCKET;
   const url = `${apiBase()}/r2/buckets/${encodeURIComponent(bucket)}/objects/${encodeURI(key)}`;
   const r = await fetch(url, { method: 'DELETE', headers: authHeaders() });
@@ -83,6 +120,11 @@ export async function deleteObject(key, opts = {}) {
 }
 
 export function publicUrl(key, opts = {}) {
+  if (!ACCOUNT_ID || !API_TOKEN) {
+    const r2s3 = objectStorageReadiness(process.env).providers
+      .find((p) => p.id === 'cloudflare-r2-s3' && p.configured);
+    if (r2s3) return resolveObjectStore({ provider: 'cloudflare-r2-s3' }).publicUrl(key);
+  }
   const bucket = opts.bucket || DEFAULT_BUCKET;
   if (PUBLIC_BASE) return `${PUBLIC_BASE.replace(/\/$/, '')}/${key}`;
   return `https://${bucket}.${ACCOUNT_ID}.r2.cloudflarestorage.com/${key}`;

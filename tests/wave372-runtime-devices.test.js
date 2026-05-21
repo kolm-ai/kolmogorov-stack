@@ -85,8 +85,10 @@ test('W372 #1 - decide returns blocked when privacy policy is block', async () =
       assert.equal(d.reason, 'privacy_block');
       assert.ok(Array.isArray(d.sensitive_classes), 'sensitive_classes is array');
       assert.ok(d.sensitive_classes.includes('email'), 'email class detected');
-      const chain = d.decision_chain[0];
-      assert.equal(chain.rung, 'privacy_check');
+      assert.equal(d.decision_chain[0].rung, 'token_budget');
+      assert.equal(d.decision_chain[0].status, 'pass');
+      const chain = d.decision_chain.find(r => r.rung === 'privacy_check');
+      assert.ok(chain, 'privacy_check rung recorded: ' + JSON.stringify(d.decision_chain));
       assert.equal(chain.status, 'block');
     } finally {
       if (prev == null) delete process.env.KOLM_PRIVACY_POLICY;

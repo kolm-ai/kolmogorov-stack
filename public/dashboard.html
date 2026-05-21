@@ -297,14 +297,14 @@
  </header>
 
  <nav class="al-tabs" role="tablist" aria-label="Artifact panes">
- <button class="al-tab active" role="tab" aria-selected="true" data-tab="test">Test</button>
- <button class="al-tab" role="tab" aria-selected="false" data-tab="serve">Serve as REST</button>
- <button class="al-tab" role="tab" aria-selected="false" data-tab="recipe">Recipe</button>
- <button class="al-tab" role="tab" aria-selected="false" data-tab="receipt">Receipt</button>
- <button class="al-tab" role="tab" aria-selected="false" data-tab="evals">Evals</button>
+ <button id="al-tab-test" class="al-tab active" role="tab" aria-selected="true" aria-controls="al-pane-test" data-tab="test">Test</button>
+ <button id="al-tab-serve" class="al-tab" role="tab" aria-selected="false" aria-controls="al-pane-serve" data-tab="serve">Serve as REST</button>
+ <button id="al-tab-recipe" class="al-tab" role="tab" aria-selected="false" aria-controls="al-pane-recipe" data-tab="recipe">Recipe</button>
+ <button id="al-tab-receipt" class="al-tab" role="tab" aria-selected="false" aria-controls="al-pane-receipt" data-tab="receipt">Receipt</button>
+ <button id="al-tab-evals" class="al-tab" role="tab" aria-selected="false" aria-controls="al-pane-evals" data-tab="evals">Evals</button>
  </nav>
 
- <div class="al-pane" data-pane="test">
+ <div id="al-pane-test" class="al-pane" role="tabpanel" aria-labelledby="al-tab-test" data-pane="test">
  <label class="al-label" for="al-prompt">Try a prompt</label>
  <textarea id="al-prompt" rows="3" placeholder="Paste a clinical note. The redactor will strip PHI and return a receipt." class="al-input" aria-label="Try a prompt"></textarea>
  <div class="al-test-row">
@@ -325,7 +325,7 @@
  </div>
  </div>
 
- <div class="al-pane" data-pane="serve" hidden>
+ <div id="al-pane-serve" class="al-pane" role="tabpanel" aria-labelledby="al-tab-serve" data-pane="serve" hidden>
  <p class="al-sub">One curl. Drop it into your service. Calls bill against your account and produce a receipt per call.</p>
  <div class="al-serve-grid">
  <label class="al-label">Endpoint
@@ -346,15 +346,15 @@
  <p class="al-fineprint">Your API key is read from this dashboard. Rotate it from <a href="/account">/account</a> if needed.</p>
  </div>
 
- <div class="al-pane" data-pane="recipe" hidden>
+ <div id="al-pane-recipe" class="al-pane" role="tabpanel" aria-labelledby="al-tab-recipe" data-pane="recipe" hidden>
  <pre id="al-recipe-pre" class="al-pre al-pre-tall">—</pre>
  </div>
 
- <div class="al-pane" data-pane="receipt" hidden>
+ <div id="al-pane-receipt" class="al-pane" role="tabpanel" aria-labelledby="al-tab-receipt" data-pane="receipt" hidden>
  <pre id="al-receipt-pre" class="al-pre al-pre-tall">—</pre>
  </div>
 
- <div class="al-pane" data-pane="evals" hidden>
+ <div id="al-pane-evals" class="al-pane" role="tabpanel" aria-labelledby="al-tab-evals" data-pane="evals" hidden>
  <p class="al-sub">The held-out evals the K-score was computed against, with per-row pass / fail.</p>
  <pre id="al-evals-pre" class="al-pre al-pre-tall">—</pre>
  </div>
@@ -750,7 +750,7 @@
  var row = document.createElement('div');
  if (step.href) {
  row.innerHTML = '&rarr; <a href="' + escapeHtml(step.href) + '"' +
- (/^https?:/.test(step.href) ? ' target="_blank" rel="noopener"' : '') +
+ (/^https?:/.test(step.href) ? ' target="_blank" rel="noopener noreferrer"' : '') +
  '>' + escapeHtml(step.label) + '</a>';
  } else {
  row.textContent = '→ ' + (step.label || '');
@@ -840,7 +840,7 @@
  var row = document.createElement('div');
  if (step.href) {
  row.innerHTML = '&rarr; <a href="' + escapeHtml(step.href) + '"' +
- (/^https?:/.test(step.href) ? ' target="_blank" rel="noopener"' : '') +
+ (/^https?:/.test(step.href) ? ' target="_blank" rel="noopener noreferrer"' : '') +
  '>' + escapeHtml(step.label) + '</a>';
  } else {
  row.textContent = '→ ' + (step.label || '');
@@ -883,7 +883,7 @@
  return '<b>' + escapeHtml(data.command) + '</b>';
  }
  if (intent === 'upgrade' && data.billing_url) {
- return '<a href="' + escapeHtml(data.billing_url) + '" target="_blank" rel="noopener">Open billing &rarr;</a>';
+ return '<a href="' + escapeHtml(data.billing_url) + '" target="_blank" rel="noopener noreferrer">Open billing &rarr;</a>';
  }
  if (intent === 'usage' && (typeof data.used === 'number' || typeof data.quota === 'number')) {
  var used = data.used != null ? data.used : '?';
@@ -1350,7 +1350,7 @@
  <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
  <a class="btn ghost" href="/audit-log">Full audit log &rarr;</a>
  <a class="btn ghost" href="/v1/audit/log?format=jsonl" download>Download JSONL</a>
- <a class="btn ghost" href="/v1/audit/verify" target="_blank" rel="noopener">Verify chain</a>
+ <a class="btn ghost" href="/v1/audit/verify" target="_blank" rel="noopener noreferrer">Verify chain</a>
  </div>
  </section>
 
@@ -2003,14 +2003,14 @@
  { input: "Can I get an invoice with my company name on it?", output: "Sure — go to Billing → Edit details, add your company name and VAT number, and click Re-issue last invoice. It'll regenerate within a minute." },
  { input: "What payment methods do you accept?", output: "We accept all major cards (Visa, Mastercard, Amex), Apple Pay, Google Pay, and ACH for annual plans." },
  { input: "I want to upgrade from Pro to Business", output: "Head to Settings → Billing → Change plan and select Business. You'll only be charged the prorated difference for the rest of this cycle." },
- { input: "Do you offer SSO?", output: "Yes — SAML SSO and SCIM provisioning ship with our Business plan. Setup takes about 15 minutes; happy to schedule a session if helpful." },
+ { input: "Do you offer SSO?", output: "Yes — SAML SSO and SCIM provisioning ship with Team or Enterprise. Setup takes about 15 minutes; happy to schedule a session if helpful." },
  { input: "How do I export my data?", output: "Settings → Data → Export. We email a download link within a few minutes. Format is JSON; let me know if you need CSV." },
- { input: "Can two people share one seat?", output: "Each seat is per-individual, but Business plans include unlimited viewer seats for read-only access — that often covers the secondary user." },
+ { input: "Can two people share one seat?", output: "Each seat is per-individual, but Team and Enterprise plans include viewer seats for read-only access — that often covers the secondary user." },
  { input: "Why was my API key revoked?", output: "Keys get revoked automatically after 90 days of inactivity. You can generate a new one in Settings → API → Create key." },
  { input: "Where can I see uptime?", output: "Live status is at status.kolm.ai with 90-day history. Subscribe there for incident notifications." },
  { input: "Do you have a Slack integration?", output: "Yes — install from Settings → Integrations → Slack. You can route receipts and alerts to any channel." },
  { input: "I'm getting rate-limited on the API", output: "Free tier is 60 req/min; Pro is 600 req/min. If you need more, drop me a note about your use case and I can bump it." },
- { input: "Can I self-host?", output: "Business plan includes a self-hosted bridge for VPC deployments. We provide Docker and Helm charts; setup is usually under 30 minutes." },
+ { input: "Can I self-host?", output: "Enterprise includes a customer-hosted bridge for VPC deployments. We provide Docker and Helm charts; setup is usually under 30 minutes." },
  { input: "How long do you retain my data?", output: "Receipts are kept indefinitely (you own them); training data is kept for 30 days then purged. You can delete anything sooner from Settings → Data." },
  { input: "Is my data used to train models?", output: "No. Your data is never used to train shared models. Only models you compile yourself see your data, and the artifacts stay yours." },
  { input: "Do you support HIPAA?", output: "Yes — sign a BAA at /baa and the platform automatically enables PHI redaction, audit chains, and the VPC-only bridge." },

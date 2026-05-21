@@ -263,16 +263,16 @@
  </div>
 
  <nav class="a-tabs" role="tablist" aria-label="Admin sections">
- <button type="button" class="a-tab is-on" data-tab="overview" role="tab" aria-selected="true">overview</button>
- <button type="button" class="a-tab" data-tab="tenants" role="tab" aria-selected="false">tenants</button>
- <button type="button" class="a-tab" data-tab="audit" role="tab" aria-selected="false">audit feed</button>
- <button type="button" class="a-tab" data-tab="compile" role="tab" aria-selected="false">compile jobs</button>
- <button type="button" class="a-tab" data-tab="observability" role="tab" aria-selected="false">observability</button>
- <button type="button" class="a-tab" data-tab="health" role="tab" aria-selected="false">health</button>
+ <button type="button" id="aTab-overview" class="a-tab is-on" data-tab="overview" role="tab" aria-selected="true" aria-controls="aPanel-overview">overview</button>
+ <button type="button" id="aTab-tenants" class="a-tab" data-tab="tenants" role="tab" aria-selected="false" aria-controls="aPanel-tenants">tenants</button>
+ <button type="button" id="aTab-audit" class="a-tab" data-tab="audit" role="tab" aria-selected="false" aria-controls="aPanel-audit">audit feed</button>
+ <button type="button" id="aTab-compile" class="a-tab" data-tab="compile" role="tab" aria-selected="false" aria-controls="aPanel-compile">compile jobs</button>
+ <button type="button" id="aTab-observability" class="a-tab" data-tab="observability" role="tab" aria-selected="false" aria-controls="aPanel-observability">observability</button>
+ <button type="button" id="aTab-health" class="a-tab" data-tab="health" role="tab" aria-selected="false" aria-controls="aPanel-health">health</button>
  </nav>
 
  <!-- Overview panel -->
- <div id="aPanel-overview" class="a-panel is-on" role="tabpanel">
+ <div id="aPanel-overview" class="a-panel is-on" role="tabpanel" aria-labelledby="aTab-overview">
  <div class="a-stats">
  <div class="a-stat">
  <div class="a-stat-label">Total tenants</div>
@@ -306,7 +306,7 @@
  </div>
 
  <!-- Tenants panel -->
- <div id="aPanel-tenants" class="a-panel" role="tabpanel">
+ <div id="aPanel-tenants" class="a-panel" role="tabpanel" aria-labelledby="aTab-tenants">
  <div class="a-actions">
  <input id="tenantSearch" class="a-search" placeholder="filter by name or email...">
  <button type="button" class="a-refresh" data-refresh="tenants">refresh</button>
@@ -325,7 +325,7 @@
  </div>
 
  <!-- Audit panel -->
- <div id="aPanel-audit" class="a-panel" role="tabpanel">
+ <div id="aPanel-audit" class="a-panel" role="tabpanel" aria-labelledby="aTab-audit">
  <div class="a-actions">
  <span class="a-loading">cross-tenant audit feed &middot; chronological, newest first</span>
  <button type="button" class="a-refresh" data-refresh="audit">refresh</button>
@@ -341,7 +341,7 @@
  </div>
 
  <!-- Compile panel -->
- <div id="aPanel-compile" class="a-panel" role="tabpanel">
+ <div id="aPanel-compile" class="a-panel" role="tabpanel" aria-labelledby="aTab-compile">
  <div class="a-actions">
  <span class="a-loading">recent compile jobs across all tenants</span>
  <button type="button" class="a-refresh" data-refresh="compile">refresh</button>
@@ -357,7 +357,7 @@
  </div>
 
  <!-- Observability panel -->
- <div id="aPanel-observability" class="a-panel" role="tabpanel">
+ <div id="aPanel-observability" class="a-panel" role="tabpanel" aria-labelledby="aTab-observability">
  <div class="a-actions">
  <span class="a-loading">live latency + invocation stream &middot; auto-refresh 10s</span>
  <button type="button" class="a-refresh" data-refresh="observability">refresh now</button>
@@ -425,7 +425,7 @@
  </div>
 
  <!-- Health panel -->
- <div id="aPanel-health" class="a-panel" role="tabpanel">
+ <div id="aPanel-health" class="a-panel" role="tabpanel" aria-labelledby="aTab-health">
  <div class="a-actions">
  <span class="a-loading">runtime + env state</span>
  <button type="button" class="a-refresh" data-refresh="health">refresh</button>

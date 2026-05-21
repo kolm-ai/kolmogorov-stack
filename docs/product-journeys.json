@@ -1,0 +1,169 @@
+{
+  "schema": "kolm-product-journeys-1",
+  "updated_at": "2026-05-21",
+  "purpose": "User-perspective journey contract for the whole Kolm product: every major product surface must expose account, CLI, TUI, API, customization, and proof paths.",
+  "research_references": [
+    {
+      "id": "openai-distillation-evals",
+      "url": "https://openai.com/index/api-model-distillation/",
+      "why_it_matters": "Modern distillation products combine captured completions, evals, and fine-tuning; Kolm must add provider-independent artifacts and local/runtime proof."
+    },
+    {
+      "id": "anthropic-messages-api",
+      "url": "https://docs.anthropic.com/en/api/overview",
+      "why_it_matters": "Claude is a native provider surface, not an afterthought behind OpenAI-compatible routing."
+    },
+    {
+      "id": "cloudflare-ai-gateway",
+      "url": "https://developers.cloudflare.com/ai-gateway/",
+      "why_it_matters": "Gateway table stakes now include analytics, logging, caching, rate limiting, retries, and fallback."
+    },
+    {
+      "id": "vercel-ai-gateway",
+      "url": "https://vercel.com/docs/ai-gateway/",
+      "why_it_matters": "Unified APIs, budgets, usage monitoring, load balancing, and fallbacks are baseline UX for AI gateways."
+    },
+    {
+      "id": "opentelemetry-genai",
+      "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "why_it_matters": "Production AI observability should use common GenAI spans, events, metrics, and provider attributes where possible."
+    },
+    {
+      "id": "vllm-openai-compatible",
+      "url": "https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html",
+      "why_it_matters": "Self-hosted serving engines increasingly expose OpenAI-compatible APIs; Kolm should route to them and compile away repeated work."
+    },
+    {
+      "id": "onnx-runtime",
+      "url": "https://onnxruntime.ai/docs",
+      "why_it_matters": "Portable inference has to target established runtimes and execution providers, not a proprietary-only runtime."
+    },
+    {
+      "id": "executorch-edge",
+      "url": "https://docs.pytorch.org/get-started/executorch/",
+      "why_it_matters": "Edge/mobile deployment needs device-aware export targets for constrained hardware."
+    },
+    {
+      "id": "workos-enterprise",
+      "url": "https://workos.com/docs",
+      "why_it_matters": "Enterprise buyers expect SSO, SCIM, audit logs, admin workflows, authorization, and secure vault patterns."
+    }
+  ],
+  "global_ux_requirements": [
+    "Every journey has a visible account entrypoint, a CLI equivalent, a TUI view or command, and an API route.",
+    "Every journey exposes customization across provider/model, compute, storage, privacy, runtime, deployment, governance, or proof dimensions.",
+    "Every cloud or enterprise journey must show missing configuration without printing secret values.",
+    "Every training or compile journey must show holdout/eval proof and failure diagnostics before promotion.",
+    "Every interactive surface must be keyboard/touch usable and cannot depend on hover-only menus."
+  ],
+  "journeys": [
+    {
+      "id": "gateway-capture",
+      "surface": "gateway-capture",
+      "user_story": "As a developer, I can replace my OpenAI, Claude, OpenRouter, Gemini-compatible, or self-hosted base URL and start capturing only the calls I choose.",
+      "happy_path": ["connect provider", "send request", "capture receipt", "filter or zero-store", "promote useful rows"],
+      "proof_commands": ["kolm capture --provider openai --as local --json", "kolm capture --provider anthropic --as local --json", "kolm tail captures --limit 5"],
+      "cloud_or_customization": ["model-provider", "privacy-mode", "deployment-mode"],
+      "evidence_paths": ["src/product-experience.js", "src/router.js", "src/daemon-connector.js", "public/account/connectors.html"]
+    },
+    {
+      "id": "privacy-lake",
+      "surface": "privacy-lake",
+      "user_story": "As a regulated operator, I can inspect what was captured, redact sensitive values, export rows, and switch to zero-retention or differential-privacy aggregates.",
+      "happy_path": ["view lake", "filter events", "scan privacy", "export evidence", "configure retention"],
+      "proof_commands": ["kolm lake stats --json", "kolm privacy report --json", "kolm privacy scan --json"],
+      "cloud_or_customization": ["privacy-mode", "storage-plane", "proof-mode"],
+      "evidence_paths": ["src/lake.js", "src/privacy-membrane.js", "src/event-store.js", "public/account/lake.html"]
+    },
+    {
+      "id": "datasets-labeling",
+      "surface": "datasets-labeling",
+      "user_story": "As a model builder, I can convert repeated work into labeled train/eval sets with review queues, simulations, and holdout splits.",
+      "happy_path": ["rank opportunities", "review labels", "create dataset", "split holdout", "run bakeoff"],
+      "proof_commands": ["kolm opportunities --json", "kolm label next --json", "kolm dataset list --json"],
+      "cloud_or_customization": ["proof-mode", "privacy-mode", "model-provider"],
+      "evidence_paths": ["src/dataset-workbench.js", "src/simulation.js", "public/account/datasets.html", "public/account/labeling.html"]
+    },
+    {
+      "id": "train-distill",
+      "surface": "train-distill",
+      "user_story": "As a user without perfect local hardware, I can train or distill via local compute, remote SSH GPU, managed GPU, Together, OpenAI/Claude teachers, or BYOC.",
+      "happy_path": ["choose dataset", "choose teacher", "choose student", "choose compute", "run eval-gated build"],
+      "proof_commands": ["kolm cloud readiness --json", "kolm train plan <dataset>", "kolm distill runs --json"],
+      "cloud_or_customization": ["model-provider", "compute-target", "artifact-runtime", "proof-mode"],
+      "evidence_paths": ["src/distill-pipeline.js", "src/remote-compute.js", "src/compute/registry.json", "public/account/builds.html"]
+    },
+    {
+      "id": "models-backbones",
+      "surface": "models-backbones",
+      "user_story": "As a builder, I can choose real backbones such as Gemma 3, Gemma 3n, MedGemma, EmbeddingGemma, Qwen, Phi, Llama, Mistral, and SmolLM by task, license, modality, memory, and target device.",
+      "happy_path": ["inspect model catalog", "recommend by task/device", "check license and modality", "bind to compile or distill spec", "verify runtime target fit"],
+      "proof_commands": ["kolm models list --json", "kolm models recommend --json", "kolm models info google/gemma-3n-E2B-it", "kolm devices recommend --json"],
+      "cloud_or_customization": ["model-provider", "compute-target", "artifact-runtime", "proof-mode"],
+      "evidence_paths": ["src/models.js", "src/model-registry.js", "src/model-weights-manifest.js", "public/models.html"]
+    },
+    {
+      "id": "multimodal-tokenization",
+      "surface": "multimodal-tokenization",
+      "user_story": "As a multimodal user, I can tokenize images, audio, video, PDFs, text, and code into searchable Markdown sidecars with local feature tokens and optional captions or transcripts.",
+      "happy_path": ["detect modality", "emit local feature sidecar", "capture media event", "review generated rows", "run multimodal bakeoff"],
+      "proof_commands": ["kolm media tokenize --path ./scan.png --json", "kolm media tokenize --dir ./evidence --json", "kolm bakeoff multimodal --json"],
+      "cloud_or_customization": ["privacy-mode", "model-provider", "storage-plane", "proof-mode"],
+      "evidence_paths": ["services/embed/multimodal.js", "public/account/multimodal-bakeoff.html", "tests/wave552-gemma-multimodal-account.test.js"]
+    },
+    {
+      "id": "compile-verify",
+      "surface": "compile-verify",
+      "user_story": "As an operator, I can compile a task into a signed .kolm artifact, verify it offline, diff versions, and export runtime-specific assets.",
+      "happy_path": ["compile", "verify", "inspect", "diff", "export target"],
+      "proof_commands": ["kolm compile --spec spec.json --out task.kolm", "kolm verify task.kolm", "kolm export task.kolm --target gguf --preview"],
+      "cloud_or_customization": ["artifact-runtime", "proof-mode", "storage-plane"],
+      "evidence_paths": ["src/compile-pipeline.js", "src/artifact.js", "docs/kolm-format-v1.md", "public/account/artifacts.html"]
+    },
+    {
+      "id": "runtime-inference",
+      "surface": "runtime-inference",
+      "user_story": "As an app developer, I can run a compiled artifact locally, in the browser, on edge/server runtimes, or behind OpenAI-compatible fallback chains.",
+      "happy_path": ["select model", "select runtime", "run request", "stream result", "log receipt"],
+      "proof_commands": ["kolm run task.kolm \"input\"", "kolm serve --mcp --http", "kolm tui --views --json"],
+      "cloud_or_customization": ["model-provider", "artifact-runtime", "deployment-mode", "compute-target"],
+      "evidence_paths": ["src/completions-api.js", "src/runtime-policy.js", "public/sdk.js", "public/tui.html"]
+    },
+    {
+      "id": "compute-cloud",
+      "surface": "compute-cloud",
+      "user_story": "As a team with no GPU, I can configure Cloudflare R2, S3-compatible storage, AWS, Supabase, Modal, RunPod, Lambda, Together, or remote SSH and still build artifacts.",
+      "happy_path": ["run readiness", "pick storage", "pick GPU/train backend", "deploy BYOC", "verify attestation"],
+      "proof_commands": ["kolm cloud readiness --json", "kolm cloud storage --json", "kolm cloud storage --provider local-artifacts --smoke --json", "kolm cloud readiness --remote --json", "GET /v1/cloud/readiness", "GET /v1/storage/object-readiness", "kolm cloud doctor", "kolm compute list --json", "kolm remote recommend --json"],
+      "cloud_or_customization": ["compute-target", "storage-plane", "deployment-mode", "governance-mode"],
+      "evidence_paths": ["src/platform-capabilities.js", "src/object-storage.js", "src/remote-compute.js", "docs/cloud-product-readiness.md", "scripts/cloud-readiness.mjs"]
+    },
+    {
+      "id": "devices-fleet",
+      "surface": "devices-fleet",
+      "user_story": "As an edge or enterprise user, I can detect devices, choose compatible runtimes, create team reverse tunnels, test installability, and push artifacts to local, SSH, HTTP, or air-gapped targets.",
+      "happy_path": ["detect device", "recommend target", "open team tunnel if needed", "install artifact", "test run", "audit install"],
+      "proof_commands": ["kolm devices detect --json", "kolm devices recommend --json", "kolm tunnel new --team <id>", "kolm airgap verify task.kolm"],
+      "cloud_or_customization": ["compute-target", "artifact-runtime", "deployment-mode"],
+      "evidence_paths": ["src/device-capabilities.js", "src/router.js", "public/account/devices.html"]
+    },
+    {
+      "id": "enterprise-governance",
+      "surface": "enterprise-governance",
+      "user_story": "As an enterprise admin, I can control tenants, scoped keys, approvals, audit logs, billing, privacy, compliance export, and SSO/SCIM-ready identity.",
+      "happy_path": ["verify tenant", "scope keys", "review audit", "set billing plan", "export compliance pack"],
+      "proof_commands": ["kolm whoami --json", "kolm audit --json", "kolm billing usage --json", "kolm keys list --json"],
+      "cloud_or_customization": ["governance-mode", "privacy-mode", "storage-plane", "proof-mode"],
+      "evidence_paths": ["src/auth.js", "src/keys.js", "src/audit.js", "public/account/api-keys.html", "public/account/audit-log.html"]
+    },
+    {
+      "id": "agents-registry",
+      "surface": "agents-registry",
+      "user_story": "As an agent-platform user, I can compile artifacts as MCP tools, install them into Claude/Cursor/Continue/Cline, publish or pull registry artifacts, and replay hashed run logs.",
+      "happy_path": ["compile as MCP", "serve tools", "install harness", "run agent", "inspect logs"],
+      "proof_commands": ["kolm compile --as-mcp --spec spec.json", "kolm serve --mcp", "kolm install claude-code --apply", "kolm hub list"],
+      "cloud_or_customization": ["deployment-mode", "governance-mode", "proof-mode"],
+      "evidence_paths": ["services/mcp/server.js", "cli/kolm.js", "public/account/agent-telemetry.html"]
+    }
+  ]
+}

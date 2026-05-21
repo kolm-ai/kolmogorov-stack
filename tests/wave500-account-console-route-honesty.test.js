@@ -37,23 +37,23 @@ test('W500 #1 - account connector and key pages use shipped capture routes only'
   assert.ok(hasRoute('POST', '/v1/capture/openai'));
   assert.ok(hasRoute('POST', '/v1/capture/anthropic'));
   assert.ok(hasRoute('POST', '/v1/capture/openrouter'));
+  assert.ok(hasRoute('POST', '/v1/capture/gemini'));
   assert.ok(hasRoute('POST', '/v1/capture/log'));
   assert.ok(hasRoute('GET', '/v1/capture/stream'));
   assert.ok(hasRoute('GET', '/v1/bridges/observations'));
   assert.ok(OPENAPI.paths['/v1/capture/openai']?.post);
   assert.ok(OPENAPI.paths['/v1/capture/anthropic']?.post);
   assert.ok(OPENAPI.paths['/v1/capture/openrouter']?.post);
-  assert.equal(OPENAPI.paths['/v1/capture/gemini'], undefined);
+  assert.ok(OPENAPI.paths['/v1/capture/gemini']?.post);
 
-  assert.match(connectors, /var PROVIDERS=\["openai","anthropic","openrouter"\]/);
+  assert.match(connectors, /var PROVIDERS=\["openai","anthropic","openrouter","gemini"\]/);
   assert.match(connectors, /Connectors · Account · kolm\.ai/);
-  assert.match(connectors, /var LABELS=\{openai:"OpenAI",anthropic:"Claude",openrouter:"OpenRouter"\}/);
-  assert.match(connectors, /var ENDPOINTS=\{openai:"\/v1\/capture\/openai",anthropic:"\/v1\/capture\/anthropic",openrouter:"\/v1\/capture\/openrouter\/v1"\}/);
+  assert.match(connectors, /var LABELS=\{openai:"OpenAI",anthropic:"Claude",openrouter:"OpenRouter",gemini:"Gemini"\}/);
+  assert.match(connectors, /var ENDPOINTS=\{openai:"\/v1\/capture\/openai",anthropic:"\/v1\/capture\/anthropic",openrouter:"\/v1\/capture\/openrouter",gemini:"\/v1\/capture\/gemini"\}/);
   assert.match(connectors, /x-upstream-api-key/);
-  assert.match(connectors, /\/docs\/connect\/openai/);
-  assert.match(connectors, /\/docs\/connect\/anthropic/);
-  assert.match(connectors, /\/docs\/connect\/openrouter/);
-  assert.doesNotMatch(connectors, /\/v1\/capture\/gemini/);
+  assert.match(connectors, /href=\\"\/docs\/connect\/"\+p\+"\\"/);
+  assert.match(connectors, /\/docs\/connectors/);
+  assert.match(connectors, /\/v1\/capture\/gemini/);
   assert.doesNotMatch(connectors, /\/docs\/connectors\/\+p/);
 
   assert.match(keys, /\/v1\/capture\/log/);

@@ -5,8 +5,8 @@
     "src/router.js",
     "src/oauth.js"
   ],
-  "total_routes": 357,
-  "group_count": 108,
+  "total_routes": 378,
+  "group_count": 112,
   "groups": [
     {
       "key": "account",
@@ -15,7 +15,7 @@
         {
           "method": "GET",
           "path": "/v1/account",
-          "line": 3749,
+          "line": 4009,
           "source": "src/router.js",
           "short": "Account",
           "comments": [
@@ -27,7 +27,7 @@
         {
           "method": "GET",
           "path": "/v1/account/audit-log",
-          "line": 3984,
+          "line": 4244,
           "source": "src/router.js",
           "short": "W409f – /v1/account/audit-log surfaces the audit ledger for the calling",
           "comments": [
@@ -43,7 +43,7 @@
         {
           "method": "POST",
           "path": "/v1/account/cancel",
-          "line": 5021,
+          "line": 5368,
           "source": "src/router.js",
           "short": "Self-serve cancel / downgrade-to-free. Any paid tenant can drop to the",
           "comments": [
@@ -56,7 +56,7 @@
         {
           "method": "POST",
           "path": "/v1/account/change-plan",
-          "line": 4701,
+          "line": 5033,
           "source": "src/router.js",
           "short": "Self-serve plan changes. Free is applied instantly (this is also the",
           "comments": [
@@ -72,7 +72,7 @@
         {
           "method": "GET",
           "path": "/v1/account/compliance-package",
-          "line": 5104,
+          "line": 5451,
           "source": "src/router.js",
           "short": "can read end-to-end. Tenant metadata + signed receipts + audit log +",
           "comments": [
@@ -88,7 +88,7 @@
         {
           "method": "POST",
           "path": "/v1/account/delete",
-          "line": 5203,
+          "line": 5550,
           "source": "src/router.js",
           "short": "Self-serve account delete. Soft-delete the tenant; receipts and artifacts",
           "comments": [
@@ -104,7 +104,7 @@
         {
           "method": "GET",
           "path": "/v1/account/export",
-          "line": 5057,
+          "line": 5404,
           "source": "src/router.js",
           "short": "Self-serve data export (/privacy promises this). Returns a JSON bundle",
           "comments": [
@@ -120,7 +120,7 @@
         {
           "method": "GET",
           "path": "/v1/account/keys",
-          "line": 3936,
+          "line": 4196,
           "source": "src/router.js",
           "short": "Account API key list - returns the tenant primary key metadata without the raw secret.",
           "comments": [
@@ -132,7 +132,7 @@
         {
           "method": "POST",
           "path": "/v1/account/keys",
-          "line": 3952,
+          "line": 4212,
           "source": "src/router.js",
           "short": "Account API key create - rotates the tenant primary key and audits the requested label.",
           "comments": [
@@ -144,7 +144,7 @@
         {
           "method": "DELETE",
           "path": "/v1/account/keys/:prefix",
-          "line": 3966,
+          "line": 4226,
           "source": "src/router.js",
           "short": "Account API key revoke - rotates away a key prefix and returns the replacement secret.",
           "comments": [
@@ -156,7 +156,7 @@
         {
           "method": "POST",
           "path": "/v1/account/receipt-secret/prune",
-          "line": 4677,
+          "line": 5009,
           "source": "src/router.js",
           "short": "Drop a specific previous key from the verification ring. Receipts signed",
           "comments": [
@@ -170,7 +170,7 @@
         {
           "method": "GET",
           "path": "/v1/account/receipt-secrets",
-          "line": 4664,
+          "line": 4996,
           "source": "src/router.js",
           "short": "List receipt-signing key metadata for the calling tenant. Secrets are",
           "comments": [
@@ -183,7 +183,7 @@
         {
           "method": "POST",
           "path": "/v1/account/rotate-key",
-          "line": 3825,
+          "line": 4085,
           "source": "src/router.js",
           "short": "Account API key rotation - rotates the tenant's primary API key and returns the new secret.",
           "comments": [
@@ -195,7 +195,7 @@
         {
           "method": "POST",
           "path": "/v1/account/rotate-receipt-secret",
-          "line": 4645,
+          "line": 4977,
           "source": "src/router.js",
           "short": "Rotate the per-tenant receipt-signing secret. Previous secret is",
           "comments": [
@@ -208,7 +208,7 @@
         {
           "method": "GET",
           "path": "/v1/account/settings",
-          "line": 4067,
+          "line": 4327,
           "source": "src/router.js",
           "short": "Account settings read - returns tenant settings merged with current defaults.",
           "comments": [
@@ -220,7 +220,7 @@
         {
           "method": "PUT",
           "path": "/v1/account/settings",
-          "line": 4078,
+          "line": 4338,
           "source": "src/router.js",
           "short": "Account settings update - persists whitelisted tenant settings and audits changed fields.",
           "comments": [
@@ -238,7 +238,7 @@
         {
           "method": "GET",
           "path": "/v1/admin/audit",
-          "line": 4818,
+          "line": 5165,
           "source": "src/router.js",
           "short": "Admin audit feed - newest audit events with tenant and operation metadata.",
           "comments": [
@@ -250,7 +250,7 @@
         {
           "method": "GET",
           "path": "/v1/admin/compile-jobs",
-          "line": 4838,
+          "line": 5185,
           "source": "src/router.js",
           "short": "Admin compile job feed - newest compile jobs with tenant, task, status, and score.",
           "comments": [
@@ -262,7 +262,7 @@
         {
           "method": "GET",
           "path": "/v1/admin/diagnostics",
-          "line": 5911,
+          "line": 6258,
           "source": "src/router.js",
           "short": "Admin diagnostics - checks data/artifact directories and selected runtime env flags.",
           "comments": [
@@ -274,7 +274,7 @@
         {
           "method": "GET",
           "path": "/v1/admin/health",
-          "line": 4858,
+          "line": 5205,
           "source": "src/router.js",
           "short": "Admin health snapshot - process, store, memory, region, and integration flags.",
           "comments": [
@@ -286,7 +286,7 @@
         {
           "method": "GET",
           "path": "/v1/admin/stats",
-          "line": 4790,
+          "line": 5137,
           "source": "src/router.js",
           "short": "Admin stats - aggregate tenants, usage, compile jobs, and audit-event counts.",
           "comments": [
@@ -298,7 +298,7 @@
         {
           "method": "GET",
           "path": "/v1/admin/submissions",
-          "line": 6512,
+          "line": 6859,
           "source": "src/router.js",
           "short": "Admin submissions list - returns all submitted project/contact records.",
           "comments": [
@@ -310,7 +310,7 @@
         {
           "method": "POST",
           "path": "/v1/admin/tenant",
-          "line": 5900,
+          "line": 6247,
           "source": "src/router.js",
           "short": "Admin tenant provision - creates a tenant with quota and returns its API key.",
           "comments": [
@@ -322,7 +322,7 @@
         {
           "method": "GET",
           "path": "/v1/admin/tenants",
-          "line": 4762,
+          "line": 5109,
           "source": "src/router.js",
           "short": "Admin tenant list - scrubbed cross-tenant view with q/limit filters.",
           "comments": [
@@ -334,7 +334,7 @@
         {
           "method": "GET",
           "path": "/v1/admin/waitlist",
-          "line": 6507,
+          "line": 6854,
           "source": "src/router.js",
           "short": "Admin waitlist list - returns all waitlist rows for founder triage.",
           "comments": [
@@ -352,7 +352,7 @@
         {
           "method": "GET",
           "path": "/v1/agents",
-          "line": 9703,
+          "line": 10070,
           "source": "src/router.js",
           "short": "W424 – agent telemetry routes fence on req.tenant_record and forward",
           "comments": [
@@ -367,7 +367,7 @@
         {
           "method": "GET",
           "path": "/v1/agents/failing",
-          "line": 9757,
+          "line": 10124,
           "source": "src/router.js",
           "short": "Top failing agent sessions for the caller's tenant.",
           "comments": [
@@ -379,7 +379,7 @@
         {
           "method": "GET",
           "path": "/v1/agents/recommend",
-          "line": 9742,
+          "line": 10109,
           "source": "src/router.js",
           "short": "Agent model recommendation for a tenant-scoped application and task hint.",
           "comments": [
@@ -391,7 +391,7 @@
         {
           "method": "GET",
           "path": "/v1/agents/sessions",
-          "line": 9716,
+          "line": 10083,
           "source": "src/router.js",
           "short": "Agent sessions list for the caller's tenant.",
           "comments": [
@@ -403,7 +403,7 @@
         {
           "method": "GET",
           "path": "/v1/agents/sessions/:id",
-          "line": 9730,
+          "line": 10097,
           "source": "src/router.js",
           "short": "Agent session detail scoped to the caller's tenant.",
           "comments": [
@@ -415,7 +415,7 @@
         {
           "method": "GET",
           "path": "/v1/agents/stats",
-          "line": 9771,
+          "line": 10138,
           "source": "src/router.js",
           "short": "Agent telemetry aggregate stats for the caller's tenant.",
           "comments": [
@@ -433,7 +433,7 @@
         {
           "method": "POST",
           "path": "/v1/anon/bootstrap",
-          "line": 859,
+          "line": 1005,
           "source": "src/router.js",
           "short": "Anonymous CLI auth (robots / agents)",
           "comments": [
@@ -447,7 +447,7 @@
         {
           "method": "POST",
           "path": "/v1/anon/claim",
-          "line": 876,
+          "line": 1022,
           "source": "src/router.js",
           "short": "Claim: convert an anonymous workspace into a permanent account.",
           "comments": [
@@ -467,7 +467,7 @@
         {
           "method": "POST",
           "path": "/v1/artifact/verify-manifest",
-          "line": 5471,
+          "line": 5818,
           "source": "src/router.js",
           "short": "for callers that have the manifest hashes block in hand (e.g. a CLI",
           "comments": [
@@ -489,7 +489,7 @@
         {
           "method": "GET",
           "path": "/v1/artifacts",
-          "line": 3150,
+          "line": 3397,
           "source": "src/router.js",
           "short": "Artifact list - exposes completed compile jobs as artifact records with hashes and downloads.",
           "comments": [
@@ -501,7 +501,7 @@
         {
           "method": "GET",
           "path": "/v1/artifacts/:id",
-          "line": 3156,
+          "line": 3403,
           "source": "src/router.js",
           "short": "Artifact detail - returns one tenant-scoped compile artifact by job id.",
           "comments": [
@@ -513,13 +513,23 @@
         {
           "method": "GET",
           "path": "/v1/artifacts/:id/download",
-          "line": 3163,
+          "line": 3410,
           "source": "src/router.js",
           "short": "Artifact download - streams the completed artifact zip by id with readiness/expiry errors.",
           "comments": [
             "Artifact download - streams the completed artifact zip by id with readiness/expiry errors."
           ],
           "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/artifacts/dependency-graph",
+          "line": 901,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
           "expanded_from": null
         }
       ]
@@ -531,7 +541,7 @@
         {
           "method": "POST",
           "path": "/v1/assistant",
-          "line": 3644,
+          "line": 3891,
           "source": "src/router.js",
           "short": "POST /v1/assistant { prompt } returns a parsed-intent action + result.",
           "comments": [
@@ -551,7 +561,7 @@
         {
           "method": "POST",
           "path": "/v1/audio/speech",
-          "line": 2721,
+          "line": 2922,
           "source": "src/router.js",
           "short": "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
           "comments": [
@@ -566,7 +576,7 @@
         {
           "method": "POST",
           "path": "/v1/audio/transcriptions",
-          "line": 2721,
+          "line": 2922,
           "source": "src/router.js",
           "short": "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
           "comments": [
@@ -581,7 +591,7 @@
         {
           "method": "POST",
           "path": "/v1/audio/translations",
-          "line": 2721,
+          "line": 2922,
           "source": "src/router.js",
           "short": "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
           "comments": [
@@ -602,7 +612,7 @@
         {
           "method": "GET",
           "path": "/v1/audit/log",
-          "line": 6345,
+          "line": 6692,
           "source": "src/router.js",
           "short": "write path with HMAC-chained signatures); this implementation gives the",
           "comments": [
@@ -617,7 +627,7 @@
         {
           "method": "GET",
           "path": "/v1/audit/verify",
-          "line": 6479,
+          "line": 6826,
           "source": "src/router.js",
           "short": "Verify the HMAC chain over this tenant's audit_events rows. Returns",
           "comments": [
@@ -637,7 +647,7 @@
         {
           "method": "POST",
           "path": "/v1/bakeoff/run",
-          "line": 10224,
+          "line": 10608,
           "source": "src/router.js",
           "short": "Bakeoff run - evaluates a set of contestant models against a dataset and",
           "comments": [
@@ -657,7 +667,7 @@
         {
           "method": "GET",
           "path": "/v1/bakeoffs",
-          "line": 10837,
+          "line": 11221,
           "source": "src/router.js",
           "short": "/v1/bakeoffs – list + run alias for /v1/bakeoff/run. The bakeoff module",
           "comments": [
@@ -672,7 +682,7 @@
         {
           "method": "POST",
           "path": "/v1/bakeoffs",
-          "line": 10843,
+          "line": 11227,
           "source": "src/router.js",
           "short": "Bakeoffs run alias - SDK-friendly synonym for /v1/bakeoff/run with the",
           "comments": [
@@ -692,7 +702,7 @@
         {
           "method": "GET",
           "path": "/v1/billing/breakdown",
-          "line": 10653,
+          "line": 11037,
           "source": "src/router.js",
           "short": "it walks the team's member tenants and rolls up.",
           "comments": [
@@ -707,7 +717,7 @@
         {
           "method": "GET",
           "path": "/v1/billing/meters",
-          "line": 10578,
+          "line": 10962,
           "source": "src/router.js",
           "short": "Returns the static catalog of legacy W384 meters merged with the W409y",
           "comments": [
@@ -722,7 +732,7 @@
         {
           "method": "GET",
           "path": "/v1/billing/tiers",
-          "line": 825,
+          "line": 979,
           "source": "src/router.js",
           "short": "P0-3 closure: /v1/billing/tiers as a public alias of /v1/plans so the",
           "comments": [
@@ -737,7 +747,7 @@
         {
           "method": "GET",
           "path": "/v1/billing/usage",
-          "line": 10622,
+          "line": 11006,
           "source": "src/router.js",
           "short": "Returns the current-period usage map for the caller's tenant. The",
           "comments": [
@@ -757,7 +767,7 @@
         {
           "method": "POST",
           "path": "/v1/bridges/auto-synthesize",
-          "line": 6670,
+          "line": 7017,
           "source": "src/router.js",
           "short": "POST /v1/bridges/auto-synthesize – turn an observation cluster into a recipe.",
           "comments": [
@@ -769,7 +779,7 @@
         {
           "method": "GET",
           "path": "/v1/bridges/observations",
-          "line": 6611,
+          "line": 6958,
           "source": "src/router.js",
           "short": "GET /v1/bridges/observations – flat list of recent captures for the /captures inbox.",
           "comments": [
@@ -782,7 +792,7 @@
         {
           "method": "POST",
           "path": "/v1/bridges/observations/:id",
-          "line": 6657,
+          "line": 7004,
           "source": "src/router.js",
           "short": "POST /v1/bridges/observations/:id – soft-update an observation (keep/discard).",
           "comments": [
@@ -795,7 +805,7 @@
         {
           "method": "POST",
           "path": "/v1/bridges/observe",
-          "line": 6543,
+          "line": 6890,
           "source": "src/router.js",
           "short": "POST /v1/bridges/observe – agents log a (model, prompt, response) tuple.",
           "comments": [
@@ -810,7 +820,7 @@
         {
           "method": "GET",
           "path": "/v1/bridges/specialist-candidates",
-          "line": 7161,
+          "line": 7508,
           "source": "src/router.js",
           "short": "GET /v1/bridges/specialist-candidates – recipes whose call volume justifies a Specialist.",
           "comments": [
@@ -822,7 +832,7 @@
         {
           "method": "GET",
           "path": "/v1/bridges/suggestions",
-          "line": 6586,
+          "line": 6933,
           "source": "src/router.js",
           "short": "GET /v1/bridges/suggestions – recipe-synthesis suggestions clustered from observations.",
           "comments": [
@@ -840,7 +850,7 @@
         {
           "method": "POST",
           "path": "/v1/build/preview",
-          "line": 1896,
+          "line": 2043,
           "source": "src/router.js",
           "short": "W347 – POST /v1/build/preview. Richer dry-run preview that powers the",
           "comments": [
@@ -862,7 +872,7 @@
         {
           "method": "POST",
           "path": "/v1/builder/compile",
-          "line": 3050,
+          "line": 3297,
           "source": "src/router.js",
           "short": "{task, examples} payload into a real compile job. Validation matches",
           "comments": [
@@ -878,7 +888,7 @@
         {
           "method": "POST",
           "path": "/v1/builder/preview",
-          "line": 1810,
+          "line": 1957,
           "source": "src/router.js",
           "short": "POST /v1/builder/preview – synthesize a recipe and estimate K-score.",
           "comments": [
@@ -893,7 +903,7 @@
         {
           "method": "GET",
           "path": "/v1/builder/templates",
-          "line": 1801,
+          "line": 1948,
           "source": "src/router.js",
           "short": "GET /v1/builder/templates – public list of starter templates.",
           "comments": [
@@ -911,7 +921,7 @@
         {
           "method": "GET",
           "path": "/v1/builds",
-          "line": 10778,
+          "line": 11162,
           "source": "src/router.js",
           "short": "/v1/builds – aliases the compile-job list for /account/builds.html.",
           "comments": [
@@ -931,7 +941,7 @@
         {
           "method": "POST",
           "path": "/v1/byoc/attestation",
-          "line": 8171,
+          "line": 8538,
           "source": "src/router.js",
           "short": "Attestation callback – UNAUTH (no API key). Identifies via enroll_token,",
           "comments": [
@@ -947,7 +957,7 @@
         {
           "method": "POST",
           "path": "/v1/byoc/deploy",
-          "line": 8114,
+          "line": 8481,
           "source": "src/router.js",
           "short": "Customer deploys a .kolm artifact to their own Fly / AWS Nitro / GCP CVM",
           "comments": [
@@ -963,7 +973,7 @@
         {
           "method": "GET",
           "path": "/v1/byoc/deployments",
-          "line": 8133,
+          "line": 8500,
           "source": "src/router.js",
           "short": "BYOC deployments list - returns tenant deployments, optionally team-scoped after membership check.",
           "comments": [
@@ -975,7 +985,7 @@
         {
           "method": "DELETE",
           "path": "/v1/byoc/deployments/:id",
-          "line": 8155,
+          "line": 8522,
           "source": "src/router.js",
           "short": "BYOC deployment teardown - marks an owned deployment torn down and hides it from listings.",
           "comments": [
@@ -987,7 +997,7 @@
         {
           "method": "GET",
           "path": "/v1/byoc/deployments/:id",
-          "line": 8144,
+          "line": 8511,
           "source": "src/router.js",
           "short": "BYOC deployment detail - returns one deployment owned by the tenant or one of their teams.",
           "comments": [
@@ -999,7 +1009,7 @@
         {
           "method": "GET",
           "path": "/v1/byoc/targets",
-          "line": 8180,
+          "line": 8547,
           "source": "src/router.js",
           "short": "BYOC targets - lists supported deploy targets for the public form and CLI.",
           "comments": [
@@ -1017,7 +1027,7 @@
         {
           "method": "POST",
           "path": "/v1/capability/build",
-          "line": 8579,
+          "line": 8946,
           "source": "src/router.js",
           "short": "Capability build - constructs a capability descriptor block from an",
           "comments": [
@@ -1031,7 +1041,7 @@
         {
           "method": "POST",
           "path": "/v1/capability/validate",
-          "line": 8587,
+          "line": 8954,
           "source": "src/router.js",
           "short": "Capability validate - checks a capability descriptor block for structural",
           "comments": [
@@ -1051,7 +1061,7 @@
         {
           "method": "POST",
           "path": "/v1/capture/anthropic",
-          "line": 7560,
+          "line": 7919,
           "source": "src/router.js",
           "short": "POST /v1/capture/anthropic – proxy to Anthropic, capture the round-trip.",
           "comments": [
@@ -1065,9 +1075,43 @@
           "expanded_from": "regex-literal"
         },
         {
+          "method": "POST",
+          "path": "/v1/capture/gemini",
+          "line": 2945,
+          "source": "src/router.js",
+          "short": "base_url=https://kolm.ai/v1/capture/gemini and keep using chat.completions.",
+          "comments": [
+            "Gemini capture and OpenAI-compatible aliases. These route to Google's",
+            "/v1beta/openai compatibility surface so OpenAI SDK clients can set",
+            "base_url=https://kolm.ai/v1/capture/gemini and keep using chat.completions."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/capture/gemini/chat/completions",
+          "line": 2946,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/capture/gemini/v1/chat/completions",
+          "line": 2947,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
           "method": "GET",
           "path": "/v1/capture/health",
-          "line": 7390,
+          "line": 7749,
           "source": "src/router.js",
           "short": "GET /v1/capture/health – operator probe. Honest answer about whether",
           "comments": [
@@ -1081,7 +1125,7 @@
         {
           "method": "POST",
           "path": "/v1/capture/log",
-          "line": 7325,
+          "line": 7672,
           "source": "src/router.js",
           "short": "POST /v1/capture/log – server-to-server batch insert of (input, output)",
           "comments": [
@@ -1096,7 +1140,7 @@
         {
           "method": "POST",
           "path": "/v1/capture/media",
-          "line": 10504,
+          "line": 10888,
           "source": "src/router.js",
           "short": "Capture media - multipart upload endpoint for image/audio/video/blob",
           "comments": [
@@ -1110,7 +1154,7 @@
         {
           "method": "POST",
           "path": "/v1/capture/openai",
-          "line": 7606,
+          "line": 7969,
           "source": "src/router.js",
           "short": "POST /v1/capture/openai – same shape, OpenAI Chat Completions API.",
           "comments": [
@@ -1122,7 +1166,7 @@
         {
           "method": "POST",
           "path": "/v1/capture/openrouter",
-          "line": 2731,
+          "line": 2932,
           "source": "src/router.js",
           "short": "OpenRouter capture and base-URL aliases. The direct base-URL forms support",
           "comments": [
@@ -1135,7 +1179,7 @@
         {
           "method": "POST",
           "path": "/v1/capture/openrouter/chat/completions",
-          "line": 2734,
+          "line": 2935,
           "source": "src/router.js",
           "short": "OpenRouter capture chat completions alias for clients whose base URL is",
           "comments": [
@@ -1148,7 +1192,7 @@
         {
           "method": "POST",
           "path": "/v1/capture/openrouter/v1/chat/completions",
-          "line": 2736,
+          "line": 2937,
           "source": "src/router.js",
           "short": "OpenRouter capture alias for SDKs that append the OpenAI chat-completions path.",
           "comments": [
@@ -1158,9 +1202,29 @@
           "expanded_from": null
         },
         {
+          "method": "POST",
+          "path": "/v1/capture/rbac/evaluate",
+          "line": 889,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/capture/rbac/policy",
+          "line": 885,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
           "method": "GET",
           "path": "/v1/capture/stream",
-          "line": 7418,
+          "line": 7777,
           "source": "src/router.js",
           "short": "Payload shape is the CLI/UI contract (W258-BE-6): capture_id /",
           "comments": [
@@ -1182,7 +1246,7 @@
         {
           "method": "GET",
           "path": "/v1/cc/kinds",
-          "line": 8500,
+          "line": 8867,
           "source": "src/router.js",
           "short": "confidential compute",
           "comments": [
@@ -1194,7 +1258,7 @@
         {
           "method": "GET",
           "path": "/v1/cc/shape/:kind",
-          "line": 8507,
+          "line": 8874,
           "source": "src/router.js",
           "short": "Confidential-compute shape - returns the expected JSON shape for an",
           "comments": [
@@ -1208,7 +1272,7 @@
         {
           "method": "POST",
           "path": "/v1/cc/verify",
-          "line": 8518,
+          "line": 8885,
           "source": "src/router.js",
           "short": "Confidential-compute verify - validates an attestation report against its",
           "comments": [
@@ -1229,7 +1293,7 @@
         {
           "method": "GET",
           "path": "/v1/changelog",
-          "line": 1550,
+          "line": 1697,
           "source": "src/router.js",
           "short": "W456: public changelog – marketing surface, no auth, no tenant scoping.",
           "comments": [
@@ -1248,7 +1312,7 @@
         {
           "method": "POST",
           "path": "/v1/chat/completions",
-          "line": 2708,
+          "line": 2909,
           "source": "src/router.js",
           "short": "W411 – every inference passthrough is gated by __w411HostedAuthGate so the",
           "comments": [
@@ -1270,7 +1334,7 @@
         {
           "method": "GET",
           "path": "/v1/cid/:cid",
-          "line": 3178,
+          "line": 3425,
           "source": "src/router.js",
           "short": "CID lookup – content-addressed resolution within the caller's tenant",
           "comments": [
@@ -1286,13 +1350,58 @@
       ]
     },
     {
+      "key": "cloud",
+      "label": "Cloud",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/cloud/deploy-plan",
+          "line": 869,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/cloud/deploy-targets",
+          "line": 865,
+          "source": "src/router.js",
+          "short": "Secret-safe deploy catalog for account UI, CLI, CI, and unauthenticated",
+          "comments": [
+            "Secret-safe deploy catalog for account UI, CLI, CI, and unauthenticated",
+            "evaluators. This does not create infrastructure and never returns secret",
+            "values; it returns the concrete commands and env-secret references needed",
+            "for BYOC, edge, GPU, and self-hosted deployments."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/cloud/readiness",
+          "line": 837,
+          "source": "src/router.js",
+          "short": "Cloud readiness is exposed directly for account UI, CI, and self-hosted",
+          "comments": [
+            "Cloud readiness is exposed directly for account UI, CI, and self-hosted",
+            "operators. It reports configured categories and missing variable names,",
+            "but never returns secret values."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
       "key": "compile",
       "label": "Compile",
       "routes": [
         {
           "method": "GET",
           "path": "/v1/compile",
-          "line": 3015,
+          "line": 3262,
           "source": "src/router.js",
           "short": "Compile job list - returns the caller's recent tenant-scoped compile jobs.",
           "comments": [
@@ -1304,7 +1413,7 @@
         {
           "method": "POST",
           "path": "/v1/compile",
-          "line": 2878,
+          "line": 3125,
           "source": "src/router.js",
           "short": "Compile job creation - queues a tenant-scoped build and returns job_id, status, and poll URL.",
           "comments": [
@@ -1317,7 +1426,7 @@
         {
           "method": "GET",
           "path": "/v1/compile/:id",
-          "line": 3020,
+          "line": 3267,
           "source": "src/router.js",
           "short": "Compile job status - returns a safe tenant-scoped snapshot plus artifact_url when complete.",
           "comments": [
@@ -1329,7 +1438,7 @@
         {
           "method": "GET",
           "path": "/v1/compile/:id/.kolm",
-          "line": 3034,
+          "line": 3281,
           "source": "src/router.js",
           "short": "Compile artifact download - streams the completed .kolm zip or reports readiness/expiry.",
           "comments": [
@@ -1347,7 +1456,7 @@
         {
           "method": "POST",
           "path": "/v1/compose",
-          "line": 5791,
+          "line": 6138,
           "source": "src/router.js",
           "short": "Compose - dispatches one query across the top-k matching kolm artifacts and",
           "comments": [
@@ -1367,7 +1476,7 @@
         {
           "method": "GET",
           "path": "/v1/concepts",
-          "line": 5682,
+          "line": 6029,
           "source": "src/router.js",
           "short": "Layer 2: Registry",
           "comments": [
@@ -1379,7 +1488,7 @@
         {
           "method": "DELETE",
           "path": "/v1/concepts/:id",
-          "line": 5695,
+          "line": 6042,
           "source": "src/router.js",
           "short": "Concept delete - removes an owned concept and its versions; forbidden tenants receive 403.",
           "comments": [
@@ -1391,7 +1500,7 @@
         {
           "method": "GET",
           "path": "/v1/concepts/:id",
-          "line": 5688,
+          "line": 6035,
           "source": "src/router.js",
           "short": "Concept detail - returns a readable concept with versions after tenant, team, or public visibility checks.",
           "comments": [
@@ -1403,7 +1512,7 @@
         {
           "method": "GET",
           "path": "/v1/concepts/:id/lineage",
-          "line": 5703,
+          "line": 6050,
           "source": "src/router.js",
           "short": "Concept lineage - returns upstream and downstream head-version lineage after visibility checks.",
           "comments": [
@@ -1415,7 +1524,7 @@
         {
           "method": "GET",
           "path": "/v1/concepts/:id/stats",
-          "line": 5710,
+          "line": 6057,
           "source": "src/router.js",
           "short": "Per-concept usage stats: invocation count, latency percentiles, cache hit rate.",
           "comments": [
@@ -1433,7 +1542,7 @@
         {
           "method": "GET",
           "path": "/v1/connectors",
-          "line": 10697,
+          "line": 11081,
           "source": "src/router.js",
           "short": "Connectors - lists upstream provider connectors (openai, anthropic,",
           "comments": [
@@ -1453,7 +1562,7 @@
         {
           "method": "POST",
           "path": "/v1/credential/verify",
-          "line": 5643,
+          "line": 5990,
           "source": "src/router.js",
           "short": "Returns: { valid: boolean, reason?: string, spec, type }",
           "comments": [
@@ -1474,7 +1583,7 @@
         {
           "method": "GET",
           "path": "/v1/datasets",
-          "line": 9972,
+          "line": 10356,
           "source": "src/router.js",
           "short": "Datasets list - returns tenant-scoped dataset summaries for captured rows.",
           "comments": [
@@ -1486,7 +1595,7 @@
         {
           "method": "POST",
           "path": "/v1/datasets",
-          "line": 9981,
+          "line": 10365,
           "source": "src/router.js",
           "short": "Dataset create - builds a tenant-stamped dataset from a namespace of captured events.",
           "comments": [
@@ -1498,7 +1607,7 @@
         {
           "method": "GET",
           "path": "/v1/datasets/:id",
-          "line": 9993,
+          "line": 10377,
           "source": "src/router.js",
           "short": "Dataset detail - inspects one dataset and hides cross-tenant records as not found.",
           "comments": [
@@ -1510,7 +1619,7 @@
         {
           "method": "POST",
           "path": "/v1/datasets/:id/split",
-          "line": 10008,
+          "line": 10392,
           "source": "src/router.js",
           "short": "Dataset split - recomputes a deterministic train/holdout split for an owned dataset.",
           "comments": [
@@ -1528,7 +1637,7 @@
         {
           "method": "POST",
           "path": "/v1/device/check",
-          "line": 8484,
+          "line": 8851,
           "source": "src/router.js",
           "short": "Device requirement check - compares a target profile against a named host profile.",
           "comments": [
@@ -1540,7 +1649,7 @@
         {
           "method": "POST",
           "path": "/v1/device/probe",
-          "line": 8494,
+          "line": 8861,
           "source": "src/router.js",
           "short": "Device host probe - detects this server's local profile using best-effort hardware probes.",
           "comments": [
@@ -1552,7 +1661,7 @@
         {
           "method": "GET",
           "path": "/v1/device/profiles",
-          "line": 8472,
+          "line": 8839,
           "source": "src/router.js",
           "short": "Device capability profiles - list static target profiles for artifact compatibility checks.",
           "comments": [
@@ -1564,7 +1673,7 @@
         {
           "method": "GET",
           "path": "/v1/device/profiles/:device_id",
-          "line": 8477,
+          "line": 8844,
           "source": "src/router.js",
           "short": "Device capability profile detail - returns one static profile or 404 for unknown device ids.",
           "comments": [
@@ -1582,7 +1691,7 @@
         {
           "method": "GET",
           "path": "/v1/devices",
-          "line": 10297,
+          "line": 10681,
           "source": "src/router.js",
           "short": "Device fleet list - enumerates operator-registered device profiles newest first.",
           "comments": [
@@ -1594,7 +1703,7 @@
         {
           "method": "POST",
           "path": "/v1/devices/:id/install",
-          "line": 10367,
+          "line": 10751,
           "source": "src/router.js",
           "short": "Device artifact install - stages a .kolm artifact by path or hash onto a registered device.",
           "comments": [
@@ -1606,7 +1715,7 @@
         {
           "method": "DELETE",
           "path": "/v1/devices/:id/install/:artifact_id",
-          "line": 10390,
+          "line": 10774,
           "source": "src/router.js",
           "short": "Device artifact uninstall - removes a staged artifact install for one registered device.",
           "comments": [
@@ -1618,7 +1727,7 @@
         {
           "method": "POST",
           "path": "/v1/devices/:id/register",
-          "line": 10340,
+          "line": 10724,
           "source": "src/router.js",
           "short": "Device fleet registration - validates and stores a canonical profile for a device id.",
           "comments": [
@@ -1630,7 +1739,7 @@
         {
           "method": "POST",
           "path": "/v1/devices/:id/test",
-          "line": 10349,
+          "line": 10733,
           "source": "src/router.js",
           "short": "Device fleet test - probes reachability and runtime status for a registered device.",
           "comments": [
@@ -1642,7 +1751,7 @@
         {
           "method": "GET",
           "path": "/v1/devices/detect",
-          "line": 10305,
+          "line": 10689,
           "source": "src/router.js",
           "short": "Device fleet detect - probes local hardware and persists the local fleet profile.",
           "comments": [
@@ -1654,7 +1763,7 @@
         {
           "method": "POST",
           "path": "/v1/devices/detect",
-          "line": 10924,
+          "line": 11308,
           "source": "src/router.js",
           "short": "Device fleet detect with hints - refreshes local inventory using optional device hints.",
           "comments": [
@@ -1666,7 +1775,7 @@
         {
           "method": "GET",
           "path": "/v1/devices/installed",
-          "line": 10357,
+          "line": 10741,
           "source": "src/router.js",
           "short": "Device install list - returns staged artifact installs, optionally filtered by device_id.",
           "comments": [
@@ -1678,7 +1787,7 @@
         {
           "method": "GET",
           "path": "/v1/devices/recommend",
-          "line": 10419,
+          "line": 10803,
           "source": "src/router.js",
           "short": "Device recommendation default - recommends target and quantization for the detected profile.",
           "comments": [
@@ -1690,7 +1799,7 @@
         {
           "method": "POST",
           "path": "/v1/devices/recommend",
-          "line": 10407,
+          "line": 10791,
           "source": "src/router.js",
           "short": "Device recommendation - chooses runtime target and quantization for profile/artifact inputs.",
           "comments": [
@@ -1708,7 +1817,7 @@
         {
           "method": "POST",
           "path": "/v1/distill/from-captures",
-          "line": 6742,
+          "line": 7089,
           "source": "src/router.js",
           "short": "Distill from captures - turns the caller's namespace captures into either",
           "comments": [
@@ -1724,7 +1833,7 @@
         {
           "method": "GET",
           "path": "/v1/distill/from-captures/preview",
-          "line": 6705,
+          "line": 7052,
           "source": "src/router.js",
           "short": "Commit (POST) picks recipe vs specialist by count (<1000 vs >=1000),",
           "comments": [
@@ -1740,7 +1849,7 @@
         {
           "method": "POST",
           "path": "/v1/distill/onpolicy",
-          "line": 6905,
+          "line": 7252,
           "source": "src/router.js",
           "short": "W480 - Run an on-policy distillation against a teacher-student pair via the",
           "comments": [
@@ -1754,7 +1863,7 @@
         {
           "method": "GET",
           "path": "/v1/distill/onpolicy/doctor",
-          "line": 2815,
+          "line": 3062,
           "source": "src/router.js",
           "short": "Public trainer doctors. These report only local trainer availability and",
           "comments": [
@@ -1768,7 +1877,7 @@
         {
           "method": "POST",
           "path": "/v1/distill/preference",
-          "line": 6927,
+          "line": 7274,
           "source": "src/router.js",
           "short": "W480 - Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant",
           "comments": [
@@ -1782,7 +1891,7 @@
         {
           "method": "GET",
           "path": "/v1/distill/preference/doctor",
-          "line": 2826,
+          "line": 3073,
           "source": "src/router.js",
           "short": "Preference distillation doctor - unauthenticated capability report for the",
           "comments": [
@@ -1795,7 +1904,7 @@
         {
           "method": "GET",
           "path": "/v1/distill/runs",
-          "line": 6864,
+          "line": 7211,
           "source": "src/router.js",
           "short": "Reads ~/.kolm/distill-runs/run_<id>/{run-meta.json, progress.jsonl, manifest.json}.",
           "comments": [
@@ -1810,7 +1919,7 @@
         {
           "method": "GET",
           "path": "/v1/distill/runs/:id",
-          "line": 6880,
+          "line": 7227,
           "source": "src/router.js",
           "short": "Distill run detail - reads ~/.kolm/distill-runs/run_<id>/{run-meta.json,",
           "comments": [
@@ -1830,7 +1939,7 @@
         {
           "method": "POST",
           "path": "/v1/drift/detect",
-          "line": 9656,
+          "line": 10023,
           "source": "src/router.js",
           "short": "Drift detect - compares two drift snapshots (baseline vs current) and",
           "comments": [
@@ -1844,7 +1953,7 @@
         {
           "method": "POST",
           "path": "/v1/drift/report",
-          "line": 9678,
+          "line": 10045,
           "source": "src/router.js",
           "short": "Drift report - builds a full drift report (signals + narrative + tolerance",
           "comments": [
@@ -1858,7 +1967,7 @@
         {
           "method": "POST",
           "path": "/v1/drift/snapshot",
-          "line": 9634,
+          "line": 10001,
           "source": "src/router.js",
           "short": "the 12-step compile→verify→run→drift→retrain loop. W434 exposes three",
           "comments": [
@@ -1880,7 +1989,7 @@
         {
           "method": "POST",
           "path": "/v1/embed",
-          "line": 3559,
+          "line": 3806,
           "source": "src/router.js",
           "short": "Tokenize-and-ingest a path (or array of paths). The path must live on the",
           "comments": [
@@ -1901,7 +2010,7 @@
         {
           "method": "POST",
           "path": "/v1/embeddings",
-          "line": 2714,
+          "line": 2915,
           "source": "src/router.js",
           "short": "OpenAI-compatible passthrough for the responses, embeddings, and",
           "comments": [
@@ -1922,7 +2031,7 @@
         {
           "method": "GET",
           "path": "/v1/eval/tenant_holdout",
-          "line": 5576,
+          "line": 5923,
           "source": "src/router.js",
           "short": "Tenant holdout list - returns the authenticated tenant's retained shadow corpus metadata.",
           "comments": [
@@ -1934,7 +2043,7 @@
         {
           "method": "POST",
           "path": "/v1/eval/tenant_holdout",
-          "line": 5531,
+          "line": 5878,
           "source": "src/router.js",
           "short": "All four are authed (mounted below authMiddleware) and per-tenant scoped:",
           "comments": [
@@ -1949,7 +2058,7 @@
         {
           "method": "DELETE",
           "path": "/v1/eval/tenant_holdout/:corpus_id",
-          "line": 5614,
+          "line": 5961,
           "source": "src/router.js",
           "short": "Tenant holdout delete - removes one authenticated tenant corpus and audits the deletion.",
           "comments": [
@@ -1961,7 +2070,7 @@
         {
           "method": "GET",
           "path": "/v1/eval/tenant_holdout/:corpus_id",
-          "line": 5588,
+          "line": 5935,
           "source": "src/router.js",
           "short": "Tenant holdout detail - returns hash and size metadata without exposing corpus rows.",
           "comments": [
@@ -1979,7 +2088,7 @@
         {
           "method": "POST",
           "path": "/v1/federated/aggregate",
-          "line": 9358,
+          "line": 9725,
           "source": "src/router.js",
           "short": "Federated approval aggregate - returns DP-noised counts across local and peer approval hashes.",
           "comments": [
@@ -1991,7 +2100,7 @@
         {
           "method": "GET",
           "path": "/v1/federated/audit",
-          "line": 9383,
+          "line": 9750,
           "source": "src/router.js",
           "short": "Federated audit - returns recent hash-only approval-share envelopes for the tenant.",
           "comments": [
@@ -2003,7 +2112,7 @@
         {
           "method": "POST",
           "path": "/v1/federated/opt-in",
-          "line": 9311,
+          "line": 9678,
           "source": "src/router.js",
           "short": "Federated opt-in - records tenant namespaces and peers for hash-only approval sharing.",
           "comments": [
@@ -2015,7 +2124,7 @@
         {
           "method": "POST",
           "path": "/v1/federated/opt-out",
-          "line": 9327,
+          "line": 9694,
           "source": "src/router.js",
           "short": "Federated opt-out - clears tenant approval-sharing opt-in state and records the reason.",
           "comments": [
@@ -2027,7 +2136,7 @@
         {
           "method": "GET",
           "path": "/v1/federated/peers",
-          "line": 9373,
+          "line": 9740,
           "source": "src/router.js",
           "short": "Federated peers - lists other opted-in approval-sharing peers visible to the tenant.",
           "comments": [
@@ -2039,7 +2148,7 @@
         {
           "method": "POST",
           "path": "/v1/federated/share-approvals",
-          "line": 9338,
+          "line": 9705,
           "source": "src/router.js",
           "short": "Federated approval share - emits hash-only approval rows for an opted-in namespace.",
           "comments": [
@@ -2057,7 +2166,7 @@
         {
           "method": "POST",
           "path": "/v1/fl/aggregate",
-          "line": 8551,
+          "line": 8918,
           "source": "src/router.js",
           "short": "Federated aggregate - folds verified client deltas into one foundation-state aggregate receipt.",
           "comments": [
@@ -2069,7 +2178,7 @@
         {
           "method": "POST",
           "path": "/v1/fl/contribution/verify",
-          "line": 8541,
+          "line": 8908,
           "source": "src/router.js",
           "short": "Federated contribution verify - checks a client update receipt against the announced round.",
           "comments": [
@@ -2081,7 +2190,7 @@
         {
           "method": "POST",
           "path": "/v1/fl/round/new",
-          "line": 8533,
+          "line": 8900,
           "source": "src/router.js",
           "short": "Federated round create - creates a foundation-state round and returns its stable round hash.",
           "comments": [
@@ -2093,7 +2202,7 @@
         {
           "method": "GET",
           "path": "/v1/fl/strategies",
-          "line": 8528,
+          "line": 8895,
           "source": "src/router.js",
           "short": "federated learning",
           "comments": [
@@ -2105,13 +2214,39 @@
       ]
     },
     {
+      "key": "gemini",
+      "label": "Gemini",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/v1/gemini/chat/completions",
+          "line": 2949,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/gemini/v1/chat/completions",
+          "line": 2948,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
       "key": "health",
       "label": "Health",
       "routes": [
         {
           "method": "GET",
           "path": "/v1/health",
-          "line": 2841,
+          "line": 3088,
           "source": "src/router.js",
           "short": "Authenticated /v1/health – full snapshot including provider availability",
           "comments": [
@@ -2132,7 +2267,7 @@
         {
           "method": "GET",
           "path": "/v1/hub",
-          "line": 3451,
+          "line": 3698,
           "source": "src/router.js",
           "short": "GET /v1/hub – public list, most-recent first, paginated by `limit`.",
           "comments": [
@@ -2144,7 +2279,7 @@
         {
           "method": "GET",
           "path": "/v1/hub/:owner/:name",
-          "line": 3479,
+          "line": 3726,
           "source": "src/router.js",
           "short": "GET /v1/hub/:owner/:name – public metadata for a single artifact.",
           "comments": [
@@ -2156,7 +2291,7 @@
         {
           "method": "GET",
           "path": "/v1/hub/:owner/:name/download",
-          "line": 3515,
+          "line": 3762,
           "source": "src/router.js",
           "short": "GET /v1/hub/:owner/:name/download – binary download, content-type application/octet-stream.",
           "comments": [
@@ -2168,7 +2303,7 @@
         {
           "method": "POST",
           "path": "/v1/hub/publish",
-          "line": 3351,
+          "line": 3598,
           "source": "src/router.js",
           "short": "POST /v1/hub/publish",
           "comments": [
@@ -2188,7 +2323,7 @@
         {
           "method": "POST",
           "path": "/v1/intent/ask",
-          "line": 3884,
+          "line": 4144,
           "source": "src/router.js",
           "short": "Response envelope:",
           "comments": [
@@ -2203,7 +2338,7 @@
         {
           "method": "GET",
           "path": "/v1/intent/next",
-          "line": 3845,
+          "line": 4105,
           "source": "src/router.js",
           "short": "pair locally; this route runs it server-side so the post-auth dashboard",
           "comments": [
@@ -2224,7 +2359,7 @@
         {
           "method": "POST",
           "path": "/v1/ir/compile",
-          "line": 8289,
+          "line": 8656,
           "source": "src/router.js",
           "short": "ir",
           "comments": [
@@ -2236,7 +2371,7 @@
         {
           "method": "POST",
           "path": "/v1/ir/replay",
-          "line": 8338,
+          "line": 8705,
           "source": "src/router.js",
           "short": "IR replay - replays every workflow IR seed and reports deterministic mismatches.",
           "comments": [
@@ -2248,7 +2383,7 @@
         {
           "method": "POST",
           "path": "/v1/ir/stats",
-          "line": 8320,
+          "line": 8687,
           "source": "src/router.js",
           "short": "IR stats - validates a body-supplied workflow IR and returns node, edge, seed, kind, and hash counts.",
           "comments": [
@@ -2260,7 +2395,7 @@
         {
           "method": "POST",
           "path": "/v1/ir/validate",
-          "line": 8329,
+          "line": 8696,
           "source": "src/router.js",
           "short": "IR validate - checks body-supplied workflow IR structure and returns its receipt-bound hash.",
           "comments": [
@@ -2278,7 +2413,7 @@
         {
           "method": "GET",
           "path": "/v1/jobs/:id",
-          "line": 6086,
+          "line": 6433,
           "source": "src/router.js",
           "short": "Job status (used by HF / URL queued jobs + W229 on-disk job registry +",
           "comments": [
@@ -2298,7 +2433,7 @@
         {
           "method": "POST",
           "path": "/v1/keys/challenge",
-          "line": 1284,
+          "line": 1431,
           "source": "src/router.js",
           "short": "Key challenge - issues a proof-of-control nonce for Ed25519 key registration.",
           "comments": [
@@ -2310,7 +2445,7 @@
         {
           "method": "GET",
           "path": "/v1/keys/public",
-          "line": 1264,
+          "line": 1411,
           "source": "src/router.js",
           "short": "Public keys list - returns registered Ed25519 verification keys and directory stats.",
           "comments": [
@@ -2322,7 +2457,7 @@
         {
           "method": "DELETE",
           "path": "/v1/keys/public/:fingerprint",
-          "line": 1315,
+          "line": 1462,
           "source": "src/router.js",
           "short": "Public key delete - admin-only removal of a registered verification key.",
           "comments": [
@@ -2334,7 +2469,7 @@
         {
           "method": "GET",
           "path": "/v1/keys/public/:fingerprint",
-          "line": 1273,
+          "line": 1420,
           "source": "src/router.js",
           "short": "Public key lookup - fetches one registered Ed25519 key by short or full fingerprint.",
           "comments": [
@@ -2346,7 +2481,7 @@
         {
           "method": "POST",
           "path": "/v1/keys/register",
-          "line": 1298,
+          "line": 1445,
           "source": "src/router.js",
           "short": "Key register - verifies a signed challenge nonce and publishes the Ed25519 public key.",
           "comments": [
@@ -2364,7 +2499,7 @@
         {
           "method": "GET",
           "path": "/v1/label-queue/audit/:event_id",
-          "line": 10179,
+          "line": 10563,
           "source": "src/router.js",
           "short": "W409o – full audit trail for a single event_id. Tests assert that every",
           "comments": [
@@ -2379,7 +2514,7 @@
         {
           "method": "GET",
           "path": "/v1/label-queue/next",
-          "line": 10090,
+          "line": 10474,
           "source": "src/router.js",
           "short": "The /account/labeling.html UI uses concrete label-queue aliases for the",
           "comments": [
@@ -2395,7 +2530,7 @@
         {
           "method": "GET",
           "path": "/v1/label-queue/stats",
-          "line": 10120,
+          "line": 10504,
           "source": "src/router.js",
           "short": "Label-queue stats alias; adapts canonical labels stats names for the legacy UI.",
           "comments": [
@@ -2407,7 +2542,7 @@
         {
           "method": "POST",
           "path": "/v1/label-queue/submit",
-          "line": 10141,
+          "line": 10525,
           "source": "src/router.js",
           "short": "Label-queue submit alias; accepts legacy label names and stores canonical verdicts.",
           "comments": [
@@ -2425,7 +2560,7 @@
         {
           "method": "POST",
           "path": "/v1/labels",
-          "line": 10038,
+          "line": 10422,
           "source": "src/router.js",
           "short": "Label submit - records a reviewer verdict for one event and blocks cross-tenant decisions.",
           "comments": [
@@ -2437,7 +2572,7 @@
         {
           "method": "GET",
           "path": "/v1/labels/:event_id",
-          "line": 10071,
+          "line": 10455,
           "source": "src/router.js",
           "short": "Label detail - fetches one persisted decision and hides cross-tenant event ids.",
           "comments": [
@@ -2449,7 +2584,7 @@
         {
           "method": "GET",
           "path": "/v1/labels/next",
-          "line": 10025,
+          "line": 10409,
           "source": "src/router.js",
           "short": "Labels next - returns tenant-scoped unlabeled events with optional namespace/workflow filters.",
           "comments": [
@@ -2461,7 +2596,7 @@
         {
           "method": "GET",
           "path": "/v1/labels/stats",
-          "line": 10063,
+          "line": 10447,
           "source": "src/router.js",
           "short": "Labels stats - returns tenant-scoped pending, approved, rejected, and edited counts.",
           "comments": [
@@ -2473,7 +2608,7 @@
         {
           "method": "GET",
           "path": "/v1/labels/synthesize-corpus",
-          "line": 7653,
+          "line": 8020,
           "source": "src/router.js",
           "short": "Returns the captured (input, output) pairs for a namespace as JSONL or",
           "comments": [
@@ -2495,7 +2630,7 @@
         {
           "method": "GET",
           "path": "/v1/lake/export",
-          "line": 9936,
+          "line": 10320,
           "source": "src/router.js",
           "short": "W409l – GET /v1/lake/export → bulk export of canonical events.",
           "comments": [
@@ -2508,7 +2643,7 @@
         {
           "method": "GET",
           "path": "/v1/lake/repeated",
-          "line": 9806,
+          "line": 10190,
           "source": "src/router.js",
           "short": "Lake repeated - finds clusters of repeated workflow inputs in the event",
           "comments": [
@@ -2522,13 +2657,15 @@
         {
           "method": "GET",
           "path": "/v1/lake/stats",
-          "line": 9792,
+          "line": 10161,
           "source": "src/router.js",
           "short": "Lake stats - per-tenant event-store roll-up: row counts, byte size, oldest",
           "comments": [
             "Lake stats - per-tenant event-store roll-up: row counts, byte size, oldest",
-            "and newest timestamps, namespace breakdown. Accepts ?namespace + ?since",
-            "filters. Scoped via _tenantScope; admin sees cross-tenant aggregate."
+            "and newest timestamps, namespace breakdown. Accepts ?namespace, ?since,",
+            "?provider, ?model, ?status, ?min_latency_ms, ?max_latency_ms, and",
+            "?exclude_errors filters. Scoped via _tenantScope; admin sees cross-tenant",
+            "aggregate."
           ],
           "stub": false,
           "expanded_from": null
@@ -2536,7 +2673,7 @@
         {
           "method": "GET",
           "path": "/v1/lake/storage",
-          "line": 9960,
+          "line": 10344,
           "source": "src/router.js",
           "short": "W409l – GET /v1/lake/storage → small env probe for the Account UI so the",
           "comments": [
@@ -2550,7 +2687,7 @@
         {
           "method": "GET",
           "path": "/v1/lake/tail",
-          "line": 9921,
+          "line": 10305,
           "source": "src/router.js",
           "short": "W409l – GET /v1/lake/tail → recent canonical events for the inbox UI.",
           "comments": [
@@ -2570,7 +2707,7 @@
         {
           "method": "POST",
           "path": "/v1/lead/enterprise",
-          "line": 6147,
+          "line": 6494,
           "source": "src/router.js",
           "short": "Enterprise inquiry intake (KOLM-102)",
           "comments": [
@@ -2585,7 +2722,7 @@
         {
           "method": "GET",
           "path": "/v1/lead/enterprise/:id",
-          "line": 6249,
+          "line": 6596,
           "source": "src/router.js",
           "short": "Admin-only read of a single enterprise lead. Useful for ops triage and",
           "comments": [
@@ -2604,7 +2741,7 @@
         {
           "method": "GET",
           "path": "/v1/library",
-          "line": 5895,
+          "line": 6242,
           "source": "src/router.js",
           "short": "Library - returns the bundled kolm runtime library version and a human",
           "comments": [
@@ -2624,7 +2761,7 @@
         {
           "method": "POST",
           "path": "/v1/lineage/build",
-          "line": 8561,
+          "line": 8928,
           "source": "src/router.js",
           "short": "lineage + capability",
           "comments": [
@@ -2636,7 +2773,7 @@
         {
           "method": "POST",
           "path": "/v1/lineage/validate",
-          "line": 8569,
+          "line": 8936,
           "source": "src/router.js",
           "short": "Lineage validate - checks an artifact-lineage block for structural",
           "comments": [
@@ -2656,7 +2793,7 @@
         {
           "method": "POST",
           "path": "/v1/loop/try",
-          "line": 737,
+          "line": 772,
           "source": "src/router.js",
           "short": "W313 – public anonymous \"try it\" demo of the capture-receipt shape.",
           "comments": [
@@ -2677,7 +2814,7 @@
         {
           "method": "GET",
           "path": "/v1/marketplace",
-          "line": 8662,
+          "line": 9029,
           "source": "src/router.js",
           "short": "Marketplace list - filters artifacts and overlays live verification before returning rows.",
           "comments": [
@@ -2689,7 +2826,7 @@
         {
           "method": "GET",
           "path": "/v1/marketplace/:slug",
-          "line": 8709,
+          "line": 9076,
           "source": "src/router.js",
           "short": "Marketplace detail - returns one artifact with live verification state or 404 for unknown slugs.",
           "comments": [
@@ -2701,7 +2838,7 @@
         {
           "method": "GET",
           "path": "/v1/marketplace/:slug/download",
-          "line": 8735,
+          "line": 9102,
           "source": "src/router.js",
           "short": "W339/W342 – install/download MUST refuse artifacts that don't pass",
           "comments": [
@@ -2717,7 +2854,7 @@
         {
           "method": "GET",
           "path": "/v1/marketplace/catalog.json",
-          "line": 8652,
+          "line": 9019,
           "source": "src/router.js",
           "short": "Marketplace catalog manifest - returns the signed catalog with live production-ready verdicts.",
           "comments": [
@@ -2729,7 +2866,7 @@
         {
           "method": "GET",
           "path": "/v1/marketplace/list",
-          "line": 8680,
+          "line": 9047,
           "source": "src/router.js",
           "short": "W342 – explicit list endpoint used by /marketplace.html client render.",
           "comments": [
@@ -2742,7 +2879,7 @@
         {
           "method": "POST",
           "path": "/v1/marketplace/publish",
-          "line": 8819,
+          "line": 9186,
           "source": "src/router.js",
           "short": "Distinct from /v1/marketplace/publish-request (manual review queue) –",
           "comments": [
@@ -2756,7 +2893,7 @@
         {
           "method": "POST",
           "path": "/v1/marketplace/publish-request",
-          "line": 8688,
+          "line": 9055,
           "source": "src/router.js",
           "short": "Marketplace publish request - queues an artifact proposal for manual review without publishing bytes.",
           "comments": [
@@ -2774,7 +2911,7 @@
         {
           "method": "POST",
           "path": "/v1/media/redact",
-          "line": 4216,
+          "line": 4476,
           "source": "src/router.js",
           "short": "Media redact - text-extractable media redactor. Accepts {media_uri | text,",
           "comments": [
@@ -2790,7 +2927,7 @@
         {
           "method": "POST",
           "path": "/v1/media/redact-job",
-          "line": 4320,
+          "line": 4580,
           "source": "src/router.js",
           "short": "envelope so the caller knows exactly what to install.",
           "comments": [
@@ -2805,7 +2942,7 @@
         {
           "method": "GET",
           "path": "/v1/media/redact-job/doctor",
-          "line": 4369,
+          "line": 4629,
           "source": "src/router.js",
           "short": "W454 – worker self-doctor proxied through the API so `kolm media",
           "comments": [
@@ -2824,7 +2961,7 @@
         {
           "method": "POST",
           "path": "/v1/memory/recall",
-          "line": 7816,
+          "line": 8183,
           "source": "src/router.js",
           "short": "POST /v1/memory/recall – REM Memory ↔ Skills bridge.",
           "comments": [
@@ -2843,7 +2980,7 @@
         {
           "method": "POST",
           "path": "/v1/messages",
-          "line": 2724,
+          "line": 2925,
           "source": "src/router.js",
           "short": "Anthropic direct + alias.",
           "comments": [
@@ -2861,7 +2998,7 @@
         {
           "method": "GET",
           "path": "/v1/models",
-          "line": 10979,
+          "line": 11363,
           "source": "src/router.js",
           "short": "other teachers, but rows whose family hints at an Anthropic-shaped",
           "comments": [
@@ -2876,7 +3013,7 @@
         {
           "method": "GET",
           "path": "/v1/models/cache",
-          "line": 2800,
+          "line": 3009,
           "source": "src/router.js",
           "short": "Models cache - returns the local model-weights cache index for the API",
           "comments": [
@@ -2889,8 +3026,18 @@
         },
         {
           "method": "GET",
+          "path": "/v1/models/info/:id",
+          "line": 3046,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
           "path": "/v1/models/manifest",
-          "line": 2760,
+          "line": 2969,
           "source": "src/router.js",
           "short": "GET /v1/models/manifest full manifest JSON",
           "comments": [
@@ -2905,13 +3052,27 @@
         {
           "method": "GET",
           "path": "/v1/models/pull",
-          "line": 2778,
+          "line": 2987,
           "source": "src/router.js",
           "short": "Models pull - 302-redirects to a resolved Hugging Face download URL for",
           "comments": [
             "Models pull - 302-redirects to a resolved Hugging Face download URL for",
             "the requested model id+variant (default variant: q4_k_m). 404 for unknown",
             "variants, 410 when the variant exists but is marked unavailable."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/models/recommend",
+          "line": 3024,
+          "source": "src/router.js",
+          "short": "Model recommendation + model info. Public and secret-free: this powers the",
+          "comments": [
+            "Model recommendation + model info. Public and secret-free: this powers the",
+            "post-auth model picker, CLI parity, and \"which backbone should I use?\"",
+            "flows without requiring a tenant before the user understands the catalog."
           ],
           "stub": false,
           "expanded_from": null
@@ -2925,7 +3086,7 @@
         {
           "method": "POST",
           "path": "/v1/moderations",
-          "line": 2714,
+          "line": 2915,
           "source": "src/router.js",
           "short": "OpenAI-compatible passthrough for the responses, embeddings, and",
           "comments": [
@@ -2946,7 +3107,7 @@
         {
           "method": "GET",
           "path": "/v1/multimodal/bakeoff",
-          "line": 4587,
+          "line": 4919,
           "source": "src/router.js",
           "short": "GET helper for TUI/CLI list-view: same shape as POST but with the",
           "comments": [
@@ -2962,15 +3123,13 @@
         {
           "method": "POST",
           "path": "/v1/multimodal/bakeoff",
-          "line": 4557,
+          "line": 4889,
           "source": "src/router.js",
-          "short": "compiled .kolm artifacts and scores each artifact's output against",
+          "short": "POST /v1/multimodal/bakeoff runs an authenticated tenant's captured",
           "comments": [
-            "compiled .kolm artifacts and scores each artifact's output against",
-            "the captured base response by token-overlap. Returns ranked",
-            "contestants + winner. The compute is pure string scoring – heavy ML",
-            "(CLIP, embedding similarity) stays in workers/multimodal-bakeoff/",
-            "and is opt-in via env override."
+            "POST /v1/multimodal/bakeoff runs an authenticated tenant's captured",
+            "image/audio/video/PDF rows through selected .kolm artifacts and returns",
+            "ranked contestants with token-overlap scoring and winner metadata."
           ],
           "stub": false,
           "expanded_from": null
@@ -2978,7 +3137,7 @@
         {
           "method": "POST",
           "path": "/v1/multimodal/redact-audio",
-          "line": 4456,
+          "line": 4716,
           "source": "src/router.js",
           "short": "W464 – multimodal audio voiceprint scrub. Anonymizes the speaker's",
           "comments": [
@@ -2993,7 +3152,7 @@
         {
           "method": "GET",
           "path": "/v1/multimodal/redact-audio/doctor",
-          "line": 4500,
+          "line": 4760,
           "source": "src/router.js",
           "short": "W464 – audio-redact worker self-doctor.",
           "comments": [
@@ -3005,7 +3164,7 @@
         {
           "method": "POST",
           "path": "/v1/multimodal/redact-image",
-          "line": 4406,
+          "line": 4666,
           "source": "src/router.js",
           "short": "{ok:false, error:'no_detector_installed', install_hint:'...'} so the",
           "comments": [
@@ -3020,12 +3179,43 @@
         {
           "method": "GET",
           "path": "/v1/multimodal/redact-image/doctor",
-          "line": 4526,
+          "line": 4786,
           "source": "src/router.js",
           "short": "W462 – image-redact worker self-doctor, proxied so the CLI's",
           "comments": [
             "W462 – image-redact worker self-doctor, proxied so the CLI's",
             "`kolm media image-doctor --remote` can ask the server."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/multimodal/tokenize",
+          "line": 4840,
+          "source": "src/router.js",
+          "short": "POST /v1/multimodal/tokenize tokenizes one local file path or directory",
+          "comments": [
+            "POST /v1/multimodal/tokenize tokenizes one local file path or directory",
+            "on an authenticated local daemon or explicitly trusted self-hosted server.",
+            "Hosted deployments deny server-side file access unless the operator sets",
+            "KOLM_ALLOW_SERVER_FILE_TOKENIZE=1."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/multimodal/tokenize/doctor",
+          "line": 4822,
+          "source": "src/router.js",
+          "short": "W554 - multimodal sidecar tokenizer. API mirror of",
+          "comments": [
+            "W554 - multimodal sidecar tokenizer. API mirror of",
+            "`kolm media tokenize`: local-safe by default, hosted-disabled unless the",
+            "operator explicitly allows server-side file access. Creates compile-ready",
+            "Markdown sidecars using deterministic local feature tokens, with optional",
+            "provider captions/transcripts when configured."
           ],
           "stub": false,
           "expanded_from": null
@@ -3039,7 +3229,7 @@
         {
           "method": "POST",
           "path": "/v1/nl/scaffold",
-          "line": 7142,
+          "line": 7489,
           "source": "src/router.js",
           "short": "air-gap branch produces the same shape locally via scaffoldRecipeFromNl;",
           "comments": [
@@ -3061,7 +3251,7 @@
         {
           "method": "GET",
           "path": "/v1/notifications/config",
-          "line": 7481,
+          "line": 7840,
           "source": "src/router.js",
           "short": "Notifications config - public VAPID/email capability flags and alert thresholds.",
           "comments": [
@@ -3073,7 +3263,7 @@
         {
           "method": "GET",
           "path": "/v1/notifications/preferences",
-          "line": 7485,
+          "line": 7844,
           "source": "src/router.js",
           "short": "Notification preferences - returns tenant alert opt-in settings plus public config.",
           "comments": [
@@ -3085,7 +3275,7 @@
         {
           "method": "PUT",
           "path": "/v1/notifications/preferences",
-          "line": 7491,
+          "line": 7850,
           "source": "src/router.js",
           "short": "Notification preferences update - sets threshold alert opt-in and optional email.",
           "comments": [
@@ -3097,7 +3287,7 @@
         {
           "method": "DELETE",
           "path": "/v1/notifications/push-subscriptions",
-          "line": 7519,
+          "line": 7878,
           "source": "src/router.js",
           "short": "Push subscription removal - deletes a subscription by endpoint from body or query.",
           "comments": [
@@ -3109,7 +3299,7 @@
         {
           "method": "GET",
           "path": "/v1/notifications/push-subscriptions",
-          "line": 7501,
+          "line": 7860,
           "source": "src/router.js",
           "short": "Push subscription list - returns registered WebPush endpoints without secret keys.",
           "comments": [
@@ -3121,7 +3311,7 @@
         {
           "method": "POST",
           "path": "/v1/notifications/push-subscriptions",
-          "line": 7509,
+          "line": 7868,
           "source": "src/router.js",
           "short": "Push subscription registration - stores an allowlisted HTTPS WebPush endpoint.",
           "comments": [
@@ -3133,7 +3323,7 @@
         {
           "method": "GET",
           "path": "/v1/notifications/state",
-          "line": 7542,
+          "line": 7901,
           "source": "src/router.js",
           "short": "Notification threshold state - returns per-namespace alert state and readiness.",
           "comments": [
@@ -3145,7 +3335,7 @@
         {
           "method": "POST",
           "path": "/v1/notifications/test",
-          "line": 7527,
+          "line": 7886,
           "source": "src/router.js",
           "short": "Notification test alert - fires a synthetic threshold alert for a namespace.",
           "comments": [
@@ -3208,7 +3398,7 @@
         {
           "method": "POST",
           "path": "/v1/openrouter/chat/completions",
-          "line": 2740,
+          "line": 2941,
           "source": "src/router.js",
           "short": "OpenRouter chat-completions alias without the extra /v1 segment.",
           "comments": [
@@ -3220,7 +3410,7 @@
         {
           "method": "POST",
           "path": "/v1/openrouter/v1/chat/completions",
-          "line": 2738,
+          "line": 2939,
           "source": "src/router.js",
           "short": "OpenRouter base-URL alias for SDKs that append /v1/chat/completions.",
           "comments": [
@@ -3238,7 +3428,7 @@
         {
           "method": "GET",
           "path": "/v1/opportunities",
-          "line": 9825,
+          "line": 10209,
           "source": "src/router.js",
           "short": "W419 – every opportunity surface must be tenant-scoped. Without auth the",
           "comments": [
@@ -3253,7 +3443,7 @@
         {
           "method": "POST",
           "path": "/v1/opportunities/:id/accept",
-          "line": 9846,
+          "line": 10230,
           "source": "src/router.js",
           "short": "Opportunity accept - marks one optimization opportunity (cache candidate,",
           "comments": [
@@ -3267,7 +3457,7 @@
         {
           "method": "POST",
           "path": "/v1/opportunities/:id/dismiss",
-          "line": 9861,
+          "line": 10245,
           "source": "src/router.js",
           "short": "Accept either /dismiss or /ignore – both map to ignoreOpportunity.",
           "comments": [
@@ -3279,7 +3469,7 @@
         {
           "method": "POST",
           "path": "/v1/opportunities/:id/ignore",
-          "line": 9878,
+          "line": 10262,
           "source": "src/router.js",
           "short": "Opportunity ignore - tenant-scoped synonym for /dismiss; marks the",
           "comments": [
@@ -3293,7 +3483,7 @@
         {
           "method": "POST",
           "path": "/v1/opportunities/:id/promote",
-          "line": 9897,
+          "line": 10281,
           "source": "src/router.js",
           "short": "W409m – POST /v1/opportunities/:id/promote → dataset.",
           "comments": [
@@ -3315,7 +3505,7 @@
         {
           "method": "POST",
           "path": "/v1/pipeline/compile",
-          "line": 9518,
+          "line": 9885,
           "source": "src/router.js",
           "short": "W420 – tenant gate. The pipeline runs compileFull which reads from the",
           "comments": [
@@ -3330,7 +3520,7 @@
         {
           "method": "POST",
           "path": "/v1/pipeline/distill",
-          "line": 9446,
+          "line": 9813,
           "source": "src/router.js",
           "short": "POST /v1/pipeline/distill – kick off distill-from-captures with mode=specialist.",
           "comments": [
@@ -3344,7 +3534,7 @@
         {
           "method": "POST",
           "path": "/v1/pipeline/full",
-          "line": 9547,
+          "line": 9914,
           "source": "src/router.js",
           "short": "job_id. Phases are streamed via /v1/pipeline/jobs/:id/stream (SSE).",
           "comments": [
@@ -3359,7 +3549,7 @@
         {
           "method": "GET",
           "path": "/v1/pipeline/jobs/:id",
-          "line": 9571,
+          "line": 9938,
           "source": "src/router.js",
           "short": "GET /v1/pipeline/jobs/:id – poll for current status + collected phases.",
           "comments": [
@@ -3371,7 +3561,7 @@
         {
           "method": "GET",
           "path": "/v1/pipeline/jobs/:id/stream",
-          "line": 9589,
+          "line": 9956,
           "source": "src/router.js",
           "short": "GET /v1/pipeline/jobs/:id/stream – SSE that replays past phases then",
           "comments": [
@@ -3384,7 +3574,7 @@
         {
           "method": "POST",
           "path": "/v1/pipeline/tokenize",
-          "line": 9395,
+          "line": 9762,
           "source": "src/router.js",
           "short": "POST /v1/pipeline/tokenize – train a tokenizer over corpus body.",
           "comments": [
@@ -3402,13 +3592,14 @@
         {
           "method": "GET",
           "path": "/v1/plans",
-          "line": 808,
+          "line": 970,
           "source": "src/router.js",
-          "short": "Plans - self-serve plan catalog (free/starter/pro/teams/business/enterprise)",
+          "short": "Plans - public plan catalog (Free / Pro / Team / Enterprise). Historical",
           "comments": [
-            "Plans - self-serve plan catalog (free/starter/pro/teams/business/enterprise)",
-            "with id, label, price_usd_month, quota, seats, and billing_link_configured",
-            "(true when the Stripe Payment Link env var is set for that plan)."
+            "Plans - public plan catalog (Free / Pro / Team / Enterprise). Historical",
+            "aliases still canonicalize server-side, but the public contract stays on",
+            "the current four-plan model. Enterprise is contact-sales unless a custom",
+            "checkout link is supplied by the operator."
           ],
           "stub": false,
           "expanded_from": null
@@ -3422,7 +3613,7 @@
         {
           "method": "GET",
           "path": "/v1/pricing",
-          "line": 780,
+          "line": 815,
           "source": "src/router.js",
           "short": "Pricing - public price catalog in USD per billable unit (tokens, compile,",
           "comments": [
@@ -3441,7 +3632,7 @@
         {
           "method": "GET",
           "path": "/v1/privacy/events",
-          "line": 8980,
+          "line": 9347,
           "source": "src/router.js",
           "short": "GET /v1/privacy/events – recent events that tripped the detector.",
           "comments": [
@@ -3453,7 +3644,7 @@
         {
           "method": "GET",
           "path": "/v1/privacy/policy",
-          "line": 8936,
+          "line": 9303,
           "source": "src/router.js",
           "short": "GET /v1/privacy/policy – return the policy dictionary.",
           "comments": [
@@ -3465,7 +3656,7 @@
         {
           "method": "PUT",
           "path": "/v1/privacy/policy/:class",
-          "line": 8942,
+          "line": 9309,
           "source": "src/router.js",
           "short": "PUT /v1/privacy/policy/:class – set { action } for a class. Admin-only.",
           "comments": [
@@ -3477,7 +3668,7 @@
         {
           "method": "GET",
           "path": "/v1/privacy/report",
-          "line": 8958,
+          "line": 9325,
           "source": "src/router.js",
           "short": "GET /v1/privacy/report – aggregate redaction counts over the event lake.",
           "comments": [
@@ -3489,7 +3680,7 @@
         {
           "method": "POST",
           "path": "/v1/privacy/scan",
-          "line": 8911,
+          "line": 9278,
           "source": "src/router.js",
           "short": "POST /v1/privacy/scan – pure detector pass over { text } body. Returns",
           "comments": [
@@ -3502,7 +3693,7 @@
         {
           "method": "POST",
           "path": "/v1/privacy/test",
-          "line": 8922,
+          "line": 9289,
           "source": "src/router.js",
           "short": "POST /v1/privacy/test – apply the current policy to body.text and",
           "comments": [
@@ -3516,13 +3707,33 @@
       ]
     },
     {
+      "key": "product",
+      "label": "Product",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/product/experience",
+          "line": 820,
+          "source": "src/router.js",
+          "short": "Product-experience contract. Public and secret-safe: this is the same",
+          "comments": [
+            "Product-experience contract. Public and secret-safe: this is the same",
+            "source of truth exposed by `kolm surfaces --json` and `kolm tui --views`.",
+            "Frontend/account/docs can consume it to avoid drifting from CLI/TUI/API."
+          ],
+          "stub": false,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
       "key": "public",
       "label": "Public",
       "routes": [
         {
           "method": "GET",
           "path": "/v1/public/concepts",
-          "line": 1050,
+          "line": 1197,
           "source": "src/router.js",
           "short": "Public registry browsing – no auth needed for visibility=public",
           "comments": [
@@ -3534,7 +3745,7 @@
         {
           "method": "GET",
           "path": "/v1/public/concepts/:id",
-          "line": 1073,
+          "line": 1220,
           "source": "src/router.js",
           "short": "Public concept detail - returns one public-visibility concept by id (no",
           "comments": [
@@ -3548,7 +3759,7 @@
         {
           "method": "GET",
           "path": "/v1/public/featured",
-          "line": 6493,
+          "line": 6840,
           "source": "src/router.js",
           "short": "Public featured - hand-curated list of the most useful public recipes for",
           "comments": [
@@ -3562,7 +3773,7 @@
         {
           "method": "POST",
           "path": "/v1/public/run",
-          "line": 1080,
+          "line": 1227,
           "source": "src/router.js",
           "short": "Public read-only run for any public concept (lets unauth visitors try the runtime)",
           "comments": [
@@ -3574,7 +3785,7 @@
         {
           "method": "POST",
           "path": "/v1/public/submit",
-          "line": 6319,
+          "line": 6666,
           "source": "src/router.js",
           "short": "Public registry submissions (Phase E – Day 120-180)",
           "comments": [
@@ -3592,7 +3803,7 @@
         {
           "method": "POST",
           "path": "/v1/publish",
-          "line": 5658,
+          "line": 6005,
           "source": "src/router.js",
           "short": "Publish an edited generator (no synthesis required)",
           "comments": [
@@ -3610,7 +3821,7 @@
         {
           "method": "POST",
           "path": "/v1/recall",
-          "line": 3541,
+          "line": 3788,
           "source": "src/router.js",
           "short": "Recall",
           "comments": [
@@ -3625,7 +3836,7 @@
         {
           "method": "GET",
           "path": "/v1/recall/sources/:id",
-          "line": 3605,
+          "line": 3852,
           "source": "src/router.js",
           "short": "Single-source debug view. Confirms a sidecar exists and returns its",
           "comments": [
@@ -3638,7 +3849,7 @@
         {
           "method": "GET",
           "path": "/v1/recall/status",
-          "line": 3592,
+          "line": 3839,
           "source": "src/router.js",
           "short": "Health check for the recall substrate.",
           "comments": [
@@ -3656,7 +3867,7 @@
         {
           "method": "GET",
           "path": "/v1/receipts/:hash/public",
-          "line": 1447,
+          "line": 1594,
           "source": "src/router.js",
           "short": "Public receipt lookup - resolves a receipt, artifact, CID, or signature hash without auth.",
           "comments": [
@@ -3669,7 +3880,7 @@
         {
           "method": "POST",
           "path": "/v1/receipts/verify",
-          "line": 1121,
+          "line": 1268,
           "source": "src/router.js",
           "short": "This is NOT public-key cryptographic verification; that requires either",
           "comments": [
@@ -3691,7 +3902,7 @@
         {
           "method": "GET",
           "path": "/v1/recipes",
-          "line": 5960,
+          "line": 6307,
           "source": "src/router.js",
           "short": "Recipe aliases",
           "comments": [
@@ -3705,7 +3916,7 @@
         {
           "method": "GET",
           "path": "/v1/recipes/:id",
-          "line": 3198,
+          "line": 3445,
           "source": "src/router.js",
           "short": "Recipe artifact aliases over the artifact/job surface.",
           "comments": [
@@ -3721,7 +3932,7 @@
         {
           "method": "GET",
           "path": "/v1/recipes/:id/download",
-          "line": 3211,
+          "line": 3458,
           "source": "src/router.js",
           "short": "Recipe artifact download alias. Streams the completed .kolm artifact for a job id.",
           "comments": [
@@ -3733,7 +3944,7 @@
         {
           "method": "POST",
           "path": "/v1/recipes/:id/label-corpus",
-          "line": 6005,
+          "line": 6352,
           "source": "src/router.js",
           "short": "Inline labeler – synchronous up to 500 rows",
           "comments": [
@@ -3745,7 +3956,7 @@
         {
           "method": "POST",
           "path": "/v1/recipes/:id/label-corpus/stream",
-          "line": 6048,
+          "line": 6395,
           "source": "src/router.js",
           "short": "SSE stream variant: emits progress as rows are labeled.",
           "comments": [
@@ -3757,7 +3968,7 @@
         {
           "method": "GET",
           "path": "/v1/recipes/:id/lineage",
-          "line": 7175,
+          "line": 7522,
           "source": "src/router.js",
           "short": "GET /v1/recipes/:id/lineage – full Memory ↔ Recipe ↔ Specialist trace.",
           "comments": [
@@ -3769,7 +3980,7 @@
         {
           "method": "POST",
           "path": "/v1/recipes/:id/run",
-          "line": 5786,
+          "line": 6133,
           "source": "src/router.js",
           "short": "SDK-conventional REST alias: POST /v1/recipes/:id/run mirrors /v1/run",
           "comments": [
@@ -3783,7 +3994,7 @@
         {
           "method": "GET",
           "path": "/v1/recipes/:id/stats",
-          "line": 5970,
+          "line": 6317,
           "source": "src/router.js",
           "short": "Recipe stats alias for concept invocation counts, cache hit rate, and latency.",
           "comments": [
@@ -3801,7 +4012,7 @@
         {
           "method": "POST",
           "path": "/v1/redact",
-          "line": 4169,
+          "line": 4429,
           "source": "src/router.js",
           "short": "Redact - applies the tenant privacy policy to a text input and returns",
           "comments": [
@@ -3822,7 +4033,7 @@
         {
           "method": "GET",
           "path": "/v1/registry/export",
-          "line": 1621,
+          "line": 1768,
           "source": "src/router.js",
           "short": "Public registry export – the registry IS the model, downloaded not called.",
           "comments": [
@@ -3837,7 +4048,7 @@
         {
           "method": "GET",
           "path": "/v1/registry/public",
-          "line": 3224,
+          "line": 3471,
           "source": "src/router.js",
           "short": "/v1/registry/public – RS-1 contract alias over public concepts. Non-paginated;",
           "comments": [
@@ -3851,7 +4062,7 @@
         {
           "method": "GET",
           "path": "/v1/registry/search",
-          "line": 3283,
+          "line": 3530,
           "source": "src/router.js",
           "short": "/v1/registry/search – programmatic discovery. Filters: task (substring on",
           "comments": [
@@ -3866,7 +4077,7 @@
         {
           "method": "POST",
           "path": "/v1/registry/submit",
-          "line": 3249,
+          "line": 3496,
           "source": "src/router.js",
           "short": "/v1/registry/submit – community recipe intake. Validates the shape, logs",
           "comments": [
@@ -3878,6 +4089,26 @@
           ],
           "stub": false,
           "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/registry/verified-publishers/evaluate",
+          "line": 897,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "GET",
+          "path": "/v1/registry/verified-publishers/policy",
+          "line": 893,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
         }
       ]
     },
@@ -3888,7 +4119,7 @@
         {
           "method": "POST",
           "path": "/v1/replay",
-          "line": 7058,
+          "line": 7405,
           "source": "src/router.js",
           "short": "Replay - reruns a tenant's recent captures through the chosen artifact and",
           "comments": [
@@ -3903,7 +4134,7 @@
         {
           "method": "GET",
           "path": "/v1/replay/preview",
-          "line": 7026,
+          "line": 7373,
           "source": "src/router.js",
           "short": "Replay preview - dry-run for /v1/replay. Resolves the artifact + namespace",
           "comments": [
@@ -3923,7 +4154,7 @@
         {
           "method": "POST",
           "path": "/v1/responses",
-          "line": 2714,
+          "line": 2915,
           "source": "src/router.js",
           "short": "OpenAI-compatible passthrough for the responses, embeddings, and",
           "comments": [
@@ -3944,7 +4175,7 @@
         {
           "method": "POST",
           "path": "/v1/run",
-          "line": 5781,
+          "line": 6128,
           "source": "src/router.js",
           "short": "Runtime run - executes a concept_id or version_id against input and returns the output.",
           "comments": [
@@ -3963,7 +4194,7 @@
         {
           "method": "POST",
           "path": "/v1/runtime/decide",
-          "line": 10270,
+          "line": 10654,
           "source": "src/router.js",
           "short": "Runtime decision - executes the policy ladder for one request and records the decision.",
           "comments": [
@@ -3975,7 +4206,7 @@
         {
           "method": "GET",
           "path": "/v1/runtime/decisions",
-          "line": 10279,
+          "line": 10663,
           "source": "src/router.js",
           "short": "Runtime decision history - returns the most recent recorded runtime decisions.",
           "comments": [
@@ -3987,7 +4218,7 @@
         {
           "method": "GET",
           "path": "/v1/runtime/policy",
-          "line": 10253,
+          "line": 10637,
           "source": "src/router.js",
           "short": "Runtime policy read - returns the active runtime policy and available policy names.",
           "comments": [
@@ -3999,7 +4230,7 @@
         {
           "method": "PUT",
           "path": "/v1/runtime/policy",
-          "line": 10261,
+          "line": 10645,
           "source": "src/router.js",
           "short": "Runtime policy update - admin-only mutation of the active runtime routing policy.",
           "comments": [
@@ -4011,7 +4242,7 @@
         {
           "method": "GET",
           "path": "/v1/runtime/replacement-stats",
-          "line": 10288,
+          "line": 10672,
           "source": "src/router.js",
           "short": "Runtime replacement stats - summarizes replacement rate, savings, and spend over a window.",
           "comments": [
@@ -4029,7 +4260,7 @@
         {
           "method": "POST",
           "path": "/v1/search",
-          "line": 5735,
+          "line": 6082,
           "source": "src/router.js",
           "short": "Search - registry similarity search across the caller's tenant artifacts.",
           "comments": [
@@ -4050,7 +4281,7 @@
         {
           "method": "POST",
           "path": "/v1/seeds/from-nl",
-          "line": 1983,
+          "line": 2130,
           "source": "src/router.js",
           "short": "POST /v1/seeds/from-nl - expand a seed into variants via the configured",
           "comments": [
@@ -4063,7 +4294,7 @@
         {
           "method": "GET",
           "path": "/v1/seeds/from-nl/health",
-          "line": 1921,
+          "line": 2068,
           "source": "src/router.js",
           "short": "W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds",
           "comments": [
@@ -4082,7 +4313,7 @@
         {
           "method": "POST",
           "path": "/v1/session/login",
-          "line": 1022,
+          "line": 1169,
           "source": "src/router.js",
           "short": "POST /v1/session/login sets an httpOnly `kolm_session` cookie. Browsers can",
           "comments": [
@@ -4098,7 +4329,7 @@
         {
           "method": "POST",
           "path": "/v1/session/logout",
-          "line": 1044,
+          "line": 1191,
           "source": "src/router.js",
           "short": "Session logout - clears the kolm_session cookie set by /v1/session/login.",
           "comments": [
@@ -4117,7 +4348,7 @@
         {
           "method": "POST",
           "path": "/v1/signin",
-          "line": 979,
+          "line": 1126,
           "source": "src/router.js",
           "short": "/v1/signin and /v1/signout mirror /v1/session/login and /v1/session/logout",
           "comments": [
@@ -4139,7 +4370,7 @@
         {
           "method": "POST",
           "path": "/v1/signout",
-          "line": 1012,
+          "line": 1159,
           "source": "src/router.js",
           "short": "/v1/session/logout; kept so older clients that POST /v1/signout still work.",
           "comments": [
@@ -4158,7 +4389,7 @@
         {
           "method": "POST",
           "path": "/v1/signup",
-          "line": 894,
+          "line": 1040,
           "source": "src/router.js",
           "short": "Public signup",
           "comments": [
@@ -4178,7 +4409,7 @@
         {
           "method": "POST",
           "path": "/v1/sigstore/attest",
-          "line": 1375,
+          "line": 1522,
           "source": "src/router.js",
           "short": "Sigstore attest - forwards a caller-signed receipt bundle to the",
           "comments": [
@@ -4193,7 +4424,7 @@
         {
           "method": "GET",
           "path": "/v1/sigstore/entry/:logIndex",
-          "line": 1354,
+          "line": 1501,
           "source": "src/router.js",
           "short": "Sigstore entry fetch - forwards to the configured Rekor instance and",
           "comments": [
@@ -4207,7 +4438,7 @@
         {
           "method": "GET",
           "path": "/v1/sigstore/health",
-          "line": 1344,
+          "line": 1491,
           "source": "src/router.js",
           "short": "has a Rekor URL configured + whether the",
           "comments": [
@@ -4228,7 +4459,7 @@
         {
           "method": "GET",
           "path": "/v1/sim",
-          "line": 10204,
+          "line": 10588,
           "source": "src/router.js",
           "short": "Sim list - returns saved workflow simulations plus the supported simulator type catalog.",
           "comments": [
@@ -4240,7 +4471,7 @@
         {
           "method": "GET",
           "path": "/v1/sim/:id",
-          "line": 10212,
+          "line": 10596,
           "source": "src/router.js",
           "short": "Sim detail - returns one saved workflow simulation record by simulation id.",
           "comments": [
@@ -4252,7 +4483,7 @@
         {
           "method": "POST",
           "path": "/v1/sim/run",
-          "line": 10189,
+          "line": 10573,
           "source": "src/router.js",
           "short": "Sim run - creates a workflow simulation and emits synthetic events into its saved run record.",
           "comments": [
@@ -4270,7 +4501,7 @@
         {
           "method": "GET",
           "path": "/v1/simulations",
-          "line": 10872,
+          "line": 11256,
           "source": "src/router.js",
           "short": "/v1/simulations – list + run alias for /v1/sim + /v1/sim/run. Plus a",
           "comments": [
@@ -4284,7 +4515,7 @@
         {
           "method": "POST",
           "path": "/v1/simulations",
-          "line": 10881,
+          "line": 11265,
           "source": "src/router.js",
           "short": "Simulations create+run - REST alias of /v1/sim/run that creates a",
           "comments": [
@@ -4298,7 +4529,7 @@
         {
           "method": "GET",
           "path": "/v1/simulations/:id",
-          "line": 10896,
+          "line": 11280,
           "source": "src/router.js",
           "short": "Simulation detail - REST alias of /v1/sim/:id. Returns one saved workflow",
           "comments": [
@@ -4311,7 +4542,7 @@
         {
           "method": "POST",
           "path": "/v1/simulations/:id/promote",
-          "line": 10907,
+          "line": 11291,
           "source": "src/router.js",
           "short": "Simulation promote - mirrors the \"promote to holdout\" button on",
           "comments": [
@@ -4332,7 +4563,7 @@
         {
           "method": "GET",
           "path": "/v1/spec",
-          "line": 1566,
+          "line": 1713,
           "source": "src/router.js",
           "short": "Public RS-1 spec document – open standard, no auth required.",
           "comments": [
@@ -4350,7 +4581,7 @@
         {
           "method": "POST",
           "path": "/v1/spec-decode",
-          "line": 6960,
+          "line": 7307,
           "source": "src/router.js",
           "short": "W480 - Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa)",
           "comments": [
@@ -4364,7 +4595,7 @@
         {
           "method": "GET",
           "path": "/v1/spec-decode/doctor",
-          "line": 6949,
+          "line": 7296,
           "source": "src/router.js",
           "short": "W480 - Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa).",
           "comments": [
@@ -4383,7 +4614,7 @@
         {
           "method": "GET",
           "path": "/v1/specialists",
-          "line": 6278,
+          "line": 6625,
           "source": "src/router.js",
           "short": "Specialists list - returns tenant-visible specialist jobs without inline corpus rows.",
           "comments": [
@@ -4395,7 +4626,7 @@
         {
           "method": "GET",
           "path": "/v1/specialists/:id",
-          "line": 6284,
+          "line": 6631,
           "source": "src/router.js",
           "short": "Specialist detail - returns one accessible specialist record for the tenant or admin.",
           "comments": [
@@ -4407,7 +4638,7 @@
         {
           "method": "POST",
           "path": "/v1/specialists/:id/run",
-          "line": 6303,
+          "line": 6650,
           "source": "src/router.js",
           "short": "Specialist run - executes the specialist preview through its source recipe fallback.",
           "comments": [
@@ -4419,7 +4650,7 @@
         {
           "method": "GET",
           "path": "/v1/specialists/:id/weights",
-          "line": 6292,
+          "line": 6639,
           "source": "src/router.js",
           "short": "Specialist weights - returns completed weight metadata or 503 while training is pending.",
           "comments": [
@@ -4431,7 +4662,7 @@
         {
           "method": "POST",
           "path": "/v1/specialists/auto-distill",
-          "line": 7704,
+          "line": 8071,
           "source": "src/router.js",
           "short": "Specialist auto-distill - turns 1,000+ kept namespace captures into a distill job.",
           "comments": [
@@ -4444,7 +4675,7 @@
         {
           "method": "POST",
           "path": "/v1/specialists/train",
-          "line": 6257,
+          "line": 6604,
           "source": "src/router.js",
           "short": "Specialist train - queues tenant specialist training from an existing recipe and optional corpus.",
           "comments": [
@@ -4456,7 +4687,7 @@
         {
           "method": "POST",
           "path": "/v1/specialists/waitlist",
-          "line": 6123,
+          "line": 6470,
           "source": "src/router.js",
           "short": "Specialist waitlist - captures guided-training interest from teams before onboarding.",
           "comments": [
@@ -4474,7 +4705,7 @@
         {
           "method": "POST",
           "path": "/v1/status/subscribe",
-          "line": 707,
+          "line": 742,
           "source": "src/router.js",
           "short": "Status subscribe - email opt-in from the /status page. Validates the address,",
           "comments": [
@@ -4494,7 +4725,7 @@
         {
           "method": "GET",
           "path": "/v1/storage/config",
-          "line": 10708,
+          "line": 11092,
           "source": "src/router.js",
           "short": "Storage config - returns the event-store driver info + media blob base",
           "comments": [
@@ -4508,7 +4739,7 @@
         {
           "method": "PUT",
           "path": "/v1/storage/config",
-          "line": 10724,
+          "line": 11108,
           "source": "src/router.js",
           "short": "Storage config update - admin-only echo endpoint that does NOT mutate",
           "comments": [
@@ -4521,9 +4752,24 @@
           "expanded_from": null
         },
         {
+          "method": "GET",
+          "path": "/v1/storage/object-readiness",
+          "line": 853,
+          "source": "src/router.js",
+          "short": "Artifact object-store readiness for account UI and CI. This is split out",
+          "comments": [
+            "Artifact object-store readiness for account UI and CI. This is split out",
+            "from generic cloud readiness because large .kolm/model bundles require a",
+            "real object path (R2 S3, AWS S3, generic S3, Supabase S3, or local disk),",
+            "not only provider env detection."
+          ],
+          "stub": false,
+          "expanded_from": null
+        },
+        {
           "method": "POST",
           "path": "/v1/storage/purge",
-          "line": 10741,
+          "line": 11125,
           "source": "src/router.js",
           "short": "Storage purge - destructive admin-only event-store purge. Requires",
           "comments": [
@@ -4537,13 +4783,39 @@
       ]
     },
     {
+      "key": "streaming",
+      "label": "Streaming",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/v1/streaming/capabilities",
+          "line": 909,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        },
+        {
+          "method": "POST",
+          "path": "/v1/streaming/normalize",
+          "line": 913,
+          "source": "src/router.js",
+          "short": null,
+          "comments": [],
+          "stub": true,
+          "expanded_from": null
+        }
+      ]
+    },
+    {
       "key": "stripe",
       "label": "Stripe",
       "routes": [
         {
           "method": "POST",
           "path": "/v1/stripe/webhook",
-          "line": 4888,
+          "line": 5235,
           "source": "src/router.js",
           "short": "(downgrade to free). Idempotent: each Stripe event id is recorded once.",
           "comments": [
@@ -4564,7 +4836,7 @@
         {
           "method": "GET",
           "path": "/v1/sync/audit",
-          "line": 9044,
+          "line": 9411,
           "source": "src/router.js",
           "short": "GET /v1/sync/audit – tail the audit.jsonl ring.",
           "comments": [
@@ -4576,7 +4848,7 @@
         {
           "method": "POST",
           "path": "/v1/sync/inbox",
-          "line": 9056,
+          "line": 9423,
           "source": "src/router.js",
           "short": "POST /v1/sync/inbox – PUBLIC receive endpoint for peer daemons. The",
           "comments": [
@@ -4591,7 +4863,7 @@
         {
           "method": "POST",
           "path": "/v1/sync/pull",
-          "line": 9030,
+          "line": 9397,
           "source": "src/router.js",
           "short": "POST /v1/sync/pull – pull events from cloud and append locally.",
           "comments": [
@@ -4603,7 +4875,7 @@
         {
           "method": "POST",
           "path": "/v1/sync/push",
-          "line": 9015,
+          "line": 9382,
           "source": "src/router.js",
           "short": "POST /v1/sync/push – push events to the configured cloud_base. Returns",
           "comments": [
@@ -4616,7 +4888,7 @@
         {
           "method": "PUT",
           "path": "/v1/sync/state",
-          "line": 9001,
+          "line": 9368,
           "source": "src/router.js",
           "short": "PUT /v1/sync/state – set sync state. Admin-only because it changes",
           "comments": [
@@ -4629,7 +4901,7 @@
         {
           "method": "GET",
           "path": "/v1/sync/status",
-          "line": 8992,
+          "line": 9359,
           "source": "src/router.js",
           "short": "GET /v1/sync/status – return current state + classes_blocked + counts.",
           "comments": [
@@ -4647,7 +4919,7 @@
         {
           "method": "POST",
           "path": "/v1/synthesize",
-          "line": 5227,
+          "line": 5574,
           "source": "src/router.js",
           "short": "Layer 1: Synthesis",
           "comments": [
@@ -4659,7 +4931,7 @@
         {
           "method": "POST",
           "path": "/v1/synthesize/batch",
-          "line": 5323,
+          "line": 5670,
           "source": "src/router.js",
           "short": "Batch synthesis: multiple concepts in one round-trip. Sequential, since",
           "comments": [
@@ -4672,7 +4944,7 @@
         {
           "method": "POST",
           "path": "/v1/synthesize/stream",
-          "line": 5270,
+          "line": 5617,
           "source": "src/router.js",
           "short": "SSE: live synthesis events (candidate generated, verified, accepted, etc.)",
           "comments": [
@@ -4690,7 +4962,7 @@
         {
           "method": "POST",
           "path": "/anthropic/v1/messages",
-          "line": 2728,
+          "line": 2929,
           "source": "src/router.js",
           "short": "/anthropic/v1/messages so SDKs that point BASE_URL at https://kolm.ai/anthropic",
           "comments": [
@@ -4704,7 +4976,7 @@
         {
           "method": "GET",
           "path": "/health",
-          "line": 695,
+          "line": 730,
           "source": "src/router.js",
           "short": "Public /health – no provider-key leakage. Authenticated callers can",
           "comments": [
@@ -4717,7 +4989,7 @@
         {
           "method": "GET",
           "path": "/ready",
-          "line": 764,
+          "line": 799,
           "source": "src/router.js",
           "short": "gates. /health stays green for static uptime; /ready fails when critical",
           "comments": [
@@ -4737,7 +5009,7 @@
         {
           "method": "POST",
           "path": "/v1/team/accept-invite",
-          "line": 9106,
+          "line": 9473,
           "source": "src/router.js",
           "short": "POST /v1/team/accept-invite – PUBLIC. The invite_token IS the credential.",
           "comments": [
@@ -4749,7 +5021,7 @@
         {
           "method": "GET",
           "path": "/v1/team/approvals",
-          "line": 9148,
+          "line": 9515,
           "source": "src/router.js",
           "short": "GET /v1/team/approvals – list pending/decided approvals.",
           "comments": [
@@ -4761,7 +5033,7 @@
         {
           "method": "POST",
           "path": "/v1/team/approvals",
-          "line": 9163,
+          "line": 9530,
           "source": "src/router.js",
           "short": "POST /v1/team/approvals – submit a new approval request.",
           "comments": [
@@ -4773,7 +5045,7 @@
         {
           "method": "POST",
           "path": "/v1/team/approvals/:id/decide",
-          "line": 9176,
+          "line": 9543,
           "source": "src/router.js",
           "short": "POST /v1/team/approvals/:id/decide – approve or reject. 403 on self-review.",
           "comments": [
@@ -4785,7 +5057,7 @@
         {
           "method": "POST",
           "path": "/v1/team/invite",
-          "line": 9086,
+          "line": 9453,
           "source": "src/router.js",
           "short": "POST /v1/team/invite – admin-only, returns the invite token + URL.",
           "comments": [
@@ -4797,7 +5069,7 @@
         {
           "method": "DELETE",
           "path": "/v1/team/member/:id",
-          "line": 9135,
+          "line": 9502,
           "source": "src/router.js",
           "short": "DELETE /v1/team/member/:id – admin-only removal.",
           "comments": [
@@ -4809,7 +5081,7 @@
         {
           "method": "GET",
           "path": "/v1/team/members",
-          "line": 9080,
+          "line": 9447,
           "source": "src/router.js",
           "short": "GET /v1/team/members – list members.",
           "comments": [
@@ -4821,7 +5093,7 @@
         {
           "method": "POST",
           "path": "/v1/team/namespaces",
-          "line": 9197,
+          "line": 9564,
           "source": "src/router.js",
           "short": "POST /v1/team/namespaces – admin-only register a (possibly shared) namespace.",
           "comments": [
@@ -4833,7 +5105,7 @@
         {
           "method": "PUT",
           "path": "/v1/team/role",
-          "line": 9121,
+          "line": 9488,
           "source": "src/router.js",
           "short": "PUT /v1/team/role – admin-only role update for a member.",
           "comments": [
@@ -4845,7 +5117,7 @@
         {
           "method": "POST",
           "path": "/v1/team/sync",
-          "line": 9226,
+          "line": 9593,
           "source": "src/router.js",
           "short": "structured body; soft cap sets x-kolm-quota-warning.",
           "comments": [
@@ -4860,7 +5132,7 @@
         {
           "method": "GET",
           "path": "/v1/team/workspace",
-          "line": 9074,
+          "line": 9441,
           "source": "src/router.js",
           "short": "GET /v1/team/workspace – return the workspace record + members.",
           "comments": [
@@ -4878,7 +5150,7 @@
         {
           "method": "GET",
           "path": "/v1/teams",
-          "line": 7866,
+          "line": 8233,
           "source": "src/router.js",
           "short": "Team list - returns active teams for the signed-in tenant with their role.",
           "comments": [
@@ -4890,7 +5162,7 @@
         {
           "method": "POST",
           "path": "/v1/teams",
-          "line": 7853,
+          "line": 8220,
           "source": "src/router.js",
           "short": "Team creation - creates a paid-plan workspace and makes the caller the owner.",
           "comments": [
@@ -4902,7 +5174,7 @@
         {
           "method": "DELETE",
           "path": "/v1/teams/:idOrSlug",
-          "line": 7899,
+          "line": 8266,
           "source": "src/router.js",
           "short": "Team delete - owner-only soft delete that removes members and pending invites.",
           "comments": [
@@ -4914,7 +5186,7 @@
         {
           "method": "GET",
           "path": "/v1/teams/:idOrSlug",
-          "line": 7873,
+          "line": 8240,
           "source": "src/router.js",
           "short": "Team detail - returns team, member, and pending-invite data for members or admins.",
           "comments": [
@@ -4926,7 +5198,7 @@
         {
           "method": "PATCH",
           "path": "/v1/teams/:idOrSlug",
-          "line": 7886,
+          "line": 8253,
           "source": "src/router.js",
           "short": "Team update - admin-only rename, plan, and seat-limit updates.",
           "comments": [
@@ -4938,7 +5210,7 @@
         {
           "method": "POST",
           "path": "/v1/teams/:idOrSlug/invite",
-          "line": 7927,
+          "line": 8294,
           "source": "src/router.js",
           "short": "Team invite - admin-only invite that enforces seat limits and returns an accept URL.",
           "comments": [
@@ -4950,7 +5222,7 @@
         {
           "method": "DELETE",
           "path": "/v1/teams/:idOrSlug/members/:tenant_id",
-          "line": 7988,
+          "line": 8355,
           "source": "src/router.js",
           "short": "Team member removal - members may leave; admins may remove non-owner members.",
           "comments": [
@@ -4962,7 +5234,7 @@
         {
           "method": "PATCH",
           "path": "/v1/teams/:idOrSlug/members/:tenant_id",
-          "line": 7974,
+          "line": 8341,
           "source": "src/router.js",
           "short": "Team member role update - admin-only role changes, with owner changes routed via transfer.",
           "comments": [
@@ -4974,7 +5246,7 @@
         {
           "method": "POST",
           "path": "/v1/teams/:idOrSlug/transfer",
-          "line": 7912,
+          "line": 8279,
           "source": "src/router.js",
           "short": "Team ownership transfer - owner-only handoff to an existing team member.",
           "comments": [
@@ -4986,7 +5258,7 @@
         {
           "method": "DELETE",
           "path": "/v1/teams/invites/:invite_id",
-          "line": 7963,
+          "line": 8330,
           "source": "src/router.js",
           "short": "Team invite revoke - admin-only deletion of an outstanding invite by invite id.",
           "comments": [
@@ -4998,7 +5270,7 @@
         {
           "method": "GET",
           "path": "/v1/teams/invites/:token",
-          "line": 7943,
+          "line": 8310,
           "source": "src/router.js",
           "short": "Team invite preview - public token lookup with invite role, expiry, and team summary.",
           "comments": [
@@ -5010,7 +5282,7 @@
         {
           "method": "POST",
           "path": "/v1/teams/invites/:token/accept",
-          "line": 7954,
+          "line": 8321,
           "source": "src/router.js",
           "short": "Team invite acceptance - signed-in tenant accepts a valid invite for their email.",
           "comments": [
@@ -5028,7 +5300,7 @@
         {
           "method": "GET",
           "path": "/v1/telemetry",
-          "line": 5810,
+          "line": 6157,
           "source": "src/router.js",
           "short": "Returns the v5 (kolm) summary AND the legacy invocations snapshot the",
           "comments": [
@@ -5050,7 +5322,7 @@
         {
           "method": "GET",
           "path": "/v1/trace/:trace_id/chain",
-          "line": 8244,
+          "line": 8611,
           "source": "src/router.js",
           "short": "Trace chain - returns tenant-scoped parent/child span chain for a 32-hex trace id.",
           "comments": [
@@ -5062,7 +5334,7 @@
         {
           "method": "GET",
           "path": "/v1/trace/:trace_id/export",
-          "line": 8255,
+          "line": 8622,
           "source": "src/router.js",
           "short": "Trace export - returns tenant-scoped raw spans for a 32-hex trace id.",
           "comments": [
@@ -5074,7 +5346,7 @@
         {
           "method": "GET",
           "path": "/v1/trace/:trace_id/stats",
-          "line": 8233,
+          "line": 8600,
           "source": "src/router.js",
           "short": "Trace stats - returns tenant-scoped span counts and timing stats for a 32-hex trace id.",
           "comments": [
@@ -5086,7 +5358,7 @@
         {
           "method": "POST",
           "path": "/v1/trace/append",
-          "line": 8266,
+          "line": 8633,
           "source": "src/router.js",
           "short": "Trace append - validates and stores one span under the authenticated tenant.",
           "comments": [
@@ -5098,7 +5370,7 @@
         {
           "method": "POST",
           "path": "/v1/trace/compile",
-          "line": 8356,
+          "line": 8723,
           "source": "src/router.js",
           "short": "Trace compile - converts a tenant trace into replayable workflow IR seeds.",
           "comments": [
@@ -5110,7 +5382,7 @@
         {
           "method": "POST",
           "path": "/v1/trace/translate",
-          "line": 8433,
+          "line": 8800,
           "source": "src/router.js",
           "short": "Trace translate - rewrites trace IR provider/model fields for replay on another provider.",
           "comments": [
@@ -5122,7 +5394,7 @@
         {
           "method": "GET",
           "path": "/v1/trace/translate/detect",
-          "line": 8413,
+          "line": 8780,
           "source": "src/router.js",
           "short": "Trace provider detect - detects source provider/model metadata for a tenant trace.",
           "comments": [
@@ -5134,7 +5406,7 @@
         {
           "method": "GET",
           "path": "/v1/trace/translate/providers",
-          "line": 8407,
+          "line": 8774,
           "source": "src/router.js",
           "short": "Trace translate providers - lists supported cross-provider trace rewrite targets.",
           "comments": [
@@ -5146,7 +5418,7 @@
         {
           "method": "POST",
           "path": "/v1/trace/verify",
-          "line": 8378,
+          "line": 8745,
           "source": "src/router.js",
           "short": "Trace replay verify - checks compiled replay outputs against captured trace spans.",
           "comments": [
@@ -5164,7 +5436,7 @@
         {
           "method": "POST",
           "path": "/v1/training/plan",
-          "line": 10241,
+          "line": 10625,
           "source": "src/router.js",
           "short": "Training plan - drafts a training plan (model class, dataset split, eval",
           "comments": [
@@ -5184,7 +5456,7 @@
         {
           "method": "GET",
           "path": "/v1/tunnel/agent/:token",
-          "line": 8052,
+          "line": 8419,
           "source": "src/router.js",
           "short": "SSE long-poll: agent attaches and receives `request` events.",
           "comments": [
@@ -5196,7 +5468,7 @@
         {
           "method": "POST",
           "path": "/v1/tunnel/agent/:token/response",
-          "line": 8059,
+          "line": 8426,
           "source": "src/router.js",
           "short": "Agent posts a response for a given request_id.",
           "comments": [
@@ -5208,7 +5480,7 @@
         {
           "method": "POST",
           "path": "/v1/tunnel/register",
-          "line": 8008,
+          "line": 8375,
           "source": "src/router.js",
           "short": "The agent maintains an SSE connection to /v1/tunnel/agent/<token>, pulls",
           "comments": [
@@ -5230,7 +5502,7 @@
         {
           "method": "GET",
           "path": "/v1/tunnels",
-          "line": 8030,
+          "line": 8397,
           "source": "src/router.js",
           "short": "Tunnels list - returns the caller's active tenant tunnels (or team tunnels",
           "comments": [
@@ -5244,7 +5516,7 @@
         {
           "method": "DELETE",
           "path": "/v1/tunnels/:token",
-          "line": 8040,
+          "line": 8407,
           "source": "src/router.js",
           "short": "Tunnel close - tears down one tunnel by token. Tenant-fenced (closeTunnel",
           "comments": [
@@ -5264,7 +5536,7 @@
         {
           "method": "POST",
           "path": "/v1/verified-inference",
-          "line": 1778,
+          "line": 1925,
           "source": "src/router.js",
           "short": "Verified-inference endpoint – Generator-Verifier asymmetry made shippable.",
           "comments": [
@@ -5286,7 +5558,7 @@
         {
           "method": "POST",
           "path": "/v1/verify",
-          "line": 5363,
+          "line": 5710,
           "source": "src/router.js",
           "short": "Verify - compiles caller-supplied source and runs the verify suite against",
           "comments": [
@@ -5301,7 +5573,7 @@
         {
           "method": "GET",
           "path": "/v1/verify/:cid",
-          "line": 5385,
+          "line": 5732,
           "source": "src/router.js",
           "short": "W436 – DoD step 9 closer. If the registry row carries `manifest.hashes`,",
           "comments": [
@@ -5323,7 +5595,7 @@
         {
           "method": "GET",
           "path": "/v1/whoami",
-          "line": 3805,
+          "line": 4065,
           "source": "src/router.js",
           "short": "W433 – /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the",
           "comments": [
@@ -5345,7 +5617,7 @@
         {
           "method": "GET",
           "path": "/v1/workflows/repeated",
-          "line": 10805,
+          "line": 11189,
           "source": "src/router.js",
           "short": "/v1/workflows/repeated – repeated-workflows.html surfaces the cluster",
           "comments": [
@@ -5365,7 +5637,7 @@
         {
           "method": "POST",
           "path": "/v1/wrap/verified",
-          "line": 1673,
+          "line": 1820,
           "source": "src/router.js",
           "short": "If `corpus_namespace` is set, we ask the tenant's Recall index for the",
           "comments": [

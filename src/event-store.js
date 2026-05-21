@@ -41,9 +41,16 @@ function _home() {
   return process.env.HOME || process.env.USERPROFILE || os.homedir();
 }
 
+function _isTestRunner() {
+  return process.env.NODE_ENV === 'test'
+    || process.env.npm_lifecycle_event === 'test'
+    || process.execArgv.some((arg) => arg === '--test' || arg.startsWith('--test-'))
+    || process.argv.some((arg) => arg === '--test' || arg.startsWith('--test-') || /[\\/]tests[\\/].+\.test\.js$/i.test(arg));
+}
+
 function _ensureDirs() {
   if (_eventsDir && fs.existsSync(_eventsDir)) return;
-  const testMode = process.env.NODE_ENV === 'test' || process.env.npm_lifecycle_event === 'test';
+  const testMode = _isTestRunner();
   const base = process.env.KOLM_DATA_DIR
     ? path.resolve(process.env.KOLM_DATA_DIR)
     : testMode

@@ -54,10 +54,10 @@ export function extractUsage(body, provider) {
     };
   }
   if (provider === 'gemini') {
-    const u = body.usageMetadata || {};
+    const u = body.usageMetadata || body.usage || {};
     return {
-      prompt_tokens: Number(u.promptTokenCount || 0),
-      completion_tokens: Number(u.candidatesTokenCount || 0),
+      prompt_tokens: Number(u.promptTokenCount || u.prompt_tokens || u.input_tokens || 0),
+      completion_tokens: Number(u.candidatesTokenCount || u.completion_tokens || u.output_tokens || 0),
     };
   }
   return { prompt_tokens: 0, completion_tokens: 0 };

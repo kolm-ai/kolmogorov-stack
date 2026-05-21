@@ -304,6 +304,63 @@ test('W411 #3 — POST /v1/capture/anthropic bridges with vendor:"anthropic" + t
   }
 });
 
+test('W411 #3b — advertised capture base-url aliases work in fixture mode without live provider keys', async () => {
+  const home = mkHome();
+  try {
+    setIsolatedHome(home);
+    process.env.KOLM_CONNECTOR_FIXTURE = '1';
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.ANTHROPIC_API_KEY;
+    const { app, apiKey } = await makeAppAndTenant();
+    await withServer(app, async (base) => {
+      const ns = 'w411_fixture_' + Date.now().toString(36);
+      const openai = await fetch(base + '/v1/capture/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: 'Bearer ' + apiKey,
+          'x-kolm-namespace': ns,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: 'fixture openai alias' }],
+        }),
+      });
+      assert.equal(openai.status, 200, 'OpenAI capture base-url alias must fixture without upstream key');
+      assert.equal(openai.headers.get('x-kolm-fixture'), 'true');
+      assert.ok(openai.headers.get('x-kolm-capture-id'));
+      const openaiJson = await openai.json();
+      assert.equal(openaiJson.object, 'chat.completion');
+
+      const anthropic = await fetch(base + '/v1/capture/anthropic/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: 'Bearer ' + apiKey,
+          'anthropic-version': '2023-06-01',
+          'x-kolm-namespace': ns,
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 128,
+          messages: [{ role: 'user', content: 'fixture anthropic alias' }],
+        }),
+      });
+      assert.equal(anthropic.status, 200, 'Anthropic capture base-url alias must fixture without upstream key');
+      assert.equal(anthropic.headers.get('x-kolm-fixture'), 'true');
+      assert.ok(anthropic.headers.get('x-kolm-capture-id'));
+      const anthropicJson = await anthropic.json();
+      assert.equal(anthropicJson.type, 'message');
+
+      const evRows = await eventStore.listEvents({ namespace: ns, limit: 50 });
+      assert.equal(evRows.length, 2, 'both fixture calls must still create capture events');
+      assert.deepEqual(new Set(evRows.map((e) => e.vendor)), new Set(['openai', 'anthropic']));
+    });
+  } finally {
+    teardownIsolated(home);
+  }
+});
+
 test('W411 #4 — /v1/capture/openrouter via local-daemon mode bridges with vendor:"openrouter"', async () => {
   const home = mkHome();
   try {

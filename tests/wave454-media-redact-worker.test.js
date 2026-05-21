@@ -92,9 +92,11 @@ test('W454 #2 — cli/kolm.js wires cmdMedia + HELP.media + completion entry', (
   assert.match(cli, /case 'media':\s*await\s+withErrorContext\('media'/,
     'main switch must route "media" through withErrorContext');
 
-  // HELP.media exists and documents the two subcommands.
+  // HELP.media exists and documents the local tokenizer plus redaction subcommands.
   assert.match(cli, /media:\s*`kolm media/,
     'HELP.media must define the help string');
+  assert.match(cli, /kolm media tokenize/,
+    'HELP.media must document `kolm media tokenize`');
   assert.match(cli, /kolm media doctor/,
     'HELP.media must document `kolm media doctor`');
   assert.match(cli, /kolm media redact-job/,
@@ -103,8 +105,8 @@ test('W454 #2 — cli/kolm.js wires cmdMedia + HELP.media + completion entry', (
   // COMPLETION_VERBS includes media; COMPLETION_SUBS maps media subcommands.
   assert.match(cli, /'redact',\s*'media'/,
     "COMPLETION_VERBS must include 'media' (next to 'redact')");
-  assert.match(cli, /media:\s*\['doctor',\s*'redact-job'\]/,
-    'COMPLETION_SUBS.media must list doctor + redact-job subcommands');
+  assert.match(cli, /media:\s*\['tokenize',\s*'doctor',\s*'redact-job'\]/,
+    'COMPLETION_SUBS.media must list tokenize + doctor + redact-job subcommands');
 });
 
 // =============================================================================

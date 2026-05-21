@@ -1,139 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>kolm tune · CLI reference · kolm.ai</title>
-<meta name="description" content="Reference for the kolm tune CLI verb: usage, flags, examples, and links to related docs.">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm tune | CLI reference | kolm.ai</title>
+<meta name="description" content="Evolve a local student artifact from skeleton to a promoted revision.">
 <link rel="canonical" href="https://kolm.ai/docs/cli/tune">
-<meta property="og:title" content="kolm tune · CLI reference · kolm.ai">
-<meta property="og:description" content="Reference for the kolm tune CLI verb: usage, flags, examples, and links to related docs.">
+<meta property="og:title" content="kolm tune | CLI reference | kolm.ai">
+<meta property="og:description" content="Evolve a local student artifact from skeleton to a promoted revision.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/tune">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm tune","description":"Reference for the kolm tune CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/tune","mainEntityOfPage":"https://kolm.ai/docs/cli/tune","author":{"@type":"Organization","name":"kolm.ai"}}
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm tune","description":"Evolve a local student artifact from skeleton to a promoted revision.","url":"https://kolm.ai/docs/cli/tune","mainEntityOfPage":"https://kolm.ai/docs/cli/tune","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
-<meta name="twitter:title" content="kolm tune · CLI reference · kolm.ai">
-<meta name="twitter:description" content="Reference for the kolm tune CLI verb: usage, flags, examples, and links to related docs.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Run</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
 <a class="skip-link" href="#main">Skip to content</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -233,11 +121,22 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="tune">
 <nav aria-label="Breadcrumb" class="crumbs">
- <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>tune</span>
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>tune</span>
 </nav>
-<p>--- title: kolm tune · kolm.ai description: Evolve a local student artifact from skeleton to a promoted revision. ---</p>
+<section class="kolm-surface-media kolm-surface-media--inline" aria-label="CLI workflow proof">
+  <div class="media-terminal">
+    <span class="media-kicker">CLI contract</span>
+    <span class="media-line"><span class="ok">$</span> kolm tune --help</span>
+    <span class="media-line"><span class="ok">$</span> kolm tune --json</span>
+    <p>Every reference page is generated from the command source, keeps usage and examples close to the product, and links into the same API, account, and artifact workflow.</p>
+  </div>
+  <div class="media-proof">
+    <span class="media-kicker">Operational proof</span>
+    <p>Use this verb inside the capture, dataset, distill, compile, verify, or runtime loop. Scripts can pin JSON output, humans get the same flow in the account console and TUI.</p>
+  </div>
+</section>
 <h1>kolm tune</h1>
-<p>&gt; Evolve an artifact&#39;s local adapter from a skeleton LoRA into a living model. Init, capture, step, eval, promote.</p>
+<blockquote><p>Evolve an artifact&#39;s local adapter from a skeleton LoRA into a living model. Init, capture, step, eval, promote.</p></blockquote>
 <h2>Usage</h2>
 <pre><code>
 kolm tune init --artifact &lt;art.kolm&gt; --base &lt;model_path_or_id&gt; [--rank 8] [--alpha 16]
@@ -251,9 +150,38 @@ kolm tune watch --artifact &lt;art.kolm&gt; [--interval 30000]
 kolm tune status --artifact &lt;art.kolm&gt;
 </code></pre>
 <h2>Pipeline</h2>
-<p>| Verb | Effect | | ---- | ------ | | <code>init</code> | v0 skeleton (PEFT config, zero weights). Required first step | | <code>capture-on</code> | every <code>kolm run</code> writes (input, output) to <code>captures.jsonl</code> | | <code>step</code> | SFT on captures (Python: torch + peft + transformers). Writes <code>vN+1</code> | | <code>eval</code> | recompute K-score for the candidate | | <code>promote</code> | if K-score(vN) &gt;= gate (default 0.85) AND &gt;= current head, flip HEAD | | <code>rollback</code> | restore the prior HEAD revision from <code>head.prev</code> | | <code>watch</code> | daemon: when captures grow past threshold, auto step then eval then promote |</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Verb</th><th>Effect</th></tr>
+</thead>
+<tbody>
+<tr><td><code>init</code></td><td>v0 skeleton (PEFT config, zero weights). Required first step</td></tr>
+<tr><td><code>capture-on</code></td><td>every <code>kolm run</code> writes (input, output) to <code>captures.jsonl</code></td></tr>
+<tr><td><code>step</code></td><td>SFT on captures (Python: torch + peft + transformers). Writes <code>vN+1</code></td></tr>
+<tr><td><code>eval</code></td><td>recompute K-score for the candidate</td></tr>
+<tr><td><code>promote</code></td><td>if K-score(vN) &gt;= gate (default 0.85) AND &gt;= current head, flip HEAD</td></tr>
+<tr><td><code>rollback</code></td><td>restore the prior HEAD revision from <code>head.prev</code></td></tr>
+<tr><td><code>watch</code></td><td>daemon: when captures grow past threshold, auto step then eval then promote</td></tr>
+</tbody>
+</table></div>
 <h2>Flags</h2>
-<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--base &lt;path|id&gt;</code> | none | base model path or HuggingFace id (required for init) | | <code>--rank &lt;n&gt;</code> | <code>8</code> | LoRA rank | | <code>--alpha &lt;n&gt;</code> | <code>16</code> | LoRA alpha | | <code>--epochs &lt;n&gt;</code> | <code>1</code> | training epochs | | <code>--batch-size &lt;n&gt;</code> | <code>4</code> | training batch size | | <code>--lr &lt;rate&gt;</code> | <code>2e-4</code> | learning rate | | <code>--airgap</code> | off | sets <code>TRANSFORMERS_OFFLINE=1</code>, <code>HF_DATASETS_OFFLINE=1</code>, <code>HF_HUB_OFFLINE=1</code>. Refuses any <code>base_model</code> that is not a local path | | <code>--rev vN</code> | latest | revision id | | <code>--force</code> | off | promote even when K-score is below current head | | <code>--interval &lt;ms&gt;</code> | <code>30000</code> | watch daemon poll interval |</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>`--base &lt;path</td><td>id&gt;`</td><td>none</td><td>base model path or HuggingFace id (required for init)</td></tr>
+<tr><td><code>--rank &lt;n&gt;</code></td><td><code>8</code></td><td>LoRA rank</td></tr>
+<tr><td><code>--alpha &lt;n&gt;</code></td><td><code>16</code></td><td>LoRA alpha</td></tr>
+<tr><td><code>--epochs &lt;n&gt;</code></td><td><code>1</code></td><td>training epochs</td></tr>
+<tr><td><code>--batch-size &lt;n&gt;</code></td><td><code>4</code></td><td>training batch size</td></tr>
+<tr><td><code>--lr &lt;rate&gt;</code></td><td><code>2e-4</code></td><td>learning rate</td></tr>
+<tr><td><code>--airgap</code></td><td>off</td><td>sets <code>TRANSFORMERS_OFFLINE=1</code>, <code>HF_DATASETS_OFFLINE=1</code>, <code>HF_HUB_OFFLINE=1</code>. Refuses any <code>base_model</code> that is not a local path</td></tr>
+<tr><td><code>--rev vN</code></td><td>latest</td><td>revision id</td></tr>
+<tr><td><code>--force</code></td><td>off</td><td>promote even when K-score is below current head</td></tr>
+<tr><td><code>--interval &lt;ms&gt;</code></td><td><code>30000</code></td><td>watch daemon poll interval</td></tr>
+</tbody>
+</table></div>
 <h2>Examples</h2>
 <pre><code>
 kolm tune init --artifact redactor.kolm --base ./qwen2.5-3b
@@ -276,13 +204,13 @@ pip install &#39;torch&gt;=2.2&#39; &#39;transformers&gt;=4.42&#39; &#39;peft&gt
 <li><a href="/docs/training">Training guide</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
- <h2 id="see-also-h">See also</h2>
- <ul>
- <li><a href="/docs/cli">All CLI verbs</a></li>
- <li><a href="/quickstart">Quickstart</a></li>
- <li><a href="/docs/api">HTTP API reference</a></li>
- <li><a href="/docs/sdk">SDK reference</a></li>
- </ul>
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
 </section>
 </main>
 </body>

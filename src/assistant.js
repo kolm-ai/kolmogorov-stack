@@ -15,7 +15,7 @@
 //   tune        - explain how to start a local tune loop (airgap CLI verb)
 //   evolve      - alias for tune
 //   install     - explain `kolm install <harness>` for claude-code/cursor/etc.
-//   upgrade     - start a plan-change to pro/teams/business/enterprise
+//   upgrade     - start a plan-change to Pro, Team, or Enterprise
 //   help        - menu of what i can do
 //   doctor      - return a health/config snapshot for this account
 //
@@ -27,7 +27,7 @@
 
 import { all, findOne } from './store.js';
 
-const PRO_PLANS = new Set(['starter', 'pro', 'teams', 'business', 'enterprise']);
+const PRO_PLANS = new Set(['pro', 'teams', 'business', 'enterprise']);
 
 // `job_xxxxxxxxxxxx` is the shape createJob() emits (job_ + 12 hex chars).
 // Loosened to 6+ hex so older/test ids still match.
@@ -83,8 +83,13 @@ function extractTask(prompt) {
 
 function extractTargetPlan(prompt) {
   const p = lc(prompt);
-  for (const plan of ['enterprise', 'business', 'teams', 'pro', 'starter']) {
-    if (p.includes(plan)) return plan;
+  for (const plan of ['enterprise', 'business', 'teams', 'team', 'pro', 'starter']) {
+    if (p.includes(plan)) {
+      if (plan === 'starter') return 'pro';
+      if (plan === 'business') return 'enterprise';
+      if (plan === 'team') return 'teams';
+      return plan;
+    }
   }
   return 'pro';
 }
@@ -324,7 +329,9 @@ export async function handleAssistant(req, _res, deps) {
       const billing = await deps.changePlan({ tenant, target });
       let narration;
       if (billing?.error === 'invalid_plan') {
-        narration = `${target} is not a valid plan. Pick one of starter / pro / teams / business / enterprise.`;
+        narration = `${target} is not a valid plan. Pick Free, Pro, Team, or Enterprise.`;
+      } else if (billing?.sales_required) {
+        narration = billing.message || `Enterprise requires an architecture review. Open ${billing.contact_url || '/enterprise/inquiry'} to continue.`;
       } else if (billing?.plan_change_pending) {
         narration = `Logged your ${target} request. Open ${billing.checkout_url} to talk to a human — we'll provision the upgrade within one business day.`;
       } else if (billing?.checkout_url || billing?.billing_url) {

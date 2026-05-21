@@ -6,23 +6,23 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>API reference · kolm.ai</title>
-<meta name="description" content="Auto-generated REST API reference for kolm.ai. 357 wired routes across 108 groups, sourced directly from route source files.">
+<meta name="description" content="Auto-generated REST API reference for kolm.ai. 378 wired routes across 112 groups, sourced directly from route source files.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="API reference &middot; kolm.ai">
-<meta property="og:description" content="Auto-generated REST API reference for kolm.ai. 357 wired routes across 108 groups, sourced directly from route source files.">
+<meta property="og:description" content="Auto-generated REST API reference for kolm.ai. 378 wired routes across 112 groups, sourced directly from route source files.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/docs/api">
 <meta property="og:image" content="https://kolm.ai/og/docs-api.svg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="API reference &middot; kolm.ai">
-<meta name="twitter:description" content="Auto-generated REST API reference for kolm.ai. 357 wired routes across 108 groups, sourced directly from route source files.">
+<meta name="twitter:description" content="Auto-generated REST API reference for kolm.ai. 378 wired routes across 112 groups, sourced directly from route source files.">
 <meta name="twitter:image" content="https://kolm.ai/og/docs-api.svg">
 <link rel="canonical" href="https://kolm.ai/docs/api">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/brand-refresh.css">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"API reference","description":"Auto-generated REST API reference for kolm.ai. 357 wired routes across 108 groups, sourced directly from route source files.","url":"https://kolm.ai/docs/api","datePublished":"2026-05-20","dateModified":"2026-05-20","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"API reference","description":"Auto-generated REST API reference for kolm.ai. 378 wired routes across 112 groups, sourced directly from route source files.","url":"https://kolm.ai/docs/api","datePublished":"2026-05-20","dateModified":"2026-05-20","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://kolm.ai/docs"},{"@type":"ListItem","position":3,"name":"API reference","item":"https://kolm.ai/docs/api"}]}</script>
 <style>
 :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -192,11 +192,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / api</div>
 <h1>API reference</h1>
-<p class="lede">The kolm.ai REST surface. 357 wired routes across 108 groups, auto-extracted from route source files and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
+<p class="lede">The kolm.ai REST surface. 378 wired routes across 112 groups, auto-extracted from route source files and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
 
-<p class="totals"><strong>357 wired routes</strong> &middot; <span class="route-live">357 reference-ready</span> &middot; <span class="route-stub">0 source-indexed</span> &middot; 108 groups &middot; generated 2026-05-20 &middot; source <code>src/router.js</code></p>
+<p class="totals"><strong>378 wired routes</strong> &middot; <span class="route-live">365 reference-ready</span> &middot; <span class="route-stub">13 source-indexed</span> &middot; 112 groups &middot; generated 2026-05-20 &middot; source <code>src/router.js</code></p>
 
-<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview"> Show reference-ready routes only</label></div>
+<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview" onclick="document.body.setAttribute('data-api-filter', this.checked ? 'live' : 'all')"> Show reference-ready routes only</label></div>
 
 
 
@@ -220,7 +220,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <li><a href="#group-agents">Agents</a> <span class="toc-count">6</span></li>
   <li><a href="#group-anon">Anonymous bootstrap</a> <span class="toc-count">2</span></li>
   <li><a href="#group-artifact">Artifact</a> <span class="toc-count">1</span></li>
-  <li><a href="#group-artifacts">Artifacts</a> <span class="toc-count">3</span></li>
+  <li><a href="#group-artifacts">Artifacts</a> <span class="toc-count">4</span></li>
   <li><a href="#group-assistant">Assistant</a> <span class="toc-count">1</span></li>
   <li><a href="#group-audio">Audio</a> <span class="toc-count">3</span></li>
   <li><a href="#group-audit">Audit</a> <span class="toc-count">2</span></li>
@@ -233,11 +233,12 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <li><a href="#group-builds">Builds</a> <span class="toc-count">1</span></li>
   <li><a href="#group-byoc">Bring-your-own-cloud</a> <span class="toc-count">6</span></li>
   <li><a href="#group-capability">Capability</a> <span class="toc-count">2</span></li>
-  <li><a href="#group-capture">Capture</a> <span class="toc-count">9</span></li>
+  <li><a href="#group-capture">Capture</a> <span class="toc-count">14</span></li>
   <li><a href="#group-cc">Cc</a> <span class="toc-count">3</span></li>
   <li><a href="#group-changelog">Changelog</a> <span class="toc-count">1</span></li>
   <li><a href="#group-chat">OpenAI-compatible chat</a> <span class="toc-count">1</span></li>
   <li><a href="#group-cid">Cid</a> <span class="toc-count">1</span></li>
+  <li><a href="#group-cloud">Cloud</a> <span class="toc-count">3</span></li>
   <li><a href="#group-compile">Compile</a> <span class="toc-count">4</span></li>
   <li><a href="#group-compose">Compose</a> <span class="toc-count">1</span></li>
   <li><a href="#group-concepts">Concepts</a> <span class="toc-count">5</span></li>
@@ -253,6 +254,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <li><a href="#group-eval">Evaluation</a> <span class="toc-count">4</span></li>
   <li><a href="#group-federated">Federated</a> <span class="toc-count">6</span></li>
   <li><a href="#group-fl">Fl</a> <span class="toc-count">4</span></li>
+  <li><a href="#group-gemini">Gemini</a> <span class="toc-count">2</span></li>
   <li><a href="#group-health">Health</a> <span class="toc-count">1</span></li>
   <li><a href="#group-hub">Hub</a> <span class="toc-count">4</span></li>
   <li><a href="#group-intent">Intent</a> <span class="toc-count">2</span></li>
@@ -270,9 +272,9 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <li><a href="#group-media">Media</a> <span class="toc-count">3</span></li>
   <li><a href="#group-memory">Memory</a> <span class="toc-count">1</span></li>
   <li><a href="#group-messages">Anthropic-compatible messages</a> <span class="toc-count">1</span></li>
-  <li><a href="#group-models">Models</a> <span class="toc-count">4</span></li>
+  <li><a href="#group-models">Models</a> <span class="toc-count">6</span></li>
   <li><a href="#group-moderations">Moderations</a> <span class="toc-count">1</span></li>
-  <li><a href="#group-multimodal">Multimodal</a> <span class="toc-count">6</span></li>
+  <li><a href="#group-multimodal">Multimodal</a> <span class="toc-count">8</span></li>
   <li><a href="#group-nl">Nl</a> <span class="toc-count">1</span></li>
   <li><a href="#group-notifications">Notifications</a> <span class="toc-count">8</span></li>
   <li><a href="#group-oauth">OAuth</a> <span class="toc-count">3</span></li>
@@ -282,13 +284,14 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <li><a href="#group-plans">Plans</a> <span class="toc-count">1</span></li>
   <li><a href="#group-pricing">Pricing</a> <span class="toc-count">1</span></li>
   <li><a href="#group-privacy">Privacy</a> <span class="toc-count">6</span></li>
+  <li><a href="#group-product">Product</a> <span class="toc-count">1</span></li>
   <li><a href="#group-public">Public</a> <span class="toc-count">5</span></li>
   <li><a href="#group-publish">Publish</a> <span class="toc-count">1</span></li>
   <li><a href="#group-recall">Recall</a> <span class="toc-count">3</span></li>
   <li><a href="#group-receipts">Receipts</a> <span class="toc-count">2</span></li>
   <li><a href="#group-recipes">Recipes</a> <span class="toc-count">8</span></li>
   <li><a href="#group-redact">Redact</a> <span class="toc-count">1</span></li>
-  <li><a href="#group-registry">Registry</a> <span class="toc-count">4</span></li>
+  <li><a href="#group-registry">Registry</a> <span class="toc-count">6</span></li>
   <li><a href="#group-replay">Replay</a> <span class="toc-count">2</span></li>
   <li><a href="#group-responses">OpenAI Responses</a> <span class="toc-count">1</span></li>
   <li><a href="#group-run">Run</a> <span class="toc-count">1</span></li>
@@ -306,7 +309,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <li><a href="#group-spec-decode">Spec Decode</a> <span class="toc-count">2</span></li>
   <li><a href="#group-specialists">Specialists</a> <span class="toc-count">7</span></li>
   <li><a href="#group-status">Status</a> <span class="toc-count">1</span></li>
-  <li><a href="#group-storage">Storage</a> <span class="toc-count">3</span></li>
+  <li><a href="#group-storage">Storage</a> <span class="toc-count">4</span></li>
+  <li><a href="#group-streaming">Streaming</a> <span class="toc-count">2</span></li>
   <li><a href="#group-stripe">Stripe</a> <span class="toc-count">1</span></li>
   <li><a href="#group-sync">Sync</a> <span class="toc-count">6</span></li>
   <li><a href="#group-synthesize">Synthesis</a> <span class="toc-count">3</span></li>
@@ -765,7 +769,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-group" id="group-artifacts">
-<h2>Artifacts <span class="group-count">(3)</span></h2>
+<h2>Artifacts <span class="group-count">(4)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-artifacts">
   <h3><span class="m m-get">GET</span> <code>/v1/artifacts</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
@@ -794,6 +798,19 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <p class="route-desc">Artifact download - streams the completed artifact zip by id with readiness/expiry errors.</p>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/artifacts/&lt;id&gt;/download&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="POST-v1-artifacts-dependency-graph">
+  <h3><span class="m m-post">POST</span> <code>/v1/artifacts/dependency-graph</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/artifacts/dependency-graph&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
   <pre><code>{
   &quot;ok&quot;: true,
   &quot;request_id&quot;: &quot;req_018x&quot;
@@ -1257,13 +1274,53 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-group" id="group-capture">
-<h2>Capture <span class="group-count">(9)</span></h2>
+<h2>Capture <span class="group-count">(14)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-capture-anthropic">
   <h3><span class="m m-post">POST</span> <code>/v1/capture/anthropic</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">regex route</span></h3>
   <p class="route-desc">POST /v1/capture/anthropic – proxy to Anthropic, capture the round-trip.</p>
   <details class="route-detail"><summary>Full comment</summary><p>OPENAI_BASE_URL=https://kolm.ai/v1/capture/openai → POST .../v1/chat/completions The suffix is discarded; the flat provider-specific capture endpoints use the same handler. Express&#39;s `?` makes the suffix optional, and the wildcard absorbs any depth. POST /v1/capture/anthropic – proxy to Anthropic, capture the round-trip. The body is the upstream Anthropic Messages payload, unmodified.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/capture/anthropic&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="POST-v1-capture-gemini">
+  <h3><span class="m m-post">POST</span> <code>/v1/capture/gemini</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
+  <p class="route-desc">base_url=https://kolm.ai/v1/capture/gemini and keep using chat.completions.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Gemini capture and OpenAI-compatible aliases. These route to Google&#39;s /v1beta/openai compatibility surface so OpenAI SDK clients can set base_url=https://kolm.ai/v1/capture/gemini and keep using chat.completions.</p></details>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/capture/gemini&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="POST-v1-capture-gemini-chat-completions">
+  <h3><span class="m m-post">POST</span> <code>/v1/capture/gemini/chat/completions</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/capture/gemini/chat/completions&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="POST-v1-capture-gemini-v1-chat-completions">
+  <h3><span class="m m-post">POST</span> <code>/v1/capture/gemini/v1/chat/completions</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/capture/gemini/v1/chat/completions&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
   -d &#39;{}&#39;</code></pre>
@@ -1367,6 +1424,30 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
+<section class="api-route" id="POST-v1-capture-rbac-evaluate">
+  <h3><span class="m m-post">POST</span> <code>/v1/capture/rbac/evaluate</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/capture/rbac/evaluate&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="GET-v1-capture-rbac-policy">
+  <h3><span class="m m-get">GET</span> <code>/v1/capture/rbac/policy</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X GET &quot;https://kolm.ai/v1/capture/rbac/policy&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
 <section class="api-route" id="GET-v1-capture-stream">
   <h3><span class="m m-get">GET</span> <code>/v1/capture/stream</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Payload shape is the CLI/UI contract (W258-BE-6): capture_id /</p>
@@ -1463,6 +1544,47 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <p class="route-desc">CID lookup – content-addressed resolution within the caller&#39;s tenant</p>
   <details class="route-detail"><summary>Full comment</summary><p>CID lookup – content-addressed resolution within the caller&#39;s tenant scope. Two compiles that produce the same bytes (same task spec, same recipes, same evals, same base model pointer) yield the same CID; this route is how downstream tools dedupe by content rather than job_id. CID format is strictly validated to keep the path safe from injection.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/cid/&lt;cid&gt;&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+</section>
+
+<section class="api-group" id="group-cloud">
+<h2>Cloud <span class="group-count">(3)</span></h2>
+<details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
+<section class="api-route" id="POST-v1-cloud-deploy-plan">
+  <h3><span class="m m-post">POST</span> <code>/v1/cloud/deploy-plan</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/cloud/deploy-plan&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="GET-v1-cloud-deploy-targets">
+  <h3><span class="m m-get">GET</span> <code>/v1/cloud/deploy-targets</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
+  <p class="route-desc">Secret-safe deploy catalog for account UI, CLI, CI, and unauthenticated</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Secret-safe deploy catalog for account UI, CLI, CI, and unauthenticated evaluators. This does not create infrastructure and never returns secret values; it returns the concrete commands and env-secret references needed for BYOC, edge, GPU, and self-hosted deployments.</p></details>
+  <pre><code>curl -X GET &quot;https://kolm.ai/v1/cloud/deploy-targets&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="GET-v1-cloud-readiness">
+  <h3><span class="m m-get">GET</span> <code>/v1/cloud/readiness</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
+  <p class="route-desc">Cloud readiness is exposed directly for account UI, CI, and self-hosted</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Cloud readiness is exposed directly for account UI, CI, and self-hosted operators. It reports configured categories and missing variable names, but never returns secret values.</p></details>
+  <pre><code>curl -X GET &quot;https://kolm.ai/v1/cloud/readiness&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
   &quot;ok&quot;: true,
@@ -2229,6 +2351,36 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 </section>
 
+<section class="api-group" id="group-gemini">
+<h2>Gemini <span class="group-count">(2)</span></h2>
+<details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
+<section class="api-route" id="POST-v1-gemini-chat-completions">
+  <h3><span class="m m-post">POST</span> <code>/v1/gemini/chat/completions</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/gemini/chat/completions&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="POST-v1-gemini-v1-chat-completions">
+  <h3><span class="m m-post">POST</span> <code>/v1/gemini/v1/chat/completions</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/gemini/v1/chat/completions&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+</section>
+
 <section class="api-group" id="group-health">
 <h2>Health <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Public surface. No auth header required. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
@@ -2604,7 +2756,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-route" id="GET-v1-lake-stats">
   <h3><span class="m m-get">GET</span> <code>/v1/lake/stats</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Lake stats - per-tenant event-store roll-up: row counts, byte size, oldest</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Lake stats - per-tenant event-store roll-up: row counts, byte size, oldest and newest timestamps, namespace breakdown. Accepts ?namespace + ?since filters. Scoped via _tenantScope; admin sees cross-tenant aggregate.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Lake stats - per-tenant event-store roll-up: row counts, byte size, oldest and newest timestamps, namespace breakdown. Accepts ?namespace, ?since, ?provider, ?model, ?status, ?min_latency_ms, ?max_latency_ms, and ?exclude_errors filters. Scoped via _tenantScope; admin sees cross-tenant aggregate.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/lake/stats&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -2901,7 +3053,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-group" id="group-models">
-<h2>Models <span class="group-count">(4)</span></h2>
+<h2>Models <span class="group-count">(6)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-models">
   <h3><span class="m m-get">GET</span> <code>/v1/models</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
@@ -2920,6 +3072,17 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <p class="route-desc">Models cache - returns the local model-weights cache index for the API</p>
   <details class="route-detail"><summary>Full comment</summary><p>Models cache - returns the local model-weights cache index for the API host (cache_dir, total_bytes, per-entry rows). Used by `kolm models cache` and the device-detect picker to know which weights are already on disk.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/models/cache&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="GET-v1-models-info-id">
+  <h3><span class="m m-get">GET</span> <code>/v1/models/info/:id</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X GET &quot;https://kolm.ai/v1/models/info/&lt;id&gt;&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
   &quot;ok&quot;: true,
@@ -2950,6 +3113,18 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   &quot;request_id&quot;: &quot;req_018x&quot;
 }</code></pre>
 </section>
+
+<section class="api-route" id="GET-v1-models-recommend">
+  <h3><span class="m m-get">GET</span> <code>/v1/models/recommend</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
+  <p class="route-desc">Model recommendation + model info. Public and secret-free: this powers the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Model recommendation + model info. Public and secret-free: this powers the post-auth model picker, CLI parity, and &quot;which backbone should I use?&quot; flows without requiring a tenant before the user understands the catalog.</p></details>
+  <pre><code>curl -X GET &quot;https://kolm.ai/v1/models/recommend&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
 </section>
 
 <section class="api-group" id="group-moderations">
@@ -2971,7 +3146,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-group" id="group-multimodal">
-<h2>Multimodal <span class="group-count">(6)</span></h2>
+<h2>Multimodal <span class="group-count">(8)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-multimodal-bakeoff">
   <h3><span class="m m-get">GET</span> <code>/v1/multimodal/bakeoff</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
@@ -2987,8 +3162,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-multimodal-bakeoff">
   <h3><span class="m m-post">POST</span> <code>/v1/multimodal/bakeoff</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">compiled .kolm artifacts and scores each artifact&#39;s output against</p>
-  <details class="route-detail"><summary>Full comment</summary><p>compiled .kolm artifacts and scores each artifact&#39;s output against the captured base response by token-overlap. Returns ranked contestants + winner. The compute is pure string scoring – heavy ML (CLIP, embedding similarity) stays in workers/multimodal-bakeoff/ and is opt-in via env override.</p></details>
+  <p class="route-desc">POST /v1/multimodal/bakeoff runs an authenticated tenant&#39;s captured</p>
+  <details class="route-detail"><summary>Full comment</summary><p>POST /v1/multimodal/bakeoff runs an authenticated tenant&#39;s captured image/audio/video/PDF rows through selected .kolm artifacts and returns ranked contestants with token-overlap scoring and winner metadata.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/multimodal/bakeoff&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -3043,6 +3218,32 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <p class="route-desc">W462 – image-redact worker self-doctor, proxied so the CLI&#39;s</p>
   <details class="route-detail"><summary>Full comment</summary><p>W462 – image-redact worker self-doctor, proxied so the CLI&#39;s `kolm media image-doctor --remote` can ask the server.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/multimodal/redact-image/doctor&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="POST-v1-multimodal-tokenize">
+  <h3><span class="m m-post">POST</span> <code>/v1/multimodal/tokenize</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
+  <p class="route-desc">POST /v1/multimodal/tokenize tokenizes one local file path or directory</p>
+  <details class="route-detail"><summary>Full comment</summary><p>POST /v1/multimodal/tokenize tokenizes one local file path or directory on an authenticated local daemon or explicitly trusted self-hosted server. Hosted deployments deny server-side file access unless the operator sets KOLM_ALLOW_SERVER_FILE_TOKENIZE=1.</p></details>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/multimodal/tokenize&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="GET-v1-multimodal-tokenize-doctor">
+  <h3><span class="m m-get">GET</span> <code>/v1/multimodal/tokenize/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
+  <p class="route-desc">W554 - multimodal sidecar tokenizer. API mirror of</p>
+  <details class="route-detail"><summary>Full comment</summary><p>W554 - multimodal sidecar tokenizer. API mirror of `kolm media tokenize`: local-safe by default, hosted-disabled unless the operator explicitly allows server-side file access. Creates compile-ready Markdown sidecars using deterministic local feature tokens, with optional provider captions/transcripts when configured.</p></details>
+  <pre><code>curl -X GET &quot;https://kolm.ai/v1/multimodal/tokenize/doctor&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
   &quot;ok&quot;: true,
@@ -3394,8 +3595,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Public surface. No auth header required. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-plans">
   <h3><span class="m m-get">GET</span> <code>/v1/plans</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">Plans - self-serve plan catalog (free/starter/pro/teams/business/enterprise)</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Plans - self-serve plan catalog (free/starter/pro/teams/business/enterprise) with id, label, price_usd_month, quota, seats, and billing_link_configured (true when the Stripe Payment Link env var is set for that plan).</p></details>
+  <p class="route-desc">Plans - public plan catalog (Free / Pro / Team / Enterprise). Historical</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Plans - public plan catalog (Free / Pro / Team / Enterprise). Historical aliases still canonicalize server-side, but the public contract stays on the current four-plan model. Enterprise is contact-sales unless a custom checkout link is supplied by the operator.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/plans&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -3492,6 +3693,22 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
   -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+</section>
+
+<section class="api-group" id="group-product">
+<h2>Product <span class="group-count">(1)</span></h2>
+<details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
+<section class="api-route" id="GET-v1-product-experience">
+  <h3><span class="m m-get">GET</span> <code>/v1/product/experience</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
+  <p class="route-desc">Product-experience contract. Public and secret-safe: this is the same</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Product-experience contract. Public and secret-safe: this is the same source of truth exposed by `kolm surfaces --json` and `kolm tui --views`. Frontend/account/docs can consume it to avoid drifting from CLI/TUI/API.</p></details>
+  <pre><code>curl -X GET &quot;https://kolm.ai/v1/product/experience&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
   &quot;ok&quot;: true,
   &quot;request_id&quot;: &quot;req_018x&quot;
@@ -3772,7 +3989,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-group" id="group-registry">
-<h2>Registry <span class="group-count">(4)</span></h2>
+<h2>Registry <span class="group-count">(6)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-registry-export">
   <h3><span class="m m-get">GET</span> <code>/v1/registry/export</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
@@ -3818,6 +4035,30 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
   -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="POST-v1-registry-verified-publishers-evaluate">
+  <h3><span class="m m-post">POST</span> <code>/v1/registry/verified-publishers/evaluate</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/registry/verified-publishers/evaluate&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="GET-v1-registry-verified-publishers-policy">
+  <h3><span class="m m-get">GET</span> <code>/v1/registry/verified-publishers/policy</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X GET &quot;https://kolm.ai/v1/registry/verified-publishers/policy&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
   &quot;ok&quot;: true,
   &quot;request_id&quot;: &quot;req_018x&quot;
@@ -4379,7 +4620,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </section>
 
 <section class="api-group" id="group-storage">
-<h2>Storage <span class="group-count">(3)</span></h2>
+<h2>Storage <span class="group-count">(4)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-storage-config">
   <h3><span class="m m-get">GET</span> <code>/v1/storage/config</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
@@ -4407,11 +4648,51 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
+<section class="api-route" id="GET-v1-storage-object-readiness">
+  <h3><span class="m m-get">GET</span> <code>/v1/storage/object-readiness</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
+  <p class="route-desc">Artifact object-store readiness for account UI and CI. This is split out</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Artifact object-store readiness for account UI and CI. This is split out from generic cloud readiness because large .kolm/model bundles require a real object path (R2 S3, AWS S3, generic S3, Supabase S3, or local disk), not only provider env detection.</p></details>
+  <pre><code>curl -X GET &quot;https://kolm.ai/v1/storage/object-readiness&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
 <section class="api-route" id="POST-v1-storage-purge">
   <h3><span class="m m-post">POST</span> <code>/v1/storage/purge</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Storage purge - destructive admin-only event-store purge. Requires</p>
   <details class="route-detail"><summary>Full comment</summary><p>Storage purge - destructive admin-only event-store purge. Requires {confirm:true} in the body; supports {before} timestamp + {namespace} filters. Returns purge counts. Used for lake-retention cleanups.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/storage/purge&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{}&#39;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+</section>
+
+<section class="api-group" id="group-streaming">
+<h2>Streaming <span class="group-count">(2)</span></h2>
+<details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
+<section class="api-route" id="GET-v1-streaming-capabilities">
+  <h3><span class="m m-get">GET</span> <code>/v1/streaming/capabilities</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X GET &quot;https://kolm.ai/v1/streaming/capabilities&quot; \
+  -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
+  <pre><code>{
+  &quot;ok&quot;: true,
+  &quot;request_id&quot;: &quot;req_018x&quot;
+}</code></pre>
+</section>
+
+<section class="api-route" id="POST-v1-streaming-normalize">
+  <h3><span class="m m-post">POST</span> <code>/v1/streaming/normalize</code> <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span></h3>
+  <p class="route-desc">Route contract generated from source. Request and response use the shared JSON envelope.</p>
+  <pre><code>curl -X POST &quot;https://kolm.ai/v1/streaming/normalize&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
   -d &#39;{}&#39;</code></pre>

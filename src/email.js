@@ -68,7 +68,7 @@ export async function sendWelcome({ email, apiKey, plan, billingUrl }) {
   ];
   if (billingUrl) {
     lines.push('', `Complete payment to activate your paid tier:`, `  ${billingUrl}`);
-    lines.push('', `Until payment is confirmed, your account is on the Developer (free) tier.`);
+    lines.push('', `Until payment is confirmed, your account is on the Free tier.`);
   }
   lines.push('', `Docs: https://kolm.ai/docs`, `Quickstart: https://kolm.ai/quickstart`, '', `— kolm`);
   return sendMail({
@@ -103,7 +103,7 @@ export async function sendBillingFailed({ email, plan }) {
     `or cancel, manage your subscription at https://kolm.ai/account.`,
     ``,
     `Your account stays active during the retry window. If all retries fail your tenant`,
-    `will downgrade to the Developer (free) tier.`,
+    `will downgrade to the Free tier.`,
     ``,
     `— kolm`,
   ].join('\n');

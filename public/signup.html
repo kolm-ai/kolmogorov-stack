@@ -13,14 +13,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Sign in guide · kolm.ai</title>
-<meta name="description" content="Sign in to kolm with Google or GitHub. Or create an account on any plan in under a minute. Fully self-serve, including Enterprise.">
+<meta name="description" content="Sign in to kolm or create a Free, Pro, or Team account. Enterprise starts with an architecture review for SSO, BAA/DPA, customer-hosted compile, and SLA scope.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <link rel="canonical" href="https://kolm.ai/signup">
 <meta property="og:title" content="Sign in guide · kolm.ai">
-<meta property="og:description" content="Sign in to kolm with Google or GitHub. Or create an account on any plan in under a minute. Fully self-serve, including Enterprise.">
+<meta property="og:description" content="Sign in to kolm or create a Free, Pro, or Team account. Enterprise starts with an architecture review for SSO, BAA/DPA, customer-hosted compile, and SLA scope.">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -78,7 +78,7 @@
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Linux, macOS, Windows (WSL)",
  "url": "https://kolm.ai/signup",
- "description": "Sign in to kolm with Google or GitHub. Or create an account on any plan in under a minute. Fully self-serve, including Enterprise.",
+ "description": "Sign in to kolm or create a Free, Pro, or Team account. Enterprise starts with an architecture review for SSO, BAA/DPA, customer-hosted compile, and SLA scope.",
  "offers": {
  "@type": "Offer",
  "price": "0",
@@ -92,7 +92,7 @@
 }
 </script>
 <meta name="twitter:title" content="Sign in guide · kolm.ai">
-<meta name="twitter:description" content="Sign in to kolm with Google or GitHub. Or create an account on any plan in under a minute. Fully self-serve, including Enterprise.">
+<meta name="twitter:description" content="Sign in to kolm or create a Free, Pro, or Team account. Enterprise starts with an architecture review for SSO, BAA/DPA, customer-hosted compile, and SLA scope.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <link rel="stylesheet" href="/surface-polish.css">
 </head>
@@ -216,11 +216,11 @@
  </div>
  <div class="eyebrow"><span class="pulse"></span>account</div>
  <h1 id="auth-title">Sign in to kolm.</h1>
- <p class="lede" id="auth-sub">One click with Google or GitHub. Every plan, including Enterprise, is fully self-serve.</p>
+ <p class="lede" id="auth-sub">One click with Google or GitHub. Start Free, Pro, or Team self-serve. Enterprise begins with an architecture review.</p>
 
  <div id="plan-banner" class="plan-banner" hidden>
  <div>
- <div><span class="plan-name" id="plan-name">Developer</span> &middot; <span class="plan-price" id="plan-price">$0</span></div>
+ <div><span class="plan-name" id="plan-name">Free</span> &middot; <span class="plan-price" id="plan-price">$0</span></div>
  <div class="plan-meta" id="plan-meta">No card. No email approval. Your account works the second sign-in returns.</div>
  </div>
  <div class="plan-switch"><a href="/pricing">change plan</a></div>
@@ -375,11 +375,11 @@ kolm compile --spec my-skill.spec.json</code></pre>
  var READ_FALLBACK = ['kolm_api_key', 'apiKey', 'recipeApiKey', 'ks_api_key'];
  var LEGACY_KEYS = ['kolm_api_key', 'apiKey', 'recipeApiKey'];
  var PLANS = {
- free: { label: 'Developer', price: '$0 forever', meta: 'No card. Your API key works the second this form returns.' },
- starter: { label: 'Starter', price: '$9 / month', meta: 'Provisioned instantly. Stripe payment link returned in the same response. Complete billing within 30 days to stay on Starter.' },
+ free: { label: 'Free', price: '$0 forever', meta: 'No card. Compile three artifacts per month and keep local runtime inference free.' },
+ starter: { label: 'Pro', price: '$49 / month', meta: 'Legacy starter requests map to Pro. Stripe Checkout completes billing after account creation.' },
  pro: { label: 'Pro', price: '$49 / month', meta: 'Provisioned instantly. Stripe payment link returned in the same response. Complete billing within 30 days to stay on Pro.' },
- teams: { label: 'Teams', price: '$149 / month', meta: 'Provisioned instantly with 5 seats. Stripe payment link returned in the same response. Complete billing within 30 days to stay on Teams.' },
- enterprise: { label: 'Enterprise', price: '$2,999 / month', meta: 'Provisioned instantly. SSO/SCIM/BAA paths via /trust. Stripe payment link returned in the same response. DPA available without contacting sales.' },
+ teams: { label: 'Team', price: '$499 / month', meta: '5 seats, private registry, CI/CD integration, audit logs, and shared compile quotas.' },
+ enterprise: { label: 'Enterprise', price: 'custom', meta: 'Book an architecture review for SSO/SAML, BAA/DPA, audit retention, customer-hosted compile, and SLA scope.' },
  };
  function $(id){ return document.getElementById(id); }
  function saveKey(key){
@@ -420,7 +420,7 @@ kolm compile --spec my-skill.spec.json</code></pre>
  var s = $('auth-sub');
  if (isSignup) {
  if (t) t.textContent = 'Create your account.';
- if (s) s.textContent = 'One click with Google or GitHub. Every plan, including Enterprise, is fully self-serve.';
+ if (s) s.textContent = 'One click with Google or GitHub. Start Free, Pro, or Team self-serve. Enterprise begins with an architecture review.';
  try { document.title = 'Sign up ·kolm'; } catch (_) {}
  } else {
  if (t) t.textContent = 'Sign in to kolm.';

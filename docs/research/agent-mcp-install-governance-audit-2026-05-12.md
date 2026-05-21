@@ -45,7 +45,7 @@ That differs from several public docs that mention `~/.claude/mcp.json`, `.confi
 
 ### Skill Sidecars
 
-`writeSkillSidecar` emits one Markdown sidecar per artifact. It uses Claude-style frontmatter and describes the backing MCP tool. The generated sidecar's no-project tool name is `mcp__kolm__<artifact>`, while the global MCP server exposes global artifacts as plain `<artifact>`. Project artifacts use `mcp__<project>__<artifact>`, so project mode is closer to the sidecar wording.
+`writeSkillSidecar` emits one Markdown sidecar per artifact. It uses Claude-style frontmatter and describes the backing MCP tool. W552 closed the no-project naming drift: global sidecars now use the plain `<artifact>` tool name, while project artifacts use `mcp__<project>__<artifact>`. `kolm compile --as-mcp` also creates a project `kolm.yaml` before writing the sidecar, so agent-indexed project skills point at the project-scoped MCP tool.
 
 The sidecar frontmatter currently sets `allowed-tools: []` and `disable-model-invocation: false`. The `allowed_tools` field is parsed from `kolm.yaml` and surfaced in MCP metadata, but it is not enforced by the server.
 

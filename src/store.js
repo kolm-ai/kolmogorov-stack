@@ -83,6 +83,39 @@ function fsyncDir(dir) {
   }
 }
 
+function sleepSync(ms) {
+  try {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+  } catch {
+    const until = Date.now() + ms;
+    while (Date.now() < until) {}
+  }
+}
+
+function replaceFileWithRetry(tmp, file) {
+  let lastErr = null;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      fs.renameSync(tmp, file);
+      return;
+    } catch (err) {
+      lastErr = err;
+      if (!['EPERM', 'EACCES', 'EBUSY'].includes(err && err.code)) throw err;
+      sleepSync(10 * (2 ** attempt));
+    }
+  }
+  // Windows can briefly hold the destination open during antivirus/indexing or
+  // adjacent test-server reads. Preserve the write instead of dropping the row:
+  // copy over the destination after retries, fsync below, then remove temp.
+  try {
+    fs.copyFileSync(tmp, file);
+    try { fs.rmSync(tmp, { force: true }); } catch {}
+    return;
+  } catch {
+    throw lastErr;
+  }
+}
+
 function writeFileDurably(file, text) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const tmp = `${file}.${process.pid}.${Date.now()}.${crypto.randomBytes(4).toString('hex')}.tmp`;
@@ -93,7 +126,7 @@ function writeFileDurably(file, text) {
     fs.fsyncSync(fd);
     fs.closeSync(fd);
     fd = null;
-    fs.renameSync(tmp, file);
+    replaceFileWithRetry(tmp, file);
     fsyncDir(path.dirname(file));
   } catch (err) {
     if (fd !== null) {

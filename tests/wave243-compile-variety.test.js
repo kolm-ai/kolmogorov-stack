@@ -102,7 +102,7 @@ test('W246 cmdTui exposes a compile wizard pane', () => {
   const idx = src.indexOf('async function cmdTui(args)');
   assert.ok(idx > 0, 'cmdTui not found');
   // The cmdTui function alone is ~700 lines — read a generous slice.
-  const block = src.slice(idx, idx + 30000);
+  const block = src.slice(idx, idx + 45000);
   assert.ok(block.includes("leftSource: 'captures'"), 'cmdTui must default to captures pane');
   assert.ok(block.includes('compile'), 'cmdTui must reference compile pane');
   assert.ok(block.includes('TUI_VALID_RECIPE_CLASSES'), 'cmdTui must declare recipe-class enum');

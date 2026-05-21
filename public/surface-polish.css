@@ -255,6 +255,95 @@ body {
  transform: translateY(0);
 }
 
+.docs-cli-page .kolm-surface-media {
+ display: grid;
+ grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+ gap: 14px;
+ margin: 18px 0 28px;
+ padding: 16px;
+ border: 1px solid var(--line, rgba(255, 255, 255, 0.14));
+ border-radius: 12px;
+ background:
+  linear-gradient(135deg, rgba(126, 240, 210, 0.08), transparent 48%),
+  var(--bg-elev, rgba(255, 255, 255, 0.04));
+ color: var(--ink, #faf2e1);
+}
+
+.docs-cli-page .kolm-surface-media .media-terminal,
+.docs-cli-page .kolm-surface-media .media-proof {
+ min-height: 118px;
+ border: 1px solid var(--line, rgba(255, 255, 255, 0.14));
+ border-radius: 10px;
+ padding: 14px;
+ background: rgba(0, 0, 0, 0.22);
+}
+
+.docs-cli-page .kolm-surface-media .media-kicker {
+ display: block;
+ margin: 0 0 8px;
+ font-family: var(--mono, ui-monospace, monospace);
+ font-size: 10.5px;
+ letter-spacing: 0.08em;
+ text-transform: uppercase;
+ color: var(--ink-faint, #737c73);
+}
+
+.docs-cli-page .kolm-surface-media b,
+.docs-cli-page .kolm-surface-media code {
+ color: var(--ink, #faf2e1);
+}
+
+.docs-cli-page .kolm-surface-media p {
+ margin: 0;
+ color: var(--ink-mute, #b5bdb1);
+ font-size: 13px;
+ line-height: 1.55;
+}
+
+.docs-cli-page .kolm-surface-media .media-line {
+ display: block;
+ margin: 5px 0;
+ font-family: var(--mono, ui-monospace, monospace);
+ font-size: 12px;
+ color: var(--ink, #faf2e1);
+ overflow-wrap: anywhere;
+}
+
+.docs-cli-page .kolm-surface-media .media-line .ok {
+ color: var(--kolm-accent, #10b981);
+}
+
+[data-theme="light"] .docs-cli-page .kolm-surface-media {
+ background:
+  linear-gradient(135deg, rgba(10, 136, 98, 0.07), transparent 48%),
+  #fff;
+ border-color: rgba(24, 23, 26, 0.1);
+ color: #18171a;
+}
+
+[data-theme="light"] .docs-cli-page .kolm-surface-media .media-terminal,
+[data-theme="light"] .docs-cli-page .kolm-surface-media .media-proof {
+ background: #f7f4ec;
+ border-color: rgba(24, 23, 26, 0.1);
+}
+
+[data-theme="light"] .docs-cli-page .kolm-surface-media b,
+[data-theme="light"] .docs-cli-page .kolm-surface-media code,
+[data-theme="light"] .docs-cli-page .kolm-surface-media .media-line {
+ color: #18171a;
+}
+
+[data-theme="light"] .docs-cli-page .kolm-surface-media p {
+ color: #4b5158;
+}
+
+@media (max-width: 720px) {
+ .docs-cli-page .kolm-surface-media {
+  grid-template-columns: 1fr;
+  padding: 14px;
+ }
+}
+
 @media (max-width: 760px) {
  :where(header nav, .nav, .topnav, .site-nav, .main-nav) {
  max-width: 100%;
@@ -423,7 +512,17 @@ body > .site-nav {
   padding: 0 8px !important;
   border-bottom: 1px solid transparent !important;
   text-decoration: none !important;
+  color: var(--kolm-ink-1) !important;
   }
+
+ :where(.site-nav .nav-item > a:hover,
+ .site-nav .nav-item > a:focus-visible,
+ .site-nav .nav-item > a.active,
+ .site-nav .nav-item > a[aria-current="page"]) {
+  color: var(--kolm-ink-0) !important;
+  border-bottom-color: rgba(126,240,210,0.62) !important;
+  text-decoration: none !important;
+ }
 
  :where(.site-nav .mega-menu) {
  display: grid !important;
@@ -436,16 +535,25 @@ body > .site-nav {
  max-width: calc(100vw - 48px) !important;
  grid-template-columns: repeat(3, minmax(150px, 1fr)) !important;
  gap: 18px 28px !important;
- padding: 22px !important;
+ padding: 18px !important;
  border: 1px solid var(--kolm-rule-2) !important;
  border-radius: var(--kolm-radius-md) !important;
- background: #11151b !important;
+ background:
+  linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018)),
+  #11151b !important;
  box-shadow: var(--kolm-shadow-panel) !important;
  opacity: 0 !important;
  visibility: hidden !important;
  pointer-events: none !important;
  transition: opacity 140ms ease, transform 140ms ease, visibility 140ms ease !important;
  z-index: 2000 !important;
+ }
+
+ :where(.site-nav .mega-col) {
+ padding: 12px !important;
+ border: 1px solid rgba(255,247,232,0.08) !important;
+ border-radius: 10px !important;
+ background: rgba(255,255,255,0.026) !important;
  }
 
  :where(.site-nav .nav-item:hover > .mega-menu,
@@ -477,9 +585,11 @@ body > .site-nav {
  }
 
  :where(.site-nav .mega-menu a) {
- display: block !important;
- min-height: 0 !important;
- padding: 6px 0 !important;
+ display: flex !important;
+ align-items: center !important;
+ min-height: 34px !important;
+ padding: 0 8px !important;
+ border-radius: 7px !important;
  border: 0 !important;
  color: var(--kolm-ink-1) !important;
  font-size: 13px !important;
@@ -489,6 +599,7 @@ body > .site-nav {
 
  :where(.site-nav .mega-menu a:hover, .site-nav .mega-menu a:focus-visible) {
  color: var(--kolm-green) !important;
+ background: rgba(126,240,210,0.07) !important;
  }
 }
 
@@ -500,6 +611,23 @@ body > .site-nav {
 
 [data-theme="light"] :where(.site-nav .mega-menu a) {
  color: #202428 !important;
+}
+
+[data-theme="light"] :where(.site-nav .nav-item > a) {
+ color: #343a40 !important;
+}
+
+[data-theme="light"] :where(.site-nav .nav-item > a:hover,
+.site-nav .nav-item > a:focus-visible,
+.site-nav .nav-item > a.active,
+.site-nav .nav-item > a[aria-current="page"]) {
+ color: #111315 !important;
+ border-bottom-color: rgba(4,120,87,0.62) !important;
+}
+
+[data-theme="light"] :where(.site-nav .mega-col) {
+ background: rgba(255,255,255,0.72) !important;
+ border-color: rgba(17,19,21,0.08) !important;
 }
 
 [data-theme="light"] :where(.site-nav .mega-menu a:hover, .site-nav .mega-menu a:focus-visible) {
@@ -1031,6 +1159,14 @@ h6:not(#kolm-noop) {
  align-items: center !important;
 }
 
+:where(.site-header .logo, header.site .logo, nav.top .logo) {
+ white-space: nowrap !important;
+ word-break: keep-all !important;
+ overflow-wrap: normal !important;
+ flex: 0 0 auto !important;
+ min-width: max-content !important;
+}
+
 @media (min-width: 980px) {
  body.compile-page section.hero .wrap {
  display: grid !important;
@@ -1251,5 +1387,666 @@ h6:not(#kolm-noop) {
  header.site-header .site-actions .cta {
  width: 74px !important;
  flex: 0 0 74px !important;
+ }
+}
+
+/* Cohesive product operating map. This is the shared orientation layer for
+   public pages, docs, pricing, enterprise, and comparison surfaces. */
+.kolm-product-spine {
+ position: sticky !important;
+ top: 60px !important;
+ z-index: 44 !important;
+ max-width: none !important;
+ padding: 10px max(18px, calc((100vw - var(--kolm-page-max)) / 2 + var(--kolm-page-pad))) !important;
+ justify-content: center !important;
+ gap: 8px !important;
+ background:
+  linear-gradient(180deg, rgba(8, 9, 12, 0.96), rgba(8, 9, 12, 0.88)),
+  rgba(8, 9, 12, 0.92) !important;
+ backdrop-filter: blur(18px) saturate(140%) !important;
+ -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+ border-top: 1px solid rgba(255,247,232,0.06) !important;
+ border-bottom: 1px solid rgba(255,247,232,0.12) !important;
+}
+
+.kolm-product-spine a {
+ min-width: 142px !important;
+ min-height: 44px !important;
+ display: grid !important;
+ grid-template-columns: 28px 1fr !important;
+ grid-template-rows: auto auto !important;
+ align-items: center !important;
+ gap: 1px 9px !important;
+ padding: 7px 10px !important;
+ border-radius: 9px !important;
+ border-color: rgba(255,247,232,0.10) !important;
+ background: rgba(255,255,255,0.026) !important;
+ color: var(--kolm-ink-1) !important;
+}
+
+.kolm-product-spine a span {
+ grid-row: 1 / span 2 !important;
+ width: 24px !important;
+ height: 24px !important;
+ display: inline-flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ border-radius: 7px !important;
+ background: rgba(126,240,210,0.10) !important;
+ color: var(--kolm-green) !important;
+ letter-spacing: 0 !important;
+}
+
+.kolm-product-spine a b {
+ color: var(--kolm-ink-0) !important;
+ font-size: 12.5px !important;
+ line-height: 1.15 !important;
+ font-weight: 650 !important;
+}
+
+.kolm-product-spine a em {
+ color: var(--kolm-ink-3) !important;
+ font-style: normal !important;
+ font-size: 10.5px !important;
+ line-height: 1.15 !important;
+}
+
+.kolm-product-spine a[aria-current="page"],
+.kolm-product-spine a:hover,
+.kolm-product-spine a:focus-visible {
+ border-color: rgba(126,240,210,0.38) !important;
+ background:
+  linear-gradient(135deg, rgba(126,240,210,0.13), rgba(255,206,125,0.045)),
+  rgba(255,255,255,0.045) !important;
+}
+
+.kolm-product-spine a[aria-current="page"] em,
+.kolm-product-spine a:hover em,
+.kolm-product-spine a:focus-visible em {
+ color: var(--kolm-ink-2) !important;
+}
+
+@media (max-width: 980px) {
+ .kolm-product-spine {
+  position: static !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  padding: 10px 18px !important;
+  overflow: visible !important;
+ }
+
+ .kolm-product-spine a {
+  min-width: 0 !important;
+  width: 100% !important;
+ }
+}
+
+/* Post-auth command center. Account pages should feel like the product
+   operating console, not a generic settings area. */
+body.kolm-account-surface {
+ background:
+  linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px),
+  radial-gradient(circle at 16% 0%, rgba(126,240,210,0.09), transparent 30%),
+  radial-gradient(circle at 88% 12%, rgba(255,206,125,0.06), transparent 32%),
+  #08090c !important;
+ background-size: 116px 116px, 116px 116px, auto, auto, auto !important;
+}
+
+.kolm-account-command {
+ max-width: 1320px !important;
+ margin: 0 auto 22px !important;
+ padding: 28px 24px 0 !important;
+ display: grid !important;
+ grid-template-columns: minmax(280px, 0.52fr) minmax(420px, 1fr) !important;
+ gap: 22px !important;
+ align-items: start !important;
+}
+
+.kac-copy,
+.kac-console {
+ border: 1px solid rgba(255,247,232,0.13) !important;
+ border-radius: 14px !important;
+ background:
+  linear-gradient(135deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018)),
+  rgba(12,15,20,0.76) !important;
+ box-shadow: 0 24px 72px rgba(0,0,0,0.30) !important;
+}
+
+.kac-copy {
+ padding: 24px !important;
+}
+
+.kac-kicker {
+ margin: 0 0 12px !important;
+ color: var(--kolm-green) !important;
+ font: 700 11px/1.2 var(--kolm-mono, ui-monospace, monospace) !important;
+ text-transform: uppercase !important;
+ letter-spacing: 0.04em !important;
+}
+
+.kac-copy h1 {
+ margin: 0 0 12px !important;
+ color: var(--kolm-ink-0) !important;
+ font-size: clamp(32px, 4vw, 56px) !important;
+ line-height: 1 !important;
+ letter-spacing: 0 !important;
+}
+
+.kac-copy p:not(.kac-kicker) {
+ margin: 0 !important;
+ max-width: 58ch !important;
+ color: var(--kolm-ink-2) !important;
+ font-size: 14.5px !important;
+ line-height: 1.6 !important;
+}
+
+.kac-console {
+ overflow: hidden !important;
+}
+
+.kac-top {
+ min-height: 48px !important;
+ display: flex !important;
+ align-items: center !important;
+ gap: 8px !important;
+ padding: 0 15px !important;
+ border-bottom: 1px solid rgba(255,247,232,0.10) !important;
+ color: var(--kolm-ink-2) !important;
+ font: 560 12px/1.2 var(--kolm-mono, ui-monospace, monospace) !important;
+}
+
+.kac-top span {
+ width: 8px !important;
+ height: 8px !important;
+ border-radius: 999px !important;
+ background: var(--kolm-green) !important;
+}
+
+.kac-top span:nth-child(1) { background: #ff6b91 !important; }
+.kac-top span:nth-child(2) { background: #ffce7d !important; }
+.kac-top b {
+ margin-left: 6px !important;
+ color: var(--kolm-ink-1) !important;
+ font-weight: 560 !important;
+ overflow: hidden !important;
+ text-overflow: ellipsis !important;
+ white-space: nowrap !important;
+}
+
+.kac-steps {
+ display: grid !important;
+ grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+ gap: 1px !important;
+ background: rgba(255,247,232,0.10) !important;
+}
+
+.kac-steps a {
+ min-height: 112px !important;
+ padding: 14px !important;
+ display: flex !important;
+ flex-direction: column !important;
+ gap: 6px !important;
+ background: rgba(8,9,12,0.78) !important;
+ color: var(--kolm-ink-1) !important;
+ text-decoration: none !important;
+}
+
+.kac-matrix {
+ display: grid !important;
+ grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+ gap: 1px !important;
+ border-top: 1px solid rgba(255,247,232,0.10) !important;
+ background: rgba(255,247,232,0.10) !important;
+}
+
+.kac-matrix a {
+ min-height: 104px !important;
+ padding: 14px !important;
+ display: flex !important;
+ flex-direction: column !important;
+ gap: 6px !important;
+ background: rgba(8,9,12,0.74) !important;
+ color: var(--kolm-ink-1) !important;
+ text-decoration: none !important;
+}
+
+.kac-matrix a:hover,
+.kac-matrix a:focus-visible {
+ background: rgba(126,240,210,0.08) !important;
+ color: var(--kolm-ink-0) !important;
+}
+
+.kac-matrix b {
+ color: var(--kolm-green) !important;
+ font: 700 11px/1.2 var(--kolm-mono, ui-monospace, monospace) !important;
+}
+
+.kac-matrix span {
+ color: var(--kolm-ink-2) !important;
+ font-size: 12px !important;
+ line-height: 1.35 !important;
+}
+
+.kac-steps a:hover,
+.kac-steps a:focus-visible {
+ background: rgba(126,240,210,0.08) !important;
+ color: var(--kolm-ink-0) !important;
+}
+
+.kac-steps span {
+ color: var(--kolm-green) !important;
+ font: 700 10px/1 var(--kolm-mono, ui-monospace, monospace) !important;
+}
+
+.kac-steps b {
+ color: var(--kolm-ink-0) !important;
+ font-size: 13.5px !important;
+ line-height: 1.15 !important;
+}
+
+.kac-steps em {
+ margin-top: auto !important;
+ color: var(--kolm-ink-3) !important;
+ font-size: 11.5px !important;
+ line-height: 1.25 !important;
+ font-style: normal !important;
+}
+
+body.kolm-account-surface .acct-shell {
+ max-width: 1320px !important;
+ grid-template-columns: 268px minmax(0, 1fr) !important;
+ gap: 22px !important;
+ padding: 0 24px 36px !important;
+}
+
+body.kolm-account-surface #account-sidebar {
+ top: 82px !important;
+ padding: 14px !important;
+ border-radius: 14px !important;
+ border-color: rgba(255,247,232,0.13) !important;
+ background: rgba(12,15,20,0.80) !important;
+ box-shadow: 0 20px 58px rgba(0,0,0,0.22) !important;
+}
+
+.kac-sidebar-note {
+ margin: 0 0 10px !important;
+ color: var(--kolm-green) !important;
+ font: 700 10px/1.2 var(--kolm-mono, ui-monospace, monospace) !important;
+ text-transform: uppercase !important;
+}
+
+.kac-side-group + .kac-side-group {
+ margin-top: 10px !important;
+ padding-top: 10px !important;
+ border-top: 1px solid rgba(255,247,232,0.08) !important;
+}
+
+body.kolm-account-surface #account-sidebar .kac-side-group h2 {
+ margin: 0 0 5px !important;
+ color: var(--kolm-ink-3) !important;
+ font: 700 10px/1.2 var(--kolm-mono, ui-monospace, monospace) !important;
+ letter-spacing: 0.04em !important;
+ text-transform: uppercase !important;
+}
+
+body.kolm-account-surface #account-sidebar .kac-side-group ul {
+ display: grid !important;
+ gap: 4px !important;
+}
+
+body.kolm-account-surface #account-sidebar a {
+ min-height: 38px !important;
+ display: flex !important;
+ align-items: center !important;
+ border: 1px solid transparent !important;
+ border-radius: 9px !important;
+ padding: 0 10px !important;
+ color: var(--kolm-ink-2) !important;
+}
+
+body.kolm-account-surface #account-sidebar a:hover,
+body.kolm-account-surface #account-sidebar a:focus-visible,
+body.kolm-account-surface #account-sidebar a[aria-current="page"] {
+ border-color: rgba(126,240,210,0.22) !important;
+ background: rgba(126,240,210,0.07) !important;
+ color: var(--kolm-ink-0) !important;
+}
+
+body.kolm-account-surface .acct-content {
+ min-width: 0 !important;
+}
+
+body.kolm-account-surface .acct-content > h1 {
+ display: none !important;
+}
+
+body.kolm-account-surface .acct-content > .lede:first-of-type {
+ margin-top: -4px !important;
+ margin-bottom: 18px !important;
+}
+
+body.kolm-account-surface .kpanel,
+body.kolm-account-surface .metric-card,
+body.kolm-account-surface .card,
+body.kolm-account-surface .settings-card {
+ border-radius: 14px !important;
+ border-color: rgba(255,247,232,0.13) !important;
+ background:
+  linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018)),
+  rgba(12,15,20,0.78) !important;
+ box-shadow: 0 18px 46px rgba(0,0,0,0.18) !important;
+}
+
+body.kolm-account-surface .metric-grid {
+ gap: 12px !important;
+}
+
+body.kolm-account-surface .metric-card {
+ min-height: 128px !important;
+ padding: 16px !important;
+}
+
+body.kolm-account-surface .metric-card .label,
+body.kolm-account-surface .ktable th {
+ color: var(--kolm-ink-3) !important;
+ letter-spacing: 0.04em !important;
+}
+
+body.kolm-account-surface .metric-card .value {
+ color: var(--kolm-ink-0) !important;
+ font-size: clamp(22px, 2.4vw, 32px) !important;
+}
+
+body.kolm-account-surface .btn,
+body.kolm-account-surface button {
+ border-radius: 9px !important;
+}
+
+body.kolm-account-surface .btn.primary {
+ background: var(--kolm-green) !important;
+ border-color: var(--kolm-green) !important;
+ color: #06120b !important;
+}
+
+body.kolm-account-surface .ktable {
+ border-collapse: separate !important;
+ border-spacing: 0 !important;
+}
+
+body.kolm-account-surface .ktable td,
+body.kolm-account-surface .ktable th {
+ padding: 10px 9px !important;
+}
+
+.object-readiness-grid {
+ display: grid;
+ grid-template-columns: repeat(4, minmax(0, 1fr));
+ gap: 12px;
+ margin: 14px 0;
+}
+
+.object-readiness .metric-card,
+.object-storage-card {
+ min-width: 0;
+}
+
+.object-provider-list {
+ display: grid;
+ grid-template-columns: repeat(2, minmax(0, 1fr));
+ gap: 10px;
+ margin-top: 12px;
+}
+
+.object-provider-card {
+ border: 1px solid var(--line, rgba(255,255,255,0.12));
+ border-radius: 10px;
+ background: rgba(255,255,255,0.025);
+ padding: 12px;
+ min-height: 132px;
+}
+
+.object-provider-card.is-ready {
+ border-color: rgba(16,185,129,0.34);
+ background: linear-gradient(180deg, rgba(16,185,129,0.075), rgba(255,255,255,0.02));
+}
+
+.object-provider-card.is-missing {
+ border-color: rgba(218,181,82,0.34);
+ background: linear-gradient(180deg, rgba(218,181,82,0.075), rgba(255,255,255,0.02));
+}
+
+.object-provider-head {
+ display: flex;
+ justify-content: space-between;
+ align-items: flex-start;
+ gap: 10px;
+ margin-bottom: 8px;
+}
+
+.object-provider-head b {
+ display: block;
+ color: var(--ink, #faf2e1);
+ font-size: 13px;
+ line-height: 1.3;
+}
+
+.object-provider-head code,
+.object-provider-meta code {
+ font-size: 11px;
+ color: var(--accent, #10b981);
+ overflow-wrap: anywhere;
+}
+
+.object-provider-meta {
+ display: grid;
+ gap: 5px;
+ color: var(--ink-mute, #a8b1aa);
+ font-size: 12px;
+ line-height: 1.45;
+}
+
+.object-provider-meta .missing {
+ color: var(--warn, #dab552);
+}
+
+.readiness-badge {
+ display: inline-flex;
+ align-items: center;
+ min-height: 28px;
+ border: 1px solid var(--line, rgba(255,255,255,0.12));
+ border-radius: 999px;
+ padding: 4px 10px;
+ font-family: var(--mono, ui-monospace, monospace);
+ font-size: 11px;
+ color: var(--ink-mute, #a8b1aa);
+ background: rgba(255,255,255,0.025);
+}
+
+.readiness-badge.ok {
+ color: var(--good, #7ec486);
+ border-color: rgba(16,185,129,0.34);
+}
+
+.readiness-badge.warn {
+ color: var(--warn, #dab552);
+ border-color: rgba(218,181,82,0.34);
+}
+
+.object-readiness-notes {
+ margin-top: 12px;
+ border: 1px dashed var(--line, rgba(255,255,255,0.12));
+ border-radius: 10px;
+ padding: 12px;
+ color: var(--ink-mute, #a8b1aa);
+ font-size: 12.5px;
+ line-height: 1.55;
+}
+
+.object-readiness-notes strong {
+ color: var(--ink, #faf2e1);
+}
+
+[data-theme="light"] body.kolm-account-surface {
+ background:
+  linear-gradient(rgba(17,19,21,0.028) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(17,19,21,0.022) 1px, transparent 1px),
+  radial-gradient(circle at 14% 0%, rgba(8,127,104,0.10), transparent 30%),
+  radial-gradient(circle at 88% 12%, rgba(145,96,12,0.07), transparent 32%),
+  #f7f3ea !important;
+ background-size: 116px 116px, 116px 116px, auto, auto, auto !important;
+}
+
+[data-theme="light"] .kolm-product-spine {
+ background: rgba(247,243,234,0.92) !important;
+ border-color: rgba(17,19,21,0.10) !important;
+}
+
+[data-theme="light"] .kolm-product-spine a,
+[data-theme="light"] .kac-copy,
+[data-theme="light"] .kac-console,
+[data-theme="light"] body.kolm-account-surface #account-sidebar,
+[data-theme="light"] body.kolm-account-surface .kpanel,
+[data-theme="light"] body.kolm-account-surface .metric-card,
+[data-theme="light"] body.kolm-account-surface .card,
+[data-theme="light"] body.kolm-account-surface .settings-card {
+ background: rgba(255,255,255,0.76) !important;
+ border-color: rgba(17,19,21,0.12) !important;
+ box-shadow: 0 20px 56px rgba(17,19,21,0.10) !important;
+}
+
+[data-theme="light"] .kolm-product-spine a b,
+[data-theme="light"] .kac-copy h1,
+[data-theme="light"] .kac-steps b,
+[data-theme="light"] body.kolm-account-surface .metric-card .value {
+ color: #111315 !important;
+}
+
+[data-theme="light"] .kolm-product-spine a em,
+[data-theme="light"] .kac-copy p:not(.kac-kicker),
+[data-theme="light"] .kac-steps em {
+ color: #4b5550 !important;
+}
+
+[data-theme="light"] .kac-top,
+[data-theme="light"] .kac-steps {
+ border-color: rgba(17,19,21,0.10) !important;
+ background: rgba(17,19,21,0.08) !important;
+}
+
+[data-theme="light"] .kac-steps a {
+ background: rgba(255,255,255,0.72) !important;
+ color: #343a40 !important;
+}
+
+[data-theme="light"] body.kolm-account-surface #account-sidebar a {
+ color: #455047 !important;
+}
+
+[data-theme="light"] body.kolm-account-surface #account-sidebar a:hover,
+[data-theme="light"] body.kolm-account-surface #account-sidebar a:focus-visible,
+[data-theme="light"] body.kolm-account-surface #account-sidebar a[aria-current="page"] {
+ color: #101418 !important;
+ background: rgba(8,127,104,0.08) !important;
+ border-color: rgba(8,127,104,0.22) !important;
+}
+
+[data-theme="light"] .kac-matrix {
+ background: rgba(17,19,21,0.08) !important;
+ border-color: rgba(17,19,21,0.10) !important;
+}
+
+[data-theme="light"] .kac-matrix a {
+ background: rgba(255,255,255,0.72) !important;
+ color: #343a40 !important;
+}
+
+[data-theme="light"] .kac-matrix b {
+ color: #087f68 !important;
+}
+
+[data-theme="light"] .kac-matrix span {
+ color: #4b5550 !important;
+}
+
+[data-theme="light"] .object-provider-card,
+[data-theme="light"] .readiness-badge,
+[data-theme="light"] .object-readiness-notes {
+ background: rgba(255,255,255,0.74);
+ border-color: rgba(17,19,21,0.12);
+ color: #4b5550;
+}
+
+[data-theme="light"] .object-provider-head b,
+[data-theme="light"] .object-readiness-notes strong {
+ color: #111315;
+}
+
+[data-theme="light"] .object-provider-card.is-ready {
+ background: linear-gradient(180deg, rgba(8,127,104,0.08), rgba(255,255,255,0.74));
+ border-color: rgba(8,127,104,0.24);
+}
+
+[data-theme="light"] .object-provider-card.is-missing {
+ background: linear-gradient(180deg, rgba(145,96,12,0.08), rgba(255,255,255,0.74));
+ border-color: rgba(145,96,12,0.24);
+}
+
+@media (max-width: 980px) {
+ .kolm-account-command {
+  grid-template-columns: 1fr !important;
+  padding: 20px 18px 0 !important;
+ }
+
+ .kac-steps {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+ }
+
+ .kac-matrix {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+ }
+
+ body.kolm-account-surface .acct-shell {
+  grid-template-columns: 1fr !important;
+  padding: 0 18px 30px !important;
+ }
+
+ body.kolm-account-surface #account-sidebar {
+  position: static !important;
+ }
+
+ .object-readiness-grid,
+ .object-provider-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+ }
+}
+
+@media (max-width: 560px) {
+ .kac-steps {
+  grid-template-columns: 1fr !important;
+ }
+
+ .kac-matrix {
+  grid-template-columns: 1fr !important;
+ }
+
+ .kac-steps a {
+  min-height: 88px !important;
+ }
+
+ .kac-matrix a {
+  min-height: 82px !important;
+ }
+
+ .object-readiness-grid,
+ .object-provider-list {
+  grid-template-columns: 1fr;
+ }
+}
+
+@media (max-width: 980px) {
+ .home-hero-left .kolm-hero-system {
+  display: block !important;
+  max-width: 100% !important;
  }
 }

@@ -1,139 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>kolm distill · CLI reference · kolm.ai</title>
-<meta name="description" content="Reference for the kolm distill CLI verb: usage, flags, examples, and links to related docs.">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm distill | CLI reference | kolm.ai</title>
+<meta name="description" content="Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge.">
 <link rel="canonical" href="https://kolm.ai/docs/cli/distill">
-<meta property="og:title" content="kolm distill · CLI reference · kolm.ai">
-<meta property="og:description" content="Reference for the kolm distill CLI verb: usage, flags, examples, and links to related docs.">
+<meta property="og:title" content="kolm distill | CLI reference | kolm.ai">
+<meta property="og:description" content="Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/distill">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm distill","description":"Reference for the kolm distill CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/distill","mainEntityOfPage":"https://kolm.ai/docs/cli/distill","author":{"@type":"Organization","name":"kolm.ai"}}
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm distill","description":"Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge.","url":"https://kolm.ai/docs/cli/distill","mainEntityOfPage":"https://kolm.ai/docs/cli/distill","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
-<meta name="twitter:title" content="kolm distill · CLI reference · kolm.ai">
-<meta name="twitter:description" content="Reference for the kolm distill CLI verb: usage, flags, examples, and links to related docs.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Run</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
 <a class="skip-link" href="#main">Skip to content</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -233,11 +121,22 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="distill">
 <nav aria-label="Breadcrumb" class="crumbs">
- <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>distill</span>
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>distill</span>
 </nav>
-<p>--- title: kolm distill · kolm.ai description: Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge. ---</p>
+<section class="kolm-surface-media kolm-surface-media--inline" aria-label="CLI workflow proof">
+  <div class="media-terminal">
+    <span class="media-kicker">CLI contract</span>
+    <span class="media-line"><span class="ok">$</span> kolm distill --help</span>
+    <span class="media-line"><span class="ok">$</span> kolm distill --json</span>
+    <p>Every reference page is generated from the command source, keeps usage and examples close to the product, and links into the same API, account, and artifact workflow.</p>
+  </div>
+  <div class="media-proof">
+    <span class="media-kicker">Operational proof</span>
+    <p>Use this verb inside the capture, dataset, distill, compile, verify, or runtime loop. Scripts can pin JSON output, humans get the same flow in the account console and TUI.</p>
+  </div>
+</section>
 <h1>kolm distill</h1>
-<p>&gt; Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge.</p>
+<blockquote><p>Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge.</p></blockquote>
 <h2>Usage</h2>
 <pre><code>
 kolm distill --namespace &lt;n&gt; [--base-model &lt;name&gt;] [--target &lt;size&gt;]
@@ -255,9 +154,38 @@ kolm distill --local-worker --spec &lt;file&gt; --seeds &lt;file&gt; --out &lt;d
 kolm distill --local-worker --list-catalog
 </code></pre>
 <h2>Flags</h2>
-<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--namespace &lt;n&gt;</code> | none | the namespace captured via <code>kolm capture</code> | | <code>--base-model &lt;name&gt;</code> | <code>Qwen/Qwen2.5-3B-Instruct</code> | base model id | | <code>--target &lt;size&gt;</code> | <code>phi-3-mini</code> | target artifact size | | <code>--local-worker</code> | off | run the in-tree distill worker, no cloud bridge | | <code>--spec &lt;file&gt;</code> | none | spec.json describing the recipe | | <code>--seeds &lt;file&gt;</code> | none | jsonl seed pairs | | <code>--out &lt;dir&gt;</code> | none | worker output dir (becomes <code>--distill-provenance</code> for <code>kolm compile</code>) | | <code>--mode &lt;m&gt;</code> | <code>stub</code> | <code>stub|collect|full|doctor</code>. <code>full</code> requires the Python ML stack | | <code>--teacher &lt;vendor:model&gt;</code> | none | e.g. <code>anthropic:claude-opus-4-7</code>, <code>openai:gpt-5</code>, <code>local:llama3.1-8b</code> | | <code>--student-base &lt;name&gt;</code> | none | e.g. <code>qwen2.5-3b</code>, <code>phi-3.5-mini</code>, <code>llama-3.2-3b</code> | | <code>--distillation-method &lt;m&gt;</code> | derived | <code>lora|qlora|full-ft|prompt-distill</code> | | <code>--redact &lt;class&gt;</code> | <code>auto</code> | <code>none|phi|pci|multi|auto</code>. Auto reads <code>redact_class</code> from the spec |</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--namespace &lt;n&gt;</code></td><td>none</td><td>the namespace captured via <code>kolm capture</code></td></tr>
+<tr><td><code>--base-model &lt;name&gt;</code></td><td><code>Qwen/Qwen2.5-3B-Instruct</code></td><td>base model id</td></tr>
+<tr><td><code>--target &lt;size&gt;</code></td><td><code>phi-3-mini</code></td><td>target artifact size</td></tr>
+<tr><td><code>--local-worker</code></td><td>off</td><td>run the in-tree distill worker, no cloud bridge</td></tr>
+<tr><td><code>--spec &lt;file&gt;</code></td><td>none</td><td>spec.json describing the recipe</td></tr>
+<tr><td><code>--seeds &lt;file&gt;</code></td><td>none</td><td>jsonl seed pairs</td></tr>
+<tr><td><code>--out &lt;dir&gt;</code></td><td>none</td><td>worker output dir (becomes <code>--distill-provenance</code> for <code>kolm compile</code>)</td></tr>
+<tr><td><code>--mode &lt;m&gt;</code></td><td><code>stub</code></td><td>`stub</td><td>collect</td><td>full</td><td>doctor<code>. </code>full` requires the Python ML stack</td></tr>
+<tr><td><code>--teacher &lt;vendor:model&gt;</code></td><td>none</td><td>e.g. <code>anthropic:claude-opus-4-7</code>, <code>openai:gpt-5</code>, <code>local:llama3.1-8b</code></td></tr>
+<tr><td><code>--student-base &lt;name&gt;</code></td><td>none</td><td>e.g. <code>qwen2.5-3b</code>, <code>phi-3.5-mini</code>, <code>llama-3.2-3b</code></td></tr>
+<tr><td><code>--distillation-method &lt;m&gt;</code></td><td>derived</td><td>`lora</td><td>qlora</td><td>full-ft</td><td>prompt-distill`</td></tr>
+<tr><td><code>--redact &lt;class&gt;</code></td><td><code>auto</code></td><td>`none</td><td>phi</td><td>pci</td><td>multi</td><td>auto<code>. Auto reads </code>redact_class` from the spec</td></tr>
+</tbody>
+</table></div>
 <h2>Redact classes</h2>
-<p>| Class | Behavior | | ----- | -------- | | <code>none</code> | no redactor; teacher sees raw input. Required only for known-clean corpora | | <code>phi</code> | HIPAA Safe Harbor: 18 identifiers + 3 kolm extensions (NPI, DEA, Medicaid ID). Receipt chain captures <code>redaction_map_hash</code>, <code>teacher_call_log_hash</code>, <code>reinjection_log_hash</code> | | <code>pci</code> | payment-card masking profile | | <code>multi</code> | <code>phi</code> + <code>pci</code> combined | | <code>auto</code> | choose based on the spec&#39;s declared <code>redact_class</code> field |</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Class</th><th>Behavior</th></tr>
+</thead>
+<tbody>
+<tr><td><code>none</code></td><td>no redactor; teacher sees raw input. Required only for known-clean corpora</td></tr>
+<tr><td><code>phi</code></td><td>HIPAA Safe Harbor: 18 identifiers + 3 kolm extensions (NPI, DEA, Medicaid ID). Receipt chain captures <code>redaction_map_hash</code>, <code>teacher_call_log_hash</code>, <code>reinjection_log_hash</code></td></tr>
+<tr><td><code>pci</code></td><td>payment-card masking profile</td></tr>
+<tr><td><code>multi</code></td><td><code>phi</code> + <code>pci</code> combined</td></tr>
+<tr><td><code>auto</code></td><td>choose based on the spec&#39;s declared <code>redact_class</code> field</td></tr>
+</tbody>
+</table></div>
 <h2>Examples</h2>
 <pre><code>
 # bridge path (after kolm capture has filled the namespace)
@@ -291,13 +219,13 @@ kolm distill --local-worker --list-catalog
 <li><a href="/docs/distillation">Distillation guide</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
- <h2 id="see-also-h">See also</h2>
- <ul>
- <li><a href="/docs/cli">All CLI verbs</a></li>
- <li><a href="/quickstart">Quickstart</a></li>
- <li><a href="/docs/api">HTTP API reference</a></li>
- <li><a href="/docs/sdk">SDK reference</a></li>
- </ul>
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
 </section>
 </main>
 </body>

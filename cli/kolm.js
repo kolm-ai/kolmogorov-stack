@@ -318,7 +318,12 @@ function prompt(q) {
 }
 
 const HELP = {
-  _root: `kolm v${VERSION} - compile private AI behavior into the smallest signed artifact that passes the tests.
+  _root: `kolm v${VERSION} - the AI control plane for owned models, signed runtimes, and enterprise evidence.
+
+PRODUCT LOOP
+  gateway -> capture -> privacy -> datasets -> evals -> train/distill -> runtime -> govern
+  Start as an OpenAI-compatible wrapper. Promote only reviewed traffic.
+  Ship the result as a signed .kolm artifact with receipts for operators.
 
 USAGE
   kolm <command> [args...]
@@ -378,6 +383,7 @@ COMMANDS
   team <sub>                       multi-tenant workspaces (create|list|show|invite|accept|members|role|remove)
   tunnel <sub>                     remote access to a self-hosted .kolm (new|list|start|close)
   cloud <sub>                      real GPU train + BYOC deploy (train|targets|deploy|list|show|destroy)
+  surfaces                         product journey map across account, CLI, TUI, API, cloud, privacy, and proof (--json)
   airgap <sub>                     hard-offline mode (status|enable|disable|verify)
   compute <sub>                    where training runs (list|detect|pick|use|info|test|status)
   doctor                           sanity-check env (config, cloud, docker, project)
@@ -581,7 +587,7 @@ USAGE
 OPTIONS
   --email, -e <addr>     required when stdin is not a TTY
   --name, -n  <text>     optional display name
-  --plan      <id>       free | starter | pro | teams | enterprise (default: free)
+  --plan      <id>       free | pro | team | teams | enterprise (default: free; starter->pro, business->enterprise)
 
 On success: the api_key is saved to ~/.kolm/config.json (mode 0600) and printed
 truncated. Paid plans also return a Stripe billing URL you can open in a browser.
@@ -780,6 +786,10 @@ OPTIONS (spec)
   --spec <file|->              JSON spec describing recipes + evals + optional pack/index
   --out <file.kolm|dir>        output path (.kolm) or directory; default ~/.kolm/artifacts
   --examples <file.jsonl>      merge external eval rows into spec.evals.cases
+  --as-mcp                     also write ./kolm.yaml + ./.kolm/skills so
+                               Claude Desktop, Codex, Cursor, Cline, Continue,
+                               and any MCP client can run the artifact with
+                               kolm serve --mcp.
   --gate <n>                   K-score gate override (default 0.85). Use --gate 0.75 to
                                accept lower-scoring artifacts; --gate 0.95 for stricter.
                                Compile still emits the artifact; the gate verdict line
@@ -946,6 +956,8 @@ SKILL.md sidecar
   sidecar uses Claude Code's frontmatter format (name / description / allowed-tools
   / disable-model-invocation) so Claude Code, Cursor, Cline and Continue can
   index the skill without further config. Pass --no-skill to suppress.
+  Pass --as-mcp when compiling from a project checkout to create a minimal
+  kolm.yaml that allow-lists the new artifact and sets skills_dir=./.kolm/skills.
 
 SPEC SHAPE (offline path — any human or AI agent can author this)
   {
@@ -979,6 +991,7 @@ EXAMPLES
 
 FLAGS
   --json     deterministic compile envelope ({artifact, k_score, gates, axes}) for CI / scripts
+  --as-mcp   create project-local MCP config for the compiled artifact
 `,
   new: `kolm new - scaffold a spec.json you can compile into a .kolm.
 
@@ -1626,7 +1639,7 @@ The hub is a verifiable artifact gallery: every published .kolm has a SHA-256
 fingerprint, a K-score, and a handle of the form <owner>/<name>. Default
 visibility is private (only you can see it); --public makes it discoverable.
 
-TEAM-SCOPED PUBLISH (Teams tier: $149/mo, 5 seats)
+TEAM-SCOPED PUBLISH (Team tier: $499/mo, 5 seats)
   --team <handle>  publishes to the team's namespace. Any active team member
                    can pull, even when the artifact is --private. Use this
                    for shared models inside a healthcare/finance/legal team
@@ -2128,9 +2141,11 @@ PIPELINE
   local vLLM) -> pipe the teacher response back through 'kolm reinject --map'
   to restore the original identifiers. The teacher never sees raw PHI.
 `,
-  media: `kolm media - multimodal redaction worker. OCR, PDF-text, whisper.
+  media: `kolm media - multimodal tokenization and redaction worker. OCR, PDF-text, whisper.
 
 USAGE
+  kolm media tokenize --path <local> [--force] [--json]
+  kolm media tokenize --dir <local-dir> [--force] [--json]
   kolm media install image [--yes] [--face-model-url URL] [--plate-model-url URL]
   kolm media install audio [--yes]
   kolm media install --all [--yes]
@@ -2143,6 +2158,9 @@ USAGE
   kolm media redact-audio <file:URI | --path <local>> [--output <wav>] [--strength 0..1]
 
 SUBCOMMANDS
+  tokenize      Create compile-ready Markdown sidecars for image/audio/video/pdf/text/code.
+                Uses local deterministic feature tokens when captions or
+                transcripts are not configured.
   install image One-command setup for the W462 pixel-space PII redactor.
                 Runs 'npm install onnxruntime-node sharp' in
                 workers/multimodal-redact-image/ and downloads the default
@@ -2195,6 +2213,8 @@ SUBCOMMANDS
 OPTIONS
   --remote          POST to /v1/media/* (server runs the worker)
   --path <p>        Local file path instead of a media-store URI
+  --dir <p>         Tokenize every supported file under a local directory
+  --force           Rewrite existing multimodal sidecars
   --kind <k>        image|audio|video|pdf (sniffed from --mime or URI extension)
   --mime <m>        Explicit mime-type override
   --model <p>       whisper.cpp ggml model path (audio/video only)
@@ -2262,7 +2282,11 @@ NOTES
   Unknown tokens (ones not present in the map) are left as-is so callers
   can detect when the teacher dropped or paraphrased a placeholder.
 `,
-  'chat-tui': `kolm chat-tui - production-grade terminal UI to chat with any model in your registry.
+  'chat-tui': `kolm chat-tui - terminal model cockpit for owned AI.
+
+PRODUCT LOOP
+  talk to any provider or .kolm artifact, save the session, replay the useful rows,
+  and promote repeated work into the same dataset/eval/distill path as the web UI.
 
 USAGE
   kolm chat-tui [--model=<id>] [--system="<prompt>"] [--registry=<dir>] [--open=<path.kolm>]
@@ -2297,7 +2321,12 @@ EXAMPLES
   kolm chat-tui --model=openai:gpt-5
   kolm chat-tui --model=kolm:phi-redactor --open=./phi-redactor.kolm
 `,
-  tui: `kolm tui - interactive shell for .kolm artifacts.
+  tui: `kolm tui - terminal command center for the kolm product loop.
+
+PRODUCT LOOP
+  live calls -> artifacts -> compile wizard -> spend -> privacy -> workflows
+  -> opportunities -> labeling -> datasets -> builds -> bakeoffs -> devices
+  -> storage -> agents -> audit -> billing -> settings
 
 USAGE
   kolm tui                             launch the REPL
@@ -2315,6 +2344,22 @@ COMMANDS (inside the REPL)
 NOTES
   Each successful local action prints the equivalent REST call beneath the
   result, so the TUI doubles as a one-click "show me the API call" tool.
+`,
+  surfaces: `kolm surfaces - product journey map for users and operators.
+
+USAGE
+  kolm surfaces [--json]
+
+WHAT IT SHOWS
+  - every major product surface and its account pages
+  - the CLI commands and TUI views that mirror each surface
+  - API routes, customization dimensions, and proof paths
+  - user-control dimensions: provider, compute, runtime, storage, privacy,
+    deployment, governance, and verification
+
+WHY IT EXISTS
+  This is the operator-readable contract that prevents account, CLI, TUI,
+  hosted API, cloud, and local product flows from drifting apart.
 `,
   repl: `kolm repl - generic interactive REPL that dispatches any kolm verb.
 
@@ -3016,8 +3061,13 @@ Public URL: https://kolm.ai/r/<token>  (POST JSON, get JSON back)
 
 USAGE
   kolm cloud train <name> [--seeds <f.jsonl>] [--base <model>] [--confirm]
-                                           rent a GPU, fine-tune on your seeds, package as .kolm
-  kolm cloud targets                       list supported BYOC deploy targets
+                                            rent a GPU, fine-tune on your seeds, package as .kolm
+  kolm cloud readiness [--remote] [--json] local or deployed cloud/GPU/storage readiness matrix
+  kolm cloud storage [--provider <id>] [--smoke] [--json]
+                                           artifact object-store readiness and round-trip smoke
+  kolm cloud targets [--json]             list BYOC, edge, SSH, GPU, and managed train targets
+  kolm cloud deploy-plan --target <t> --artifact <id> [--json]
+                                           local, secret-safe deploy steps for any supported target
   kolm cloud deploy --target <t> --artifact <id> [--region r] [--name n] [--team <id>] [--out <path>]
   kolm cloud list                          list deployments
   kolm cloud show <deployment_id>          inspect one deployment
@@ -3028,11 +3078,12 @@ TRAIN BACKENDS
                        Cost: ~$2-5 for Qwen 2.5 7B on 2k pairs, ~30-45 min.
   runpod, lambda, vast (planned, see kolm compute list)
 
-DEPLOY TARGETS
-  fly, aws-nitro, gcp-cvm, azure-cvm, docker
+  DEPLOY TARGETS
+    docker, ssh, fly, aws-nitro, gcp-cvm, azure-cvm, cloudflare-workers,
+    vercel-edge, deno-deploy, runpod-gpu, lambda-gpu, together-finetune
 
-The kolm cloud signs the deploy script; weights + receipts live in your account.
-`,
+  The kolm cloud signs the deploy script; weights + receipts live in your account.
+  `,
   'cloud train': `kolm cloud train - rent a GPU and run a real LoRA fine-tune.
 
 USAGE
@@ -3960,9 +4011,9 @@ function findProjectKolmYaml(startDir) {
 // so harnesses (Claude Code, Cursor, Cline, Continue) can auto-index the skill.
 // Writes to <projectRoot>/<skills_dir>/<name>.md when a kolm.yaml is present,
 // else next to the artifact.
-function writeSkillSidecar({ artifactPath, description, kScore }) {
+function writeSkillSidecar({ artifactPath, description, kScore, projectRoot }) {
   const artifactName = path.basename(artifactPath, '.kolm');
-  const proj = findProjectKolmYaml(path.dirname(artifactPath));
+  const proj = findProjectKolmYaml(projectRoot || path.dirname(artifactPath));
   let skillsDir;
   let mcpToolName;
   if (proj) {
@@ -3971,7 +4022,7 @@ function writeSkillSidecar({ artifactPath, description, kScore }) {
     mcpToolName = `mcp__${proj.name}__${artifactName}`;
   } else {
     skillsDir = path.dirname(artifactPath);
-    mcpToolName = `mcp__kolm__${artifactName}`;
+    mcpToolName = artifactName;
   }
   fs.mkdirSync(skillsDir, { recursive: true });
   const outPath = path.join(skillsDir, `${artifactName}.md`);
@@ -3979,7 +4030,7 @@ function writeSkillSidecar({ artifactPath, description, kScore }) {
   const kLine = (kScore && typeof kScore.composite === 'number')
     ? `K-score: ${kScore.composite.toFixed(3)} (composite). `
     : '';
-  const body = [
+  let body = [
     '---',
     `name: ${artifactName}`,
     `description: ${desc}`,
@@ -4001,11 +4052,72 @@ function writeSkillSidecar({ artifactPath, description, kScore }) {
     '',
     '## Guarantees',
     '',
-    `${kLine}Runtime egress is patched at the process boundary — the artifact cannot reach the network during execution. The .kolm bundle is signed; signatures are verified before each call.`,
+    `${kLine}The .kolm bundle is signed and verified before each call. Recipe execution uses the local artifact runner with input-size and timeout limits; project mode exposes only allow-listed artifacts from kolm.yaml.`,
     '',
   ].join('\n');
   fs.writeFileSync(outPath, body);
   return outPath;
+}
+
+function ensureMcpProjectForArtifact({ artifactPath, description, kScore }) {
+  const cwd = process.cwd();
+  const yamlPath = path.join(cwd, 'kolm.yaml');
+  const projectName = slugify(path.basename(cwd) || 'kolm-project') || 'kolm-project';
+  const relArtifact = path.relative(cwd, artifactPath).replace(/\\/g, '/');
+  const artPath = relArtifact && !relArtifact.startsWith('..') ? './' + relArtifact : artifactPath.replace(/\\/g, '/');
+  if (!fs.existsSync(yamlPath)) {
+    const safeDesc = String(description || 'Kolm MCP artifact project.').replace(/"/g, '\\"').slice(0, 500);
+    const yaml = [
+      'kolm_yaml_version: "0.1"',
+      `name: ${projectName}`,
+      'version: 0.1.0',
+      `description: "${safeDesc}"`,
+      '',
+      'artifacts:',
+      `  - path: "${artPath}"`,
+      `    name: ${projectName}`,
+      `    description: "${safeDesc}"`,
+      typeof kScore?.composite === 'number' ? `    k_min: ${Math.max(0, Math.min(1, Number(kScore.composite))).toFixed(3)}` : '    k_min: 0',
+      '',
+      'mcp:',
+      '  transport: stdio',
+      '  host: 127.0.0.1',
+      '',
+      'skills_dir: ./.kolm/skills',
+      '',
+    ].join('\n');
+    fs.writeFileSync(yamlPath, yaml);
+  } else {
+    const safeDesc = String(description || 'Kolm MCP artifact project.').replace(/"/g, '\\"').slice(0, 500);
+    const current = fs.readFileSync(yamlPath, 'utf8');
+    if (!current.includes(`path: "${artPath}"`) && !current.includes(`path: '${artPath}'`) && !current.includes(`path: ${artPath}`)) {
+      const item = [
+        `  - path: "${artPath}"`,
+        `    name: ${projectName}`,
+        `    description: "${safeDesc}"`,
+        typeof kScore?.composite === 'number' ? `    k_min: ${Math.max(0, Math.min(1, Number(kScore.composite))).toFixed(3)}` : '    k_min: 0',
+        '',
+      ].join('\n');
+      let next;
+      if (/^artifacts:\s*$/m.test(current)) {
+        const mcpMatch = current.match(/^mcp:\s*$/m);
+        if (mcpMatch && mcpMatch.index != null) {
+          next = current.slice(0, mcpMatch.index) + item + current.slice(mcpMatch.index);
+        } else {
+          next = current.replace(/^artifacts:\s*$/m, 'artifacts:\n' + item);
+        }
+      } else {
+        next = current.replace(/\s*$/, '\n\nartifacts:\n' + item);
+      }
+      fs.writeFileSync(yamlPath, next);
+    }
+  }
+  fs.mkdirSync(path.join(cwd, '.kolm', 'skills'), { recursive: true });
+  return {
+    path: yamlPath,
+    project: projectName,
+    command: 'kolm serve --mcp',
+  };
 }
 
 // kolm.yaml writer. Hand-rolls a minimal YAML so we don't pull a yaml dep
@@ -5779,12 +5891,10 @@ async function cmdBilling(args) {
   const localTiersCatalog = () => ({
     source: 'local_bundled',
     plans: [
-      { id: 'free',       label: 'Developer',  price_usd_month: 0,    quota: 10000,    seats: 1  },
-      { id: 'starter',    label: 'Starter',    price_usd_month: 9,    quota: 50000,    seats: 1  },
-      { id: 'pro',        label: 'Pro',        price_usd_month: 49,   quota: 200000,   seats: 1  },
-      { id: 'teams',      label: 'Teams',      price_usd_month: 149,  quota: 1000000,  seats: 5  },
-      { id: 'business',   label: 'Business',   price_usd_month: 1499, quota: 5000000,  seats: 25 },
-      { id: 'enterprise', label: 'Enterprise', price_usd_month: 2999, quota: 10000000, seats: 25 },
+      { id: 'free',       label: 'Free',       price_usd_month: 0,    price_label: '$0/mo',   quota: 10000,    seats: 1,  self_serve: true  },
+      { id: 'pro',        label: 'Pro',        price_usd_month: 49,   price_label: '$49/mo',  quota: 200000,   seats: 1,  self_serve: true  },
+      { id: 'teams',      label: 'Team',       price_usd_month: 499,  price_label: '$499/mo', quota: 1000000,  seats: 5,  self_serve: true  },
+      { id: 'enterprise', label: 'Enterprise', price_usd_month: null, price_label: 'Custom',  quota: 10000000, seats: 25, self_serve: false, contact_sales: true },
     ],
   });
 
@@ -5884,11 +5994,11 @@ async function cmdBilling(args) {
       console.log('');
     }
     for (const r of rows) {
-      const price = r.price_usd_month != null ? '$' + r.price_usd_month + '/mo'
-        : (r.price_usd_monthly != null ? '$' + r.price_usd_monthly + '/mo' : '-');
+      const price = r.price_label || (r.price_usd_month != null ? '$' + r.price_usd_month + '/mo'
+        : (r.price_usd_monthly != null ? '$' + r.price_usd_monthly + '/mo' : '-'));
       const seats = r.seats != null ? '  seats=' + r.seats : '';
       const quota = r.quota != null ? '  quota=' + r.quota : '';
-      const link = r.billing_link_configured === false ? '  (billing link unconfigured)' : '';
+      const link = r.contact_sales ? '  (contact sales)' : (r.billing_link_configured === false ? '  (billing link unconfigured)' : '');
       console.log('  ' + (r.id || r.name || '-').padEnd(12) + '  ' + (r.label || '').padEnd(14) + '  ' + price.padEnd(10) + seats + quota + link);
     }
   } else if (sub === 'breakdown') {
@@ -6279,6 +6389,7 @@ async function cmdCompile(args) {
     // gates can still flag the artifact. The exit code on the matching
     // ship-gate failure is EXIT.GATE_FAIL so CI scripts can distinguish.
     const allowBelowGateFlag = args.includes('--allow-below-gate');
+    const asMcpFlag = args.includes('--as-mcp');
     // W243 canonical recipe-class enum, surfaced to /account, /compile, cmdDistill, cmdTui.
     if (classFlag && !['rule', 'synthesized_rule', 'compiled_rule', 'distilled_model'].includes(classFlag)) {
       console.error(`error: --class must be one of: rule, synthesized_rule, compiled_rule, distilled_model (got '${classFlag}')`);
@@ -6719,8 +6830,20 @@ async function cmdCompile(args) {
       // mirror what `kolm inspect --json` exposes. Skill sidecar still emits;
       // PostCompile hook still fires. Gate-fail exit still applies after print.
       if (wantJsonCompile) {
+        let mcpProject = null;
+        if (asMcpFlag) {
+          try {
+            mcpProject = ensureMcpProjectForArtifact({
+              artifactPath: r.outPath,
+              description: spec.task || `Spec-compiled artifact ${path.basename(r.outPath, '.kolm')}.`,
+              kScore: r.k_score,
+            });
+          } catch (e) {
+            if (process.env.KOLM_DEBUG) console.error('mcp project emit failed:', e.message);
+          }
+        }
         if (!args.includes('--no-skill')) {
-          try { writeSkillSidecar({ artifactPath: r.outPath, description: spec.task || `Spec-compiled artifact ${path.basename(r.outPath, '.kolm')}.`, kScore: r.k_score }); }
+          try { writeSkillSidecar({ artifactPath: r.outPath, description: spec.task || `Spec-compiled artifact ${path.basename(r.outPath, '.kolm')}.`, kScore: r.k_score, projectRoot: asMcpFlag ? process.cwd() : undefined }); }
           catch (e) { if (process.env.KOLM_DEBUG) console.error('skill emit failed:', e.message); }
         }
         await dispatch('PostCompile', { command: 'compile', cwd: process.cwd(), artifact: r.outPath, sha256: r.sha256, bytes: r.bytes, k_score: r.k_score }, { onResult: printHookResult });
@@ -6734,6 +6857,7 @@ async function cmdCompile(args) {
           production_ready: prodVerdict.ok,
           gate_reasons: prodVerdict.reasons,
           gates: prodVerdict.gates,
+          mcp_project: mcpProject,
           evals_report: r.evals_report || null,
         }, null, 2));
         if (verdict === 'fail') process.exit(EXIT.GATE_FAIL);
@@ -6767,17 +6891,33 @@ async function cmdCompile(args) {
           console.log(`           extend recipes[0].source patterns, or fix expected outputs.`);
         }
       }
+      let mcpProject = null;
+      if (asMcpFlag) {
+        try {
+          mcpProject = ensureMcpProjectForArtifact({
+            artifactPath: r.outPath,
+            description: spec.task || `Spec-compiled artifact ${path.basename(r.outPath, '.kolm')}.`,
+            kScore: r.k_score,
+          });
+        } catch (e) {
+          if (process.env.KOLM_DEBUG) console.error('mcp project emit failed:', e.message);
+        }
+      }
       if (!args.includes('--no-skill')) {
         try {
           const skillPath = writeSkillSidecar({
             artifactPath: r.outPath,
             description: spec.task || `Spec-compiled artifact ${path.basename(r.outPath, '.kolm')}.`,
             kScore: r.k_score,
+            projectRoot: asMcpFlag ? process.cwd() : undefined,
           });
           console.log(`skill: ${skillPath}`);
         } catch (e) {
           if (process.env.KOLM_DEBUG) console.error('skill emit failed:', e.message);
         }
+      }
+      if (mcpProject) {
+        console.log(`mcp: ${path.relative(process.cwd(), mcpProject.path) || mcpProject.path} (serve with: ${mcpProject.command})`);
       }
       await dispatch('PostCompile', { command: 'compile', cwd: process.cwd(), artifact: r.outPath, sha256: r.sha256, bytes: r.bytes, k_score: r.k_score }, { onResult: printHookResult });
       // Post-compile hint: show --input form first because single-quoted JSON
@@ -6975,17 +7115,33 @@ async function cmdCompile(args) {
       console.log('  evals:     ' + total + ' user-provided');
     }
   }
+  let mcpProject = null;
+  if (args.includes('--as-mcp')) {
+    try {
+      mcpProject = ensureMcpProjectForArtifact({
+        artifactPath: outPath,
+        description: task,
+        kScore: state.k_score,
+      });
+    } catch (e) {
+      if (process.env.KOLM_DEBUG) console.error('mcp project emit failed:', e.message);
+    }
+  }
   if (!args.includes('--no-skill')) {
     try {
       const skillPath = writeSkillSidecar({
         artifactPath: outPath,
         description: task,
         kScore: state.k_score,
+        projectRoot: args.includes('--as-mcp') ? process.cwd() : undefined,
       });
       console.log(`skill: ${skillPath}`);
     } catch (e) {
       if (process.env.KOLM_DEBUG) console.error('skill emit failed:', e.message);
     }
+  }
+  if (mcpProject) {
+    console.log(`mcp: ${path.relative(process.cwd(), mcpProject.path) || mcpProject.path} (serve with: ${mcpProject.command})`);
   }
   await dispatchCloud('PostCompile', { command: 'compile', cwd: process.cwd(), artifact: outPath, k_score: state.k_score, bytes: buf.length, cloud: true }, { onResult: printHookResult });
   if (state.deploy_hook_set) {
@@ -8465,7 +8621,7 @@ async function cmdPublish(args) {
   // --team <handle>: publish to a team workspace instead of your personal namespace.
   // Wave 57. Server verifies you're a member of the team and uses the team slug
   // as the artifact owner. All other team members can pull private team artifacts.
-  // Requires Teams plan ($149/mo, 5 seats) — non-members get 403.
+  // Requires Team plan ($499/mo, 5 seats); non-members get 403.
   const teamHandle = pickFlag(args, '--team');
 
   const bytes = fs.readFileSync(ap);
@@ -8510,7 +8666,7 @@ async function cmdPublish(args) {
     console.error('\npublish failed: ' + (e.message || e));
     if (e.status === 403 && teamHandle) {
       console.error(`  you are not a member of team "${teamHandle}". list yours with: kolm team list`);
-      console.error('  Teams plan ($149/mo, 5 seats) required to publish team-scoped artifacts.');
+      console.error('  Team plan ($499/mo, 5 seats) required to publish team-scoped artifacts.');
     }
     if (e.status === 404 && teamHandle) {
       console.error(`  team "${teamHandle}" does not exist. create one with: kolm team create <name>`);
@@ -15806,9 +15962,14 @@ function chatExtractTask(prompt) {
 
 function chatExtractTargetPlan(prompt) {
   const p = chatLc(prompt);
-  const plans = ['enterprise', 'business', 'teams', 'pro', 'starter'];
+  const plans = ['enterprise', 'business', 'teams', 'team', 'pro', 'starter'];
   for (let i = 0; i < plans.length; i++) {
-    if (p.indexOf(plans[i]) >= 0) return plans[i];
+    if (p.indexOf(plans[i]) >= 0) {
+      if (plans[i] === 'starter') return 'pro';
+      if (plans[i] === 'business') return 'enterprise';
+      if (plans[i] === 'team') return 'teams';
+      return plans[i];
+    }
   }
   return 'pro';
 }
@@ -15957,7 +16118,7 @@ function localAssistantParse(prompt) {
       return {
         ok: true,
         intent: 'upgrade',
-        narration: "Run 'kolm plan --target pro' for an upgrade link. Plans: starter $19 . pro $99 . teams $299 . business $999.",
+        narration: "Run 'kolm plan --target pro' for an upgrade link. Plans: Free, Pro $49/mo, Team $499/mo, Enterprise custom.",
         data: { target: target, command: 'kolm plan --target ' + target },
         next_steps: [
           { label: 'plan',    command: 'kolm plan --target ' + target },
@@ -17614,6 +17775,28 @@ async function handleTunnelRequest(c, token, req, artifactPath) {
 // Bring-your-own-cloud: deploy a .kolm artifact to your own Fly / AWS Nitro
 // / GCP CVM / Azure CVM / Docker host. kolm.ai issues the signed deploy
 // script and records the attestation. kolm.ai never runs the artifact.
+function printObjectStorageReadiness(out, source = 'local-env') {
+  console.log(`object storage: ${out.cloud_ok ? 'cloud ready' : out.ok ? 'local ready' : 'needs configuration'} (${source})`);
+  console.log(`selected:       ${out.selected_provider || '(none)'}`);
+  console.log(`secret values included: ${out.secret_values_included === false ? 'false' : 'unknown'}`);
+  console.log('');
+  const rows = Array.isArray(out.providers) ? out.providers : [];
+  for (const p of rows) {
+    const state = p.configured ? 'ready' : 'missing';
+    const miss = Array.isArray(p.missing) && p.missing.length ? ` missing=${p.missing.join(',')}` : '';
+    const cap = Array.isArray(p.capabilities) ? ` caps=${p.capabilities.join('/')}` : '';
+    const max = p.max_single_object_bytes ? ` max=${p.max_single_object_bytes}B` : '';
+    console.log(`  ${state.padEnd(7)} ${String(p.id).padEnd(24)} ${p.label || ''}${miss}${max}${cap}`);
+  }
+  if (out.cloud_ok) {
+    console.log('');
+    console.log('artifact cloud storage is configured. run with --smoke to verify a write/read/delete round trip.');
+  } else {
+    console.log('');
+    console.log('configure R2 S3, AWS S3, generic S3, or Supabase S3 before claiming hosted artifact storage.');
+  }
+}
+
 async function cmdCloud(args) {
   const sub = args[0];
   const rest = args.slice(1);
@@ -17623,8 +17806,161 @@ async function cmdCloud(args) {
     return;
   }
   if (sub === 'targets') {
-    const r = await api(c, 'GET', '/v1/byoc/targets');
-    for (const t of r.targets || []) console.log(' - ' + t);
+    const wantJson = rest.includes('--json');
+    const remote = rest.includes('--remote');
+    let out;
+    if (remote) {
+      out = await api(c, 'GET', '/v1/cloud/deploy-targets');
+    } else {
+      const { deploymentMatrix } = await import('../src/deployment-plans.js');
+      out = deploymentMatrix();
+    }
+    if (wantJson) {
+      console.log(JSON.stringify(out, null, 2));
+      return;
+    }
+    const rows = Array.isArray(out.targets) ? out.targets : (out.targets || []).map((id) => ({ id, label: id }));
+    for (const t of rows) {
+      const suffix = t.category ? ` (${t.category})` : '';
+      console.log(' - ' + (t.id || t) + suffix + (t.label && t.label !== t.id ? `  ${t.label}` : ''));
+    }
+    return;
+  }
+  if (sub === 'readiness' || sub === 'doctor') {
+    const remote = rest.includes('--remote');
+    let out;
+    if (remote) {
+      const body = await api(c, 'GET', '/v1/cloud/readiness');
+      out = body.readiness || body;
+      if (!out.cloud && body.cloud) out.cloud = body.cloud;
+      if (!out.blockers && body.blockers) out.blockers = body.blockers;
+      if (!out.platform_matrix && body.platform_matrix) out.platform_matrix = body.platform_matrix;
+      out.source = c.base.replace(/\/+$/, '');
+    } else {
+      const { cloudReadinessSummary } = await import('../src/platform-capabilities.js');
+      out = cloudReadinessSummary(process.env);
+      out.source = 'local-env';
+    }
+    if (rest.includes('--json')) {
+      console.log(JSON.stringify(out, null, 2));
+      return;
+    }
+    console.log(`cloud readiness: ${out.ok ? 'ready' : 'needs configuration'} (${out.source})`);
+    console.log(`platform matrix: ${out.platform_matrix.ok ? 'ok' : 'missing ' + out.platform_matrix.missing.join(', ')}`);
+    for (const [category, row] of Object.entries(out.cloud.categories)) {
+      console.log(`  ${category.padEnd(20)} ${row.configured}/${row.total}${row.ids.length ? '  ' + row.ids.join(', ') : ''}`);
+    }
+    if (Array.isArray(out.deployment_profiles) && out.deployment_profiles.length) {
+      console.log('');
+      console.log('deployment paths:');
+      for (const p of out.deployment_profiles) {
+        console.log(`  ${p.configured ? 'ready' : 'needs config'}  ${String(p.id).padEnd(22)} ${p.label}`);
+      }
+    }
+    if (out.blockers.length) {
+      console.log('');
+      console.log('configure before claiming hosted cloud/train readiness:');
+      for (const b of out.blockers) console.log('  - ' + b);
+    }
+    return;
+  }
+  if (sub === 'storage' || sub === 'object-storage') {
+    const wantJson = rest.includes('--json');
+    const remote = rest.includes('--remote');
+    const smoke = rest.includes('--smoke') || rest.includes('smoke');
+    const provider = flag(rest, '--provider') || flag(rest, '--storage-provider') || '';
+    if (remote && smoke) {
+      console.error('error: remote storage smoke is intentionally not exposed; run local smoke on the machine that owns the credentials.');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (remote) {
+      const body = await api(c, 'GET', '/v1/storage/object-readiness');
+      const out = body.storage || body;
+      if (provider && Array.isArray(out.providers)) {
+        out.providers = out.providers.filter((p) => p.id === provider);
+        out.selected_provider = out.providers[0]?.id || null;
+      }
+      if (wantJson) {
+        console.log(JSON.stringify(out, null, 2));
+        return;
+      }
+      printObjectStorageReadiness(out, c.base.replace(/\/+$/, ''));
+      return;
+    }
+    const storage = await import('../src/object-storage.js');
+    if (smoke) {
+      let out;
+      try {
+        out = await storage.smokeObjectStore({ env: process.env, provider });
+      } catch (e) {
+        if (wantJson) {
+          console.log(JSON.stringify({
+            ok: false,
+            error: String(e.message || e),
+            code: e.code || 'object_storage_smoke_error',
+            readiness: e.readiness || storage.objectStorageReadiness(process.env),
+            secret_values_included: false,
+          }, null, 2));
+          process.exit(EXIT.EXECUTION);
+        }
+        console.error('storage smoke failed: ' + String(e.message || e));
+        if (e.readiness) printObjectStorageReadiness(e.readiness, 'local-env');
+        process.exit(EXIT.EXECUTION);
+      }
+      if (wantJson) {
+        console.log(JSON.stringify(out, null, 2));
+        return;
+      }
+      console.log(`object storage smoke: ${out.ok ? 'ok' : 'failed'} (${out.provider})`);
+      console.log(`bucket: ${out.bucket || '(local)'}`);
+      console.log(`key:    ${out.key}`);
+      console.log(`bytes:  ${out.size}`);
+      console.log(`round-trip verified: ${out.round_trip ? 'yes' : 'no'}`);
+      console.log('secret values included: false');
+      return;
+    }
+    const out = storage.objectStorageReadiness(process.env);
+    if (provider && Array.isArray(out.providers)) {
+      out.providers = out.providers.filter((p) => p.id === provider);
+      out.selected_provider = out.providers[0]?.id || null;
+    }
+    if (wantJson) {
+      console.log(JSON.stringify(out, null, 2));
+      return;
+    }
+    printObjectStorageReadiness(out, 'local-env');
+    return;
+  }
+  if (sub === 'deploy-plan' || (sub === 'deploy' && rest.includes('--plan'))) {
+    const target = flag(rest, '--target') || rest.find((a) => a && !a.startsWith('-') && a !== '--plan');
+    const artifactId = flag(rest, '--artifact') || flag(rest, '--artifact-id') || '<artifact>';
+    const region = flag(rest, '--region') || 'iad';
+    const name = flag(rest, '--name') || 'kolm-app';
+    const baseUrl = flag(rest, '--base') || c.base || 'https://kolm.ai';
+    const wantJson = rest.includes('--json');
+    const { buildDeployPlan } = await import('../src/deployment-plans.js');
+    let plan;
+    try {
+      plan = buildDeployPlan({ target, artifactId, region, name, baseUrl });
+    } catch (e) {
+      console.error('error: ' + e.message);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (wantJson) {
+      console.log(JSON.stringify(plan, null, 2));
+      return;
+    }
+    console.log(`deploy plan: ${plan.target.label} (${plan.target.id})`);
+    console.log(`artifact:    ${plan.artifact_id}`);
+    console.log(`region:      ${plan.region}`);
+    console.log('secrets:     ' + (plan.required_secret_refs.join(', ') || '(none)'));
+    console.log('');
+    for (const [idx, step] of plan.steps.entries()) {
+      console.log(`${String(idx + 1).padStart(2)}. ${step.label}`);
+      console.log(`    ${step.command}`);
+    }
+    console.log('');
+    console.log('secret values included: false');
     return;
   }
   if (sub === 'deploy') {
@@ -17678,6 +18014,40 @@ async function cmdCloud(args) {
   }
   console.error('unknown cloud subcommand:', sub);
   process.exit(EXIT.BAD_ARGS);
+}
+
+async function cmdSurfaces(args) {
+  if (maybeHelp('surfaces', args)) return;
+  const {
+    USER_CONTROL_DIMENSIONS,
+    listProductExperience,
+    tuiViews,
+    validateProductExperience,
+  } = await import('../src/product-experience.js');
+  const out = {
+    ok: true,
+    contract: validateProductExperience(),
+    customization_dimensions: USER_CONTROL_DIMENSIONS,
+    surfaces: listProductExperience(),
+    tui_views: tuiViews(),
+  };
+  out.ok = out.contract.ok;
+  if (args.includes('--json')) {
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+  console.log(`product surfaces: ${out.contract.counts.surfaces} surfaces, ${out.contract.counts.customization_dimensions} customization dimensions, ${out.contract.counts.tui_views} TUI views`);
+  console.log('');
+  for (const s of out.surfaces) {
+    console.log(`${s.id.padEnd(22)} ${s.name}`);
+    console.log(`  goal: ${s.user_goal}`);
+    console.log(`  account: ${s.account.join(', ')}`);
+    console.log(`  cli: ${s.cli.slice(0, 3).join('  |  ')}`);
+    console.log(`  tui: ${s.tui.join(', ')}`);
+    console.log(`  customize: ${s.customization.join(', ')}`);
+  }
+  console.log('');
+  console.log('user control: ' + USER_CONTROL_DIMENSIONS.map((d) => d.id).join(', '));
 }
 
 // ---------- kolm cloud train ----------
@@ -18329,6 +18699,7 @@ const COMPLETION_VERBS = [
   'config', 'hmac', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'loop', 'logs', 'ask', 'nl', 'chat', 'chat-tui', 'version', 'help', 'completion', 'upgrade', 'update', 'self-update',
   'models', 'gpu', 'export', 'seeds', 'anonymize', 'redact', 'media', 'reinject', 'improve', 'instant', 'extract', 'doc',
+  'surfaces',
   'keygen', 'pubkey', 'keys', 'auditor', 'audit', 'settings', 'quantize',
   'sigstore-attest', 'attest', 'test', 'drift', 'trace', 'ir', 'device', 'cc', 'fl',
   'marketplace', 'sdk', 'tail', 'replay', 'runtime', 'bridges',
@@ -18363,7 +18734,8 @@ const COMPLETION_SUBS = {
   airgap:  ['status', 'enable', 'disable', 'verify'],
   team:    ['create', 'list', 'show', 'invite', 'accept', 'members', 'role', 'remove', 'transfer', 'delete'],
   tunnel:  ['new', 'list', 'start', 'close'],
-  cloud:   ['train', 'targets', 'deploy', 'list', 'show', 'destroy'],
+    cloud:   ['train', 'readiness', 'doctor', 'storage', 'targets', 'deploy-plan', 'deploy', 'list', 'show', 'destroy'],
+  surfaces: [],
   hub:     ['list', 'ls', 'show', 'seeds', 'pull'],
   tune:    ['init', 'capture-on', 'capture-off', 'step', 'eval', 'promote', 'rollback', 'watch', 'status'],
   tokenize:['train', 'encode', 'decode', 'inspect'],
@@ -18420,7 +18792,7 @@ const COMPLETION_SUBS = {
   privacy:    ['scan', 'test', 'smoke', 'policy', 'report'],
   pipeline:   ['tokenize', 'distill', 'compile', 'full'],
   // W454 — multimodal redaction worker (OCR / pdf-parse / whisper).
-  media:      ['doctor', 'redact-job'],
+  media:      ['tokenize', 'doctor', 'redact-job'],
   // W455 — per-prompt loss telemetry: `kolm distill runs [<id>]`.
   distill:    ['runs'],
   agents:     ['stats', 'sessions', 'recommend', 'failing'],
@@ -21245,6 +21617,46 @@ async function cmdMedia(args) {
   const rest = args.slice(1);
   const remote = rest.includes('--remote');
   const jsonOut = rest.includes('--json') || remote;
+  if (sub === 'tokenize') {
+    const localPath = pickFlag(rest, '--path');
+    const dir = pickFlag(rest, '--dir');
+    const force = rest.includes('--force');
+    if (!localPath && !dir) {
+      console.error('usage: kolm media tokenize --path <local> OR --dir <local-dir> [--force] [--json]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (remote) {
+      const c = loadConfig();
+      if (!c.api_key) {
+        console.error('not logged in. run: kolm login (or drop --remote)');
+        process.exit(EXIT.MISSING_PREREQ);
+      }
+      const body = { force };
+      if (localPath) body.path = localPath;
+      if (dir) body.dir = dir;
+      const data = await api(c, 'POST', '/v1/multimodal/tokenize', body);
+      console.log(JSON.stringify(data, null, 2));
+      if (data && data.ok === false) process.exit(1);
+      return;
+    }
+    const mm = await import('../services/embed/multimodal.js');
+    const out = dir
+      ? await mm.tokenizeDir(dir, { force })
+      : await mm.tokenize(localPath, { force });
+    if (jsonOut) {
+      console.log(JSON.stringify({ ok: true, ...out }, null, 2));
+      return;
+    }
+    if (dir) {
+      console.log(`tokenized directory: added=${out.added} skipped=${out.skipped} errors=${out.errors.length}`);
+      for (const [modality, count] of Object.entries(out.by_modality || {})) console.log(`  ${modality}: ${count}`);
+      if (out.errors.length) process.exit(EXIT.EXECUTION);
+      return;
+    }
+    if (out.skipped) console.log(`skipped ${out.modality}: ${out.reason || 'sidecar-exists'}`);
+    else console.log(`wrote ${out.modality} sidecar: ${out.sidecarPath}`);
+    return;
+  }
   if (sub === 'doctor') {
     if (remote) {
       const c = loadConfig();
@@ -23814,6 +24226,20 @@ const TUI_CURSOR_SHOW = '\x1b[?25h';
 
 async function cmdTui(args) {
   if (maybeHelp('tui', args)) return;
+  if (args.includes('--views')) {
+    const { tuiViews, validateProductExperience } = await import('../src/product-experience.js');
+    const out = { ok: true, contract: validateProductExperience(), views: tuiViews() };
+    out.ok = out.contract.ok;
+    if (args.includes('--json')) {
+      console.log(JSON.stringify(out, null, 2));
+      return;
+    }
+    console.log(`tui views: ${out.views.length}`);
+    for (const v of out.views) {
+      console.log(`${v.id.padEnd(22)} ${v.surfaces.join(', ')}`);
+    }
+    return;
+  }
   const c = loadConfig();
 
   // Non-TTY guard. Piped stdin / stdout would hang on raw mode + SSE; instead
@@ -23914,9 +24340,11 @@ async function cmdTui(args) {
     // It has no keybind to avoid adding another crowded hotkey; use
     // :connectors or :providers from command mode.
     { id: 'connectors',          key: null, endpoint: '/v1/account',              kind: 'get',   label: 'connectors (OpenAI / Claude / OpenRouter)' },
+    { id: 'models',              key: 'G', endpoint: '/v1/models',                kind: 'get',   label: 'models and backbones' },
     // W465 — Billing breakdown view. Closes the per-namespace cost
     // attribution triangle: page panel, CLI (`kolm billing breakdown`), TUI.
     { id: 'billing-breakdown',  key: 'J', endpoint: '/v1/billing/breakdown',     kind: 'get',   label: 'billing breakdown (by namespace)' },
+    { id: 'multimodal-tokenize', key: 'K', endpoint: '/v1/multimodal/tokenize/doctor', kind: 'get', label: 'multimodal tokenization' },
     // W466 — Multimodal bake-off view. Closes the multimodal compare triangle:
     // /account/multimodal-bakeoff page, CLI (`kolm bakeoff multimodal`), TUI.
     { id: 'multimodal-bakeoff', key: 'M', endpoint: '/v1/multimodal/bakeoff',    kind: 'get',   label: 'multimodal bakeoff (base vs compiled)' },
@@ -24283,6 +24711,11 @@ async function cmdTui(args) {
       'connectors':    'connectors',
       'providers':     'connectors',
       'provider':      'connectors',
+      // W554 - explicit model/backbone and multimodal-tokenization views.
+      'models':        'models',
+      'model-catalog': 'models',
+      'backbones':     'models',
+      'gemma':         'models',
       // W465 — billing breakdown view aliases (CLI `kolm billing breakdown` + TUI `:breakdown` + web).
       'breakdown':     'billing-breakdown',
       'billing-breakdown':'billing-breakdown',
@@ -24293,6 +24726,10 @@ async function cmdTui(args) {
       'multimodal-bakeoff':'multimodal-bakeoff',
       'mm-bakeoff':    'multimodal-bakeoff',
       'mm':            'multimodal-bakeoff',
+      'tokenize':      'multimodal-tokenize',
+      'tokenization':  'multimodal-tokenize',
+      'multimodal-tokenize':'multimodal-tokenize',
+      'mm-tokenize':   'multimodal-tokenize',
     };
     if (VIEW_ALIAS[verb]) {
       const id = VIEW_ALIAS[verb];
@@ -25110,7 +25547,7 @@ async function _dispatchVerb(verb, args) {
     mesh: cmdMesh, migrate: cmdMigrate, wrap: cmdWrap,
     tail: cmdTail, replay: cmdReplay, sync: cmdSync, profile: cmdProfile, bridges: cmdBridges,
     drift: cmdDrift, install: cmdInstall, tune: cmdTune, rag: cmdRag,
-    team: cmdTeam, tunnel: cmdTunnel, cloud: cmdCloud, airgap: cmdAirgap,
+    team: cmdTeam, tunnel: cmdTunnel, cloud: cmdCloud, surfaces: cmdSurfaces, airgap: cmdAirgap,
     compute: cmdCompute, doctor: cmdDoctor, loop: cmdLoop, logs: cmdLogs,
     ask: cmdAsk, chat: cmdChat, 'chat-tui': cmdChatTui, completion: cmdCompletion,
     upgrade: cmdUpgrade, update: cmdUpdate, 'self-update': cmdUpdate,
@@ -25254,6 +25691,7 @@ async function main() {
       case 'team':     await withErrorContext('team',     () => cmdTeam(rest)); break;
       case 'tunnel':   await withErrorContext('tunnel',   () => cmdTunnel(rest)); break;
       case 'cloud':    await withErrorContext('cloud',    () => cmdCloud(rest)); break;
+      case 'surfaces': await withErrorContext('surfaces', () => cmdSurfaces(rest)); break;
       case 'airgap':   await withErrorContext('airgap',   () => cmdAirgap(rest)); break;
       case 'compute':  await withErrorContext('compute',  () => cmdCompute(rest)); break;
       case 'doctor':   await withErrorContext('doctor',   () => cmdDoctor(rest)); break;

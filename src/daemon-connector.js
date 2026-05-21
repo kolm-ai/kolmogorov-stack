@@ -162,6 +162,34 @@ function isRawAllowed(req) {
 // content hash. The lake table itself NEVER stores inline raw text; consumers
 // that want the raw payload must read the sidecar file (gated behind the same
 // KOLM_ALLOW_RAW boolean at read time).
+function isZeroRetentionRequest(req, body = {}) {
+  const headers = (req && req.headers) || {};
+  const header = String(
+    headers['x-kolm-retention']
+    || headers['x-kolm-no-store']
+    || headers['x-kolm-zero-retention']
+    || ''
+  ).toLowerCase();
+  const meta = body && typeof body === 'object' && body.metadata && typeof body.metadata === 'object'
+    ? body.metadata
+    : {};
+  const bodyRetention = String(
+    body.kolm_retention
+    || body.retention
+    || meta.kolm_retention
+    || meta.retention
+    || ''
+  ).toLowerCase();
+  return header === 'none'
+    || header === 'no-store'
+    || header === 'true'
+    || header === '1'
+    || bodyRetention === 'none'
+    || bodyRetention === 'zero-retention'
+    || body.no_store === true
+    || meta.no_store === true;
+}
+
 function writeRawSidecar(text, kind /* 'prompt'|'response' */) {
   const s = String(text == null ? '' : text);
   if (s.length === 0) return { hash: null, path: null };
@@ -341,6 +369,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
     };
   }
   const body = req.body && typeof req.body === 'object' ? req.body : {};
+  const zeroRetention = isZeroRetentionRequest(req, body);
   const model = String(body.model || '').slice(0, 128);
   const policy = loadPolicy();
   const rawAllowed = isRawAllowed(req);
@@ -423,7 +452,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
   let rawResponseHash = null;
   let rawPromptPath = null;
   let rawResponsePath = null;
-  if (rawAllowed && promptText) {
+  if (!zeroRetention && rawAllowed && promptText) {
     const sc = writeRawSidecar(promptText, 'prompt');
     rawPromptHash = sc.hash;
     rawPromptPath = sc.path;
@@ -457,6 +486,16 @@ async function proxyOne({ provider, upstreamPath, req }) {
     // into the observation row when forwardRaw threw; that meant any 5xx
     // from upstream leaked PII to the lake. We now persist the redacted
     // form (via deriveLakePrompt()) on this path, identical to success.
+    if (zeroRetention) {
+      return {
+        status: 502,
+        body: { error: { type: 'upstream_error', message: String(e.message || e) } },
+        event: null,
+        durable: false,
+        retention: 'none',
+        http_status: 0,
+      };
+    }
     const lakePromptOnError = deriveLakePrompt();
     const promptRedactedField = scan.sensitive
       ? (redactedPromptText != null ? redactedPromptText : (privacyRedact(promptText).redacted_text || null))
@@ -524,6 +563,17 @@ async function proxyOne({ provider, upstreamPath, req }) {
     } catch (_) { bodyForCaller = upstreamResp.body; }
   }
   // W409b — sidecar raw response only when opt-in. Off by default.
+  if (zeroRetention) {
+    return {
+      status: upstreamResp.status,
+      http_status: upstreamResp.status,
+      headers: upstreamResp.headers,
+      body: bodyForCaller,
+      event: null,
+      durable: false,
+      retention: 'none',
+    };
+  }
   if (rawAllowed && respText) {
     const sc = writeRawSidecar(respText, 'response');
     rawResponseHash = sc.hash;
@@ -742,6 +792,9 @@ export function buildDaemonApp({ dataDir } = {}) {
       'X-Kolm-Privacy-Policy',
       'X-Kolm-Raw',
       'X-Kolm-Privacy-Override',
+      'X-Kolm-Retention',
+      'X-Kolm-No-Store',
+      'X-Kolm-Zero-Retention',
     ].join(', '));
     res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     if (req.method === 'OPTIONS') return res.status(204).end();
@@ -750,6 +803,11 @@ export function buildDaemonApp({ dataDir } = {}) {
 
   async function handlePassthrough(provider, upstreamPath, req, res) {
     const out = await proxyOne({ provider, upstreamPath, req });
+    if (out.retention === 'none') {
+      res.set('x-kolm-retention', 'none');
+      res.set('x-kolm-no-store', 'true');
+      res.set('x-kolm-event-durable', 'false');
+    }
     if (out.event) {
       res.set('x-kolm-event-id', out.event.event_id);
       res.set('x-kolm-provider', out.event.provider || provider);

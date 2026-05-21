@@ -472,7 +472,7 @@
  var hasSig = !!(v && (v.signature || (v.evaluation && v.evaluation.signature)));
  var sigCell = hasSig ? '<span class="src">signed</span>' : '<span class="src" style="color:var(--ink-faint);opacity:0.55">no evidence</span>';
  return ''
- + '<a class="lb-row ' + rowClass + '" href="/v1/public/concepts/' + escText(c.id) + '" target="_blank" rel="noopener">'
+ + '<a class="lb-row ' + rowClass + '" href="/v1/public/concepts/' + escText(c.id) + '" target="_blank" rel="noopener noreferrer">'
  + '<span class="rank">' + rank + '</span>'
  + '<div class="meta">'
  + '<div class="name">' + escText(c.name || c.id) + '</div>'

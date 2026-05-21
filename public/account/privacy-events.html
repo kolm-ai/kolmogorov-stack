@@ -3,21 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>Privacy events · Account · Account · kolm.ai</title>
+<title>Privacy events · Account · kolm.ai</title>
 <meta name="description" content="Redaction events table on kolm.ai: timestamp, event id, sensitive classes seen, VAR count, blocked status, policy applied. Per-row view-vault link.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/privacy-events">
-<meta property="og:title" content="Privacy events · Account · Account · kolm.ai">
-<meta property="og:description" content="Redaction events table on kolm.ai: timestamp, event id, sensitive classes seen, VAR count, blocked status, policy applied. Per-row view-vault link.">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://kolm.ai/account/privacy-events">
+<meta property="og:title" content="Privacy events &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Redaction events table on kolm.ai: timestamp, event id, sensitive classes seen, VAR count, blocked status, policy applied. Per-row view-vault link." />
+<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/privacy-events" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+<script src="/nav.js" defer></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Privacy events · Account · kolm.ai","description":"Redaction events table on kolm.ai: timestamp, event id, sensitive classes seen, VAR count, blocked status, policy applied. Per-row view-vault link.","url":"https://kolm.ai/account/privacy-events","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Privacy events","item":"https://kolm.ai/account/privacy-events"}]}}</script>
 <style>
 .acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
@@ -27,7 +29,7 @@
 #account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
 #account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
 #account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
-.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0}
 .acct-content h2{font-size:16px;margin:22px 0 10px}
 .acct-content h3{font-size:14px;margin:16px 0 8px}
 .acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
@@ -62,19 +64,13 @@
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
 
 </style>
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Privacy events · Account · Account · kolm.ai">
-<meta name="twitter:description" content="Redaction events table on kolm.ai: timestamp, event id, sensitive classes seen, VAR count, blocked status, policy applied. Per-row view-vault link.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -172,8 +168,8 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><a href="/docs">Help</a></div>
- </div>
+    <div class="site-actions"><a href="/docs">Help</a></div>
+  </div>
 </header>
 
 <main id="main">
@@ -183,16 +179,16 @@
 <h1>Privacy events.</h1>
 <p class="lede">Every redaction the privacy membrane fired. Class names, replacement count, whether the request was blocked, which policy hit. Click any row for the vault trail.</p>
 <div class="toolbar">
- <select id="class-filter" aria-label="Sensitive class"><option value="">All classes</option></select>
- <select id="status-filter" aria-label="Status"><option value="">All status</option><option value="allowed">allowed</option><option value="redacted">redacted</option><option value="blocked">blocked</option></select>
- <a class="btn" href="/account/storage#per-class">Per-class policy</a>
+  <select id="class-filter" aria-label="Sensitive class"><option value="">All classes</option></select>
+  <select id="status-filter" aria-label="Status"><option value="">All status</option><option value="allowed">allowed</option><option value="redacted">redacted</option><option value="blocked">blocked</option></select>
+  <a class="btn" href="/account/storage#per-class">Per-class policy</a>
 </div>
 <table class="ktable">
- <thead><tr><th>When</th><th>Event id</th><th>Classes seen</th><th>VAR count</th><th>Status</th><th>Policy</th><th></th></tr></thead>
- <tbody id="pe-rows"><tr><td colspan="7"><div class="skel" style="width:260px"></div></td></tr></tbody>
+  <thead><tr><th>When</th><th>Event id</th><th>Classes seen</th><th>VAR count</th><th>Status</th><th>Policy</th><th></th></tr></thead>
+  <tbody id="pe-rows"><tr><td colspan="7"><div class="skel" style="width:260px"></div></td></tr></tbody>
 </table>
 <div id="empty-state" class="empty" hidden data-empty-state>
- <strong>No privacy events yet.</strong> Either nothing sensitive has been seen, or the membrane is in allow-everything mode. Configure per-class policy on <a href="/account/storage">/account/storage</a>.
+  <strong>No privacy events yet.</strong> Either nothing sensitive has been seen, or the membrane is in allow-everything mode. Configure per-class policy on <a href="/account/storage">/account/storage</a>.
 </div>
 </section>
 </div>
@@ -200,53 +196,52 @@
 
 <script>
 (function(){
- var key=null; try{key=localStorage.getItem("ks_api_key")||localStorage.getItem("kolm-key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("apiKey")||localStorage.getItem("recipeApiKey");}catch(_){}
+  var key=null; try{key=localStorage.getItem("kolm-key")||localStorage.getItem("ks_api_key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("KOLM_API_KEY");}catch(_){}
 
- if(!key){window.kfetch=function(){return Promise.reject(new Error("missing api key"));};location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
- window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
- window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
- window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
- window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
- window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
- window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+  window.KOLM_AUTH=key?{"Authorization":"Bearer "+key,"Accept":"application/json"}:{"Accept":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
+  window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
+  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
 })();
 var rows=document.getElementById("pe-rows");
 var classSel=document.getElementById("class-filter");
 var statusSel=document.getElementById("status-filter");
 function statusPill(s){return s==="blocked"?"<span class=\"pill bad\">blocked</span>":s==="redacted"?"<span class=\"pill warn\">redacted</span>":s==="allowed"?"<span class=\"pill ok\">allowed</span>":"<span class=\"pill mute\">"+window.kesc(s||"-")+"</span>";}
 window.kfetch("/v1/bridges/observations?limit=500&sensitive=1").catch(function(){return {observations:[]};}).then(function(j){
- var raw=(j&&j.observations)||(Array.isArray(j)?j:[]);
- var events=raw.filter(function(e){return e.sensitive_data_detected||(e.sensitive_classes&&e.sensitive_classes.length);});
- if(!events.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
- var allClasses={};events.forEach(function(e){(e.sensitive_classes||[]).forEach(function(c){allClasses[c]=true;});});
- Object.keys(allClasses).sort().forEach(function(c){var o=document.createElement("option");o.value=c;o.textContent=c;classSel.appendChild(o);});
- function paint(){
- var cf=classSel.value, sf=statusSel.value;
- var visible=events.filter(function(e){
- if(cf&&!(e.sensitive_classes||[]).includes(cf))return false;
- var st=e.privacy_status||(e.privacy_blocked?"blocked":(e.sensitive_classes&&e.sensitive_classes.length?"redacted":"allowed"));
- if(sf&&st!==sf)return false;
- return true;
- });
- rows.innerHTML=visible.slice(0,200).map(function(e){
- var st=e.privacy_status||(e.privacy_blocked?"blocked":(e.sensitive_classes&&e.sensitive_classes.length?"redacted":"allowed"));
- var when=(e.created_at||"").slice(11,19)||"-";
- return "<tr>"+
- "<td>"+window.kesc(when)+"</td>"+
- "<td><code>"+window.kesc((e.event_id||e.id||"").slice(0,16))+"</code></td>"+
- "<td>"+(e.sensitive_classes||[]).map(function(c){return "<span class=\"kbd\">"+window.kesc(c)+"</span>";}).join(" ")+"</td>"+
- "<td>"+(e.redaction_count||0)+" VAR_</td>"+
- "<td>"+statusPill(st)+"</td>"+
- "<td><code>"+window.kesc(e.policy_applied||e.policy||"default")+"</code></td>"+
- "<td><a class=\"btn\" href=\"/account/storage#vault/"+window.kesc(e.event_id||e.id||"")+"\">view vault</a></td>"+
- "</tr>";
- }).join("");
- }
- classSel.addEventListener("change",paint);
- statusSel.addEventListener("change",paint);
- paint();
+  var raw=(j&&j.observations)||(Array.isArray(j)?j:[]);
+  var events=raw.filter(function(e){return e.sensitive_data_detected||(e.sensitive_classes&&e.sensitive_classes.length);});
+  if(!events.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
+  var allClasses={};events.forEach(function(e){(e.sensitive_classes||[]).forEach(function(c){allClasses[c]=true;});});
+  Object.keys(allClasses).sort().forEach(function(c){var o=document.createElement("option");o.value=c;o.textContent=c;classSel.appendChild(o);});
+  function paint(){
+    var cf=classSel.value, sf=statusSel.value;
+    var visible=events.filter(function(e){
+      if(cf&&!(e.sensitive_classes||[]).includes(cf))return false;
+      var st=e.privacy_status||(e.privacy_blocked?"blocked":(e.sensitive_classes&&e.sensitive_classes.length?"redacted":"allowed"));
+      if(sf&&st!==sf)return false;
+      return true;
+    });
+    rows.innerHTML=visible.slice(0,200).map(function(e){
+      var st=e.privacy_status||(e.privacy_blocked?"blocked":(e.sensitive_classes&&e.sensitive_classes.length?"redacted":"allowed"));
+      var when=(e.created_at||"").slice(11,19)||"-";
+      return "<tr>"+
+        "<td>"+window.kesc(when)+"</td>"+
+        "<td><code>"+window.kesc((e.event_id||e.id||"").slice(0,16))+"</code></td>"+
+        "<td>"+(e.sensitive_classes||[]).map(function(c){return "<span class=\"kbd\">"+window.kesc(c)+"</span>";}).join(" ")+"</td>"+
+        "<td>"+(e.redaction_count||0)+" VAR_</td>"+
+        "<td>"+statusPill(st)+"</td>"+
+        "<td><code>"+window.kesc(e.policy_applied||e.policy||"default")+"</code></td>"+
+        "<td><a class=\"btn\" href=\"/account/storage#vault/"+window.kesc(e.event_id||e.id||"")+"\">view vault</a></td>"+
+      "</tr>";
+    }).join("");
+  }
+  classSel.addEventListener("change",paint);
+  statusSel.addEventListener("change",paint);
+  paint();
 });
 </script>
-<script src="/nav.js" defer></script>
 </body>
 </html>

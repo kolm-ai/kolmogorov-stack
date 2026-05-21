@@ -1,139 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>kolm inspection · CLI reference · kolm.ai</title>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm inspection | CLI reference | kolm.ai</title>
 <meta name="description" content="Reference for the kolm inspection CLI verb: usage, flags, examples, and links to related docs.">
 <link rel="canonical" href="https://kolm.ai/docs/cli/inspection">
-<meta property="og:title" content="kolm inspection · CLI reference · kolm.ai">
+<meta property="og:title" content="kolm inspection | CLI reference | kolm.ai">
 <meta property="og:description" content="Reference for the kolm inspection CLI verb: usage, flags, examples, and links to related docs.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/inspection">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TechArticle","headline":"kolm inspection","description":"Reference for the kolm inspection CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/inspection","mainEntityOfPage":"https://kolm.ai/docs/cli/inspection","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
-<meta name="twitter:title" content="kolm inspection · CLI reference · kolm.ai">
-<meta name="twitter:description" content="Reference for the kolm inspection CLI verb: usage, flags, examples, and links to related docs.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Run</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
 <a class="skip-link" href="#main">Skip to content</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -233,71 +121,73 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="inspection">
 <nav aria-label="Breadcrumb" class="crumbs">
- <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>inspection</span>
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>inspection</span>
 </nav>
+<section class="kolm-surface-media kolm-surface-media--inline" aria-label="CLI workflow proof">
+  <div class="media-terminal">
+    <span class="media-kicker">CLI contract</span>
+    <span class="media-line"><span class="ok">$</span> kolm inspection --help</span>
+    <span class="media-line"><span class="ok">$</span> kolm inspection --json</span>
+    <p>Every reference page is generated from the command source, keeps usage and examples close to the product, and links into the same API, account, and artifact workflow.</p>
+  </div>
+  <div class="media-proof">
+    <span class="media-kicker">Operational proof</span>
+    <p>Use this verb inside the capture, dataset, distill, compile, verify, or runtime loop. Scripts can pin JSON output, humans get the same flow in the account console and TUI.</p>
+  </div>
+</section>
 <h1>kolm inspection verbs</h1>
-<p>The five read-only CLI verbs you reach for when something is wrong, when a teammate asks &quot;is it actually working?&quot;, or when you need to file a support ticket. None of them mutate state.</p>
-<p>| Verb | Use it when | |------|-------------| | <code>kolm status</code> | One-line oneliner: am I logged in, what tenant, what base URL | | <code>kolm health</code> | Is the cloud up + how fresh is my key + how many ms is the round trip | | <code>kolm metrics</code> | Aggregate counters for captures / artifacts / jobs in the last 24h | | <code>kolm artifacts</code> | List + show + diff compiled artifacts in your tenant | | <code>kolm support-bundle</code> | Dump env + recent logs + redacted config into a tarball you can attach to a ticket |</p>
-<h2>kolm status</h2>
+<p>Use the read-only CLI verbs when you need to prove whether a tenant, artifact, or cloud path is healthy. These commands do not mutate account or artifact state.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Verb</th><th>Use it when</th></tr>
+</thead>
+<tbody>
+<tr><td><code>kolm status</code></td><td>Confirm login state, tenant, plan, and base URL.</td></tr>
+<tr><td><code>kolm health</code></td><td>Check cloud health, readiness, auth, capture durability, and round-trip time.</td></tr>
+<tr><td><code>kolm metrics</code></td><td>Review capture, job, and artifact counters for a selected window.</td></tr>
+<tr><td><code>kolm artifacts</code></td><td>List, show, and compare compiled artifacts visible to your key.</td></tr>
+<tr><td><code>kolm support-bundle</code></td><td>Export redacted environment, logs, config, and health evidence for support.</td></tr>
+</tbody>
+</table></div>
+<h2>Status</h2>
 <pre><code>
-kolm status oneliner: tenant + plan + base
-kolm status --json machine-readable
+kolm status
+kolm status --json
 </code></pre>
-<p>Exits 0 if logged in and the cloud answers, 3 if not logged in, 1 on network error. Reads only; never mutates config.</p>
-<h2>kolm health</h2>
+<p><code>kolm status</code> is the fastest answer to &quot;am I logged in, which tenant am I using, and where will commands send traffic?&quot;</p>
+<h2>Health</h2>
 <pre><code>
-kolm health pings /health and prints the rtt
-kolm health --json {ok, rtt_ms, build_id, sw_cache}
+kolm health
+kolm health --require-ready --require-auth --require-capture --json
 </code></pre>
-<p>The same probe <code>/value-loop</code> uses for its live status badge (W312). Useful to script in CI as a precheck.</p>
-<h2>kolm metrics</h2>
+<p>Use strict health in CI after deployment so cloud readiness and authenticated capture are both proven.</p>
+<h2>Metrics</h2>
 <pre><code>
-kolm metrics 24h summary (captures, jobs, artifacts)
-kolm metrics --since 1h window override
-kolm metrics --json machine-readable rollup
+kolm metrics
+kolm metrics --since 1h --json
 </code></pre>
-<p>Aggregates by status (<code>running</code> / <code>done</code> / <code>failed</code>) for jobs and by namespace for captures. Mirrors the rollup at <code>/dashboard</code>.</p>
-<h2>kolm artifacts</h2>
+<p>Metrics rolls up recent captures, jobs, artifacts, and failures so operators can see whether the value loop is moving.</p>
+<h2>Artifacts</h2>
 <pre><code>
-kolm artifacts list all artifacts visible to your key
-kolm artifacts list --namespace eng filter by capture namespace
-kolm artifacts list --json machine-readable
-kolm artifacts show &lt;hash&gt; full manifest + receipt chain
-kolm artifacts show &lt;hash&gt; --json
-kolm artifacts diff &lt;hash-a&gt; &lt;hash-b&gt; side-by-side manifest diff
+kolm artifacts list
+kolm artifacts show &lt;hash&gt;
+kolm artifacts diff &lt;hash-a&gt; &lt;hash-b&gt;
 </code></pre>
-<p>The <code>diff</code> view suppresses noisy fields (signatures, timestamps) and highlights changes in <code>recipe_class</code>, <code>base_model</code>, <code>eval_score</code>, and <code>k_score.composite</code>. Pair with <code>kolm verify &lt;hash&gt;</code> if you need the full receipt-chain audit.</p>
-<h2>kolm support-bundle</h2>
+<p>Artifact inspection pairs with <code>kolm verify</code> when you need the signed manifest and receipt chain for audit.</p>
+<h2>Support Bundle</h2>
 <pre><code>
-kolm support-bundle writes ./kolm-support-&lt;ts&gt;.tgz
-kolm support-bundle --out ~/Desktop custom directory
-kolm support-bundle --redact-extra &lt;re&gt; add a regex to the redactor
+kolm support-bundle
+kolm support-bundle --out ~/Desktop
 </code></pre>
-<p>Bundles:</p>
-<ul>
-<li>redacted <code>~/.kolm/config.json</code> (api_key replaced with its W310 fingerprint)</li>
-<li>last 200 lines of CLI logs from <code>~/.kolm/logs/</code></li>
-<li>output of <code>kolm status --json</code> + <code>kolm health --json</code> + <code>kolm metrics --json</code></li>
-<li><code>kolm doctor --loop --json</code> if the loop completes within 10s</li>
-</ul>
-<p>The redactor strips every value that looks like an API key, JWT, or email domain before the archive is written. Verify with <code>tar -tzf</code> before sending.</p>
-<h2>See also</h2>
-<ul>
-<li><code>/value-loop</code> and <code>kolm loop</code> (W298/W300) - the in-process end-to-end smoke</li>
-<p>the support bundle includes.</p>
-<li><code>/dashboard</code> - the visual analog of <code>kolm metrics</code>.</li>
-<li><code>kolm verify</code> - the receipt-chain audit that completes the picture for</li>
-<p><code>kolm artifacts show</code>.</p>
-<li><code>/spec/rs-1</code> - the receipt-chain contract these verbs surface.</li>
-</ul>
+<p>The bundle redacts secrets before writing config, recent logs, health output, metrics, and doctor-loop evidence.</p>
 <section class="see-also" aria-labelledby="see-also-h">
- <h2 id="see-also-h">See also</h2>
- <ul>
- <li><a href="/docs/cli">All CLI verbs</a></li>
- <li><a href="/quickstart">Quickstart</a></li>
- <li><a href="/docs/api">HTTP API reference</a></li>
- <li><a href="/docs/sdk">SDK reference</a></li>
- </ul>
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
 </section>
 </main>
 </body>

@@ -3,21 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f7f4ec";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>Overview · Account · Account · kolm.ai</title>
+<title>Overview · Account · kolm.ai</title>
 <meta name="description" content="Workspace summary on kolm.ai: live spend, captured events, active artifacts, top opportunities.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/overview">
-<meta property="og:title" content="Overview · Account · Account · kolm.ai">
-<meta property="og:description" content="Workspace summary on kolm.ai: live spend, captured events, active artifacts, top opportunities.">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://kolm.ai/account/overview">
+<meta property="og:title" content="Overview &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Workspace summary on kolm.ai: live spend, captured events, active artifacts, top opportunities." />
+<meta property="og:image" content="https://kolm.ai/og-card.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/overview" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <link rel="stylesheet" href="/brand-refresh.css">
+<script src="/nav.js" defer></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Overview · Account · kolm.ai","description":"Workspace summary on kolm.ai: live spend, captured events, active artifacts, top opportunities.","url":"https://kolm.ai/account/overview","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Overview","item":"https://kolm.ai/account/overview"}]}}</script>
 <style>
 .acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
@@ -27,14 +29,13 @@
 #account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
 #account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
 #account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
-.acct-content h1{margin:0 0 4px;font-size:28px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0}
 .acct-content h2{font-size:16px;margin:22px 0 10px}
 .acct-content h3{font-size:14px;margin:16px 0 8px}
 .acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
 .skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#faf2e1);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
 .skip-link:focus{left:0}
-.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-@media (min-width:1280px){.metric-grid{grid-template-columns:repeat(3,1fr)}}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px}
 .metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
 .metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
@@ -61,21 +62,22 @@
 .toolbar input[type=search],.toolbar select,.toolbar input[type=text]{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
 .kbd{font-family:var(--mono);font-size:11px;background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--ink-mute);border:1px solid var(--line)}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
-
+.journey-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.journey-card{display:block;min-height:132px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);text-decoration:none;color:var(--ink)}
+.journey-card:hover{border-color:var(--accent)}
+.journey-card span{display:block;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:7px}
+.journey-card b{display:block;font-size:14px;font-weight:600;color:var(--ink);line-height:1.25;margin-bottom:6px}
+.journey-card small{display:block;font-size:12.5px;line-height:1.45;color:var(--ink-mute)}
+@media (max-width:980px){.journey-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.journey-grid{grid-template-columns:1fr}.journey-card{min-height:auto}}
 </style>
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Overview · Account · Account · kolm.ai">
-<meta name="twitter:description" content="Workspace summary on kolm.ai: live spend, captured events, active artifacts, top opportunities.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="kolm home">kolm</a>
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -173,83 +175,69 @@
     </div>
     </nav>
     <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><a href="/docs">Help</a></div>
- </div>
+    <div class="site-actions"><a href="/docs">Help</a></div>
+  </div>
 </header>
 
 <main id="main">
 <div class="acct-shell">
-<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview" aria-current="page">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/agent-telemetry">Agent telemetry</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Builds</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview" aria-current="page">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Builds</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
 <section class="acct-content">
 <h1>Overview.</h1>
 <p class="lede">Workspace summary. Live spend, captured events, active artifacts, top opportunities. Real numbers from your tenant.</p>
-<!-- W413: Next actions panel. Fetches /v1/intent/next (the post-auth mirror
- of the `kolm next` CLI verb, ranked by the W412 recommender). Renders
- top 3 ranked actions as primary CTAs so a newly-arrived user always has
- a concrete next step in their line of sight. -->
-<div id="next-actions" class="kpanel" data-w413="next-actions" aria-busy="true" style="margin-bottom:18px">
- <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px">
- <h2 style="margin:0;font-size:15px">Next actions</h2>
- <span class="pill mute" style="font-size:10px">kolm next</span>
- </div>
- <div id="next-actions-body">
- <div class="skel" style="width:340px;height:14px"></div>
- <div class="skel" style="width:240px;height:11px;margin-top:6px"></div>
- </div>
-</div>
-<!-- W415: Ask kolm. Mirrors `kolm do "..."` on the web. POSTs to
- /v1/intent/ask with {question:<text>}, renders the classifier's matched
- verb + the exact CLI command + a one-line explanation + up to 3
- alternatives. Same source as the CLI verb so the UI and the terminal
- give the same answer. -->
-<div id="ask-kolm" class="kpanel" data-w415="ask-form" style="margin-bottom:18px">
- <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px">
- <h2 style="margin:0;font-size:15px">Ask kolm</h2>
- <span class="pill mute" style="font-size:10px">kolm do "..."</span>
- </div>
- <form id="ask-form" data-w415="ask-form-el" autocomplete="off" style="display:flex;gap:8px;align-items:stretch">
- <input id="ask-input" type="text" name="question" placeholder='try: "what should i do next?" or "show captures from claude-code"' style="flex:1;min-width:0;padding:8px 10px;font:13px var(--mono,ui-monospace,Menlo,Consolas,monospace);background:var(--bg-elev,#101316);color:var(--ink,#ece7dc);border:1px solid var(--line,rgba(236,231,220,0.12));border-radius:8px" aria-label="Ask kolm a natural-language question" />
- <button type="submit" id="ask-submit" style="padding:8px 14px;font:12px var(--mono);background:var(--accent,#10b981);color:#0b0d10;border:0;border-radius:8px;cursor:pointer">Ask</button>
- </form>
- <div id="ask-answer" data-w415="ask-answer" style="margin-top:10px;min-height:0"></div>
-</div>
-<!-- W409i: nine canonical counters on the post-auth dashboard. Each card maps
- 1:1 to a CLI verb (kolm tail captures, kolm opportunities, kolm dataset list,
- kolm label next, kolm jobs, kolm artifacts, kolm devices, kolm team queue,
- kolm billing usage) so what you see here matches what the terminal shows. -->
-<div class="metric-grid" id="metric-grid" aria-busy="true" data-counter-count="9">
- <div class="metric-card" data-counter="captured-traffic"><div class="label">Captured traffic</div><div class="value" id="m-events">...</div><div class="delta" id="m-events-d">&nbsp;</div></div>
- <div class="metric-card" data-counter="savings-opportunities"><div class="label">Savings opportunities</div><div class="value" id="m-opps">...</div><div class="delta" id="m-opps-d">&nbsp;</div></div>
- <div class="metric-card" data-counter="datasets"><div class="label">Datasets</div><div class="value" id="m-datasets">...</div><div class="delta" id="m-datasets-d">&nbsp;</div></div>
- <div class="metric-card" data-counter="review-queue"><div class="label">Review queue</div><div class="value" id="m-queue">...</div><div class="delta" id="m-queue-d">&nbsp;</div></div>
- <div class="metric-card" data-counter="builds-in-progress"><div class="label">Builds in-progress</div><div class="value" id="m-builds">...</div><div class="delta" id="m-builds-d">&nbsp;</div></div>
- <div class="metric-card" data-counter="artifacts"><div class="label">Active artifacts</div><div class="value" id="m-artifacts">...</div><div class="delta" id="m-artifacts-d">&nbsp;</div></div>
- <div class="metric-card" data-counter="devices"><div class="label">Devices</div><div class="value" id="m-devices">...</div><div class="delta" id="m-devices-d">&nbsp;</div></div>
- <div class="metric-card" data-counter="team-approvals"><div class="label">Team approvals</div><div class="value" id="m-approvals">...</div><div class="delta" id="m-approvals-d">&nbsp;</div></div>
- <div class="metric-card" data-counter="usage-billing"><div class="label">Usage / billing (30d)</div><div class="value" id="m-spend">...</div><div class="delta" id="m-spend-d">&nbsp;</div></div>
+<section class="kpanel" data-postauth-product-command-center>
+  <h2>Product command center</h2>
+  <p class="pdesc">Choose the workflow first, then drop into the matching account surface, CLI verb, API route, or TUI view. Bring OpenAI, Claude, OpenRouter, Gemini-compatible, or self-hosted traffic; run on R2-compatible object storage, S3-compatible storage, AWS, Supabase, Modal, RunPod, Lambda, Together, or remote SSH.</p>
+  <div class="journey-grid">
+    <a class="journey-card" href="/account/connectors" data-journey-id="gateway-capture" data-surface="api-wrapper"><span>Gateway</span><b>Wrap any model API</b><small>OpenAI, Claude, OpenRouter, Gemini, local, and internal endpoints.</small></a>
+    <a class="journey-card" href="/account/privacy-events" data-journey-id="privacy-lake" data-surface="privacy-lake"><span>Privacy lake</span><b>Capture, redact, govern</b><small>Zero-retention, policy gates, vault links, and class-level privacy controls.</small></a>
+    <a class="journey-card" href="/account/datasets" data-journey-id="datasets-labeling" data-surface="datasets-labeling"><span>Datasets</span><b>Promote reviewed rows</b><small>Holdouts, labels, accepted corrections, and dataset lineage.</small></a>
+    <a class="journey-card" href="/account/builds" data-journey-id="train-distill" data-surface="training-distill"><span>Train/distill</span><b>Turn traffic into specialists</b><small>Training, distillation, synthetic data, eval gates, and hosted or local compute.</small></a>
+    <a class="journey-card" href="/models" data-journey-id="models-backbones" data-surface="gemma"><span>Backbones</span><b>Select the model family</b><small>Gemma 3, Gemma 3n, MedGemma, EmbeddingGemma, Qwen, Llama, Mistral, and custom rows.</small></a>
+    <a class="journey-card" href="/account/multimodal-bakeoff" data-journey-id="multimodal-tokenization" data-surface="multimodal-tokenization"><span>Multimodal</span><b>Tokenize files locally</b><small>Image, audio, video, and PDF sidecars that compile into the same artifact loop.</small></a>
+    <a class="journey-card" href="/account/builds" data-journey-id="compile-verify" data-surface="compiler"><span>Compile</span><b>Ship signed .kolm artifacts</b><small>K-score, receipts, verifier output, rollback metadata, and production-ready gates.</small></a>
+    <a class="journey-card" href="/account/artifacts" data-journey-id="runtime-inference" data-surface="runtime-inference"><span>Runtime</span><b>Run anywhere</b><small>Local CPU/CUDA/MPS/ROCm/DirectML/OpenVINO/QNN, browser, edge, server, and mobile targets.</small></a>
+    <a class="journey-card" href="/account/storage" data-journey-id="compute-cloud" data-surface="compute"><span>Cloud/compute</span><b>Attach hosted capacity</b><small>BYOC, cloud readiness, object storage, remote SSH, hosted GPU, and deployment profiles.</small></a>
+    <a class="journey-card" href="/account/devices" data-journey-id="devices-fleet" data-surface="devices"><span>Devices</span><b>Install across the fleet</b><small>Registered device fleet, local/SSH/HTTP installs, tunnels, health checks, and team remote ops.</small></a>
+    <a class="journey-card" href="/account/audit-log" data-journey-id="enterprise-governance" data-surface="enterprise"><span>Enterprise</span><b>Govern every action</b><small>Teams, approvals, audit log, privacy membrane, BAA, SSO/SAML/SCIM, and evidence export.</small></a>
+    <a class="journey-card" href="/marketplace" data-journey-id="agents-registry" data-surface="agents-registry"><span>Agents/registry</span><b>Publish reusable artifacts</b><small>Private registry, agent recipes, MCP tools, verifier badges, and deployment handoff.</small></a>
+  </div>
+</section>
+<section class="kpanel" data-w415="ask-form">
+  <h2>Ask kolm</h2>
+  <p class="pdesc">Ask in natural language and get the matching command, account surface, or next workflow.</p>
+  <form id="ask-form" data-w415="ask-form-el" class="toolbar">
+    <input id="ask-input" type="search" name="question" placeholder="Show captures ready to distill..." aria-label="Ask kolm" style="min-width:280px;flex:1">
+    <button class="btn primary" id="ask-submit" type="submit">Ask</button>
+  </form>
+  <div id="ask-answer" class="empty" hidden><div data-w415="answer-row"></div><div data-w415="alternatives"></div><button class="btn" type="button" data-w415="copy" hidden>copy</button></div>
+</section>
+<section class="kpanel" data-w413="next-actions">
+  <h2>Next actions</h2>
+  <p class="pdesc">Ranked from your current account state. Each action links the dashboard to the matching CLI/API workflow.</p>
+  <div id="next-actions-body" class="metric-grid" style="grid-template-columns:repeat(3,1fr)" aria-busy="true">
+    <div class="metric-card"><div class="skel" style="width:160px"></div><div class="skel" style="width:220px;margin-top:8px"></div></div>
+  </div>
+</section>
+<div class="metric-grid" id="metric-grid" data-counter-count="9" aria-busy="true">
+  <div class="metric-card" data-counter="captured-traffic"><div class="label">Captured traffic</div><div class="value" id="m-events">...</div><div class="delta" id="m-events-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="savings-opportunities"><div class="label">Savings opportunities</div><div class="value" id="m-opps">...</div><div class="delta" id="m-opps-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="datasets"><div class="label">Datasets</div><div class="value" id="m-datasets">...</div><div class="delta" id="m-datasets-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="review-queue"><div class="label">Review queue</div><div class="value" id="m-review">...</div><div class="delta" id="m-review-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="builds-in-progress"><div class="label">Builds running</div><div class="value" id="m-builds">...</div><div class="delta" id="m-builds-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="artifacts"><div class="label">Active artifacts</div><div class="value" id="m-artifacts">...</div><div class="delta" id="m-artifacts-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="devices"><div class="label">Devices</div><div class="value" id="m-devices">...</div><div class="delta" id="m-devices-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="team-approvals"><div class="label">Team approvals</div><div class="value" id="m-approvals">...</div><div class="delta" id="m-approvals-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="usage-billing"><div class="label">Usage billing</div><div class="value" id="m-spend">...</div><div class="delta" id="m-spend-d">&nbsp;</div></div>
 </div>
 <h2>Top opportunities</h2>
 <div id="opp-list">
- <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
- <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
- <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
-</div>
-<!-- W457: Recently shipped. Hooks the W456 public /v1/changelog feed into
- the authed dashboard so the operator sees wave context next to their
- tenant numbers. Public route (no auth, identical for every caller)
- mirrored by `kolm changelog` CLI verb. -->
-<div id="recent-shipped" class="kpanel" data-w457="recent-shipped" aria-busy="true" style="margin-top:18px">
- <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px">
- <h2 style="margin:0;font-size:15px">Recently shipped</h2>
- <span class="pill mute" style="font-size:10px"><a href="/changelog" style="color:inherit;text-decoration:none">/changelog</a></span>
- </div>
- <div id="recent-shipped-body">
- <div class="skel" style="width:340px;height:14px"></div>
- <div class="skel" style="width:240px;height:11px;margin-top:6px"></div>
- </div>
+  <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
+  <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
+  <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
 </div>
 <div id="empty-state" class="empty" hidden data-empty-state>
- <strong>No captured events yet.</strong> Set <code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code> (or point at <code>https://kolm.ai/v1/capture/openai</code>) and your first call lands here. See <a href="/account/connectors">Connectors</a>.
+  <strong>No captured events yet.</strong> Set <code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code> (or point at <code>https://kolm.ai/v1/capture/openai</code>) and your first call lands here. See <a href="/account/connectors">Connectors</a>.
 </div>
 </section>
 </div>
@@ -257,239 +245,100 @@
 
 <script>
 (function(){
- var key=null; try{key=localStorage.getItem("ks_api_key")||localStorage.getItem("kolm-key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("apiKey")||localStorage.getItem("recipeApiKey");}catch(_){}
+  var key=null; try{key=localStorage.getItem("kolm-key")||localStorage.getItem("ks_api_key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("KOLM_API_KEY");}catch(_){}
 
- if(!key){window.kfetch=function(){return Promise.reject(new Error("missing api key"));};location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
- window.KOLM_AUTH={"Authorization":"Bearer "+key,"Accept":"application/json"};
- window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
- window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
- window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
- window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
- window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+  window.KOLM_AUTH=key?{"Authorization":"Bearer "+key,"Accept":"application/json"}:{"Accept":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
+  window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
+  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
 })();
-// W409i: fetch all 9 counter sources in parallel. Each is wrapped in a
-// catch() so a missing / 404 endpoint just leaves that counter at 0 rather
-// than breaking the whole grid.
-function _len(x){return Array.isArray(x)?x.length:(x&&Array.isArray(x.items)?x.items.length:(x&&typeof x.n==='number'?x.n:(x&&typeof x.total==='number'?x.total:0)));}
-Promise.allSettled([
- window.kfetch("/v1/account").catch(function(){return {};}),
- window.kfetch("/v1/artifacts").catch(function(){return [];}),
- window.kfetch("/v1/opportunities?limit=3").catch(function(){return {opportunities:[]};}),
- window.kfetch("/v1/datasets").catch(function(){return {datasets:[]};}),
- window.kfetch("/v1/label-queue/stats").catch(function(){return {items:[]};}),
- window.kfetch("/v1/builds").catch(function(){return {items:[]};}),
- window.kfetch("/v1/devices").catch(function(){return {items:[]};}),
- window.kfetch("/v1/team/approvals?state=pending").catch(function(){return {items:[]};}),
- window.kfetch("/v1/billing/usage").catch(function(){return {};}),
-]).then(function(rs){
- var acct=rs[0].value||{}, arts=rs[1].value||[], opps=rs[2].value||{opportunities:[]};
- var datasets=rs[3].value||{}, queue=rs[4].value||{}, builds=rs[5].value||{};
- var devices=rs[6].value||{}, approvals=rs[7].value||{}, billing=rs[8].value||{};
- var artList=Array.isArray(arts)?arts:(arts.artifacts||[]);
- var oppList=Array.isArray(opps)?opps:(opps.opportunities||[]);
- var datasetN=_len(datasets.datasets||datasets);
- var queueN=_len(queue.items||queue.queue||queue);
- var buildsList=builds.builds||builds.items||builds;
- var buildsInProgress=Array.isArray(buildsList)?buildsList.filter(function(b){return b&&(b.status==='running'||b.status==='queued'||b.status==='in_progress');}).length:(builds.in_progress||0);
- var deviceN=_len(devices.devices||devices.items||devices);
- var approvalsN=_len(approvals.items||approvals.approvals||approvals);
- var spendUsd=billing.spend_usd!=null?billing.spend_usd:(billing.used&&billing.used.spend_usd!=null?billing.used.spend_usd:(acct.spend_30d_usd!=null?acct.spend_30d_usd:(acct.used&&acct.used.spend_usd)));
-
- document.getElementById("m-events").textContent=window.knum(acct.events_total||(acct.used&&acct.used.captured_events)||0);
- document.getElementById("m-events-d").textContent=acct.events_namespaces?(acct.events_namespaces+" namespaces"):"all namespaces";
- document.getElementById("m-opps").textContent=window.knum(oppList.length);
- document.getElementById("m-opps-d").textContent=oppList.length?"oldest "+(oppList[0].type||""):"none open";
- document.getElementById("m-datasets").textContent=window.knum(datasetN);
- document.getElementById("m-datasets-d").textContent=datasetN?"approved + draft":"none yet";
- document.getElementById("m-queue").textContent=window.knum(queueN);
- document.getElementById("m-queue-d").textContent=queueN?"awaiting review":"empty";
- document.getElementById("m-builds").textContent=window.knum(buildsInProgress);
- document.getElementById("m-builds-d").textContent=buildsInProgress?"running":"none in progress";
- document.getElementById("m-artifacts").textContent=window.knum(artList.length);
- document.getElementById("m-artifacts-d").textContent=artList.length?(artList[0].artifact_id||artList[0].id||"latest"):"none yet";
- document.getElementById("m-devices").textContent=window.knum(deviceN);
- document.getElementById("m-devices-d").textContent=deviceN?"registered":"none registered";
- document.getElementById("m-approvals").textContent=window.knum(approvalsN);
- document.getElementById("m-approvals-d").textContent=approvalsN?"pending":"all clear";
- document.getElementById("m-spend").textContent=window.kusd(spendUsd);
- document.getElementById("m-spend-d").textContent=acct.plan?("plan: "+acct.plan):"current period";
-
- document.getElementById("metric-grid").removeAttribute("aria-busy");
- var box=document.getElementById("opp-list");
- if(!oppList.length){box.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
- box.innerHTML=oppList.slice(0,3).map(function(o){
- return "<div class=\"kpanel\" style=\"display:flex;justify-content:space-between;align-items:flex-start;gap:14px\">"+
- "<div><div style=\"font-family:var(--mono);font-size:11.5px;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em\">"+window.kesc(o.type||"-")+"</div>"+
- "<div style=\"font-size:13.5px;color:var(--ink-mute);margin-top:4px\">"+window.kesc(o.reason||o.pattern||"")+"</div></div>"+
- "<div style=\"font-family:var(--mono);font-size:14px;color:var(--good);white-space:nowrap\">"+window.kusd(o.estimated_savings_usd||o.savings_estimate)+"/mo</div>"+
- "</div>";
- }).join("");
-});
-
-// W413: Next-actions panel. Mirrors `kolm next` CLI verb. Each recommendation
-// is rendered as a card with the command (copy-on-click) and the why (plain
-// English). If the endpoint 404s on an older backend the panel reveals an
-// empty-state hint instead of hanging on the skeleton.
-window.kfetch("/v1/intent/next").then(function(payload){
- var panel=document.getElementById("next-actions");
- var body=document.getElementById("next-actions-body");
- panel.removeAttribute("aria-busy");
- var recs=(payload&&payload.recommendations)||[];
- if(!recs.length){
- body.innerHTML="<div style=\"color:var(--ink-mute);font-size:13px\">You're all caught up. Run <code style=\"background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--accent)\">kolm what</code> for a full snapshot.</div>";
- return;
- }
- body.innerHTML=recs.slice(0,3).map(function(r){
- return "<div data-w413=\"next-action\" data-action=\""+window.kesc(r.action||"")+"\" style=\"padding:10px 0;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));display:flex;justify-content:space-between;align-items:flex-start;gap:14px\">"+
- "<div style=\"flex:1\">"+
- "<div style=\"font-family:var(--mono);font-size:12.5px;color:var(--accent)\">$ "+window.kesc(r.command||"")+"</div>"+
- "<div style=\"font-size:12.5px;color:var(--ink-mute);margin-top:4px;line-height:1.5\">"+window.kesc(r.why||"")+"</div>"+
- "</div>"+
- "<button type=\"button\" class=\"btn\" data-copy=\""+window.kesc(r.command||"")+"\" style=\"font-size:11px;padding:4px 10px;flex-shrink:0\">copy</button>"+
- "</div>";
- }).join("");
- body.querySelectorAll("button[data-copy]").forEach(function(btn){
- btn.addEventListener("click",function(){
- var cmd=btn.getAttribute("data-copy")||"";
- if(navigator.clipboard&&navigator.clipboard.writeText){
- navigator.clipboard.writeText(cmd).then(function(){
- var prev=btn.textContent;btn.textContent="copied";setTimeout(function(){btn.textContent=prev;},1200);
- }).catch(function(){});
- }
- });
- });
+(function(){
+  var form=document.getElementById("ask-form");
+  var input=document.getElementById("ask-input");
+  var answer=document.getElementById("ask-answer");
+  if(!form||!input||!answer)return;
+  function renderAsk(j){
+    var intent=(j&&j.intent)||j||{};
+    var alts=Array.isArray(intent.alternatives)?intent.alternatives:[];
+    var cmd="kolm "+window.kesc(intent.verb||"help")+(intent.args&&intent.args.length?" "+window.kesc(intent.args.join(" ")):"");
+    answer.hidden=false;
+    answer.innerHTML="<div data-w415=\"answer-row\"><strong>"+cmd+"</strong> <span class=\"pill ok\">"+window.kesc(Math.round(Number(intent.confidence||0)*100)||0)+"%</span> <button class=\"btn\" type=\"button\" data-w415=\"copy\" data-copy=\""+cmd.replace(/"/g,"&quot;")+"\">copy</button></div>"+
+      "<div data-w415=\"alternatives\">"+alts.slice(0,3).map(function(a){return "<code>kolm "+window.kesc(a.verb||"help")+"</code>";}).join(" ")+"</div>";
+  }
+  form.addEventListener("submit",function(ev){
+    ev.preventDefault();
+    var question=input.value.trim();
+    if(!question)return;
+    answer.hidden=false; answer.textContent="Thinking...";
+    fetch("/v1/intent/ask",{method:"POST",headers:Object.assign({"content-type":"application/json"},window.KOLM_AUTH||{}),body:JSON.stringify({question:question})})
+      .then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j;});})
+      .then(renderAsk)
+      .catch(function(e){answer.hidden=false;answer.textContent=(e&&e.error)||"Could not classify that request.";});
+  });
+  answer.addEventListener("click",function(ev){
+    var btn=ev.target&&ev.target.closest&&ev.target.closest("[data-w415=copy]");
+    if(!btn)return;
+    var text=btn.getAttribute("data-copy")||"";
+    if(navigator.clipboard)navigator.clipboard.writeText(text);
+  });
+})();
+var nextBody=document.getElementById("next-actions-body");
+window.kfetch("/v1/intent/next").then(function(j){
+  var recs=(j&&j.recommendations)||[];
+  if(!recs.length){nextBody.innerHTML="<div class=\"empty\" data-empty-state>No recommended actions yet. Capture traffic or build an artifact to unlock workflow guidance.</div>";return;}
+  nextBody.removeAttribute("aria-busy");
+  nextBody.innerHTML=recs.slice(0,3).map(function(r){
+    var cmd=window.kesc(r.command||"kolm doctor --json");
+    return "<article class=\"metric-card\" data-w413=\"next-action\"><div class=\"label\">rank "+window.kesc(String(r.rank||"-"))+"</div><div style=\"font-weight:650;margin-bottom:6px\">"+window.kesc(r.action||"Next action")+"</div><div class=\"delta\" style=\"min-height:34px\">"+window.kesc(r.why||"")+"</div><code style=\"display:block;margin-top:10px;white-space:normal;word-break:break-word\">"+cmd+"</code><button class=\"btn\" type=\"button\" data-copy=\""+cmd+"\">copy</button></article>";
+  }).join("");
 }).catch(function(){
- var panel=document.getElementById("next-actions");
- panel.removeAttribute("aria-busy");
- document.getElementById("next-actions-body").innerHTML="<div style=\"color:var(--ink-mute);font-size:13px\">Next-action recommender is offline. Try <code style=\"background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--accent)\">kolm next</code> on the CLI instead.</div>";
+  nextBody.innerHTML="<div class=\"empty\" data-empty-state>Next actions are unavailable while the local account API is offline.</div>";
 });
-// W415: Ask kolm. NL question → /v1/intent/ask → render classified verb +
-// exact CLI command + one-line explanation + up to 3 alternatives. Same
-// source as `kolm do` so the web and the terminal give the same answer.
-(function wireAskForm(){
- var form=document.getElementById("ask-form");
- var input=document.getElementById("ask-input");
- var submit=document.getElementById("ask-submit");
- var answer=document.getElementById("ask-answer");
- if(!form||!input||!answer) return;
- function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
- function pillColor(conf){
- if(conf==null) return "#888";
- if(conf>=0.85) return "#10b981";
- if(conf>=0.6) return "#eab308";
- return "#ef4444";
- }
- function copyBtn(text){
- return '<button type="button" data-w415="copy" data-copy="'+esc(text)+'" style="padding:3px 8px;font:10px var(--mono);background:transparent;color:var(--ink-mute);border:1px solid var(--line);border-radius:5px;cursor:pointer">copy</button>';
- }
- form.addEventListener("submit", function(ev){
- ev.preventDefault();
- var q = input.value.trim();
- if(!q) return;
- submit.disabled = true;
- answer.innerHTML = '<div style="color:var(--ink-mute);font-size:12px">classifying…</div>';
- var ac = (typeof AbortController!=="undefined") ? new AbortController() : null;
- var timer = setTimeout(function(){ if(ac) ac.abort(); }, 8000);
- fetch("/v1/intent/ask", {
- method: "POST",
- headers: {"content-type":"application/json"},
- body: JSON.stringify({question:q}),
- credentials: "include",
- signal: ac ? ac.signal : undefined,
- }).then(function(r){ return r.json().then(function(j){return {ok:r.ok, status:r.status, body:j};}); })
- .then(function(out){
- clearTimeout(timer);
- submit.disabled = false;
- var b = out.body || {};
- if(!out.ok || b.ok!==true){
- var msg = (b && (b.message||b.error)) || ("HTTP "+out.status);
- answer.innerHTML = '<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:6px">classify failed: '+esc(msg)+'</div>';
- return;
- }
- var html = '';
- html += '<div data-w415="answer-row" style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">';
- html += '<code style="font:12px var(--mono);background:var(--bg-elev);padding:3px 8px;border-radius:5px;color:var(--accent)">'+esc(b.command||("kolm "+b.verb))+'</code>';
- html += copyBtn(b.command||("kolm "+b.verb));
- if(typeof b.confidence==="number"){
- html += '<span class="pill" data-w415="confidence" style="background:'+pillColor(b.confidence)+';color:#0b0d10;font-size:10px;padding:2px 7px;border-radius:99px">conf '+b.confidence.toFixed(2)+'</span>';
- }
- if(b.source){
- html += '<span class="pill mute" style="font-size:10px">source: '+esc(b.source)+'</span>';
- }
- html += '</div>';
- if(b.why){
- html += '<div style="color:var(--ink-mute);font-size:11px;margin-top:4px">'+esc(b.why)+'</div>';
- }
- if(b.alternatives && b.alternatives.length){
- html += '<div data-w415="alternatives" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line)"><div style="color:var(--ink-mute);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">alternatives</div>';
- for(var i=0;i<b.alternatives.length;i++){
- var a = b.alternatives[i];
- html += '<div data-w415="alt-row" style="display:flex;align-items:center;gap:6px;margin-top:3px">';
- html += '<code style="font:11px var(--mono);background:var(--bg-elev);padding:2px 6px;border-radius:4px;color:var(--ink-mute)">'+esc(a.command||("kolm "+a.verb))+'</code>';
- html += copyBtn(a.command||("kolm "+a.verb));
- if(typeof a.confidence==="number"){
- html += '<span style="color:var(--ink-mute);font-size:10px">'+a.confidence.toFixed(2)+'</span>';
- }
- html += '</div>';
- }
- html += '</div>';
- }
- answer.innerHTML = html;
- var btns = answer.querySelectorAll('[data-w415="copy"]');
- for(var k=0;k<btns.length;k++){
- btns[k].addEventListener("click", function(e){
- var t = e.currentTarget.getAttribute("data-copy")||"";
- if(navigator.clipboard && navigator.clipboard.writeText){
- navigator.clipboard.writeText(t).then(function(){
- e.currentTarget.textContent="copied";
- setTimeout(function(){ try{ e.currentTarget.textContent="copy"; }catch(_){} }, 1200);
- }).catch(function(){});
- }
- });
- }
- })
- .catch(function(e){
- clearTimeout(timer);
- submit.disabled = false;
- var msg = (e && e.name==="AbortError") ? "request timed out (8s)" : (e && e.message) || "network error";
- answer.innerHTML = '<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:6px">'+esc(msg)+'</div>';
- });
- });
-})();
-// W457: Recently shipped. Public /v1/changelog (no auth needed, marketing
-// surface) → top 3 waves. Identical source as the `kolm changelog` CLI verb.
-// Soft-fails to "see /changelog" if the route is unreachable.
-(function wireRecentShipped(){
- var panel=document.getElementById("recent-shipped");
- var body=document.getElementById("recent-shipped-body");
- if(!panel||!body) return;
- function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
- fetch("/v1/changelog?limit=3").then(function(r){return r.json();}).then(function(j){
- panel.removeAttribute("aria-busy");
- var waves=(j && Array.isArray(j.waves)) ? j.waves : [];
- if(!waves.length){
- body.innerHTML='<div style="color:var(--ink-mute);font-size:13px">No recent waves. See <a href="/changelog" style="color:inherit">/changelog</a>.</div>';
- return;
- }
- body.innerHTML=waves.map(function(w){
- var tags=(Array.isArray(w.tags)?w.tags:[]).slice(0,3).map(function(t){
- return '<span class="pill mute" style="font-size:10px;margin-right:4px">'+esc(t)+'</span>';
- }).join("");
- return '<div data-w457="wave-row" data-wave="'+esc(w.wave)+'" style="padding:10px 0;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04))">'+
- '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">'+
- '<div style="font-family:var(--mono);font-size:12.5px;color:var(--accent)">'+esc(w.wave)+' &middot; '+esc(w.title||"")+'</div>'+
- '<div style="font-family:var(--mono);font-size:11px;color:var(--ink-mute)">'+esc(w.date||"")+'</div>'+
- '</div>'+
- '<div style="font-size:12.5px;color:var(--ink-mute);margin-top:4px;line-height:1.5">'+esc(w.summary||"")+'</div>'+
- (tags?'<div style="margin-top:6px">'+tags+'</div>':'')+
- '</div>';
- }).join("");
- }).catch(function(){
- panel.removeAttribute("aria-busy");
- body.innerHTML='<div style="color:var(--ink-mute);font-size:13px">Changelog feed offline. See <a href="/changelog" style="color:inherit">/changelog</a> or run <code style="background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--accent)">kolm changelog</code>.</div>';
- });
-})();
+nextBody.addEventListener("click",function(e){
+  var b=e.target.closest("[data-copy]"); if(!b)return;
+  navigator.clipboard&&navigator.clipboard.writeText(b.getAttribute("data-copy")||"");
+  b.textContent="copied"; setTimeout(function(){b.textContent="copy";},900);
+});
+Promise.allSettled([
+  window.kfetch("/v1/account").catch(function(){return {};}),
+  window.kfetch("/v1/artifacts").catch(function(){return [];}),
+  window.kfetch("/v1/opportunities?limit=3").catch(function(){return {opportunities:[]};}),
+]).then(function(rs){
+  var acct=rs[0].value||{}, arts=rs[1].value||[], opps=rs[2].value||{opportunities:[]};
+  var artList=Array.isArray(arts)?arts:(arts.artifacts||[]);
+  var oppList=Array.isArray(opps)?opps:(opps.opportunities||[]);
+  document.getElementById("m-spend").textContent=window.kusd(acct.spend_30d_usd!=null?acct.spend_30d_usd:(acct.used&&acct.used.spend_usd));
+  document.getElementById("m-events").textContent=window.knum(acct.events_total||(acct.used&&acct.used.captured_events));
+  document.getElementById("m-artifacts").textContent=window.knum(artList.length);
+  document.getElementById("m-opps").textContent=window.knum(oppList.length);
+  document.getElementById("m-datasets").textContent=window.knum(acct.datasets_total||(acct.used&&acct.used.datasets)||0);
+  document.getElementById("m-review").textContent=window.knum(acct.review_queue_total||(acct.used&&acct.used.review_queue)||0);
+  document.getElementById("m-builds").textContent=window.knum(acct.builds_in_progress||(acct.used&&acct.used.builds_in_progress)||0);
+  document.getElementById("m-devices").textContent=window.knum(acct.devices_total||(acct.used&&acct.used.device_sync_targets)||0);
+  document.getElementById("m-approvals").textContent=window.knum(acct.team_approvals_pending||(acct.used&&acct.used.team_approvals)||0);
+  document.getElementById("m-spend-d").textContent=acct.plan?("plan: "+acct.plan):"";
+  document.getElementById("m-events-d").textContent=acct.events_namespaces?(acct.events_namespaces+" namespaces"):"";
+  document.getElementById("m-artifacts-d").textContent=artList.length?(artList[0].artifact_id||artList[0].id||"latest"):"";
+  document.getElementById("m-opps-d").textContent=oppList.length?"oldest "+(oppList[0].type||""):"";
+  document.getElementById("m-datasets-d").textContent="train + holdout";
+  document.getElementById("m-review-d").textContent="labels waiting";
+  document.getElementById("m-builds-d").textContent="compile jobs";
+  document.getElementById("m-devices-d").textContent="install targets";
+  document.getElementById("m-approvals-d").textContent="governance queue";
+  document.getElementById("metric-grid").removeAttribute("aria-busy");
+  var box=document.getElementById("opp-list");
+  if(!oppList.length){box.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
+  box.innerHTML=oppList.slice(0,3).map(function(o){
+    return "<div class=\"kpanel\" style=\"display:flex;justify-content:space-between;align-items:flex-start;gap:14px\">"+
+      "<div><div style=\"font-family:var(--mono);font-size:11.5px;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em\">"+window.kesc(o.type||"-")+"</div>"+
+      "<div style=\"font-size:13.5px;color:var(--ink-mute);margin-top:4px\">"+window.kesc(o.reason||o.pattern||"")+"</div></div>"+
+      "<div style=\"font-family:var(--mono);font-size:14px;color:var(--good);white-space:nowrap\">"+window.kusd(o.estimated_savings_usd||o.savings_estimate)+"/mo</div>"+
+    "</div>";
+  }).join("");
+});
 </script>
-<script src="/nav.js" defer></script>
 </body>
 </html>

@@ -76,6 +76,7 @@
 <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site-header">
  <div class="wrap">
@@ -184,6 +185,7 @@
  </div>
  </div>
 </header>
+<main id="main">
 
 <section class="hero">
  <div class="wrap-tight">
@@ -273,7 +275,7 @@
  <h2>The first compile inside a regulated environment.</h2>
 
  <ol class="steps">
- <li><b>Sign the BAA (10 minutes)</b><span>E-sign at <a href="/upgrade?plan=enterprise" style="color:var(--good)">/upgrade?plan=enterprise</a>. PHI Schedule auto-populated with the company name. Countersigned at click.</span></li>
+ <li><b>Scope the BAA</b><span>Book the Enterprise review at <a href="/enterprise/inquiry" style="color:var(--good)">/enterprise/inquiry</a>. PHI Schedule and deployment boundary are reviewed before countersignature.</span></li>
  <li><b>Deploy the bridge (20 minutes)</b><span>Enterprise console renders Docker Compose + Helm chart + Terraform. Paste into the customer's IaC repo. Bridge phones home once with a heartbeat &mdash; not PHI.</span></li>
  <li><b>Wire the KMS key (5 minutes)</b><span>IAM role JSON generated in the console. Customer creates the role, pastes the ARN. Receipts henceforth sign with the customer-managed key.</span></li>
  <li><b>Run the redactor cookbook (12 minutes)</b><span>Pull <a href="/cookbook/soap-redactor" style="color:var(--good)">cookbook/soap-redactor</a>, point it at 50 anonymised SOAP notes, compile. K=0.97 in our internal seed; the customer's seeds may differ.</span></li>
@@ -351,6 +353,8 @@
  </div>
 </section>
 
+
+</main>
 <footer class="site">
  <div class="wrap row">
  <div>&copy; 2026 kolm</div>

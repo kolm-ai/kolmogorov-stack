@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { buildRouter } from './src/router.js';
 import { provisionTenant } from './src/auth.js';
 import { isProductionRuntime } from './src/env.js';
+import { init as initOtel, expressMiddleware as otelMiddleware } from './src/otel.js';
 import { synthesize } from './src/synthesis.js';
 import { createConcept, publishVersion } from './src/registry.js';
 import { all } from './src/store.js';
@@ -65,6 +66,7 @@ app.use((req, res, next) => {
   return express.json({ limit: '4mb' })(req, res, next);
 });
 app.use(express.urlencoded({ extended: true }));
+if (initOtel()) app.use(otelMiddleware());
 
 // /articles serves the index page directly (no 301 redirect) — must come
 // BEFORE express.static so the static directory-redirect doesn't fire.

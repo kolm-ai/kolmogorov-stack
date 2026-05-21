@@ -27,7 +27,7 @@
  *   KOLM_OTEL                    set to "1" to enable; off otherwise.
  *
  * API:
- *   const otel = require('./src/otel');
+ *   import * as otel from './src/otel.js';
  *   otel.init();                          // call once at server start
  *   const span = otel.startSpan('kolm.run', { 'kolm.artifact_id': 'art_x' });
  *   try { ... } finally { otel.endSpan(span, { status: 'ok' }); }
@@ -35,10 +35,10 @@
  *   otel.shutdown();                      // flush before exit
  */
 
-const crypto = require('crypto');
-const https = require('https');
-const http = require('http');
-const { URL } = require('url');
+import crypto from 'node:crypto';
+import https from 'node:https';
+import http from 'node:http';
+import { URL } from 'node:url';
 
 const STATE = {
   enabled: false,
@@ -335,7 +335,7 @@ function routePattern(req) {
     || '';
 }
 
-module.exports = {
+export {
   init,
   startSpan,
   endSpan,

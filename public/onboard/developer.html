@@ -183,22 +183,22 @@
  <h2>Install the CLI</h2>
  <p class="sub">Pick your package manager. The CLI ships as a single statically linked binary plus a thin Node wrapper; no daemon required.</p>
  <div class="ob-tabs" role="tablist">
- <button class="ob-tab active" data-os="mac" role="tab" aria-selected="true">macOS</button>
- <button class="ob-tab" data-os="linux" role="tab" aria-selected="false">Linux</button>
- <button class="ob-tab" data-os="win" role="tab" aria-selected="false">Windows</button>
+ <button id="ob-tab-mac" class="ob-tab active" data-os="mac" role="tab" aria-selected="true" aria-controls="ob-term-mac">macOS</button>
+ <button id="ob-tab-linux" class="ob-tab" data-os="linux" role="tab" aria-selected="false" aria-controls="ob-term-linux">Linux</button>
+ <button id="ob-tab-win" class="ob-tab" data-os="win" role="tab" aria-selected="false" aria-controls="ob-term-win">Windows</button>
  </div>
- <div class="ob-term" data-tab-content="mac">$ npm i -g github:sneaky-hippo/kolmogorov-stack
+ <div id="ob-term-mac" class="ob-term" role="tabpanel" aria-labelledby="ob-tab-mac" data-tab-content="mac">$ npm i -g github:sneaky-hippo/kolmogorov-stack
 $ kolm login --key ks_xxxxxxxx
 <span class="ok"> ok. config written to ~/.kolm/config.json</span>
 $ kolm doctor
 <span class="c"> CLI version 7.x</span>
 <span class="ok"> ready.</span></div>
- <div class="ob-term" data-tab-content="linux" style="display:none">$ npm i -g github:sneaky-hippo/kolmogorov-stack
+ <div id="ob-term-linux" class="ob-term" role="tabpanel" aria-labelledby="ob-tab-linux" data-tab-content="linux" style="display:none">$ npm i -g github:sneaky-hippo/kolmogorov-stack
 $ kolm login --key ks_xxxxxxxx
 <span class="ok"> ok. config written to ~/.kolm/config.json</span>
 $ kolm doctor
 <span class="ok"> ready.</span></div>
- <div class="ob-term" data-tab-content="win" style="display:none">PS&gt; npm i -g github:sneaky-hippo/kolmogorov-stack
+ <div id="ob-term-win" class="ob-term" role="tabpanel" aria-labelledby="ob-tab-win" data-tab-content="win" style="display:none">PS&gt; npm i -g github:sneaky-hippo/kolmogorov-stack
 PS&gt; kolm login --key ks_xxxxxxxx
 <span class="ok"> ok.</span>
 PS&gt; kolm doctor

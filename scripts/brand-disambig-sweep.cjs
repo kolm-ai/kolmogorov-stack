@@ -49,6 +49,10 @@ function normalizeTitle(html) {
   // Collapse double-suffix bug ("X · kolm.ai · kolm.ai" or "X · kolm.ai · kolm.ai")
   next = next.replace(/((?:·|&middot;|\|)\s*kolm\.ai\s*){2,}$/i, '· kolm.ai');
 
+  // Collapse legacy ASCII brand suffixes before the canonical suffix:
+  // "Admin console - kolm.ai · kolm.ai" -> "Admin console · kolm.ai".
+  next = next.replace(/\s+-\s*kolm\.ai\s*(?:·|&middot;|\|)\s*kolm\.ai\s*$/i, ' · kolm.ai');
+
   // Pipe-separator → middot
   if (/\|\s*kolm\.ai\s*$/i.test(next)) {
     next = next.replace(/\|\s*kolm\.ai\s*$/i, '· kolm.ai');

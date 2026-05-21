@@ -3,10 +3,10 @@
 // W363 — real billing upgrade flow. Every tenant always gets a working URL.
 //
 // Fallback chain (first match wins):
-//   1. existing Stripe Payment Link (STRIPE_PAYMENT_LINK_<PLAN>) via the
+//   1. existing Stripe Payment Link (STRIPE_PAYMENT_LINK_PRO/TEAM/ENT) via the
 //      router's billingLinkFor callback
 //   2. Stripe Checkout Session created on the fly via plain fetch when
-//      KOLM_STRIPE_KEY + KOLM_STRIPE_PRICE_<PLAN> are set (no SDK; just
+//      KOLM_STRIPE_KEY + KOLM_STRIPE_PRICE_PRO/TEAM/ENT are set (no SDK; just
 //      a POST to https://api.stripe.com/v1/checkout/sessions)
 //   3. KOLM_BILLING_URL — self-hosted billing portal; the plan id is
 //      appended as ?plan=<plan>
@@ -22,11 +22,15 @@ import path from 'node:path';
 import os from 'node:os';
 
 const STRIPE_PRICE_ENVS = {
-  starter:    'KOLM_STRIPE_PRICE_STARTER',
   pro:        'KOLM_STRIPE_PRICE_PRO',
-  teams:      'KOLM_STRIPE_PRICE_TEAMS',
-  business:   'KOLM_STRIPE_PRICE_BUSINESS',
+  team:       'KOLM_STRIPE_PRICE_TEAM',
+  teams:      'KOLM_STRIPE_PRICE_TEAM',
   enterprise: 'KOLM_STRIPE_PRICE_ENT',
+};
+const LEGACY_STRIPE_PRICE_ENVS = {
+  pro: ['KOLM_STRIPE_PRICE_STARTER'],
+  teams: ['KOLM_STRIPE_PRICE_TEAMS'],
+  enterprise: ['KOLM_STRIPE_PRICE_BUSINESS'],
 };
 
 export function upgradeRequestsFile() {
@@ -97,7 +101,8 @@ export async function resolveUpgradeUrl({ plan, tenantId, email, existingLinkFn 
   // Path 2: Stripe Checkout Session via plain fetch.
   const stripeKey = process.env.KOLM_STRIPE_KEY || process.env.STRIPE_SECRET_KEY || '';
   const priceEnvName = STRIPE_PRICE_ENVS[planId];
-  const priceId = priceEnvName ? (process.env[priceEnvName] || '') : '';
+  const fallbackPriceEnvNames = LEGACY_STRIPE_PRICE_ENVS[planId] || [];
+  const priceId = [priceEnvName].concat(fallbackPriceEnvNames).filter(Boolean).map(name => process.env[name]).find(Boolean) || '';
   if (stripeKey && priceId) {
     try {
       const url = await createStripeCheckoutSession({

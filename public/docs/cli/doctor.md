@@ -1,11 +1,11 @@
 ---
-title: kolm doctor · kolm.ai
-description: Sanity-check the environment. Detect GPU. Run the value-loop smoke.
+title: kolm doctor - kolm.ai
+description: Run environment, auth, cloud, hardware, and value-loop checks before sending real traffic.
 ---
 
 # kolm doctor
 
-> Sanity-check the environment. Detect GPU. Run the value-loop smoke.
+Run environment, auth, cloud, hardware, and value-loop checks before sending real traffic.
 
 ## Usage
 
@@ -19,45 +19,29 @@ kolm doctor --loop [--json]
 
 | Flag | Default | Description |
 | ---- | ------- | ----------- |
-| `--detect-hw` | off | probe GPU via `nvidia-smi` / `system_profiler`; recommend a tier. Exit 0 on detection, 3 on no GPU |
-| `--loop` | off | run the value-loop smoke (capture/log, capture/health, bridges/observations, distill/from-captures, replay) in-process against a fresh anon tenant |
-| `--json` | off | machine-readable output |
+| `--detect-hw` | off | Probe GPU and platform capabilities, then recommend a compile or runtime tier. |
+| `--loop` | off | Run the value-loop smoke against capture, health, observations, distill, and replay. |
+| `--json` | off | Emit a machine-readable report for CI or support bundles. |
 
-## Checks (default mode)
+## Checks
 
-- config file
-- api key
-- cloud reachability
-- receipt secret
-- node >= 18
-- docker (optional, for `kolm bench --reproduce`)
-- `ANTHROPIC_API_KEY` (optional)
-- project config (`kolm.yaml`)
-- project + global artifact counts
+- config file and saved base URL
+- API key shape and authenticated account reachability
+- public health and readiness endpoints
+- receipt secret availability
+- Node.js 18 or newer
+- optional Docker for reproducible benchmarks
+- optional provider keys used by local examples
+- project config and artifact inventory
 
-## Exit codes
+## Exit Codes
 
 | Code | Meaning |
 | ---- | ------- |
-| `0` | no blockers (warnings allowed) |
-| `1` | one or more required checks failed |
-| `3` | `--detect-hw` found no GPU |
-
-## Examples
-
-```bash
-kolm doctor
-kolm doctor --detect-hw
-kolm doctor --loop --json | jq '.rungs'
-```
+| `0` | No blocking checks failed. |
+| `1` | One or more required checks failed. |
+| `3` | `--detect-hw` found no supported acceleration path. |
 
 ## Notes
 
-New install? Run `kolm doctor --loop` before pointing real traffic at kolm. Each rung either passes or fails and the report lists the offender. Equivalent to `kolm loop`.
-
-## See also
-
-- [Quickstart](/quickstart)
-- [kolm loop](/docs/cli/loop)
-- [kolm health](/docs/cli/health)
-- [Troubleshooting](/docs/troubleshooting)
+Run `kolm doctor --loop` before routing production traffic. The report names the failing rung so the fix is explicit instead of buried in logs.

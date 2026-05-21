@@ -99,7 +99,7 @@ test('W260 #4 - index.html v0.2 strip names all four CLI verbs', () => {
 });
 
 test('W260 #5 - index.html v0.2 strip carries the v0.2 framing (header + heading)', () => {
-  assert.match(INDEX, /What ships in v0\.2 today\./,
+  assert.match(INDEX, /What (ships in )?v0\.2 (today\.|includes\.)/i,
     'v0.2 section heading preserved');
   assert.match(INDEX, /aria-label="what ships in v0\.2"/,
     'v0.2 section aria-label preserved');
@@ -133,14 +133,16 @@ test('W260 #8 - index.html em-dash budget <= 1 (W220 / W205 lock)', () => {
 // pricing.html — three-tier framing + BAA / self-hosted note
 // =====================================================================
 
-test('W260 #9 - pricing.html surfaces the three-tier framing (Free / Starter / Teams+Enterprise)', () => {
+test('W260 #9 - pricing.html surfaces the current pricing framing (Free / Pro / Team / Enterprise)', () => {
   // The conceptual three-tier callout must enumerate all three positions.
   assert.match(PRICING, /data-w260="three-tier"/,
     'three-tier summary block must be present');
   assert.match(PRICING, /Three ways to use kolm/i,
     'three-tier summary must have a heading');
-  assert.match(PRICING, /\$9\s*\/\s*mo/,
-    'three-tier summary must price Starter at $9/mo');
+  assert.match(PRICING, /Pro\s+\$49\s*\/\s*mo/i,
+    'pricing summary must price Pro at $49/mo');
+  assert.match(PRICING, /Team\s+\$499\s*\/\s*mo/i,
+    'pricing summary must price Team at $499/mo');
 });
 
 test('W260 #10 - pricing.html three-tier summary names CLI + runtime as free', () => {

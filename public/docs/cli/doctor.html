@@ -1,139 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>kolm doctor · CLI reference · kolm.ai</title>
-<meta name="description" content="Reference for the kolm doctor CLI verb: usage, flags, examples, and links to related docs.">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm doctor | CLI reference | kolm.ai</title>
+<meta name="description" content="Run environment, auth, cloud, hardware, and value-loop checks before sending real traffic.">
 <link rel="canonical" href="https://kolm.ai/docs/cli/doctor">
-<meta property="og:title" content="kolm doctor · CLI reference · kolm.ai">
-<meta property="og:description" content="Reference for the kolm doctor CLI verb: usage, flags, examples, and links to related docs.">
+<meta property="og:title" content="kolm doctor | CLI reference | kolm.ai">
+<meta property="og:description" content="Run environment, auth, cloud, hardware, and value-loop checks before sending real traffic.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/doctor">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm doctor","description":"Reference for the kolm doctor CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/doctor","mainEntityOfPage":"https://kolm.ai/docs/cli/doctor","author":{"@type":"Organization","name":"kolm.ai"}}
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm doctor","description":"Run environment, auth, cloud, hardware, and value-loop checks before sending real traffic.","url":"https://kolm.ai/docs/cli/doctor","mainEntityOfPage":"https://kolm.ai/docs/cli/doctor","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
-<meta name="twitter:title" content="kolm doctor · CLI reference · kolm.ai">
-<meta name="twitter:description" content="Reference for the kolm doctor CLI verb: usage, flags, examples, and links to related docs.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Run</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
 <a class="skip-link" href="#main">Skip to content</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -233,11 +121,22 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="doctor">
 <nav aria-label="Breadcrumb" class="crumbs">
- <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>doctor</span>
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>doctor</span>
 </nav>
-<p>--- title: kolm doctor · kolm.ai description: Sanity-check the environment. Detect GPU. Run the value-loop smoke. ---</p>
+<section class="kolm-surface-media kolm-surface-media--inline" aria-label="CLI workflow proof">
+  <div class="media-terminal">
+    <span class="media-kicker">CLI contract</span>
+    <span class="media-line"><span class="ok">$</span> kolm doctor --help</span>
+    <span class="media-line"><span class="ok">$</span> kolm doctor --json</span>
+    <p>Every reference page is generated from the command source, keeps usage and examples close to the product, and links into the same API, account, and artifact workflow.</p>
+  </div>
+  <div class="media-proof">
+    <span class="media-kicker">Operational proof</span>
+    <p>Use this verb inside the capture, dataset, distill, compile, verify, or runtime loop. Scripts can pin JSON output, humans get the same flow in the account console and TUI.</p>
+  </div>
+</section>
 <h1>kolm doctor</h1>
-<p>&gt; Sanity-check the environment. Detect GPU. Run the value-loop smoke.</p>
+<p>Run environment, auth, cloud, hardware, and value-loop checks before sending real traffic.</p>
 <h2>Usage</h2>
 <pre><code>
 kolm doctor
@@ -245,44 +144,48 @@ kolm doctor --detect-hw [--json]
 kolm doctor --loop [--json]
 </code></pre>
 <h2>Flags</h2>
-<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--detect-hw</code> | off | probe GPU via <code>nvidia-smi</code> / <code>system_profiler</code>; recommend a tier. Exit 0 on detection, 3 on no GPU | | <code>--loop</code> | off | run the value-loop smoke (capture/log, capture/health, bridges/observations, distill/from-captures, replay) in-process against a fresh anon tenant | | <code>--json</code> | off | machine-readable output |</p>
-<h2>Checks (default mode)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--detect-hw</code></td><td>off</td><td>Probe GPU and platform capabilities, then recommend a compile or runtime tier.</td></tr>
+<tr><td><code>--loop</code></td><td>off</td><td>Run the value-loop smoke against capture, health, observations, distill, and replay.</td></tr>
+<tr><td><code>--json</code></td><td>off</td><td>Emit a machine-readable report for CI or support bundles.</td></tr>
+</tbody>
+</table></div>
+<h2>Checks</h2>
 <ul>
-<li>config file</li>
-<li>api key</li>
-<li>cloud reachability</li>
-<li>receipt secret</li>
-<li>node &gt;= 18</li>
-<li>docker (optional, for <code>kolm bench --reproduce</code>)</li>
-<li><code>ANTHROPIC_API_KEY</code> (optional)</li>
-<li>project config (<code>kolm.yaml</code>)</li>
-<li>project + global artifact counts</li>
+<li>config file and saved base URL</li>
+<li>API key shape and authenticated account reachability</li>
+<li>public health and readiness endpoints</li>
+<li>receipt secret availability</li>
+<li>Node.js 18 or newer</li>
+<li>optional Docker for reproducible benchmarks</li>
+<li>optional provider keys used by local examples</li>
+<li>project config and artifact inventory</li>
 </ul>
-<h2>Exit codes</h2>
-<p>| Code | Meaning | | ---- | ------- | | <code>0</code> | no blockers (warnings allowed) | | <code>1</code> | one or more required checks failed | | <code>3</code> | <code>--detect-hw</code> found no GPU |</p>
-<h2>Examples</h2>
-<pre><code>
-kolm doctor
-kolm doctor --detect-hw
-kolm doctor --loop --json | jq &#39;.rungs&#39;
-</code></pre>
+<h2>Exit Codes</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Code</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>0</code></td><td>No blocking checks failed.</td></tr>
+<tr><td><code>1</code></td><td>One or more required checks failed.</td></tr>
+<tr><td><code>3</code></td><td><code>--detect-hw</code> found no supported acceleration path.</td></tr>
+</tbody>
+</table></div>
 <h2>Notes</h2>
-<p>New install? Run <code>kolm doctor --loop</code> before pointing real traffic at kolm. Each rung either passes or fails and the report lists the offender. Equivalent to <code>kolm loop</code>.</p>
-<h2>See also</h2>
-<ul>
-<li><a href="/quickstart">Quickstart</a></li>
-<li><a href="/docs/cli/loop">kolm loop</a></li>
-<li><a href="/docs/cli/health">kolm health</a></li>
-<li><a href="/docs/troubleshooting">Troubleshooting</a></li>
-</ul>
+<p>Run <code>kolm doctor --loop</code> before routing production traffic. The report names the failing rung so the fix is explicit instead of buried in logs.</p>
 <section class="see-also" aria-labelledby="see-also-h">
- <h2 id="see-also-h">See also</h2>
- <ul>
- <li><a href="/docs/cli">All CLI verbs</a></li>
- <li><a href="/quickstart">Quickstart</a></li>
- <li><a href="/docs/api">HTTP API reference</a></li>
- <li><a href="/docs/sdk">SDK reference</a></li>
- </ul>
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
 </section>
 </main>
 </body>

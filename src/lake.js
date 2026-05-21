@@ -50,13 +50,14 @@ function _diskUsed(filePath) {
 // repeated clusters. Admin / local-only daemon callers leave the field unset.
 export async function lakeStats(opts = {}) {
   const since = _parseSince(opts.since) || _parseSince('30d');
-  const rows = await listEvents({
+  let rows = await listEvents({
     namespace: opts.namespace,
     tenant_id: opts.tenant_id || opts.tenant || null,
     since,
     limit: 0, // unlimited
     order: 'asc',
   });
+  rows = filterLakeEvents(rows, opts);
 
   const total_calls = rows.length;
   let total_spend_usd = 0;
@@ -151,8 +152,42 @@ export async function lakeStats(opts = {}) {
       since,
       namespace: opts.namespace || null,
       tenant_id: opts.tenant_id || opts.tenant || null,
+      provider: opts.provider || null,
+      model: opts.model || null,
+      status: opts.status || null,
+      min_latency_ms: Number.isFinite(Number(opts.min_latency_ms)) ? Number(opts.min_latency_ms) : null,
+      max_latency_ms: Number.isFinite(Number(opts.max_latency_ms)) ? Number(opts.max_latency_ms) : null,
+      exclude_errors: !!opts.exclude_errors,
     },
   };
+}
+
+export function filterLakeEvents(rows, opts = {}) {
+  let out = Array.isArray(rows) ? rows.slice() : [];
+  if (opts.provider) {
+    const provider = String(opts.provider).toLowerCase();
+    out = out.filter((r) => String(r.provider || '').toLowerCase() === provider);
+  }
+  if (opts.model) {
+    const model = String(opts.model).toLowerCase();
+    out = out.filter((r) => String(r.model || '').toLowerCase() === model);
+  }
+  if (opts.status) {
+    const status = String(opts.status).toLowerCase();
+    out = out.filter((r) => String(r.status || (r.error ? 'error' : 'ok')).toLowerCase() === status);
+  }
+  if (opts.exclude_errors) {
+    out = out.filter((r) => !r.error && String(r.status || 'ok').toLowerCase() !== 'error');
+  }
+  const minLatency = Number(opts.min_latency_ms);
+  if (Number.isFinite(minLatency)) {
+    out = out.filter((r) => Number(r.latency_ms) >= minLatency);
+  }
+  const maxLatency = Number(opts.max_latency_ms);
+  if (Number.isFinite(maxLatency)) {
+    out = out.filter((r) => Number(r.latency_ms) <= maxLatency);
+  }
+  return out;
 }
 
 // clusterRepeatedPrompts(events) -> [{signature, normalized, count, sample_event_ids, avg_cost, avg_latency, providers}].

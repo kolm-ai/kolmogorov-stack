@@ -1,6 +1,6 @@
 {
   "schema": "kolm-product-surface-catalog-1",
-  "updated_at": "2026-05-20",
+  "updated_at": "2026-05-21",
   "owner": "product-engineering",
   "purpose": "Canonical product, feature, route-group, competitor, upgrade, and certification registry. Every shipped route group must be owned by exactly one product surface.",
   "human_spec_path": "docs/PRODUCT_SURFACE_SPEC_2026-05-20.md",
@@ -382,6 +382,7 @@
         "status",
         "public",
         "changelog",
+        "product",
         "spec",
         "spec-decode",
         "library",
@@ -394,10 +395,12 @@
         "/docs/api",
         "/openapi.json",
         "/sdk-current.json",
+        "/v1/product/experience",
         "/v1/spec"
       ],
       "code_paths": [
         "server.js",
+        "src/product-experience.js",
         "scripts/build-api-ref.cjs",
         "scripts/build-openapi.cjs",
         "scripts/build-sdk-version.js",
@@ -405,6 +408,7 @@
       ],
       "doc_paths": [
         "docs/PRODUCT.md",
+        "docs/product-journeys.json",
         "docs/research/api-docs-contract-drift-audit-2026-05-12.md",
         "docs/research/sdk-cli-integration-audit-2026-05-12.md"
       ],
@@ -736,6 +740,7 @@
         "models",
         "connectors",
         "openrouter",
+        "gemini",
         "wrap",
         "verified-inference",
         "assistant",
@@ -744,6 +749,7 @@
         "media",
         "multimodal",
         "search",
+        "streaming",
         "redact"
       ],
       "primary_paths": [
@@ -763,6 +769,7 @@
         "src/verified.js",
         "src/assistant.js",
         "src/multimodal-bakeoff.js",
+        "src/streaming-contract.js",
         "cli/kolm.js"
       ],
       "doc_paths": [
@@ -1425,6 +1432,7 @@
         "fl",
         "federated",
         "byoc",
+        "cloud",
         "storage",
         "sync",
         "tunnel",
@@ -1436,7 +1444,9 @@
         "/self-host",
         "/tunnels",
         "/v1/devices",
+        "/v1/cloud/readiness",
         "/v1/byoc/deployments",
+        "/v1/storage/object-readiness",
         "/v1/storage/config"
       ],
       "code_paths": [
@@ -1444,6 +1454,7 @@
         "src/devices.js",
         "src/device-install.js",
         "src/byoc.js",
+        "src/object-storage.js",
         "src/cloud-sync.js",
         "src/tunnel.js",
         "src/confidential-compute.js",
@@ -1477,6 +1488,7 @@
           "node scripts/local-surface-smoke.cjs --json --surface=deployment-edge-federated",
           "GET/POST /v1/devices/detect local smoke",
           "storage config smoke",
+          "kolm cloud storage --provider local-artifacts --smoke --json",
           "federated approval unit gates"
         ],
         "prod_gates": [

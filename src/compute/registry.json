@@ -93,6 +93,36 @@
       "summary": "Windows DX12 path. Maintenance mode upstream."
     },
     {
+      "name": "local-openvino",
+      "kind": "local",
+      "train": false,
+      "infer": true,
+      "airgap": true,
+      "cost_per_hour_usd": 0,
+      "cold_start_seconds": 0,
+      "vram_cap_gb": "own",
+      "auth": "KOLM_OPENVINO_URL",
+      "tier": 2,
+      "detect": "KOLM_OPENVINO_URL or OPENVINO_HOME present",
+      "framework": "OpenVINO / OVMS OpenAI-compatible shim",
+      "summary": "Intel CPU/iGPU/NPU inference target for enterprise Windows and edge boxes."
+    },
+    {
+      "name": "local-qnn",
+      "kind": "local",
+      "train": false,
+      "infer": true,
+      "airgap": true,
+      "cost_per_hour_usd": 0,
+      "cold_start_seconds": 0,
+      "vram_cap_gb": "shared",
+      "auth": "KOLM_QNN_URL",
+      "tier": 2,
+      "detect": "KOLM_QNN_URL or QNN_SDK_ROOT present",
+      "framework": "Qualcomm QNN / Hexagon NPU OpenAI-compatible shim",
+      "summary": "Snapdragon / Hexagon NPU inference target for Android and embedded devices."
+    },
+    {
       "name": "modal",
       "kind": "cloud-serverless",
       "train": true,

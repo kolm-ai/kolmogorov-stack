@@ -84,7 +84,7 @@ export const PROVIDERS = {
     upstream: env('KOLM_UPSTREAM_GEMINI_BASE', 'https://generativelanguage.googleapis.com'),
     auth: 'key-param',
     env_key: 'GEMINI_API_KEY',
-    paths: ['/v1beta/models/*'],
+    paths: ['/v1beta/models/*', '/v1beta/openai/chat/completions'],
     // 2026 Google AI Studio pricing per 1k tokens (text+image).
     cost_per_1k: {
       'gemini-2.5-flash':   { input: 0.000075, output: 0.0003 },

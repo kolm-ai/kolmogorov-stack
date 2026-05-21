@@ -294,8 +294,8 @@ test('W271 #26 - existing demo-anchor section still ships below the hero', () =>
     'demo-anchor section below the hero must remain');
 });
 
-test('W271 #27 - existing "What ships in v0.2 today." section preserved', () => {
-  assert.match(INDEX, /What ships in v0\.2 today\./,
+test('W271 #27 - existing v0.2 section preserved', () => {
+  assert.match(INDEX, /What (ships in )?v0\.2 (today\.|includes\.)/i,
     'v0.2 heading must remain (W260 #5 anchor lives here)');
 });
 

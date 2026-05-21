@@ -1,139 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>kolm bench · CLI reference · kolm.ai</title>
-<meta name="description" content="Reference for the kolm bench CLI verb: usage, flags, examples, and links to related docs.">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm bench | CLI reference | kolm.ai</title>
+<meta name="description" content="Reproducible benchmark for a .kolm artifact or a public reproducer suite.">
 <link rel="canonical" href="https://kolm.ai/docs/cli/bench">
-<meta property="og:title" content="kolm bench · CLI reference · kolm.ai">
-<meta property="og:description" content="Reference for the kolm bench CLI verb: usage, flags, examples, and links to related docs.">
+<meta property="og:title" content="kolm bench | CLI reference | kolm.ai">
+<meta property="og:description" content="Reproducible benchmark for a .kolm artifact or a public reproducer suite.">
 <meta property="og:url" content="https://kolm.ai/docs/cli/bench">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://kolm.ai/og-card.svg">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/og/docs-cli.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/surface-polish.css">
 <script src="/nav.js" defer></script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm bench","description":"Reference for the kolm bench CLI verb: usage, flags, examples, and links to related docs.","url":"https://kolm.ai/docs/cli/bench","mainEntityOfPage":"https://kolm.ai/docs/cli/bench","author":{"@type":"Organization","name":"kolm.ai"}}
+{"@context":"https://schema.org","@type":"TechArticle","headline":"kolm bench","description":"Reproducible benchmark for a .kolm artifact or a public reproducer suite.","url":"https://kolm.ai/docs/cli/bench","mainEntityOfPage":"https://kolm.ai/docs/cli/bench","author":{"@type":"Organization","name":"kolm.ai"}}
 </script>
-<meta name="twitter:title" content="kolm bench · CLI reference · kolm.ai">
-<meta name="twitter:description" content="Reference for the kolm bench CLI verb: usage, flags, examples, and links to related docs.">
-<meta name="twitter:image" content="https://kolm.ai/og-card.svg">
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
-<header class="site-header">
- <div class="wrap">
- <a href="/" class="brand" aria-label="kolm.ai home">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Run</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    <!-- KOLM_NAV_END (W221) -->
- <div class="site-actions"><button type="button" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
- <a href="/signin" class="ghost">sign in</a>
- <a href="/signup" class="cta">Get API Key &rarr;</a>
- </div>
- </div>
-</header>
 <a class="skip-link" href="#main">Skip to content</a>
-    <!-- KOLM_NAV_BEGIN (W221 consolidated) -->
     <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
@@ -233,11 +121,22 @@
     <!-- KOLM_NAV_END (W221) -->
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="bench">
 <nav aria-label="Breadcrumb" class="crumbs">
- <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>bench</span>
+  <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>bench</span>
 </nav>
-<p>--- title: kolm bench · kolm.ai description: Reproducible benchmark for a .kolm artifact or a public reproducer suite. ---</p>
+<section class="kolm-surface-media kolm-surface-media--inline" aria-label="CLI workflow proof">
+  <div class="media-terminal">
+    <span class="media-kicker">CLI contract</span>
+    <span class="media-line"><span class="ok">$</span> kolm bench --help</span>
+    <span class="media-line"><span class="ok">$</span> kolm bench --json</span>
+    <p>Every reference page is generated from the command source, keeps usage and examples close to the product, and links into the same API, account, and artifact workflow.</p>
+  </div>
+  <div class="media-proof">
+    <span class="media-kicker">Operational proof</span>
+    <p>Use this verb inside the capture, dataset, distill, compile, verify, or runtime loop. Scripts can pin JSON output, humans get the same flow in the account console and TUI.</p>
+  </div>
+</section>
 <h1>kolm bench</h1>
-<p>&gt; Reproducible artifact benchmark. Alias: <code>kolm benchmark</code>. Three modes: artifact-local, public reproducer, head-to-head vs an LLM.</p>
+<blockquote><p>Reproducible artifact benchmark. Alias: <code>kolm benchmark</code>. Three modes: artifact-local, public reproducer, head-to-head vs an LLM.</p></blockquote>
 <h2>Usage</h2>
 <pre><code>
 kolm bench &lt;artifact.kolm&gt; [flags] # artifact-local benchmark JSON
@@ -246,12 +145,48 @@ kolm bench --compare &lt;artifact.kolm&gt; [flags] # head-to-head: kolm vs LLM
 </code></pre>
 <h2>Flags</h2>
 <h3>Artifact mode</h3>
-<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--runs &lt;n&gt;</code> | <code>1</code> | runs per embedded eval case | | <code>--input &#39;&lt;json|string&gt;&#39;</code> | none | fallback input when the artifact has no evals | | <code>--target &lt;name&gt;</code> | none | target label for the report | | <code>--device &lt;name&gt;</code> | none | device label for the report | | <code>--out &lt;file&gt;</code> | stdout | also write the JSON report to a file | | <code>--json</code> | on | emit JSON to stdout |</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--runs &lt;n&gt;</code></td><td><code>1</code></td><td>runs per embedded eval case</td></tr>
+<tr><td>`--input &#39;&lt;json</td><td>string&gt;&#39;`</td><td>none</td><td>fallback input when the artifact has no evals</td></tr>
+<tr><td><code>--target &lt;name&gt;</code></td><td>none</td><td>target label for the report</td></tr>
+<tr><td><code>--device &lt;name&gt;</code></td><td>none</td><td>device label for the report</td></tr>
+<tr><td><code>--out &lt;file&gt;</code></td><td>stdout</td><td>also write the JSON report to a file</td></tr>
+<tr><td><code>--json</code></td><td>on</td><td>emit JSON to stdout</td></tr>
+</tbody>
+</table></div>
 <h3>Compare mode</h3>
-<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--corpus &lt;jsonl&gt;</code> | none | external corpus, one <code>{input,output}</code> per line (<code>{prompt,completion}</code> legacy accepted) | | <code>--runs &lt;n&gt;</code> | <code>5</code> | runs per case | | <code>--llm-sample &lt;n&gt;</code> | <code>min(20, |corpus|)</code> | cap LLM paths to first N cases | | <code>--md &lt;file&gt;</code> | none | write Markdown report | | <code>--json &lt;file&gt;</code> | none | write JSON report | | <code>--input &#39;&lt;json|string&gt;&#39;</code> | none | single ad-hoc input when no <code>--corpus</code> and no embedded evals |</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--corpus &lt;jsonl&gt;</code></td><td>none</td><td>external corpus, one <code>{input,output}</code> per line (<code>{prompt,completion}</code> legacy accepted)</td></tr>
+<tr><td><code>--runs &lt;n&gt;</code></td><td><code>5</code></td><td>runs per case</td></tr>
+<tr><td><code>--llm-sample &lt;n&gt;</code></td><td>`min(20,</td><td>corpus</td><td>)`</td><td>cap LLM paths to first N cases</td></tr>
+<tr><td><code>--md &lt;file&gt;</code></td><td>none</td><td>write Markdown report</td></tr>
+<tr><td><code>--json &lt;file&gt;</code></td><td>none</td><td>write JSON report</td></tr>
+<tr><td>`--input &#39;&lt;json</td><td>string&gt;&#39;`</td><td>none</td><td>single ad-hoc input when no <code>--corpus</code> and no embedded evals</td></tr>
+</tbody>
+</table></div>
 <p>Environment for compare mode: <code>ANTHROPIC_API_KEY</code> (required for llm-api path), <code>KOLM_BENCH_LLM_MODEL</code> (default <code>claude-haiku-4-5</code>), <code>KOLM_BENCH_LLM_INPUT_RATE</code>, <code>KOLM_BENCH_LLM_OUTPUT_RATE</code>, <code>KOLM_BENCH_LOCAL_LLM_URL</code> (default <code>http://127.0.0.1:11434</code>), <code>KOLM_BENCH_LOCAL_LLM_MODEL</code> (default <code>llama3.2:1b</code>).</p>
 <h3>Reproduce mode</h3>
-<p>| Flag | Default | Description | | ---- | ------- | ----------- | | <code>--reproduce &lt;suite&gt;</code> | none | public reproducer. Available: <code>swebench-lite-n150</code> | | <code>--seed &lt;n&gt;</code> | per-suite (e.g. 42) | seed | | <code>--n &lt;n&gt;</code> | per-suite (e.g. 150) | sample size | | <code>--out &lt;file&gt;</code> | <code>~/.kolm/bench/&lt;suite&gt;/report.json</code> | report path | | <code>--dry-run</code> | off | print the plan; do not pull or run docker | | <code>--api-key &lt;key&gt;</code> | none | override <code>ANTHROPIC_API_KEY</code> for the spawned container |</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--reproduce &lt;suite&gt;</code></td><td>none</td><td>public reproducer. Available: <code>swebench-lite-n150</code></td></tr>
+<tr><td><code>--seed &lt;n&gt;</code></td><td>per-suite (e.g. 42)</td><td>seed</td></tr>
+<tr><td><code>--n &lt;n&gt;</code></td><td>per-suite (e.g. 150)</td><td>sample size</td></tr>
+<tr><td><code>--out &lt;file&gt;</code></td><td><code>~/.kolm/bench/&lt;suite&gt;/report.json</code></td><td>report path</td></tr>
+<tr><td><code>--dry-run</code></td><td>off</td><td>print the plan; do not pull or run docker</td></tr>
+<tr><td><code>--api-key &lt;key&gt;</code></td><td>none</td><td>override <code>ANTHROPIC_API_KEY</code> for the spawned container</td></tr>
+</tbody>
+</table></div>
 <h2>Examples</h2>
 <pre><code>
 kolm bench redactor.kolm --runs 5 --out report.json
@@ -269,13 +204,13 @@ kolm bench --reproduce swebench-lite-n150 --api-key $ANTHROPIC_API_KEY
 <li><a href="/docs/api">API reference</a></li>
 </ul>
 <section class="see-also" aria-labelledby="see-also-h">
- <h2 id="see-also-h">See also</h2>
- <ul>
- <li><a href="/docs/cli">All CLI verbs</a></li>
- <li><a href="/quickstart">Quickstart</a></li>
- <li><a href="/docs/api">HTTP API reference</a></li>
- <li><a href="/docs/sdk">SDK reference</a></li>
- </ul>
+  <h2 id="see-also-h">See also</h2>
+  <ul>
+    <li><a href="/docs/cli">All CLI verbs</a></li>
+    <li><a href="/quickstart">Quickstart</a></li>
+    <li><a href="/docs/api">HTTP API reference</a></li>
+    <li><a href="/docs/sdk">SDK reference</a></li>
+  </ul>
 </section>
 </main>
 </body>

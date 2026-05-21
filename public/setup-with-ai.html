@@ -154,6 +154,7 @@
 <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 
 <header class="site-header">
@@ -263,6 +264,7 @@
  </div>
  </div>
 </header>
+<main id="main">
 
 <section class="hero">
  <div class="wrap">
@@ -281,37 +283,37 @@
  <div class="wrap">
 
  <div class="tabs" role="tablist" aria-label="Pick an AI assistant">
- <button type="button" role="tab" data-tab="claude" aria-selected="true" aria-controls="panel-claude">Claude<span class="sub">claude.ai</span></button>
- <button type="button" role="tab" data-tab="chatgpt" aria-selected="false" aria-controls="panel-chatgpt">ChatGPT<span class="sub">chatgpt.com</span></button>
- <button type="button" role="tab" data-tab="gemini" aria-selected="false" aria-controls="panel-gemini">Gemini<span class="sub">gemini.google.com</span></button>
- <button type="button" role="tab" data-tab="copilot" aria-selected="false" aria-controls="panel-copilot">Copilot<span class="sub">copilot.microsoft.com</span></button>
+ <button type="button" id="tab-claude" role="tab" data-tab="claude" aria-selected="true" aria-controls="panel-claude">Claude<span class="sub">claude.ai</span></button>
+ <button type="button" id="tab-chatgpt" role="tab" data-tab="chatgpt" aria-selected="false" aria-controls="panel-chatgpt">ChatGPT<span class="sub">chatgpt.com</span></button>
+ <button type="button" id="tab-gemini" role="tab" data-tab="gemini" aria-selected="false" aria-controls="panel-gemini">Gemini<span class="sub">gemini.google.com</span></button>
+ <button type="button" id="tab-copilot" role="tab" data-tab="copilot" aria-selected="false" aria-controls="panel-copilot">Copilot<span class="sub">copilot.microsoft.com</span></button>
  </div>
 
  <div class="tab-panel" id="panel-claude" data-tab="claude" data-active="true" role="tabpanel" aria-labelledby="tab-claude">
  <div class="step-head">
  <h3>01 system prompt (paste first)</h3>
- <a class="open-ai" href="https://claude.ai/new" target="_blank" rel="noopener">Open Claude <span class="arrow">&rarr;</span></a>
+ <a class="open-ai" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Open Claude <span class="arrow">&rarr;</span></a>
  </div>
  </div>
 
  <div class="tab-panel" id="panel-chatgpt" data-tab="chatgpt" data-active="false" role="tabpanel" aria-labelledby="tab-chatgpt">
  <div class="step-head">
  <h3>01 system prompt (paste first)</h3>
- <a class="open-ai" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT <span class="arrow">&rarr;</span></a>
+ <a class="open-ai" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open ChatGPT <span class="arrow">&rarr;</span></a>
  </div>
  </div>
 
  <div class="tab-panel" id="panel-gemini" data-tab="gemini" data-active="false" role="tabpanel" aria-labelledby="tab-gemini">
  <div class="step-head">
  <h3>01 system prompt (paste first)</h3>
- <a class="open-ai" href="https://gemini.google.com/app" target="_blank" rel="noopener">Open Gemini <span class="arrow">&rarr;</span></a>
+ <a class="open-ai" href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">Open Gemini <span class="arrow">&rarr;</span></a>
  </div>
  </div>
 
  <div class="tab-panel" id="panel-copilot" data-tab="copilot" data-active="false" role="tabpanel" aria-labelledby="tab-copilot">
  <div class="step-head">
  <h3>01 system prompt (paste first)</h3>
- <a class="open-ai" href="https://copilot.microsoft.com/" target="_blank" rel="noopener">Open Copilot <span class="arrow">&rarr;</span></a>
+ <a class="open-ai" href="https://copilot.microsoft.com/" target="_blank" rel="noopener noreferrer">Open Copilot <span class="arrow">&rarr;</span></a>
  </div>
  </div>
 
@@ -397,6 +399,8 @@
  </div>
 </section>
 
+
+</main>
 <footer class="site">
  <div class="wrap" style="max-width: 1180px;">
  <div class="footer-grid">

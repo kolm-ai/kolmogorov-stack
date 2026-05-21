@@ -36,6 +36,8 @@ import { runGgufTarget, ggufRuntimeAvailable } from './runners/gguf-runner.js';
 import { runOnnxTarget, onnxRuntimeAvailable } from './runners/onnx-runner.js';
 import { verifySignatureBlock as verifyEd25519Block } from './ed25519.js';
 import { canonicalJson } from './cid.js';
+import { ragLibFor } from './rag.js';
+import { estimateTokens } from './optimization.js';
 
 // W287 — supported runtime_target values for dispatchRuntime. The historical
 // default is 'js' (every artifact built before W287 had no runtime_target
@@ -499,6 +501,7 @@ async function runJsTarget(bundle, input, opts = {}) {
   }
   const timeout = opts.timeoutMs || DEFAULT_TIMEOUT_MS;
   const params = opts.params || null;
+  const rag = ragLibFor(bundle.artifact_path);
   const t0 = process.hrtime.bigint();
   const tried = [];
   let lastError = null;
@@ -508,7 +511,7 @@ async function runJsTarget(bundle, input, opts = {}) {
     try { fn = compileJs(r.source); }
     catch (e) { tried.push({ id: r.id, stage: 'compile', error: e.message }); lastError = `compile ${r.id}: ${e.message}`; continue; }
     try {
-      const output = fn(input, { timeout, pack, index, params });
+      const output = fn(input, { timeout, pack, index, params, rag: rag });
       const us = Number(process.hrtime.bigint() - t0) / 1000;
       return {
         output,
@@ -555,11 +558,22 @@ export async function runArtifact(artifactPath, input, opts = {}) {
   const { manifest } = bundle;
   const target = manifest.runtime_target || 'js';
 
-  const maxBytes = opts.maxBytes || MAX_INPUT_BYTES;
+  const runtimePolicy = {
+    ...(manifest.policy && typeof manifest.policy === 'object' ? manifest.policy : {}),
+    ...(manifest.runtime_policy && typeof manifest.runtime_policy === 'object' ? manifest.runtime_policy : {}),
+  };
+  const maxBytes = opts.maxBytes || Number(runtimePolicy.max_input_bytes || 0) || MAX_INPUT_BYTES;
+  const maxTokens = opts.maxTokens || Number(runtimePolicy.max_input_tokens || 0);
   const timeout = opts.timeoutMs || DEFAULT_TIMEOUT_MS;
   const bytes = inputBytes(input);
   if (bytes > maxBytes) {
     throw kolmError('KOLM_E_INPUT_TOO_LARGE', `input ${bytes}B exceeds limit ${maxBytes}B`);
+  }
+  if (maxTokens) {
+    const tokens = estimateTokens(input);
+    if (tokens > maxTokens) {
+      throw kolmError('KOLM_E_TOKEN_BUDGET', `input estimated ${tokens} tokens exceeds artifact limit ${maxTokens}`);
+    }
   }
 
   // Tenant-supplied parameters: any buyer can pass per-call config (extra

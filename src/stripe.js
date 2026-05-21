@@ -47,12 +47,14 @@ export function verifyStripeSignature(rawBody, sigHeader, secret, tolerance = 30
 }
 
 // Cents → plan id. Numbers must match `price_usd_month * 100` in PLAN_CATALOG.
+// Legacy amounts stay mapped so existing Payment Links/webhooks still resolve.
 const AMOUNT_TO_PLAN = {
-  900:    'starter',     // $9
-  4900:   'pro',         // $49
-  14900:  'teams',       // $149
-  149900: 'business',    // $1,499
-  299900: 'enterprise',  // $2,999
+  900:    'pro',         // legacy starter link
+  4900:   'pro',         // Pro $49
+  14900:  'teams',       // legacy team link
+  49900:  'teams',       // Team $499
+  149900: 'enterprise',  // legacy business link
+  299900: 'enterprise',  // legacy enterprise link
 };
 
 export function planFromAmount(cents) {

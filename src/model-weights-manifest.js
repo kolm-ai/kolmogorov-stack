@@ -301,16 +301,17 @@ export const ALL_VARIANTS = [
     notes: 'Fallback: Qwen 2.5 32B Q4 (Qwen 3.5 27B not yet shipped).',
     unavailable: false,
   },
-  // Gemma 4 26B-A4B fallback to gemma-2-27b-it Q4.
+  // Gemma 3 27B fallback to the closest stable GGUF bundle until the operator
+  // pins an exact Gemma 3 27B quantized artifact.
   {
-    model_id: 'google/gemma-4-26b-a4b-it',
+    model_id: 'google/gemma-3-27b-it',
     variant: 'q4_k_m',
     hf_repo: 'bartowski/gemma-2-27b-it-GGUF',
     hf_revision: 'main',
     files: [{ path: 'gemma-2-27b-it-Q4_K_M.gguf', bytes: 16_645_383_456 }],
     total_bytes: 16_645_383_456,
     tier: 'workstation',
-    notes: 'Fallback: Gemma 2 27B-it Q4 (Gemma 4 26B-A4B not yet shipped).',
+    notes: 'Operational fallback: Gemma 2 27B-it Q4 for Gemma-family workstation tests; pin an exact Gemma 3 27B quantized bundle before claiming Gemma 3 weight parity.',
     unavailable: false,
   },
   {

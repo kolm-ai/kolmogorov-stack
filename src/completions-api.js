@@ -6,6 +6,8 @@
 //   2. A local kolm artifact path (model = "kolm-path:<absolute-or-relative-path>")
 //   3. Anthropic                  (model = "anthropic:<model-id>" or "claude-*")
 //   4. OpenAI                     (model = "openai:<model-id>" or "gpt-*")
+//   5. OpenRouter                 (model = "openrouter:<provider/model>")
+//   6. Gemini OpenAI-compatible   (model = "gemini:<model-id>" or "google/gemini-*")
 //
 // The point: a tenant can point any existing OpenAI-SDK client (LangChain,
 // LlamaIndex, the openai npm package, Continue.dev, Cursor, ChatGPT clones,
@@ -73,6 +75,32 @@ const DEFAULT_REGISTRY_DIRS = [
 // ---------------------------------------------------------------------------
 export async function handleChatCompletion(req, opts = {}) {
   validateRequest(req);
+  const chain = resolveModelChain(req);
+  const failures = [];
+  for (let i = 0; i < chain.length; i++) {
+    const model = chain[i];
+    try {
+      const out = await handleChatCompletionOne({ ...req, model }, opts);
+      if (failures.length) {
+        out.kolm_fallback = {
+          selected_model: model,
+          attempted: failures,
+        };
+      }
+      return out;
+    } catch (e) {
+      failures.push({
+        model,
+        status: e.status || 500,
+        code: e.code || 'error',
+        message: String(e.message || e).slice(0, 240),
+      });
+      if (i === chain.length - 1 || !isFallbackableError(e)) throw e;
+    }
+  }
+}
+
+async function handleChatCompletionOne(req, opts = {}) {
   const resolved = await resolveModel(req.model, opts);
 
   switch (resolved.kind) {
@@ -81,10 +109,39 @@ export async function handleChatCompletion(req, opts = {}) {
     case 'anthropic':
       return await runAnthropicCompletion(req, resolved, opts);
     case 'openai':
-      return await runOpenAiCompletion(req, resolved, opts);
+      return await runOpenAiCompatibleCompletion(req, resolved, openAiProviderConfig(), opts);
+    case 'openrouter':
+      return await runOpenAiCompatibleCompletion(req, resolved, openRouterProviderConfig(), opts);
+    case 'gemini':
+      return await runOpenAiCompatibleCompletion(req, resolved, geminiProviderConfig(), opts);
     default:
       throw apiError(400, 'invalid_model', `unsupported model selector '${req.model}'`);
   }
+}
+
+export function resolveModelChain(req = {}) {
+  const chain = [];
+  const add = (v) => {
+    if (v == null) return;
+    if (Array.isArray(v)) { for (const x of v) add(x); return; }
+    const s = String(v).trim();
+    if (!s) return;
+    if (s.includes(',')) { for (const x of s.split(',')) add(x); return; }
+    if (!chain.includes(s)) chain.push(s);
+  };
+  add(req.model);
+  add(req.fallback_models);
+  add(req.fallbacks);
+  add(req.kolm && req.kolm.fallback_models);
+  return chain;
+}
+
+function isFallbackableError(e) {
+  const status = Number(e && e.status);
+  if (status === 408 || status === 409 || status === 425 || status === 429) return true;
+  if (status >= 500) return true;
+  const code = String((e && e.code) || '');
+  return /upstream|timeout|rate|unavailable|overloaded|network/i.test(code);
 }
 
 // ---------------------------------------------------------------------------
@@ -124,7 +181,17 @@ export async function* streamChatCompletion(req, opts = {}) {
   }
 
   if (resolved.kind === 'openai') {
-    yield* streamOpenAiCompletion(req, resolved, opts, id, created);
+    yield* streamOpenAiCompatibleCompletion(req, resolved, openAiProviderConfig(), opts, id, created);
+    return;
+  }
+
+  if (resolved.kind === 'openrouter') {
+    yield* streamOpenAiCompatibleCompletion(req, resolved, openRouterProviderConfig(), opts, id, created);
+    return;
+  }
+
+  if (resolved.kind === 'gemini') {
+    yield* streamOpenAiCompatibleCompletion(req, resolved, geminiProviderConfig(), opts, id, created);
     return;
   }
 }
@@ -158,13 +225,21 @@ async function resolveModel(model, opts) {
     const id = model.startsWith('openai:') ? model.slice('openai:'.length) : model;
     return { kind: 'openai', modelId: id, displayModel: model };
   }
+  if (model.startsWith('openrouter:')) {
+    const id = model.slice('openrouter:'.length);
+    return { kind: 'openrouter', modelId: id, displayModel: model };
+  }
+  if (model.startsWith('gemini:') || model.startsWith('google/gemini-') || model.startsWith('models/gemini-')) {
+    const id = model.startsWith('gemini:') ? model.slice('gemini:'.length) : model.replace(/^models\//, '');
+    return { kind: 'gemini', modelId: id, displayModel: model };
+  }
 
   // Bare names — fall back to kolm lookup, then refuse if not found.
   const abs = lookupArtifactByName(model, opts);
   if (abs) return { kind: 'kolm', artifactPath: abs, displayModel: `kolm:${model}` };
 
   throw apiError(400, 'invalid_model',
-    `model '${model}' is not a kolm artifact in the registry, and lacks an anthropic:/openai:/claude-/gpt- prefix`);
+    `model '${model}' is not a kolm artifact in the registry, and lacks a kolm:/anthropic:/openai:/openrouter:/gemini: provider prefix`);
 }
 
 function lookupArtifactByName(name, opts) {
@@ -320,37 +395,82 @@ async function* streamAnthropicCompletion(req, resolved, _opts, id, created) {
 // SDK as a dep — we hit /v1/chat/completions directly via fetch so anyone
 // who set OPENAI_API_KEY gets bridging without npm-installing extra weight.
 // ---------------------------------------------------------------------------
-async function runOpenAiCompletion(req, resolved, _opts) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw apiError(503, 'upstream_unavailable', 'OPENAI_API_KEY not set; cannot bridge to openai');
-  const endpoint = process.env.OPENAI_BASE_URL || 'https://api.openai.com';
+function openAiProviderConfig() {
+  return {
+    vendor: 'openai',
+    key: process.env.OPENAI_API_KEY,
+    keyName: 'OPENAI_API_KEY',
+    baseUrl: normalizeOpenAiBaseUrl(process.env.OPENAI_BASE_URL || 'https://api.openai.com'),
+  };
+}
+
+function openRouterProviderConfig() {
+  return {
+    vendor: 'openrouter',
+    key: process.env.OPENROUTER_API_KEY,
+    keyName: 'OPENROUTER_API_KEY',
+    baseUrl: process.env.OPENROUTER_BASE_URL || process.env.KOLM_OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
+    extraHeaders: {
+      'HTTP-Referer': process.env.OPENROUTER_SITE_URL || process.env.KOLM_PUBLIC_BASE || 'https://kolm.ai',
+      'X-Title': process.env.OPENROUTER_APP_TITLE || 'kolm.ai',
+    },
+  };
+}
+
+function geminiProviderConfig() {
+  return {
+    vendor: 'gemini',
+    key: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY,
+    keyName: 'GEMINI_API_KEY',
+    baseUrl: process.env.GEMINI_OPENAI_BASE_URL || process.env.KOLM_GEMINI_OPENAI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai',
+  };
+}
+
+function chatCompletionsUrl(baseUrl) {
+  const clean = String(baseUrl || '').replace(/\/+$/, '');
+  return /\/chat\/completions$/.test(clean) ? clean : `${clean}/chat/completions`;
+}
+
+function normalizeOpenAiBaseUrl(baseUrl) {
+  const clean = String(baseUrl || '').replace(/\/+$/, '');
+  return /\/v1$/.test(clean) ? clean : `${clean}/v1`;
+}
+
+async function runOpenAiCompatibleCompletion(req, resolved, provider, _opts) {
+  if (!provider.key) {
+    throw apiError(503, 'upstream_unavailable', `${provider.keyName} not set; cannot bridge to ${provider.vendor}`);
+  }
   const body = {
     model: resolved.modelId,
     messages: req.messages,
     max_tokens: req.max_tokens,
     temperature: req.temperature,
   };
-  const r = await fetch(`${endpoint}/v1/chat/completions`, {
+  const r = await fetch(chatCompletionsUrl(provider.baseUrl), {
     method: 'POST',
-    headers: { 'authorization': `Bearer ${apiKey}`, 'content-type': 'application/json' },
+    headers: {
+      'authorization': `Bearer ${provider.key}`,
+      'content-type': 'application/json',
+      ...(provider.extraHeaders || {}),
+    },
     body: JSON.stringify(body),
   });
   if (!r.ok) {
     const text = await r.text();
-    throw apiError(r.status, 'upstream_error', `openai upstream returned ${r.status}: ${text.slice(0, 200)}`);
+    throw apiError(r.status, 'upstream_error', `${provider.vendor} upstream returned ${r.status}: ${text.slice(0, 200)}`);
   }
   const resp = await r.json();
   return {
     ...resp,
     model: resolved.displayModel,
-    upstream: { vendor: 'openai', model: resolved.modelId },
+    upstream: { vendor: provider.vendor, model: resolved.modelId },
   };
 }
 
-async function* streamOpenAiCompletion(req, resolved, _opts, _id, _created) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw apiError(503, 'upstream_unavailable', 'OPENAI_API_KEY not set');
-  const endpoint = process.env.OPENAI_BASE_URL || 'https://api.openai.com';
+async function* streamOpenAiCompatibleCompletion(req, resolved, provider, _opts, _id, _created) {
+  if (!provider.key) {
+    throw apiError(503, 'upstream_unavailable', `${provider.keyName} not set; cannot bridge to ${provider.vendor}`);
+  }
   const body = {
     model: resolved.modelId,
     messages: req.messages,
@@ -358,14 +478,18 @@ async function* streamOpenAiCompletion(req, resolved, _opts, _id, _created) {
     temperature: req.temperature,
     stream: true,
   };
-  const r = await fetch(`${endpoint}/v1/chat/completions`, {
+  const r = await fetch(chatCompletionsUrl(provider.baseUrl), {
     method: 'POST',
-    headers: { 'authorization': `Bearer ${apiKey}`, 'content-type': 'application/json' },
+    headers: {
+      'authorization': `Bearer ${provider.key}`,
+      'content-type': 'application/json',
+      ...(provider.extraHeaders || {}),
+    },
     body: JSON.stringify(body),
   });
   if (!r.ok) {
     const text = await r.text();
-    throw apiError(r.status, 'upstream_error', `openai upstream returned ${r.status}: ${text.slice(0, 200)}`);
+    throw apiError(r.status, 'upstream_error', `${provider.vendor} upstream returned ${r.status}: ${text.slice(0, 200)}`);
   }
   // Forward chunks verbatim — openai SSE format is already what our client
   // wants. We rewrite the model field so the client sees "openai:gpt-..."
@@ -436,6 +560,10 @@ export async function handleListModels(opts = {}) {
   out.push({ id: 'anthropic:claude-sonnet-4-6', object: 'model', created: 0, owned_by: 'anthropic', kind: 'bridge' });
   out.push({ id: 'anthropic:claude-opus-4-7', object: 'model', created: 0, owned_by: 'anthropic', kind: 'bridge' });
   out.push({ id: 'openai:gpt-5', object: 'model', created: 0, owned_by: 'openai', kind: 'bridge' });
+  out.push({ id: 'openrouter:anthropic/claude-sonnet-4-6', object: 'model', created: 0, owned_by: 'openrouter', kind: 'bridge' });
+  out.push({ id: 'openrouter:google/gemini-2.5-flash', object: 'model', created: 0, owned_by: 'openrouter', kind: 'bridge' });
+  out.push({ id: 'gemini:gemini-2.5-flash', object: 'model', created: 0, owned_by: 'google', kind: 'bridge' });
+  out.push({ id: 'gemini:gemini-2.5-pro', object: 'model', created: 0, owned_by: 'google', kind: 'bridge' });
   return { object: 'list', data: out };
 }
 

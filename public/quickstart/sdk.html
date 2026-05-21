@@ -194,15 +194,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="section"><div class="wrap">
  <h2>Install</h2>
  <div class="tabs" role="tablist">
- <button class="tab" role="tab" aria-selected="true" data-tab="ts">TypeScript</button>
- <button class="tab" role="tab" aria-selected="false" data-tab="py">Python</button>
+ <button id="tab-ts" class="tab" role="tab" aria-selected="true" aria-controls="panel-ts" data-tab="ts">TypeScript</button>
+ <button id="tab-py" class="tab" role="tab" aria-selected="false" aria-controls="panel-py" data-tab="py">Python</button>
  </div>
- <div class="tabpanel" data-tab="ts" data-active="true">
+ <div id="panel-ts" class="tabpanel" role="tabpanel" aria-labelledby="tab-ts" data-tab="ts" data-active="true">
  <pre class="terminal"><b>$</b> git clone https://github.com/sneaky-hippo/kolmogorov-stack
 <b>$</b> npm i file:./kolmogorov-stack/sdk/node
 <span class="mute">local package linked as @kolmogorov/kolm-sdk</span></pre>
  </div>
- <div class="tabpanel" data-tab="py" data-active="false">
+ <div id="panel-py" class="tabpanel" role="tabpanel" aria-labelledby="tab-py" data-tab="py" data-active="false">
  <pre class="terminal"><b>$</b> pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python
 <span class="mute">Successfully installed kolm-0.2.0</span></pre>
  </div>
@@ -216,10 +216,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
  <div class="step-head"><span class="step-num">step 1</span><span class="step-name">Swap the import</span><span class="step-cli">import Kolm from &apos;@kolmogorov/kolm-sdk&apos;</span></div>
  <p>The SDK ships an <code>OpenAI</code>-compatible client surface so the body of your existing handler does not change. Pass <code>captureNamespace</code> to start collecting prompt+response pairs into your tenant&apos;s capture store.</p>
  <div class="tabs" role="tablist">
- <button class="tab" role="tab" aria-selected="true" data-tab="ts1">TypeScript</button>
- <button class="tab" role="tab" aria-selected="false" data-tab="py1">Python</button>
+ <button id="tab-ts1" class="tab" role="tab" aria-selected="true" aria-controls="panel-ts1" data-tab="ts1">TypeScript</button>
+ <button id="tab-py1" class="tab" role="tab" aria-selected="false" aria-controls="panel-py1" data-tab="py1">Python</button>
  </div>
- <div class="tabpanel" data-tab="ts1" data-active="true">
+ <div id="panel-ts1" class="tabpanel" role="tabpanel" aria-labelledby="tab-ts1" data-tab="ts1" data-active="true">
  <pre class="terminal"><span class="kw">import</span> Kolm <span class="kw">from</span> <span class="str">&apos;@kolmogorov/kolm-sdk&apos;</span>;
 <span class="kw">const</span> kolm = <span class="kw">new</span> <span class="fn">Kolm</span>({ apiKey: process.env.KOLM_KEY, captureNamespace: <span class="str">&apos;summarizer&apos;</span> });
 <span class="kw">const</span> res = <span class="kw">await</span> kolm.chat.completions.<span class="fn">create</span>({
@@ -230,7 +230,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 // res.kolm.durable -&gt; true
 // res.kolm.namespace -&gt; &apos;summarizer&apos;</span></pre>
  </div>
- <div class="tabpanel" data-tab="py1" data-active="false">
+ <div id="panel-py1" class="tabpanel" role="tabpanel" aria-labelledby="tab-py1" data-tab="py1" data-active="false">
  <pre class="terminal"><span class="kw">from</span> kolm <span class="kw">import</span> Kolm
 kolm = <span class="fn">Kolm</span>(api_key=os.environ[<span class="str">&apos;KOLM_KEY&apos;</span>], capture_namespace=<span class="str">&apos;summarizer&apos;</span>)
 res = kolm.chat.completions.<span class="fn">create</span>(
@@ -247,15 +247,15 @@ res = kolm.chat.completions.<span class="fn">create</span>(
  <div class="step-head"><span class="step-num">step 2</span><span class="step-name">Stream the live capture tail</span><span class="step-cli">kolm.captures.stream()</span></div>
  <p>Open an SSE stream on your namespace and inspect what is actually landing. Async iteration in TS, generator in Python.</p>
  <div class="tabs" role="tablist">
- <button class="tab" role="tab" aria-selected="true" data-tab="ts2">TypeScript</button>
- <button class="tab" role="tab" aria-selected="false" data-tab="py2">Python</button>
+ <button id="tab-ts2" class="tab" role="tab" aria-selected="true" aria-controls="panel-ts2" data-tab="ts2">TypeScript</button>
+ <button id="tab-py2" class="tab" role="tab" aria-selected="false" aria-controls="panel-py2" data-tab="py2">Python</button>
  </div>
- <div class="tabpanel" data-tab="ts2" data-active="true">
+ <div id="panel-ts2" class="tabpanel" role="tabpanel" aria-labelledby="tab-ts2" data-tab="ts2" data-active="true">
  <pre class="terminal"><span class="kw">for await</span> (<span class="kw">const</span> cap <span class="kw">of</span> kolm.captures.<span class="fn">stream</span>({ namespace: <span class="str">&apos;summarizer&apos;</span> })) {
  console.<span class="fn">log</span>(cap.id, cap.latency_us, cap.input.<span class="fn">slice</span>(<span class="str">0</span>, <span class="str">60</span>));
 }</pre>
  </div>
- <div class="tabpanel" data-tab="py2" data-active="false">
+ <div id="panel-py2" class="tabpanel" role="tabpanel" aria-labelledby="tab-py2" data-tab="py2" data-active="false">
  <pre class="terminal"><span class="kw">for</span> cap <span class="kw">in</span> kolm.captures.<span class="fn">stream</span>(namespace=<span class="str">&apos;summarizer&apos;</span>):
  <span class="fn">print</span>(cap.id, cap.latency_us, cap.input[:<span class="str">60</span>])</pre>
  </div>
@@ -265,15 +265,15 @@ res = kolm.chat.completions.<span class="fn">create</span>(
  <div class="step-head"><span class="step-num">step 3</span><span class="step-name">Promote to a compile job</span><span class="step-cli">kolm.distill.fromCaptures()</span></div>
  <p>Triggers the same <code>/v1/distill/from-captures</code> route the CLI uses. Returns a job handle you can await.</p>
  <div class="tabs" role="tablist">
- <button class="tab" role="tab" aria-selected="true" data-tab="ts3">TypeScript</button>
- <button class="tab" role="tab" aria-selected="false" data-tab="py3">Python</button>
+ <button id="tab-ts3" class="tab" role="tab" aria-selected="true" aria-controls="panel-ts3" data-tab="ts3">TypeScript</button>
+ <button id="tab-py3" class="tab" role="tab" aria-selected="false" aria-controls="panel-py3" data-tab="py3">Python</button>
  </div>
- <div class="tabpanel" data-tab="ts3" data-active="true">
+ <div id="panel-ts3" class="tabpanel" role="tabpanel" aria-labelledby="tab-ts3" data-tab="ts3" data-active="true">
  <pre class="terminal"><span class="kw">const</span> job = <span class="kw">await</span> kolm.distill.<span class="fn">fromCaptures</span>({ namespace: <span class="str">&apos;summarizer&apos;</span>, tier: <span class="str">&apos;3090&apos;</span>, recipeClass: <span class="str">&apos;specialist&apos;</span> });
 <span class="kw">const</span> artifact = <span class="kw">await</span> job.<span class="fn">wait</span>();
 console.<span class="fn">log</span>(artifact.id, artifact.k_score);</pre>
  </div>
- <div class="tabpanel" data-tab="py3" data-active="false">
+ <div id="panel-py3" class="tabpanel" role="tabpanel" aria-labelledby="tab-py3" data-tab="py3" data-active="false">
  <pre class="terminal">job = kolm.distill.<span class="fn">from_captures</span>(namespace=<span class="str">&apos;summarizer&apos;</span>, tier=<span class="str">&apos;3090&apos;</span>, recipe_class=<span class="str">&apos;specialist&apos;</span>)
 artifact = job.<span class="fn">wait</span>()
 <span class="fn">print</span>(artifact.id, artifact.k_score)</pre>
@@ -284,14 +284,14 @@ artifact = job.<span class="fn">wait</span>()
  <div class="step-head"><span class="step-num">step 4</span><span class="step-name">Verify before run</span><span class="step-cli">kolm.artifacts.verify()</span></div>
  <p>Replays the receipt chain offline against the artifact bytes. Throws on the first broken link. Never run an artifact you cannot verify.</p>
  <div class="tabs" role="tablist">
- <button class="tab" role="tab" aria-selected="true" data-tab="ts4">TypeScript</button>
- <button class="tab" role="tab" aria-selected="false" data-tab="py4">Python</button>
+ <button id="tab-ts4" class="tab" role="tab" aria-selected="true" aria-controls="panel-ts4" data-tab="ts4">TypeScript</button>
+ <button id="tab-py4" class="tab" role="tab" aria-selected="false" aria-controls="panel-py4" data-tab="py4">Python</button>
  </div>
- <div class="tabpanel" data-tab="ts4" data-active="true">
+ <div id="panel-ts4" class="tabpanel" role="tabpanel" aria-labelledby="tab-ts4" data-tab="ts4" data-active="true">
  <pre class="terminal"><span class="kw">const</span> ok = <span class="kw">await</span> kolm.artifacts.<span class="fn">verify</span>(<span class="str">&apos;./summarizer.kolm&apos;</span>);
 console.<span class="fn">log</span>(ok.signatures_valid, ok.drift_within_tolerance);</pre>
  </div>
- <div class="tabpanel" data-tab="py4" data-active="false">
+ <div id="panel-py4" class="tabpanel" role="tabpanel" aria-labelledby="tab-py4" data-tab="py4" data-active="false">
  <pre class="terminal">ok = kolm.artifacts.<span class="fn">verify</span>(<span class="str">&apos;./summarizer.kolm&apos;</span>)
 <span class="fn">print</span>(ok.signatures_valid, ok.drift_within_tolerance)</pre>
  </div>
@@ -301,14 +301,14 @@ console.<span class="fn">log</span>(ok.signatures_valid, ok.drift_within_toleran
  <div class="step-head"><span class="step-num">step 5</span><span class="step-name">Run offline</span><span class="step-cli">kolm.run()</span></div>
  <p>Hand the SDK a verified <code>.kolm</code> and call <code>.run()</code> with no network. Dispatches to the runtime baked into the artifact &mdash; JS, WASM, native, GGUF, or ONNX.</p>
  <div class="tabs" role="tablist">
- <button class="tab" role="tab" aria-selected="true" data-tab="ts5">TypeScript</button>
- <button class="tab" role="tab" aria-selected="false" data-tab="py5">Python</button>
+ <button id="tab-ts5" class="tab" role="tab" aria-selected="true" aria-controls="panel-ts5" data-tab="ts5">TypeScript</button>
+ <button id="tab-py5" class="tab" role="tab" aria-selected="false" aria-controls="panel-py5" data-tab="py5">Python</button>
  </div>
- <div class="tabpanel" data-tab="ts5" data-active="true">
+ <div id="panel-ts5" class="tabpanel" role="tabpanel" aria-labelledby="tab-ts5" data-tab="ts5" data-active="true">
  <pre class="terminal"><span class="kw">const</span> r = <span class="kw">await</span> kolm.<span class="fn">run</span>(<span class="str">&apos;./summarizer.kolm&apos;</span>, { prompt: <span class="str">&apos;Summarize this PR:...&apos;</span> });
 console.<span class="fn">log</span>(r.output);</pre>
  </div>
- <div class="tabpanel" data-tab="py5" data-active="false">
+ <div id="panel-py5" class="tabpanel" role="tabpanel" aria-labelledby="tab-py5" data-tab="py5" data-active="false">
  <pre class="terminal">r = kolm.<span class="fn">run</span>(<span class="str">&apos;./summarizer.kolm&apos;</span>, prompt=<span class="str">&apos;Summarize this PR:...&apos;</span>)
 <span class="fn">print</span>(r.output)</pre>
  </div>

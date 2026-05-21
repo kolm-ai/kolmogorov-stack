@@ -138,6 +138,21 @@ test('W228 #9 - sweep stable across 3 runs (no oscillation between runs)', () =>
   }
 });
 
+test('W228 #9b - no title ships duplicate kolm.ai suffixes', () => {
+  const offenders = [];
+  for (const name of listIndexable()) {
+    const html = fs.readFileSync(path.join(PUBLIC, name), 'utf8');
+    const m = html.match(/<title>([^<]*)<\/title>/i);
+    if (!m) continue;
+    const title = m[1].trim();
+    if (/\s+-\s*kolm\.ai\s*(?:·|&middot;|\|)\s*kolm\.ai\s*$/i.test(title)) {
+      offenders.push(`${name}: "${title}"`);
+    }
+  }
+  assert.equal(offenders.length, 0,
+    `pages with duplicate kolm.ai title suffixes:\n${offenders.slice(0,10).join('\n')}`);
+});
+
 test('W228 #10 - no <title> contains other Kolm entities that could confuse buyers', () => {
   const banned = [/Kolm therapeutics/i, /Kolm engines/i, /Kolm band/i, /Petter Kolm/i];
   const offenders = [];

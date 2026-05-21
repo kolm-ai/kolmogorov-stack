@@ -64,10 +64,11 @@ test('verifyStripeSignature: idempotency-friendly — same body+secret yields sa
 });
 
 test('planFromAmount maps each PLAN_CATALOG cents value', () => {
-  assert.equal(planFromAmount(900),    'starter');
+  assert.equal(planFromAmount(900),    'pro');
   assert.equal(planFromAmount(4900),   'pro');
   assert.equal(planFromAmount(14900),  'teams');
-  assert.equal(planFromAmount(149900), 'business');
+  assert.equal(planFromAmount(49900),  'teams');
+  assert.equal(planFromAmount(149900), 'enterprise');
   assert.equal(planFromAmount(299900), 'enterprise');
 });
 

@@ -104,6 +104,7 @@
 <link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <header class="site-header">
  <div class="wrap">
@@ -212,6 +213,7 @@
  </div>
  </div>
 </header>
+<main id="main">
 
 <section class="hero"><div class="wrap">
  <p class="crumbs"><a href="/dashboard">dashboard</a> &nbsp;/&nbsp; train</p>
@@ -239,7 +241,7 @@
  <div class="picks" id="picks-base">
  <button class="pick sel" data-name="meta-llama/Llama-3.1-8B-Instruct" data-params="8B" type="button"><div class="n">Llama 3.1 8B Instruct</div><div class="d">Meta &middot; chat-tuned</div><div class="p">~$8 compile</div></button>
  <button class="pick" data-name="Qwen/Qwen2.5-7B-Instruct" data-params="7B" type="button"><div class="n">Qwen 2.5 7B Instruct</div><div class="d">Alibaba &middot; multilingual</div><div class="p">~$7 compile</div></button>
- <button class="pick" data-name="google/gemma-2-9b-it" data-params="9B" type="button"><div class="n">Gemma 2 9B IT</div><div class="d">Google &middot; small + strong</div><div class="p">~$9 compile</div></button>
+ <button class="pick" data-name="google/gemma-2-9b-it" data-params="9B" type="button"><div class="n">Gemma 2 9B IT</div><div class="d">Google &middot; small + strong</div><div class="p">small local compile</div></button>
  <button class="pick" data-name="microsoft/Phi-3.5-mini-instruct" data-params="3.8B" type="button"><div class="n">Phi 3.5 Mini</div><div class="d">Microsoft &middot; edge / on-device</div><div class="p">~$4 compile</div></button>
  <button class="pick" data-name="meta-llama/Llama-3.1-70B-Instruct" data-params="70B" type="button"><div class="n">Llama 3.1 70B Instruct</div><div class="d">Meta &middot; reasoning class</div><div class="p">~$48 compile</div></button>
  <button class="pick" data-name="mistralai/Mixtral-8x22B-Instruct-v0.1" data-params="141B" type="button"><div class="n">Mixtral 8x22B</div><div class="d">Mistral &middot; sparse MoE</div><div class="p">~$72 compile</div></button>
@@ -343,6 +345,8 @@
 
 </div></div>
 
+
+</main>
 <footer class="site"><div class="wrap">
  <div>kolm v0.1.0 &middot; <a href="/docs">docs</a> &middot; <a href="/spec/rs-1">RS-1 spec</a> &middot; <a href="/research">research</a></div>
  <div><a href="/dashboard">&larr; back to dashboard</a></div>
