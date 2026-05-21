@@ -42,6 +42,7 @@ It does not claim `https://kolm.ai` is final. Production still needs a deploymen
 | Contract recovery and pricing polish | PASS, malformed HTML, stale pricing, metadata snippet, external-link rel, tab semantics, duplicate-ID, and image-alt scans clean; 17 changed routes audited dark/light desktop/mobile with 68 renders, 4,020 visible controls, 52 product media renders, 0 failures, 0 warnings: `reports/ui-surface-audit/2026-05-21Tfrontend-contract-recovery-polish/report.md` |
 | Main-landmark accessibility sweep | PASS, every non-CLI public HTML page has one `<main>` landmark, skip links resolve, H1 counts remain one per page, and the 125 changed routes passed dark/light desktop/mobile screenshots with 500 renders, 22,940 visible controls, 496 product media renders, 0 failures, 0 warnings: `reports/ui-surface-audit/2026-05-21Tfrontend-main-landmarks/report.md` |
 | Public markdown corruption recovery | PASS, `public/launch-checklist.md` was restored from the clean Git object after separator-stream corruption was detected; follow-up scan covered 694 public non-CLI text assets and found `public_non_cli_corruption_suspects=0` |
+| Homepage hero H1 correction | PASS, visible homepage H1 no longer says `Turn model traffic / into owned AI`; it now says `The AI Compiler. Own your model. Run anywhere.` with immediate 11.6x cheaper / 7.4x faster proof and Docker-for-AI lede; `/` audited dark/light desktop/mobile with 0 failures and 0 warnings: `reports/ui-surface-audit/2026-05-21Tfrontend-hero-h1-correction/report.md` |
 | Monolithic all-route note | The monolithic combined audit produced screenshots but failed during late cleanup/report generation, so the complete evidence set is the three PASS split reports above |
 | Targeted demo screenshots | Homepage, pricing, upgrade, account, and enterprise screenshots were inspected from the final report directories |
 | Markup integrity | PASS, scanner found `bad: 0` malformed public HTML files |
@@ -110,6 +111,7 @@ It does not claim `https://kolm.ai` is final. Production still needs a deploymen
 | Contract recovery and pricing polish | Recovered non-CLI HTML from the separator-regression repair path, then reapplied the tab/link semantics fixes, restored clean metadata snippets, and aligned visible pricing/account/signup/enterprise copy to Free, Pro $49, Team $499, and Enterprise architecture review |
 | Main-landmark accessibility sweep | Added a skip link and `<main id="main">` landmark to the older public articles, cookbook, compare, research, use-case, trust, status, setup, registry, receipt, and reference pages that still rendered without a main content landmark |
 | Public markdown corruption recovery | Repaired `public/launch-checklist.md` from `HEAD:public/launch-checklist.md` after the broad separator-normalization regression left it as a single dash-separated character stream; did not touch CLI-owned generated docs |
+| Homepage hero H1 correction | Replaced the visible homepage hero headline from `Turn model traffic / into owned AI / Run anywhere` to `The AI Compiler. Own your model. Run anywhere.`, made speed/cost proof visible immediately below the H1, and tightened the lede around the Docker-for-AI/base-URL/.kolm artifact story |
 
 ## Competitive Research Lens
 
@@ -198,4 +200,6 @@ node -e "scan 694 public non-CLI text assets for dash/question-mark separator co
 git diff --check -- public/launch-checklist.md
 npm.cmd run lint:refs
 node -e "run scoped git diff --check across FINAL_UIUX_PRODUCT_SURFACE_AUDIT_2026-05-20.md and 195 modified non-CLI public text assets, excluding public/docs/cli"
+git diff --check -- public\index.html
+npm.cmd run ui:audit -- --routes=/ --themes=dark,light --viewports=desktop,mobile --no-cli --out=reports/ui-surface-audit/2026-05-21Tfrontend-hero-h1-correction --timeout=20000
 ```
