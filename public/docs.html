@@ -183,8 +183,8 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
+          <p class="mega-h">Distill</p>
+          <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
@@ -202,7 +202,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
+          <a href="/build-your-own">Create artifact</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -285,7 +285,7 @@
 
  <!-- ====================== ZONE 1: QUICKSTARTS ====================== -->
  <h2 id="quickstarts"><span class="zone-eye">Zone 1</span>Quickstarts</h2>
- <p>Five 5-minute walkthroughs. Pick the surface you ship to.</p>
+ <p>Five 5-minute walkthroughs. Pick the workflow you need.</p>
  <div class="card-grid" data-zone="quickstarts">
  <a class="docs-card" href="/quickstart">
  <div class="dc-eye">overview</div>
@@ -295,7 +295,7 @@
  <a class="docs-card" href="/quickstart/cli">
  <div class="dc-eye">cli</div>
  <div class="dc-t">CLI quickstart</div>
- <div class="dc-s">Five verbs to get from prod traffic to a signed .kolm.</div>
+ <div class="dc-s">Five verbs to get from production calls to a signed .kolm.</div>
  </a>
  <a class="docs-card" href="/quickstart/api">
  <div class="dc-eye">api</div>
@@ -345,7 +345,7 @@
  <p>Every CLI verb has a doc page. Grouped by what you reach for first.</p>
 
  <div class="verb-cat">
- <p class="verb-cat-h">capture &middot; ingest prod traffic</p>
+ <p class="verb-cat-h">capture &middot; ingest production calls</p>
  <div class="verb-grid" data-cat="capture">
  <a href="/docs/cli/capture"><span class="vb-n">kolm capture</span><span class="vb-d">Drop-in proxy for OpenAI and Anthropic. Captures (input, output) into a namespace.</span></a>
  <a href="/docs/cli/tail"><span class="vb-n">kolm tail</span><span class="vb-d">Stream live capture rows from your kolm cloud over Server-Sent Events.</span></a>
@@ -374,7 +374,7 @@
  <a href="/docs/cli/run"><span class="vb-n">kolm run</span><span class="vb-d">Execute a .kolm artifact locally against a JSON or string input.</span></a>
  <a href="/docs/cli/serve"><span class="vb-n">kolm serve</span><span class="vb-d">Expose .kolm artifacts as MCP tools or as an OpenAI-compatible HTTP server.</span></a>
  <a href="/docs/cli/replay"><span class="vb-n">kolm replay</span><span class="vb-d">Replay captured prompts against a compiled artifact and report per-row diffs.</span></a>
- <a href="/docs/cli/runtime"><span class="vb-n">kolm runtime</span><span class="vb-d">Per-call policy decider plus the runtime-target builder for cross-compile.</span></a>
+ <a href="/docs/cli/runtime"><span class="vb-n">kolm runtime</span><span class="vb-d">Per-call policy decider plus runtime-target packaging for cross-compile.</span></a>
  <a href="/docs/cli/rag"><span class="vb-n">kolm rag</span><span class="vb-d">Airgapped local retrieval (BM25, no embedder, no network).</span></a>
  <a href="/docs/cli/demo"><span class="vb-n">kolm demo</span><span class="vb-d">Canonical close-the-loop demo. Seeds the lake with ~150 example pairs.</span></a>
  </div>
@@ -386,7 +386,7 @@
  <a href="/docs/cli/eval"><span class="vb-n">kolm eval</span><span class="vb-d">Re-run a .kolm's embedded eval set and show per-case pass / fail.</span></a>
  <a href="/docs/cli/bench"><span class="vb-n">kolm bench</span><span class="vb-d">Reproducible benchmark for a .kolm artifact or a public reproducer suite.</span></a>
  <a href="/docs/cli/loop"><span class="vb-n">kolm loop</span><span class="vb-d">Run the value-loop smoke. Five rungs, green or red.</span></a>
- <a href="/docs/cli/fix"><span class="vb-n">kolm fix</span><span class="vb-d">Auto-iterate on a failing artifact. Surface failing cases and suggest seed fixes.</span></a>
+ <a href="/docs/cli/fix"><span class="vb-n">kolm fix</span><span class="vb-d">Auto-iterate on a failing artifact. Show failing cases and suggest seed fixes.</span></a>
  </div>
  </div>
 
@@ -434,7 +434,7 @@
  <a class="docs-card" href="/docs/distill">
  <div class="dc-eye">concept</div>
  <div class="dc-t">Distillation</div>
- <div class="dc-s">How captured production traffic becomes reviewed data, evals, and local student candidates.</div>
+ <div class="dc-s">How captured production calls become reviewed data, evals, and local student candidates.</div>
  </a>
  <a class="docs-card" href="/docs/runtime">
  <div class="dc-eye">concept</div>
@@ -470,7 +470,7 @@
  <a class="docs-card" href="/docs/glossary">
  <div class="dc-eye">terms</div>
  <div class="dc-t">Glossary</div>
- <div class="dc-s">Adapter, AI compiler, artifact, capture, compile, distillation, K-score, receipt chain, sandbox, witness. Plain English.</div>
+ <div class="dc-s">Gateway, artifact, capture, compile, distillation, K-score, receipt chain, sandbox, witness. Plain English.</div>
  </a>
  <a class="docs-card" href="/docs/troubleshooting">
  <div class="dc-eye">when things break</div>

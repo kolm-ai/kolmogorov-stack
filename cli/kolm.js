@@ -20547,8 +20547,8 @@ function fetchLatestNpmVersion(timeoutMs) {
 // when both strings fail the simple x.y.z parse so we never throw on weird tags.
 function compareVersions(a, b) {
     const parse = (s) => {
-        const m = /^(\d+)\.(\d+)\.(\d+)/.exec(String(s || ''));
-        return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+        const m = /^(\d+)\.(\d+)(?:\.(\d+))?/.exec(String(s || ''));
+        return m ? [Number(m[1]), Number(m[2]), Number(m[3] || 0)] : null;
     };
     const pa = parse(a), pb = parse(b);
     if (!pa || !pb) return a < b ? -1 : a > b ? 1 : 0;

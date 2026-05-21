@@ -90,8 +90,8 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
+          <p class="mega-h">Distill</p>
+          <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
@@ -109,7 +109,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
+          <a href="/build-your-own">Create artifact</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -181,18 +181,18 @@
 
 <main id="main">
 <div class="acct-shell">
-<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview" aria-current="page">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Builds</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview" aria-current="page">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured events</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
 <section class="acct-content">
 <h1>Overview.</h1>
 <p class="lede">Operate the full <code>.kolm</code> lifecycle from one console: connect providers, capture AI calls, review data, compile artifacts, run targets, and govern the workspace.</p>
 <section class="kpanel" data-postauth-product-command-center>
   <h2>Product command center</h2>
-  <p class="pdesc">One map for the full product: API wrapper, privacy lake, datasets, training, multimodal, signed artifacts, runtimes, cloud storage, devices, governance, and registry handoff.</p>
+  <p class="pdesc">One map for the full product: API wrapper, privacy lake, datasets, distillation, multimodal evals, signed artifacts, runtimes, cloud storage, devices, governance, and registry handoff.</p>
   <div class="journey-grid">
-    <a class="journey-card" href="/account/connectors" data-journey-id="gateway-capture" data-surface="api-wrapper"><span>Gateway</span><b>Wrap any model API</b><small>OpenAI, Claude, OpenRouter, Gemini, local, and internal endpoints.</small></a>
+    <a class="journey-card" href="/account/connectors" data-journey-id="gateway-capture" data-surface="api-wrapper"><span>Gateway</span><b>Route any model API</b><small>OpenAI, Claude, OpenRouter, Gemini, local, and internal endpoints.</small></a>
     <a class="journey-card" href="/account/privacy-events" data-journey-id="privacy-lake" data-surface="privacy-lake"><span>Privacy lake</span><b>Capture, redact, govern</b><small>Policy gates, vault links, and class-level privacy controls.</small></a>
     <a class="journey-card" href="/account/datasets" data-journey-id="datasets-labeling" data-surface="datasets-labeling"><span>Datasets</span><b>Promote reviewed rows</b><small>Holdouts, labels, corrections, and lineage.</small></a>
-    <a class="journey-card" href="/account/builds" data-journey-id="train-distill" data-surface="training-distill"><span>Train/distill</span><b>Build specialists</b><small>Training, distillation, eval gates, and compute.</small></a>
+    <a class="journey-card" href="/account/builds" data-journey-id="train-distill" data-surface="training-distill"><span>Train/distill</span><b>Distill specialists</b><small>Training, distillation, eval gates, and compute.</small></a>
     <a class="journey-card" href="/models" data-journey-id="models-backbones" data-surface="gemma"><span>Backbones</span><b>Select the model family</b><small>Gemma 3, Gemma 3n, MedGemma, EmbeddingGemma, Qwen, Llama, Mistral, and custom rows.</small></a>
     <a class="journey-card" href="/account/multimodal-bakeoff" data-journey-id="multimodal-tokenization" data-surface="multimodal-tokenization"><span>Multimodal</span><b>Tokenize files locally</b><small>Image, audio, video, and PDF sidecars.</small></a>
     <a class="journey-card" href="/account/builds" data-journey-id="compile-verify" data-surface="compiler"><span>Compile</span><b>Ship signed .kolm</b><small>K-score, receipts, verifier state, and rollback metadata.</small></a>
@@ -205,7 +205,7 @@
 </section>
 <section class="kpanel" data-w415="ask-form">
   <h2>Ask kolm</h2>
-  <p class="pdesc">Ask in natural language and get the matching command, account surface, or next workflow.</p>
+  <p class="pdesc">Ask in natural language and get the matching command, account page, or next workflow.</p>
   <form id="ask-form" data-w415="ask-form-el" class="toolbar">
     <input id="ask-input" type="search" name="question" placeholder="Show captures ready to distill..." aria-label="Ask kolm" style="min-width:280px;flex:1">
     <button class="btn primary" id="ask-submit" type="submit">Ask</button>
@@ -224,7 +224,7 @@
   <div class="metric-card" data-counter="savings-opportunities"><div class="label">Savings opportunities</div><div class="value" id="m-opps">...</div><div class="delta" id="m-opps-d">&nbsp;</div></div>
   <div class="metric-card" data-counter="datasets"><div class="label">Datasets</div><div class="value" id="m-datasets">...</div><div class="delta" id="m-datasets-d">&nbsp;</div></div>
   <div class="metric-card" data-counter="review-queue"><div class="label">Review queue</div><div class="value" id="m-review">...</div><div class="delta" id="m-review-d">&nbsp;</div></div>
-  <div class="metric-card" data-counter="builds-in-progress"><div class="label">Builds running</div><div class="value" id="m-builds">...</div><div class="delta" id="m-builds-d">&nbsp;</div></div>
+  <div class="metric-card" data-counter="builds-in-progress"><div class="label">Distill jobs</div><div class="value" id="m-builds">...</div><div class="delta" id="m-builds-d">&nbsp;</div></div>
   <div class="metric-card" data-counter="artifacts"><div class="label">Active artifacts</div><div class="value" id="m-artifacts">...</div><div class="delta" id="m-artifacts-d">&nbsp;</div></div>
   <div class="metric-card" data-counter="devices"><div class="label">Devices</div><div class="value" id="m-devices">...</div><div class="delta" id="m-devices-d">&nbsp;</div></div>
   <div class="metric-card" data-counter="team-approvals"><div class="label">Team approvals</div><div class="value" id="m-approvals">...</div><div class="delta" id="m-approvals-d">&nbsp;</div></div>
@@ -288,7 +288,7 @@
 var nextBody=document.getElementById("next-actions-body");
 window.kfetch("/v1/intent/next").then(function(j){
   var recs=(j&&j.recommendations)||[];
-  if(!recs.length){nextBody.innerHTML="<div class=\"empty\" data-empty-state>No recommended actions yet. Capture AI calls or build an artifact to unlock workflow guidance.</div>";return;}
+  if(!recs.length){nextBody.innerHTML="<div class=\"empty\" data-empty-state>No recommended actions yet. Capture AI calls or distill an artifact to unlock workflow guidance.</div>";return;}
   nextBody.removeAttribute("aria-busy");
   nextBody.innerHTML=recs.slice(0,3).map(function(r){
     var cmd=window.kesc(r.command||"kolm doctor --json");

@@ -158,8 +158,8 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
+          <p class="mega-h">Distill</p>
+          <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
@@ -177,7 +177,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
+          <a href="/build-your-own">Create artifact</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -328,7 +328,7 @@
  <section class="section">
  <div class="wrap">
  <div class="eyebrow"><span class="num">02</span>available &middot; verifiable artifacts</div>
- <h2>Continuous attestation surface.</h2>
+ <h2>Continuous attestation.</h2>
  <p class="sec-lede">Seven attestation artifacts available alongside the Type I letter. Each row links to the artifact, endpoint, or auditor record that proves it.</p>
  <div class="roadmap-wrap">
  <div class="roadmap-row">
@@ -567,7 +567,7 @@
  <h4>KMS hosting + rotation cadence + export targets</h4>
  <ul>
  <li>The KMS process: AWS KMS, GCP Cloud KMS, Azure Key Vault Managed HSM, HashiCorp Vault transit, or your own HSM</li>
- <li>The rotation cadence policy: 365 days is the default kolm surfaces, but your compliance officer picks the number that satisfies your SOC 2 control, your NIST SP 800-57 target, or your jurisdiction-specific rule</li>
+ <li>The rotation cadence policy: 365 days is the default in Kolm, but your compliance officer picks the number that satisfies your SOC 2 control, your NIST SP 800-57 target, or your jurisdiction-specific rule</li>
  <li>The OS scheduler that triggers cadence-driven rotation: cron, systemd timer, k8s CronJob, Airflow DAG, GitHub Actions schedule</li>
  <li>The incident-response playbook that fires <code>reason=compromise</code> rotations and the HR workflow that fires <code>reason=personnel</code> rotations</li>
  <li>The KMS-native sign-time path at compile (so the private key never leaves the KMS after the one-time export)</li>

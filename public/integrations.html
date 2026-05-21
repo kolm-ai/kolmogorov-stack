@@ -132,8 +132,8 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
+          <p class="mega-h">Distill</p>
+          <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
@@ -151,7 +151,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
+          <a href="/build-your-own">Create artifact</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -491,7 +491,7 @@ const { text, receipt } = await llm.invokeWithReceipt('refund #1234');</pre>
 
  <div class="ig" id="langchain-py">
  <div class="top"><h3>LangChain (Python)</h3><span class="stat">source package</span></div>
- <p>Same surface, Pythonic. <code>invoke_with_receipt(prompt)</code> returns a tuple. Works in LangGraph nodes, LangServe handlers, and plain scripts.</p>
+ <p>Same interface, Pythonic. <code>invoke_with_receipt(prompt)</code> returns a tuple. Works in LangGraph nodes, LangServe handlers, and plain scripts.</p>
  <pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
 pip install -e ./kolmogorov-stack/packages/python-langchain-kolm[langchain]
 from kolm_langchain import KolmLLM
@@ -513,7 +513,7 @@ const r = await llm.complete('summarize this ticket');</pre>
 
  <div class="ig" id="llamaindex-py">
  <div class="top"><h3>LlamaIndex (Python)</h3><span class="stat">source package</span></div>
- <p>Python LlamaIndex adapter exposing the same <code>invoke_with_receipt</code> surface as the LangChain one. Lets QueryEngines and SubQuestion agents speak to a compiled .kolm without losing the audit trail.</p>
+ <p>Python LlamaIndex adapter exposing the same <code>invoke_with_receipt</code> interface as the LangChain one. Lets QueryEngines and SubQuestion agents speak to a compiled .kolm without losing the audit trail.</p>
  <pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
 pip install -e ./kolmogorov-stack/packages/python-llamaindex-kolm[llamaindex]
 from kolm_llamaindex import KolmLLM

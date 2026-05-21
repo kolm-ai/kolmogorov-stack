@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>kolm enterprise · governed owned AI</title>
-<meta name="description" content="Enterprise AI compiler for regulated teams: self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.">
+<title>kolm enterprise - private AI control</title>
+<meta name="description" content="Enterprise control for production AI: one model gateway, signed .kolm artifacts, self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="kolm enterprise · governed owned AI">
-<meta property="og:description" content="Enterprise AI compiler for regulated teams: self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.">
+<meta property="og:title" content="kolm enterprise - private AI control">
+<meta property="og:description" content="Enterprise control for production AI: one model gateway, signed .kolm artifacts, self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/enterprise">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:title" content="kolm enterprise · governed owned AI">
-<meta name="twitter:description" content="Enterprise AI compiler for regulated teams: self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.">
+<meta name="twitter:title" content="kolm enterprise - private AI control">
+<meta name="twitter:description" content="Enterprise control for production AI: one model gateway, signed .kolm artifacts, self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/enterprise">
@@ -138,7 +138,7 @@
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Linux, macOS, Windows (WSL)",
  "url": "https://kolm.ai/enterprise",
- "description": "Enterprise AI compiler for regulated teams: self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.",
+ "description": "Enterprise control for production AI: one model gateway, signed .kolm artifacts, self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.",
  "offers": {
  "@type": "Offer",
  "price": "0",
@@ -173,8 +173,8 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
+          <p class="mega-h">Distill</p>
+          <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
@@ -192,7 +192,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
+          <a href="/build-your-own">Create artifact</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -270,7 +270,7 @@
  <section class="hero frontier-bg">
  <div class="wrap">
  <div class="hero-copy">
- <div class="hero-eyebrow"><span class="he-dot"></span>Enterprise &middot; governed owned AI</div>
+ <div class="hero-eyebrow"><span class="he-dot"></span>Enterprise &middot; private AI control</div>
  <h1>Own the AI your teams depend on.</h1>
  <p class="lede">Compile approved workflows into signed <code>.kolm</code> artifacts inside your boundary. Self-host or air-gap the runtime, publish through a private registry, and give security teams receipts, logs, BAA, SBOM, and SLSA evidence.</p>
  <div class="actions">
@@ -383,7 +383,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <div id="ed-detail-1" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-1" data-detail="1">
  <div class="ed-d-eye">step 01 &middot; compile</div>
  <h3>The model is born inside your boundary.</h3>
- <p>kolm reads a JSON spec plus gold examples and builds one signed <code>.kolm</code> file on your hardware.</p>
+ <p>kolm reads a JSON spec plus gold examples and creates one signed <code>.kolm</code> file on your hardware.</p>
  <p>K-score gates promotion. CI exits non-zero on failure.</p>
  <span class="ed-d-pill">no cloud roundtrip &middot; no training data leak</span>
  </div>
@@ -461,7 +461,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">finance slot</b> &middot; open</td><td>Target: hedge fund, prop shop, or registered investment advisor with &gt;$1B AUM and an internal compliance team. First workload: MNPI redaction or per-trade-decision audit trail.</td></tr>
  <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">legal slot</b> &middot; open</td><td>Target: AmLaw 200 or boutique with &gt;100 attorneys, IT lead + GC sponsor. First workload: redline policy compiled to .kolm + chain-of-custody export.</td></tr>
  <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">defense / gov slot</b> &middot; open</td><td>Target: prime contractor, FFRDC, or DoD program office. First workload: airgap-strict compile + reproducible bench on an unclassified surrogate dataset, then move to classified mirror.</td></tr>
- <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">ai-native saas slot</b> &middot; open</td><td>Target: Series-B or later AI-product company that has hit the &ldquo;every prompt is a liability&rdquo; wall. First workload: capture and specialize from your current inference traffic into a local model you keep.</td></tr>
+ <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">ai-native saas slot</b> &middot; open</td><td>Target: Series-B or later AI-product company that has hit the &ldquo;every prompt is a liability&rdquo; wall. First workload: capture and specialize current inference calls into a local model you keep.</td></tr>
  </table>
  </div>
  </div>

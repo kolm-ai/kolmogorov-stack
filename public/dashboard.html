@@ -66,8 +66,8 @@
           <a href="/capture">Gateway</a>
         </div>
         <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
+          <p class="mega-h">Distill</p>
+          <a href="/training">Training</a>
           <a href="/distill">Distill</a>
           <a href="/compile">Compile</a>
         </div>
@@ -85,7 +85,7 @@
         <div class="mega-col">
           <p class="mega-h">Choose</p>
           <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
+          <a href="/build-your-own">Create artifact</a>
           <a href="/docs/runtime">Runtime targets</a>
         </div>
         <div class="mega-col">
@@ -981,7 +981,7 @@
  enableSend();
  }
  function handleQuotaFail(){
- appendTurn('kolm', 'Compile quota used for this period. New builds resume next cycle or after an upgrade.', {
+ appendTurn('kolm', 'Compile quota used for this period. New artifact jobs resume next cycle or after an upgrade.', {
  nextSteps: [
  { label: 'View plans', href: '/pricing' },
  { label: 'Account usage', href: '/account' }
@@ -1174,7 +1174,7 @@
  renderHistory();
  // Greeting on first ever visit.
  if (history.length === 0) {
- appendTurn('kolm', 'Hi. I can manage your builds, status, usage, plan, and start compiles from here. Try the prompts below, or open /ask for the full surface.', {
+ appendTurn('kolm', 'Hi. I can manage artifact jobs, status, usage, plan, and new compiles from here. Try the prompts below, or open /ask for the full assistant.', {
  nextSteps: [
  { label: 'show my builds', href: '/account/builds' },
  { label: 'open /ask', href: '/ask' }
@@ -1995,20 +1995,20 @@
  // -- templates (inline data, kept terse) --
  var TEMPLATES = {
  support: [
- { input: "My subscription was charged twice this month, can you refund the extra?", output: "I'm sorry about the duplicate charge. I see two charges on the same day; I've refunded the extra one — it should appear in 3–5 business days. Anything else I can help with?" },
- { input: "How do I cancel my plan?", output: "You can cancel anytime from Settings → Billing → Cancel plan. Your access stays active until the end of the current billing period." },
+ { input: "My subscription was charged twice this month, can you refund the extra?", output: "I see two charges on the same day. I refunded the duplicate; it should appear in 3-5 business days." },
+ { input: "How do I cancel my plan?", output: "Open Settings > Billing > Cancel plan. Your access stays active until the end of the current billing period." },
  { input: "I forgot my password and the reset email isn't arriving", output: "Check your spam folder first. If it's not there, send the email you signed up with to support@kolm.ai and I'll trigger a manual reset within an hour." },
- { input: "Is there a student discount?", output: "Yes — 50% off Pro for verified students. Email us from your .edu address and we'll switch your plan within a business day." },
- { input: "Your dashboard is loading really slowly today", output: "Thanks for flagging — we're seeing the same on our end. Engineering is investigating. I'll DM you when it's resolved." },
- { input: "Can I get an invoice with my company name on it?", output: "Sure — go to Billing → Edit details, add your company name and VAT number, and click Re-issue last invoice. It'll regenerate within a minute." },
+ { input: "Is there a student discount?", output: "Yes. Verified students get 50% off Pro. Email from your .edu address and we will switch the plan within one business day." },
+ { input: "Your dashboard is loading really slowly today", output: "Thanks for flagging it. Engineering is investigating the slowdown and we will update the status page when it is resolved." },
+ { input: "Can I get an invoice with my company name on it?", output: "Open Billing > Edit details, add the company name and VAT number, then click Re-issue last invoice." },
  { input: "What payment methods do you accept?", output: "We accept all major cards (Visa, Mastercard, Amex), Apple Pay, Google Pay, and ACH for annual plans." },
- { input: "I want to upgrade from Pro to Business", output: "Head to Settings → Billing → Change plan and select Business. You'll only be charged the prorated difference for the rest of this cycle." },
- { input: "Do you offer SSO?", output: "Yes — SAML SSO and SCIM provisioning ship with Team or Enterprise. Setup takes about 15 minutes; happy to schedule a session if helpful." },
- { input: "How do I export my data?", output: "Settings → Data → Export. We email a download link within a few minutes. Format is JSON; let me know if you need CSV." },
- { input: "Can two people share one seat?", output: "Each seat is per-individual, but Team and Enterprise plans include viewer seats for read-only access — that often covers the secondary user." },
- { input: "Why was my API key revoked?", output: "Keys get revoked automatically after 90 days of inactivity. You can generate a new one in Settings → API → Create key." },
+ { input: "I want to move from Pro to Enterprise", output: "Open Enterprise > Architecture review. We will attach your plan, security, SSO, and deployment context so sales can review it without another email loop." },
+ { input: "Do you offer SSO?", output: "Yes. SAML SSO and SCIM provisioning ship with Team and Enterprise. Enterprise reviews also cover BAA, audit logs, and private deployment." },
+ { input: "How do I export my data?", output: "Open Settings > Data > Export. We email a JSON download link within a few minutes." },
+ { input: "Can two people share one seat?", output: "Each seat is per individual. Team and Enterprise include viewer seats for read-only access." },
+ { input: "Why was my API key revoked?", output: "Keys are revoked after 90 days of inactivity. Generate a new one in Settings > API > Create key." },
  { input: "Where can I see uptime?", output: "Live status is at status.kolm.ai with 90-day history. Subscribe there for incident notifications." },
- { input: "Do you have a Slack integration?", output: "Yes — install from Settings → Integrations → Slack. You can route receipts and alerts to any channel." },
+ { input: "Do you have a Slack integration?", output: "Yes. Open Settings > Integrations > Slack to route receipts and alerts to a channel." },
  { input: "I'm getting rate-limited on the API", output: "Free tier is 60 req/min; Pro is 600 req/min. If you need more, drop me a note about your use case and I can bump it." },
  { input: "Can I self-host?", output: "Enterprise includes a customer-hosted bridge for VPC deployments. We provide Docker and Helm charts; setup is usually under 30 minutes." },
  { input: "How long do you retain my data?", output: "Receipts are kept indefinitely (you own them); training data is kept for 30 days then purged. You can delete anything sooner from Settings → Data." },
