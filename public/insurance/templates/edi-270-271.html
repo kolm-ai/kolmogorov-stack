@@ -169,7 +169,7 @@
  <section class="tpl-hero">
  <div class="crumb"><a href="/health-insurance">health-insurance</a> &middot; <a href="/health-insurance#insurance-templates">templates</a> &middot; edi-270-271</div>
  <h1>EDI 270/271 eligibility pair</h1>
- <p class="lede">A kolm template that handles both sides of the eligibility loop: the 270 inquiry from provider to payer asking "is this member covered for these services?" and the 271 response back with active/inactive benefits, service-type-codes, and copay/deductible. One symmetric transformer with <code>--direction inquiry|response</code>. Pure rule-class; deterministic; no model inference.</p>
+<p class="lede">Normalize both sides of the eligibility loop: 270 inquiries and 271 responses. The rule-class transformer auto-detects direction and emits a shared schema for coverage, service types, copay, and deductible.</p>
  <div class="tpl-meta">
  <div><div class="k">template id</div><span class="v">edi-270-271</span></div>
  <div><div class="k">k-score gate</div><span class="v">&ge; 0.94</span></div>

@@ -326,7 +326,7 @@
  <p>Four engines compose the compiler. Each does one thing, and the artifact only ships when all four agree.</p>
 
  <h3>1. Recall.</h3>
- <p>Recall builds a local index from an approved corpus and binds its content hash into the artifact manifest. Text and JSON ship today; image, audio, and PDF embedders land in the next quarterly release.</p>
+ <p>Recall builds a local index from an approved corpus and binds its content hash into the artifact manifest. Text and JSON are supported in the current build; image, audio, and PDF embedders are tracked in the next release train.</p>
 
  <h3>2. Distill.</h3>
  <p>Distill is k-sample teacher labeling followed by LoRA training against an open-weight base. The trainer bridges to the customer-hosted GPU pool; the artifact carries the resulting adapter, the seed, and the verifier evidence used to accept each label.</p>

@@ -308,7 +308,7 @@
  <span class="here">UC-01 &middot; agentic coding</span>
  </div>
  <h1>A compiled coding specialist your <span class="tone">agent calls</span> over MCP.</h1>
- <p class="lede">Cursor, Claude Code, Cline, Aider, Continue all share one shape: high-frequency calls into your repo for conventions, types, error classes, and test scaffolds. <b>kolm</b> compiles those calls into a per-project signed artifact (a single <code>.kolm</code> file) that the agent calls over MCP via <code>kolm serve --mcp</code>. The artifact is a compiled recipe pack, not a cache. <b>Shipped today:</b> recipe-mode local execution, signed-at-load manifest verification, K-score recorded at compile time. <b>Also shipping:</b> bundled model + LoRA for fully offline runs, in-process egress monitor on the MCP path, deterministic-output guarantee. Today the benchmark patches the Node API surface; MCP <code>tools/call</code> dispatches to <code>runArtifact</code> directly.</p>
+ <p class="lede">Coding agents keep asking the same repo-specific questions. <b>kolm</b> compiles those answers into one signed <code>.kolm</code> file exposed over MCP, so the agent calls a deterministic local tool instead of a frontier model for repeat lookups.</p>
  <div class="cta-row">
  <a href="/signup?plan=pro" class="btn-primary">Start Pro &rarr;</a>
  <a href="/runtimes" class="btn-link">See the MCP integration <span aria-hidden="true">&rarr;</span></a>
@@ -320,7 +320,7 @@
  <div class="wrap">
  <div class="eyebrow"><span class="num">01</span> &middot; the gap</div>
  <h2>The gap is repo-awareness, <span class="tone">not memory.</span></h2>
- <p class="sec-lede">Coding agents are good at general code and bad at <em>your</em> code. Your conventions, your type aliases, your test fixtures, your build invariants: the agent re-derives all of it every turn. The model is fine. The harness has nothing to call. <b>kolm compiles a file the harness can call.</b></p>
+ <p class="sec-lede">The model is fine. The harness has nothing local to call. kolm turns your repo conventions, fixtures, types, and invariants into a signed tool the agent can reuse every turn.</p>
  <div class="pain">
  <div class="pain-card">
  <div class="lab">Verifier quality gate</div>
@@ -345,7 +345,7 @@
  <div class="wrap">
  <div class="eyebrow"><span class="num">02</span> &middot; the integration</div>
  <h2>One MCP server. <span class="tone">One tool per artifact.</span></h2>
- <p class="sec-lede">Every <code>.kolm</code> in <code>~/.kolm/artifacts</code> registers as an MCP tool when you run <code>kolm serve --mcp</code>. The agent calls the tool over standard MCP <code>tools/call</code>; the artifact runs its embedded recipes against the input and returns a deterministic answer plus a signed receipt. Same input + same artifact = same output, every time.</p>
+ <p class="sec-lede">Run <code>kolm serve --mcp</code> and every artifact in <code>~/.kolm/artifacts</code> becomes a tool. The agent calls it over MCP and gets deterministic output plus a signed receipt.</p>
  <div class="triplets">
  <div class="trip">
  <div class="icn">DSC</div>
@@ -396,7 +396,7 @@
  <div class="wrap">
  <div class="eyebrow"><span class="num">04</span> &middot; what a call looks like</div>
  <h2>One call. <span class="tone">Sub-millisecond. Reproducible.</span></h2>
- <p class="sec-lede">A single <code>tools/call</code> against a compiled <code>.kolm</code> dispatches a recipe and returns deterministic output plus a signed trailer. The reference fixture at <code>test/fixtures/sample.kolm</code> measures p50 = 274&micro;s, p95 = 335&micro;s, accuracy = 1.0, network egress = 0 over 400 invocations. Reproduce yourself in 30 seconds.</p>
+ <p class="sec-lede">A single <code>tools/call</code> dispatches the recipe and returns a signed trailer. The reference fixture measures p50 = 274&micro;s, p95 = 335&micro;s, accuracy = 1.0, network egress = 0 over 400 invocations.</p>
  <div class="uc">
  <div class="hd"><span class="dot"></span><span>call timeline &middot; reference run on test/fixtures/sample.kolm</span></div>
  <div class="body">

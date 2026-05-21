@@ -220,7 +220,7 @@
  <div class="hero-copy">
  <div class="hero-eyebrow"><span class="he-dot"></span>Legal &middot; privilege intact &middot; attorney-client preserved</div>
  <h1>Legal AI without the <span class="tone">privilege risk.</span></h1>
- <p class="lede">Most law firms have banned cloud LLMs on client matter. The usual line is "every prompt is potentially discoverable." kolm flips the architecture: you compile the firm's redline policy and document-review patterns into a single signed file, then the firm runs that file locally. No client document touches a third-party API at run time. Privilege intact, audit defensible, model behavior frozen.</p>
+ <p class="lede">Cloud LLM bans usually start with one concern: every prompt is discoverable. kolm compiles the firm's redline policy and review patterns into a signed local file. No client document touches a third-party API at run time.</p>
  <div class="actions">
  <a href="/docs" class="btn primary">all cookbooks</a>
  <a href="/enterprise/inquiry" class="btn ghost">Book Enterprise review</a>
@@ -279,7 +279,7 @@ runtime 14.2s on M3 Pro, 0 network calls</pre>
  <div class="wrap">
  <div class="eyebrow"><span class="num">04</span>privilege</div>
  <h2>Why the receipt matters at deposition.</h2>
- <p class="sec-lede">A signed receipt is the firm's record that this artifact was the one that produced this output for this input on this date. It binds the model state, the recall sources, and the input/output hashes into a single chain. If opposing counsel asks how the AI was used, the firm produces the artifact and the receipt. Reproducibility is the audit defense.</p>
+ <p class="sec-lede">A signed receipt proves which artifact produced which output from which input. If counsel asks how AI was used, the firm can produce the artifact, receipt, and replay path.</p>
  <div class="kvtable">
  <table>
  <tr><td>artifact hash</td><td>sha256 of the .kolm zip. Pinned in the firm's matter management system at deployment. Cannot drift.</td></tr>
@@ -311,7 +311,7 @@ runtime 14.2s on M3 Pro, 0 network calls</pre>
  <div class="wrap">
  <div class="eyebrow"><span class="num">06</span>why legal AI is different</div>
  <h2>Three problems cloud AI cannot solve for a firm.</h2>
- <p class="sec-lede">The reason most firms have written cloud-LLM bans into their information security policy is not vendor friction. It is the structural mismatch between Model Rule 1.6 confidentiality and a third-party inference API that logs prompts.</p>
+ <p class="sec-lede">Cloud-LLM bans are usually not vendor friction. They are a mismatch between confidentiality duties and a third-party inference API that may log prompts.</p>
  <div class="kvtable">
  <table>
  <tr><td>ABA Model Rule 1.6 confidentiality</td><td>A lawyer must not reveal information relating to representation. A cloud prompt is a disclosure to a third-party processor, and most firms cannot get the informed consent required for every matter touched. Architecture that keeps document text on firm hardware sidesteps the consent question entirely.</td></tr>

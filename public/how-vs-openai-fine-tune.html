@@ -210,8 +210,8 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; how kolm relates to OpenAI fine-tune</p>
  <h1>kolm vs OpenAI fine-tune</h1>
- <p class="lede">OpenAI's fine-tuning service is the shortest path from a JSONL of examples to a working custom model. You upload your data, OpenAI manages the GPU, the eval UX, and the serving infrastructure, and you call the tuned model through the standard chat-completions API with a custom model ID. For teams whose only deploy target is the OpenAI API and whose data has no residency constraints, it is the right call. It removes ML infrastructure entirely.</p>
- <p class="lede">kolm.ai is the AI compiler for the opposite shape of problem. Where OpenAI keeps the weights and bills you per token forever, kolm captures your real production traffic, distills a small student model on your hardware (or a one-line cloud worker), and hands you a portable signed file you can run on a laptop, a phone, an edge box, or an air-gapped VPC. The trade is real on both sides and this page lays it out without bashing either tool.</p>
+ <p class="lede">OpenAI fine-tuning is the shortest path when the OpenAI API is your only deploy target and residency is not a constraint. kolm is for teams that need the tuned behavior as a signed file they can own, audit, and run elsewhere.</p>
+ <p class="lede">Use OpenAI when hosted custom models are enough. Use kolm when the behavior needs to become a portable signed artifact that runs on your hardware, edge devices, or an air-gapped VPC.</p>
  <p class="stamp">Wave 401 &middot; reviewed 2026-05-18 &middot; hosted custom model vs portable signed file</p>
  </div>
 </section>

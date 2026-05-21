@@ -217,8 +217,8 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/compare">compare</a> &nbsp;/&nbsp; how kolm relates to Anthropic</p>
  <h1>kolm vs Anthropic</h1>
- <p class="lede">Anthropic Claude (Opus, Sonnet, Haiku) via the Messages API, paired with prompt caching and the message-batches surface, is one of the strongest hosted reasoning platforms in 2026. The reasoning quality at the top of the SKU ladder is at the frontier, the safety posture is what regulated buyers ask for, and the cache + batches combo brings the marginal cost of repeated prompts down materially. For teams whose primary constraint is reasoning capability and whose deploy target is a hosted API, Claude direct is the right call.</p>
- <p class="lede">kolm.ai sits one layer below. It captures the prompt and completion pairs going out to Claude (or any other frontier API), distills a small student model on your hardware, and emits a signed file that runs locally. The two stacks are not always substitutes: a lot of production deployments end up using Claude as the teacher inside a kolm compile and shipping the .kolm artifact for the repetitive 90% of traffic. This page lays out the honest geometry of when each tool wins and when they pair.</p>
+ <p class="lede">Claude is the right call when your constraint is frontier reasoning and your deployment target is Anthropic's hosted API. kolm is for repeated, narrow workflows you want to own, prove, and run outside a vendor endpoint.</p>
+ <p class="lede">They can pair: use Claude as the teacher inside a kolm compile, then ship the repetitive workflow as a portable <code>.kolm</code> artifact. This page shows when Claude wins, when kolm wins, and when they stack.</p>
  <p class="stamp">Wave 401 &middot; reviewed 2026-05-18 &middot; hosted reasoning vs portable signed file</p>
  </div>
 </section>

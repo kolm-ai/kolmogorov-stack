@@ -229,7 +229,7 @@
  <div class="wrap">
  <div class="hero-eyebrow"><span class="he-dot"></span>research . training . 11 min read</div>
  <h1>Bradley-Terry reward models.</h1>
- <p class="lede">Every preference-optimization recipe in the last five years has the same engine inside it: a Bradley-Terry log-odds loss over chosen-versus-rejected pairs. RLHF uses it to train a separate reward model. DPO bakes it into the policy update. Best-of-N inference uses it to score candidates at decode time. kolm trains it as a tiny regression head and ships it as its own signed artifact.</p>
+<p class="lede">Reward models turn chosen-versus-rejected examples into a reusable scoring head. kolm trains that head, signs it, and ships it as its own artifact for evaluation and preference optimization.</p>
 
  <div class="meta-line">
  <span>May 14, 2026</span>

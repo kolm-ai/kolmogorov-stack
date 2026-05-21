@@ -326,7 +326,7 @@
  <a href="/signup?plan=pro" class="btn-primary">Start Pro &rarr;</a>
  <a href="/articles/rent-vs-buy-compute" class="btn-link">The full thesis &amp; worked example <span aria-hidden="true">&rarr;</span></a>
  </div>
- <div style="margin:20px 0 0;padding:14px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;max-width:780px;color:var(--ink-mute)"><b style="color:var(--ink)">v0.2 provenance (wave 144).</b> The capture proxy ships today and emits a recipe-class <code>.kolm</code> with deterministic code + K-score gate + Ed25519-signed manifest + receipt, plus optional <code>kolm-moe-1</code> composition and bundled <code>kolm-tokenizer-1</code>. Loading a trained LoRA adapter on an open base into the artifact (the &ldquo;LoRA you keep&rdquo; framing) ships through the runtime bridge.</div>
+ <div style="margin:20px 0 0;padding:14px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;max-width:780px;color:var(--ink-mute)"><b style="color:var(--ink)">v0.2 provenance.</b> The capture proxy emits a recipe-class <code>.kolm</code> with deterministic code + K-score gate + Ed25519-signed manifest + receipt, plus optional <code>kolm-moe-1</code> composition and bundled <code>kolm-tokenizer-1</code>. Loading a trained LoRA adapter on an open base into the artifact (the &ldquo;LoRA you keep&rdquo; framing) runs through the runtime bridge.</div>
  </div>
 </section>
 
@@ -334,7 +334,7 @@
  <div class="wrap">
  <div class="eyebrow"><span class="num">01</span> &middot; the gap</div>
  <h2>Frontier spend goes up. <span class="tone">No asset accumulates.</span></h2>
- <p class="sec-lede">Every other large recurring line in software (cloud hosting, observability, payments) either is fungible commodity or accrues real switching cost. <b>Frontier API spend accrues neither.</b> Cancel today and you have nothing but log entries. The fix is the inversion: capture the verified pairs your team is already buying, and turn them into a local artifact you own.</p>
+ <p class="sec-lede">Frontier API spend usually leaves behind logs, not assets. kolm captures the verified pairs your team already buys and turns them into a local artifact you own.</p>
  <div class="pain">
  <div class="pain-card">
  <div class="lab">Threshold to distill</div>
@@ -461,7 +461,7 @@ namespace=prod-tickets ready_to_distill=false threshold=1000
  <div class="wrap">
  <div class="eyebrow"><span class="num">06</span> &middot; legal &amp; privacy</div>
  <h2>Your prompts. <span class="tone">Your outputs. Your artifact.</span></h2>
- <p class="sec-lede">The legal frame is the most-asked question in design-partner calls. Three sentences resolve it: provider TOS grants you ownership of outputs you paid for; we train a task-specific LoRA on your prompts and those outputs (not a competing general model); the artifact ships to you and we hold no copy. The privacy frame is parallel: TLS end-to-end through the proxy, tenant-scoped storage, no cross-tenant join path, and a bring-your-own-VPC docker bundle for regulated buyers.</p>
+ <p class="sec-lede">The legal frame is straightforward: train on prompts and outputs you paid for, not on provider weights. The privacy frame is tenant-scoped capture, no cross-tenant joins, and a BYO-VPC path for regulated buyers.</p>
  <div class="uc">
  <div class="hd"><span class="dot"></span><span>capture path &middot; what crosses what perimeter</span></div>
  <div class="body">

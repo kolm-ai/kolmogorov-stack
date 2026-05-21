@@ -236,7 +236,7 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; compare</p>
  <h1>The defensible combination nobody else leads with.</h1>
- <p class="lede">Cost and offline are table stakes &mdash; LoRAX, Predibase, OpenPipe, and the DIY stack all ship distillation today. What no competitor leads with is the bundle: signed + compiled + frozen-eval-gated + receipt chain + PHI redactor + cross-vendor + portable .kolm format. Every <b style="color:var(--accent)">YES</b> below cites the shipping wave that delivered it. For procurement and security review, see <a href="/enterprise" style="color:inherit;border-bottom:1px dashed currentColor">/enterprise</a>.</p>
+<p class="lede">Cost and offline are table stakes. The differentiator is the bundle: signed artifact, frozen eval gate, receipt chain, PHI redactor, cross-vendor teacher path, and portable <code>.kolm</code> format.</p>
  <p class="stamp">Ten axes &middot; reviewed 2026-05-17 &middot; wave 169 reconciliation pass</p>
  <div class="actions">
  <a class="btn primary" href="/quickstart">Compile your first .kolm &rarr;</a>
@@ -304,7 +304,7 @@
  <td class="no">NO</td>
  <td class="partial">PARTIAL</td>
  <td class="no">NO</td>
- <td class="kolm"><b>YES &middot; ship-day-1</b><div class="note">single-file artifact, no runtime network; verifier works air-gapped (W163 deterministic build)</div></td>
+<td class="kolm"><b>YES</b><div class="note">single-file artifact, no runtime network; verifier works air-gapped (W163 deterministic build)</div></td>
  </tr>
  <tr>
  <td class="axis">Cryptographically signed (third-party verifiable)</td>
@@ -322,7 +322,7 @@
  <td class="no">NO</td>
  <td class="no">NO</td>
  <td class="no">NO</td>
- <td class="kolm"><b>YES &middot; wave 144+</b><div class="note">K-score V2 with R/F/E/Z axes; verifier rejects artifacts where train ∩ holdout ≠ ∅ (Q+2)</div></td>
+<td class="kolm"><b>YES &middot; wave 144+</b><div class="note">K-score V2 with R/F/E/Z axes; verifier rejects artifacts with train/holdout leakage (Q+2)</div></td>
  </tr>
  <tr>
  <td class="axis">Receipt chain (hash-linked, signed)</td>
@@ -331,7 +331,7 @@
  <td class="no">NO</td>
  <td class="no">NO</td>
  <td class="no">NO</td>
- <td class="kolm"><b>YES &middot; wave 144-167</b><div class="note">spec→seeds→split→train→recipes→evals→external_holdout→tenant_shadow→auditor→supersession→drift→export→sigs→rekor</div></td>
+<td class="kolm"><b>YES &middot; wave 144-167</b><div class="note">spec -> seeds -> split -> train -> recipes -> evals -> holdouts -> auditor -> supersession -> drift -> export -> signatures -> Rekor</div></td>
  </tr>
  <tr>
  <td class="axis">PHI/PII redactor for teacher call</td>
@@ -408,7 +408,7 @@
 <section class="section">
  <div class="wrap">
  <h2>Per-competitor teardowns.</h2>
- <p class="lede">If you're already shipping on one of these stacks, the teardown is the shortest path to deciding whether kolm complements or replaces what you have. Each page is a single screen, no marketing.</p>
+<p class="lede">Already shipping on one of these stacks? Use the teardown to decide whether kolm complements it or replaces it.</p>
  <div class="pair-grid">
  <a class="card" href="/how-vs-lorax"><span class="vt">01 &middot; LoRA serving infra</span><h3>kolm vs LoRAX</h3><p>LoRAX is Apache-2.0 multi-LoRA serving infrastructure. kolm builds the adapter; LoRAX serves it. Complement, not competitor &mdash; the teardown shows the stack with both.</p><span class="go">open teardown &rarr;</span></a>
  <a class="card" href="/how-vs-predibase"><span class="vt">02 &middot; hosted fine-tune + Rubrik</span><h3>kolm vs Predibase</h3><p>Predibase (acquired by Rubrik June 2025) ships hosted LoRAX + agentic governance. kolm ships a portable signed file you mail to a phone. Different problems.</p><span class="go">open teardown &rarr;</span></a>
@@ -423,7 +423,7 @@
 <section class="section">
  <div class="wrap">
  <h2>What every YES above means in code.</h2>
- <p class="lede">A claim only counts if it maps to a verifier check or a manifest field. Skim the audit trail:</p>
+<p class="lede">A claim only counts when it maps to a verifier check or manifest field.</p>
  <ul class="notes">
  <li><code>kolm verify artifact.kolm</code> runs 24 checks &mdash; each prints PASS / WARN / FAIL with the field or hash it inspected. Run it on any artifact, even one you didn't build.</li>
  <li><b>Wave 157 (Q+3a)</b> &middot; PHI redactor receipt integrity. Check #14 confirms no raw PHI leaked. Manifest: <code>redaction_map_hash</code>, <code>teacher_call_log_hash</code>, <code>reinjection_log_hash</code>. <a href="/spec/rs-1#section-7-6">RS-1 &sect;7.6</a>.</li>
@@ -444,7 +444,7 @@
 <section class="section">
  <div class="wrap">
  <h2>When the competitors are the right answer.</h2>
- <p class="lede">A defensible moat doesn't mean every workload should switch. Three honest cases where you should stay where you are:</p>
+<p class="lede">Not every workload should switch. These are the cases where another stack is the better fit.</p>
  <div class="pair-grid">
  <div class="card" style="cursor:default">
  <span class="vt">stay with hyperscaler</span>
@@ -473,7 +473,7 @@
 <section class="section" style="border-bottom:none">
  <div class="wrap">
  <h2>Ship private AI as an artifact, not a promise.</h2>
- <p class="lede">Start with the compiler. Prove the artifact. Then choose whether to serve it on LoRAX, on a phone, or in an air-gapped VPC. The .kolm file is the same in all three.</p>
+<p class="lede">Compile once. Prove the artifact. Run it on LoRAX, a phone, or in an air-gapped VPC.</p>
  <div class="actions">
  <a class="btn primary" href="/quickstart">Compile your first .kolm &rarr;</a>
  <a class="btn" href="/training">Read /training tour &rarr;</a>

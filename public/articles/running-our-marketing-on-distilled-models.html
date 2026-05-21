@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Our marketing runs on 4 distilled models · kolm.ai</title>
-<meta name="description" content="The kolm marketing site is dogfood. Four Specialists power the most expensive AI features on this site, on a $99/mo GPU sliver. Here">
+<meta name="description" content="How kolm uses four internal Specialists for repeatable marketing workflows, with K-scores, compile costs, rollback notes, and frontier escalation boundaries.">
 <meta name="keywords" content="dogfood AI, marketing AI cost, distilled model marketing stack, kolm specialists, .kolm production">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
@@ -15,11 +15,11 @@
 <meta name="robots" content="index,follow,max-snippet:-1">
 <meta property="og:site_name" content="kolm">
 <meta property="og:title" content="Our marketing runs on 4 distilled models · kolm.ai">
-<meta property="og:description" content="The kolm marketing site is dogfood. Four Specialists power the most expensive AI features on this site, on a $99/mo GPU sliver. Here">
+<meta property="og:description" content="How kolm uses four internal Specialists for repeatable marketing workflows, with K-scores, compile costs, rollback notes, and frontier escalation boundaries.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Our marketing runs on 4 distilled models · kolm.ai">
-<meta name="twitter:description" content="The kolm marketing site is dogfood. Four Specialists power the most expensive AI features on this site, on a $99/mo GPU sliver. Here">
+<meta name="twitter:description" content="How kolm uses four internal Specialists for repeatable marketing workflows, with K-scores, compile costs, rollback notes, and frontier escalation boundaries.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta property="og:url" content="https://kolm.ai/articles/running-our-marketing-on-distilled-models">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -283,9 +283,9 @@
  <div class="wrap">
  <span class="pill"><span class="dot"></span>Dogfood &middot; 2026-05-09 &middot; 10 min read</span>
  <h1>Our marketing runs on <span class="tone">four distilled models.</span></h1>
- <p class="lede">The site you&rsquo;re reading this on uses AI for nine features. <b>Four of them are powered by .kolm Specialists running on a $99/mo GPU sliver.</b> One is on the frontier where it belongs. Four are static or rule-based. This is the breakdown: which Specialists, why we picked them, what they cost, and where we kept the frontier.</p>
+ <p class="lede">The site you&rsquo;re reading this on uses AI for nine features. <b>Four are powered by .kolm Specialists on dedicated runtime capacity.</b> One stays on the frontier where it belongs. Four are static or rule-based. This is the breakdown: which Specialists, why we picked them, what they cost, and where we kept the frontier.</p>
  <div class="meta"><span><b>By</b>&nbsp;Kolmogorov</span><span><b>Tag</b>&nbsp;dogfood &middot; cost &middot; production</span></div>
- <div style="margin:18px 0 0;padding:16px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute);max-width:780px"><b style="color:var(--ink)">v0.2 provenance (wave 144).</b> The four &ldquo;Specialists&rdquo; running our marketing today are recipe-class artifacts: deterministic compiled code, an Ed25519-signed manifest + receipt, an optional <code>kolm-moe-1</code> composition block routing across N expert recipes, an optional bundled <code>kolm-tokenizer-1</code> byte-level BPE, a <code>KOLMIDX</code> deterministic lookup container, plus the K-score gate. Trained LoRA distillation with INT4/GGUF/ONNX weight bundling on a small base ships through the runtime bridge. The cost / latency / cap-ex numbers below describe a recipe-class deployment; if you see &ldquo;LoRA&rdquo; or &ldquo;quantized weights&rdquo; in the narrative, that is the runtime-bridge path shipping alongside v0.2.</div>
+ <div style="margin:18px 0 0;padding:16px 18px;border:1px solid rgba(245,158,11,0.32);border-left:3px solid #f59e0b;border-radius:8px;background:rgba(245,158,11,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute);max-width:780px"><b style="color:var(--ink)">v0.2 provenance.</b> The four Specialists in this case study are recipe-class artifacts: deterministic compiled code, an Ed25519-signed manifest + receipt, an optional <code>kolm-moe-1</code> composition block routing across N expert recipes, an optional bundled <code>kolm-tokenizer-1</code> byte-level BPE, a <code>KOLMIDX</code> deterministic lookup container, plus the K-score gate. Trained LoRA distillation with INT4/GGUF/ONNX weight bundling on a small base runs through the runtime bridge. The cost and latency numbers below describe a recipe-class deployment; LoRA or quantized-weight references describe the runtime-bridge path.</div>
  </div>
 </section>
 
@@ -339,7 +339,7 @@
  </table>
  </div>
 
- <p><b>One-time compile total: $1,020.</b> Marginal cost of all four running on one $99/mo H100-sliver from a tier-2 GPU host: $99/mo, regardless of volume. If we 10x our outbound volume tomorrow, the cost stays at $99.</p>
+ <p><b>One-time compile total: $1,020.</b> Marginal cost of all four is tied to fixed runtime capacity, not token volume. If outbound volume grows 10x, the serving cost stays fixed until capacity is saturated.</p>
 
  <p>For comparison, when we ran all four on Sonnet at our current volume in February, the bill was $1,860/mo. <b>The four artifacts paid back their compile cost in 17 days.</b></p>
 

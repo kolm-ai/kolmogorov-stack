@@ -200,7 +200,7 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/migrate">migrate</a> &nbsp;/&nbsp; from hyperscaler</p>
  <h1>Distill from OpenAI or Anthropic into a local .kolm.</h1>
- <p class="lede">Hyperscaler fine-tuning (OpenAI custom models, Anthropic custom Claude, Google Vertex AI tuning, AWS Bedrock customization) keeps the tuned weights inside the vendor's infrastructure. The model exists only behind their API. That works until your deployment target moves outside the vendor's reach &mdash; air-gap, edge, offshore subsidiary, on-prem mirror. The kolm pattern flips it: use the hyperscaler API as the <b>teacher</b>, capture the prompt/completion pairs into <code>seeds.jsonl</code>, then LoRA-fine-tune a small open-weight base. The student approximates the teacher on your task; you ship a file you actually own.</p>
+ <p class="lede">Hyperscaler fine-tunes keep the model behind the vendor API. kolm uses that API as the teacher, captures examples into <code>seeds.jsonl</code>, and compiles a small student model into a signed file you can run in air-gap, edge, on-prem, or cloud.</p>
  <p class="stamp">Wave 188 &middot; from hyperscaler &middot; cross-vendor distillation migration</p>
  </div>
 </section>

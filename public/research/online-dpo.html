@@ -230,7 +230,7 @@
  <div class="wrap">
  <div class="hero-eyebrow"><span class="he-dot"></span>research . training . 11 min read</div>
  <h1>Online iterative DPO.</h1>
- <p class="lede">Offline DPO trains on a static pair set. The pairs drift away from the policy as soon as the policy moves; gradients shrink and quality plateaus. Online iterative DPO closes the loop: sample fresh candidates from the current policy each round, judge them, train one DPO step, swap the adapter, repeat. Each round produces its own signed artifact pinned to the round's captures.</p>
+<p class="lede">Online DPO keeps preference training fresh by sampling from the current policy each round. kolm pins every round to captures, judge results, adapter swap, and a signed artifact.</p>
 
  <div class="meta-line">
  <span>May 15, 2026</span>

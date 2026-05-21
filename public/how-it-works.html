@@ -221,11 +221,11 @@
  </div>
  </section>
 
- <section class="hiw-provenance" aria-label="what ships in v0.2 vs roadmap">
+ <section class="hiw-provenance" aria-label="current v0.2 scope vs roadmap">
  <div class="wrap">
  <div class="hh-card">
- <h4 class="hh-h">What this page describes and what v0.2 ships today</h4>
- <p class="hh-body">The 8-stage pipeline below is the full design. The <b>v0.2 build ships stages 1, 2, 3, 5, 7, and 8</b> as rule-class compilation: gather, spec, synthesize a deterministic recipe pack, verify against the held-out 20%, observe and tighten coverage, and sign the artifact. Plus the wave-144 additions: <a href="/docs#moe">MoE composition</a>, the pure-JS <a href="/docs#tokenizer">byte-level BPE tokenizer</a>, <code>kolm extract</code>, and <code>kolm doc check</code>. Stages <b>4 (k-sample from a frontier teacher), 6 (student fit), and the INT4/GGUF/ONNX bundling</b> referenced lower on this page ship through the runtime bridge. The eight-stage write-up is the shipping architecture; LoRA and INT4 paragraphs below describe the runtime-bridge path that ships alongside v0.2.</p>
+ <h4 class="hh-h">Current v0.2 scope</h4>
+ <p class="hh-body">The 8-stage pipeline below is the full design. The <b>v0.2 build covers stages 1, 2, 3, 5, 7, and 8</b> as rule-class compilation: gather, spec, synthesize a deterministic recipe pack, verify against the held-out 20%, observe and tighten coverage, and sign the artifact. It also includes <a href="/docs#moe">MoE composition</a>, the pure-JS <a href="/docs#tokenizer">byte-level BPE tokenizer</a>, <code>kolm extract</code>, and <code>kolm doc check</code>. Stages <b>4 (k-sample from a frontier teacher), 6 (student fit), and INT4/GGUF/ONNX bundling</b> are handled by the runtime bridge.</p>
  </div>
  </div>
  </section>

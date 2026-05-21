@@ -252,7 +252,7 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; drift detection + supersession chain</p>
  <h1>A frozen artifact does not stay correct forever.</h1>
- <p class="lede">Distillation freezes a recipe against a snapshot of the input distribution. Six months later production traffic has shifted, an upstream model published a CVE, a regulator changed a redactor class. kolm closes the lifecycle ladder with four tiers a verifier can walk in both directions: stale notification, re-distillation cadence, drift detection cron, supersession chain. Every retirement event becomes a hash-bound manifest block bound into <code style="font-family:var(--mono);background:var(--bg-elev);padding:2px 8px;border-radius:4px;color:var(--ink);font-size:14px">artifact_hash</code> &mdash; any tamper breaks all downstream signatures including Rekor.</p>
+ <p class="lede">A compiled artifact is frozen; production is not. kolm tracks staleness, scheduled rebuilds, drift reports, and supersession as hash-bound manifest blocks so a verifier can prove when an artifact should keep running or be retired.</p>
  <p class="stamp">Lifecycle ladder M+1 through M+4 &middot; reviewed 2026-05-17 &middot; wave 171 dedicated surface</p>
  <div class="actions">
  <a class="btn primary" href="/quickstart">Compile your first .kolm &rarr;</a>
@@ -432,7 +432,7 @@
 <section class="section">
  <div class="wrap">
  <h2>The two manifest blocks, on the wire.</h2>
- <p class="lede">Every effect a tenant relies on is captured by a manifest field and a verifier check that re-derives that field. The two lifecycle blocks are self-validating mini receipts: each carries its own SHA-256 over the canonical JSON of itself minus its hash field, and binds into <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">artifact_hash_input</code> so any tamper drifts <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">artifact_hash</code> and breaks every downstream signature including the Rekor anchor.</p>
+ <p class="lede">The two lifecycle blocks are self-validating receipts. Each carries its own hash, binds into <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">artifact_hash_input</code>, and breaks downstream signatures if tampered.</p>
  <div class="grid-2">
  <div class="card">
  <span class="vt">manifest.supersession_provenance</span>
@@ -531,7 +531,7 @@
 <section class="section">
  <div class="wrap">
  <h2>The receipt chain, in order.</h2>
- <p class="lede">Lifecycle blocks append after auditor attestation because the lifecycle layers are downstream concerns &mdash; an artifact can be attested by an auditor today and superseded by a drift-triggered rebuild tomorrow. Both events bind into the receipt-chain hash; either ALL signatures verify against the manifest as written or some signature breaks. A third-party verifier walking the chain from current backwards to genesis can confirm at every step: the predecessor existed and verified at the time it was named, the supersession reason was legitimate and accompanied by required evidence, no quiet edit was made to the chain.</p>
+ <p class="lede">Lifecycle blocks append after auditor attestation. A verifier can walk from the current artifact back to genesis and prove the predecessor, supersession reason, evidence, and chain integrity.</p>
  <div class="receipt-chain">
  <b>spec</b> &rarr; <b>seeds</b> &rarr; <b>split</b> &rarr; <b>train</b> &rarr; <b>recipes</b> &rarr; <b>evals</b> &rarr; <b>external_holdout</b> &rarr; <b>tenant_shadow</b> &rarr; <b>auditor_attestation</b> &rarr; <span class="new">supersession</span> &rarr; <span class="new">drift_report</span> &rarr; <b>export</b> &rarr; <b>signatures</b> &rarr; <b>rekor</b>
  </div>
@@ -547,7 +547,7 @@
 <section class="section">
  <div class="wrap">
  <h2>Why two checks, not one.</h2>
- <p class="lede">Supersession and drift report are independent receipts. The two-check shape lets a verifier surface each independently, so an auditor reading the binder PDF sees both rows whether the artifact is the first-in-chain (both informational), a routine rebuild with drift monitoring (drift report green, supersession green with <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">scheduled_rebuild</code>), or the drift-triggered successor that retires a breached predecessor (drift report on the predecessor was breach; new artifact carries <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">supersession_provenance.reason='drift_detected'</code> with the breached signals inlined).</p>
+ <p class="lede">Supersession and drift are separate receipts. That lets auditors distinguish a routine rebuild, a warning-band drift event, and a breach-driven successor without reading one overloaded status.</p>
  <div class="grid-2">
  <div class="card">
  <span class="vt">scenario A</span>
@@ -580,7 +580,7 @@
 <section class="section">
  <div class="wrap">
  <h2>Honest scope: what kolm ships, what the tenant owns.</h2>
- <p class="lede">kolm gives the tenant the manifest blocks + verifier semantics + scheduler scaffolding. It does NOT fork a daemon, schedule an OS job, or re-run a distillation pipeline. Those are downstream concerns &mdash; every regulated tenant already has cron, systemd timers, k8s CronJob, Airflow DAGs, GitHub Actions schedules. This keeps kolm pure: every effect a tenant relies on is captured by a manifest field and a verifier check that re-derives that field.</p>
+ <p class="lede">kolm ships the manifest blocks, verifier semantics, and scheduler scaffolding. The tenant owns the actual cron, Airflow, k8s, or GitHub Actions schedule.</p>
  <div class="grid-2">
  <div class="card">
  <span class="vt">kolm ships</span>

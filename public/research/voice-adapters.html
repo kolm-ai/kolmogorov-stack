@@ -229,7 +229,7 @@
  <div class="wrap">
  <div class="hero-eyebrow"><span class="he-dot"></span>research . training . 10 min read</div>
  <h1>Voice adapters.</h1>
- <p class="lede">A radiology dictation system fails on &quot;hypoechoic&quot;. A bank's call-center transcript loses every account number ending in a colloquial reading. The general-purpose Whisper model is excellent and not enough. The fix is not a new ASR architecture; it is a 40 MB LoRA adapter on Whisper's decoder cross-attention, trained on 5-50 hours of paired domain audio, gated by held-out WER, and shipped as a signed artifact next to the policy.</p>
+<p class="lede">General ASR misses domain language. kolm trains small voice adapters on paired domain audio, gates them on held-out WER, and ships the adapter as a signed artifact next to the policy.</p>
 
  <div class="meta-line">
  <span>May 14, 2026</span>

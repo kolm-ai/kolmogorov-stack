@@ -166,7 +166,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/research">research</a> / output-specs</div>
 <h1>Typed output specs</h1>
-<p class="lede">An output spec is a machine-readable description of what shape a response must take: JSON schema for structured outputs, OpenAPI for tool-calling, Pydantic or TypeScript types for SDK-style consumers. A spec lets the trainer score conformance directly, the runtime constrain decoding, and the auditor verify that a captured response satisfied the contract the buyer signed.</p>
+<p class="lede">Output specs make response shape auditable. The same schema can train conformance, constrain runtime output, and prove a captured response satisfied the buyer's contract.</p>
 
 <h2 id="what">What it is</h2>
 <p>Treating model outputs as a typed object goes back to function-calling in OpenAI's June 2023 release and earlier to the structured-prediction literature. JSON Schema (draft 2020-12) is the dominant lingua franca; OpenAPI 3.1 wraps it for tool definitions. At inference time the spec becomes a grammar: token-level constrained decoding via finite-state machines (Willard and Louf's <em>Outlines</em>, 2023; Dong et al. <em>XGrammar</em>, 2024) guarantees the output parses without the latency overhead of post-hoc retries. At training time the spec becomes a reward: shape-conformance pass rate is a verifiable signal that can drive RL (the BFCL benchmark, Yan et al. 2024, scores tool calls this way). At gate time the spec becomes a contract: the K-score includes a shape-conformance component the auditor can replay against the same schema.</p>

@@ -171,7 +171,7 @@
  <section class="tpl-hero">
  <div class="crumb"><a href="/health-insurance">health-insurance</a> &middot; <a href="/health-insurance#insurance-templates">templates</a> &middot; edi-278</div>
  <h1>EDI 278 services review transformer</h1>
- <p class="lede">A kolm template that ingests EDI 278 services-review transactions (5010A1) - health-services review requests + responses (prior authorizations, referrals, admissions, certifications, extensions). Distinguishes 278 request (information-source UMO) from 278 response. Pure rule-class; deterministic; pairs cleanly with the existing prior-auth-review template (which adds the policy-mapped recommendation on top).</p>
+<p class="lede">Parse EDI 278 service-review requests and responses for prior auth, referrals, admissions, certifications, and extensions. The deterministic rule pack normalizes the transaction for downstream prior-auth workflows.</p>
  <div class="tpl-meta">
  <div><div class="k">template id</div><span class="v">edi-278</span></div>
  <div><div class="k">k-score gate</div><span class="v">&ge; 0.93</span></div>

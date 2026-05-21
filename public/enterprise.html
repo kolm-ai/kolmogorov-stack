@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<title>Enterprise · kolm.ai</title>
-<meta name="description" content="kolm for enterprise buyers: BAA DPA annual invoice founder-direct procurement. Talk to the people who built it.">
+<title>kolm enterprise · governed owned AI</title>
+<meta name="description" content="Enterprise AI compiler for regulated teams: self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
-<meta property="og:title" content="Enterprise · kolm.ai">
-<meta property="og:description" content="kolm for enterprise buyers: BAA DPA annual invoice founder-direct procurement. Talk to the people who built it.">
+<meta property="og:title" content="kolm enterprise · governed owned AI">
+<meta property="og:description" content="Enterprise AI compiler for regulated teams: self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/enterprise">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
-<meta name="twitter:title" content="Enterprise · kolm.ai">
-<meta name="twitter:description" content="kolm for enterprise buyers: BAA DPA annual invoice founder-direct procurement. Talk to the people who built it.">
+<meta name="twitter:title" content="kolm enterprise · governed owned AI">
+<meta name="twitter:description" content="Enterprise AI compiler for regulated teams: self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/enterprise">
@@ -138,7 +138,7 @@
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Linux, macOS, Windows (WSL)",
  "url": "https://kolm.ai/enterprise",
- "description": "kolm for enterprise buyers: BAA &middot; DPA &middot; annual invoice &middot; founder-direct procurement. Talk to the people who built it.",
+ "description": "Enterprise AI compiler for regulated teams: self-host, air-gap, BAA, SSO, audit logs, SBOM/SLSA, private registry, and architecture review.",
  "offers": {
  "@type": "Offer",
  "price": "0",
@@ -270,9 +270,9 @@
  <section class="hero frontier-bg">
  <div class="wrap">
  <div class="hero-copy">
- <div class="hero-eyebrow"><span class="he-dot"></span>Enterprise &middot; founder-direct &middot; in-boundary AI</div>
- <h1>Your team's AI. <span class="tone">In your boundary.</span></h1>
- <p class="lede">One file. One signature. One auditor-ready receipt chain. kolm compiles a team-private model inside your network, publishes it to a registry only your team can pull, and proves every run with a verifiable receipt. Founder-direct procurement underneath.</p>
+ <div class="hero-eyebrow"><span class="he-dot"></span>Enterprise &middot; governed owned AI</div>
+ <h1>Own the AI your teams depend on.</h1>
+ <p class="lede">Compile approved workflows into signed <code>.kolm</code> artifacts inside your boundary. Self-host or air-gap the runtime, publish through a private registry, and give security teams receipts, logs, BAA, SBOM, and SLSA evidence.</p>
  <div class="actions">
  <a href="/enterprise/inquiry" class="btn primary electric">Book architecture review &rarr;</a>
  <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" class="btn ghost">Contact us</a>
@@ -307,7 +307,7 @@
  <div class="ed-cap">live demo &middot; team-private publish</div>
  <h2>How a team ships an audited model in four commands.</h2>
  </div>
- <p class="ed-lede">A healthcare engineer compiles a PHI redactor on a workstation that never reaches the public internet. A teammate pulls it. The artifact is SHA-pinned. The receipt is signed. Click a step to inspect it.</p>
+ <p class="ed-lede">Compile inside the boundary. Publish privately. Pull by SHA pin. Audit every run.</p>
  </div>
  <div class="ed-grid">
  <div class="ed-term" aria-label="kolm terminal demo">
@@ -383,29 +383,29 @@ verdict: <span class="ok">audit clean</span></pre>
  <div id="ed-detail-1" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-1" data-detail="1">
  <div class="ed-d-eye">step 01 &middot; compile</div>
  <h3>The model is born inside your boundary.</h3>
- <p>kolm reads a JSON spec plus your gold examples and produces a single .kolm file. The compile runs on your hardware. The bytes never leave the host.</p>
- <p>The K-score is the gate. 0.85 is the default floor. CI exits non-zero on a fail so the artifact never gets promoted by accident.</p>
+ <p>kolm reads a JSON spec plus gold examples and builds one signed <code>.kolm</code> file on your hardware.</p>
+ <p>K-score gates promotion. CI exits non-zero on failure.</p>
  <span class="ed-d-pill">no cloud roundtrip &middot; no training data leak</span>
  </div>
  <div id="ed-detail-2" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-2" data-detail="2" hidden>
  <div class="ed-d-eye">step 02 &middot; verify</div>
  <h3>The artifact carries its own proof.</h3>
- <p>Every .kolm has a SHA-256, an Ed25519-signed receipt chain, and the K-score it passed at. Inspection is offline. You don't need our infrastructure to trust the file.</p>
- <p>The signature also pins the recipe source and the spec evals: if anything inside the artifact changes, the signature breaks.</p>
+ <p>Every <code>.kolm</code> carries SHA-256, Ed25519 receipt chain, and the K-score it passed. Inspection works offline.</p>
+ <p>The signature pins recipe source and evals. Tamper with the artifact and verification fails.</p>
  <span class="ed-d-pill">verifiable offline &middot; signature breaks on tamper</span>
  </div>
  <div id="ed-detail-3" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-3" data-detail="3" hidden>
  <div class="ed-d-eye">step 03 &middot; publish</div>
  <h3>Share with the team. Nobody else.</h3>
- <p>Publish with <code>--team &lt;handle&gt;</code> and the artifact is owned by the team, not a person. Members pull it. Non-members get 404. We don't even confirm the name exists.</p>
- <p>Storage and bandwidth are governed by the Team plan at $499/mo for 5 seats or an Enterprise contract. Visibility defaults to private; <code>--public</code> is opt-in.</p>
+ <p>Publish with <code>--team &lt;handle&gt;</code>. Members pull it; non-members get 404.</p>
+ <p>Visibility defaults to private. Team starts at $499/mo for 5 seats; Enterprise is custom.</p>
  <span class="ed-d-pill">private by default &middot; Team $499 &middot; Enterprise custom</span>
  </div>
  <div id="ed-detail-4" class="ed-detail" role="tabpanel" aria-labelledby="ed-tab-4" data-detail="4" hidden>
  <div class="ed-d-eye">step 04 &middot; audit</div>
  <h3>Receipts your auditor will accept.</h3>
- <p>Each pull and each run appends to a receipt chain. The K-score is checked against the publish-time value to detect drift. External calls are counted (and forbidden by default).</p>
- <p>One quarterly PDF rolls this up: regression report, drift, sub-processor delta, incident log. Goes to your auditor unchanged.</p>
+ <p>Each pull and run appends to the receipt chain. K-score drift and external calls are checked automatically.</p>
+ <p>The quarterly binder rolls up regressions, drift, subprocessors, and incident log.</p>
  <span class="ed-d-pill">drift = 0 &middot; egress = 0 &middot; auditor-ready</span>
  </div>
  </div>
@@ -421,7 +421,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <div class="wrap">
  <div class="eyebrow"><span class="num">01</span>four motions</div>
  <h2>Where kolm is being bought.</h2>
- <p class="sec-lede">Four regulated motions where local-by-construction is a procurement requirement, not a preference. Same product underneath; vertical pages cover the procurement-relevant detail.</p>
+ <p class="sec-lede">Four regulated motions where local-by-construction is a requirement. Same product, different procurement packet.</p>
  <div class="kvtable">
  <table>
  <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">healthcare</b> &middot; PHI stays on hosts you control</td><td>Chart prep, clinical-note classification, prior-auth summarization. BAA on file at contract. <a href="/healthcare" style="color:var(--accent)">Healthcare &rarr;</a></td></tr>
@@ -437,7 +437,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <div class="wrap">
  <div class="eyebrow"><span class="num">02</span>procurement</div>
  <h2>The paperwork your team needs.</h2>
- <p class="sec-lede">Standard-form contracts, security posture documented, audit chain built into the product, and the founders on the call. Everything a procurement team needs to start a pilot.</p>
+ <p class="sec-lede">Contracts, security posture, audit chain, and pilot scope in one procurement packet.</p>
  <div class="kvtable">
  <table>
  <tr><td>BAA &middot; HIPAA business-associate agreement</td><td>Template at <a href="/baa" style="color:var(--accent)">/baa</a>. Founder-signed within 48 hours of engagement letter.</td></tr>
@@ -454,7 +454,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <div class="wrap">
  <div class="eyebrow"><span class="num">03</span>design partner</div>
  <h2>Five pilot slots. Founder-direct.</h2>
- <p class="sec-lede">kolm runs a design-partner program through 30 Sep 2026: five slots, one per vertical, free Pro tier during pilot, weekly founder office hours, named on the homepage at general availability (with consent). We are not pretending to have customers we do not have. We are inviting the first five who want to shape the product.</p>
+ <p class="sec-lede">Five design-partner slots through 30 Sep 2026: one per vertical, free Pro during pilot, weekly founder office hours, and optional launch reference.</p>
  <div class="kvtable">
  <table>
  <tr><td><b style="font-family:ui-monospace,Menlo,Consolas,monospace">healthcare slot</b> &middot; open</td><td>Target: regional or multi-state health system, &gt;500 beds, with a CIO sponsor. First workload: chart-prep summarization or prior-auth classification. We bring the architecture, you bring the gold examples.</td></tr>
@@ -471,7 +471,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <div class="wrap">
  <div class="eyebrow"><span class="num">04</span>what a pilot looks like</div>
  <h2>Eight weeks. Three artifacts.</h2>
- <p class="sec-lede">No vague &ldquo;explore the technology together&rdquo; pilot. Every design-partner engagement has the same shape: a kickoff scoped to one workload, a compiled artifact under K-score 0.85 by week 4, a production-shadow deployment by week 6, a sign-off package by week 8. If your team cannot commit a security reviewer and a workload owner, this is not the right time.</p>
+ <p class="sec-lede">Every pilot has one workload, one owner, one security reviewer, and three signed artifacts by week 8.</p>
  <div class="kvtable">
  <table>
  <tr><td>week 0 &middot; kickoff</td><td>Engagement letter + mutual NDA + MSA. One workload picked. Gold-example collection plan agreed.</td></tr>
@@ -489,7 +489,7 @@ verdict: <span class="ok">audit clean</span></pre>
  <div class="wrap">
  <div class="eyebrow"><span class="num">05</span>talk to founders</div>
  <h2>One call. No SDR.</h2>
- <p class="sec-lede">kolm has no sales team. If you are evaluating, you talk to the people who write the code. Enterprise starts with a 30-minute architecture review at <a href="/enterprise/inquiry" style="color:var(--accent)">/enterprise/inquiry</a>. Or mail <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" style="color:var(--accent)">dev@kolm.ai</a> directly &ndash; we reply within one business day. If we are not the right fit we will say so on the first call.</p>
+ <p class="sec-lede">Start with a 30-minute architecture review at <a href="/enterprise/inquiry" style="color:var(--accent)">/enterprise/inquiry</a> or mail <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" style="color:var(--accent)">dev@kolm.ai</a>. You talk to the people building the system.</p>
  <div class="actions">
  <a href="/enterprise/inquiry" class="btn primary">Book architecture review &rarr;</a>
  <a href="mailto:dev@kolm.ai?subject=kolm%20enterprise" class="btn ghost">Contact us</a>

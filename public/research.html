@@ -1610,7 +1610,7 @@
  <div class="stamp"><span class="topic">frontier</span>May 14, 2026</div>
  <div class="body">
  <h3>Multi-token-per-step prediction &middot; TST, patch-level training, and the LoRA-distill equivalent.</h3>
- <p>Nous TST (arXiv 2605.06546) trades 2.5x pre-training time at 10B scale. ICLR 2025 Patch-Level Training (arXiv 2407.12665) lands 0.5x cost at 370M-2.7B. Neither applies to LoRA distill, but their inference-side dual is speculative decoding, which kolm ships today: draft 1.5B + target 7B + <code>num_speculative_tokens=5</code> via vLLM PagedAttention. The mechanism, the equivalence, and the throughput math.</p>
+ <p>Nous TST (arXiv 2605.06546) trades 2.5x pre-training time at 10B scale. ICLR 2025 Patch-Level Training (arXiv 2407.12665) lands 0.5x cost at 370M-2.7B. Neither applies to LoRA distill, but their inference-side dual is speculative decoding: draft 1.5B + target 7B + <code>num_speculative_tokens=5</code> via vLLM PagedAttention. The mechanism, the equivalence, and the throughput math.</p>
  </div>
  <div class="read">13 min &rarr;</div>
  </a>
@@ -1664,7 +1664,7 @@
  <div class="stamp"><span class="topic">case study</span>May 9, 2026</div>
  <div class="body">
  <h3>Running our marketing on four distilled models.</h3>
- <p>Dogfood. Four Specialists, one $99/mo GPU sliver, $1,860 &rarr; $339 monthly bill. K-scores per artifact, the two compiles that failed, and the six commands that drive the whole pipeline.</p>
+ <p>Internal case study. Four Specialists on dedicated runtime capacity, $1,860 &rarr; $339 monthly bill. K-scores per artifact, the two compiles that failed, and the six commands that drive the pipeline.</p>
  </div>
  <div class="read">10 min &rarr;</div>
  </a>

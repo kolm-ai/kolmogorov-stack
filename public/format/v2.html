@@ -221,7 +221,7 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/format/v2">format</a> &nbsp;/&nbsp; .kolm v1 to v2 transition</p>
  <h1>The <code style="font-family:var(--mono);background:var(--bg-elev);padding:2px 10px;border-radius:5px;color:var(--ink);font-size:42px;border:1px solid var(--line)">.kolm</code> file is the portable artifact every other surface in kolm refers to.</h1>
- <p class="lede">Every other surface on this site &mdash; the verifier, the drift detector, the K-score calculator, the compare matrix, the receipt chain &mdash; operates on a single underlying object: the <code>.kolm</code> file. Format v1 was a JSON-only manifest that worked for pure-rule recipes but could not carry compiled binaries. Format v2 is a deterministic binary bundle (ZIP with epoch-0 mtimes and pinned compression) that holds the canonical <code>manifest.json</code>, the receipt chain, the signature cascade, and the compiled WASM, GGUF, Rust, and C payloads alongside one another. This page documents the bundle layout, the manifest top-level keys, backwards compatibility against v1 readers, and the opt-in migration path.</p>
+ <p class="lede">A <code>.kolm</code> file is the unit everything else verifies, scores, signs, and runs. Format v2 upgrades the old JSON manifest into a deterministic bundle that can carry manifests, receipts, signatures, evals, and compiled WASM, GGUF, Rust, or C payloads.</p>
  <p class="stamp">Format v2 bundle layout &middot; reviewed 2026-05-17 &middot; wave 187 dedicated surface</p>
  <div class="actions">
  <a class="btn primary" href="/quickstart">Compile your first .kolm &rarr;</a>
@@ -234,7 +234,7 @@
 <section class="section">
  <div class="wrap">
  <h2>The v1 to v2 transition.</h2>
- <p class="lede">v1 was the pre-RS-1 layout: a single <code>artifact.json</code> blob with the manifest fields, the receipt chain, and the signatures inlined at the top level. It worked for pure JavaScript rule recipes because nothing else needed to ride in the artifact. v2 promoted the file to a deterministic ZIP container so the artifact can carry compiled binaries (WASM, GGUF, Rust, C) and a sub-directory of canonical slot entries (<code>manifest.json</code>, <code>receipt.json</code>, <code>signatures</code>) the verifier can stream individually instead of parsing one giant JSON blob.</p>
+ <p class="lede">v1 was one <code>artifact.json</code> blob. v2 is a deterministic ZIP container with streamable slots for manifest, receipt, signatures, evals, seeds, and compiled payloads.</p>
  <table class="tbl">
  <thead>
  <tr><th>concern</th><th>format v1</th><th>format v2</th></tr>
@@ -276,7 +276,7 @@
 <section class="section">
  <div class="wrap">
  <h2>The v2 bundle structure.</h2>
- <p class="lede">The v2 bundle is a deterministic ZIP with epoch-0 mtimes and store/deflate compression so byte-identical inputs produce byte-identical artifacts. The verifier never extracts to the filesystem; it streams entries by name. Mandatory slot entries live under <code>meta/</code>; recipe payload lives under <code>recipes/&lt;recipe_id&gt;/</code>; the input corpus and the eval pack live under <code>seeds/</code> and <code>evals/</code> respectively. Any class-dependent payload (model weights, native binaries, retrieval index) is namespaced beneath its owning recipe so a multi-recipe bundle stays unambiguous.</p>
+ <p class="lede">The verifier streams the ZIP by name and never extracts it to disk. <code>meta/</code> holds trust material, <code>recipes/</code> holds payloads, and <code>seeds/</code> plus <code>evals/</code> hold the data behind the score.</p>
  <pre class="tree">.kolm/
  <span class="ok">meta/manifest.json</span> <span class="dim"># canonical-JSON manifest, root of trust (RS-1 v2.1 &sect;3.1)</span>
  <span class="ok">meta/receipt.json</span> <span class="dim"># build-time receipt chain: spec &rarr; seeds &rarr; recipes &rarr; evals &rarr; export</span>
@@ -307,7 +307,7 @@
 <section class="section">
  <div class="wrap">
  <h2>The manifest.json top-level schema.</h2>
- <p class="lede">The manifest is the root of trust. Every other entry in the bundle hashes into the manifest's <code>artifact_hash_input</code>; the receipt chain ends with the manifest hash; every signature in <code>meta/signatures.json</code> covers a canonical-JSON serialization of the manifest body. The top-level keys below match the RS-1 v2.1 &sect;3.1 contract; the canonical-JSON rule is sorted keys recursively, no insignificant whitespace, UTF-8, integers as integers, so byte-identical input produces byte-identical output across the JavaScript, Python, and Rust reference implementations.</p>
+ <p class="lede">The manifest is the root of trust. Bundle entries hash into <code>artifact_hash_input</code>, the receipt chain ends at that hash, and signatures cover the canonical manifest body.</p>
  <div class="grid-3">
  <div class="schema-card">
  <span class="vt" style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent)">identity</span>
@@ -358,7 +358,7 @@
 <section class="section">
  <div class="wrap">
  <h2>Backwards compatibility &middot; readers across the version boundary.</h2>
- <p class="lede">Every <code>.kolm</code> file leads with a four-byte magic header. v1 artifacts start with <code>0x7B 0x22 0x73 0x63</code> (the ASCII bytes for <code>{"sc</code>, the opening of a canonical JSON object whose first key is <code>schema</code>). v2 bundles start with the ZIP local file header magic <code>0x50 0x4B 0x03 0x04</code>. Readers branch on the hex magic-byte check before allocating any further state.</p>
+ <p class="lede">Readers branch on the first four bytes: v1 starts like canonical JSON, v2 starts with the ZIP local-file header. That check happens before any deeper parse.</p>
  <p>A v2 reader on a v1 file detects the JSON magic, parses the artifact as a top-level JSON object, emits a <code>format_version_old</code> warn-level log entry, and continues verification using the v1 codepath. Verification passes when the v1 signatures cover the v1 canonical body. This is the fail-open branch.</p>
  <p>A v1 reader on a v2 file detects the ZIP magic, recognizes the bytes are not a JSON document, and refuses to parse rather than risk silently treating raw archive bytes as a malformed manifest. The v1 reader prints <code>format_version_unsupported &middot; expected v1 JSON, saw ZIP local file header</code> and exits non-zero. No silent corruption: a v1 reader knows it cannot read a v2 file.</p>
  <div class="takeaway">
@@ -438,7 +438,7 @@
 <section class="section">
  <div class="wrap">
  <h2>Migrating a v1 artifact to v2.</h2>
- <p class="lede">Existing v1 <code>.kolm</code> files remain valid forever. v2 readers fail-open on v1 input and the canonical manifest contract is stable across the version boundary, so a v1 artifact still verifies, still surfaces a K-score, still proves a receipt chain. Migration is opt-in: a tenant runs the migrate verb when they want the bundle benefits (streaming verify, compiled-binary support, downstream re-attestation against the latest toolchain).</p>
+ <p class="lede">Existing v1 <code>.kolm</code> files remain valid. Migration is opt-in and only needed when a tenant wants v2 bundle benefits: streaming verification, compiled payloads, and re-attestation against the latest toolchain.</p>
  <pre class="terminal">$ kolm migrate <span class="mute">acme-legacy.kolm</span> <span class="warn">--format-v2</span>
  source: acme-legacy.kolm <span class="mute">(v1, 0.9 MB)</span>
  target: acme-legacy-v2.kolm <span class="mute">(v2, 0.9 MB)</span>

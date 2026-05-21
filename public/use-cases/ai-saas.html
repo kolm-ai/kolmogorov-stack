@@ -325,7 +325,7 @@
  <div class="pain-card">
  <div class="lab">Marginal kolm cost</div>
  <div class="big">$0.0003<span class="u">/ call</span></div>
- <p>3B-class Specialist serving the same task. <b>~130&times; cheaper</b> on a $99/mo GPU sliver after the one-time compile fee. Latency drops 3-8&times; alongside.</p>
+ <p>3B-class Specialist serving the same task. <b>~130&times; cheaper</b> on dedicated GPU capacity after the one-time compile fee. Latency drops 3-8&times; alongside.</p>
  </div>
  <div class="pain-card">
  <div class="lab">Compile cost (once)</div>
@@ -395,7 +395,7 @@ ticket-router-eval.jsonl <span class="cm"># 50 holdout</span>
  <div class="wrap">
  <div class="eyebrow"><span class="num">04</span> &middot; the model after vs before</div>
  <h2>One feature. <span class="tone">Eight months of margin.</span></h2>
- <p class="sec-lede">Worked example: a Series A company processing 4M ticket-routing calls / month. Before kolm, that&rsquo;s a $160k/yr line item with growth-elastic exposure. After: a fixed $99/mo GPU and a one-time compile.</p>
+ <p class="sec-lede">Worked example: a Series A company processing 4M ticket-routing calls / month. Before kolm, that&rsquo;s a $160k/yr line item with growth-elastic exposure. After: fixed runtime capacity and a one-time compile.</p>
  <div class="econ">
  <div>
  <div class="lab">Before kolm &middot; SonnetX API</div>
@@ -405,7 +405,7 @@ ticket-router-eval.jsonl <span class="cm"># 50 holdout</span>
  <div>
  <div class="lab">After kolm &middot; compiled Specialist</div>
  <div class="big acc">$1,888<span style="font-size:13px;color:var(--ink-mute);font-weight:400">&nbsp;/ year</span></div>
- <p>$99/mo GPU + $700 one-time compile. <b>Fixed.</b> Latency 180ms p50. K-score 94.2 monitored continuously, regressions block deploys.</p>
+ <p>Dedicated runtime capacity + $700 one-time compile. <b>Fixed.</b> Latency 180ms p50. K-score 94.2 monitored continuously, regressions block deploys.</p>
  </div>
  </div>
  </div>

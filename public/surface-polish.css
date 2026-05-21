@@ -219,6 +219,345 @@ body {
  box-shadow 160ms var(--kolm-ease);
 }
 
+/* 2026-05-21 product-grade finish layer.
+   Purpose: make the site read as one AI infrastructure product, not a stack of
+   page-local demos. Scoped to shared chrome, buttons, and account surfaces. */
+:root {
+ --kolm-bg-deep: #07090b;
+ --kolm-bg-soft: #0d1115;
+ --kolm-paper: #f7f2e8;
+ --kolm-ink-strong: #fff7e8;
+ --kolm-ink-soft: #d9ded7;
+ --kolm-ink-muted: #8e9a91;
+ --kolm-teal: #72e7cd;
+ --kolm-cyan: #80cfff;
+ --kolm-amber: #f0c77a;
+ --kolm-red: #ff8a8a;
+ --kolm-border: rgba(255,247,232,0.12);
+ --kolm-border-strong: rgba(255,247,232,0.22);
+ --kolm-radius: 8px;
+}
+
+[data-theme="light"] {
+ --kolm-bg-deep: #f6f1e7;
+ --kolm-bg-soft: #ffffff;
+ --kolm-ink-strong: #111418;
+ --kolm-ink-soft: #323a3f;
+ --kolm-ink-muted: #657067;
+ --kolm-border: rgba(16,24,32,0.12);
+ --kolm-border-strong: rgba(16,24,32,0.22);
+ --kolm-teal: #06745f;
+ --kolm-cyan: #1263a3;
+ --kolm-amber: #8a5a00;
+}
+
+.site-header,
+header.site,
+nav.top {
+ backdrop-filter: blur(18px) saturate(1.08) !important;
+ -webkit-backdrop-filter: blur(18px) saturate(1.08) !important;
+ border-bottom: 1px solid var(--kolm-border) !important;
+ box-shadow: 0 1px 0 rgba(255,255,255,0.025) inset !important;
+}
+
+.site-header .brand,
+header.site .brand,
+nav.top .brand {
+ font-family: var(--mono, ui-monospace, monospace) !important;
+ font-weight: 650 !important;
+ color: var(--kolm-ink-strong) !important;
+ letter-spacing: 0 !important;
+}
+
+.site-nav .nav-item > a.nav-top,
+.site-nav a,
+nav.top .nav-links a {
+ position: relative !important;
+ border-bottom: 0 !important;
+ color: var(--kolm-ink-muted) !important;
+ font-family: var(--sans, system-ui, sans-serif) !important;
+ font-size: 12.5px !important;
+ font-weight: 560 !important;
+ letter-spacing: 0 !important;
+}
+
+.site-nav .nav-item > a.nav-top::after,
+.site-nav > a::after,
+nav.top .nav-links a::after {
+ content: "" !important;
+ position: absolute !important;
+ left: 8px !important;
+ right: 8px !important;
+ bottom: 7px !important;
+ height: 1px !important;
+ transform: scaleX(0) !important;
+ transform-origin: center !important;
+ background: linear-gradient(90deg, transparent, var(--kolm-teal), transparent) !important;
+ opacity: 0 !important;
+ transition: transform 150ms var(--kolm-ease), opacity 150ms var(--kolm-ease) !important;
+}
+
+.site-nav .nav-item > a.nav-top:hover,
+.site-nav .nav-item > a.nav-top.active,
+.site-nav a:hover,
+.site-nav a.active,
+nav.top .nav-links a:hover,
+nav.top .nav-links a.active {
+ color: var(--kolm-ink-strong) !important;
+ text-decoration: none !important;
+}
+
+.site-nav .nav-item > a.nav-top:hover::after,
+.site-nav .nav-item > a.nav-top.active::after,
+.site-nav > a:hover::after,
+.site-nav > a.active::after,
+nav.top .nav-links a:hover::after,
+nav.top .nav-links a.active::after {
+ transform: scaleX(1) !important;
+ opacity: 1 !important;
+}
+
+.site-nav .mega-menu {
+ border-radius: 10px !important;
+ border: 1px solid var(--kolm-border-strong) !important;
+ background:
+  linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025)),
+  rgba(8,10,13,0.98) !important;
+ box-shadow: 0 24px 70px rgba(0,0,0,0.34) !important;
+ padding: 16px !important;
+ gap: 18px !important;
+}
+
+.site-nav .mega-h {
+ color: var(--kolm-teal) !important;
+ letter-spacing: 0.04em !important;
+}
+
+.site-nav .mega-menu a {
+ border-radius: 6px !important;
+ padding: 7px 8px !important;
+ color: var(--kolm-ink-soft) !important;
+}
+
+.site-nav .mega-menu a:hover,
+.site-nav .mega-menu a:focus-visible {
+ background: rgba(114,231,205,0.08) !important;
+ color: var(--kolm-ink-strong) !important;
+}
+
+[data-theme="light"] .site-nav .mega-menu {
+ background:
+  linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.78)),
+  #fffaf0 !important;
+ box-shadow: 0 24px 70px rgba(16,24,32,0.12) !important;
+}
+
+.btn,
+.btn-primary,
+.btn-ghost,
+.btn-secondary,
+.button,
+.cta,
+a.btn,
+a.cta,
+button:not(.nav-toggle):not(.theme-toggle) {
+ border-radius: var(--kolm-radius) !important;
+ letter-spacing: 0 !important;
+ font-weight: 620 !important;
+ box-shadow: none !important;
+}
+
+.btn.primary,
+.btn-primary,
+.site-actions .cta,
+button.primary,
+a.cta {
+ background: var(--kolm-ink-strong) !important;
+ color: #090b0e !important;
+ border-color: var(--kolm-ink-strong) !important;
+}
+
+.btn.primary:hover,
+.btn-primary:hover,
+.site-actions .cta:hover,
+button.primary:hover,
+a.cta:hover {
+ transform: translateY(-1px) !important;
+ background: #ffffff !important;
+ border-color: #ffffff !important;
+}
+
+.btn.ghost,
+.btn-ghost,
+.btn-secondary {
+ background: rgba(255,255,255,0.035) !important;
+ border-color: var(--kolm-border-strong) !important;
+ color: var(--kolm-ink-soft) !important;
+}
+
+.btn.ghost:hover,
+.btn-ghost:hover,
+.btn-secondary:hover {
+ background: rgba(255,255,255,0.065) !important;
+ color: var(--kolm-ink-strong) !important;
+ border-color: rgba(114,231,205,0.34) !important;
+}
+
+.btn.accent {
+ background: rgba(114,231,205,0.10) !important;
+ border-color: rgba(114,231,205,0.34) !important;
+ color: var(--kolm-teal) !important;
+}
+
+[data-theme="light"] .btn.primary,
+[data-theme="light"] .btn-primary,
+[data-theme="light"] .site-actions .cta,
+[data-theme="light"] button.primary,
+[data-theme="light"] a.cta {
+ background: #111418 !important;
+ border-color: #111418 !important;
+ color: #fffaf0 !important;
+}
+
+[data-theme="light"] .btn.ghost,
+[data-theme="light"] .btn-ghost,
+[data-theme="light"] .btn-secondary {
+ background: rgba(255,255,255,0.70) !important;
+ color: #20282d !important;
+ border-color: rgba(16,24,32,0.16) !important;
+}
+
+/* Account console: dense, quiet operator UI instead of marketing cards. */
+body:has(#acct-empty),
+body:has(#acct-loaded) {
+ background:
+  radial-gradient(900px 440px at 16% 0%, rgba(114,231,205,0.08), transparent 66%),
+  radial-gradient(780px 420px at 88% 8%, rgba(128,207,255,0.06), transparent 64%),
+  var(--kolm-bg-deep) !important;
+}
+
+.page-main:has(#acct-empty),
+.page-main:has(#acct-loaded) {
+ max-width: 1180px !important;
+ margin: 0 auto !important;
+ padding: clamp(42px, 6vw, 72px) 32px 82px !important;
+}
+
+.page-main:has(#acct-empty) .page-head,
+.page-main:has(#acct-loaded) .page-head {
+ margin: 0 0 24px !important;
+ padding: 0 !important;
+}
+
+.page-main:has(#acct-empty) .page-head h1,
+.page-main:has(#acct-loaded) .page-head h1 {
+ font-size: clamp(42px, 5vw, 72px) !important;
+ line-height: 0.98 !important;
+ letter-spacing: -0.02em !important;
+ margin-bottom: 10px !important;
+}
+
+.page-main:has(#acct-empty) .page-head .lede,
+.page-main:has(#acct-loaded) .page-head .lede {
+ max-width: 58ch !important;
+ color: var(--kolm-ink-soft) !important;
+}
+
+.metric-grid {
+ gap: 12px !important;
+}
+
+.metric-card,
+.settings-card,
+.account-auth,
+#billing-banner,
+#acct-loaded > .card {
+ border: 1px solid var(--kolm-border) !important;
+ border-radius: 10px !important;
+ background:
+  linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018)),
+  rgba(255,255,255,0.026) !important;
+ box-shadow: none !important;
+}
+
+.metric-card {
+ padding: 16px !important;
+ min-height: 112px !important;
+}
+
+.metric-card .label,
+.settings-card .lbl,
+.page-main .eyebrow,
+.fineprint {
+ letter-spacing: 0 !important;
+}
+
+.metric-card .value {
+ font-family: var(--mono, ui-monospace, monospace) !important;
+ color: var(--kolm-ink-strong) !important;
+}
+
+.settings-grid {
+ gap: 14px !important;
+ align-items: stretch !important;
+}
+
+.settings-card {
+ padding: 18px !important;
+}
+
+.settings-card h2 {
+ font-size: 16px !important;
+ line-height: 1.2 !important;
+ margin-bottom: 8px !important;
+}
+
+.settings-card p {
+ color: var(--kolm-ink-muted) !important;
+ line-height: 1.48 !important;
+}
+
+.field {
+ gap: 7px !important;
+ margin-top: 12px !important;
+}
+
+.field input,
+.field select,
+.field textarea,
+.account-auth input {
+ border-radius: 7px !important;
+ background: rgba(0,0,0,0.18) !important;
+ border-color: var(--kolm-border) !important;
+}
+
+[data-theme="light"] .metric-card,
+[data-theme="light"] .settings-card,
+[data-theme="light"] .account-auth,
+[data-theme="light"] #billing-banner,
+[data-theme="light"] #acct-loaded > .card {
+ background: rgba(255,255,255,0.72) !important;
+ border-color: rgba(16,24,32,0.12) !important;
+}
+
+[data-theme="light"] .field input,
+[data-theme="light"] .field select,
+[data-theme="light"] .field textarea,
+[data-theme="light"] .account-auth input {
+ background: rgba(255,255,255,0.82) !important;
+}
+
+@media (max-width: 720px) {
+ .page-main:has(#acct-empty),
+ .page-main:has(#acct-loaded) {
+  padding-inline: 18px !important;
+ }
+ .site-nav .mega-menu {
+  box-shadow: none !important;
+  border-radius: 8px !important;
+ }
+}
+
 :where(a[class*="card"], a[class*="-card"], button[class*="card"], button[class*="-card"]):hover {
  background-color: var(--kolm-panel-hover);
 }
@@ -1934,6 +2273,14 @@ body.kolm-account-surface .ktable th {
  background: rgba(17,19,21,0.08) !important;
 }
 
+[data-theme="light"] .kac-top {
+ color: #455047 !important;
+}
+
+[data-theme="light"] .kac-top b {
+ color: #27302b !important;
+}
+
 [data-theme="light"] .kac-steps a {
  background: rgba(255,255,255,0.72) !important;
  color: #343a40 !important;
@@ -2048,5 +2395,400 @@ body.kolm-account-surface .ktable th {
  .home-hero-left .kolm-hero-system {
   display: block !important;
   max-width: 100% !important;
+ }
+}
+
+/* Final account/product-shell pass. This sits at the end of the polish layer
+   so the account console, product spine, and mega menus win over legacy page CSS. */
+.site-header .nav-top,
+.site-header .site-actions a,
+.site-header .brand {
+ text-decoration: none !important;
+}
+
+.site-header .nav-top::after,
+.site-header .brand::after,
+.site-header .site-actions a::after {
+ display: none !important;
+}
+
+.site-nav .nav-item > .nav-top {
+ position: relative !important;
+ min-height: 38px !important;
+ padding: 0 10px !important;
+ border-radius: 8px !important;
+ border: 1px solid transparent !important;
+ display: inline-flex !important;
+ align-items: center !important;
+}
+
+.site-nav .nav-item > .nav-top:hover,
+.site-nav .nav-item > .nav-top:focus-visible {
+ background: rgba(126,240,210,0.08) !important;
+ border-color: rgba(126,240,210,0.18) !important;
+ color: var(--kolm-ink-0, #faf2e1) !important;
+}
+
+.site-nav .nav-item > .nav-top[aria-current="page"] {
+ background: rgba(126,240,210,0.10) !important;
+ border-color: rgba(126,240,210,0.24) !important;
+ color: var(--kolm-green, #7ef0d2) !important;
+}
+
+.mega-menu {
+ border-radius: 12px !important;
+ border: 1px solid rgba(255,247,232,0.12) !important;
+ background:
+  linear-gradient(180deg, rgba(22,27,32,0.96), rgba(11,13,17,0.96)) !important;
+ box-shadow: 0 26px 80px rgba(0,0,0,0.32) !important;
+ padding: 12px !important;
+ gap: 10px !important;
+}
+
+.mega-menu a {
+ min-height: 34px !important;
+ border-radius: 7px !important;
+ padding: 7px 9px !important;
+ text-decoration: none !important;
+}
+
+.mega-menu a:hover,
+.mega-menu a:focus-visible {
+ background: rgba(126,240,210,0.08) !important;
+ color: var(--kolm-ink-0, #faf2e1) !important;
+}
+
+body.kolm-account-surface .page-main > .page-head {
+ display: none !important;
+}
+
+.kolm-account-command {
+ grid-template-columns: minmax(280px, 0.54fr) minmax(0, 1fr) !important;
+ gap: 14px !important;
+ padding-top: 22px !important;
+}
+
+.kac-copy {
+ display: flex !important;
+ flex-direction: column !important;
+ justify-content: center !important;
+ min-height: 100% !important;
+}
+
+.kac-kicker {
+ letter-spacing: 0.04em !important;
+}
+
+.kac-copy h1 {
+ max-width: 11ch !important;
+ font-size: 64px !important;
+ letter-spacing: 0 !important;
+}
+
+.kac-copy p:not(.kac-kicker) {
+ max-width: 43ch !important;
+ font-size: 15px !important;
+ line-height: 1.48 !important;
+}
+
+.kac-console {
+ border-radius: 12px !important;
+}
+
+.kac-top {
+ min-height: 38px !important;
+}
+
+.kac-steps {
+ grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+ gap: 1px !important;
+}
+
+.kac-steps a {
+ min-height: 86px !important;
+ padding: 12px !important;
+ border-radius: 0 !important;
+}
+
+.kac-steps span {
+ font-size: 10px !important;
+}
+
+.kac-steps b {
+ font-size: 13px !important;
+}
+
+.kac-steps em {
+ font-size: 11.5px !important;
+}
+
+.kac-matrix {
+ grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+ gap: 1px !important;
+}
+
+.kac-matrix a {
+ min-height: 76px !important;
+ border-radius: 0 !important;
+ padding: 12px !important;
+}
+
+.kac-matrix b {
+ font-size: 12px !important;
+}
+
+.kac-matrix span {
+ font-size: 11.5px !important;
+ line-height: 1.35 !important;
+}
+
+body.kolm-account-surface .acct-shell {
+ margin-top: 14px !important;
+}
+
+[data-theme="light"] .site-nav .nav-item > .nav-top:hover,
+[data-theme="light"] .site-nav .nav-item > .nav-top:focus-visible,
+[data-theme="light"] .site-nav .nav-item > .nav-top[aria-current="page"] {
+ background: rgba(8,127,104,0.08) !important;
+ border-color: rgba(8,127,104,0.18) !important;
+ color: #0c6f5b !important;
+}
+
+[data-theme="light"] .mega-menu {
+ background:
+  linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,243,234,0.96)) !important;
+ border-color: rgba(17,19,21,0.12) !important;
+ box-shadow: 0 26px 80px rgba(17,19,21,0.14) !important;
+}
+
+[data-theme="light"] .mega-menu a:hover,
+[data-theme="light"] .mega-menu a:focus-visible {
+ background: rgba(8,127,104,0.08) !important;
+ color: #101418 !important;
+}
+
+@media (max-width: 980px) {
+ .kolm-account-command {
+  grid-template-columns: 1fr !important;
+  padding-top: 18px !important;
+ }
+
+ .kac-copy h1 {
+  max-width: none !important;
+  font-size: 52px !important;
+ }
+
+ .kac-steps,
+ .kac-matrix {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+ }
+}
+
+@media (max-width: 560px) {
+ .kac-steps,
+ .kac-matrix {
+  grid-template-columns: 1fr !important;
+ }
+}
+
+@media (max-width: 920px) {
+ body.nav-open::before {
+  display: none !important;
+ }
+
+ .site-header .site-nav.is-open,
+ header.site .site-nav.is-open,
+ header.site nav.is-open {
+  z-index: 1001 !important;
+  background: #0b0d10 !important;
+  border-bottom: 1px solid rgba(255,247,232,0.12) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,0.56) !important;
+  backdrop-filter: none !important;
+ }
+
+ .site-nav.is-open .mega-menu {
+  background: #111418 !important;
+  border: 1px solid rgba(255,247,232,0.12) !important;
+  box-shadow: none !important;
+ }
+
+ [data-theme="light"] .site-header .site-nav.is-open,
+ [data-theme="light"] header.site .site-nav.is-open,
+ [data-theme="light"] header.site nav.is-open {
+  background: #f7f4ec !important;
+  border-bottom-color: rgba(17,19,21,0.12) !important;
+  box-shadow: 0 28px 80px rgba(17,19,21,0.16) !important;
+ }
+
+ [data-theme="light"] .site-nav.is-open .mega-menu {
+  background: #ffffff !important;
+  border-color: rgba(17,19,21,0.12) !important;
+ }
+}
+
+/* Pricing conversion pass: show the actual plan architecture in the first
+   meaningful scroll, not a long abstract hero. */
+body:has(.w373-pricing-block) section.hero {
+ padding: 30px 0 18px !important;
+ min-height: 0 !important;
+}
+
+body:has(.w373-pricing-block) section.hero .wrap {
+ display: grid !important;
+ grid-template-columns: minmax(320px, 0.62fr) minmax(0, 1fr) !important;
+ gap: 24px 48px !important;
+ align-items: end !important;
+}
+
+body:has(.w373-pricing-block) section.hero .hero-eyebrow,
+body:has(.w373-pricing-block) section.hero .provider-strip {
+ grid-column: 1 / -1 !important;
+}
+
+body:has(.w373-pricing-block) section.hero h1.hero-h1 {
+ max-width: 14ch !important;
+ font-size: 56px !important;
+ line-height: 1.02 !important;
+ letter-spacing: 0 !important;
+ margin: 0 !important;
+}
+
+body:has(.w373-pricing-block) section.hero p.lede {
+ max-width: 58ch !important;
+ font-size: 17px !important;
+ margin: 0 0 2px !important;
+}
+
+body:has(.w373-pricing-block) section.hero .ticker-bar {
+ display: none !important;
+}
+
+body:has(.w373-pricing-block) section.hero .provider-strip {
+ margin-top: 0 !important;
+ padding: 12px 0 0 !important;
+}
+
+body:has(.w373-pricing-block) .kolm-surface-media {
+ display: block !important;
+ padding: 16px var(--kolm-page-pad) !important;
+ margin: 0 !important;
+}
+
+body:has(.w373-pricing-block) main > section:has(.w373-pricing-block) {
+ padding: 34px 0 86px !important;
+}
+
+body:has(.w373-pricing-block) .kolm-surface-media .ksm-shell {
+ grid-template-columns: minmax(240px, 0.42fr) minmax(0, 1fr) !important;
+ gap: 14px !important;
+ align-items: stretch !important;
+}
+
+body:has(.w373-pricing-block) .kolm-surface-media .ksm-copy,
+body:has(.w373-pricing-block) .kolm-surface-media .ksm-console {
+ min-height: 0 !important;
+}
+
+body:has(.w373-pricing-block) .kolm-surface-media .ksm-copy h2 {
+ max-width: 14ch !important;
+ font-size: 34px !important;
+ line-height: 1.04 !important;
+ letter-spacing: 0 !important;
+}
+
+body:has(.w373-pricing-block) .kolm-surface-media .ksm-copy p {
+ max-width: 46ch !important;
+ font-size: 13px !important;
+ line-height: 1.45 !important;
+}
+
+body:has(.w373-pricing-block) .kolm-surface-media .ksm-link {
+ margin-top: 14px !important;
+ min-height: 38px !important;
+}
+
+body:has(.w373-pricing-block) .kolm-surface-media .ksm-flow {
+ grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+body:has(.w373-pricing-block) .kolm-surface-media .ksm-step {
+ min-height: 116px !important;
+ padding: 12px !important;
+}
+
+body:has(.w373-pricing-block) .kolm-surface-media .ksm-step em {
+ display: none !important;
+}
+
+body:has(.w373-pricing-block) .kolm-surface-media .ksm-stats {
+ min-height: 44px !important;
+}
+
+body:has(.w373-pricing-block) .plans-header {
+ margin-bottom: 24px !important;
+ display: grid !important;
+ grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1fr) !important;
+ gap: 28px !important;
+ align-items: end !important;
+}
+
+body:has(.w373-pricing-block) .plans-header .eyebrow {
+ grid-column: 1 / -1 !important;
+ margin-bottom: -10px !important;
+}
+
+body:has(.w373-pricing-block) .plans-header h2 {
+ margin: 0 !important;
+ max-width: 13ch !important;
+ font-size: 48px !important;
+ line-height: 1.04 !important;
+ letter-spacing: 0 !important;
+}
+
+body:has(.w373-pricing-block) .plans-header .sec-lede {
+ margin: 0 !important;
+ max-width: 62ch !important;
+ font-size: 15px !important;
+}
+
+@media (max-width: 900px) {
+ body:has(.w373-pricing-block) section.hero .wrap {
+  display: block !important;
+ }
+
+ body:has(.w373-pricing-block) .kolm-surface-media .ksm-shell {
+  grid-template-columns: 1fr !important;
+ }
+
+ body:has(.w373-pricing-block) .kolm-surface-media .ksm-flow {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+ }
+
+ body:has(.w373-pricing-block) section.hero h1.hero-h1 {
+  font-size: 52px !important;
+ }
+
+ body:has(.w373-pricing-block) .plans-header {
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+ }
+
+ body:has(.w373-pricing-block) .plans-header .eyebrow {
+  margin-bottom: 0 !important;
+ }
+}
+
+@media (max-width: 560px) {
+ body:has(.w373-pricing-block) .kolm-surface-media .ksm-flow {
+  grid-template-columns: 1fr !important;
+ }
+
+ body:has(.w373-pricing-block) section.hero {
+  padding: 36px 0 18px !important;
+ }
+
+ body:has(.w373-pricing-block) section.hero h1.hero-h1,
+ body:has(.w373-pricing-block) .plans-header h2 {
+  font-size: 40px !important;
  }
 }

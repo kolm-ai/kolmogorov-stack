@@ -182,7 +182,7 @@
  <section class="tpl-hero">
  <div class="crumb"><a href="/health-insurance">health-insurance</a> &middot; <a href="/health-insurance#insurance-templates">templates</a> &middot; prior-auth-letter</div>
  <h1>Prior-authorization letter generator</h1>
- <p class="lede">A kolm template that drafts a clinically-grounded prior-authorization request letter from a planned-service code + member context + medical history. The model is fine-tuned to satisfy the standard "medical necessity" four-criterion framework (1: appropriate diagnosis; 2: evidence-based treatment guideline; 3: prior failed conservative therapy; 4: clinical urgency). Output is structured: { letter_body, criteria_satisfied: { ... }, supporting_evidence_citations[], submission_route: "278|portal|fax", confidence }. Class: model-class (class 3).</p>
+<p class="lede">Draft clinically grounded prior-authorization letters from planned service, member context, and medical history. Output scores the four medical-necessity criteria, cites supporting evidence, and recommends a submission route.</p>
  <div class="tpl-meta">
  <div><div class="k">template id</div><span class="v">prior-auth-letter</span></div>
  <div><div class="k">k-score gate</div><span class="v">&ge; 0.92</span></div>

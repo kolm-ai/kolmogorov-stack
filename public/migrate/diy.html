@@ -198,7 +198,7 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/migrate">migrate</a> &nbsp;/&nbsp; from DIY stack</p>
  <h1>Wrap your LLaMA-Factory or Axolotl pipeline with kolm.</h1>
- <p class="lede">LLaMA-Factory, Axolotl, Unsloth, TRL, PEFT &mdash; the DIY LoRA stack is what kolm builds on, not what kolm competes with. kolm is shrink-wrap around the stack you already run. The trainer call kolm emits is the same trainer call you were making by hand; the kernel optimizations Unsloth provides still apply; the YAML configs you tuned over six months keep working. What changes: the build now emits a signed artifact with a receipt chain, the eval is gated by a frozen K-score threshold, and there's an explicit drop-out path back to raw <code>llamafactory-cli train</code> at any time.</p>
+ <p class="lede">Keep LLaMA-Factory, Axolotl, Unsloth, TRL, and PEFT. kolm wraps the trainer call you already run, then adds the missing production layer: signed artifact, receipt chain, frozen K-score gate, and a clean escape hatch back to raw DIY.</p>
  <p class="stamp">Wave 188 &middot; from DIY stack &middot; shrink-wrap migration</p>
  </div>
 </section>

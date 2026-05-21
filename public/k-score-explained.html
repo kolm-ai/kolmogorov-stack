@@ -239,7 +239,7 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; k-score &middot; the compile-time quality gate</p>
  <h1>A K-score gate decides whether a <code style="font-family:var(--mono);font-size:0.78em;background:var(--bg-elev);padding:3px 10px;border-radius:6px;border:1px solid var(--line)">.kolm</code> ships.</h1>
- <p class="lede">Every artifact is scored on four axes against a frozen holdout, the axes are weighted into one composite number, and the composite is compared to the recipe-class default gate. If the gate is cleared the artifact signs and ships; if not, the compile aborts with a non-zero exit, the verifier emits <code style="font-family:var(--mono);background:var(--bg-elev);padding:2px 6px;border-radius:3px;color:var(--ink);border:1px solid var(--line)">gate_failed</code> in the receipt, and no <code style="font-family:var(--mono);background:var(--bg-elev);padding:2px 6px;border-radius:3px;color:var(--ink);border:1px solid var(--line)">.kolm</code> bytes are written. The K-score is the compile-time quality contract: no eval, no ship.</p>
+ <p class="lede">K-score is the compile-time quality contract. Each artifact is scored against a frozen holdout; if the gate clears it signs and ships, and if it fails no <code style="font-family:var(--mono);background:var(--bg-elev);padding:2px 6px;border-radius:3px;color:var(--ink);border:1px solid var(--line)">.kolm</code> bytes are written.</p>
  <p class="stamp">K-score quality gate &middot; reviewed 2026-05-17 &middot; wave 185 dedicated explainer</p>
  <div class="actions">
  <a class="btn primary" href="/quickstart">Compile your first .kolm &rarr;</a>
@@ -252,7 +252,7 @@
 <section class="section">
  <div class="wrap">
  <h2>The four K-score axes.</h2>
- <p class="lede">Each axis is a normalized scalar in [0, 1]. The composite is a weighted sum; the default weight per axis is 0.25, customizable per recipe via the <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">k_score_components</code> manifest field. The four-axis shape is normative in RS-1 &sect;7.6; the per-axis weight is policy and travels with the artifact bytes, so a verifier replaying the composite uses the same weights the builder used.</p>
+ <p class="lede">The composite is a weighted sum of normalized axes. Weights travel in the manifest, so a verifier replaying the score uses the same policy the builder used.</p>
  <div class="axes">
  <div class="axis">
  <span class="tier">axis 01</span>
@@ -432,7 +432,7 @@
 <section class="section">
  <div class="wrap">
  <h2>Where the K-score lands in the receipt chain.</h2>
- <p class="lede">The K-score is computed in the <b>evals</b> block of the receipt chain (the sixth node, after <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">spec &rarr; seeds &rarr; split &rarr; train &rarr; recipes</code>). The block hashes into <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">artifact_hash_input</code> so any post-hoc edit of the composite, the axes, or the gate drifts <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">artifact_hash</code> and breaks every downstream signature including the Rekor transparency-log anchor. The K-score is part of the artifact identity, not metadata layered on top.</p>
+ <p class="lede">The K-score lives in the <b>evals</b> receipt block and hashes into <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">artifact_hash_input</code>. Editing the score, axes, or gate changes the artifact identity and breaks downstream signatures.</p>
  <div class="receipt-chain">
  <b>spec</b> &rarr; <b>seeds</b> &rarr; <b>split</b> &rarr; <b>train</b> &rarr; <b>recipes</b> &rarr; <span class="new">evals</span> &rarr; <b>external_holdout</b> &rarr; <b>tenant_shadow</b> &rarr; <b>auditor_attestation</b> &rarr; <b>supersession</b> &rarr; <b>drift_report</b> &rarr; <b>export</b> &rarr; <b>signatures</b> &rarr; <b>rekor</b>
  </div>

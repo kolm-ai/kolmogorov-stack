@@ -244,7 +244,7 @@
  <div class="wrap">
  <div class="hero-eyebrow"><span class="he-dot"></span>HTTP API reference . v1</div>
  <h1>The core endpoints.<br><span class="tone">Plain HTTP.</span></h1>
- <p>Bearer auth on private endpoints. JSON in, JSON out. Versioned at <code>/v1</code>. The CLI and SDKs wrap this surface; you can hit it directly with <code>curl</code>. This page documents the buyer-facing core; the full route inventory (admin, preview, internal) is published with the OpenAPI manifest in <a href="/docs" style="color:var(--violet,#faf2e1)">/docs</a>.</p>
+ <p>Plain <code>/v1</code> HTTP for capture, compile, run, verify, billing, and registry workflows. The CLI and SDKs wrap this surface; <code>curl</code> works too. Full OpenAPI lives in <a href="/docs" style="color:var(--violet,#faf2e1)">/docs</a>.</p>
  <p data-w409j="loop-vocab" style="margin-top:14px;color:var(--ink-mute);font-size:14px;line-height:1.55;max-width:74ch">The endpoints below trace the loop: <code>capture</code> a real call &rarr; surface an <code>opportunity</code> &rarr; promote rows into a <code>dataset</code> &rarr; <code>label</code> the holdout &rarr; run a <code>bakeoff</code> &rarr; <code>build</code> a signed artifact &rarr; <code>verify</code> the receipts &rarr; <code>run</code> on your hardware. Every artifact carries an Ed25519 signature anyone can re-check offline against the embedded public key.</p>
  </div>
  </section>
@@ -327,7 +327,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
 
  <section class="api-section" id="errors">
  <h2>HTTP error codes</h2>
- <p class="lede">Documented endpoints aim to return errors as JSON: <code>{ "error": "&lt;message&gt;", "code": "&lt;machine_code&gt;" }</code>. Some routes still return ad-hoc <code>{ "error" }</code> shapes; the generated route manifest is the source of truth. A <code>request_id</code> envelope field and matching response header ship via the request-id middleware.</p>
+ <p class="lede">Documented endpoints return JSON errors with a human message, machine code, and request id when available. The generated route manifest is the source of truth.</p>
  <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-family:var(--mono);font-size:13px;color:var(--ink-mute,#b5bdb1);padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2,#11151b)">
  <code style="color:#7ef0d2">2xx</code><span>Success.</span>
  <code style="color:var(--ink,#faf2e1)">3xx</code><span>Redirect or not-modified.</span>
@@ -487,7 +487,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
 
  <section class="api-section">
  <h2>Compile</h2>
- <p class="lede">The orchestrator: synthesize a verifier, k-sample the frontier, observe deterministic patterns, sign, bundle. Returns a job id; polls become <code>.kolm</code> files. Adapter/student fit ships through the runtime bridge; v0 emits recipe-tier artifacts with signed model-pointer records.</p>
+ <p class="lede">Start a compile job, poll status, and receive a signed <code>.kolm</code> artifact. The compiler captures the recipe, eval gate, model pointer, and receipt chain.</p>
 
  <div class="endpoint" id="compile-create">
  <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/compile</span><span class="auth-pill bearer">bearer</span></div>
@@ -664,7 +664,7 @@ Authorization: Bearer ks_&lt;your-key&gt;</pre>
 
  <section class="api-section">
  <h2>Capture &amp; distill</h2>
- <p class="lede">Drop-in proxy endpoints that mirror upstream Anthropic and OpenAI shapes. Every call you forward through us is recorded as an <code>(input, output)</code> pair under a tenant namespace. At 1,000 pairs the namespace is eligible for <code>auto-distill</code> (preview) &middot; we hand off to a training bridge and ship you a signed <code>.kolm</code> you keep forever; LoRA packaging requires the bridge and may return 503 in v0. Your frontier API key never touches our store; we forward it via <code>x-upstream-api-key</code> and strip it before logging.</p>
+ <p class="lede">Drop-in proxy endpoints mirror OpenAI and Anthropic. Forward calls through kolm, collect tenant-scoped examples, and distill when the namespace has enough signal. Upstream keys are forwarded by header and stripped before logging.</p>
 
  <div class="endpoint" id="capture-anthropic">
  <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/capture/anthropic</span><span class="auth-pill bearer">bearer</span></div>
@@ -778,7 +778,7 @@ count_only bool "1" | "true"</pre>
 
  <section class="api-section">
  <h2>Receipts</h2>
- <p class="lede">Every <code>/v1/run</code> output ships with an Ed25519 public-key receipt anyone can verify offline against the embedded public key. A layered Ed25519 integrity check is retained for legacy v0.1 receipts so historical archives still verify. This endpoint is the server-side recompute for convenience.</p>
+ <p class="lede">Every <code>/v1/run</code> output can carry an Ed25519 receipt that verifies offline. Legacy receipt checks stay available so old archives remain reproducible.</p>
 
  <div class="endpoint" id="verify">
  <div class="ep-head"><span class="method post">POST</span><span class="path">/v1/receipts/verify</span><span class="auth-pill public">public</span></div>

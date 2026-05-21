@@ -177,7 +177,7 @@
  <section class="tpl-hero">
  <div class="crumb"><a href="/health-insurance">health-insurance</a> &middot; <a href="/health-insurance#insurance-templates">templates</a> &middot; mlr-rebate</div>
  <h1>MLR rebate calculator (PPACA &sect;2718)</h1>
- <p class="lede">A kolm template that computes the Medical Loss Ratio (MLR) under PPACA &sect;2718 and the resulting member rebate, if any. Class: rule (class 0). Input: { reporting_year, market: "individual"|"small_group"|"large_group", state, premium_revenue, incurred_claims, quality_improvement_expense, taxes_fees, member_months }. Output: { mlr_numerator, mlr_denominator, mlr_ratio, threshold, rebate_owed_total, per_member_rebate }. Thresholds: 80% individual + small group; 85% large group.</p>
+<p class="lede">Compute Medical Loss Ratio and member rebate exposure from annual market-segment inputs. The rule pack applies PPACA thresholds and returns numerator, denominator, ratio, threshold, total rebate, and per-member rebate.</p>
  <div class="tpl-badges">
  <span><b>recipe-class:</b> rule (class 0)</span>
  <span><b>spec:</b> PPACA &sect;2718 + 45 CFR &sect;158</span>

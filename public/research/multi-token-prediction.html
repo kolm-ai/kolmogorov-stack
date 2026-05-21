@@ -267,7 +267,7 @@
  <li><a href="#plt">PLT: patch-level training</a></li>
  <li><a href="#equiv">Why neither directly applies to LoRA distill</a></li>
  <li><a href="#spec">Speculative decoding: the inference-side dual</a></li>
- <li><a href="#stack">What kolm ships today</a></li>
+ <li><a href="#stack">Current kolm serving stack</a></li>
  <li><a href="#math">Throughput math</a></li>
  <li><a href="#open">Open work</a></li>
  </ol>
@@ -330,7 +330,7 @@ llm_kwargs = dict(
  llm_kwargs[<span class="arg">"num_speculative_tokens"</span>] = <span class="arg">5</span>
 llm = LLM(**llm_kwargs)</pre>
 
- <h2 id="stack">What kolm ships today.</h2>
+ <h2 id="stack">Current kolm serving stack.</h2>
  <p>The serving runtime composes five throughput techniques in one path. None of these are research claims; they are <code>pip install</code> away in a real wheelhouse and configured by default when the box supports them.</p>
 
  <ul>

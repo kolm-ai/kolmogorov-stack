@@ -180,7 +180,7 @@
 
  <section class="tpl-section">
  <h2>Input &amp; output spec</h2>
- <p class="lede">Input is raw EDI 834 X12 text from a plan sponsor (employer, exchange, government program). Output is a normalized member roster with one entry per INS loop, classified as one of five member-action values - add, change, term, cancel, reinstate, plus audit for INS03 030 audit-or-compare payloads - so downstream enrollment systems can apply the delta without re-parsing X12.</p>
+<p class="lede">Input is raw EDI 834 X12 from a sponsor. Output is a normalized member roster with one entry per INS loop and a member action such as add, change, term, cancel, reinstate, or audit.</p>
  <div class="tpl-grid2">
  <div>
  <p style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px">input &middot; raw 834 (X12 5010A1)</p>
@@ -242,7 +242,7 @@
 
  <section class="tpl-section">
  <h2>4-ring receipt schema</h2>
- <p class="lede">Every transform ships a receipt your auditor can re-verify offline. Because this is a rule-class recipe the execution ring carries a deterministic hash of the parsed INS loops plus the per-member action vector rather than a model judge id; the seal matches the model-class templates so downstream verifier code does not branch on recipe class.</p>
+<p class="lede">Every transform ships an offline-verifiable receipt. Rule-class execution records a deterministic hash of parsed INS loops and member actions, so verifier code stays consistent across recipe classes.</p>
  <div class="tpl-receipt-grid">
  <div><div class="ring">ring 01 &middot; pre-image</div><div class="name">isa_control_num + bgn_reference + sponsor_tax_id_hash</div><div class="b">tenant-rotated Ed25519</div></div>
  <div><div class="ring">ring 02 &middot; derived</div><div class="name">purpose_code + plan_dict_hash + loop_topology_hash</div><div class="b">bound to recipe_version</div></div>

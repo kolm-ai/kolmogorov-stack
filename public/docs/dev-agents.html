@@ -186,7 +186,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / dev-agents</div>
 <h1>Dev-agent proxy install</h1>
-<p class="lede">Every code-writing AI you use already speaks an OpenAI-compatible API. Point them at <code>http://127.0.0.1:8787</code> and the local kolm proxy captures the full round-trip: prompt, response, latency, cost, whether you accepted it, which file you applied it to. Then it tells you which model was the cheapest one that still got the task done. One install, six agents covered.</p>
+<p class="lede">Point code-writing agents at the local OpenAI-compatible kolm proxy. It captures prompt, response, latency, cost, acceptance, and touched file, then shows which model did the job cheapest.</p>
 
 <h2 id="why">Why route through a proxy</h2>
 <p>You already have one editor, two chat agents, and a fresh coding CLI you tried this week. Each one bills separately, each one stores its history somewhere different, none of them tell you which model worked best for the kind of code you actually write. The kolm proxy is a single capture point. Every request goes through it, every response comes back through it, and your laptop builds a private record you can query, filter, and compile down into a smaller cheaper artifact that handles your house-style prompts at a fraction of the rented cost.</p>

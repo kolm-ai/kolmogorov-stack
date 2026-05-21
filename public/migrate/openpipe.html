@@ -197,7 +197,7 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/migrate">migrate</a> &nbsp;/&nbsp; from OpenPipe</p>
  <h1>Replace OpenPipe's capture-then-hosted-endpoint with kolm capture-then-compile.</h1>
- <p class="lede">OpenPipe wraps your OpenAI / Anthropic SDK calls and logs every prompt/completion pair to its backend, fine-tunes from the logged traffic, then serves the result as a hosted endpoint. The capture loop is the right shape. The output shape is what changes: kolm captures the same traffic into local <code>seeds.jsonl</code> and compiles a signed artifact you keep. Same teacher, same student base, same eval, same auto-fine-tune trigger. The deliverable is a file with a receipt instead of a URL with a usage meter.</p>
+ <p class="lede">OpenPipe has the right capture loop. kolm changes the deliverable: capture the same traffic into local <code>seeds.jsonl</code>, compile a signed artifact, and keep the file instead of a hosted endpoint with a usage meter.</p>
  <p class="stamp">Wave 188 &middot; from OpenPipe &middot; capture-loop migration</p>
  </div>
 </section>

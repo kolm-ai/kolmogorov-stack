@@ -302,7 +302,7 @@
  <span class="here">UC-05 &middot; verifiable AI</span>
  </div>
  <h1>Outputs you can prove came from a <span class="tone">specific artifact.</span></h1>
- <p class="lede"><b style="color:var(--ink)">Shipping today.</b> Every <code>.kolm</code> output ships with an Ed25519 receipt chained to the artifact&rsquo;s manifest hash and your tenant key. In v0.1, the issuer or any holder of the shared tenant receipt secret can re-verify offline (an auditor or counter-party under NDA). Independent third-party verification via Sigstore/Rekor anchoring, content-anchor service, and on-chain transaction ship alongside in rs-2/rs-3.</p>
+<p class="lede">Every <code>.kolm</code> output can carry an Ed25519 receipt chained to the artifact manifest and tenant key. Auditors can re-verify offline, and external anchoring paths cover higher-assurance deployments.</p>
  <div class="cta-row">
  <a href="/signup?plan=pro" class="btn-primary">Start Pro &rarr;</a>
  <a href="/whitepaper#receipts" class="btn-link">Receipt format spec <span aria-hidden="true">&rarr;</span></a>
@@ -373,7 +373,7 @@
  <div class="wrap">
  <div class="eyebrow"><span class="num">03</span> &middot; verifying offline</div>
  <h2>An auditor in 2030 verifies a receipt from <span class="tone">today.</span></h2>
- <p class="sec-lede"><b style="color:var(--ink)">Shipping today.</b> The verification ritual works offline against any artifact, any time, using your archived tenant receipt secret (the v0.1 mode). The Rekor/anchor flow shown below ships alongside in rs-2/rs-3; today receipts are Ed25519-verifiable by the issuer or shared-secret holder.</p>
+<p class="sec-lede">The verification ritual works offline against any artifact using your archived receipt material. Rekor and anchor flows extend the same proof path for deployments that require third-party anchoring.</p>
  <div class="term" style="max-width:880px">
  <div class="hd"><span class="dot"></span><span>auditor laptop &middot; 2030</span></div>
  <pre><span class="cm"># given: a .kolm artifact and a receipt claim</span>

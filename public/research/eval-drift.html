@@ -166,7 +166,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/research">research</a> / eval-drift</div>
 <h1>Eval drift detection</h1>
-<p class="lede">A frozen evaluation set is only useful while it stays out of the training distribution. As more data is captured, mined, or synthesized, the holdout can leak in by accident: near-duplicates, paraphrased prompts, or the same task in a new template. Eval drift detection is the set of statistical tests that catch this before the gate publishes a number that has no meaning.</p>
+<p class="lede">A frozen eval set only works if it stays out of training. Eval drift checks catch near-duplicates, paraphrases, and template leakage before the gate publishes a meaningless score.</p>
 
 <h2 id="what">What it is</h2>
 <p>Three failure modes are conflated under the heading "drift". The first is <em>contamination</em>: a training-corpus row that is byte-identical or near-duplicate of a holdout row, usually from a sloppy synthesis pipeline. The second is <em>distributional overlap</em>: the holdout was sampled from the same generator as the train set, so the gate measures interpolation rather than generalization. The third is <em>covariate shift</em>: the production prompt distribution has moved, so even an honest gate reports a number that does not predict downstream behavior. The literature covers all three: Carlini et al. (2022) on memorization, Gao et al. (2021) on the Pile's contamination audits, Magar and Schwartz (2022) on what train-test overlap actually buys, and the classical Sugiyama et al. (2007) framework for covariate-shift detection via density-ratio estimation.</p>

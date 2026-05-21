@@ -143,7 +143,7 @@ function normalizeDescription(raw, fallbackTitle) {
       .replace(/\s+(?:·|&middot;)\s+kolm\.ai$/i, '')
       .replace(/\s+\|\s+kolm(?:\.ai)?$/i, '')
       .replace(/^kolm\.ai\s*-\s*/i, '');
-    desc = `${subject}: capture model traffic, review datasets, distill repeated work, and run signed local AI artifacts.`;
+    desc = `${subject}: capture AI calls, review datasets, distill repeated work, and run signed local AI artifacts.`;
   }
   if (desc.length > 160) {
     desc = desc.slice(0, 157).replace(/\s+\S*$/, '').trim() + '...';

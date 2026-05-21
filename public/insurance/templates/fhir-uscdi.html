@@ -177,7 +177,7 @@
  <section class="tpl-hero">
  <div class="crumb"><a href="/health-insurance">health-insurance</a> &middot; <a href="/health-insurance#insurance-templates">templates</a> &middot; fhir-uscdi</div>
  <h1>FHIR R4 USCDI v3 normalizer</h1>
- <p class="lede">A kolm template that ingests FHIR R4 bundles (Patient + Encounter + Condition + Observation + MedicationRequest + Procedure + Immunization + AllergyIntolerance + DocumentReference + DiagnosticReport + CarePlan) and emits normalized USCDI v3 JSON shaped for analytics. Pure rule-class &mdash; no inference required for the structural mapping. USCDI v3 (the July 2022 ONC data class set) plus the v4 candidate fields are recognized; v4-only fields are passed through with a <code>_uscdi_class: "v4_candidate"</code> tag so downstream consumers can opt in.</p>
+<p class="lede">Convert FHIR R4 bundles into normalized USCDI v3 JSON for analytics. The structural map is rule-class, deterministic, and passes v4 candidate fields through with an opt-in tag.</p>
  <div class="tpl-badges">
  <span><b>recipe-class:</b> rule (class 0)</span>
  <span><b>data class set:</b> USCDI v3 (Jul 2022)</span>

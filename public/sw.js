@@ -1,11 +1,12 @@
-// Recipe service worker · keeps the registry available offline.
-const CACHE = 'kolm-v7-2026-05-21-wave559-frontend-refresh-cache-bust';
+// Recipe service worker: keeps the registry available offline.
+const CACHE = 'kolm-v9-2026-05-21-account-mobile-nav-v1';
 const PRECACHE = [
  '/device',
  '/styles.css',
  '/sdk.js',
  '/v1/registry/export',
  '/manifest.json',
+ '/frontend-version.json',
 ];
 
 self.addEventListener('install', (e) => {
@@ -40,8 +41,20 @@ self.addEventListener('fetch', (e) => {
  return;
  }
 
+ // Network-first for JavaScript so navigation and UI fixes are not held behind
+ // an old cache after deploy.
+ if (url.pathname.match(/\.js$/)) {
+ e.respondWith(
+ fetch(e.request).then((res) => {
+ if (res.ok) caches.open(CACHE).then((c) => c.put(e.request, res.clone()));
+ return res;
+ }).catch(() => caches.match(e.request))
+ );
+ return;
+ }
+
  // Cache-first for static assets and the device shell.
- if (PRECACHE.includes(url.pathname) || url.pathname.match(/\.(css|js|svg|png|woff2-)$/)) {
+ if (PRECACHE.includes(url.pathname) || url.pathname.match(/\.(css|svg|png|woff2-)$/)) {
  e.respondWith(
  caches.match(e.request).then(
  (hit) => hit || fetch(e.request).then((res) => {
@@ -54,13 +67,13 @@ self.addEventListener('fetch', (e) => {
  }
 });
 
-// W215: WebPush handler — receive a threshold alert and surface it as a
+// W215: WebPush handler: receive a threshold alert and surface it as a
 // notification. The /v1/notifications/test route fires the same payload shape.
 self.addEventListener('push', (e) => {
  let payload = {};
  try { payload = e.data ? e.data.json() : {}; } catch (_) { payload = { title: 'kolm.ai', body: e.data ? e.data.text() : '' }; }
  const title = payload.title || 'kolm.ai capture threshold crossed';
- const body = payload.body || (payload.namespace ? (payload.namespace + ': ' + (payload.count || 0) + ' captures — distill is ready') : '');
+ const body = payload.body || (payload.namespace ? (payload.namespace + ': ' + (payload.count || 0) + ' captures; distill is ready') : '');
  const url = payload.url || '/captures';
  e.waitUntil(
  self.registration.showNotification(title, {

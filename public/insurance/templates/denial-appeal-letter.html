@@ -177,7 +177,7 @@
  <section class="tpl-hero">
  <div class="crumb"><a href="/health-insurance">health-insurance</a> &middot; <a href="/health-insurance#insurance-templates">templates</a> &middot; denial-appeal-letter</div>
  <h1>Denial-code &rarr; appeal letter generator</h1>
- <p class="lede">A kolm template that drafts a complete, factually-grounded appeal letter from a denial code + claim context + member context. The model is fine-tuned to cite the policy section being appealed, the medical-necessity criteria the original denial missed, the patient-specific facts, and the regulatory hook (state-level external review timing). Output is structured: { letter_body, citations, regulatory_basis, recommended_attachments[], confidence }. Class: model-class (class 3). The model never invents citations &mdash; the citation list is grounded in the lib.pack.policy_index passed at compile time.</p>
+<p class="lede">Draft appeal letters from denial codes, claim context, member facts, and a tenant policy index. Output is structured with letter body, citations, regulatory basis, attachments, and confidence; citations stay grounded in the policy pack.</p>
  <div class="tpl-meta">
  <div><div class="k">template id</div><span class="v">denial-appeal-letter</span></div>
  <div><div class="k">k-score gate</div><span class="v">&ge; 0.92</span></div>

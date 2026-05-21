@@ -237,7 +237,7 @@
  <div class="wrap">
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; migrate to kolm</p>
  <h1>Migrate to kolm without rewriting your fine-tune pipeline.</h1>
- <p class="lede">Five one-page guides from the systems already running in your stack. Your training data keeps its shape, your recipe semantics survive 1:1, your eval set forwards as a frozen holdout, and the serving infra you spent months hardening still serves the artifact. kolm builds the file; everything downstream stays put. What changes: you get a receipt chain a third party can verify, a K-score gate that blocks ship when eval regresses, an Ed25519 signature, and a portable .kolm format that runs on a phone, an edge box, or an air-gapped VPC.</p>
+ <p class="lede">Move from LoRAX, Predibase, OpenPipe, DIY LoRA, or hyperscaler fine-tuning without throwing away your data, evals, or serving stack. kolm adds signed artifacts, K-score gates, receipt chains, and portable <code>.kolm</code> output.</p>
  <p class="stamp">Wave 188 &middot; reviewed 2026-05-17 &middot; one-page-per-source migration guides</p>
  <div class="actions">
  <a class="btn primary" href="/quickstart">Compile your first .kolm</a>
@@ -250,7 +250,7 @@
 <section class="section">
  <div class="wrap">
  <h2>Pick your source.</h2>
- <p class="lede">Each card is one screen of CLI plus an honest scope. Click through for the four-step migration, a "what survives" table, and the cases where kolm is not the right answer.</p>
+ <p class="lede">Each guide gives the four-step migration, what survives, and when another stack is still the better fit.</p>
  <div class="grid-5">
 
  <a class="mcard" href="/migrate/lorax">
@@ -320,7 +320,7 @@
 <section class="section">
  <div class="wrap">
  <h2>What gets preserved when you migrate.</h2>
- <p class="lede">kolm does not ask you to throw out the work you already did. The four load-bearing assets your team built come across with their semantics intact. The lock is on the build artifact, not the inputs to the build.</p>
+ <p class="lede">Your data, recipes, evals, and serving choices keep their meaning. The lock moves to the signed build artifact.</p>
  <div class="grid-2">
  <div class="col">
  <h3>Preserved <span class="tag">survives 1:1</span></h3>
@@ -347,7 +347,7 @@
 <section class="section">
  <div class="wrap">
  <h2>The CLI verbs you will use during migration.</h2>
- <p class="lede">Every migration guide uses some subset of these verbs. All eight ship today in <code>cli/kolm.js</code>; the per-source guides cite them in the order a tenant would invoke them while moving from a hosted provider to a kolm-owned receipt chain.</p>
+ <p class="lede">These are the verbs used across the migration guides, ordered by the path from hosted model to owned receipt chain.</p>
  <table class="tbl">
  <thead>
  <tr><th>Verb</th><th>What it does</th><th>Status</th></tr>

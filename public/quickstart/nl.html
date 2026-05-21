@@ -224,14 +224,14 @@
 <section class="section">
  <div class="wrap">
  <h2>Prereqs.</h2>
- <p class="lede">Node 20 or newer, then <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13.5px;border:1px solid var(--line)">npx kolm</code> on first run (or install globally with <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13.5px;border:1px solid var(--line)">npm i -g github:sneaky-hippo/kolmogorov-stack</code>). The walkthrough below runs end to end with <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13.5px;border:1px solid var(--line)">KOLM_AIRGAP=1</code> set in your environment, so no API key is required and nothing leaves your laptop. The deterministic air-gap branch is the default; opt into the networked LLM path with <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13.5px;border:1px solid var(--line)">--network</code> when you want richer drafts, and the scaffold output flips <code>network_status</code> from <code>air_gap</code> to <code>wired</code> so downstream tools can branch on which path ran.</p>
+ <p class="lede">Install with <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13.5px;border:1px solid var(--line)">npx kolm</code> on Node 20 or newer. This walkthrough defaults to <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13.5px;border:1px solid var(--line)">KOLM_AIRGAP=1</code>, so no API key is required and nothing leaves your laptop.</p>
  </div>
 </section>
 
 <section class="section" id="step-1">
  <div class="wrap">
  <h2>The four-step natural-language flow.</h2>
- <p class="lede">Each step uses one CLI verb. Each verb's output is the next verb's input. Every artifact along the way carries its provenance: the NL request that drafted the scaffold, the candidate set that became the training data, the teacher/student pair that produced the LoRA, and the verifier verdict that gated the ship. A third party walking the chain can re-derive every claim from the receipts inside the <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">.kolm</code>.</p>
+ <p class="lede">Each CLI verb feeds the next one, and every artifact carries provenance: request, examples, teacher/student pair, and verifier verdict. A third party can replay the chain from the receipts inside the <code style="font-family:var(--mono);background:var(--bg-elev);padding:1px 6px;border-radius:3px;color:var(--ink);font-size:13px;border:1px solid var(--line)">.kolm</code>.</p>
 
  <div class="step-stack" style="display:flex;flex-direction:column;gap:18px;margin-top:24px">
 

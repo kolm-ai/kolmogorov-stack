@@ -177,7 +177,7 @@
  <section class="tpl-hero">
  <div class="crumb"><a href="/health-insurance">health-insurance</a> &middot; <a href="/health-insurance#insurance-templates">templates</a> &middot; hedis-cbp</div>
  <h1>HEDIS CBP &mdash; Controlling High Blood Pressure</h1>
- <p class="lede">A kolm template that computes the HEDIS Controlling High Blood Pressure (CBP) measure: the percentage of plan members 18-85 with hypertension whose most recent BP reading in the measurement year was adequately controlled (&lt; 140/90 mmHg if age 18-59 or with diabetes; &lt; 150/90 mmHg if age 60-85 without diabetes). Class: synthesized-rule (class 1). Input: FHIR R4 bundle of qualifying members + their Observation BP readings; output: { measure: "CBP", numerator, denominator, rate, members: [{ member_id_redacted, age, age_band, has_diabetes, qualifying_bp_reading, controlled }] }.</p>
+<p class="lede">Compute the HEDIS Controlling High Blood Pressure measure from FHIR R4 members and BP observations. Output includes numerator, denominator, rate, and per-member controlled flags for QA.</p>
  <div class="tpl-badges">
  <span><b>recipe-class:</b> synthesized-rule (class 1)</span>
  <span><b>spec:</b> NCQA HEDIS MY 2024+</span>

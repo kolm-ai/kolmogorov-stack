@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#050607;color:#faf2e1}html{color-scheme:dark}</style>
 <title>Security and compliance roadmap · kolm.ai</title>
-<meta name="description" content="One canonical page for your privacy officer. What we ship today, what we are working on with verifiable dates, what we have decided not to pursue, and how...">
+<meta name="description" content="Security, privacy, compliance, signing, retention, BAA, SOC 2, and deployment boundaries for teams evaluating kolm.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 
 <meta property="og:title" content="Security and compliance roadmap · kolm.ai">
-<meta property="og:description" content="One canonical page for your privacy officer. What we ship today, what we are working on with verifiable dates, what we have decided not to pursue, and how...">
+<meta property="og:description" content="Security, privacy, compliance, signing, retention, BAA, SOC 2, and deployment boundaries for teams evaluating kolm.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/security">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:title" content="Security and compliance roadmap · kolm.ai">
-<meta name="twitter:description" content="One canonical page for your privacy officer. What we ship today, what we are working on with verifiable dates, what we have decided not to pursue, and how...">
+<meta name="twitter:description" content="Security, privacy, compliance, signing, retention, BAA, SOC 2, and deployment boundaries for teams evaluating kolm.">
 <meta name="twitter:image" content="https://kolm.ai/og-card.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/security">
@@ -257,7 +257,7 @@
  <div class="hero-copy">
  <div class="hero-eyebrow"><span class="he-dot"></span>Security &amp; compliance &middot; canonical roadmap &middot; 2026-05-16</div>
  <h1>Security and <span class="tone">compliance roadmap.</span></h1>
- <p class="lede">One page for your privacy officer. Section 01 is the control list shipped in production today, each with a link to the artifact that verifies it. Section 02 lists the attestations we are actively pursuing with verifiable target dates, no aspirational claims. Section 03 lists the frameworks we have decided not to pursue and why. Section 04 is the verification quickref for your auditor. Section 05 is the vulnerability-disclosure path. Send this URL to your compliance officer; everything they need to ask is anchored here.</p>
+ <p class="lede">The buyer-facing security record for kolm: shipped controls, signable contracts, attestations, auditor lookups, and disclosure path. Every claim below points to an artifact, endpoint, document, or signed receipt.</p>
  <div class="actions">
  <a href="mailto:security@kolm.ai?subject=kolm%20security%20review" class="btn primary electric">Email security@kolm.ai &rarr;</a>
  <a href="/baa" class="btn ghost">BAA &amp; PHI Schedule</a>
@@ -271,16 +271,7 @@
  <div class="wrap">
  <div class="eyebrow"><span class="num">00</span>posture summary &middot; one paragraph for procurement</div>
  <h2>Where we stand, in plain English.</h2>
- <p class="sec-lede" style="max-width:880px">
- HIPAA Security Rule mapping, BAA with PHI Schedule, GDPR Article 28 DPA, and EU SCCs Module 2 are
- live today and signable founder-direct. The Halborn external penetration test completed in
- April 2026 (0 Critical / 1 High / 3 Medium / 3 Informational; all P0 and P1 closed by 2026-05-06).
- SOC 2 Type I attestation is available alongside the Halborn pentest report, Vanta posture snapshot, and CAIQ-Lite on MNDA. Bug bounty is
- $500 floor for verified Mediums to $10,000 ceiling for verified Criticals on the production
- boundary, scope documented in <a href="/security.txt"><code>/security.txt</code></a>.
- Every claim on this page is anchored to the artifact, endpoint, document, or signed receipt
- that proves it &mdash; if a row is not on the lists below, we are not asserting it.
- </p>
+ <p class="sec-lede" style="max-width:880px">HIPAA mapping, BAA, GDPR DPA, and EU SCCs are signable. Halborn pentest P0/P1 issues are closed. SOC 2 Type I, Halborn, Vanta, and CAIQ-Lite are available under MNDA. Bug bounty scope lives at <a href="/security.txt"><code>/security.txt</code></a>.</p>
  </div>
  </section>
 
@@ -478,7 +469,7 @@
  <div class="wrap">
  <div class="eyebrow"><span class="num">06</span>key rotation lifecycle &middot; wave 189 &middot; rotate verb shipped wave 193</div>
  <h2>Key rotation lifecycle.</h2>
- <p class="sec-lede">Every <code>.kolm</code> artifact is signed with Ed25519 (RS-1 v2.1 <a href="/spec/rs-1#section-7-9">&sect;7.9</a>) and optionally bound to a Sigstore + Rekor transparency entry (RS-1 v2.1 <a href="/spec/rs-1#section-7-10">&sect;7.10</a>). The signature scheme is cryptographically open-ended &mdash; Ed25519 keys do not expire mathematically &mdash; but operational keys must rotate on cadence for compliance, on demand for compromise, and on personnel change. This section names the three triggers, the verifier behavior during the overlap window, the CLI surface, and the four customer-hosted KMS export targets kolm interoperates with.</p>
+ <p class="sec-lede">Every <code>.kolm</code> artifact is Ed25519 signed and can be bound to Sigstore + Rekor. This section covers rotation triggers, verifier overlap, and customer-hosted KMS export targets.</p>
 
  <h3 style="font-size:18px; font-weight:500; color:var(--ink); margin:32px 0 8px">Why operational keys must rotate.</h3>
  <p style="font-size:14px; line-height:1.6; color:var(--ink-mute); max-width:780px">Ed25519 has no built-in expiry; the same private key can sign for decades without weakening. Operational policy is what forces rotation. NIST SP 800-57 Part 1 Rev 5 recommends cryptoperiods of one to two years for high-assurance signing keys; SOC 2 CC6.1 requires a documented, customer-defined rotation cadence with evidence of enforcement; HIPAA Security Rule 45 CFR 164.312(a)(2)(iv) and 164.312(d) demand encryption key management procedures including rotation, escrow, and revocation. Different jurisdictions add their own requirements for PHI or PII signing keys. kolm ships rotation primitives so the operator can satisfy whichever rule applies; kolm does not pick the cadence or host the keys.</p>

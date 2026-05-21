@@ -177,7 +177,7 @@
  <section class="tpl-hero">
  <div class="crumb"><a href="/health-insurance">health-insurance</a> &middot; <a href="/health-insurance#insurance-templates">templates</a> &middot; npi-directory</div>
  <h1>Provider NPI directory lookup</h1>
- <p class="lede">A kolm template that resolves a provider NPI to a normalized directory record + validates the NPI checksum (Luhn-mod-10) + the entity-type code (1: individual provider / 2: organization). The lookup itself queries the NPPES NPI Registry through a pluggable tenant-side resolver, the template ships the parser + validator + the schema; tenants wire to NPPES or their internal provider master. Class: rule (class 0).</p>
+<p class="lede">Resolve a provider NPI into a normalized directory record, validate the Luhn-mod-10 checksum, and classify entity type. Tenants wire the resolver to NPPES or their internal provider master.</p>
  <div class="tpl-badges">
  <span><b>recipe-class:</b> rule (class 0)</span>
  <span><b>spec:</b> NPPES NPI Registry v2 schema</span>
