@@ -380,60 +380,120 @@
   </div>
 </section>
 
+<!-- ================== SOTA quantization menu (W614) ================== -->
+<section class="ks-section" id="quant-menu">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Quantize &middot; 10 methods &middot; per-method doctor</span>
+      <h2 class="ks-h2">Every state-of-the-art quantizer, behind one verb.</h2>
+      <p class="ks-lede">The 4-bit / NF4 baseline is a commodity. The differentiator is the <em class="ks-em">menu</em>, the K-score gate, and the signed cross-engine <code>.kolm</code>. Pick the method that fits your accuracy / VRAM target, install only the libs you need, and the artifact format stays the same on the other side.</p>
+    </div>
+
+    <div class="home-cmp">
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Bits</th>
+            <th>Library &middot; paper</th>
+            <th class="kolm-col">Shipped via <code>kolm quantize</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>int4</code></td><td>4</td><td>bitsandbytes (Dettmers 2022) NF4 + double</td><td class="kolm-col">yes</td></tr>
+          <tr><td><code>int8</code></td><td>8</td><td>bitsandbytes (Dettmers 2022) LLM.int8</td><td class="kolm-col">yes</td></tr>
+          <tr><td><code>gptq</code></td><td>2&ndash;8</td><td>AutoGPTQ (Frantar 2022) calibration-based</td><td class="kolm-col">yes</td></tr>
+          <tr><td><code>awq</code></td><td>3&ndash;4</td><td>AutoAWQ (Lin 2023) activation-aware</td><td class="kolm-col">yes</td></tr>
+          <tr><td><code>aqlm</code></td><td>2</td><td>AQLM (Egiazarian 2024) additive, near-lossless</td><td class="kolm-col">yes</td></tr>
+          <tr><td><code>quip</code></td><td>&lt;2</td><td>QuIP# (Tseng 2024) E8 lattice + incoherence</td><td class="kolm-col">yes</td></tr>
+          <tr><td><code>exl2</code></td><td>variable</td><td>ExLlamaV2 EXL2 runtime-optimized</td><td class="kolm-col">yes</td></tr>
+          <tr><td><code>exl3</code></td><td>variable</td><td>ExLlamaV2 EXL3 successor format (tighter than EXL2)</td><td class="kolm-col">yes</td></tr>
+          <tr><td><code>hqq</code></td><td>1&ndash;8</td><td>HQQ (Mobius Labs 2024) calibration-free</td><td class="kolm-col">yes</td></tr>
+          <tr><td><code>qat</code></td><td>2&ndash;4</td><td>EfficientQAT (Chen 2024) block-wise QAT</td><td class="kolm-col">yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ks-grid ks-grid-3" style="margin-top:var(--ks-6)">
+      <div class="ks-card">
+        <div class="ks-card__h">Per-method doctor</div>
+        <p class="ks-card__p"><code>kolm quantize --local-worker --doctor --json</code> returns <code>ready_by_method</code>: green for the methods whose libs are importable, red for the rest, with install hints. A tenant who only runs <code>int4</code> and <code>hqq</code> installs bitsandbytes + hqq and skips the other eight.</p>
+      </div>
+      <div class="ks-card">
+        <div class="ks-card__h">K-score gate</div>
+        <p class="ks-card__p">Every quantized artifact is re-evaluated against the frozen seed split before it can be released. If composite K drops below threshold (default 0.85), the compile receipt blocks the ship and tells you which axis (accuracy / stability / latency) regressed.</p>
+      </div>
+      <div class="ks-card">
+        <div class="ks-card__h">One artifact, every engine</div>
+        <p class="ks-card__p">The <code>.kolm</code> wraps weights + spec + receipts + Ed25519 sidecar into one sealed file. The runtime picks vLLM, SGLang, TRT-LLM, llama.cpp, MLX, WebGPU, or CoreML for the device. No re-quantize per backend, no per-engine config drift.</p>
+      </div>
+    </div>
+
+    <p class="ks-fineprint" style="margin-top:var(--ks-5)">Heavy ML libs (bitsandbytes / auto-gptq / autoawq / aqlm / quip-sharp / exllamav2 / hqq / efficient_qat / torch / accelerate) live in the isolated <code>@kolm/quantize-worker</code> package, NOT in the root <code>kolm</code> install. AQLM / QuIP# / EfficientQAT also need the upstream repo checkout (env var) because their optimizers are research code, not pip-clean libraries; the doctor surfaces the missing path with a copy-paste install hint.</p>
+  </div>
+</section>
+
 <!-- ================== Anatomy (3 steps) ================== -->
 <section class="ks-section" id="how">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">How kolm works</span>
-      <h2 class="ks-h2">One workflow. Three lines of code.</h2>
-      <p class="ks-lede">Capture what works, compile it once, run it forever. No vendor lock-in, no per-token bill after compile, no model you can't reproduce.</p>
+      <span class="ks-eyebrow">Three surfaces</span>
+      <h2 class="ks-h2">Capture, Compile, Run. <em class="ks-em">Pick what you need.</em></h2>
+      <p class="ks-lede">Three product surfaces that each stand on their own. Run them as a pipeline when you want a signed runtime out of production traffic, or use one alone when that's all you need. The commands below are what the CLI actually accepts; the receipts, K-score, and cross-engine .kolm are what makes them ours.</p>
     </div>
 
     <div class="home-anatomy">
       <div class="code-stack">
         <div class="code-step">
-          <div class="lab">Step 1 · Capture</div>
-          <pre>$ export OPENAI_BASE_URL=api.kolm.ai/v1
-$ # your app keeps working
-$ # we keep a signed log of approved calls</pre>
+          <div class="lab">Capture · Wrapper</div>
+          <pre>$ export OPENAI_BASE_URL=https://api.kolm.ai/v1
+$ # your app keeps working unchanged
+$ # every approved response: hashed, signed, logged</pre>
         </div>
         <div class="code-step">
-          <div class="lab">Step 2 · Compile</div>
+          <div class="lab">Compile · Studio (distill)</div>
           <pre>$ kolm distill --namespace support \
-    --teacher claude-sonnet \
-    --student qwen2.5-7b \
-    --quantize int4
-  <i class="ks-yes" aria-hidden="true"></i> support-2026-05-22.kolm (5.2 GB)</pre>
+    --teacher anthropic:claude-sonnet-4-6 \
+    --student-base qwen2.5-7b
+  → ~/.kolm/distill-runs/&lt;run_id&gt;/ (LoRA + receipts)</pre>
         </div>
         <div class="code-step">
-          <div class="lab">Step 3 · Run</div>
-          <pre>$ kolm run support-2026-05-22.kolm "..."
-  → cloud, browser, phone, VPC, air-gap
-  → signed receipts for every response</pre>
+          <div class="lab">Compile · Studio (quantize)</div>
+          <pre>$ kolm quantize --local-worker \
+    --method int4 \
+    --in ./adapter --out ./adapter-int4
+  → adapter-int4/  (NF4 + double, ~5.2 GB on 7B)</pre>
+        </div>
+        <div class="code-step">
+          <div class="lab">Run · Runtime</div>
+          <pre>$ kolm run support-2026-05-22.kolm '{"text":"..."}'
+  → device-local: vLLM | llama.cpp | MLX | WebGPU | CoreML
+  → signed receipt per response, Ed25519-verifiable</pre>
         </div>
       </div>
 
       <div class="step-detail">
-        <h3>1. Capture: without rewriting anything</h3>
-        <p>Flip one env var and your app routes through kolm's OpenAI-compatible gateway. Every approved response is hashed, timestamped, and stored in a tenant-isolated capture log you can audit, replay, or export.</p>
+        <h3>Capture · Wrapper</h3>
+        <p>Flip one env var and your app routes through kolm's OpenAI-compatible gateway. Every approved response is hashed, timestamped, and stored in a tenant-isolated capture log you can audit, replay, or export. <em class="ks-em">Standalone-useful</em>: you can run the wrapper for the gateway, redaction, and receipts without ever distilling anything.</p>
         <ul>
-          <li>Works with OpenAI, Anthropic, vLLM, SGLang, TRT-LLM, TGI, Fireworks</li>
-          <li>Drop-in for the OpenAI SDK, Anthropic SDK, LangChain, Vercel AI SDK</li>
-          <li>PII redaction at the edge (W454 text, W462 image, W464 audio)</li>
+          <li>Drop-in for OpenAI SDK, Anthropic SDK, LangChain, Vercel AI SDK, vLLM, SGLang, TRT-LLM, TGI</li>
+          <li>PII redaction at the edge: text (W454), image faces / plates (W462), audio voiceprint (W464)</li>
+          <li>Signed log: per-call sha256 + tenant key + Ed25519 receipt</li>
         </ul>
-        <h3 style="margin-top:var(--ks-6)">2. Compile: distill + quantize in one command</h3>
-        <p>Take the approved captures, distill them into a smaller open student, and quantize. The output is a signed <code>.kolm</code> artifact with the seed split, the teacher receipts, and an Ed25519 sidecar binding the weights to the spec.</p>
+        <h3 style="margin-top:var(--ks-6)">Compile · Studio</h3>
+        <p>Distill captures into a smaller student, OR quantize an existing checkpoint, OR both. Each is its own verb. The output of either path is a signed <code>.kolm</code> artifact with the seed split, the teacher receipts, and an Ed25519 sidecar binding weights to spec. <em class="ks-em">Standalone-useful</em>: you can quantize a model you trained elsewhere without ever running the wrapper.</p>
         <ul>
-          <li>INT4 / INT8 / BF16: same artifact format, different size class</li>
-          <li>Frozen evals, K-score drift detection, bake-off against the teacher</li>
-          <li>Reproducible: same captures + same seed = bit-identical output</li>
+          <li>Quantize methods: <code>int4</code> (bnb NF4 + double), <code>int8</code> (bnb LLM.int8), <code>gptq</code>, <code>awq</code>, <code>aqlm</code> (2-bit additive), <code>quip</code> (E8 sub-2-bit), <code>exl2</code>, <code>exl3</code>, <code>hqq</code> (calibration-free), <code>qat</code> (EfficientQAT). Per-method doctor reports green/red separately so you only install the libs you need.</li>
+          <li>Teachers: <code>anthropic:*</code> (Claude family), <code>openai:*</code> (GPT-5/o3/4o), <code>google:*</code> (Gemini), <code>xai:*</code> (Grok), <code>local:*</code> (any OpenAI-compatible)</li>
+          <li>Students: Qwen 2.5 (0.5b/1.5b/3b/7b), Llama 3.2 (1b/3b), Phi 3.5-mini, Gemma 2-2b, Mistral 7B, SmolLM2, GLM-4-9B, Yi-1.5-6B, DeepSeek-V3-Distill-1.5B</li>
+          <li>K-score gate (default 0.85) blocks shipping when accuracy/stability/latency drops below threshold</li>
         </ul>
-        <h3 style="margin-top:var(--ks-6)">3. Run: anywhere, with receipts</h3>
-        <p>A <code>.kolm</code> is a single sealed file. The runtime verifies the signature, loads the right backend for the device, and emits a signed receipt for every response.</p>
+        <h3 style="margin-top:var(--ks-6)">Run · Runtime</h3>
+        <p>A <code>.kolm</code> is a single sealed file. The runtime verifies the signature, loads the right backend for the device, and emits a signed receipt for every response. <em class="ks-em">Standalone-useful</em>: you can run a <code>.kolm</code> someone else compiled without ever touching the gateway or the trainer.</p>
         <ul>
-          <li>Backends: vLLM, SGLang, TRT-LLM, llama.cpp, candle, MLX, WebGPU</li>
-          <li>Targets: cloud GPU, laptop, browser (WASM), phone, VPC, air-gap</li>
-          <li>Verify any response in two seconds at <a href="/verify-prod">/verify-prod</a></li>
+          <li>Backends auto-picked: vLLM / SGLang / TRT-LLM (cloud GPU), llama.cpp / candle (CPU + consumer GPU), MLX (Apple silicon), WebGPU + WASM (browser), Core ML (iOS), NNAPI (Android)</li>
+          <li>Targets: cloud, laptop, browser, phone, VPC, fully air-gapped appliance</li>
+          <li>Verify any response in two seconds at <a href="/verify-prod">/verify-prod</a>, no cooperation from kolm required</li>
         </ul>
       </div>
     </div>
@@ -1722,6 +1782,10 @@ CMD [<span style="color:var(--ks-accent)">"kolm"</span>, <span style="color:var(
     </div>
 
     <div class="home-clog">
+      <div class="home-clog-item">
+        <div class="home-clog-date">2026-05-22</div>
+        <div class="home-clog-body"><b>W614 SOTA quant menu shipped.</b> The worker now drives 10 methods, not 4: <code>int4</code>, <code>int8</code>, <code>gptq</code>, <code>awq</code>, plus <code>aqlm</code> (2-bit additive, Egiazarian 2024), <code>quip</code> (E8 sub-2-bit, Tseng 2024), <code>exl2</code>, <code>exl3</code>, <code>hqq</code> (calibration-free), <code>qat</code> (EfficientQAT, Chen 2024). Per-method doctor reports green/red separately so a tenant only installs the libs they need.</div>
+      </div>
       <div class="home-clog-item">
         <div class="home-clog-date">2026-05-22</div>
         <div class="home-clog-body"><b>W604 first-principles homepage rebuild.</b> Eyebrow "Open-source AI compiler." H1 "Distill frontier models / Quantize to INT4 / Run on your hardware." Reproducible terminal card in hero shows actual quantize+run transcript. Service worker bumped to <code>kolm-v27</code>.</div>

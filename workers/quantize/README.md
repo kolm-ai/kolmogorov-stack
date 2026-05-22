@@ -1,9 +1,11 @@
 # @kolm/quantize-worker
 
-Wave 195 (Q+5). Isolated kolm quantization worker. Lives in its own package so
-the heavy ML deps (bitsandbytes, auto-gptq, optimum, torch, accelerate) NEVER
-land in the root kolm install. The root `kolm` CLI invokes this worker only
-when the tenant explicitly opts in via `kolm quantize --local-worker`.
+Wave 195 (Q+5) base. W614 expansion: full SOTA quant menu (10 methods, not 4),
+per-method doctor. Isolated kolm quantization worker. Lives in its own package
+so the heavy ML deps (bitsandbytes, auto-gptq, optimum, autoawq, aqlm,
+exllamav2, hqq, efficient_qat, torch, accelerate) NEVER land in the root kolm
+install. The root `kolm` CLI invokes this worker only when the tenant
+explicitly opts in via `kolm quantize --local-worker`.
 
 ## Install
 

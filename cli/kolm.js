@@ -1462,40 +1462,56 @@ USAGE
   kolm quantize --local-worker --method <method> --in <dir> --out <dir>
   kolm quantize --local-worker --doctor
 
-METHODS
-  int4     bitsandbytes 4-bit weight quantization
-  int8     bitsandbytes 8-bit weight quantization
-  gptq     auto-gptq (post-training, calibration set required)
-  awq      AutoAWQ (activation-aware weight quantization)
+METHODS (W614 — full SOTA quant menu, per-method doctor)
+  int4     bitsandbytes 4-bit (NF4 + double) weight quantization
+  int8     bitsandbytes 8-bit (LLM.int8) weight quantization
+  gptq     auto-gptq post-training quantization (4-bit, calibration-based)
+  awq      AutoAWQ activation-aware weight quantization (4-bit, near-FP16 accuracy)
+  aqlm     AQLM additive quantization (Egiazarian 2024) - near-lossless 2-bit
+           drives \$AQLM_REPO_PATH (Vahe1994/AQLM optimizer not in the pip package)
+  quip     QuIP# (Tseng 2024) sub-2-bit, E8 lattice + incoherence preprocessing
+           drives \$QUIP_SHARP_REPO_PATH (Cornell-RelaxML/quip-sharp)
+  exl2     ExLlamaV2 EXL2 runtime-optimized variable-bit quantization
+  exl3     ExLlamaV2 EXL3 next-gen format (better compression than EXL2)
+  hqq      HQQ (Mobius Labs 2024) calibration-free half-quadratic quantization
+  qat      EfficientQAT (Chen 2024) block-wise quantization-aware training
+           drives \$EFFICIENT_QAT_REPO_PATH (OpenGVLab/EfficientQAT)
 
 FLAGS
   --local-worker          REQUIRED. Routes through workers/quantize/quantize.mjs. The
-                          root kolm install has no torch / bitsandbytes / auto-gptq deps;
-                          those live in the isolated @kolm/quantize-worker package.
-  --doctor                check whether python3 + torch + bitsandbytes are importable.
-                          exits 0 when the toolchain is ready, 1 otherwise.
+                          root kolm install has zero ML deps; every quant lib lives in
+                          the isolated @kolm/quantize-worker package and is OPTIONAL.
+  --doctor                report per-method readiness (which libs are importable).
+                          exits 0 if any method is ready; 1 otherwise.
+                          --doctor --method=<m> exits 0/1 for that specific method.
   --in <dir>              source adapter directory (the .kolm artifact + LoRA weights)
   --out <dir>             destination directory for quantized weights
-  --method <name>         one of int4 | int8 | gptq | awq (default: int4)
+  --method <name>         one of int4 | int8 | gptq | awq | aqlm | quip |
+                          exl2 | exl3 | hqq | qat   (default: int4)
   --json                  machine-readable JSON output
 
 EXAMPLES
   kolm quantize --local-worker --doctor
+  kolm quantize --local-worker --doctor --method=hqq    # is HQQ specifically ready?
   kolm quantize --local-worker --method=int4 --in ./adapter --out ./adapter-int4
-  kolm quantize --local-worker --method=gptq --in ./adapter --out ./adapter-gptq --json
+  kolm quantize --local-worker --method=hqq  --in ./adapter --out ./adapter-hqq
+  kolm quantize --local-worker --method=aqlm --in ./adapter --out ./adapter-aqlm --json
 
 HONEST SCOPE
   This verb is opt-in. Without --local-worker the verb prints a scaffolding message and
   exits 0 (no work done). The isolated worker at workers/quantize/ declares its Python
-  ML deps under package.json's "python.requires" key, NOT under "dependencies", so npm
-  install at the root never pulls torch or bitsandbytes. Customer runs
-  'cd workers/quantize && npm install' + sets up a Python venv to enable the verb.
+  ML deps in package.json's "python.per_method" map, NOT in the root "dependencies", so
+  npm install at the root never pulls torch / bitsandbytes / any quant lib. Customer
+  runs 'cd workers/quantize && npm install' + sets up a Python venv with the libs they
+  need - tenants who only run int4+hqq install bitsandbytes+hqq and skip the rest.
 
-  The Node entrypoint detects whether python3 + bitsandbytes are importable and
-  invokes scripts/quantize.py only when both succeed; otherwise the worker stops
-  with an honest manifest naming what is missing. Today the python script is the
-  customer's responsibility (kolm ships the scaffolding; the heavy lifting is the
-  customer's opt-in).
+  Per-method readiness: each method probes its own libs independently. The doctor returns
+  ready_by_method = {int4: true, hqq: true, gptq: false, ...} so a tenant gets honest
+  green/red per method, never a "ready" flag that hides per-method gaps.
+
+  Methods marked above as "drives \$<X>_REPO_PATH" need an additional repo checkout
+  because the upstream optimizer is research code, not a pip-clean library. The doctor
+  surfaces the missing path in the manifest, the install hint links to the repo.
 `,
   auditor: `kolm auditor - third-party attestation lifecycle (wave 166, N+7).
 

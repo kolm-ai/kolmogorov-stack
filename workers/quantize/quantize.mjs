@@ -14,18 +14,29 @@
 //                      or emit an honest "not_yet_wired" manifest naming
 //                      what is missing.
 //
-// Supported methods (mirrors workers/distill semantics):
-//   int4    bitsandbytes 4-bit weight quantization
-//   int8    bitsandbytes 8-bit weight quantization
-//   gptq    auto-gptq post-training quantization
-//   awq     AutoAWQ activation-aware weight quantization
+// Supported methods (W614 expansion — full SOTA quant menu, per-method doctor):
+//   int4    bitsandbytes 4-bit weight quantization (NF4 + double, convenience baseline)
+//   int8    bitsandbytes 8-bit weight quantization (LLM.int8)
+//   gptq    auto-gptq post-training quantization (4-bit, calibration-based)
+//   awq     AutoAWQ activation-aware weight quantization (4-bit, near-FP16 accuracy)
+//   aqlm    AQLM (Egiazarian 2024) additive quantization, near-lossless 2-bit
+//   quip    QuIP# (Tseng 2024) sub-2-bit with incoherence preprocessing (E8 lattice)
+//   exl2    ExLlamaV2 EXL2 runtime-optimized variable-bit quantization
+//   exl3    ExLlamaV2 EXL3 next-gen format (better compression than EXL2)
+//   hqq     HQQ (Mobius Labs 2024) calibration-free half-quadratic quantization
+//   qat     EfficientQAT (Chen 2024) quantization-aware training (block-wise)
 //
 // Honest-scope contract:
 //   * kolm ships the Node entrypoint + dep detection + the real python
-//     script (scripts/quantize.py — W336 P2 fix). The customer still must
-//     create the venv and pip install workers/quantize/requirements.txt
-//     because kolm does NOT pip install on the customer's behalf (the
-//     heavy ML deps would otherwise leak into the root install).
+//     script (scripts/quantize.py — W336 P2 fix; W614 expanded to all 10
+//     methods). The customer still must create the venv and pip install
+//     workers/quantize/requirements.txt because kolm does NOT pip install
+//     on the customer's behalf (the heavy ML deps would otherwise leak
+//     into the root install).
+//   * Per-method readiness: each method has its OWN Python dep set, and
+//     the worker only refuses methods whose deps are missing. e.g. a tenant
+//     with only bitsandbytes + hqq installed can run int4/int8/hqq even
+//     without auto-gptq/autoawq/aqlm/quip-sharp/exllamav2/efficient_qat.
 //   * If the venv is missing, the worker emits a manifest naming the
 //     missing pieces and exits 2 (W253 ML#9 — CI must fail loud).
 
@@ -38,7 +49,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
-const VALID_METHODS = ['int4', 'int8', 'gptq', 'awq'];
+const VALID_METHODS = ['int4', 'int8', 'gptq', 'awq', 'aqlm', 'quip', 'exl2', 'exl3', 'hqq', 'qat'];
 const WORKER_NAME    = 'kolm-quantize-worker';
 const WORKER_VERSION = '0.1.0';
 
@@ -60,6 +71,11 @@ if (args.doctor) {
     console.log(`  auto_gptq_ok:    ${report.auto_gptq_ok}`);
     console.log(`  optimum_ok:      ${report.optimum_ok}`);
     console.log(`  autoawq_ok:      ${report.autoawq_ok}`);
+    console.log(`  aqlm_ok:         ${report.aqlm_ok}`);
+    console.log(`  quip_ok:         ${report.quip_ok}`);
+    console.log(`  exllamav2_ok:    ${report.exllamav2_ok}`);
+    console.log(`  hqq_ok:          ${report.hqq_ok}`);
+    console.log(`  efficient_qat_ok:${report.efficient_qat_ok}`);
     console.log(`  ready_by_method: ${JSON.stringify(report.ready_by_method)}`);
     console.log(`  ready:           ${report.ready_for_quantize}`);
     if (report.hint) console.log(`  hint:            ${report.hint}`);
@@ -150,6 +166,11 @@ async function doctor() {
   const autoGptq = probePythonModule('auto_gptq', '__version__', python_ok);
   const optimum = probePythonModule('optimum', '__version__', python_ok);
   const autoawq = probePythonModule('awq', '__version__', python_ok);
+  const aqlm = probePythonModule('aqlm', '__version__', python_ok);
+  const quip = probePythonModule('quip_sharp', '__version__', python_ok);
+  const exllamav2 = probePythonModule('exllamav2', '__version__', python_ok);
+  const hqq = probePythonModule('hqq', '__version__', python_ok);
+  const efficientQat = probePythonModule('efficient_qat', '__version__', python_ok);
 
   const baseOk = python_ok && torch.ok && transformers.ok && accelerate.ok;
   const ready_by_method = {
@@ -157,6 +178,12 @@ async function doctor() {
     int8: baseOk && bitsandbytes.ok,
     gptq: baseOk && autoGptq.ok && optimum.ok,
     awq: baseOk && autoawq.ok,
+    aqlm: baseOk && aqlm.ok,
+    quip: baseOk && quip.ok,
+    exl2: baseOk && exllamav2.ok,
+    exl3: baseOk && exllamav2.ok,
+    hqq: baseOk && hqq.ok,
+    qat: baseOk && efficientQat.ok,
   };
   const missing_by_method = Object.fromEntries(
     Object.entries({
@@ -189,6 +216,48 @@ async function doctor() {
         ['accelerate', accelerate.ok],
         ['autoawq', autoawq.ok],
       ],
+      aqlm: [
+        ['python3', python_ok],
+        ['torch', torch.ok],
+        ['transformers', transformers.ok],
+        ['accelerate', accelerate.ok],
+        ['aqlm', aqlm.ok],
+      ],
+      quip: [
+        ['python3', python_ok],
+        ['torch', torch.ok],
+        ['transformers', transformers.ok],
+        ['accelerate', accelerate.ok],
+        ['quip-sharp', quip.ok],
+      ],
+      exl2: [
+        ['python3', python_ok],
+        ['torch', torch.ok],
+        ['transformers', transformers.ok],
+        ['accelerate', accelerate.ok],
+        ['exllamav2', exllamav2.ok],
+      ],
+      exl3: [
+        ['python3', python_ok],
+        ['torch', torch.ok],
+        ['transformers', transformers.ok],
+        ['accelerate', accelerate.ok],
+        ['exllamav2', exllamav2.ok],
+      ],
+      hqq: [
+        ['python3', python_ok],
+        ['torch', torch.ok],
+        ['transformers', transformers.ok],
+        ['accelerate', accelerate.ok],
+        ['hqq', hqq.ok],
+      ],
+      qat: [
+        ['python3', python_ok],
+        ['torch', torch.ok],
+        ['transformers', transformers.ok],
+        ['accelerate', accelerate.ok],
+        ['efficient_qat', efficientQat.ok],
+      ],
     }).map(([methodName, deps]) => [methodName, deps.filter(([, ok]) => !ok).map(([name]) => name)])
   );
   const ready_for_quantize = Object.values(ready_by_method).some(Boolean);
@@ -211,6 +280,16 @@ async function doctor() {
     optimum_version: optimum.version,
     autoawq_ok: autoawq.ok,
     autoawq_version: autoawq.version,
+    aqlm_ok: aqlm.ok,
+    aqlm_version: aqlm.version,
+    quip_ok: quip.ok,
+    quip_version: quip.version,
+    exllamav2_ok: exllamav2.ok,
+    exllamav2_version: exllamav2.version,
+    hqq_ok: hqq.ok,
+    hqq_version: hqq.version,
+    efficient_qat_ok: efficientQat.ok,
+    efficient_qat_version: efficientQat.version,
     ready_by_method,
     missing_by_method,
     ready_for_quantize,

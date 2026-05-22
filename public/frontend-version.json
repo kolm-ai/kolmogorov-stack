@@ -1,6 +1,6 @@
 {
   "surface": "kolm-public-frontend",
-  "version": "2026-05-22-w613-editorial-serif-tri-hue-no-grid",
+  "version": "2026-05-22-w614-sota-quant-menu-10-methods",
   "source_commit_at_edit_time": "a195783",
   "hero_h1": "Compile any AI model. Run it anywhere.",
   "hero_loop": "route -> capture -> compile -> run",
@@ -185,7 +185,16 @@
     "W613 reduced accent frequency: eyebrow ::before dash recolored from mint to ink-3 (was reading as monocolor), inline <code> in hero lede and prose changed from mint-on-mint bubble to neutral ink on rgba(255,250,240,0.045) bg with line border (was the loudest amateur tell — code competing with CTAs for the eye)",
     "W613 .ks-stat__val .accent and .ks-table .accent now use warm-amber (numeric data deserves warmth, not action-mint); .ks-table .accent-mint and .accent-cool variants added for explicit override when a cell IS an action or IS code",
     "W613 added .ks-warm / .ks-cool / .ks-num / .ks-em utility classes plus body-level font-variant-numeric: lining-nums on .ks so digits render with consistent height across the entire site by default",
-    "W613 sw.js cache key bumped to kolm-v7-2026-05-22-wave613-editorial-serif-tri-hue-no-grid"
+    "W613 sw.js cache key bumped to kolm-v7-2026-05-22-wave613-editorial-serif-tri-hue-no-grid",
+    "W614 SOTA quant menu shipped: workers/quantize/ now drives 10 methods (int4/int8/gptq/awq/aqlm/quip/exl2/exl3/hqq/qat) up from 4, behind one CLI verb with per-method readiness reporting",
+    "W614 workers/quantize/quantize.mjs VALID_METHODS expanded to 10; doctor() probes aqlm/quip_sharp/exllamav2/hqq/efficient_qat in addition to bitsandbytes/auto_gptq/optimum/awq; ready_by_method + missing_by_method maps now cover all 10 methods independently",
+    "W614 workers/quantize/scripts/quantize.py grew run_aqlm/run_quip/run_exl2/run_exl3/run_hqq/run_qat functions; aqlm/quip/qat drive upstream repo entry-points via AQLM_REPO_PATH/QUIP_SHARP_REPO_PATH/EFFICIENT_QAT_REPO_PATH env vars (research code, not pip-clean libraries)",
+    "W614 workers/quantize/requirements.txt + package.json restructured to per-method dependency map so a tenant who only runs int4+hqq installs bitsandbytes+hqq and skips the other eight libs",
+    "W614 cli/kolm.js quantize --help rewritten to enumerate all 10 methods with one-line scheme blurbs and per-method doctor examples",
+    "W614 homepage public/index.html grew a new SOTA quantization menu section (between #numbers and #how) with 10-row method matrix + 3-card differentiator grid (per-method doctor / K-score gate / one-artifact-every-engine)",
+    "W614 homepage inline methods list (line 433) updated from 4 methods to 10",
+    "W614 changelog section gained a W614 entry above W604",
+    "W614 sw.js cache key bumped to kolm-v7-2026-05-22-wave614-sota-quant-menu-10-methods"
   ],
   "production_verification_url": "https://kolm.ai/frontend-version.json"
 }

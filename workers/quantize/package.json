@@ -1,8 +1,8 @@
 {
   "name": "@kolm/quantize-worker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Isolated kolm quantization worker. Heavy ML deps (bitsandbytes/auto-gptq/optimum/torch/accelerate) live HERE, not in the root package. Root kolm install stays light; tenants opt in to the worker when they have the toolchain.",
+  "description": "Isolated kolm quantization worker. Heavy ML deps (bitsandbytes / auto-gptq / autoawq / aqlm / quip-sharp / exllamav2 / hqq / efficient_qat / torch / accelerate) live HERE, not in the root package. Root kolm install stays light; tenants opt in to the worker (and to individual methods) when they have the toolchain. Per-method doctor lets a tenant with only bitsandbytes + hqq run int4/int8/hqq without needing the rest.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "quantize.mjs",
@@ -19,12 +19,38 @@
   "optionalDependencies": {},
   "python": {
     "requires": [
-      "bitsandbytes>=0.43",
       "torch>=2.2",
+      "transformers>=4.42",
+      "accelerate>=0.30",
+      "safetensors>=0.4",
+      "bitsandbytes>=0.43",
       "auto-gptq>=0.7",
       "optimum>=1.20",
-      "accelerate>=0.30"
+      "autoawq>=0.2.5",
+      "aqlm>=1.1.6",
+      "exllamav2>=0.2",
+      "hqq>=0.2"
     ],
-    "note": "Install in a separate Python venv. The Node entrypoint detects whether `python3` + `torch` + `bitsandbytes` are importable and only invokes scripts/quantize.py when all three succeed; otherwise it stops with an honest manifest naming what is missing."
+    "base_requires": [
+      "torch>=2.2",
+      "transformers>=4.42",
+      "accelerate>=0.30",
+      "safetensors>=0.4"
+    ],
+    "per_method": {
+      "int4": ["bitsandbytes>=0.43"],
+      "int8": ["bitsandbytes>=0.43"],
+      "gptq": ["auto-gptq>=0.7", "optimum>=1.20"],
+      "awq":  ["autoawq>=0.2.5"],
+      "aqlm": ["aqlm>=1.1.6", "(env: AQLM_REPO_PATH=/path/to/AQLM checkout)"],
+      "quip": ["quip-sharp @ git+https://github.com/Cornell-RelaxML/quip-sharp@main",
+               "(env: QUIP_SHARP_REPO_PATH=/path/to/quip-sharp checkout)"],
+      "exl2": ["exllamav2>=0.2"],
+      "exl3": ["exllamav2>=0.2"],
+      "hqq":  ["hqq>=0.2"],
+      "qat":  ["efficient_qat @ git+https://github.com/OpenGVLab/EfficientQAT@main",
+               "(env: EFFICIENT_QAT_REPO_PATH=/path/to/EfficientQAT checkout)"]
+    },
+    "note": "Install in a separate Python venv. `requires` is the union of every pip-clean dep across all 10 methods (mirrors the distill worker shape so kolm tooling can introspect uniformly). The Node entrypoint probes each method's deps independently — `node quantize.mjs --doctor --json` returns ready_by_method so a tenant only needs the libs for the methods they actually run. AQLM / QuIP# / EfficientQAT also need a repo checkout via env var (per_method names them explicitly); those are intentionally OUT of requires because pip cannot install them cleanly."
   }
 }

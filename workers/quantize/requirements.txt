@@ -1,8 +1,36 @@
-bitsandbytes>=0.43
+# W614 — every quant method is OPTIONAL.
+# Install only the ones you need; the worker probes each separately
+# and exposes per-method readiness via `node quantize.mjs --doctor --json`.
+
+# --- base (every method needs these) ---
 torch>=2.2
 transformers>=4.42
 accelerate>=0.30
 safetensors>=0.4
+
+# --- int4 / int8 (bitsandbytes) ---
+bitsandbytes>=0.43
+
+# --- gptq (auto-gptq + optimum) ---
 auto-gptq>=0.7
 optimum>=1.20
+
+# --- awq (autoawq) ---
 autoawq>=0.2.5
+
+# --- aqlm (additive 2-bit; also needs $AQLM_REPO_PATH for the optimizer) ---
+aqlm>=1.1.6
+
+# --- quip# (E8 lattice sub-2-bit; also needs $QUIP_SHARP_REPO_PATH for the optimizer) ---
+# quip-sharp is not on PyPI cleanly; install from upstream:
+#   pip install git+https://github.com/Cornell-RelaxML/quip-sharp@main
+
+# --- exl2 / exl3 (ExLlamaV2 runtime-optimized) ---
+exllamav2>=0.2
+
+# --- hqq (calibration-free, pure pip) ---
+hqq>=0.2
+
+# --- qat (EfficientQAT; also needs $EFFICIENT_QAT_REPO_PATH for the training loop) ---
+# efficient_qat is not on PyPI; install from upstream:
+#   pip install git+https://github.com/OpenGVLab/EfficientQAT@main
