@@ -1,5 +1,5 @@
 // Recipe service worker: keeps the registry available offline.
-const CACHE = 'kolm-v26-2026-05-22-frontend-v603-homepage-revamp';
+const CACHE = 'kolm-v27-2026-05-22-frontend-v604-sota-quantize-redesign';
 const PRECACHE = [
  '/device',
  '/design-tokens.css',
@@ -10,8 +10,10 @@ const PRECACHE = [
  '/kolm-svg.css',
  '/w598.css',
  '/w600-layout.css',
+ '/w604.css',
  '/nav.js',
  '/kolm-svg.js',
+ '/w604.js',
  '/sdk.js',
  '/v1/registry/export',
  '/manifest.json',

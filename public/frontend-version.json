@@ -1,9 +1,10 @@
 {
   "surface": "kolm-public-frontend",
-  "version": "2026-05-22-w603-homepage-hero-revamp",
-  "source_commit_at_edit_time": "e0c84f5",
-  "hero_h1": "Route any model. Distill specialists. Run on any device.",
+  "version": "2026-05-22-w604-sota-quantize-redesign",
+  "source_commit_at_edit_time": "6f52d77",
+  "hero_h1": "Distill frontier models. Quantize to INT4. Run on your hardware.",
   "hero_loop": "gateway -> evidence -> distill -> artifact -> runtime -> audit",
+  "hero_proof": "DeepSeek-R1 32B -> 17.9 GB INT4 in 125.3s on a single RTX 5090, 11.5 tok/s",
   "pricing_model": "Free / Pro $49 / Team $499 / Enterprise custom",
   "stale_copy_checks": [
     "old traffic headline removed",
@@ -116,7 +117,17 @@
     "W603 homepage hero lede rewritten to three short sentences ending with the .kolm runtime target list",
     "W603 homepage 4-card product loop tightened: each card now opens with mechanism (One base URL / Reviewed calls / One signed artifact / Receipt+hash+K-score) instead of generic verbs",
     "W603 homepage console khs-grid four cells re-tightened in same mechanism-first tone (frontier+open+local+internal, K-score gate, one signed .kolm, offline re-verifiable)",
-    "W603 homepage meta description, og:description, twitter:description, and JSON-LD organization description re-aligned around 'AI compiler' positioning"
+    "W603 homepage meta description, og:description, twitter:description, and JSON-LD organization description re-aligned around 'AI compiler' positioning",
+    "W604 first-principles homepage rebuild: eyebrow rewritten from 'The AI compiler' to 'Open-source AI compiler' and lede rewritten to lead with the proven SOTA quantization benchmark (DeepSeek-R1 32B -> 17.9 GB INT4 in 125.3s on RTX 5090)",
+    "W604 hero adds a reproducible terminal-style benchmark card showing the actual quantize + run command, real timings, real VRAM, real throughput, and the snail-on-wall reasoning answer the model produces",
+    "W604 hero CTA stack tightened to one magnetic primary 'Start free' + ghost 'See the benchmarks' anchor that jumps to the new #benchmarks matrix below",
+    "W604 hero gains a cursor-reactive ambient mint/cream gradient orb (CSS-driven, RAF-lerped, prefers-reduced-motion and touch respected) as the single calm interactive moment",
+    "W604 trust strip under the hero replaces the old hero-platforms grid with a clean 'Drops in for OpenAI/Anthropic/OpenRouter/vLLM/Ollama/LangChain/LiteLLM/Vercel AI/llama.cpp/ONNX' row",
+    "W604 SOTA quantize matrix section inserted between hero and product rail: four-row table covering DeepSeek-R1 32B, Qwen 2.5 7B, Qwen 2.5 3B, Qwen 2.5 0.5B with original size, INT4 size, compress time, VRAM, throughput, and verified-task tick",
+    "W604 quantize matrix mobile-responsive (table collapses to per-row stacked cards under 880px) with per-cell data-l labels",
+    "W604 benchmarks.html gains the same SOTA quantize matrix as its first content group so the homepage CTA lands on the proof the visitor came for",
+    "W604 kolm-svg.js anatomy illustration relabeled from claims-redactor.kolm/382 MB to deepseek-r1-32b.kolm/17.9 GB with K-score 88.2",
+    "W604 w604.css and w604.js added to index.html head and footer, and to sw.js PRECACHE under network-first cache v27"
   ],
   "production_verification_url": "https://kolm.ai/frontend-version.json"
 }

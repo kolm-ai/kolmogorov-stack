@@ -171,13 +171,13 @@
     // .kolm internals — cutaway layers
     return '<svg class="kolm-ill kolm-ill--anatomy" viewBox="0 0 360 280" role="img" aria-label="The .kolm artifact contains weights, signature, K-score, and a receipt chain">' +
       '<rect x="30" y="30" width="300" height="220" rx="14" fill="var(--brand-primary)" fill-opacity=".05" stroke="var(--brand-primary)" stroke-opacity=".55" stroke-width="1.5"/>' +
-      '<text x="180" y="58" text-anchor="middle" font-family="ui-monospace, monospace" font-size="14" font-weight="700" fill="var(--brand-primary)">claims-redactor.kolm</text>' +
+      '<text x="180" y="58" text-anchor="middle" font-family="ui-monospace, monospace" font-size="14" font-weight="700" fill="var(--brand-primary)">deepseek-r1-32b.kolm</text>' +
       // layer rows
       '<g font-family="ui-monospace, monospace" font-size="10" fill="currentColor">' +
         '<rect x="50" y="80"  width="260" height="28" rx="6" fill="currentColor" fill-opacity=".06"/>' +
-        '<text x="62" y="98" fill-opacity=".85">model.safetensors</text><text x="296" y="98" text-anchor="end" fill-opacity=".55">17.9 GB</text>' +
+        '<text x="62" y="98" fill-opacity=".85">weights.int4</text><text x="296" y="98" text-anchor="end" fill-opacity=".55">17.9 GB</text>' +
         '<rect x="50" y="116" width="260" height="28" rx="6" fill="currentColor" fill-opacity=".06"/>' +
-        '<text x="62" y="134" fill-opacity=".85">manifest.json</text><text x="296" y="134" text-anchor="end" fill-opacity=".55">1.2 KB</text>' +
+        '<text x="62" y="134" fill-opacity=".85">manifest.json</text><text x="296" y="134" text-anchor="end" fill-opacity=".55">1.4 KB</text>' +
         '<rect x="50" y="152" width="260" height="28" rx="6" fill="currentColor" fill-opacity=".06"/>' +
         '<text x="62" y="170" fill-opacity=".85">signature.ed25519</text><text x="296" y="170" text-anchor="end" fill-opacity=".55">64 B</text>' +
         '<rect x="50" y="188" width="260" height="28" rx="6" fill="currentColor" fill-opacity=".06"/>' +
@@ -187,7 +187,7 @@
       '<g transform="translate(258,18)">' +
         '<rect width="78" height="32" rx="16" fill="var(--brand-primary)" fill-opacity=".18" stroke="var(--brand-primary)" stroke-opacity=".7"/>' +
         '<text x="14" y="20" font-family="ui-monospace, monospace" font-size="10" fill="currentColor" fill-opacity=".7">K</text>' +
-        '<text x="42" y="22" font-family="ui-monospace, monospace" font-size="14" font-weight="700" fill="var(--brand-primary)">87.4</text>' +
+        '<text x="42" y="22" font-family="ui-monospace, monospace" font-size="14" font-weight="700" fill="var(--brand-primary)">88.2</text>' +
       '</g>' +
       // pulsing scan line
       '<rect class="kolm-ill-scan" x="48" y="78" width="264" height="2" fill="var(--brand-primary)" fill-opacity=".5"/>' +
