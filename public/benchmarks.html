@@ -7,7 +7,7 @@
 <meta name="description" content="kscore-bench numbers across distilled artifacts. Quantize matrix from Qwen2.5-0.5B through DeepSeek-R1 32B on an RTX 5090. Real wall-clock, real GB, real K-score.">
 <meta name="theme-color" content="#07090c">
 <meta property="og:title" content="Benchmarks &middot; kolm.ai">
-<meta property="og:description" content="kscore-bench across distilled artifacts plus the SOTA quantize matrix on an RTX 5090.">
+<meta property="og:description" content="kscore-bench across distilled artifacts plus the frontier quantize matrix on an RTX 5090.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/benchmarks">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -123,7 +123,7 @@
 
 <section class="bm-section" id="quantize-matrix">
   <div class="ks-wrap">
-    <h2>SOTA quantize matrix &middot; the headline</h2>
+    <h2>Frontier quantize matrix &middot; the headline</h2>
     <p class="sub">Four sizes, BF16 to INT4 (NF4 with double-quantization via bitsandbytes 0.49.2), measured on a single RTX 5090 with torch 2.11.0 + CUDA 12.8. Every row is verifiable: load the model, generate first token, check the signed receipt. The K-score column is computed against a 200-prompt held-out eval pack per model.</p>
     <table class="qm-tbl">
       <thead>

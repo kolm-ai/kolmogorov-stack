@@ -350,8 +350,8 @@ console.log(r.content[0].text);</pre>
 
       <section class="fr-section fr-section--tight fr-reveal" id="sota-recipes" style="margin: var(--ks-12) 0;">
         <div class="fr-container">
-          <span class="fr-eyebrow">SOTA RECIPES</span>
-          <h2 class="fr-h2">Or build a SOTA recipe in one line.</h2>
+          <span class="fr-eyebrow">FRONTIER RECIPES</span>
+          <h2 class="fr-h2">Or build a frontier recipe in one line.</h2>
           <p class="fr-lede">Same compiler. Different starting point. These commands produce verified, signed, K-scored .kolm artifacts ready for the leaderboard.</p>
           <div class="fr-grid-2">
             <div class="fr-card fr-card--feature">
@@ -359,18 +359,18 @@ console.log(r.content[0].text);</pre>
                 <span class="fr-pill fr-pill--violet">REASONING</span>
                 <span class="fr-pill fr-pill--amber">MULTI-TEACHER</span>
               </div>
-              <h3 class="fr-h3">SOTA reasoning, 8B</h3>
+              <h3 class="fr-h3">Frontier reasoning, 8B</h3>
               <p>Opus-4.7 teacher distilled into a Qwen2.5-7B student with NF4 quantization and reasoning-trace supervision.</p>
-              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build sota-reasoning <span class="fr-cli__flag">--teacher=claude-opus-4-7</span> <span class="fr-cli__flag">--student=qwen2-5-7b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=reasoning</span></pre>
+              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build reasoning <span class="fr-cli__flag">--teacher=claude-opus-4-7</span> <span class="fr-cli__flag">--student=qwen2-5-7b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=reasoning</span></pre>
             </div>
             <div class="fr-card fr-card--feature">
               <div>
                 <span class="fr-pill fr-pill--violet">CODING</span>
                 <span class="fr-pill fr-pill--amber">MTP</span>
               </div>
-              <h3 class="fr-h3">SOTA coding, 13B + MTP</h3>
+              <h3 class="fr-h3">Frontier coding, 13B + MTP</h3>
               <p>Multi-token prediction head bolted onto a 14B coder student. Aider bench drives the bake-off grader.</p>
-              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build sota-coding <span class="fr-cli__flag">--student=qwen2-5-14b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=mpt</span> <span class="fr-cli__flag">--bench=aider</span></pre>
+              <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build coding <span class="fr-cli__flag">--student=qwen2-5-14b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=mpt</span> <span class="fr-cli__flag">--bench=aider</span></pre>
             </div>
             <div class="fr-card fr-card--mint">
               <div>

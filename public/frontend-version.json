@@ -1,7 +1,7 @@
 {
   "surface": "kolm-public-frontend",
-  "version": "2026-05-23-w621-sota-frontier-pivot",
-  "source_commit_at_edit_time": "a195783",
+  "version": "2026-05-23-w622-frontier-aesthetic-faq-svg",
+  "source_commit_at_edit_time": "pending-w622",
   "hero_h1": "Compile any AI model. Run it anywhere.",
   "hero_loop": "route -> capture -> compile -> run",
   "hero_proof": "DeepSeek-R1 32B -> 17.9 GB INT4 in 125s on a single RTX 5090, 11.5 tok/s",
@@ -239,7 +239,16 @@
     "W620 three-forks quantize cards stripped of weird big-mono-labels (<8 GB / no data / re-train) - now just plain card title + one-line method body",
     "W620 four CLI code-step cards tightened: capture goes from 3 lines to 1 (just the export), distill drops the `--namespace support` redundant flag note, quantize drops --local-worker noise, run drops the device-list comment - prose under each card carries the explanation",
     "W620 pricing.html Business tier visually elevated: new 'Best $ / call' warm-amber badge (parallels Pro's mint 'Most teams'), tagline rewritten to lead with '$0.020 per 1k calls. Cheapest tier by 33%.', CTA upgraded from ghost 'Contact sales' to primary 'Talk to sales ->', value props bolded '50 million' and called out '10x Team' for the volume comparison - per user 'enterprise tier always loses more money than the rest fixs that'",
-    "W620 sw.js cache key bumped to kolm-v7-2026-05-23-wave620-homepage-tighten"
+    "W620 sw.js cache key bumped to kolm-v7-2026-05-23-wave620-homepage-tighten",
+    "W622 (A) site-wide SOTA scrub: replaced 'SOTA' with 'frontier' / 'best-in-class' across index, community, changelog, benchmarks, leaderboard, models, pricing, quickstart, recipes, frontier-stack, product, self-host, and both compare pages so the word no longer appears in customer-facing copy",
+    "W622 (B) killed 'MAY 2026' eyebrow on hero SVG (rewrote to 'REAL MODELS, RUN ON ONE GPU') and replaced 'May 2026' month labels on community.html challenge cards with 'Current'",
+    "W622 (C) removed the 16-name 'BUILT WITH RESPECT' efficiency-community influencer strip from the homepage that read as filler",
+    "W622 (D) BUILD ANYTHING bit-width matrix reframed from a flat 12-cell jargon dump into 3 hardware-class bands (PHONE & EDGE / LAPTOP & CONSUMER GPU / DATA CENTER) with a vertical mint/amber/violet accent strip per band, value-first sublabels per row, and one .accent highlight per band (XOR-Net 1.58b for edge, NF4 for consumer GPU)",
+    "W622 (E) homepage hero quantize table gained a sibling .fr-explain band that names the model people recognize (DeepSeek-R1 32B), names the hardware ($2,000 RTX 5090), explains the headline (3-4x compression, 0 tokens billed) with 4 stat callouts, and foots with the honest 70B caveat (CPU offload required on a 5090)",
+    "W622 (F) the empty 'questions everyone asks first' FAQ rebuilt on .fr-faq__row glass cards with numbered chevrons; 10 details/summary rows now render with visible chrome instead of looking like a blank list",
+    "W622 (G) hero SVG 5-target spacing fixed: dashed line endpoint extended from x=440 to x=480, air-gapped device translate shifted to (480 682), restoring the 100px inter-target gap that the cloud-GPU-to-air-gapped pair was missing",
+    "W622 aesthetic overhaul: appended ~280 lines to frontier.css adding aurora-mesh section backgrounds, .fr-h2 gradient text fill, .fr-card glass (backdrop-filter blur + saturate) with hover edge ring + radial glow, gradient-fill .fr-pill halos in mint/amber/violet, .fr-btn sheen + magnetic-mint variant with lift, .fr-target-band hardware-class bands with vertical accent strips, .fr-explain bands, .fr-faq accordion rows, and 640px mobile overrides",
+    "W622 sw.js cache key bumped to kolm-v7-2026-05-23-wave622-frontier-aesthetic-faq-svg"
   ],
   "production_verification_url": "https://kolm.ai/frontend-version.json"
 }

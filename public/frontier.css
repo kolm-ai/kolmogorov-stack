@@ -426,3 +426,403 @@
   .fr-tilt { transform: none !important; }
   .fr-btn, .fr-card, .fr-matrix__cell { transition: none; }
 }
+
+/* ============================================================
+   W622 aesthetic layer — lifts the page out of "bland" without
+   breaking any W621 layouts. Appended; never overrides core
+   .fr-* primitives, only enriches them.
+   ============================================================ */
+
+/* --- Section aurora: subtle two-color mesh gradient that breathes
+   under content. Auto-applies to .fr-section every other section
+   via :nth-of-type, plus an opt-in .fr-section--aurora class. --- */
+.fr-section {
+  position: relative;
+  isolation: isolate;
+}
+.fr-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 440px at 12% 0%, rgba(126, 240, 210, 0.045) 0%, transparent 60%),
+    radial-gradient(700px 380px at 92% 100%, rgba(176, 124, 245, 0.035) 0%, transparent 65%);
+  opacity: 0.9;
+}
+.fr-section--aurora-amber::before {
+  background:
+    radial-gradient(900px 440px at 12% 0%, rgba(255, 177, 85, 0.055) 0%, transparent 60%),
+    radial-gradient(700px 380px at 92% 100%, rgba(126, 240, 210, 0.030) 0%, transparent 65%);
+}
+
+/* --- Display headings get tighter optical weight + a kerned shimmer
+   line under the H2. Subtle. --- */
+.fr-h2 {
+  background: linear-gradient(180deg, var(--ink-1) 0%, color-mix(in oklab, var(--ink-1) 88%, var(--fr-mint)) 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+@supports not (background-clip: text) {
+  .fr-h2 { color: var(--ink-1); -webkit-text-fill-color: currentColor; }
+}
+
+/* --- Card glass + edge ring + ambient inner glow on hover --- */
+.fr-card {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.018) 0%, rgba(255,255,255,0.004) 100%),
+    var(--surface-1);
+  border: 1px solid rgba(236, 231, 220, 0.06);
+  backdrop-filter: blur(8px) saturate(115%);
+  -webkit-backdrop-filter: blur(8px) saturate(115%);
+}
+.fr-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(60% 80% at 50% 0%, rgba(126, 240, 210, 0.05) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--fr-duration-flow) var(--fr-spring-base);
+  z-index: 0;
+}
+.fr-card:hover::after { opacity: 1; }
+.fr-card > * { position: relative; z-index: 1; }
+.fr-card:hover {
+  box-shadow:
+    0 0 0 1px rgba(126, 240, 210, 0.18),
+    0 8px 28px -8px rgba(0, 0, 0, 0.55),
+    0 24px 60px -16px rgba(0, 0, 0, 0.45);
+}
+
+.fr-card--feature {
+  background:
+    linear-gradient(180deg, rgba(126, 240, 210, 0.055) 0%, rgba(255, 255, 255, 0.006) 38%, var(--surface-1) 100%);
+  border-color: rgba(126, 240, 210, 0.12);
+}
+
+/* --- Pills: subtle gradient fill + soft outer halo for premium feel --- */
+.fr-pill {
+  background:
+    linear-gradient(180deg, rgba(126, 240, 210, 0.16) 0%, rgba(126, 240, 210, 0.06) 100%);
+  box-shadow: 0 0 0 1px var(--fr-mint-edge), 0 4px 12px -4px rgba(126, 240, 210, 0.20);
+  border: 0;
+}
+.fr-pill--amber {
+  background:
+    linear-gradient(180deg, rgba(255, 177, 85, 0.18) 0%, rgba(255, 177, 85, 0.06) 100%);
+  box-shadow: 0 0 0 1px var(--fr-amber-edge), 0 4px 12px -4px rgba(255, 177, 85, 0.22);
+}
+.fr-pill--violet {
+  background:
+    linear-gradient(180deg, rgba(176, 124, 245, 0.16) 0%, rgba(176, 124, 245, 0.06) 100%);
+  box-shadow: 0 0 0 1px var(--fr-violet-edge), 0 4px 12px -4px rgba(176, 124, 245, 0.20);
+}
+.fr-pill--ghost {
+  background: transparent;
+  box-shadow: 0 0 0 1px var(--line-2);
+}
+
+/* --- Button: gradient + sheen on hover. Mint button glows; ghost gets
+   an inner glow ring. --- */
+.fr-btn {
+  position: relative;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--ink-1) 100%, white 4%), var(--ink-1));
+  overflow: hidden;
+}
+.fr-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,0.10) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform var(--fr-duration-flow) var(--fr-spring-base);
+  pointer-events: none;
+}
+.fr-btn:hover::before { transform: translateX(120%); }
+.fr-btn--mint {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--fr-mint) 100%, white 14%), var(--fr-mint));
+  color: #02110d;
+  box-shadow: 0 0 0 1px rgba(126, 240, 210, 0.45), 0 10px 28px -10px rgba(126, 240, 210, 0.55);
+}
+.fr-btn--mint:hover {
+  box-shadow: 0 0 0 1px rgba(126, 240, 210, 0.6), 0 14px 42px -10px rgba(126, 240, 210, 0.75);
+  transform: translateY(-1px);
+}
+.fr-btn--ghost { background: transparent; color: var(--ink-1); box-shadow: inset 0 0 0 1px var(--line-2); }
+.fr-btn--ghost:hover { box-shadow: inset 0 0 0 1px var(--fr-mint-edge), 0 8px 20px -8px rgba(126, 240, 210, 0.25); }
+
+.fr-btn__arrow { display: inline-block; transition: transform var(--fr-duration-quick) var(--fr-spring-fast); }
+.fr-btn:hover .fr-btn__arrow { transform: translateX(3px); }
+
+/* --- Matrix cell accent variant (used in W622 banded matrix to mark
+   the "default" / sweet-spot row) --- */
+.fr-matrix__cell--accent {
+  background:
+    linear-gradient(180deg, rgba(126, 240, 210, 0.10) 0%, rgba(126, 240, 210, 0.02) 100%);
+  border-color: var(--fr-mint-edge);
+  box-shadow: 0 0 0 1px var(--fr-mint-edge), 0 12px 28px -10px rgba(126, 240, 210, 0.18);
+}
+.fr-matrix__cell--accent .fr-matrix__key { color: var(--fr-mint); }
+
+/* --- W622 BUILD ANYTHING bands: large grouped sections with their
+   own micro-header (pill + h3 + sub) and a contained matrix grid. --- */
+.fr-target-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.fr-target-band {
+  position: relative;
+  padding: 28px clamp(20px, 3vw, 32px) 8px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid rgba(236, 231, 220, 0.06);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.014) 0%, rgba(255,255,255,0.004) 60%),
+    var(--surface-1);
+  overflow: hidden;
+}
+.fr-target-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 90% at 0% 0%, rgba(126, 240, 210, 0.05) 0%, transparent 50%),
+    radial-gradient(60% 80% at 100% 100%, rgba(176, 124, 245, 0.03) 0%, transparent 55%);
+  z-index: 0;
+}
+.fr-target-band > * { position: relative; z-index: 1; }
+.fr-target-band__head { margin-bottom: 20px; max-width: 68ch; }
+.fr-target-band__pill {
+  display: inline-flex;
+  margin-bottom: 10px;
+}
+.fr-target-band__sub {
+  font-family: var(--fr-font-sans);
+  font-size: var(--fr-text-sm);
+  color: var(--ink-3);
+  line-height: 1.55;
+  margin-top: 8px;
+}
+
+/* Bigger left-side accent strip on each band keyed to its pill color */
+.fr-target-band:nth-of-type(1)::after {
+  content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, var(--fr-mint), transparent);
+}
+.fr-target-band:nth-of-type(2)::after {
+  content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, var(--fr-amber), transparent);
+}
+.fr-target-band:nth-of-type(3)::after {
+  content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, var(--fr-violet), transparent);
+}
+
+/* --- W622 explainer band (homepage "what the four numbers mean") --- */
+.fr-explain {
+  position: relative;
+  padding: clamp(28px, 3vw, 40px) clamp(20px, 3vw, 36px);
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid rgba(236, 231, 220, 0.06);
+  background:
+    linear-gradient(180deg, rgba(126, 240, 210, 0.04) 0%, rgba(255, 255, 255, 0.004) 50%, var(--surface-1) 100%);
+  overflow: hidden;
+}
+.fr-explain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(80% 50% at 50% 0%, rgba(126, 240, 210, 0.08) 0%, transparent 60%);
+}
+.fr-explain__head { margin-bottom: 24px; max-width: 60ch; position: relative; }
+.fr-explain__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(220px, 0.9fr);
+  gap: 36px;
+  align-items: start;
+  position: relative;
+}
+@media (max-width: 820px) {
+  .fr-explain__grid { grid-template-columns: 1fr; gap: 24px; }
+}
+.fr-explain__col p + p { margin-top: 12px; }
+.fr-explain__col .fr-lede { font-size: var(--fr-text-base); line-height: 1.65; color: var(--ink-2); max-width: 60ch; }
+.fr-explain__col code {
+  font-family: var(--fr-font-mono);
+  font-size: 0.92em;
+  background: rgba(126, 240, 210, 0.08);
+  border: 1px solid var(--fr-mint-edge);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--fr-mint);
+}
+.fr-explain__facts {
+  list-style: none;
+  margin: 0;
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+  background:
+    linear-gradient(180deg, rgba(126,240,210,0.06) 0%, rgba(126,240,210,0.015) 100%);
+  border: 1px solid var(--fr-mint-edge);
+  border-radius: var(--radius-md, 12px);
+  box-shadow: 0 0 0 1px rgba(126, 240, 210, 0.10), 0 10px 28px -12px rgba(126, 240, 210, 0.22);
+}
+.fr-explain__facts li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fr-fact__k {
+  font-family: var(--fr-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fr-text-xl);
+  color: var(--ink-1);
+  font-weight: 540;
+  letter-spacing: -0.012em;
+  line-height: 1.0;
+}
+.fr-fact__v {
+  font-family: var(--fr-font-sans);
+  font-size: 12.5px;
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+.fr-explain__foot {
+  margin-top: 22px;
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  color: var(--ink-3);
+  text-transform: uppercase;
+  position: relative;
+}
+
+/* --- W622 FAQ rows (premium accordion replaces .home-faq) --- */
+.fr-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fr-faq__row {
+  border: 1px solid rgba(236, 231, 220, 0.07);
+  border-radius: var(--radius-md, 12px);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.012) 0%, rgba(255,255,255,0.003) 100%),
+    var(--surface-1);
+  overflow: hidden;
+  transition:
+    border-color var(--fr-duration-quick) var(--fr-spring-base),
+    box-shadow var(--fr-duration-flow) var(--fr-spring-base);
+}
+.fr-faq__row:hover { border-color: rgba(126, 240, 210, 0.20); }
+.fr-faq__row[open] {
+  border-color: var(--fr-mint-edge);
+  box-shadow: 0 0 0 1px rgba(126, 240, 210, 0.16), 0 14px 36px -16px rgba(126, 240, 210, 0.20);
+  background:
+    linear-gradient(180deg, rgba(126, 240, 210, 0.05) 0%, rgba(255, 255, 255, 0.005) 30%, var(--surface-1) 100%);
+}
+.fr-faq__row > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  display: grid;
+  grid-template-columns: 36px 1fr 28px;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 22px;
+  font-family: var(--fr-font-sans);
+  font-size: var(--fr-text-md);
+  color: var(--ink-1);
+  font-weight: 540;
+  letter-spacing: -0.005em;
+}
+.fr-faq__row > summary::-webkit-details-marker { display: none; }
+.fr-faq__row > summary::marker { content: ''; }
+.fr-faq__n {
+  font-family: var(--fr-font-mono);
+  font-size: var(--fr-text-xs);
+  letter-spacing: var(--fr-track-label);
+  color: var(--fr-mint);
+  font-weight: 540;
+}
+.fr-faq__q { color: var(--ink-1); }
+.fr-faq__q code {
+  font-family: var(--fr-font-mono);
+  font-size: 0.92em;
+  background: rgba(126,240,210,0.08);
+  border: 1px solid var(--fr-mint-edge);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--fr-mint);
+}
+.fr-faq__chev {
+  font-family: var(--fr-font-mono);
+  color: var(--ink-3);
+  text-align: right;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform var(--fr-duration-quick) var(--fr-spring-fast),
+              color var(--fr-duration-quick) var(--fr-spring-base);
+}
+.fr-faq__row[open] .fr-faq__chev {
+  transform: rotate(45deg);
+  color: var(--fr-mint);
+}
+.fr-faq__a {
+  padding: 0 22px 20px 70px;
+  font-family: var(--fr-font-sans);
+  font-size: var(--fr-text-base);
+  line-height: 1.65;
+  color: var(--ink-2);
+  max-width: 80ch;
+}
+.fr-faq__a a {
+  color: var(--fr-mint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.fr-faq__a code {
+  font-family: var(--fr-font-mono);
+  font-size: 0.94em;
+  background: rgba(126,240,210,0.08);
+  border: 1px solid var(--fr-mint-edge);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--fr-mint);
+}
+@media (max-width: 640px) {
+  .fr-faq__row > summary { grid-template-columns: 28px 1fr 24px; padding: 14px 16px; font-size: 14.5px; }
+  .fr-faq__a { padding: 0 16px 16px 50px; font-size: 14px; }
+}
+
+/* --- Subtle stronger reveal animation on .fr-card descendants when
+   the section reveals (compound springs) --- */
+.fr-reveal .fr-card { transition-delay: 40ms; }
+
+/* --- Anchor-link link styling default inside .fr-section (mint, with
+   subtle underline-offset). Doesn't fire on .fr-btn / .fr-pill descendants. --- */
+.fr-section a:not(.fr-btn):not(.fr-pill):not([class*="fr-pill"]):not(.fr-card a):not(.fr-cli a) {
+  color: inherit;
+}
+.fr-explain a, .fr-faq__a a, .fr-section__head a {
+  color: var(--fr-mint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color var(--fr-duration-micro) var(--fr-spring-base);
+}
+.fr-explain a:hover, .fr-faq__a a:hover, .fr-section__head a:hover {
+  color: color-mix(in oklab, var(--fr-mint) 100%, white 16%);
+}
+

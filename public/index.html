@@ -326,10 +326,10 @@
         <path d="M140 86 L210 124 M205 117 L210 124 L202 122" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
         <path d="M380 86 L310 124 M318 122 L310 124 L315 117" stroke="var(--ks-ink-4)" stroke-width="1.3" fill="none"/>
 
-        <!-- ROW 2 (W620 rebuild): four real compressions. Each row is a single
-             track showing what survives quantize. Numbers are measured, May 2026,
-             RTX 5090, bitsandbytes 0.49.2 NF4+double, torch 2.11.0+cu128. -->
-        <text x="260" y="146" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">REAL MODELS &middot; SHRUNK 3&ndash;4&times; &middot; MAY 2026</text>
+        <!-- ROW 2 (W622 rebuild): four real compressions. Each row is a single
+             track showing what survives quantize. Numbers measured on RTX 5090,
+             bitsandbytes 0.49.2 NF4+double, torch 2.11.0+cu128. -->
+        <text x="260" y="146" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">REAL MODELS, RUN ON ONE GPU</text>
 
         <!-- backplate -->
         <rect x="22" y="158" width="476" height="178" rx="10" fill="var(--ks-bg-1)" stroke="var(--ks-ink-4)" stroke-width="1" stroke-dasharray="2 4" opacity="0.65"/>
@@ -422,7 +422,7 @@
           <line x1="240" y1="608" x2="180" y2="688"/>
           <line x1="280" y1="608" x2="280" y2="688"/>
           <line x1="300" y1="608" x2="380" y2="692"/>
-          <line x1="315" y1="608" x2="440" y2="682"/>
+          <line x1="318" y1="608" x2="480" y2="682"/>
         </g>
 
         <g font-family="var(--ks-sans)" font-size="11" fill="var(--ks-ink-2)" text-anchor="middle">
@@ -451,13 +451,38 @@
             <rect x="-22" y="20" width="32" height="6" fill="var(--ks-accent-cool)" opacity="0.55"/>
             <text x="0" y="58">cloud GPU</text>
           </g>
-          <g transform="translate(440 682)">
+          <g transform="translate(480 682)">
             <rect x="-22" y="0" width="44" height="50" rx="6" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
             <path d="M0 14 L-10 22 L-10 36 L0 42 L10 36 L10 22 Z" fill="none" stroke="var(--ks-accent)" stroke-width="1.5"/>
             <text x="0" y="68">air-gapped</text>
           </g>
         </g>
       </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ================== W622 Hero-table explainer band ================== -->
+<section class="fr-section fr-section--tight fr-reveal" id="why-it-matters" aria-labelledby="why-it-matters-h">
+  <div class="fr-container">
+    <div class="fr-explain">
+      <div class="fr-explain__head">
+        <span class="fr-eyebrow">What the four numbers mean</span>
+        <h2 class="fr-h2" id="why-it-matters-h">The 32B is the news. Running it on a single GPU is the product.</h2>
+      </div>
+      <div class="fr-explain__grid">
+        <div class="fr-explain__col">
+          <p class="fr-lede">DeepSeek&#8209;R1 32B is the open-weights reasoning model people keep posting transcripts of. Quantized through the kolm forge in 125 seconds. The result, 17.9 GB, fits a single $2,000 RTX 5090 with VRAM to spare.</p>
+          <p class="fr-lede">The other three rows are the same compiler, applied to smaller bases. They are not a stunt. They are the entire size ladder, on the same machine, in under three minutes total. The point of the table is that the curve scales: pick any base, pick any target, the compiler emits one signed <code>.kolm</code> file and tells you the K&#8209;Score versus the original.</p>
+        </div>
+        <ul class="fr-explain__facts">
+          <li><span class="fr-fact__k">3 to 4&times;</span><span class="fr-fact__v">smaller on disk, every row</span></li>
+          <li><span class="fr-fact__k">$2,000 GPU</span><span class="fr-fact__v">single RTX 5090, 32 GB VRAM</span></li>
+          <li><span class="fr-fact__k">125s</span><span class="fr-fact__v">to quantize the 32B</span></li>
+          <li><span class="fr-fact__k">0 tokens billed</span><span class="fr-fact__v">artifact runs on your hardware</span></li>
+        </ul>
+      </div>
+      <p class="fr-explain__foot">Same method, larger bases: 70B&#8209;class needs CPU offload on a 5090; multi&#8209;GPU clears it cleanly. Numbers measured on the open repro at <a href="/benchmarks" style="color:var(--fr-mint);">/benchmarks</a>.</p>
     </div>
   </div>
 </section>
@@ -552,7 +577,7 @@
       </div>
     </div>
 
-    <!-- Full SOTA menu, one click away. -->
+    <!-- Full frontier-quant menu, one click away. -->
     <details style="margin-top:var(--ks-10);">
       <summary style="cursor:pointer; user-select:none; color:var(--ks-accent); font-weight:500; padding:var(--ks-3) 0;">See all 10 methods with paper citations &rarr;</summary>
       <div class="home-cmp" style="margin-top:var(--ks-4);">
@@ -675,8 +700,8 @@
 <section class="fr-section fr-reveal" id="frontier-recipes">
   <div class="fr-container">
     <span class="fr-eyebrow">FRONTIER RECIPES</span>
-    <h2 class="fr-h2">Build SOTA. Pick a recipe. One command.</h2>
-    <p class="fr-lede">Curated builds the LocalLLaMA crowd shares on r/ and HF. Reasoning, coding, low-bit, MTP, multi-teacher, agentic. Every stack composable on the same compiler.</p>
+    <h2 class="fr-h2">Pick a recipe. Hit one command. Own the model.</h2>
+    <p class="fr-lede">Six builds the LocalLLaMA crowd actually runs: frontier reasoning, frontier coding, sub-1-GB phone models, MTP speed, multi-teacher fusion, agentic replay. Same compiler, your hardware.</p>
     <div class="fr-grid-3" style="margin-top:32px;">
 
       <article class="fr-card fr-card--feature">
@@ -684,9 +709,9 @@
           <span class="fr-pill fr-pill--mint">REASONING</span>
           <span class="fr-pill fr-pill--violet">MULTI-TEACHER</span>
         </div>
-        <h3 class="fr-h3">SOTA reasoning, 8B</h3>
+        <h3 class="fr-h3">Frontier reasoning, 8B</h3>
         <p>Distill chain-of-thought from a frontier teacher into a Qwen 2.5 7B student. NF4 weight quant plus dynamic activation gating. K-Score gated; bake-off scored vs the teacher on your held-out reasoning rows.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build sota-reasoning <span class="fr-cli__flag">--teacher=claude-opus-4-7</span> <span class="fr-cli__flag">--student=qwen2-5-7b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=reasoning</span>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build reasoning <span class="fr-cli__flag">--teacher=claude-opus-4-7</span> <span class="fr-cli__flag">--student=qwen2-5-7b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=reasoning</span>
 <span class="fr-cli__comment"># 14 min, 5.2 GB artifact, 92.4 K-Score vs teacher</span></pre>
       </article>
 
@@ -695,9 +720,9 @@
           <span class="fr-pill fr-pill--mint">CODING</span>
           <span class="fr-pill fr-pill--amber">MTP</span>
         </div>
-        <h3 class="fr-h3">SOTA coding plus MTP, 13B</h3>
+        <h3 class="fr-h3">Frontier coding + MTP, 13B</h3>
         <p>Qwen 2.5 14B student with multi-token-prediction heads for autoregressive code emission. Trained on your captured edit and review traffic. INT4 NF4; serves on a single 24 GB GPU.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build sota-coding <span class="fr-cli__flag">--student=qwen2-5-14b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=mpt</span>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> kolm build coding <span class="fr-cli__flag">--student=qwen2-5-14b</span> <span class="fr-cli__flag">--bit=4.0</span> <span class="fr-cli__flag">--mode=mpt</span>
 <span class="fr-cli__comment"># MTP heads add 1.7x throughput on greedy decode</span></pre>
       </article>
 
@@ -748,113 +773,127 @@
   </div>
 </section>
 
-<!-- ================== W621 Build-anything matrix ================== -->
-<section class="fr-section fr-reveal">
+<!-- ================== W622 Build-anything matrix, reframed value-first ================== -->
+<section class="fr-section fr-reveal" id="build-anything">
   <div class="fr-container">
-    <span class="fr-eyebrow">BUILD ANYTHING</span>
-    <h2 class="fr-h2">Every precision. Every mode. One signed artifact.</h2>
-    <p class="fr-lede">1.58-bit BitNet to FP8. Dynamic 2.0 to TurboQuant KV. The forge accepts any combination.</p>
-    <div class="fr-matrix" style="margin-top:32px;">
+    <span class="fr-eyebrow">PICK YOUR TARGET</span>
+    <h2 class="fr-h2">Same model. Different precision. Different device.</h2>
+    <p class="fr-lede">Compression isn't one number. The forge gives you twelve, grouped by where the model has to run. Pick the row that matches your hardware; we wire the right kernel.</p>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">1.0-bit</div>
-        <div class="fr-matrix__val">XOR-Net binary</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:6%"></span></div>
-        <div class="fr-matrix__caption">Pure sign weights. Edge MCUs, popcount kernels.</div>
+    <div class="fr-target-stack" style="margin-top:36px;">
+
+      <!-- BAND 1: phone/edge -->
+      <div class="fr-target-band">
+        <div class="fr-target-band__head">
+          <span class="fr-target-band__pill fr-pill fr-pill--mint">PHONE &amp; EDGE</span>
+          <h3 class="fr-h3">Sub-2-bit. Fits a Pixel. No matmul, just popcount.</h3>
+          <p class="fr-target-band__sub">For wearables, MCUs, on-device assistants. Trade some headroom; gain offline + zero-cost inference.</p>
+        </div>
+        <div class="fr-matrix">
+          <div class="fr-matrix__cell fr-matrix__cell--accent">
+            <div class="fr-matrix__key">1.0-bit</div>
+            <div class="fr-matrix__val">XOR-Net binary</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:6%"></span></div>
+            <div class="fr-matrix__caption">Pure sign weights. ESP32-class MCUs.</div>
+          </div>
+          <div class="fr-matrix__cell">
+            <div class="fr-matrix__key">1.25-bit</div>
+            <div class="fr-matrix__val">QuIP# lattice</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:8%"></span></div>
+            <div class="fr-matrix__caption">Sub-2-bit, near-lossless on a 7B base.</div>
+          </div>
+          <div class="fr-matrix__cell">
+            <div class="fr-matrix__key">1.58-bit</div>
+            <div class="fr-matrix__val">BitNet ternary</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:10%"></span></div>
+            <div class="fr-matrix__caption">{-1, 0, +1}. 3B base &rarr; 580 MB on Pixel 8.</div>
+          </div>
+          <div class="fr-matrix__cell">
+            <div class="fr-matrix__key">2.0-bit</div>
+            <div class="fr-matrix__val">AQLM additive</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:13%"></span></div>
+            <div class="fr-matrix__caption">Phone-class footprint, retains chat fluency.</div>
+          </div>
+        </div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">1.25-bit</div>
-        <div class="fr-matrix__val">QuIP# E8 lattice</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:8%"></span></div>
-        <div class="fr-matrix__caption">Incoherence-processed; sub-2-bit, near-lossless 7B.</div>
+      <!-- BAND 2: laptop / consumer GPU -->
+      <div class="fr-target-band">
+        <div class="fr-target-band__head">
+          <span class="fr-target-band__pill fr-pill fr-pill--amber">LAPTOP &amp; CONSUMER GPU</span>
+          <h3 class="fr-h3">3 to 4-bit. The 95% sweet spot.</h3>
+          <p class="fr-target-band__sub">The DeepSeek-R1 32B in the hero quantized at this band. Where a $2,000 GPU runs a model that used to cost a data center.</p>
+        </div>
+        <div class="fr-matrix">
+          <div class="fr-matrix__cell">
+            <div class="fr-matrix__key">2.25-bit</div>
+            <div class="fr-matrix__val">HQQ calibration-free</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:14%"></span></div>
+            <div class="fr-matrix__caption">No calibration set required. Quantizes in seconds.</div>
+          </div>
+          <div class="fr-matrix__cell">
+            <div class="fr-matrix__key">3.0-bit</div>
+            <div class="fr-matrix__val">GPTQ groupwise</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:19%"></span></div>
+            <div class="fr-matrix__caption">Hessian-aware rounding, calibrated on your rows.</div>
+          </div>
+          <div class="fr-matrix__cell fr-matrix__cell--accent">
+            <div class="fr-matrix__key">4.0-bit</div>
+            <div class="fr-matrix__val">NF4 + double quant</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:25%"></span></div>
+            <div class="fr-matrix__caption">bitsandbytes default. What ran the 32B on a 5090.</div>
+          </div>
+          <div class="fr-matrix__cell">
+            <div class="fr-matrix__key">Dyn 2.0</div>
+            <div class="fr-matrix__val">Mixed-precision activations</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:32%"></span></div>
+            <div class="fr-matrix__caption">Per-layer learned bit budget. Top K-Score per byte.</div>
+          </div>
+        </div>
       </div>
 
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">1.58-bit</div>
-        <div class="fr-matrix__val">BitNet ternary</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:10%"></span></div>
-        <div class="fr-matrix__caption">{-1, 0, +1}. QAT-from-scratch or fine-tune.</div>
-      </div>
-
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">2.0-bit</div>
-        <div class="fr-matrix__val">AQLM additive</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:13%"></span></div>
-        <div class="fr-matrix__caption">Additive quantization, phone-class footprint.</div>
-      </div>
-
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">2.25-bit</div>
-        <div class="fr-matrix__val">HQQ calibration-free</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:14%"></span></div>
-        <div class="fr-matrix__caption">No calibration set required. Runs in seconds.</div>
-      </div>
-
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">3.0-bit</div>
-        <div class="fr-matrix__val">GPTQ groupwise</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:19%"></span></div>
-        <div class="fr-matrix__caption">Optimal brain quantization, calibrated.</div>
-      </div>
-
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">4.0-bit</div>
-        <div class="fr-matrix__val">NF4 plus double</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:25%"></span></div>
-        <div class="fr-matrix__caption">bitsandbytes default. The 95% sweet spot.</div>
-      </div>
-
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">8.0-bit</div>
-        <div class="fr-matrix__val">LLM.int8 vector</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:50%"></span></div>
-        <div class="fr-matrix__caption">Outlier-isolated INT8, no accuracy loss.</div>
-      </div>
-
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">FP8</div>
-        <div class="fr-matrix__val">E4M3 / E5M2</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:50%"></span></div>
-        <div class="fr-matrix__caption">Native on H100, B200. Per-tensor scale.</div>
-      </div>
-
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">NVFP4</div>
-        <div class="fr-matrix__val">NVIDIA microscaling</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:25%"></span></div>
-        <div class="fr-matrix__caption">Microblock FP4 on Blackwell. Hardware path.</div>
-      </div>
-
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">Dyn 2.0</div>
-        <div class="fr-matrix__val">Mixed-precision activations</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:32%"></span></div>
-        <div class="fr-matrix__caption">Per-layer bit budget, learned. Best K-Score.</div>
-      </div>
-
-      <div class="fr-matrix__cell">
-        <div class="fr-matrix__key">TurboQ KV</div>
-        <div class="fr-matrix__val">KV-cache INT2 to INT4</div>
-        <div class="fr-bar"><span class="fr-bar__fill" style="width:18%"></span></div>
-        <div class="fr-matrix__caption">Shrinks context cache 4x. Long-context wins.</div>
+      <!-- BAND 3: data center -->
+      <div class="fr-target-band">
+        <div class="fr-target-band__head">
+          <span class="fr-target-band__pill fr-pill fr-pill--violet">DATA CENTER</span>
+          <h3 class="fr-h3">8-bit and native FP. Hardware-accelerated paths.</h3>
+          <p class="fr-target-band__sub">When latency and accuracy outrank disk size. Native FP8 on Hopper. Microblock FP4 on Blackwell. KV-cache shrunk 4x for long-context workloads.</p>
+        </div>
+        <div class="fr-matrix">
+          <div class="fr-matrix__cell">
+            <div class="fr-matrix__key">8.0-bit</div>
+            <div class="fr-matrix__val">LLM.int8 vector</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:50%"></span></div>
+            <div class="fr-matrix__caption">Outlier-isolated INT8. No measurable accuracy loss.</div>
+          </div>
+          <div class="fr-matrix__cell">
+            <div class="fr-matrix__key">FP8</div>
+            <div class="fr-matrix__val">E4M3 / E5M2</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:50%"></span></div>
+            <div class="fr-matrix__caption">Native tensor cores on H100, B200. Per-tensor scale.</div>
+          </div>
+          <div class="fr-matrix__cell">
+            <div class="fr-matrix__key">NVFP4</div>
+            <div class="fr-matrix__val">Blackwell microscaling</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:25%"></span></div>
+            <div class="fr-matrix__caption">Microblock FP4. The B200 native low-bit path.</div>
+          </div>
+          <div class="fr-matrix__cell">
+            <div class="fr-matrix__key">TurboQ KV</div>
+            <div class="fr-matrix__val">KV-cache INT2&ndash;INT4</div>
+            <div class="fr-bar"><span class="fr-bar__fill" style="width:18%"></span></div>
+            <div class="fr-matrix__caption">4x smaller context cache. Long-document agents stop OOM-ing.</div>
+          </div>
+        </div>
       </div>
 
     </div>
-    <p style="margin-top:24px;"><a class="fr-btn fr-btn--ghost" href="/forge">Open the forge</a></p>
+
+    <p style="margin-top:32px;"><a class="fr-btn fr-btn--mint" data-fr-magnetic href="/forge">Open the forge <span class="fr-btn__arrow">&rarr;</span></a> <a class="fr-btn fr-btn--ghost" href="/compile" style="margin-left:8px;">How quantize works</a></p>
   </div>
 </section>
 
-<!-- ================== W621 Top creators strip ================== -->
-<section class="fr-section fr-section--tight">
-  <div class="fr-container">
-    <span class="fr-eyebrow">BUILT WITH RESPECT</span>
-    <h2 class="fr-h2">The efficiency community we learn from.</h2>
-    <p class="fr-lede">kolm rides on the shoulders of the people quantizing every new base within hours. Their formats and tooling are first-class on kolm.</p>
-    <p class="fr-num--unit" style="margin-top:18px; line-height:1.9;">bartowski &middot; Unsloth &middot; TheBloke &middot; mradermacher &middot; ByteShape &middot; DavidAU &middot; QuantFactory &middot; lmstudio-community &middot; MaziyarPanahi &middot; DeepSeek &middot; Qwen &middot; Moonshot &middot; Tencent AngelSlim &middot; Gryphe &middot; Undi95 &middot; mlabonne</p>
-    <p style="margin-top:16px;"><a class="fr-btn fr-btn--ghost" href="/community">See the full roster &amp; how to publish</a></p>
-  </div>
-</section>
+<!-- ================== W621 creators strip, removed W622 ================== -->
 
 <!-- ================== W621 Frontier methods row ================== -->
 <section class="fr-section fr-reveal">
@@ -1885,7 +1924,7 @@ CMD [<span style="color:var(--ks-accent)">"kolm"</span>, <span style="color:var(
     <div class="home-clog">
       <div class="home-clog-item">
         <div class="home-clog-date">2026-05-22</div>
-        <div class="home-clog-body"><b>W614 SOTA quant menu shipped.</b> The worker now drives 10 methods, not 4: <code>int4</code>, <code>int8</code>, <code>gptq</code>, <code>awq</code>, plus <code>aqlm</code> (2-bit additive, Egiazarian 2024), <code>quip</code> (E8 sub-2-bit, Tseng 2024), <code>exl2</code>, <code>exl3</code>, <code>hqq</code> (calibration-free), <code>qat</code> (EfficientQAT, Chen 2024). Per-method doctor reports green/red separately so a tenant only installs the libs they need.</div>
+        <div class="home-clog-body"><b>W614 frontier quant menu shipped.</b> The worker now drives 10 methods, not 4: <code>int4</code>, <code>int8</code>, <code>gptq</code>, <code>awq</code>, plus <code>aqlm</code> (2-bit additive, Egiazarian 2024), <code>quip</code> (E8 sub-2-bit, Tseng 2024), <code>exl2</code>, <code>exl3</code>, <code>hqq</code> (calibration-free), <code>qat</code> (EfficientQAT, Chen 2024). Per-method doctor reports green/red separately so a tenant only installs the libs they need.</div>
       </div>
       <div class="home-clog-item">
         <div class="home-clog-date">2026-05-22</div>
@@ -2356,7 +2395,7 @@ $ kolm media image-doctor
 
       <div class="home-road-card shipped">
         <div class="when">May 2026</div>
-        <h4>DeepSeek-R1 32B INT4 + SOTA matrix</h4>
+        <h4>DeepSeek-R1 32B INT4 on a 5090</h4>
         <ul>
           <li>Four sizes proven on one RTX 5090</li>
           <li>Reproducible quantize transcripts</li>
@@ -2574,55 +2613,97 @@ $ kolm media image-doctor
 
 <!-- W620: stats bar removed; numbers folded into Trust/Why sections inline. -->
 
-<!-- ================== FAQ ================== -->
-<section class="ks-section" id="faq">
-  <div class="ks-wrap-narrow">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">FAQ</span>
-      <h2 class="ks-h2">The questions everyone asks first.</h2>
+<!-- ================== FAQ, W622 visual rebuild on .fr-card details ================== -->
+<section class="fr-section fr-reveal" id="faq" aria-labelledby="faq-h">
+  <div class="fr-container fr-container--tight">
+    <div class="fr-section__head">
+      <span class="fr-eyebrow">FAQ</span>
+      <h2 class="fr-h2" id="faq-h">The ten questions we get every week.</h2>
+      <p class="fr-lede">Tap a row to expand. Same answers we give in support, only without the back-and-forth.</p>
     </div>
-    <div class="home-faq">
-      <details>
-        <summary>Is kolm a replacement for OpenAI?</summary>
-        <div class="a">No. kolm sits in front of OpenAI (and Anthropic, vLLM, SGLang, TRT-LLM). You keep the SDK you already use. We route, log approvals, and let you compile those approved calls into a smaller model you own. After compile, you stop paying per token.</div>
+    <div class="fr-faq" style="margin-top:32px;">
+      <details class="fr-faq__row">
+        <summary>
+          <span class="fr-faq__n">01</span>
+          <span class="fr-faq__q">Is kolm a replacement for OpenAI?</span>
+          <span class="fr-faq__chev" aria-hidden="true">+</span>
+        </summary>
+        <div class="fr-faq__a">No. kolm sits in front of OpenAI (and Anthropic, vLLM, SGLang, TRT-LLM). You keep the SDK you already use. We route, log approvals, and let you compile those approved calls into a smaller model you own. After compile, you stop paying per token.</div>
       </details>
-      <details>
-        <summary>What is a <code>.kolm</code> artifact?</summary>
-        <div class="a">One sealed file that contains the model weights, the spec it was compiled against, the seed split it trained on, the teacher receipts, and an Ed25519 signature binding them all. Verify any response a <code>.kolm</code> produces at <a href="/verify-prod">/verify-prod</a>.</div>
+      <details class="fr-faq__row">
+        <summary>
+          <span class="fr-faq__n">02</span>
+          <span class="fr-faq__q">What is a <code>.kolm</code> artifact?</span>
+          <span class="fr-faq__chev" aria-hidden="true">+</span>
+        </summary>
+        <div class="fr-faq__a">One sealed file that contains the model weights, the spec it was compiled against, the seed split it trained on, the teacher receipts, and an Ed25519 signature binding them all. Verify any response a <code>.kolm</code> produces at <a href="/verify-prod">/verify-prod</a>.</div>
       </details>
-      <details>
-        <summary>Where does the data live? Can I self-host?</summary>
-        <div class="a">Every capture, dataset, and artifact is tenant-isolated and tenant-fenced. Your data never crosses to another tenant. The whole stack runs on your own hardware (BYOC, VPC, on-prem, air-gapped) under Apache-2.0. See <a href="/self-host">/self-host</a>.</div>
+      <details class="fr-faq__row">
+        <summary>
+          <span class="fr-faq__n">03</span>
+          <span class="fr-faq__q">Where does the data live? Can I self-host?</span>
+          <span class="fr-faq__chev" aria-hidden="true">+</span>
+        </summary>
+        <div class="fr-faq__a">Every capture, dataset, and artifact is tenant-isolated and tenant-fenced. Your data never crosses to another tenant. The whole stack runs on your own hardware (BYOC, VPC, on-prem, air-gapped) under Apache-2.0. See <a href="/self-host">/self-host</a>.</div>
       </details>
-      <details>
-        <summary>How real are the benchmarks on this page?</summary>
-        <div class="a">Run them yourself. The DeepSeek-R1 32B to 17.9 GB INT4 in 125s number was measured May 2026 on an RTX 5090 with bitsandbytes 0.49.2 (NF4 + double quant) and torch 2.11.0+cu128. Transcripts are linked from <a href="/benchmarks">/benchmarks</a>.</div>
+      <details class="fr-faq__row">
+        <summary>
+          <span class="fr-faq__n">04</span>
+          <span class="fr-faq__q">How real are the benchmarks on this page?</span>
+          <span class="fr-faq__chev" aria-hidden="true">+</span>
+        </summary>
+        <div class="fr-faq__a">Run them yourself. The DeepSeek-R1 32B to 17.9 GB INT4 in 125s number was measured on an RTX 5090 with bitsandbytes 0.49.2 (NF4 + double quant) and torch 2.11.0+cu128. Transcripts are linked from <a href="/benchmarks">/benchmarks</a>.</div>
       </details>
-      <details>
-        <summary>What about HIPAA, SOC 2, regulated workloads?</summary>
-        <div class="a">SOC 2 Type I available today. HIPAA mapping (<a href="/hipaa-mapping">/hipaa-mapping</a>) and a signed BAA (<a href="/baa">/baa</a>) ship on Business. Explicit doors for healthcare, finance, legal, defense, and EU/sovereign deployments. PII redaction (text, image, audio) on by default at the gateway.</div>
+      <details class="fr-faq__row">
+        <summary>
+          <span class="fr-faq__n">05</span>
+          <span class="fr-faq__q">What about HIPAA, SOC 2, regulated workloads?</span>
+          <span class="fr-faq__chev" aria-hidden="true">+</span>
+        </summary>
+        <div class="fr-faq__a">SOC 2 Type I available today. HIPAA mapping (<a href="/hipaa-mapping">/hipaa-mapping</a>) and a signed BAA (<a href="/baa">/baa</a>) ship on Business. Explicit doors for healthcare, finance, legal, defense, and EU/sovereign deployments. PII redaction (text, image, audio) on by default at the gateway.</div>
       </details>
-      <details>
-        <summary>Will my model drift after I deploy it?</summary>
-        <div class="a">Every compile carries a K-score. The runtime computes a fresh K-score from production responses and alerts when it drops. <a href="/drift">/drift</a> shows the recipe: snapshot at compile, detect on every batch, recompile from fresh captures when the verdict moves out of "within."</div>
+      <details class="fr-faq__row">
+        <summary>
+          <span class="fr-faq__n">06</span>
+          <span class="fr-faq__q">Will my model drift after I deploy it?</span>
+          <span class="fr-faq__chev" aria-hidden="true">+</span>
+        </summary>
+        <div class="fr-faq__a">Every compile carries a K-Score. The runtime computes a fresh K-Score from production responses and alerts when it drops. <a href="/drift">/drift</a> shows the recipe: snapshot at compile, detect on every batch, recompile from fresh captures when the verdict moves out of "within."</div>
       </details>
-      <details>
-        <summary>How is this different from "fine-tune a small model"?</summary>
-        <div class="a">Fine-tuning is one step of compile. Kolm wraps capture (where do the rows come from?), distill (which student? which teacher? what loss?), quantize (verified roundtrip), eval (frozen at compile), package (one file), sign (Ed25519), and verify (registry + receipt). The value is the wiring.</div>
+      <details class="fr-faq__row">
+        <summary>
+          <span class="fr-faq__n">07</span>
+          <span class="fr-faq__q">How is this different from "fine-tune a small model"?</span>
+          <span class="fr-faq__chev" aria-hidden="true">+</span>
+        </summary>
+        <div class="fr-faq__a">Fine-tuning is one step of compile. kolm wraps capture (where do the rows come from?), distill (which student? which teacher? what loss?), quantize (verified roundtrip), eval (frozen at compile), package (one file), sign (Ed25519), and verify (registry + receipt). The value is the wiring.</div>
       </details>
-      <details>
-        <summary>What if I just want to verify someone else's <code>.kolm</code>?</summary>
-        <div class="a">Free, no signup. <code>curl https://kolm.ai/v1/verify/&lt;cid&gt;</code> returns the registry row. <code>kolm verify file.kolm</code> verifies an artifact locally. <code>kolm verify --receipt &lt;receipt.json&gt;</code> verifies a response. All three work without an API key.</div>
+      <details class="fr-faq__row">
+        <summary>
+          <span class="fr-faq__n">08</span>
+          <span class="fr-faq__q">What if I just want to verify someone else's <code>.kolm</code>?</span>
+          <span class="fr-faq__chev" aria-hidden="true">+</span>
+        </summary>
+        <div class="fr-faq__a">Free, no signup. <code>curl https://kolm.ai/v1/verify/&lt;cid&gt;</code> returns the registry row. <code>kolm verify file.kolm</code> verifies an artifact locally. <code>kolm verify --receipt &lt;receipt.json&gt;</code> verifies a response. All three work without an API key.</div>
       </details>
-      <details>
-        <summary>How do I export my data if I leave kolm?</summary>
-        <div class="a"><code>kolm account export</code> writes a JSONL of every capture, every artifact, every receipt, every registry row, and every audit-log entry. Apache-2.0 license + open artifact format means the data is yours forever; rebuild the same compile elsewhere from the export.</div>
+      <details class="fr-faq__row">
+        <summary>
+          <span class="fr-faq__n">09</span>
+          <span class="fr-faq__q">How do I export my data if I leave kolm?</span>
+          <span class="fr-faq__chev" aria-hidden="true">+</span>
+        </summary>
+        <div class="fr-faq__a"><code>kolm account export</code> writes a JSONL of every capture, every artifact, every receipt, every registry row, and every audit-log entry. Apache-2.0 license + open artifact format means the data is yours forever; rebuild the same compile elsewhere from the export.</div>
       </details>
-      <details>
-        <summary>How do I cancel my plan?</summary>
-        <div class="a">Dashboard: Settings &rarr; Plan &rarr; Cancel. CLI: <code>kolm billing cancel</code>. No phone tree, no retention specialist. Cancellation takes effect at the end of the current billing period; export your data first if you want it.</div>
+      <details class="fr-faq__row">
+        <summary>
+          <span class="fr-faq__n">10</span>
+          <span class="fr-faq__q">How do I cancel my plan?</span>
+          <span class="fr-faq__chev" aria-hidden="true">+</span>
+        </summary>
+        <div class="fr-faq__a">Dashboard: Settings &rarr; Plan &rarr; Cancel. CLI: <code>kolm billing cancel</code>. No phone tree, no retention specialist. Cancellation takes effect at the end of the current billing period; export your data first if you want it.</div>
       </details>
     </div>
+    <p style="margin-top:24px;"><a class="fr-btn fr-btn--ghost" href="/faq">Browse the full FAQ <span class="fr-btn__arrow">&rarr;</span></a></p>
   </div>
 </section>
 

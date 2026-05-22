@@ -7,7 +7,7 @@
 <meta name="description" content="Every model kolm can compile to a signed .kolm artifact. Teachers, students, runtimes, quantization matrix. DeepSeek-R1, Qwen2.5, Llama 3.3, Phi-4, Mistral, Gemma, custom on request.">
 <meta name="theme-color" content="#07090c">
 <meta property="og:title" content="Models &middot; kolm.ai">
-<meta property="og:description" content="Every base model, teacher, and runtime that kolm supports. Includes the SOTA quantize matrix.">
+<meta property="og:description" content="Every base model, teacher, and runtime that kolm supports. Includes the frontier quantize matrix.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/models">
 <meta property="og:image" content="https://kolm.ai/og-card.svg">
@@ -81,7 +81,7 @@
   <div class="ks-wrap">
     <span class="ks-eyebrow">For developers and engineers &middot; Supported models</span>
     <h1 class="ks-h1" style="margin-top: var(--ks-3); max-width: 26ch;">Every model kolm can compile, distill, and run.</h1>
-    <p class="ks-lede" style="max-width: 64ch;">Frontier teachers, open-weights students, and the runtimes that load them. Every cell on this page has been compile-verified on a current driver stack; the SOTA quantize matrix at the bottom is real wall-clock from a single RTX 5090.</p>
+    <p class="ks-lede" style="max-width: 64ch;">Frontier teachers, open-weights students, and the runtimes that load them. Every cell on this page has been compile-verified on a current driver stack; the frontier quantize matrix at the bottom is real wall-clock from a single RTX 5090.</p>
     <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
       <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Compile your first model <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="#quantize" class="ks-btn ks-btn--ghost ks-btn--lg">See the quantize matrix</a>
@@ -180,7 +180,7 @@
         <span class="role student">Student</span>
         <div class="row1"><h3>DeepSeek-R1-Distill-Qwen-32B</h3><span class="sz">61 GB &rarr; 17.9 GB INT4</span></div>
         <p>The flagship. Already a strong reasoner out of the box from DeepSeek's distillation; further specializable for narrow domains via kolm. Runs at 11.5 tok/s on a single RTX 5090 in INT4.</p>
-        <div class="specs"><span><b>Best for:</b> SOTA reasoning, large CoT, complex specialists</span><span><b>Runtime:</b> vLLM, TRT-LLM, llama.cpp</span><span><b>Quantize:</b> 125.3s on RTX 5090</span></div>
+        <div class="specs"><span><b>Best for:</b> frontier reasoning, large CoT, complex specialists</span><span><b>Runtime:</b> vLLM, TRT-LLM, llama.cpp</span><span><b>Quantize:</b> 125.3s on RTX 5090</span></div>
       </div>
       <div class="mdl-card">
         <span class="role student">Student</span>
@@ -201,7 +201,7 @@
 <section class="ks-section" id="quantize">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">SOTA quantize matrix</span>
+      <span class="ks-eyebrow">Frontier quantize matrix</span>
       <h2 class="ks-h2">Real wall-clock on a single RTX 5090, with INT4 NF4 + double-quant.</h2>
       <p class="ks-lede">Same compiler path, four sizes, one host. Numbers reproduce; we ship the script in the repo. DeepSeek-R1 32B INT4 runs at 11.5 tok/s with chain-of-thought intact.</p>
     </div>
