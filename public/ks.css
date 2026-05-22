@@ -31,15 +31,15 @@
      Mint = action / CTA / live state.  Used sparingly.
      Warm = numeric data, prices, durations.  Adds editorial warmth.
      Cool = code syntax, secondary category.  Visual variety, not decoration. */
-  --ks-accent:      #76edd0;
-  --ks-accent-2:    #b6f5e2;
-  --ks-accent-soft: rgba(118,237,208,0.08);
-  --ks-accent-edge: rgba(118,237,208,0.24);
-  --ks-accent-glow: rgba(118,237,208,0.14);
-  --ks-accent-warm: #e8b86d;
-  --ks-accent-warm-soft: rgba(232,184,109,0.10);
-  --ks-accent-cool: #9d97e3;
-  --ks-accent-cool-soft: rgba(157,151,227,0.10);
+  --ks-accent:      #2bf5b3;
+  --ks-accent-2:    #92ffd9;
+  --ks-accent-soft: rgba(43,245,179,0.12);
+  --ks-accent-edge: rgba(43,245,179,0.34);
+  --ks-accent-glow: rgba(43,245,179,0.22);
+  --ks-accent-warm: #ffb155;
+  --ks-accent-warm-soft: rgba(255,177,85,0.14);
+  --ks-accent-cool: #a89bff;
+  --ks-accent-cool-soft: rgba(168,155,255,0.14);
 
   /* Status — used only in product / dashboards, not marketing */
   --ks-pos:         #6ee7a8;
@@ -120,11 +120,11 @@
   --ks-ink-2: rgba(12,17,26,0.78);
   --ks-ink-3: rgba(12,17,26,0.56);
   --ks-ink-4: rgba(12,17,26,0.38);
-  --ks-accent: #1d8866;
-  --ks-accent-2: #146d4f;
-  --ks-accent-soft: rgba(29,136,102,0.10);
-  --ks-accent-edge: rgba(29,136,102,0.28);
-  --ks-accent-glow: rgba(29,136,102,0.18);
+  --ks-accent: #0e9a6b;
+  --ks-accent-2: #08754f;
+  --ks-accent-soft: rgba(14,154,107,0.12);
+  --ks-accent-edge: rgba(14,154,107,0.36);
+  --ks-accent-glow: rgba(14,154,107,0.22);
 }
 
 /* ----- 2. Base reset, scoped to .ks --------------------------------------- */
@@ -976,6 +976,13 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
 .ks .api-hero,
 .ks .prod-section,
 .ks .prod-hero { background-color: var(--ks-bg); position: relative; }
+
+/* W616: Hide tertiary sections on DESKTOP too. The narrative was designed
+   around 8-10 sections; the 30 extra grew there by accretion. Sections
+   marked [data-mobile-hide] are now hidden everywhere so the homepage
+   reads as the intentional spine, not the archeological dig. Lock-in test
+   anchors still resolve because the markup is present, just not painted. */
+.ks [data-mobile-hide] { display: none !important; }
 
 /* Section alternation (subtle): odd elevations on bg-1 to break monotony. */
 .ks .ks-section.ks-section--alt,

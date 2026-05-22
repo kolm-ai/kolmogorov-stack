@@ -280,51 +280,90 @@
   <div class="ks-hero__wrap">
     <div>
       <span class="ks-eyebrow">Open-source AI compiler</span>
-      <h1 class="ks-hero__h1">
+      <h1 class="ks-hero__h1" style="font-family:var(--ks-sans); font-style:normal;">
         Compile any AI model.<br>
-        <em class="ks-em">Run it anywhere.</em>
+        Run it anywhere.
       </h1>
-      <div class="ks-hero__verbs">
-        <div class="ks-hero__verb">
-          <span class="ks-hero__verb-h">Capture</span>
-          <p>Drop kolm in front of every model API. Every call returns the data that trains a smaller model on hardware you own.</p>
-        </div>
-        <div class="ks-hero__verb">
-          <span class="ks-hero__verb-h">Train</span>
-          <p>Distill, fine-tune, and INT4-quantize any frontier model in kolm Studio, or compile straight from your captures.</p>
-        </div>
-        <div class="ks-hero__verb">
-          <span class="ks-hero__verb-h">Run</span>
-          <p>Ship to a phone, a laptop, in a browser, the cloud, your VPC, or fully air-gapped. Solo or whole team, with SSO, roles, and audit logs.</p>
-        </div>
-      </div>
+      <p class="ks-lede" style="max-width:46ch;">Take any open-weights model. Pick a target: phone, laptop, browser, your VPC, an air-gapped SCIF. Get back one signed <code>.kolm</code> file that runs there. No vendor lock-in, no per-token bill, your weights stay yours.</p>
       <div class="ks-hero__ctas">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Quickstart <span class="ks-btn-arrow">→</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#numbers">See it work</a>
-        <a class="ks-btn ks-btn--link ks-btn--lg" href="#roi">Calculate your savings</a>
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Start free <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#how">How it works</a>
       </div>
     </div>
-    <div>
-      <pre class="ks-code" aria-label="Terminal example"><span class="com"># capture: route every model API through kolm</span>
-<span class="pmpt">$</span> export OPENAI_BASE_URL=https://api.kolm.ai/v1
-<span class="pmpt">$</span> export OPENAI_API_KEY=$KOLM_API_KEY
 
-<span class="com"># train: compile a specialist from your captures</span>
-<span class="pmpt">$</span> kolm distill \
-    --namespace <span class="arg">support</span> --teacher claude-sonnet \
-    --student qwen2.5-7b --quantize <span class="arg">int4</span>
+    <!-- Bold visual: ONE artifact flowing to many devices.
+         Inline SVG so it ships with zero JS and renders crisp on retina. -->
+    <div aria-hidden="true">
+      <svg viewBox="0 0 480 420" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; max-width:520px; display:block;">
+        <defs>
+          <linearGradient id="kolmGlow" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="var(--ks-accent)" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="var(--ks-accent-2)" stop-opacity="0.6"/>
+          </linearGradient>
+          <radialGradient id="kolmBloom" cx="50%" cy="40%" r="55%">
+            <stop offset="0%" stop-color="var(--ks-accent)" stop-opacity="0.20"/>
+            <stop offset="100%" stop-color="var(--ks-accent)" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
 
-  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> sampled 2,341 approved captures
-  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> distilled to qwen2.5-7b
-  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> quantized to INT4 (NF4 + double)
-  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> signed support-2026-05-22.kolm
+        <!-- ambient bloom behind the artifact -->
+        <circle cx="240" cy="170" r="200" fill="url(#kolmBloom)"/>
 
-<span class="com"># run: anywhere your team works</span>
-<span class="pmpt">$</span> kolm run support-2026-05-22.kolm \
-    "snail climbs <span class="num">3</span>ft up, slips <span class="num">2</span>ft. <span class="num">10</span>ft wall?"
+        <!-- the .kolm artifact, center -->
+        <g transform="translate(170 110)">
+          <rect x="0" y="0" width="140" height="120" rx="14" fill="var(--ks-bg-1)" stroke="url(#kolmGlow)" stroke-width="2"/>
+          <text x="70" y="56" text-anchor="middle" font-family="var(--ks-mono)" font-size="20" font-weight="600" fill="var(--ks-ink)">.kolm</text>
+          <text x="70" y="80" text-anchor="middle" font-family="var(--ks-sans)" font-size="10.5" fill="var(--ks-ink-3)" letter-spacing="0.06em">SIGNED &middot; SEALED</text>
+          <text x="70" y="100" text-anchor="middle" font-family="var(--ks-mono)" font-size="10.5" fill="var(--ks-accent)">ed25519 &middot; sha256</text>
+        </g>
 
-  <span class="ok">→</span> Day <span class="num">8</span>. <span class="com">(24.5 tok/s, 5.2 GB RAM)</span>
-</pre>
+        <!-- target devices, fanning out below -->
+        <g font-family="var(--ks-sans)" font-size="11" fill="var(--ks-ink-2)" text-anchor="middle">
+          <!-- phone -->
+          <g transform="translate(60 290)">
+            <line x1="180" y1="-50" x2="0" y2="-10" stroke="var(--ks-accent-edge)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <rect x="-18" y="0" width="36" height="58" rx="6" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
+            <rect x="-12" y="6" width="24" height="38" rx="2" fill="var(--ks-bg-1)"/>
+            <text x="0" y="78">phone</text>
+          </g>
+          <!-- laptop -->
+          <g transform="translate(160 300)">
+            <line x1="80" y1="-60" x2="0" y2="-10" stroke="var(--ks-accent-edge)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <rect x="-30" y="-4" width="60" height="38" rx="3" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
+            <rect x="-26" y="0" width="52" height="30" fill="var(--ks-bg-1)"/>
+            <path d="M-36 36 L36 36 L32 42 L-32 42 Z" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
+            <text x="0" y="62">laptop</text>
+          </g>
+          <!-- browser -->
+          <g transform="translate(260 300)">
+            <line x1="-20" y1="-60" x2="0" y2="-10" stroke="var(--ks-accent-edge)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <rect x="-32" y="-4" width="64" height="42" rx="4" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
+            <rect x="-32" y="-4" width="64" height="10" rx="4" fill="var(--ks-bg-3)"/>
+            <circle cx="-26" cy="1" r="1.5" fill="var(--ks-accent-warm)"/>
+            <circle cx="-22" cy="1" r="1.5" fill="var(--ks-accent)"/>
+            <text x="0" y="62">browser</text>
+          </g>
+          <!-- cloud / GPU -->
+          <g transform="translate(360 300)">
+            <line x1="-120" y1="-60" x2="0" y2="-10" stroke="var(--ks-accent-edge)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <rect x="-30" y="0" width="60" height="34" rx="4" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
+            <rect x="-22" y="8" width="14" height="6" fill="var(--ks-accent)" opacity="0.7"/>
+            <rect x="-4" y="8" width="14" height="6" fill="var(--ks-accent-warm)" opacity="0.7"/>
+            <rect x="-22" y="20" width="32" height="6" fill="var(--ks-accent-cool)" opacity="0.55"/>
+            <text x="0" y="58">cloud GPU</text>
+          </g>
+          <!-- air-gapped VPC -->
+          <g transform="translate(420 290)">
+            <line x1="-180" y1="-50" x2="0" y2="-10" stroke="var(--ks-accent-edge)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <rect x="-22" y="0" width="44" height="50" rx="6" fill="var(--ks-bg-2)" stroke="var(--ks-ink-4)"/>
+            <path d="M0 14 L-10 22 L-10 36 L0 42 L10 36 L10 22 Z" fill="none" stroke="var(--ks-accent)" stroke-width="1.5"/>
+            <text x="0" y="68">air-gapped</text>
+          </g>
+        </g>
+
+        <!-- top eyebrow on the visual -->
+        <text x="240" y="48" text-anchor="middle" font-family="var(--ks-sans)" font-size="11" letter-spacing="0.14em" fill="var(--ks-ink-3)">ONE FILE &middot; FIVE TARGETS</text>
+      </svg>
     </div>
   </div>
 </section>
@@ -347,102 +386,107 @@
   </div>
 </div>
 
-<!-- ================== Real numbers ================== -->
+<!-- ================== Capability claim (W616: replaces W604 model-brag stats) ================== -->
 <section class="ks-section" id="numbers">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Proof, not slides</span>
-      <h2 class="ks-h2">Real numbers, from real hardware.</h2>
-      <p class="ks-lede">Four sizes proven on one RTX 5090 in <b>May 2026</b> with bitsandbytes 0.49.2 (NF4 + double quant) and torch 2.11.0+cu128. The transcripts are in <a href="/benchmarks" class="ks-accent" style="text-decoration:underline;text-underline-offset:3px;">/benchmarks</a>.</p>
+      <span class="ks-eyebrow">What kolm actually does</span>
+      <h2 class="ks-h2">Any open-weights model. Your hardware.</h2>
+      <p class="ks-lede">Pick any open model from Hugging Face. Pick a target the model has to fit. kolm compiles it into one sealed file that runs there. The big sizes shrink to fit a workstation, the medium sizes shrink to fit a laptop, the small sizes shrink to fit a browser tab. Reproducible on your hardware, signed on the way out.</p>
     </div>
-    <div class="ks-stats">
-      <div class="ks-stat">
-        <div class="ks-stat__lab">DeepSeek-R1 32B</div>
-        <div class="ks-stat__val">61<span class="ks-dim">→</span><span class="accent">17.9</span><small>GB</small></div>
-        <div class="ks-stat__sub">INT4 in 125s · 19.2 GB VRAM · 11.5 tok/s</div>
+
+    <div class="ks-grid ks-grid-4" style="margin-top:var(--ks-7);">
+      <div class="ks-card" style="text-align:center;">
+        <div style="font-family:var(--ks-mono); font-size:34px; font-weight:600; color:var(--ks-accent); line-height:1;">70B</div>
+        <div class="ks-card__h" style="margin-top:var(--ks-3);">workstation</div>
+        <p class="ks-card__p">Fits a single 80 GB GPU at 4-bit. Same artifact, BF16 on two GPUs.</p>
       </div>
-      <div class="ks-stat">
-        <div class="ks-stat__lab">Qwen2.5 7B</div>
-        <div class="ks-stat__val">14.2<span class="ks-dim">→</span><span class="accent">5.2</span><small>GB</small></div>
-        <div class="ks-stat__sub">INT4 in 29s · 24.5 tok/s</div>
+      <div class="ks-card" style="text-align:center;">
+        <div style="font-family:var(--ks-mono); font-size:34px; font-weight:600; color:var(--ks-accent); line-height:1;">32B</div>
+        <div class="ks-card__h" style="margin-top:var(--ks-3);">prosumer GPU</div>
+        <p class="ks-card__p">DeepSeek-R1 class. 61 GB BF16 compresses to under 18 GB INT4. Runs on a 24 GB consumer card.</p>
       </div>
-      <div class="ks-stat">
-        <div class="ks-stat__lab">Qwen2.5 3B</div>
-        <div class="ks-stat__val">5.8<span class="ks-dim">→</span><span class="accent">1.9</span><small>GB</small></div>
-        <div class="ks-stat__sub">INT4 in 14s · fits a laptop</div>
+      <div class="ks-card" style="text-align:center;">
+        <div style="font-family:var(--ks-mono); font-size:34px; font-weight:600; color:var(--ks-accent); line-height:1;">7B</div>
+        <div class="ks-card__h" style="margin-top:var(--ks-3);">laptop</div>
+        <p class="ks-card__p">Qwen, Llama, Mistral, Gemma class. Real-time on an M-series Mac or any 8 GB GPU.</p>
       </div>
-      <div class="ks-stat">
-        <div class="ks-stat__lab">Qwen2.5 0.5B</div>
-        <div class="ks-stat__val">0.93<span class="ks-dim">→</span><span class="accent">0.44</span><small>GB</small></div>
-        <div class="ks-stat__sub">INT4 in 12s · runs in a browser</div>
+      <div class="ks-card" style="text-align:center;">
+        <div style="font-family:var(--ks-mono); font-size:34px; font-weight:600; color:var(--ks-accent); line-height:1;">&lt;1B</div>
+        <div class="ks-card__h" style="margin-top:var(--ks-3);">browser tab</div>
+        <p class="ks-card__p">WebGPU runtime. No server, no install. Same <code>.kolm</code> the workstation runs.</p>
       </div>
     </div>
+
+    <p class="ks-fineprint" style="margin-top:var(--ks-5); text-align:center;">Numbers depend on the specific model and your hardware. <a href="/benchmarks" style="color:var(--ks-accent); text-decoration:underline; text-underline-offset:3px;">Full benchmarks with reproducible commands</a> &middot; <a href="https://huggingface.co/models" rel="noopener" style="color:var(--ks-accent); text-decoration:underline; text-underline-offset:3px;">browse models</a></p>
   </div>
 </section>
 
-<!-- ================== SOTA quantization menu (W615: intuitive rebuild of W614) ================== -->
+<!-- ================== Quant menu (W616: bold + plain-english) ================== -->
 <section class="ks-section" id="quant-menu">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Quantize &middot; 10 methods, one default</span>
-      <h2 class="ks-h2">Don't shop the menu. Tell kolm the constraint.</h2>
-      <p class="ks-lede">Most teams should use <code>int4</code> and stop reading. The other nine methods exist for one specific constraint each: fit a 32B in 8 GB, skip calibration data, retrain anyway. Pick the constraint that matches, kolm picks the method.</p>
+      <span class="ks-eyebrow">Quantize</span>
+      <h2 class="ks-h2">One verb. Ten methods. Sensible default.</h2>
+      <p class="ks-lede">You don't need to pick. <code>kolm quantize</code> uses 4-bit by default and works on every open model. The other nine methods are there for when you have a specific constraint.</p>
     </div>
 
-    <!-- DEFAULT: the canonical command, large -->
-    <div class="ks-card" style="margin-bottom:var(--ks-6); padding:var(--ks-6); border:1px solid var(--ks-accent-edge); background:var(--ks-accent-soft);">
-      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:var(--ks-4); margin-bottom:var(--ks-3);">
-        <span class="ks-eyebrow" style="margin:0;">Default for 95% of cases</span>
-        <code style="font-size:0.95rem; color:var(--ks-accent);">int4 &middot; bitsandbytes NF4 + double</code>
+    <!-- DEFAULT: one big bold panel, the canonical command + result. -->
+    <div style="margin-top:var(--ks-7); padding:var(--ks-7); border-radius:14px; background:linear-gradient(135deg, var(--ks-accent-soft), transparent 60%); border:1px solid var(--ks-accent-edge);">
+      <div style="display:flex; align-items:baseline; gap:var(--ks-3); flex-wrap:wrap; margin-bottom:var(--ks-4);">
+        <span class="ks-eyebrow" style="margin:0; color:var(--ks-accent);">The default</span>
+        <span style="color:var(--ks-ink-3); font-size:13px;">95% of teams stop here</span>
       </div>
-      <pre class="ks-code" aria-label="Default quantize command"><span class="pmpt">$</span> kolm quantize qwen2.5-7b --method <span class="arg">int4</span>
-  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> 14.2 GB &rarr; 5.2 GB in 29s on RTX 5090
-  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> K-score 0.91 (above 0.85 gate)
-  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> signed qwen2.5-7b-int4-2026-05-22.kolm</pre>
+      <pre class="ks-code" aria-label="Default quantize command" style="font-size:15px; margin:0;"><span class="pmpt">$</span> kolm quantize <span class="arg">your-model</span>
+  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> 4-bit, K-score gated, one signed .kolm
+  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> runs on vLLM, llama.cpp, MLX, WebGPU
+  <span class="ok"><i class="ks-yes" aria-hidden="true"></i></span> no per-engine reconfigure</pre>
     </div>
 
-    <!-- DECIDER: three forks, plain-english triggers -->
-    <div class="ks-shead" style="margin-top:var(--ks-7);">
-      <span class="ks-eyebrow">Switch when you have a specific reason</span>
-      <h3 class="ks-h3">Three forks. Pick the one that matches your constraint.</h3>
+    <!-- THREE FORKS: visual cards with one short line each. -->
+    <div style="margin-top:var(--ks-12); margin-bottom:var(--ks-4);">
+      <span class="ks-eyebrow">Switch when</span>
     </div>
     <div class="ks-grid ks-grid-3">
       <div class="ks-card">
-        <div class="ks-card__h">It has to fit in less than 8 GB</div>
-        <p class="ks-card__p">A 32B at INT4 is 17.9 GB. If you need it in 8 GB, drop to <strong>2-bit</strong> with <code>aqlm</code> (Egiazarian 2024, near-lossless) or <strong>sub-2-bit</strong> with <code>quip</code> (Tseng 2024, E8 lattice). Both want the upstream repo checkout, the doctor names the env var.</p>
-        <p class="ks-card__p" style="margin-top:var(--ks-3);"><code>kolm quantize --method aqlm</code></p>
+        <div style="font-size:22px; line-height:1; color:var(--ks-accent-warm); font-family:var(--ks-mono); font-weight:600;">&lt; 8 GB</div>
+        <div class="ks-card__h" style="margin-top:var(--ks-3);">It has to fit on a small device</div>
+        <p class="ks-card__p">Drop to 2-bit. <code>--method aqlm</code> or <code>--method quip</code>.</p>
       </div>
       <div class="ks-card">
-        <div class="ks-card__h">No calibration samples on hand</div>
-        <p class="ks-card__p">Most 4-bit methods (gptq, awq) want 128 to 512 calibration samples. <code>hqq</code> (Mobius Labs 2024) is calibration-free, runs in seconds, gets you most of the way. Run it for a fast first pass, switch to gptq/awq once you have real samples.</p>
-        <p class="ks-card__p" style="margin-top:var(--ks-3);"><code>kolm quantize --method hqq</code></p>
+        <div style="font-size:22px; line-height:1; color:var(--ks-accent-warm); font-family:var(--ks-mono); font-weight:600;">no data</div>
+        <div class="ks-card__h" style="margin-top:var(--ks-3);">No calibration samples on hand</div>
+        <p class="ks-card__p">Calibration-free, runs in seconds. <code>--method hqq</code>.</p>
       </div>
       <div class="ks-card">
-        <div class="ks-card__h">You're going to retrain anyway</div>
-        <p class="ks-card__p">If the model is going through a training pass, do quantization-aware training instead of post-hoc. <code>qat</code> uses EfficientQAT (Chen 2024) so 2 to 4-bit lands with full task accuracy. Costs more compute up front, recovers it in every inference.</p>
-        <p class="ks-card__p" style="margin-top:var(--ks-3);"><code>kolm quantize --method qat</code></p>
+        <div style="font-size:22px; line-height:1; color:var(--ks-accent-warm); font-family:var(--ks-mono); font-weight:600;">re-train</div>
+        <div class="ks-card__h" style="margin-top:var(--ks-3);">You're retraining anyway</div>
+        <p class="ks-card__p">Quantization-aware training, 2&ndash;4 bit at full accuracy. <code>--method qat</code>.</p>
       </div>
     </div>
 
-    <!-- Differentiator cards (kolm's contribution, not the methods) -->
-    <div class="ks-grid ks-grid-3" style="margin-top:var(--ks-7);">
+    <!-- THREE THINGS KOLM ADDS: bold icons, one-liners. -->
+    <div style="margin-top:var(--ks-12); margin-bottom:var(--ks-4);">
+      <span class="ks-eyebrow">What you get every time</span>
+    </div>
+    <div class="ks-grid ks-grid-3">
       <div class="ks-card">
-        <div class="ks-card__h">Per-method doctor</div>
-        <p class="ks-card__p"><code>kolm quantize --local-worker --doctor --json</code> returns <code>ready_by_method</code>: green for the methods whose libs are importable, red for the rest, with install hints. A tenant who only runs <code>int4</code> and <code>hqq</code> installs bitsandbytes + hqq and skips the other eight.</p>
+        <div class="ks-card__h" style="color:var(--ks-accent);">K-score gate</div>
+        <p class="ks-card__p">Quality re-checked against a frozen eval split. Ships only if it passes. The receipt tells you what regressed if it doesn't.</p>
       </div>
       <div class="ks-card">
-        <div class="ks-card__h">K-score gate</div>
-        <p class="ks-card__p">Every quantized artifact is re-evaluated against the frozen seed split before it can be released. If composite K drops below threshold (default 0.85), the compile receipt blocks the ship and tells you which axis (accuracy / stability / latency) regressed.</p>
+        <div class="ks-card__h" style="color:var(--ks-accent);">Per-method doctor</div>
+        <p class="ks-card__p">Install only the libs you actually use. <code>kolm quantize --doctor</code> tells you which methods are ready and which need one more pip install.</p>
       </div>
       <div class="ks-card">
-        <div class="ks-card__h">One artifact, every engine</div>
-        <p class="ks-card__p">The <code>.kolm</code> wraps weights + spec + receipts + Ed25519 sidecar into one sealed file. The runtime picks vLLM, SGLang, TRT-LLM, llama.cpp, MLX, WebGPU, or CoreML for the device. No re-quantize per backend, no per-engine config drift.</p>
+        <div class="ks-card__h" style="color:var(--ks-accent);">One file, every engine</div>
+        <p class="ks-card__p">vLLM, SGLang, TRT-LLM, llama.cpp, MLX, WebGPU, CoreML. The runtime picks for you. No re-quantize per backend.</p>
       </div>
     </div>
 
-    <!-- POWER USER: full 10-method matrix hidden behind a toggle -->
-    <details style="margin-top:var(--ks-6);">
-      <summary class="ks-eyebrow" style="cursor:pointer; user-select:none;">See all 10 methods (the full SOTA menu)</summary>
+    <!-- Full SOTA menu, one click away. -->
+    <details style="margin-top:var(--ks-10);">
+      <summary style="cursor:pointer; user-select:none; color:var(--ks-accent); font-weight:500; padding:var(--ks-3) 0;">See all 10 methods with paper citations &rarr;</summary>
       <div class="home-cmp" style="margin-top:var(--ks-4);">
         <table>
           <thead>
@@ -450,7 +494,7 @@
               <th>Method</th>
               <th>Bits</th>
               <th>Library &middot; paper</th>
-              <th class="kolm-col">Shipped via <code>kolm quantize</code></th>
+              <th class="kolm-col">Shipped</th>
             </tr>
           </thead>
           <tbody>
@@ -461,13 +505,12 @@
             <tr><td><code>aqlm</code></td><td>2</td><td>AQLM (Egiazarian 2024) additive, near-lossless</td><td class="kolm-col">yes</td></tr>
             <tr><td><code>quip</code></td><td>&lt;2</td><td>QuIP# (Tseng 2024) E8 lattice + incoherence</td><td class="kolm-col">yes</td></tr>
             <tr><td><code>exl2</code></td><td>variable</td><td>ExLlamaV2 EXL2 runtime-optimized</td><td class="kolm-col">yes</td></tr>
-            <tr><td><code>exl3</code></td><td>variable</td><td>ExLlamaV2 EXL3 successor format (tighter than EXL2)</td><td class="kolm-col">yes</td></tr>
+            <tr><td><code>exl3</code></td><td>variable</td><td>ExLlamaV2 EXL3 successor format</td><td class="kolm-col">yes</td></tr>
             <tr><td><code>hqq</code></td><td>1&ndash;8</td><td>HQQ (Mobius Labs 2024) calibration-free</td><td class="kolm-col">yes</td></tr>
             <tr><td><code>qat</code></td><td>2&ndash;4</td><td>EfficientQAT (Chen 2024) block-wise QAT</td><td class="kolm-col">yes</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="ks-fineprint" style="margin-top:var(--ks-4);">Heavy ML libs (bitsandbytes / auto-gptq / autoawq / aqlm / quip-sharp / exllamav2 / hqq / efficient_qat / torch / accelerate) live in the isolated <code>@kolm/quantize-worker</code> package, NOT in the root <code>kolm</code> install. AQLM / QuIP# / EfficientQAT also need the upstream repo checkout (env var) because their optimizers are research code, not pip-clean libraries; the doctor surfaces the missing path with a copy-paste install hint.</p>
     </details>
   </div>
 </section>
@@ -734,7 +777,7 @@ $ # every approved response: hashed, signed, logged</pre>
 </section>
 
 <!-- ================== Compare ================== -->
-<section class="ks-section" id="compare">
+<section class="ks-section" id="compare" data-mobile-hide>
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Compare</span>
@@ -1026,267 +1069,58 @@ $ # every approved response: hashed, signed, logged</pre>
   </div>
 </section>
 
-<!-- ================== Six pieces deep dives ================== -->
-<section class="ks-section" id="pieces" data-mobile-hide>
+<!-- ================== Pieces (W616: compact 6-card grid, depth lives on dedicated pages) ================== -->
+<section class="ks-section" id="pieces">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">The six pieces, in detail</span>
-      <h2 class="ks-h2">What each piece does, what it costs, and what backs it.</h2>
-      <p class="ks-lede">Every piece is independently usable. Bring just the gateway, or just the compiler, or just the runtime, and skip the rest. The artifact format is the contract.</p>
+      <span class="ks-eyebrow">Six pieces. Each one stands alone.</span>
+      <h2 class="ks-h2">Use the whole stack, or just the part you need.</h2>
+      <p class="ks-lede">The artifact format is the contract. Drop in the gateway and skip everything else. Or compile artifacts elsewhere and run them on the kolm runtime. Or run the runtime in your VPC and never touch the cloud.</p>
     </div>
 
-    <article class="home-piece">
-      <div>
-        <div class="home-piece-lab">01 · Gateway</div>
-        <h3>Route every model API through one URL.</h3>
-        <p>Drop in front of OpenAI, Anthropic, vLLM, SGLang, TRT-LLM, TGI, Fireworks, Together, Groq, or your own self-hosted endpoint. The gateway speaks OpenAI Chat Completions and Anthropic Messages natively. Your code keeps using the SDK it already uses.</p>
-        <p>Policy-driven failover routes a request to the next provider if the primary errors, exceeds latency budget, or hits a quota wall. Edge PII redaction (text via regex + ML, image via YOLO face / plate detection, audio via voiceprint scrub) runs before any payload leaves your VPC.</p>
-        <ul>
-          <li>Approval-only capture writes a tenant-fenced row to the dataset log</li>
-          <li>Per-namespace rate limits, per-tenant cost caps, per-route budget alerts</li>
-          <li>OTel + Prometheus + structured JSON logs on by default</li>
-          <li>One env var swap to start (<code>OPENAI_BASE_URL=https://api.kolm.ai/v1</code>)</li>
-        </ul>
-        <div class="perf">
-          <div><b>P50 latency add</b><span>3.1 ms</span></div>
-          <div><b>P99 latency add</b><span>11.4 ms</span></div>
-          <div><b>Throughput / pod</b><span>9,400 req/s</span></div>
-          <div><b>Replay match</b><span>100% (hash)</span></div>
-        </div>
-      </div>
-      <div>
-        <pre class="ks-code"><span class="com"># before: hardcoded vendor</span>
-<span class="pmpt">$</span> export OPENAI_BASE_URL=https://api.openai.com/v1
-
-<span class="com"># after: gateway, no other code change</span>
-<span class="pmpt">$</span> export OPENAI_BASE_URL=https://api.kolm.ai/v1
-<span class="pmpt">$</span> export OPENAI_API_KEY=$KOLM_API_KEY
-
-<span class="com"># everything else stays the same</span>
-<span class="pmpt">&gt;&gt;&gt;</span> from openai import OpenAI
-<span class="pmpt">&gt;&gt;&gt;</span> c = OpenAI()
-<span class="pmpt">&gt;&gt;&gt;</span> c.chat.completions.create(
-...     model=<span class="arg">"claude-sonnet"</span>,
-...     messages=[{<span class="arg">"role"</span>: <span class="arg">"user"</span>,
-...                <span class="arg">"content"</span>: <span class="arg">"hi"</span>}],
-...     extra_headers={<span class="arg">"x-kolm-namespace"</span>:
-...                    <span class="arg">"support"</span>}
-... )
-&lt;ChatCompletion id=...&gt;
-<span class="com"># gateway approves + logs the call to the
-# "support" capture stream for compile later</span></pre>
-      </div>
-    </article>
-
-    <article class="home-piece">
-      <div>
-        <div class="home-piece-lab">02 · Capture</div>
-        <h3>Build a private dataset, automatically, from real traffic.</h3>
-        <p>Every approved gateway response becomes one row in a tenant-fenced JSONL store. The row carries the namespace, the (redacted) input, the response, a hash chain to the previous row, and an Ed25519 signature. The capture log is the seed corpus for distill.</p>
-        <p>You can browse, filter, score, label, and approve rows in the dashboard or the TUI. Or write a policy that auto-approves rows above a confidence threshold, or that auto-rejects rows containing PII the redactor missed. Captures never leave your tenant.</p>
-        <ul>
-          <li>Tenant-fenced storage with per-row defense-in-depth</li>
-          <li>Hash chain links every row to the prior one for tamper detection</li>
-          <li>Export to JSONL, Parquet, Hugging Face dataset, or signed eval set</li>
-          <li>Label studio integration; LLM-judge auto-scoring; human review queue</li>
-        </ul>
-        <div class="perf">
-          <div><b>Write throughput</b><span>27,000 rows/s</span></div>
-          <div><b>Storage</b><span>~1.3 KB/row</span></div>
-          <div><b>Cross-tenant leak risk</b><span>0 (fence-checked)</span></div>
-          <div><b>Replay coverage</b><span>100%</span></div>
-        </div>
-      </div>
-      <div>
-        <pre class="ks-code"><span class="com"># browse captures (TUI)</span>
-<span class="pmpt">$</span> kolm tui
-<span class="com">  [c] captures &rarr; arrow keys to scroll
-  [/] filter by namespace, score, tag, PII
-  [a] approve  [r] reject  [l] label</span>
-
-<span class="com"># export an approved subset for distill</span>
-<span class="pmpt">$</span> kolm dataset export \
-    --namespace <span class="arg">support</span> --min-score <span class="num">0.85</span> \
-    --format jsonl --out <span class="arg">./support.jsonl</span>
-
-  <i class="ks-yes" aria-hidden="true"></i> wrote <span class="num">2,341</span> rows (<span class="num">3.04</span> MB)
-  <i class="ks-yes" aria-hidden="true"></i> seed split: <span class="num">2,107</span> train / <span class="num">234</span> eval
-  <i class="ks-yes" aria-hidden="true"></i> hash chain verified</pre>
-      </div>
-    </article>
-
-    <article class="home-piece">
-      <div>
-        <div class="home-piece-lab">03 · Distill</div>
-        <h3>Turn frontier calls into a specialist that fits on a laptop.</h3>
-        <p>Pick a teacher (claude-sonnet, gpt-4o, your own) and a smaller open student (qwen2.5-{0.5b, 3b, 7b, 14b}, llama-3-8b, mistral-7b, gemma-2-9b, phi-3-mini). Kolm samples the approved captures, trains the student against the teacher's responses, and ships a fine-tuned checkpoint.</p>
-        <p>Defaults are honest. LoRA rank 16. Cosine schedule. 3 epochs. Seed split is reproducible. Frozen eval is held out at compile time, never seen by training. Optional bake-off computes token Jaccard against the teacher and an LLM-judge score; you see the gap before you ship.</p>
-        <ul>
-          <li>Teachers: Anthropic, OpenAI, vLLM, SGLang, TRT-LLM, TGI, your own</li>
-          <li>Students: 13 open models, INT4 / INT8 / BF16, 0.5B to 70B</li>
-          <li>Resume from a partial run; fallback teacher if primary errors</li>
-          <li>Trust receipt: distill_meta.json carries seed, sample hash, teacher fingerprint</li>
-        </ul>
-        <div class="perf">
-          <div><b>2k rows on RTX 5090</b><span>~14 min (7B, LoRA)</span></div>
-          <div><b>Held-out Jaccard</b><span>0.78 (median)</span></div>
-          <div><b>LLM-judge tie/win</b><span>62% (median)</span></div>
-          <div><b>Recompile to fresh artifact</b><span>~6 min from cache</span></div>
-        </div>
-      </div>
-      <div>
-        <pre class="ks-code"><span class="com"># one command, end-to-end</span>
-<span class="pmpt">$</span> kolm distill \
-    --namespace <span class="arg">support</span> \
-    --teacher <span class="arg">claude-sonnet-4-6</span> \
-    --student <span class="arg">qwen2.5-7b</span> \
-    --quantize <span class="arg">int4</span>
-
-  <i class="ks-yes" aria-hidden="true"></i> sampled <span class="num">2,341</span> approved captures
-  <i class="ks-yes" aria-hidden="true"></i> seed split: <span class="num">2,107</span>/<span class="num">234</span> (deterministic)
-  <i class="ks-yes" aria-hidden="true"></i> trained: epoch <span class="num">3</span>/<span class="num">3</span>, loss <span class="num">0.91</span>
-  <i class="ks-yes" aria-hidden="true"></i> frozen eval Jaccard: <span class="num">0.81</span>
-  <i class="ks-yes" aria-hidden="true"></i> bake-off vs teacher: <span class="num">64</span>% win/tie
-  <i class="ks-yes" aria-hidden="true"></i> quantized to INT4 (NF4 + double)
-  <i class="ks-yes" aria-hidden="true"></i> signed <span class="arg">support-2026-05-22.kolm</span>
-
-run-id: r_3f8a91 (resumable; foreign-teacher fallback set)</pre>
-      </div>
-    </article>
-
-    <article class="home-piece">
-      <div>
-        <div class="home-piece-lab">04 · Compile</div>
-        <h3>Pack weights, spec, evals, and receipts into one signed file.</h3>
-        <p>A <code>.kolm</code> is a single sealed file. Inside: model weights, the spec (tokenizer, template, sampling defaults), the seed split, the frozen eval, the teacher fingerprint, every receipt that fed training, and an Ed25519 sidecar that binds the artifact to the spec. Change one byte, the signature breaks.</p>
-        <p>Compile target picks the format. INT4 (NF4 + double quant, smallest), INT8 (balanced), BF16 (full quality). Same artifact format across all three. You can also compile to native code (C, Rust) or WASM for embedded targets.</p>
-        <ul>
-          <li>One file. No "download these 14 shards." No "remember to grab the tokenizer."</li>
-          <li>Verifies in two seconds. Re-verifies on every load by the runtime.</li>
-          <li>Optional attestation: TDX, SEV-SNP, Nitro, NRAS embedded into the manifest</li>
-          <li>SLSA-style provenance graph from receipts to artifact hash</li>
-        </ul>
-        <div class="perf">
-          <div><b>Compile time</b><span>~6 min from cache</span></div>
-          <div><b>Artifact size (7B INT4)</b><span>5.2 GB</span></div>
-          <div><b>Sig overhead</b><span>~140 bytes</span></div>
-          <div><b>Verify time</b><span>1.8 s</span></div>
-        </div>
-      </div>
-      <div>
-        <pre class="ks-code"><span class="com"># compile and inspect the resulting artifact</span>
-<span class="pmpt">$</span> kolm compile spec.kolmspec --quantize int4
-  <i class="ks-yes" aria-hidden="true"></i> sealed support-2026-05-22.kolm (5.2 GB)
-
-<span class="pmpt">$</span> kolm inspect support-2026-05-22.kolm
-manifest:
-  version:        kolm-1
-  spec:           support@1.2.0
-  student:        qwen2.5-7b
-  teacher:        claude-sonnet-4-6
-  quantize:       int4 (nf4 + double)
-  artifact_hash:  sha256:9a3e...c7b1
-  signed_by:      ed25519:8f2a...
-  bound:          weights + spec + receipts
-  attestations:   none (optional)
-
-eval:
-  frozen_rows:    234
-  jaccard:        0.81
-  bakeoff_win:    0.64
-  k_score:        92.4</pre>
-      </div>
-    </article>
-
-    <article class="home-piece">
-      <div>
-        <div class="home-piece-lab">05 · Runtime</div>
-        <h3>One artifact. Every backend. Cloud, browser, phone, VPC, air-gap.</h3>
-        <p>The kolm runtime is a thin shell around a backend the device can actually run. On a cloud GPU it picks vLLM, SGLang, or TRT-LLM. On a laptop it picks llama.cpp or candle. On a Mac it picks MLX. In a browser it picks WebGPU (with a WASM fallback). On a phone it picks Core ML (iOS) or NNAPI (Android).</p>
-        <p>Every response carries a signed receipt (kolm-audit-1 envelope) that links the response to the artifact hash, the spec, and the input hash. You can verify any response at <a href="/verify-prod">/verify-prod</a> in two seconds without giving us the response text.</p>
-        <ul>
-          <li>Same <code>.kolm</code> file, every runtime. No "rebuild for this target."</li>
-          <li>Receipts are off by default for free tier, on by default for Pro+</li>
-          <li>Tenant fence enforced inside the runtime (RS-1 sandbox)</li>
-          <li>Optional confidential compute: TDX / SEV-SNP / Nitro / NRAS verified at load</li>
-        </ul>
-        <div class="perf">
-          <div><b>7B INT4 on RTX 5090</b><span>24.5 tok/s</span></div>
-          <div><b>7B INT4 on M3 Max</b><span>17.8 tok/s</span></div>
-          <div><b>3B INT4 on laptop CPU</b><span>9.4 tok/s</span></div>
-          <div><b>0.5B INT4 in browser</b><span>11.2 tok/s (WebGPU)</span></div>
-        </div>
-      </div>
-      <div>
-        <pre class="ks-code"><span class="com"># cloud GPU</span>
-<span class="pmpt">$</span> kolm run support-2026-05-22.kolm \
-    <span class="arg">"snail climbs 3ft up, slips 2ft. 10ft wall?"</span>
-  &rarr; Day <span class="num">8</span>. <span class="com">(24.5 tok/s, 5.2 GB VRAM)</span>
-
-<span class="com"># laptop, no GPU</span>
-<span class="pmpt">$</span> kolm run support-2026-05-22.kolm \
-    --backend llama.cpp --threads <span class="num">8</span> \
-    <span class="arg">"..."</span>
-
-<span class="com"># browser (WebGPU)</span>
-<span class="pmpt">&gt;</span> import { run } from <span class="arg">"@kolm/web"</span>;
-<span class="pmpt">&gt;</span> const r = await run(<span class="arg">"./support.kolm"</span>,
-                       <span class="arg">"..."</span>);
-
-<span class="com"># every response carries a signed receipt</span>
-<span class="pmpt">$</span> kolm verify --receipt last.receipt.json
-  <i class="ks-yes" aria-hidden="true"></i> artifact: support-2026-05-22.kolm
-  <i class="ks-yes" aria-hidden="true"></i> signed by: ed25519:8f2a...
-  <i class="ks-yes" aria-hidden="true"></i> response hash matches</pre>
-      </div>
-    </article>
-
-    <article class="home-piece">
-      <div>
-        <div class="home-piece-lab">06 · Registry</div>
-        <h3>Verify any kolm, by anyone, in two seconds.</h3>
-        <p>The registry is a public, queryable, signed index of every compile. By default a compile is private; you can publish to make it verifiable by anyone, or keep it inside a private registry on a Business tenant. Either way, a receipt always points back to a registry row.</p>
-        <p>The registry lock-ins: artifact hash, spec hash, teacher fingerprint, training-data hash, signing key, attestation report (if any), and a hash chain to the prior registry row. If a compile is in the registry, a third party can verify any response that artifact produced without seeing the response.</p>
-        <ul>
-          <li>Public queryable: anyone can verify any published <code>.kolm</code></li>
-          <li>Private mirror: Business tenants run their own registry inside the VPC</li>
-          <li>Hash-chained: append-only, tamper-evident</li>
-          <li>OCI-style content addressing for the artifact bytes</li>
-        </ul>
-        <div class="perf">
-          <div><b>Verify time</b><span>1.8 s</span></div>
-          <div><b>Registry rows (May 2026)</b><span>43,217</span></div>
-          <div><b>Published compiles</b><span>11,894</span></div>
-          <div><b>API uptime (30d)</b><span>99.97%</span></div>
-        </div>
-      </div>
-      <div>
-        <pre class="ks-code"><span class="com"># query the public registry</span>
-<span class="pmpt">$</span> kolm registry search --teacher claude-sonnet \
-    --student qwen2.5-7b --quantize int4 --limit <span class="num">5</span>
-
-  cid        spec           jaccard   k_score   when
-  ks_9a3e... support@1.2.0  0.81      92.4      2026-05-22
-  ks_7c11... support@1.1.0  0.79      91.0      2026-05-15
-  ks_2b88... support@1.0.0  0.74      89.3      2026-05-01
-  ...
-
-<span class="com"># verify any response any artifact produced</span>
-<span class="pmpt">$</span> curl https://kolm.ai/v1/verify/ks_9a3e...
-{
-  <span class="arg">"artifact_hash"</span>: <span class="arg">"sha256:9a3e...c7b1"</span>,
-  <span class="arg">"signed_by"</span>: <span class="arg">"ed25519:8f2a..."</span>,
-  <span class="arg">"published_at"</span>: <span class="arg">"2026-05-22T14:11Z"</span>,
-  <span class="arg">"verified"</span>: <span class="arg">true</span>
-}</pre>
-      </div>
-    </article>
-
+    <div class="ks-grid ks-grid-3" style="margin-top:var(--ks-7);">
+      <a class="ks-card ks-card--linked" href="/capture" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">01 &middot; gateway</div>
+        <div class="ks-card__h">Route every model API through one URL</div>
+        <p class="ks-card__p">OpenAI, Anthropic, vLLM, your self-hosted endpoint. Policy failover, edge redaction, signed capture. <strong style="color:var(--ks-accent);">3.1 ms P50 add.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open gateway docs &rarr;</p>
+      </a>
+      <a class="ks-card ks-card--linked" href="/capture" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">02 &middot; capture</div>
+        <div class="ks-card__h">A private dataset, built automatically</div>
+        <p class="ks-card__p">Every approved gateway call becomes one signed, hash-chained row. Tenant-fenced. Browse, filter, label, export. <strong style="color:var(--ks-accent);">27k rows/s.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open capture docs &rarr;</p>
+      </a>
+      <a class="ks-card ks-card--linked" href="/distill" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">03 &middot; distill</div>
+        <div class="ks-card__h">A specialist that fits a laptop</div>
+        <p class="ks-card__p">Sample approved captures. Pick a teacher and a smaller open student. Get a fine-tuned, bake-off-scored checkpoint. <strong style="color:var(--ks-accent);">~14 min for 7B.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open distill docs &rarr;</p>
+      </a>
+      <a class="ks-card ks-card--linked" href="/compile" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">04 &middot; compile</div>
+        <div class="ks-card__h">One signed file, every backend</div>
+        <p class="ks-card__p">Weights, spec, seed split, frozen eval, every receipt, Ed25519 sidecar. Verifies in two seconds. <strong style="color:var(--ks-accent);">~140-byte sig.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open compile docs &rarr;</p>
+      </a>
+      <a class="ks-card ks-card--linked" href="/runtimes" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">05 &middot; runtime</div>
+        <div class="ks-card__h">Cloud, browser, phone, VPC, air-gap</div>
+        <p class="ks-card__p">vLLM, SGLang, TRT-LLM, llama.cpp, MLX, WebGPU, Core ML, NNAPI. Each response carries a signed receipt. <strong style="color:var(--ks-accent);">24.5 tok/s on RTX 5090.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open runtimes docs &rarr;</p>
+      </a>
+      <a class="ks-card ks-card--linked" href="/registry" style="text-decoration:none; display:block;">
+        <div style="font-family:var(--ks-mono); font-size:13px; color:var(--ks-accent); margin-bottom:var(--ks-2);">06 &middot; registry</div>
+        <div class="ks-card__h">Verify any kolm, by anyone, in 2 s</div>
+        <p class="ks-card__p">Public queryable. Hash-chained. Or run a private mirror inside your VPC. Receipts always link back to a row. <strong style="color:var(--ks-accent);">99.97% uptime.</strong></p>
+        <p class="ks-card__p" style="margin-top:var(--ks-3); color:var(--ks-accent);">Open registry docs &rarr;</p>
+      </a>
+    </div>
   </div>
 </section>
 
 <!-- ================== Customer scenarios ================== -->
-<section class="ks-section" id="scenarios">
+<section class="ks-section" id="scenarios" data-mobile-hide>
   <div class="ks-wrap">
     <div class="ks-shead">
       <span class="ks-eyebrow">Six real shapes of the work</span>

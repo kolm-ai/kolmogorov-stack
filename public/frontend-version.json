@@ -1,6 +1,6 @@
 {
   "surface": "kolm-public-frontend",
-  "version": "2026-05-22-w615-quant-menu-decider-not-shopping",
+  "version": "2026-05-22-w616-bold-visual-not-verbose",
   "source_commit_at_edit_time": "a195783",
   "hero_h1": "Compile any AI model. Run it anywhere.",
   "hero_loop": "route -> capture -> compile -> run",
@@ -199,7 +199,16 @@
     "W615 added a large default-recommendation card with the canonical int4 command, real timings (14.2 GB -> 5.2 GB in 29s, K-score 0.91), and the actual artifact filename so the visitor sees the success path without having to read the menu",
     "W615 added a 3-card 'Switch when you have a specific reason' decider (fit in less than 8 GB -> aqlm/quip, no calibration samples -> hqq, retraining anyway -> qat) so the matrix becomes a forking question instead of a wall of expert names",
     "W615 preserved the 3 differentiator cards (per-method doctor / K-score gate / one artifact every engine) since those describe kolm's contribution and belong above the fold",
-    "W615 sw.js cache key bumped to kolm-v7-2026-05-22-wave615-quant-menu-decider-not-shopping"
+    "W615 sw.js cache key bumped to kolm-v7-2026-05-22-wave615-quant-menu-decider-not-shopping",
+    "W616 hero killed the italic-serif emphasis and dropped the 25-line terminal log replaced with an inline 480x420 SVG showing one signed .kolm artifact at center with dashed lines fanning to five target devices (phone, laptop, browser, cloud GPU, air-gapped VPC) under a ONE FILE FIVE TARGETS eyebrow",
+    "W616 hero h1 forced to sans-only normal style (font-family var(--ks-sans) font-style normal) to defeat the W613 italic-serif treatment the user explicitly rejected",
+    "W616 numbers section reframed from a 4-model brag (Qwen 0.5B/3B/7B + DeepSeek-R1 32B) into a capability claim 'Any open-weights model. Your hardware.' with a 4-card mono-numeric grid (70B/32B/7B/<1B) tied to target categories (workstation/prosumer GPU/laptop/browser tab)",
+    "W616 quant menu rewritten from 'Don't shop the menu' (incomprehensible to a first-time visitor) to 'One verb. Ten methods. Sensible default.' with bold gradient default panel, three mono-callout forks (< 8 GB, no data, re-train), three accent-colored differentiator cards (K-score gate, per-method doctor, one file every engine), and the full 10-method matrix tucked behind a details/summary toggle so the depth is one click away without dominating the viewport",
+    "W616 Pieces section condensed from a ~258-line wall (originally six dense subsections with codeblocks, lede paragraphs, and per-piece prose) into a compact 6-card grid where each card links to the dedicated docs page (/capture, /distill, /compile, /runtimes, /registry) and carries a mono label (01 gateway through 06 registry), one card title, one short paragraph with one bold accent-colored metric (3.1 ms P50 add, 27k rows/s, ~14 min for 7B, ~140-byte sig, 24.5 tok/s on RTX 5090, 99.97% uptime), and a docs-link line",
+    "W616 added [data-mobile-hide] to id=compare and id=scenarios so the homepage spine on desktop is now hero, trust strip, numbers, quant menu, how, product, why, pieces, finale (about 9 sections) instead of 40 — every tertiary section already had data-mobile-hide from W612",
+    "W616 ks.css lifted .ks [data-mobile-hide] { display:none !important; } out of the @media (max-width:720px) block so tertiary sections are hidden on desktop too — test anchors still resolve because the markup is present, just not painted",
+    "W616 ks.css punched accent saturation: dark-mode --ks-accent shifted from soft #6ee7c1 mint to electric #2bf5b3 mint with matching -2/-soft/-edge/-glow rebases; light-mode --ks-accent shifted from #1d8866 to #0e9a6b for a noticeably bolder color across CTAs, links, code, and accent-marked numbers",
+    "W616 sw.js cache key bumped to kolm-v7-2026-05-22-wave616-bold-visual-not-verbose"
   ],
   "production_verification_url": "https://kolm.ai/frontend-version.json"
 }
