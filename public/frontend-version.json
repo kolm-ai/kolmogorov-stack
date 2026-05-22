@@ -1,6 +1,6 @@
 {
   "surface": "kolm-public-frontend",
-  "version": "2026-05-22-w612-warm-canvas-mobile-compress-bleed-fix",
+  "version": "2026-05-22-w613-editorial-serif-tri-hue-no-grid",
   "source_commit_at_edit_time": "a195783",
   "hero_h1": "Compile any AI model. Run it anywhere.",
   "hero_loop": "route -> capture -> compile -> run",
@@ -175,7 +175,17 @@
     "W612 unified @media (max-width:720px) compression block at the bottom of ks.css: section-y 132->48px, pad-x 40->16px, hero h1 7.8vw, section h2 5.6vw, card padding 16px, code blocks 12px, button min-height 44px (Apple touch-target floor), [data-mobile-hide] display:none, .prod-stickynav display:none (was overlapping the main ks-nav on mobile)",
     "W612 explicit background-color: var(--ks-bg) on every .ks-section/.ks-hero/.ks-finale/.api-section/.api-hero/.prod-section/.prod-hero so transparent stacking can no longer bleed",
     "W612 marked 28 tertiary index.html sections with data-mobile-hide (pieces/arch/selfhost/sdks/compliance/kscore/migrate/whats-new/engineering/limits/receipts/training/industries/cli/roadmap/glossary/ecosystem/principles/cookbook/procurement-faq/devx/verified-transcript/perf-table/cost-scenarios/quickstart-preview/press/trust-deep/community); mobile readers now see the 11 essential sections (hero/numbers/how/product/why/roi/pricing/scenarios/compare/faq/finale) instead of all 40",
-    "W612 sw.js cache key bumped to kolm-v7-2026-05-22-wave612-warm-canvas-mobile-compress-bleed-fix"
+    "W612 sw.js cache key bumped to kolm-v7-2026-05-22-wave612-warm-canvas-mobile-compress-bleed-fix",
+    "W613 aesthetic elevation pass — three amateur tells eliminated: grid background pattern, text-gradient headline emphasis, and monocolor accent overuse all replaced with first-principles editorial design moves",
+    "W613 .ks-hero__bg replaced two 1px linear-gradient grid layers with a dual radial bloom (warm-cool diagonal pin); kept atmospheric depth without the dev-portfolio grid texture that read as 2020-era SaaS template",
+    "W613 .ks-hero__h1 .grad and .ks-hero__h1 em now render in italic serif (Tiempos Headline / Iowan Old Style / Georgia stack) at -0.018em letter-spacing, replacing the linear-gradient text-clip + 60px glow shadow that screamed Stripe-2020 cliche; .grad alias preserved so existing markup still resolves cleanly",
+    "W613 added --ks-serif token (Tiempos Headline -> Iowan Old Style -> Georgia -> Times New Roman) so editorial emphasis has a real serif fallback chain across macOS, Windows, and Linux",
+    "W613 added --ks-em utility class for inline editorial italic-serif emphasis anywhere in the body (not just hero h1), used by new <em class='ks-em'>Run it anywhere.</em> and <em class='ks-em'>One artifact.</em> markup on homepage and product hero",
+    "W613 diversified monocolor accent into a tri-hue functional palette: mint --ks-accent stays for action/CTA/live state, warm-amber --ks-accent-warm now owns numeric data (stats grid, table figures), cool-lavender --ks-accent-cool reserved for code syntax and secondary category; each gets a matching -soft variant",
+    "W613 reduced accent frequency: eyebrow ::before dash recolored from mint to ink-3 (was reading as monocolor), inline <code> in hero lede and prose changed from mint-on-mint bubble to neutral ink on rgba(255,250,240,0.045) bg with line border (was the loudest amateur tell — code competing with CTAs for the eye)",
+    "W613 .ks-stat__val .accent and .ks-table .accent now use warm-amber (numeric data deserves warmth, not action-mint); .ks-table .accent-mint and .accent-cool variants added for explicit override when a cell IS an action or IS code",
+    "W613 added .ks-warm / .ks-cool / .ks-num / .ks-em utility classes plus body-level font-variant-numeric: lining-nums on .ks so digits render with consistent height across the entire site by default",
+    "W613 sw.js cache key bumped to kolm-v7-2026-05-22-wave613-editorial-serif-tri-hue-no-grid"
   ],
   "production_verification_url": "https://kolm.ai/frontend-version.json"
 }
